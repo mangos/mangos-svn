@@ -1560,22 +1560,33 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     WorldPacket data;
     if(newspell->active)
     {
-        PlayerSpellList::iterator itr,next;
-        for (itr = m_spells.begin(); itr != m_spells.end(); itr=next)
+        PlayerSpellList::iterator itr;
+        for (itr = m_spells.begin(); itr != m_spells.end(); itr++)
         {
-            next = itr;
-            next++;
-            if(!(*itr)->spellId)
-                continue;
+            if(!*itr) continue;
+            SpellEntry *i_spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
+            if(!i_spellInfo) continue;
+
             if(IsRankSpellDueToSpell(spellInfo,(*itr)->spellId))
             {
-                if((*itr)->active)
+                if((*itr)->active && spellInfo->manaCost == i_spellInfo->manaCost) 
                 {
                     data.Initialize(SMSG_SUPERCEDED_SPELL);
-                    data << uint32((*itr)->spellId);
-                    data << uint32(spell_id);
+
+                    if(CompareSpellRank(spell_id, (*itr)->spellId) >= 0)
+                    {
+                        data << uint32((*itr)->spellId);
+                        data << uint32(spell_id);
+                        (*itr)->active = 0;
+                    }
+                    else
+                    {
+                        data << uint32(spell_id);
+                        data << uint32((*itr)->spellId);
+                        newspell->active = 0;
+                    }
+
                     GetSession()->SendPacket( &data );
-                    (*itr)->active = 0;
                 }
             }
         }
@@ -1647,6 +1658,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 
     newspell->slotId = tmpslot;
     m_spells.push_back(newspell);
+
     return true;
 }
 
@@ -3506,28 +3518,28 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
                 break;
             case AGILITY:                                   // modify agility
                 ApplyStatMod(STAT_AGILITY,                val, apply);
-                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT1,val, apply);
+                ApplyPosStatMod(STAT_AGILITY,             val, apply);
                 typestr = "AGILITY";
                 break;
             case STRENGHT:                                  //modify strength
                 ApplyStatMod(STAT_STRENGTH,               val, apply);
-                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT0,val, apply);
+                ApplyPosStatMod(STAT_STRENGTH,            val, apply);
                 typestr = "STRENGHT";
                 break;
             case INTELLECT:                                 //modify intellect
                 ApplyStatMod(STAT_INTELLECT,               val,    apply);
-                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT3,val,    apply);
+                ApplyPosStatMod(STAT_INTELLECT,            val,    apply);
                 //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
                 typestr = "INTELLECT";
                 break;
             case SPIRIT:                                    //modify spirit
                 ApplyStatMod(STAT_SPIRIT,                 val, apply);
-                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT4,val, apply);
+                ApplyPosStatMod(STAT_SPIRIT,              val, apply);
                 typestr = "SPIRIT";
                 break;
             case STAMINA:                                   //modify stamina
                 ApplyStatMod(STAT_STAMINA                ,val,   apply);
-                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT2,val,   apply);
+                ApplyPosStatMod(STAT_STAMINA             ,val,   apply);
                 //ApplyMaxHealthMod(                        val*10,apply);
                 typestr = "STAMINA";
                 break;

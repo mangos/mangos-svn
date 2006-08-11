@@ -396,6 +396,7 @@ enum EUnitFields
     PLAYER_EXPLORED_ZONES_1                    = 0x35D + PLAYER_SELECTION,
     PLAYER_REST_STATE_EXPERIENCE               = 0x39D + PLAYER_SELECTION,
     PLAYER_FIELD_COINAGE                       = 0x39E + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
     PLAYER_FIELD_POSSTAT0                      = 0x39F + PLAYER_SELECTION,
     PLAYER_FIELD_POSSTAT1                      = 0x3A0 + PLAYER_SELECTION,
     PLAYER_FIELD_POSSTAT2                      = 0x3A1 + PLAYER_SELECTION,

@@ -224,6 +224,18 @@ int32 GetDuration(SpellEntry *spellInfo)
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
 }
 
+int32 CompareSpellRank(uint32 spellId_1, uint32 spellId_2)
+{
+    if (spellId_1 == spellId_2) return 0;
+
+    int32 diff = 0;
+
+    for(int i=0;i<3;i++)
+        diff += CompareAuraRanks(spellId_1, i, spellId_2, i);
+
+    return diff;
+}
+
 uint32 FindSpellRank(uint32 spellId)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -243,25 +255,25 @@ uint32 FindSpellRank(uint32 spellId)
         switch(spellInfo->Rank[rankfield])
         {
             case 172:rank = 1;break;
-            case 2438:rank = 2;break;
-            case 5271:rank = 3;break;
-            case 16790:rank = 4;break;
-            case 18149:rank = 5;break;
-            case 13419:rank = 6;break;
-            case 11757:rank = 7;break;
-            case 70968:rank = 8;break;
-            case 134222:rank = 9;break;
+            case 2438:case 2449:rank = 2;break;
+            case 5271:case 5436:rank = 3;break;
+            case 16790:case 17435:rank = 4;break;
+            case 18149:case 18931:rank = 5;break;
+            case 13419:case 13986:rank = 6;break;
+            case 11757:case 12346:rank = 7;break;
+            case 70968:case 73268:rank = 8;break;
+            case 134222:case 136537:rank = 9;break;
             case 134229:rank = 10;break;
-            case 134237:rank = 11;break;
-            case 134245:rank = 12;break;
-            case 134274:rank = 13;break;
-            case 134282:rank = 14;break;
-            case 134290:rank = 15;break;
-            case 146442:rank = 16;break;
-            case 59695:rank = 1;break;                      //rank of profession skill.
-            case 46478:rank = 2;break;
-            case 84128:rank = 3;break;
-            case 274133:rank = 4;break;
+            case 134237:case 136552:rank = 11;break;
+            case 134245:case 136560:rank = 12;break;
+            case 134274:case 136589:rank = 13;break;
+            case 134282:case 136597:rank = 14;break;
+            case 134290:case 136605:rank = 15;break;
+            case 146442:case 148693:rank = 16;break;
+            case 48345:case 59695:rank = 1;break;                      //rank of profession skill.
+            case 46478:case 48356:rank = 2;break;
+            case 84128:case 86418:rank = 3;break;
+            case 274133:case 277565:rank = 4;break;
             case 822:rank = 0;break;                        //spell from creating related to race
             default:rank = 0;break;
         }
