@@ -1060,7 +1060,9 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     if (m_spellInfo->EffectMiscValue[i])
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
-        int32 duration = m_spellInfo->EffectBasePoints[i]+1;
+        int32 duration = GetDuration(m_spellInfo);
+        if(duration == 0)
+            duration = m_spellInfo->EffectBasePoints[i]+1;
         if(duration <= 1)
             duration = 300;
         SpellItemEnchantment *pEnchant;
@@ -1326,6 +1328,13 @@ void Spell::EffectWeaponDmg(uint32 i)
     //    fdamage += damage;
 
     m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,(uint32)fdamage);
+
+    if(m_spellInfo->Effect[i] == 121)
+    {
+        m_caster->resetAttackTimer(BASE_ATTACK);
+        m_caster->resetAttackTimer(OFF_ATTACK);
+        m_caster->resetAttackTimer(RANGED_ATTACK);
+    }
 }
 
 void Spell::EffectWeaponDmgPerc(uint32 i)
@@ -1565,7 +1574,9 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     if (m_spellInfo->EffectMiscValue[i])
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
-        int32 duration = m_spellInfo->EffectBasePoints[i]+1;
+        int32 duration = GetDuration(m_spellInfo);
+        if(duration == 0)
+            duration = m_spellInfo->EffectBasePoints[i]+1;
         if(duration <= 1)
             duration = 300;
         SpellItemEnchantment *pEnchant;

@@ -74,6 +74,7 @@ float GetMinRange(SpellRange *range);
 float GetMaxRange(SpellRange *range);
 int32 GetDuration(SpellEntry *spellInfo);
 uint32 FindSpellRank(uint32 spellId);
+bool canStackSpellRank(SpellEntry *spellInfo);
 int32 CompareSpellRank(uint32 spellId_1, uint32 spellId_2);
 bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2);
 bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);

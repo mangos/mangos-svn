@@ -309,6 +309,26 @@ uint32 FindSpellRank(uint32 spellId)
     return rank;
 }
 
+bool canStackSpellRank(SpellEntry *spellInfo)
+{
+    if(spellInfo->powerType > 0)
+        return false;
+    if(spellInfo->powerType == 0)
+    {
+        if(spellInfo->manaCost > 0)
+            return true;
+        if(spellInfo->ManaCostPercentage > 0)
+            return true;
+        if(spellInfo->manaCostPerlevel > 0)
+            return true;
+        if(spellInfo->manaPerSecond > 0)
+            return true;
+        if(spellInfo->manaPerSecondPerLevel > 0)
+            return true;
+    }
+    return false;
+}
+
 bool IsPassiveSpell(uint32 spellId)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
