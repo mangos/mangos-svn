@@ -64,7 +64,8 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
         Map* Map = MapManager::Instance().GetMap(MapID);
         float posz = Map->GetWaterLevel(x,y);
         guid = Target->GetGUID();
-        float predamage = float((((float(FallTime)*10/11000)*(float(FallTime)*10/11000)) - 1) /6 ) * Target->GetMaxHealth();
+        float fallperc = float(FallTime)*10/11000;
+        float predamage = (fallperc*fallperc - 1) /9  * Target->GetMaxHealth();
         damage = (uint32)predamage;
 
         if (damage > 0 && damage < 2* Target->GetMaxHealth())

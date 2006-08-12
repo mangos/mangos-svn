@@ -262,10 +262,13 @@ ObjectAccessor::GetCorpseForPlayer(Player const &player)
 {
     Guard guard(i_corpseGuard);
     uint64 guid = player.GetGUID();
-    for(CorpsesMapType::iterator iter=i_corpse.begin(); iter != i_corpse.end(); ++iter)
-        if(iter->second->GetOwnerGUID() == guid)
-            return iter->second;
-    return NULL;
+
+    Player2CorpsesMapType::iterator iter = i_corpse.find(player.GetGUID());
+    if( iter == i_corpse.end() ) return NULL;
+
+    assert(iter->second->GetType() == CORPSE_RESURRECTABLE);
+
+    return iter->second;
 }
 
 void
@@ -283,10 +286,12 @@ ObjectAccessor::_buildChangeObjectForPlayer(Object *obj, UpdateDataMapType &upda
 }
 
 void
-ObjectAccessor::RemoveCorpse(uint64 guid)
+ObjectAccessor::RemoveCorpse(Corpse *corpse)
 {
+    assert(corpse && corpse->GetType() == CORPSE_RESURRECTABLE);
+
     Guard guard(i_corpseGuard);
-    CorpsesMapType::iterator iter = i_corpse.find(guid);
+    Player2CorpsesMapType::iterator iter = i_corpse.find(corpse->GetOwnerGUID());
     if( iter != i_corpse.end() )
         i_corpse.erase(iter);
 }
@@ -294,9 +299,11 @@ ObjectAccessor::RemoveCorpse(uint64 guid)
 void
 ObjectAccessor::AddCorpse(Corpse *corpse)
 {
+    assert(corpse && corpse->GetType() == CORPSE_RESURRECTABLE);
+
     Guard guard(i_corpseGuard);
-    assert(i_corpse.find(corpse->GetGUID()) == i_corpse.end());
-    i_corpse[corpse->GetGUID()] = corpse;
+    assert(i_corpse.find(corpse->GetOwnerGUID()) == i_corpse.end());
+    i_corpse[corpse->GetOwnerGUID()] = corpse;
 }
 
 void

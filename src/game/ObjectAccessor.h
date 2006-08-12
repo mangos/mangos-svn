@@ -47,7 +47,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
     public:
 
         typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayersMapType;
-        typedef HM_NAMESPACE::hash_map<uint64, Corpse* > CorpsesMapType;
+        typedef HM_NAMESPACE::hash_map<uint64, Corpse* > Player2CorpsesMapType;
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
@@ -77,7 +77,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void Update(const uint32 &diff);
 
         Corpse* GetCorpseForPlayer(Player const &);
-        void RemoveCorpse(uint64);
+        void RemoveCorpse(Corpse *corpse);
         void AddCorpse(Corpse *corpse);
 
         bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
@@ -100,8 +100,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         };
 
         friend struct ObjectChangeAccumulator;
-        PlayersMapType i_players;
-        CorpsesMapType i_corpse;
+        PlayersMapType        i_players;
+        Player2CorpsesMapType i_corpse;
 
         typedef ZThread::FastMutex LockType;
         typedef MaNGOS::GeneralLock<LockType > Guard;

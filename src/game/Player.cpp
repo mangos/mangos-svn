@@ -2026,6 +2026,10 @@ bool Player::CanLearnProSpell(uint32 spell)
 
 void Player::DeleteFromDB()
 {
+    // convert corpse to bones if exist (to prevent exiting Corpse in World without DB entry)
+    // bones will be deleted by corpse/bones deleting thread shortly
+    SpawnCorpseBones(); 
+
     uint32 guid = GetGUIDLow();
 
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
@@ -2035,7 +2039,6 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
 
-    DeleteCorpse(true); // delete from World (to prevent exiting World object without DB entry) and DB
 
     //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
     QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
@@ -2293,7 +2296,9 @@ void Player::KillPlayer()
 
 void Player::CreateCorpse()
 {
-    DeleteCorpse();
+    // prevent existance 2 corpse for player
+    SpawnCorpseBones();
+
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
     Corpse* corpse = new Corpse();
@@ -2338,7 +2343,7 @@ void Player::CreateCorpse()
         }
     }
 
-    corpse->SaveToDB(CORPSE_RESURRECTABLE);
+    corpse->SaveToDB();
 
     MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
 
@@ -2350,47 +2355,13 @@ void Player::SpawnCorpseBones()
     Corpse* corpse =  GetCorpse();
     if(!corpse) return;
 
-    corpse->SetUInt32Value(CORPSE_FIELD_FLAGS, 5);
-    corpse->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
-
-    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
-    {
-        if(corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
-            corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
-    }
-
-    DEBUG_LOG("Deleting Corpse and swpaning bones.\n");
-
-    WorldPacket data;
-    data.Initialize(SMSG_DESTROY_OBJECT);
-    data << (uint64)corpse->GetGUID();
-    GetSession()->SendPacket(&data);
-
-    corpse->DeleteFromDB(CORPSE_RESURRECTABLE);
-    corpse->SaveToDB(CORPSE_BONES);
-
-    // Removing outdated POI if at same map
-    if(corpse->GetMapId() == GetMapId())
-        PlayerTalkClass->SendPointOfInterest( corpse->GetPositionX(), corpse->GetPositionY(), 7, 0, 30, "" );
-
+    corpse->ConvertCorpseToBones();
 }
 
 Corpse* Player::GetCorpse() const 
 { 
     return ObjectAccessor::Instance().GetCorpseForPlayer(*this); 
 }
-
-void Player::DeleteCorpse(bool inc_bones)
-{
-    Corpse* corpse =  GetCorpse();
-    if(!corpse) return;
-
-    corpse->DeleteFromDB(CORPSE_RESURRECTABLE);
-    if(inc_bones)
-        corpse->DeleteFromDB(CORPSE_BONES);
-    corpse->DeleteFromWorld(true);
-}
-
 
 void Player::DeathDurabilityLoss(double percent)
 {

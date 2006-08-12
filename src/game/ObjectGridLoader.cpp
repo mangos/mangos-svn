@@ -34,7 +34,7 @@ ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m)
         std::set<Object *>::iterator obj = i_objects.find(iter->second);
         if( obj != i_objects.end() )
             i_objects.erase( obj );
-        RemoveCorpse(iter->second->GetGUID());
+        iter->second->RemoveFromWorld();
     }
 }
 
