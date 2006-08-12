@@ -208,7 +208,7 @@ void GameObject::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
 }
 
-GameObjectInfo const *GameObject::GetGOInfo()
+GameObjectInfo const *GameObject::GetGOInfo() const
 {
     return objmgr.GetGameObjectInfo(GetUInt32Value (OBJECT_FIELD_ENTRY));
 }
@@ -257,4 +257,20 @@ void GameObject::_LoadQuests()
     while( result1->NextRow() );
 
     delete result1;
+}
+
+bool GameObject::IsTransport() const
+{
+    GameObjectInfo const * gInfo = GetGOInfo();
+    if(!gInfo) return false;
+    bool res = !strcmp(gInfo->name,"Subway");
+/*        || gInfo->name == "GnomeSign_Engineer01"
+        || gInfo->name == "Box o' Squirrels"
+        || gInfo->name == "DwarvenBrazier196"
+        || gInfo->name == "DwarfSign_Fireworks01"
+        || gInfo->name == "PostBoxGnome01"
+        || gInfo->name == "DwarvenBrazier195"
+        || gInfo->name == "DwarfSign_Alchemist01"
+        );*/
+    return res;
 }
