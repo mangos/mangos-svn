@@ -98,6 +98,8 @@ void Creature::CreateTrainerSpells()
 
     } while( result->NextRow() );
 
+	delete result;
+
 }
 
 //---------------------------------------------------------------//
