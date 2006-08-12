@@ -102,6 +102,15 @@ NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
 }
 
 void
+NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+{
+    for(std::map<OBJECT_HANDLE, GameObject*>::iterator iter=m.begin(); iter != m.end(); ++iter)
+        // ignore transport gameobjects at same map
+        if(i_player.GetMapId()!=iter->second->GetMapId() || !iter->second->IsTransport())
+            iter->second->BuildOutOfRangeUpdateBlock(&i_data);
+}
+
+void
 ObjectVisibleNotifier::Visit(PlayerMapType &m)
 {
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
@@ -117,8 +126,12 @@ ObjectVisibleNotifier::Visit(PlayerMapType &m)
 void
 ObjectNotVisibleNotifier::Visit(PlayerMapType &m)
 {
+    // ignore transport gameobjects at same map
+    bool transport = (i_object.GetTypeId() == TYPEID_GAMEOBJECT && ((GameObject&)i_object).IsTransport());
+
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-        iter->second->SendOutOfRange(&i_object);
+        if(i_object.GetMapId()!=iter->second->GetMapId() || !transport)
+            iter->second->SendOutOfRange(&i_object);
 }
 
 void
@@ -175,11 +188,28 @@ ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m)
     }
 }
 
+void GameObjectWithNameIn2DRangeChecker::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(itr->second->GetGOInfo()->name == i_name)
+        {
+            if(itr->second->GetDistance2dSq(i_unit) <= i_dist2)
+            {
+                i_object = itr->second;
+                return;
+            }
+        }
+    }
+}
+
 template void VisibleNotifier::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
 template void VisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
 template void VisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
 
-template void NotVisibleNotifier::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
 template void NotVisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
 template void NotVisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
 

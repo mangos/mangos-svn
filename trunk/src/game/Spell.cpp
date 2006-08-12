@@ -1642,23 +1642,6 @@ uint8 Spell::CheckItems()
         assert(focusobj);
         char const* focusname = focusobj->Name;
 
-        QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `gameobject_template` WHERE `name` = \"%s\"",focusname);
-        if(!result)
-        {
-            sLog.outError("Gameobject template \"%s\" not found (required as object focus for cast #u)",focusname,this->m_spellInfo->Id);
-            return (uint8)CAST_FAIL_REQUIRES_SOMETHING;
-        }
-
-        // many gameobject can have same focusname (forge for example)
-        std::set<uint32> go_ids;
-        do
-        {
-            Field *fields = result->Fetch();
-            go_ids.insert(fields[0].GetUInt32());
-        } while (result->NextRow());
-
-        delete result;
-
         // Find GO
         SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
         float range = GetMaxRange(srange);
@@ -1667,10 +1650,10 @@ uint8 Spell::CheckItems()
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;
 
-        bool ok = false;
-        MaNGOS::ObjectSetIn2DRangeChecker<GameObject> checker(ok,m_caster,go_ids, range);
+        GameObject* ok = NULL;
+        MaNGOS::GameObjectWithNameIn2DRangeChecker checker(ok,m_caster,focusobj->Name, range);
 
-        TypeContainerVisitor<MaNGOS::ObjectSetIn2DRangeChecker<GameObject>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        TypeContainerVisitor<MaNGOS::GameObjectWithNameIn2DRangeChecker, TypeMapContainer<AllObjectTypes> > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 
