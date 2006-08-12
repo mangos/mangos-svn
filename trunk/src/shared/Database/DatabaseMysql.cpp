@@ -106,7 +106,7 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
     va_list ap;
     char szQuery [1024];
     va_start(ap, format);
-    vsprintf( szQuery, 1024, format, ap );
+    vsprintf( szQuery, format, ap );
     va_end(ap);
 
     return Query(szQuery);
@@ -184,7 +184,7 @@ bool DatabaseMysql::PExecute(const char * format,...)
     va_list ap;
     char szQuery [1024];
     va_start(ap, format);
-    vsprintf( szQuery, 1024, format, ap );
+    vsprintf( szQuery, format, ap );
     va_end(ap);
 
     return Execute(szQuery);
