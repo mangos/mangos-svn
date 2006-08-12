@@ -603,7 +603,15 @@ void Spell::cast()
             if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)
                 needspelllog = false;
             for(iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();iunit++)
+            {
+                if((*iunit)->GetTypeId() != TYPEID_PLAYER && m_spellInfo->TargetCreatureType)
+                {
+                    CreatureInfo const *cinfo = ((Creature*)(*iunit))->GetCreatureInfo();
+                    if(m_spellInfo->TargetCreatureType != cinfo->type)
+                        continue;
+                }
                 HandleEffects((*iunit),NULL,NULL,j);
+            }
             for(iitem= m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
                 HandleEffects(NULL,(*iitem),NULL,j);
             for(igo= m_targetGOs[j].begin();igo != m_targetGOs[j].end();igo++)
@@ -1540,7 +1548,7 @@ uint8 Spell::CheckRange()
 
     Unit *target = m_targets.getUnitTarget();
 
-    if(target)
+    if(target && target->GetGUID() != m_caster->GetGUID())
     {
         float dist = m_caster->GetDistanceSq(target);
         if(dist > max_range * max_range)

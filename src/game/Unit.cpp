@@ -1684,9 +1684,11 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
 void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
 {
-    AuraMap::iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    AuraMap::iterator i,next;
+    for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
     {
+        next = i;
+        next++;
         if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
         {
             if(dispel_type == 1)
@@ -1711,13 +1713,13 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
                 if(positive)
                     continue;
             }
-            break;
+            RemoveAura(i);
+            if( m_Auras.empty() )
+                break;
+            else
+            next =  m_Auras.begin();
         }
     }
-
-    if(i == m_Auras.end()) return;
-
-    RemoveAura(i);
 }
 
 void Unit::RemoveAura(uint32 spellId, uint32 effindex)

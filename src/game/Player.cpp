@@ -469,6 +469,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         }
     }
 
+    if(class_ == WARRIOR)
+        CastSpell(this,2457,true);
     return true;
 }
 
@@ -1558,7 +1560,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     newspell->active = active;
 
     WorldPacket data;
-    if(newspell->active)
+    if(newspell->active && !canStackSpellRank(spellInfo))
     {
         PlayerSpellList::iterator itr;
         for (itr = m_spells.begin(); itr != m_spells.end(); itr++)
@@ -1569,7 +1571,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 
             if(IsRankSpellDueToSpell(spellInfo,(*itr)->spellId))
             {
-                if((*itr)->active && spellInfo->manaCost == i_spellInfo->manaCost) 
+                if((*itr)->active) 
                 {
                     data.Initialize(SMSG_SUPERCEDED_SPELL);
 
