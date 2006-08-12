@@ -845,15 +845,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     GetPlayer()->SetPower(POWER_RAGE, 0 );
 
-    if(GetPlayer()->GetMaxPower(POWER_FOCUS) > GetPlayer()->m_resurrectMana)
-        GetPlayer()->SetPower(POWER_FOCUS, GetPlayer()->m_resurrectMana );
-    else
-        GetPlayer()->SetPower(POWER_FOCUS, GetPlayer()->GetMaxPower(POWER_FOCUS) );
-
-    if(GetPlayer()->GetMaxPower(POWER_ENERGY) > GetPlayer()->m_resurrectMana)
-        GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->m_resurrectMana );
-    else
-        GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->GetMaxPower(POWER_ENERGY) );
+    GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->GetMaxPower(POWER_ENERGY) );
 
     GetPlayer()->SpawnCorpseBones();
 

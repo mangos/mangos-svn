@@ -36,6 +36,7 @@ Corpse::Corpse() : Object()
     m_valuesCount = CORPSE_END;
 
     m_POI = false;
+    m_type = CORPSE_RESURRECTABLE;
 }
 
 bool Corpse::Create( uint32 guidlow )
@@ -64,10 +65,10 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
     return true;
 }
 
-void Corpse::SaveToDB(CorpseType type)
+void Corpse::SaveToDB()
 {
     // prevent DB data inconsistance problems and duplicates
-    DeleteFromDB(type);
+    DeleteFromDB();
 
     std::ostringstream ss;
     ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`) VALUES (" 
@@ -75,7 +76,7 @@ void Corpse::SaveToDB(CorpseType type)
         << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
-    ss << "', NOW(), " << int(type) << ")";
+    ss << "', NOW(), " << int(GetType()) << ")";
     sDatabase.Execute( ss.str().c_str() );
 
     // update grid table
@@ -91,14 +92,18 @@ void Corpse::SaveToDB(CorpseType type)
 void Corpse::DeleteFromWorld(bool remove)
 {
     ObjectAccessor::Instance().RemoveBonesFromPlayerView(this);
-    MapManager::Instance().GetMap(GetMapId())->Remove(this,remove);
-    ObjectAccessor::Instance().RemoveCorpse(GetGUID());
+    MapManager::Instance().GetMap(GetMapId())->Remove(this,false);
+
+    RemoveFromWorld();
+
+    if(remove)
+        delete this;
 }
 
-void Corpse::DeleteFromDB(CorpseType type)
+void Corpse::DeleteFromDB()
 {
     std::ostringstream ss;
-    if(type == CORPSE_BONES)
+    if(GetType() == CORPSE_BONES)
         // only specific bones
         ss  << "DELETE FROM `corpse` WHERE `guid` = '" << GetGUIDLow() << "'";
     else
@@ -124,6 +129,9 @@ bool Corpse::LoadFromDB(uint32 guid)
     float ort       = fields[5].GetFloat();
     //uint32 zoneid   = fields[6].GetUInt32();
     uint32 mapid    = fields[7].GetUInt32();
+    uint32 bones   = fields[10].GetUInt32();
+
+    m_type = (bones == 0) ? CORPSE_RESURRECTABLE : CORPSE_BONES;
 
     if(!LoadValues( fields[8].GetString() ))
     {
@@ -148,22 +156,28 @@ bool Corpse::LoadFromDB(uint32 guid)
 
 void Corpse::AddToWorld()
 {
-    ObjectAccessor::Instance().AddCorpse(this);
     Object::AddToWorld();
 
-    if(Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID()))
-        UpdateForPlayer(player,true);
+    if(GetType() == CORPSE_RESURRECTABLE)
+    {
+        ObjectAccessor::Instance().AddCorpse(this);
+
+        if(Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID()))
+            UpdateForPlayer(player,true);
+    }
 }
 
 void Corpse::RemoveFromWorld()
 {
     Object::RemoveFromWorld();
-    ObjectAccessor::Instance().RemoveCorpse(GetGUID());
+
+    if(GetType() == CORPSE_RESURRECTABLE)
+        ObjectAccessor::Instance().RemoveCorpse(this);
 }
 
 void Corpse::UpdateForPlayer(Player* player, bool first)
 {
-    if(player && player->GetGUID() == GetOwnerGUID())
+    if(player && player->GetGUID() == GetOwnerGUID() && player->GetMapId() == GetMapId())
     {
         bool POI_range = (GetDistance2dSq(player) > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS);
 
@@ -175,5 +189,47 @@ void Corpse::UpdateForPlayer(Player* player, bool first)
         }
 
         m_POI = POI_range;
+    }
+}
+
+void Corpse::ConvertCorpseToBones()
+{
+    assert(GetType()==CORPSE_RESURRECTABLE);
+
+    Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID());
+
+    // Removing outdated POI if at same map
+    if(player && player->GetMapId() == GetMapId())
+        player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 0, 30, "" );
+
+    DEBUG_LOG("Deleting Corpse and swpaning bones.\n");
+
+    // remove corpse from player_guid -> corpse map
+    ObjectAccessor::Instance().RemoveCorpse(this);
+
+    // remove corpse from DB
+    DeleteFromDB();
+
+    // update data to bone state
+    m_type = CORPSE_BONES;
+
+    SetUInt32Value(CORPSE_FIELD_FLAGS, 5);
+    SetUInt64Value(CORPSE_FIELD_OWNER, 0);
+
+    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
+    {
+        if(GetUInt32Value(CORPSE_FIELD_ITEM + i))
+            SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
+    }
+
+    // add bones to DB
+    SaveToDB();
+
+    if(player)
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_DESTROY_OBJECT);
+        data << (uint64)GetGUID();
+        player->GetSession()->SendPacket(&data);
     }
 }

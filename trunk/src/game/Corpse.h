@@ -37,11 +37,11 @@ class Corpse : public Object
         bool Create( uint32 guidlow );
         bool Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang );
 
-        void SaveToDB(CorpseType type);
+        void SaveToDB();
         bool LoadFromDB(uint32 guid);
 
         void DeleteFromWorld(bool remove);
-        void DeleteFromDB(CorpseType type);
+        void DeleteFromDB();
 
         void AddToWorld();
         void RemoveFromWorld();
@@ -51,5 +51,11 @@ class Corpse : public Object
         void UpdateForPlayer(Player* player, bool first);
 
         bool m_POI;
+
+        CorpseType GetType() const { return m_type; }
+        void ConvertCorpseToBones();
+
+    private:
+        CorpseType m_type;
 };
 #endif

@@ -371,8 +371,7 @@ void WorldSession::SendSpiritResurrect()
     _player->SetHealth( _player->GetMaxHealth()/2 );
     _player->SetPower(POWER_MANA, _player->GetMaxPower(POWER_MANA)/2 );
     _player->SetPower(POWER_RAGE, 0 );
-    _player->SetPower(POWER_FOCUS, _player->GetMaxPower(POWER_FOCUS)/2 );
-    _player->SetPower(POWER_ENERGY, _player->GetMaxPower(POWER_ENERGY)/2 );
+    _player->SetPower(POWER_ENERGY, _player->GetMaxPower(POWER_ENERGY));
     _player->ApplyStats(true);
 
     _player->DeathDurabilityLoss(0.25);

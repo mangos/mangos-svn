@@ -616,8 +616,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_resurrectHealth = health;
             m_resurrectMana = mana;
         };
-        Corpse* GetCorpse() const;
-        void DeleteCorpse(bool inc_bones = false);
 
         int getCinematic()
         {
@@ -744,8 +742,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
 
         void DeleteFromDB();
+
+        Corpse* GetCorpse() const;
         void SpawnCorpseBones();
         void CreateCorpse();
+
         void KillPlayer();
         void ResurrectPlayer();
         void BuildPlayerRepop();
