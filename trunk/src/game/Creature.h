@@ -370,7 +370,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint8 m_emoteState;
         bool m_isPet;                                       // set only in Pet::Pet
         bool m_isTotem;                                     // set only in Totem::Totem
-        void Regenerate(Powers power);
+        void RegenerateMana();
         void RegenerateHealth();
         uint32 m_regenTimer;
 

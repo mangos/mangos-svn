@@ -162,7 +162,7 @@ void Creature::AIM_Update(const uint32 &diff)
                 break;
             if (!isInCombat())
                 RegenerateHealth();
-            Regenerate(POWER_MANA);
+            RegenerateMana();
             m_regenTimer = 2000;
             break;
         }
@@ -171,17 +171,12 @@ void Creature::AIM_Update(const uint32 &diff)
     }
 }
 
-void Creature::Regenerate(Powers power)
+void Creature::RegenerateMana()
 {
-    uint32 curValue = GetPower(power);
-    uint32 maxValue = GetMaxPower(power);
+    uint32 curValue = GetPower(POWER_MANA);
+    uint32 maxValue = GetMaxPower(POWER_MANA);
 
-    if(power != POWER_RAGE)
-    {
-        if (curValue >= maxValue)   return;
-    }
-    else if (curValue == 0)
-        return;
+    if (curValue >= maxValue)   return;
 
     float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
 
@@ -191,16 +186,14 @@ void Creature::Regenerate(Powers power)
 
     uint32 addvalue = 0;
 
-    switch (power)
-    {
-        case POWER_MANA:
-            addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate);
-            break;
-    }
+    if (isInCombat() || isPet())
+        addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate);
+    else
+        addvalue = maxValue/3;
 
     curValue += addvalue;
     if (curValue > maxValue) curValue = maxValue;
-    SetPower(power, curValue);
+    SetPower(POWER_MANA, curValue);
 }
 
 void Creature::RegenerateHealth()
@@ -210,6 +203,8 @@ void Creature::RegenerateHealth()
 
     if (curValue >= maxValue) return;
 
+
+
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
 
     uint16 Spirit = GetStat(STAT_SPIRIT);
@@ -218,10 +213,15 @@ void Creature::RegenerateHealth()
 
     uint32 addvalue = 0;
 
-    if( GetPower(POWER_MANA) > 0 )
-        addvalue = uint32((Spirit*0.25) * HealthIncreaseRate);
+    if(isPet())
+    {
+        if( GetPower(POWER_MANA) > 0 )
+            addvalue = uint32((Spirit*0.25) * HealthIncreaseRate);
+        else
+            addvalue = uint32((Spirit*0.80) * HealthIncreaseRate);
+    }
     else
-        addvalue = uint32((Spirit*0.80) * HealthIncreaseRate);
+        addvalue = maxValue/3;
 
     curValue += addvalue;
     if (curValue > maxValue) curValue = maxValue;

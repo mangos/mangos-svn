@@ -139,6 +139,8 @@ Player::Player (WorldSession *session): Unit()
 
 Player::~Player ()
 {
+    DuelComplete();
+
     uint32 eslot;
     for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
     {
@@ -9169,7 +9171,7 @@ void Player::UpdatePVPFlag(time_t currTime)
     if( !m_pvp_counting ) return;
 
     //Is player is in a PvP action stop counting
-    if( (isInCombat() || isInDuel()) && getVictim()->GetTypeId() == TYPEID_PLAYER )
+    if( isInCombatWithPlayer() || isInDuel() )
     {
         m_pvp_counting = false;
         return;
