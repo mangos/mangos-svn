@@ -22,6 +22,7 @@
 #include "ObjectAccessor.h"
 #include "EventSystem.h"
 #include "GlobalEvents.h"
+#include "ObjectDefines.h"
 
 static void CorpsesErase(CorpseType type,uint32 delay)
 {
@@ -31,25 +32,48 @@ static void CorpsesErase(CorpseType type,uint32 delay)
     {
         do
         {
-
             Field *fields = result->Fetch();
-            uint64 guid = fields[0].GetUInt64();
+            uint32 guidlow = fields[0].GetUInt32();
             float positionX = fields[2].GetFloat();
             float positionY = fields[3].GetFloat();
             //float positionZ = fields[4].GetFloat();
             //float ort       = fields[5].GetFloat();
             uint32 mapid    = fields[7].GetUInt32();
 
-            sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),GUID_LOPART(guid),positionX,positionY,mapid);
+            uint64 guid = MAKE_GUID(guidlow,HIGHGUID_CORPSE);
 
-            Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
-            if(corpse)
-                corpse->DeleteFromWorld(true);
+            sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,mapid);
+
+            // convert corpse to bones
+            if(type==CORPSE_RESURRECTABLE)
+            {
+                Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
+                if(corpse)
+                    corpse->ConvertCorpseToBones();
+                else
+                {
+                    sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
+                    sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                    sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
+                }
+            }
+            // delete  bones
             else
-                sLog.outDebug("%s %u not found in world. Delete from DB also.",(type==CORPSE_BONES?"Bones":"Corpse"),GUID_LOPART(guid));
+            {
+                // not load grid if grid not loaded for bones removing
+                if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))
+                {
+                    Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
+                    if(corpse)
+                        corpse->DeleteFromWorld(true);
+                    else
+                        sLog.outDebug("Bones %u not found in world. Delete from DB also.",guidlow);
+                }
 
-            sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",GUID_LOPART(guid));
-            sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",GUID_LOPART(guid));
+                // remove bones from DB in any case
+                sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
+            }
         } while (result->NextRow());
 
         delete result;

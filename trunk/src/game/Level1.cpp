@@ -168,6 +168,8 @@ bool ChatHandler::HandleRecallCommand(const char* args)
         m_session->GetPlayer()->TeleportTo(0, 1586.48f, 239.562f, -52.149f,0.0f);
     else if (strncmp((char*)args,"darr",5)==0)
         m_session->GetPlayer()->TeleportTo(1, 10037.6f, 2496.8f, 1318.4f,0.0f);
+    else if (strncmp((char*)args,"gm",5)==0)
+        m_session->GetPlayer()->TeleportTo(1, 16202.5, 16205, 1,1.15);
     else
         return false;
 
