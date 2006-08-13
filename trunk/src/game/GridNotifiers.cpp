@@ -139,7 +139,8 @@ MessageDeliverer::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( iter->second != &i_player || i_toSelf )
+        if( (iter->second != &i_player || i_toSelf) 
+            && (!i_ownTeamOnly || iter->second->GetTeam() == i_player.GetTeam()) )
         {
             iter->second->GetSession()->SendPacket(i_message);
         }

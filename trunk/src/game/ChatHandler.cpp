@@ -45,6 +45,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     switch(type)
     {
         case CHAT_MSG_SAY:
+        case CHAT_MSG_EMOTE: // "/me text" emote type
         {
             std::string msg = "";
             recv_data >> msg;
@@ -52,8 +53,18 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            sChatHandler.FillMessageData( &data, this, type, lang, NULL, 0, msg.c_str() );
-            GetPlayer()->SendMessageToSet( &data, true );
+            if(type==CHAT_MSG_SAY)
+            {
+                sChatHandler.FillMessageData( &data, this, type, lang, NULL, 0, msg.c_str() );
+                GetPlayer()->SendMessageToSet( &data, true );
+            }
+            else
+            {
+                std::ostringstream msg2;
+                msg2 << GetPlayer()->GetName() << " " << msg;
+                sChatHandler.FillMessageData( &data, this, type, lang, NULL, 0, msg2.str().c_str() );
+                GetPlayer()->SendMessageToOwnTeamSet( &data, true );
+            }
         } break;
 
         case CHAT_MSG_PARTY:

@@ -740,6 +740,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool SetPosition(float x, float y, float z, float orientation);
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
+        void SendMessageToOwnTeamSet(WorldPacket *data, bool self);
 
         void DeleteFromDB();
 
