@@ -877,12 +877,11 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << GetGUID();
     *p_data << m_name;
 
-    uint32 bytes = GetUInt32Value(UNIT_FIELD_BYTES_0);
-    *p_data << uint8(bytes);
-    *p_data << uint8(bytes >> 8);
-    *p_data << uint8(bytes >> 16);
+    *p_data << getRace();
+    *p_data << getClass();
+    *p_data << getGender();
 
-    bytes = GetUInt32Value(PLAYER_BYTES);
+    uint32 bytes = GetUInt32Value(PLAYER_BYTES);
     *p_data << uint8(bytes);
     *p_data << uint8(bytes >> 8);
     *p_data << uint8(bytes >> 16);

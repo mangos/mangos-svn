@@ -27,7 +27,9 @@ enum CorpseType
     CORPSE_BONES         = 1
 };
 
-#define CORPSE_RECLAIM_RADIUS 20
+
+// Value equal client resurrection dialog show radius.
+#define CORPSE_RECLAIM_RADIUS 39
 
 class Corpse : public Object
 {
