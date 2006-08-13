@@ -27,7 +27,7 @@
 
 template<typename TRAVELLER>
 void
-DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1, const float &x2, const float &y2, const float &offset, float &x, float &y)
+DestinationHolder<TRAVELLER>::_findOffSetPoint(float x1, float y1, float x2, float y2, float offset, float &x, float &y)
 {
     /* given the point (x1, y1) and (x2, y2).. need to find the point (x,y) on the same line
      * such that the distance from (x, y) to (x2, y2) is offset.
@@ -63,7 +63,7 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1,
 
 template<typename TRAVELLER>
 void
-DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &dest_x, const float &dest_y, const float &dest_z, const float offset)
+DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, float offset)
 {
     i_fromX = traveller.GetPositionX();
     i_fromY = traveller.GetPositionY();
@@ -85,7 +85,7 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
 
 template<typename TRAVELLER>
 void
-DestinationHolder<TRAVELLER>::UpdateLocation(TRAVELLER &traveller, const float &dest_x, const float &dest_y, const float &dest_z)
+DestinationHolder<TRAVELLER>::UpdateLocation(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z)
 {
     i_destX = dest_x;
     i_destY = dest_y;
@@ -105,7 +105,7 @@ DestinationHolder<TRAVELLER>::UpdateLocation(TRAVELLER &traveller, const float &
 
 template<typename TRAVELLER>
 bool
-DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32 &diff, bool force_update)
+DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update)
 {
     i_tracker.Update(diff);
     float x,y,z;
@@ -139,7 +139,7 @@ DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
     }
     else
     {
-        double percent_passed = (double)((double)time_elapsed / (double)i_totalTravelTime);
+        double percent_passed = (double)time_elapsed / (double)i_totalTravelTime;
         x = i_fromX + ((i_destX - i_fromX) * percent_passed);
         y = i_fromY + ((i_destY - i_fromY) * percent_passed);
         z = i_fromZ + ((i_destZ - i_fromZ) * percent_passed);

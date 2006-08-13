@@ -383,7 +383,7 @@ Map::Remove(T *obj, bool remove)
 }
 
 void
-Map::PlayerRelocation(Player *player, const float &x, const float &y, const float &z, const float &orientation)
+Map::PlayerRelocation(Player *player, float x, float y, float z, float orientation)
 {
     CellPair old_val = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     CellPair new_val = MaNGOS::ComputeCellPair(x, y);
@@ -449,7 +449,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 }
 
 void
-Map::CreatureRelocation(Creature *creature, const float &x, const float &y, const float &z, const float &ang)
+Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang)
 {
     CellPair old_val = MaNGOS::ComputeCellPair(creature->GetPositionX(), creature->GetPositionY());
     CellPair new_val = MaNGOS::ComputeCellPair(x, y);
@@ -528,7 +528,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
     return true;
 }
 
-void Map::GetUnitList(const float &x, const float &y,std::list<Unit*> &unlist)
+void Map::GetUnitList(float x, float y, std::list<Unit*> &unlist)
 {
 
     CellPair p = MaNGOS::ComputeCellPair(x, y);

@@ -2825,7 +2825,7 @@ void Player::DealWithSpellDamage(DynamicObject &obj)
     obj.DealWithSpellDamage(*this);
 }
 
-bool Player::SetPosition(const float &x, const float &y, const float &z, const float &orientation)
+bool Player::SetPosition(float x, float y, float z, float orientation)
 {
     Map *m = MapManager::Instance().GetMap(m_mapId);
 

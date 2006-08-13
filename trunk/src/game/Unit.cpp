@@ -152,8 +152,8 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Wal
     data << uint8(0xFF) << GetGUID();
                                                             // Point A, starting location
     data << GetPositionX() << GetPositionY() << GetPositionZ();
-                                                            // little trick related to orientation
-    data << (uint32)((*((uint32*)&GetOrientation())) & 0x30000000);
+    float orientation = GetOrientation();                   // little trick related to orientation
+    data << (uint32)((*((uint32*)&orientation)) & 0x30000000);
     data << uint8(Walkback);                                // walkback when walking from A to B
     data << uint32(Run ? 0x00000100 : 0x00000000);          // flags
     /* Flags:

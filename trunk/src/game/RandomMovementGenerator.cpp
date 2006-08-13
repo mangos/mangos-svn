@@ -75,18 +75,17 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
     if(creature.hasUnitState(UNIT_STAT_ROOT) || creature.hasUnitState(UNIT_STAT_STUNDED))
         return;
     i_nextMoveTime.Update(diff);
-    Traveller<Creature> traveller(creature);
     i_destinationHolder.ResetUpdate();
     if( i_nextMoveTime.Passed() )
     {
         if( creature.IsStopped() )
         {
             assert( i_nextMove <= MAX_RAND_WAYPOINTS );
-            const float &x = i_waypoints[i_nextMove][0];
-            const float &y = i_waypoints[i_nextMove][1];
-            const float &z = i_waypoints[i_nextMove][2];
+            const float x = i_waypoints[i_nextMove][0];
+            const float y = i_waypoints[i_nextMove][1];
+            const float z = i_waypoints[i_nextMove][2];
             creature.addUnitState(UNIT_STAT_ROAMING);
-            Traveller<Creature> traveller(creature);
+            CreatureTraveller traveller(creature);
             i_destinationHolder.SetDestination(traveller, x, y, z);
             traveller.Relocation(x,y,z);
             i_nextMoveTime.Reset( i_destinationHolder.GetTotalTravelTime() );

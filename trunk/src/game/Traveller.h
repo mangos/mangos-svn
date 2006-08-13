@@ -42,15 +42,15 @@ struct MANGOS_DLL_DECL Traveller
 
     operator T&(void) { return i_traveller; }
     operator const T&(void) { return i_traveller; }
-    inline const float &GetPositionX(void) const { return i_traveller.GetPositionX(); }
-    inline const float &GetPositionY(void) const { return i_traveller.GetPositionY(); }
-    inline const float &GetPositionZ(void) const { return i_traveller.GetPositionZ(); }
+    inline float GetPositionX() const { return i_traveller.GetPositionX(); }
+    inline float GetPositionY() const { return i_traveller.GetPositionY(); }
+    inline float GetPositionZ() const { return i_traveller.GetPositionZ(); }
     inline T& GetTraveller(void) { return i_traveller; }
 
     float Speed(void) { assert(false); return 0.0; }
-    void Relocation(const float &x, const float &y, const float &z, const float &orientation) {}
-    void Relocation(const float &x, const float &y, const float &z) { Relocation(x, y, z, i_traveller.GetOrientation()); }
-    void MoveTo(const float &x, const float &y, const float &z, const uint32 &t) {}
+    void Relocation(float x, float y, float z, float orientation) {}
+    void Relocation(float x, float y, float z) { Relocation(x, y, z, i_traveller.GetOrientation()); }
+    void MoveTo(float x, float y, float z, uint32 t) {}
 };
 
 // specializetion for creatures
@@ -61,13 +61,13 @@ inline float Traveller<Creature>::Speed()
 }
 
 template<>
-inline void Traveller<Creature>::Relocation(const float &x, const float &y, const float &z, const float &orientation)
+inline void Traveller<Creature>::Relocation(float x, float y, float z, float orientation)
 {
     MapManager::Instance().GetMap(i_traveller.GetMapId())->CreatureRelocation(&i_traveller, x, y, z, orientation);
 }
 
 template<>
-inline void Traveller<Creature>::MoveTo(const float &x, const float &y, const float &z, const uint32 &t)
+inline void Traveller<Creature>::MoveTo(float x, float y, float z, uint32 t)
 {
     i_traveller.AI_SendMoveToPacket(x, y, z, t, i_traveller.getMoveRunFlag(), false);
 }
@@ -80,7 +80,7 @@ inline float Traveller<Player>::Speed()
 }
 
 template<>
-inline void Traveller<Player>::Relocation(const float &x, const float &y, const float &z, const float &orientation)
+inline void Traveller<Player>::Relocation(float x, float y, float z, float orientation)
 {
     MapManager::Instance().GetMap(i_traveller.GetMapId())->PlayerRelocation(&i_traveller, x, y, z, orientation);
 }
