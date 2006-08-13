@@ -99,8 +99,19 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         inline bool IsActiveGrid(Object *obj) const
         {
-            GridPair p = MaNGOS::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
+            return IsActiveGrid(obj->GetPositionX(),obj->GetPositionY());
+        }
+
+        inline bool IsActiveGrid(float x, float y) const
+        {
+            GridPair p = MaNGOS::ComputeGridPair(x, y);
             return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
+        }
+
+        inline bool IsRemovalGrid(float x, float y) const
+        {
+            GridPair p = MaNGOS::ComputeGridPair(x, y);
+            return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_REMOVAL );
         }
 
         bool UnloadGrid(const uint32 &x, const uint32 &y);

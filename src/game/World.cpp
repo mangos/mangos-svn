@@ -289,9 +289,7 @@ void World::SetInitialWorldSettings()
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
     // need good tests on windows
-
-    //uint32 m_CorpsesEventID =
-    AddEvent(&HandleCorpsesErase,NULL,1200,false,true);
+    AddEvent(&HandleCorpsesErase,NULL,20*60,false,true);
 }
 
 void World::Update(time_t diff)

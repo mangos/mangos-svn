@@ -1104,6 +1104,9 @@ void Player::Regenerate(Powers power)
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue = uint32(20);
             break;
+        case POWER_FOCUS:
+        case POWER_HAPPINESS:
+            break;
     }
 
     if (power != POWER_RAGE)
@@ -2564,6 +2567,8 @@ void Player::UpdateMeleeSkillWeapon (WeaponAttackType attType)
             if (tmpitem)
                 UpdateSkill(tmpitem->GetSkill());
         };break;
+        case RANGED_ATTACK:
+            break;
     }
 }
 
