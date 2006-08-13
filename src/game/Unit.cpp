@@ -93,6 +93,8 @@ Unit::Unit() : Object()
 
 Unit::~Unit()
 {
+   AttackStop();
+   RemoveAllAttackers();
 }
 
 void Unit::Update( uint32 p_time )
