@@ -244,7 +244,7 @@ Map::Add(T *obj)
     cell_lock->Visit(cell_lock, player_notifier, *this);
 }
 
-void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self)
+void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
@@ -256,7 +256,7 @@ void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self)
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
         return;
 
-    MaNGOS::MessageDeliverer post_man(*player, msg, to_self);
+    MaNGOS::MessageDeliverer post_man(*player, msg, to_self, own_team_only);
     TypeContainerVisitor<MaNGOS::MessageDeliverer, ContainerMapList<Player> > message(post_man);
     CellLock<ReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, message, *this);

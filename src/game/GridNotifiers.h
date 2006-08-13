@@ -107,7 +107,8 @@ namespace MaNGOS
         Player &i_player;
         WorldPacket *i_message;
         bool i_toSelf;
-        MessageDeliverer(Player &pl, WorldPacket *msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
+        bool i_ownTeamOnly;
+        MessageDeliverer(Player &pl, WorldPacket *msg, bool to_self, bool ownTeamOnly) : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly) {}
         void Visit(PlayerMapType &m);
     };
 

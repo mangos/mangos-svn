@@ -82,7 +82,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         void Update(const uint32&);
         uint64 CalculateGridMask(const uint32 &y) const;
 
-        void MessageBoardcast(Player *, WorldPacket *, bool to_self);
+        void MessageBoardcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
 
         void MessageBoardcast(Object *, WorldPacket *);
 

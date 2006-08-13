@@ -2848,6 +2848,11 @@ void Player::SendMessageToSet(WorldPacket *data, bool self)
     MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self);
 }
 
+void Player::SendMessageToOwnTeamSet(WorldPacket *data, bool self)
+{
+    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self,true);
+}
+
 void Player::SendDirectMessage(WorldPacket *data)
 {
     GetSession()->SendPacket(data);
@@ -9029,9 +9034,7 @@ void Player::_SaveReputation()
 
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-
-        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u')", (uint32)GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
-
+        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
     }
 }
 
