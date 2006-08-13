@@ -493,9 +493,9 @@ char const *fmtstring( char const *format, ... )
     char    *buf;
     int len;
 
-    va_start (argptr, format);
-    vsprintf (temp_buffer, format, argptr);
-    va_end (argptr);
+    va_start(argptr, format);
+    vsnprintf(temp_buffer,MAX_FMT_STRING, format, argptr);
+    va_end(argptr);
 
     len = strlen(temp_buffer);
 

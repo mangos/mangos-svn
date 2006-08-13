@@ -64,6 +64,8 @@ WaypointMovementGenerator::_load(Creature &c)
 
         } while( result->NextRow() );
 
+        delete result;
+
         assert( sz == count );
     }
 }
@@ -81,6 +83,8 @@ WaypointMovementGenerator::Initialize()
             si_waypointHolders.insert( fields[0].GetUInt32() );
         }
         while( result->NextRow() );
+
+        delete result;
     }
 }
 

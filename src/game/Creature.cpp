@@ -99,15 +99,8 @@ void Creature::CreateTrainerSpells()
     } while( result->NextRow() );
 
 	delete result;
-
 }
 
-//---------------------------------------------------------------//
-/* with compiler optimzation, switch statement differs
- * from if statement.  Going to a switch statement can
- * be perform in order(1) where as an if statement has
- * an order(N) performances.
- */
 void Creature::AIM_Update(const uint32 &diff)
 {
     switch( m_deathState )
@@ -492,11 +485,15 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
                 break;
             }
         }while(result->NextRow());
+
+        delete result;
+
         if(!findnpc)
         {
             player->PlayerTalkClass->SendTalking( "$NSorry", "Here no this person.");
             return;
         }
+        
         //need add more case.
         switch(gossip->Action)
         {
@@ -522,10 +519,16 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
 uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 {
     QueryResult *result= sDatabase.PQuery("SELECT `textid` FROM `npc_gossip_textid` WHERE `action` = '%u' AND `zoneid` ='%u'", action, zoneid );
+
     if(!result)
         return 0;
+    
     Field *fields = result->Fetch();
-    return fields[0].GetUInt32();
+    uint32 id = fields[0].GetUInt32();
+
+    delete result;
+
+    return id;
 }
 
 uint32 Creature::GetGossipCount( uint32 gossipid )
@@ -547,7 +550,9 @@ uint32 Creature::GetNpcTextId()
     if(result)
     {
         Field *fields = result->Fetch();
-        return fields[3].GetUInt32();
+        uint32 id = fields[3].GetUInt32();
+        delete result;
+        return id;
     }
     return DEFAULT_GOSSIP_MESSAGE;
 }
@@ -581,8 +586,10 @@ void Creature::LoadGossipOptions()
     uint32 npcflags=GetUInt32Value(UNIT_NPC_FLAGS);
 
     QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_option` WHERE (npcflag & %u)!=0", npcflags );
+
     if(!result)
         return;
+
     GossipOption *go;
     do
     {
@@ -596,6 +603,7 @@ void Creature::LoadGossipOptions()
         go->Option=fields[5].GetCppString();
         addGossipOption(go);
     }while( result->NextRow() );
+    delete result;
 }
 
 bool Creature::hasQuest(uint32 quest_id)
