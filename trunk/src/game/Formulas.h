@@ -49,6 +49,8 @@ namespace MaNGOS
                     }
                 }
                 while( result->NextRow() );
+
+                delete result;
             }
 
             return 0;

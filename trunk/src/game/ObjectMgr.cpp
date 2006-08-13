@@ -331,8 +331,9 @@ void ObjectMgr::LoadMailedItems()
 void ObjectMgr::LoadGuilds()
 {
     Guild *newguild;
-    QueryResult *result = sDatabase.Query( "SELECT `guildid` FROM `guild`" );
     uint32 count = 0;
+
+    QueryResult *result = sDatabase.Query( "SELECT `guildid` FROM `guild`" );
 
     if( !result )
     {
@@ -360,6 +361,8 @@ void ObjectMgr::LoadGuilds()
         AddGuild(newguild);
 
     }while( result->NextRow() );
+
+    delete result;
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u guild definitions", count );
@@ -544,9 +547,7 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
     QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`destination` FROM `taxi_path` WHERE `taxi_path`.`source` = '%u' ORDER BY `destination`", curloc);
 
     if( ! result )
-    {
-        return 1;
-    }
+        return false;
 
     do
     {
@@ -556,7 +557,9 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
         Mask[field] |= 1 << ( (destination - 1 ) % 32 );
     }while( result->NextRow() );
 
-    return 1;
+    delete result;
+
+    return true;
 }
 
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
@@ -565,11 +568,14 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
     QueryResult *result = sDatabase.PQuery("SELECT `taxi_node`.`id`, SQRT(pow(`taxi_node`.`position_x`-'%f',2)+pow(`taxi_node`.`position_y`-'%f',2)+pow(`taxi_node`.`position_z`-'%f',2)) AS `distance` FROM `taxi_node` WHERE `taxi_node`.`continent` = '%u' ORDER BY `distance` LIMIT 1", x, y, z, mapid);
 
     if( ! result  )
-    {
         return 0;
-    }
+
     Field *fields = result->Fetch();
-    return fields[0].GetUInt8();
+    uint8 loc = fields[0].GetUInt8();
+
+    delete result;
+
+    return loc;
 
 }
 
@@ -584,9 +590,12 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
         cost = 0;
         return;
     }
+
     Field *fields = result->Fetch();
     cost = fields[0].GetUInt32();
     path = fields[1].GetUInt16();
+
+    delete result;
 }
 
 uint16 ObjectMgr::GetTaxiMount( uint32 id )
@@ -595,13 +604,14 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id )
     QueryResult *result = sDatabase.PQuery("SELECT `taxi_node`.`mount` FROM `taxi_node` WHERE `taxi_node`.`id` = '%u'", id);
 
     if( ! result )
-    {
         return 0;
-    }
 
     Field *fields = result->Fetch();
-    return fields[0].GetUInt16();
+    uint16 mount_id = fields[0].GetUInt16();
 
+    delete result;
+
+    return mount_id;
 }
 
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )

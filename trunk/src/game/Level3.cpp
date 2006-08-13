@@ -1118,6 +1118,8 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
 
     }while( result->NextRow() );
 
+    delete result;
+
     return true;
 }
 

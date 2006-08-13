@@ -60,16 +60,22 @@ bool Pet::LoadPetFromDB( Unit* owner )
 {
     WorldPacket data;
     uint32 ownerid = owner->GetGUIDLow();
+
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", ownerid );
+
     if(!result)
         return false;
+
     Field *fields = result->Fetch();
 
     float px, py, pz;
     owner->GetClosePoint(NULL, px, py, pz);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), fields[1].GetUInt32()))
+    {
+        delete result;
         return false;
+    }
 
     std::string name;
     if(owner->GetTypeId() == TYPEID_PLAYER)
@@ -139,6 +145,9 @@ bool Pet::LoadPetFromDB( Unit* owner )
     m_spells[2] = fields[8].GetUInt32();
     m_spells[3] = fields[9].GetUInt32();
     m_actState = fields[10].GetUInt32();
+
+    delete result;
+
     AIM_Initialize();
     MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
     owner->SetPet(this);

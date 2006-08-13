@@ -209,7 +209,7 @@ int RASocket::zprintf( const char * szText, ... )
     va_list ap;
     va_start(ap, szText);
     char*megabuffer=new char[1024];
-    unsigned int sz=vsprintf(megabuffer,szText,ap);
+    unsigned int sz=vsnprintf(megabuffer,1024,szText,ap);
     #ifdef RA_CRYPT
     Encrypt(megabuffer,sz);
     #endif

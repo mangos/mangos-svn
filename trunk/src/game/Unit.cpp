@@ -383,14 +383,16 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
             pVictim->AddHostil(GetGUID(), damage);
-            if( GetTypeId() == TYPEID_PLAYER
+            if( pVictim != this                             // not generate rage for self damage (falls, ...)
+                &&  GetTypeId() == TYPEID_PLAYER
                 && (getClass() == WARRIOR || m_form == 5 || m_form == 8)
                 && !m_currentMeleeSpell)                    // not generate rage for special attacks
                 ((Player*)this)->CalcRage(damage,true);
         }
         else
         {
-            if( pVictim->getClass() == WARRIOR )
+            if( pVictim != this                             // not generate rage for self damage (falls, ...)
+                && pVictim->getClass() == WARRIOR )
                 ((Player*)pVictim)->CalcRage(damage,false);
 
             // random durability for items (HIT)
