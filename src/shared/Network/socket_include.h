@@ -67,10 +67,14 @@ typedef unsigned short port_t;
 #define s6_addr16 _S6_un._S6_u8
 #define MSG_NOSIGNAL 0
 
-#elif defined __FreeBSD__
+#elif defined(__FreeBSD__) || defined(__OpenBSD__)
 // ----------------------------------------
-// FreeBSD
-# if __FreeBSD_version >= 400014
+// FreeBSD and OpenBSD
+
+# if defined(__FreeBSD__) && __FreeBSD_version < 400014
+#  error FreeBSD versions prior to 400014 does not support ipv6
+# endif
+
 #  define s6_addr16 __u6_addr.__u6_addr16
 #  if !defined(MSG_NOSIGNAL)
 #   define MSG_NOSIGNAL 0
@@ -80,9 +84,6 @@ typedef in_addr_t ipaddr_t;
 typedef in_port_t port_t;
 #  define IPV6_ADD_MEMBERSHIP IPV6_JOIN_GROUP
 #  define IPV6_DROP_MEMBERSHIP IPV6_LEAVE_GROUP
-# else
-#  error FreeBSD versions prior to 400014 does not support ipv6
-# endif
 
 #elif defined MACOSX
 // ----------------------------------------
