@@ -86,9 +86,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void MessageBoardcast(Object *, WorldPacket *);
 
-        void PlayerRelocation(Player *, const float &x, const float &y, const float &z, const float &angl);
+        void PlayerRelocation(Player *, float x, float y, float z, float angl);
 
-        void CreatureRelocation(Creature *creature, const float &x, const float &y, const float &, const float &);
+        void CreatureRelocation(Creature *creature, float x, float y, float, float);
 
         template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
@@ -105,7 +105,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         bool UnloadGrid(const uint32 &x, const uint32 &y);
 
-        void GetUnitList(const float &x, const float &y, std::list<Unit*> &unlist);
+        void GetUnitList(float x, float y, std::list<Unit*> &unlist);
 
         void ResetGridExpiry(GridInfo &info) const
         {

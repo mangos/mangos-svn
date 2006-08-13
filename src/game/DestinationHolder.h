@@ -36,18 +36,18 @@ class MANGOS_DLL_DECL DestinationHolder
     public:
         DestinationHolder() : i_tracker(TRAVELLER_UPDATE_INTERVAL), i_totalTravelTime(0), i_timeStarted(0) {}
 
-        void SetDestination(TRAVELLER &traveller, const float &dest_x, const float &dest_y, const float &dest_z, const float offset = 0);
+        void SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, float offset = 0);
         inline bool UpdateExpired(void) const { return i_tracker.Passed(); }
         inline void ResetUpdate(uint32 t = TRAVELLER_UPDATE_INTERVAL) { i_tracker.Reset(TRAVELLER_UPDATE_INTERVAL); }
         inline uint32 GetTotalTravelTime(void) const { return i_totalTravelTime; }
         inline uint32 GetStartTravelTime(void) const { return i_timeStarted; }
         inline bool HasArrived(void) const { return (i_totalTravelTime == 0 || (getMSTime() - i_timeStarted) >= i_totalTravelTime); }
-        bool UpdateTraveller(TRAVELLER &traveller, const uint32 &diff, bool force_update);
-        void UpdateLocation(TRAVELLER &traveller, const float &, const float &, const float &);
+        bool UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update);
+        void UpdateLocation(TRAVELLER &traveller, float, float, float);
         void GetLocationNow(float &x, float &y, float &z) const;
 
     private:
-        void _findOffSetPoint(const float &x1, const float &y1, const float &x2, const float &y2, const float &offset, float &x, float &y);
+        void _findOffSetPoint(float x1, float y1, float x2, float y2, float offset, float &x, float &y);
 
 };
 #endif

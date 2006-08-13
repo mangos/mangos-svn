@@ -108,7 +108,7 @@ typedef CoordPair<TOTAL_NUMBER_OF_CELLS_PER_MAP> CellPair;
 namespace MaNGOS
 {
     template<class RET_TYPE, int CENTER_VAL>
-        inline RET_TYPE Compute(const float &x, const float &y, const float center_offset, const float size)
+        inline RET_TYPE Compute(float x, float y, float center_offset, float size)
     {
         float x_offset = (x - center_offset)/size;
         float y_offset = (y - center_offset)/size;
@@ -118,12 +118,12 @@ namespace MaNGOS
         return RET_TYPE(x_val, y_val);
     }
 
-    inline GridPair ComputeGridPair(const float &x, const float &y)
+    inline GridPair ComputeGridPair(float x, float y)
     {
         return Compute<GridPair, CENTER_GRID_ID>(x, y, CENTER_GRID_OFFSET, SIZE_OF_GRIDS);
     }
 
-    inline CellPair ComputeCellPair(const float &x, const float &y)
+    inline CellPair ComputeCellPair(float x, float y)
     {
         return Compute<CellPair, CENTER_GRID_CELL_ID>(x, y, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL);
     }

@@ -104,7 +104,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
     if(i_creature.hasUnitState(UNIT_STAT_ROOT) || i_creature.hasUnitState(UNIT_STAT_STUNDED))
         return;
     i_nextMoveTime.Update(diff);
-    Traveller<Creature> traveller(creature);
+    CreatureTraveller traveller(creature);
     i_destinationHolder.UpdateTraveller(traveller, diff, false);
     if( i_nextMoveTime.Passed() )
     {
@@ -113,7 +113,6 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
             assert( i_currentNode < i_path.Size() );
             creature.addUnitState(UNIT_STAT_ROAMING);
             const Path::PathNode &node(i_path(i_currentNode));
-            Traveller<Creature> traveller(creature);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
         }

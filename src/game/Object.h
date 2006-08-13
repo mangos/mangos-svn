@@ -122,7 +122,7 @@ class MANGOS_DLL_SPEC Object
         bool IsBeingTeleported() { return mSemaphoreTeleport; }
         void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
 
-        void Relocate(const float &x, const float &y, const float &z, const float &orientation)
+        void Relocate(float x, float y, float z, float orientation)
         {
             m_positionX = x;
             m_positionY = y;
@@ -130,10 +130,10 @@ class MANGOS_DLL_SPEC Object
             m_orientation = orientation;
         }
 
-        const float& GetPositionX( ) const { return m_positionX; }
-        const float& GetPositionY( ) const { return m_positionY; }
-        const float& GetPositionZ( ) const { return m_positionZ; }
-        const float& GetOrientation( ) const { return m_orientation; }
+        float GetPositionX( ) const { return m_positionX; }
+        float GetPositionY( ) const { return m_positionY; }
+        float GetPositionZ( ) const { return m_positionZ; }
+        float GetOrientation( ) const { return m_orientation; }
         void GetClosePoint( const Object* victim, float &x, float &y, float &z ) const;
         void GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const;
         const float GetObjectSize() const
@@ -170,9 +170,9 @@ class MANGOS_DLL_SPEC Object
             return m_floatValues[ index ];
         }
 
-        void SetUInt32Value( uint16 index, const uint32  value );
+        void SetUInt32Value( uint16 index,       uint32  value );
         void SetUInt64Value( uint16 index, const uint64 &value );
-        void SetFloatValue(  uint16 index, const float  &value );
+        void SetFloatValue(  uint16 index,       float   value );
 
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModUInt64Value(uint16 index, int32 val, bool apply);
