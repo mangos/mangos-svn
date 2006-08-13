@@ -96,6 +96,10 @@ TcpSocket::TcpSocket(SocketHandler& h,size_t isize,size_t osize) : Socket(h)
 #pragma warning(default:4355)
 #endif
 
+#if COMPILER == COMPILER_MICROSOFT
+#define vsnprintf _vsnprintf
+#endif
+
 TcpSocket::~TcpSocket()
 {
 #ifdef HAVE_OPENSSL
