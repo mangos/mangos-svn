@@ -474,7 +474,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     }
 
     if(class_ == WARRIOR)
-        CastSpell(this,2457,true);
+        CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
     return true;
 }
 
@@ -2273,6 +2273,9 @@ void Player::ResurrectPlayer()
     {
         DeMorph();
     }
+
+    if(getClass() == WARRIOR)
+        CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
 
     m_deathTimer = 0;
 }
