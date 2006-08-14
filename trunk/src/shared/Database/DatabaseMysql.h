@@ -55,5 +55,4 @@ class DatabaseMysql : public Database
         ZThread::FastMutex mMutex;
         MYSQL *mMysql;
 };
-
 #endif

@@ -699,7 +699,7 @@ void Spell::SendSpellCooldown()
     if( rec == 0 && catrec == 0 && m_CastItem)
     {
         ItemPrototype const* proto = m_CastItem->GetProto();
-        if(proto) 
+        if(proto)
         {
             for(int idx = 0; idx < 5; ++idx)
             {
@@ -713,7 +713,7 @@ void Spell::SendSpellCooldown()
         }
     }
 
-    // no cooldown 
+    // no cooldown
     if( rec == 0 && catrec == 0)
         return;
 

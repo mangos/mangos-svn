@@ -54,8 +54,8 @@
 /* Define to 1 if you have the `mysql' library (-lmysql). */
 #undef HAVE_LIBMYSQL
 
-/* Define to 1 if you have the `mysqlclient' library (-lmysqlclient). */
-#undef HAVE_LIBMYSQLCLIENT
+/* Define to 1 if you have the `mysqlclient_r' library (-lmysqlclient_r). */
+#undef HAVE_LIBMYSQLCLIENT_R
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD

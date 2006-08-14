@@ -270,7 +270,7 @@ uint32 FindSpellRank(uint32 spellId)
             case 134282:case 136597:rank = 14;break;
             case 134290:case 136605:rank = 15;break;
             case 146442:case 148693:rank = 16;break;
-            case 48345:case 59695:rank = 1;break;                      //rank of profession skill.
+            case 48345:case 59695:rank = 1;break;           //rank of profession skill.
             case 46478:case 48356:rank = 2;break;
             case 84128:case 86418:rank = 3;break;
             case 274133:case 277565:rank = 4;break;

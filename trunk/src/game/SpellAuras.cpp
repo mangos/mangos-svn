@@ -365,7 +365,7 @@ void Aura::Update(uint32 diff)
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                     leaderGuid = ((Player*)owner)->GetGroupLeader();
             }
-            
+
             Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
             float radius =  GetRadius(sSpellRadius.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
             if(pGroup)
@@ -501,8 +501,8 @@ void Aura::_AddAura()
         }
     }
 
-    // adding linked auras 
-    if(m_modifier.m_auraname == 36) // add the shapeshift aura's boosts
+    // adding linked auras
+    if(m_modifier.m_auraname == 36)                         // add the shapeshift aura's boosts
         HandleShapeshiftBoosts(true, this);
 
     m_target->ApplyStats(false);
@@ -559,7 +559,7 @@ void Aura::_AddAura()
 void Aura::_RemoveAura()
 {
     // removing linked auras added ad _AddAura call before removing aura
-    if(m_modifier.m_auraname == 36) // remove the shapeshift aura's boosts
+    if(m_modifier.m_auraname == 36)                         // remove the shapeshift aura's boosts
         HandleShapeshiftBoosts(false, this);
 
     m_target->ApplyStats(false);
@@ -567,7 +567,8 @@ void Aura::_RemoveAura()
     ApplyModifier(false);
     m_target->ApplyStats(true);
 
-    if(m_isPassive && !(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem()))                                         //passive auras do not get put in slots
+                                                            //passive auras do not get put in slots
+    if(m_isPassive && !(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem()))
         return;
 
     uint8 slot = GetAuraSlot();

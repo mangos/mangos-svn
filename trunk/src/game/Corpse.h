@@ -27,7 +27,6 @@ enum CorpseType
     CORPSE_BONES         = 1
 };
 
-
 // Value equal client resurrection dialog show radius.
 #define CORPSE_RECLAIM_RADIUS 39
 

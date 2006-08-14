@@ -43,5 +43,4 @@ class Database
         // must be called before finish thread run (one time for thread using one from existed Database objects)
         virtual void ThreadEnd();
 };
-
 #endif

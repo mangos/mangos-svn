@@ -537,11 +537,12 @@ void CliMotd(char*command,pPrintf zprintf)
     {
         zprintf("Current Message of the day: \x0d\x0a%s\x0d\x0a", sWorld.GetMotd());
         return;
-    } else {   
+    }
+    else
+    {
         sWorld.SetMotd(motdText);
         zprintf("Text changed to:\x0d\x0a%s\x0d\x0a", motdText);
     }
 
 }
-
 #endif

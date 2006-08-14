@@ -376,7 +376,6 @@ void Spell::EffectHeal( uint32 i )
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth);
         uint32 newhealth = curhealth + addhealth < maxhealth ? uint32(curhealth + addhealth) : maxhealth;
         unitTarget->SetHealth( newhealth );
-        
 
         //If the target is in combat, then player is in combat too
         if( m_caster != unitTarget &&
@@ -1070,7 +1069,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         if(!pEnchant)
             return;
         for(int x=0;x<3;x++)
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+x,0);
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+x,0);
 
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3, enchant_id);
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+1, duration*1000);
@@ -1584,7 +1583,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         if(!pEnchant)
             return;
         for(int x=0;x<3;x++)
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);
 
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3, enchant_id);
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+1, duration*1000);
@@ -1908,7 +1907,7 @@ void Spell::EffectSummonObject(uint32 i)
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
     data << pGameObj->GetGUID();
     m_caster->SendMessageToSet(&data,true);
-    
+
     m_caster->m_ObjectSlot[slot] = pGameObj->GetGUID();
 }
 
