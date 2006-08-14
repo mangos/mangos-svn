@@ -54,6 +54,7 @@ Player::Player (WorldSession *session): Unit()
     m_session = session;
 
     info = NULL;
+    cstats = NULL;
     m_divider = 0;
     m_timedquest = 0;
 
@@ -158,7 +159,8 @@ Player::~Player ()
             delete m_items[i];
     }
     CleanupChannels();
-
+    
+    delete cstats;
     delete info;
     delete PlayerTalkClass;
 }
@@ -8429,6 +8431,15 @@ bool Player::LoadFromDB( uint32 guid )
     m_class = fields[6].GetUInt8();
 
     info = objmgr.GetPlayerCreateInfo(m_race, m_class);
+    if (info)
+    {
+        cstats = new PlayerCreateStats;
+        cstats->agility = (float)info->agility;
+        cstats->intellect = (float)info->intellect;
+        cstats->spirit = (float)info->spirit;
+        cstats->stamina = (float)info->stamina;
+        cstats->strength = (float)info->strength;
+    }
 
     m_positionX = fields[7].GetFloat();
     m_positionY = fields[8].GetFloat();
@@ -9300,4 +9311,22 @@ int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
 void Player::ApplyBlockValueMod(int32 val,bool apply)
 {
     ApplyModUInt32Var(m_BlockValue,val,apply);
+}
+
+void Player::RemoveAreaAurasFromGroup()
+{
+    Group* pGroup = objmgr.GetGroupByLeader(this->GetGroupLeader());
+    if(!pGroup)
+        return;
+
+    for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+    {
+        Unit* Member = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+        if(!Member)
+            continue;
+        Member->RemoveAreaAurasByOthers(GetGUID());
+        for (uint8 i = 0; i < 4; i++)
+            if (m_TotemSlot[i])
+                Member->RemoveAreaAurasByOthers(m_TotemSlot[i]);
+    }
 }

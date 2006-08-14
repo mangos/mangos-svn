@@ -70,6 +70,7 @@ void Group::Disband()
     {
         player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
         ASSERT( player );
+        player->RemoveAreaAurasByOthers();
 
         player->UnSetInGroup();
         player->GetSession()->SendPacket( &data );
@@ -115,6 +116,13 @@ uint32 Group::RemoveMember(const uint64 &guid)
 {
     uint32 i, j;
     bool leaderFlag;
+
+    Player *player = ObjectAccessor::Instance().FindPlayer( guid );
+    if (player)
+    {
+        player->RemoveAreaAurasByOthers();
+        player->RemoveAreaAurasFromGroup();
+    }
 
     for( i = 0; i < m_count; i++ )
     {

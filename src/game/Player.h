@@ -147,6 +147,15 @@ struct PlayerCreateInfo
     std::list<uint16> action[4];
 };
 
+struct PlayerCreateStats
+{
+    float strength;
+    float agility;
+    float stamina;
+    float intellect;
+    float spirit;
+};
+
 struct Areas
 {
     uint32 areaID;
@@ -378,6 +387,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}
+        PlayerCreateStats* GetPlayerCreateStats() { return cstats; }
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel();
@@ -472,6 +482,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddEnchantDuration(Item *item,uint32 slot,uint32 duration);
         void SaveEnchant();
         void LoadEnchant();
+        void RemoveAreaAurasFromGroup();
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -975,6 +986,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::string m_rank_name;
 
         PlayerCreateInfo *info;
+        PlayerCreateStats *cstats;
 
         uint32 m_race;
         uint32 m_class;

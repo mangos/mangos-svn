@@ -116,7 +116,7 @@ struct SpellEntry
     uint32      spellPriority;
     uint32    SpellNameIndex[8];
     uint32    SpellNameFlag;
-    uint32    Rank[8];
+    char*     Rank[8];
     uint32    RankFlags;
     uint32    ManaCostPercentage;
     uint32    StartRecoveryCategory;

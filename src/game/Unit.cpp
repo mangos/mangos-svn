@@ -81,14 +81,8 @@ Unit::Unit() : Object()
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
     m_modCastSpeedPct = 0;
-    //m_spellCritSchool.clear();
     m_reflectSpellSchool.clear();
     m_scAuras.clear();
-    /*m_damageDoneCreature.clear();
-    m_damageDone.clear();
-    m_damageTaken.clear();
-    m_powerCostSchool.clear();
-    m_creatureAttackPower.clear();*/
 }
 
 Unit::~Unit()
@@ -1539,6 +1533,12 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID)
 
 bool Unit::AddAura(Aura *Aur, bool uniq)
 {
+    if (!isAlive())
+    {
+        delete Aur;
+        return false;
+    }
+
     AuraMap::iterator i = m_Auras.find( spellEffectPair(Aur->GetId(), Aur->GetEffIndex()) );
     // take out same spell
     if (i != m_Auras.end())
@@ -1726,6 +1726,35 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
     }
 }
 
+void Unit::RemoveAreaAurasByOthers(uint64 guid)
+{
+    int j = 0;
+    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
+    {
+        if (i->second && i->second->IsAreaAura())
+        {
+            uint64 casterGuid = i->second->GetCaster()->GetGUID();
+            uint64 targetGuid = i->second->GetTarget()->GetGUID();
+            // if area aura cast by someone else or by the specified caster
+            if (casterGuid == guid || (guid == 0 && casterGuid != targetGuid))
+            {
+                for (j = 0; j < 4; j++)
+                    if (m_TotemSlot[j] == casterGuid)
+                        break;
+                // and not by one of my totems
+                if (j == 4)
+                    RemoveAura(i);
+                else
+                    ++i;
+            }
+            else
+                ++i;
+        }
+        else
+            ++i;
+    }
+}
+
 void Unit::RemoveAura(uint32 spellId, uint32 effindex)
 {
     AuraMap::iterator i = m_Auras.find( spellEffectPair(spellId, effindex) );
@@ -1857,33 +1886,56 @@ void Unit::ApplyStats(bool apply)
 
     if(GetTypeId() != TYPEID_PLAYER) return;
 
-    PlayerCreateInfo* pinfo = ((Player*)this)->GetPlayerInfo();
-    if(!pinfo) return;
+    PlayerCreateStats* pstats = ((Player*)this)->GetPlayerCreateStats();
+    if(!pstats) return;
 
     float val;
-    uint32 val2,tem_att_power;
-    int32 totalstatmods[5] = {0,0,0,0,0};
+    int32 val2,tem_att_power;
+    float totalstatmods[5] = {1,1,1,1,1};
+    float totalresmods[7] = {1,1,1,1,1,1,1};
 
     AuraList& mModPercentStat = GetAurasByType(SPELL_AURA_MOD_PERCENT_STAT);
     for(AuraList::iterator i = mModPercentStat.begin(); i != mModPercentStat.end(); ++i)
     {
         if((*i)->GetModifier()->m_miscvalue != -1)
-            totalstatmods[(*i)->GetModifier()->m_miscvalue] += (*i)->GetModifier()->m_amount;
+            totalstatmods[(*i)->GetModifier()->m_miscvalue] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
         else
             for (uint8 j = 0; j < 5; j++)
-                totalstatmods[j] += (*i)->GetModifier()->m_amount;
+                totalstatmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
     }
+    AuraList& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
+    for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
+        for(uint8 j = 0; j <= 6; j++)
+            if((*i)->GetModifier()->m_miscvalue & (1<<j))
+                totalresmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+
+    //startSta = uint8((float)startSta * totalstatmods[STAT_STAMINA]);
+    //startInt = uint8((float)startInt * totalstatmods[STAT_INTELLECT]);
+
+    for (uint8 i = 0; i < 5; i++)
+        totalstatmods[i] = totalstatmods[i] * 100.0f - 100.0f;
+    for (uint8 i = 0; i < 7; i++)
+        totalresmods[i] = totalresmods[i] * 100.0f - 100.0f;
 
     // restore percent mods
     if (apply)
     {
         for (uint8 i = 0; i < 5; i++)
         {
-            if (totalstatmods[i])
+            if (totalstatmods[i] != 0)
             {
                 ApplyStatPercentMod(Stats(i),totalstatmods[i], apply );
                 ((Player*)this)->ApplyPosStatPercentMod(Stats(i),totalstatmods[i], apply );
                 ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );
+            }
+        }
+        for (uint8 i = 0; i < 7; i++)
+        {
+            if (totalresmods[i] != 0)
+            {
+                ApplyResistancePercentMod(SpellSchools(i), totalresmods[i], apply );
+                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true, totalresmods[i], apply);
+                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);
             }
         }
     }
@@ -1894,14 +1946,14 @@ void Unit::ApplyStats(bool apply)
     ApplyArmorMod( val2, apply);
 
     // HP
-    val2 = (GetStat(STAT_STAMINA) - pinfo->stamina)*10;
+    val2 = (GetStat(STAT_STAMINA) - (uint8)pstats->stamina)*10;
 
     ApplyMaxHealthMod( val2, apply);
 
     // MP
     if(getClass() != WARRIOR && getClass() != ROGUE)
     {
-        val2 = (GetStat(STAT_INTELLECT) - pinfo->intellect)*15;
+        val2 = (GetStat(STAT_INTELLECT) - (uint8)pstats->intellect)*15;
 
         ApplyMaxPowerMod(POWER_MANA, val2, apply);
 
@@ -2005,6 +2057,15 @@ void Unit::ApplyStats(bool apply)
                 ApplyStatPercentMod(Stats(i),totalstatmods[i], apply );
                 ((Player*)this)->ApplyPosStatPercentMod(Stats(i),totalstatmods[i], apply );
                 ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );
+            }
+        }
+        for (uint8 i = 0; i < 7; i++)
+        {
+            if (totalresmods[i])
+            {
+                ApplyResistancePercentMod(SpellSchools(i), totalresmods[i], apply );
+                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true, totalresmods[i], apply);
+                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);
             }
         }
     }

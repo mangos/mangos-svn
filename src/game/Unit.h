@@ -122,54 +122,12 @@ struct ProcTriggerSpell
     uint32 procCharges;
 };
 
-/*struct SpellCritSchool
-{
-    uint32 spellId;
-    int32 school;
-    int32 chance;
-};*/
-
 struct ReflectSpellSchool
 {
     uint32 spellId;
     int32 school;
     int32 chance;
 };
-
-/*struct DamageDoneCreature
-{
-    uint32 spellId;
-    uint32 creaturetype;
-    int32 damage;
-};
-
-struct CreatureAttackPower
-{
-    uint32 spellId;
-    uint32 creaturetype;
-    int32 damage;
-};
-
-struct DamageDone
-{
-    uint32 spellId;
-    int32 school;
-    int32 damage;
-};
-
-struct DamageTaken
-{
-    uint32 spellId;
-    int32 school;
-    int32 damage;
-};
-
-struct PowerCostSchool
-{
-    uint32 spellId;
-    int32 school;
-    int32 damage;
-};*/
 
 struct SpellImmune
 {
@@ -563,6 +521,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveSpellsCausingAura(uint32 auraType);
         void RemoveRankAurasDueToSpell(uint32 spellId);
         bool RemoveNoStackAurasDueToAura(Aura *Aur);
+        void RemoveAreaAurasByOthers(uint64 guid = 0);
 
         void RemoveAllAuras();
         void RemoveAllAurasOnDeath();
@@ -599,15 +558,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
         std::list<struct DamageManaShield*> m_damageManaShield;
-        //std::list<struct SpellCritSchool*> m_spellCritSchool;
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
         std::list<struct ReflectSpellSchool*> m_reflectSpellSchool;
         SpellImmuneList m_spellImmune[6];
-        /*std::list<struct DamageDoneCreature*> m_damageDoneCreature;
-        std::list<struct DamageDone*> m_damageDone;
-        std::list<struct DamageTaken*> m_damageTaken;
-        std::list<struct PowerCostSchool*> m_powerCostSchool;
-        std::list<struct CreatureAttackPower*> m_creatureAttackPower;*/
 
         float GetHostility(uint64 guid) const;
         float GetHostilityDistance(uint64 guid) const { return GetHostility( guid )/(3.5f * getLevel()+1.0f); }

@@ -373,7 +373,7 @@ void Aura::Update(uint32 diff)
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                    if(!Target || Target->GetGUID() == m_caster->GetGUID())
+                    if(!Target || Target->GetGUID() == m_caster->GetGUID() || !Target->isAlive())
                         continue;
                     Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
 
@@ -1866,31 +1866,33 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
 
 void Aura::HandleModResistancePercent(bool apply)
 {
-    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
-        m_target->ApplyArmorPercentMod(m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 127 || m_modifier.m_miscvalue == 126)
+    for(int8 i = 0; i < 7; i++)
     {
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_HOLY,   m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_FIRE,   m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_NATURE, m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_FROST,  m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_SHADOW, m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_ARCANE, m_modifier.m_amount, apply );
+        if(m_modifier.m_miscvalue & int32(1<<i))
+        {
+            m_target->ApplyResistancePercentMod(SpellSchools(i), m_modifier.m_amount, apply );
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true,m_modifier.m_amount, apply);
+                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false,m_modifier.m_amount, apply);
+            }
+        }
     }
 }
 
 void Aura::HandleModBaseResistance(bool apply)
 {
-    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
-        m_target->ApplyArmorMod(m_modifier.m_amount, apply);
-    if(m_modifier.m_miscvalue == 126 || m_modifier.m_miscvalue == 127)
+    for(int i = 0; i < 7; i++)
     {
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_HOLY,   m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_FIRE,   m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_NATURE, m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_FROST,  m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_SHADOW, m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_ARCANE, m_modifier.m_amount, apply);
+        if(m_modifier.m_miscvalue & (1<<i))
+        {
+            m_target->ApplyResistancePercentMod(SpellSchools(i), m_modifier.m_amount, apply );
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true,m_modifier.m_amount, apply);
+                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false,m_modifier.m_amount, apply);
+            }
+        }
     }
 }
 
@@ -1900,59 +1902,53 @@ void Aura::HandleModBaseResistance(bool apply)
 
 void Aura::HandleAuraModStat(bool apply)
 {
-    switch(m_modifier.m_miscvalue)
+    if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
     {
-        case 0: case 1: case 2: case 3: case 4:
+        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");
+        return;
+    }
+
+    for(int32 i = 0; i < 5; i++)
+    {
+        if (m_modifier.m_miscvalue == -1 || m_modifier.m_miscvalue == i)
         {
-            Stats stat = (Stats)m_modifier.m_miscvalue;
-            m_target->ApplyStatMod(stat,m_modifier.m_amount,apply);
+            m_target->ApplyStatMod(Stats(i), m_modifier.m_amount,apply);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
             {
                 if (m_modifier.m_miscvalue2 == 0)
-                    ((Player*)m_target)->ApplyPosStatMod(stat,m_modifier.m_amount,apply);
+                    ((Player*)m_target)->ApplyPosStatMod(Stats(i),m_modifier.m_amount,apply);
                 else
-                    ((Player*)m_target)->ApplyNegStatMod(stat,m_modifier.m_amount,apply);
+                    ((Player*)m_target)->ApplyNegStatMod(Stats(i),m_modifier.m_amount,apply);
             }
-        }break;
-        case -1:
-        {
-            for(Stats stat = STAT_STRENGTH; stat <= STAT_SPIRIT; stat = Stats(uint8(stat)+1))
-            {
-                m_target->ApplyStatMod(stat,m_modifier.m_amount,apply);
-                if(m_target->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_modifier.m_miscvalue2 == 0)
-                        ((Player*)m_target)->ApplyPosStatMod(stat,m_modifier.m_amount,apply);
-                    else
-                        ((Player*)m_target)->ApplyNegStatMod(stat,m_modifier.m_amount,apply);
-                }
-            }
-        }break;
-        default:
-            sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");
+        }
     }
 }
 
 void Aura::HandleModPercentStat(bool apply)
 {
-    if(m_modifier.m_miscvalue != -1)
+    if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
     {
-        m_target->ApplyStatPercentMod(Stats(m_modifier.m_miscvalue), m_modifier.m_amount, apply );
-        if (m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            ((Player*)m_target)->ApplyPosStatPercentMod(Stats(m_modifier.m_miscvalue), m_modifier.m_amount, apply );
-            ((Player*)m_target)->ApplyNegStatPercentMod(Stats(m_modifier.m_miscvalue), m_modifier.m_amount, apply );
-        }
+        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+        return;
     }
-    else
+
+    for (int32 i = 0; i < 5; i++)
     {
-        for (uint8 i = 0; i < 5; i++)
+        if(m_modifier.m_miscvalue == i || m_modifier.m_miscvalue == -1)
         {
             m_target->ApplyStatPercentMod(Stats(i), m_modifier.m_amount, apply );
             if (m_target->GetTypeId() == TYPEID_PLAYER)
             {
                 ((Player*)m_target)->ApplyPosStatPercentMod(Stats(i), m_modifier.m_amount, apply );
                 ((Player*)m_target)->ApplyNegStatPercentMod(Stats(i), m_modifier.m_amount, apply );
+                PlayerCreateStats *pstats = ((Player*)m_target)->GetPlayerCreateStats();
+                if (pstats)
+                {
+                    if (i == STAT_STAMINA)
+                        pstats->stamina *= (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
+                    if (i == STAT_INTELLECT)
+                        pstats->intellect *= (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
+                }
             }
         }
     }
