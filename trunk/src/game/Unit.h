@@ -30,6 +30,7 @@
 
 // Passive Spell codes explicit used in code
 #define SPELL_PASSIVE_DUAL_WIELD                674
+#define SPELL_PASSIVE_BATTLE_STANCE            2457
 #define SPELL_PASSIVE_PARRY_1                  3127
 #define SPELL_PASSIVE_UNDERWATER_BREATHING     5227
 #define SPELL_PASSIVE_PARRY_2                 18848
