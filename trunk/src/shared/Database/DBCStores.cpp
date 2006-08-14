@@ -240,16 +240,17 @@ uint32 FindSpellRank(uint32 spellId)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo) return false;
-    int rankfield = -1;
-    uint32 rank = 0;
     for(int i=0;i<8;i++)
-        if(spellInfo->Rank[i] > 0)
     {
-        rankfield = i;
-        break;
+        if(strcmp(spellInfo->Rank[i], "") != 0)
+        {
+            char *tmp = strstr(spellInfo->Rank[i], " ");
+            if (!tmp) continue;
+            return atoi(tmp+1);
+        }
     }
-    if(rankfield < 0)
-        return 0;
+    return 0;
+    /*
     if(rankfield == 0)                                      //english client
     {
         switch(spellInfo->Rank[rankfield])
@@ -306,7 +307,7 @@ uint32 FindSpellRank(uint32 spellId)
             default:rank = 0;break;
         }
     }
-    return rank;
+    return rank;*/
 }
 
 bool canStackSpellRank(SpellEntry *spellInfo)
