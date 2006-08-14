@@ -479,7 +479,6 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
         return false;
     }
 
-
     if(GetOwnerGUID()!=owner_guid)
     {
         sLog.outError("Item::LoadFromDB: item: %u have in DB owner guid: %lu. Updated to correct: %lu",GetOwnerGUID(),owner_guid);

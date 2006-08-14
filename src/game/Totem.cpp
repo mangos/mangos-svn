@@ -33,15 +33,15 @@ void Totem::Update( uint32 time )
 {
     Creature::Update( time );
     Unit *owner = GetOwner();
-    if (!owner || !owner->isAlive() || !this->isAlive()) 
+    if (!owner || !owner->isAlive() || !this->isAlive())
     {
-        UnSummon();                                        // remove self
+        UnSummon();                                         // remove self
         return;
     }
 
     if (m_duration <= time)
     {
-        UnSummon();                                        // remove self
+        UnSummon();                                         // remove self
         return;
     }
     else
@@ -84,9 +84,9 @@ void Totem::UnSummon()
     MapManager::Instance().GetMap(this->GetMapId())->Remove((Creature*)this, true);
 }
 
-void Totem::SetOwner(uint64 guid) 
-{ 
-    SetUInt64Value(UNIT_FIELD_SUMMONEDBY, guid); 
+void Totem::SetOwner(uint64 guid)
+{
+    SetUInt64Value(UNIT_FIELD_SUMMONEDBY, guid);
     Unit *owner = this->GetOwner();
     if (owner)
     {

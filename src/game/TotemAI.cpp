@@ -79,7 +79,7 @@ void TotemAI::AttackStop(Unit *)
 void
 TotemAI::UpdateAI(const uint32 diff)
 {
-    if (!i_totem.isTotem() || i_totem.m_currentSpell) 
+    if (!i_totem.isTotem() || i_totem.m_currentSpell)
         return;
     if (((Totem*)&i_totem)->GetTotemType() != TOTEM_ACTIVE)
         return;

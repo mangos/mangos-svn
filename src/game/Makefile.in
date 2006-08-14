@@ -98,13 +98,13 @@ am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
 	SpellAuras.$(OBJEXT) Spell.$(OBJEXT) SpellEffects.$(OBJEXT) \
 	SpellHandler.$(OBJEXT) TargetedMovementGenerator.$(OBJEXT) \
 	TaxiHandler.$(OBJEXT) TaxiMovementGenerator.$(OBJEXT) \
-	Totem.$(OBJEXT) TotemAI.$(OBJEXT) \
-	tools.$(OBJEXT) TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
-	UpdateData.$(OBJEXT) WaypointMovementGenerator.$(OBJEXT) \
-	Weather.$(OBJEXT) World.$(OBJEXT) WorldLog.$(OBJEXT) \
-	WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
-	WorldSocketMgr.$(OBJEXT) BattleGround.$(OBJEXT) \
-	BattleGroundMgr.$(OBJEXT) BattleGroundHandler.$(OBJEXT)
+	tools.$(OBJEXT) Totem.$(OBJEXT) TotemAI.$(OBJEXT) \
+	TradeHandler.$(OBJEXT) Unit.$(OBJEXT) UpdateData.$(OBJEXT) \
+	WaypointMovementGenerator.$(OBJEXT) Weather.$(OBJEXT) \
+	World.$(OBJEXT) WorldLog.$(OBJEXT) WorldSession.$(OBJEXT) \
+	WorldSocket.$(OBJEXT) WorldSocketMgr.$(OBJEXT) \
+	BattleGround.$(OBJEXT) BattleGroundMgr.$(OBJEXT) \
+	BattleGroundHandler.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp

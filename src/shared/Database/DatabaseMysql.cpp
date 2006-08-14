@@ -26,6 +26,7 @@ void DatabaseMysql::ThreadStart()
 {
     mysql_thread_init();
 }
+
 void DatabaseMysql::ThreadEnd()
 {
     mysql_thread_end();

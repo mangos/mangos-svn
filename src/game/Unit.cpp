@@ -93,8 +93,8 @@ Unit::Unit() : Object()
 
 Unit::~Unit()
 {
-   AttackStop();
-   RemoveAllAttackers();
+    AttackStop();
+    RemoveAllAttackers();
 }
 
 void Unit::Update( uint32 p_time )
@@ -1721,7 +1721,7 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
             if( m_Auras.empty() )
                 break;
             else
-            next =  m_Auras.begin();
+                next =  m_Auras.begin();
         }
     }
 }

@@ -1575,7 +1575,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 
             if(IsRankSpellDueToSpell(spellInfo,(*itr)->spellId))
             {
-                if((*itr)->active) 
+                if((*itr)->active)
                 {
                     data.Initialize(SMSG_SUPERCEDED_SPELL);
 
@@ -2032,7 +2032,7 @@ void Player::DeleteFromDB()
 {
     // convert corpse to bones if exist (to prevent exiting Corpse in World without DB entry)
     // bones will be deleted by corpse/bones deleting thread shortly
-    SpawnCorpseBones(); 
+    SpawnCorpseBones();
 
     uint32 guid = GetGUIDLow();
 
@@ -2042,7 +2042,6 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
-
 
     //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
     QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
@@ -2362,9 +2361,9 @@ void Player::SpawnCorpseBones()
     corpse->ConvertCorpseToBones();
 }
 
-Corpse* Player::GetCorpse() const 
-{ 
-    return ObjectAccessor::Instance().GetCorpseForPlayer(*this); 
+Corpse* Player::GetCorpse() const
+{
+    return ObjectAccessor::Instance().GetCorpseForPlayer(*this);
 }
 
 void Player::DeathDurabilityLoss(double percent)
@@ -5251,7 +5250,7 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
         {
             AddItemEnchant(item,item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3),false);
             for(int y=0;y<3;y++)
-            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+y,0);
+                item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+y,0);
         }
     }
 }
@@ -7167,7 +7166,7 @@ void Player::UpdateEnchantTime(uint32 time)
                 {
                     AddItemEnchant((*itr)->item,(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3),false);
                     for(int y=0;y<3;y++)
-                    (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+y,0);
+                        (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+y,0);
                     m_enchantDuration.erase(itr);
                     continue;
                 }
@@ -7223,7 +7222,7 @@ void Player::ReducePoisonCharges(uint32 enchantId)
     for(int i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_RANGED; i++)
     {
         pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        
+
         pItem = GetItemByPos( pos );
         if(!pItem)
             continue;
@@ -7236,7 +7235,7 @@ void Player::ReducePoisonCharges(uint32 enchantId)
             {
                 AddItemEnchant(pItem,enchantId,false);
                 for(int y=0;y<3;y++)
-                pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+y,0);
+                    pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+y,0);
                 break;
             }
             else
@@ -7276,7 +7275,7 @@ void Player::LoadEnchant()
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        
+
         pItem = GetItemByPos( pos );
         if(!pItem)
             continue;
@@ -8441,7 +8440,7 @@ bool Player::LoadFromDB( uint32 guid )
     {
         sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %d Y: ^%d). Teleport to default race/class locations.",guid,m_positionX,m_positionY);
         PlayerCreateInfo* info = objmgr.GetPlayerCreateInfo(m_race, m_class);
-        if(!info) 
+        if(!info)
         {
             sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
             return false;
@@ -8845,7 +8844,6 @@ void Player::SaveToDB()
     if (inworld)
         RemoveFromWorld();
 
-
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
@@ -9104,7 +9102,6 @@ void Player::SendOutOfRange(Object* obj)
     his_data.BuildPacket(&his_pk);
     GetSession()->SendPacket(&his_pk);
 }
-
 
 inline void Player::SendAttackSwingNotInRange()
 {

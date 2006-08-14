@@ -45,7 +45,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     switch(type)
     {
         case CHAT_MSG_SAY:
-        case CHAT_MSG_EMOTE: // "/me text" emote type
+        case CHAT_MSG_EMOTE:                                // "/me text" emote type
         {
             std::string msg = "";
             recv_data >> msg;

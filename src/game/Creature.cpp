@@ -98,7 +98,7 @@ void Creature::CreateTrainerSpells()
 
     } while( result->NextRow() );
 
-	delete result;
+    delete result;
 }
 
 void Creature::AIM_Update(const uint32 &diff)
@@ -202,8 +202,6 @@ void Creature::RegenerateHealth()
     uint32 maxValue = GetMaxHealth();
 
     if (curValue >= maxValue) return;
-
-
 
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
 
@@ -493,7 +491,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
             player->PlayerTalkClass->SendTalking( "$NSorry", "Here no this person.");
             return;
         }
-        
+
         //need add more case.
         switch(gossip->Action)
         {
@@ -522,7 +520,7 @@ uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 
     if(!result)
         return 0;
-    
+
     Field *fields = result->Fetch();
     uint32 id = fields[0].GetUInt32();
 

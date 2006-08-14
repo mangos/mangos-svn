@@ -158,7 +158,6 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
         return;
     }
 
-
     Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
     data.Initialize( SMSG_FORCE_MOVE_ROOT );

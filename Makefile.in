@@ -232,8 +232,6 @@ target_alias = @target_alias@
 
 # ZThread headers
 
-# MySQL shared library (Linux)
-
 # MySQL shared library (Win32)
 
 # OpenSSL shared library (Win32)
@@ -336,12 +334,12 @@ EXTRA_DIST = reconf configure win/mangosdVC71.sln \
 	dep/include/zthread/Thread.h dep/include/zthread/ThreadLocal.h \
 	dep/include/zthread/ThreadLocalImpl.h \
 	dep/include/zthread/Time.h dep/include/zthread/Waitable.h \
-	dep/include/zthread/ZThread.h \
-	dep/lib/debug/libmySQL.dll dep/lib/debug/libmySQL.lib \
-	dep/lib/release/libmySQL.dll dep/lib/release/libmySQL.lib \
-	dep/lib/debug/libeay32.dll dep/lib/debug/libeay32.lib \
-	dep/lib/release/libeay32.dll dep/lib/release/libeay32.lib \
-	dep/lib/debug/sqlite.lib dep/lib/release/sqlite.lib
+	dep/include/zthread/ZThread.h dep/lib/debug/libmySQL.dll \
+	dep/lib/debug/libmySQL.lib dep/lib/release/libmySQL.dll \
+	dep/lib/release/libmySQL.lib dep/lib/debug/libeay32.dll \
+	dep/lib/debug/libeay32.lib dep/lib/release/libeay32.dll \
+	dep/lib/release/libeay32.lib dep/lib/debug/sqlite.lib \
+	dep/lib/release/sqlite.lib
 SUBDIRS = doc dep src sql
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -543,7 +541,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/dep/include/mysql $(distdir)/dep/include/openssl $(distdir)/dep/include/sqlite $(distdir)/dep/include/zlib $(distdir)/dep/include/zthread $(distdir)/dep/lib $(distdir)/dep/lib/debug $(distdir)/dep/lib/release $(distdir)/doc $(distdir)/src/mangosd $(distdir)/src/realmd $(distdir)/src/shared $(distdir)/win $(distdir)/win/VC71 $(distdir)/win/VC80 $(distdir)/win_intel $(distdir)/win_intel/VC71
+	$(mkdir_p) $(distdir)/dep/include/mysql $(distdir)/dep/include/openssl $(distdir)/dep/include/sqlite $(distdir)/dep/include/zlib $(distdir)/dep/include/zthread $(distdir)/dep/lib/debug $(distdir)/dep/lib/release $(distdir)/doc $(distdir)/src/mangosd $(distdir)/src/realmd $(distdir)/src/shared $(distdir)/win $(distdir)/win/VC71 $(distdir)/win/VC80 $(distdir)/win_intel $(distdir)/win_intel/VC71
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
