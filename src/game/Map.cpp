@@ -41,6 +41,33 @@ bool FileExists(const char * fn)
     return true;
 }
 
+bool Map::ExistMAP(int mapid,int x,int y)
+{
+    std::string dataPath="./";
+
+    if(sConfig.GetString("DataDir",&dataPath))
+    {
+        if(dataPath.at(dataPath.length()-1)!='/')
+            dataPath.append("/");
+    }
+
+    int len = dataPath.length()+strlen("maps/%03u%02u%02u.map")+1;
+    char* tmp = new char[len];
+    snprintf(tmp, len, (char *)(dataPath+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
+
+    FILE *pf=fopen(tmp,"rb");
+
+    delete[] tmp;
+
+    if(!pf)
+        return false;
+
+    fclose(pf);
+
+    return true;
+}
+
+
 GridMap * Map::LoadMAP(int mapid,int x,int y)
 {
     char *tmp;
@@ -49,9 +76,7 @@ GridMap * Map::LoadMAP(int mapid,int x,int y)
 
     std::string dataPath="./";
 
-    if(!sConfig.GetString("DataDir",&dataPath))
-        dataPath="./";
-    else
+    if(sConfig.GetString("DataDir",&dataPath))
     {
         if(dataPath.at(dataPath.length()-1)!='/')
             dataPath.append("/");

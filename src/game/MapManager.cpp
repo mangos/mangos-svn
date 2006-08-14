@@ -97,3 +97,13 @@ MapManager::Update(time_t diff)
     ObjectAccessor::Instance().Update(diff);
     FlightMaster::Instance().FlightReportUpdate(diff);
 }
+
+bool MapManager::ExistMAP(int mapid,int x,int y)
+{
+    GridPair p = MaNGOS::ComputeGridPair(x,y);
+
+    int gx=63-p.x_coord;
+    int gy=63-p.y_coord;
+
+    return Map::ExistMAP(mapid,gx,gy);
+}
