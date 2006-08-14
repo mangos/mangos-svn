@@ -23,6 +23,7 @@
 #include "EventSystem.h"
 #include "GlobalEvents.h"
 #include "ObjectDefines.h"
+#include "Common.h"
 
 static void CorpsesErase(CorpseType type,uint32 delay)
 {
@@ -40,37 +41,44 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             //float ort       = fields[5].GetFloat();
             uint32 mapid    = fields[7].GetUInt32();
 
-            uint64 guid = (guidlow,HIGHGUID_CORPSE);
+            uint64 guid = MAKE_GUID(guidlow,HIGHGUID_CORPSE);
 
             sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,mapid);
 
-            // convert corpse to bones
-            if(type==CORPSE_RESURRECTABLE)
+            // not load grid if grid not loaded for corpse/bones removing
+            if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))
             {
-                Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
-                if(corpse)
-                    corpse->ConvertCorpseToBones();
+                // convert corpse to bones
+                if(type==CORPSE_RESURRECTABLE)
+                {
+                    Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
+                    if(corpse)
+                        corpse->ConvertCorpseToBones();
+                    else
+                    {
+                        sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
+                        sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                        sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
+                    }
+                }
+                // delete  bones
                 else
                 {
-                    sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
-                    sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
-                    sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
-                }
-            }
-            // delete  bones
-            else
-            {
-                // not load grid if grid not loaded for bones removing
-                if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))
-                {
+                    // not load grid if grid not loaded for bones removing
                     Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
                     if(corpse)
                         corpse->DeleteFromWorld(true);
                     else
+                    {
                         sLog.outDebug("Bones %u not found in world. Delete from DB also.",guidlow);
+                        sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                        sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
+                    }
                 }
-
-                // remove bones from DB in any case
+            }
+            else
+            {
+                // remove corpse/bones from DB in any case
                 sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                 sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
             }
