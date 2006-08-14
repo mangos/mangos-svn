@@ -111,7 +111,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         inline bool IsRemovalGrid(float x, float y) const
         {
             GridPair p = MaNGOS::ComputeGridPair(x, y);
-            return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_REMOVAL );
+            return( !i_grids[p.x_coord][p.y_coord] || i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_REMOVAL );
         }
 
         bool UnloadGrid(const uint32 &x, const uint32 &y);
@@ -126,6 +126,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
         uint32 GetId(void) const { return i_id; }
 
+        static bool ExistMAP(int mapid, int x, int y);
         GridMap * LoadMAP(int mapid, int x, int y);
         static void InitStateMachine(void);
         float GetHeight(float x, float y);

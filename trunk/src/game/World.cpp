@@ -214,6 +214,19 @@ void World::SetInitialWorldSettings()
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 
+    // check existance map files (startup race areas).
+    if(   !MapManager::ExistMAP(0,-6240.32, 331.033)
+        ||!MapManager::ExistMAP(0,-8949.95,-132.493)
+        ||!MapManager::ExistMAP(0,-8949.95,-132.493)
+        ||!MapManager::ExistMAP(1,-618.518,-4251.67)
+        ||!MapManager::ExistMAP(0, 1676.35, 1677.45)
+        ||!MapManager::ExistMAP(1, 10311.3, 832.463)
+        ||!MapManager::ExistMAP(1,-2917.58,-257.98))
+    {
+        sLog.outError("Correct *.map files not found by path '%smap'. Please place *.map files in directory by this path or correct DataDir value in mangosd.conf file.",dataPath.c_str());  
+        exit(1);
+    }
+
     //duplicate
     //sDatabase.PExecute("UPDATE `character` SET `online` = 0");
 

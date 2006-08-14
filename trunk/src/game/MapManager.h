@@ -56,6 +56,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
             }
         }
 
+        static bool ExistMAP(int mapid,int x,int y);
     private:
         MapManager();
         ~MapManager();
