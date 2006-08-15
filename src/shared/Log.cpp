@@ -169,41 +169,6 @@ void Log::outTitle( const char * str)
         fflush(logfile);
     }
 
-    if(m_colored)
-    {
-        SetColor(true,BLACK);
-        printf( " bl" );
-        SetColor(true,RED);
-        printf( " rd" );
-        SetColor(true,GREEN);
-        printf( " gr" );
-        SetColor(true,BROWN);
-        printf( " br" );
-        SetColor(true,BLUE);
-        printf( " bl" );
-        SetColor(true,MAGENTA);
-        printf( " mg" );
-        SetColor(true,CYAN);
-        printf( " cy" );
-        SetColor(true,GREY);
-        printf( " wt" );
-        SetColor(true,YELLOW);
-        printf( " yex" );
-        SetColor(true,LRED);
-        printf( " lrd" );
-        SetColor(true,LGREEN);
-        printf( " lgr" );
-        SetColor(true,LBLUE);
-        printf( " lbl" );
-        SetColor(true,LMAGENTA);
-        printf( " lmg" );
-        SetColor(true,LCYAN);
-        printf( " lcy" );
-        SetColor(true,WHITE);
-        printf( " lwt\n" );
-        ResetColor(true);
-    }
-
     fflush(stdout);
 }
 
