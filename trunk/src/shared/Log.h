@@ -25,10 +25,31 @@
 //extern uint8 loglevel;
 class Config;
 
+enum Color
+{
+    BLACK,
+    RED,
+    GREEN,
+    BROWN,
+    BLUE,
+    MAGENTA,
+    CYAN,
+    GREY,
+    YELLOW,
+    LRED,
+    LGREEN,
+    LBLUE,
+    LMAGENTA,
+    LCYAN,
+    WHITE
+};
+
+const int Color_count = int(WHITE)+1;
+
 class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThread::FastMutex> >
 {
     friend class MaNGOS::OperatorNew<Log>;
-    Log() : logfile(NULL) { Initialize(); }
+    Log() : logfile(NULL), m_colored(false) { Initialize(); }
     ~Log()
     {
         if( logfile != NULL )
@@ -37,16 +58,22 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
     }
     public:
         void Initialize();
+        void InitColors(std::string init_str);
+        void outTitle( const char * str);
         void outString( const char * str, ... );
         void outError( const char * err, ... );
         void outBasic( const char * str, ... );
         void outDetail( const char * str, ... );
         void outDebug( const char * str, ... );
         void outMenu( const char * str, ... );
+
+        void SetColor(bool stdout_stream, Color color);
+        void ResetColor(bool stdout_stream);
     private:
         FILE* logfile;
         uint32 m_logLevel;
-
+        bool m_colored;
+        Color m_colors[4];
 };
 
 #define sLog MaNGOS::Singleton<Log>::Instance()

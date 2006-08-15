@@ -79,17 +79,17 @@ bool Master::Run()
     sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n\n" );
 
-    sLog.outString( "MM   MM         MM   MM  MMMMM   MMMM   MMMMM");
-    sLog.outString( "MM   MM         MM   MM MMM MMM MM  MM MMM MMM");
-    sLog.outString( "MMM MMM         MMM  MM MMM MMM MM  MM MMM");
-    sLog.outString( "MM M MM         MMMM MM MMM     MM  MM  MMM");
-    sLog.outString( "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM");
-    sLog.outString( "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM");
-    sLog.outString( "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM");
-    sLog.outString( "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM");
-    sLog.outString( "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM");
-    sLog.outString( "        MM  MMM http://www.mangosproject.org");
-    sLog.outString( "        MMMMMM\n\n");
+    sLog.outTitle( "MM   MM         MM   MM  MMMMM   MMMM   MMMMM");
+    sLog.outTitle( "MM   MM         MM   MM MMM MMM MM  MM MMM MMM");
+    sLog.outTitle( "MMM MMM         MMM  MM MMM MMM MM  MM MMM");
+    sLog.outTitle( "MM M MM         MMMM MM MMM     MM  MM  MMM");
+    sLog.outTitle( "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM");
+    sLog.outTitle( "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM");
+    sLog.outTitle( "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM");
+    sLog.outTitle( "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM");
+    sLog.outTitle( "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM");
+    sLog.outTitle( "        MM  MMM http://www.mangosproject.org");
+    sLog.outTitle( "        MMMMMM\n\n");
 
     _StartDB();
 
