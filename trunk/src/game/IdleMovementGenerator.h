@@ -21,7 +21,7 @@
 
 #include "MovementGenerator.h"
 
-class MANGOS_DLL_DECL IdleMovementGenerator : public MovementGenerator
+class MANGOS_DLL_SPEC IdleMovementGenerator : public MovementGenerator
 {
     public:
 

@@ -356,8 +356,8 @@ void WorldSession::SendSpiritResurrect()
                 if(eff==6)
                 {
                     Aura *Aur = new Aura(spellInfo, i, _player, _player);
-                    _player->AddAura(Aur);
-                    if (level < 20)
+                    bool added = _player->AddAura(Aur);
+                    if (added && level < 20)
                     {
                         Aur->SetAuraDuration((level-10)*60000);
                         Aur->UpdateAuraDuration();

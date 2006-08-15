@@ -236,19 +236,20 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
         int cnt;
         fields = result->Fetch();
         cnt = fields[0].GetUInt32();
+        delete result;
 
         if ( cnt > 0 )
         {
-            QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
-            fields = result->Fetch();
+            QueryResult *result2 = sDatabase.PQuery("SELECT * FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+            assert(result2);
+            Field *fields2 = result->Fetch();
 
-            SendGMTicketGetTicket(6,fields[2].GetString());
-            delete result;
+            SendGMTicketGetTicket(6,fields2[2].GetString());
+            delete result2;
         }
         else
             SendGMTicketGetTicket(1,0);
     }
-    delete result;
 }
 
 void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
@@ -305,6 +306,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         int cnt;
         fields = result->Fetch();
         cnt = fields[0].GetUInt32();
+        delete result;
 
         if ( cnt > 0 )
         {
@@ -335,8 +337,6 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
             }
         }
     }
-
-    delete result;
 }
 
 void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
@@ -585,6 +585,8 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     if( result )
         friendResult = FRIEND_ALREADY;
 
+    delete result;
+
     if (!strcmp(GetPlayer()->GetName(),friendName.c_str())) friendResult = FRIEND_SELF;
 
     data.Initialize( SMSG_FRIEND_STATUS );
@@ -601,14 +603,10 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             data << (uint8)friendResult << (uint64)friendGuid << (uint8)0;
             data << (uint32)friendArea << (uint32)friendLevel << (uint32)friendClass;
 
-            delete result;
-
             uint32 guid;
             guid=GetPlayer()->GetGUIDLow();
 
-            result = sDatabase.PQuery("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')", (uint32)guid, friendName.c_str(), (uint32)friendGuid);
-
-            delete result;
+            sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')", (uint32)guid, friendName.c_str(), (uint32)friendGuid);
         }
         else
             friendResult = FRIEND_ADDED_OFFLINE;
@@ -684,6 +682,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     if( result )
         ignoreResult = FRIEND_IGNORE_ALREADY;
+
     delete result;
 
     if (!strcmp(GetPlayer()->GetName(),IgnoreName.c_str())) ignoreResult = FRIEND_IGNORE_SELF;
@@ -895,6 +894,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     if(result)
     {
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        delete result;
     }
     else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
     {
@@ -918,14 +918,12 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
         else
         {
-            GetPlayer()->TeleportTo(at->mapId,at->X,at->Y,at->Z,GetPlayer()->GetOrientation());
+            GetPlayer()->TeleportTo(at->mapId,at->X,at->Y,at->Z,at->Orientation);
         }
         delete at;
     }
-    delete result;
 
     // set resting flag we are in the inn
-
 }
 
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)

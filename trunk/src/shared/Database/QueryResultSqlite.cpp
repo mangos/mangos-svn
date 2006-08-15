@@ -22,7 +22,6 @@ QueryResultSqlite::QueryResultSqlite(char **tableData, uint32 rowCount, uint32 f
 QueryResult(rowCount, fieldCount), mTableData(tableData), mTableIndex(0)
 {
     mCurrentRow = new Field[mFieldCount];
-    ASSERT(mCurrentRow);
 
     for (uint32 i = 0; i < mFieldCount; i++)
     {
@@ -66,12 +65,12 @@ void QueryResultSqlite::EndQuery()
     if (mCurrentRow)
     {
         delete [] mCurrentRow;
-        mCurrentRow = 0;
+        mCurrentRow = NULL;
     }
     if (mTableData)
     {
         sqlite_free_table(mTableData);
-        mTableData = 0;
+        mTableData = NULL;
     }
 }
 

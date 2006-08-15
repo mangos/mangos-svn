@@ -50,11 +50,15 @@ MapManager::~MapManager()
     sDatabase.PExecute("TRUNCATE table `creature_grid`");
     sDatabase.PExecute("TRUNCATE table `gameobject_grid`");
     sDatabase.PExecute("TRUNCATE table `corpse_grid`");
+
+    Map::DeleteStateMachine();
 }
 
 void
 MapManager::Initialize()
 {
+    Map::InitStateMachine();
+
     sLog.outDebug("Grid compression apply on creature(s) ...");
     grid_compression("creature", "creature_grid");
     sLog.outDebug("Grid compression apply on gameobject(s) ...");

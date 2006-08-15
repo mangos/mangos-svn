@@ -1540,6 +1540,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
 
     AuraMap::iterator i = m_Auras.find( spellEffectPair(Aur->GetId(), Aur->GetEffIndex()) );
+
     // take out same spell
     if (i != m_Auras.end())
     {
@@ -1548,51 +1549,50 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
             if ((*i).second->GetTarget()->GetTypeId() == TYPEID_PLAYER )
                 (*i).second->UpdateAuraDuration();
         delete Aur;
+        return false;
     }
-    else
+
+    if (!Aur->IsPassive())                              // passive auras stack with all
     {
-        if (!Aur->IsPassive())                              // passive auras stack with all
+        if (!RemoveNoStackAurasDueToAura(Aur))
         {
-            if (!RemoveNoStackAurasDueToAura(Aur))
+            delete Aur;
+            return false;                               // couldnt remove conflicting aura with higher rank
+        }
+    }
+
+    Aur->_AddAura();
+    m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
+    if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
+    {
+        m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
+        m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
+    }
+
+    if (Aur->IsSingleTarget() && Aur->GetTarget() && Aur->GetSpellProto())
+    {
+        std::list<Aura *> *scAuras = Aur->GetCaster()->GetSingleCastAuras();
+        std::list<Aura *>::iterator itr, next;
+        for (itr = scAuras->begin(); itr != scAuras->end(); itr = next)
+        {
+            next = itr;
+            next++;
+            if ((*itr)->GetTarget() != Aur->GetTarget() &&
+                (*itr)->GetSpellProto()->Category == Aur->GetSpellProto()->Category &&
+                (*itr)->GetSpellProto()->SpellIconID == Aur->GetSpellProto()->SpellIconID &&
+                (*itr)->GetSpellProto()->SpellVisual == Aur->GetSpellProto()->SpellVisual &&
+                (*itr)->GetSpellProto()->Attributes == Aur->GetSpellProto()->Attributes &&
+                (*itr)->GetSpellProto()->AttributesEx == Aur->GetSpellProto()->AttributesEx &&
+                (*itr)->GetSpellProto()->AttributesExEx == Aur->GetSpellProto()->AttributesExEx)
             {
-                delete Aur;
-                return false;                               // couldnt remove conflicting aura with higher rank
+                (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
+                if(scAuras->empty())
+                    break;
+                else
+                    next = scAuras->begin();
             }
         }
-
-        Aur->_AddAura();
-        m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
-        if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
-        {
-            m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
-            m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
-        }
-
-        if (Aur->IsSingleTarget() && Aur->GetTarget() && Aur->GetSpellProto())
-        {
-            std::list<Aura *> *scAuras = Aur->GetCaster()->GetSingleCastAuras();
-            std::list<Aura *>::iterator itr, next;
-            for (itr = scAuras->begin(); itr != scAuras->end(); itr = next)
-            {
-                next = itr;
-                next++;
-                if ((*itr)->GetTarget() != Aur->GetTarget() &&
-                    (*itr)->GetSpellProto()->Category == Aur->GetSpellProto()->Category &&
-                    (*itr)->GetSpellProto()->SpellIconID == Aur->GetSpellProto()->SpellIconID &&
-                    (*itr)->GetSpellProto()->SpellVisual == Aur->GetSpellProto()->SpellVisual &&
-                    (*itr)->GetSpellProto()->Attributes == Aur->GetSpellProto()->Attributes &&
-                    (*itr)->GetSpellProto()->AttributesEx == Aur->GetSpellProto()->AttributesEx &&
-                    (*itr)->GetSpellProto()->AttributesExEx == Aur->GetSpellProto()->AttributesExEx)
-                {
-                    (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
-                    if(scAuras->empty())
-                        break;
-                    else
-                        next = scAuras->begin();
-                }
-            }
-            scAuras->push_back(Aur);
-        }
+        scAuras->push_back(Aur);
     }
     return true;
 }

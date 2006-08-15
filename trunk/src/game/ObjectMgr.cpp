@@ -71,6 +71,11 @@ ObjectMgr::~ObjectMgr()
     }
     mAreaTriggerMap.clear( );
 
+    for( TeleportMap::iterator i = mTeleports.begin( ); i != mTeleports.end( ); ++ i )
+    {
+        delete i->second;
+    }
+    mTeleports.clear();
 }
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const

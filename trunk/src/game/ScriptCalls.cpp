@@ -37,6 +37,7 @@ bool LoadScriptingModule(char const* libName)
     if(!testScript->hScriptsLib )
     {
         printf("Error loading Scripts Library %s !\n",name.c_str());
+        delete testScript;
         return false;
     }
     else printf("Scripts Library %s was successfully loaded.\n",name.c_str());

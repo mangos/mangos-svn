@@ -74,7 +74,7 @@ uint32 GossipMenu::MenuItemAction( unsigned int ItemId )
 void GossipMenu::ClearMenu()
 {
     for (unsigned int i=0; i<m_gItemsCount; i++)
-        delete m_gItems[i].m_gMessage;
+        delete[] m_gItems[i].m_gMessage;
 
     m_gItemsCount = 0;
 }
@@ -270,7 +270,7 @@ bool QuestMenu::HasItem( uint32 questid )
 void QuestMenu::ClearMenu()
 {
     for (int i=0; i<m_qItemsCount; i++)
-        delete m_qItems[i].m_qTitle;
+        delete[] m_qItems[i].m_qTitle;
 
     m_qItemsCount = 0;
 }

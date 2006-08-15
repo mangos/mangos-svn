@@ -253,6 +253,12 @@ m_removeOnDeath(false)
     SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);
 }
 
+Aura::~Aura()
+{
+    delete m_procSpell;
+    delete m_procdamage;
+}
+
 uint32 Aura::CalculateDamage()
 {
     SpellEntry* spellproto = GetSpellProto();
@@ -734,6 +740,7 @@ void Aura::HandleAuraDummy(bool apply)
             }
             else
             {
+                delete m_procdamage;
                 m_procdamage = NULL;
             }
         }
@@ -1651,6 +1658,7 @@ void Aura::HandleAuraProcTriggerDamage(bool apply)
     }
     else
     {
+        delete m_procdamage;
         m_procdamage = NULL;
     }
 }

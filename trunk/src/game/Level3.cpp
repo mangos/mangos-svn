@@ -202,6 +202,12 @@ bool ChatHandler::HandleGoCommand(const char* args)
     float z = (float)atof(pz);
     uint32 mapid = (uint32)atoi(pmapid);
 
+    if(!MapManager::ExistMAP(mapid,x,y))
+    {
+        PSendSysMessage(".go target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        return true;
+    }
+
     m_session->GetPlayer()->TeleportTo(mapid, x, y, z,0.0f);
 
     return true;
