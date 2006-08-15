@@ -240,8 +240,7 @@ uint32 AddEvent(EventHandler func,void* param,uint32 timer,bool separate_thread,
         {
             if(rmse||wmse)
             {
-                MThread* t=new MThread;
-                t->Start(( void (*)(void*))&PushmsEvent,event);
+                MThread::Start(( void (*)(void*))&PushmsEvent,event);
             }
             else PushmsEvent(event);
         }
@@ -249,8 +248,7 @@ uint32 AddEvent(EventHandler func,void* param,uint32 timer,bool separate_thread,
         {
             if(rse||wse)
             {
-                MThread* t=new MThread;
-                t->Start(( void (*)(void*))&PushsEvent,event);
+                MThread::Start(( void (*)(void*))&PushsEvent,event);
             }
             else PushsEvent(event);
         }
@@ -258,8 +256,7 @@ uint32 AddEvent(EventHandler func,void* param,uint32 timer,bool separate_thread,
         {
             if(rme||wme)
             {
-                MThread* t=new MThread;
-                t->Start(( void (*)(void*))&PushmEvent,event);
+                MThread::Start(( void (*)(void*))&PushmEvent,event);
             }
             else PushmEvent(event);
         }
@@ -384,8 +381,7 @@ void msThread()
         {
             if(pos->st)
             {
-                MThread *tr=new MThread ();
-                tr->Start (pos->handler,pos->param );
+                MThread::Start(pos->handler,pos->param );
             }
             else
                 pos->handler (pos->param );
@@ -416,8 +412,7 @@ void mspThread()
             {
                 if(ppos->st)
                 {
-                    MThread *tr=new MThread ();
-                    tr->Start (ppos->handler,ppos->param );
+                    MThread::Start(ppos->handler,ppos->param );
                 }
                 else
                     ppos->handler (ppos->param );
@@ -447,8 +442,7 @@ void sThread()
         {
             if(pos->st)
             {
-                MThread *tr=new MThread ();
-                tr->Start (pos->handler,pos->param );
+                MThread::Start(pos->handler,pos->param );
             }
             else
                 pos->handler (pos->param );
@@ -480,8 +474,7 @@ void spThread()
             {
                 if(ppos->st)
                 {
-                    MThread *tr=new MThread ();
-                    tr->Start (ppos->handler,ppos->param );
+                    MThread::Start(ppos->handler,ppos->param );
                 }
                 else
                     ppos->handler (ppos->param );
@@ -512,8 +505,7 @@ void mThread()
         {
             if(pos->st)
             {
-                MThread *tr=new MThread ();
-                tr->Start (pos->handler,pos->param );
+                MThread::Start(pos->handler,pos->param );
             }
             else
                 pos->handler (pos->param );
@@ -544,8 +536,7 @@ void mpThread()
             {
                 if(ppos->st)
                 {
-                    MThread *tr=new MThread ();
-                    tr->Start (ppos->handler,ppos->param );
+                    MThread::Start(ppos->handler,ppos->param );
                 }
                 else
                     ppos->handler (ppos->param );
@@ -563,16 +554,10 @@ void mpThread()
 
 void StartEventSystem()
 {
-    MThread* t1=new MThread;
-    t1->Start(( void (*)(void*))&mThread,NULL);
-    MThread* t2=new MThread;
-    t2->Start(( void (*)(void*))&sThread,NULL);
-    MThread* t3=new MThread;
-    t3->Start(( void (*)(void*))&msThread,NULL);
-    MThread* t4=new MThread;
-    t4->Start(( void (*)(void*))&mpThread,NULL);
-    MThread* t5=new MThread;
-    t5->Start(( void (*)(void*))&spThread,NULL);
-    MThread* t6=new MThread;
-    t6->Start(( void (*)(void*))&mspThread,NULL);
+    MThread::Start(( void (*)(void*))&mThread,NULL);
+    MThread::Start(( void (*)(void*))&sThread,NULL);
+    MThread::Start(( void (*)(void*))&msThread,NULL);
+    MThread::Start(( void (*)(void*))&mpThread,NULL);
+    MThread::Start(( void (*)(void*))&spThread,NULL);
+    MThread::Start(( void (*)(void*))&mspThread,NULL);
 }

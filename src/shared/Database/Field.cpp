@@ -59,23 +59,18 @@ mType(type)
 
 Field::~Field()
 {
-    if (mValue)
-        delete [] mValue;
-    if (mName)
-        delete [] mName;
-    mValue = mName = NULL;
+    delete [] mValue;
+    delete [] mName;
 }
 
 void Field::SetValue(const char *value)
 {
-    if (mValue)
-        delete [] mValue;
+    delete [] mValue;
 
     if (value)
     {
         mValue = new char[strlen(value) + 1];
-        if (mValue)
-            strcpy(mValue, value);
+        strcpy(mValue, value);
     }
     else
         mValue = NULL;
@@ -83,13 +78,12 @@ void Field::SetValue(const char *value)
 
 void Field::SetName(const char *name)
 {
-    if (mName)
-        delete [] mName;
+    delete [] mName;
+
     if (name)
     {
         mName = new char[strlen(name) + 1];
-        if (mName)
-            strcpy(mName, name);
+        strcpy(mName, name);
     }
     else
         mName = NULL;

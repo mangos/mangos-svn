@@ -31,6 +31,8 @@ BattleGroundMgr::BattleGroundMgr()
 
 BattleGroundMgr::~BattleGroundMgr()
 {
+    for(std::map<uint32, BattleGround*>::iterator itr=m_BattleGrounds.begin();itr!=m_BattleGrounds.end();++itr)
+        delete itr->second;
     m_BattleGrounds.clear();
 }
 

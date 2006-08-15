@@ -59,10 +59,12 @@ m_regenTimer(2000), pickPocketed(false)
 
 Creature::~Creature()
 {
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
+        delete *i;
     mQuests.clear( );
+
     for( SpellsList::iterator i = m_tspells.begin( ); i != m_tspells.end( ); i++ )
         delete (*i);
-
     m_tspells.clear();
 
     delete i_AI;
@@ -817,7 +819,10 @@ bool Creature::LoadFromDB(uint32 guid)
 
     if(!Create(guid,fields[2].GetUInt32(),fields[3].GetFloat(),fields[4].GetFloat(),
         fields[5].GetFloat(),fields[6].GetFloat(),fields[1].GetUInt32()))
+    {
+        delete result;
         return false;
+    }
 
     SetHealth(fields[15].GetUInt32());
     SetPower(POWER_MANA,fields[16].GetUInt32());
@@ -877,7 +882,12 @@ void Creature::_LoadGoods()
 
 void Creature::_LoadQuests()
 {
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
+        delete *i;
     mQuests.clear();
+
+    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
+        delete *i;
     mInvolvedQuests.clear();
 
     Field *fields;

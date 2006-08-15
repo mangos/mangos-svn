@@ -93,6 +93,7 @@ void SQLStorage::Load ()
     {
         RecordCount = 0;
         printf("Error in %s table, probably sql file format was updated (there should be %d fields in sql).\n",table,iNumFields);
+        delete result;
         return;
     }
 

@@ -1770,6 +1770,7 @@ bool Player::removeSpell(uint16 spell_id)
     {
         if ((*itr)->spellId == spell_id)
         {
+            delete *itr;
             m_spells.erase(itr);
             return true;
         }
@@ -6497,6 +6498,7 @@ void Player::StoreItem( uint16 pos, Item *pItem, bool update )
             pItem2->SetCount( pItem2->GetCount() + pItem->GetCount() );
             if( IsInWorld() && update )
                 pItem2->SendUpdateToPlayer( this );
+            delete pItem;
         }
     }
 }
@@ -7529,6 +7531,9 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
     {
+        if(!GetQuestSlot( 0 ))
+            return false;
+
         if( !SatisfyQuestLog( msg ) )
             return false;
 
@@ -7645,47 +7650,46 @@ void Player::AddQuest( Quest *pQuest )
     if( pQuest )
     {
         uint16 log_slot = GetQuestSlot( 0 );
-        if( log_slot )
+        assert(log_slot);
+
+        uint32 quest_id = pQuest->GetQuestId();
+        QuestInfo const* qInfo = pQuest->GetQuestInfo();
+
+        mQuestStatus[quest_id].m_quest = pQuest;
+        mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
+        mQuestStatus[quest_id].m_rewarded = false;
+        mQuestStatus[quest_id].m_explored = false;
+
+        if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
         {
-            uint32 quest_id = pQuest->GetQuestId();
-            QuestInfo const* qInfo = pQuest->GetQuestInfo();
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                mQuestStatus[quest_id].m_itemcount[i] = 0;
+        }
+        if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+        {
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                mQuestStatus[quest_id].m_mobcount[i] = 0;
+        }
 
-            mQuestStatus[quest_id].m_quest = pQuest;
-            mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
-            mQuestStatus[quest_id].m_rewarded = false;
-            mQuestStatus[quest_id].m_explored = false;
+        GiveQuestSourceItem( quest_id );
+        AdjustQuestReqItemCount( quest_id );
 
-            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
-            {
-                for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
-                    mQuestStatus[quest_id].m_itemcount[i] = 0;
-            }
-            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
-            {
-                for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
-                    mQuestStatus[quest_id].m_mobcount[i] = 0;
-            }
+        SetUInt32Value(log_slot + 0, quest_id);
+        SetUInt32Value(log_slot + 1, 0);
 
-            GiveQuestSourceItem( quest_id );
-            AdjustQuestReqItemCount( quest_id );
-
-            SetUInt32Value(log_slot + 0, quest_id);
-            SetUInt32Value(log_slot + 1, 0);
-
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
-            {
-                uint32 limittime = qInfo->LimitTime;
-                SetTimedQuest( quest_id );
-                mQuestStatus[quest_id].m_timer = limittime * 60000;
-                uint64 ktime = 0;                           // unkwnown and dependent from server start time and player login time
-                uint32 qtime = static_cast<uint32>(time(NULL) - ktime) + limittime;
-                SetUInt32Value( log_slot + 2, qtime );
-            }
-            else
-            {
-                mQuestStatus[quest_id].m_timer = 0;
-                SetUInt32Value( log_slot + 2, 0 );
-            }
+        if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+        {
+            uint32 limittime = qInfo->LimitTime;
+            SetTimedQuest( quest_id );
+            mQuestStatus[quest_id].m_timer = limittime * 60000;
+            uint64 ktime = 0;                           // unkwnown and dependent from server start time and player login time
+            uint32 qtime = static_cast<uint32>(time(NULL) - ktime) + limittime;
+            SetUInt32Value( log_slot + 2, qtime );
+        }
+        else
+        {
+            mQuestStatus[quest_id].m_timer = 0;
+            SetUInt32Value( log_slot + 2, 0 );
         }
     }
 }
@@ -8399,6 +8403,7 @@ bool Player::LoadFromDB( uint32 guid )
     if(!LoadValues( fields[3].GetString()))
     {
         sLog.outError("ERROR: Player #%d have broken data in `data` field. Can't be loaded.",GUID_LOPART(guid));
+        delete result;
         return false;
     }
 
@@ -8457,6 +8462,7 @@ bool Player::LoadFromDB( uint32 guid )
         if(!info)
         {
             sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
+            delete result;
             return false;
         }
 
@@ -8785,7 +8791,8 @@ void Player::_LoadReputation()
 
 void Player::_LoadSpells()
 {
-
+    for (PlayerSpellList::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+        delete *itr;
     m_spells.clear();
 
     QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
@@ -9027,8 +9034,7 @@ void Player::_SaveMail()
     {
         Mail *m = (*itr);
 
-        QueryResult *result = sDatabase.PQuery("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
-        delete result;
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
     }
 }
 
@@ -9060,7 +9066,7 @@ void Player::_SaveSpells()
 
     for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        sDatabase.PQuery("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId,(*itr)->active);
+        sDatabase.PExecute("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId,(*itr)->active);
     }
 }
 

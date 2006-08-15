@@ -1163,6 +1163,13 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     float ort = fields[3].GetFloat();
     int mapid = fields[4].GetUInt16();
     delete result;
+
+    if(!MapManager::ExistMAP(mapid,x,y))
+    {
+        PSendSysMessage(".tele target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        return true;
+    }
+
     m_session->GetPlayer()->TeleportTo(mapid, x, y, z, ort);
     return true;
 }

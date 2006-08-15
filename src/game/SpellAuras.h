@@ -141,6 +141,7 @@ class Aura
         void HandleRangedAmmoHaste(bool Apply);
 
         Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target);
+        ~Aura();
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
         Modifier* GetModifier() {return &m_modifier;}
@@ -184,8 +185,8 @@ class Aura
 
         ProcTriggerSpell* GetProcSpell() { return m_procSpell; }
         ProcTriggerDamage* GetProcDamage() { return m_procdamage; }
-        void RemoveProcSpell() { m_procSpell = NULL; }
-        void RemoveProcDamage() { m_procdamage = NULL; }
+        void RemoveProcSpell() { delete m_procSpell; m_procSpell = NULL; }
+        void RemoveProcDamage() { delete m_procdamage; m_procdamage = NULL; }
         void TriggerSpell();
         void SendCoolDownEvent();
         bool IsUpdated() { return m_updated; }

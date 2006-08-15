@@ -435,7 +435,6 @@ void AuthSocket::_HandleRealmList()
         this->Close();
         return;
     }
-    ASSERT (result);
 
     uint32 id = (*result)[0].GetUInt32();
     delete result;

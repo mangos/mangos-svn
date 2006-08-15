@@ -128,7 +128,10 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         static bool ExistMAP(int mapid, int x, int y);
         GridMap * LoadMAP(int mapid, int x, int y);
-        static void InitStateMachine(void);
+
+        static void InitStateMachine();
+        static void DeleteStateMachine();
+
         float GetHeight(float x, float y);
         uint16 GetAreaFlag(float x, float y );
         uint8 GetTerrainType(float x, float y );

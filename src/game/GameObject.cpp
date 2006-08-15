@@ -219,7 +219,11 @@ GameObjectInfo const *GameObject::GetGOInfo() const
 
 void GameObject::_LoadQuests()
 {
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
+        delete *i;
     mQuests.clear();
+    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
+        delete *i;
     mInvolvedQuests.clear();
 
     Field *fields;

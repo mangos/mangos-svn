@@ -21,14 +21,14 @@
 
 class ChannelMgr
 {
-    typedef map<string,Channel *> ChannelMap;
-    ChannelMap channels;
-    void MakeNotOnPacket(WorldPacket *data, std::string name)
-    {
-        data->Initialize(SMSG_CHANNEL_NOTIFY);
-        (*data) << (uint8)0x05 << name;
-    }
     public:
+        typedef map<string,Channel *> ChannelMap;
+        ChannelMgr() {}
+        ~ChannelMgr() {
+            for(ChannelMap::iterator itr = channels.begin();itr!=channels.end(); ++itr)
+                delete itr->second;
+            channels.clear();
+        }
         Channel *GetJoinChannel(std::string name, Player *p)
         {
             if(channels.count(name) == 0)
@@ -66,6 +66,13 @@ class ChannelMgr
                 channels.erase(name);
                 delete channel;
             }
+        }
+    private:
+        ChannelMap channels;
+        void MakeNotOnPacket(WorldPacket *data, std::string name)
+        {
+            data->Initialize(SMSG_CHANNEL_NOTIFY);
+            (*data) << (uint8)0x05 << name;
         }
 };
 

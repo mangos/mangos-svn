@@ -136,6 +136,7 @@ bool Corpse::LoadFromDB(uint32 guid)
     if(!LoadValues( fields[8].GetString() ))
     {
         sLog.outError("ERROR: Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
+        delete result;
         return false;
     }
 
@@ -143,13 +144,13 @@ bool Corpse::LoadFromDB(uint32 guid)
     SetMapId(mapid);
     Relocate(positionX,positionY,positionZ,ort);
 
+    delete result;
+
     if(!IsPositionValid())
     {
         sLog.outError("ERROR: Corpse (guidlow %d, owner %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()),GetPositionX(),GetPositionY());
         return false;
     }
-
-    delete result;
 
     return true;
 }

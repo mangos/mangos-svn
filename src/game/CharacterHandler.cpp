@@ -301,6 +301,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         if ( cnt > 0 )
         {
             QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+            assert(result4);
             fields = result4->Fetch();
             data.Initialize (SMSG_BINDPOINTUPDATE);
             data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
@@ -315,6 +316,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             int plrace = GetPlayer()->getRace();
             int plclass = GetPlayer()->getClass();
             QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
+            assert(result5);
             fields = result5->Fetch();
             // store and send homebind for player
             sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
@@ -428,6 +430,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         Field *fields = result->Fetch();
         pCurrChar->SetInGuild(fields[0].GetUInt32());
         pCurrChar->SetRank(fields[2].GetUInt32());
+        delete result;
     }
 
     sLog.outError("AddObject at CharacterHandler.cpp");
@@ -459,7 +462,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }
 
-    delete result;
     pCurrChar->LoadEnchant();
 }
 

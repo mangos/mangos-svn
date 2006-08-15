@@ -127,6 +127,15 @@ void Map::InitStateMachine()
     si_GridStates[GRID_STATE_REMOVAL] = new RemovalState;
 }
 
+void Map::DeleteStateMachine()
+{
+    delete si_GridStates[GRID_STATE_INVALID];
+    delete si_GridStates[GRID_STATE_ACTIVE];
+    delete si_GridStates[GRID_STATE_IDLE];
+    delete si_GridStates[GRID_STATE_REMOVAL];
+}
+
+
 Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
 {
     //    char tmp[32];

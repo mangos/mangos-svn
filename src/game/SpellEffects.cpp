@@ -278,8 +278,10 @@ void Spell::EffectApplyAura(uint32 i)
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
     if(m_CastItem)
         Aur->SetCastItem(m_CastItem);
-    unitTarget->AddAura(Aur);
-    if (Aur && Aur->IsTrigger())
+
+    bool added = unitTarget->AddAura(Aur);
+
+    if (added && Aur->IsTrigger())
     {
         // arcane missiles
         SpellEntry *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);

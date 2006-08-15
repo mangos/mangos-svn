@@ -34,6 +34,8 @@ AddonHandler::AddonHandler()
 AddonHandler::~AddonHandler()
 {
     //clean the addon data when close
+    for(std::list<AddOns*>::iterator i = m_Addon_data.begin();i!=m_Addon_data.end();++i)
+        delete *i;
     m_Addon_data.clear();
 }
 

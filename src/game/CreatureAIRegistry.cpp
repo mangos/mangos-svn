@@ -55,7 +55,6 @@ namespace MaNGOS
         void Initialize()
         {
             MapManager::Instance().Initialize();
-            Map::InitStateMachine();
             RedZone::Initialize();
             AIRegistry::Initialize();
             WaypointMovementGenerator::Initialize();
