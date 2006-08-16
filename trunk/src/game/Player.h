@@ -365,7 +365,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
     public:
-        Player (WorldSession *session);
+        explicit Player (WorldSession *session);
         ~Player ( );
 
         void AddToWorld();
