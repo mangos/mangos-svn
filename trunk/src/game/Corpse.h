@@ -53,10 +53,13 @@ class Corpse : public Object
 
         bool m_POI;
 
+        time_t const& GetGhostTime() const { return m_time; }
+        void ResetGhostTime() { m_time = time(NULL); }
         CorpseType GetType() const { return m_type; }
         void ConvertCorpseToBones();
 
     private:
         CorpseType m_type;
+        time_t m_time;
 };
 #endif

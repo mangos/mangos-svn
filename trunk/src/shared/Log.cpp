@@ -33,7 +33,7 @@ enum LogType
     LogError
 };
 
-const int LogType_count = int(LogDebug) +1;
+const int LogType_count = int(LogError) +1;
 
 void Log::InitColors(std::string str)
 {
@@ -149,6 +149,20 @@ void Log::Initialize()
     InitColors(sConfig.GetStringDefault("LogColors", ""));
 }
 
+void Log::outTimestamp()
+{
+    time_t t = time(NULL);
+    tm* aTm = localtime(&t);
+    //       YYYY   year
+    //       MM     month (2 digits 01-12)
+    //       DD     day (2 digits 01-31)
+    //       HH     hour (2 digits 00-23)
+    //       MM     minutes (2 digits 00-59)
+    //       SS     seconds (2 digits 00-59)
+    fprintf(logfile,"%-4d-%02d-%02d %02d:%02d:%02d ",aTm->tm_year+1900,aTm->tm_mon+1,aTm->tm_mday,aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
+}
+
+
 void Log::outTitle( const char * str)
 {
     if( !str ) return;
@@ -190,6 +204,7 @@ void Log::outString( const char * str, ... )
     printf( "\n" );
     if(logfile)
     {
+        outTimestamp();
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -216,6 +231,7 @@ void Log::outError( const char * err, ... )
     fprintf( stderr, "\n" );
     if(logfile)
     {
+        outTimestamp();
         vfprintf(logfile, err, ap);
         fprintf(logfile, "\n" );
         va_end(ap);
@@ -246,6 +262,7 @@ void Log::outBasic( const char * str, ... )
 
     if(logfile)
     {
+        outTimestamp();
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -276,6 +293,7 @@ void Log::outDetail( const char * str, ... )
     }
     if(logfile)
     {
+        outTimestamp();
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -306,6 +324,7 @@ void Log::outDebug( const char * str, ... )
     }
     if(logfile)
     {
+        outTimestamp();
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -330,6 +349,7 @@ void Log::outMenu( const char * str, ... )
 
     if(logfile)
     {
+        outTimestamp();
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );

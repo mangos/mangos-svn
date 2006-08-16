@@ -163,7 +163,7 @@ void LoadDBCStores(std::string dataPath)
 
     if(not_found_dbc_files.size() >= DBCFilesCount )
     {
-        sLog.outError("\n\nIncorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
+        sLog.outError("Incorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
         exit(1);
     }
     else if(not_found_dbc_files.size() > 0 )
@@ -173,7 +173,7 @@ void LoadDBCStores(std::string dataPath)
         for(std::list<std::string>::iterator i = not_found_dbc_files.begin(); i != not_found_dbc_files.end(); ++i)
             str += dataPath + *i + "\n";
 
-        sLog.outError("\n\nSome required *.dbc files (%u from %d) not found:\n%s",not_found_dbc_files.size(),DBCFilesCount,str.c_str());
+        sLog.outError("Some required *.dbc files (%u from %d) not found:\n%s",not_found_dbc_files.size(),DBCFilesCount,str.c_str());
         exit(1);
     }
 

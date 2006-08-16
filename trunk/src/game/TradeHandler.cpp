@@ -29,13 +29,13 @@
 
 void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDebug( "\nWORLD: Ignore Trade %u",_player->GetGUID());
+    sLog.outDebug( "WORLD: Ignore Trade %u",_player->GetGUID());
     recvPacket.print_storage();
 }
 
 void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDebug( "\nWORLD: Busy Trade %u",_player->GetGUID());
+    sLog.outDebug( "WORLD: Busy Trade %u",_player->GetGUID());
     recvPacket.print_storage();
 }
 
