@@ -6453,18 +6453,21 @@ uint8 Player::CanUseAmmo( uint32 item ) const
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
-void Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update )
+// Return stored item (if stored to stack, it can diff. from pItem)
+Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update )
 {
     Item *pItem = CreateItem( item, count );
     if( pItem )
     {
         ItemPrototype const *pProto = pItem->GetProto();
         ItemAdded( item, count );
-        StoreItem( pos, pItem, update );
+        return StoreItem( pos, pItem, update );
     }
+    return NULL;
 }
 
-void Player::StoreItem( uint16 pos, Item *pItem, bool update )
+// Return stored item (if stored to stack, it can diff. from pItem)
+Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
@@ -6515,8 +6518,10 @@ void Player::StoreItem( uint16 pos, Item *pItem, bool update )
             if( IsInWorld() && update )
                 pItem2->SendUpdateToPlayer( this );
             delete pItem;
+            return pItem2;
         }
     }
+    return pItem;
 }
 
 void Player::EquipItem( uint16 pos, Item *pItem, bool update )

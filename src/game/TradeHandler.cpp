@@ -191,7 +191,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                         {
                             sLog.outDebug("partner storing: %u",myItems[i]);
                             _player->pTrader->StoreItem( dst, myItems[i], true);
-                            _player->RemoveItem(255, (uint8)_player->tradeItems[i], true);
+                            _player->RemoveItem(INVENTORY_SLOT_BAG_0, (uint8)_player->tradeItems[i], true);
                             break;
                         }
                     }
@@ -205,7 +205,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                         {
                             sLog.outDebug("player storing: %u",hisItems[i]);
                             _player->StoreItem( dst, hisItems[i], true);
-                            _player->pTrader->RemoveItem(255, (uint8)_player->pTrader->tradeItems[i], true);
+                            _player->pTrader->RemoveItem(INVENTORY_SLOT_BAG_0, (uint8)_player->pTrader->tradeItems[i], true);
                             break;
                         }
                     }
