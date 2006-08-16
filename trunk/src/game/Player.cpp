@@ -547,7 +547,7 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
         return;
     }
 
-    if ((m_isunderwater & 0x01) && !(m_isunderwater & 0x80) && !(m_deathState & DEAD))
+    if ((m_isunderwater & 0x01) && !(m_isunderwater & 0x80) && isAlive())
     {
         //single trigger timer
         if (!(m_isunderwater & 0x02))
@@ -574,7 +574,7 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
     }
 
     //single trigger retract bar
-    else if (!(m_isunderwater & 0x01) && !(m_isunderwater & 0x08) && (m_isunderwater & 0x02) && (m_breathTimer > 0) && (!(m_deathState & DEAD)))
+    else if (!(m_isunderwater & 0x01) && !(m_isunderwater & 0x08) && (m_isunderwater & 0x02) && (m_breathTimer > 0) && isAlive())
     {
         m_isunderwater = 0x08;
 
@@ -595,7 +595,7 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
 
 void Player::HandleLava()
 {
-    if ((m_isunderwater & 0x80) && !(m_deathState & DEAD))
+    if ((m_isunderwater & 0x80) && isAlive())
     {
         //Single trigger Set BreathTimer
         if (!(m_isunderwater & 0x04))
@@ -2285,8 +2285,6 @@ void Player::ResurrectPlayer()
 
 void Player::KillPlayer()
 {
-    WorldPacket data;
-
     SetMovement(MOVE_ROOT);
 
     StopMirrorTimer(0);
@@ -2887,8 +2885,9 @@ void Player::SendDirectMessage(WorldPacket *data)
 void Player::CheckExploreSystem()
 {
 
-    if (m_deathState & DEAD)
+    if (!isAlive())
         return;
+
     if (isInFlight())
         return;
 
@@ -9101,7 +9100,7 @@ void Player::SavePet()
         std::string name;
         uint32 actState;
         name = GetName();
-        name.append("\\\'s Pet");
+        name.append("\'s Pet");
         actState = STATE_RA_FOLLOW;
 
         sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", GetGUIDLow() );

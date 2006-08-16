@@ -242,7 +242,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
         {
             QueryResult *result2 = sDatabase.PQuery("SELECT * FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
             assert(result2);
-            Field *fields2 = result->Fetch();
+            Field *fields2 = result2->Fetch();
 
             SendGMTicketGetTicket(6,fields2[2].GetString());
             delete result2;
