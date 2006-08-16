@@ -82,7 +82,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
         name = ((Player*)owner)->GetName();
     else
         name = ((Creature*)owner)->GetCreatureInfo()->Name;
-    name.append("\\\'s Pet");
+    name.append("\\'s Pet");
     SetName( name );
 
     CreatureInfo const *cinfo = GetCreatureInfo();
