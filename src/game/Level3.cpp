@@ -102,7 +102,18 @@ bool ChatHandler::HandleWorldPortCommand(const char* args)
     if (!px || !py || !pz)
         return false;
 
-    m_session->GetPlayer()->TeleportTo(atoi(pContinent), (float)atof(px), (float)atof(py), (float)atof(pz),0.0f);
+    float x = atof(px);
+    float y = atof(py);
+    float z = atof(pz);
+    uint32 mapid = atoi(pContinent);
+
+    if(!MapManager::ExistMAP(mapid,x,y))
+    {
+        PSendSysMessage(".worldport target map not exist (X: %f Y: %f MapId: %u)",x,y,mapid);
+        return true;
+    }
+
+    m_session->GetPlayer()->TeleportTo(mapid, x, y, z,0.0f);
 
     return true;
 }
