@@ -57,7 +57,10 @@ bool Map::ExistMAP(int mapid,int x,int y)
 
     FILE *pf=fopen(tmp,"rb");
 
+    sLog.outDetail("Check existing of map file '%s': %s",tmp,(pf ? "exist." : "not exist!"));
+
     delete[] tmp;
+
 
     if(!pf)
         return false;
