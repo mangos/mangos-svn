@@ -9100,7 +9100,7 @@ void Player::SavePet()
         std::string name;
         uint32 actState;
         name = GetName();
-        name.append("\'s Pet");
+        name.append("\\'s Pet");
         actState = STATE_RA_FOLLOW;
 
         sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", GetGUIDLow() );
