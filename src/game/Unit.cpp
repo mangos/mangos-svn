@@ -2409,11 +2409,8 @@ bool Unit::AttackStop()
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
 
     if(m_currentMeleeSpell)
-    {
         m_currentMeleeSpell->cancel();
-        delete m_currentMeleeSpell;
-        m_currentMeleeSpell = NULL;
-    }
+
     return true;
 }
 
