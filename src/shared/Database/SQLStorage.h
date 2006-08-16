@@ -33,6 +33,7 @@ class SQLStorage
             data=NULL;
             pIndex=NULL;
             iNumFields =strlen(fmt);
+            MaxEntry = 0;
         }
 
         template<class T>
