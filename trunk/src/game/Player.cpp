@@ -2849,6 +2849,21 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     if( old_x != x || old_y != y || old_r != orientation)
         m->PlayerRelocation(this, x, y, z, orientation);
 
+    Map* m2 = MapManager::Instance().GetMap(GetMapId());
+    if (((m2->GetWaterLevel(x,y)  + 2) < m2->GetHeight(x,y)))
+    {
+        // at ground
+        if(m_form == FORM_AQUA)
+            RemoveAurasDueToSpell(m_ShapeShiftForm);
+    }
+    else
+    {
+        // in water
+        if(m_form > 0 && m_form != FORM_AQUA && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE)
+            RemoveAurasDueToSpell(m_ShapeShiftForm);
+    }
+
+
     CheckExploreSystem();
 
     return true;
