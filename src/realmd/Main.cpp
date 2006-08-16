@@ -72,11 +72,11 @@ int main(int argc, char **argv)
 
     if (!sConfig.SetSource(cfg_file.c_str()))
     {
-        sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
+        sLog.outError("Could not find configuration file %s.", cfg_file.c_str());
     }
     else
     {
-        sLog.outString("\nUsing configuration file %s.", cfg_file.c_str());
+        sLog.outString("Using configuration file %s.", cfg_file.c_str());
     }
 
     // Non-critical warning about conf file version

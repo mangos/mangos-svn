@@ -783,6 +783,10 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     if (!corpse )
         return;
 
+    // prevent resurrect before 30-sec delay after body release not finished
+    if(corpse->GetGhostTime() + 30 > time(NULL))
+        return;
+
     float dist = corpse->GetDistance2dSq(GetPlayer());
     sLog.outDebug("Corpse 2D Distance: \t%f",dist);
     if (dist > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS)

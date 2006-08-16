@@ -867,6 +867,8 @@ void Player::Update( uint32 p_time )
             m_deathTimer = 0;
             BuildPlayerRepop();
             RepopAtGraveyard();
+            if(Corpse* corpse = GetCorpse())
+                corpse->ResetGhostTime();
         }
         else
             m_deathTimer -= p_time;

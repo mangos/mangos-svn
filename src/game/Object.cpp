@@ -641,7 +641,7 @@ bool Object::IsPositionValid() const
 
 bool Object::PrintIndexError(uint32 index, bool set) const
 {
-    sLog.outError("\nERROR: Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u",(set ? "set value to" : "get value from"),index,m_valuesCount,GetTypeId(),m_objectType);
+    sLog.outError("ERROR: Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u",(set ? "set value to" : "get value from"),index,m_valuesCount,GetTypeId(),m_objectType);
 
     // assert must fail after function call
     return false;
