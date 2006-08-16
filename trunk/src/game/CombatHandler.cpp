@@ -47,11 +47,11 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
-    uint64 guid = GetPlayer()->GetSelection();
-
-    GetPlayer()->SendAttackStop(guid);
-    GetPlayer()->AttackStop();
+    if(Unit* victim = GetPlayer()->getVictim())
+    {
+        GetPlayer()->SendAttackStop(victim);
+        GetPlayer()->AttackStop();
+    }
 }
 
 void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
