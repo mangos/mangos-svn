@@ -479,9 +479,9 @@ void Spell::EffectCreateItem(uint32 i)
         return;
     }
 
-    player->StoreItem( dest, pItem, true);
     if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE )
         pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
+    player->StoreItem( dest, pItem, true);
     //should send message "create item" to client.-FIX ME
     player->UpdateSkillPro(m_spellInfo->Id);
 }
@@ -701,7 +701,7 @@ void Spell::EffectSummonChangeItem(uint32 i)
     uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
     if( msg == EQUIP_ERR_OK )
     {
-        player->StoreItem( dest, pItem, true);
+        pItem = player->StoreItem( dest, pItem, true);
         player->DestroyItemCount(pItem->GetEntry(),1,true);
     }
     else
