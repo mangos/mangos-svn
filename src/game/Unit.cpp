@@ -240,13 +240,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         DEBUG_LOG("SET JUST_DIED");
         pVictim->setDeathState(JUST_DIED);
 
-        uint64 attackerGuid, victimGuid;
-        attackerGuid = GetGUID();
-        victimGuid = pVictim->GetGUID();
-
         DEBUG_LOG("DealDamageAttackStop");
-        SendAttackStop(victimGuid);
-        pVictim->SendAttackStop(attackerGuid);
+        SendAttackStop(pVictim);
+        pVictim->SendAttackStop(this);
 
         DEBUG_LOG("DealDamageHealth1");
         pVictim->SetHealth(0);
@@ -264,7 +260,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             HostilList::iterator i;
             for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
             {
-                if(i->UnitGuid==victimGuid)
+                if(i->UnitGuid==pVictim->GetGUID())
                 {
                     m_hostilList.erase(i);
                     break;
@@ -275,7 +271,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if(pet && pet->isPet())
             {
                 pet->setDeathState(JUST_DIED);
-                pet->SendAttackStop(attackerGuid);
+                pet->SendAttackStop(this);
                 pet->SetHealth(0);
                 pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
                 pet->addUnitState(UNIT_STAT_DIED);
@@ -344,21 +340,21 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                         if(uint32(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel())) > sWorld.getConfig(CONFIG_GETXP_LEVELDIFF))
                             continue;
                         pGroupGuy->GiveXP(xp, pVictim);
-                        pGroupGuy->KilledMonster(entry, victimGuid);
+                        pGroupGuy->KilledMonster(entry, pVictim->GetGUID());
                     }
                 }
                 else
                 {
                     DEBUG_LOG("Player kill enemy alone");
                     player->GiveXP(xp, pVictim);
-                    player->KilledMonster(entry,victimGuid);
+                    player->KilledMonster(entry,pVictim->GetGUID());
                 }
             }
         }
         else
         {
             DEBUG_LOG("Monster kill Monster");
-            SendAttackStop(victimGuid);
+            SendAttackStop(pVictim);
             pVictim->addUnitState(UNIT_STAT_DIED);
         }
         AttackStop();
@@ -970,7 +966,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
 
     if (!pVictim->isAlive())
     {
-        SendAttackStop(pVictim->GetGUID());
+        SendAttackStop(pVictim);
         return;
     }
 
@@ -1189,21 +1185,20 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
     return urand ((uint32)min_damage, (uint32)max_damage);
 }
 
-void Unit::SendAttackStop(uint64 victimGuid)
+void Unit::SendAttackStop(Unit* victim)
 {
     WorldPacket data;
     data.Initialize( SMSG_ATTACKSTOP );
     data << uint8(0xFF) << GetGUID();
-    data << uint8(0xFF) << victimGuid;
+    data << uint8(0xFF) << victim->GetGUID();
     data << uint32( 0 );
     data << (uint32)0;
 
     SendMessageToSet(&data, true);
-    sLog.outDetail("%u %X stopped attacking "I64FMT, GetGUIDLow(), GetGUIDHigh(), victimGuid);
+    sLog.outDetail("%u %X stopped attacking "I64FMT, GetGUIDLow(), GetGUIDHigh(), victim->GetGUID());
 
-    Creature *pVictim = ObjectAccessor::Instance().GetCreature(*this, victimGuid);
-    if( pVictim != NULL )
-        pVictim->AI().AttackStop(this);
+    if(victim->GetTypeId() == TYPEID_UNIT)
+        ((Creature*)victim)->AI().AttackStop(this);
 }
 
 uint16 Unit::GetDefenceSkillValue() const
