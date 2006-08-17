@@ -96,19 +96,26 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
 
-    //Movement flag
-    GetPlayer( )->SetMovementFlags(flags);
+    bool isJumping = GetPlayer()->HasMovementFlags(MOVEMENT_JUMPING);
+    uint16 opcode = recv_data.GetOpcode();
 
-    GetPlayer( )->SetPosition(x, y, z, orientation);
-    if(recv_data.GetOpcode() != MSG_MOVE_JUMP)
+    //Movement flag
+    if (opcode == MSG_MOVE_HEARTBEAT && isJumping)
+        GetPlayer( )->SetMovementFlags(GetPlayer( )->GetMovementFlags() & ~flags);
+    else
+        GetPlayer( )->SetMovementFlags(flags);
+
+    if(!(opcode == MSG_MOVE_HEARTBEAT && isJumping))
     {
         WorldPacket data;
-        data.Initialize( recv_data.GetOpcode() );
+        data.Initialize( opcode );
         data << uint8(0xFF) << GetPlayer()->GetGUID();
         data << flags << time;
         data << x << y << z << orientation;
         GetPlayer()->SendMessageToSet(&data, false);
     }
+
+    GetPlayer( )->SetPosition(x, y, z, orientation);
 
     uint32 MapID = GetPlayer()->GetMapId();
     Map* Map = MapManager::Instance().GetMap(MapID);

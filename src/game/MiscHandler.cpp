@@ -38,12 +38,6 @@
 #include "BattleGround.h"
 #include "SpellAuras.h"
 
-//TODO add these to the proper header file
-
-#define MOVEMENT_WALKING 0x100
-#define MOVEMENT_JUMPING 0x2000
-#define MOVEMENT_FALLING 0x6000
-
 void my_esc( char * r, const char * s )
 {
     int i, j;
