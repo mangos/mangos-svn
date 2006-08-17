@@ -75,7 +75,6 @@ float GetMaxRange(SpellRange *range);
 int32 GetDuration(SpellEntry *spellInfo);
 uint32 FindSpellRank(uint32 spellId);
 bool canStackSpellRank(SpellEntry *spellInfo);
-int32 CompareSpellRank(uint32 spellId_1, uint32 spellId_2);
 bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2);
 bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
@@ -83,6 +82,8 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, ui
 SpellSpecific GetSpellSpecific(uint32 spellId);
 bool IsSpellSingleEffectPerCaster(uint32 spellId);
 bool IsPassiveSpell(uint32 spellId);
+bool IsPositiveSpell(uint32 spellId);
+bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
 
 template<class T>
 class DBCStorage

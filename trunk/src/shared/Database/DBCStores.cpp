@@ -224,18 +224,6 @@ int32 GetDuration(SpellEntry *spellInfo)
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
 }
 
-int32 CompareSpellRank(uint32 spellId_1, uint32 spellId_2)
-{
-    if (spellId_1 == spellId_2) return 0;
-
-    int32 diff = 0;
-
-    for(int i=0;i<3;i++)
-        diff += CompareAuraRanks(spellId_1, i, spellId_2, i);
-
-    return diff;
-}
-
 uint32 FindSpellRank(uint32 spellId)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -478,4 +466,45 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
         default:
             return false;
     }
+}
+
+bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
+{
+    SpellEntry *spellproto = sSpellStore.LookupEntry(spellId);
+    if (!spellproto) return false;
+
+    switch(spellproto->EffectImplicitTargetA[effIndex])
+    {
+        case 6: //TARGET_S_E:
+        case 15: //TARGET_AE_E:
+        case 16: //TARGET_AE_E_INSTANT:
+        case 22: //TARGET_AC_E:
+        case 24: //TARGET_INFRONT:
+        case 25: //TARGET_DUELVSPLAYER:
+        case 28: //TARGET_AE_E_CHANNEL:
+        case 53: //TARGET_AE_SELECTED:
+            return false;
+        default:
+            return (spellproto->AttributesEx & (1<<7)) ? false : true;
+    }
+}
+
+bool IsPositiveSpell(uint32 spellId)
+{
+    SpellEntry *spellproto = sSpellStore.LookupEntry(spellId);
+    if (!spellproto) return false;
+    int positive = 0, negative = 0;
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (IsPositiveEffect(spellId, i))
+            positive++;
+        else
+            negative++;
+    }
+
+    if (positive != negative)
+        return positive > negative;
+    else
+        return (spellproto->AttributesEx & (1<<7)) ? false : true;
 }

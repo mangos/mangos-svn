@@ -250,7 +250,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     pCreature->AIM_Initialize();
     //pCreature->SetUInt32Value(UNIT_FIELD_HEALTH , 1); // temp set on 1 HP needs to be MAX HP (strange error)
 
-    sLog.outError(LANG_ADD_OBJ);
+    sLog.outDebug(LANG_ADD_OBJ);
 
     MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
     pCreature->SaveToDB();

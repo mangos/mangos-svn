@@ -1585,7 +1585,7 @@ uint8 Spell::CheckMana(uint32 *mana)
 
     Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue == m_spellInfo->School)
+        if((*i)->GetModifier()->m_miscvalue & int32(1 << m_spellInfo->School))
             manaCost += (*i)->GetModifier()->m_amount;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1855,26 +1855,33 @@ void Spell::Delayed(int32 delaytime)
 
 void Spell::reflect(Unit *refunit)
 {
+    if (m_caster == refunit)
+        return;
+
     SpellEntry *refspell = NULL;
 
     // if the spell to reflect is a reflect spell, do nothing.
     for(int i=0; i<3; i++)
         if(m_spellInfo->Effect[i] == 6 && (m_spellInfo->EffectApplyAuraName[i] == 74 || m_spellInfo->EffectApplyAuraName[i] == 28))
             return;
-    for(std::list<struct ReflectSpellSchool*>::iterator i = refunit->m_reflectSpellSchool.begin();i != refunit->m_reflectSpellSchool.end();i++)
+
+    int32 reflectchance = 0; // proper base reflect chance is ?
+
+    Unit::AuraList& mReflectSpells = refunit->GetAurasByType(SPELL_AURA_REFLECT_SPELLS);
+    for(Unit::AuraList::iterator i = mReflectSpells.begin(); i != mReflectSpells.end(); ++i)
+        reflectchance += (*i)->GetModifier()->m_amount;
+
+    Unit::AuraList& mReflectSpellsSchool = refunit->GetAurasByType(SPELL_AURA_REFLECT_SPELLS_SCHOOL);
+    for(Unit::AuraList::iterator i = mReflectSpellsSchool.begin(); i != mReflectSpellsSchool.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue & int32(1 << m_spellInfo->School))
+            reflectchance += (*i)->GetModifier()->m_amount;
+
+    if (reflectchance > 0 && uint32(reflectchance) >= urand(0,100))
     {
-        if((*i)->school == -1 || (*i)->school == m_spellInfo->School)
-        {
-            if((*i)->chance >= urand(0,100))
-                refspell = m_spellInfo;
-        }
+        Spell spell(refunit, refspell, true, 0);
+
+        SpellCastTargets targets;
+        targets.setUnitTarget( m_caster );
+        spell.prepare(&targets);
     }
-
-    if(!refspell || m_caster == refunit) return;
-
-    Spell spell(refunit, refspell, true, 0);
-
-    SpellCastTargets targets;
-    targets.setUnitTarget( m_caster );
-    spell.prepare(&targets);
 }
