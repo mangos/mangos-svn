@@ -16,4 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+// not thread guarded variant for call from other thread
+void CorpsesErase();
+
+// thread guareded variant for call from event system
 void HandleCorpsesErase(void*);
