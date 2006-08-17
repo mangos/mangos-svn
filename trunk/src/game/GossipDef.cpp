@@ -347,7 +347,7 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
             data << uint32( 0x00 );
     }
 
-    data << qInfo->RewMoney;
+    data << uint32(qInfo->RewOrReqMoney);
 
     data << pQuest->m_reqitemscount;
     for (uint32 i=0; i <  QUEST_OBJECTIVES_COUNT; i++)
@@ -389,7 +389,7 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
     data << uint32(0);
 
     data << uint32(pQuest->GetQuestInfo()->NextQuestId);
-    data << uint32(pQuest->GetQuestInfo()->RewMoney);
+    data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney);
     data << uint32(pQuest->GetQuestInfo()->RewXP);
 
     data << uint32(pQuest->GetQuestInfo()->RewSpell);
@@ -490,7 +490,7 @@ void PlayerMenu::SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNex
             data << uint32(0);
     }
 
-    data << uint32(qInfo->RewMoney);
+    data << uint32(qInfo->RewOrReqMoney);
     data << uint32(0x00);
     data << uint32(qInfo->RewSpell);
 
@@ -530,8 +530,8 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
         data << uint32(0x01);
     else
         data << uint32(0x00);
-    // Req Gold
-    data << uint32(0x00);
+    // Req Money
+    data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney < 0 ? -pQuest->GetQuestInfo()->RewOrReqMoney : 0);
 
     data << uint32( pQuest->m_reqitemscount );
 

@@ -29,7 +29,7 @@ void WorldRunnable::run()
 
     uint32 realCurrTime = 0, realPrevTime = 0;
 
-    while (!Master::m_stopEvent)
+    while (!World::m_stopEvent)
     {
 
         if (realPrevTime > realCurrTime)

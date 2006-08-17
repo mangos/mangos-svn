@@ -181,7 +181,7 @@ void CliHelp(char*,pPrintf zprintf)
 void CliExit(char*,pPrintf zprintf)
 {
     zprintf( "Exiting daemon...\n" );
-    Master::m_stopEvent = true;
+    World::m_stopEvent = true;
 }
 
 void CliInfo(char*,pPrintf zprintf)
@@ -485,7 +485,7 @@ void CliRunnable::run()
     void CliHelp();
     putchar(7);
 
-    while (!Master::m_stopEvent)
+    while (!World::m_stopEvent)
     {
 
         printf("mangos>");
@@ -503,7 +503,7 @@ void CliRunnable::run()
         }
         else if (feof(stdin))
         {
-            Master::m_stopEvent = true;
+            World::m_stopEvent = true;
         }
 
     }

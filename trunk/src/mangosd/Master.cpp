@@ -44,8 +44,6 @@ INSTANTIATE_SINGLETON_1( CliRunnable );
 
 INSTANTIATE_SINGLETON_1( Master );
 
-volatile bool Master::m_stopEvent = false;
-
 void Master::_OnSignal(int s)
 {
     switch (s)
@@ -54,11 +52,11 @@ void Master::_OnSignal(int s)
         case SIGQUIT:
         case SIGTERM:
         case SIGABRT:
-            Master::m_stopEvent = true;
+            World::m_stopEvent = true;
             break;
         #ifdef _WIN32
         case SIGBREAK:
-            Master::m_stopEvent = true;
+            World::m_stopEvent = true;
             break;
         #endif
     }
@@ -182,7 +180,7 @@ bool Master::Run()
     #endif
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
-    while (!Master::m_stopEvent)
+    while (!World::m_stopEvent)
     {
 
         if (realPrevTime > realCurrTime)

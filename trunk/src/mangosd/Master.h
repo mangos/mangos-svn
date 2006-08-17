@@ -32,7 +32,6 @@ class Master
         ~Master();
         bool Run();
 
-        static volatile bool m_stopEvent;
     private:
         bool _StartDB();
         void _StopDB();

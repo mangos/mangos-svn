@@ -49,6 +49,8 @@
 
 INSTANTIATE_SINGLETON_1( World );
 
+volatile bool World::m_stopEvent = false;
+
 World::World()
 {
     m_playerLimit = 0;
@@ -598,7 +600,10 @@ void World::ShuttDownMsg()
     // need to check if passed more than 1 second to avoid flood
 
     if(m_ShutdownTimer <= 0)
-        raise(SIGINT);
+    {
+        m_stopEvent = true;
+        return;
+    }
 
     WorldPacket data;
 

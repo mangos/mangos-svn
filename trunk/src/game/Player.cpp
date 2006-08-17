@@ -7674,9 +7674,9 @@ bool Player::CanCompleteQuest( uint32 quest_id )
             if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && mQuestStatus[quest_id].m_timer == 0 )
                 return false;
 
-            if ( qInfo->RewMoney < 0 )
+            if ( qInfo->RewOrReqMoney < 0 )
             {
-                if ( GetMoney() + qInfo->RewMoney < 0 )
+                if ( int32(GetMoney()) < -qInfo->RewOrReqMoney )
                     return false;
             }
             return true;
@@ -7867,7 +7867,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
         else
             ModifyMoney( MaNGOS::XP::xp_to_money(pQuest->XPValue( this )) );
 
-        ModifyMoney( qInfo->RewMoney );
+        ModifyMoney( qInfo->RewOrReqMoney );
 
         if ( !qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
             mQuestStatus[quest_id].m_rewarded = true;
@@ -8314,6 +8314,35 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
     }
 }
 
+void Player::MoneyChanged( uint32 count )
+{
+    uint32 quest;
+    for( int i = 0; i < 20; i++ )
+    {
+        quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+        if ( quest != 0 )
+        {
+            QuestInfo const *qInfo = objmgr.GetQuestInfo(quest);
+            if( qInfo && qInfo->RewOrReqMoney < 0 )
+            {
+                if( mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
+                {
+                    if(int32(count) >= -qInfo->RewOrReqMoney)
+                    {
+                        if ( CanCompleteQuest( quest ) )
+                            CompleteQuest( quest );
+                    }
+                }
+                else if( mQuestStatus[quest].m_status == QUEST_STATUS_COMPLETE )
+                {
+                    if(int32(count) < -qInfo->RewOrReqMoney)
+                        IncompleteQuest( quest );
+                }
+            }
+        }
+    }
+}
+
 bool Player::HaveQuestForItem( uint32 itemid )
 {
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
@@ -8360,12 +8389,12 @@ void Player::SendQuestReward( Quest *pQuest )
         if ( getLevel() < 60 )
         {
             data << pQuest->XPValue( this );
-            data << pQuest->GetQuestInfo()->RewMoney;
+            data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney);
         }
         else
         {
             data << uint32(0);
-            data << pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( this );
+            data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney + pQuest->XPValue( this ));
         }
         data << uint32( pQuest->m_rewitemscount );
 
@@ -9298,6 +9327,9 @@ void Player::UnsummonPet(bool remove)
 
     SavePet();
     SetPet(0);
+
+    pet->AttackStop();
+    RemoveAllAttackers();
 
     WorldPacket data;
     data.Initialize(SMSG_DESTROY_OBJECT);
