@@ -574,6 +574,7 @@ void Spell::cast()
     if(castResult != 0)
     {
         SendCastResult(castResult);
+        finish();
         return;
     }
     castResult = CanCast();

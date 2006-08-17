@@ -1162,8 +1162,10 @@ void Spell::EffectSummonPet(uint32 i)
     }
 
     Pet* NewSummon = new Pet();
-    if(NewSummon->LoadPetFromDB( m_caster ))
-        return;
+
+    // is it need for somthing? it load wrong old type of pet instead creating new
+    //if(NewSummon->LoadPetFromDB( m_caster ))
+    //    return;
 
     if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
     {
@@ -1847,15 +1849,7 @@ void Spell::EffectDismissPet(uint32 i)
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player *_player = (Player*)m_caster;
-
-    Creature* pet = _player->GetPet();
-    unitTarget = (Unit*)pet;
-
-    if(!pet)
-        return;
-
-    _player->UnsummonPet(false);
+    ((Player*)m_caster)->UnsummonPet(false);
 }
 
 void Spell::EffectSummonObject(uint32 i)
