@@ -69,11 +69,10 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                     if(corpse)
                         corpse->DeleteFromWorld(true);
                     else
-                    {
                         sLog.outDebug("Bones %u not found in world. Delete from DB also.",guidlow);
-                        sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
-                        sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
-                    }
+
+                    sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                    sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
                 }
             }
             else
@@ -88,14 +87,19 @@ static void CorpsesErase(CorpseType type,uint32 delay)
     }
 }
 
+void CorpsesErase()
+{
+    //sLog.outBasic("Global Event (corpses/bones removal)");
+    CorpsesErase(CORPSE_BONES,             20*60);          // 20 mins
+    CorpsesErase(CORPSE_RESURRECTABLE,3*24*60*60);          // 3 days
+}
+
+
 void HandleCorpsesErase(void*)
 {
     sDatabase.ThreadStart();                                // let thread do safe mySQL requests
 
-    //sLog.outBasic("Global Event (corpses/bones removal)");
-
-    CorpsesErase(CORPSE_BONES,             20*60);          // 20 mins
-    CorpsesErase(CORPSE_RESURRECTABLE,3*24*60*60);          // 3 days
+    CorpsesErase();
 
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }

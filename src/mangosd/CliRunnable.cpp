@@ -23,6 +23,7 @@
 #include "Timer.h"
 #include "ScriptCalls.h"
 #include "AddonHandler.h"
+#include "GlobalEvents.h"
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
@@ -58,6 +59,7 @@ void CliLoadScripts(char*,pPrintf);
 void CliLoadAddons(char*,pPrintf);
 void CliKick(char*,pPrintf);
 void CliMotd(char*,pPrintf);
+void CliCorpses(char*,pPrintf);
 
 #define CMD(a) a,(sizeof(a)-1)
 const CliCommand Commands[]=
@@ -78,7 +80,8 @@ const CliCommand Commands[]=
     {CMD("loadscripts"), & CliLoadScripts,"Load script library"},
     {CMD("loadaddons"), & CliLoadAddons,"Load Addons data"},
     {CMD("kick"), & CliKick,"Kick user"},
-    {CMD("motd"), & CliMotd,"Change or display motd"}
+    {CMD("motd"), & CliMotd,"Change or display motd"},
+    {CMD("corpses"), & CliCorpses,"Manually call corpses erase global even code"}
 };
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
@@ -544,5 +547,10 @@ void CliMotd(char*command,pPrintf zprintf)
         zprintf("Text changed to:\x0d\x0a%s\x0d\x0a", motdText);
     }
 
+}
+
+void CliCorpses(char*,pPrintf)
+{
+    CorpsesErase();
 }
 #endif
