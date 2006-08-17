@@ -90,6 +90,9 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         uint8 msg = _player->CanEquipItem( NULL_SLOT, dest, pItem, !not_swapable );
 
         if( msg == EQUIP_ERR_OK )
+            msg = _player->CanUnequipItem( dest, !not_swapable );
+
+        if( msg == EQUIP_ERR_OK )
         {
             Item *pItem2 = _player->GetItemByPos( dest );
             if( pItem2 )

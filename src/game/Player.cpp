@@ -6052,6 +6052,43 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
         return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
 }
 
+uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
+{
+    // Applied only to equiped items
+    if(!IsEquipmentPos(pos) )
+        return EQUIP_ERR_OK;
+
+    Item* pItem = GetItemByPos(pos);
+
+    // Applied only to existed equiped item
+    if( !pItem )
+        return EQUIP_ERR_OK;
+
+    sLog.outDebug( "STORAGE: CanUnequipItem slot = %u, item = %u, count = %u", pos, pItem->GetEntry(), pItem->GetCount());
+
+    ItemPrototype const *pProto = pItem->GetProto();
+    if( !pProto )
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+
+    if(isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE)
+        return EQUIP_ERR_CANT_DO_IN_COMBAT;
+
+    // All equiped items can swaped (not in combat case)
+    if(swap)
+        return EQUIP_ERR_OK;
+
+    uint32 type = pProto->InventoryType;
+    uint8 slot = pos & 255;
+
+
+    // can't unequip mainhand item if offhand item equiped
+    if(slot == EQUIPMENT_SLOT_MAINHAND && GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND ))
+        return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+
+    return EQUIP_ERR_OK;
+}
+
+
 uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const
 {
     dest = 0;
@@ -6904,11 +6941,14 @@ void Player::SwapItem( uint16 src, uint16 dst )
             return;
         }
 
-        if(IsEquipmentPos ( src ) && isInCombat() &&
-            pSrcItem->GetProto()->Class != ITEM_CLASS_WEAPON && pSrcItem->GetProto()->Class != ITEM_CLASS_PROJECTILE)
+        if(IsEquipmentPos ( src ))
         {
-            SendEquipError( EQUIP_ERR_CANT_DO_IN_COMBAT, pSrcItem, pDstItem );
-            return;
+            uint8 msg = CanUnequipItem( src, pDstItem != NULL );
+            if(msg != EQUIP_ERR_OK)
+            {
+                SendEquipError( msg, pSrcItem, pDstItem );
+                return;
+            }
         }
 
         if( srcslot == dstbag )
@@ -7031,7 +7071,12 @@ void Player::SwapItem( uint16 src, uint16 dst )
             else if( IsBankPos( dst ) )
                 msg = CanBankItem( dstbag, dstslot, dest, pSrcItem, true );
             else if( IsEquipmentPos( dst ) )
+            {
                 msg = CanEquipItem( dstslot, dest, pSrcItem, true );
+                if( msg == EQUIP_ERR_OK )
+                    msg = CanUnequipItem( dest, true );
+            }
+
             if( msg == EQUIP_ERR_OK )
             {
                 uint16 dest2;
@@ -7056,6 +7101,9 @@ void Player::SwapItem( uint16 src, uint16 dst )
                 else if( IsEquipmentPos( src ) )
                 {
                     msg = CanEquipItem( srcslot, dest2, pDstItem, true);
+                    if( msg == EQUIP_ERR_OK )
+                        msg = CanUnequipItem( dest2, true);
+
                     if( msg != EQUIP_ERR_OK )
                     {
                         SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, pSrcItem, pDstItem );

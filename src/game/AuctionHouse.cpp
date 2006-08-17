@@ -282,7 +282,18 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     uint32 etime, bid, buyout;
     recv_data >> auctioneer >> item;
     recv_data >> bid >> buyout >> etime;
+
     Player *pl = GetPlayer();
+    uint16 pos = pl->GetPosByGuid(item);
+    Item *it = pl->GetItemByPos( pos );
+
+    uint8 msg = pl->CanUnequipItem( pos, false );
+    if(msg != EQUIP_ERR_OK)
+    {
+        pl->SendEquipError( msg, NULL, it );
+        return;
+    }
+
     AuctionEntry *AH = new AuctionEntry;
     AH->auctioneer = GUID_LOPART(auctioneer);
     AH->item = GUID_LOPART(item);
@@ -296,8 +307,6 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->Id = objmgr.GenerateAuctionID();
     sLog.outString("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes)",GUID_LOPART(item),GUID_LOPART(auctioneer),bid,buyout,time);
     objmgr.AddAuction(AH);
-    uint16 pos = pl->GetPosByGuid(item);
-    Item *it = pl->GetItemByPos( pos );
     objmgr.AddAItem(it);
 
     std::ostringstream ss;
