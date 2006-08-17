@@ -86,6 +86,8 @@ enum EnviromentalDamage
 class World
 {
     public:
+        static volatile bool m_stopEvent;
+
         World();
         ~World();
 

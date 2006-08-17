@@ -181,7 +181,7 @@ struct QuestInfo
     uint32 RewRepFaction2;
     uint32 RewRepValue1;
     uint32 RewRepValue2;
-    uint32 RewMoney;
+    int32  RewOrReqMoney;
     uint32 RewXP;
     uint32 RewSpell;
     uint32 PointMapId;

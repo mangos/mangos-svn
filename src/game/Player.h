@@ -520,6 +520,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ItemAdded( uint32 entry, uint32 count );
         void ItemRemoved( uint32 entry, uint32 count );
         void KilledMonster( uint32 entry, uint64 guid );
+        void MoneyChanged( uint32 value );
         bool HaveQuestForItem( uint32 itemid );
 
         void SendQuestComplete( uint32 quest_id );
@@ -562,8 +563,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
 
         uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
-        void ModifyMoney( int32 d ) { SetMoney (GetMoney() + d); }
-        void SetMoney( uint32 value ) { SetUInt32Value (PLAYER_FIELD_COINAGE, value); }
+        void ModifyMoney( int32 d ) { SetMoney (GetMoney() + d > 0 ? GetMoney() + d : 0); }
+        void SetMoney( uint32 value ) 
+        { 
+            SetUInt32Value (PLAYER_FIELD_COINAGE, value); 
+            MoneyChanged( value );
+        }
 
         uint32 GetTutorialInt(uint32 intId )
         {
