@@ -352,6 +352,10 @@ class WorldSession;
 #define BUYBACK_SLOT_12              80
 #define BUYBACK_SLOT_END             81
 
+#define MOVEMENT_WALKING 0x100
+#define MOVEMENT_JUMPING 0x2000
+#define MOVEMENT_FALLING 0x6000
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
