@@ -94,7 +94,6 @@ void CorpsesErase()
     CorpsesErase(CORPSE_RESURRECTABLE,3*24*60*60);          // 3 days
 }
 
-
 void HandleCorpsesErase(void*)
 {
     sDatabase.ThreadStart();                                // let thread do safe mySQL requests

@@ -24,7 +24,8 @@ class ChannelMgr
     public:
         typedef map<string,Channel *> ChannelMap;
         ChannelMgr() {}
-        ~ChannelMgr() {
+        ~ChannelMgr()
+        {
             for(ChannelMap::iterator itr = channels.begin();itr!=channels.end(); ++itr)
                 delete itr->second;
             channels.clear();
