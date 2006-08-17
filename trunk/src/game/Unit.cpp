@@ -1547,12 +1547,12 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         return false;
     }
 
-    if (!Aur->IsPassive())                              // passive auras stack with all
+    if (!Aur->IsPassive())                                  // passive auras stack with all
     {
         if (!RemoveNoStackAurasDueToAura(Aur))
         {
             delete Aur;
-            return false;                               // couldnt remove conflicting aura with higher rank
+            return false;                                   // couldnt remove conflicting aura with higher rank
         }
     }
 

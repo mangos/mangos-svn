@@ -159,7 +159,7 @@ Player::~Player ()
             delete m_items[i];
     }
     CleanupChannels();
-    
+
     delete cstats;
     delete info;
     delete PlayerTalkClass;
@@ -2860,7 +2860,6 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
         if(m_form > 0 && m_form != FORM_AQUA && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
-
 
     CheckExploreSystem();
 
@@ -6080,14 +6079,12 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     uint32 type = pProto->InventoryType;
     uint8 slot = pos & 255;
 
-
     // can't unequip mainhand item if offhand item equiped
     if(slot == EQUIPMENT_SLOT_MAINHAND && GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND ))
         return EQUIP_ERR_CANT_DO_RIGHT_NOW;
 
     return EQUIP_ERR_OK;
 }
-
 
 uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const
 {
@@ -7751,7 +7748,7 @@ void Player::AddQuest( Quest *pQuest )
             uint32 limittime = qInfo->LimitTime;
             SetTimedQuest( quest_id );
             mQuestStatus[quest_id].m_timer = limittime * 60000;
-            uint64 ktime = 0;                           // unkwnown and dependent from server start time and player login time
+            uint64 ktime = 0;                               // unkwnown and dependent from server start time and player login time
             uint32 qtime = static_cast<uint32>(time(NULL) - ktime) + limittime;
             SetUInt32Value( log_slot + 2, qtime );
         }

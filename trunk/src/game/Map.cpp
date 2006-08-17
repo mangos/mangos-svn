@@ -61,7 +61,6 @@ bool Map::ExistMAP(int mapid,int x,int y)
 
     delete[] tmp;
 
-
     if(!pf)
         return false;
 
@@ -69,7 +68,6 @@ bool Map::ExistMAP(int mapid,int x,int y)
 
     return true;
 }
-
 
 GridMap * Map::LoadMAP(int mapid,int x,int y)
 {
@@ -137,7 +135,6 @@ void Map::DeleteStateMachine()
     delete si_GridStates[GRID_STATE_IDLE];
     delete si_GridStates[GRID_STATE_REMOVAL];
 }
-
 
 Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
 {

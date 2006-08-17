@@ -37,7 +37,7 @@ Corpse::Corpse() : Object()
 
     m_POI = false;
     m_type = CORPSE_RESURRECTABLE;
-    m_time = time(NULL) - 30; // to prevent resurrecting delay at load
+    m_time = time(NULL) - 30;                               // to prevent resurrecting delay at load
 }
 
 bool Corpse::Create( uint32 guidlow )
