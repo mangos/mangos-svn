@@ -81,7 +81,6 @@ Unit::Unit() : Object()
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
     m_modCastSpeedPct = 0;
-    m_reflectSpellSchool.clear();
     m_scAuras.clear();
 }
 
@@ -602,7 +601,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
     {
         SpellEntry *spellInfo = sSpellStore.LookupEntry( (*i)->m_spellId);
 
-        if(((*i)->m_schoolType & School) || (*i)->m_schoolType == School || (*i)->m_schoolType ==127)
+        if((*i)->m_schoolType & int32(1<<School))
         {
             currAbsorbDamage = damage+ (*i)->m_currAbsorb;
             if(currAbsorbDamage < (*i)->m_totalAbsorb)
@@ -1881,16 +1880,14 @@ void Unit::ApplyStats(bool apply)
 
     if(GetTypeId() != TYPEID_PLAYER) return;
 
-    PlayerCreateStats* pstats = ((Player*)this)->GetPlayerCreateStats();
-    if(!pstats) return;
 
     float val;
     int32 val2,tem_att_power;
     float totalstatmods[5] = {1,1,1,1,1};
     float totalresmods[7] = {1,1,1,1,1,1,1};
 
-    AuraList& mModPercentStat = GetAurasByType(SPELL_AURA_MOD_PERCENT_STAT);
-    for(AuraList::iterator i = mModPercentStat.begin(); i != mModPercentStat.end(); ++i)
+    AuraList& mModTotalStatPct = GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+    for(AuraList::iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
     {
         if((*i)->GetModifier()->m_miscvalue != -1)
             totalstatmods[(*i)->GetModifier()->m_miscvalue] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
@@ -1903,9 +1900,6 @@ void Unit::ApplyStats(bool apply)
         for(uint8 j = 0; j <= 6; j++)
             if((*i)->GetModifier()->m_miscvalue & (1<<j))
                 totalresmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-
-    //startSta = uint8((float)startSta * totalstatmods[STAT_STAMINA]);
-    //startInt = uint8((float)startInt * totalstatmods[STAT_INTELLECT]);
 
     for (uint8 i = 0; i < 5; i++)
         totalstatmods[i] = totalstatmods[i] * 100.0f - 100.0f;
@@ -1941,14 +1935,14 @@ void Unit::ApplyStats(bool apply)
     ApplyArmorMod( val2, apply);
 
     // HP
-    val2 = (GetStat(STAT_STAMINA) - (uint8)pstats->stamina)*10;
+    val2 = (GetStat(STAT_STAMINA) - ((Player*)this)->GetCreateStat(STAT_STAMINA))*10;
 
     ApplyMaxHealthMod( val2, apply);
 
     // MP
     if(getClass() != WARRIOR && getClass() != ROGUE)
     {
-        val2 = (GetStat(STAT_INTELLECT) - (uint8)pstats->intellect)*15;
+        val2 = (GetStat(STAT_INTELLECT) - ((Player*)this)->GetCreateStat(STAT_INTELLECT))*15;
 
         ApplyMaxPowerMod(POWER_MANA, val2, apply);
 

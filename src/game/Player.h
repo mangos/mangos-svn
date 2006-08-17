@@ -147,15 +147,6 @@ struct PlayerCreateInfo
     std::list<uint16> action[4];
 };
 
-struct PlayerCreateStats
-{
-    float strength;
-    float agility;
-    float stamina;
-    float intellect;
-    float spirit;
-};
-
 struct Areas
 {
     uint32 areaID;
@@ -387,7 +378,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}
-        PlayerCreateStats* GetPlayerCreateStats() { return cstats; }
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel();
@@ -432,6 +422,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetNegStat(Stats stat, uint32 val) { SetFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val); }
         void ApplyNegStatMod(Stats stat, uint32 val, bool apply) { ApplyModFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val, apply); }
         void ApplyNegStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val, apply); }
+        void SetCreateStat(Stats stat, float val) { m_createStats[stat] = val; }
+        void ApplyCreateStatMod(Stats stat, float val, bool apply) { m_createStats[stat] += (apply ? val : -val); }
+        void ApplyCreateStatPercentMod(Stats stat, float val, bool apply) { m_createStats[stat] *= (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val)); }
+        float GetPosStat(Stats stat) const { return GetFloatValue(PLAYER_FIELD_POSSTAT0+stat); }
+        float GetNegStat(Stats stat) const { return GetFloatValue(PLAYER_FIELD_NEGSTAT0+stat); }
+        float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
 
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
@@ -987,7 +983,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::string m_rank_name;
 
         PlayerCreateInfo *info;
-        PlayerCreateStats *cstats;
+        float m_createStats[5];
 
         uint32 m_race;
         uint32 m_class;

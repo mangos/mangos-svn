@@ -123,13 +123,6 @@ struct ProcTriggerSpell
     uint32 procCharges;
 };
 
-struct ReflectSpellSchool
-{
-    uint32 spellId;
-    int32 school;
-    int32 chance;
-};
-
 struct SpellImmune
 {
     uint32 type;
@@ -560,7 +553,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<struct DamageShield> m_damageShields;
         std::list<struct DamageManaShield*> m_damageManaShield;
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
-        std::list<struct ReflectSpellSchool*> m_reflectSpellSchool;
         SpellImmuneList m_spellImmune[6];
 
         float GetHostility(uint64 guid) const;

@@ -179,7 +179,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MANA_REGEN_INTERRUPT = 134,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_DONE = 135,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_DONE_PERCENT = 136,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE = 137,
+    &Aura::HandleModTotalPercentStat,                       //SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE = 137,
     &Aura::HandleHaste,                                     //SPELL_AURA_MOD_HASTE = 138,
     &Aura::HandleForceReaction,                             //SPELL_AURA_FORCE_REACTION = 139,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_HASTE = 140,
@@ -217,23 +217,7 @@ m_removeOnDeath(false)
     if(m_duration == -1)
         m_permanent = true;
     m_isPassive = IsPassiveSpell(m_spellId);
-
-    switch(spellproto->EffectImplicitTargetA[eff])
-    {
-        case TARGET_S_E:
-        case TARGET_AE_E:
-        case TARGET_AE_E_INSTANT:
-        case TARGET_AC_E:
-        case TARGET_INFRONT:
-        case TARGET_DUELVSPLAYER:
-        case TARGET_AE_E_CHANNEL:
-        case TARGET_AE_SELECTED:
-            m_positive = false;
-            break;
-
-        default:
-            m_positive = (spellproto->AttributesEx & (1<<7)) ? false : true;
-    }
+    m_positive = IsPositiveEffect(m_spellId, m_effIndex);
 
     uint32 type = 0;
     if(!m_positive)
@@ -1493,6 +1477,7 @@ void Aura::HandleAuraManaShield(bool apply)
         {
             if(GetId() == (*i)->m_spellId)
             {
+                delete *i;
                 m_target->m_damageManaShield.erase(i);
             }
         }
@@ -1561,65 +1546,12 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
 
 void Aura::HandleReflectSpells(bool apply)
 {
-    if(apply)
-    {
-        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_reflectSpellSchool.erase(i);
-            }
-        }
-        ReflectSpellSchool *rss = new ReflectSpellSchool();
-
-        rss->chance = m_modifier.m_amount;
-        rss->spellId = GetId();
-        rss->school = -1;
-        m_target->m_reflectSpellSchool.push_back(rss);
-    }
-    else
-    {
-        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_reflectSpellSchool.erase(i);
-                break;
-            }
-        }
-    }
+    // has no immediate effect when adding / removing
 }
 
 void Aura::HandleReflectSpellsSchool(bool apply)
 {
-    if(apply)
-    {
-        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_reflectSpellSchool.erase(i);
-            }
-        }
-        ReflectSpellSchool *rss = new ReflectSpellSchool();
-
-        rss->chance = m_modifier.m_amount;
-        rss->spellId = GetId();
-        rss->school = m_modifier.m_miscvalue;
-        m_target->m_reflectSpellSchool.push_back(rss);
-    }
-    else
-    {
-        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                delete *i;
-                m_target->m_reflectSpellSchool.erase(i);
-                break;
-            }
-        }
-    }
+    // has no immediate effect when adding / removing
 }
 
 /*********************************************************/
@@ -1857,17 +1789,20 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
         return;
     }
 
-    bool positive = m_modifier.m_miscvalue2 == 0;
+    // only players have base stats
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player *p_target = (Player*)m_target;
 
     for(int8 x=0;x < 7;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
             SpellSchools school = SpellSchools(SPELL_SCHOOL_NORMAL + x);
-
-            m_target->ApplyResistancePercentMod(school,m_modifier.m_amount, apply);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(school,positive,m_modifier.m_amount, apply);
+            float curRes = p_target->GetFloatValue(UNIT_FIELD_RESISTANCES + x);
+            float baseRes = curRes + p_target->GetResistanceBuffMods(school, false) - p_target->GetResistanceBuffMods(school, true);
+            float baseRes_new = baseRes * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
+            p_target->SetFloatValue(UNIT_FIELD_RESISTANCES + x, curRes + baseRes_new - baseRes);
         }
     }
 }
@@ -1890,18 +1825,15 @@ void Aura::HandleModResistancePercent(bool apply)
 
 void Aura::HandleModBaseResistance(bool apply)
 {
+    // only players have base stats
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player *p_target = (Player*)m_target;
+
     for(int i = 0; i < 7; i++)
-    {
         if(m_modifier.m_miscvalue & (1<<i))
-        {
-            m_target->ApplyResistancePercentMod(SpellSchools(i), m_modifier.m_amount, apply );
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true,m_modifier.m_amount, apply);
-                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false,m_modifier.m_amount, apply);
-            }
-        }
-    }
+            p_target->ApplyResistanceMod(SpellSchools(SPELL_SCHOOL_NORMAL + i),m_modifier.m_amount, apply);
+
 }
 
 /********************************/
@@ -1940,6 +1872,32 @@ void Aura::HandleModPercentStat(bool apply)
         return;
     }
 
+    // only players have base stats
+    if (m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player *p_target = (Player*)m_target;
+
+    for (int32 i = 0; i < 5; i++)
+    {
+        if(m_modifier.m_miscvalue == i || m_modifier.m_miscvalue == -1)
+        {
+            float curStat = p_target->GetFloatValue(UNIT_FIELD_STATS + i);
+            float baseStat = curStat + p_target->GetNegStat(Stats(i)) - p_target->GetPosStat(Stats(i));
+            float baseStat_new = baseStat * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
+            p_target->SetFloatValue(UNIT_FIELD_STATS + i, curStat + baseStat_new - baseStat);
+            p_target->ApplyCreateStatPercentMod(Stats(i), m_modifier.m_amount, apply );
+        }
+    }
+}
+
+void Aura::HandleModTotalPercentStat(bool apply)
+{
+    if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
+    {
+        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+        return;
+    }
+
     for (int32 i = 0; i < 5; i++)
     {
         if(m_modifier.m_miscvalue == i || m_modifier.m_miscvalue == -1)
@@ -1949,14 +1907,7 @@ void Aura::HandleModPercentStat(bool apply)
             {
                 ((Player*)m_target)->ApplyPosStatPercentMod(Stats(i), m_modifier.m_amount, apply );
                 ((Player*)m_target)->ApplyNegStatPercentMod(Stats(i), m_modifier.m_amount, apply );
-                PlayerCreateStats *pstats = ((Player*)m_target)->GetPlayerCreateStats();
-                if (pstats)
-                {
-                    if (i == STAT_STAMINA)
-                        pstats->stamina *= (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
-                    if (i == STAT_INTELLECT)
-                        pstats->intellect *= (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
-                }
+                ((Player*)m_target)->ApplyCreateStatPercentMod(Stats(i), m_modifier.m_amount, apply );
             }
         }
     }
@@ -2076,33 +2027,7 @@ void Aura::HandleModSpellCritChance(bool Apply)
 
 void Aura::HandleModSpellCritChanceShool(bool Apply)
 {
-    /*if(Apply)
-    {
-        for(std::list<struct SpellCritSchool*>::iterator i = m_target->m_spellCritSchool.begin();i != m_target->m_spellCritSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_spellCritSchool.erase(i);
-            }
-        }
-        SpellCritSchool *scs = new SpellCritSchool();
-
-        scs->chance = m_modifier.m_amount;
-        scs->spellId = GetId();
-        scs->school = m_modifier.m_miscvalue;
-        m_target->m_spellCritSchool.push_back(scs);
-    }
-    else
-    {
-        for(std::list<struct SpellCritSchool*>::iterator i = m_target->m_spellCritSchool.begin();i != m_target->m_spellCritSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_spellCritSchool.erase(i);
-                break;
-            }
-        }
-    }*/
+    // has no immediate effect when adding / removing
 }
 
 /********************************/
@@ -2166,101 +2091,16 @@ void Aura::HandleModPCTRegen(bool apply)
 
 void Aura::HandleModCreatureAttackPower(bool apply)
 {
-    /*   if(apply)
-       {
-
-           for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
-           {
-               if(GetId() == (*i)->spellId)
-               {
-                   m_target->m_creatureAttackPower.erase(i);
-               }
-           }
-
-           CreatureAttackPower *cap = new CreatureAttackPower();
-
-           cap->spellId = GetId();
-           cap->damage = m_modifier.m_amount;
-           cap->creaturetype = m_modifier.m_miscvalue;
-           m_target->m_creatureAttackPower.push_back(cap);
-       }
-       else
-       {
-           for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
-           {
-               if(GetId() == (*i)->spellId)
-               {
-                   m_target->m_creatureAttackPower.erase(i);
-                   break;
-               }
-           }
-       }*/
+    // has no immediate effect when adding / removing
 }
 
 void Aura::HandleModDamageDoneCreature(bool Apply)
 {
-    /*if(Apply)
-    {
-
-        for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_damageDoneCreature.erase(i);
-            }
-        }
-
-        DamageDoneCreature *ddc = new DamageDoneCreature();
-
-        ddc->spellId = GetId();
-        ddc->damage = m_modifier.m_amount;
-        ddc->creaturetype = m_modifier.m_miscvalue;
-        m_target->m_damageDoneCreature.push_back(ddc);
-    }
-    else
-    {
-        for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_damageDoneCreature.erase(i);
-                break;
-            }
-        }
-    }*/
+    // has no immediate effect when adding / removing
 }
 
 void Aura::HandleModDamageDone(bool apply)
 {
-    /*    if(apply)
-        {
-
-            for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
-            {
-                if(GetId() == (*i)->spellId)
-                {
-                    m_target->m_damageDone.erase(i);
-                }
-            }
-
-            DamageDone *dd = new DamageDone();
-
-            dd->spellId = GetId();
-            dd->damage = m_modifier.m_amount;
-            dd->school = m_modifier.m_miscvalue;
-            m_target->m_damageDone.push_back(dd);
-        }
-        else
-        {
-            for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
-            {
-                if(GetId() == (*i)->spellId)
-                {
-                    m_target->m_damageDone.erase(i);
-                    break;
-                }
-            }
-        }*/
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
     if(m_modifier.m_miscvalue2)
@@ -2271,35 +2111,6 @@ void Aura::HandleModDamageDone(bool apply)
 
 void Aura::HandleModDamageTaken(bool apply)
 {
-    /*if(apply)
-    {
-
-        for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_damageTaken.erase(i);
-            }
-        }
-
-        DamageTaken *dt = new DamageTaken();
-
-        dt->spellId = GetId();
-        dt->damage = m_modifier.m_amount;
-        dt->school = m_modifier.m_miscvalue;
-        m_target->m_damageTaken.push_back(dt);
-    }
-    else
-    {
-        for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_damageTaken.erase(i);
-                break;
-            }
-        }
-    }*/
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
     if(m_modifier.m_miscvalue2)
@@ -2340,33 +2151,7 @@ void Aura::HandleModPowerCost(bool apply)
 
 void Aura::HandleModPowerCostSchool(bool apply)
 {
-    /*if(apply)
-    {
-        for(std::list<struct PowerCostSchool*>::iterator i = m_target->m_powerCostSchool.begin();i != m_target->m_powerCostSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_powerCostSchool.erase(i);
-            }
-        }
-        PowerCostSchool *pcs = new PowerCostSchool();
-
-        pcs->damage = m_modifier.m_amount;
-        pcs->spellId = GetId();
-        pcs->school = m_modifier.m_miscvalue;
-        m_target->m_powerCostSchool.push_back(pcs);
-    }
-    else
-    {
-        for(std::list<struct PowerCostSchool*>::iterator i = m_target->m_powerCostSchool.begin();i != m_target->m_powerCostSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_powerCostSchool.erase(i);
-                break;
-            }
-        }
-    }*/
+    // has no immediate effect when adding / removing
 }
 
 /*********************************************************/

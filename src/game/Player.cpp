@@ -54,7 +54,6 @@ Player::Player (WorldSession *session): Unit()
     m_session = session;
 
     info = NULL;
-    cstats = NULL;
     m_divider = 0;
     m_timedquest = 0;
 
@@ -160,7 +159,6 @@ Player::~Player ()
     }
     CleanupChannels();
 
-    delete cstats;
     delete info;
     delete PlayerTalkClass;
 }
@@ -177,7 +175,17 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
     info = objmgr.GetPlayerCreateInfo((uint32)race, (uint32)class_);
-    if(!info) return false;
+    if(!info)
+    {
+        sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
+        return false;
+    }
+
+    m_createStats[STAT_AGILITY] = (float)info->agility;
+    m_createStats[STAT_INTELLECT] = (float)info->intellect;
+    m_createStats[STAT_SPIRIT] = (float)info->spirit;
+    m_createStats[STAT_STAMINA] = (float)info->stamina;
+    m_createStats[STAT_STRENGTH] = (float)info->strength;
 
     for (i = 0; i < BANK_SLOT_BAG_END; i++)
         m_items[i] = NULL;
@@ -1583,7 +1591,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
                 {
                     data.Initialize(SMSG_SUPERCEDED_SPELL);
 
-                    if(CompareSpellRank(spell_id, (*itr)->spellId) >= 0)
+                    if(FindSpellRank(spell_id) >= FindSpellRank((*itr)->spellId))
                     {
                         data << uint32((*itr)->spellId);
                         data << uint32(spell_id);
@@ -3502,6 +3510,9 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     }
 
     _RemoveStatsMods();
+    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT); 
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(false);
 
     int32 val;
     std::string typestr;
@@ -3658,6 +3669,8 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         }
     }
 
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(true);
     _ApplyStatsMods();
 
     if(apply)
@@ -8505,15 +8518,18 @@ bool Player::LoadFromDB( uint32 guid )
     m_class = fields[6].GetUInt8();
 
     info = objmgr.GetPlayerCreateInfo(m_race, m_class);
-    if (info)
+    if(!info)
     {
-        cstats = new PlayerCreateStats;
-        cstats->agility = (float)info->agility;
-        cstats->intellect = (float)info->intellect;
-        cstats->spirit = (float)info->spirit;
-        cstats->stamina = (float)info->stamina;
-        cstats->strength = (float)info->strength;
+        sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
+        delete result;
+        return false;
     }
+
+    m_createStats[STAT_AGILITY] = (float)info->agility;
+    m_createStats[STAT_INTELLECT] = (float)info->intellect;
+    m_createStats[STAT_SPIRIT] = (float)info->spirit;
+    m_createStats[STAT_STAMINA] = (float)info->stamina;
+    m_createStats[STAT_STRENGTH] = (float)info->strength;
 
     m_positionX = fields[7].GetFloat();
     m_positionY = fields[8].GetFloat();
@@ -8524,13 +8540,6 @@ bool Player::LoadFromDB( uint32 guid )
     if(!IsPositionValid())
     {
         sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %d Y: ^%d). Teleport to default race/class locations.",guid,m_positionX,m_positionY);
-        PlayerCreateInfo* info = objmgr.GetPlayerCreateInfo(m_race, m_class);
-        if(!info)
-        {
-            sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
-            delete result;
-            return false;
-        }
 
         m_mapId = info->mapId;
         m_positionX = info->positionX;
