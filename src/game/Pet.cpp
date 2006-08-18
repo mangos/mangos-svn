@@ -61,7 +61,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
     WorldPacket data;
     uint32 ownerid = owner->GetGUIDLow();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", ownerid );
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current` FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", ownerid );
 
     if(!result)
         return false;

@@ -111,6 +111,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMooveRootAck(WorldPacket& recvPacket);
         void HandleLookingForGroup(WorldPacket& recvPacket);
 
+	// new inspect
+	void HandleInspectOpcode(WorldPacket& recvPacket);
+
         void HandleMoveWaterWalkAck(WorldPacket& recvPacket);
         void HandleMountSpecialAnimOpcode(WorldPacket &recvdata);
 

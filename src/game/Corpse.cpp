@@ -117,24 +117,24 @@ void Corpse::DeleteFromDB()
 
 bool Corpse::LoadFromDB(uint32 guid)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse` WHERE `guid` = '%u'",guid);
 
     if( ! result )
         return false;
 
     Field *fields = result->Fetch();
     //uint64 guid = fields[0].GetUInt64();
-    float positionX = fields[2].GetFloat();
-    float positionY = fields[3].GetFloat();
-    float positionZ = fields[4].GetFloat();
-    float ort       = fields[5].GetFloat();
+    float positionX = fields[0].GetFloat();
+    float positionY = fields[1].GetFloat();
+    float positionZ = fields[2].GetFloat();
+    float ort       = fields[3].GetFloat();
     //uint32 zoneid   = fields[6].GetUInt32();
-    uint32 mapid    = fields[7].GetUInt32();
-    uint32 bones   = fields[10].GetUInt32();
+    uint32 mapid    = fields[4].GetUInt32();
+    uint32 bones   = fields[6].GetUInt32();
 
     m_type = (bones == 0) ? CORPSE_RESURRECTABLE : CORPSE_BONES;
 
-    if(!LoadValues( fields[8].GetString() ))
+    if(!LoadValues( fields[5].GetString() ))
     {
         sLog.outError("ERROR: Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
         delete result;

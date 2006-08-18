@@ -287,7 +287,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     // home bind stuff
     Field *fields;
-    QueryResult *result7 = sDatabase.PQuery("SELECT COUNT(*) FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    QueryResult *result7 = sDatabase.PQuery("SELECT COUNT(`guid`) FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
     if (result7)
     {
         int cnt;
@@ -419,7 +419,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     Player *pCurrChar = GetPlayer();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
 
     if(result)
     {

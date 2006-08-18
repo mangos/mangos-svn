@@ -172,7 +172,7 @@ void Weather::ReGenerate()
 
     // At this point, only weather that isn't doing anything remains
     QueryResult *result;
-    result = sDatabase.PQuery("SELECT * FROM `game_weather` WHERE `zone` = '%u'", m_zone);
+    result = sDatabase.PQuery("SELECT `zone`,`spring_rain_chance`,`spring_snow_chance`,`spring_storm_chance`,`summer_rain_chance`,`summer_snow_chance`,`summer_storm_chance`,`fall_rain_chance`,`fall_snow_chance`,`fall_storm_chance`,`winter_rain_chance`,`winter_snow_chance`,`winter_storm_chance` FROM `game_weather` WHERE `zone` = '%u'", m_zone);
     if (!result)
         return;
 

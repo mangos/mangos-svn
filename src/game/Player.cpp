@@ -2457,7 +2457,7 @@ void Player::BroadcastToFriends(std::string msg)
     Field *fields;
     Player *pfriend;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'", GetGUIDLow());
 
     if(!result) return;
 
@@ -2467,7 +2467,7 @@ void Player::BroadcastToFriends(std::string msg)
         fields = result->Fetch();
 
         sChatHandler.FillSystemMessageData(&data, 0, msg.c_str());
-        pfriend = ObjectAccessor::Instance().FindPlayer(fields[2].GetUInt64());
+        pfriend = ObjectAccessor::Instance().FindPlayer(fields[0].GetUInt64());
 
         if (pfriend && pfriend->IsInWorld())
             pfriend->GetSession()->SendPacket(&data);
@@ -8638,7 +8638,7 @@ void Player::_LoadActions()
 
     m_actions.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
 
     if(result)
     {
@@ -8646,7 +8646,7 @@ void Player::_LoadActions()
         {
             Field *fields = result->Fetch();
 
-            addAction(fields[1].GetUInt8(), fields[2].GetUInt16(), fields[3].GetUInt8(), fields[4].GetUInt8());
+            addAction(fields[0].GetUInt8(), fields[1].GetUInt16(), fields[2].GetUInt8(), fields[3].GetUInt8());
         }
         while( result->NextRow() );
 
@@ -8663,16 +8663,16 @@ void Player::_LoadAuras()
     for(uint8 j = 0; j < 6; j++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`effect_index`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
         do
         {
             Field *fields = result->Fetch();
-            uint32 spellid = fields[1].GetUInt32();
-            uint32 effindex = fields[2].GetUInt32();
-            int32 remaintime = (int32)fields[3].GetUInt32();
+            uint32 spellid = fields[0].GetUInt32();
+            uint32 effindex = fields[1].GetUInt32();
+            int32 remaintime = (int32)fields[2].GetUInt32();
 
             SpellEntry* spellproto = sSpellStore.LookupEntry(spellid);
             if(!spellproto)
@@ -8730,7 +8730,7 @@ void Player::_LoadCorpse()
 
 void Player::_LoadInventory()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
 
     uint16 dest;
     if (result)
@@ -8738,9 +8738,9 @@ void Player::_LoadInventory()
         do
         {
             Field *fields = result->Fetch();
-            uint8  slot      = fields[2].GetUInt8();
-            uint32 item_guid = fields[3].GetUInt32();
-            uint32 item_id   = fields[4].GetUInt32();
+            uint8  slot      = fields[0].GetUInt8();
+            uint32 item_guid = fields[1].GetUInt32();
+            uint32 item_id   = fields[2].GetUInt32();
 
             ItemPrototype const * proto = objmgr.GetItemPrototype(item_id);
 
@@ -8789,7 +8789,7 @@ void Player::_LoadMail()
 
     m_mail.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -8928,7 +8928,7 @@ void Player::_LoadSpells()
 
 void Player::_LoadTutorials()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -8937,7 +8937,7 @@ void Player::_LoadTutorials()
             Field *fields = result->Fetch();
 
             for (int iI=0; iI<8; iI++)
-                m_Tutorials[iI] = fields[iI + 1].GetUInt32();
+                m_Tutorials[iI] = fields[iI].GetUInt32();
 
         }
         while( result->NextRow() );

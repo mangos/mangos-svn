@@ -127,7 +127,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     Field *player_fields, *items_fields, *spells_fields, *skills_fields, *actions_fields;
     PlayerCreateInfo *pPlayerCreateInfo;
 
-    QueryResult *player_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", race, class_);
+    QueryResult *player_result = sDatabase.PQuery("SELECT `createId`,`race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID`,`BaseStrength`,`BaseAgility`,`BaseStamina`,`BaseIntellect`,`BaseSpirit`,`BaseArmor`,`BaseHealth`,`BaseMana`,`BaseRage`,`BaseFocus`,`BaseEnergy`,`attackpower`,`mindmg`,`maxdmg`,`ranmindmg`,`ranmaxdmg` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", race, class_);
 
     if(!player_result)
     {
@@ -168,27 +168,27 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete player_result;
 
-    QueryResult *items_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo_item` WHERE `createid` = '0' OR `createid` = '%u'", createId);
+    QueryResult *items_result = sDatabase.PQuery("SELECT `itemid`,`bagIndex`,`slot`,`amount` FROM `playercreateinfo_item` WHERE `createid` = '0' OR `createid` = '%u'", createId);
 
     do
     {
         if(!items_result) break;
         items_fields = items_result->Fetch();
-        pPlayerCreateInfo->item_id.push_back(items_fields[1].GetUInt32());
-        pPlayerCreateInfo->item_bagIndex.push_back(items_fields[2].GetUInt32());
-        pPlayerCreateInfo->item_slot.push_back(items_fields[3].GetUInt8());
-        pPlayerCreateInfo->item_amount.push_back(items_fields[4].GetUInt32());
+        pPlayerCreateInfo->item_id.push_back(items_fields[0].GetUInt32());
+        pPlayerCreateInfo->item_bagIndex.push_back(items_fields[1].GetUInt32());
+        pPlayerCreateInfo->item_slot.push_back(items_fields[2].GetUInt8());
+        pPlayerCreateInfo->item_amount.push_back(items_fields[3].GetUInt32());
     } while (items_result->NextRow());
 
     delete items_result;
 
-    QueryResult *spells_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo_spell` WHERE `createid` = '0' OR `createid` = '%u'", createId);
+    QueryResult *spells_result = sDatabase.PQuery("SELECT `Spell` FROM `playercreateinfo_spell` WHERE `createid` = '0' OR `createid` = '%u'", createId);
 
     do
     {
         if(!spells_result) break;
         spells_fields = spells_result->Fetch();
-        pPlayerCreateInfo->spell.push_back(spells_fields[1].GetUInt16());
+        pPlayerCreateInfo->spell.push_back(spells_fields[0].GetUInt16());
 
     } while( spells_result->NextRow() );
 
@@ -208,16 +208,16 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete skills_result;
 
-    QueryResult *actions_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo_action` WHERE `createid` = '0' OR `createid` = '%u'", createId);
+    QueryResult *actions_result = sDatabase.PQuery("SELECT `Skill`,`SkillMin`,`SkillMax`,`Note` FROM `playercreateinfo_action` WHERE `createid` = '0' OR `createid` = '%u'", createId);
 
     do
     {
         if(!actions_result) break;
         actions_fields = actions_result->Fetch();
-        pPlayerCreateInfo->action[0].push_back(actions_fields[1].GetUInt16());
-        pPlayerCreateInfo->action[1].push_back(actions_fields[2].GetUInt16());
-        pPlayerCreateInfo->action[2].push_back(actions_fields[3].GetUInt16());
-        pPlayerCreateInfo->action[3].push_back(actions_fields[4].GetUInt16());
+        pPlayerCreateInfo->action[0].push_back(actions_fields[0].GetUInt16());
+        pPlayerCreateInfo->action[1].push_back(actions_fields[1].GetUInt16());
+        pPlayerCreateInfo->action[2].push_back(actions_fields[2].GetUInt16());
+        pPlayerCreateInfo->action[3].push_back(actions_fields[3].GetUInt16());
 
     } while( actions_result->NextRow() );
 
@@ -260,7 +260,7 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 
 void ObjectMgr::LoadAuctions()
 {
-    QueryResult *result = sDatabase.Query( "SELECT * FROM `auctionhouse`" );
+    QueryResult *result = sDatabase.Query( "SELECT `auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid` FROM `auctionhouse`" );
 
     if( !result )
         return;
@@ -295,7 +295,7 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadAuctionItems()
 {
-    QueryResult *result = sDatabase.Query( "SELECT * FROM `auctionhouse_item`" );
+    QueryResult *result = sDatabase.Query( "SELECT `guid` FROM `auctionhouse_item`" );
 
     if( !result )
         return;
@@ -315,7 +315,7 @@ void ObjectMgr::LoadAuctionItems()
 
 void ObjectMgr::LoadMailedItems()
 {
-    QueryResult *result = sDatabase.Query( "SELECT * FROM `mail_item`" );
+	QueryResult *result = sDatabase.Query( "SELECT `guid` FROM `mail_item`" );
 
     if( !result )
         return;
@@ -470,7 +470,7 @@ void ObjectMgr::LoadGossipText()
 ItemPage *ObjectMgr::RetreiveItemPageText(uint32 Page_ID)
 {
     ItemPage *pIText;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `item_page` WHERE `id` = '%u'", Page_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`text`,`next_page` FROM `item_page` WHERE `id` = '%u'", Page_ID);
 
     if( !result ) return NULL;
     int cic, count = 0;
@@ -517,7 +517,7 @@ AreaTriggerPoint *ObjectMgr::GetAreaTriggerQuestPoint(uint32 Trigger_ID)
 void ObjectMgr::LoadAreaTriggerPoints()
 {
     int count = 0;
-    QueryResult *result = sDatabase.Query( "SELECT * FROM `areatrigger_involvedrelation`" );
+    QueryResult *result = sDatabase.Query( "SELECT `id`,`quest` FROM `areatrigger_involvedrelation`" );
     AreaTriggerPoint *pArea;
 
     if( !result ) return;
@@ -714,7 +714,7 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 void ObjectMgr::LoadTeleportCoords()
 {
 
-    QueryResult *result = sDatabase.Query( "SELECT * FROM `areatrigger_template`" );
+    QueryResult *result = sDatabase.Query( "SELECT `id`,`target_position_x`,`target_position_y`,`target_position_z`,`target_map` FROM `areatrigger_template`" );
 
     if( !result )
         return;
@@ -736,7 +736,7 @@ void ObjectMgr::LoadTeleportCoords()
         pTC = new TeleportCoords;
         pTC->id = fields[0].GetUInt32();
         //pTC->Name = fields[6].GetString();
-        pTC->mapId = fields[5].GetUInt32();
+        pTC->mapId = fields[4].GetUInt32();
         pTC->x = fields[1].GetFloat();
         pTC->y = fields[2].GetFloat();
         pTC->z = fields[3].GetFloat();

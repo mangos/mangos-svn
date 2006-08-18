@@ -222,6 +222,9 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         // played time
         { CMSG_PLAYED_TIME,      STATUS_LOGGEDIN, &WorldSession::HandlePlayedTime                   },
 
+	// new inspect
+        { CMSG_INSPECT,   STATUS_LOGGEDIN, &WorldSession::HandleInspectOpcode                   },
+
         // new
         { CMSG_FORCE_MOVE_UNROOT_ACK,   STATUS_LOGGEDIN, &WorldSession::HandleMooveUnRootAck                   },
         { CMSG_FORCE_MOVE_ROOT_ACK, STATUS_LOGGEDIN, &WorldSession::HandleMooveRootAck               },

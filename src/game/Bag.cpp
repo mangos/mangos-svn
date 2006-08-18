@@ -106,16 +106,16 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
 
     if (result)
     {
         do
         {
             Field *fields = result->Fetch();
-            uint8  slot      = fields[2].GetUInt8();
-            uint32 item_guid = fields[3].GetUInt32();
-            uint32 item_id   = fields[4].GetUInt32();
+            uint8  slot      = fields[0].GetUInt8();
+            uint32 item_guid = fields[1].GetUInt32();
+            uint32 item_id   = fields[2].GetUInt32();
 
             ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
 

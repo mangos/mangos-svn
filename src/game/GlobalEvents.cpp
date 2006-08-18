@@ -27,7 +27,7 @@
 
 static void CorpsesErase(CorpseType type,uint32 delay)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`map` FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
 
     if(result)
     {
@@ -35,11 +35,11 @@ static void CorpsesErase(CorpseType type,uint32 delay)
         {
             Field *fields = result->Fetch();
             uint32 guidlow = fields[0].GetUInt32();
-            float positionX = fields[2].GetFloat();
-            float positionY = fields[3].GetFloat();
+            float positionX = fields[1].GetFloat();
+            float positionY = fields[2].GetFloat();
             //float positionZ = fields[4].GetFloat();
             //float ort       = fields[5].GetFloat();
-            uint32 mapid    = fields[7].GetUInt32();
+            uint32 mapid    = fields[3].GetUInt32();
 
             uint64 guid = MAKE_GUID(guidlow,HIGHGUID_CORPSE);
 
