@@ -71,7 +71,9 @@ Rate.Power3 = 1;
 Rate.Drop = 1
 
 # XP rate 
-Rate.XP = 1
+Rate.XP.Kill    = 1
+Rate.XP.Quest   = 1
+Rate.XP.Explore = 1
 
 # Default remote console port
 Ra.Port = 3443

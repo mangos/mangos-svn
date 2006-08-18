@@ -30,7 +30,7 @@ inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
     if( ( xp < 0 ) || ((VictimLvl<(AttackerLvl * 0.8)) && (AttackerLvl > 5)) )
         xp = 0;
     else
-        xp *= sWorld.getRate(RATE_XP);
+        xp *= sWorld.getRate(RATE_XP_KILL);
 
     return (uint32)xp;
 }

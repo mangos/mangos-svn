@@ -69,7 +69,9 @@ enum Rates
     RATE_POWER_RAGE,
     RATE_POWER_FOCUS,
     RATE_DROP,
-    RATE_XP,
+    RATE_XP_KILL,
+    RATE_XP_QUEST,
+    RATE_XP_EXPLORE,
     MAX_RATES
 };
 
