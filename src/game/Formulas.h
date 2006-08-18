@@ -208,7 +208,7 @@ namespace MaNGOS
                     pl->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
             }
 
-            return (uint32)(xp_gain*sWorld.getRate(RATE_XP));
+            return (uint32)(xp_gain*sWorld.getRate(RATE_XP_KILL));
         }
 
         inline uint32 xp_Diff(uint32 lvl)
