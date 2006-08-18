@@ -1631,7 +1631,6 @@ uint8 Spell::CheckItems()
                             return (uint8)CAST_FAIL_ALREADY_FULL_MANA;
                 }
             }
-            return uint8(0);
         }
     }
     if(itemTarget)
