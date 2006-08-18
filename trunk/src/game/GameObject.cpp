@@ -174,25 +174,25 @@ bool GameObject::LoadFromDB(uint32 guid)
 {
     float rotation0, rotation1, rotation2, rotation3;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject` WHERE `guid` = '%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer` FROM `gameobject` WHERE `guid` = '%u'", guid);
 
     if( ! result )
         return false;
 
     Field *fields = result->Fetch();
-    uint32 entry = fields[1].GetUInt32();
-    uint32 map_id=fields[2].GetUInt32();
-    float x = fields[3].GetFloat();
-    float y = fields[4].GetFloat();
-    float z = fields[5].GetFloat();
-    float ang = fields[6].GetFloat();
+    uint32 entry = fields[0].GetUInt32();
+    uint32 map_id=fields[1].GetUInt32();
+    float x = fields[2].GetFloat();
+    float y = fields[3].GetFloat();
+    float z = fields[4].GetFloat();
+    float ang = fields[5].GetFloat();
 
-    rotation0 = fields[7].GetFloat();
-    rotation1 = fields[8].GetFloat();
-    rotation2 = fields[9].GetFloat();
-    rotation3 = fields[10].GetFloat();
-    lootid=fields[11].GetUInt32();
-    m_respawnTimer=fields[12].GetUInt32();
+    rotation0 = fields[6].GetFloat();
+    rotation1 = fields[7].GetFloat();
+    rotation2 = fields[8].GetFloat();
+    rotation3 = fields[9].GetFloat();
+    lootid=fields[10].GetUInt32();
+    m_respawnTimer=fields[11].GetUInt32();
     delete result;
 
     if (Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
@@ -229,14 +229,14 @@ void GameObject::_LoadQuests()
     Field *fields;
     Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject_questrelation` WHERE `id` = '%u'", GetEntry ());
+    QueryResult *result = sDatabase.PQuery("SELECT `quest` FROM `gameobject_questrelation` WHERE `id` = '%u'", GetEntry ());
 
     if(result)
     {
         do
         {
             fields = result->Fetch();
-            pQuest = objmgr.NewQuest( fields[1].GetUInt32() );
+            pQuest = objmgr.NewQuest( fields[0].GetUInt32() );
             if (!pQuest) continue;
 
             addQuest(pQuest);
@@ -246,14 +246,14 @@ void GameObject::_LoadQuests()
         delete result;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `gameobject_involvedrelation` WHERE `id` = '%u'", GetEntry ());
+    QueryResult *result1 = sDatabase.PQuery("SELECT `quest` FROM `gameobject_involvedrelation` WHERE `id` = '%u'", GetEntry ());
 
     if(!result1) return;
 
     do
     {
         fields = result1->Fetch();
-        pQuest = objmgr.NewQuest( fields[1].GetUInt32() );
+        pQuest = objmgr.NewQuest( fields[0].GetUInt32() );
         if (!pQuest) continue;
 
         addInvolvedQuest(pQuest);

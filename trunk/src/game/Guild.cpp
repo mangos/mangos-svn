@@ -120,7 +120,7 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
     LoadRanksFromDB(GuildId);
     LoadMembersFromDB(GuildId);
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild` WHERE `guildid` = '%u'", GuildId);
+    QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`MOTD` FROM `guild` WHERE `guildid` = '%u'", GuildId);
 
     if(!result)
         return;
@@ -165,14 +165,14 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
 void Guild::LoadRanksFromDB(uint32 GuildId)
 {
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_rank` WHERE `guildid` = '%u'", GuildId);
+    QueryResult *result = sDatabase.PQuery("SELECT `rname`,`rights` FROM `guild_rank` WHERE `guildid` = '%u'", GuildId);
 
     if(!result) return;
 
     do
     {
         fields = result->Fetch();
-        CreateRank(fields[1].GetCppString(),fields[2].GetUInt32());
+        CreateRank(fields[0].GetCppString(),fields[1].GetUInt32());
 
     }while( result->NextRow() );
     delete result;
@@ -184,7 +184,7 @@ void Guild::LoadMembersFromDB(uint32 GuildId)
     Player *pl;
     MemberSlot *newmember;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_member` WHERE `guildid` = '%u'", GuildId);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`rank`,`Pnote`,`OFFnote` FROM `guild_member` WHERE `guildid` = '%u'", GuildId);
 
     if(!result)
         return;
@@ -193,12 +193,12 @@ void Guild::LoadMembersFromDB(uint32 GuildId)
     {
         fields = result->Fetch();
         newmember = new MemberSlot;
-        newmember->guid = fields[1].GetUInt64();
-        newmember->RankId = fields[2].GetUInt32();
+        newmember->guid = fields[0].GetUInt64();
+        newmember->RankId = fields[1].GetUInt32();
         pl = ObjectAccessor::Instance().FindPlayer(newmember->guid);
         if(!pl || !pl->IsInWorld()) Loadplayerstats(newmember);
-        newmember->Pnote = fields[3].GetCppString();
-        newmember->OFFnote = fields[4].GetCppString();
+        newmember->Pnote = fields[2].GetCppString();
+        newmember->OFFnote = fields[3].GetCppString();
         AddMember(newmember);
 
     }while( result->NextRow() );

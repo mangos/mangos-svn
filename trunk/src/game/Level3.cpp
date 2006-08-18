@@ -2258,7 +2258,7 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     if (!player) return false;
     char *name=(char*)args;
 
-    result = sDatabase.PQuery("SELECT * FROM `game_tele` WHERE `name` = '%s'",name);
+    result = sDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s'",name);
     if (result)
     {
         SendSysMessage("Teleport location already exists!");

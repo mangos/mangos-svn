@@ -223,7 +223,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
     Field *fields;
     guid = GetPlayer()->GetGUID();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`ticket_id`) FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
 
     if (result)
     {
@@ -234,11 +234,11 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 
         if ( cnt > 0 )
         {
-            QueryResult *result2 = sDatabase.PQuery("SELECT * FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+            QueryResult *result2 = sDatabase.PQuery("SELECT `ticket_text` FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
             assert(result2);
             Field *fields2 = result2->Fetch();
 
-            SendGMTicketGetTicket(6,fields2[2].GetString());
+            SendGMTicketGetTicket(6,fields2[0].GetString());
             delete result2;
         }
         else
@@ -453,7 +453,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 
     guid=GetPlayer()->GetGUIDLow();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`guid`) FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
 
     if(result)
     {
@@ -461,7 +461,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
         Counter=fields[0].GetUInt32();
         delete result;
 
-        result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
+        result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
         if(result)
         {
             fields = result->Fetch();
@@ -526,7 +526,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     SendPacket( &data );
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
 
-    result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
+    result = sDatabase.PQuery("SELECT COUNT(`friend`) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
 
     if(!result) return;
 
@@ -537,7 +537,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     dataI.Initialize( SMSG_IGNORE_LIST );
     dataI << nrignore;
 
-    result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
+    result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
 
     if(!result) return;
 
@@ -574,7 +574,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
     pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", friendGuid);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", friendGuid);
 
     if( result )
         friendResult = FRIEND_ALREADY;
@@ -886,9 +886,9 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `areatrigger_tavern` WHERE `id` = '%u'", Trigger_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `areatrigger_tavern` WHERE `id` = '%u'", Trigger_ID);
     if(!result)
-        result = sDatabase.PQuery("SELECT * FROM `areatrigger_city` WHERE `id` = '%u'", Trigger_ID);
+        result = sDatabase.PQuery("SELECT `name` FROM `areatrigger_city` WHERE `id` = '%u'", Trigger_ID);
     if(result)
     {
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
@@ -1151,3 +1151,30 @@ void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
     data << LevelPlayedTime;
     SendPacket(&data);
 }
+
+void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
+{
+
+    WorldPacket data;
+    uint64 guid;
+    recv_data >> guid;
+    DEBUG_LOG("Inspected guid is %lu",guid);
+
+    if( _player != 0 )
+	{
+        _player->SetSelection(guid);
+	}
+
+    if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
+    {
+	DEBUG_LOG("We are here 2");
+        _player->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
+        _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
+    }
+
+        data.Initialize( SMSG_INSPECT );
+	data << guid;
+	SendPacket(&data);
+
+}
+

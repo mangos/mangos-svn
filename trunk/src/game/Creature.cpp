@@ -75,7 +75,7 @@ void Creature::CreateTrainerSpells()
 {
     TrainerSpell *tspell;
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqspell`,`reqskill`,`reqskillvalue` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
 
     if(!result) return;
 
@@ -85,16 +85,16 @@ void Creature::CreateTrainerSpells()
     {
         fields = result->Fetch();
 
-        spellinfo = sSpellStore.LookupEntry(fields[2].GetUInt32());
+        spellinfo = sSpellStore.LookupEntry(fields[0].GetUInt32());
 
         if(!spellinfo) continue;
 
         tspell = new TrainerSpell;
         tspell->spell = spellinfo;
-        tspell->spellcost = fields[3].GetUInt32();
-        tspell->reqspell = fields[4].GetUInt32();
-        tspell->reqskill = fields[5].GetUInt32();
-        tspell->reqskillvalue = fields[6].GetUInt32();
+        tspell->spellcost = fields[1].GetUInt32();
+        tspell->reqspell = fields[2].GetUInt32();
+        tspell->reqskill = fields[3].GetUInt32();
+        tspell->reqskillvalue = fields[4].GetUInt32();
 
         m_tspells.push_back(tspell);
 
@@ -546,11 +546,11 @@ uint32 Creature::GetGossipCount( uint32 gossipid )
 
 uint32 Creature::GetNpcTextId()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_gossip` WHERE `npc_guid`= '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `textid` FROM `npc_gossip` WHERE `npc_guid`= '%u'",GetGUIDLow());
     if(result)
     {
         Field *fields = result->Fetch();
-        uint32 id = fields[3].GetUInt32();
+        uint32 id = fields[0].GetUInt32();
         delete result;
         return id;
     }
@@ -585,7 +585,7 @@ void Creature::LoadGossipOptions()
 {
     uint32 npcflags=GetUInt32Value(UNIT_NPC_FLAGS);
 
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_option` WHERE (npcflag & %u)!=0", npcflags );
+    QueryResult *result = sDatabase.PQuery( "SELECT `id`,`gossip_id`,`npcflag`,`icon`,`action`,`option` FROM `npc_option` WHERE (npcflag & %u)!=0", npcflags );
 
     if(!result)
         return;
@@ -811,32 +811,32 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 bool Creature::LoadFromDB(uint32 guid)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature` WHERE `guid` = '%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
     if(!result)
         return false;
 
     Field *fields = result->Fetch();
 
-    if(!Create(guid,fields[2].GetUInt32(),fields[3].GetFloat(),fields[4].GetFloat(),
-        fields[5].GetFloat(),fields[6].GetFloat(),fields[1].GetUInt32()))
+    if(!Create(guid,fields[1].GetUInt32(),fields[2].GetFloat(),fields[3].GetFloat(),
+        fields[4].GetFloat(),fields[5].GetFloat(),fields[0].GetUInt32()))
     {
         delete result;
         return false;
     }
 
-    SetHealth(fields[15].GetUInt32());
-    SetPower(POWER_MANA,fields[16].GetUInt32());
+    SetHealth(fields[11].GetUInt32());
+    SetPower(POWER_MANA,fields[12].GetUInt32());
 
-    SetUInt32Value(UNIT_NPC_FLAGS,fields[19].GetUInt32());
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[20].GetUInt32());
+    SetUInt32Value(UNIT_NPC_FLAGS,fields[15].GetUInt32());
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[16].GetUInt32());
 
-    respawn_cord[0] = fields[11].GetFloat();
-    respawn_cord[1] = fields[12].GetFloat();
-    respawn_cord[2] = fields[13].GetFloat();
+    respawn_cord[0] = fields[8].GetFloat();
+    respawn_cord[1] = fields[9].GetFloat();
+    respawn_cord[2] = fields[10].GetFloat();
 
-    m_respawnDelay =(fields[7].GetUInt32()+fields[8].GetUInt32())*1000/2;
-    m_respawnTimer = fields[17].GetUInt32();
-    m_deathState = (DeathState)fields[18].GetUInt32();
+    m_respawnDelay =(fields[6].GetUInt32()+fields[7].GetUInt32())*1000/2;
+    m_respawnTimer = fields[13].GetUInt32();
+    m_deathState = (DeathState)fields[14].GetUInt32();
 
     delete result;
 
@@ -893,14 +893,14 @@ void Creature::_LoadQuests()
     Field *fields;
     Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature_questrelation` WHERE `id` = '%u'", GetEntry ());
+    QueryResult *result = sDatabase.PQuery("SELECT `quest` FROM `creature_questrelation` WHERE `id` = '%u'", GetEntry ());
 
     if(result)
     {
         do
         {
             fields = result->Fetch();
-            pQuest = objmgr.NewQuest( fields[1].GetUInt32() );
+            pQuest = objmgr.NewQuest( fields[0].GetUInt32() );
             if (!pQuest) continue;
 
             addQuest(pQuest);
@@ -910,14 +910,14 @@ void Creature::_LoadQuests()
         delete result;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `creature_involvedrelation` WHERE `id` = '%u'", GetEntry ());
+    QueryResult *result1 = sDatabase.PQuery("SELECT `quest` FROM `creature_involvedrelation` WHERE `id` = '%u'", GetEntry ());
 
     if(!result1) return;
 
     do
     {
         fields = result1->Fetch();
-        pQuest = objmgr.NewQuest( fields[1].GetUInt32() );
+        pQuest = objmgr.NewQuest( fields[0].GetUInt32() );
         if (!pQuest) continue;
 
         addInvolvedQuest(pQuest);
