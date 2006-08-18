@@ -1625,100 +1625,50 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
 
 void Aura::HandlePeriodicEnergize(bool apply)
 {
-    if(apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
+    if (m_periodicTimer <= 0)
+        m_periodicTimer += m_modifier.periodictime;
+
+    m_isPeriodic = apply;
 }
 
 void Aura::HandlePeriodicHeal(bool apply)
 {
-    if(!m_target)
-        return;
-    if(apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
+    if (m_periodicTimer <= 0)
+        m_periodicTimer += m_modifier.periodictime;
+
+    m_isPeriodic = apply;
 }
 
 void Aura::HandlePeriodicDamage(bool apply)
 {
-    if( apply )
-    {
-        //m_PeriodicEventId = AddEvent(&HandleDOTEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
+    if (m_periodicTimer <= 0)
+        m_periodicTimer += m_modifier.periodictime;
+
+    m_isPeriodic = apply;
 }
 
 void Aura::HandlePeriodicDamagePCT(bool apply)
 {
-    if(apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
+    if (m_periodicTimer <= 0)
+        m_periodicTimer += m_modifier.periodictime;
+
+    m_isPeriodic = apply;
 }
 
 void Aura::HandlePeriodicLeech(bool apply)
 {
-    if(apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
+    if (m_periodicTimer <= 0)
+        m_periodicTimer += m_modifier.periodictime;
+
+    m_isPeriodic = apply;
 }
 
-void Aura::HandlePeriodicManaLeech(bool Apply)
+void Aura::HandlePeriodicManaLeech(bool apply)
 {
-    if(Apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
+    if (m_periodicTimer <= 0)
+        m_periodicTimer += m_modifier.periodictime;
+
+    m_isPeriodic = apply;
 }
 
 /*********************************************************/
@@ -1827,7 +1777,6 @@ void Aura::HandleModBaseResistance(bool apply)
     for(int i = 0; i < 7; i++)
         if(m_modifier.m_miscvalue & (1<<i))
             p_target->ApplyResistanceMod(SpellSchools(SPELL_SCHOOL_NORMAL + i),m_modifier.m_amount, apply);
-
 }
 
 /********************************/
