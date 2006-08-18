@@ -192,7 +192,7 @@ bool GameObject::LoadFromDB(uint32 guid)
     rotation2 = fields[9].GetFloat();
     rotation3 = fields[10].GetFloat();
     lootid=fields[11].GetUInt32();
-    m_respawnTimer=fields[11].GetUInt32();
+    m_respawnTimer=fields[12].GetUInt32();
     delete result;
 
     if (Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
