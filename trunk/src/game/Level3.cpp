@@ -173,9 +173,9 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
             pCreature->SetUInt32Value( UNIT_FIELD_DISPLAYID, 5233 );
             pCreature->SetUInt32Value( UNIT_NPC_FLAGS , 1 );
             pCreature->SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE , fields[7].GetUInt32() );
-            pCreature->SetUInt32Value( UNIT_FIELD_HEALTH, 100 + 30*(60) );
-            pCreature->SetUInt32Value( UNIT_FIELD_MAXHEALTH, 100 + 30*(60) );
-            pCreature->SetUInt32Value( UNIT_FIELD_LEVEL , 60 );
+            pCreature->SetHealth( 100 + 30*(60) );
+            pCreature->SetMaxHealth( 100 + 30*(60) );
+            pCreature->SetLevel( 60 );
             pCreature->SetFloatValue( UNIT_FIELD_COMBATREACH , 1.5f );
             pCreature->SetFloatValue( UNIT_FIELD_MAXDAMAGE ,  5.0f );
             pCreature->SetFloatValue( UNIT_FIELD_MINDAMAGE , 8.0f );
@@ -1693,9 +1693,9 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
     pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, 5233);
     pCreature->SetUInt32Value(UNIT_NPC_FLAGS, 33);
     pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE , 35);
-    pCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 100);
-    pCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, 100);
-    pCreature->SetUInt32Value(UNIT_FIELD_LEVEL, 60);
+    pCreature->SetHealth(100);
+    pCreature->SetMaxHealth(100);
+    pCreature->SetLevel(60);
     pCreature->SetUInt32Value(UNIT_FIELD_FLAGS, 0x0300);
     pCreature->SetUInt32Value(UNIT_FIELD_AURA+0, 10848);
     pCreature->SetUInt32Value(UNIT_FIELD_AURALEVELS+0, 0xEEEEEE3C);

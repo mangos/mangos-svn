@@ -440,9 +440,9 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
         pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
         pCreature->SetUInt32Value(UNIT_NPC_FLAGS , npcFlags);
         pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE , factionId);
-        pCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
-        pCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, 28 + 30*level);
-        pCreature->SetUInt32Value(UNIT_FIELD_LEVEL , level);
+        pCreature->SetHealth(28 + 30*level);
+        pCreature->SetMaxHealth(28 + 30*level);
+        pCreature->SetLevel(level);
 
         pCreature->SetFloatValue(UNIT_FIELD_COMBATREACH , 1.5f);
         pCreature->SetFloatValue(UNIT_FIELD_MAXDAMAGE ,  5.0f);
