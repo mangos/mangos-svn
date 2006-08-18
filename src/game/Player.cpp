@@ -6564,7 +6564,16 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
             pItem2->SetCount( pItem2->GetCount() + pItem->GetCount() );
             if( IsInWorld() && update )
                 pItem2->SendUpdateToPlayer( this );
+
+            // delete item (it not in any slot currently)
+            pItem->DeleteFromDB();
+            if( IsInWorld() && update )
+            {
+                pItem->RemoveFromWorld();
+                pItem->DestroyForPlayer( this );
+            }
             delete pItem;
+
             return pItem2;
         }
     }
@@ -6795,6 +6804,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             }
         }
     }
+    delete pItem;
 }
 
 void Player::DestroyItemCount( uint32 item, uint32 count, bool update )

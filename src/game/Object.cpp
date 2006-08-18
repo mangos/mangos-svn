@@ -63,6 +63,9 @@ Object::Object( )
 
 Object::~Object( )
 {
+    if(m_objectUpdated)
+        ObjectAccessor::Instance().RemoveUpdateObject(this);
+
     if(m_uint32Values)
         delete [] m_uint32Values;
 }
