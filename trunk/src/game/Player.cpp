@@ -8959,6 +8959,11 @@ void Player::SaveToDB()
         RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
     }
 
+    // save state
+    uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
+    uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
+    uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
+
     // Set player sit state to standing on save
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
@@ -9053,7 +9058,10 @@ void Player::SaveToDB()
         _ApplyAllItemMods();
     }
 
-    //_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
+    // restore state
+    SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
+    SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
+    SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
 
     if (inworld)
         AddToWorld();

@@ -77,52 +77,14 @@ void DynamicObject::Update(uint32 p_time)
         }
     }
 
-    if(m_PeriodicDamageCurrentTick > p_time)
-        m_PeriodicDamageCurrentTick -= p_time;
-    else
+    m_PeriodicDamageCurrentTick -= p_time;
+    if (m_PeriodicDamageCurrentTick < 0)
     {
-        m_PeriodicDamageCurrentTick = m_PeriodicDamageTick;
-        //m_caster->DealWithSpellDamage(*this);
+        m_PeriodicDamageCurrentTick += m_PeriodicDamageTick;
         DealWithSpellDamage(*m_caster);
     }
-
-    //if(deleteThis)
-    //{
-    //    Delete();
-    //}
 }
 
-/*void DynamicObject::DealWithSpellDamage(Player &caster)
-{
-    //uint32 runtimes=1;
-    //if(deleteThis)
-    //    runtimes=m_DamageMaxTimes-m_DamageCurTimes;
-
-    Modifier mod;
-    mod.m_auraname = 3;
-    mod.m_amount = m_PeriodicDamage;
-
-    //for(int i=0;i<runtimes;i++)
-    //{
-        UnitList.clear();
-        MapManager::Instance().GetMap(m_mapId)->GetUnitList(GetPositionX(), GetPositionY(),UnitList);
-        for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
-        {
-            if((*iter))
-            {
-                if( (*iter)->isAlive() )
-                {
-                    if(GetDistanceSq(*iter) < m_PeriodicDamageRadius * m_PeriodicDamageRadius && (*iter)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                    {
-                        caster.PeriodicAuraLog((*iter),m_spell,&mod);
-                    }
-                }
-            }
-        }
-    //    m_DamageCurTimes++;
-    //}
-}
-*/
 void DynamicObject::DealWithSpellDamage(Unit &caster)
 {
     Modifier mod;

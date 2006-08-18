@@ -413,14 +413,8 @@ void Aura::Update(uint32 diff)
 
     if(m_isPeriodic && (m_duration >= 0 || m_isPassive))
     {
-        if(m_periodicTimer > 0)
-        {
-            if(m_periodicTimer <= diff)
-                m_periodicTimer = 0;
-            else
-                m_periodicTimer -= diff;
-        }
-        if(m_periodicTimer == 0)
+        m_periodicTimer -= diff;
+        if(m_periodicTimer < 0)
         {
             if (m_modifier.m_auraname == SPELL_AURA_MOD_REGEN || m_modifier.m_auraname == SPELL_AURA_MOD_POWER_REGEN)
             {
@@ -428,7 +422,7 @@ void Aura::Update(uint32 diff)
                 return;
             }
             // update before applying (aura can be removed in TriggerSpell or PeriodicAuraLog calls)
-            m_periodicTimer = m_modifier.periodictime;
+            m_periodicTimer += m_modifier.periodictime;
 
             if(m_isTrigger)
             {
@@ -1922,9 +1916,9 @@ void Aura::HandleModRegen(bool apply)                       // eating
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 
-    if(apply && !m_periodicTimer)
+    if(apply && m_periodicTimer <= 0)
     {
-        m_periodicTimer = 5000;
+        m_periodicTimer += 5000;
         if (m_target->GetHealth() + m_modifier.m_amount <= m_target->GetMaxHealth())
             m_target->SetHealth(m_target->GetHealth() + m_modifier.m_amount);
     }
@@ -1937,9 +1931,9 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 
-    if(apply && !m_periodicTimer)
+    if(apply && m_periodicTimer <= 0)
     {
-        m_periodicTimer = 5000;
+        m_periodicTimer += 5000;
         Powers pt = m_target->getPowerType();
         // Prevent rage regeneration in combat with rage loss slowdown warrior talant and 0<->1 switching range out combat.
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
