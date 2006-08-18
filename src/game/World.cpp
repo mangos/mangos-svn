@@ -579,7 +579,10 @@ time_t World::_UpdateGameTime()
     if(m_ShutdownTimer > 0 && elapsed > 0)
     {
         m_ShutdownTimer -= elapsed;
-        ShuttDownMsg();
+        if(m_ShutdownTimer <= 0)
+            m_stopEvent = true;
+        else
+            ShuttDownMsg();
     }
 
     m_gameTime += elapsed;
@@ -596,15 +599,6 @@ void World::ShutdownServ(uint32 time)
 
 void World::ShuttDownMsg()
 {
-    // TODO
-    // need to check if passed more than 1 second to avoid flood
-
-    if(m_ShutdownTimer <= 0)
-    {
-        m_stopEvent = true;
-        return;
-    }
-
     WorldPacket data;
 
     data.Initialize(SMSG_SERVER_MESSAGE);
