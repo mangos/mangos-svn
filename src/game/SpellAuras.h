@@ -217,7 +217,7 @@ class Aura
         bool m_areaAura;
         bool m_isPassive;
 
-        uint32 m_periodicTimer;
+        int32 m_periodicTimer;
         uint32 m_PeriodicEventId;
         bool m_updated;
         bool m_removeOnDeath;

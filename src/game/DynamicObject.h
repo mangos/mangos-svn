@@ -56,7 +56,7 @@ class DynamicObject : public Object
         SpellEntry * m_spell;
         uint32 m_PeriodicDamage;
         uint32 m_PeriodicDamageTick;
-        uint32 m_PeriodicDamageCurrentTick;
+        int32 m_PeriodicDamageCurrentTick;
         float m_PeriodicDamageRadius;
 
         uint32 m_aliveDuration;
