@@ -43,6 +43,7 @@
 #include "GossipDef.h"
 #include "Creature.h"
 #include "Totem.h"
+#include "CreatureAI.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -302,6 +303,10 @@ void Spell::EffectApplyAura(uint32 i)
                 cancel();
         }
     }
+
+    // negative auras cause immediate creature aggro
+    if (added && !Aur->IsPositive() && Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
+        ((Creature*)Aur->GetTarget())->AI().AttackStart(Aur->GetCaster());
 }
 
 void Spell::EffectManaDrain(uint32 i)
