@@ -461,7 +461,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update );
         Item* StoreItem( uint16 pos, Item *pItem, bool update );
         void EquipItem( uint16 pos, Item *pItem, bool update );
-        void BankItem( uint16 pos, Item *pItem, bool update );
+        Item* BankItem( uint16 pos, Item *pItem, bool update );
         void RemoveItem( uint8 bag, uint8 slot, bool update );
         void RemoveItemCount( uint32 item, uint32 count, bool update );
         void DestroyItem( uint8 bag, uint8 slot, bool update );

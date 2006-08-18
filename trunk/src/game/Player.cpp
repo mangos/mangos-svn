@@ -6500,7 +6500,7 @@ uint8 Player::CanUseAmmo( uint32 item ) const
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
-// Return stored item (if stored to stack, it can diff. from pItem)
+// Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
 Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update )
 {
     Item *pItem = CreateItem( item, count );
@@ -6513,7 +6513,7 @@ Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update )
     return NULL;
 }
 
-// Return stored item (if stored to stack, it can diff. from pItem)
+// Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
 Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
@@ -6615,9 +6615,10 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
     }
 }
 
-void Player::BankItem( uint16 pos, Item *pItem, bool update )
+// Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
+Item* Player::BankItem( uint16 pos, Item *pItem, bool update )
 {
-    StoreItem( pos, pItem, update);
+    return StoreItem( pos, pItem, update);
 }
 
 void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
