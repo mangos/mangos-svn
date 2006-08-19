@@ -728,7 +728,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
         {
             Field* fields = result->Fetch();
 
-            uint64 guid = fields[1].GetUInt64();
+            uint64 guid = fields[0].GetUInt64();
 
             if(Player* sender = objmgr.GetPlayer(guid))
                 sender->GetSession()->SendGMTicketGetTicket(1,0);
