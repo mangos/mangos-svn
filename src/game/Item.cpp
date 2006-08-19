@@ -482,7 +482,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
 
     if(GetOwnerGUID()!=owner_guid)
     {
-        sLog.outError("Item::LoadFromDB: item: %u have in DB owner guid: %lu. Updated to correct: %lu",GetOwnerGUID(),owner_guid);
+        sLog.outError("Item::LoadFromDB: item: %u have in DB owner guid: %u. Updated to correct: %u",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()), GUID_LOPART(owner_guid));
         SetOwnerGUID(owner_guid);
     }
 

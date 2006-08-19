@@ -94,7 +94,6 @@ MapManager::Update(time_t diff)
         return;
 
     i_timer.Reset();
-    Guard guard(*this);
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
         iter->second->Update(diff);
 
