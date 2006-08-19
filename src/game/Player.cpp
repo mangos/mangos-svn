@@ -2916,7 +2916,7 @@ void Player::CheckExploreSystem()
         }
         else if(p->area_level)
         {
-            uint32 XP = p->area_level*10*sWorld.getRate(RATE_XP_EXPLORE);
+            uint32 XP = uint32(p->area_level*10*sWorld.getRate(RATE_XP_EXPLORE));
             uint32 area = p->ID;
             GiveXP( XP, NULL );
 
@@ -7874,7 +7874,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
         }
 
         if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
-            GiveXP( pQuest->XPValue( this )*sWorld.getRate(RATE_XP_QUEST), NULL );
+            GiveXP( uint32(pQuest->XPValue( this )*sWorld.getRate(RATE_XP_QUEST)), NULL );
         else
             ModifyMoney( MaNGOS::XP::xp_to_money(pQuest->XPValue( this )) );
 

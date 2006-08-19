@@ -217,8 +217,12 @@ void Spell::FillTargetMap()
                     break;
                 case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_FEED_PET:
-                case SPELL_EFFECT_LEARN_PET_SPELL:
+                case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
                     tmpUnitMap.push_back(m_caster);
+                    break;
+                case SPELL_EFFECT_LEARN_PET_SPELL:
+                    if(Creature* pet = m_caster->GetPet())
+                        tmpUnitMap.push_back(pet);
                     break;
                 case SPELL_EFFECT_DISENCHANT:
                 case SPELL_EFFECT_ENCHANT_ITEM:
@@ -1157,7 +1161,17 @@ void Spell::TakeReagents()
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
         if( p_caster->HasItemCount(itemid,itemcount) )
+        {
+            // Cast item must be re-search if it same as reagent (it can be deleted)
+            bool refind = m_CastItem && m_CastItem->GetProto()->ItemId == itemid;
             p_caster->DestroyItemCount(itemid, itemcount, true);
+
+            uint16 pos = p_caster->GetPosByGuid(itemid);
+            if(pos)
+                m_CastItem = p_caster->GetItemByPos(pos);
+            else
+                m_CastItem = NULL;
+        }
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
