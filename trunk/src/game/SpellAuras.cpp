@@ -1743,10 +1743,10 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
             SpellSchools school = SpellSchools(SPELL_SCHOOL_NORMAL + x);
-            float curRes = p_target->GetFloatValue(UNIT_FIELD_RESISTANCES + x);
+            float curRes = p_target->GetResistance(school);
             float baseRes = curRes + p_target->GetResistanceBuffMods(school, false) - p_target->GetResistanceBuffMods(school, true);
             float baseRes_new = baseRes * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
-            p_target->SetFloatValue(UNIT_FIELD_RESISTANCES + x, curRes + baseRes_new - baseRes);
+            p_target->SetResistance(school, curRes + baseRes_new - baseRes);
         }
     }
 }
@@ -1824,10 +1824,10 @@ void Aura::HandleModPercentStat(bool apply)
     {
         if(m_modifier.m_miscvalue == i || m_modifier.m_miscvalue == -1)
         {
-            float curStat = p_target->GetFloatValue(UNIT_FIELD_STATS + i);
+            float curStat = p_target->GetStat(Stats(i));
             float baseStat = curStat + p_target->GetNegStat(Stats(i)) - p_target->GetPosStat(Stats(i));
             float baseStat_new = baseStat * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
-            p_target->SetFloatValue(UNIT_FIELD_STATS + i, curStat + baseStat_new - baseStat);
+            p_target->SetStat(Stats(i), curStat + baseStat_new - baseStat);
             p_target->ApplyCreateStatPercentMod(Stats(i), m_modifier.m_amount, apply );
         }
     }
@@ -2044,22 +2044,26 @@ void Aura::HandleModDamageDoneCreature(bool Apply)
 
 void Aura::HandleModDamageDone(bool apply)
 {
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-    if(m_modifier.m_miscvalue2)
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
-    else
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+    // physical damage modifier is applied to damage fields
+    if(m_modifier.m_miscvalue & (int32)(1<<SPELL_SCHOOL_NORMAL))
+    {
+        m_target->ApplyModUInt32Value(UNIT_FIELD_MINDAMAGE,m_modifier.m_amount,apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_MAXDAMAGE,m_modifier.m_amount,apply);
+        // TODO: add ranged support and maybe offhand ?
+        // not completely sure how this should work
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(m_modifier.m_miscvalue2)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
+            else
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+        }
+    }
 }
 
 void Aura::HandleModDamageTaken(bool apply)
 {
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-    if(m_modifier.m_miscvalue2)
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
-    else
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+    // has no immediate effect when adding / removing
 }
 
 void Aura::HandleModDamagePercentDone(bool apply)
