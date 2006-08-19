@@ -220,6 +220,7 @@ class ObjectMgr
 
         uint64 GetPlayerGUIDByName(const char *name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
+        uint32 GetPlayerTeamByGUID(const uint64 &guid) const;
 
         bool GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask );
         uint32 GetNearestTaxiNode( float x, float y, float z, uint32 mapid );

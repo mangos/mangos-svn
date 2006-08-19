@@ -2928,44 +2928,55 @@ void Player::CheckExploreSystem()
 
 }
 
+uint32 Player::TeamForRace(uint8 race)
+{
+    switch(race)
+    {
+        case DWARF:
+        case GNOME:
+        case HUMAN:
+        case NIGHTELF:
+            return ALLIANCE;
+        case ORC:
+        case TAUREN:
+        case TROLL:
+        case UNDEAD_PLAYER:
+            return HORDE;
+    }
+    return 0;
+}
+
+
 void Player::setFactionForRace(uint8 race)
 {
-    m_team = 0;
+    m_team = TeamForRace(race);
     uint32 faction = 0;
     switch(race)
     {
         case HUMAN:
             faction = 1;
-            m_team = (uint32)ALLIANCE;
             break;
         case DWARF:
             faction = 3;
-            m_team = (uint32)ALLIANCE;
             break;
         case NIGHTELF:
             faction = 4;
-            m_team = (uint32)ALLIANCE;
             break;
         case GNOME:
             faction = 115;
-            m_team = (uint32)ALLIANCE;
             break;
 
         case ORC:
             faction = 2;
-            m_team = (uint32)HORDE;
             break;
         case UNDEAD_PLAYER:
             faction = 5;
-            m_team = (uint32)HORDE;
             break;
         case TAUREN:
             faction = 6;
-            m_team = (uint32)HORDE;
             break;
         case TROLL:
             faction = 116;
-            m_team = (uint32)HORDE;
             break;
     }
     setFaction( faction );
@@ -9220,7 +9231,7 @@ void Player::SavePet()
 void Player::outDebugValues() const
 {
     sLog.outDebug("HP is: \t\t\t%f\t\tMP is: \t\t\t%f",GetMaxHealth(), GetMaxPower(POWER_MANA));
-    sLog.outDebug("AGILITY is: \t\t%f\t\tSTRENGHT is: \t\t%f",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
+    sLog.outDebug("AGILITY is: \t\t%f\t\tSTRENGTH is: \t\t%f",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
     sLog.outDebug("INTELLECT is: \t\t%f\t\tSPIRIT is: \t\t%f",GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
     sLog.outDebug("STAMINA is: \t\t%f\t\tSPIRIT is: \t\t%f",GetStat(STAT_STAMINA), GetStat(STAT_SPIRIT));
     sLog.outDebug("Armor is: \t\t%f\t\tBlock is: \t\t%f",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
