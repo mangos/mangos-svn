@@ -242,7 +242,7 @@ class ObjectMgr
             ASSERT( TC );
             mTeleports[TC->id] = TC;
         }
-        TeleportCoords* GetTeleportCoords(uint32 id) const
+        TeleportCoords const* GetTeleportCoords(uint32 id) const
         {
             TeleportMap::const_iterator itr = mTeleports.find( id );
             if( itr != mTeleports.end( ) )

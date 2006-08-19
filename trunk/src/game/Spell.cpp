@@ -1120,11 +1120,11 @@ void Spell::TakeCastItem()
         if(proto->DisplayInfoID == 6009 && m_spellInfo->School == 5)
             return;
         ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
-        if(ItemCount<=1)
-        {
-            //delete m_CastItem;
-            m_CastItem = NULL;
-        }
+
+        // Item can be destoyed in case single or many same items
+        uint16 pos = ((Player*)m_caster)->GetPosByGuid(proto->ItemId);
+        if(pos)
+            m_CastItem = ((Player*)m_caster)->GetItemByPos(pos);
     }
 }
 
@@ -1821,30 +1821,34 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     if(!Target || Target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    TeleportCoords* TC = new TeleportCoords();
 
     if(m_spellInfo->Id == 8690 )
     {
         Field *fields;
-        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
-        fields = result4->Fetch();
+        QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
+        fields = result->Fetch();
+
+        TeleportCoords* TC = new TeleportCoords();
         TC->mapId = fields[0].GetUInt32();
         TC->x = fields[2].GetFloat();
         TC->y = fields[3].GetFloat();
         TC->z = fields[4].GetFloat();
-        delete result4;
+
+        delete result;
+
+        ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,0.0f);
+        delete TC;
     }
     else
     {
-        TC = objmgr.GetTeleportCoords(id);
+        TeleportCoords const* TC = objmgr.GetTeleportCoords(id);
         if(!TC)
         {
             sLog.outString( "SPELL: unknown Teleport Coords ID %i\n", id );
             return;
         }
+        ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,0.0f);
     }
-
-    ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,0.0f);
 }
 
 void Spell::Delayed(int32 delaytime)
