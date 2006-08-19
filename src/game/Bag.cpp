@@ -106,7 +106,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
 
     if (result)
     {

@@ -1063,7 +1063,7 @@ void Player::Regenerate(Powers power)
     float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
     float RageIncreaseRate = sWorld.getRate(RATE_POWER_RAGE);
 
-    uint16 Spirit = GetStat(STAT_SPIRIT);
+    float Spirit = GetStat(STAT_SPIRIT);
     uint8 Class = getClass();
 
     if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
@@ -1155,7 +1155,7 @@ void Player::RegenerateHealth()
 
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
 
-    uint16 Spirit = GetStat(STAT_SPIRIT);
+    float Spirit = GetStat(STAT_SPIRIT);
     uint8 Class = getClass();
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
@@ -3708,7 +3708,7 @@ void Player::CastItemEquipSpell(Item *item)
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
         {
-            DEBUG_LOG("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
+            ERROR_LOG("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
             continue;
         }
 
@@ -3745,7 +3745,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
         {
-            DEBUG_LOG("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
+            ERROR_LOG("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
             continue;
         }
 
@@ -9219,14 +9219,14 @@ void Player::SavePet()
 
 void Player::outDebugValues() const
 {
-    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetMaxHealth(), GetMaxPower(POWER_MANA));
-    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
-    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
-    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetStat(STAT_STAMINA), GetStat(STAT_SPIRIT));
-    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%f",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
-    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
-    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
+    sLog.outDebug("HP is: \t\t\t%f\t\tMP is: \t\t\t%f",GetMaxHealth(), GetMaxPower(POWER_MANA));
+    sLog.outDebug("AGILITY is: \t\t%f\t\tSTRENGHT is: \t\t%f",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
+    sLog.outDebug("INTELLECT is: \t\t%f\t\tSPIRIT is: \t\t%f",GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%f\t\tSPIRIT is: \t\t%f",GetStat(STAT_STAMINA), GetStat(STAT_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%f\t\tBlock is: \t\t%f",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%f\t\tFireRes is: \t\t%f",GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
+    sLog.outDebug("NatureRes is: \t\t%f\t\tFrostRes is: \t\t%f",GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
+    sLog.outDebug("ShadowRes is: \t\t%f\t\tArcaneRes is: \t\t%f",GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));

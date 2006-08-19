@@ -182,7 +182,7 @@ void Creature::RegenerateMana()
 
     float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
 
-    uint16 Spirit = GetStat(STAT_SPIRIT);
+    float Spirit = GetStat(STAT_SPIRIT);
 
     if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
 
@@ -207,7 +207,7 @@ void Creature::RegenerateHealth()
 
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
 
-    uint16 Spirit = GetStat(STAT_SPIRIT);
+    float Spirit = GetStat(STAT_SPIRIT);
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
 
@@ -216,9 +216,9 @@ void Creature::RegenerateHealth()
     if(isPet())
     {
         if( GetPower(POWER_MANA) > 0 )
-            addvalue = uint32((Spirit*0.25) * HealthIncreaseRate);
+            addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
         else
-            addvalue = uint32((Spirit*0.80) * HealthIncreaseRate);
+            addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate);
     }
     else
         addvalue = maxValue/3;

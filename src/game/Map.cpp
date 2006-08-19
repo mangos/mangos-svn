@@ -254,7 +254,7 @@ Map::Add(T *obj)
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        DEBUG_LOG("Map::Add: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        ERROR_LOG("Map::Add: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
@@ -302,7 +302,7 @@ void Map::MessageBoardcast(Object *obj, WorldPacket *msg)
 
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        DEBUG_LOG("Map::MessageBoardcast: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        ERROR_LOG("Map::MessageBoardcast: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
@@ -387,7 +387,7 @@ Map::Remove(T *obj, bool remove)
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        DEBUG_LOG("Map::Remove: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        ERROR_LOG("Map::Remove: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
