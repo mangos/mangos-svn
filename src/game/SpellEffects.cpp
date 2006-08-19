@@ -306,7 +306,16 @@ void Spell::EffectApplyAura(uint32 i)
 
     // negative auras cause immediate creature aggro
     if (added && !Aur->IsPositive() && Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
-        ((Creature*)Aur->GetTarget())->AI().AttackStart(Aur->GetCaster());
+    {
+        switch (Aur->GetModifier()->m_auraname)
+        {
+            case SPELL_AURA_MOD_DETECT_RANGE:
+            case SPELL_AURA_AURAS_VISIBLE:
+                break;
+            default:
+                ((Creature*)Aur->GetTarget())->AI().AttackStart(Aur->GetCaster());
+        }
+    }
 }
 
 void Spell::EffectManaDrain(uint32 i)

@@ -223,6 +223,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
             pVictim->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
+            SendAttackStop(pVictim);
             return;
         }
         ((Creature*)pVictim)->AI().AttackStart(this);
@@ -2645,11 +2646,6 @@ uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
     AuraList& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
         if(cinfo && cinfo->type == uint32((*i)->GetModifier()->m_miscvalue))
-            pdamage += (*i)->GetModifier()->m_amount;
-
-    AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
-    for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             pdamage += (*i)->GetModifier()->m_amount;
 
     AuraList& mDamageTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
