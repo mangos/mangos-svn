@@ -671,8 +671,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             return pvpOn;
         };
 
-        void setFactionForRace(uint8 race);
-
         inline std::list<struct actions> getActionList() { return m_actions; };
         void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
         void removeAction(uint8 button);
@@ -794,7 +792,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void CheckExploreSystem(void);
 
+        static uint32 TeamForRace(uint8 race);
         uint32 GetTeam() const { return m_team; }
+        void setFactionForRace(uint8 race);
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
         uint32 GetReputation(uint32 faction_id) const;

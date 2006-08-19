@@ -16,6 +16,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#define MAIL_MONEY_TAKEN 1
+#define MAIL_ITEM_TAKEN 2
+#define MAIL_RETURNED_TO_SENDER 3
+#define MAIL_DELETED 4
+#define MAIL_MADE_PERMANENT 5
+#define MAIL_OK 0
+#define MAIL_ERR_BAG_FULL 1
+#define MAIL_ERR_CANNOT_SEND_TO_SELF 2
+#define MAIL_ERR_NOT_ENOUGH_MONEY 3
+#define MAIL_ERR_RECIPIENT_NOT_FOUND 4
+#define MAIL_ERR_NOT_YOUR_TEAM 5
+#define MAIL_ERR_INTERNAL_ERROR 6
+
+
 struct Mail
 {
     uint32 messageID;

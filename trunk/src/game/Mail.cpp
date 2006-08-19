@@ -30,7 +30,6 @@
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
     time_t base = time(NULL);
-    time_t etime = base + (30 * 3600);
     WorldPacket data;
     uint64 sender,item;
     std::string receiver,subject,body;
@@ -54,7 +53,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
         tmpData << uint32(0);
         tmpData << uint32(0);
-        tmpData << uint32(2);
+        tmpData << uint32(MAIL_ERR_CANNOT_SEND_TO_SELF);
         SendPacket(&tmpData);
         return;
     }
@@ -64,28 +63,45 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
         tmpData << uint32(0);
         tmpData << uint32(0);
-        tmpData << uint32(3);
+        tmpData << uint32(MAIL_ERR_NOT_ENOUGH_MONEY);
         SendPacket(&tmpData);
         return;
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", receiver.c_str());
-
-    if (!result)
+    if (!rc)
     {
         data.Initialize(SMSG_SEND_MAIL_RESULT);
         data << uint32(0);
         data << uint32(0);
-        data << uint32(4);
+        data << uint32(MAIL_ERR_RECIPIENT_NOT_FOUND);
         SendPacket(&data);
         return;
     }
 
-    delete result;
+    Player *receive = objmgr.GetPlayer(rc);
+
+    uint32 rc_team = 0;
+
+    if(receive)
+        rc_team = receive->GetTeam();
+    else
+        rc_team = objmgr.GetPlayerTeamByGUID(rc);
+
+    // test the receiver's Faction...
+    if (pl->GetTeam() != rc_team)
+    {
+        data.Initialize(SMSG_SEND_MAIL_RESULT);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(MAIL_ERR_NOT_YOUR_TEAM);
+        SendPacket(&data);
+        return; 
+    }
+
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(0);
     data << uint32(0);
-    data << uint32(0);
+    data << uint32(MAIL_OK);
     SendPacket(&data);
 
     if (item != 0)
@@ -93,6 +109,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         uint16 pos = pl->GetPosByGuid(item);
         Item *it = pl->GetItemByPos( pos );
 
+        objmgr.RemoveMItem(it->GetGUIDLow());
         objmgr.AddMItem(it);
 
         std::ostringstream ss;
@@ -109,21 +126,21 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
     pl->ModifyMoney( -30 - money );
 
-    Player *receive = objmgr.GetPlayer(rc);
-
+    time_t etime = base + 3600 * ((COD > 0)? 3 : 30); //time if COD 3 days, if no COD 30 days
     if (receive)
     {
         Mail* m = new Mail;
         m->messageID = mID;
-        m->sender =   pl->GetGUIDLow();
+        m->sender = pl->GetGUIDLow();
         m->receiver = GUID_LOPART(rc);
         m->subject = subject;
         m->body = body;
         m->item = GUID_LOPART(item);
-        m->money = money;
         m->time = etime;
-        m->COD = 0;
+        m->money = money;
+        m->COD = COD;
         m->checked = 0;
+
         receive->AddMail(m);
 
         data.Initialize(SMSG_RECEIVED_MAIL);
@@ -133,7 +150,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), etime, money, COD, 0); // there was (long)etime ;-) COD added
 }
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
@@ -166,10 +183,9 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(message);
-    data << uint32(4);
+    data << uint32(MAIL_DELETED);
     data << uint32(0);
     SendPacket(&data);
-
 }
 
 void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
@@ -185,11 +201,12 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     m->sender = pl->GetGUIDLow();
     m->time = sWorld.GetGameTime() + (30 * 3600);
     m->checked = 0;
+    m->COD = 0;
     pl->RemoveMail(message);
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(message);
-    data << uint32(3);
+    data << uint32(MAIL_RETURNED_TO_SENDER);
     data << uint32(0);
     SendPacket(&data);
 
@@ -203,8 +220,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     }
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
-
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%I64d','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, 0);//m->checked); //there was (long)m->time...
 }
 
 void WorldSession::HandleTakeItem(WorldPacket & recv_data )
@@ -223,17 +239,56 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     if( msg == EQUIP_ERR_OK )
     {
         m->item = 0;
+
+        if (m->COD > 0)
+        {
+            Mail* mn = new Mail;
+            mn->messageID = objmgr.GenerateMailID();
+            mn->sender = m->receiver;
+            mn->receiver = m->sender;
+            mn->subject = m->subject;
+            mn->body = "Your item sold, player paid a COD";
+            mn->item = 0;
+            mn->time = time(NULL) + (30 * 3600);
+            mn->money = m->COD;
+            mn->COD = 0;
+            mn->checked = 0;
+
+            Player *receive = objmgr.GetPlayer((uint64)m->sender);
+
+            if (receive)
+            {
+                WorldPacket data2;
+                data2.Initialize(SMSG_RECEIVED_MAIL); //move this code to function Player::AddMail ;-)
+                data2 << uint32(0);
+                SendPacket(&data2);
+                receive->GetSession()->SendPacket(&data2);
+                receive->AddMail(mn);
+            }
+            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mn->messageID);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), 0, mn->time, mn->money, 0, 0); //added
+            // client tests, if player has enought money !!!
+            pl->ModifyMoney( -int32(m->COD) ); 
+        }
+        m->COD = 0;
         pl->AddMail(m);
         _player->StoreItem( dest, it, true);
         objmgr.RemoveMItem(it->GetGUIDLow());
+        sDatabase.PExecute("DELETE FROM `mail_item` WHERE `guid` = '%u'", it->GetGUIDLow());
         data.Initialize(SMSG_SEND_MAIL_RESULT);
         data << uint32(message);
-        data << uint32(2);
+        data << uint32(MAIL_ITEM_TAKEN);
         data << uint32(0);
         SendPacket(&data);
     }
     else
-        _player->SendEquipError( msg, it, NULL );
+    {
+        data.Initialize(SMSG_SEND_MAIL_RESULT);
+        data << uint32(message);
+        data << uint32(0);
+        data << uint32(MAIL_ERR_BAG_FULL);
+        SendPacket(&data);
+    }
 }
 
 void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
@@ -248,7 +303,7 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(id);
-    data << uint32(1);
+    data << uint32(MAIL_MONEY_TAKEN);
     data << uint32(0);
     SendPacket(&data);
 
@@ -260,8 +315,9 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 
 void WorldSession::HandleGetMail(WorldPacket & recv_data )
 {
-    uint32 info;
-    recv_data >> info;
+    uint64 mailbox; 
+    recv_data >> mailbox; // from mailbox in Storm near bank it was 0x000068A2 (dec 26786) and 0xF0004000 (dec 4026548224)
+
     WorldPacket data;
     Player* pl = _player;
     data.Initialize(SMSG_MAIL_LIST_RESULT);
@@ -269,8 +325,8 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     std::list<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
     {
-        data << uint32((*itr)->messageID);                  // NOT CORRECT, Unknown
-        data << uint8(0);                                   // Message Type 0 = Default
+        data << uint32((*itr)->messageID);                  // Correct..., also message id , if you change it, server crashes
+        data << uint8(0);                                   // Message Type 0 = Default, maybe there will be also Reply
         data << uint32((*itr)->sender);                     // SenderID
         data << uint32(0);                                  // Constant
 
@@ -279,7 +335,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
             data << uint32((*itr)->messageID);              // MessageID!!
         else
             data << uint32(0);                              // No messageID
-        data << uint32(0);                                  // Unknown
+        data << uint32(0);                                  // Unknown - 0x00000029
         data << uint32(0);                                  // Unknown
         if ((*itr)->item != 0)
         {
@@ -293,10 +349,10 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << uint32(0);                                  // Unknown
         data << uint32(0);                                  // Unknown
         data << uint32(0);                                  // Unknown
-        data << uint8(1);                                   // Unknown
-        data << uint32(0xFFFFFFFF);                         // Unknown
-        data << uint32(0);                                  // Unknown
-        data << uint32(0);                                  // Unknown
+        data << uint8(1);                                   // Unknown - Count
+        data << uint32(0xFFFFFFFF);                         // Unknown - Charges
+        data << uint32(0);                                  // Unknown - MaxDurability 
+        data << uint32(0);                                  // Unknown - Durability
         data << uint32((*itr)->money);                      // Gold
         data << uint32((*itr)->COD);                        // COD
         data << uint32((*itr)->checked);                    // flags 0: not checked 1: checked 8: COD Payment: "Subject"
@@ -463,12 +519,28 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     }
     item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
+    WorldPacket data;
+    data.Initialize(SMSG_SEND_MAIL_RESULT);
+
     uint16 dest;
     uint8 msg = _player->CanStoreItem( 0, NULL_SLOT, dest, item, false );
     if( msg == EQUIP_ERR_OK )
+    {
         _player->StoreItem(dest, item, true);
+        data << uint32(mailid);
+        data << uint32(MAIL_MADE_PERMANENT);
+        data << uint32(0);
+    }
     else
+    {
+        delete item;
         _player->SendEquipError( msg, item, NULL );
+        data << uint32(mailid);
+        data << uint32(0);
+        data << uint32(MAIL_ERR_INTERNAL_ERROR); 
+    }
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )

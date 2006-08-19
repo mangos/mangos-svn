@@ -258,6 +258,20 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
     return false;
 }
 
+uint32 ObjectMgr::GetPlayerTeamByGUID(const uint64 &guid) const
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
+
+    if(result)
+    {
+        uint8 race = (*result)[0].GetUInt8();
+        delete result;
+        return Player::TeamForRace(race);
+    }
+
+    return 0;
+}
+
 void ObjectMgr::LoadAuctions()
 {
     QueryResult *result = sDatabase.Query( "SELECT `auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid` FROM `auctionhouse`" );

@@ -228,6 +228,9 @@
 			<File 
 				RelativePath="..\..\src\game\Mail.cpp">
 			</File>
+			<File
+				RelativePath="..\..\src\game\Mail.h">
+			</File>
 			<File 
 				RelativePath="..\..\src\game\Map.cpp">
 			</File>
