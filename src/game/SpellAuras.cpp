@@ -2047,16 +2047,16 @@ void Aura::HandleModDamageDone(bool apply)
     // physical damage modifier is applied to damage fields
     if(m_modifier.m_miscvalue & (int32)(1<<SPELL_SCHOOL_NORMAL))
     {
-        m_target->ApplyModUInt32Value(UNIT_FIELD_MINDAMAGE,m_modifier.m_amount,apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_MAXDAMAGE,m_modifier.m_amount,apply);
+        m_target->ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,m_modifier.m_amount,apply);
+        m_target->ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,m_modifier.m_amount,apply);
         // TODO: add ranged support and maybe offhand ?
         // not completely sure how this should work
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
             if(m_modifier.m_miscvalue2)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
+                m_target->ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
             else
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+                m_target->ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
         }
     }
 }
