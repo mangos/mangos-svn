@@ -208,7 +208,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete skills_result;
 
-    QueryResult *actions_result = sDatabase.PQuery("SELECT `Skill`,`SkillMin`,`SkillMax`,`Note` FROM `playercreateinfo_action` WHERE `createid` = '0' OR `createid` = '%u'", createId);
+    QueryResult *actions_result = sDatabase.PQuery("SELECT `button`, `action`, `type`, `misc` FROM `playercreateinfo_action` WHERE `createid` = '0' OR `createid` = '%u'", createId);
 
     do
     {

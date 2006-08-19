@@ -365,19 +365,19 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 getClassMask() const { return 1 << (getClass()-1); };
         uint8 getGender() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 16) & 0xFF); };
 
-        uint32 GetStat(Stats stat) const { return (uint32)GetFloatValue(UNIT_FIELD_STATS+stat); }
-        void SetStat(Stats stat, uint32 val) { SetFloatValue(UNIT_FIELD_STATS+stat, val); }
-        void ApplyStatMod(Stats stat, uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_STATS+stat, val, apply); }
+        float GetStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_STATS+stat); }
+        void SetStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_STATS+stat, val); }
+        void ApplyStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_STATS+stat, val, apply); }
         void ApplyStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_STATS+stat, val, apply); }
 
-        uint32 GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL) ; }
-        void SetArmor(uint32 val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
-        void ApplyArmorMod(uint32 val, bool apply) { ApplyResistanceMod(SPELL_SCHOOL_NORMAL, val, apply); }
+        float GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL) ; }
+        void SetArmor(float val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
+        void ApplyArmorMod(float val, bool apply) { ApplyResistanceMod(SPELL_SCHOOL_NORMAL, val, apply); }
         void ApplyArmorPercentMod(float val, bool apply) { ApplyResistancePercentMod(SPELL_SCHOOL_NORMAL, val, apply); }
 
-        uint32 GetResistance(SpellSchools school) const { return (uint32)GetFloatValue(UNIT_FIELD_RESISTANCES+school); }
-        void SetResistance(SpellSchools school, uint32 val) { SetFloatValue(UNIT_FIELD_RESISTANCES+school,val); }
-        void ApplyResistanceMod(SpellSchools school, uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_RESISTANCES+school, val, apply); }
+        float GetResistance(SpellSchools school) const { return (uint32)GetFloatValue(UNIT_FIELD_RESISTANCES+school); }
+        void SetResistance(SpellSchools school, float val) { SetFloatValue(UNIT_FIELD_RESISTANCES+school,val); }
+        void ApplyResistanceMod(SpellSchools school, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_RESISTANCES+school, val, apply); }
         void ApplyResistancePercentMod(SpellSchools school, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_RESISTANCES+school, val, apply); }
 
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }

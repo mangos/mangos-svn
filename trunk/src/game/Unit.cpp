@@ -643,7 +643,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
     }
     if(School == 0)
     {
-        uint32 armor = pVictim->GetArmor();
+        float armor = pVictim->GetArmor();
         float tmpvalue = armor/(pVictim->getLevel()*85.0 +400.0 +armor);
         if(tmpvalue < 0)
             tmpvalue = 0.0;
@@ -655,7 +655,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
     }
     if( School > 0)
     {
-        uint32 tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
+        float tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
         *resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
         if(*resist > damage)
             *resist = damage;
@@ -789,7 +789,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             break;
 
         case MELEE_HIT_BLOCK:
-            *blocked_amount = (pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
+            *blocked_amount = uint32(pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
 
             if (pVictim->GetUnitBlockChance())
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
@@ -1930,19 +1930,19 @@ void Unit::ApplyStats(bool apply)
     }
 
     // Armor
-    val2 = 2*GetStat(STAT_AGILITY);
+    val = 2*GetStat(STAT_AGILITY);
 
-    ApplyArmorMod( val2, apply);
+    ApplyArmorMod( val, apply);
 
     // HP
-    val2 = (GetStat(STAT_STAMINA) - ((Player*)this)->GetCreateStat(STAT_STAMINA))*10;
+    val2 = uint32((GetStat(STAT_STAMINA) - ((Player*)this)->GetCreateStat(STAT_STAMINA))*10);
 
     ApplyMaxHealthMod( val2, apply);
 
     // MP
     if(getClass() != WARRIOR && getClass() != ROGUE)
     {
-        val2 = (GetStat(STAT_INTELLECT) - ((Player*)this)->GetCreateStat(STAT_INTELLECT))*15;
+        val2 = uint32((GetStat(STAT_INTELLECT) - ((Player*)this)->GetCreateStat(STAT_INTELLECT))*15);
 
         ApplyMaxPowerMod(POWER_MANA, val2, apply);
 
@@ -1955,9 +1955,9 @@ void Unit::ApplyStats(bool apply)
 
     //Ranged
     if(getClass() == HUNTER)
-        val2 = getLevel() * 2 + GetStat(STAT_AGILITY) * 2 - 20;
+        val2 = uint32(getLevel() * 2 + GetStat(STAT_AGILITY) * 2 - 20);
     else
-        val2 = getLevel() + GetStat(STAT_AGILITY) * 2 - 20;
+        val2 = uint32(getLevel() + GetStat(STAT_AGILITY) * 2 - 20);
 
     if(!apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS);
@@ -1979,15 +1979,15 @@ void Unit::ApplyStats(bool apply)
 
     switch(getClass())
     {
-        case WARRIOR: val2 = getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20; break;
-        case PALADIN: val2 = getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20; break;
-        case ROGUE:   val2 = getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20; break;
-        case HUNTER:  val2 = getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20; break;
-        case SHAMAN:  val2 = getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20; break;
-        case DRUID:   val2 = GetStat(STAT_STRENGTH)*2 - 20; break;
-        case MAGE:    val2 = GetStat(STAT_STRENGTH) - 10; break;
-        case PRIEST:  val2 = GetStat(STAT_STRENGTH) - 10; break;
-        case WARLOCK: val2 = GetStat(STAT_STRENGTH) - 10; break;
+        case WARRIOR: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case PALADIN: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case ROGUE:   val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
+        case HUNTER:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
+        case SHAMAN:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case DRUID:   val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
+        case MAGE:    val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
+        case PRIEST:  val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
+        case WARLOCK: val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
     }
     tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
 
@@ -2015,7 +2015,7 @@ void Unit::ApplyStats(bool apply)
     else if(getClass() == ROGUE)  classrate = 29;
     else classrate = 20;
 
-    val = float(5 + GetStat(STAT_AGILITY)/classrate);
+    val = 5 + GetStat(STAT_AGILITY)/classrate;
 
     ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE, val, apply);
 
@@ -2025,9 +2025,9 @@ void Unit::ApplyStats(bool apply)
     else classrate = 20;
                                                             ///*+(Defense*0,04);
     if (getRace() == NIGHTELF)
-        val = float(GetStat(STAT_AGILITY)/classrate + 1);
+        val = GetStat(STAT_AGILITY)/classrate + 1;
     else
-        val = float(GetStat(STAT_AGILITY)/classrate);
+        val = GetStat(STAT_AGILITY)/classrate;
 
     ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, val, apply);
 

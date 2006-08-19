@@ -416,15 +416,15 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UnsummonPet(bool remove);
         void Uncharm();
 
-        uint32 GetResistanceBuffMods(SpellSchools school, bool positive) const { return (uint32)GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
-        void SetResistanceBuffMods(SpellSchools school, bool positive, uint32 val) { SetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school,val); }
-        void ApplyResistanceBuffModsMod(SpellSchools school, bool positive, uint32 val, bool apply) { ApplyModFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
+        float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
+        void SetResistanceBuffMods(SpellSchools school, bool positive, float val) { SetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school,val); }
+        void ApplyResistanceBuffModsMod(SpellSchools school, bool positive, float val, bool apply) { ApplyModFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
         void ApplyResistanceBuffModsPercentMod(SpellSchools school, bool positive, float val, bool apply) { ApplyPercentModFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
-        void SetPosStat(Stats stat, uint32 val) { SetFloatValue(PLAYER_FIELD_POSSTAT0+stat, val); }
-        void ApplyPosStatMod(Stats stat, uint32 val, bool apply) { ApplyModFloatValue(PLAYER_FIELD_POSSTAT0+stat, val, apply); }
+        void SetPosStat(Stats stat, float val) { SetFloatValue(PLAYER_FIELD_POSSTAT0+stat, val); }
+        void ApplyPosStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(PLAYER_FIELD_POSSTAT0+stat, val, apply); }
         void ApplyPosStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(PLAYER_FIELD_POSSTAT0+stat, val, apply); }
-        void SetNegStat(Stats stat, uint32 val) { SetFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val); }
-        void ApplyNegStatMod(Stats stat, uint32 val, bool apply) { ApplyModFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val, apply); }
+        void SetNegStat(Stats stat, float val) { SetFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val); }
+        void ApplyNegStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val, apply); }
         void ApplyNegStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val, apply); }
         void SetCreateStat(Stats stat, float val) { m_createStats[stat] = val; }
         void ApplyCreateStatMod(Stats stat, float val, bool apply) { m_createStats[stat] += (apply ? val : -val); }

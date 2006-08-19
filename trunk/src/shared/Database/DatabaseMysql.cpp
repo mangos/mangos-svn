@@ -128,8 +128,8 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
         if(mysql_query(mMysql, sql))
         {
-            DEBUG_LOG( "SQL: %s\n", sql );
-            DEBUG_LOG( (std::string("query ERROR: ") + mysql_error(mMysql)).c_str() );
+            ERROR_LOG( "SQL: %s\n", sql );
+            ERROR_LOG( (std::string("query ERROR: ") + mysql_error(mMysql)).c_str() );
             return NULL;
         }
 
@@ -169,7 +169,7 @@ bool DatabaseMysql::Execute(const char *sql)
         DEBUG_LOG( (std::string("SQL: ") + sql).c_str() );
         if(mysql_query(mMysql, sql))
         {
-            DEBUG_LOG( (std::string("SQL ERROR: ") + mysql_error(mMysql)).c_str() );
+            ERROR_LOG( (std::string("SQL ERROR: ") + mysql_error(mMysql)).c_str() );
             return false;
         }
         // end guarded block
