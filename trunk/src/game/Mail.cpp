@@ -476,8 +476,8 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 
             while (nextpage)
             {
-                data << (*result)[1].GetString();
-                nextpage = (*result)[2].GetUInt32();
+                data << (*result)[0].GetString();
+                nextpage = (*result)[1].GetUInt32();
                 data << nextpage;
             }
 

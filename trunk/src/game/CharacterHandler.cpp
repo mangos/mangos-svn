@@ -425,7 +425,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     {
         Field *fields = result->Fetch();
         pCurrChar->SetInGuild(fields[0].GetUInt32());
-        pCurrChar->SetRank(fields[2].GetUInt32());
+        pCurrChar->SetRank(fields[1].GetUInt32());
         delete result;
     }
 

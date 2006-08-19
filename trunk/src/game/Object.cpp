@@ -63,11 +63,23 @@ Object::Object( )
 
 Object::~Object( )
 {
+
+    DEBUG_LOG("We are here 1");
+
     if(m_objectUpdated)
+	{
+	DEBUG_LOG("We are here 2");
         ObjectAccessor::Instance().RemoveUpdateObject(this);
+	m_objectUpdated = true;
+	DEBUG_LOG("We are here 3");
+	}
 
     if(m_uint32Values)
+	{
+	DEBUG_LOG("We are here 4");
         delete [] m_uint32Values;
+	DEBUG_LOG("We are here 5");
+	}
 }
 
 void Object::_Create( uint32 guidlow, uint32 guidhigh )
