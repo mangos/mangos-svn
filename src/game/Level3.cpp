@@ -273,8 +273,12 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
         return true;
     }
 
-    Player * player = m_session->GetPlayer();
     Player * target = getSelectedPlayer();
+    if(!target)
+    {
+        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
 
     if (skill > 0)
     {
@@ -971,15 +975,22 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         return true;
     }
 
+    Player* target = getSelectedPlayer();
+    if(!target)
+    {
+        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
     uint32 spell = atol((char*)args);
 
-    if (m_session->GetPlayer()->HasSpell(spell))
+    if (target->HasSpell(spell))
     {
         SendSysMessage(LANG_KNOWN_SPELL);
         return true;
     }
 
-    m_session->GetPlayer()->learnSpell((uint16)spell);
+    target->learnSpell((uint16)spell);
 
     return true;
 }
@@ -1017,15 +1028,22 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
         }
     }
 
+    Player* target = getSelectedPlayer();
+    if(!target)
+    {
+        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
     for(uint32 spell=minS;spell<maxS;spell++)
     {
-        if (m_session->GetPlayer()->HasSpell(spell))
+        if (target->HasSpell(spell))
         {
             WorldPacket data;
             data.Initialize(SMSG_REMOVED_SPELL);
             data << (uint32)spell;
-            m_session->SendPacket( &data );
-            m_session->GetPlayer()->removeSpell(spell);
+            target->GetSession()->SendPacket( &data );
+            target->removeSpell(spell);
         }
         else
             SendSysMessage(LANG_FORGET_SPELL);
