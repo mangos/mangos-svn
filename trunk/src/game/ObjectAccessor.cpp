@@ -199,22 +199,6 @@ ObjectAccessor::RemoveUpdateObject(Object *obj)
         i_objects.erase( iter );
 }
 
-template<class T>
-void
-ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &m)
-{
-    if( m.size() == 0 )
-        return;
-
-    Guard guard(i_updateGuard);
-    for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        std::set<Object *>::iterator obj = i_objects.find(iter->second);
-        if( obj != i_objects.end() )
-            i_objects.erase( obj );
-    }
-}
-
 void
 ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)
 {
@@ -497,6 +481,3 @@ namespace MaNGOS
     }
 }
 
-template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, GameObject *> &m);
-template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, DynamicObject *> &m);
-template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Creature *> &m);

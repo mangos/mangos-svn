@@ -82,12 +82,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
-        template<class T> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &);
-
-    #ifdef WIN32
-
-        template<> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &);
-    #endif
     private:
 
         struct ObjectChangeAccumulator
@@ -115,10 +109,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         LockType i_updateGuard;
         LockType i_corpseGuard;
 };
-
-#ifndef WIN32
-template<> void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &);
-#endif
 
 namespace MaNGOS
 {

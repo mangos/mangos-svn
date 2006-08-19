@@ -80,7 +80,7 @@ struct SpellEntry
     uint32    baseLevel;
     uint32    spellLevel;
     uint32    DurationIndex;
-    uint32    powerType;
+    int32     powerType;
     uint32    manaCost;
     uint32    manaCostPerlevel;
     uint32    manaPerSecond;
