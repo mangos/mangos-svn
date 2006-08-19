@@ -194,15 +194,15 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete spells_result;
 
-    QueryResult *skills_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo_skill` WHERE `createid` = '0' OR `createid` = '%u'", createId);
+    QueryResult *skills_result = sDatabase.PQuery("SELECT `Skill`, `SkillMin`, `SkillMax` FROM `playercreateinfo_skill` WHERE `createid` = '0' OR `createid` = '%u'", createId);
 
     do
     {
         if(!skills_result) break;
         skills_fields = skills_result->Fetch();
-        pPlayerCreateInfo->skill[0].push_back(skills_fields[1].GetUInt16());
-        pPlayerCreateInfo->skill[1].push_back(skills_fields[2].GetUInt16());
-        pPlayerCreateInfo->skill[2].push_back(skills_fields[3].GetUInt16());
+        pPlayerCreateInfo->skill[0].push_back(skills_fields[0].GetUInt16());
+        pPlayerCreateInfo->skill[1].push_back(skills_fields[1].GetUInt16());
+        pPlayerCreateInfo->skill[2].push_back(skills_fields[2].GetUInt16());
 
     } while( skills_result->NextRow() );
 

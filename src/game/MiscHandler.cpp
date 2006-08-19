@@ -465,7 +465,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
         if(result)
         {
             fields = result->Fetch();
-            friendstr[i].PlayerGUID = fields[2].GetUInt64();
+            friendstr[i].PlayerGUID = fields[0].GetUInt64();
             pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
 
             if(pObj && pObj->IsInWorld())
@@ -1167,7 +1167,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
     if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
     {
-	DEBUG_LOG("We are here 2");
         _player->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
         _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
@@ -1178,3 +1177,27 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
 }
 
+void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
+{
+
+    WorldPacket data;
+    uint64 guid;
+    recv_data >> guid;
+    DEBUG_LOG("Party Stats guid is %lu",guid);
+/*
+    data.Initialize( MSG_INSPECT_HONOR_STATS );
+    data << (uint64)guid;
+    data << (uint32)0x05;
+    data << (uint32)0x00;
+    data << (uint32)0x00;
+    data << (uint32)0x00;
+    data << (uint32)0x00;
+    data << (uint32)0x00;
+    data << (uint32)0x02;
+    data << (uint32)0x00;
+    data << (uint32)0x00;
+    data << (uint32)0x00;
+    SendPacket(&data);
+
+*/
+}

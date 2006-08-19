@@ -114,6 +114,9 @@ class MANGOS_DLL_SPEC WorldSession
 	// new inspect
 	void HandleInspectOpcode(WorldPacket& recvPacket);
 
+	// new party stats
+	void HandleInspectHonorStatsOpcode(WorldPacket& recvPacket);
+	
         void HandleMoveWaterWalkAck(WorldPacket& recvPacket);
         void HandleMountSpecialAnimOpcode(WorldPacket &recvdata);
 

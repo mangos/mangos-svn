@@ -225,6 +225,9 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 	// new inspect
         { CMSG_INSPECT,   STATUS_LOGGEDIN, &WorldSession::HandleInspectOpcode                   },
 
+	// new inspect stats
+        { MSG_INSPECT_HONOR_STATS,   STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode                   },
+
         // new
         { CMSG_FORCE_MOVE_UNROOT_ACK,   STATUS_LOGGEDIN, &WorldSession::HandleMooveUnRootAck                   },
         { CMSG_FORCE_MOVE_ROOT_ACK, STATUS_LOGGEDIN, &WorldSession::HandleMooveRootAck               },
