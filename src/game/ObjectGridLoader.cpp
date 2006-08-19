@@ -21,23 +21,6 @@
 #include "ObjectAccessor.h"
 #include "Utilities.h"
 
-template<>
-inline void
-ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m)
-{
-    if( m.size() == 0 )
-        return;
-
-    Guard guard(i_updateGuard);
-    for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        std::set<Object *>::iterator obj = i_objects.find(iter->second);
-        if( obj != i_objects.end() )
-            i_objects.erase( obj );
-        iter->second->RemoveFromWorld();
-    }
-}
-
 template<class T> void addUnitState(T *obj)
 {
 }
@@ -124,21 +107,18 @@ template<class T>
 void
 ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
 {
-    ObjectAccessor::Instance().RemoveUpdateObjects(m);
+    if( m.size() == 0 )
+        return;
+
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-
-    if( m.size() == 0 )
-	{
-        return;
-	}
-	DEBUG_LOG("Crash1");
+        DEBUG_LOG("Crash1 check: "I64FMT,iter->first);
         delete iter->second;
-	DEBUG_LOG("Crash2");
+	    DEBUG_LOG("Crash2 check: "I64FMT,iter->first);
     }
 
     m.clear();
-	DEBUG_LOG("Crash3");
+	DEBUG_LOG("Crash3 check");
 }
 
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);

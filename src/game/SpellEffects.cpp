@@ -470,7 +470,13 @@ void Spell::EffectCreateItem(uint32 i)
         return;
     }
 
-    uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
+    uint32 num_to_add;
+
+    if(player->getLevel() >= m_spellInfo->spellLevel)
+        num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
+    else
+        num_to_add = 2;
+
     if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
         num_to_add = 1;
 

@@ -40,6 +40,12 @@ Corpse::Corpse() : Object()
     m_time = time(NULL) - 30;                               // to prevent resurrecting delay at load
 }
 
+Corpse::~Corpse()
+{
+    if(GetType() == CORPSE_RESURRECTABLE)
+        ObjectAccessor::Instance().RemoveCorpse(this);
+}
+
 bool Corpse::Create( uint32 guidlow )
 {
     Object::_Create(guidlow, HIGHGUID_CORPSE);

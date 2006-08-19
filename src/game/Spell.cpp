@@ -1133,6 +1133,20 @@ void Spell::TakePower(uint32 mana)
     if(m_CastItem)
         return;
 
+    // health as power used
+    if(m_spellInfo->powerType == -2)
+    {
+        uint32 currentHealth = m_caster->GetHealth();
+        m_caster->SetHealth(currentHealth - mana);
+        return;
+    }
+
+    if(m_spellInfo->powerType <0 || m_spellInfo->powerType > POWER_HAPPINESS)
+    {
+        sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->powerType);
+        return;
+    }
+
     Powers powerType = Powers(m_spellInfo->powerType);
 
     uint32 currentPower = m_caster->GetPower(powerType);
@@ -1588,6 +1602,23 @@ uint8 Spell::CheckRange()
 
 uint8 Spell::CheckMana(uint32 *mana)
 {
+    // health as power used
+    if(m_spellInfo->powerType == -2)
+    {
+        uint32 currentHealth = m_caster->GetHealth();
+        uint32 healthCost = m_spellInfo->manaCost;
+        *mana = healthCost;
+        if(currentHealth+1 < *mana)
+            return CAST_FAIL_CANT_DO_THAT_YET;
+        else return 0;
+    }
+
+    if(m_spellInfo->powerType <0 || m_spellInfo->powerType > POWER_HAPPINESS)
+    {
+        sLog.outError("Spell::CheckMana: Unknown power type '%d'", m_spellInfo->powerType);
+        return CAST_FAIL_UNKNOWN_REASON;
+    }
+
     Powers powerType = Powers(m_spellInfo->powerType);
 
     uint32 currentPower = m_caster->GetPower(powerType);

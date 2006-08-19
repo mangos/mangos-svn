@@ -34,6 +34,7 @@ class Corpse : public Object
 {
     public:
         Corpse( );
+        ~Corpse( );
 
         bool Create( uint32 guidlow );
         bool Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang );
