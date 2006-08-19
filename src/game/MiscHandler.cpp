@@ -487,7 +487,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 
             while( result->NextRow() )
             {
-                friendstr[i].PlayerGUID = fields[2].GetUInt64();
+                friendstr[i].PlayerGUID = fields[0].GetUInt64();
                 pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
                 if(pObj)
                 {
@@ -545,7 +545,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     {
 
         fields = result->Fetch();
-        dataI << fields[2].GetUInt64();
+        dataI << fields[0].GetUInt64();
 
     }while( result->NextRow() );
     delete result;
@@ -1184,20 +1184,10 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     uint64 guid;
     recv_data >> guid;
     DEBUG_LOG("Party Stats guid is %lu",guid);
-/*
+
+    // TODO need to be finished ...
     data.Initialize( MSG_INSPECT_HONOR_STATS );
-    data << (uint64)guid;
-    data << (uint32)0x05;
-    data << (uint32)0x00;
-    data << (uint32)0x00;
-    data << (uint32)0x00;
-    data << (uint32)0x00;
-    data << (uint32)0x00;
-    data << (uint32)0x02;
-    data << (uint32)0x00;
-    data << (uint32)0x00;
-    data << (uint32)0x00;
+    data << guid;
     SendPacket(&data);
 
-*/
 }

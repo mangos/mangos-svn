@@ -127,10 +127,18 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
     ObjectAccessor::Instance().RemoveUpdateObjects(m);
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
+
+    if( m.size() == 0 )
+	{
+        return;
+	}
+	DEBUG_LOG("Crash1");
         delete iter->second;
+	DEBUG_LOG("Crash2");
     }
 
     m.clear();
+	DEBUG_LOG("Crash3");
 }
 
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);

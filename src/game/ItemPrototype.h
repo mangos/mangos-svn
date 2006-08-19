@@ -126,6 +126,9 @@ enum ITEM_SUBCLASS_CONSUMABLE
 {
     ITEM_SUBCLASS_FOOD                    = 1,
     ITEM_SUBCLASS_LIQUID                  = 2,
+    ITEM_SUBCLASS_POTION                  = 3,
+    ITEM_SUBCLASS_SCROLL                  = 4,
+    ITEM_SUBCLASS_BANDAGE                 = 5,
 };
 
 enum ITEM_SUBCLASS_CONTAINER
