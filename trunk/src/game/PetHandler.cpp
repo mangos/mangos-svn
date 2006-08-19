@@ -141,7 +141,7 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     sLog.outString( "HandlePetNameQuery.\n" );
     uint32 who;
     uint64 guid;
-    uint32 state3;
+    //float state3;
 
     std::string name = "ERROR_NO_NAME_FOR_PET_GUID";
 
@@ -152,7 +152,7 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     if(pet && pet->isPet())
     {
         name   = ((Pet*)pet)->GetName();
-        state3 = pet->GetStat(STAT_INTELLECT);
+        //state3 = pet->GetStat(STAT_INTELLECT);
     }
     WorldPacket data;
     data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);

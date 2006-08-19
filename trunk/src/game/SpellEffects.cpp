@@ -81,7 +81,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectWeaponDmgPerc,                            //SPELL_EFFECT_WEAPON_PERCENT_DAMAGE = 31
     &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE = 32 //Useless
     &Spell::EffectOpenLock,                                 //SPELL_EFFECT_OPEN_LOCK = 33
-    &Spell::EffectSummonChangeItem,                         //SPELL_EFFECT_SUMMON_MOUNT_OBSOLETE = 34
+    &Spell::EffectSummonChangeItem,                         //SPELL_EFFECT_SUMMON_CHANGE_ITEM = 34
     &Spell::EffectApplyAA,                                  //SPELL_EFFECT_APPLY_AREA_AURA = 35
     &Spell::EffectLearnSpell,                               //SPELL_EFFECT_LEARN_SPELL = 36
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE = 37 //Useless
@@ -464,10 +464,16 @@ void Spell::EffectCreateItem(uint32 i)
     uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
     if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
         num_to_add = 1;
-    if(num_to_add > pProto->Stackable)
-        num_to_add = pProto->Stackable;
 
-    Item *pItem = player->CreateItem(newitemid, num_to_add);
+    uint16 dest;
+    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, newitemid, num_to_add, false);
+    if( msg != EQUIP_ERR_OK )
+    {
+        player->SendEquipError( msg, NULL, NULL );
+        return;
+    }
+
+    Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true);
 
     if(!pItem)
     {
@@ -475,18 +481,9 @@ void Spell::EffectCreateItem(uint32 i)
         return;
     }
 
-    uint16 dest;
-    uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
-    if( msg != EQUIP_ERR_OK )
-    {
-        player->SendEquipError( msg, NULL, NULL );
-        delete pItem;
-        return;
-    }
-
     if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE )
         pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
-    player->StoreItem( dest, pItem, true);
+
     //should send message "create item" to client.-FIX ME
     player->UpdateSkillPro(m_spellInfo->Id);
 }
@@ -691,29 +688,24 @@ void Spell::EffectOpenLock(uint32 i)
 
 void Spell::EffectSummonChangeItem(uint32 i)
 {
-    if(!itemTarget)
-        return;
-
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
+
+    Player *player = (Player*)m_caster;
 
     uint32 newitemid = m_spellInfo->EffectItemType[i];
     if(!newitemid)
         return;
-    Player *player = (Player*)m_caster;
-    Item *pItem = player->CreateItem(newitemid,1);
+
     uint16 dest;
-    uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
+    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, newitemid, 1, false);
+
     if( msg == EQUIP_ERR_OK )
     {
-        pItem = player->StoreItem( dest, pItem, true);
-        player->DestroyItemCount(pItem->GetEntry(),1,true);
+        player->StoreNewItem( dest, newitemid, 1, true);
     }
     else
-    {
-        delete pItem;
         player->SendEquipError( msg, NULL, NULL );
-    }
 }
 
 void Spell::EffectOpenSecretSafe(uint32 i)

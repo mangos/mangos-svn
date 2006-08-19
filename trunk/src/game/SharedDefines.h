@@ -162,7 +162,7 @@ enum SpellSchools
 #define SPELL_EFFECT_WEAPON_PERCENT_DAMAGE      31
 #define SPELL_EFFECT_TRIGGER_MISSILE            32
 #define SPELL_EFFECT_OPEN_LOCK                  33
-#define SPELL_EFFECT_SUMMON_MOUNT_OBSOLETE      34
+#define SPELL_EFFECT_SUMMON_CHANGE_ITEM         34
 #define SPELL_EFFECT_APPLY_AREA_AURA            35
 #define SPELL_EFFECT_LEARN_SPELL                36
 #define SPELL_EFFECT_SPELL_DEFENSE              37
