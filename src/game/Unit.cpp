@@ -292,6 +292,13 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 1);
         }
 
+        // rage from maked damage TO creatures and players (target dead case)
+        if( pVictim != this                             // not generate rage for self damage (falls, ...)
+            &&  GetTypeId() == TYPEID_PLAYER
+            && (getPowerType() == POWER_RAGE)           // warrior and some druid forms
+            && !m_currentMeleeSpell)                    // not generate rage for special attacks
+            ((Player*)this)->CalcRage(damage,true);
+
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
         bool PvP = false;
         Player *player = 0;
@@ -371,20 +378,24 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             pVictim->setTransForm(0);
         }
 
+        // rage from maked damage TO creatures and players
+        if( pVictim != this                             // not generate rage for self damage (falls, ...)
+            &&  GetTypeId() == TYPEID_PLAYER
+            && (getPowerType() == POWER_RAGE)           // warrior and some druid forms
+            && !m_currentMeleeSpell)                    // not generate rage for special attacks
+            ((Player*)this)->CalcRage(damage,true);
+
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
             pVictim->AddHostil(GetGUID(), damage);
-            if( pVictim != this                             // not generate rage for self damage (falls, ...)
-                &&  GetTypeId() == TYPEID_PLAYER
-                && (getPowerType() == POWER_RAGE)           // warrior and some druid forms
-                && !m_currentMeleeSpell)                    // not generate rage for special attacks
-                ((Player*)this)->CalcRage(damage,true);
         }
         else
         {
+            // rage from recieved damage (from creatures and players)
             if( pVictim != this                             // not generate rage for self damage (falls, ...)
-                && (getPowerType() == POWER_RAGE))          // warrior and some druid forms
+                                                            // warrior and some druid forms
+                && (((Player*)pVictim)->getPowerType() == POWER_RAGE))
                 ((Player*)pVictim)->CalcRage(damage,false);
 
             // random durability for items (HIT)
