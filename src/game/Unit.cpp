@@ -377,14 +377,14 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             pVictim->AddHostil(GetGUID(), damage);
             if( pVictim != this                             // not generate rage for self damage (falls, ...)
                 &&  GetTypeId() == TYPEID_PLAYER
-                && (getClass() == WARRIOR || m_form == 5 || m_form == 8)
+                && (getPowerType() == POWER_RAGE)           // warrior and some druid forms
                 && !m_currentMeleeSpell)                    // not generate rage for special attacks
                 ((Player*)this)->CalcRage(damage,true);
         }
         else
         {
             if( pVictim != this                             // not generate rage for self damage (falls, ...)
-                && pVictim->getClass() == WARRIOR )
+                && (getPowerType() == POWER_RAGE))          // warrior and some druid forms
                 ((Player*)pVictim)->CalcRage(damage,false);
 
             // random durability for items (HIT)
