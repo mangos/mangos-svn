@@ -24,6 +24,8 @@
 #include "ScriptCalls.h"
 #include "AddonHandler.h"
 #include "GlobalEvents.h"
+#include "ObjectMgr.h"
+#include "WorldSession.h"
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
@@ -135,33 +137,62 @@ void CliLoadScripts(char*command,pPrintf zprintf)
 void CliDelete(char*command,pPrintf zprintf)
 {
 
-    char *del;
+    char *account_name;
     int x=0;
     while(command[x]==' ')
         x++;
-    del=&command[x];
-    if(!strlen(del))
+    account_name=&command[x];
+    if(!strlen(account_name))
     {
         zprintf("Syntax is: delete account\x0d\x0a");
         return;
     }
     Field *fields;
-    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",del);
+    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",account_name);
 
     if (!result)
     {
-        zprintf("User %s does not exist\x0d\x0a",del);
+        zprintf("User %s does not exist\x0d\x0a",account_name);
         return;
     }
 
     fields = result->Fetch();
-    int guid = fields[0].GetUInt32();
-    sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",guid);
-    loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",del);
-    loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",guid);
+    uint32 account_id = fields[0].GetUInt32();
     delete result;
 
-    zprintf("We deleted : %s\x0d\x0a",del);
+    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%d'",account_id);
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 guid = fields[0].GetUInt32();
+
+            // kick if player currently
+            if(Player* p = objmgr.GetPlayer(guid))
+                p->GetSession()->LogoutPlayer(false); 
+
+            WorldSession acc_s(account_id,NULL); // some invalide session
+            Player acc_player(&acc_s);
+
+            acc_player.LoadFromDB(guid);
+
+            acc_player.DeleteFromDB();
+
+            zprintf("We deleted character: %s from account %s\x0d\x0a",acc_player.GetName(),account_name);
+
+        } while (result->NextRow());
+
+        delete result;
+    }
+
+    sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",account_id);
+    loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",account_name);
+    loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
+
+    zprintf("We deleted account: %s\x0d\x0a",account_name);
 }
 
 void CliBroadcast(char *text,pPrintf zprintf)

@@ -115,7 +115,7 @@ void Group::SendUpdate()
 uint32 Group::RemoveMember(const uint64 &guid)
 {
     uint32 i, j;
-    bool leaderFlag;
+    bool leaderFlag = false;
 
     Player *player = ObjectAccessor::Instance().FindPlayer( guid );
     if (player)
