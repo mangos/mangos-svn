@@ -300,7 +300,7 @@ void World::SetInitialWorldSettings()
 
     //Start Addon stuff
     bool temp = sConfig.GetBoolDefault("AddonDefault", 1);
-    sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d (%s all addons not registared in DB)", temp, temp? "Enabled" : "Disabled"  );
+    sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d (%s all addons not registered in DB)", temp, temp? "Enabled" : "Disabled"  );
     sAddOnHandler.SetAddonDefault(temp);
     sAddOnHandler._LoadFromDB();
 
@@ -331,14 +331,14 @@ void World::Update(time_t diff)
             next++;
             if (time(NULL) > (itr->second->time))
             {
-                if (itr->second->bidder == 0)
+                if (itr->second->bidder == 0)               // if noone bidded auction...
                 {
                     Mail *m = new Mail;
                     m->receiver = itr->second->owner;
                     m->body = "";
                     m->sender = itr->second->owner;
                     m->checked = 0;
-                    m->COD = 0;
+                    m->COD = 0;                             // there might be deposit
                     m->messageID = objmgr.GenerateMailID();
                     m->money = 0;
                     m->time = time(NULL) + (29 * 3600);
@@ -358,8 +358,7 @@ void World::Update(time_t diff)
                     sDatabase.Execute( ss.str().c_str() );
 
                     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-
-                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0,  m->checked);
+                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, 0);
 
                     Player *rpl = objmgr.GetPlayer(m->receiver);
                     if (rpl)
@@ -368,10 +367,12 @@ void World::Update(time_t diff)
                     }
                     else
                         delete m;
-                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",itr->second->owner);
-                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",itr->second->item);
-                    sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `id` = '%u'",itr->second->Id);
 
+                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",itr->second->owner);
+                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
+                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",itr->second->item);
+
+                    objmgr.RemoveAItem(itr->second->item); 
                     objmgr.RemoveAuction(itr->second->Id);
                 }
                 else
@@ -389,8 +390,7 @@ void World::Update(time_t diff)
                     m->item = 0;
 
                     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-
-                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
+                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, 0);
 
                     Player *rpl = objmgr.GetPlayer(m->receiver);
                     if (rpl)
@@ -425,8 +425,7 @@ void World::Update(time_t diff)
                     sDatabase.Execute( ss.str().c_str() );
 
                     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn->messageID);
-
-                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
+                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, 0);
 
                     Player *rpl1 = objmgr.GetPlayer(mn->receiver);
                     if (rpl1)
@@ -435,6 +434,10 @@ void World::Update(time_t diff)
                     }
                     else
                         delete mn;
+
+                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
+                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",itr->second->item);
+
                     objmgr.RemoveAItem(itr->second->item);
                     objmgr.RemoveAuction(itr->second->Id);
                 }

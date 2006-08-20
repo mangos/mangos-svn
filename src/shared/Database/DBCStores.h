@@ -24,12 +24,6 @@
 #include "dbcfile.h"
 #include "DBCStructure.h"
 
-struct bidentry
-{
-    uint32 AuctionID;
-    uint32 amt;
-};
-
 struct AuctionEntry
 {
     uint32 auctioneer;
