@@ -1472,44 +1472,6 @@ void Player::SendInitialSpells()
     sLog.outDetail( "CHARACTER: Sent Initial Spells" );
 }
 
-bidentry* Player::GetBid(uint32 id)
-{
-    std::list<bidentry*>::iterator itr;
-    for (itr = m_bids.begin(); itr != m_bids.end();)
-    {
-        if ((*itr)->AuctionID == id)
-        {
-            return (*itr);
-        }
-        else
-        {
-            ++itr;
-        }
-    }
-    return NULL;
-
-}
-
-void Player::AddBid(bidentry *be)
-{
-    std::list<bidentry*>::iterator itr;
-    for (itr = m_bids.begin(); itr != m_bids.end();)
-    {
-        if ((*itr)->AuctionID == be->AuctionID)
-        {
-
-            m_bids.erase(itr++);
-
-        }
-        else
-        {
-            ++itr;
-        }
-    }
-    m_bids.push_back(be);
-
-}
-
 void Player::RemoveMail(uint32 id)
 {
     std::list<Mail*>::iterator itr;
@@ -2085,8 +2047,6 @@ void Player::DeleteFromDB()
     // together. auctionhouse_items are saved by item_guid not by player guid.
     // sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",guid);
     // sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",guid);
-    // sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%u'",guid);
-
 }
 
 void Player::SetMovement(uint8 pType)
@@ -8623,8 +8583,6 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadTutorials();
 
-    _LoadBids();
-
     _LoadAuras();
 
     _LoadInventory();
@@ -8707,30 +8665,6 @@ void Player::_LoadAuras()
 
         delete result;
     }
-}
-
-void Player::_LoadBids()
-{
-
-    m_bids.clear();
-
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`amount` FROM `auctionhouse_bid` WHERE `bidder` = '%u'",GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            bidentry *be = new bidentry;
-            be->AuctionID = fields[0].GetUInt32();
-            be->amt = fields[1].GetUInt32();
-            m_bids.push_back(be);
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-
 }
 
 void Player::_LoadCorpse()
@@ -9043,7 +8977,6 @@ void Player::SaveToDB()
 
     SaveEnchant();
     _SaveMail();
-    _SaveBids();
     _SaveAuctions();
     _SaveInventory();
     _SaveQuestStatus();
@@ -9102,7 +9035,7 @@ void Player::_SaveAuctions()
             Item *it = objmgr.GetAItem(Aentry->item);
 
             sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
-            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%d', '%u', '%u', '%u')", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
+            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%I64d', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
 
             std::ostringstream ss;
             ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
@@ -9126,22 +9059,6 @@ void Player::_SaveAuras()
     {
         sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
     }
-}
-
-void Player::_SaveBids()
-{
-    sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%u'",GetGUIDLow());
-
-    std::list<bidentry*>::iterator itr;
-    for (itr = m_bids.begin(); itr != m_bids.end(); itr++)
-    {
-        AuctionEntry *a = objmgr.GetAuction((*itr)->AuctionID);
-        if (a)
-        {
-            sDatabase.PExecute("INSERT INTO `auctionhouse_bid` (`bidder`,`id`,`amount`) VALUES ('%u', '%u', '%u')", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
-        }
-    }
-
 }
 
 void Player::_SaveInventory()
@@ -9168,7 +9085,7 @@ void Player::_SaveMail()
     {
         Mail *m = (*itr);
 
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, m->COD, m->checked);
     }
 }
 

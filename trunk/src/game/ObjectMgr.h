@@ -139,7 +139,6 @@ class ObjectMgr
             ASSERT( ah );
             ASSERT( mAuctions.find(ah->Id) == mAuctions.end() );
             mAuctions[ah->Id] = ah;
-            sLog.outString("adding auction entry with id %u",ah->Id);
         }
         AuctionEntry* GetAuction(uint32 id) const
         {

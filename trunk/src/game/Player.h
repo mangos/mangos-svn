@@ -604,10 +604,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveMail(uint32 id);
         std::list<Mail*>::iterator GetmailBegin() { return m_mail.begin();};
         std::list<Mail*>::iterator GetmailEnd() { return m_mail.end();};
-        void AddBid(bidentry *be);
-        bidentry* GetBid(uint32 id);
-        std::list<bidentry*>::iterator GetBidBegin() { return m_bids.begin();};
-        std::list<bidentry*>::iterator GetBidEnd() { return m_bids.end();};
 
         void PetSpellInitialize();
         bool HasSpell(uint32 spell) const;
@@ -940,7 +936,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void _LoadActions();
         void _LoadAuras();
-        void _LoadBids();
         void _LoadCorpse();
         void _LoadInventory();
         void _LoadMail();
@@ -957,7 +952,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveActions();
         void _SaveAuctions();
         void _SaveAuras();
-        void _SaveBids();
         void _SaveInventory();
         void _SaveMail();
         void _SaveQuestStatus();
@@ -1027,7 +1021,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_currentBuybackSlot;
 
         std::list<struct Factions> factions;
-        std::list<bidentry*> m_bids;
         std::list<Mail*> m_mail;
         PlayerSpellList m_spells;
         std::list<struct actions> m_actions;

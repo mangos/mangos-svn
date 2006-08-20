@@ -167,7 +167,6 @@ void SQLStorage::Load ()
     pIndex =newIndex;
     MaxEntry=maxi;
     data=_data;
-
 }
 
 void SQLStorage::printIndexError(uint32 id) const

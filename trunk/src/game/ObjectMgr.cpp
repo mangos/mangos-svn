@@ -274,16 +274,30 @@ uint32 ObjectMgr::GetPlayerTeamByGUID(const uint64 &guid) const
 
 void ObjectMgr::LoadAuctions()
 {
-    QueryResult *result = sDatabase.Query( "SELECT `auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid` FROM `auctionhouse`" );
+
+    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `auctionhouse`");
+
+    Field *fields = result->Fetch();
+    uint32 AuctionCount=fields[0].GetUInt32();
+    delete result;
+
+    if(!AuctionCount)
+        return;
+
+    result = sDatabase.Query( "SELECT `auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`, `id` FROM `auctionhouse`" );
 
     if( !result )
         return;
+
+    barGoLink bar( AuctionCount );
 
     AuctionEntry *aItem;
 
     do
     {
-        Field *fields = result->Fetch();
+        fields = result->Fetch();
+
+        bar.step();
 
         aItem = new AuctionEntry;
         aItem->auctioneer = fields[0].GetUInt32();
@@ -298,6 +312,9 @@ void ObjectMgr::LoadAuctions()
     } while (result->NextRow());
     delete result;
 
+    sLog.outString("");
+    sLog.outString( ">> Loaded %u auction items", AuctionCount);
+    sLog.outString("");
 }
 
 void ObjectMgr::LoadItemPrototypes()
