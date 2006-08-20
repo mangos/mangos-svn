@@ -333,40 +333,45 @@ void World::Update(time_t diff)
             {
                 if (itr->second->bidder == 0)               // if noone bidded auction...
                 {
-                    Mail *m = new Mail;
-                    m->receiver = itr->second->owner;
-                    m->body = "";
-                    m->sender = itr->second->owner;
-                    m->checked = 0;
-                    m->COD = 0;                             // there might be deposit
-                    m->messageID = objmgr.GenerateMailID();
-                    m->money = 0;
-                    m->time = time(NULL) + (29 * 3600);
-                    m->subject = "Your item failed to sell";
-                    m->item = itr->second->item;
-                    Item *it = objmgr.GetAItem(m->item);
-                    objmgr.AddMItem(it);
-
-                    std::ostringstream ss;
-                    ss << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
-                        << it->GetGUIDLow() << ", '";
-                    for(uint16 i = 0; i < it->GetValuesCount(); i++ )
+                    Item *it = objmgr.GetAItem(itr->second->item);
+                    if(it)
                     {
-                        ss << it->GetUInt32Value(i) << " ";
-                    }
-                    ss << "' )";
-                    sDatabase.Execute( ss.str().c_str() );
+                        Mail *m = new Mail;
+                        m->receiver = itr->second->owner;
+                        m->body = "";
+                        m->sender = itr->second->owner;
+                        m->checked = 0;
+                        m->COD = 0;                             // there might be deposit
+                        m->messageID = objmgr.GenerateMailID();
+                        m->money = 0;
+                        m->time = time(NULL) + (29 * 3600);
+                        m->subject = "Your item failed to sell";
+                        m->item = itr->second->item;
+                        objmgr.AddMItem(it);
 
-                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, 0);
+                        std::ostringstream ss;
+                        ss << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
+                            << it->GetGUIDLow() << ", '";
+                        for(uint16 i = 0; i < it->GetValuesCount(); i++ )
+                        {
+                            ss << it->GetUInt32Value(i) << " ";
+                        }
+                        ss << "' )";
+                        sDatabase.Execute( ss.str().c_str() );
 
-                    Player *rpl = objmgr.GetPlayer(m->receiver);
-                    if (rpl)
-                    {
-                        rpl->AddMail(m);
+                        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
+                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, 0);
+
+                        Player *rpl = objmgr.GetPlayer(m->receiver);
+                        if (rpl)
+                        {
+                            rpl->AddMail(m);
+                        }
+                        else
+                            delete m;
                     }
                     else
-                        delete m;
+                        sLog.outError("Auction item %u not found, and lost.",itr->second->item);
 
                     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",itr->second->owner);
                     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);

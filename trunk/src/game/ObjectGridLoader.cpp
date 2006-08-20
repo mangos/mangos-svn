@@ -112,13 +112,12 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
 
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        DEBUG_LOG("Crash1 check: "I64FMT,iter->first);
+        DEBUG_LOG("Unloader Crash1 check: (%p)",iter->second);
         delete iter->second;
-	    DEBUG_LOG("Crash2 check: "I64FMT,iter->first);
+	    DEBUG_LOG("Unloader Crash2 check: (%p)",iter->second);
     }
 
     m.clear();
-	DEBUG_LOG("Crash3 check");
 }
 
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
