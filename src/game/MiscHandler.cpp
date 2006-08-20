@@ -444,8 +444,8 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST"  );
 
-    unsigned char Counter=0, nrignore=0;
-    int i=0;
+    unsigned char nrignore=0;
+    uint8 i=0;
     uint32 guid;
     Field *fields;
     Player* pObj;
@@ -453,28 +453,20 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 
     guid=GetPlayer()->GetGUIDLow();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`guid`) FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
-
+    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
     if(result)
     {
         fields = result->Fetch();
-        Counter=fields[0].GetUInt32();
-        delete result;
 
-        result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
-        if(result)
-        {
-            fields = result->Fetch();
+        do {
             friendstr[i].PlayerGUID = fields[0].GetUInt64();
-            pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
-
-            if(pObj && pObj->IsInWorld())
+            pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
+            if(pObj)
             {
                 friendstr[i].Status = 1;
                 friendstr[i].Area = pObj->GetZoneId();
                 friendstr[i].Level = pObj->getLevel();
                 friendstr[i].Class = pObj->getClass();
-                i++;
             }
             else
             {
@@ -482,38 +474,21 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
                 friendstr[i].Area = 0;
                 friendstr[i].Level = 0;
                 friendstr[i].Class = 0;
-                i++;
             }
+            i++;
 
-            while( result->NextRow() )
-            {
-                friendstr[i].PlayerGUID = fields[0].GetUInt64();
-                pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
-                if(pObj)
-                {
-                    friendstr[i].Status = 1;
-                    friendstr[i].Area = pObj->GetZoneId();
-                    friendstr[Counter].Level = pObj->getLevel();
-                    friendstr[Counter].Class = pObj->getClass();
-                    i++;
-                }
-                else
-                {
-                    friendstr[i].Status = 0;
-                    friendstr[i].Area = 0;
-                    friendstr[Counter].Level = 0;
-                    friendstr[Counter].Class = 0;
-                    i++;
-                }
-            }
-            delete result;
-        }
+            // prevent overflow
+            if(i==255)
+                break;
+        } while( result->NextRow() );
+
+        delete result;
     }
 
     data.Initialize( SMSG_FRIEND_LIST );
-    data << Counter;
+    data << i;
 
-    for (int j=0; j<Counter; j++)
+    for (int j=0; j < i; j++)
     {
 
         sLog.outDetail( "WORLD: Adding Friend - Guid:%lu, Status:%u, Area:%u, Level:%u Class:%u",friendstr[j].PlayerGUID, friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
@@ -572,38 +547,41 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         GetPlayer()->GetName(), friendName.c_str() );
 
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
-    pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", friendGuid);
+    if(friendGuid)
+    {
+        pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
+        QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", friendGuid);
 
-    if( result )
-        friendResult = FRIEND_ALREADY;
+        if( result )
+            friendResult = FRIEND_ALREADY;
 
-    delete result;
+        delete result;
 
-    if (!strcmp(GetPlayer()->GetName(),friendName.c_str())) friendResult = FRIEND_SELF;
+        if(pfriend==GetPlayer()) 
+            friendResult = FRIEND_SELF;
+
+        if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid))
+            friendResult = FRIEND_ENEMY;
+    }
 
     data.Initialize( SMSG_FRIEND_STATUS );
 
-    if (friendGuid > 0 && friendResult!=FRIEND_ALREADY && friendResult!=FRIEND_SELF)
+    if (friendGuid && friendResult==FRIEND_NOT_FOUND)
     {
-        if( pfriend != NULL && pfriend->IsInWorld())
+        if( pfriend && pfriend->IsInWorld())
         {
             friendResult = FRIEND_ADDED_ONLINE;
             friendArea = pfriend->GetZoneId();
             friendLevel = pfriend->getLevel();
             friendClass = pfriend->getClass();
 
-            data << (uint8)friendResult << (uint64)friendGuid << (uint8)0;
-            data << (uint32)friendArea << (uint32)friendLevel << (uint32)friendClass;
-
-            uint32 guid;
-            guid=GetPlayer()->GetGUIDLow();
-
-            sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')", (uint32)guid, friendName.c_str(), (uint32)friendGuid);
         }
         else
             friendResult = FRIEND_ADDED_OFFLINE;
+
+        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')", 
+            GetPlayer()->GetGUIDLow(), friendName.c_str(), GUID_LOPART(friendGuid));
 
         sLog.outDetail( "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u. ",
             friendName.c_str(), friendGuid, friendArea, friendLevel, friendClass);
@@ -624,6 +602,10 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         data << (uint8)friendResult << (uint64)friendGuid;
         sLog.outDetail( "WORLD: %s Guid not found. ", friendName.c_str() );
     }
+
+    data << (uint8)friendResult << (uint64)friendGuid << (uint8)0;
+    if(friendResult == FRIEND_ADDED_ONLINE)
+        data << (uint32)friendArea << (uint32)friendLevel << (uint32)friendClass;
 
     SendPacket( &data );
 
@@ -659,7 +641,6 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     std::string IgnoreName = "UNKNOWN";
     unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
-    Player *pIgnore=NULL;
     uint64 IgnoreGuid = 0;
 
     WorldPacket data;
@@ -670,49 +651,45 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         GetPlayer()->GetName(), IgnoreName.c_str() );
 
     IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName.c_str());
-    pIgnore = ObjectAccessor::Instance().FindPlayer((uint64)IgnoreGuid);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`name`,`friend`,`flags` FROM `character_social` WHERE `flags` = 'IGNORE' AND `friend` = '%u'", (uint32)IgnoreGuid);
+    if(IgnoreGuid)
+    {
+        QueryResult *result = sDatabase.PQuery("SELECT `guid`,`name`,`friend`,`flags` FROM `character_social` WHERE `flags` = 'IGNORE' AND `friend` = '%u'", (uint32)IgnoreGuid);
 
-    if( result )
-        ignoreResult = FRIEND_IGNORE_ALREADY;
+        if( result )
+            ignoreResult = FRIEND_IGNORE_ALREADY;
 
-    delete result;
+        if(IgnoreGuid==GetPlayer()->GetGUID()) 
+            ignoreResult = FRIEND_IGNORE_SELF;
 
-    if (!strcmp(GetPlayer()->GetName(),IgnoreName.c_str())) ignoreResult = FRIEND_IGNORE_SELF;
+        delete result;
+    }
 
     data.Initialize( SMSG_FRIEND_STATUS );
 
-    if (pIgnore && ignoreResult!=FRIEND_IGNORE_ALREADY && ignoreResult!=FRIEND_IGNORE_SELF)
+    if (IgnoreGuid && ignoreResult == FRIEND_IGNORE_NOT_FOUND)
     {
         ignoreResult = FRIEND_IGNORE_ADDED;
 
-        uint32 guid;
-        guid=GetPlayer()->GetGUIDLow();
-
-        data << (uint8)ignoreResult << (uint64)IgnoreGuid;
-
-        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')", guid, IgnoreName.c_str(), IgnoreGuid);
-
+        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')", 
+            GetPlayer()->GetGUIDLow(), IgnoreName.c_str(), IgnoreGuid);
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
     {
-        data << (uint8)ignoreResult << (uint64)IgnoreGuid;
         sLog.outDetail( "WORLD: %s Guid Already Ignored. ", IgnoreName.c_str() );
     }
     else if(ignoreResult==FRIEND_IGNORE_SELF)
     {
-        data << (uint8)ignoreResult << (uint64)IgnoreGuid;
         sLog.outDetail( "WORLD: %s Guid can't add himself. ", IgnoreName.c_str() );
     }
     else
     {
-        data << (uint8)ignoreResult << (uint64)IgnoreGuid;
         sLog.outDetail( "WORLD: %s Guid not found. ", IgnoreName.c_str() );
     }
 
+    data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+
     SendPacket( &data );
-    delete result;
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_STATUS)" );
 }
 
