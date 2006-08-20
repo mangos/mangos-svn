@@ -268,7 +268,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             mn->body = "";
             mn->checked = 0;
             mn->COD = 0;
-            mn->money = ah->bid;
+            mn->money = ah->buyout;
             mn->item = 0;
             mn->time = time(NULL) + (29 * 3600);
 
