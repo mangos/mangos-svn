@@ -27,7 +27,7 @@
 #include "mpq.h"
 #include "common.h"
 
-#ifndef _WIN32
+#ifdef _WIN32
 //toupper
 #include <ctype.h>
 #endif

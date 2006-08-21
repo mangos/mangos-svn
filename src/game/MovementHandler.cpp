@@ -116,20 +116,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
 
     GetPlayer( )->SetPosition(x, y, z, orientation);
-
-    uint32 MapID = GetPlayer()->GetMapId();
-    Map* Map = MapManager::Instance().GetMap(MapID);
-    float posz = Map->GetWaterLevel(x,y);
-    uint8 flag1 = Map->GetTerrainType(x,y);
-
-    //!Underwater check
-    if ((z < (posz - (float)2)) && (flag1 & 0x01))
-        GetPlayer()->m_isunderwater|= 0x01;
-    else if (z > (posz - (float)2))
-        GetPlayer()->m_isunderwater&= 0x7A;
-    //!in lava check
-    if ((z < (posz - (float)0)) && (flag1 & 0x02))
-        GetPlayer()->m_isunderwater|= 0x80;
 }
 
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)

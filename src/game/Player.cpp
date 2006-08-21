@@ -2816,16 +2816,28 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
         m->PlayerRelocation(this, x, y, z, orientation);
 
     Map* m2 = MapManager::Instance().GetMap(GetMapId());
-    if (((m2->GetWaterLevel(x,y)  + 2) < m2->GetHeight(x,y)))
+    float water_z = m2->GetWaterLevel(x,y);
+    uint8 flag1 = m2->GetTerrainType(x,y);
+
+    //!Underwater check
+    if ((z < (water_z - (float)2)) && (flag1 & 0x01))
+        m_isunderwater|= 0x01;
+    else if (z > (water_z - (float)2))
+        m_isunderwater&= 0x7A;
+    //!in lava check
+    if ((z < (water_z - (float)0)) && (flag1 & 0x02))
+        m_isunderwater|= 0x80;
+
+    if((water_z - m2->GetHeight(x,y)) > 2)
     {
-        // at ground
-        if(m_form == FORM_AQUA)
+        // in water
+        if(m_form > 0 && m_form != FORM_AQUA && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
     else
     {
-        // in water
-        if(m_form > 0 && m_form != FORM_AQUA && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE)
+        // at ground
+        if(m_form == FORM_AQUA)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
 
