@@ -172,9 +172,9 @@ void CliDelete(char*command,pPrintf zprintf)
 
             // kick if player currently
             if(Player* p = objmgr.GetPlayer(guid))
-                p->GetSession()->LogoutPlayer(false); 
+                p->GetSession()->LogoutPlayer(false);
 
-            WorldSession acc_s(account_id,NULL); // some invalide session
+            WorldSession acc_s(account_id,NULL);            // some invalide session
             Player acc_player(&acc_s);
 
             acc_player.LoadFromDB(guid);

@@ -199,7 +199,7 @@ void World::SetInitialWorldSettings()
     regen_values[RATE_POWER_FOCUS] = sConfig.GetFloatDefault("Rate.Power3", 1);
     regen_values[RATE_DROP]        = sConfig.GetFloatDefault("Rate.Drop", 1);
     regen_values[RATE_XP_KILL]     = sConfig.GetFloatDefault("Rate.XP.Kill", 1);
-    regen_values[RATE_XP_QUEST]    = sConfig.GetFloatDefault("Rate.XP.Quest", 1);    
+    regen_values[RATE_XP_QUEST]    = sConfig.GetFloatDefault("Rate.XP.Quest", 1);
     regen_values[RATE_XP_EXPLORE]  = sConfig.GetFloatDefault("Rate.XP.Explore", 1);
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
@@ -341,7 +341,7 @@ void World::Update(time_t diff)
                         m->body = "";
                         m->sender = itr->second->owner;
                         m->checked = 0;
-                        m->COD = 0;                             // there might be deposit
+                        m->COD = 0;                         // there might be deposit
                         m->messageID = objmgr.GenerateMailID();
                         m->money = 0;
                         m->time = time(NULL) + (29 * 3600);
@@ -377,7 +377,7 @@ void World::Update(time_t diff)
                     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
                     sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",itr->second->item);
 
-                    objmgr.RemoveAItem(itr->second->item); 
+                    objmgr.RemoveAItem(itr->second->item);
                     objmgr.RemoveAuction(itr->second->Id);
                 }
                 else

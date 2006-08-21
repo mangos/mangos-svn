@@ -473,14 +473,14 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 
     switch(spellproto->EffectImplicitTargetA[effIndex])
     {
-        case 6: //TARGET_S_E:
-        case 15: //TARGET_AE_E:
-        case 16: //TARGET_AE_E_INSTANT:
-        case 22: //TARGET_AC_E:
-        case 24: //TARGET_INFRONT:
-        case 25: //TARGET_DUELVSPLAYER:
-        case 28: //TARGET_AE_E_CHANNEL:
-        case 53: //TARGET_AE_SELECTED:
+        case 6:                                             //TARGET_S_E:
+        case 15:                                            //TARGET_AE_E:
+        case 16:                                            //TARGET_AE_E_INSTANT:
+        case 22:                                            //TARGET_AC_E:
+        case 24:                                            //TARGET_INFRONT:
+        case 25:                                            //TARGET_DUELVSPLAYER:
+        case 28:                                            //TARGET_AE_E_CHANNEL:
+        case 53:                                            //TARGET_AE_SELECTED:
             return false;
         default:
             return (spellproto->AttributesEx & (1<<7)) ? false : true;

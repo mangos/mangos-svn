@@ -346,7 +346,7 @@ void ObjectMgr::LoadAuctionItems()
 
 void ObjectMgr::LoadMailedItems()
 {
-	QueryResult *result = sDatabase.Query( "SELECT `guid` FROM `mail_item`" );
+    QueryResult *result = sDatabase.Query( "SELECT `guid` FROM `mail_item`" );
 
     if( !result )
         return;

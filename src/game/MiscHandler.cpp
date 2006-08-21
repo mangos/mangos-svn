@@ -458,7 +458,8 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     {
         fields = result->Fetch();
 
-        do {
+        do
+        {
             friendstr[i].PlayerGUID = fields[0].GetUInt64();
             pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
             if(pObj)
@@ -558,7 +559,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
         delete result;
 
-        if(pfriend==GetPlayer()) 
+        if(pfriend==GetPlayer())
             friendResult = FRIEND_SELF;
 
         if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid))
@@ -580,7 +581,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         else
             friendResult = FRIEND_ADDED_OFFLINE;
 
-        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')", 
+        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')",
             GetPlayer()->GetGUIDLow(), friendName.c_str(), GUID_LOPART(friendGuid));
 
         sLog.outDetail( "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u. ",
@@ -659,7 +660,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         if( result )
             ignoreResult = FRIEND_IGNORE_ALREADY;
 
-        if(IgnoreGuid==GetPlayer()->GetGUID()) 
+        if(IgnoreGuid==GetPlayer()->GetGUID())
             ignoreResult = FRIEND_IGNORE_SELF;
 
         delete result;
@@ -671,7 +672,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     {
         ignoreResult = FRIEND_IGNORE_ADDED;
 
-        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')", 
+        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')",
             GetPlayer()->GetGUIDLow(), IgnoreName.c_str(), IgnoreGuid);
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
@@ -1138,9 +1139,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     DEBUG_LOG("Inspected guid is %lu",guid);
 
     if( _player != 0 )
-	{
+    {
         _player->SetSelection(guid);
-	}
+    }
 
     if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
     {
@@ -1148,9 +1149,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 
-        data.Initialize( SMSG_INSPECT );
-	data << guid;
-	SendPacket(&data);
+    data.Initialize( SMSG_INSPECT );
+    data << guid;
+    SendPacket(&data);
 
 }
 
