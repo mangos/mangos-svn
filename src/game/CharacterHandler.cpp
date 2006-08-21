@@ -459,6 +459,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
 
     pCurrChar->LoadEnchant();
+    pCurrChar->LoadCorpse(); // Place charcter in world (and load zone) before corpse check
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

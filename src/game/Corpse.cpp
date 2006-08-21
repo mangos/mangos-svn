@@ -171,7 +171,12 @@ void Corpse::AddToWorld()
         ObjectAccessor::Instance().AddCorpse(this);
 
         if(Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID()))
-            UpdateForPlayer(player,true);
+        {
+            if(player->isAlive())
+                ConvertCorpseToBones();
+            else
+                UpdateForPlayer(player,true);
+        }
     }
 }
 
