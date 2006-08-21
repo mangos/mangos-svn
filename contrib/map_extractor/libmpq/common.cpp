@@ -27,10 +27,8 @@
 #include "mpq.h"
 #include "common.h"
 
-#ifdef _WIN32
 //toupper
 #include <ctype.h>
-#endif
 
 /*
  *  This function decrypts a MPQ block.
