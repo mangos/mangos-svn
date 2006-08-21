@@ -220,7 +220,7 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
 				//	if(z<zmin)zmin=z;
 				}
 	
-	
+			_chunk->waterlevel=-999999; // no liquid/water	
 		
 		}
 		 else
@@ -246,7 +246,6 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
 					
 					mf.seekRelative(-4);
 					mf.read(&_chunk->waterlevel,4);
-					if(_chunk->waterlevel > zmax) _chunk->waterlevel=-999999;
 
 					if(chunkflags & 4 || chunkflags & 8)
 						_chunk->flag |=1;
