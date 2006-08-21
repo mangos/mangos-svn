@@ -410,6 +410,10 @@ class MANGOS_DLL_SPEC Player : public Unit
             if(isAlive() && !cur)
             {
                 _ApplyAllItemMods();
+
+                // restore default warrior stance
+                if(getClass()== WARRIOR)
+                    CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
             }
         };
 
@@ -483,6 +487,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddEnchantDuration(Item *item,uint32 slot,uint32 duration);
         void SaveEnchant();
         void LoadEnchant();
+        void LoadCorpse();
         void RemoveAreaAurasFromGroup();
 
         /*********************************************************/
@@ -897,7 +902,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***              ENVIROMENTAL SYSTEM                  ***/
         /*********************************************************/
-        bool IsInWater() const { return (m_isunderwater & 0x80); }
+        bool IsInWater() const;
 
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
@@ -936,7 +941,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void _LoadActions();
         void _LoadAuras();
-        void _LoadCorpse();
         void _LoadInventory();
         void _LoadMail();
         void _LoadQuestStatus();

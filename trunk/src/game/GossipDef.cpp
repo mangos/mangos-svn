@@ -395,7 +395,7 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
     data << uint32(pQuest->GetQuestInfo()->RewSpell);
 
     data << uint32(pQuest->GetQuestInfo()->SrcItemId);
-    data << uint32(pQuest->GetQuestInfo()->Flags);
+    data << uint32(pQuest->GetQuestInfo()->SpecialFlags);
 
     int iI;
 

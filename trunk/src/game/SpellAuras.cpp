@@ -875,15 +875,6 @@ void Aura::HandleAuraModShapeshift(bool apply)
 
     if(apply)
     {
-        if(unit_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            if(((Player*)unit_target)->IsInWater())
-            {
-                if(m_modifier.m_miscvalue != FORM_AQUA )
-                    return;
-            }
-        }
-
         unit_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
@@ -2236,14 +2227,6 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
 
     if(apply)
     {
-        if(unit_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            if(((Player*)unit_target)->IsInWater())
-            {
-                if(aura->GetModifier()->m_miscvalue != FORM_AQUA )
-                    return;
-            }
-        }
         if(unit_target->m_ShapeShiftForm)
         {
             unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);

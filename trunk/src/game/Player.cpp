@@ -2245,9 +2245,6 @@ void Player::ResurrectPlayer()
         DeMorph();
     }
 
-    if(getClass() == WARRIOR)
-        CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
-
     m_deathTimer = 0;
 }
 
@@ -2333,6 +2330,7 @@ void Player::SpawnCorpseBones()
     if(!corpse) return;
 
     corpse->ConvertCorpseToBones();
+    SaveToDB(); // prevent loading as ghost without corpse
 }
 
 Corpse* Player::GetCorpse() const
@@ -2804,6 +2802,14 @@ void Player::DealWithSpellDamage(DynamicObject &obj)
     obj.DealWithSpellDamage(*this);
 }
 
+bool Player::IsInWater() const
+{
+    Map* m = MapManager::Instance().GetMap(GetMapId());
+    float water_z = m->GetWaterLevel(GetPositionX(),GetPositionY());
+    uint8 flag = m->GetTerrainType(GetPositionX(),GetPositionY());
+    return (GetPositionZ() < (water_z - 2)) && (flag & 0x01);
+}
+
 bool Player::SetPosition(float x, float y, float z, float orientation)
 {
     Map *m = MapManager::Instance().GetMap(m_mapId);
@@ -2820,23 +2826,24 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     uint8 flag1 = m2->GetTerrainType(x,y);
 
     //!Underwater check
-    if ((z < (water_z - (float)2)) && (flag1 & 0x01))
+    if ((z < (water_z - 2)) && (flag1 & 0x01))
         m_isunderwater|= 0x01;
-    else if (z > (water_z - (float)2))
+    else if (z > (water_z - 2))
         m_isunderwater&= 0x7A;
-    //!in lava check
-    if ((z < (water_z - (float)0)) && (flag1 & 0x02))
+
+   //!in lava check
+    if ((z < (water_z - 0)) && (flag1 & 0x02))
         m_isunderwater|= 0x80;
 
-    if((water_z - m2->GetHeight(x,y)) > 2)
+    // form checks
+    if ((z < (water_z - 2)) && (flag1 & 0x01))
     {
-        // in water
         if(m_form > 0 && m_form != FORM_AQUA && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
-    else
+    // let not lost aqua form swiming and jumping at water level
+    else if( z > (water_z - 2)  )
     {
-        // at ground
         if(m_form == FORM_AQUA)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
@@ -3369,6 +3376,8 @@ void Player::DuelComplete()
 
     AttackStop();
     m_pDuel->AttackStop();
+    RemoveAllAttackers();
+    m_pDuel->RemoveAllAttackers();
 
     data.Initialize(SMSG_DUEL_WINNER);
     data << (uint8)0;
@@ -8600,8 +8609,6 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadReputation();
 
-    _LoadCorpse();
-
     _LoadPet();
 
     // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
@@ -8678,10 +8685,15 @@ void Player::_LoadAuras()
     }
 }
 
-void Player::_LoadCorpse()
+void Player::LoadCorpse()
 {
     if(Corpse* corpse = GetCorpse())
-        corpse->UpdateForPlayer(this,true);
+    {
+        if(isAlive())
+            corpse->ConvertCorpseToBones();
+        else
+            corpse->UpdateForPlayer(this,true);
+    }
 }
 
 void Player::_LoadInventory()
