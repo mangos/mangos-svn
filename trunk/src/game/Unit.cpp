@@ -293,10 +293,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
 
         // rage from maked damage TO creatures and players (target dead case)
-        if( pVictim != this                             // not generate rage for self damage (falls, ...)
+        if( pVictim != this                                 // not generate rage for self damage (falls, ...)
             &&  GetTypeId() == TYPEID_PLAYER
-            && (getPowerType() == POWER_RAGE)           // warrior and some druid forms
-            && !m_currentMeleeSpell)                    // not generate rage for special attacks
+            && (getPowerType() == POWER_RAGE)               // warrior and some druid forms
+            && !m_currentMeleeSpell)                        // not generate rage for special attacks
             ((Player*)this)->CalcRage(damage,true);
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
@@ -379,10 +379,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
 
         // rage from maked damage TO creatures and players
-        if( pVictim != this                             // not generate rage for self damage (falls, ...)
+        if( pVictim != this                                 // not generate rage for self damage (falls, ...)
             &&  GetTypeId() == TYPEID_PLAYER
-            && (getPowerType() == POWER_RAGE)           // warrior and some druid forms
-            && !m_currentMeleeSpell)                    // not generate rage for special attacks
+            && (getPowerType() == POWER_RAGE)               // warrior and some druid forms
+            && !m_currentMeleeSpell)                        // not generate rage for special attacks
             ((Player*)this)->CalcRage(damage,true);
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -1891,7 +1891,6 @@ void Unit::ApplyStats(bool apply)
     // froze spells gives + 50% change to crit
 
     if(GetTypeId() != TYPEID_PLAYER) return;
-
 
     float val;
     int32 val2,tem_att_power;

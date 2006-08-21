@@ -568,9 +568,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
         void ModifyMoney( int32 d ) { SetMoney (GetMoney() + d > 0 ? GetMoney() + d : 0); }
-        void SetMoney( uint32 value ) 
-        { 
-            SetUInt32Value (PLAYER_FIELD_COINAGE, value); 
+        void SetMoney( uint32 value )
+        {
+            SetUInt32Value (PLAYER_FIELD_COINAGE, value);
             MoneyChanged( value );
         }
 

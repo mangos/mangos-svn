@@ -37,9 +37,9 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
 
     data.Initialize( SMSG_AUCTION_BIDDER_LIST_RESULT );
     uint32 cnt = 0;
-    Player *pl = GetPlayer(); 
+    Player *pl = GetPlayer();
     for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    { 
+    {
         if (pl && itr->second->bidder == pl->GetGUIDLow())
             cnt++;
     }
@@ -52,12 +52,13 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
         data << uint32(50);
     }
     uint32 cnter = 1;
-    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++) // added
-    { 
+                                                            // added
+    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
+    {
         //cycle, which finds all players auctions
         AuctionEntry *Aentry = itr->second;
-        Player *pl = GetPlayer(); 
-        if( Aentry && pl && Aentry->bidder == pl->GetGUIDLow() && (cnter < 51)) 
+        Player *pl = GetPlayer();
+        if( Aentry && pl && Aentry->bidder == pl->GetGUIDLow() && (cnter < 51))
         {
             data << Aentry->Id;
             Item *it = objmgr.GetAItem(Aentry->item);
@@ -96,7 +97,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         if ((price < ah->buyout) || (ah->buyout == 0))
         {
             if (ah->bidder > 0)
-            { 
+            {
                 Mail* n = new Mail;
                 n->messageID = objmgr.GenerateMailID();
                 n->sender = ah->owner;
@@ -136,12 +137,13 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
             data.Initialize( SMSG_AUCTION_BIDDER_LIST_RESULT );
             uint32 cnt = 0;
-            Player *pl = GetPlayer(); 
-            for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++) // added
-            { 
+            Player *pl = GetPlayer();
+                                                            // added
+            for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
+            {
                 //we need count of auctions of this player
                 AuctionEntry *Aentry = itr->second;
-                if( Aentry && pl && Aentry->bidder == pl->GetGUIDLow()) 
+                if( Aentry && pl && Aentry->bidder == pl->GetGUIDLow())
                     cnt++;
             }
             if (cnt < 51)
@@ -175,7 +177,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                     data << uint32((Aentry->time - time(NULL)) * 1000);
                     data << uint64(0);
                     data << Aentry->bid;
-                    cnter++; 
+                    cnter++;
                 }
             }
 
@@ -202,14 +204,14 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             m->item = ah->item;
             m->time = time(NULL) + (29 * 3600);
 
-            if (ah->bidder > 0) // mail to last bidder if there's one... + return money
+            if (ah->bidder > 0)                             // mail to last bidder if there's one... + return money
             {
-                Mail *mn2 = new Mail; 
+                Mail *mn2 = new Mail;
                 mn2->messageID = objmgr.GenerateMailID();
                 mn2->sender = ah->owner;
                 mn2->receiver = ah->bidder;
                 mn2->subject = "You lost a bid!";
-                mn2->body = "Item has been bought"; 
+                mn2->body = "Item has been bought";
                 mn2->checked = 0;
                 mn2->COD = 0;
                 mn2->money = ah->bid;
@@ -262,7 +264,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
             Mail *mn = new Mail;
             mn->messageID = objmgr.GenerateMailID();
-            mn->sender = 0; //changed to 0, but there should be "Horde or Ali Auction House"
+            mn->sender = 0;                                 //changed to 0, but there should be "Horde or Ali Auction House"
             mn->receiver = ah->owner;
             mn->subject = "Your item sold!";
             mn->body = "";
@@ -383,14 +385,14 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 {
     uint32 auctioneer;
-    uint32 unk1; // 0xF0001000 
-    uint32 auctionID; // but this is not auction id... it's another number...
+    uint32 unk1;                                            // 0xF0001000
+    uint32 auctionID;                                       // but this is not auction id... it's another number...
     recv_data >> auctioneer >> unk1;
     recv_data >> auctionID;
     sLog.outError("DELETE AUCTION !!! auctioneer : %u, unknown: %u, AuctionID: %u", auctioneer, unk1, auctionID);
 
     WorldPacket data;
-    data << unk1 << auctionID;//need fix here, this code does nothing
+    data << unk1 << auctionID;                              //need fix here, this code does nothing
     SendPacket(&data);
 }
 
@@ -431,7 +433,8 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
                         data << Aentry->bid;
                         data << uint32(0);
                         data << Aentry->buyout;
-                        data << uint32((Aentry->time - time(NULL)) * 1000); // May be need fixing
+                                                            // May be need fixing
+                        data << uint32((Aentry->time - time(NULL)) * 1000);
                         data << uint32(Aentry->bidder);
                         data << uint32(0);
                         data << Aentry->bid;

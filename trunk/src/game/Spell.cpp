@@ -1852,7 +1852,6 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     if(!Target || Target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-
     if(m_spellInfo->Id == 8690 )
     {
         Field *fields;
@@ -1913,7 +1912,7 @@ void Spell::reflect(Unit *refunit)
         if(m_spellInfo->Effect[i] == 6 && (m_spellInfo->EffectApplyAuraName[i] == 74 || m_spellInfo->EffectApplyAuraName[i] == 28))
             return;
 
-    int32 reflectchance = 0; // proper base reflect chance is ?
+    int32 reflectchance = 0;                                // proper base reflect chance is ?
 
     Unit::AuraList& mReflectSpells = refunit->GetAurasByType(SPELL_AURA_REFLECT_SPELLS);
     for(Unit::AuraList::iterator i = mReflectSpells.begin(); i != mReflectSpells.end(); ++i)

@@ -2918,7 +2918,6 @@ uint32 Player::TeamForRace(uint8 race)
     return 0;
 }
 
-
 void Player::setFactionForRace(uint8 race)
 {
     m_team = TeamForRace(race);
@@ -3493,7 +3492,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     }
 
     _RemoveStatsMods();
-    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT); 
+    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(false);
 

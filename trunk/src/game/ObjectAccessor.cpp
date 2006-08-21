@@ -480,4 +480,3 @@ namespace MaNGOS
         i_creature.DestroyForPlayer(&i_player);
     }
 }
-

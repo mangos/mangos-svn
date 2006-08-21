@@ -222,10 +222,10 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         // played time
         { CMSG_PLAYED_TIME,      STATUS_LOGGEDIN, &WorldSession::HandlePlayedTime                   },
 
-	// new inspect
+        // new inspect
         { CMSG_INSPECT,   STATUS_LOGGEDIN, &WorldSession::HandleInspectOpcode                   },
 
-	// new inspect stats
+        // new inspect stats
         { MSG_INSPECT_HONOR_STATS,   STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode                   },
 
         // new

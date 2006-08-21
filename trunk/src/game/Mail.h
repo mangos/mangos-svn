@@ -29,7 +29,6 @@
 #define MAIL_ERR_NOT_YOUR_TEAM 5
 #define MAIL_ERR_INTERNAL_ERROR 6
 
-
 struct Mail
 {
     uint32 messageID;
