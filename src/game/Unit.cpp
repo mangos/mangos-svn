@@ -88,14 +88,7 @@ Unit::~Unit()
 {
     AttackStop();
     RemoveAllAttackers();
-
-    // just to free memory
-    while(!m_Auras.empty())
-    {
-        delete m_Auras.begin()->second;
-        m_Auras.erase(m_Auras.begin());
-    }
-
+    RemoveAllAuras();
     // TODO: this isnt official behaviour
     // auras need to store the caster guid and use that if needed.
     RemoveAllCastAuras();
