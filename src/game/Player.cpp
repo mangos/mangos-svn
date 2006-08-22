@@ -6024,8 +6024,16 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
 
             if( type == INVTYPE_WEAPON || type == INVTYPE_WEAPONOFFHAND )
             {
-                if(eslot == EQUIPMENT_SLOT_OFFHAND && !HasSpell( SPELL_PASSIVE_DUAL_WIELD ))
-                    return EQUIP_ERR_CANT_DUAL_WIELD;
+                if(eslot == EQUIPMENT_SLOT_OFFHAND)
+                {
+                    if(!HasSpell( SPELL_PASSIVE_DUAL_WIELD ))
+                        return EQUIP_ERR_CANT_DUAL_WIELD;
+
+                    Item *mainItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
+                    if(mainItem && mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON)
+                        return EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED;
+                }
+
             }
             if( type == INVTYPE_SHIELD )
             {
