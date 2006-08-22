@@ -488,6 +488,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SaveEnchant();
         void LoadEnchant();
         void LoadCorpse();
+        void LoadPet();
         void RemoveAreaAurasFromGroup();
 
         /*********************************************************/
@@ -944,7 +945,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadInventory();
         void _LoadMail();
         void _LoadQuestStatus();
-        void _LoadPet();
         void _LoadReputation();
         void _LoadSpells();
         void _LoadTutorials();
