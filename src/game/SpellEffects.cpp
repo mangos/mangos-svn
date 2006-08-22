@@ -793,8 +793,9 @@ void Spell::EffectSummon(uint32 i)
         name = ((Player*)m_caster)->GetName();
     else
         name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-    name.append("\\'s Pet");
+    name.append("'s Pet");
     spawnCreature->SetName( name );
+
     MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -983,8 +984,9 @@ void Spell::EffectSummonWild(uint32 i)
         name = ((Player*)m_caster)->GetName();
     else
         name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-    name.append("\\'s Pet");
+    name.append("'s Pet");
     spawnCreature->SetName( name );
+
     MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -993,7 +995,6 @@ void Spell::EffectSummonWild(uint32 i)
         m_caster->SetPet(spawnCreature);
         ((Player*)m_caster)->PetSpellInitialize();
     }
-
 }
 
 void Spell::EffectTeleUnitsFaceCaster(uint32 i)
@@ -1207,7 +1208,7 @@ void Spell::EffectSummonPet(uint32 i)
             name = ((Player*)m_caster)->GetName();
         else
             name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-        name.append("\\'s Pet");
+        name.append("'s Pet");
         NewSummon->SetName( name );
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
@@ -2089,7 +2090,7 @@ void Spell::EffectSummonCritter(uint32 i)
         name = ((Player*)m_caster)->GetName();
     else
         name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-    name.append("\\'s Pet");
+    name.append("'s Pet");
     critter->SetName( name );
     m_caster->SetPet(critter);
     MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)critter);
@@ -2119,7 +2120,7 @@ void Spell::EffectSummonDeadPet(uint32 i)
 
     std::string name;
     name = _player->GetName();
-    name.append("\\'s Pet");
+    name.append("'s Pet");
     pet->SetName( name );
     _player->PetSpellInitialize();
 
