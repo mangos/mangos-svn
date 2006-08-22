@@ -660,7 +660,6 @@ void Aura::HandleAddModifier(bool apply)
     else
     {
         SpellModList *p_mods = p_target->getSpellModList(spellInfo->EffectMiscValue[m_effIndex]);
-        if (!p_mods->size()) return;
         for (SpellModList::iterator itr = p_mods->begin(); itr != p_mods->end(); ++itr)
         {
             SpellModifier *mod = *itr;
