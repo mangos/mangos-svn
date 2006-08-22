@@ -160,24 +160,52 @@ bool Master::Run()
         // exit(1); go on with no RA
 
     }
-    // patch by SegaL. Only for HT and dual core. Ypu may apply it at your own risk.
-    //int Aff;
-    //Aff = sConfig.GetIntDefault("Affinity", 0);
-    //if(!Aff)
-    //{
-    //  sLog.outError("Affinity ID not defined");
-    //  exit(1);
-    //}
-    //else
-    //{
-    //  sLog.outString("Set Affinity running as %d", Aff);
-    //}
-    //HANDLE hProcess = GetCurrentProcess();
-    //SetProcessAffinityMask(hProcess,Aff);
-    //SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS);
 
     h.Add(&RAListenSocket);
     #endif
+
+    #ifdef WIN32
+    {
+        HANDLE hProcess = GetCurrentProcess();
+
+        uint32 Aff = sConfig.GetIntDefault("UseProcessors", 0);
+        if(Aff > 0)
+        {
+            uint32 appAff;
+            uint32 sysAff;
+
+            if(GetProcessAffinityMask(hProcess,&appAff,&sysAff))
+            {
+                uint32 curAff = Aff & appAff;                                  // remove non accassable processors
+
+                if(!curAff ) 
+                {
+                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessable for mangosd. Accessable processors bitmask (hex): %x",Aff,appAff);
+                }
+                else
+                {
+                    if(SetProcessAffinityMask(hProcess,curAff))
+                        sLog.outString("Using processors (bitmask, hex): %x", curAff);
+                    else
+                        sLog.outError("Can't set used processors (hex): %x",curAff);
+                }
+            }
+            sLog.outString("");
+        }
+
+        uint32 Prio = sConfig.GetIntDefault("ProcessPriority", 0);
+
+        if(Prio)
+        {
+            if(SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS))
+                sLog.outString("mangosd process priority class set to HIGH");
+            else
+                sLog.outError("ERROR: Can't set mangosd process priority class.");
+            sLog.outString("");
+        }
+    }
+    #endif
+
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
     while (!World::m_stopEvent)
