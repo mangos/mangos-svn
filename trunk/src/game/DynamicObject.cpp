@@ -125,7 +125,5 @@ void DynamicObject::Delete()
     m_PeriodicDamage = 0;
     m_PeriodicDamageTick = 0;
     RemoveFromWorld();
-    //FIX ME ,NEED TO DELETE
-    MapManager::Instance().GetMap(GetMapId())->Remove(this, true);
-    //Log::getSingleton( ).outError("Don't Forget FIX ME at DynamicObject.cpp \n");
+    ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }

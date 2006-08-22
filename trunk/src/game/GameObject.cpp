@@ -133,7 +133,7 @@ void GameObject::Delete()
     SendMessageToSet(&data,true);
     //TODO: set timestamp
     RemoveFromWorld();
-    MapManager::Instance().GetMap(GetMapId())->Remove(this, true);
+    ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 
 void GameObject::getFishLoot(Loot *fishloot)

@@ -126,7 +126,7 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     {
         pl->RemoveGameObject(obj->GetSpellId(),false);
         plTarget->RemoveGameObject(obj->GetSpellId(),false);
-        MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
+        ObjectAccessor::Instance().AddObjectToRemoveList(obj);
     }
 
     pl->SetUInt64Value(PLAYER_DUEL_ARBITER,0);

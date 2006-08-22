@@ -429,9 +429,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         delete result;
     }
 
-    sLog.outError("AddObject at CharacterHandler.cpp");
     MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
+    sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUID());
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
