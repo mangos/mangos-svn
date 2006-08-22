@@ -140,6 +140,11 @@ Player::Player (WorldSession *session): Unit()
 Player::~Player ()
 {
     DuelComplete();
+    
+    RemoveAllAuras();
+    // TODO: this isnt official behaviour
+    // auras need to store the caster guid and use that if needed.
+    RemoveAllCastAuras();
 
     uint32 eslot;
     for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)

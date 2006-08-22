@@ -88,10 +88,6 @@ Unit::~Unit()
 {
     AttackStop();
     RemoveAllAttackers();
-    RemoveAllAuras();
-    // TODO: this isnt official behaviour
-    // auras need to store the caster guid and use that if needed.
-    RemoveAllCastAuras();
 }
 
 void Unit::Update( uint32 p_time )
