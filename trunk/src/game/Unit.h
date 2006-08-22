@@ -400,7 +400,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint32 GetAttackTime(WeaponAttackType att) const { return (uint32)GetFloatValue(UNIT_FIELD_BASEATTACKTIME+att); }
         void SetAttackTime(WeaponAttackType att, uint32 val) { SetFloatValue(UNIT_FIELD_BASEATTACKTIME+att,val); }
-        void ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att, val, apply); }
+        void ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att, val, !apply); }
 
         // fuction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
