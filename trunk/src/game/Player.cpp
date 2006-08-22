@@ -8609,8 +8609,6 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadReputation();
 
-    _LoadPet();
-
     // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
     // Skip _ApplyAllItemMods(); -- applied in _LoadInventory() by EquipItem calls at item load
 
@@ -8783,7 +8781,7 @@ void Player::_LoadMail()
     }
 }
 
-void Player::_LoadPet()
+void Player::LoadPet()
 {
     uint64 pet_guid = GetPetGUID();
     if(pet_guid)
@@ -9154,18 +9152,7 @@ void Player::SavePet()
 {
     Creature* pet = GetPet();
     if(pet)
-    {
-        std::string name;
-        uint32 actState;
-        name = GetName();
-        name.append("\\'s Pet");
-        actState = STATE_RA_FOLLOW;
-
-        sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", GetGUIDLow() );
-        sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
-            pet->GetEntry(), GetGUIDLow(), pet->getLevel(), pet->GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-            pet->m_spells[0], pet->m_spells[1], pet->m_spells[2], pet->m_spells[3], actState, pet->GetPower(POWER_HAPPINESS), name.c_str());
-    }
+        pet->SaveToDB();
 }
 
 void Player::outDebugValues() const

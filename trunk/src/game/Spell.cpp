@@ -584,6 +584,8 @@ void Spell::cast()
     castResult = CanCast();
     if(castResult == 0)
     {
+        SendSpellCooldown();
+
         TakePower(mana);
         TakeCastItem();
         TakeReagents();
@@ -659,8 +661,6 @@ void Spell::cast()
                 reflect(*iunit);
             }
         }
-
-        SendSpellCooldown();
 
         if( ( IsAutoRepeat() || m_rangedShoot ) && m_caster->GetTypeId() == TYPEID_PLAYER )
             ((Player*)m_caster)->UpdateRangedSkillWeapon();
@@ -1121,10 +1121,7 @@ void Spell::TakeCastItem()
             return;
         ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
 
-        // Item can be destoyed in case single or many same items
-        uint16 pos = ((Player*)m_caster)->GetPosByGuid(proto->ItemId);
-        if(pos)
-            m_CastItem = ((Player*)m_caster)->GetItemByPos(pos);
+        m_CastItem = NULL;
     }
 }
 
@@ -1176,15 +1173,11 @@ void Spell::TakeReagents()
         uint32 itemcount = m_spellInfo->ReagentCount[x];
         if( p_caster->HasItemCount(itemid,itemcount) )
         {
-            // Cast item must be re-search if it same as reagent (it can be deleted)
-            bool refind = m_CastItem && m_CastItem->GetProto()->ItemId == itemid;
+            if(m_CastItem && m_CastItem->GetProto()->ItemId == itemid)
+                m_CastItem = NULL;
+
             p_caster->DestroyItemCount(itemid, itemcount, true);
 
-            uint16 pos = p_caster->GetPosByGuid(itemid);
-            if(pos)
-                m_CastItem = p_caster->GetItemByPos(pos);
-            else
-                m_CastItem = NULL;
         }
         else
         {
