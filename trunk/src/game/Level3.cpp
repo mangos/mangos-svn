@@ -975,6 +975,35 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         return true;
     }
 
+    if (!strcmp(args, "all_myclass"))
+    {
+        PSendSysMessage("%s - Learning all spells/skills for its class.", m_session->GetPlayer()->GetName());
+
+        uint32 family = 0;
+        switch(m_session->GetPlayer()->getClass())
+        {
+            case CLASS_WARRIOR: family = SPELLFAMILY_WARRIOR; break;
+            case CLASS_PALADIN: family = SPELLFAMILY_PALADIN; break;
+            case CLASS_HUNTER: family = SPELLFAMILY_HUNTER; break;
+            case CLASS_ROGUE: family = SPELLFAMILY_ROGUE; break;
+            case CLASS_PRIEST: family = SPELLFAMILY_PRIEST; break;
+            case CLASS_SHAMAN: family = SPELLFAMILY_SHAMAN; break;
+            case CLASS_MAGE: family = SPELLFAMILY_MAGE; break;
+            case CLASS_WARLOCK: family = SPELLFAMILY_WARLOCK; break;
+            case CLASS_DRUID: family = SPELLFAMILY_DRUID; break;
+            default: return true;
+        }
+
+        for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
+        {
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(i);
+            if (spellInfo && spellInfo->SpellFamilyName == family && !m_session->GetPlayer()->HasSpell(i))
+                m_session->GetPlayer()->learnSpell((uint16)i);
+        }
+
+        return true;
+    }
+
     Player* target = getSelectedPlayer();
     if(!target)
     {
@@ -1060,10 +1089,25 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         return true;
     }
 
-    char* citemId = strtok((char*)args, " ");
+    char* citemId = strtok((char*)args, " "); 
     char* ccount = strtok(NULL, " ");
-    uint32 itemId = atol(citemId);
+    uint32 itemId = atol(citemId); 
     uint32 count = 1;
+
+    if (itemId == 0)
+    {
+        char *citemName = strtok(NULL, "");
+        QueryResult *result = sDatabase.PQuery("SELECT entry FROM item_template WHERE name = '%s'", citemName);
+        if (!result)
+        {
+            WorldPacket data;
+            FillSystemMessageData(&data, m_session, fmtstring("Could not find '%s'", citemName));
+            m_session->SendPacket(&data);
+            return true;
+        }
+        itemId = result->Fetch()->GetUInt16();
+        delete result;
+    }
 
     if (ccount) { count = atol(ccount); }
     if (count < 1) { count = 1; }
@@ -1081,7 +1125,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         Item* item = pl->GetItemByPos(dest);
         if(item)
             item->SetBinding( false );
-
+        
         PSendSysMessage(LANG_ITEM_CREATED, itemId, count);
     }
     else
@@ -1238,7 +1282,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
         return false;
     }
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
-    sLog.outError(LANG_ADD_OBJ_LV3);
+    sLog.outDebug(LANG_ADD_OBJ_LV3);
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     if(strcmp(safe,"true") == 0)
