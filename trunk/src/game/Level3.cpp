@@ -1113,18 +1113,24 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     if (count < 1) { count = 1; }
 
     Player* pl = m_session->GetPlayer();
+    Player* plTarget = getSelectedPlayer();
+    if(!plTarget)
+        plTarget = pl;
 
     sLog.outDetail(LANG_ADDITEM, itemId, count);
     uint16 dest;
-    uint8 msg = pl->CanStoreNewItem( 0, NULL_SLOT, dest, itemId, count, false );
+    uint8 msg = plTarget->CanStoreNewItem( 0, NULL_SLOT, dest, itemId, count, false );
     if( msg == EQUIP_ERR_OK )
     {
-        pl->StoreNewItem( dest, itemId, count, true);
+        plTarget->StoreNewItem( dest, itemId, count, true);
 
-        // remove binding (let GM give it to another player)
-        Item* item = pl->GetItemByPos(dest);
-        if(item)
-            item->SetBinding( false );
+        // remove binding (let GM give it to another player later)
+        if(pl==plTarget)
+        {
+            Item* item = pl->GetItemByPos(dest);
+            if(item)
+                item->SetBinding( false );
+        }
         
         PSendSysMessage(LANG_ITEM_CREATED, itemId, count);
     }
@@ -1156,6 +1162,10 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     }
 
     Player* pl = m_session->GetPlayer();
+    Player* plTarget = getSelectedPlayer();
+    if(!plTarget)
+        plTarget = pl;
+
 
     sLog.outDetail(LANG_ADDITEMSET, itemsetId);
 
@@ -1177,15 +1187,18 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
 
         uint16 dest;
 
-        uint8 msg = pl->CanStoreNewItem( 0, NULL_SLOT, dest, itemId, 1, false );
+        uint8 msg = plTarget->CanStoreNewItem( 0, NULL_SLOT, dest, itemId, 1, false );
         if( msg == EQUIP_ERR_OK )
         {
-            pl->StoreNewItem( dest, itemId, 1, true);
+            plTarget->StoreNewItem( dest, itemId, 1, true);
 
-            // remove binding (let GM give it to another player)
-            Item* item = pl->GetItemByPos(dest);
-            if(item)
-                item->SetBinding( false );
+            // remove binding (let GM give it to another player later)
+            if(pl==plTarget)
+            {
+                Item* item = pl->GetItemByPos(dest);
+                if(item)
+                    item->SetBinding( false );
+            }
 
             PSendSysMessage(LANG_ITEM_CREATED, itemId, 1);
         }
