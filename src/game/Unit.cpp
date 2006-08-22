@@ -88,6 +88,17 @@ Unit::~Unit()
 {
     AttackStop();
     RemoveAllAttackers();
+
+    // just to free memory
+    while(!m_Auras.empty())
+    {
+        delete m_Auras.begin()->second;
+        m_Auras.erase(m_Auras.begin());
+    }
+
+    // TODO: this isnt official behaviour
+    // auras need to store the caster guid and use that if needed.
+    RemoveAllCastAuras();
 }
 
 void Unit::Update( uint32 p_time )
@@ -1569,6 +1580,14 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 
     Aur->_AddAura();
     m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
+
+    // save memory by only adding auras cast on others
+    if (Aur->GetCaster() != Aur->GetTarget())
+    {
+        AuraMap& c_Auras = Aur->GetCaster()->GetCastAuras();
+        c_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
+    }
+
     if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
     {
         m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
@@ -1825,7 +1844,11 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     }
     (*i).second->SetRemoveOnDeath(onDeath);
     (*i).second->_RemoveAura();
+    AuraMap& c_Auras = (*i).second->GetCaster()->GetCastAuras();
+    AuraMap::iterator ic = c_Auras.find(spellEffectPair((*i).second->GetId(), (*i).second->GetEffIndex()));
     delete (*i).second;
+    if (ic != c_Auras.end())
+        c_Auras.erase(ic);
     m_Auras.erase(i++);
     m_removedAuras++;                                       // internal count used by unit update
 }
@@ -1857,6 +1880,15 @@ void Unit::RemoveAllAuras()
     {
         AuraMap::iterator iter = m_Auras.begin();
         RemoveAura(iter);
+    }
+}
+
+void Unit::RemoveAllCastAuras()
+{
+    while (!m_CastAuras.empty())
+    {
+        AuraMap::iterator iter = m_CastAuras.begin();
+        iter->second->GetTarget()->RemoveAura(iter->second->GetId(), iter->second->GetEffIndex());
     }
 }
 
@@ -2410,6 +2442,8 @@ bool Unit::AttackStop()
 
     if(m_currentMeleeSpell)
         m_currentMeleeSpell->cancel();
+
+    
 
     return true;
 }

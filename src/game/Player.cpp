@@ -8650,6 +8650,7 @@ void Player::_LoadActions()
 void Player::_LoadAuras()
 {
     m_Auras.clear();
+    m_CastAuras.clear();
 
     for(uint8 i = 0; i < 48; i++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);

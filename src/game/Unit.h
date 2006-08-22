@@ -491,6 +491,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             if (s == JUST_DIED)
             {
                 RemoveAllAurasOnDeath();
+                UnsummonTotem();
             }
             if (m_deathState != ALIVE && s == ALIVE)
             {
@@ -518,6 +519,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAreaAurasByOthers(uint64 guid = 0);
 
         void RemoveAllAuras();
+        void RemoveAllCastAuras();
         void RemoveAllAurasOnDeath();
         //void SetAura(Aura* Aur){ m_Auras = Aur; }
         bool SetAurDuration(uint32 spellId, uint32 effindex, uint32 duration);
@@ -563,6 +565,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap& GetAuras( ) {return m_Auras;}
+        AuraMap& GetCastAuras( ) {return m_CastAuras;}
         AuraList& GetAurasByType(uint8 type) {return m_modAuras[type];}
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run);
@@ -606,6 +609,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         DeathState m_deathState;
 
         AuraMap m_Auras;
+        AuraMap m_CastAuras;
 
         std::list<Aura *> m_scAuras;                        // casted singlecast auras
         std::list<DynamicObject*> m_dynObj;
