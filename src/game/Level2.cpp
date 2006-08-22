@@ -278,7 +278,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
     unit->DeleteFromDB();
 
     ObjectAccessor::Instance().RemoveCreatureFromPlayerView(m_session->GetPlayer(),unit);
-    MapManager::Instance().GetMap(unit->GetMapId())->Remove(unit, true);
+    ObjectAccessor::Instance().AddObjectToRemoveList(unit);
 
     SendSysMessage("Creature Removed");
 

@@ -314,6 +314,9 @@ void World::SetInitialWorldSettings()
 
 void World::Update(time_t diff)
 {
+    // remove and delete all objects with delayed remove
+    ObjectAccessor::Instance().RemoveAllObjectsInRemoveList();
+
     for(int i = 0; i < WUPDATE_COUNT; i++)
         if(m_timers[i].GetCurrent()>=0)
             m_timers[i].Update(diff);

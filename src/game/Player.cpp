@@ -3427,7 +3427,7 @@ void Player::DuelComplete()
     {
         RemoveGameObject(obj->GetSpellId(),false);
         m_pDuel->RemoveGameObject(obj->GetSpellId(),false);
-        MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
+        ObjectAccessor::Instance().AddObjectToRemoveList(obj);
     }
 
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
@@ -9302,7 +9302,10 @@ void Player::UnsummonPet(bool remove)
     data << pet->GetGUID();
     SendMessageToSet (&data, true);
 
-    MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,remove);
+    if(remove)
+        ObjectAccessor::Instance().AddObjectToRemoveList(pet);
+    else
+        MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,remove);
 
     data.Initialize(SMSG_PET_SPELLS);
     data << uint64(0);

@@ -1886,11 +1886,7 @@ void Spell::EffectSummonObject(uint32 i)
             obj = ObjectAccessor::Instance().GetGameObject(*m_caster, guid);
 
         if(obj)
-        {
-
-            MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
-            obj = NULL;
-        }
+            ObjectAccessor::Instance().AddObjectToRemoveList(obj);
         m_caster->m_ObjectSlot[slot] = 0;
     }
 

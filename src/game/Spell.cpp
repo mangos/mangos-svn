@@ -835,7 +835,7 @@ void Spell::finish()
         data.Initialize(SMSG_DESTROY_OBJECT);
         data << (*i)->GetGUID();
         m_caster->SendMessageToSet(&data, true);
-        MapManager::Instance().GetMap((*i)->GetMapId())->Remove((*i), true);
+        ObjectAccessor::Instance().AddObjectToRemoveList(*i);
         m_AreaAura = false;
     }
     m_dynObjToDel.clear();
@@ -850,7 +850,7 @@ void Spell::finish()
         data.Initialize(SMSG_DESTROY_OBJECT);
         data << (*k)->GetGUID();
         m_caster->SendMessageToSet(&data, true);
-        MapManager::Instance().GetMap((*k)->GetMapId())->Remove((*k), true);
+        ObjectAccessor::Instance().AddObjectToRemoveList(*k);
     }
 
     m_ObjToDel.clear();*/
@@ -869,8 +869,14 @@ void Spell::SendCastResult(uint8 result)
     data.Initialize(SMSG_CAST_RESULT);
     data << m_spellInfo->Id;
     if(result != 0)
-        data << uint8(2);
-    data << result;
+    {
+        data << uint8(2);                                   // status = fail
+        data << uint8(result);                              // problem 
+
+        // first and second opt. argument (uint32 both), not work for me.
+    }
+    else
+        data << uint8(0);                                   // status = ok
 
     ((Player*)m_caster)->GetSession()->SendPacket(&data);
 }

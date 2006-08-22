@@ -110,6 +110,9 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
     if( m.size() == 0 )
         return;
 
+    // remove and delete all objects with delayed remove
+    ObjectAccessor::Instance().RemoveAllObjectsInRemoveList();
+
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         DEBUG_LOG("Unloader Crash1 check: (%p)",iter->second);

@@ -99,12 +99,8 @@ void Corpse::SaveToDB()
 void Corpse::DeleteFromWorld(bool remove)
 {
     ObjectAccessor::Instance().RemoveBonesFromPlayerView(this);
-    MapManager::Instance().GetMap(GetMapId())->Remove(this,false);
-
+    ObjectAccessor::Instance().AddObjectToRemoveList(this);
     RemoveFromWorld();
-
-    if(remove)
-        delete this;
 }
 
 void Corpse::DeleteFromDB()

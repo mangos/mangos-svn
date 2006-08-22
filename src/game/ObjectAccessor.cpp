@@ -199,6 +199,49 @@ ObjectAccessor::RemoveUpdateObject(Object *obj)
         i_objects.erase( iter );
 }
 
+void ObjectAccessor::AddObjectToRemoveList(Object *obj)
+{
+    assert(obj && (obj->GetTypeId()==TYPEID_CORPSE || obj->GetTypeId()==TYPEID_DYNAMICOBJECT
+        || obj->GetTypeId()==TYPEID_GAMEOBJECT && obj->GetTypeId()!=TYPEID_UNIT) && "Must be grid object.");
+
+    Guard guard(i_removeGuard);
+    i_objectsToRemove.insert(obj);
+    sLog.outDebug("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
+}
+void ObjectAccessor::RemoveAllObjectsInRemoveList()
+{
+    if(i_objectsToRemove.empty())
+        return;
+
+    Guard guard(i_removeGuard);
+    sLog.outDebug("Object remover 1 check.");
+    while(!i_objectsToRemove.empty())
+    {
+        Object* obj = *i_objectsToRemove.begin();
+        i_objectsToRemove.erase(i_objectsToRemove.begin());
+        switch(obj->GetTypeId())
+        {
+            case TYPEID_CORPSE:
+                MapManager::Instance().GetMap(obj->GetMapId())->Remove((Corpse*)obj,true);
+                break;
+            case TYPE_DYNAMICOBJECT:
+                MapManager::Instance().GetMap(obj->GetMapId())->Remove((DynamicObject*)obj,true);
+                break;
+            case TYPEID_GAMEOBJECT:
+                MapManager::Instance().GetMap(obj->GetMapId())->Remove((GameObject*)obj,true);
+                break;
+            case TYPEID_UNIT:
+                MapManager::Instance().GetMap(obj->GetMapId())->Remove((Creature*)obj,true);
+                break;
+            default:
+                sLog.outError("Non-grid object (TypeId: %u) in grid object removing list, ignored.",obj->GetTypeId());
+                break;
+        }
+    }
+    sLog.outDebug("Object remover 2 check.");
+}
+
+
 void
 ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)
 {

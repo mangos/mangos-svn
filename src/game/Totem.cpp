@@ -81,7 +81,7 @@ void Totem::UnSummon()
     if (owner)
         owner->RemoveAurasDueToSpell(m_spell);
 
-    MapManager::Instance().GetMap(this->GetMapId())->Remove((Creature*)this, true);
+    ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 
 void Totem::SetOwner(uint64 guid)
