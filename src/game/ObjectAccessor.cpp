@@ -199,10 +199,14 @@ ObjectAccessor::RemoveUpdateObject(Object *obj)
         i_objects.erase( iter );
 }
 
-void ObjectAccessor::AddObjectToRemoveList(Object *obj)
+void ObjectAccessor::AddObjectToRemoveList(Creature      *obj) { _AddObjectToRemoveList(obj); }
+void ObjectAccessor::AddObjectToRemoveList(GameObject    *obj) { _AddObjectToRemoveList(obj); }
+void ObjectAccessor::AddObjectToRemoveList(Corpse        *obj) { _AddObjectToRemoveList(obj); }
+void ObjectAccessor::AddObjectToRemoveList(DynamicObject *obj) { _AddObjectToRemoveList(obj); }
+
+void ObjectAccessor::_AddObjectToRemoveList(Object *obj)
 {
-    assert(obj && (obj->GetTypeId()==TYPEID_CORPSE || obj->GetTypeId()==TYPEID_DYNAMICOBJECT
-        || obj->GetTypeId()==TYPEID_GAMEOBJECT && obj->GetTypeId()!=TYPEID_UNIT) && "Must be grid object.");
+    if(!obj) return;
 
     Guard guard(i_removeGuard);
     i_objectsToRemove.insert(obj);
