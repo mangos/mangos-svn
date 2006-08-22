@@ -660,6 +660,7 @@ void Aura::HandleAddModifier(bool apply)
     else
     {
         SpellModList *p_mods = p_target->getSpellModList(spellInfo->EffectMiscValue[m_effIndex]);
+        if (!p_mods->size()) return;
         for (SpellModList::iterator itr = p_mods->begin(); itr != p_mods->end(); ++itr)
         {
             SpellModifier *mod = *itr;
@@ -1023,7 +1024,7 @@ void Aura::HandleFarSight(bool apply)
 
 void Aura::HandleAuraTracCreatures(bool apply)
 {
-    m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? m_modifier.m_miscvalue : 0 );
+    m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1) : 0 );
 }
 
 void Aura::HandleAuraTracResources(bool apply)

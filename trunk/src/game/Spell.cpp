@@ -1270,20 +1270,16 @@ uint8 Spell::CanCast()
     if(target)
     {
         //If m_immuneToDispel type contain this spell type, IMMUNE spell.
-        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_DISPEL].begin(), next; itr != target->m_spellImmune[IMMUNITY_DISPEL].end(); itr = next)
+        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_DISPEL].begin(), next; itr != target->m_spellImmune[IMMUNITY_DISPEL].end(); ++itr)
         {
-            next = itr;
-            next++;
             if((*itr)->type == m_spellInfo->Dispel)
             {
                 castResult = CAST_FAIL_IMMUNE;
                 break;
             }
         }
-        for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_MECHANIC].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); itr = next)
+        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_MECHANIC].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); ++itr)
         {
-            next = itr;
-            next++;
             if((*itr)->type == m_spellInfo->Mechanic)
             {
                 castResult = CAST_FAIL_IMMUNE;
