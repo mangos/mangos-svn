@@ -39,12 +39,19 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if ( pCreature )
     {
-        uint32 questStatus = Script->NPCDialogStatus(_player, pCreature);
-        if( questStatus > 6 )
+        uint32 questStatus = DIALOG_STATUS_NONE;
+
+        FactionTemplateResolver my_faction = pCreature->getFactionTemplateEntry();
+        FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+    
+        if( !my_faction.IsHostileTo(your_faction))          // not show quest status to enemies
         {
-            //uint32 defstatus = DIALOG_STATUS_CHAT;
-            uint32 defstatus = DIALOG_STATUS_NONE;
-            questStatus = pCreature->getDialogStatus(_player, defstatus);
+            questStatus = Script->NPCDialogStatus(_player, pCreature);
+            if( questStatus > 6 )
+            {
+                uint32 defstatus = pCreature->isServiceProvider() ? DIALOG_STATUS_CHAT : DIALOG_STATUS_NONE;
+                questStatus = pCreature->getDialogStatus(_player, defstatus);
+            }
         }
         _player->PlayerTalkClass->SendQuestStatus(questStatus, guid);
     }
@@ -59,6 +66,12 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(!pCreature)
+        return;
+
+    FactionTemplateResolver my_faction = pCreature->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+    
+    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
         return;
 
     if(Script->GossipHello( _player, pCreature ) )

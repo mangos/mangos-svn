@@ -95,6 +95,12 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         return;
     }
 
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+    
+    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+        return;
+
     CreatureInfo const *ci = unit->GetCreatureInfo();
 
     if (!ci)
@@ -187,6 +193,12 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     if(!unit) return;
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+    
+    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+        return;
 
     std::list<TrainerSpell*>::iterator titr;
 
@@ -301,6 +313,13 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: CMSG_GOSSIP_HELLO - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
         return;
     }
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+    
+    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+        return;
+
     if(!Script->GossipHello( _player, unit ))
     {
         unit->prepareGossipMenu(_player,0);
@@ -322,6 +341,13 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
         return;
     }
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+    
+    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+        return;
+
     if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
         unit->OnGossipSelect( _player, option );
 }
@@ -442,6 +468,19 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     uint64 npcGUID, itemGUID;
 
     recv_data >> npcGUID >> itemGUID;
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: CMSG_REPAIR_ITEM - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)), npcGUID );
+        return;
+    }
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+    
+    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+        return;
 
     if (itemGUID)
     {

@@ -703,10 +703,11 @@ enum SpellSchools
 #define LOCKTYPE_SLOW_OPEN              17
 #define LOCKTYPE_SLOW_CLOSE             18
 
-#define TRAINER_TYPE_GENERAL            0
-#define TRAINER_TYPE_TALENTS            1
+#define TRAINER_TYPE_CLASS              0
+#define TRAINER_TYPE_MOUNTS             1
 #define TRAINER_TYPE_TRADESKILLS        2
 #define TRAINER_TYPE_PETS               3
+
 
 #define SHAPESHIFT_FORM_CAT             1
 #define SHAPESHIFT_FORM_TREE            2
