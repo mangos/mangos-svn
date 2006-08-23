@@ -1089,9 +1089,9 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         return true;
     }
 
-    char* citemId = strtok((char*)args, " "); 
+    char* citemId = strtok((char*)args, " ");
     char* ccount = strtok(NULL, " ");
-    uint32 itemId = atol(citemId); 
+    uint32 itemId = atol(citemId);
     uint32 count = 1;
 
     if (itemId == 0)
@@ -1131,7 +1131,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
             if(item)
                 item->SetBinding( false );
         }
-        
+
         PSendSysMessage(LANG_ITEM_CREATED, itemId, count);
     }
     else
@@ -1165,7 +1165,6 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     Player* plTarget = getSelectedPlayer();
     if(!plTarget)
         plTarget = pl;
-
 
     sLog.outDetail(LANG_ADDITEMSET, itemsetId);
 

@@ -2432,8 +2432,6 @@ bool Unit::AttackStop()
     if(m_currentMeleeSpell)
         m_currentMeleeSpell->cancel();
 
-    
-
     return true;
 }
 

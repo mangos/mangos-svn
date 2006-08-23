@@ -176,9 +176,9 @@ bool Master::Run()
 
             if(GetProcessAffinityMask(hProcess,&appAff,&sysAff))
             {
-                uint32 curAff = Aff & appAff;                                  // remove non accassable processors
+                uint32 curAff = Aff & appAff;               // remove non accassable processors
 
-                if(!curAff ) 
+                if(!curAff )
                 {
                     sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessable for mangosd. Accessable processors bitmask (hex): %x",Aff,appAff);
                 }

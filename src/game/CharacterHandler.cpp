@@ -461,8 +461,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     pCurrChar->LoadEnchant();
 
     // Place charcter in world (and load zone) before some object loading
-    pCurrChar->LoadCorpse(); 
-    pCurrChar->LoadPet();    
+    pCurrChar->LoadCorpse();
+    pCurrChar->LoadPet();
 
 }
 
