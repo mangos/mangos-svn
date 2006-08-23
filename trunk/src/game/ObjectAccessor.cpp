@@ -212,6 +212,7 @@ void ObjectAccessor::_AddObjectToRemoveList(Object *obj)
     i_objectsToRemove.insert(obj);
     sLog.outDebug("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
 }
+
 void ObjectAccessor::RemoveAllObjectsInRemoveList()
 {
     if(i_objectsToRemove.empty())
@@ -244,7 +245,6 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
     }
     sLog.outDebug("Object remover 2 check.");
 }
-
 
 void
 ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)

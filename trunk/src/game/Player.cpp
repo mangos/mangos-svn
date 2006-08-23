@@ -140,7 +140,7 @@ Player::Player (WorldSession *session): Unit()
 Player::~Player ()
 {
     DuelComplete();
-    
+
     RemoveAllAuras();
     // TODO: this isnt official behaviour
     // auras need to store the caster guid and use that if needed.
@@ -2335,7 +2335,7 @@ void Player::SpawnCorpseBones()
     if(!corpse) return;
 
     corpse->ConvertCorpseToBones();
-    SaveToDB(); // prevent loading as ghost without corpse
+    SaveToDB();                                             // prevent loading as ghost without corpse
 }
 
 Corpse* Player::GetCorpse() const
@@ -2836,7 +2836,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     else if (z > (water_z - 2))
         m_isunderwater&= 0x7A;
 
-   //!in lava check
+    //!in lava check
     if ((z < (water_z - 0)) && (flag1 & 0x02))
         m_isunderwater|= 0x80;
 

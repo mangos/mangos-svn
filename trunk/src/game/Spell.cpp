@@ -871,7 +871,7 @@ void Spell::SendCastResult(uint8 result)
     if(result != 0)
     {
         data << uint8(2);                                   // status = fail
-        data << uint8(result);                              // problem 
+        data << uint8(result);                              // problem
 
         // first and second opt. argument (uint32 both), not work for me.
     }
