@@ -229,7 +229,7 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
             case TYPEID_CORPSE:
                 MapManager::Instance().GetMap(obj->GetMapId())->Remove((Corpse*)obj,true);
                 break;
-            case TYPE_DYNAMICOBJECT:
+            case TYPEID_DYNAMICOBJECT:
                 MapManager::Instance().GetMap(obj->GetMapId())->Remove((DynamicObject*)obj,true);
                 break;
             case TYPEID_GAMEOBJECT:

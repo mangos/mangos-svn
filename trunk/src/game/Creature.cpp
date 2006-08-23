@@ -331,6 +331,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 {
     PlayerMenu* pm=pPlayer->PlayerTalkClass;
     pm->ClearMenus();
+
     if(!m_goptions.size())
         LoadGossipOptions();
     GossipOption* gso;
@@ -348,6 +349,60 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                 if(!gossiptext)
                     cantalking=false;
             }
+            else
+            {
+                switch (gso->Action)
+                {
+                    case GOSSIP_OPTION_ARMORER:
+                        cantalking=false;                   // added in special mode
+                        break;
+                    case GOSSIP_OPTION_SPIRITHEALER:
+                        if( !pPlayer->isDead() )
+                            cantalking=false;
+                        break;
+                    case GOSSIP_OPTION_VENDOR:
+                    case GOSSIP_OPTION_STABLEPET:
+                        break;
+                    case GOSSIP_OPTION_TRAINER:
+                        /*
+                        switch(GetCreatureInfo()->trainer_type)
+                        {
+                            case TRAINER_TYPE_CLASS:
+                            case TRAINER_TYPE_PETS:
+                                if(pPlayer->getClass()!=GetCreatureInfo()->classNum)
+                                    cantalking=false;
+                                break;
+                            case TRAINER_TYPE_MOUNTS:
+                                //if(GetCreatureInfo()->trainer_spellOrRace && pPlayer->getRace() != GetCreatureInfo()->trainer_spellOrRace))
+                                //    cantalking=false;
+                                break;
+                            case TRAINER_TYPE_TRADESKILLS:
+                                // filed not exist in DB currently
+                                //if(GetCreatureInfo()->trainer_spellOrRace && !pPlayer->HasSpell(GetCreatureInfo()->trainer_spellOrRace))
+                                //    cantalking=false;
+                                break;
+                            default:
+                                sLog.outError("Creature %u (entry: %u) have trainer type %u",GetGUIDLow(),GetCreatureInfo()->Entry,GetCreatureInfo()->trainer_type);
+                                break;
+                        }
+                        */
+                        break;
+                    case GOSSIP_OPTION_QUESTGIVER:
+                    case GOSSIP_OPTION_TAXIVENDOR:
+                    case GOSSIP_OPTION_GUARD:
+                    case GOSSIP_OPTION_INNKEEPER:
+                    case GOSSIP_OPTION_BANKER:
+                    case GOSSIP_OPTION_PETITIONER:
+                    case GOSSIP_OPTION_TABARDVENDOR:
+                    case GOSSIP_OPTION_BATTLEFIELD:
+                    case GOSSIP_OPTION_AUCTIONEER:
+                        break;                              // no checks
+                    default:
+                        sLog.outError("Creature %u (entry: %u) have unknown gossip option %u",GetGUIDLow(),GetCreatureInfo()->Entry,gso->Action);
+                        break;
+                }
+            }
+
             if(gso->Option!="" && cantalking )
             {
                 pm->GetGossipMenu()->AddMenuItem((uint8)gso->Icon,gso->Option.c_str(), gossipid,gso->Action,false);
@@ -358,6 +413,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
     if(pm->GetGossipMenu()->MenuItemCount()==1 && ingso->Id==8 && GetGossipCount( ingso->GossipId )>0)
     {
         pm->ClearMenus();
+
         for( std::list<GossipOption*>::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
         {
             gso=*i;
