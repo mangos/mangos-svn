@@ -129,6 +129,12 @@ bool ChatHandler::HandleInfoCommand(const char* args)
 
 bool ChatHandler::HandleDismountCommand(const char* args)
 {
+    if(m_session->GetPlayer( )->isInFlight())
+    {
+        SendSysMessage(LANG_CHAR_IN_FLIGHT);
+        return true;
+    }
+
     m_session->GetPlayer( )->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
     m_session->GetPlayer( )->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT | UNIT_FLAG_DISABLE_MOVE);
     m_session->GetPlayer( )->SetPlayerSpeed(MOVE_RUN, 7.5, true);
