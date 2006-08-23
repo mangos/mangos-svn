@@ -104,25 +104,6 @@ struct DamageShield
     Unit *m_caster;
 };
 
-struct ProcTriggerDamage
-{
-    uint64 caster;
-    uint32 procDamage;
-    uint32 procChance;
-    uint32 procFlags;
-    uint32 procCharges;
-};
-
-struct ProcTriggerSpell
-{
-    uint32 trigger;
-    uint32 spellId;
-    uint64 caster;
-    uint32 procChance;
-    uint32 procFlags;
-    uint32 procCharges;
-};
-
 struct SpellImmune
 {
     uint32 type;
@@ -424,6 +405,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
         uint16 GetDefenceSkillValue() const;
         uint16 GetWeaponSkillValue(WeaponAttackType attType) const;
+        uint32 GetWeaponProcChance() const;
         MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const;
 
         bool isVendor()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
@@ -462,7 +444,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage);
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
-        void CastSpell(Unit* Victim, uint32 spellId, bool triggered);
+        void CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem = NULL);
 
         void DeMorph();
 

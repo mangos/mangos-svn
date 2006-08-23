@@ -710,16 +710,16 @@ void Player::Update( uint32 p_time )
             // default combat reach 10
             // TODO add weapon,skill check
 
-            float pldistance = 10.0f;
+            float pldistance = 25.0f;
 
-            if(getClass() == WARRIOR)
+            /*if(getClass() == WARRIOR)
                 pldistance += 1;
 
             if(GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND ) != 0)
                 pldistance += 2;
 
             if(GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS) != 0)
-                pldistance += 3;
+                pldistance += 3;*/
 
             if (isAttackReady(BASE_ATTACK))
             {
@@ -3749,8 +3749,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     for (int i = 0; i < 5; i++)
     {
         if(!proto->Spells[i].SpellId ) continue;
-        if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
-
+        
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
         {
@@ -3758,14 +3757,11 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
             continue;
         }
 
-        DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
+        if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
 
-        Spell spell(this, spellInfo, true, 0);
-
-        SpellCastTargets targets;
-        targets.setUnitTarget( Target );
-        spell.m_CastItem = item;
-        spell.prepare(&targets);
+        uint32 chance = spellInfo->procChance <= 100 ? spellInfo->procChance : GetWeaponProcChance();
+        if (chance > rand_chance())
+            this->CastSpell(Target, spellInfo->Id, true, item);
     }
 
     // item combat enchantments
@@ -3776,20 +3772,13 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
         uint32 enchant_display = pEnchant->display_type;
-        uint32 enchant_value1 = pEnchant->value1;
+        uint32 chance = pEnchant->value1 != 0 ? pEnchant->value1 : GetWeaponProcChance();
         uint32 enchant_spell_id = pEnchant->spellid;
         SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
         if(!enchantSpell_info) continue;
         if(enchant_display!=4 && enchant_display!=2 && this->IsItemSpellToCombat(enchantSpell_info))
-        {
-            if (urand(0,100) <= enchant_value1 || enchant_value1 == 0)
-            {
-                Spell spell(this, enchantSpell_info, true, 0);
-                SpellCastTargets targets;
-                targets.setUnitTarget(Target);
-                spell.prepare(&targets);
-            }
-        }
+            if (chance > rand_chance())
+                this->CastSpell(Target, enchantSpell_info->Id, true);
     }
 }
 
@@ -9433,3 +9422,4 @@ void Player::RemoveAreaAurasFromGroup()
                 Member->RemoveAreaAurasByOthers(m_TotemSlot[i]);
     }
 }
+

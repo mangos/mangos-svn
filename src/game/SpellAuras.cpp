@@ -206,10 +206,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 static void HandleShapeshiftBoosts(bool apply, Aura* aura);
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
-m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
-m_caster(caster),m_castItem(0), m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
+m_spellId(spellproto->Id), m_effIndex(eff), m_caster(caster),m_castItem(0), 
+m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_removeOnDeath(false)
+m_removeOnDeath(false), m_procCharges(0)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -239,8 +239,6 @@ m_removeOnDeath(false)
 
 Aura::~Aura()
 {
-    delete m_procSpell;
-    delete m_procdamage;
 }
 
 uint32 Aura::CalculateDamage()
@@ -707,19 +705,17 @@ void Aura::HandleAuraDummy(bool apply)
         Player *player = (Player*)m_caster;
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
         {
+            Unit::AuraList& tAuraPeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
             if(apply)
-            {
-                m_procdamage = new ProcTriggerDamage();
-                m_procdamage->caster = m_caster->GetGUID();
-                m_procdamage->procChance = GetSpellProto()->procChance;
-                m_procdamage->procDamage = uint32(0.035 * m_modifier.m_amount);
-                m_procdamage->procFlags = GetSpellProto()->procFlags;
-                m_procdamage->procCharges = GetSpellProto()->procCharges;
-            }
+                tAuraPeriodicDamage.push_back(this);
             else
+                tAuraPeriodicDamage.remove(this);
+
+            if(apply && !m_procCharges)
             {
-                delete m_procdamage;
-                m_procdamage = NULL;
+                m_procCharges = GetSpellProto()->procCharges;
+                if (!m_procCharges)
+                    m_procCharges = -1;
             }
         }
     }
@@ -1545,40 +1541,27 @@ void Aura::HandleReflectSpellsSchool(bool apply)
 
 void Aura::HandleAuraProcTriggerSpell(bool apply)
 {
-    if(apply)
+    if(apply && !m_procCharges)
     {
-        m_procSpell = new ProcTriggerSpell();
-        m_procSpell->spellId = GetSpellProto()->Id;
-        m_procSpell->caster = m_caster->GetGUID();
-        m_procSpell->trigger = GetSpellProto()->EffectTriggerSpell[GetEffIndex()];
-        m_procSpell->procChance = GetSpellProto()->procChance;
-        m_procSpell->procFlags = GetSpellProto()->procFlags;
-        m_procSpell->procCharges = GetSpellProto()->procCharges;
-    }
-    else
-    {
-        delete m_procSpell;
-        m_procSpell = NULL;
+        m_procCharges = GetSpellProto()->procCharges;
+        if (!m_procCharges)
+            m_procCharges = -1;
     }
 }
 
 void Aura::HandleAuraProcTriggerDamage(bool apply)
 {
-    if(apply)
+    if(apply && !m_procCharges)
     {
-        m_procdamage = new ProcTriggerDamage();
-        m_procdamage->caster = m_caster->GetGUID();
-        m_procdamage->procDamage = m_modifier.m_amount;
-        m_procdamage->procChance = GetSpellProto()->procChance;
-        m_procdamage->procFlags = GetSpellProto()->procFlags;
-        m_procdamage->procCharges = GetSpellProto()->procCharges;
-    }
-    else
-    {
-        delete m_procdamage;
-        m_procdamage = NULL;
+        m_procCharges = GetSpellProto()->procCharges;
+        if (!m_procCharges)
+            m_procCharges = -1;
     }
 }
+
+/*********************************************************/
+/***                   PERIODIC                        ***/
+/*********************************************************/
 
 void Aura::HandlePeriodicTriggerSpell(bool apply)
 {
