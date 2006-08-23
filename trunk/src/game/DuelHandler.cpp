@@ -61,7 +61,12 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         //
         //Set players factions. These factios are into factionstemplate.dbc
         pl->setFaction(BLUE_TEAM);                          //Blue faction
+        if(Creature* pet = pl->GetPet())
+            pet->setFaction(BLUE_TEAM);
+
         plTarget->setFaction(RED_TEAM);                     //Red faction
+        if(Creature* pet = plTarget->GetPet())
+            pet->setFaction(RED_TEAM);
 
         pl->StorePvpState();
         plTarget->StorePvpState();
