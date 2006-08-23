@@ -480,8 +480,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param );
         void AddWeaponProficiency(uint32 newflag) { m_WeaponProficiency |= newflag ;}
         void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag ;}
-        uint32 GetWeaponProficiency() { return m_WeaponProficiency;}
-        uint32 GetArmorProficiency() { return m_ArmorProficiency;}
+        uint32 GetWeaponProficiency() const { return m_WeaponProficiency;}
+        uint32 GetArmorProficiency() const { return m_ArmorProficiency;}
+        
         void UpdateEnchantTime(uint32 time);
         void ReducePoisonCharges(uint32 enchantId);
         void AddEnchantDuration(Item *item,uint32 slot,uint32 duration);

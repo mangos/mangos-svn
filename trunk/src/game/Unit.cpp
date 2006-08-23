@@ -411,7 +411,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     DEBUG_LOG("DealDamageEnd");
 }
 
-void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered)
+void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem)
 {
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
@@ -421,12 +421,16 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered)
         sLog.outError("WORLD: unknown spell id %i\n", spellId);
         return;
     }
+    
+    if (castItem)
+        DEBUG_LOG("WORLD: cast Item spellId - %i", spellId);
 
     Spell *spell = new Spell(this, spellInfo, triggered, 0);
     WPAssert(spell);
 
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );
+    spell->m_CastItem = castItem;
     spell->prepare(&targets);
     m_canMove = false;
     if (triggered) delete spell;
@@ -689,53 +693,6 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resist, WeaponAttackType attType)
 {
-    // this unit's proc trigger damage and spell
-    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
-    {
-        ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
-        if(procdamage)
-        {
-            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
-            if( (procdamage->procFlags == 0) && procdamage->procChance > rand_chance()
-                && (procdamage->procCharges > 0 || nocharges))
-            {
-                SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
-                if(!nocharges)
-                {
-                    procdamage->procCharges -= 1;
-                    if(procdamage->procCharges == 0)
-                        (*i).second->RemoveProcDamage();
-                }
-            }
-        }
-        if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
-        {
-            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
-            if((procspell->procFlags == 0) && procspell->procChance > rand_chance()
-                && (procspell->procCharges > 0 || nocharges))
-            {
-                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->trigger );
-
-                if(!spellInfo)
-                {
-                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->trigger);
-                    return;
-                }
-
-                Spell spell(this, spellInfo, true, 0);
-
-                SpellCastTargets targets;
-                targets.setUnitTarget( pVictim );
-                spell.prepare(&targets);
-                if(!nocharges)
-                {
-                    procspell->procCharges -= 1;
-                    if(procspell->procCharges == 0)
-                        (*i).second->RemoveProcSpell();
-                }
-            }
-        }
-    }
     MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim, attType);
     if (outcome == MELEE_HIT_MISS)
     {
@@ -853,100 +810,94 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     {
         *absorbDamage = absorb;
     }
-    // Fix me : when the procdamage->procCharges == 0 and nocharges == false,remove this aura.
-    // pVictim's proc trigger damage and spell
-    for (AuraMap::iterator i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); ++i)
+
+    // this unit's proc trigger damage
+    AuraList& mProcTriggerDamage = GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    for(AuraList::iterator i = mProcTriggerDamage.begin(), next; i != mProcTriggerDamage.end(); i = next)
     {
-        ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
-        if(procdamage)
+        next = i; next++;
+        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & 20) == 0) continue;
+        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if (chance > 100) chance = GetWeaponProcChance();
+        if (chance > rand_chance())
         {
-            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
-            if((procdamage->procFlags & 40) && procdamage->procChance > rand_chance()
-                && (procdamage->procCharges > 0 || nocharges))
+            this->SpellNonMeleeDamageLog(pVictim,(*i)->GetId(), uint32(0.035 * (*i)->GetModifier()->m_amount));
+            if ((*i)->m_procCharges != -1)
             {
-                pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
-                if(!nocharges)
+                (*i)->m_procCharges -= 1;
+                if((*i)->m_procCharges == 0)
                 {
-                    procdamage->procCharges -= 1;
-                    if(procdamage->procCharges == 0)
-                        (*i).second->RemoveProcDamage();
-                }
-            }
-        }
-        if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
-        {
-            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
-            if((procspell->procFlags & 40)  && procspell->procChance > rand_chance()
-                && (procspell->procCharges > 0 || nocharges))
-            {
-                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->trigger);
-
-                if(!spellInfo)
-                {
-                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->trigger);
-                    return;
-                }
-
-                Spell spell(pVictim, spellInfo, true, 0);
-
-                SpellCastTargets targets;
-                targets.setUnitTarget( this );
-                spell.prepare(&targets);
-
-                if((*i).second->GetProcSpell()->trigger == 26545)
-                    pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,(*i).second->CalculateDamage());
-                if(!nocharges)
-                {
-                    procspell->procCharges -= 1;
-                    if(procspell->procCharges == 0)
-                        (*i).second->RemoveProcSpell();
+                    RemoveAurasDueToSpell((*i)->GetId());
+                    next = mProcTriggerDamage.begin();
                 }
             }
         }
     }
-    // this unit's proc trigger damage and spell
-    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
+
+    // this unit's proc trigger spell
+    AuraList& mProcTriggerSpell = GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+    for(AuraList::iterator i = mProcTriggerSpell.begin(), next; i != mProcTriggerSpell.end(); i = next)
     {
-        ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
-        if(procdamage)
+        next = i; next++;
+        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & 20) == 0) continue;
+        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if (chance > 100) chance = GetWeaponProcChance();
+        if (chance > rand_chance())
         {
-            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
-            if( (procdamage->procFlags & 20) && procdamage->procChance > rand_chance()
-                && (procdamage->procCharges > 0 || nocharges))
+            this->CastSpell(pVictim, (*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()], true);
+            if ((*i)->m_procCharges != -1)
             {
-                SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
-                if(!nocharges)
+                (*i)->m_procCharges -= 1;
+                if((*i)->m_procCharges == 0)
                 {
-                    procdamage->procCharges -= 1;
-                    if(procdamage->procCharges == 0)
-                        (*i).second->RemoveProcDamage();
+                    RemoveAurasDueToSpell((*i)->GetId());
+                    next = mProcTriggerSpell.begin();
                 }
             }
         }
-        if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
+    }
+
+    // this victim's proc trigger damage
+    AuraList& vProcTriggerDamage = pVictim->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    for(AuraList::iterator i = vProcTriggerDamage.begin(), next; i != vProcTriggerDamage.end(); i = next)
+    {
+        next = i; next++;
+        if(((*i)->GetSpellProto()->procFlags & 40) == 0) continue;
+        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if (chance > 100) chance = GetWeaponProcChance();
+        if (chance > rand_chance())
         {
-            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
-            if((procspell->procFlags & 20) && procspell->procChance > rand_chance()
-                && (procspell->procCharges > 0 || nocharges))
+            pVictim->SpellNonMeleeDamageLog(this,(*i)->GetId(), uint32(0.035 * (*i)->GetModifier()->m_amount));
+            if ((*i)->m_procCharges != -1)
             {
-                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->trigger );
-
-                if(!spellInfo)
+                (*i)->m_procCharges -= 1;
+                if((*i)->m_procCharges == 0)
                 {
-                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->trigger);
-                    return;
+                    RemoveAurasDueToSpell((*i)->GetId());
+                    next = mProcTriggerDamage.begin();
                 }
+            }
+        }
+    }
 
-                Spell spell(this, spellInfo, true, 0);
-
-                SpellCastTargets targets;
-                targets.setUnitTarget( pVictim );
-                spell.prepare(&targets);
-                if(!nocharges)
+    // this victims's proc trigger spell
+    AuraList& vProcTriggerSpell = pVictim->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+    for(AuraList::iterator i = vProcTriggerSpell.begin(), next; i != vProcTriggerSpell.end(); i = next)
+    {
+        next = i; next++;
+        if(((*i)->GetSpellProto()->procFlags & 40) == 0) continue;
+        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if (chance > 100) chance = GetWeaponProcChance();
+        if (chance > rand_chance())
+        {
+            pVictim->CastSpell(this, (*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()], true);
+            if ((*i)->m_procCharges != -1)
+            {
+                (*i)->m_procCharges -= 1;
+                if((*i)->m_procCharges == 0)
                 {
-                    procspell->procCharges -= 1;
-                    if(procspell->procCharges == 0)
-                        (*i).second->RemoveProcSpell();
+                    RemoveAurasDueToSpell((*i)->GetId());
+                    next = mProcTriggerSpell.begin();
                 }
             }
         }
@@ -2729,4 +2680,14 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
         }
     }
 
+}
+
+uint32 Unit::GetWeaponProcChance() const
+{
+    // normalized proc chance for weapon attack speed
+    if(isAttackReady(BASE_ATTACK))
+        return uint32(GetAttackTime(BASE_ATTACK) * 1.82 / 1000);
+    else if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+        return uint32(GetAttackTime(OFF_ATTACK) * 1.82 / 1000);
+    return 0;
 }

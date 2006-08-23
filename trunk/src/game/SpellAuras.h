@@ -184,20 +184,15 @@ class Aura
         void _RemoveAura();
         uint32 CalculateDamage();
 
-        ProcTriggerSpell* GetProcSpell() { return m_procSpell; }
-        ProcTriggerDamage* GetProcDamage() { return m_procdamage; }
-        void RemoveProcSpell() { delete m_procSpell; m_procSpell = NULL; }
-        void RemoveProcDamage() { delete m_procdamage; m_procdamage = NULL; }
         void TriggerSpell();
         void SendCoolDownEvent();
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
         void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }
 
-    private:
+        int32 m_procCharges;
 
-        ProcTriggerSpell *m_procSpell;
-        ProcTriggerDamage *m_procdamage;
+    private:
         Modifier m_modifier;
         uint32 m_spellId;
         uint32 m_effIndex;
