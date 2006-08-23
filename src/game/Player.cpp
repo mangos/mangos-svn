@@ -3420,6 +3420,19 @@ void Player::DuelComplete()
     //Restore to correct factiontemplate
     setFactionForRace(getRace());
     m_pDuel->setFactionForRace(m_pDuel->getRace());
+    //Restore pet factiontemplate
+    if(Creature* pet = GetPet())
+    {
+        pet->AttackStop();
+        pet->RemoveAllAttackers();
+        pet->setFaction(getFaction());
+    }
+    if(Creature* pet = m_pDuel->GetPet())
+    {
+        pet->AttackStop();
+        pet->RemoveAllAttackers();
+        pet->setFaction(m_pDuel->getFaction());
+    }
     #endif
 
     //ResurrectPlayer();
