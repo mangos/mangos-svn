@@ -149,7 +149,7 @@ void PlayerMenu::CloseGossip()
     sLog.outDebug( "WORLD: Sent SMSG_GOSSIP_COMPLETE" );
 }
 
-void PlayerMenu::SendPointOfInterest( float X, float Y, Poi_Icon Icon, uint32 Flags, uint32 Data, char const * locName )
+void PlayerMenu::SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, char const * locName )
 {
     WorldPacket data;
 

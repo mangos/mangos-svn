@@ -227,7 +227,7 @@ int32 GetDuration(SpellEntry *spellInfo)
 uint32 FindSpellRank(uint32 spellId)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
-    if(!spellInfo) return false;
+    if(!spellInfo) return 0;
     for(int i=0;i<8;i++)
     {
         if(strcmp(spellInfo->Rank[i], "") != 0)

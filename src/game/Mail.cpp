@@ -342,13 +342,17 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << uint32(0);                                  // Unknown
         if ((*itr)->item != 0)
         {
-            Item* i = objmgr.GetMItem((*itr)->item);
-            data << uint32(i->GetUInt32Value(OBJECT_FIELD_ENTRY));
+            if(Item* i = objmgr.GetMItem((*itr)->item))
+                data << uint32(i->GetUInt32Value(OBJECT_FIELD_ENTRY));
+            else
+            {
+                sLog.outError("Mail to %s marked as having item (mail item idx: %u), but item not found.",pl->GetName(),(*itr)->item);
+                data << uint32(0);
+            }
         }
         else
-        {
             data << uint32(0);
-        }
+
         data << uint32(0);                                  // Unknown
         data << uint32(0);                                  // Unknown
         data << uint32(0);                                  // Unknown
