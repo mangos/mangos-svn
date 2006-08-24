@@ -165,7 +165,7 @@ class MANGOS_DLL_SPEC PlayerMenu
 
         void SendGossipMenu( uint32 TitleTextId, uint64 npcGUID );
         void CloseGossip();
-        void SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char * locName );
+        void SendPointOfInterest( float X, float Y, Poi_Icon Icon, uint32 Flags, uint32 Data, const char * locName );
         void SendTalking( uint32 textID );
         void SendTalking( char const * title, char const * text );
 

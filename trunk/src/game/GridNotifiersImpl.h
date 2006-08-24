@@ -103,8 +103,7 @@ template<>
 inline void
 MaNGOS::ObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
-    std::map<OBJECT_HANDLE, Creature*> tmp(m);              // required for grid->grid (group) move case
-    for(std::map<OBJECT_HANDLE, Creature*>::iterator iter=tmp.begin(); iter != tmp.end(); ++iter)
+    for(std::map<OBJECT_HANDLE, Creature*>::iterator iter=m.begin(); iter != m.end(); ++iter)
         if(!MaNGOS::Utilities::IsSpiritHealer(iter->second))
             iter->second->Update(i_timeDiff);
 }

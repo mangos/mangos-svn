@@ -492,29 +492,11 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     Cell new_cell = RedZone::GetZone(new_val);
     creature->Relocate(x, y, z, ang);
 
-    if( creature->hasUnitState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING) )
-    {
-        if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
-        {
-            DEBUG_LOG("Creature "I64FMT" moved from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", creature->GetGUID(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+    // delay creature move from grid/cell to grid/cell moves
+    if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
+        AddCreatureToMoveList(creature,old_cell,new_cell);
 
-            {
-                assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
-                WriteGuard guard(i_info[old_cell.GridX()][old_cell.GridY()]->i_lock);
-                (*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).RemoveGridObject<Creature>(creature, creature->GetGUID());
-                if( !old_cell.DiffGrid(new_cell) )
-                    (*i_grids[new_cell.GridX()][new_cell.GridY()])(new_cell.CellX(), new_cell.CellY()).AddGridObject<Creature>(creature, creature->GetGUID());
-            }
-
-            if( old_cell.DiffGrid(new_cell) )
-            {
-                EnsureGridCreated(GridPair(new_cell.GridX(), new_cell.GridY()));
-                WriteGuard guard(i_info[new_cell.GridX()][new_cell.GridY()]->i_lock);
-                (*i_grids[new_cell.GridX()][new_cell.GridY()])(new_cell.CellX(), new_cell.CellY()).AddGridObject<Creature>(creature, creature->GetGUID());
-            }
-        }
-    }
-    else
+    if( !creature->hasUnitState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
     {
         CellLock<ReadGuard> cell_lock(new_cell, new_val);
         MaNGOS::CreatureRelocationNotifier relocationNotifier(*creature);
@@ -522,7 +504,55 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
         TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, ContainerMapList<Player> > c2p_relocation(relocationNotifier);
         cell_lock->Visit(cell_lock, c2p_relocation, *this);
     }
+}
 
+void Map::AddCreatureToMoveList(Creature *c, Cell old_cell, Cell new_cell)
+{
+    if(!c) return;
+
+    i_creaturesToMove.push_back(CreatureMover(c,old_cell,new_cell));
+    sLog.outDebug("Creature (GUID: %u Entry: %u ) added to grid-to-grid moving list.",c->GetGUIDLow(),c->GetCreatureInfo()->Entry);
+}
+
+void Map::MoveAllCreaturesInMoveList()
+{
+    if(i_creaturesToMove.empty())
+        return;
+
+    sLog.outDebug("Creature mover 1 check.");
+    while(!i_creaturesToMove.empty())
+    {
+        CreatureMover cm = i_creaturesToMove.front();
+        i_creaturesToMove.pop_front();
+
+        {
+            DEBUG_LOG("Creature "I64FMT" moved from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", cm.creature->GetGUID(), cm.old_cell.GridX(), cm.old_cell.GridY(), cm.old_cell.CellX(), cm.old_cell.CellY(), cm.new_cell.GridX(), cm.new_cell.GridY(), cm.new_cell.CellX(), cm.new_cell.CellY());
+
+            {
+                assert(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()] != NULL);
+                WriteGuard guard(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()]->i_lock);
+                if( !cm.old_cell.DiffGrid(cm.new_cell) )
+                {
+                    (*i_grids[cm.old_cell.GridX()][cm.old_cell.GridY()])(cm.old_cell.CellX(), cm.old_cell.CellY()).RemoveGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                    (*i_grids[cm.new_cell.GridX()][cm.new_cell.GridY()])(cm.new_cell.CellX(), cm.new_cell.CellY()).AddGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                }
+            }
+
+            if( cm.old_cell.DiffGrid(cm.new_cell) )
+            {
+                {
+                    WriteGuard guard(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()]->i_lock);
+                    (*i_grids[cm.old_cell.GridX()][cm.old_cell.GridY()])(cm.old_cell.CellX(), cm.old_cell.CellY()).RemoveGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                }
+                {
+                    EnsureGridCreated(GridPair(cm.new_cell.GridX(), cm.new_cell.GridY()));
+                    WriteGuard guard(i_info[cm.new_cell.GridX()][cm.new_cell.GridY()]->i_lock);
+                    (*i_grids[cm.new_cell.GridX()][cm.new_cell.GridY()])(cm.new_cell.CellX(), cm.new_cell.CellY()).AddGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                }
+            }
+        }
+    }
+    sLog.outDebug("Creature mover 2 check.");
 }
 
 bool Map::UnloadGrid(const uint32 &x, const uint32 &y)

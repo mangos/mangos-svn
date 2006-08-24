@@ -90,8 +90,7 @@ namespace MaNGOS
 
         template<class T> void updateObjects(std::map<OBJECT_HANDLE, T *> &m)
         {
-            std::map<OBJECT_HANDLE, T *> tmp(m);            // required for grid->grid (group) move case
-            for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=tmp.begin(); iter != tmp.end(); ++iter)
+            for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=m.begin(); iter != m.end(); ++iter)
                 iter->second->Update(i_timeDiff);
         }
 
