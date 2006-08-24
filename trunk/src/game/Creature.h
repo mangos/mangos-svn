@@ -165,7 +165,9 @@ struct CreatureInfo
     uint32  family;
     float   bounding_radius;
     uint32  trainer_type;
+    uint32  trainer_spell;
     uint32  classNum;
+    uint32  race;
     float   minrangedmg;
     float   maxrangedmg;
     uint32  rangedattackpower;

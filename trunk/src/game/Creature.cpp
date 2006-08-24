@@ -336,6 +336,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
         LoadGossipOptions();
     GossipOption* gso;
     GossipOption* ingso;
+
     for( std::list<GossipOption*>::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
     {
         gso=*i;
@@ -353,6 +354,13 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
             {
                 switch (gso->Action)
                 {
+                    case GOSSIP_OPTION_QUESTGIVER:
+                    {
+                        uint32 quest_status = getDialogStatus(pPlayer,DIALOG_STATUS_NONE);
+
+                        if(quest_status == DIALOG_STATUS_NONE || quest_status == DIALOG_STATUS_UNAVAILABLE)
+                            cantalking=false;
+                    };  break;
                     case GOSSIP_OPTION_ARMORER:
                         cantalking=false;                   // added in special mode
                         break;
@@ -361,38 +369,49 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                             cantalking=false;
                         break;
                     case GOSSIP_OPTION_VENDOR:
-                    case GOSSIP_OPTION_STABLEPET:
+                        if(!GetItemCount())
+                        {
+                            sLog.outError("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.",
+                                GetGUIDLow(),GetCreatureInfo()->Entry);
+                            cantalking=false;
+                        }
                         break;
                     case GOSSIP_OPTION_TRAINER:
-                        /*
+                        if(m_tspells.empty())
+                        {
+                            sLog.outError("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
+                                GetGUIDLow(),GetCreatureInfo()->Entry);
+                            cantalking=false;
+                        }
                         switch(GetCreatureInfo()->trainer_type)
                         {
                             case TRAINER_TYPE_CLASS:
-                            case TRAINER_TYPE_PETS:
                                 if(pPlayer->getClass()!=GetCreatureInfo()->classNum)
                                     cantalking=false;
                                 break;
+                            case TRAINER_TYPE_PETS:
+                                if(pPlayer->getClass()!=HUNTER)
+                                    cantalking=false;
+                                break;
                             case TRAINER_TYPE_MOUNTS:
-                                //if(GetCreatureInfo()->trainer_spellOrRace && pPlayer->getRace() != GetCreatureInfo()->trainer_spellOrRace))
-                                //    cantalking=false;
+                                if(GetCreatureInfo()->race && pPlayer->getRace() != GetCreatureInfo()->race)
+                                    cantalking=false;
                                 break;
                             case TRAINER_TYPE_TRADESKILLS:
-                                // filed not exist in DB currently
-                                //if(GetCreatureInfo()->trainer_spellOrRace && !pPlayer->HasSpell(GetCreatureInfo()->trainer_spellOrRace))
-                                //    cantalking=false;
+                                if(GetCreatureInfo()->trainer_spell && !pPlayer->HasSpell(GetCreatureInfo()->trainer_spell))
+                                    cantalking=false;
                                 break;
                             default:
                                 sLog.outError("Creature %u (entry: %u) have trainer type %u",GetGUIDLow(),GetCreatureInfo()->Entry,GetCreatureInfo()->trainer_type);
                                 break;
                         }
-                        */
                         break;
-                    case GOSSIP_OPTION_QUESTGIVER:
                     case GOSSIP_OPTION_TAXIVENDOR:
                     case GOSSIP_OPTION_GUARD:
                     case GOSSIP_OPTION_INNKEEPER:
                     case GOSSIP_OPTION_BANKER:
                     case GOSSIP_OPTION_PETITIONER:
+                    case GOSSIP_OPTION_STABLEPET:
                     case GOSSIP_OPTION_TABARDVENDOR:
                     case GOSSIP_OPTION_BATTLEFIELD:
                     case GOSSIP_OPTION_AUCTIONEER:
@@ -410,6 +429,8 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
             }
         }
     }
+
+    /*
     if(pm->GetGossipMenu()->MenuItemCount()==1 && ingso->Id==8 && GetGossipCount( ingso->GossipId )>0)
     {
         pm->ClearMenus();
@@ -424,6 +445,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
             }
         }
     }
+    */
 }
 
 void Creature::sendPreparedGossip( Player* player)
@@ -431,10 +453,14 @@ void Creature::sendPreparedGossip( Player* player)
     if(!player)
         return;
     GossipMenu* gossipmenu = player->PlayerTalkClass->GetGossipMenu();
+
+    if(!isServiceProvider())
+        player->SendPreparedQuest( GetGUID() );
+
     if ( !gossipmenu || gossipmenu->MenuItemCount() == 0 )
         return;
 
-    if ( gossipmenu->MenuItemCount() == 1 )
+    if ( gossipmenu->MenuItemCount() == 1 && gossipmenu->MenuItemAction(0) != GOSSIP_OPTION_INNKEEPER )
         OnGossipSelect( player, 0 );
     else
         player->PlayerTalkClass->SendGossipMenu( GetNpcTextId(), GetGUID() );
