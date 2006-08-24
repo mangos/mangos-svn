@@ -49,7 +49,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
             questStatus = Script->NPCDialogStatus(_player, pCreature);
             if( questStatus > 6 )
             {
-                uint32 defstatus = pCreature->isServiceProvider() ? DIALOG_STATUS_CHAT : DIALOG_STATUS_NONE;
+                uint32 defstatus = DIALOG_STATUS_NONE;
                 questStatus = pCreature->getDialogStatus(_player, defstatus);
             }
         }
