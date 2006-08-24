@@ -101,6 +101,13 @@ MapManager::Update(time_t diff)
     FlightMaster::Instance().FlightReportUpdate(diff);
 }
 
+void MapManager::MoveAllCreaturesInMoveList()
+{
+    for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
+        iter->second->MoveAllCreaturesInMoveList();
+}
+
+
 bool MapManager::ExistMAP(int mapid, float x,float y)
 {
     GridPair p = MaNGOS::ComputeGridPair(x,y);

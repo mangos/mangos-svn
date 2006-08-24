@@ -77,11 +77,17 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
         SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
         return true;
     }
-    uint32 icon = atol((char*)args);
+
+    char* icon_text = strtok((char*)args, " ");
+    uint32 icon = atol(icon_text);
     if ( icon < 0 )
         icon = 0;
-    sLog.outDetail("Command : POI, NPC = %u, icon = %u", target->GetGUID(), icon);
-    pPlayer->PlayerTalkClass->SendPointOfInterest(target->GetPositionX(), target->GetPositionY(), icon, 6, 30, "Test POI");
+
+    char* flags_text = strtok(NULL, " ");
+    uint32 flags = atol(flags_text);
+
+    sLog.outDetail("Command : POI, NPC = %u, icon = %u flags = %u", target->GetGUID(), icon,flags);
+    pPlayer->PlayerTalkClass->SendPointOfInterest(target->GetPositionX(), target->GetPositionY(), Poi_Icon(icon), flags, 30, "Test POI");
     return true;
 }
 

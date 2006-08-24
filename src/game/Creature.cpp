@@ -542,7 +542,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
     {
         float x,y;
         bool findnpc=false;
-        uint32 icon=0;
+        Poi_Icon icon = ICON_POI_0;
         QueryResult *result;
         Field *fields;
         uint32 mapid=GetMapId();

@@ -194,7 +194,7 @@ void Corpse::UpdateForPlayer(Player* player, bool first)
         {
             std::string corpsename = player->GetName();
             corpsename.append(" corpse.");
-            player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 6, 30, corpsename.c_str());
+            player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 6, 30, corpsename.c_str());
         }
 
         m_POI = POI_range;
@@ -209,7 +209,7 @@ void Corpse::ConvertCorpseToBones()
 
     // Removing outdated POI if at same map
     if(player && player->GetMapId() == GetMapId())
-        player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 0, 30, "" );
+        player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 0, 30, "" );
 
     DEBUG_LOG("Deleting Corpse and swpaning bones.\n");
 

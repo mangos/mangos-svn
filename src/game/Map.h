@@ -68,6 +68,16 @@ typedef struct
     float Z[MAP_RESOLUTION][MAP_RESOLUTION];
 }GridMap;
 
+struct CreatureMover
+{
+    CreatureMover(Creature* c, Cell old_c, Cell new_c) : creature(c),old_cell(old_c), new_cell(new_c) {}
+
+    Creature* creature;
+    Cell old_cell;
+    Cell new_cell;
+};
+
+
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
     public:
@@ -150,7 +160,11 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
             return GetZoneId(GetAreaFlag(x,y));
         }
 
+        void MoveAllCreaturesInMoveList();
     private:
+        void AddCreatureToMoveList(Creature *c, Cell old_cell, Cell new_cell);
+        std::list<CreatureMover> i_creaturesToMove;
+
         bool loaded(const GridPair &) const;
         void EnsureGridLoadedForPlayer(const Cell&, Player*, bool add_player);
         void NotifyPlayerVisibility(const Cell &, const CellPair &, Player *);
