@@ -30,6 +30,7 @@
 #define LANG_GMS_ON_SRV                  "There are following active GMs on this server:"
 #define LANG_GMS_NOT_LOGGED              "There are no GMs currently logged in on this server."
 #define LANG_CHAR_IN_FLIGHT              "You are flying and can't do dismount."
+#define LANG_CHAR_NON_MOUNTED            "You are not mounted and can't do dismount."
 
 // alliance ranks
 #define LANG_ALI_PRIVATE                 "Private "
