@@ -151,7 +151,8 @@ struct QuestInfo
     uint32 Type;
     uint32 RequiredRaces;
     uint32 RequiredClass;
-    uint32 RequiredTradeskill;
+    uint32 RequiredSkill;
+    uint32 RequiredSkillValue;
     uint32 RequiredRepFaction;
     uint32 RequiredRepValue;
     uint32 LimitTime;
