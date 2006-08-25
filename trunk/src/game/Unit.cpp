@@ -421,7 +421,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                         remove = false;
                 if (remove)
                 {
-                    RemoveAurasDueToSpell(i->second->GetId());
+                    pVictim->RemoveAurasDueToSpell(i->second->GetId());
                     next = vAuras.begin();
                 }
             }
@@ -893,7 +893,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 (*i)->m_procCharges -= 1;
                 if((*i)->m_procCharges == 0)
                 {
-                    RemoveAurasDueToSpell((*i)->GetId());
+                    pVictim->RemoveAurasDueToSpell((*i)->GetId());
                     next = vProcTriggerDamage.begin();
                 }
             }
@@ -916,7 +916,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 (*i)->m_procCharges -= 1;
                 if((*i)->m_procCharges == 0)
                 {
-                    RemoveAurasDueToSpell((*i)->GetId());
+                    pVictim->RemoveAurasDueToSpell((*i)->GetId());
                     next = vProcTriggerSpell.begin();
                 }
             }
