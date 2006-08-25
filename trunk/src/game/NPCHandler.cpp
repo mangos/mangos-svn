@@ -101,6 +101,9 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
         return;
 
+    if(!unit->isCanTrainingOf(_player,true))
+        return;
+
     CreatureInfo const *ci = unit->GetCreatureInfo();
 
     if (!ci)
@@ -451,6 +454,7 @@ void WorldSession::SendBindPoint()
     data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
     data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
     SendPacket( &data );
+    _player->PlayerTalkClass->CloseGossip();
 }
 
 //Need fix
