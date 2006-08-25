@@ -8042,10 +8042,10 @@ bool Player::SatisfyQuestSkill( uint32 quest_id, bool msg )
     QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
     if( qInfo )
     {
-        uint32 reqskill = qInfo->RequiredTradeskill;
+        uint32 reqskill = qInfo->RequiredSkill;
         if( reqskill == QUEST_TRSKILL_NONE )
             return true;
-        if( GetSkillValue( reqskill ) == 0 )
+        if( GetSkillValue( reqskill ) < qInfo->RequiredSkillValue )
         {
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
