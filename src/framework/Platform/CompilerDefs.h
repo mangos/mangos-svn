@@ -24,9 +24,7 @@
 #define PLATFORM_APPLE 2
 #define PLATFORM_INTEL 3
 
-#if defined( __INTEL_COMPILER )
-#  define PLATFORM PLATFORM_INTEL
-#elif defined( __WIN32__ ) || defined( WIN32 ) || defined( _WIN32 )
+#if defined( __WIN32__ ) || defined( WIN32 ) || defined( _WIN32 )
 #  define PLATFORM PLATFORM_WIN32
 #elif defined( __APPLE_CC__ )
 #  define PLATFORM PLATFORM_APPLE
