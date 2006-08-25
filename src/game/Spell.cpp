@@ -611,12 +611,13 @@ void Spell::cast()
                 needspelllog = false;
             for(iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();iunit++)
             {
-                if((*iunit)->GetTypeId() != TYPEID_PLAYER && m_spellInfo->TargetCreatureType)
+                // let the client worry about this
+                /*if((*iunit)->GetTypeId() != TYPEID_PLAYER && m_spellInfo->TargetCreatureType)
                 {
                     CreatureInfo const *cinfo = ((Creature*)(*iunit))->GetCreatureInfo();
-                    if(m_spellInfo->TargetCreatureType != cinfo->type)
+                    if((m_spellInfo->TargetCreatureType & cinfo->type) == 0)
                         continue;
-                }
+                }*/
                 HandleEffects((*iunit),NULL,NULL,j);
             }
             for(iitem= m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
@@ -1121,7 +1122,7 @@ void Spell::TakeCastItem()
     uint32 ItemCount = m_CastItem->GetCount();
     uint32 ItemClass = proto->Class;
 
-    if (ItemClass == ITEM_CLASS_CONSUMABLE)
+    if (ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_BOOK)
     {
         if(proto->DisplayInfoID == 6009 && m_spellInfo->School == 5)
             return;
@@ -1810,9 +1811,11 @@ uint8 Spell::CheckItems()
 uint32 Spell::CalculateDamage(uint8 i)
 {
     uint32 value = 0;
-    uint32 level = m_caster->getLevel();
+    uint32 level = 0;
+    // currently the damage should not be increased by level
+    /*uint32 level = m_caster->getLevel();
     if( level > m_spellInfo->maxLevel && m_spellInfo->maxLevel > 0)
-        level = m_spellInfo->maxLevel;
+        level = m_spellInfo->maxLevel;*/
     float basePointsPerLevel = m_spellInfo->EffectRealPointsPerLevel[i];
     float randomPointsPerLevel = m_spellInfo->EffectDicePerLevel[i];
     uint32 basePoints = uint32(m_spellInfo->EffectBasePoints[i]+level*basePointsPerLevel);
@@ -1821,7 +1824,6 @@ uint32 Spell::CalculateDamage(uint8 i)
     uint8 comboPoints=0;
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         comboPoints = (uint8)((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
-
     value += m_spellInfo->EffectBaseDice[i];
     if(randomPoints <= 1)
         value = basePoints+1;
