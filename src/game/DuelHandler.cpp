@@ -47,8 +47,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     {
 
         sLog.outDebug( "WORLD: received CMSG_DUEL_ACCEPTED" );
-        DEBUG_LOG("Player 1 is: %lu", (unsigned long)pl->GetGUID());
-        DEBUG_LOG("Player 2 is: %lu", (unsigned long)plTarget->GetGUID());
+        DEBUG_LOG("Player 1 is: " I64FMT, pl->GetGUID());
+        DEBUG_LOG("Player 2 is: " I64FMT, plTarget->GetGUID());
 
         //Set players team
         pl->SetUInt32Value(PLAYER_DUEL_TEAM, 1);

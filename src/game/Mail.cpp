@@ -151,7 +151,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
                                                             // there was (long)etime ;-) COD added
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), etime, money, COD, 0);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (uint64)etime, money, COD, 0);
 }
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
@@ -222,7 +222,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
                                                             //m->checked); //there was (long)m->time...
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%I64d','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, 0);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 }
 
 void WorldSession::HandleTakeItem(WorldPacket & recv_data )
@@ -269,7 +269,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             }
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mn->messageID);
                                                             //added
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), 0, mn->time, mn->money, 0, 0);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), 0, (uint64)mn->time, mn->money, 0, 0);
             // client tests, if player has enought money !!!
             pl->ModifyMoney( -int32(m->COD) );
         }

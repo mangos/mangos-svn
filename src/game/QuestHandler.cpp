@@ -245,7 +245,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                 }
             }
             else
-                sLog.outError("Unknown questgiver GUID #%lu for reward choice (not creature and not gameobject), ignore.",guid);
+                sLog.outError("Unknown questgiver GUID #" I64FMTD " for reward choice (not creature and not gameobject), ignore.",guid);
         }
         delete pQuest;
     }
@@ -273,7 +273,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
                 _player->PlayerTalkClass->SendQuestReward( quest, guid, true, NULL, 0);
         }
         else
-            sLog.outError("Unknown questgiver GUID #%lu for reward request (not creature and not gameobject), ignore.",guid);
+            sLog.outError("Unknown questgiver GUID #" I64FMTD " for reward request (not creature and not gameobject), ignore.",guid);
 
         delete pQuest;
     }

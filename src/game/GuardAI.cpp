@@ -39,7 +39,7 @@ GuardAI::GuardAI(Creature &c) : i_creature(c), i_victimGuid(0), i_myFaction(c.ge
 
 void GuardAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_creature.getVictim() == NULL && u->isTargetableForAttack())
+    if( i_creature.getVictim() == NULL && u->isTargetableForAttack() && u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
@@ -64,6 +64,9 @@ void GuardAI::DamageInflict(Unit *healer, uint32 amount_healed)
 bool GuardAI::_needToStop() const
 {
     if( !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
+        return true;
+
+    if(!i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
         return true;
 
     float rx,ry,rz;

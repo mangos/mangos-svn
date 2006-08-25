@@ -254,7 +254,7 @@ Map::Add(T *obj)
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        ERROR_LOG("Map::Add: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        ERROR_LOG("Map::Add: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
@@ -268,7 +268,7 @@ Map::Add(T *obj)
         (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
     }
 
-    DEBUG_LOG("Object %lu enters grid[%u,%u]", (unsigned long)obj->GetGUID(), cell.GridX(), cell.GridY());
+    DEBUG_LOG("Object " I64FMTD " enters grid[%u,%u]", obj->GetGUID(), cell.GridX(), cell.GridY());
     cell.data.Part.reserved = ALL_DISTRICT;
 
     MaNGOS::ObjectVisibleNotifier notifier(*static_cast<Object *>(obj));
@@ -302,7 +302,7 @@ void Map::MessageBoardcast(Object *obj, WorldPacket *msg)
 
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        ERROR_LOG("Map::MessageBoardcast: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        ERROR_LOG("Map::MessageBoardcast: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
@@ -387,7 +387,7 @@ Map::Remove(T *obj, bool remove)
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        ERROR_LOG("Map::Remove: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        ERROR_LOG("Map::Remove: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
@@ -395,7 +395,7 @@ Map::Remove(T *obj, bool remove)
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
         return;
 
-    DEBUG_LOG("Remove object %lu from grid[%u,%u]", (unsigned long)obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
+    DEBUG_LOG("Remove object " I64FMTD " from grid[%u,%u]", obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
 
@@ -769,6 +769,22 @@ uint32 Map::GetZoneId(uint16 areaflag)
     else
         return 0;
 }
+
+float Map::IsInWater(float x, float y)
+{
+    float z = GetHeight(x,y);
+    float water_z = GetWaterLevel(x,y);
+    uint8 flag = GetTerrainType(x,y);
+    return (z < (water_z-2)) && (flag & 0x01);
+}
+
+float Map::IsUnderWater(float x, float y, float z)
+{
+    float water_z = GetWaterLevel(x,y);
+    uint8 flag = GetTerrainType(x,y);
+    return (z < (water_z-2)) && (flag & 0x01);
+}
+
 
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);

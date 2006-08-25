@@ -2139,11 +2139,8 @@ void Spell::EffectTransmitted(uint32 i)
 
     if(m_spellInfo->EffectMiscValue[i] == 35591)
     {
-        Map* Map = MapManager::Instance().GetMap(m_caster->GetMapId());
-        //uint8 flag1 = Map->GetTerrainType(fx,fy);
-        float posz = Map->GetWaterLevel(fx,fy);
-        //!Underwater check
-        if (fz > (posz - (float)2))
+        Map* map = MapManager::Instance().GetMap(m_caster->GetMapId());
+        if ( map->IsUnderWater(fx,fy,fz) )
         {
             SendCastResult(CAST_FAIL_CANT_BE_CAST_HERE);
             up_skillvalue = 4;

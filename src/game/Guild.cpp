@@ -73,7 +73,7 @@ void Guild::create(uint64 lGuid, std::string gname)
     rname = "Initiate";
     CreateRank(rname,GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 
-    sLog.outDebug("GUILD: creating guild %s to leader:%lu", gname.c_str(), leaderGuid);
+    sLog.outDebug("GUILD: creating guild %s to leader:" I64FMTD, gname.c_str(), leaderGuid);
 
     QueryResult *result = sDatabase.Query( "SELECT MAX(`guildid`) FROM `guild`" );
     if( result )
@@ -212,8 +212,8 @@ void Guild::Loadplayerstats(MemberSlot *memslot)
     // column 'level' doesn't exist in `character` table.
     // column 'zoneId' maybe now work?
     // FIXME: Get proper values for characters' zone and level.
-    //QueryResult *result = sDatabase.PQuery("SELECT (`name`, `level`, `class`, `zoneId`) FROM `character` WHERE `guid` = '%lu'", (unsigned long)memslot->guid);
-    QueryResult *result = sDatabase.PQuery("SELECT `name`,`class`,`map`,`position_x`,`position_y` FROM `character` WHERE `guid` = '%lu'", (unsigned long)memslot->guid);
+    //QueryResult *result = sDatabase.PQuery("SELECT (`name`, `level`, `class`, `zoneId`) FROM `character` WHERE `guid` = '" I64FMTD "'", memslot->guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `name`,`class`,`map`,`position_x`,`position_y` FROM `character` WHERE `guid` = '" I64FMTD "'", memslot->guid);
     if(!result) return;
 
     fields = result->Fetch();

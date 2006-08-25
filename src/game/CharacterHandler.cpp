@@ -37,7 +37,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 
     data.Initialize(SMSG_CHAR_ENUM);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu' ORDER BY `guid`", (unsigned long)GetAccountId());
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
 
     uint8 num = 0;
 
@@ -91,7 +91,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu'", (unsigned long)GetAccountId());
+    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u'", GetAccountId());
 
     if ( result )
     {
@@ -109,7 +109,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     uint32 GameType = sWorld.getConfig(CONFIG_GAME_TYPE);
     if(GameType == 1 || GameType == 8)
     {
-        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%lu' LIMIT 1", (unsigned long)GetAccountId());
+        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
         if(result2)
         {
             Field * field = result2->Fetch();

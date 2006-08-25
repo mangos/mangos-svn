@@ -237,7 +237,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool isPet() const { return m_isPet; }
         bool isTotem() const { return m_isTotem; }
-        bool isCivilian() { return (bool)GetCreatureInfo()->civilian; }
+        bool isCivilian() const { return GetCreatureInfo()->civilian != 0; }
+        bool isCanSwimOrFly() const;
+        bool isCanWalkOrFly() const;
 
         void AIM_Update(const uint32 &);
         void AIM_Initialize(void);
