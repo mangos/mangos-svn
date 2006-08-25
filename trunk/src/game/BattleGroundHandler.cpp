@@ -41,7 +41,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
     recv_data >> guid;
-    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from: %lu" , guid);
+    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from: " I64FMT, guid);
 
     // For now we'll assume all battlefield npcs are mapid 489
     // gossip related
@@ -85,7 +85,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
     recv_data >> guid;                                      // >> MapID >> Instance;
-    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: %lu" , guid);
+    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: " I64FMT, guid);
 
     // We're in BG.
     GetPlayer()->m_bgBattleGroundID = 1;

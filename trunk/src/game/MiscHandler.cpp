@@ -492,7 +492,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     for (int j=0; j < i; j++)
     {
 
-        sLog.outDetail( "WORLD: Adding Friend - Guid:%lu, Status:%u, Area:%u, Level:%u Class:%u",friendstr[j].PlayerGUID, friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
+        sLog.outDetail( "WORLD: Adding Friend - Guid:" I64FMTD ", Status:%u, Area:%u, Level:%u Class:%u",friendstr[j].PlayerGUID, friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
 
         data << friendstr[j].PlayerGUID << friendstr[j].Status ;
         if (friendstr[j].Status != 0)
@@ -989,9 +989,9 @@ void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)
     recv_data >> PositionZ;
     recv_data >> Orientation;
 
-    DEBUG_LOG("Guid %lu",guid);
-    DEBUG_LOG("unknown1 %lu",unknown1);
-    DEBUG_LOG("unknown2 %lu",unknown2);
+    DEBUG_LOG("Guid " I64FMTD,guid);
+    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
+    DEBUG_LOG("unknown2 %u",unknown2);
     DEBUG_LOG("X %f",PositionX);
     DEBUG_LOG("Y %f",PositionY);
     DEBUG_LOG("Z %f",PositionZ);
@@ -1025,9 +1025,9 @@ void WorldSession::HandleMooveRootAck(WorldPacket& recv_data)
     recv_data >> PositionZ;
     recv_data >> Orientation;
 
-    DEBUG_LOG("Guid %lu",guid);
-    DEBUG_LOG("unknown1 %lu",unknown1);
-    DEBUG_LOG("unknown1 %lu",unknown2);
+    DEBUG_LOG("Guid " I64FMTD,guid);
+    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
+    DEBUG_LOG("unknown1 %u",unknown2);
     DEBUG_LOG("X %f",PositionX);
     DEBUG_LOG("Y %f",PositionY);
     DEBUG_LOG("Z %f",PositionZ);
@@ -1043,7 +1043,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
     recv_data >> guid;
     recv_data >> value1;                                    // ms time ?
-    DEBUG_LOG("Guid %lu",guid);
+    DEBUG_LOG("Guid " I64FMTD,guid);
     DEBUG_LOG("Value 1 %u",value1);
 }
 
@@ -1136,7 +1136,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     WorldPacket data;
     uint64 guid;
     recv_data >> guid;
-    DEBUG_LOG("Inspected guid is %lu",guid);
+    DEBUG_LOG("Inspected guid is " I64FMTD,guid);
 
     if( _player != 0 )
     {
@@ -1161,7 +1161,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     WorldPacket data;
     uint64 guid;
     recv_data >> guid;
-    DEBUG_LOG("Party Stats guid is %lu",guid);
+    DEBUG_LOG("Party Stats guid is " I64FMTD,guid);
 
     // TODO need to be finished ...
     data.Initialize( MSG_INSPECT_HONOR_STATS );

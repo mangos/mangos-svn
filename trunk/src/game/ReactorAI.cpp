@@ -121,6 +121,9 @@ ReactorAI::needToStop() const
     if( !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
         return true;
 
+    if(!i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
+        return true;
+
     float rx,ry,rz;
     i_creature.GetRespawnCoord(rx, ry, rz);
     float spawndist=i_creature.GetDistanceSq(rx,ry,rz);

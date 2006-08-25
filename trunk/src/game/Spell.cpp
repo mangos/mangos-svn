@@ -1604,9 +1604,10 @@ uint8 Spell::CheckMana(uint32 *mana)
         uint32 currentHealth = m_caster->GetHealth();
         uint32 healthCost = m_spellInfo->manaCost;
         *mana = healthCost;
-        if(currentHealth+1 < *mana)
+        if(currentHealth <= healthCost)
             return CAST_FAIL_CANT_DO_THAT_YET;
-        else return 0;
+
+        return 0;
     }
 
     if(m_spellInfo->powerType <0 || m_spellInfo->powerType > POWER_HAPPINESS)

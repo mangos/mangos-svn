@@ -29,7 +29,9 @@ RandomMovementGenerator::Initialize(Creature &creature)
     float x,y,z,z2;
     creature.GetRespawnCoord(x, y, z);
     uint32 mapid=creature.GetMapId();
-    z2 = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
+
+    Map* map = MapManager::Instance().GetMap(mapid);
+    z2 = map->GetHeight(x,y);
     if( abs( z2 - z ) < 5 )
         z = z2;
 
@@ -38,11 +40,14 @@ RandomMovementGenerator::Initialize(Creature &creature)
     i_waypoints[0][1] = y;
     i_waypoints[0][2] = z;
 
+    bool is_water_ok = creature.isCanSwimOrFly();
+    bool is_land_ok  = creature.isCanWalkOrFly();
+
     for(unsigned int idx=1; idx < MAX_RAND_WAYPOINTS+1; ++idx)
     {
         const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
         const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
-
+            
         i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
         i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
 
@@ -50,7 +55,16 @@ RandomMovementGenerator::Initialize(Creature &creature)
         MaNGOS::NormalizeMapCoord(i_waypoints[idx][0]);
         MaNGOS::NormalizeMapCoord(i_waypoints[idx][1]);
 
-        z2 = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
+        bool is_water = map->IsInWater(i_waypoints[idx][0],i_waypoints[idx][1]);
+
+        // if generated wrong path just ignore
+        if( is_water && !is_water_ok || !is_water && !is_land_ok )
+        {
+            i_waypoints[idx][0] = i_waypoints[idx-1][0];
+            i_waypoints[idx][1] = i_waypoints[idx-1][1];
+        }
+
+        z2 = map->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
         if( abs( z2 - z ) < 5 )
             z = z2;
         i_waypoints[idx][2] =  z;

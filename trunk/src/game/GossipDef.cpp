@@ -136,7 +136,7 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
     }
 
     pSession->SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent SMSG_GOSSIP_MESSAGE NPCGuid=%lu",(unsigned long)npcGUID );
+    sLog.outDebug( "WORLD: Sent SMSG_GOSSIP_MESSAGE NPCGuid=%u",GUID_LOPART(npcGUID) );
 }
 
 void PlayerMenu::CloseGossip()
@@ -297,7 +297,7 @@ void PlayerMenu::SendQuestMenu( QEmote eEmote, std::string Title, uint64 npcGUID
     }
     pSession->SendPacket( &data );
     uint32 fqid=pQuestMenu->GetItem(0).m_qId;
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_LIST npcguid=%lu, questid-0=%u",(unsigned long)npcGUID,fqid);
+    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_LIST NPC Guid=%u, questid-0=%u",npcGUID,fqid);
 }
 
 void PlayerMenu::SendQuestStatus( uint32 questStatus, uint64 npcGUID )
@@ -308,7 +308,7 @@ void PlayerMenu::SendQuestStatus( uint32 questStatus, uint64 npcGUID )
     data << npcGUID << questStatus;
 
     pSession->SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_STATUS NPC Guid=%u, status=%u",uint32(GUID_LOPART(npcGUID)),questStatus);
+    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_STATUS NPC Guid=%u, status=%u",GUID_LOPART(npcGUID),questStatus);
 }
 
 void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept)
@@ -364,7 +364,7 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
     }
 
     pSession->SendPacket( &data );
-    sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,pQuest->GetQuestId());
+    sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestId());
 }
 
 void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
@@ -495,7 +495,7 @@ void PlayerMenu::SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNex
     data << uint32(qInfo->RewSpell);
 
     pSession->SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,quest_id );
+    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),quest_id );
 }
 
 void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel )
@@ -558,5 +558,5 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
     data << uint32(0x04) << uint32(0x08) << uint32(0x10);
 
     pSession->SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,pQuest->GetQuestInfo()->QuestId );
+    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestInfo()->QuestId );
 }

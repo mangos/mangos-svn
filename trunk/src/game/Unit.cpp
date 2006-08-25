@@ -1456,6 +1456,24 @@ void Unit::SetInFront(Unit const* target)
     m_orientation = GetAngle(target);
 }
 
+bool Unit::isInAccessablePlaceFor(Creature* c) const
+{
+    if(IsInWater())
+        return c->isCanSwimOrFly();
+    else
+        return c->isCanWalkOrFly();
+}
+
+bool Unit::IsInWater() const
+{
+    return MapManager::Instance().GetMap(GetMapId())->IsInWater(GetPositionX(),GetPositionY());
+}
+
+bool Unit::IsUnderWater() const
+{
+    return MapManager::Instance().GetMap(GetMapId())->IsUnderWater(GetPositionX(),GetPositionY(),GetPositionZ());
+}
+
 void Unit::DeMorph()
 {
 

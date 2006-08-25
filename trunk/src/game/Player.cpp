@@ -2807,14 +2807,6 @@ void Player::DealWithSpellDamage(DynamicObject &obj)
     obj.DealWithSpellDamage(*this);
 }
 
-bool Player::IsInWater() const
-{
-    Map* m = MapManager::Instance().GetMap(GetMapId());
-    float water_z = m->GetWaterLevel(GetPositionX(),GetPositionY());
-    uint8 flag = m->GetTerrainType(GetPositionX(),GetPositionY());
-    return (GetPositionZ() < (water_z - 2)) && (flag & 0x01);
-}
-
 bool Player::SetPosition(float x, float y, float z, float orientation)
 {
     Map *m = MapManager::Instance().GetMap(m_mapId);
@@ -2841,13 +2833,13 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
         m_isunderwater|= 0x80;
 
     // form checks
-    if ((z < (water_z - 2)) && (flag1 & 0x01))
+    if ( IsUnderWater() )
     {
         if(m_form > 0 && m_form != FORM_AQUA && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
-    // let not lost aqua form swiming and jumping at water level
-    else if( z > (water_z - 2)  )
+    // IsInWater check ignore bridge and underwater ways case, check additional z
+    else if( !IsInWater() && z < water_z + 1 )
     {
         if(m_form == FORM_AQUA)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
@@ -8516,7 +8508,7 @@ void Player::SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creatu
 bool Player::LoadFromDB( uint32 guid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic` FROM `character` WHERE `guid` = '%lu'",(unsigned long)guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
         return false;
@@ -9072,7 +9064,7 @@ void Player::_SaveAuctions()
             Item *it = objmgr.GetAItem(Aentry->item);
 
             sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
-            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%I64d', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
+            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, (uint64)Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
 
             std::ostringstream ss;
             ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
@@ -9122,7 +9114,7 @@ void Player::_SaveMail()
     {
         Mail *m = (*itr);
 
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%I64d', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, m->COD, m->checked);
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
     }
 }
 
