@@ -240,6 +240,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isCivilian() const { return GetCreatureInfo()->civilian != 0; }
         bool isCanSwimOrFly() const;
         bool isCanWalkOrFly() const;
+        bool isCanTrainingOf(Player* player, bool msg) const;
 
         void AIM_Update(const uint32 &);
         void AIM_Initialize(void);

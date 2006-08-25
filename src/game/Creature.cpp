@@ -345,6 +345,86 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         return DIALOG_STATUS_CHAT;
 }
 
+bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
+{
+    if(m_tspells.empty())
+    {
+        sLog.outError("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
+        GetGUIDLow(),GetCreatureInfo()->Entry);
+        return false;
+    }
+
+    switch(GetCreatureInfo()->trainer_type)
+    {
+        case TRAINER_TYPE_CLASS:
+            if(pPlayer->getClass()!=GetCreatureInfo()->classNum)
+            {
+                if(msg)
+                {
+                    pPlayer->PlayerTalkClass->ClearMenus();
+                    switch(GetCreatureInfo()->classNum)
+                    {
+                        case DRUID:  pPlayer->PlayerTalkClass->SendGossipMenu( 4913,GetGUID()); break;
+                        case HUNTER: pPlayer->PlayerTalkClass->SendGossipMenu(10090,GetGUID()); break;
+                        case MAGE:   pPlayer->PlayerTalkClass->SendGossipMenu(  328,GetGUID()); break;
+                        case PALADIN:pPlayer->PlayerTalkClass->SendGossipMenu( 1635,GetGUID()); break;
+                        case PRIEST: pPlayer->PlayerTalkClass->SendGossipMenu( 4436,GetGUID()); break;
+                        case ROGUE:  pPlayer->PlayerTalkClass->SendGossipMenu( 4797,GetGUID()); break;
+                        case SHAMAN: pPlayer->PlayerTalkClass->SendGossipMenu( 5003,GetGUID()); break;
+                        case WARLOCK:pPlayer->PlayerTalkClass->SendGossipMenu( 5836,GetGUID()); break;
+                        case WARRIOR:pPlayer->PlayerTalkClass->SendGossipMenu( 4985,GetGUID()); break;
+                    }
+                }
+                return false;
+            }
+            break;
+        case TRAINER_TYPE_PETS:
+            if(pPlayer->getClass()!=HUNTER)
+            {
+                pPlayer->PlayerTalkClass->ClearMenus();
+                pPlayer->PlayerTalkClass->SendGossipMenu(3620,GetGUID());
+                return false;
+            }
+            break;
+        case TRAINER_TYPE_MOUNTS:
+            if(GetCreatureInfo()->race && pPlayer->getRace() != GetCreatureInfo()->race)
+            {
+                if(msg)
+                {
+                    pPlayer->PlayerTalkClass->ClearMenus();
+                    switch(GetCreatureInfo()->classNum)
+                    {
+                        case RACE_DWARF:     pPlayer->PlayerTalkClass->SendGossipMenu(5865,GetGUID()); break;
+                        case RACE_GNOME:     pPlayer->PlayerTalkClass->SendGossipMenu(4881,GetGUID()); break;
+                        case RACE_HUMAN:     pPlayer->PlayerTalkClass->SendGossipMenu(5861,GetGUID()); break;
+                        case RACE_NIGHT_ELF: pPlayer->PlayerTalkClass->SendGossipMenu(5862,GetGUID()); break;
+                        case RACE_ORC:       pPlayer->PlayerTalkClass->SendGossipMenu(5863,GetGUID()); break;
+                        case RACE_TAUREN:    pPlayer->PlayerTalkClass->SendGossipMenu(5864,GetGUID()); break;
+                        case RACE_TROLL:     pPlayer->PlayerTalkClass->SendGossipMenu(5816,GetGUID()); break;
+                        case RACE_UNDEAD:    pPlayer->PlayerTalkClass->SendGossipMenu( 624,GetGUID()); break;
+                    }
+                }
+                return false;
+            }
+            break;
+        case TRAINER_TYPE_TRADESKILLS:
+            if(GetCreatureInfo()->trainer_spell && !pPlayer->HasSpell(GetCreatureInfo()->trainer_spell))
+            {
+                if(msg)
+                {
+                    pPlayer->PlayerTalkClass->ClearMenus();
+                    pPlayer->PlayerTalkClass->SendGossipMenu(11031,GetGUID());
+                }
+                return false;
+            }
+            break;
+        default:
+            sLog.outError("Creature %u (entry: %u) have trainer type %u",GetGUIDLow(),GetCreatureInfo()->Entry,GetCreatureInfo()->trainer_type);
+            return false;
+    }
+    return true;
+}
+
 void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 {
     PlayerMenu* pm=pPlayer->PlayerTalkClass;
@@ -395,34 +475,8 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                         }
                         break;
                     case GOSSIP_OPTION_TRAINER:
-                        if(m_tspells.empty())
-                        {
-                            sLog.outError("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
-                                GetGUIDLow(),GetCreatureInfo()->Entry);
+                        if(!isCanTrainingOf(pPlayer,false))
                             cantalking=false;
-                        }
-                        switch(GetCreatureInfo()->trainer_type)
-                        {
-                            case TRAINER_TYPE_CLASS:
-                                if(pPlayer->getClass()!=GetCreatureInfo()->classNum)
-                                    cantalking=false;
-                                break;
-                            case TRAINER_TYPE_PETS:
-                                if(pPlayer->getClass()!=HUNTER)
-                                    cantalking=false;
-                                break;
-                            case TRAINER_TYPE_MOUNTS:
-                                if(GetCreatureInfo()->race && pPlayer->getRace() != GetCreatureInfo()->race)
-                                    cantalking=false;
-                                break;
-                            case TRAINER_TYPE_TRADESKILLS:
-                                if(GetCreatureInfo()->trainer_spell && !pPlayer->HasSpell(GetCreatureInfo()->trainer_spell))
-                                    cantalking=false;
-                                break;
-                            default:
-                                sLog.outError("Creature %u (entry: %u) have trainer type %u",GetGUIDLow(),GetCreatureInfo()->Entry,GetCreatureInfo()->trainer_type);
-                                break;
-                        }
                         break;
                     case GOSSIP_OPTION_TAXIVENDOR:
                     case GOSSIP_OPTION_GUARD:
@@ -447,6 +501,9 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
             }
         }
     }
+
+    if(pm->GetGossipMenu()->MenuItemCount()==0 && HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER))
+        isCanTrainingOf(pPlayer,true);
 
     /*
     if(pm->GetGossipMenu()->MenuItemCount()==1 && ingso->Id==8 && GetGossipCount( ingso->GossipId )>0)
@@ -854,6 +911,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     SetLevel(cinfo->level);
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
 
     SetAttackTime(BASE_ATTACK,  cinfo->baseattacktime);
