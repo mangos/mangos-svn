@@ -406,6 +406,26 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 ((Player*)pVictim)->DeathDurabilityLoss(0.05);
             }
         }
+        
+        // TODO: Store auras by interrupt flag to speed this up.
+        // TODO: Fix roots that should not break from its own damage.
+        AuraMap& vAuras = pVictim->GetAuras();
+        for (AuraMap::iterator i = vAuras.begin(), next; i != vAuras.end(); i = next)
+        {
+            next = i; next++;
+            if (i->second->GetSpellProto()->AuraInterruptFlags & (1<<1))
+            {
+                bool remove = true;
+                if (i->second->GetSpellProto()->procFlags & (1<<3))
+                    if (i->second->GetSpellProto()->procChance < rand_chance())
+                        remove = false;
+                if (remove)
+                {
+                    RemoveAurasDueToSpell(i->second->GetId());
+                    next = vAuras.begin();
+                }
+            }
+        }
     }
 
     DEBUG_LOG("DealDamageEnd");
@@ -874,7 +894,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 if((*i)->m_procCharges == 0)
                 {
                     RemoveAurasDueToSpell((*i)->GetId());
-                    next = mProcTriggerDamage.begin();
+                    next = vProcTriggerDamage.begin();
                 }
             }
         }
@@ -897,7 +917,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 if((*i)->m_procCharges == 0)
                 {
                     RemoveAurasDueToSpell((*i)->GetId());
-                    next = mProcTriggerSpell.begin();
+                    next = vProcTriggerSpell.begin();
                 }
             }
         }
