@@ -32,6 +32,76 @@
 #include "Language.h"
 #include "World.h"
 
+bool ChatHandler::HandleGoObjectCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    int32 guid = atoi((char*)args);
+    if(!guid)
+        return false;
+
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `gameobject` WHERE `guid` = '%i'",guid);
+    if (!result)
+    {
+        SendSysMessage("Object not found!");
+        return true;
+    }
+
+    Field *fields = result->Fetch();
+    float x = fields[0].GetFloat();
+    float y = fields[1].GetFloat();
+    float z = fields[2].GetFloat();
+    float ort = fields[3].GetFloat();
+    int mapid = fields[4].GetUInt16();
+    delete result;
+
+    if(!MapManager::ExistMAP(mapid,x,y))
+    {
+        PSendSysMessage("target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        return true;
+    }
+
+    m_session->GetPlayer()->TeleportTo(mapid, x, y, z, ort);
+    return true;
+}
+
+bool ChatHandler::HandleGoCreatureCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    int32 guid = atoi((char*)args);
+    if(!guid)
+        return false;
+
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `creature` WHERE `guid` = '%i'",guid);
+    if (!result)
+    {
+        SendSysMessage("Creature not found!");
+        return true;
+    }
+
+    Field *fields = result->Fetch();
+    float x = fields[0].GetFloat();
+    float y = fields[1].GetFloat();
+    float z = fields[2].GetFloat();
+    float ort = fields[3].GetFloat();
+    int mapid = fields[4].GetUInt16();
+    
+    delete result;
+
+    if(!MapManager::ExistMAP(mapid,x,y))
+    {
+        PSendSysMessage("target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        return true;
+    }
+
+    m_session->GetPlayer()->TeleportTo(mapid, x, y, z, ort);
+    return true;
+}
+
+
 bool ChatHandler::HandleGUIDCommand(const char* args)
 {
     uint64 guid = m_session->GetPlayer()->GetSelection();
