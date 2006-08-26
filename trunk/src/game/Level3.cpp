@@ -1460,8 +1460,12 @@ bool ChatHandler::HandleDieCommand(const char* args)
         return true;
     }
 
-    target->SetHealth( 0);
-    target->setDeathState(JUST_DIED);
+    if( target->isAlive() )
+    {
+        uint32 health = target->GetHealth();
+        m_session->GetPlayer()->DealDamage(target, target->GetHealth(), 0, false);
+    }
+
     return true;
 }
 
