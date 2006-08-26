@@ -1317,7 +1317,7 @@ uint8 Spell::CanCast()
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
 
-    // if(m_CastItem || itemTarget) - always check items (required focus object can be required for any type casts)
+    // if(m_CastItem || itemTarget) - always check items (focus object can be required for any type casts)
     castResult = CheckItems();
 
     if(castResult == 0)
@@ -1688,22 +1688,23 @@ uint8 Spell::CheckItems()
 
     if(m_spellInfo->RequiresSpellFocus)
     {
-        SpellFocusObject* focusobj = sSpellFocusObject.LookupEntry(m_spellInfo->RequiresSpellFocus);
+        /*SpellFocusObject* focusobj = sSpellFocusObject.LookupEntry(m_spellInfo->RequiresSpellFocus);
         assert(focusobj);
         char const* focusname = focusobj->Name;
 
         // Find GO
         SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
-        float range = GetMaxRange(srange);
+        float range = GetMaxRange(srange);*/
 
         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;
 
         GameObject* ok = NULL;
-        MaNGOS::GameObjectWithNameIn2DRangeChecker checker(ok,m_caster,focusobj->Name, range);
+        MaNGOS::GameObjectFocusCheck go_check(m_caster,m_spellInfo->RequiresSpellFocus);
+        MaNGOS::GameObjectSearcher<MaNGOS::GameObjectFocusCheck> checker(ok,go_check);
 
-        TypeContainerVisitor<MaNGOS::GameObjectWithNameIn2DRangeChecker, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectFocusCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 

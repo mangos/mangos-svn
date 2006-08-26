@@ -40,7 +40,7 @@ DBCStorage <SpellItemEnchantment> sSpellItemEnchantmentStore(SpellItemEnchantmen
 DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
 DBCStorage <SpellCastTime> sCastTime(SpellCastTimefmt);
 DBCStorage <SpellDuration> sSpellDuration(SpellDurationfmt);
-DBCStorage <SpellFocusObject> sSpellFocusObject(SpellFocusObjectfmt);
+//DBCStorage <SpellFocusObject> sSpellFocusObject(SpellFocusObjectfmt);
 DBCStorage <SpellRadius> sSpellRadius(SpellRadiusfmt);
 DBCStorage <SpellRange> sSpellRange(SpellRangefmt);
 
@@ -50,7 +50,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 15;
+    const uint32 DBCFilesCount = 14;
 
     barGoLink bar( DBCFilesCount );
 
@@ -126,12 +126,12 @@ void LoadDBCStores(std::string dataPath)
     else
         not_found_dbc_files.push_back("dbc/SpellDuration.dbc");
 
-    tmpPath=dataPath;
+    /*tmpPath=dataPath;
     tmpPath.append("dbc/SpellFocusObject.dbc");
     if(sSpellFocusObject.Load(tmpPath.c_str()))
         bar.step();
     else
-        not_found_dbc_files.push_back("dbc/SpellFocusObject.dbc");
+        not_found_dbc_files.push_back("dbc/SpellFocusObject.dbc");*/
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellItemEnchantment.dbc");

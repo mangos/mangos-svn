@@ -189,24 +189,6 @@ ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m)
     }
 }
 
-void GameObjectWithNameIn2DRangeChecker::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
-{
-    // already found
-    if(i_object) return;
-
-    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
-    {
-        if(itr->second->GetGOInfo()->name == i_name)
-        {
-            if(itr->second->GetDistance2dSq(i_unit) <= i_dist2)
-            {
-                i_object = itr->second;
-                return;
-            }
-        }
-    }
-}
-
 template void VisibleNotifier::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
 template void VisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
 template void VisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);

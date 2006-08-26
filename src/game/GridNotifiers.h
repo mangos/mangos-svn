@@ -169,19 +169,52 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
     };
 
-    struct MANGOS_DLL_DECL GameObjectWithNameIn2DRangeChecker
+    template<class Check>
+    struct MANGOS_DLL_DECL GameObjectSearcher
     {
         GameObject* &i_object;
-        Unit* i_unit;
-        std::string i_name;
-        float  i_dist2;
+        Check const& i_check;
 
-        GameObjectWithNameIn2DRangeChecker(GameObject* & result, Unit* unit, std::string name, float radius)
-            : i_object(result), i_unit(unit), i_name(name), i_dist2(radius*radius) {}
+        GameObjectSearcher(GameObject* & result, Check const& check) : i_object(result),i_check(check) {}
 
         void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    template<class Check>
+    void GameObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+    {
+        // already found
+        if(i_object) return;
+
+        for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        {
+            if(i_check(itr->second))
+            {
+                i_object = itr->second;
+                return;
+            }
+        }
+    }
+
+    class GameObjectFocusCheck
+    {
+        public:
+            GameObjectFocusCheck(Unit* unit,uint32 focusId) : i_unit(unit), i_focusId(focusId) {}
+            bool operator()(GameObject* go) const
+            {
+                if(go->GetGOInfo()->type!=8 || go->GetGOInfo()->sound0 != i_focusId)
+                    return false;
+
+                float dist = go->GetGOInfo()->sound1;
+
+                return go->GetDistanceSq(i_unit) <= dist*dist;
+            }
+        private:
+            uint32 i_focusId;
+            Unit* i_unit;
+
     };
 
     struct MANGOS_DLL_DECL GridUnitListNotifier
