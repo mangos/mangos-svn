@@ -130,7 +130,7 @@ extern DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore;
 extern DBCStorage <ItemSetEntry>             sItemSetStore;
 extern DBCStorage <SkillLineAbility>         sSkillLineAbilityStore;
 extern DBCStorage <SpellDuration>            sSpellDuration;
-extern DBCStorage <SpellFocusObject>         sSpellFocusObject;
+//extern DBCStorage <SpellFocusObject>         sSpellFocusObject;
 extern DBCStorage <SpellItemEnchantment>     sSpellItemEnchantmentStore;
 extern DBCStorage <SpellRadius>              sSpellRadius;
 extern DBCStorage <SpellRange>               sSpellRange;
