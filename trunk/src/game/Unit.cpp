@@ -1572,7 +1572,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
     }
 
-    if (Aur->IsSingleTarget() && Aur->GetTarget() && Aur->GetSpellProto())
+    if (IsSingleTarget(Aur->GetId()) && Aur->GetTarget() && Aur->GetSpellProto())
     {
         std::list<Aura *> *scAuras = Aur->GetCaster()->GetSingleCastAuras();
         std::list<Aura *>::iterator itr, next;
@@ -1777,7 +1777,7 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
 
 void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 {
-    if ((*i).second->IsSingleTarget())
+    if (IsSingleTarget((*i).second->GetId()))
     {
         std::list<Aura *> *scAuras = (*i).second->GetCaster()->GetSingleCastAuras();
         scAuras->remove((*i).second);

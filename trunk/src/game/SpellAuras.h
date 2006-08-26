@@ -175,7 +175,6 @@ class Aura
         bool IsPeriodic() const { return m_isPeriodic; }
         bool IsTrigger() const { return m_isTrigger; }
         bool IsPassive() const { return m_isPassive; }
-        bool IsSingleTarget();
 
         void Update(uint32 diff);
         void ApplyModifier(bool Apply);

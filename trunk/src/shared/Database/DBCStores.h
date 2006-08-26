@@ -78,6 +78,7 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId);
 bool IsPassiveSpell(uint32 spellId);
 bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
+bool IsSingleTarget(uint32 spellId);
 
 template<class T>
 class DBCStorage
