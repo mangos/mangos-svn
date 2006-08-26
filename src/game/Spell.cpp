@@ -1581,7 +1581,8 @@ uint8 Spell::CheckRange()
         if(dist < min_range * min_range)
             return CAST_FAIL_TOO_CLOSE;
         if( m_caster != target && !m_Istriggeredpell && !m_caster->isInFront( target, max_range) )
-            return CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
+            if (!IsPositiveSpell(m_spellInfo->Id) && casttime != 0 && !IsSingleTarget(m_spellInfo->Id))
+                return CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
     }
 
     if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destY != 0)

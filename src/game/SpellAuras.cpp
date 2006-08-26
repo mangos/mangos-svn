@@ -1163,7 +1163,7 @@ void Aura::HandleAuraModStun(bool apply)
     if (apply)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
-        //m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+        m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         if(m_target->GetTypeId() != TYPEID_PLAYER)
             ((Creature *)m_target)->StopMoving();
 
@@ -2086,32 +2086,6 @@ void Aura::SendCoolDownEvent()
     data << uint32(m_spellId) << m_caster->GetGUID();
     data << uint32(0);                                      //CoolDown Time ?
     m_caster->SendMessageToSet(&data,true);
-}
-
-bool Aura::IsSingleTarget()
-{
-    SpellEntry *spellInfo = GetSpellProto();
-    if (!spellInfo) return false;
-
-    // cheap shot is an exception
-    if ( m_spellId == 1833 || m_spellId == 14902 ) return false;
-
-    // cannot be cast on another target while not cooled down anyway
-    if ( GetAuraDuration() < spellInfo->RecoveryTime) return false;
-    if ( spellInfo->RecoveryTime == 0 && GetAuraDuration() < spellInfo->CategoryRecoveryTime) return false;
-
-    // all other single target spells have if it has AttributesEx
-    if ( spellInfo->AttributesEx & (1<<18) ) return true;
-
-    // other single target
-                                                            //Fear
-    if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
-                                                            //Banish
-        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)
-        ) return true;
-    // all other single target spells have if it has Attributes
-    //if ( spellInfo->Attributes & (1<<30) ) return true;
-    return false;
 }
 
 // FIX-ME!!
