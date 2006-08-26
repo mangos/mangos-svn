@@ -83,6 +83,13 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
         data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
         SendPacket( &data );
     }
+
+    WorldPacket data;
+    data.Initialize( recv_data.GetOpcode() );
+    data << uint8(0xFF) << GetPlayer()->GetGUID();
+    data << flags << time;
+    data << x << y << z << GetPlayer()->GetOrientation();
+    GetPlayer()->SendMessageToSet(&data, false);
 }
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
@@ -101,7 +108,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     //Movement flag
     if (opcode == MSG_MOVE_HEARTBEAT && isJumping)
-        GetPlayer( )->SetMovementFlags(GetPlayer( )->GetMovementFlags() & ~flags);
+        GetPlayer( )->SetMovementFlags(GetPlayer( )->GetMovementFlags() & ~MOVEMENT_JUMPING);
     else
         GetPlayer( )->SetMovementFlags(flags);
 
