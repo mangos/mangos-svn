@@ -39,6 +39,8 @@
 #include "CellImpl.h"
 #include "Policies/SingletonImp.h"
 #include "Totem.h"
+#include "Creature.h"
+#include "ConfusedMovementGenerator.h"
 
 pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
@@ -1122,11 +1124,14 @@ void Aura::HandleModConfuse(bool apply)
     {
         m_target->addUnitState(UNIT_STAT_CONFUSED);
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        if (m_target->GetTypeId() == TYPEID_UNIT)
+            (*((Creature*)m_target))->Mutate(new ConfusedMovementGenerator(*((Creature*)m_target)));
     }
     else
     {
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        (*((Creature*)m_target))->MovementExpired();
     }
 }
 
