@@ -797,11 +797,11 @@ void Creature::generateMoneyLoot()
         {
             uint32 gold_part              = rand() % (diff / 10000);
             uint32 silver_and_copper_part = rand() % (diff % 10000);
-            loot.gold = gold_part * 10000 + silver_and_copper_part + GetCreatureInfo()->mingold;
+            loot.gold = uint32((gold_part * 10000 + silver_and_copper_part + GetCreatureInfo()->mingold) * sWorld.getRate(RATE_DROP));
         }
         else
         {
-            loot.gold = rand() % diff + GetCreatureInfo()->mingold;
+            loot.gold = uint32((rand() % diff + GetCreatureInfo()->mingold) * sWorld.getRate(RATE_DROP));
         }
     }
 }
