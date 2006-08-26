@@ -18,3 +18,13 @@ LogFile = "Realmd.log"
 # Default: "" - none colors
 #          "13 7 11 9" - for example :)
 LogColors = ""
+
+# Used processors mask for multi-processors system (Used only at Windows)
+# Default: 0 (selected by OS)
+#          number (bitmask value of selected processors)
+UseProcessors = 0
+
+# Process proirity setting (Used only at Windows)
+#          0 (Normal)
+# Default: 1 (HIGH)
+ProcessPriority = 1

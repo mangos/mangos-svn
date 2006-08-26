@@ -72,7 +72,7 @@ am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
 	BattleGroundHandler.$(OBJEXT) BattleGroundMgr.$(OBJEXT) \
 	Channel.$(OBJEXT) ChannelHandler.$(OBJEXT) \
 	CharacterHandler.$(OBJEXT) Chat.$(OBJEXT) \
-	ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
+	ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) ConfusedMovementGenerator.$(OBJEXT) \
 	Container.$(OBJEXT) Corpse.$(OBJEXT) CreatureAI.$(OBJEXT) \
 	CreatureAIRegistry.$(OBJEXT) CreatureAISelector.$(OBJEXT) \
 	Creature.$(OBJEXT) debugcmds.$(OBJEXT) \
@@ -276,6 +276,7 @@ libgame_a_SOURCES = \
 	Chat.cpp \
 	ChatHandler.cpp \
 	CombatHandler.cpp \
+	ConfusedMovementGenerator.cpp \
 	Container.cpp \
 	Corpse.cpp \
 	CreatureAI.cpp \
@@ -365,6 +366,7 @@ libgame_a_SOURCES = \
 	ChannelMgr.h \
 	Chat.h \
 	CompositeAI.h \
+	ConfusedMovementGenerator.h \
 	Container.h \
 	Corpse.h \
 	CreatureAI.h \
@@ -504,6 +506,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Chat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ChatHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CombatHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ConfusedMovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Container.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Corpse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Creature.Po@am__quote@

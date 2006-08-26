@@ -32,6 +32,7 @@ libgame_a_SOURCES = \
 	Chat.cpp \
 	ChatHandler.cpp \
 	CombatHandler.cpp \
+	ConfusedMovementGenerator.cpp \
 	Container.cpp \
 	Corpse.cpp \
 	CreatureAI.cpp \
@@ -121,6 +122,7 @@ libgame_a_SOURCES = \
 	ChannelMgr.h \
 	Chat.h \
 	CompositeAI.h \
+	ConfusedMovementGenerator.h \
 	Container.h \
 	Corpse.h \
 	CreatureAI.h \
