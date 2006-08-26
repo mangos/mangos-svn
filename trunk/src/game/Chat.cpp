@@ -166,6 +166,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "delticket",   2, &ChatHandler::HandleDelTicketCommand,        "",   NULL },
         { "maxskill",    3, &ChatHandler::HandleMaxSkillCommand,         "",   NULL },
         { "whispers",    1, &ChatHandler::HandleWhispersCommand,         "",   NULL },
+        { "gocreature",  2, &ChatHandler::HandleGoCreatureCommand,       "",   NULL },
+        { "goobject",    2, &ChatHandler::HandleGoObjectCommand,         "",   NULL },
 
         // shutdown commands
         { "shutdown",    3, &ChatHandler::ShutDown,          "",    NULL },
