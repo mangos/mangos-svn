@@ -359,6 +359,12 @@
 				RelativePath="..\..\src\game\Bag.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\ConfusedMovementGenerator.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ConfusedMovementGenerator.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Corpse.cpp">
 			</File>
 			<File

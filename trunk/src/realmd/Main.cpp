@@ -121,6 +121,48 @@ int main(int argc, char **argv)
 
     HookSignals();
 
+    #ifdef WIN32
+    {
+        HANDLE hProcess = GetCurrentProcess();
+
+        uint32 Aff = sConfig.GetIntDefault("UseProcessors", 0);
+        if(Aff > 0)
+        {
+            uint32 appAff;
+            uint32 sysAff;
+
+            if(GetProcessAffinityMask(hProcess,&appAff,&sysAff))
+            {
+                uint32 curAff = Aff & appAff;               // remove non accassable processors
+
+                if(!curAff )
+                {
+                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessable for realmd. Accessable processors bitmask (hex): %x",Aff,appAff);
+                }
+                else
+                {
+                    if(SetProcessAffinityMask(hProcess,curAff))
+                        sLog.outString("Using processors (bitmask, hex): %x", curAff);
+                    else
+                        sLog.outError("Can't set used processors (hex): %x",curAff);
+                }
+            }
+            sLog.outString("");
+        }
+
+        uint32 Prio = sConfig.GetIntDefault("ProcessPriority", 0);
+
+        if(Prio)
+        {
+            if(SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS))
+                sLog.outString("realmd process priority class set to HIGH");
+            else
+                sLog.outError("ERROR: Can't set realmd process priority class.");
+            sLog.outString("");
+        }
+    }
+    #endif
+
     while (!stopEvent)
         h.Select(0, 100000);
 
