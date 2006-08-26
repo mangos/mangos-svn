@@ -38,7 +38,6 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     if(pEnemy)
     {
         _player->Attack(pEnemy);
-        _player->SendAttackStart(pEnemy);
         return;
     }
 
@@ -47,11 +46,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 {
-    if(Unit* victim = GetPlayer()->getVictim())
-    {
-        GetPlayer()->SendAttackStop(victim);
-        GetPlayer()->AttackStop();
-    }
+    GetPlayer()->AttackStop();
 }
 
 void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )

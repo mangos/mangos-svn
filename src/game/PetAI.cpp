@@ -87,7 +87,7 @@ void PetAI::_stopAttack()
         i_pet.StopMoving();
         i_pet->Idle();
         i_victimGuid = 0;
-        i_pet.AttackStop();
+        i_pet.CombatStop();
         return;
     }
     else if( !victim  )

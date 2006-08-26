@@ -949,8 +949,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
 
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation)
 {
-    AttackStop();
-    RemoveAllAttackers();
+    CombatStop();
 
     if(this->GetMapId() == mapid)
     {
@@ -3371,10 +3370,8 @@ void Player::DuelComplete()
     WorldPacket data;
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
 
-    AttackStop();
-    m_pDuel->AttackStop();
-    RemoveAllAttackers();
-    m_pDuel->RemoveAllAttackers();
+    CombatStop();
+    m_pDuel->CombatStop();
 
     data.Initialize(SMSG_DUEL_WINNER);
     data << (uint8)0;
@@ -3415,14 +3412,12 @@ void Player::DuelComplete()
     //Restore pet factiontemplate
     if(Creature* pet = GetPet())
     {
-        pet->AttackStop();
-        pet->RemoveAllAttackers();
+        pet->CombatStop();
         pet->setFaction(getFaction());
     }
     if(Creature* pet = m_pDuel->GetPet())
     {
-        pet->AttackStop();
-        pet->RemoveAllAttackers();
+        pet->CombatStop();
         pet->setFaction(m_pDuel->getFaction());
     }
     #endif
@@ -3462,24 +3457,6 @@ int irand(int min, int max)
     holdrand = (holdrand * 214013L) + 2531011L;
 
     return (((holdrand >> 17) * (max - min)) >> 15) + min;
-}
-
-void Player::SendAttackStart(Unit* pVictim)
-{
-    WorldPacket data;
-
-    if(!isAttackReady(BASE_ATTACK))
-        resetAttackTimer(BASE_ATTACK);
-
-    if(haveOffhandWeapon() && !isAttackReady(OFF_ATTACK))
-        resetAttackTimer(OFF_ATTACK);
-
-    data.Initialize( SMSG_ATTACKSTART );
-    data << GetGUID();
-    data << pVictim->GetGUID();
-
-    SendMessageToSet(&data, true);
-    DEBUG_LOG( "WORLD: Sent SMSG_ATTACKSTART" );
 }
 
 //---------------------------------------------------------//
@@ -9293,8 +9270,7 @@ void Player::UnsummonPet(bool remove)
     SavePet();
     SetPet(0);
 
-    pet->AttackStop();
-    RemoveAllAttackers();
+    pet->CombatStop();
 
     WorldPacket data;
     data.Initialize(SMSG_DESTROY_OBJECT);

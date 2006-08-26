@@ -342,8 +342,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
         return true;
     }
 
-    unit->AttackStop();
-    unit->RemoveAllAttackers();
+    unit->CombatStop();
 
     unit->DeleteFromDB();
 

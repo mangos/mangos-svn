@@ -102,7 +102,7 @@ void AggressorAI::_stopAttack()
     {
         DEBUG_LOG("Creature stopped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
         i_victimGuid = 0;
-        i_creature.AttackStop();
+        i_creature.CombatStop();
         return;
     }
     else if( !victim  )
