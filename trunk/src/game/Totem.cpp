@@ -74,8 +74,7 @@ void Totem::UnSummon()
     data << GetGUID();
     SendMessageToSet(&data, true);
 
-    AttackStop();
-    RemoveAllAttackers();
+    CombatStop();
     RemoveAurasDueToSpell(m_spell);
     Unit *owner = this->GetOwner();
     if (owner)

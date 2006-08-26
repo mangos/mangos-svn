@@ -320,8 +320,7 @@ void Aura::Update(uint32 diff)
         {
             float x,y,z,angle,speed,pos_x,pos_y,pos_z;
             uint32 time;
-            m_target->AttackStop();
-            m_target->RemoveAllAttackers();
+            m_target->CombatStop();
             angle = m_target->GetAngle( m_caster->GetPositionX(), m_caster->GetPositionY() );
             speed = m_target->GetSpeed();
             pos_x = m_target->GetPositionX()+speed*diff* cos(-angle)/1000;
@@ -1139,9 +1138,8 @@ void Aura::HandleModFear(bool Apply)
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
-        m_target->SendAttackStop(m_caster);
-        m_caster->SendAttackStop(m_target);
         m_target->AttackStop();
+        m_caster->AttackStop();
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         data<<m_target->GetGUIDLow();

@@ -743,8 +743,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendLogXPGain(uint32 GivenXP,Unit* victim);
         void SendOutOfRange(Object* obj);
 
-        void SendAttackStart(Unit* pVictim);
-
         //Low Level Packets
         void PlaySound(uint32 Sound, bool OnlySelf);
         //notifiers

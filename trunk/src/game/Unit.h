@@ -333,6 +333,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAllAttackers();
         bool isInCombatWithPlayer() const;
         Unit* getVictim() const { return m_attacking; }
+        void CombatStop() { AttackStop(); RemoveAllAttackers(); }
 
         void addUnitState(uint32 f) { m_state |= f; };
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
@@ -458,7 +459,6 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void DeMorph();
 
-        void SendAttackStop(Unit* victim);
         void SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
         void SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked);
 
@@ -473,13 +473,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual void setDeathState(DeathState s)
         {
             if (s != ALIVE)
-            {
-                if (isInCombat())
-                {
-                    AttackStop();
-                    RemoveAllAttackers();
-                }
-            }
+                CombatStop();
+
             if (s == JUST_DIED)
             {
                 RemoveAllAurasOnDeath();
@@ -615,6 +610,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
     private:
+        void SendAttackStop(Unit* victim); // only from AttackStop(Unit*)
+        void SendAttackStart(Unit* pVictim); // only from Unit::AttackStart(Unit*)
+
+
         uint32 m_state;                                     // Even derived shouldn't modify
 };
 #endif

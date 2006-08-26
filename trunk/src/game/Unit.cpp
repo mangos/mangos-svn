@@ -86,8 +86,7 @@ Unit::Unit() : Object()
 
 Unit::~Unit()
 {
-    AttackStop();
-    RemoveAllAttackers();
+    CombatStop();
 }
 
 void Unit::Update( uint32 p_time )
@@ -223,7 +222,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
             pVictim->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
-            SendAttackStop(pVictim);
+            CombatStop();
             return;
         }
         ((Creature*)pVictim)->AI().AttackStart(this);
@@ -241,8 +240,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         pVictim->setDeathState(JUST_DIED);
 
         DEBUG_LOG("DealDamageAttackStop");
-        SendAttackStop(pVictim);
-        pVictim->SendAttackStop(this);
+        AttackStop();
+        pVictim->CombatStop();
 
         DEBUG_LOG("DealDamageHealth1");
         pVictim->SetHealth(0);
@@ -271,7 +270,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if(pet && pet->isPet())
             {
                 pet->setDeathState(JUST_DIED);
-                pet->SendAttackStop(this);
+                pet->CombatStop();
                 pet->SetHealth(0);
                 pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
                 pet->addUnitState(UNIT_STAT_DIED);
@@ -361,7 +360,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         else
         {
             DEBUG_LOG("Monster kill Monster");
-            SendAttackStop(pVictim);
+            pVictim->CombatStop();
             pVictim->addUnitState(UNIT_STAT_DIED);
         }
         AttackStop();
@@ -948,7 +947,8 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
 
     if (!pVictim->isAlive())
     {
-        SendAttackStop(pVictim);
+        AttackStop();
+        pVictim->CombatStop();
         return;
     }
 
@@ -1165,6 +1165,20 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
         max_damage = 5.0;
 
     return urand ((uint32)min_damage, (uint32)max_damage);
+}
+
+void Unit::SendAttackStart(Unit* pVictim)
+{
+    if(GetTypeId()!=TYPEID_PLAYER)
+        return;
+
+    WorldPacket data;
+    data.Initialize( SMSG_ATTACKSTART );
+    data << GetGUID();
+    data << pVictim->GetGUID();
+
+    ((Player*)this)->SendMessageToSet(&data, true);
+    DEBUG_LOG( "WORLD: Sent SMSG_ATTACKSTART" );
 }
 
 void Unit::SendAttackStop(Unit* victim)
@@ -2401,10 +2415,14 @@ bool Unit::Attack(Unit *victim)
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
+    if(!isAttackReady(BASE_ATTACK))
+        resetAttackTimer(BASE_ATTACK);
+
     // delay offhand weapon attack to next attack time
     if(haveOffhandWeapon())
         resetAttackTimer(OFF_ATTACK);
 
+    SendAttackStart(victim);
     return true;
 }
 
@@ -2413,6 +2431,8 @@ bool Unit::AttackStop()
     if (!m_attacking)
         return false;
 
+    Unit* victim = m_attacking;
+
     m_attacking->_removeAttacker(this);
     m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
@@ -2420,6 +2440,8 @@ bool Unit::AttackStop()
 
     if(m_currentMeleeSpell)
         m_currentMeleeSpell->cancel();
+
+    SendAttackStop(victim);
 
     return true;
 }
