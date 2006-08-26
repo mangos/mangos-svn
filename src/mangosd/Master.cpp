@@ -105,13 +105,6 @@ bool Master::Run()
                                                             //sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME );
     socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);
 
-    //sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
-    //sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
-    //sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
-    //sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
-    //sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
-    //sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
-
     //uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);
     //sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
     //grid_clean_up_delay *= 1000;
