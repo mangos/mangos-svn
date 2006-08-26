@@ -152,7 +152,7 @@ void Log::ResetColor(bool stdout_stream)
 
 void Log::Initialize()
 {
-    std::string logfn=sConfig.GetStringDefault("ServerLogFile", "Server.log");
+    std::string logfn=sConfig.GetStringDefault("LogFile", "Server.log");
     logfile = fopen(logfn.c_str(), "w");
     m_logLevel = sConfig.GetIntDefault("LogLevel", 0);
     InitColors(sConfig.GetStringDefault("LogColors", ""));
