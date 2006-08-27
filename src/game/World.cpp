@@ -197,7 +197,8 @@ void World::SetInitialWorldSettings()
     regen_values[RATE_POWER_MANA]  = sConfig.GetFloatDefault("Rate.Power1", 1);
     regen_values[RATE_POWER_RAGE]  = sConfig.GetFloatDefault("Rate.Power2", 1);
     regen_values[RATE_POWER_FOCUS] = sConfig.GetFloatDefault("Rate.Power3", 1);
-    regen_values[RATE_DROP]        = sConfig.GetFloatDefault("Rate.Drop", 1);
+    regen_values[RATE_DROP_ITEMS]  = sConfig.GetFloatDefault("Rate.Drop.Items", 1);
+    regen_values[RATE_DROP_MONEY]  = sConfig.GetFloatDefault("Rate.Drop.Money", 1);
     regen_values[RATE_XP_KILL]     = sConfig.GetFloatDefault("Rate.XP.Kill", 1);
     regen_values[RATE_XP_QUEST]    = sConfig.GetFloatDefault("Rate.XP.Quest", 1);
     regen_values[RATE_XP_EXPLORE]  = sConfig.GetFloatDefault("Rate.XP.Explore", 1);
