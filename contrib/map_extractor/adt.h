@@ -36,7 +36,7 @@ double v9[9][9];
 double v8[8][8];
 uint16 area_id;
 //Liquid *lq;
-float waterlevel;
+float waterlevel[9][9];
 uint8 flag;
 }chunk;
 

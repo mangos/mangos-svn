@@ -192,9 +192,8 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
 	if(wmoc.x >xbase)wmoc.x =xbase;
 	if(wmoc.z >zbase)wmoc.z =zbase;
 	int chunkflags = header.flags;
-	float zmin=999999999;
-	float zmax=-999999999;
-	char fcc[5];
+	float zmin=999999999.0f;
+	float zmax=-999999999.0f;
 	//must be there, bl!zz uses some crazy format
 	int nTextures;
 	while (mf.getPos ()<lastpos)
@@ -219,9 +218,6 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
 					if(z>zmax)zmax=z;
 				//	if(z<zmin)zmin=z;
 				}
-	
-			_chunk->waterlevel=-999999; // no liquid/water	
-		
 		}
 		 else
 			if(fourcc==0x4d434e52)
@@ -238,16 +234,30 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
 				mf.read(fcc1,4);
 				flipcc(fcc1);
 				fcc1[4]=0;
-				if (strcmp(fcc1,"MCSE"))
-			
-			//	if(size)
-				{
-					//chunkflag
-					
-					mf.seekRelative(-4);
-					mf.read(&_chunk->waterlevel,4);
 
-					if(chunkflags & 4 || chunkflags & 8)
+				if (!strcmp(fcc1,"MCSE"))
+                {
+                    for(int i=0;i<9;i++)
+                        for(int j=0;j<9;j++)
+                            _chunk->waterlevel[i][j]=-999999; // no liquid/water
+                }
+                else
+				{
+                    float maxheight;
+                    mf.read(&maxheight, 4);
+					
+                    for(int j=0;j<9;j++)
+                        for(int i=0;i<9;i++)
+                        {
+                            mf.read(&h, 4);
+                            mf.read(&h, 4);
+                            if(h > maxheight)
+                                _chunk->waterlevel[i][j]=-999999;
+                            else
+                                _chunk->waterlevel[i][j]=h;
+                        }
+
+                    if(chunkflags & 4 || chunkflags & 8)
 						_chunk->flag |=1;
 					if(chunkflags & 16)
 						_chunk->flag |=2;
@@ -351,8 +361,18 @@ double GetZ(double x,double z)
 	
 }
 
+inline
+void TransformWaterData()
+{
+    cell= new Cell;
 
+    for(int x=0;x<128;x++)
+        for(int y=0;y<128;y++)
+            cell->v9[x][y] = mcells->ch[x/8][y/8].waterlevel[x%8][y%8];
 
+    //and the last 1
+    cell->v9[128][128] = mcells->ch[15][15].waterlevel[8][8];
+}
 
 inline
 void TransformData()
@@ -363,23 +383,25 @@ void TransformData()
 	{
 		for(int y=0;y<128;y++)
 		{
-		cell->v8[x][y]=mcells -> ch[x/8][y/8].v8[x%8][y%8] ;
-		cell->v9[x][y]=mcells -> ch[x/8][y/8].v9[x%8][y%8];
+            cell->v8[x][y] = (float)mcells->ch[x/8][y/8].v8[x%8][y%8];
+            cell->v9[x][y] = (float)mcells->ch[x/8][y/8].v9[x%8][y%8];
 		}
 
 		//extra 1 point on bounds
-		cell->v9[x][128]=mcells -> ch[x/8][15].v9[x%8][8];
+		cell->v9[x][128] = (float)mcells->ch[x/8][15].v9[x%8][8];
 		//x==y
-		cell->v9[128][x]=mcells -> ch[15][x/8].v9[8][x%8];
+		cell->v9[128][x] = (float)mcells->ch[15][x/8].v9[8][x%8];
 
 	}
 
 
 	//and the last 1
-	cell->v9[128][128]=mcells -> ch[15][15].v9[8][8];
+	cell->v9[128][128] = (float)mcells->ch[15][15].v9[8][8];
 
 	delete mcells;
 }
+
+const char MAP_MAGIC[] = "MAP_1.00";
 
 bool ConvertADT(char * filename,char * filename2)
 {
@@ -393,6 +415,9 @@ bool ConvertADT(char * filename,char * filename2)
 		printf("Can't create the output file '%s'\n",filename2);
 		return false;
 	}
+
+    // write magic header
+    fwrite(MAP_MAGIC,1,8,output);
 
 	for(unsigned int x=0;x<16;x++)
 	for(unsigned int y=0;y<16;y++)
@@ -412,15 +437,17 @@ bool ConvertADT(char * filename,char * filename2)
 		}
 	}
 	
-	for(unsigned int x=0;x<16;x++)
-	for(unsigned int y=0;y<16;y++)
-	fwrite(&mcells->ch[y][x].flag,1,1,output);
+    for(unsigned int x=0;x<16;x++)
+        for(unsigned int y=0;y<16;y++)
+            fwrite(&mcells->ch[y][x].flag,1,1,output);
 
-	for(unsigned int x=0;x<16;x++)
-	for(unsigned int y=0;y<16;y++)
-	fwrite(&mcells->ch[y][x].waterlevel,4,1,output);
+    TransformWaterData();
 
-	
+    for(unsigned int x=0;x<128;x++)
+        for(unsigned int y=0;y<128;y++)
+            fwrite(&cell->v9[y][x],1,sizeof(float),output);
+
+    delete cell;
 	TransformData();
 	
 	for(unsigned int x=0;x<iRes;x++)
