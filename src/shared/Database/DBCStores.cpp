@@ -300,6 +300,9 @@ uint32 FindSpellRank(uint32 spellId)
 
 bool canStackSpellRank(SpellEntry *spellInfo)
 {
+    if(FindSpellRank(spellInfo->Id) == 0)
+        return true;
+
     if(spellInfo->powerType == 0)
     {
         if(spellInfo->manaCost > 0)
