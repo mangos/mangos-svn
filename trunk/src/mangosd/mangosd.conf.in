@@ -84,10 +84,13 @@ Rate.Power1 = 1;
 Rate.Power2 = 1;
 Rate.Power3 = 1;
 
-# Drop rate
-Rate.Drop = 1
+# Drop rates
+# Default: 1
+Rate.Drop.Items = 1
+Rate.Drop.Money = 1
 
-# XP rate 
+# XP rates
+# Default: 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1

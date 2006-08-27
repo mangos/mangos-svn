@@ -122,7 +122,7 @@ struct NotChanceFor
         if(m_player && itm.questchance > 0 && m_player->HaveQuestForItem(itm.itemid))
             return itm.questchance <= rand_chance();
         else if(itm.chance > 0)
-            return itm.chance * sWorld.getRate(RATE_DROP) <= rand_chance();
+            return itm.chance * sWorld.getRate(RATE_DROP_ITEMS) <= rand_chance();
         else
             return true;
     }

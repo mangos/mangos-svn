@@ -39,7 +39,7 @@ class SQLStorage
         template<class T>
             T const* LookupEntry(uint32 id) const
         {
-            if(id>MaxEntry)
+            if(id>=MaxEntry)
             {
                 printIndexError(id);
                 return NULL;
