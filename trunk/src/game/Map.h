@@ -164,6 +164,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void MoveAllCreaturesInMoveList();
     private:
+        void CreatureRelocationNotifying(Creature *creature, Cell newcell, CellPair newval);
+
         void AddCreatureToMoveList(Creature *c, Cell old_cell, Cell new_cell);
         std::list<CreatureMover> i_creaturesToMove;
 
