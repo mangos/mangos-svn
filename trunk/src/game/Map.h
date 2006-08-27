@@ -64,7 +64,7 @@ typedef struct
 {
     uint16 area_flag[16][16];
     uint8 terrain_type[16][16];
-    float liquid_level[16][16];
+    float liquid_level[128][128];
     float Z[MAP_RESOLUTION][MAP_RESOLUTION];
 }GridMap;
 

@@ -30,6 +30,10 @@
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
 
+// magic *.map header
+const char MAP_MAGIC[] = "MAP_1.00";
+
+
 static GridState* si_GridStates[MAX_GRID_STATE];
 
 inline
@@ -59,11 +63,22 @@ bool Map::ExistMAP(int mapid,int x,int y)
 
     sLog.outDetail("Check existing of map file '%s': %s",tmp,(pf ? "exist." : "not exist!"));
 
-    delete[] tmp;
-
     if(!pf)
+    {
+        delete[] tmp;
         return false;
+    }
 
+    char magic[8];
+    fread(magic,1,8,pf);
+    if(strncmp(MAP_MAGIC,magic,8))
+    {
+        sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.",tmp);
+        delete [] tmp;
+        return false;
+    }
+
+    delete [] tmp;
     fclose(pf);
 
     return true;
@@ -108,6 +123,15 @@ GridMap * Map::LoadMAP(int mapid,int x,int y)
         delete [] tmp;
         return NULL;
     }
+    char magic[8];
+    fread(magic,1,8,pf);
+    if(strncmp(MAP_MAGIC,magic,8))
+    {
+        sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.",tmp);
+        delete [] tmp;
+        return NULL;
+    }
+
     // fseek(pf,0,2);
     // uint32 fs=ftell(pf);
     // fseek(pf,0,0);
@@ -737,8 +761,8 @@ float Map::GetWaterLevel(float x, float y )
     gx=(int)(32-x/SIZE_OF_GRIDS) ;                          //grid x
     gy=(int)(32-y/SIZE_OF_GRIDS);                           //grid y
 
-    lx=16*(32 -x/SIZE_OF_GRIDS - gx);
-    ly=16*(32 -y/SIZE_OF_GRIDS - gy);
+    lx=128*(32 -x/SIZE_OF_GRIDS - gx);
+    ly=128*(32 -y/SIZE_OF_GRIDS - gy);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
         GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
