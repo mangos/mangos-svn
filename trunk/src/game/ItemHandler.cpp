@@ -132,8 +132,6 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
     _player->DestroyItem( bag, slot, true );
 }
 
-extern void CheckItemDamageValues ( ItemPrototype *itemProto );
-
 void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
