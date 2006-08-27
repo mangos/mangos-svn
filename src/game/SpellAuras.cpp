@@ -1393,32 +1393,32 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 
 void Aura::HandleModMechanicImmunity(bool apply)
 {
-    m_target->ApplySpellImmune(GetId(),IMMUNITY_EFFECT,m_modifier.m_miscvalue,apply);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply)
 {
-    m_target->ApplySpellImmune(GetId(),IMMUNITY_STATE,m_modifier.m_miscvalue,apply);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_EFFECT,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModStateImmunity(bool apply)
 {
-    m_target->ApplySpellImmune(GetId(),IMMUNITY_SCHOOL,m_modifier.m_miscvalue,apply);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_STATE,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModSchoolImmunity(bool apply)
 {
-    m_target->ApplySpellImmune(GetId(),IMMUNITY_DAMAGE,m_modifier.m_miscvalue,apply);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_SCHOOL,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModDmgImmunity(bool apply)
 {
-    m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_DAMAGE,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModDispelImmunity(bool apply)
 {
-    m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,m_modifier.m_miscvalue,apply);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
 }
 
 /*********************************************************/

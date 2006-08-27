@@ -767,7 +767,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void KillPlayer();
         void ResurrectPlayer();
         void BuildPlayerRepop();
-        void DeathDurabilityLoss(double percent);
+        void DurabilityLoss(double percent);
         void RepopAtGraveyard();
         void DuelComplete();
 
@@ -781,8 +781,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BroadcastToFriends(std::string msg);
 
         void UpdateDefense();
-        void UpdateMeleeSkillWeapon (WeaponAttackType attType);
-        void UpdateRangedSkillWeapon();
+        void UpdateWeaponSkill (WeaponAttackType attType);
 
         void SetSkill(uint32 id, uint16 currVal, uint16 maxVal);
         uint16 GetSkillValue(uint32 skill) const;

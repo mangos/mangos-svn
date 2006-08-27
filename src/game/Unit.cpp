@@ -254,7 +254,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             DEBUG_LOG("We are dead, loosing 10 percents durability");
             if (durabilityLoss)
             {
-                ((Player*)pVictim)->DeathDurabilityLoss(0.10);
+                ((Player*)pVictim)->DurabilityLoss(0.10);
             }
             HostilList::iterator i;
             for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
@@ -402,7 +402,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if (randdurability == 10)
             {
                 DEBUG_LOG("HIT: We decrease durability with 5 percent");
-                ((Player*)pVictim)->DeathDurabilityLoss(0.05);
+                ((Player*)pVictim)->DurabilityLoss(0.05);
             }
         }
         
@@ -464,11 +464,12 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellID);
     if(!spellInfo)
         return;
+
     uint32 absorb=0;
     uint32 resist=0;
 
     uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
-    absorb = CalDamageAbsorb(pVictim,spellInfo->School,pdamage,&resist);
+    CalDamageReduction(pVictim,spellInfo->School,pdamage, &absorb, &resist);
 
     //WorldPacket data;
     if(m_modSpellHitChance+100 < urand(0,100))
@@ -501,8 +502,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     uint32 absorb=0;
     uint32 resist=0;
 
-    uint32 pdamage = SpellDamageBonus(pVictim,spellProto,mod->m_amount);
-    absorb = CalDamageAbsorb(pVictim,spellProto->School,pdamage,&resist);
+    uint32 pdamage = SpellDamageBonus(pVictim, spellProto, mod->m_amount);
+    CalDamageReduction(pVictim, spellProto->School, pdamage, &absorb, &resist);
 
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb);
@@ -619,26 +620,23 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
     SendMessageToSet(&data, true);
 }
 
-uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uint32 *resist)
+void Unit::CalDamageReduction(Unit *pVictim,uint32 School,const uint32 damage, uint32 *absorb, uint32 *resist)
 {
     uint32 AbsorbDamage=0;
     uint32 currAbsorbDamage=0;
     uint32 currentPower;
     bool  removeAura=false;
 
-    if(!pVictim)
-        return 0;
-    if(!pVictim->isAlive())
-        return 0;
-    if(!damage)
-        return 0;
+    if(!pVictim || !pVictim->isAlive() || !damage)
+        return;
+
     for(std::list<struct DamageManaShield*>::iterator i = pVictim->m_damageManaShield.begin();i != pVictim->m_damageManaShield.end();i++)
     {
         SpellEntry *spellInfo = sSpellStore.LookupEntry( (*i)->m_spellId);
 
-        if((*i)->m_schoolType & int32(1<<School))
+        if((*i)->m_schoolType & School)
         {
-            currAbsorbDamage = damage+ (*i)->m_currAbsorb;
+            currAbsorbDamage = damage + (*i)->m_currAbsorb;
             if(currAbsorbDamage < (*i)->m_totalAbsorb)
             {
                 AbsorbDamage = damage;
@@ -703,14 +701,12 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
         if (randdurability == 10)
         {
             DEBUG_LOG("BLOCK: We decrease durability with 5 percent");
-            ((Player*)pVictim)->DeathDurabilityLoss(0.05);
+            ((Player*)pVictim)->DurabilityLoss(0.05);
         }
     }
-
-    return AbsorbDamage;
 }
 
-void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resist, WeaponAttackType attType)
+void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType)
 {
     MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim, attType);
     if (outcome == MELEE_HIT_MISS)
@@ -723,10 +719,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
-    *damage = MeleeDamageBonus(pVictim, CalculateDamage (attType));
+    *damage += CalculateDamage (attType);
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
-        ((Player*)this)->UpdateMeleeSkillWeapon (attType);
+        ((Player*)this)->UpdateWeaponSkill(attType);
 
     switch (outcome)
     {
@@ -811,23 +807,24 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             break;
     }
 
-    for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
-    {
-        pVictim->SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
-    }
-    uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage,resist);
-
-    if (*damage <= absorb + *resist + *blocked_amount)
+    MeleeDamageBonus(pVictim, damage);
+    CalDamageReduction(pVictim, *damageType, *damage, absorbDamage, resistDamage);
+    
+    if (*damage <= *absorbDamage + *resistDamage + *blocked_amount)
     {
         //*hitInfo = 0x00010020;
-        *hitInfo = HITINFO_NOACTION | HITINFO_ABSORB;
-        *absorbDamage = absorb;
+        *hitInfo = HITINFO_NOACTION | HITINFO_SWINGNOHITSOUND;
         *damageType = 0;
         return;
     }
-    else
+
+    if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
+    if (*resistDamage) *hitInfo |= HITINFO_RESIST;
+
+    // victim's damageshield
+    for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
     {
-        *absorbDamage = absorb;
+        pVictim->SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
     }
 
     // this unit's proc trigger damage
@@ -936,12 +933,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
         }
     }
-
 }
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
 {
-
     if(hasUnitState(UNIT_STAT_CONFUSED) || hasUnitState(UNIT_STAT_STUNDED))
         return;
 
@@ -984,8 +979,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
         SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
     else
     {
-        if (absorbed_dmg)hitInfo |= HITINFO_ABSORB;
-        if (resisted_dmg)hitInfo |= HITINFO_RESIST;
         if ((absorbed_dmg || resisted_dmg) && ((absorbed_dmg + resisted_dmg + blocked_dmg) > damage)) hitInfo |= HITINFO_SWINGNOHITSOUND;
 
         //do animation
@@ -1572,14 +1565,6 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 
     Aur->_AddAura();
     m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
-
-    // save memory by only adding auras cast on others
-    if (Aur->GetCaster() != Aur->GetTarget())
-    {
-        AuraMap& c_Auras = Aur->GetCaster()->GetCastAuras();
-        c_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
-    }
-
     if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
     {
         m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
@@ -1836,11 +1821,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     }
     (*i).second->SetRemoveOnDeath(onDeath);
     (*i).second->_RemoveAura();
-    AuraMap& c_Auras = (*i).second->GetCaster()->GetCastAuras();
-    AuraMap::iterator ic = c_Auras.find(spellEffectPair((*i).second->GetId(), (*i).second->GetEffIndex()));
     delete (*i).second;
-    if (ic != c_Auras.end())
-        c_Auras.erase(ic);
     m_Auras.erase(i++);
     m_removedAuras++;                                       // internal count used by unit update
 }
@@ -1872,15 +1853,6 @@ void Unit::RemoveAllAuras()
     {
         AuraMap::iterator iter = m_Auras.begin();
         RemoveAura(iter);
-    }
-}
-
-void Unit::RemoveAllCastAuras()
-{
-    while (!m_CastAuras.empty())
-    {
-        AuraMap::iterator iter = m_CastAuras.begin();
-        iter->second->GetTarget()->RemoveAura(iter->second->GetId(), iter->second->GetEffIndex());
     }
 }
 
@@ -2642,33 +2614,31 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     return pdamage;
 }
 
-uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
+void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
 {
-    if(!pVictim) return pdamage;
+    if(!pVictim) return;
     //If m_immuneToDamage type contain magic, IMMUNE damage.
     for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_DAMAGE].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_DAMAGE].end(); itr = next)
     {
-        next = itr;
-        next++;
         if((*itr)->type & IMMUNE_DAMAGE_PHYSICAL)
         {
-            pdamage = 0;
+            *pdamage = 0;
             break;
         }
     }
     //If m_immuneToSchool type contain this school type, IMMUNE damage.
-    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_SCHOOL].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_SCHOOL].end(); itr = next)
+    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_SCHOOL].begin(); itr != pVictim->m_spellImmune[IMMUNITY_SCHOOL].end(); ++itr)
     {
-        next = itr;
-        next++;
         if((*itr)->type & IMMUNE_SCHOOL_PHYSICAL)
         {
-            pdamage = 0;
+            *pdamage = 0;
             break;
         }
     }
-    if(pdamage == 0)
-        return pdamage;
+
+    if(*pdamage == 0)
+        return;
+
     CreatureInfo const *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
@@ -2678,30 +2648,29 @@ uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
         {
             uint32 happiness = GetPower(POWER_HAPPINESS);
             if(happiness>=750000)
-                pdamage = uint32(pdamage*1.25);
+                *pdamage = uint32(*pdamage * 1.25);
             else if(happiness>=500000)
-                pdamage = uint32(pdamage*1.0);
-            else pdamage = uint32(pdamage*0.75);
+                *pdamage = uint32(*pdamage * 1.0);
+            else *pdamage = uint32(*pdamage * 0.75);
         }
     }
 
     AuraList& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
         if(cinfo && cinfo->type == uint32((*i)->GetModifier()->m_miscvalue))
-            pdamage += (*i)->GetModifier()->m_amount;
+            *pdamage += (*i)->GetModifier()->m_amount;
 
     AuraList& mDamageTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-            pdamage += (*i)->GetModifier()->m_amount;
+            *pdamage += (*i)->GetModifier()->m_amount;
 
     AuraList& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
     for(AuraList::iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
         if(cinfo && (cinfo->type & uint32((*i)->GetModifier()->m_miscvalue)) != 0)
-            pdamage += uint32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+            *pdamage += uint32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
 
-    pdamage = uint32(pdamage * (m_modDamagePCT+100)/100);
-    return pdamage;
+    *pdamage = uint32(*pdamage * (m_modDamagePCT+100)/100);
 }
 
 void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
@@ -2710,15 +2679,11 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
     {
         for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(), next; itr != m_spellImmune[op].end(); itr = next)
         {
-            next = itr;
-            next++;
+            next = itr; next++;
             if((*itr)->type == type)
             {
                 m_spellImmune[op].erase(itr);
-                if (m_spellImmune[op].empty())
-                    break;
-                else
-                    next = m_spellImmune[op].begin();
+                next = m_spellImmune[op].begin();
             }
         }
         SpellImmune *Immune = new SpellImmune();
@@ -2728,10 +2693,8 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
     }
     else
     {
-        for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(), next; itr != m_spellImmune[op].end(); itr = next)
+        for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(); itr != m_spellImmune[op].end(); ++itr)
         {
-            next = itr;
-            next++;
             if((*itr)->spellId == spellId)
             {
                 m_spellImmune[op].erase(itr);
