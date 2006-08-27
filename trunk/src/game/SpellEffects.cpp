@@ -64,7 +64,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_SPECIALIZE = 14
     &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL = 15
     &Spell::EffectQuestComplete,                            //SPELL_EFFECT_QUEST_COMPLETE = 16
-    &Spell::EffectWeaponDmgNOSchool,                        //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL = 17
+    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL = 17
     &Spell::EffectResurrect,                                //SPELL_EFFECT_RESURRECT = 18
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_EXTRA_ATTACKS = 19
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DODGE = 20
@@ -78,7 +78,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummon,                                   //SPELL_EFFECT_SUMMON = 28
     &Spell::EffectMomentMove,                               //SPELL_EFFECT_LEAP = 29
     &Spell::EffectEnergize,                                 //SPELL_EFFECT_ENERGIZE = 30
-    &Spell::EffectWeaponDmgPerc,                            //SPELL_EFFECT_WEAPON_PERCENT_DAMAGE = 31
+    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_PERCENT_DAMAGE = 31
     &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE = 32 //Useless
     &Spell::EffectOpenLock,                                 //SPELL_EFFECT_OPEN_LOCK = 33
     &Spell::EffectSummonChangeItem,                         //SPELL_EFFECT_SUMMON_CHANGE_ITEM = 34
@@ -274,11 +274,24 @@ void Spell::EffectApplyAura(uint32 i)
         SendCastResult(castResult);
         return;
     }
+
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
     if(m_CastItem)
         Aur->SetCastItem(m_CastItem);
+
+    if (!Aur->IsPositive() && Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
+    {
+        switch (Aur->GetModifier()->m_auraname)
+        {
+            case SPELL_AURA_MOD_DETECT_RANGE:
+            case SPELL_AURA_AURAS_VISIBLE:
+                break;
+            default:
+                ((Creature*)Aur->GetTarget())->AI().AttackStart(Aur->GetCaster());
+        }
+    }
 
     bool added = unitTarget->AddAura(Aur);
 
@@ -301,19 +314,6 @@ void Spell::EffectApplyAura(uint32 i)
             }
             else
                 cancel();
-        }
-    }
-
-    // negative auras cause immediate creature aggro
-    if (added && !Aur->IsPositive() && Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
-    {
-        switch (Aur->GetModifier()->m_auraname)
-        {
-            case SPELL_AURA_MOD_DETECT_RANGE:
-            case SPELL_AURA_AURAS_VISIBLE:
-                break;
-            default:
-                ((Creature*)Aur->GetTarget())->AI().AttackStart(Aur->GetCaster());
         }
     }
 }
@@ -431,28 +431,6 @@ void Spell::EffectHealthLeach(uint32 i)
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, uint32(tmpvalue*pct));
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
-}
-
-void Spell::EffectWeaponDmgNOSchool(uint32 i)
-{
-    if(!unitTarget)
-        return;
-    if(!unitTarget->isAlive())
-        return;
-
-    float minDmg,maxDmg;
-    minDmg = maxDmg = 0;
-
-    minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE);
-    maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE);
-
-    uint32 randDmg = (uint32)(maxDmg-minDmg);
-    uint32 dmg = (uint32)minDmg;
-    if(randDmg > 1)
-        dmg += (uint32)(rand()%randDmg);
-    dmg += damage;
-
-    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,dmg);
 }
 
 void Spell::EffectCreateItem(uint32 i)
@@ -1289,27 +1267,35 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    float    chanceToHit = 100.0f;
-    int32    attackerSkill = m_caster->GetWeaponSkillValue(BASE_ATTACK);
-    int32    victimSkill = unitTarget->GetDefenceSkillValue();
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
+    WeaponAttackType attType = BASE_ATTACK;
+
+    if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
     {
-        if (attackerSkill <= victimSkill - 24)
-            chanceToHit = 0;
-        else if (attackerSkill <= victimSkill)
-            chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
-
-        if (chanceToHit < 15.0f)
-            chanceToHit = 15.0f;
+        attType = RANGED_ATTACK;
     }
-
-    float fdamage;
-    if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
-        fdamage = m_caster->CalculateDamage(BASE_ATTACK);
     else
     {
-        fdamage = m_caster->CalculateDamage(RANGED_ATTACK);
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        if(unitTarget->isAttackReady(BASE_ATTACK)) attType = BASE_ATTACK;
+        else if (unitTarget->haveOffhandWeapon() && unitTarget->isAttackReady(OFF_ATTACK))
+            attType = OFF_ATTACK;
+    }
+
+    uint32 hitInfo = 0;
+    uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
+    uint32 damageType = NORMAL_DAMAGE;
+    uint32 victimState = VICTIMSTATE_NORMAL;
+    // no bonus from items with +dmg
+    uint32 damage = m_spellInfo->EffectBasePoints[i];
+    uint32 blocked_dmg = 0;
+    uint32 absorbed_dmg = 0;
+    uint32 resisted_dmg = 0;
+
+    m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+
+    // take ammo
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
         {
             Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
             if(!pItem)
@@ -1326,24 +1312,11 @@ void Spell::EffectWeaponDmg(uint32 i)
         }
     }
 
-    if((chanceToHit/100) * 512 >= urand(0, 512) )
-    {
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (attackerSkill < victimSkill - 20)
-                fdamage = (fdamage * 30) / 100;
-            else if (attackerSkill < victimSkill - 10)
-                fdamage = (fdamage * 60) / 100;
-        }
-    }
-    else fdamage = 0;
-    fdamage += damage;
+    if (hitInfo & nohitMask)
+        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget->GetGUID(), 1, m_spellInfo->School, damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
 
-    // generate lot additional rage to worrior.
-    //if (fdamage)
-    //    fdamage += damage;
-
-    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,(uint32)fdamage);
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget->GetGUID(), m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
+    unitTarget->DealDamage(unitTarget, damage, 0, true);
 
     if(m_spellInfo->Effect[i] == 121)
     {
@@ -1351,29 +1324,6 @@ void Spell::EffectWeaponDmg(uint32 i)
         m_caster->resetAttackTimer(OFF_ATTACK);
         m_caster->resetAttackTimer(RANGED_ATTACK);
     }
-}
-
-void Spell::EffectWeaponDmgPerc(uint32 i)
-{
-    if(!unitTarget)
-        return;
-    if(!unitTarget->isAlive())
-        return;
-
-    float minDmg,maxDmg;
-    minDmg = maxDmg = 0;
-
-    minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE);
-    maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE);
-
-    uint32 randDmg = (uint32)(maxDmg-minDmg);
-    uint32 dmg = (uint32)minDmg;
-    if(randDmg > 1)
-        dmg += (uint32)(rand()%randDmg);
-    dmg = (uint32)(dmg*(damage/100));
-
-    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,dmg);
-
 }
 
 void Spell::EffectThreat(uint32 i)

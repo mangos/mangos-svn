@@ -392,8 +392,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint8 getStandState() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_1) & 0xFF); };
 
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
-        void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resist, WeaponAttackType attType);
-        uint32 CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uint32 *resist);
+        void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType);
+        void CalDamageReduction(Unit *pVictim, uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist);
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK);
 
@@ -506,7 +506,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAreaAurasByOthers(uint64 guid = 0);
 
         void RemoveAllAuras();
-        void RemoveAllCastAuras();
         void RemoveAllAurasOnDeath();
         //void SetAura(Aura* Aur){ m_Auras = Aur; }
         bool SetAurDuration(uint32 spellId, uint32 effindex, uint32 duration);
@@ -552,7 +551,6 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap& GetAuras( ) {return m_Auras;}
-        AuraMap& GetCastAuras( ) {return m_CastAuras;}
         AuraList& GetAurasByType(uint8 type) {return m_modAuras[type];}
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run);
@@ -569,7 +567,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void ApplyStats(bool apply);
         void UnsummonTotem(int8 slot = -1);
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 damage);
-        uint32 MeleeDamageBonus(Unit *pVictim, uint32 damage);
+        void MeleeDamageBonus(Unit *pVictim, uint32 *damage);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
 
     protected:
@@ -596,7 +594,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         DeathState m_deathState;
 
         AuraMap m_Auras;
-        AuraMap m_CastAuras;
 
         std::list<Aura *> m_scAuras;                        // casted singlecast auras
         std::list<DynamicObject*> m_dynObj;

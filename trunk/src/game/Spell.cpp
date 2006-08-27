@@ -664,7 +664,7 @@ void Spell::cast()
         }
 
         if( ( IsAutoRepeat() || m_rangedShoot ) && m_caster->GetTypeId() == TYPEID_PLAYER )
-            ((Player*)m_caster)->UpdateRangedSkillWeapon();
+            ((Player*)m_caster)->UpdateWeaponSkill(RANGED_ATTACK);
     }
 
     if(m_spellState != SPELL_STATE_CASTING)

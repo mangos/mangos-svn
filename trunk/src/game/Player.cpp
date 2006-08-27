@@ -142,9 +142,6 @@ Player::~Player ()
     DuelComplete();
 
     RemoveAllAuras();
-    // TODO: this isnt official behaviour
-    // auras need to store the caster guid and use that if needed.
-    RemoveAllCastAuras();
 
     uint32 eslot;
     for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
@@ -2342,7 +2339,7 @@ Corpse* Player::GetCorpse() const
     return ObjectAccessor::Instance().GetCorpseForPlayer(*this);
 }
 
-void Player::DeathDurabilityLoss(double percent)
+void Player::DurabilityLoss(double percent)
 {
     uint32 pDurability, pNewDurability;
 
@@ -2521,8 +2518,13 @@ void Player::UpdateSkillPro(uint32 spellid)
 
 }
 
-void Player::UpdateMeleeSkillWeapon (WeaponAttackType attType)
+void Player::UpdateWeaponSkill (WeaponAttackType attType)
 {
+    // no skill gain in pvp
+    Unit *pVictim = getVictim();
+    if(pVictim->GetTypeId() == TYPEID_PLAYER)
+        return;
+
     switch(attType)
     {
         case BASE_ATTACK:
@@ -2543,16 +2545,13 @@ void Player::UpdateMeleeSkillWeapon (WeaponAttackType attType)
                 UpdateSkill(tmpitem->GetSkill());
         };break;
         case RANGED_ATTACK:
-            break;
+        {
+            Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+
+            if (tmpitem)
+                UpdateSkill(tmpitem->GetSkill());
+        };break;
     }
-}
-
-void Player::UpdateRangedSkillWeapon()
-{
-    Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-
-    if (tmpitem)
-        UpdateSkill(tmpitem->GetSkill());
 }
 
 void Player::ModifySkillBonus(uint32 skillid,int32 val)
@@ -8626,7 +8625,6 @@ void Player::_LoadActions()
 void Player::_LoadAuras()
 {
     m_Auras.clear();
-    m_CastAuras.clear();
 
     for(uint8 i = 0; i < 48; i++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);

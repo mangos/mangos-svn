@@ -25,7 +25,7 @@
 void
 ConfusedMovementGenerator::Initialize(Creature &creature)
 {
-    const float wander_distance=22;
+    const float wander_distance=11;
     float x,y,z,z2;
     x = creature.GetPositionX();
     y = creature.GetPositionY();
