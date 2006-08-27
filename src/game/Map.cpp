@@ -519,7 +519,13 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     // delay creature move from grid/cell to grid/cell moves
     if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
         AddCreatureToMoveList(creature,old_cell,new_cell);
+    else
+        // diffcell/diffgrid case called at finishing move creature in Map::MoveAllCreaturesInMoveList
+        CreatureRelocationNotifying(creature,new_cell,new_val);
+}
 
+void Map::CreatureRelocationNotifying(Creature *creature, Cell new_cell, CellPair new_val)
+{
     if( !creature->hasUnitState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
     {
         CellLock<ReadGuard> cell_lock(new_cell, new_val);
@@ -574,6 +580,7 @@ void Map::MoveAllCreaturesInMoveList()
                     (*i_grids[cm.new_cell.GridX()][cm.new_cell.GridY()])(cm.new_cell.CellX(), cm.new_cell.CellY()).AddGridObject<Creature>(cm.creature, cm.creature->GetGUID());
                 }
             }
+            CreatureRelocationNotifying(cm.creature,cm.new_cell,cm.new_cell.cellPair());
         }
     }
     sLog.outDebug("Creature mover 2 check.");
@@ -587,6 +594,9 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
     {
         if( ObjectAccessor::Instance().PlayersNearGrid(x, y, i_id) )
             return false;
+
+        // Finish creature moves at map before unload
+        MoveAllCreaturesInMoveList();
 
         WriteGuard guard(i_info[x][y]->i_lock);
         DEBUG_LOG("Unloading grid[%u,%u] for map %u", x,y, i_id);
