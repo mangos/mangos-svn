@@ -403,7 +403,7 @@ void WorldSession::SendSpiritResurrect()
     _player->SetPower(POWER_ENERGY, _player->GetMaxPower(POWER_ENERGY));
     _player->ApplyStats(true);
 
-    _player->DeathDurabilityLoss(0.25);
+    _player->DurabilityLoss(0.25);
     _player->SpawnCorpseBones();
 
     // update world right away
