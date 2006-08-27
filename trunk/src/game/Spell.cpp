@@ -757,6 +757,16 @@ void Spell::SendSpellCooldown()
         data << uint32(rec);
     }
     _player->GetSession()->SendPacket(&data);
+
+    // show cooldown for item
+    if(m_CastItem)
+    {
+        data.clear();
+        data.Initialize(SMSG_ITEM_COOLDOWN);
+        data << m_CastItem->GetGUID();
+        data << uint32(m_spellInfo->Id);
+        _player->GetSession()->SendPacket(&data);
+    }
 }
 
 void Spell::update(uint32 difftime)
