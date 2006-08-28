@@ -129,6 +129,7 @@ struct TrainerSpell
     uint32 reqspell;
     uint32 reqskill;
     uint32 reqskillvalue;
+    uint32 reqlevel;
 };
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
