@@ -79,13 +79,17 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 void Bag::SaveToDB()
 {
     Item::SaveToDB();
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
-    for (uint8 i = 0; i < GetProto()->ContainerSlots; i++)
+
+    if(GetSlot()!=NULL_SLOT)                                           // equiped bag
     {
-        if (m_bagslot[i])
+        sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
+        for (uint8 i = 0; i < GetProto()->ContainerSlots; i++)
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GUID_LOPART(GetOwnerGUID()), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
-            m_bagslot[i]->SaveToDB();
+            if (m_bagslot[i])
+            {
+                sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GUID_LOPART(GetOwnerGUID()), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
+                m_bagslot[i]->SaveToDB();
+            }
         }
     }
 }
@@ -106,33 +110,36 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
-
-    if (result)
+    if(GetSlot()!=NULL_SLOT)                                           // equiped bag
     {
-        do
+        QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
+
+        if (result)
         {
-            Field *fields = result->Fetch();
-            uint8  slot      = fields[0].GetUInt8();
-            uint32 item_guid = fields[1].GetUInt32();
-            uint32 item_id   = fields[2].GetUInt32();
-
-            ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
-
-            if(!proto)
+            do
             {
-                sLog.outError( "Bag::LoadFromDB: Player %d have unknown item (id: #%u) in bag #%u, skipped.", GUID_LOPART(GetOwnerGUID()), item_id, GetSlot());
-                continue;
-            }
+                Field *fields = result->Fetch();
+                uint8  slot      = fields[0].GetUInt8();
+                uint32 item_guid = fields[1].GetUInt32();
+                uint32 item_id   = fields[2].GetUInt32();
 
-            Item *item = NewItemOrBag(proto);
-            item->SetSlot(slot);
-            if(!item->LoadFromDB(item_guid, owner_guid, 1))
-                continue;
-            StoreItem( slot, item, true );
-        } while (result->NextRow());
+                ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
 
-        delete result;
+                if(!proto)
+                {
+                    sLog.outError( "Bag::LoadFromDB: Player %d have unknown item (id: #%u) in bag #%u, skipped.", GUID_LOPART(GetOwnerGUID()), item_id, GetSlot());
+                    continue;
+                }
+
+                Item *item = NewItemOrBag(proto);
+                item->SetSlot(slot);
+                if(!item->LoadFromDB(item_guid, owner_guid, 1))
+                    continue;
+                StoreItem( slot, item, true );
+            } while (result->NextRow());
+
+            delete result;
+        }
     }
     return true;
 }
