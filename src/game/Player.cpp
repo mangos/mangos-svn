@@ -1598,7 +1598,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
         {
             EffectVal=spellInfo->EffectItemType[i];
             op=spellInfo->EffectMiscValue[i];
-            tmpval = spellInfo->EffectBasePoints[i];
+            tmpval = spellInfo->EffectBasePoints[i]+1;
 
             if(tmpval > 0)
             {

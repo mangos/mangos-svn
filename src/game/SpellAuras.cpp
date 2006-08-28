@@ -228,7 +228,7 @@ m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
     if(!caster)
     {
         m_caster_guid = target->GetGUID();
-        damage = spellproto->EffectBasePoints[eff];
+        damage = spellproto->EffectBasePoints[eff]+1;       // stored value-1 
     }
     else
     {
@@ -270,7 +270,7 @@ uint32 Aura::CalculateDamage()
 
     float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[m_effIndex];
     float randomPointsPerLevel = spellproto->EffectDicePerLevel[m_effIndex];
-    uint32 basePoints = uint32(spellproto->EffectBasePoints[m_effIndex] + level * basePointsPerLevel);
+    uint32 basePoints = uint32(spellproto->EffectBasePoints[m_effIndex]+1 + level * basePointsPerLevel);
     uint32 randomPoints = uint32(spellproto->EffectDieSides[m_effIndex] + level * randomPointsPerLevel);
     float comboDamage = spellproto->EffectPointsPerComboPoint[m_effIndex];
     uint8 comboPoints=0;
@@ -603,7 +603,7 @@ void Aura::_RemoveAura()
 }
 
 /*********************************************************/
-/***               BASIC AURA FUCTION                  ***/
+/***               BASIC AURA FUNCTION                 ***/
 /*********************************************************/
 
 void Aura::HandleNULL(bool apply)
@@ -621,7 +621,7 @@ void Aura::HandleAddModifier(bool apply)
     if(!spellInfo) return;
 
     uint8 op = spellInfo->EffectMiscValue[m_effIndex];
-    int32 value = spellInfo->EffectBasePoints[m_effIndex];
+    int32 value = spellInfo->EffectBasePoints[m_effIndex]+1;
     uint8 type = spellInfo->EffectApplyAuraName[m_effIndex];
     uint32 mask = spellInfo->EffectItemType[m_effIndex];
     if (!op) return;
@@ -640,7 +640,7 @@ void Aura::HandleAddModifier(bool apply)
         p_mods->push_back(mod);
 
         uint16 send_val=0, send_mark=0;
-        int16 tmpval=spellInfo->EffectBasePoints[m_effIndex];
+        int16 tmpval=spellInfo->EffectBasePoints[m_effIndex]+1;
         uint32 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
 
         if(tmpval != 0)

@@ -183,7 +183,7 @@ void Spell::EffectResurrectNew(uint32 i)
     if(unitTarget->isAlive()) return;
     if(!unitTarget->IsInWorld()) return;
 
-    uint32 health = m_spellInfo->EffectBasePoints[i];
+    uint32 health = m_spellInfo->EffectBasePoints[i]+1;
     uint32 mana = m_spellInfo->EffectMiscValue[i];
     ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest((Player*)unitTarget);
@@ -217,7 +217,7 @@ void Spell::EffectDummy(uint32 i)
         {
             Unit *tmpTarget = unitTarget;
             unitTarget = m_triggeredByAura->GetTarget();
-            damage = trig_info->EffectBasePoints[i];
+            damage = trig_info->EffectBasePoints[i]+1;
             EffectSchoolDMG(i);
             unitTarget = tmpTarget;
         }
@@ -1284,7 +1284,8 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 damageType = NORMAL_DAMAGE;
     uint32 victimState = VICTIMSTATE_NORMAL;
     // no bonus from items with +dmg
-    uint32 damage = m_spellInfo->EffectBasePoints[i];
+    // prevent "unlimited" damage m_spellInfo->EffectBasePoints[i] store value-1 and vlaue can be < 0
+    uint32 damage = m_spellInfo->EffectBasePoints[i]+1 > 0 ? m_spellInfo->EffectBasePoints[i]+1 : 0;
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
@@ -1315,7 +1316,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget->GetGUID(), 1, m_spellInfo->School, damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
 
     m_caster->SendSpellNonMeleeDamageLog(unitTarget->GetGUID(), m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
-    unitTarget->DealDamage(unitTarget, damage, 0, true);
+    m_caster->DealDamage(unitTarget, damage, 0, true);
 
     if(m_spellInfo->Effect[i] == 121)
     {
@@ -1774,7 +1775,7 @@ void Spell::EffectInebriate(uint32 i)
 
     Player *player = (Player*)m_caster;
     uint16 currentDrunk = player->GetDrunkValue();
-    uint16 drunkMod = m_spellInfo->EffectBasePoints[i] * 0xFFFF / 100;
+    uint16 drunkMod = (m_spellInfo->EffectBasePoints[i]+1) * 0xFFFF / 100;
     if (currentDrunk + drunkMod > 0xFFFF)
         currentDrunk = 0xFFFF;
     else
@@ -1880,7 +1881,7 @@ void Spell::EffectResurrect(uint32 i)
 
     Player* pTarget = ((Player*)unitTarget);
 
-    uint32 health = m_spellInfo->EffectBasePoints[i];
+    uint32 health = m_spellInfo->EffectBasePoints[i]+1;
     uint32 mana = m_spellInfo->EffectMiscValue[i];
 
     ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
@@ -1954,7 +1955,7 @@ void Spell::EffectSelfResurrect(uint32 i)
 
     if(m_spellInfo->SpellVisual == 99 && m_spellInfo->SpellIconID ==1)
     {
-        health = m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] :(-m_spellInfo->EffectBasePoints[i]);
+        health = m_spellInfo->EffectBasePoints[i]+1 > 0 ? m_spellInfo->EffectBasePoints[i]+1 :(-(m_spellInfo->EffectBasePoints[i]+1));
         if(unitTarget->getPowerType() == POWER_MANA)
             mana = m_spellInfo->EffectMiscValue[i];
     }
