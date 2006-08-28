@@ -851,6 +851,7 @@ void Spell::EffectLearnSpell(uint32 i)
         }
         case 2550:                                          //SKILL_COOKING
         {
+            player->learnSpell(818);
             player->learnSpell(2540);
             player->learnSpell(2538);
             break;
