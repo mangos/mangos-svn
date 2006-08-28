@@ -98,7 +98,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
     FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
     
-    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+    if( my_faction.IsHostileTo(your_faction))             // do not talk with enemies
         return;
 
     if(!unit->isCanTrainingOf(_player,true))
@@ -147,7 +147,8 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         }
         else ReqskillValueFlag = true;
 
-        if(_player->getLevel() >= spellInfo->spellLevel)
+        uint32 spellLevel = ( (*itr)->reqlevel ? (*itr)->reqlevel : spellInfo->spellLevel);
+        if(_player->getLevel() >= spellLevel)
             LevelFlag = true;
         if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
             ReqspellFlag = true;
@@ -168,7 +169,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint32((*itr)->spellcost);
         data << uint32(0);
         data << uint32(0);
-        data << uint8(spellInfo->spellLevel);
+        data << uint8(spellLevel);
         data << uint32((*itr)->reqskill);
         data << uint32((*itr)->reqskillvalue);
         data << uint32((*itr)->reqspell);
@@ -221,7 +222,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     if(!spellInfo) return;
     if(_player->HasSpell(spellInfo->Id))
         return;
-    if(_player->getLevel() < spellInfo->spellLevel)
+    if(_player->getLevel() < (proto->reqlevel ? proto->reqlevel : spellInfo->spellLevel))
         return;
     if(proto->reqskill && _player->GetSkillValue(proto->reqskill) < proto->reqskillvalue)
         return;

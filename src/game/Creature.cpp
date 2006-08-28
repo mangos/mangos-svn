@@ -76,7 +76,7 @@ void Creature::CreateTrainerSpells()
 {
     TrainerSpell *tspell;
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqspell`,`reqskill`,`reqskillvalue` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqspell`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
 
     if(!result) return;
 
@@ -96,6 +96,7 @@ void Creature::CreateTrainerSpells()
         tspell->reqspell = fields[2].GetUInt32();
         tspell->reqskill = fields[3].GetUInt32();
         tspell->reqskillvalue = fields[4].GetUInt32();
+        tspell->reqlevel = fields[5].GetUInt32();
 
         m_tspells.push_back(tspell);
 
