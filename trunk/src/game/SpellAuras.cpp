@@ -2255,6 +2255,8 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
 
+    double healthPercentage = (double)unit_target->GetHealth() / (double)unit_target->GetMaxHealth();
+
     if(apply)
     {
         if(unit_target->m_ShapeShiftForm)
@@ -2274,4 +2276,6 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
     {
         unit_target->RemoveAurasDueToSpell(spellId);
     }
+
+    unit_target->SetHealth(ceil((double)unit_target->GetMaxHealth() * healthPercentage));
 }
