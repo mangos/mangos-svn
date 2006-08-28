@@ -250,7 +250,7 @@ enum SpellSchools
 #define SPELL_EFFECT_SKILL                      118
 #define SPELL_EFFECT_APPLY_AURA_NEW             119
 #define SPELL_EFFECT_TELEPORT_GRAVEYARD         120
-#define SPELL_EFFECT_ADICIONAL_DMG              121
+#define SPELL_EFFECT_NORMALIZED_WEAPON_DMG      121
 #define TOTAL_SPELL_EFFECTS                     122
 
 #define STATE_STANDING                          0

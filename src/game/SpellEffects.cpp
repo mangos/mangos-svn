@@ -168,7 +168,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSkill,                                    //SPELL_EFFECT_SKILL = 118 -- professions and more
     &Spell::EffectNULL,                                     //SPELL_EFFECT_APPLY_AURA_NEW = 119
     &Spell::EffectNULL,                                     //SPELL_EFFECT_TELEPORT_GRAVEYARD = 120
-    &Spell::EffectWeaponDmg                                 //SPELL_EFFECT_ADICIONAL_DMG = 121
+    &Spell::EffectWeaponDmg                                 //SPELL_EFFECT_NORMALIZED_WEAPON_DMG = 121
 };
 
 void Spell::EffectNULL(uint32 i)
@@ -1266,26 +1266,38 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    WeaponAttackType attType = BASE_ATTACK;
+    uint32 wp[3] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG };
 
+    // multiple weap dmg effect workaround
+    // execute only the first weapon damage
+    // and handle all effects at once
+    uint8 j,k;
+    // no bonus from items with +dmg
+    uint32 damage = 0;
+
+    for (j = 0; j < 3; j++)
+    {
+        for (k = 0; k < 3; k++)
+            if (m_spellInfo->Effect[j] == wp[k])
+                break;
+        if (k != 3)
+        {
+            if (j < i)
+                return;
+            // prevent "unlimited" damage m_spellInfo->EffectBasePoints[i] store value-1 and vlaue can be < 0
+            if (m_spellInfo->Effect[j] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
+                damage += m_spellInfo->EffectBasePoints[i]+1 > 0 ? m_spellInfo->EffectBasePoints[i]+1 : 0;
+        }
+    }
+
+    WeaponAttackType attType = BASE_ATTACK;
     if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
-    {
         attType = RANGED_ATTACK;
-    }
-    else
-    {
-        if(unitTarget->isAttackReady(BASE_ATTACK)) attType = BASE_ATTACK;
-        else if (unitTarget->haveOffhandWeapon() && unitTarget->isAttackReady(OFF_ATTACK))
-            attType = OFF_ATTACK;
-    }
 
     uint32 hitInfo = 0;
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
     uint32 damageType = NORMAL_DAMAGE;
     uint32 victimState = VICTIMSTATE_NORMAL;
-    // no bonus from items with +dmg
-    // prevent "unlimited" damage m_spellInfo->EffectBasePoints[i] store value-1 and vlaue can be < 0
-    uint32 damage = m_spellInfo->EffectBasePoints[i]+1 > 0 ? m_spellInfo->EffectBasePoints[i]+1 : 0;
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
@@ -1312,13 +1324,17 @@ void Spell::EffectWeaponDmg(uint32 i)
         }
     }
 
+    for (j = 0; j < 3; j++)
+        if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
+            damage = uint32(damage * m_spellInfo->EffectBasePoints[j] / 100);
+
     if (hitInfo & nohitMask)
         m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget->GetGUID(), 1, m_spellInfo->School, damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
 
     m_caster->SendSpellNonMeleeDamageLog(unitTarget->GetGUID(), m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
     m_caster->DealDamage(unitTarget, damage, 0, true);
 
-    if(m_spellInfo->Effect[i] == 121)
+    //if(m_spellInfo->Effect[i] == 121)
     {
         m_caster->resetAttackTimer(BASE_ATTACK);
         m_caster->resetAttackTimer(OFF_ATTACK);
