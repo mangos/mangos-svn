@@ -211,7 +211,7 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_spellId(spellproto->Id), m_effIndex(eff), m_caster(caster),m_castItem(0), 
 m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_removeOnDeath(false), m_procCharges(0)
+m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -1427,7 +1427,7 @@ void Aura::HandleAuraModDispelImmunity(bool apply)
 
 void Aura::HandleAuraDamageShield(bool apply)
 {
-    if(apply)
+    /*if(apply)
     {
         for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
             if(i->m_spellId == GetId() && i->m_caster == GetCaster())
@@ -1449,12 +1449,15 @@ void Aura::HandleAuraDamageShield(bool apply)
             m_target->m_damageShields.erase(i);
             break;
         }
-    }
+    }*/
 }
 
 void Aura::HandleAuraManaShield(bool apply)
 {
-    if(apply)
+    if (apply && !m_absorbDmg)
+        m_absorbDmg = m_modifier.m_amount;
+
+    /*if(apply)
     {
 
         for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
@@ -1486,12 +1489,14 @@ void Aura::HandleAuraManaShield(bool apply)
                 break;
             }
         }
-    }
+    }*/
 }
 
 void Aura::HandleAuraSchoolAbsorb(bool apply)
 {
-    if(apply)
+    if (apply && !m_absorbDmg)
+        m_absorbDmg = m_modifier.m_amount;
+    /*if(apply)
     {
 
         for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
@@ -1521,7 +1526,7 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
                 break;
             }
         }
-    }
+    }*/
 }
 
 /*********************************************************/
