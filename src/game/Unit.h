@@ -101,7 +101,7 @@ struct DamageShield
 {
     uint32 m_spellId;
     uint32 m_damage;
-    Unit *m_caster;
+    uint64 m_caster_guid;
 };
 
 struct SpellImmune

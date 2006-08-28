@@ -277,9 +277,7 @@ void Spell::EffectApplyAura(uint32 i)
 
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
-    Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
-    if(m_CastItem)
-        Aur->SetCastItem(m_CastItem);
+    Aura* Aur = new Aura(m_spellInfo, i, unitTarget,m_caster, m_CastItem);
 
     if (!Aur->IsPositive() && Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
     {
@@ -289,7 +287,7 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_AURAS_VISIBLE:
                 break;
             default:
-                ((Creature*)Aur->GetTarget())->AI().AttackStart(Aur->GetCaster());
+                ((Creature*)Aur->GetTarget())->AI().AttackStart(m_caster);
         }
     }
 
@@ -714,7 +712,7 @@ void Spell::EffectApplyAA(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
+    Aura* Aur = new Aura(m_spellInfo, i, unitTarget, m_caster);
     //Aur->SetModifier(m_spellInfo->EffectApplyAuraName[i],m_spellInfo->EffectBasePoints[i]+rand()%m_spellInfo->EffectDieSides[i]+1,0,m_spellInfo->EffectMiscValue[i],0);
     unitTarget->AddAura(Aur);
     //unitTarget->SetAura(aff); FIX-ME!

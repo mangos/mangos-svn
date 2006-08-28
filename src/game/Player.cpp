@@ -8649,7 +8649,8 @@ void Player::_LoadAuras()
                 continue;
             }
 
-            Aura* aura = new Aura(spellproto, effindex, this, this);
+            // FIXME: real caster not stored in DB currently
+            Aura* aura = new Aura(spellproto, effindex, this, this/*caster*/);
             if (remaintime == -1)
             {
                 sLog.outDebug("SpellAura (id=%u) has duration:%d ", spellid, remaintime);

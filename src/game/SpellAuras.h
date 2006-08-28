@@ -141,7 +141,7 @@ class Aura
         void HandleRangedAmmoHaste(bool Apply);
         void HandleModTotalPercentStat(bool Apply);
 
-        Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target);
+        Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         ~Aura();
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
@@ -155,12 +155,10 @@ class Aura
         void SetAuraDuration(int32 duration) { m_duration = duration; }
         void UpdateAuraDuration();
 
-        Unit* GetCaster() const { return m_caster; }
+        uint64 const& GetCasterGUID() const { return m_caster_guid; }
+        Unit* GetCaster() const;
         Unit* GetTarget() const { return m_target; }
-        void SetCaster(Unit* caster) { m_caster = caster; }
         void SetTarget(Unit* target) { m_target = target; }
-        void SetCastItem(Item* item) { m_castItem = item; }
-        Item* GetCastItem() const { return m_castItem; }
 
         uint8 GetAuraSlot() const { return m_auraSlot; }
         void SetAuraSlot(uint8 slot) { m_auraSlot = slot; }
@@ -197,7 +195,7 @@ class Aura
         uint32 m_spellId;
         uint32 m_effIndex;
         //SpellEntry *m_spellProto;
-        Unit* m_caster;
+        uint64 m_caster_guid;
         Unit* m_target;
         int32 m_duration;
         int32 m_timeCla;

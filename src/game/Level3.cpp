@@ -1513,7 +1513,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
                 continue;
             if (eff == 6)
             {
-                Aura *Aur = new Aura(spellInfo, i, NULL, m_session->GetPlayer());
+                Aura *Aur = new Aura(spellInfo, i, m_session->GetPlayer());
                 m_session->GetPlayer()->AddAura(Aur);
             }
         }

@@ -207,8 +207,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
 static void HandleShapeshiftBoosts(bool apply, Aura* aura);
 
-Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
-m_spellId(spellproto->Id), m_effIndex(eff), m_caster(caster),m_castItem(0), 
+Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
+m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0),m_castItem(castItem), 
 m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
 m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
@@ -227,11 +227,14 @@ m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
     uint32 damage;
     if(!caster)
     {
-        m_caster = target;
+        m_caster_guid = target->GetGUID();
         damage = spellproto->EffectBasePoints[eff];
     }
     else
+    {
+        m_caster_guid = caster->GetGUID();
         damage = CalculateDamage();
+    }
 
     m_areaAura = spellproto->Effect[eff]==SPELL_EFFECT_APPLY_AREA_AURA ? true : false;
 
@@ -243,6 +246,14 @@ Aura::~Aura()
 {
 }
 
+Unit* Aura::GetCaster() const
+{
+    if(m_caster_guid==m_target->GetGUID())
+        return m_target;
+
+    return ObjectAccessor::Instance().GetUnit(*m_target,m_caster_guid);
+}
+
 uint32 Aura::CalculateDamage()
 {
     SpellEntry* spellproto = GetSpellProto();
@@ -250,8 +261,8 @@ uint32 Aura::CalculateDamage()
     uint32 level;
     if(!m_target)
         return 0;
-    Unit* caster = m_caster;
-    if(!m_caster)
+    Unit* caster = GetCaster();
+    if(!caster)
         caster = m_target;
     level= caster->getLevel();
     if( level > spellproto->maxLevel && spellproto->maxLevel > 0)
@@ -290,8 +301,9 @@ void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 misc
     m_modifier.m_miscvalue2 = miscValue2;
     m_modifier.periodictime = pt;
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player *)m_caster)->ApplySpellMod(m_spellId,SPELLMOD_ALL_EFFECTS, m_modifier.m_amount);
+    Unit* caster = GetCaster();
+    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player *)caster)->ApplySpellMod(m_spellId,SPELLMOD_ALL_EFFECTS, m_modifier.m_amount);
 }
 
 void Aura::Update(uint32 diff)
@@ -302,28 +314,30 @@ void Aura::Update(uint32 diff)
         if (m_duration < 0)
             m_duration = 0;
         m_timeCla -= diff;
-        if(m_timeCla <= 0)
+
+        Unit* caster = GetCaster();
+        if(caster && m_timeCla <= 0)
         {
-            Powers powertype = m_caster->getPowerType();
-            uint32 curpower = m_caster->GetPower(powertype);
+            Powers powertype = caster->getPowerType();
+            uint32 curpower = caster->GetPower(powertype);
             uint32 manaPerSecond = GetSpellProto()->manaPerSecond;
-            uint32 manaPerSecondPerLevel = uint32(GetSpellProto()->manaPerSecondPerLevel*m_caster->getLevel());
+            uint32 manaPerSecondPerLevel = uint32(GetSpellProto()->manaPerSecondPerLevel*caster->getLevel());
             m_timeCla = 1000;
             if(manaPerSecond > curpower)
-                m_caster->SetPower(powertype,0);
+                caster->SetPower(powertype,0);
             else
-                m_caster->SetPower(powertype,curpower-manaPerSecond);
+                caster->SetPower(powertype,curpower-manaPerSecond);
             if(manaPerSecondPerLevel > curpower)
-                m_caster->SetPower(powertype,0);
+                caster->SetPower(powertype,0);
             else
-                m_caster->SetPower(powertype,curpower-manaPerSecondPerLevel);
+                caster->SetPower(powertype,curpower-manaPerSecondPerLevel);
         }
-        if(m_target->isAlive() && m_target->hasUnitState(UNIT_STAT_FLEEING))
+        if(caster && m_target->isAlive() && m_target->hasUnitState(UNIT_STAT_FLEEING))
         {
             float x,y,z,angle,speed,pos_x,pos_y,pos_z;
             uint32 time;
             m_target->CombatStop();
-            angle = m_target->GetAngle( m_caster->GetPositionX(), m_caster->GetPositionY() );
+            angle = m_target->GetAngle( caster->GetPositionX(), caster->GetPositionY() );
             speed = m_target->GetSpeed();
             pos_x = m_target->GetPositionX()+speed*diff* cos(-angle)/1000;
             pos_y = m_target->GetPositionY()+speed*diff* sin(-angle)/1000;
@@ -340,17 +354,19 @@ void Aura::Update(uint32 diff)
         }
     }
 
-    if(m_areaAura && m_caster && m_target)
+    if(m_areaAura && m_target)
     {
         // update for the caster of the aura
-        if(m_caster->GetGUID() == m_target->GetGUID())
+        if(m_caster_guid == m_target->GetGUID())
         {
+            Unit* caster = m_target;
+
             uint64 leaderGuid = 0;
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                leaderGuid = ((Player*)m_caster)->GetGroupLeader();
-            else if(((Creature*)m_caster)->isTotem())
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+                leaderGuid = ((Player*)caster)->GetGroupLeader();
+            else if(((Creature*)caster)->isTotem())
             {
-                Unit *owner = ((Totem*)m_caster)->GetOwner();
+                Unit *owner = ((Totem*)caster)->GetOwner();
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                     leaderGuid = ((Player*)owner)->GetGroupLeader();
             }
@@ -362,15 +378,15 @@ void Aura::Update(uint32 diff)
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                    if(!Target || Target->GetGUID() == m_caster->GetGUID() || !Target->isAlive())
+                    if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive())
                         continue;
                     Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
 
-                    if(m_caster->GetDistanceSq(Target) > radius * radius )
+                    if(caster->GetDistanceSq(Target) > radius * radius )
                     {
                         // remove auras of the same caster from out of range players
                         if (t_aura)
-                            if (t_aura->GetCaster()->GetGUID() == m_caster->GetGUID())
+                            if (t_aura->GetCasterGUID() == m_caster_guid)
                                 Target->RemoveAura(m_spellId, m_effIndex);
                     }
                     else
@@ -378,30 +394,30 @@ void Aura::Update(uint32 diff)
                         // apply aura to players in range that dont have it yet
                         if (!t_aura)
                         {
-                            Aura *aur = new Aura(GetSpellProto(), m_effIndex, m_caster, Target);
+                            Aura *aur = new Aura(GetSpellProto(), m_effIndex, Target, caster);
                             Target->AddAura(aur);
                         }
                     }
                 }
             }
-            else if (m_caster->GetTypeId() != TYPEID_PLAYER && ((Creature*)m_caster)->isTotem())
+            else if (caster->GetTypeId() != TYPEID_PLAYER && ((Creature*)caster)->isTotem())
             {
                 // add / remove auras from the totem's owner
-                Unit *owner = ((Totem*)m_caster)->GetOwner();
+                Unit *owner = ((Totem*)caster)->GetOwner();
                 if (owner)
                 {
                     Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
-                    if(m_caster->GetDistanceSq(owner) > radius * radius )
+                    if(caster->GetDistanceSq(owner) > radius * radius )
                     {
                         if (o_aura)
-                            if (o_aura->GetCaster()->GetGUID() == m_caster->GetGUID())
+                            if (o_aura->GetCasterGUID() == m_caster_guid)
                                 owner->RemoveAura(m_spellId, m_effIndex);
                     }
                     else
                     {
                         if (!o_aura)
                         {
-                            Aura *aur = new Aura(GetSpellProto(), m_effIndex, m_caster, owner);
+                            Aura *aur = new Aura(GetSpellProto(), m_effIndex, owner, caster);
                             owner->AddAura(aur);
                         }
                     }
@@ -429,10 +445,10 @@ void Aura::Update(uint32 diff)
             }
             else
             {
-                if(!m_caster)
-                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+                if(Unit* caster = GetCaster())
+                    caster->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
                 else
-                    m_caster->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
             }
         }
     }
@@ -493,8 +509,10 @@ void Aura::_AddAura()
     m_target->ApplyStats(true);
     sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
 
+    Unit* caster = GetCaster();
+
     // passive auras (except totem auras) do not get placed in the slots
-    if(!m_isPassive || (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem()))
+    if(!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
     {
         if(!samespell)
         {
@@ -550,8 +568,9 @@ void Aura::_RemoveAura()
     ApplyModifier(false);
     m_target->ApplyStats(true);
 
+    Unit* caster = GetCaster();
                                                             //passive auras do not get put in slots
-    if(m_isPassive && !(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem()))
+    if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
         return;
 
     uint8 slot = GetAuraSlot();
@@ -682,11 +701,13 @@ void Aura::TriggerSpell()
         return;
     }
 
-    Spell spell(m_caster, spellInfo, true, this);
+    Unit* caster = GetCaster();
+
+    Spell spell(caster, spellInfo, true, this);
     Unit* target = m_target;
-    if(!target && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if(!target && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+        target = ObjectAccessor::Instance().GetUnit(*caster, ((Player*)caster)->GetSelection());
     }
     if(!target)
         return;
@@ -701,9 +722,11 @@ void Aura::TriggerSpell()
 
 void Aura::HandleAuraDummy(bool apply)
 {
-    if(GetSpellProto()->SpellVisual == 5622 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    Unit* caster = GetCaster();
+
+    if(GetSpellProto()->SpellVisual == 5622 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        Player *player = (Player*)m_caster;
+        Player *player = (Player*)caster;
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
         {
             Unit::AuraList& tAuraPeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
@@ -720,8 +743,8 @@ void Aura::HandleAuraDummy(bool apply)
             }
         }
     }
-    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92
-        && m_caster->GetTypeId() == TYPEID_PLAYER && m_castItem)
+    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 && caster
+        && caster->GetTypeId() == TYPEID_PLAYER && m_castItem)
     {
         if(m_target && m_target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -924,8 +947,11 @@ void Aura::HandleAuraTransform(bool apply)
         m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         m_target->setTransForm(0);
     }
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_target->SendUpdateToPlayer((Player*)m_caster);
+
+    Unit* caster = GetCaster();
+
+    if(caster && caster->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)caster);
 }
 
 void Aura::HandleForceReaction(bool Apply)
@@ -973,17 +999,18 @@ void Aura::HandleChannelDeathItem(bool apply)
 {
     if(!apply)
     {
-        if(m_caster->GetTypeId() != TYPEID_PLAYER || !m_removeOnDeath)
+        Unit* caster = GetCaster();
+        if(!caster || caster->GetTypeId() != TYPEID_PLAYER || !m_removeOnDeath)
             return;
         SpellEntry *spellInfo = GetSpellProto();
         if(spellInfo->EffectItemType[m_effIndex] == 0)
             return;
         uint16 dest;
-        uint8 msg = ((Player*)m_caster)->CanStoreNewItem( 0, NULL_SLOT, dest, spellInfo->EffectItemType[m_effIndex], 1, false);
+        uint8 msg = ((Player*)caster)->CanStoreNewItem( 0, NULL_SLOT, dest, spellInfo->EffectItemType[m_effIndex], 1, false);
         if( msg == EQUIP_ERR_OK )
-            ((Player*)m_caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], 1, true);
+            ((Player*)caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], 1, true);
         else
-            ((Player*)m_caster)->SendEquipError( msg, NULL, NULL );
+            ((Player*)caster)->SendEquipError( msg, NULL, NULL );
     }
 }
 
@@ -1002,9 +1029,10 @@ void Aura::HandleBindSight(bool apply)
 {
     if(!m_target)
         return;
-    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    Player *player = (Player*)m_caster;
+    Player *player = (Player*)m_target;
     player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
 }
 
@@ -1012,9 +1040,10 @@ void Aura::HandleFarSight(bool apply)
 {
     if(!m_target)
         return;
-    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    Player *player = (Player*)m_caster;
+    Player *player = (Player*)m_target;
     player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
 }
 
@@ -1050,25 +1079,34 @@ void Aura::HandleModPossess(bool apply)
         CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
         if( apply )
         {
-            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
-            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-            m_caster->SetCharm(creatureTarget);
-            creatureTarget->AIM_Initialize();
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            Unit* caster = GetCaster();
+            if(caster)
             {
-                ((Player*)m_caster)->PetSpellInitialize();
+                creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
+                creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
+                caster->SetCharm(creatureTarget);
+                creatureTarget->AIM_Initialize();
+                if(caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    ((Player*)caster)->PetSpellInitialize();
+                }
             }
         }
         else
         {
             creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
             creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
-            m_caster->SetCharm(0);
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+
+            if(Unit* caster = GetCaster())
             {
-                data.Initialize(SMSG_PET_SPELLS);
-                data << uint64(0);
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                caster->SetCharm(0);
+
+                if(caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    data.Initialize(SMSG_PET_SPELLS);
+                    data << uint64(0);
+                    ((Player*)caster)->GetSession()->SendPacket(&data);
+                }
             }
             creatureTarget->AIM_Initialize();
         }
@@ -1092,25 +1130,33 @@ void Aura::HandleModCharm(bool apply)
         CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
         if( apply )
         {
-            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
-            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-            m_caster->SetCharm(creatureTarget);
-            creatureTarget->AIM_Initialize();
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            Unit* caster = GetCaster();
+            if(caster)
             {
-                ((Player*)m_caster)->PetSpellInitialize();
+                creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
+                creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
+                caster->SetCharm(creatureTarget);
+                creatureTarget->AIM_Initialize();
+                if(caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    ((Player*)caster)->PetSpellInitialize();
+                }
             }
         }
         else
         {
             creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
             creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
-            m_caster->SetCharm(0);
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            Unit* caster = GetCaster();
+            if(caster)
             {
-                data.Initialize(SMSG_PET_SPELLS);
-                data << uint64(0);
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                caster->SetCharm(0);
+                if(caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    data.Initialize(SMSG_PET_SPELLS);
+                    data << uint64(0);
+                    ((Player*)caster)->GetSession()->SendPacket(&data);
+                }
             }
             creatureTarget->AIM_Initialize();
         }
@@ -1144,7 +1190,11 @@ void Aura::HandleModFear(bool Apply)
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
         m_target->AttackStop();
-        m_caster->AttackStop();
+ 
+        Unit* caster = GetCaster();
+        if(caster)
+            caster->AttackStop();
+
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         data<<m_target->GetGUIDLow();
@@ -1284,9 +1334,15 @@ void Aura::HandleAuraModSilence(bool apply)
 
 void Aura::HandleModThreat(bool apply)
 {
-    if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
+    if(!m_target || !m_target->isAlive())
         return;
-    m_target->AddHostil(m_caster->GetGUID(),apply ? float(m_modifier.m_amount) : -float(m_modifier.m_amount));
+
+    Unit* caster = GetCaster();
+
+    if(!caster || !caster->isAlive())
+        return;
+
+    m_target->AddHostil(m_caster_guid,apply ? float(m_modifier.m_amount) : -float(m_modifier.m_amount));
 }
 
 /*********************************************************/
@@ -1430,13 +1486,13 @@ void Aura::HandleAuraDamageShield(bool apply)
     /*if(apply)
     {
         for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
-        {
-            m_target->m_damageShields.erase(i);
-            break;
-        }
+            if(i->m_spellId == GetId() && i->m_caster_guid == m_caster_guid)
+            {
+                m_target->m_damageShields.erase(i);
+                break;
+            }
         DamageShield* ds = new DamageShield();
-        ds->m_caster = GetCaster();
+        ds->m_caster_guid = m_caster_guid;
         ds->m_damage = m_modifier.m_amount;
         ds->m_spellId = GetId();
         m_target->m_damageShields.push_back((*ds));
@@ -1444,7 +1500,7 @@ void Aura::HandleAuraDamageShield(bool apply)
     else
     {
         for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
+            if(i->m_spellId == GetId() && i->m_caster_guid == m_caster_guid)
         {
             m_target->m_damageShields.erase(i);
             break;
@@ -1587,10 +1643,13 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
         m_isTrigger = false;
         m_duration = 0;
         //probably it's temporary for taming creature..
-        if(GetSpellProto()->Id == 1515 && m_caster->isAlive())
+
+        Unit* caster = GetCaster();
+
+        if(GetSpellProto()->Id == 1515 && caster && caster->isAlive())
         {
             SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
-            Spell spell(m_caster, spell_proto, true, 0);
+            Spell spell(caster, spell_proto, true, 0);
             Unit* target = NULL;
             target = m_target;
             if(!target || !target->isAlive())
@@ -1966,7 +2025,7 @@ void Aura::HandleModCastingSpeed(bool apply)
 
 void Aura::HandleModAttackSpeed(bool apply)
 {
-    if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
+    if(!m_target || !m_target->isAlive() )
         return;
 
     m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
@@ -2089,11 +2148,15 @@ void Aura::HandleModPowerCostSchool(bool apply)
 
 void Aura::SendCoolDownEvent()
 {
-    WorldPacket data;
-    data.Initialize(SMSG_COOLDOWN_EVENT);
-    data << uint32(m_spellId) << m_caster->GetGUID();
-    data << uint32(0);                                      //CoolDown Time ?
-    m_caster->SendMessageToSet(&data,true);
+    Unit* caster = GetCaster();
+    if(caster)
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_COOLDOWN_EVENT);
+        data << uint32(m_spellId) << m_caster_guid;
+        data << uint32(0);                                      //CoolDown Time ?
+        caster->SendMessageToSet(&data,true);
+    }
 }
 
 // FIX-ME!!
@@ -2129,13 +2192,15 @@ void HandleDOTEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
     //Aur->GetCaster()->AddPeriodicAura(Aur);
-    Aur->GetCaster()->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->GetModifier());
+    if(Unit* caster = Aur->GetCaster())
+        caster->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->GetModifier());
 }
 
 void HandleHealEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
-    Aur->GetTarget()->PeriodicAuraLog(Aur->GetCaster(), Aur->GetSpellProto(), Aur->GetModifier());
+    if(Unit* caster = Aur->GetCaster())
+        Aur->GetTarget()->PeriodicAuraLog(caster, Aur->GetSpellProto(), Aur->GetModifier());
 }
 
 void HandleShapeshiftBoosts(bool apply, Aura* aura)
