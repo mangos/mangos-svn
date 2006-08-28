@@ -384,7 +384,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void SetAttackTime(WeaponAttackType att, uint32 val) { SetFloatValue(UNIT_FIELD_BASEATTACKTIME+att,val); }
         void ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att, val, !apply); }
 
-        // fuction template id
+        // faction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); }
         FactionTemplateEntry* getFactionTemplateEntry() const;

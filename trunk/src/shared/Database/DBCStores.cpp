@@ -406,8 +406,8 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, ui
     if(!spellInfo_1 || !spellInfo_2) return 0;
     if (spellId_1 == spellId_2) return 0;
 
-    int32 diff = (int32)spellInfo_1->EffectBasePoints[effIndex_1] - (int32)spellInfo_2->EffectBasePoints[effIndex_2];
-    if (spellInfo_1->EffectBasePoints[effIndex_1] < 0 && spellInfo_2->EffectBasePoints[effIndex_2] < 0) return -diff;
+    int32 diff = spellInfo_1->EffectBasePoints[effIndex_1] - spellInfo_2->EffectBasePoints[effIndex_2];
+    if (spellInfo_1->EffectBasePoints[effIndex_1]+1 < 0 && spellInfo_2->EffectBasePoints[effIndex_2]+1 < 0) return -diff;
     else return diff;
 }
 
