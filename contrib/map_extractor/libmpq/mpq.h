@@ -29,6 +29,7 @@
 
 #ifndef _MPQ_H
 #define _MPQ_H
+
 #ifdef _WIN32
 #include <io.h>
 
@@ -44,6 +45,9 @@
 //lseek ...
 #include <unistd.h>
 //PATH_MAX
+#ifdef __FreeBSD__
+#include<limits.h>
+#endif
 //#include <linux/limits.h>
 // size_t
 #include <stdlib.h>
