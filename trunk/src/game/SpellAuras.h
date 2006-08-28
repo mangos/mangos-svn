@@ -190,6 +190,7 @@ class Aura
         void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }
 
         int32 m_procCharges;
+        int32 m_absorbDmg;
 
     private:
         Modifier m_modifier;

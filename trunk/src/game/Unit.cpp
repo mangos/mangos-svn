@@ -620,82 +620,91 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
     SendMessageToSet(&data, true);
 }
 
-void Unit::CalDamageReduction(Unit *pVictim,uint32 School,const uint32 damage, uint32 *absorb, uint32 *resist)
+void Unit::CalDamageReduction(Unit *pVictim,uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist)
 {
-    uint32 AbsorbDamage=0;
-    uint32 currAbsorbDamage=0;
-    uint32 currentPower;
-    bool  removeAura=false;
-
     if(!pVictim || !pVictim->isAlive() || !damage)
         return;
 
-    for(std::list<struct DamageManaShield*>::iterator i = pVictim->m_damageManaShield.begin();i != pVictim->m_damageManaShield.end();i++)
-    {
-        SpellEntry *spellInfo = sSpellStore.LookupEntry( (*i)->m_spellId);
-
-        if((*i)->m_schoolType & School)
-        {
-            currAbsorbDamage = damage + (*i)->m_currAbsorb;
-            if(currAbsorbDamage < (*i)->m_totalAbsorb)
-            {
-                AbsorbDamage = damage;
-                (*i)->m_currAbsorb = currAbsorbDamage;
-            }
-            else
-            {
-                AbsorbDamage = (*i)->m_totalAbsorb - (*i)->m_currAbsorb;
-                (*i)->m_currAbsorb = (*i)->m_totalAbsorb;
-                removeAura = true;
-            }
-
-            if((*i)->m_modType == SPELL_AURA_MANA_SHIELD)
-            {
-                float multiple;
-                for(int x=0;x<3;x++)
-                    if(spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MANA_SHIELD)
-                {
-                    multiple = spellInfo->EffectMultipleValue[x];
-                    break;
-                }
-                currentPower = pVictim->GetPower(POWER_MANA);
-                if ( (float)(currentPower) > AbsorbDamage*multiple )
-                {
-                    pVictim->SetPower(POWER_MANA, (uint32)(currentPower-AbsorbDamage*multiple) );
-                }
-                else
-                {
-                    pVictim->SetPower(POWER_MANA, 0 );
-                }
-            }
-
-            if(removeAura)
-                pVictim->RemoveAurasDueToSpell((*i)->m_spellId);
-        }
-        break;
-    }
     if(School == 0)
     {
         float armor = pVictim->GetArmor();
-        float tmpvalue = armor/(pVictim->getLevel()*85.0 +400.0 +armor);
+        float tmpvalue = armor / (pVictim->getLevel() * 85.0 + 400.0 +armor);
         if(tmpvalue < 0)
             tmpvalue = 0.0;
         if(tmpvalue > 1.0)
             tmpvalue = 1.0;
-        AbsorbDamage += uint32(damage * tmpvalue);
-        if(AbsorbDamage > damage)
-            AbsorbDamage = damage;
+        *absorb += uint32(damage * tmpvalue);
+        if(*absorb > damage)
+            *absorb = damage;
     }
-    if( School > 0)
+
+    if(School > 0)
     {
         float tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
         *resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
-        if(*resist > damage)
-            *resist = damage;
+        if(*resist > damage - *absorb)
+            *resist = damage - *absorb;
     }
 
+    int32 RemainingDamage = damage - *absorb - *resist;
+    int32 currentAbsorb, manaReduction, maxAbsorb, manaMultiplier;
+
+    if (School == SPELL_SCHOOL_NORMAL)
+    {
+        AuraList& vManaShield = pVictim->GetAurasByType(SPELL_AURA_MANA_SHIELD);
+        for(AuraList::iterator i = vManaShield.begin(), next; i != vManaShield.end() && RemainingDamage >= 0; i = next)
+        {
+            next = i; next++;
+            if (RemainingDamage - (*i)->m_absorbDmg >= 0)
+                currentAbsorb = (*i)->m_absorbDmg;
+            else
+                currentAbsorb = RemainingDamage;
+
+            manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()];
+            maxAbsorb = pVictim->GetPower(POWER_MANA) / manaMultiplier;
+            if (currentAbsorb > maxAbsorb)
+                currentAbsorb = maxAbsorb;
+
+            (*i)->m_absorbDmg -= currentAbsorb;
+            if((*i)->m_absorbDmg <= 0)
+            {
+                pVictim->RemoveAurasDueToSpell((*i)->GetId());
+                next = vManaShield.begin();
+            }
+            
+            manaReduction = int32(currentAbsorb * manaMultiplier);
+            pVictim->ApplyPowerMod(POWER_MANA, manaReduction, false);
+
+            RemainingDamage -= currentAbsorb;
+        }
+    }
+
+    AuraList& vSchoolAbsorb = pVictim->GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
+    for(AuraList::iterator i = vSchoolAbsorb.begin(), next; i != vSchoolAbsorb.end() && RemainingDamage >= 0; i = next)
+    {
+        next = i; next++;
+        if ((*i)->GetModifier()->m_miscvalue & int32(1<<School))
+        {
+            if (RemainingDamage - (*i)->m_absorbDmg >= 0)
+            {
+                currentAbsorb = (*i)->m_absorbDmg;
+                pVictim->RemoveAurasDueToSpell((*i)->GetId());
+                next = vSchoolAbsorb.begin();
+            }
+            else
+            {
+                currentAbsorb = RemainingDamage;
+                (*i)->m_absorbDmg -= RemainingDamage;
+            }
+
+            RemainingDamage -= currentAbsorb;
+        }
+    }
+
+    *absorb = damage - RemainingDamage - *resist;
+
     // random durability loss for items on absorb (ABSORB)
-    if (pVictim->GetTypeId() == TYPEID_PLAYER)
+    if (*absorb && pVictim->GetTypeId() == TYPEID_PLAYER)
     {
         int randdurability = urand(0, 300);
         if (randdurability == 10)
@@ -813,7 +822,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     if (*damage <= *absorbDamage + *resistDamage + *blocked_amount)
     {
         //*hitInfo = 0x00010020;
-        *hitInfo = HITINFO_NOACTION | HITINFO_SWINGNOHITSOUND;
+        *hitInfo = HITINFO_ABSORB | HITINFO_SWINGNOHITSOUND;
         *damageType = 0;
         return;
     }
@@ -821,11 +830,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
     if (*resistDamage) *hitInfo |= HITINFO_RESIST;
 
-    // victim's damageshield
-    for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
-    {
-        pVictim->SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
-    }
+    // victim's damage shield
+    AuraList& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
+    for(AuraList::iterator i = vDamageShields.begin(); i != vDamageShields.end(); ++i)
+        pVictim->SpellNonMeleeDamageLog(this, (*i)->GetId(), (*i)->GetModifier()->m_amount);
 
     // this unit's proc trigger damage
     AuraList& mProcTriggerDamage = GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
@@ -979,8 +987,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
         SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
     else
     {
-        if ((absorbed_dmg || resisted_dmg) && ((absorbed_dmg + resisted_dmg + blocked_dmg) > damage)) hitInfo |= HITINFO_SWINGNOHITSOUND;
-
         //do animation
         SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
 

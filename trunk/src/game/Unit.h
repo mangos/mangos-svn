@@ -538,8 +538,6 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         bool m_silenced;
         bool waterbreath;
-        std::list<struct DamageShield> m_damageShields;
-        std::list<struct DamageManaShield*> m_damageManaShield;
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
         SpellImmuneList m_spellImmune[6];
 
