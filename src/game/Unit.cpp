@@ -958,7 +958,8 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
     if(m_currentSpell)
         return;
 
-    if (m_currentMeleeSpell)
+    // melee attack spell casted at main hand attack only
+    if (m_currentMeleeSpell && attType == BASE_ATTACK)
     {
         m_currentMeleeSpell->cast();
         return;

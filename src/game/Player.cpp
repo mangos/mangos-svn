@@ -5684,6 +5684,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( bag == 0 )
             {
+                // check count of items
                 if( !swap && pProto->MaxCount > 0 )
                 {
                     uint32 curcount = 0;
@@ -5745,6 +5746,8 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                         }
                     }
                 }
+
+                // search stack for merge to
                 if( pProto->Stackable > 1 )
                 {
                     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
@@ -5780,6 +5783,8 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                         }
                     }
                 }
+
+                // search free slot - ammo special case
                 if( pProto->Class == ITEM_CLASS_PROJECTILE )
                 {
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
@@ -5805,6 +5810,8 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                         }
                     }
                 }
+
+                // search free slot
                 for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
                 {
                     pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
@@ -5814,6 +5821,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                         return EQUIP_ERR_OK;
                     }
                 }
+
                 for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                 {
                     pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
@@ -5836,7 +5844,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                 }
                 return EQUIP_ERR_INVENTORY_FULL;
             }
-            else
+            else                                            // in specific bag 
             {
                 if( slot == NULL_SLOT )
                 {
@@ -5846,6 +5854,8 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                         if( pBag && !pBag->IsEmpty() )
                             return EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG;
                     }
+
+                    // search stack in bag for merge to
                     if( pProto->Stackable > 1 )
                     {
                         if( bag == INVENTORY_SLOT_BAG_0 )
@@ -5919,7 +5929,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                     }
                     return EQUIP_ERR_BAG_FULL;
                 }
-                else
+                else                                        // specific bag and slot
                 {
                     if( pProto->InventoryType == INVTYPE_BAG )
                     {

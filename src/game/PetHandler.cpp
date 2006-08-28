@@ -45,7 +45,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     recv_data >> guid2;                                     //tag guid
 
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid1);
-    sLog.outString( "HandlePetAction.Pet %u flag is %u, spellid is %u, tanget %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
+    sLog.outString( "HandlePetAction.Pet %u flag is %u, spellid is %u, target %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
     if(!pet)
     {
         sLog.outError( "Pet %u not exist.\n", uint32(GUID_LOPART(guid1)) );
