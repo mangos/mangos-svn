@@ -124,7 +124,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                 // Duration 21 = permanent
                 if ((eff == 6) && (spellInfo->DurationIndex == 21) && (spellInfo->rangeIndex == 1))
                 {
-                    Aura *Aur = new Aura(spellInfo, i, NULL, GetPlayer());
+                    Aura *Aur = new Aura(spellInfo, i, GetPlayer());
                     GetPlayer()->AddAura(Aur);
                 }
             }

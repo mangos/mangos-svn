@@ -1579,28 +1579,31 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 
     if (IsSingleTarget(Aur->GetId()) && Aur->GetTarget() && Aur->GetSpellProto())
     {
-        std::list<Aura *> *scAuras = Aur->GetCaster()->GetSingleCastAuras();
-        std::list<Aura *>::iterator itr, next;
-        for (itr = scAuras->begin(); itr != scAuras->end(); itr = next)
+        if(Unit* caster = Aur->GetCaster())
         {
-            next = itr;
-            next++;
-            if ((*itr)->GetTarget() != Aur->GetTarget() &&
-                (*itr)->GetSpellProto()->Category == Aur->GetSpellProto()->Category &&
-                (*itr)->GetSpellProto()->SpellIconID == Aur->GetSpellProto()->SpellIconID &&
-                (*itr)->GetSpellProto()->SpellVisual == Aur->GetSpellProto()->SpellVisual &&
-                (*itr)->GetSpellProto()->Attributes == Aur->GetSpellProto()->Attributes &&
-                (*itr)->GetSpellProto()->AttributesEx == Aur->GetSpellProto()->AttributesEx &&
-                (*itr)->GetSpellProto()->AttributesExEx == Aur->GetSpellProto()->AttributesExEx)
+            std::list<Aura *> *scAuras = caster->GetSingleCastAuras();
+            std::list<Aura *>::iterator itr, next;
+            for (itr = scAuras->begin(); itr != scAuras->end(); itr = next)
             {
-                (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
-                if(scAuras->empty())
-                    break;
-                else
-                    next = scAuras->begin();
+                next = itr;
+                next++;
+                if ((*itr)->GetTarget() != Aur->GetTarget() &&
+                    (*itr)->GetSpellProto()->Category == Aur->GetSpellProto()->Category &&
+                    (*itr)->GetSpellProto()->SpellIconID == Aur->GetSpellProto()->SpellIconID &&
+                    (*itr)->GetSpellProto()->SpellVisual == Aur->GetSpellProto()->SpellVisual &&
+                    (*itr)->GetSpellProto()->Attributes == Aur->GetSpellProto()->Attributes &&
+                    (*itr)->GetSpellProto()->AttributesEx == Aur->GetSpellProto()->AttributesEx &&
+                    (*itr)->GetSpellProto()->AttributesExEx == Aur->GetSpellProto()->AttributesExEx)
+                {
+                    (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
+                    if(scAuras->empty())
+                        break;
+                    else
+                        next = scAuras->begin();
+                }
             }
+            scAuras->push_back(Aur);
         }
-        scAuras->push_back(Aur);
     }
     return true;
 }
@@ -1654,7 +1657,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
         {
             bool sec_match = false;
             if (is_sec && IsSpellSingleEffectPerCaster(i_spellId))
-                if (Aur->GetCaster() == (*i).second->GetCaster())
+                if (Aur->GetCasterGUID() == (*i).second->GetCasterGUID())
                     if (GetSpellSpecific(spellId) == GetSpellSpecific(i_spellId))
                         sec_match = true;
 
@@ -1741,7 +1744,7 @@ void Unit::RemoveAreaAurasByOthers(uint64 guid)
     {
         if (i->second && i->second->IsAreaAura())
         {
-            uint64 casterGuid = i->second->GetCaster()->GetGUID();
+            uint64 casterGuid = i->second->GetCasterGUID();
             uint64 targetGuid = i->second->GetTarget()->GetGUID();
             // if area aura cast by someone else or by the specified caster
             if (casterGuid == guid || (guid == 0 && casterGuid != targetGuid))
@@ -1784,15 +1787,20 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 {
     if (IsSingleTarget((*i).second->GetId()))
     {
-        std::list<Aura *> *scAuras = (*i).second->GetCaster()->GetSingleCastAuras();
-        scAuras->remove((*i).second);
+        if(Unit* caster = (*i).second->GetCaster())
+        {
+            std::list<Aura *> *scAuras = caster->GetSingleCastAuras();
+            scAuras->remove((*i).second);
+        }
     }
     // remove aura from party members when the caster turns off the aura
     if((*i).second->IsAreaAura())
     {
-        Unit *i_caster = (*i).second->GetCaster(), *i_target = (*i).second->GetTarget();
-        if(i_caster->GetGUID() == i_target->GetGUID())
+        Unit *i_target = (*i).second->GetTarget();
+        if((*i).second->GetCasterGUID() == i_target->GetGUID())
         {
+            Unit* i_caster = i_target;
+
             uint64 leaderGuid = 0;
             if (i_caster->GetTypeId() == TYPEID_PLAYER)
                 leaderGuid = ((Player*)i_caster)->GetGroupLeader();
@@ -1814,7 +1822,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
                         continue;
                     Aura *t_aura = Target->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());
                     if (t_aura)
-                        if (t_aura->GetCaster()->GetGUID() == i_caster->GetGUID())
+                        if (t_aura->GetCasterGUID() == i_caster->GetGUID())
                             Target->RemoveAura((*i).second->GetId(), (*i).second->GetEffIndex());
                 }
             }

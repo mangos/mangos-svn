@@ -384,7 +384,7 @@ void WorldSession::SendSpiritResurrect()
                     continue;
                 if(eff==6)
                 {
-                    Aura *Aur = new Aura(spellInfo, i, _player, _player);
+                    Aura *Aur = new Aura(spellInfo, i, _player);
                     bool added = _player->AddAura(Aur);
                     if (added && level < 20)
                     {
