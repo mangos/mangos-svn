@@ -59,6 +59,7 @@ m_regenTimer(2000), pickPocketed(false)
 
 Creature::~Creature()
 {
+    CombatStop();
     RemoveAllAuras();
     for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
         delete *i;

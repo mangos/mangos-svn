@@ -86,7 +86,6 @@ Unit::Unit() : Object()
 
 Unit::~Unit()
 {
-    CombatStop();
 }
 
 void Unit::Update( uint32 p_time )

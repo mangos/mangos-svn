@@ -141,6 +141,8 @@ Player::~Player ()
 {
     DuelComplete();
 
+    CombatStop();
+
     RemoveAllAuras();
 
     uint32 eslot;
