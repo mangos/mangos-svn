@@ -164,6 +164,7 @@ class ChatHandler
         bool HandleAddSpwCommand(const char* args);
         bool HandleGoCreatureCommand(const char* args);
         bool HandleGoObjectCommand(const char* args);
+        bool HandleTargetObjectCommand(const char* args);
 
         // shutdown server
         bool ShutDown(const char* args);
