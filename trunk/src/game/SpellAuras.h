@@ -192,6 +192,7 @@ class Aura
 
     private:
         Modifier m_modifier;
+        SpellModifier *m_spellmod;
         uint32 m_spellId;
         uint32 m_effIndex;
         //SpellEntry *m_spellProto;

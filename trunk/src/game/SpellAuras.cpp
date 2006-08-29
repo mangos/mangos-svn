@@ -270,7 +270,7 @@ uint32 Aura::CalculateDamage()
 
     float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[m_effIndex];
     float randomPointsPerLevel = spellproto->EffectDicePerLevel[m_effIndex];
-    uint32 basePoints = uint32(spellproto->EffectBasePoints[m_effIndex]+1 + level * basePointsPerLevel);
+    uint32 basePoints = uint32(spellproto->EffectBasePoints[m_effIndex] + level * basePointsPerLevel);
     uint32 randomPoints = uint32(spellproto->EffectDieSides[m_effIndex] + level * randomPointsPerLevel);
     float comboDamage = spellproto->EffectPointsPerComboPoint[m_effIndex];
     uint8 comboPoints=0;
@@ -638,6 +638,7 @@ void Aura::HandleAddModifier(bool apply)
         mod->spellId = m_spellId;
         mod->charges = spellInfo->procCharges;
         p_mods->push_back(mod);
+        m_spellmod = mod;
 
         uint16 send_val=0, send_mark=0;
         int16 tmpval=spellInfo->EffectBasePoints[m_effIndex]+1;
@@ -678,16 +679,7 @@ void Aura::HandleAddModifier(bool apply)
     else
     {
         SpellModList *p_mods = p_target->getSpellModList(spellInfo->EffectMiscValue[m_effIndex]);
-        for (SpellModList::iterator itr = p_mods->begin(); itr != p_mods->end(); ++itr)
-        {
-            SpellModifier *mod = *itr;
-            if (!mod) continue;
-            if (mod->op != op || mod->value != value || mod->type != type || mod->mask != mask)
-                continue;
-            p_mods->remove(mod);
-            delete mod;
-            break;
-        }
+        p_mods->remove(this->m_spellmod);
     }
 }
 
@@ -2205,6 +2197,7 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
 
     Unit *unit_target = aura->GetTarget();
     uint32 spellId = 0;
+    uint32 spellId2 = 0;
 
     switch(aura->GetModifier()->m_miscvalue)
     {
@@ -2236,7 +2229,9 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             spellId = 7381;
             break;
         case FORM_MOONKIN:
-            spellId = 24907;
+            spellId = 24905;
+            // aura from effect trigger spell
+            spellId2 = 24907;
             break;
         case FORM_GHOSTWOLF:
         case FORM_BATTLESTANCE:
@@ -2270,6 +2265,7 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
     else
     {
         unit_target->RemoveAurasDueToSpell(spellId);
+        unit_target->RemoveAurasDueToSpell(spellId2);
     }
 
     unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));

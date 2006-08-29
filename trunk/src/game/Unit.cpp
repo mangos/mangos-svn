@@ -2626,7 +2626,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     critchance = critchance > 0 ? critchance :0;
     if(critchance >= urand(0,100))
     {
-        pdamage = uint32(pdamage*1.5);
+        int32 critbonus = pdamage / 2;
+        if (GetTypeId() == TYPEID_PLAYER)
+            ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, critbonus);
+        pdamage += critbonus;
         crit = true;
     }
 

@@ -1272,8 +1272,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     // execute only the first weapon damage
     // and handle all effects at once
     uint8 j,k;
-    // no bonus from items with +dmg
-    uint32 damage = 0;
+    int32 bonus = 0;
 
     for (j = 0; j < 3; j++)
     {
@@ -1284,9 +1283,8 @@ void Spell::EffectWeaponDmg(uint32 i)
         {
             if (j < i)
                 return;
-            // prevent "unlimited" damage m_spellInfo->EffectBasePoints[i] store value-1 and vlaue can be < 0
             if (m_spellInfo->Effect[j] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
-                damage += m_spellInfo->EffectBasePoints[i]+1 > 0 ? m_spellInfo->EffectBasePoints[i]+1 : 0;
+                bonus += m_spellInfo->EffectBasePoints[i]+1;
         }
     }
 
@@ -1298,11 +1296,27 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
     uint32 damageType = NORMAL_DAMAGE;
     uint32 victimState = VICTIMSTATE_NORMAL;
+    uint32 damage = 0;
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
 
     m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+
+    if (damage + bonus > 0)
+        damage += bonus;
+    else
+        damage = 0;
+
+    for (j = 0; j < 3; j++)
+        if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
+            damage = uint32(damage * (m_spellInfo->EffectBasePoints[j]+1) / 100);
+
+    if (hitInfo & nohitMask)
+        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget->GetGUID(), 1, m_spellInfo->School, damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
+
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget->GetGUID(), m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
+    m_caster->DealDamage(unitTarget, damage, 0, true);
 
     // take ammo
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1323,16 +1337,6 @@ void Spell::EffectWeaponDmg(uint32 i)
             ((Player*)m_caster)->DestroyItemCount( ammo, 1, true);
         }
     }
-
-    for (j = 0; j < 3; j++)
-        if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
-            damage = uint32(damage * m_spellInfo->EffectBasePoints[j] / 100);
-
-    if (hitInfo & nohitMask)
-        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget->GetGUID(), 1, m_spellInfo->School, damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
-
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget->GetGUID(), m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
-    m_caster->DealDamage(unitTarget, damage, 0, true);
 
     //if(m_spellInfo->Effect[i] == 121)
     {
@@ -1956,7 +1960,7 @@ void Spell::EffectQuestComplete(uint32 i)
     if(_player->GetQuestRewardStatus( quest_id ))
         return
 
-            _player->PlayerTalkClass->SendQuestReward( quest_id, _player->GetGUID(), true, NULL, 0 );
+    _player->PlayerTalkClass->SendQuestReward( quest_id, _player->GetGUID(), true, NULL, 0 );
 }
 
 void Spell::EffectSelfResurrect(uint32 i)
