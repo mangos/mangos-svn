@@ -193,8 +193,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     Path &pathnodes(flight->GetPath());
     assert( pathnodes.Size() > 0 );
 
-    GetPlayer( )->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, MountId );
-    GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
+    GetPlayer( )->Mount( MountId, true );
 
     uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
     data.Initialize( SMSG_MONSTER_MOVE );

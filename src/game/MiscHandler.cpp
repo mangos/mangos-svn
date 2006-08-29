@@ -57,8 +57,6 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
     GetPlayer()->RepopAtGraveyard();
 }
 
-extern int num_item_prototypes;
-
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 {
     uint32 clientcount = 0;

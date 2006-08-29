@@ -3464,9 +3464,7 @@ void Player::FlightComplete()
 {
     clearUnitState(UNIT_STAT_IN_FLIGHT);
     SetMoney( m_dismountCost);
-    SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-    /* Remove the "player locked" flag, to allow movement */
-    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT | UNIT_FLAG_DISABLE_MOVE );
+    Unmount();
 }
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
@@ -8915,8 +8913,7 @@ void Player::SaveToDB()
     if (isInFlight())
     {
         return;
-        SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-        RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
+        Unmount();
     }
 
     // save state

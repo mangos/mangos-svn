@@ -131,7 +131,7 @@ bool ChatHandler::HandleDismountCommand(const char* args)
 {
 
     //If player is not mounted, so go out :)
-    if (!m_session->GetPlayer( )->GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID))
+    if (!m_session->GetPlayer( )->IsMounted())
     {
         SendSysMessage(LANG_CHAR_NON_MOUNTED);
         return true;
@@ -143,8 +143,7 @@ bool ChatHandler::HandleDismountCommand(const char* args)
         return true;
     }
 
-    m_session->GetPlayer( )->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-    m_session->GetPlayer( )->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT | UNIT_FLAG_DISABLE_MOVE);
+    m_session->GetPlayer( )->Unmount();
     m_session->GetPlayer( )->SetPlayerSpeed(MOVE_RUN, 7.5, true);
     return true;
 }

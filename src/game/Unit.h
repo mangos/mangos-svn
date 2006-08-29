@@ -391,6 +391,11 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint8 getStandState() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_1) & 0xFF); };
 
+        bool IsMounted() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT ); }
+        uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
+        void Mount(uint32 mount, bool taxi = false);
+        void Unmount();
+
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType);
         void CalDamageReduction(Unit *pVictim, uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist);

@@ -647,7 +647,8 @@ void Unit::CalDamageReduction(Unit *pVictim,uint32 School, const uint32 damage, 
     }
 
     int32 RemainingDamage = damage - *absorb - *resist;
-    int32 currentAbsorb, manaReduction, maxAbsorb, manaMultiplier;
+    int32 currentAbsorb, manaReduction, maxAbsorb;
+    float manaMultiplier;
 
     if (School == SPELL_SCHOOL_NORMAL)
     {
@@ -2391,6 +2392,10 @@ bool Unit::Attack(Unit *victim)
     if(victim == this)
         return false;
 
+    // player don't must attack in mount state
+    if(GetTypeId()==TYPEID_PLAYER && IsMounted())
+        return false;
+
     if (m_attacking)
     {
         if (m_attacking == victim)
@@ -2728,4 +2733,27 @@ uint32 Unit::GetWeaponProcChance() const
     else if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
         return uint32(GetAttackTime(OFF_ATTACK) * 1.82 / 1000);
     return 0;
+}
+
+void Unit::Mount(uint32 mount, bool taxi)
+{
+    if(!mount) 
+        return;
+
+    SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, mount);
+
+    uint32 flag = UNIT_FLAG_MOUNT;
+    if(taxi)
+        flag |= UNIT_FLAG_DISABLE_MOVE;
+
+    SetFlag( UNIT_FIELD_FLAGS, flag );
+}
+
+void Unit::Unmount()
+{
+    if(!IsMounted())
+        return;
+
+    SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+    RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
 }

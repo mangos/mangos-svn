@@ -385,7 +385,7 @@ void Spell::EffectHeal( uint32 i )
         float pct = (100+unitTarget->m_RegenPCT)/100;
         uint32 curhealth = unitTarget->GetHealth();
         uint32 maxhealth = unitTarget->GetMaxHealth();
-        uint32 addhealth = damage*pct;
+        uint32 addhealth = uint32(damage*pct);
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth);
         uint32 newhealth = curhealth + addhealth < maxhealth ? uint32(curhealth + addhealth) : maxhealth;
