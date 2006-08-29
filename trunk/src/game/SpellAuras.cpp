@@ -786,15 +786,10 @@ void Aura::HandleAuraMounted(bool apply)
         if(!ci)return;
         uint32 displayId = ci->DisplayID;
         if(displayId != 0)
-        {
-            m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , displayId);
-            //m_target->SetFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_MOVEBLOCKED );
-            m_target->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
-        }
+            m_target->Mount(displayId);
     }else
     {
-        m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-        m_target->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT  | UNIT_FLAG_DISABLE_MOVE );
+        m_target->Unmount();
     }
 }
 
@@ -2277,5 +2272,5 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
         unit_target->RemoveAurasDueToSpell(spellId);
     }
 
-    unit_target->SetHealth(ceil((double)unit_target->GetMaxHealth() * healthPercentage));
+    unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));
 }

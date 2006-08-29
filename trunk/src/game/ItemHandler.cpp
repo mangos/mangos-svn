@@ -232,10 +232,6 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 }
 
-extern char *fmtstring( char *format, ... );
-
-extern char *GetInventoryImageFilefromObjectClass(uint32 classNum, uint32 subclassNum, uint32 type, uint32 DisplayID);
-
 void WorldSession::HandleReadItem( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: CMSG_READ_ITEM");

@@ -996,8 +996,7 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
     chr->GetSession()->SendPacket(&data);
 
     chr->SetUInt32Value( UNIT_FIELD_FLAGS , 0x001000 );
-    chr->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , mId);
-    chr->SetUInt32Value( UNIT_FIELD_FLAGS , 0x003000 );
+    chr->Mount(mId);
 
     data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE );
     data << uint8(0xFF);

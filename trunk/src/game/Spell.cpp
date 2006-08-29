@@ -1019,7 +1019,7 @@ void Spell::SendLogExecute()
         data << m_targets.m_GOTarget->GetGUID();
 
     m_caster->SendMessageToSet(&data,true);
-};
+}
 
 void Spell::SendInterrupted(uint8 result)
 {
