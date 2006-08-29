@@ -318,7 +318,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
 
-        void setDeathState(DeathState s)
+        void setDeathState(DeathState s)                   // overwrite virtual Unit::setDeathState
         {
             if(s == JUST_DIED)
             {
@@ -330,7 +330,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
             if(s == JUST_DIED)
                 Unit::setDeathState(CORPSE);
-        };
+        }
 
         void Say(char const* text, uint32 language);
 

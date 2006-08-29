@@ -84,7 +84,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
     if(i_creature.getVictim())
         i_victimGuid = i_creature.getVictim()->GetGUID();
 
-    // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() clearóâ at Unit death etc.
+    // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() cleared at Unit death etc.
     if( i_victimGuid )
     {
         if( needToStop() )
@@ -148,27 +148,32 @@ ReactorAI::stopAttack()
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
         i_creature->MovementExpired();
         i_creature->Idle();
+        i_victimGuid = 0;
+        i_creature.AttackStop();
+        return;
     }
-    else if( !victim  )
+
+    if( !victim  )
     {
         DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else if( victim->isStealth() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else if( victim->isInFlight() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else
     {
         DEBUG_LOG("Creature stopped attacking due to target %s [guid=%u]", victim->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
+
+    // TargetedMovementGenerator can be already remove at i_creature death and not updated i_victimGuid
+    if( i_creature->top()->GetMovementGeneratorType() == MovementGenerator::TARGETED_MOTION_TYPE )
+        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+
     i_victimGuid = 0;
     i_creature.AttackStop();
 }

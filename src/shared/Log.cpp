@@ -379,3 +379,16 @@ void debug_log(const char * str, ...)
 
     MaNGOS::Singleton<Log>::Instance().outDebug(buf);
 }
+
+void error_log(const char * str, ...)
+{
+    if( !str ) return;
+
+    char buf[100];
+    va_list ap;
+    va_start(ap, str);
+    vsnprintf(buf,100, str, ap);
+    va_end(ap);
+
+    MaNGOS::Singleton<Log>::Instance().outError(buf);
+}

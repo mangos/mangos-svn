@@ -29,5 +29,6 @@ class MANGOS_DLL_DECL TaxiMovementGenerator : public MovementGenerator
         void Reset(const Creature &);
         bool GetNext(const Creature &, float &x, float &y, float &z, float &orientation);
         void Update(Creature &, const uint32 &);
+        MovementGeneratorType GetMovementGeneratorType() { return MovementGenerator::TAXI_MOTION_TYPE; }
 };
 #endif

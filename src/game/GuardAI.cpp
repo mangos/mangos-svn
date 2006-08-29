@@ -96,32 +96,39 @@ void GuardAI::_stopAttack()
         DEBUG_LOG("Creature stopped attacking because he's dead [guid=%u]", i_creature.GetGUIDLow());
         i_creature.StopMoving();
         i_creature->Idle();
+
+        i_state = STATE_NORMAL;
+
+        i_victimGuid = 0;
+        i_creature.AttackStop();
+        return;
     }
-    else if( !victim  )
+
+    if( !victim  )
     {
         DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else if( !victim ->isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking because victim is dead [guid=%u]", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else if( victim ->isStealth() )
     {
         DEBUG_LOG("Creature stopped attacking because victim is using stealth [guid=%u]", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else if( victim ->isInFlight() )
     {
         DEBUG_LOG("Creature stopped attacking because victim is flying away [guid=%u]", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else
     {
         DEBUG_LOG("Creature stopped attacking because victim outran him [guid=%u]", i_creature.GetGUIDLow());
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
+
+    // TargetedMovementGenerator can be already remove at i_creature death and not updated i_victimGuid
+    if( i_creature->top()->GetMovementGeneratorType() == MovementGenerator::TARGETED_MOTION_TYPE )
+        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+
     i_state = STATE_NORMAL;
 
     i_victimGuid = 0;
