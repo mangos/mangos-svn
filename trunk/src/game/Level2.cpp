@@ -32,6 +32,54 @@
 #include "Language.h"
 #include "World.h"
 
+bool ChatHandler::HandleTargetObjectCommand(const char* args)
+{
+
+    QueryResult *result;
+
+    if(*args)
+    {
+        int32 id = atoi((char*)args);
+        if(id)
+            result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i AND `id` = '%u' ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),id);
+        else
+            result = sDatabase.PQuery(
+                "SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` "
+                "FROM `gameobject`,`gameobject_template` WHERE `gameobject_template`.`entry` = `gameobject`.`id` AND `map` = %i AND `name` LIKE '%%%s%%' ORDER BY `order` ASC LIMIT 1", 
+                m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),args);
+    }
+    else
+        result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId());
+
+    if (!result)
+    {
+        SendSysMessage("Nothing found!");
+        return true;
+    }
+
+    Field *fields = result->Fetch();
+    uint32 guid = fields[0].GetUInt32();
+    uint32 id = fields[1].GetUInt32();
+    float x = fields[2].GetFloat();
+    float y = fields[3].GetFloat();
+    float z = fields[4].GetFloat();
+    float o = fields[5].GetFloat();
+    int mapid = fields[6].GetUInt16();
+    delete result;
+
+    const GameObjectInfo *goI = objmgr.GetGameObjectInfo(id);
+
+    if (!goI)
+    {
+        PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST,id);
+        return false;
+    }
+
+    PSendSysMessage("Selected object:\n%s\nGUID: %u ID: %u\nX: %f Y: %f Z: %f MapId: %u\nOrientation: %f", goI->name, guid, id, x, y, z, mapid, o);
+
+    return true;
+}
+
 bool ChatHandler::HandleGoObjectCommand(const char* args)
 {
     if(!*args)

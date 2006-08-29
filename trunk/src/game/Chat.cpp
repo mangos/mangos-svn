@@ -168,6 +168,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "whispers",    1, &ChatHandler::HandleWhispersCommand,         "",   NULL },
         { "gocreature",  2, &ChatHandler::HandleGoCreatureCommand,       "",   NULL },
         { "goobject",    2, &ChatHandler::HandleGoObjectCommand,         "",   NULL },
+        { "targetobject",2, &ChatHandler::HandleTargetObjectCommand,     "",   NULL },
 
         // shutdown commands
         { "shutdown",    3, &ChatHandler::ShutDown,          "",    NULL },
