@@ -2816,7 +2816,13 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     const float old_r = m_orientation;
 
     if( old_x != x || old_y != y || old_r != orientation)
+    {
         m->PlayerRelocation(this, x, y, z, orientation);
+
+        // remove at movement non-move stealth aura
+        if(HasFlag(UNIT_FIELD_BYTES_1,0x2000000))
+            RemoveAurasDueToSpell(20580);
+    }
 
     Map* m2 = MapManager::Instance().GetMap(GetMapId());
     float water_z = m2->GetWaterLevel(x,y);

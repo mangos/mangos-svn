@@ -1543,7 +1543,7 @@ uint8 Spell::CanCast()
 
                     FactionTemplateResolver my_faction = m_caster->getFactionTemplateEntry();
                     FactionTemplateResolver its_faction = (*itr)->getFactionTemplateEntry();
-                    if( my_faction.IsFriendlyTo(its_faction) )
+                    if( !its_faction.IsHostileTo(my_faction) && !its_faction.IsHostileToAll() )
                         continue;
 
                     if((*itr)->GetTypeId() != TYPEID_PLAYER)
