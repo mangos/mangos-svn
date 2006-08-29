@@ -105,7 +105,8 @@ void AggressorAI::_stopAttack()
         i_creature.CombatStop();
         return;
     }
-    else if( !victim  )
+
+    if( !victim  )
     {
         DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
     }
@@ -131,9 +132,9 @@ void AggressorAI::_stopAttack()
     i_victimGuid = 0;
     i_creature.AttackStop();
 
-    //i_creature.StopMoving();
-    //i_creature->Idle();
-    static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+    // TargetedMovementGenerator can be already remove at i_creature death and not updated i_victimGuid
+    if( i_creature->top()->GetMovementGeneratorType() == MovementGenerator::TARGETED_MOTION_TYPE )
+        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
 }
 
 void
@@ -173,7 +174,8 @@ AggressorAI::UpdateAI(const uint32 diff)
             {
                 i_creature->MovementExpired();
                 DEBUG_LOG("Creature running back home [guid=%u]", i_creature.GetGUIDLow());
-                static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+                if( i_creature->top()->GetMovementGeneratorType() == MovementGenerator::TARGETED_MOTION_TYPE )
+                    static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
                 i_state = STATE_NORMAL;
                 i_pVictim = NULL;
             }

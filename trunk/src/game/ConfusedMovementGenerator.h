@@ -33,6 +33,7 @@ class MANGOS_DLL_DECL ConfusedMovementGenerator : public MovementGenerator
         void Initialize(Creature &);
         void Reset(Creature &);
         void Update(Creature &, const uint32 &);
+        MovementGeneratorType GetMovementGeneratorType() { return MovementGenerator::CONFUSED_MOTION_TYPE; }
 
         static int Permissible(const Creature *);
     private:

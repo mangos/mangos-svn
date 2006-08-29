@@ -90,3 +90,4 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
 
 // primary for script library
 void MANGOS_DLL_SPEC debug_log(const char * str, ...);
+void MANGOS_DLL_SPEC error_log(const char * str, ...);
