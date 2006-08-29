@@ -374,27 +374,27 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     // Skill spec +5
     if (Player::HasSpell(SPELL_PASSIVE_SWORD_SPECIALIZATION))
     {
-        SetSkill(43,1 ,10);
-        SetSkill(55,1 ,10);
+        SetSkill(43,6 ,10);
+        SetSkill(55,6 ,10);
     }
     if (Player::HasSpell(SPELL_PASSIVE_MACE_SPECIALIZATION))
     {
-        SetSkill(54,1 ,10);
-        SetSkill(160,1 ,10);
+        SetSkill(54,6 ,10);
+        SetSkill(160,6 ,10);
     }
     if (Player::HasSpell(SPELL_PASSIVE_AXE_SPECIALIZATION))
     {
-        SetSkill(44,1 ,10);
-        SetSkill(172,1 ,10);
+        SetSkill(44,6 ,10);
+        SetSkill(172,6 ,10);
     }
     if (Player::HasSpell(SPELL_PASSIVE_THROWING_SPECIALIZATION))
     {
-        SetSkill(176,1 ,10);
+        SetSkill(176,6 ,10);
     }
     if (Player::HasSpell(SPELL_PASSIVE_BOW_SPECIALIZATION))
     {
-        SetSkill(45,1 ,10);
-        SetSkill(226,1 ,10);
+        SetSkill(45,6 ,10);
+        SetSkill(226,6 ,10);
     }
 
     //+5% HP if has skill Endurance
@@ -408,7 +408,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     {
         SetResistance(SPELL_SCHOOL_FROST, 10 );
     }
-    if (Player::HasSpell(SPELL_PASSIVE_NATURE_RESISTANCE))
+    if (Player::HasSpell(SPELL_PASSIVE_NATURE_RESISTANCE) || Player::HasSpell(SPELL_HORDE_PASSIVE_NATURE_RESISTANCE))
     {
         SetResistance(SPELL_SCHOOL_NATURE, 10 );
     }

@@ -83,8 +83,15 @@ TotemAI::UpdateAI(const uint32 diff)
         return;
     if (((Totem*)&i_totem)->GetTotemType() != TOTEM_ACTIVE)
         return;
+    
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
+    if (!spellInfo) return;
+    SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
+    float max_range = GetMaxRange(srange);
+
     Unit *victim = ObjectAccessor::Instance().GetUnit(*(Unit*)&i_totem, i_victimGuid);
-    if (victim)
+    // stop attacking dead or out of range victims
+    if (victim && victim->isAlive() && i_totem.GetDistanceSq(victim) < max_range * max_range)
     {
         // if totem is not casting and it has a victim .. cast again
         AttackStart(victim);
@@ -94,12 +101,6 @@ TotemAI::UpdateAI(const uint32 diff)
         i_victimGuid = 0;
 
     // look for a new victim in range
-
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
-    if (!spellInfo) return;
-    SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
-    float max_range = GetMaxRange(srange);
-
     std::list<Unit*> UnitList;
     MapManager::Instance().GetMap(i_totem.GetMapId())->GetUnitList(i_totem.GetPositionX(), i_totem.GetPositionY(),UnitList);
     for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
