@@ -1072,7 +1072,7 @@ void Player::Regenerate(Powers power)
     if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
     if( RageIncreaseRate <= 0 ) RageIncreaseRate = 1;
 
-    uint32 addvalue = 0;
+    float addvalue = 0.0;
 
     switch (power)
     {
@@ -1104,20 +1104,20 @@ void Player::Regenerate(Powers power)
 
             switch (Class)
             {
-                case DRUID:   addvalue = uint32((Spirit/5 + 15) * ManaIncreaseRate); break;
-                case HUNTER:  addvalue = uint32((Spirit/5 + 15) * ManaIncreaseRate); break;
-                case MAGE:    addvalue = uint32((Spirit/4 + 12.5) * ManaIncreaseRate); break;
-                case PALADIN: addvalue = uint32((Spirit/5 + 15)  * ManaIncreaseRate); break;
-                case PRIEST:  addvalue = uint32((Spirit/4 + 12.5) * ManaIncreaseRate); break;
-                case SHAMAN:  addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate); break;
-                case WARLOCK: addvalue = uint32((Spirit/5 + 15)  * ManaIncreaseRate); break;
+                case DRUID:   addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
+                case HUNTER:  addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
+                case MAGE:    addvalue = (Spirit/4 + 12.5) * ManaIncreaseRate; break;
+                case PALADIN: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
+                case PRIEST:  addvalue = (Spirit/4 + 12.5) * ManaIncreaseRate; break;
+                case SHAMAN:  addvalue = (Spirit/5 + 17)   * ManaIncreaseRate; break;
+                case WARLOCK: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
             }
             break;
         case POWER_RAGE:                                    // Regenerate rage
-            addvalue = uint32(30 * RageIncreaseRate);       // 3 rage by tick
+            addvalue = 30 * RageIncreaseRate;               // 3 rage by tick
             break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
-            addvalue = uint32(20);
+            addvalue = 20;
             break;
         case POWER_FOCUS:
         case POWER_HAPPINESS:
@@ -1132,19 +1132,19 @@ void Player::Regenerate(Powers power)
             case PLAYER_STATE_SIT_LOW_CHAIR:
             case PLAYER_STATE_SIT_MEDIUM_CHAIR:
             case PLAYER_STATE_SIT_HIGH_CHAIR:
-            case PLAYER_STATE_SIT:          addvalue = (uint32)(addvalue*2.0f); break;
-            case PLAYER_STATE_SLEEP:        addvalue = (uint32)(addvalue*3.0f); break;
-            case PLAYER_STATE_KNEEL:        addvalue = (uint32)(addvalue*1.5f); break;
+            case PLAYER_STATE_SIT:          addvalue *= 2.0; break;
+            case PLAYER_STATE_SLEEP:        addvalue *= 3.0; break;
+            case PLAYER_STATE_KNEEL:        addvalue *= 1.5; break;
         }
-        curValue += addvalue;
+        curValue += uint32(addvalue);
         if (curValue > maxValue) curValue = maxValue;
     }
     else
     {
-        if(curValue <= addvalue)
+        if(curValue <= uint32(addvalue))
             curValue = 0;
         else
-            curValue -= addvalue;
+            curValue -= uint32(addvalue);
     }
     SetPower(power, curValue);
 }
@@ -1163,26 +1163,26 @@ void Player::RegenerateHealth()
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
 
-    uint32 addvalue = 0;
+    float addvalue = 0.0;
 
     switch (Class)
     {
-        case DRUID:   addvalue = uint32((Spirit*0.09 + 6.5) * HealthIncreaseRate); break;
-        case HUNTER:  addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
-        case MAGE:    addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
-        case PALADIN: addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
-        case PRIEST:  addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
-        case ROGUE:   addvalue = uint32((Spirit*0.50 + 2.0) * HealthIncreaseRate); break;
-        case SHAMAN:  addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
-        case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
-        case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
+        case DRUID:   addvalue = (Spirit*0.09 + 6.5) * HealthIncreaseRate; break;
+        case HUNTER:  addvalue = (Spirit*0.25)       * HealthIncreaseRate; break;
+        case MAGE:    addvalue = (Spirit*0.10)       * HealthIncreaseRate; break;
+        case PALADIN: addvalue = (Spirit*0.25)       * HealthIncreaseRate; break;
+        case PRIEST:  addvalue = (Spirit*0.10)       * HealthIncreaseRate; break;
+        case ROGUE:   addvalue = (Spirit*0.50 + 2.0) * HealthIncreaseRate; break;
+        case SHAMAN:  addvalue = (Spirit*0.11)       * HealthIncreaseRate; break;
+        case WARLOCK: addvalue = (Spirit*0.07 + 6.0) * HealthIncreaseRate; break;
+        case WARRIOR: addvalue = (Spirit*0.80)       * HealthIncreaseRate; break;
     }
     if (HasSpell(SPELL_PASSIVE_REGENERATION))               // TODO: Should be aura controlled
     {
         if (isInCombat())
-            addvalue*=uint32(0.10);
+            addvalue *= 0.10;
         else
-            addvalue*=uint32(1.10);
+            addvalue *= 1.10;
     }
 
     switch (getStandState())
@@ -1191,11 +1191,11 @@ void Player::RegenerateHealth()
         case PLAYER_STATE_SIT_LOW_CHAIR:
         case PLAYER_STATE_SIT_MEDIUM_CHAIR:
         case PLAYER_STATE_SIT_HIGH_CHAIR:
-        case PLAYER_STATE_SIT:          addvalue = (uint32)(addvalue*2.0f); break;
-        case PLAYER_STATE_SLEEP:        addvalue = (uint32)(addvalue*3.0f); break;
-        case PLAYER_STATE_KNEEL:        addvalue = (uint32)(addvalue*1.5f); break;
+        case PLAYER_STATE_SIT:          addvalue *= 2.0; break;
+        case PLAYER_STATE_SLEEP:        addvalue *= 3.0; break;
+        case PLAYER_STATE_KNEEL:        addvalue *= 1.5; break;
     }
-    curValue += addvalue;
+    curValue += uint32(addvalue);
     if (curValue > maxValue) curValue = maxValue;
     SetHealth(curValue);
 }
@@ -2828,6 +2828,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     m = MapManager::Instance().GetMap(GetMapId());
     x = m_positionX;
     y = m_positionY;
+    z = m_positionZ;
 
     float water_z = m->GetWaterLevel(x,y);
     uint8 flag1 = m->GetTerrainType(x,y);
