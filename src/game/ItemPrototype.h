@@ -182,6 +182,11 @@ enum ITEM_SUBCLASS_PROJECTILE
     ITEM_SUBCLASS_BULLET            = 3,
 };
 
+enum ITEM_SUBCLASS_TRADE_GOODS
+{
+    ITEM_SUBCLASS_BOMB              = 2,
+};
+
 enum ITEM_SUBCLASS_BOOK
 {
     ITEM_SUBCLASS_BOOK                  = 0,
