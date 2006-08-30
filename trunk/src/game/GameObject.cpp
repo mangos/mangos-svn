@@ -29,7 +29,7 @@
 #include "MapManager.h"
 #include "LootMgr.h"
 
-GameObject::GameObject() : Object()
+GameObject::GameObject() : Object(), m_refs(0)
 {
     m_objectType |= TYPE_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -40,6 +40,13 @@ GameObject::GameObject() : Object()
     m_lootState = CLOSED;
 
     lootid=0;
+}
+
+GameObject::~GameObject()
+{
+    // crash possable at access to deleted GO in Unit::m_gameobj
+    if(isReferenced()) 
+        sLog.outError("Delete GameObject (GUID: %u) that have references in Unit GO list. Crash possable later.",GetGUIDLow());
 }
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
@@ -122,6 +129,13 @@ void GameObject::Update(uint32 p_time)
 
 void GameObject::Delete()
 {
+    // prevent crash at access to deleted GO in Unit::m_gameobj
+    if(isReferenced()) 
+    {
+        sLog.outError("Attempt delete GameObject (GUID: %u) that have references in Unit GO list.",GetGUIDLow());
+        return;
+    }
+
     WorldPacket data;
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
     data << GetGUID();

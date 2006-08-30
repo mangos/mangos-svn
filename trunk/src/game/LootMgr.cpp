@@ -109,7 +109,7 @@ bool LootItem::lootable(LootItem &itm, Player* player)
         return true;
     else
         return itm.chance > 0;
-};
+}
 
 struct NotChanceFor
 {
