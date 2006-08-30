@@ -157,7 +157,7 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             guild->Loadplayerstatsbyguid(_player->GetGUID());
         }
-        _player->UnsummonPet(false);
+        _player->UnsummonPet();
         _player->Uncharm();
         _player->UnsummonTotem();
 

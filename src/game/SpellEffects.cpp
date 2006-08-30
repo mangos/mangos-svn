@@ -1148,7 +1148,7 @@ void Spell::EffectSummonPet(uint32 i)
     if(OldSummon)
     {
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_caster)->UnsummonPet(true);
+            ((Player*)m_caster)->UnsummonPet();
         else
             return;
     }
@@ -1834,7 +1834,7 @@ void Spell::EffectDismissPet(uint32 i)
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    ((Player*)m_caster)->UnsummonPet(false);
+    ((Player*)m_caster)->UnsummonPet();
 }
 
 void Spell::EffectSummonObject(uint32 i)

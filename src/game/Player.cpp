@@ -9281,7 +9281,7 @@ void Player::UpdatePVPFlag(time_t currTime)
     }
 }
 
-void Player::UnsummonPet(bool remove)
+void Player::UnsummonPet()
 {
     Creature* pet = GetPet();
     if(!pet) return;
@@ -9296,10 +9296,7 @@ void Player::UnsummonPet(bool remove)
     data << pet->GetGUID();
     SendMessageToSet (&data, true);
 
-    if(remove)
-        ObjectAccessor::Instance().AddObjectToRemoveList(pet);
-    else
-        MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,remove);
+    ObjectAccessor::Instance().AddObjectToRemoveList(pet);
 
     data.Initialize(SMSG_PET_SPELLS);
     data << uint64(0);

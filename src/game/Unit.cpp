@@ -1440,7 +1440,7 @@ Unit* Unit::SelectHostilTarget()
     m_hostilList.sort();
     m_hostilList.reverse();
     uint64 guid = m_hostilList.front().UnitGuid;
-    if(guid != getVictim()->GetGUID())
+    if(!getVictim() || guid != getVictim()->GetGUID())
         return ObjectAccessor::Instance().GetUnit(*this, guid);
     else
         return NULL;

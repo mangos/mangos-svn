@@ -405,7 +405,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             if(s == JUST_DIED && cur)
             {
                 _RemoveAllItemMods();
-                UnsummonPet(true);
+                UnsummonPet();
             }
             if(isAlive() && !cur)
             {
@@ -417,7 +417,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             }
         };
 
-        void UnsummonPet(bool remove);
+        void UnsummonPet();
         void Uncharm();
 
         float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
