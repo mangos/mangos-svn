@@ -1266,7 +1266,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    uint32 wp[3] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG };
+    uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };
 
     // multiple weap dmg effect workaround
     // execute only the first weapon damage
@@ -1276,15 +1276,15 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     for (j = 0; j < 3; j++)
     {
-        for (k = 0; k < 3; k++)
+        for (k = 0; k < 4; k++)
             if (m_spellInfo->Effect[j] == wp[k])
                 break;
-        if (k != 3)
+        if (k != 4)
         {
             if (j < i)
                 return;
             if (m_spellInfo->Effect[j] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
-                bonus += m_spellInfo->EffectBasePoints[i]+1;
+                bonus += m_spellInfo->EffectBasePoints[j]+1;
         }
     }
 
@@ -1338,12 +1338,12 @@ void Spell::EffectWeaponDmg(uint32 i)
         }
     }
 
-    //if(m_spellInfo->Effect[i] == 121)
+    /*if(m_spellInfo->Effect[i] == 121)
     {
         m_caster->resetAttackTimer(BASE_ATTACK);
         m_caster->resetAttackTimer(OFF_ATTACK);
         m_caster->resetAttackTimer(RANGED_ATTACK);
-    }
+    }*/
 }
 
 void Spell::EffectThreat(uint32 i)

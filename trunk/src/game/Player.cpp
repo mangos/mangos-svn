@@ -5373,7 +5373,7 @@ uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
             slots[0] = EQUIPMENT_SLOT_OFFHAND;
             break;
         case INVTYPE_HOLDABLE:
-            slots[0] = EQUIPMENT_SLOT_MAINHAND;
+            slots[0] = EQUIPMENT_SLOT_OFFHAND;
             break;
         case INVTYPE_THROWN:
             slots[0] = EQUIPMENT_SLOT_RANGED;
