@@ -267,7 +267,5 @@ bool GameObject::IsTransport() const
 {
     GameObjectInfo const * gInfo = GetGOInfo();
     if(!gInfo) return false;
-    return strcmp(gInfo->name,"Subway") == 0
-        || strncmp(gInfo->name,"Boat to ",8) == 0
-        || strncmp(gInfo->name,"Zeppelin - ",11) == 0;
+    return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
 }

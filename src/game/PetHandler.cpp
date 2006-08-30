@@ -81,6 +81,15 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     uint64 selguid = _player->GetSelection();
                     Unit *TargetUnit = ObjectAccessor::Instance().GetUnit(*_player, selguid);
                     if(TargetUnit == NULL) return;
+
+                    FactionTemplateResolver unit_faction = TargetUnit->getFactionTemplateEntry();
+                    FactionTemplateResolver player_faction = GetPlayer()->getFactionTemplateEntry();
+    
+                    // not let attack friendly units.
+                    if( player_faction.IsFriendlyTo(unit_faction)) 
+                        return;
+
+
                     pet->AI().AttackStart(TargetUnit);
                     data.Initialize(SMSG_AI_REACTION);
                     data << guid1 << uint32(00000002);

@@ -978,7 +978,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetDontMove(true);
         //SaveToDB();
 
-        MapManager::Instance().GetMap(mapid)->Add(this);
+        MapManager::Instance().GetMap(GetMapId())->Add(this);
 
         // Resend spell list to client after far teleport.
         SendInitialSpells();
@@ -2824,9 +2824,13 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
             RemoveAurasDueToSpell(20580);
     }
 
-    Map* m2 = MapManager::Instance().GetMap(GetMapId());
-    float water_z = m2->GetWaterLevel(x,y);
-    uint8 flag1 = m2->GetTerrainType(x,y);
+    // reread after Ma::Relocation
+    m = MapManager::Instance().GetMap(GetMapId());
+    x = m_positionX;
+    y = m_positionY;
+
+    float water_z = m->GetWaterLevel(x,y);
+    uint8 flag1 = m->GetTerrainType(x,y);
 
     //!Underwater check
     if ((z < (water_z - 2)) && (flag1 & 0x01))

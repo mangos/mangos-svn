@@ -1958,7 +1958,7 @@ void Spell::EffectQuestComplete(uint32 i)
         return;
 
     if(_player->GetQuestRewardStatus( quest_id ))
-        return
+        return;
 
     _player->PlayerTalkClass->SendQuestReward( quest_id, _player->GetGUID(), true, NULL, 0 );
 }
