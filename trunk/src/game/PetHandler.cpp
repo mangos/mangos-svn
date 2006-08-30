@@ -97,7 +97,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
                 }
                 case 3:
-                    _player->UnsummonPet(true);
+                    _player->UnsummonPet();
                     break;
                 default:
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.\n", flag, spellid);
@@ -212,7 +212,7 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
         {
             uint32 feelty = pet->GetPower(POWER_HAPPINESS);
             pet->SetPower(POWER_HAPPINESS ,(feelty-50000) > 0 ?(feelty-50000) : 0);
-            _player->UnsummonPet(true);
+            _player->UnsummonPet();
         }
         else if(pet->GetGUID() == _player->GetCharmGUID())
         {
