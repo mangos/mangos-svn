@@ -204,7 +204,7 @@ namespace MaNGOS
             GameObjectFocusCheck(Unit* unit,uint32 focusId) : i_unit(unit), i_focusId(focusId) {}
             bool operator()(GameObject* go) const
             {
-                if(go->GetGOInfo()->type!=8 || go->GetGOInfo()->sound0 != i_focusId)
+                if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS || go->GetGOInfo()->sound0 != i_focusId)
                     return false;
 
                 float dist = go->GetGOInfo()->sound1;
