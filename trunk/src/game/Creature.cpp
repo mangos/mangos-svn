@@ -163,7 +163,9 @@ void Creature::AIM_Update(const uint32 &diff)
                 loot.clear();
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;
-                GetRespawnCoord(m_positionX, m_positionY, m_positionZ);
+                float x,y,z;
+                GetRespawnCoord(x, y, z);
+                MapManager::Instance().GetMap(GetMapId())->CreatureRelocation(this,x,y,z,GetOrientation());
             }
             else
                 m_deathTimer -= diff;

@@ -1133,9 +1133,11 @@ void Spell::EffectSummonPet(uint32 i)
             OldSummon->setDeathState(ALIVE);
             OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
             (*OldSummon)->Clear();
-            MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
         }
+        MapManager::Instance().GetMap(m_caster->GetMapId())->Remove(OldSummon,false);
+        OldSummon->SetMapId(m_caster->GetMapId());
         OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
+        MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             ((Player*)m_caster)->PetSpellInitialize();
