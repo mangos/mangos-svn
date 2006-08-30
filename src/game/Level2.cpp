@@ -402,6 +402,37 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleDelObjectCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    uint32 lowguid = atoi((char*)args);
+    if(!lowguid)
+        return false;
+    
+    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+
+    if(!obj)
+    {
+        PSendSysMessage("Game Object (GUID: %u) not found", obj->GetGUIDLow());
+        return true;
+    }
+
+    if(obj->isReferenced())
+    {
+        PSendSysMessage("Game Object (GUID: %u) have references in some Unit GO list, can't be deleted.", obj->GetGUIDLow());
+        return true;
+    }
+
+    obj->Delete();
+    obj->DeleteFromDB();
+
+    PSendSysMessage("Game Object (GUID: %u) removed", obj->GetGUIDLow());
+
+    return true;
+}
+
 bool ChatHandler::HandleDeMorphCommand(const char* args)
 {
     sLog.outError(LANG_DEMORPHED,m_session->GetPlayer()->GetName());

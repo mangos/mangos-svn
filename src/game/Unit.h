@@ -160,7 +160,7 @@ enum UnitFlags
     UNIT_FLAG_RESTING        = 0x00000020,
     UNIT_FLAG_MOUNT          = 0x00002000,
     UNIT_FLAG_DISABLE_ROTATE = 0x00040000,
-    UNIT_FLAG_ATTACKING      = 0x00080000,
+    UNIT_FLAG_IN_COMBAT      = 0x00080000,
     UNIT_FLAG_SKINNABLE      = 0x04000000,
     UNIT_FLAG_SHEATHE        = 0x40000000
 };
@@ -311,6 +311,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); 
         }
         void _removeAttacker(Unit *pAttacker)               // must be called only from Unit::AttackStop()
         {
@@ -319,7 +320,11 @@ class MANGOS_DLL_SPEC Unit : public Object
                 m_attackers.erase(itr);
 
             if (m_attackers.size() == 0)
+            {
                 clearUnitState(UNIT_STAT_ATTACK_BY);
+                if(!m_attacking)
+                    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); 
+            }
         }
         Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
         {

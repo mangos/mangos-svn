@@ -220,8 +220,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
-            pVictim->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
-            CombatStop();
+            pVictim->CombatStop();
             return;
         }
         ((Creature*)pVictim)->AI().AttackStart(this);
@@ -244,7 +243,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
         DEBUG_LOG("DealDamageHealth1");
         pVictim->SetHealth(0);
-        pVictim->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
 
         // 10% durability loss on death
         // clean hostilList
@@ -271,7 +269,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 pet->setDeathState(JUST_DIED);
                 pet->CombatStop();
                 pet->SetHealth(0);
-                pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
                 pet->addUnitState(UNIT_STAT_DIED);
                 for(i = m_hostilList.begin(); i != m_hostilList.end(); ++i)
                 {
@@ -1402,7 +1399,10 @@ void Unit::_UpdateSpells( uint32 time )
         //(*i)->Update( difftime );
         if( (*ite1)->isFinished() )
         {
-            (*ite1)->Delete();
+            (*ite1)->RemoveRef();
+            if(!(*ite1)->isReferenced())
+                (*ite1)->Delete();
+
             m_gameObj.erase(ite1);
             if(m_gameObj.empty())
                 break;
@@ -2265,6 +2265,7 @@ void Unit::RemoveDynObject(uint32 spellid)
 void Unit::AddGameObject(GameObject* gameObj)
 {
     m_gameObj.push_back(gameObj);
+    gameObj->AddRef();
 }
 
 void Unit::RemoveGameObject(uint32 spellid, bool del)
@@ -2278,7 +2279,8 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
         next++;
         if(spellid == 0 || (*i)->GetSpellId() == spellid)
         {
-            if(del)
+            (*i)->RemoveRef();
+            if(del && !(*i)->isReferenced())
                 (*i)->Delete();
 
             m_gameObj.erase(i);
@@ -2402,7 +2404,7 @@ bool Unit::Attack(Unit *victim)
         AttackStop();
     }
     addUnitState(UNIT_STAT_ATTACKING);
-    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
+    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
@@ -2427,7 +2429,8 @@ bool Unit::AttackStop()
     m_attacking->_removeAttacker(this);
     m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
-    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
+    if(m_attackers.empty())
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
     if(m_currentMeleeSpell)
         m_currentMeleeSpell->cancel();

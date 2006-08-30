@@ -68,12 +68,18 @@ class MANGOS_DLL_SPEC GameObject : public Object
 {
     public:
         GameObject();
+        ~GameObject();
 
         bool Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3);
         void Update(uint32 p_time);
         GameObjectInfo const* GetGOInfo() const;
 
         bool IsTransport() const;
+
+        // GO links stored in Unit::m_gameObj 
+        bool isReferenced() const { return m_refs !=0; }
+        void AddRef() { ++m_refs; }                         // for used in Unit::m_gameObj operations
+        void RemoveRef() { if(m_refs) --m_refs; }           // for used in Unit::m_gameObj operations
 
         void SaveToDB();
         bool LoadFromDB(uint32 guid);
@@ -100,5 +106,6 @@ class MANGOS_DLL_SPEC GameObject : public Object
         uint32      m_respawnDelayTimer;
         uint32      m_flags;
         LootState   m_lootState;
+        uint32      m_refs;
 };
 #endif
