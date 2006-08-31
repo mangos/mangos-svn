@@ -1735,6 +1735,46 @@ void Player::learnSpell(uint16 spell_id)
         case 2842:                                          //poisons
             SetSkill(40,1,maxskill);
             break;
+            // Languages
+        case 668:
+            SetSkill(98,1,300);
+            break;
+        case 669:
+            SetSkill(109,1,300);
+            break;
+        case 670:
+            SetSkill(115,1,300);
+            break;
+        case 671:
+            SetSkill(113,1,300);
+            break;
+        case 672:
+            SetSkill(111,1,300);
+            break;
+        case 813:
+            SetSkill(137,1,300);
+            break;
+        case 814:
+            SetSkill(138,1,300);
+            break;
+        case 815:
+            SetSkill(139,1,300);
+            break;
+        case 816:
+            SetSkill(140,1,300);
+            break;
+        case 817:
+            SetSkill(141,1,300);
+            break;
+        case 7340:
+            SetSkill(313,1,300);
+            break;
+        case 7341:
+            SetSkill(315,1,300);
+            break;
+        case 17737:
+            SetSkill(673,1,300);
+            break;
         default:break;
     }
 }
