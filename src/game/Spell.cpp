@@ -574,6 +574,7 @@ void Spell::cast()
     uint8 castResult = 0;
     if(m_caster->GetTypeId() != TYPEID_PLAYER && unitTarget)
         m_caster->SetInFront(unitTarget);
+
     castResult = CheckMana( &mana);
     if(castResult != 0)
     {
@@ -581,6 +582,7 @@ void Spell::cast()
         finish();
         return;
     }
+
     castResult = CanCast();
     if(castResult == 0)
     {
@@ -1609,6 +1611,10 @@ uint8 Spell::CheckRange()
 
 uint8 Spell::CheckMana(uint32 *mana)
 {
+    // item cast not used power
+    if(m_CastItem)
+        return 0;
+
     // health as power used
     if(m_spellInfo->powerType == -2)
     {
