@@ -313,7 +313,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     std::list<uint8>::iterator item_bagIndex_itr;
     std::list<uint8>::iterator item_slot_itr;
     std::list<uint32>::iterator item_amount_itr;
-    std::list<uint16>::iterator spell_itr, skill_itr[3], action_itr[4];
+    std::list<uint16>::iterator skill_itr[3], action_itr[4];
+    std::list<CreateSpellPair>::iterator spell_itr;
 
     item_id_itr = info->item_id.begin();
     item_bagIndex_itr = info->item_bagIndex.begin();
@@ -323,11 +324,11 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     for (; spell_itr!=info->spell.end(); spell_itr++)
     {
-        tspell = (*spell_itr);
+        tspell = spell_itr->first;
         if (tspell)
         {
             sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
-            addSpell(tspell,1);
+            addSpell(tspell,spell_itr->second);
         }
     }
 

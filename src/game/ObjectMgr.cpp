@@ -182,13 +182,13 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete items_result;
 
-    QueryResult *spells_result = sDatabase.PQuery("SELECT `Spell` FROM `playercreateinfo_spell` WHERE `createid` = '0' OR `createid` = '%u'", createId);
+    QueryResult *spells_result = sDatabase.PQuery("SELECT `Spell`,`Active` FROM `playercreateinfo_spell` WHERE `createid` = '0' OR `createid` = '%u'", createId);
 
     do
     {
         if(!spells_result) break;
         spells_fields = spells_result->Fetch();
-        pPlayerCreateInfo->spell.push_back(spells_fields[0].GetUInt16());
+        pPlayerCreateInfo->spell.push_back(CreateSpellPair(spells_fields[0].GetUInt16(), spells_fields[1].GetBool()));
 
     } while( spells_result->NextRow() );
 
