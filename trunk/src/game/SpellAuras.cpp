@@ -2196,7 +2196,7 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
         return;
 
     Unit *unit_target = aura->GetTarget();
-    uint32 spellId = 0;
+    /*uint32 spellId = 0;
     uint32 spellId2 = 0;
 
     switch(aura->GetModifier()->m_miscvalue)
@@ -2243,9 +2243,10 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             break;
     }
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
+    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );*/
 
     double healthPercentage = (double)unit_target->GetHealth() / (double)unit_target->GetMaxHealth();
+    uint32 form = aura->GetModifier()->m_miscvalue-1;
 
     if(apply)
     {
@@ -2254,18 +2255,28 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);
         }
 
-        if(spellInfo)
+        if(unit_target->GetTypeId() == TYPEID_PLAYER)
         {
-            Spell p_spell(aura->GetCaster(),spellInfo,true,aura);
-            SpellCastTargets targets;
-            targets.setUnitTarget(unit_target);
-            p_spell.prepare(&targets);
+            const PlayerSpellList& sp_list = ((Player *)unit_target)->getSpellList();
+            for (PlayerSpellList::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+            {
+                SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
+                if (!spellInfo || !IsPassiveSpell((*itr)->spellId)) continue;
+                if (spellInfo->Stances & (1<<form))
+                    unit_target->CastSpell(unit_target, (*itr)->spellId, true);
+            }
         }
     }
     else
     {
-        unit_target->RemoveAurasDueToSpell(spellId);
-        unit_target->RemoveAurasDueToSpell(spellId2);
+        Unit::AuraMap& tAuras = unit_target->GetAuras();
+        for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
+        {
+            if ((*itr).second->GetSpellProto()->Stances & uint32(1<<form))
+                unit_target->RemoveAura(itr);
+            else
+                ++itr;
+        }
     }
 
     unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));

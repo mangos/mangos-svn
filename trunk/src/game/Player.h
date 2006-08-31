@@ -111,6 +111,8 @@ struct actions
     uint16 action;
 };
 
+typedef std::pair<uint16, bool> CreateSpellPair;
+
 struct PlayerCreateInfo
 {
     uint8 createId;
@@ -142,7 +144,7 @@ struct PlayerCreateInfo
     std::list<uint8> item_bagIndex;
     std::list<uint8> item_slot;
     std::list<uint32> item_amount;
-    std::list<uint16> spell;
+    std::list<CreateSpellPair> spell;
     std::list<uint16> skill[3];
     std::list<uint16> action[4];
 };
