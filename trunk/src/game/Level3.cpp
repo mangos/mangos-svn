@@ -1004,6 +1004,40 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         return true;
     }
 
+    if (!strcmp(args, "all_lang"))
+    {
+        PSendSysMessage("%s - Learning all languages.", m_session->GetPlayer()->GetName());
+
+        m_session->GetPlayer()->learnSpell(668);
+        m_session->GetPlayer()->learnSpell(669);
+        m_session->GetPlayer()->learnSpell(670);
+        m_session->GetPlayer()->learnSpell(671);
+        m_session->GetPlayer()->learnSpell(672);
+        m_session->GetPlayer()->learnSpell(813);
+        m_session->GetPlayer()->learnSpell(814);
+        m_session->GetPlayer()->learnSpell(815);
+        m_session->GetPlayer()->learnSpell(816);
+        m_session->GetPlayer()->learnSpell(817);
+        m_session->GetPlayer()->learnSpell(7340);
+        m_session->GetPlayer()->learnSpell(7341);
+        m_session->GetPlayer()->learnSpell(17737);
+
+        m_session->GetPlayer()->SetSkill(98,300,300);
+        m_session->GetPlayer()->SetSkill(109,300,300);
+        m_session->GetPlayer()->SetSkill(115,300,300);
+        m_session->GetPlayer()->SetSkill(113,300,300);
+        m_session->GetPlayer()->SetSkill(111,300,300);
+        m_session->GetPlayer()->SetSkill(137,300,300);
+        m_session->GetPlayer()->SetSkill(138,300,300);
+        m_session->GetPlayer()->SetSkill(139,300,300);
+        m_session->GetPlayer()->SetSkill(140,300,300);
+        m_session->GetPlayer()->SetSkill(141,300,300);
+        m_session->GetPlayer()->SetSkill(313,300,300);
+        m_session->GetPlayer()->SetSkill(315,300,300);
+        m_session->GetPlayer()->SetSkill(673,300,300);
+        return true;
+    }
+
     Player* target = getSelectedPlayer();
     if(!target)
     {
