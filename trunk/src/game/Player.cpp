@@ -5388,6 +5388,9 @@ uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
             slots[2] = INVENTORY_SLOT_BAG_3;
             slots[3] = INVENTORY_SLOT_BAG_4;
             break;
+        case INVTYPE_RELIC:
+            slots[0] = EQUIPMENT_SLOT_RANGED;
+            break;
         default :
             return NULL_SLOT;
     }
