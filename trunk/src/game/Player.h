@@ -764,7 +764,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         Corpse* GetCorpse() const;
         void SpawnCorpseBones();
-        void CreateCorpse();
+        Corpse* CreateCorpse();
 
         void KillPlayer();
         void ResurrectPlayer();

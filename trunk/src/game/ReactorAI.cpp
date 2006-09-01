@@ -118,7 +118,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
 bool
 ReactorAI::needToStop() const
 {
-    if( !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
+    if( !i_creature.isAlive() || !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() )
         return true;
 
     if(!i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
@@ -137,21 +137,21 @@ ReactorAI::needToStop() const
 void
 ReactorAI::stopAttack()
 {
-    assert( i_victimGuid );
-
-    Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
-
-    assert(!i_creature.getVictim() || i_creature.getVictim() == victim);
-
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
         i_creature->MovementExpired();
         i_creature->Idle();
         i_victimGuid = 0;
-        i_creature.AttackStop();
+        i_creature.CombatStop();
         return;
     }
+
+    assert( i_victimGuid );
+
+    Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
+
+    assert(!i_creature.getVictim() || i_creature.getVictim() == victim);
 
     if( !victim  )
     {

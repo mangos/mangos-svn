@@ -63,7 +63,7 @@ void GuardAI::DamageInflict(Unit *healer, uint32 amount_healed)
 
 bool GuardAI::_needToStop() const
 {
-    if( !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
+    if( !i_creature.isAlive() || !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() )
         return true;
 
     if(!i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
@@ -85,12 +85,6 @@ void GuardAI::AttackStop(Unit *)
 
 void GuardAI::_stopAttack()
 {
-    assert( i_victimGuid );
-
-    Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
-
-    assert(!i_creature.getVictim() || i_creature.getVictim() == victim);
-
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking because he's dead [guid=%u]", i_creature.GetGUIDLow());
@@ -100,9 +94,15 @@ void GuardAI::_stopAttack()
         i_state = STATE_NORMAL;
 
         i_victimGuid = 0;
-        i_creature.AttackStop();
+        i_creature.CombatStop();
         return;
     }
+
+    assert( i_victimGuid );
+
+    Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
+
+    assert(!i_creature.getVictim() || i_creature.getVictim() == victim);
 
     if( !victim  )
     {
