@@ -83,7 +83,7 @@ TotemAI::UpdateAI(const uint32 diff)
         return;
     if (((Totem*)&i_totem)->GetTotemType() != TOTEM_ACTIVE)
         return;
-    
+
     SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
     if (!spellInfo) return;
     SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);

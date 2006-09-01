@@ -84,11 +84,10 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
                     FactionTemplateResolver unit_faction = TargetUnit->getFactionTemplateEntry();
                     FactionTemplateResolver player_faction = GetPlayer()->getFactionTemplateEntry();
-    
-                    // not let attack friendly units.
-                    if( player_faction.IsFriendlyTo(unit_faction)) 
-                        return;
 
+                    // not let attack friendly units.
+                    if( player_faction.IsFriendlyTo(unit_faction))
+                        return;
 
                     pet->AI().AttackStart(TargetUnit);
                     data.Initialize(SMSG_AI_REACTION);

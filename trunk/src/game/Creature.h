@@ -318,7 +318,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
 
-        void setDeathState(DeathState s)                   // overwrite virtual Unit::setDeathState
+        void setDeathState(DeathState s)                    // overwrite virtual Unit::setDeathState
         {
             if(s == JUST_DIED)
             {

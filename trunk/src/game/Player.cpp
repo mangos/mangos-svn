@@ -3769,7 +3769,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     for (int i = 0; i < 5; i++)
     {
         if(!proto->Spells[i].SpellId ) continue;
-        
+
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
         {
@@ -5899,7 +5899,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                 }
                 return EQUIP_ERR_INVENTORY_FULL;
             }
-            else                                            // in specific bag 
+            else                                            // in specific bag
             {
                 if( slot == NULL_SLOT )
                 {
@@ -9450,4 +9450,3 @@ void Player::RemoveAreaAurasFromGroup()
                 Member->RemoveAreaAurasByOthers(m_TotemSlot[i]);
     }
 }
-

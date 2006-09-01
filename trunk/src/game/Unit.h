@@ -311,7 +311,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); 
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
         }
         void _removeAttacker(Unit *pAttacker)               // must be called only from Unit::AttackStop()
         {
@@ -323,7 +323,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             {
                 clearUnitState(UNIT_STAT_ATTACK_BY);
                 if(!m_attacking)
-                    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); 
+                    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             }
         }
         Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
@@ -435,12 +435,13 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isTabardVendor() const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR ); }
         bool isAuctioner()    const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER ); }
         bool isArmorer()      const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_ARMORER ); }
-        bool isServiceProvider() const { 
-            return HasFlag( UNIT_NPC_FLAGS, 
-                UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_TAXIVENDOR | 
+        bool isServiceProvider() const
+        {
+            return HasFlag( UNIT_NPC_FLAGS,
+                UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_TAXIVENDOR |
                 UNIT_NPC_FLAG_PETITIONER | UNIT_NPC_FLAG_BATTLEFIELDPERSON | UNIT_NPC_FLAG_BANKER |
-                UNIT_NPC_FLAG_INNKEEPER | UNIT_NPC_FLAG_GUARD | UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_TABARDVENDOR | 
-                UNIT_NPC_FLAG_AUCTIONEER ); 
+                UNIT_NPC_FLAG_INNKEEPER | UNIT_NPC_FLAG_GUARD | UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_TABARDVENDOR |
+                UNIT_NPC_FLAG_AUCTIONEER );
         }
         //Need fix or use this
         bool isGuard() const  { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUARD); }
@@ -618,9 +619,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
     private:
-        void SendAttackStop(Unit* victim); // only from AttackStop(Unit*)
-        void SendAttackStart(Unit* pVictim); // only from Unit::AttackStart(Unit*)
-
+        void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)
+        void SendAttackStart(Unit* pVictim);                // only from Unit::AttackStart(Unit*)
 
         uint32 m_state;                                     // Even derived shouldn't modify
 };

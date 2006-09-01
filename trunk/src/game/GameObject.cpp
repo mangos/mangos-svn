@@ -45,7 +45,7 @@ GameObject::GameObject() : Object(), m_refs(0)
 GameObject::~GameObject()
 {
     // crash possable at access to deleted GO in Unit::m_gameobj
-    if(isReferenced()) 
+    if(isReferenced())
         sLog.outError("Delete GameObject (GUID: %u) that have references in Unit GO list. Crash possable later.",GetGUIDLow());
 }
 
@@ -130,7 +130,7 @@ void GameObject::Update(uint32 p_time)
 void GameObject::Delete()
 {
     // prevent crash at access to deleted GO in Unit::m_gameobj
-    if(isReferenced()) 
+    if(isReferenced())
     {
         sLog.outError("Attempt delete GameObject (GUID: %u) that have references in Unit GO list.",GetGUIDLow());
         return;

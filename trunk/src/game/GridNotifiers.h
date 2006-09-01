@@ -170,7 +170,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    struct MANGOS_DLL_DECL GameObjectSearcher
+        struct MANGOS_DLL_DECL GameObjectSearcher
     {
         GameObject* &i_object;
         Check const& i_check;
@@ -183,7 +183,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    void GameObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+        void GameObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
     {
         // already found
         if(i_object) return;

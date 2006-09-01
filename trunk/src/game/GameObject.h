@@ -76,10 +76,16 @@ class MANGOS_DLL_SPEC GameObject : public Object
 
         bool IsTransport() const;
 
-        // GO links stored in Unit::m_gameObj 
+        // GO links stored in Unit::m_gameObj
         bool isReferenced() const { return m_refs !=0; }
-        void AddRef() { ++m_refs; }                         // for used in Unit::m_gameObj operations
-        void RemoveRef() { if(m_refs) --m_refs; }           // for used in Unit::m_gameObj operations
+        void AddRef()                                       // for used in Unit::m_gameObj operations
+        {
+            ++m_refs;
+        }
+        void RemoveRef()                                    // for used in Unit::m_gameObj operations
+        {
+            if(m_refs) --m_refs;
+        }
 
         void SaveToDB();
         bool LoadFromDB(uint32 guid);

@@ -33,7 +33,6 @@
 // magic *.map header
 const char MAP_MAGIC[] = "MAP_1.00";
 
-
 static GridState* si_GridStates[MAX_GRID_STATE];
 
 inline
@@ -818,7 +817,6 @@ float Map::IsUnderWater(float x, float y, float z)
     uint8 flag = GetTerrainType(x,y);
     return (z < (water_z-2)) && (flag & 0x01);
 }
-
 
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);

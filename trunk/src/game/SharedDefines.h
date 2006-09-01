@@ -708,7 +708,6 @@ enum SpellSchools
 #define TRAINER_TYPE_TRADESKILLS        2
 #define TRAINER_TYPE_PETS               3
 
-
 #define SHAPESHIFT_FORM_CAT             1
 #define SHAPESHIFT_FORM_TREE            2
 #define SHAPESHIFT_FORM_TRAVEL          3

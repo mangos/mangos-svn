@@ -401,7 +401,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 ((Player*)pVictim)->DurabilityLoss(0.05);
             }
         }
-        
+
         // TODO: Store auras by interrupt flag to speed this up.
         // TODO: Fix roots that should not break from its own damage.
         AuraMap& vAuras = pVictim->GetAuras();
@@ -436,7 +436,7 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castIte
         sLog.outError("WORLD: unknown spell id %i\n", spellId);
         return;
     }
-    
+
     if (castItem)
         DEBUG_LOG("WORLD: cast Item spellId - %i", spellId);
 
@@ -668,7 +668,7 @@ void Unit::CalDamageReduction(Unit *pVictim,uint32 School, const uint32 damage, 
                 pVictim->RemoveAurasDueToSpell((*i)->GetId());
                 next = vManaShield.begin();
             }
-            
+
             manaReduction = int32(currentAbsorb * manaMultiplier);
             pVictim->ApplyPowerMod(POWER_MANA, manaReduction, false);
 
@@ -815,7 +815,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
     MeleeDamageBonus(pVictim, damage);
     CalDamageReduction(pVictim, *damageType, *damage, absorbDamage, resistDamage);
-    
+
     if (*damage <= *absorbDamage + *resistDamage + *blocked_amount)
     {
         //*hitInfo = 0x00010020;
@@ -2742,7 +2742,7 @@ uint32 Unit::GetWeaponProcChance() const
 
 void Unit::Mount(uint32 mount, bool taxi)
 {
-    if(!mount) 
+    if(!mount)
         return;
 
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, mount);
