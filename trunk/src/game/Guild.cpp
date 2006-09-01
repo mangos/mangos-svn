@@ -110,7 +110,7 @@ void Guild::InviteMember(Player* pl)
         newmember->guid = (uint64)pl->GetGUID();
         newmember->RankId = (uint32)GR_INITIATE;
         newmember->OFFnote = (std::string)"";
-		newmember->Pnote = (std::string)"";
+	newmember->Pnote = (std::string)"";
         newmember->level = (uint8)pl->getLevel();
         newmember->Class = (uint8)pl->getClass();
         newmember->zoneId = (uint32)sAreaStore.LookupEntry(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()))->zone;
@@ -325,7 +325,7 @@ void Guild::SaveMemberToDB(MemberSlot *memslot)
 {
     if(!memslot) return;
     sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'",memslot->guid);
-	sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`) VALUES ('%u', '%u', '%u')", Id, memslot->guid, memslot->RankId);
+	sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')", Id, memslot->guid, memslot->RankId, memslot->Pnote.c_str(), memslot->OFFnote.c_str());
 }
 
 void Guild::DelGuildFromDB()
