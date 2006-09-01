@@ -217,41 +217,55 @@ void CliExit(char*,pPrintf zprintf)
 
 void CliInfo(char*,pPrintf zprintf)
 {
-    Field *fields;
-    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `character` WHERE `online` > 0");
+    QueryResult *resultDB = sDatabase.Query("SELECT `name`,`account` FROM `character` WHERE `online` > 0");
 
-    if (result)
+    if (!resultDB)
     {
-        fields = result->Fetch();
-        int cnt = fields[0].GetUInt32();
-        delete result;
-        if ( cnt > 0 )
-        {
-            zprintf("Online users: %d\x0d\x0a",cnt);
-            result = sDatabase.PQuery( "SELECT `character`.`name`,`character`.`account`,`realmd`.`account`.`gmlevel`,`realmd`.`account`.`username`,`realmd`.`account`.`last_ip` FROM `character` LEFT JOIN `realmd`.`account` ON `realmd`.`account`.`id` = `character`.`account` WHERE `character`.`online` > 0" );
-
-            zprintf("========================================================\x0d\x0a");
-            zprintf("|    Account    |   Character   |      IP       |  GM  |\x0d\x0a");
-            zprintf("========================================================\x0d\x0a");
-
-            do
-            {
-                fields = result->Fetch();
-                zprintf("|%15s|", fields[3].GetString());
-                zprintf("%15s|",fields[0].GetString());
-                zprintf("%15s|",fields[4].GetString());
-                zprintf("%6d|\x0d\x0a", fields[2].GetUInt32());
-            }while( result->NextRow() );
-
-            zprintf("========================================================\x0d\x0a");
-            delete result;
-        }
-        else
-            zprintf("NO online users\x0d\x0a");
-
+        zprintf("NO online users\x0d\x0a");
+        return;
     }
 
+    zprintf("Online users: %d\x0d\x0a",resultDB->GetRowCount());
+    zprintf("========================================================\x0d\x0a");
+    zprintf("|    Account    |   Character   |      IP       |  GM  |\x0d\x0a");
+    zprintf("========================================================\x0d\x0a");
+
+    int linesize = 1+15+1+15+1+15+1+6+3; // see format string
+    char* buf = new char[resultDB->GetRowCount()*linesize+1];
+    char* bufPos = buf;
+
+    do{
+
+        Field * fieldsDB = resultDB->Fetch();
+        std::string name = fieldsDB[0].GetCppString();
+        uint32 account = fieldsDB[1].GetUInt32();
+
+        QueryResult *resultLogin = loginDatabase.PQuery( 
+            "SELECT `username`,`last_ip`,`gmlevel` FROM `account` WHERE `id` = '%u'",account );
+
+        if(resultLogin)
+        {
+            Field *fieldsLogin = resultLogin->Fetch();
+            bufPos+=sprintf(bufPos,"|%15s|%15s|%15s|%6d|\x0d\x0a", 
+                fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsLogin[2].GetUInt32());
+
+            delete resultLogin;
+        }
+        else
+            bufPos += sprintf(bufPos,"|<Error>        |%15s|<Error>        |<Err> |\x0d\x0a",name.c_str());
+
+    }while(resultDB->NextRow());
+
+    *bufPos = '\0';
+
+    delete resultDB;
+
+    zprintf("%s",buf);
+    zprintf("========================================================\x0d\x0a");
+
+    delete[] buf;
 }
+
 
 void CliBanList(char*,pPrintf zprintf)
 {
