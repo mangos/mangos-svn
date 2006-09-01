@@ -1174,7 +1174,8 @@ void Aura::HandleModConfuse(bool apply)
     {
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        (*((Creature*)m_target))->MovementExpired();
+        if (m_target->GetTypeId() == TYPEID_UNIT)
+            (*((Creature*)m_target))->MovementExpired();
     }
 }
 
