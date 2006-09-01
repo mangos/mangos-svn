@@ -211,6 +211,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
     if(isInvisible())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+    pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_FEAR);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
