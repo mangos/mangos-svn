@@ -107,7 +107,6 @@ void MapManager::MoveAllCreaturesInMoveList()
         iter->second->MoveAllCreaturesInMoveList();
 }
 
-
 bool MapManager::ExistMAP(int mapid, float x,float y)
 {
     GridPair p = MaNGOS::ComputeGridPair(x,y);

@@ -34,13 +34,13 @@ class MANGOS_DLL_SPEC MovementGenerator
     public:
         enum MovementGeneratorType
         {
-            IDLE_MOTION_TYPE = 0,      // IdleMovementGenerator.h
-            RANDOM_MOTION_TYPE,        // RandomMovementGenerator.h
-            TARGETED_MOTION_TYPE,      // TargetedMovementGenerator.h
-            ANIMAL_RANDOM_MOTION_TYPE, // AnimalRandomMovementGenerator.h
-            CONFUSED_MOTION_TYPE,      // ConfusedMovementGenerator.h
-            TAXI_MOTION_TYPE,          // TaxiMovementGenerator.h
-            WAYPOINT_MOTION_TYPE,      // WaypointMovementGenerator.h
+            IDLE_MOTION_TYPE = 0,                           // IdleMovementGenerator.h
+            RANDOM_MOTION_TYPE,                             // RandomMovementGenerator.h
+            TARGETED_MOTION_TYPE,                           // TargetedMovementGenerator.h
+            ANIMAL_RANDOM_MOTION_TYPE,                      // AnimalRandomMovementGenerator.h
+            CONFUSED_MOTION_TYPE,                           // ConfusedMovementGenerator.h
+            TAXI_MOTION_TYPE,                               // TaxiMovementGenerator.h
+            WAYPOINT_MOTION_TYPE,                           // WaypointMovementGenerator.h
         };
 
         virtual ~MovementGenerator();

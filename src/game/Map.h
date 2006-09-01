@@ -77,7 +77,6 @@ struct CreatureMover
     Cell new_cell;
 };
 
-
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
     public:

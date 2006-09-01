@@ -123,7 +123,6 @@ bool Creature::isCanWalkOrFly() const
     return true;
 }
 
-
 void Creature::AIM_Update(const uint32 &diff)
 {
     switch( m_deathState )
@@ -354,7 +353,7 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
     if(m_tspells.empty())
     {
         sLog.outError("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
-        GetGUIDLow(),GetCreatureInfo()->Entry);
+            GetGUIDLow(),GetCreatureInfo()->Entry);
         return false;
     }
 

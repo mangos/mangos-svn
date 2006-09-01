@@ -208,7 +208,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 static void HandleShapeshiftBoosts(bool apply, Aura* aura);
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
-m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0),m_castItem(castItem), 
+m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0),m_castItem(castItem),
 m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
 m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
@@ -228,7 +228,7 @@ m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
     if(!caster)
     {
         m_caster_guid = target->GetGUID();
-        damage = spellproto->EffectBasePoints[eff]+1;       // stored value-1 
+        damage = spellproto->EffectBasePoints[eff]+1;       // stored value-1
     }
     else
     {
@@ -1177,7 +1177,7 @@ void Aura::HandleModFear(bool Apply)
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
         m_target->AttackStop();
- 
+
         Unit* caster = GetCaster();
         if(caster)
             caster->AttackStop();
@@ -2141,7 +2141,7 @@ void Aura::SendCoolDownEvent()
         WorldPacket data;
         data.Initialize(SMSG_COOLDOWN_EVENT);
         data << uint32(m_spellId) << m_caster_guid;
-        data << uint32(0);                                      //CoolDown Time ?
+        data << uint32(0);                                  //CoolDown Time ?
         caster->SendMessageToSet(&data,true);
     }
 }

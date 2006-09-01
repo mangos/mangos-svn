@@ -109,13 +109,12 @@ struct MANGOS_DLL_DECL Cell
     inline bool NoCreate(void) const { return data.Part.nocreate; }
     inline void SetNoCreate(void) { data.Part.nocreate = 1; }
 
-    CellPair cellPair() const 
-    { 
+    CellPair cellPair() const
+    {
         return CellPair(
             data.Part.grid_x*MAX_NUMBER_OF_CELLS+data.Part.cell_x,
             data.Part.grid_y*MAX_NUMBER_OF_CELLS+data.Part.cell_y);
     }
-
 
     Cell& operator=(const Cell &cell)
     {

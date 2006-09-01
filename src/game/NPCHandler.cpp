@@ -97,8 +97,8 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
     FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-    
-    if( my_faction.IsHostileTo(your_faction))             // do not talk with enemies
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
         return;
 
     if(!unit->isCanTrainingOf(_player,true))
@@ -200,8 +200,8 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
     FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-    
-    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
         return;
 
     std::list<TrainerSpell*>::iterator titr;
@@ -320,8 +320,8 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
     FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
     FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-    
-    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
         return;
 
     if(!Script->GossipHello( _player, unit ))
@@ -348,8 +348,8 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
     FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-    
-    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
         return;
 
     if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
@@ -483,8 +483,8 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
 
     FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
     FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-    
-    if( my_faction.IsHostileTo(your_faction))             // do not talk with ememies
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
         return;
 
     if (itemGUID)

@@ -45,7 +45,7 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
         else
             result = sDatabase.PQuery(
                 "SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` "
-                "FROM `gameobject`,`gameobject_template` WHERE `gameobject_template`.`entry` = `gameobject`.`id` AND `map` = %i AND `name` LIKE '%%%s%%' ORDER BY `order` ASC LIMIT 1", 
+                "FROM `gameobject`,`gameobject_template` WHERE `gameobject_template`.`entry` = `gameobject`.`id` AND `map` = %i AND `name` LIKE '%%%s%%' ORDER BY `order` ASC LIMIT 1",
                 m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),args);
     }
     else
@@ -136,7 +136,7 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     float z = fields[2].GetFloat();
     float ort = fields[3].GetFloat();
     int mapid = fields[4].GetUInt16();
-    
+
     delete result;
 
     if(!MapManager::ExistMAP(mapid,x,y))
@@ -148,7 +148,6 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     m_session->GetPlayer()->TeleportTo(mapid, x, y, z, ort);
     return true;
 }
-
 
 bool ChatHandler::HandleGUIDCommand(const char* args)
 {
@@ -410,7 +409,7 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
     uint32 lowguid = atoi((char*)args);
     if(!lowguid)
         return false;
-    
+
     GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
 
     if(!obj)

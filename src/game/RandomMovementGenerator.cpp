@@ -47,7 +47,7 @@ RandomMovementGenerator::Initialize(Creature &creature)
     {
         const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
         const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
-            
+
         i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
         i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
 
