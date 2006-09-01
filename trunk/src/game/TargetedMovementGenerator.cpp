@@ -87,6 +87,8 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
 {
     if(!&owner)
         return;
+    if(owner.hasUnitState(UNIT_STAT_FLEEING))
+        return;
     DEBUG_LOG("Target home location %u", owner.GetGUIDLow());
     float x, y, z;
     owner.GetRespawnCoord(x, y, z);

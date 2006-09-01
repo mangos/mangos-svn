@@ -332,25 +332,35 @@ void Aura::Update(uint32 diff)
             else
                 caster->SetPower(powertype,curpower-manaPerSecondPerLevel);
         }
-        if(caster && m_target->isAlive() && m_target->hasUnitState(UNIT_STAT_FLEEING))
+        if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS,(UNIT_STAT_FLEEING<<16)))
         {
             float x,y,z,angle,speed,pos_x,pos_y,pos_z;
-            uint32 time;
             m_target->CombatStop();
             angle = m_target->GetAngle( caster->GetPositionX(), caster->GetPositionY() );
-            speed = m_target->GetSpeed();
-            pos_x = m_target->GetPositionX()+speed*diff* cos(-angle)/1000;
-            pos_y = m_target->GetPositionY()+speed*diff* sin(-angle)/1000;
+            // If the m_target is player,and if the speed is too slow,change it :P 
+            if(m_target->GetTypeId() != TYPEID_PLAYER)
+                speed = m_target->GetSpeed(MOVE_RUN);
+            else speed = m_target->GetSpeed();
+            pos_x = m_target->GetPositionX();
+            pos_y = m_target->GetPositionY();
             uint32 mapid = m_target->GetMapId();
             pos_z = MapManager::Instance().GetMap(mapid)->GetHeight(pos_x,pos_y);
-            m_target->Relocate(pos_x,pos_y,pos_z,-angle);
-
-            x = m_target->GetPositionX() + speed*m_duration * cos(-angle)/1000;
-            y = m_target->GetPositionY() + speed*m_duration * sin(-angle)/1000;
-            mapid = m_target->GetMapId();
-            z = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
-            time = uint32(::sqrt(x*x+y*y+z*z)/speed);
-            m_target->SendMonsterMove(x,y,z,false,true,time);
+            // Control the max Distance; 30 for temp.
+            if(m_target->GetDistanceSq(caster) <= 30*30)
+            {
+                x = m_target->GetPositionX() + speed*diff * sin(angle)/1000;
+                y = m_target->GetPositionY() + speed*diff * cos(angle)/1000;
+                mapid = m_target->GetMapId();
+                z = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
+                // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
+                // fixed me if it needs checking when the position will be in water?
+                if(z<=pos_z+1.3 && z>=pos_z-1.3)
+                {
+                    m_target->SendMonsterMove(x,y,z,false,true,diff);
+                    if(m_target->GetTypeId() != TYPEID_PLAYER)
+                        m_target->Relocate(x,y,z,m_target->GetOrientation());
+                }
+            }
         }
     }
 
@@ -1184,15 +1194,17 @@ void Aura::HandleModFear(bool Apply)
 
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
-        data<<m_target->GetGUIDLow();
+        data<<m_target->GetGUID();
         data<<uint8(0);
     }
     else
     {
-        data<<m_target->GetGUIDLow();
+        data<<m_target->GetGUID();
         data<<uint8(1);
         m_target->clearUnitState(UNIT_STAT_FLEEING);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        if(m_target->GetTypeId() != TYPEID_PLAYER)
+            (*((Creature*)m_target))->Initialize((Creature*)m_target);
     }
     m_target->SendMessageToSet(&data,true);
 }

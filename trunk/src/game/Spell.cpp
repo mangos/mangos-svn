@@ -1551,7 +1551,7 @@ uint8 Spell::CanCast()
                     if((*itr)->GetTypeId() != TYPEID_PLAYER)
                     {
                         float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster);
-                        if((*itr)->GetDistanceSq(m_caster) < attackdis*attackdis )
+                        if((*itr)->GetDistanceSq(m_caster) < attackdis )
                         {
                             castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
                             break;
