@@ -2182,7 +2182,15 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
 
 void Player::BuildPlayerRepop()
 {
+    // place corpse instead player body
+    Corpse* corpse = GetCorpse();
+    if(!corpse)
+        corpse = CreateCorpse();
 
+    // now show corpse for all
+    MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
+
+    // convert player body to ghost
     WorldPacket data;
 
     SetHealth( 1 );
@@ -2249,7 +2257,6 @@ void Player::BuildPlayerRepop()
         SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);        //10045 correct wisp model
 
     SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
-
 }
 
 void Player::SendDelayResponse(const uint32 ml_seconds)
@@ -2308,11 +2315,11 @@ void Player::KillPlayer()
     // 6 minutes until repop at graveyard
     m_deathTimer = 360000;
 
-    // create the body
+    // dead player body showed at this moment, corpse wiil be show at Player ghost repop
     CreateCorpse();
 }
 
-void Player::CreateCorpse()
+Corpse* Player::CreateCorpse()
 {
     // prevent existance 2 corpse for player
     SpawnCorpseBones();
@@ -2324,7 +2331,7 @@ void Player::CreateCorpse()
         GetPositionY(), GetPositionZ(), GetOrientation()))
     {
         delete corpse;
-        return;
+        return NULL;
     }
 
     _uf = GetUInt32Value(UNIT_FIELD_BYTES_0);
@@ -2363,9 +2370,9 @@ void Player::CreateCorpse()
 
     corpse->SaveToDB();
 
-    MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
-
+    // register for player, but not show
     corpse->AddToWorld();
+    return corpse;
 }
 
 void Player::SpawnCorpseBones()
