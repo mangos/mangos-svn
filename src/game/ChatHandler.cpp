@@ -243,7 +243,6 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         }
 
         WPAssert(data.size() == 20 + namlen);
-        SendPacket( &data );
         GetPlayer()->SendMessageToSet( &data, true );
     }
 }
