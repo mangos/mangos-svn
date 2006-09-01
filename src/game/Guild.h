@@ -136,7 +136,7 @@ class Guild
         void DelMember(uint64 guid);
         void InviteMember(Player* pl);
 
-        void SetMOTD(std::string motd) { MOTD = motd; }
+        void SetMOTD(std::string motd) { MOTD = motd; SaveGuildToDB();}
         void SetGINFO(std::string ginfo){ GINFO = ginfo; }
         void SetPNOTE(uint64 guid,std::string pnote);
         void SetOFFNOTE(uint64 guid,std::string offnote);

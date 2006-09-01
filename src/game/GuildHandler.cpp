@@ -165,20 +165,12 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
     Guild *guild;
-    MemberSlot *memslot;
-
+    
     sLog.outDebug( "WORLD: Received CMSG_GUILD_ACCEPT"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildIdInvited());
     if(!guild || GetPlayer()->GetGuildId()) return;
-
-    memslot = new MemberSlot;
-    memslot->guid = (uint64)GetPlayer()->GetGUID();
-    memslot->RankId = GR_INITIATE;
-    memslot->Pnote = "";
-    memslot->OFFnote = "";
-    guild->AddMember(memslot);
-
+	guild->InviteMember(GetPlayer());
     GetPlayer()->SetInGuild(GetPlayer()->GetGuildIdInvited());
     GetPlayer()->SetRank( GR_INITIATE );
     GetPlayer()->SetGuildIdInvited(0);
