@@ -100,6 +100,8 @@ Player::Player (WorldSession *session): Unit()
 
     pTrader = NULL;
 
+    ClearTrade();
+
     m_cinematic = 0;
 
     PlayerTalkClass = new PlayerMenu( GetSession() );
@@ -5617,7 +5619,8 @@ Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
         return m_items[slot];
-    else
+    else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END 
+        || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END ) 
     {
         Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
         if ( pBag )
@@ -7300,6 +7303,16 @@ void Player::SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 
     data << msg;
     GetSession()->SendPacket(&data);
 }
+
+void Player::ClearTrade()
+{
+    tradeGold = 0;
+    acceptTrade = false;
+    for(int i=0; i<7; i++)
+        tradeItems[i] = NULL_SLOT;
+}
+
+
 
 void Player::UpdateEnchantTime(uint32 time)
 {
