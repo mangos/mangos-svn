@@ -204,6 +204,21 @@ bool Bag::IsEmpty() const
     return true;
 }
 
+uint32 Bag::GetItemCount( uint32 item ) const
+{
+    uint32 ContainerSlots=GetProto()->ContainerSlots;
+
+    Item *pItem;
+    uint32 count = 0;
+    for(uint32 i=0; i < ContainerSlots; i++)
+    {
+        pItem = m_bagslot[i];
+        if( pItem && pItem->GetEntry() == item )
+            count += pItem->GetCount();
+    }
+    return count;
+}
+
 uint8 Bag::GetSlotByItemGUID(uint64 guid) const
 {
     uint32 ContainerSlots=GetProto()->ContainerSlots;

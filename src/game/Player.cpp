@@ -5514,20 +5514,11 @@ uint32 Player::GetItemCount( uint32 item ) const
             count += pItem->GetCount();
     }
     Bag *pBag;
-    ItemPrototype const *pBagProto;
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
         pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pBag )
-        {
-            pBagProto = pBag->GetProto();
-            if( pBagProto )
-            {
-                pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-                if( pItem && pItem->GetEntry() == item )
-                    count += pItem->GetCount();
-            }
-        }
+            count += pBag->GetItemCount(item);
     }
     return count;
 }
