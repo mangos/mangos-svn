@@ -294,7 +294,8 @@ void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
 void Guild::SaveGuildToDB()
 {
     sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
-    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`MOTD`,`createdate`) VALUES('%u','%s','%u', '%u', '%u', '%u', '%u', '%u', '%s', NOW())", Id, name.c_str(), leaderGuid, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, MOTD.c_str());
+    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`MOTD`,`createdate`) VALUES('%u','%s','%u', '%s', NOW())", Id, name.c_str(), leaderGuid, MOTD.c_str());
+	sDatabase.PExecute("UPDATE `guild` SET EmblemStyle=%u, EmblemColor=%u, BorderStyle=%u, BorderColor=%u, BackgroundColor=%u WHERE guildid = %u", EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, Id);
     SaveRanksToDB();
     SaveGuildMembersToDB();
 }
@@ -554,13 +555,27 @@ void Guild::Query(WorldSession *session)
     std::list<RankInfo*>::iterator itr;
     for (itr = ranks.begin(); itr != ranks.end();itr++)
     data << (*itr)->name;
-    data << EmblemStyle;
-    data << EmblemColor;
-    data << BorderStyle;
-    data << BorderColor;
-    data << BackgroundColor;
+
+	data << (uint32)0;
+    data << (EmblemStyle << 8);
+    data << (EmblemColor << 8);
+    data << (BorderStyle << 8);
+    data << (BorderColor << 8);
+    data << (BackgroundColor << 8);
+	data << (uint32)0;
 
     session->SendPacket( &data );
 
     sLog.outDebug( "WORLD: Sent (SMSG_GUILD_QUERY_RESPONSE)" );
+}
+
+void Guild::SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor)
+{
+	this->EmblemStyle = emblemStyle;
+	this->EmblemColor = emblemColor;
+	this->BorderStyle = borderStyle;
+	this->BorderColor = borderColor;
+	this->BackgroundColor = backgroundColor;
+
+    sDatabase.PExecute("UPDATE `guild` SET EmblemStyle=%u, EmblemColor=%u, BorderStyle=%u, BorderColor=%u, BackgroundColor=%u WHERE guildid = %u", EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, Id);
 }
