@@ -551,9 +551,31 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
         return true;
     }
 
-    // changed 'creatureId' to lowercase
-    // changed 'X', 'y', 'Z' to 'positionx', 'positiony', 'positionz'
-    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%f', '%f', '%f')", pCreature->GetGUIDLow(), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
+    int wait;
+    if(*args)
+        wait = atoi(args);
+    else
+        wait = 0;
+
+    if(wait < 0)
+        wait = 0;
+
+    uint32 point;
+
+    QueryResult *result = sDatabase.PQuery( "SELECT MAX(`point`) FROM `creature_movement` WHERE `id` = '%u'",pCreature->GetGUIDLow());
+    if( result )
+    {
+        point = (*result)[0].GetUInt32()+1;
+
+        delete result;
+    }
+    else
+        point = 0;
+
+    Player* player = m_session->GetPlayer();
+
+    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`waittime`) VALUES ('%u','%u','%f', '%f', '%f','%u')", 
+        pCreature->GetGUIDLow(), point, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), wait);
 
     SendSysMessage(LANG_WAYPOINT_ADDED);
 
