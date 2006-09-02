@@ -95,6 +95,10 @@ Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
 
+# Creature Damage Rate.
+# Examples: 2 - creatures will damage 2x, 1.7 - 1.7x.
+Rate.Creature.Damage = 1
+
 # Default remote console port
 Ra.Port = 3443
 
@@ -126,4 +130,3 @@ PlayerSaveInterval = 900000
 
 # Default WorldServerPort
 WorldServerPort = 8085
-

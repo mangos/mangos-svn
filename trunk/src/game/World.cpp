@@ -202,6 +202,7 @@ void World::SetInitialWorldSettings()
     regen_values[RATE_XP_KILL]     = sConfig.GetFloatDefault("Rate.XP.Kill", 1);
     regen_values[RATE_XP_QUEST]    = sConfig.GetFloatDefault("Rate.XP.Quest", 1);
     regen_values[RATE_XP_EXPLORE]  = sConfig.GetFloatDefault("Rate.XP.Explore", 1);
+    regen_values[RATE_CREATURE_DAMAGE] = sConfig.GetFloatDefault("Rate.Creature.Damage", 1);
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
     m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);
