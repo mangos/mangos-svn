@@ -687,3 +687,43 @@ void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
     guild->SetGINFO(GINFO);
 
 }
+
+void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
+{
+    sLog.outDebug( "WORLD: Received MSG_SAVE_GUILD_EMBLEM"  );
+
+	uint32 stuff0;
+	uint32 stuff1;
+
+	uint32 EmblemStyle;
+    uint32 EmblemColor;
+    uint32 BorderStyle;
+    uint32 BorderColor;
+    uint32 BackgroundColor;
+
+	recvPacket >> stuff0;
+	recvPacket >> stuff1;
+
+	recvPacket >> EmblemStyle;
+	recvPacket >> EmblemColor;
+	recvPacket >> BorderStyle;
+	recvPacket >> BorderColor;
+	recvPacket >> BackgroundColor;
+
+    Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
+    if(!guild)
+    {
+        SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
+        return;
+    }
+
+	if (guild->GetLeader() != GetPlayer()->GetGUID())
+	{
+		SendCommandResult(GUILD_CREATE_S,"",GUILD_PERMISSIONS);
+        return;
+	}
+
+	guild->SetEmblem(EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
+
+	guild->Query(this);
+}
