@@ -744,7 +744,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
         case MELEE_HIT_PARRY:
             *damage = 0;
-            *victimState = 3;
+            *victimState = VICTIMSTATE_PARRY;
 
             // instant (maybe with small delay) counter attack
             {
@@ -767,17 +767,17 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 ((Player*)pVictim)->UpdateDefense();
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-            break;
+            return;
 
         case MELEE_HIT_DODGE:
             *damage = 0;
-            *victimState = 2;
+            *victimState = VICTIMSTATE_DODGE;
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-            break;
+            return;
 
         case MELEE_HIT_BLOCK:
             *blocked_amount = uint32(pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
@@ -787,7 +787,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             else
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
-            *victimState = 5;
+            *victimState = VICTIMSTATE_BLOCKS;
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
