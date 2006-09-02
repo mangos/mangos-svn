@@ -196,6 +196,9 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // unsommon pet, it will be lost anyway
+    GetPlayer( )->UnsummonPet();
+
     //CHECK DONE, DO FLIGHT
 
     GetPlayer( )->SaveToDB();                               //For temporary avoid save player on air

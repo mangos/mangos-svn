@@ -953,6 +953,17 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 {
     CombatStop();
 
+    // remove selection
+    if(GetSelection())
+    {
+        Unit* unit = ObjectAccessor::Instance().GetUnit(*this, GetSelection());
+        if(unit)
+            SendOutOfRange(unit);
+    }
+
+    // unsommon pet if lost
+    Creature* pet = GetPet();
+
     if(this->GetMapId() == mapid)
     {
         // near teleport
@@ -986,6 +997,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // Resend spell list to client after far teleport.
         SendInitialSpells();
     }
+
+    // unsommon pet if lost
+    if(!pet||GetMapId()!=pet->GetMapId()||GetDistanceSq(pet) > OWNER_MAX_DISTANCE*OWNER_MAX_DISTANCE )
+        UnsummonPet(pet);
 }
 
 void Player::AddToWorld()
@@ -9087,12 +9102,6 @@ void Player::SaveToDB()
     _SaveReputation();
     SavePet();
 
-    Creature *OldSummon = GetPet();
-    if(OldSummon && OldSummon->isPet())
-    {
-        ((Pet*)OldSummon)->SavePetToDB();
-    }
-
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
 
@@ -9230,7 +9239,7 @@ void Player::_SaveTutorials()
 void Player::SavePet()
 {
     Creature* pet = GetPet();
-    if(pet)
+    if(pet && pet->isPet())
         pet->SaveToDB();
 }
 
@@ -9356,26 +9365,30 @@ void Player::UpdatePVPFlag(time_t currTime)
     }
 }
 
-void Player::UnsummonPet()
+void Player::UnsummonPet(Creature* pet)
 {
-    Creature* pet = GetPet();
-    if(!pet) return;
+    if(!pet)
+        pet = GetPet();
 
-    SavePet();
+    if(!pet||pet->GetGUID()!=GetPetGUID()) return;
+
     SetPet(0);
 
     pet->CombatStop();
+
+    if(pet->isPet())
+        pet->SaveToDB();
 
     WorldPacket data;
     data.Initialize(SMSG_DESTROY_OBJECT);
     data << pet->GetGUID();
     SendMessageToSet (&data, true);
 
-    ObjectAccessor::Instance().AddObjectToRemoveList(pet);
-
     data.Initialize(SMSG_PET_SPELLS);
     data << uint64(0);
     GetSession()->SendPacket(&data);
+
+    ObjectAccessor::Instance().AddObjectToRemoveList(pet);
 }
 
 void Player::Uncharm()

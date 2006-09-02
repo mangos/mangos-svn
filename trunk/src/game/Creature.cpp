@@ -35,6 +35,7 @@
 #include "FactionTemplateResolver.h"
 #include "CreatureAI.h"
 #include "CreatureAISelector.h"
+#include "Pet.h"
 
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
@@ -172,6 +173,16 @@ void Creature::AIM_Update(const uint32 &diff)
         }
         case ALIVE:
         {
+            if(isPet())
+            {
+                // unsummon pet that lost owner
+                Unit* owner = ((Pet*)this)->GetOwner();
+                if(!owner||GetMapId()!=owner->GetMapId()||GetDistanceSq(owner) > OWNER_MAX_DISTANCE*OWNER_MAX_DISTANCE)
+                {
+                    ((Pet*)this)->Unsummon();
+                    return;
+                }
+            }
             Unit::Update( diff );
             i_motionMaster.UpdateMotion(diff);
             i_AI->UpdateAI(diff);

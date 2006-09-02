@@ -219,7 +219,7 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
         return;
 
     Guard guard(i_removeGuard);
-    sLog.outDebug("Object remover 1 check.");
+    //sLog.outDebug("Object remover 1 check.");
     while(!i_objectsToRemove.empty())
     {
         Object* obj = *i_objectsToRemove.begin();
@@ -243,7 +243,7 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
                 break;
         }
     }
-    sLog.outDebug("Object remover 2 check.");
+    //sLog.outDebug("Object remover 2 check.");
 }
 
 void

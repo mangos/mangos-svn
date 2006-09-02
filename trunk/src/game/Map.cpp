@@ -548,7 +548,7 @@ void Map::MoveAllCreaturesInMoveList()
     if(i_creaturesToMove.empty())
         return;
 
-    sLog.outDebug("Creature mover 1 check.");
+    //sLog.outDebug("Creature mover 1 check.");
     while(!i_creaturesToMove.empty())
     {
         CreatureMover cm = i_creaturesToMove.front();
@@ -582,7 +582,7 @@ void Map::MoveAllCreaturesInMoveList()
             CreatureRelocationNotifying(cm.creature,cm.new_cell,cm.new_cell.cellPair());
         }
     }
-    sLog.outDebug("Creature mover 2 check.");
+    //sLog.outDebug("Creature mover 2 check.");
 }
 
 bool Map::UnloadGrid(const uint32 &x, const uint32 &y)

@@ -419,7 +419,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             }
         };
 
-        void UnsummonPet();
+        void UnsummonPet(Creature* pet = NULL);
         void Uncharm();
 
         float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }

@@ -35,6 +35,8 @@ enum PetState
     STATE_RA_AUTOSPELL      = STATE_RA_SPELL1 | STATE_RA_SPELL2 | STATE_RA_SPELL3 | STATE_RA_SPELL4
 };
 
+#define OWNER_MAX_DISTANCE 100
+
 class Pet : public Creature
 {
     public:
@@ -51,9 +53,12 @@ class Pet : public Creature
         std::string GetName() { return m_name; }
         void SetName(std::string newname) { m_name=newname; }
         Unit *GetOwner();
-        void SavePetToDB();
         bool LoadPetFromDB( Unit* owner );
-        void DeletePetFromDB();
+        void SaveToDB();                                    // overwrited of Creature::SaveToDB
+        void DeleteFromDB();                                // overwrited of Creature::DeleteFromDB
+        void Unsummon();
+
+        void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
 
     protected:
         std::string m_name;
