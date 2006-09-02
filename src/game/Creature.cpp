@@ -350,6 +350,9 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 
 bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
 {
+    if(!isTrainer())
+        return false;
+
     if(m_tspells.empty())
     {
         sLog.outError("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
