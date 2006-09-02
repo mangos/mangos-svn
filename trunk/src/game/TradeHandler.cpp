@@ -39,14 +39,6 @@ void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
     recvPacket.print_storage();
 }
 
-void WorldSession::ClearTrade()
-{
-    _player->tradeGold = 0;
-    _player->acceptTrade = false;
-    for(int i=0; i<7; i++)
-        _player->tradeItems[i] = -1;
-}
-
 void WorldSession::UpdateTrade()
 {
     WorldPacket data;
@@ -63,7 +55,7 @@ void WorldSession::UpdateTrade()
     data << (uint32) 0;
     for(int i=0; i<7; i++)
     {
-        item = (pThis->tradeItems[i] >= 0 ? pThis->GetItemByPos( INVENTORY_SLOT_BAG_0,(uint8) pThis->tradeItems[i] ) : NULL);
+        item = (pThis->tradeItems[i] != NULL_SLOT ? pThis->GetItemByPos( pThis->tradeItems[i] ) : NULL);
 
         data << (uint8) i;
         if(item)
@@ -93,7 +85,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
         Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
         bool myCanStoreItem=false,hisCanStoreItem=false,myCanCompleteTrade=true,hisCanCompleteTrade=true;
-        int i,k;
+        int i;
         uint16 dst;
         if ( !GetPlayer()->pTrader ) return;
         _player->acceptTrade = true;
@@ -104,30 +96,26 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             _player->pTrader->GetSession()->SendPacket(&data);
             for(i=0; i<6; i++)
             {
-                sLog.outDebug("player trade item: %u",_player->tradeItems[i]);
-                if(_player->tradeItems[i] >= 0 )
+                if(_player->tradeItems[i] != NULL_SLOT )
                 {
-                    myItems[i]=_player->GetItemByPos( INVENTORY_SLOT_BAG_0,(uint8) _player->tradeItems[i] );
+                    sLog.outDebug("player trade item bag: %u slot: %u",_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255 );
+                    myItems[i]=_player->GetItemByPos( _player->tradeItems[i] );
                 }
-                sLog.outDebug("partner trade item: %u",_player->pTrader->tradeItems[i]);
-                if(_player->pTrader->tradeItems[i] >= 0)
+                if(_player->pTrader->tradeItems[i] != NULL_SLOT)
                 {
-                    hisItems[i]=_player->pTrader->GetItemByPos( INVENTORY_SLOT_BAG_0,(uint8) _player->pTrader->tradeItems[i]);
+                    sLog.outDebug("partner trade item bag: %u slot: %u",_player->pTrader->tradeItems[i] >> 8,_player->pTrader->tradeItems[i] & 255);
+                    hisItems[i]=_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]);
                 }
             }
             for(i=0; i<6; i++)
             {
                 if(myItems[i])
                 {
-                    for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++)
+                    myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
+                    if(_player->pTrader->CanStoreItem( 0, NULL_SLOT, dst, myItems[i], false )== EQUIP_ERR_OK)
                     {
-                        myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
-                        if(_player->pTrader->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, myItems[i], false )== EQUIP_ERR_OK)
-                        {
-                            hisCanStoreItem = true;
-                            sLog.outDebug("partner can accept item: %u",myItems[i]);
-                            break;
-                        }
+                        hisCanStoreItem = true;
+                        sLog.outDebug("partner can accept item: %u",myItems[i]->GetGUIDLow());
                     }
                 }
                 else
@@ -137,15 +125,11 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 sLog.outDebug("hisCanStoreItem: %u",hisCanStoreItem);
                 if(hisItems[i])
                 {
-                    for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++)
+                    hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
+                    if(_player->CanStoreItem( 0, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
                     {
-                        hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
-                        if(_player->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, hisItems[i], false ) == EQUIP_ERR_OK)
-                        {
-                            myCanStoreItem = true;
-                            sLog.outDebug("you can accept item: %u",hisItems[i]);
-                            break;
-                        }
+                        myCanStoreItem = true;
+                        sLog.outDebug("you can accept item %u ",hisItems[i]->GetGUIDLow());
                     }
                 }
                 else
@@ -184,38 +168,31 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             {
                 if(myItems[i])
                 {
-                    for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++)
+                    myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
+                    if(_player->pTrader->CanStoreItem( 0, NULL_SLOT, dst, myItems[i], false ) == EQUIP_ERR_OK)
                     {
-                        myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
-                        if(_player->pTrader->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, myItems[i], false ) == EQUIP_ERR_OK)
-                        {
-                            sLog.outDebug("partner storing: %u",myItems[i]);
-                            _player->RemoveItem(INVENTORY_SLOT_BAG_0, (uint8)_player->tradeItems[i], true);
-                            _player->pTrader->StoreItem( dst, myItems[i], true);
-                            break;
-                        }
+                        sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
+                        _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
+                        _player->pTrader->StoreItem( dst, myItems[i], true);
                     }
                 }
                 if(hisItems[i])
                 {
-                    for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++)
+                    hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
+                    if(_player->CanStoreItem( 0, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
                     {
-                        hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
-                        if(_player->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, hisItems[i], false ) == EQUIP_ERR_OK)
-                        {
-                            sLog.outDebug("player storing: %u",hisItems[i]);
-                            _player->pTrader->RemoveItem(INVENTORY_SLOT_BAG_0, (uint8)_player->pTrader->tradeItems[i], true);
-                            _player->StoreItem( dst, hisItems[i], true);
-                            break;
-                        }
+                        sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
+                        _player->pTrader->RemoveItem(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);
+                        _player->StoreItem( dst, hisItems[i], true);
                     }
                 }
             }
-            _player->ModifyMoney( -((int)_player->tradeGold) );
+            _player->ModifyMoney( -((int32)_player->tradeGold) );
             _player->ModifyMoney(_player->pTrader->tradeGold );
-            _player->pTrader->ModifyMoney( -((int)_player->pTrader->tradeGold) );
+            _player->pTrader->ModifyMoney( -((int32)_player->pTrader->tradeGold) );
             _player->pTrader->ModifyMoney(_player->tradeGold );
-            ClearTrade();
+            _player->ClearTrade();
+            _player->pTrader->ClearTrade();
             data.Initialize(SMSG_TRADE_STATUS);
             data << (uint32)8;
             _player->pTrader->GetSession()->SendPacket(&data);
@@ -252,12 +229,12 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
     data.Initialize(SMSG_TRADE_STATUS);
     data << (uint32)2;
     _player->pTrader->GetSession()->SendPacket(&data);
-    _player->pTrader->GetSession()->ClearTrade();
+    _player->pTrader->ClearTrade();
 
     data.Initialize(SMSG_TRADE_STATUS);
     data << (uint32)2;
     SendPacket(&data);
-    ClearTrade();
+    _player->ClearTrade();
 }
 
 void WorldSession::SendCancelTrade()
@@ -278,7 +255,7 @@ void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
         _player->pTrader->GetSession()->SendCancelTrade();
         _player->pTrader = NULL;
     }
-    ClearTrade();
+    _player->ClearTrade();
 }
 
 void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
@@ -379,14 +356,14 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 {
     uint8 tradeSlot;
-    uint8 trash;
-    uint8 bagSlot;
+    uint8 bag;
+    uint8 slot;
 
     recvPacket >> tradeSlot;
-    recvPacket >> trash;
-    recvPacket >> bagSlot;
+    recvPacket >> bag;
+    recvPacket >> slot;
 
-    _player->tradeItems[tradeSlot] = (int) bagSlot;
+    _player->tradeItems[tradeSlot] = (bag << 8) | slot;
 
     UpdateTrade();
 }
@@ -396,7 +373,7 @@ void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
     uint8 slot;
     recvPacket >> slot;
 
-    _player->tradeItems[slot] = -1;
+    _player->tradeItems[slot] = NULL_SLOT;
 
     UpdateTrade();
 }

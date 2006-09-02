@@ -243,7 +243,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
         void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
 
-        void ClearTrade();
         void UpdateTrade();
         void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
         void HandleBeginTradeOpcode(WorldPacket& recvPacket);
