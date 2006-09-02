@@ -179,8 +179,8 @@ struct QuestInfo
     uint32 RewItemCount[ QUEST_REWARDS_COUNT ];
     uint32 RewRepFaction1;
     uint32 RewRepFaction2;
-    uint32 RewRepValue1;
-    uint32 RewRepValue2;
+    int32  RewRepValue1;
+    int32  RewRepValue2;
     int32  RewOrReqMoney;
     uint32 RewXP;
     uint32 RewSpell;

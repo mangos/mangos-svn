@@ -3167,6 +3167,13 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
             RepPoints = (uint32)(((5-dif)*0.20)*100);
         SetStanding(pCreature->getFaction(), (RepPoints > 0 ? RepPoints : 1) );
     }
+
+    // special quest repuration reward/losts
+    if(pQuest->GetQuestInfo()->RewRepFaction1 && pQuest->GetQuestInfo()->RewRepValue1 )
+        SetStanding(pQuest->GetQuestInfo()->RewRepFaction1, pQuest->GetQuestInfo()->RewRepValue1 );
+
+    if(pQuest->GetQuestInfo()->RewRepFaction2 && pQuest->GetQuestInfo()->RewRepValue2 )
+        SetStanding(pQuest->GetQuestInfo()->RewRepFaction2, pQuest->GetQuestInfo()->RewRepValue2 );
 }
 
 //Update honor fields
@@ -6728,6 +6735,9 @@ void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
             {
                 remcount += pItem->GetCount();
                 RemoveItem( INVENTORY_SLOT_BAG_0, i, update );
+
+                if(remcount >=count)
+                    return;
             }
             else
             {
@@ -6757,6 +6767,9 @@ void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
                         {
                             remcount += pItem->GetCount();
                             RemoveItem( i, j, update );
+
+                            if(remcount >=count)
+                                return;
                         }
                         else
                         {
@@ -6869,6 +6882,9 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             {
                 remcount += pItem->GetCount();
                 DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+
+                if(remcount >=count)
+                    return;
             }
             else
             {
@@ -6900,6 +6916,9 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                         {
                             remcount += pItem->GetCount();
                             DestroyItem( i, j, update );
+
+                            if(remcount >=count)
+                                return;
                         }
                         else
                         {
