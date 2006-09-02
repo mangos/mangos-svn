@@ -85,6 +85,8 @@ bool Pet::LoadPetFromDB( Unit* owner )
     name.append("'s Pet");
     SetName( name );
 
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
+
     CreatureInfo const *cinfo = GetCreatureInfo();
     if(cinfo->type == CREATURE_TYPE_CRITTER)
     {
@@ -129,7 +131,6 @@ bool Pet::LoadPetFromDB( Unit* owner )
 
     SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
     SetPower(   POWER_MANA, 28 + 10 * petlevel);
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
     SetUInt32Value(UNIT_FIELD_FLAGS,0);
     SetUInt32Value(UNIT_FIELD_BYTES_1,0);
     SetUInt32Value(UNIT_FIELD_BYTES_2,1);
