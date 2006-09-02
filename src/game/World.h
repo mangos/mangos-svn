@@ -73,6 +73,7 @@ enum Rates
     RATE_XP_KILL,
     RATE_XP_QUEST,
     RATE_XP_EXPLORE,
+    RATE_CREATURE_DAMAGE,
     MAX_RATES
 };
 
