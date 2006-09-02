@@ -69,9 +69,9 @@ Object::~Object( )
 
     if(m_uint32Values)
     {
-        DEBUG_LOG("Object desctr 1 check (%p)",(void*)this);
+        //DEBUG_LOG("Object desctr 1 check (%p)",(void*)this);
         delete [] m_uint32Values;
-        DEBUG_LOG("Object desctr 2 check (%p)",(void*)this);
+        //DEBUG_LOG("Object desctr 2 check (%p)",(void*)this);
     }
 }
 

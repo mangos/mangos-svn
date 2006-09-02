@@ -66,14 +66,20 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 case 0x0000:                                //flat=1792  //STAY
                     pet->StopMoving();
                     (*pet)->Idle();
-                    ((Pet*)pet)->AddActState( STATE_RA_STAY );
-                    ((Pet*)pet)->ClearActState( STATE_RA_FOLLOW );
+                    if(pet->isPet())
+                    {
+                        ((Pet*)pet)->AddActState( STATE_RA_STAY );
+                        ((Pet*)pet)->ClearActState( STATE_RA_FOLLOW );
+                    }
                     break;
                 case 0x0001:                                //spellid=1792  //FOLLOW
                     pet->addUnitState(UNIT_STAT_FOLLOW);
                     (*pet)->Mutate(new TargetedMovementGenerator(*_player));
-                    ((Pet*)pet)->AddActState( STATE_RA_FOLLOW );
-                    ((Pet*)pet)->ClearActState( STATE_RA_STAY );
+                    if(pet->isPet())
+                    {
+                        ((Pet*)pet)->AddActState( STATE_RA_FOLLOW );
+                        ((Pet*)pet)->ClearActState( STATE_RA_STAY );
+                    }
                     break;
                 case 0x0002:                                //spellid=1792  //ATTACK
                 {
@@ -96,7 +102,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
                 }
                 case 3:
-                    _player->UnsummonPet();
+                    _player->UnsummonPet(pet);
                     break;
                 default:
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.\n", flag, spellid);
@@ -106,16 +112,25 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             switch(spellid)
             {
                 case 0:                                     //passive
-                    ((Pet*)pet)->AddActState( STATE_RA_PASSIVE );
-                    ((Pet*)pet)->ClearActState( STATE_RA_PROACTIVE | STATE_RA_PROACTIVE );
+                    if(pet->isPet())
+                    {
+                        ((Pet*)pet)->AddActState( STATE_RA_PASSIVE );
+                        ((Pet*)pet)->ClearActState( STATE_RA_PROACTIVE | STATE_RA_PROACTIVE );
+                    }
                     break;
                 case 1:                                     //recovery
-                    ((Pet*)pet)->AddActState( STATE_RA_REACTIVE );
-                    ((Pet*)pet)->ClearActState( STATE_RA_PASSIVE | STATE_RA_PROACTIVE );
+                    if(pet->isPet())
+                    {
+                        ((Pet*)pet)->AddActState( STATE_RA_REACTIVE );
+                        ((Pet*)pet)->ClearActState( STATE_RA_PASSIVE | STATE_RA_PROACTIVE );
+                    }
                     break;
                 case 2:                                     //activete
-                    ((Pet*)pet)->AddActState( STATE_RA_PROACTIVE );
-                    ((Pet*)pet)->ClearActState( STATE_RA_PASSIVE | STATE_RA_REACTIVE );
+                    if(pet->isPet())
+                    {
+                        ((Pet*)pet)->AddActState( STATE_RA_PROACTIVE );
+                        ((Pet*)pet)->ClearActState( STATE_RA_PASSIVE | STATE_RA_REACTIVE );
+                    }
                     break;
             }
             break;

@@ -659,7 +659,7 @@ void Unit::CalDamageReduction(Unit *pVictim,uint32 School, const uint32 damage, 
                 currentAbsorb = RemainingDamage;
 
             manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()];
-            maxAbsorb = pVictim->GetPower(POWER_MANA) / manaMultiplier;
+            maxAbsorb = int32(pVictim->GetPower(POWER_MANA) / manaMultiplier);
             if (currentAbsorb > maxAbsorb)
                 currentAbsorb = maxAbsorb;
 
@@ -994,7 +994,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
         else
             damage = 0;
             
-        DealDamage (pVictim, (damage*sWorld.getRate(RATE_CREATURE_DAMAGE)), 0, true);
+        DealDamage (pVictim, uint32(damage*sWorld.getRate(RATE_CREATURE_DAMAGE)), 0, true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
         {
@@ -2487,11 +2487,12 @@ Creature* Unit::GetPet() const
         {
             sLog.outError("Unit::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
             const_cast<Unit*>(this)->SetPet(0);
+            return NULL;
         }
         return pet;
     }
-    else
-        return NULL;
+
+    return NULL;
 }
 
 Creature* Unit::GetCharm() const

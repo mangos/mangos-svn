@@ -115,9 +115,9 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
 
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        DEBUG_LOG("Unloader Crash1 check: (%p)",iter->second);
+        //DEBUG_LOG("Unloader Crash1 check: (%p)",iter->second);
         delete iter->second;
-        DEBUG_LOG("Unloader Crash2 check: (%p)",iter->second);
+        //DEBUG_LOG("Unloader Crash2 check: (%p)",iter->second);
     }
 
     m.clear();

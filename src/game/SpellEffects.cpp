@@ -1148,7 +1148,7 @@ void Spell::EffectSummonPet(uint32 i)
     if(OldSummon)
     {
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_caster)->UnsummonPet();
+            ((Player*)m_caster)->UnsummonPet(OldSummon);
         else
             return;
     }
@@ -1199,7 +1199,7 @@ void Spell::EffectSummonPet(uint32 i)
             NewSummon->AddActState(STATE_RA_SPELL1);
         }
 
-        NewSummon->SavePetToDB();
+        NewSummon->SaveToDB();
         NewSummon->AIM_Initialize();
         MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);
 
