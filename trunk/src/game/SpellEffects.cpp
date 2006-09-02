@@ -721,6 +721,9 @@ void Spell::EffectApplyAA(uint32 i)
 
 void Spell::EffectSummon(uint32 i)
 {
+    if(m_caster->GetPetGUID())
+        return;
+
     if(!unitTarget)
         return;
     uint32 pet_entry = m_spellInfo->EffectMiscValue[i];
@@ -1076,6 +1079,9 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
 void Spell::EffectTameCreature(uint32 i)
 {
+    if(m_caster->GetPetGUID())
+        return;
+
     if(!unitTarget)
         return;
 
@@ -1088,6 +1094,10 @@ void Spell::EffectTameCreature(uint32 i)
 
     if(m_caster->getClass() == CLASS_HUNTER)
     {
+        creatureTarget->AttackStop();
+        if(m_caster->getVictim()==creatureTarget)
+            m_caster->AttackStop();
+
         uint32 petlevel = creatureTarget->getLevel();
         creatureTarget->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         creatureTarget->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
@@ -1336,7 +1346,8 @@ void Spell::EffectWeaponDmg(uint32 i)
             else
                 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
 
-            ((Player*)m_caster)->DestroyItemCount( ammo, 1, true);
+            if(ammo)
+                ((Player*)m_caster)->DestroyItemCount( ammo, 1, true);
         }
     }
 
