@@ -89,6 +89,23 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
+
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: HandleTaxiQueryAviableNodesOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+        return;
+
+    if(!unit->isTaxi())
+        return;
+
     curloc = objmgr.GetNearestTaxiNode(
         GetPlayer( )->GetPositionX( ),
         GetPlayer( )->GetPositionY( ),

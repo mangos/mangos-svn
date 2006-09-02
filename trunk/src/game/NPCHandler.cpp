@@ -36,6 +36,24 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
     recv_data >> guid;
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: HandleTabardVendorActivateOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+        return;
+
+    if( !unit->isTabardVendor())                            // it's not tabard vendor
+        return;
+
     SendTabardVendorActivate(guid);
 }
 
@@ -54,6 +72,23 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
     sLog.outString( "WORLD: Received CMSG_BANKER_ACTIVATE" );
 
     recv_data >> guid;
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: HandleBankerActivateOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+        return;
+
+    if( !unit->isBanker())                                  // it's not banker
+        return;
 
     SendShowBank(guid);
 }
@@ -204,6 +239,9 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
         return;
 
+    if(!unit->isCanTrainingOf(_player,true))
+        return;
+
     std::list<TrainerSpell*>::iterator titr;
 
     for (titr = unit->GetTspellsBegin(); titr != unit->GetTspellsEnd();titr++)
@@ -277,6 +315,24 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
         0x01, 0x01, 0x00, 0x00, 0x00, 0xe7, 0x16, 0x00, 0x00, 0xef, 0x23, 0x00, 0x00, 0xe8, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
     };
     recv_data >> guid;
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: HandlePetitionShowListOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+        return;
+
+    if( !unit->isGuildMaster())                             // it's not guild master
+        return;
+
     data.Initialize( SMSG_PETITION_SHOWLIST );
     data << guid;
     data.append( tdata, sizeof(tdata) );
@@ -288,6 +344,24 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
     uint64 guid;
 
     recv_data >> guid;
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: HandleAuctionHelloOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
+
+    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
+
+    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+        return;
+
+    if( !unit->isAuctioner())                               // it's not auctioner
+        return;
+
     SendAuctionHello(guid);
 }
 
