@@ -129,6 +129,7 @@ extern DBCStorage <FactionEntry>             sFactionStore;
 extern DBCStorage <FactionTemplateEntry>     sFactionTemplateStore;
 extern DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore;
 extern DBCStorage <ItemSetEntry>             sItemSetStore;
+extern DBCStorage <LockEntry>                sLockStore;
 extern DBCStorage <SkillLineAbility>         sSkillLineAbilityStore;
 extern DBCStorage <SpellDuration>            sSpellDuration;
 //extern DBCStorage <SpellFocusObject>         sSpellFocusObject;

@@ -205,3 +205,9 @@ struct SpellItemEnchantment
     uint32      aura_id;
     uint32      slot;
 };
+
+struct LockEntry
+{
+    uint32      ID;
+    uint32      requiredskill;
+};

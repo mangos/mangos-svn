@@ -22,6 +22,7 @@ const char FactionEntryfmt[]="nixxxxxxxiiiiiiiiiixxxxxxxxxxxxxxxxxx";
 const char FactionTemplateEntryfmt[]="nxxiiixxxxixxx";
 const char ItemDisplayTemplateEntryfmt[]="ixxxxxxxxxxixxxxxxxxxxi";
 const char ItemSetEntryfmt[]="dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
+const char LockEntryfmt[]="nxxxxxxxxxxxxxxxxixxxxxxxxxxxxxxx";
 const char SkillLineAbilityfmt[]="iiniiiiiiiiixxx";
 const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
