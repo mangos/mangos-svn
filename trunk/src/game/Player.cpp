@@ -882,8 +882,6 @@ void Player::Update( uint32 p_time )
             m_deathTimer = 0;
             BuildPlayerRepop();
             RepopAtGraveyard();
-            if(Corpse* corpse = GetCorpse())
-                corpse->ResetGhostTime();
         }
         else
             m_deathTimer -= p_time;
@@ -2229,8 +2227,11 @@ void Player::BuildPlayerRepop()
 
     //! corpse reclaim delay 30 * 1000ms
     data.Initialize(SMSG_CORPSE_RECLAIM_DELAY );
-    data << (uint32)30000;
+    data << (uint32)(CORPSE_RECLAIM_DELAY*1000);
     GetSession()->SendPacket( &data );
+
+    // to prevent cheating 
+    corpse->ResetGhostTime();
 
     //TODO: Check/research this
     data.Initialize(SMSG_SPELL_START );

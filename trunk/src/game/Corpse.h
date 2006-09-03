@@ -29,6 +29,7 @@ enum CorpseType
 
 // Value equal client resurrection dialog show radius.
 #define CORPSE_RECLAIM_RADIUS 39
+#define CORPSE_RECLAIM_DELAY  30
 
 class Corpse : public Object
 {
