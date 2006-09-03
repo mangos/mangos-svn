@@ -1434,7 +1434,7 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
         m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
     else
         m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
     data << (uint32)0;
