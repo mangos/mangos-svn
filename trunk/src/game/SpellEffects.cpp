@@ -881,6 +881,29 @@ void Spell::EffectLearnSpell(uint32 i)
             player->learnSpell(2383);
             break;
         }
+        case 264:                                           //SKILL_BOWS
+        {
+            if(!player->HasSpell(75))
+                player->learnSpell(2480);
+            break;
+        }
+        case 266:                                           //SKILL_GUNS
+        {
+            if(!player->HasSpell(75))
+                player->learnSpell(7918);
+            break;
+        }
+        case 5011:                                          //SKILL_CROSSBOWS
+        {
+            if(!player->HasSpell(75))
+                player->learnSpell(7919);
+            break;
+        }
+        case 2567:                                          //SKILL_THROWN
+        {
+            player->learnSpell(2764);
+            break;
+        }
         default:break;
     }
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
