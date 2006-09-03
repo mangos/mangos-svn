@@ -73,7 +73,8 @@ class MANGOS_DLL_DECL ObjectGridUnloader
     public:
         ObjectGridUnloader(NGridType &grid) : i_grid(grid) {}
 
-        void UnloadN(void)
+        void MoveToRespawnN();
+        void UnloadN()
         {
             for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
             {
