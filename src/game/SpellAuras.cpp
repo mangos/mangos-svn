@@ -2279,6 +2279,9 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
                     unit_target->CastSpell(unit_target, (*itr)->spellId, true);
             }
         }
+
+        if (aura->GetModifier()->m_miscvalue == FORM_TRAVEL)
+            unit_target->CastSpell(unit_target, 5419, true);
     }
     else
     {
@@ -2290,6 +2293,9 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             else
                 ++itr;
         }
+
+        if (aura->GetModifier()->m_miscvalue == FORM_TRAVEL)
+            unit_target->RemoveAurasDueToSpell(5419);
     }
 
     unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));
