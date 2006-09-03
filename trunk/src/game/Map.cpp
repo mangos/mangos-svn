@@ -557,33 +557,80 @@ void Map::MoveAllCreaturesInMoveList()
         {
             DEBUG_LOG("Creature "I64FMT" moved from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", cm.creature->GetGUID(), cm.old_cell.GridX(), cm.old_cell.GridY(), cm.old_cell.CellX(), cm.old_cell.CellY(), cm.new_cell.GridX(), cm.new_cell.GridY(), cm.new_cell.CellX(), cm.new_cell.CellY());
 
+            if( !cm.old_cell.DiffGrid(cm.new_cell) )        // in same grid
             {
-                assert(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()] != NULL);
-                WriteGuard guard(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()]->i_lock);
-                if( !cm.old_cell.DiffGrid(cm.new_cell) )
-                {
-                    (*i_grids[cm.old_cell.GridX()][cm.old_cell.GridY()])(cm.old_cell.CellX(), cm.old_cell.CellY()).RemoveGridObject<Creature>(cm.creature, cm.creature->GetGUID());
-                    (*i_grids[cm.new_cell.GridX()][cm.new_cell.GridY()])(cm.new_cell.CellX(), cm.new_cell.CellY()).AddGridObject<Creature>(cm.creature, cm.creature->GetGUID());
-                }
-            }
-
-            if( cm.old_cell.DiffGrid(cm.new_cell) )
-            {
-                {
+                { 
+                    assert(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()] != NULL);
                     WriteGuard guard(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()]->i_lock);
-                    (*i_grids[cm.old_cell.GridX()][cm.old_cell.GridY()])(cm.old_cell.CellX(), cm.old_cell.CellY()).RemoveGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                    if( !cm.old_cell.DiffGrid(cm.new_cell) )
+                    {
+                        (*i_grids[cm.old_cell.GridX()][cm.old_cell.GridY()])(cm.old_cell.CellX(), cm.old_cell.CellY()).RemoveGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                        (*i_grids[cm.new_cell.GridX()][cm.new_cell.GridY()])(cm.new_cell.CellX(), cm.new_cell.CellY()).AddGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                    }
                 }
+                CreatureRelocationNotifying(cm.creature,cm.new_cell,cm.new_cell.cellPair());
+            }
+            else                                            // in diff. grids
+            {
+                // prevent load new grid at creature move (creature out any player view in this case any way)
+                // or remove it if respawn grid also not loaded
+                if(!loaded(GridPair(cm.new_cell.data.Part.grid_x, cm.new_cell.data.Part.grid_y)))
                 {
-                    EnsureGridCreated(GridPair(cm.new_cell.GridX(), cm.new_cell.GridY()));
-                    WriteGuard guard(i_info[cm.new_cell.GridX()][cm.new_cell.GridY()]->i_lock);
-                    (*i_grids[cm.new_cell.GridX()][cm.new_cell.GridY()])(cm.new_cell.CellX(), cm.new_cell.CellY()).AddGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                    MoveCreatureToRespawn(cm.creature,cm.old_cell);
+                }
+                else
+                {
+                    {
+                        WriteGuard guard(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()]->i_lock);
+                        (*i_grids[cm.old_cell.GridX()][cm.old_cell.GridY()])(cm.old_cell.CellX(), cm.old_cell.CellY()).RemoveGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                    }
+                    {
+                        EnsureGridCreated(GridPair(cm.new_cell.GridX(), cm.new_cell.GridY()));
+                        WriteGuard guard(i_info[cm.new_cell.GridX()][cm.new_cell.GridY()]->i_lock);
+                        (*i_grids[cm.new_cell.GridX()][cm.new_cell.GridY()])(cm.new_cell.CellX(), cm.new_cell.CellY()).AddGridObject<Creature>(cm.creature, cm.creature->GetGUID());
+                    }
+                    CreatureRelocationNotifying(cm.creature,cm.new_cell,cm.new_cell.cellPair());
                 }
             }
-            CreatureRelocationNotifying(cm.creature,cm.new_cell,cm.new_cell.cellPair());
         }
     }
     //sLog.outDebug("Creature mover 2 check.");
 }
+
+void Map::MoveCreatureToRespawn(Creature *c, Cell cur_cell)
+{
+    float resp_x, resp_y, resp_z;
+    c->GetRespawnCoord(resp_x, resp_y, resp_z);
+
+    CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
+    Cell resp_cell = RedZone::GetZone(resp_val);
+
+    // teleport it to respawn point (like normal respawn if player see) or ...
+    if(loaded(GridPair(resp_cell.data.Part.grid_x, resp_cell.data.Part.grid_y)))
+    {
+        sLog.outDebug("Creature (GUID: %u Entry: %u ) moved from unloaded grid[%u,%u]cell[%u,%u] to respawn grid[%u,%u]cell[%u,%u].",
+            c->GetGUIDLow(),c->GetCreatureInfo()->Entry,cur_cell.GridX(), cur_cell.GridY(), cur_cell.CellX(), cur_cell.CellY(), resp_cell.GridX(), resp_cell.GridY(), resp_cell.CellX(), resp_cell.CellY());
+        c->CombatStop();
+        (*c)->Clear();
+        c->Relocate(resp_x, resp_y, resp_z, c->GetOrientation());
+        {
+            WriteGuard guard(i_info[cur_cell.GridX()][cur_cell.GridY()]->i_lock);
+            (*i_grids[cur_cell.GridX()][cur_cell.GridY()])(cur_cell.CellX(), cur_cell.CellY()).RemoveGridObject<Creature>(c, c->GetGUID());
+        }
+        {
+            EnsureGridCreated(GridPair(resp_cell.GridX(), resp_cell.GridY()));
+            WriteGuard guard(i_info[resp_cell.GridX()][resp_cell.GridY()]->i_lock);
+            (*i_grids[resp_cell.GridX()][resp_cell.GridY()])(resp_cell.CellX(), resp_cell.CellY()).AddGridObject<Creature>(c, c->GetGUID());
+        }
+    }
+    // ... or unload (if respawn grid also not loaded)
+    else
+    {
+        sLog.outDebug("Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.",c->GetGUIDLow(),c->GetCreatureInfo()->Entry);
+        ObjectAccessor::Instance().AddObjectToRemoveList(c);
+    }
+}
+
 
 bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
 {
@@ -594,19 +641,27 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
         if( ObjectAccessor::Instance().PlayersNearGrid(x, y, i_id) )
             return false;
 
-        // Finish creature moves at map before unload
-        MoveAllCreaturesInMoveList();
-
-        WriteGuard guard(i_info[x][y]->i_lock);
         DEBUG_LOG("Unloading grid[%u,%u] for map %u", x,y, i_id);
         ObjectGridUnloader unloader(*grid);
-        uint64 mask = CalculateGridMask(y);
-        i_gridMask[x] &= ~mask;
-        i_gridStatus[x] &= ~mask;
-        unloader.UnloadN();
-        delete i_grids[x][y];
-        i_grids[x][y] = NULL;
 
+        // move creatures to respawn grids if this is diff.grid or to remove list
+        unloader.MoveToRespawnN();
+
+        // Finish creature moves at map before unload (before remove list to more safest)
+        MoveAllCreaturesInMoveList();
+
+        // remove and delete all creatures with delayed remove before unload
+        ObjectAccessor::Instance().RemoveAllObjectsInRemoveList();
+
+        {
+            WriteGuard guard(i_info[x][y]->i_lock);
+            uint64 mask = CalculateGridMask(y);
+            i_gridMask[x] &= ~mask;
+            i_gridStatus[x] &= ~mask;
+            unloader.UnloadN();
+            delete i_grids[x][y];
+            i_grids[x][y] = NULL;
+        }
     }
     delete i_info[x][y];
     i_info[x][y] = NULL;

@@ -493,10 +493,10 @@ void World::Update(time_t diff)
         MapManager::Instance().Update(diff);
     }
 
+    // move all creatures with delayed move (before remove list to more safest)
+    MapManager::Instance().MoveAllCreaturesInMoveList();
     // remove and delete all objects with delayed remove
     ObjectAccessor::Instance().RemoveAllObjectsInRemoveList();
-    // move all creatures with delayed move
-    MapManager::Instance().MoveAllCreaturesInMoveList();
 }
 
 void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)

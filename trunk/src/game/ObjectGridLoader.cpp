@@ -20,6 +20,60 @@
 #include "Database/DatabaseEnv.h"
 #include "ObjectAccessor.h"
 #include "Utilities.h"
+#include "MapManager.h"
+#include "RedZoneDistrict.h"
+
+class MANGOS_DLL_DECL ObjectGridRespawnMover
+{
+    public:
+        ObjectGridRespawnMover() {}
+
+        void Move(GridType &grid);
+
+        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+        template<> void Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &m);
+};
+
+void
+ObjectGridRespawnMover::Move(GridType &grid)
+{
+    TypeContainerVisitor<ObjectGridRespawnMover, TypeMapContainer<AllObjectTypes> > mover(*this);
+    grid.VisitGridObjects(mover);
+}
+
+
+
+template<>
+void
+ObjectGridRespawnMover::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    if( m.size() == 0 )
+        return;
+
+    // creature in unloading grid can have respawn point in another grid
+    // if it will be unloaded then it will not respawn in original grid until unload/load original grid
+    // move to respwn point to prevent this case. For player view in respawn grid this wll be normal respawn.
+    for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(), next; iter != m.end(); iter = next)
+    {
+        next = iter; ++next;
+
+        Creature * c = iter->second;
+        float resp_x, resp_y, resp_z;
+        c->GetRespawnCoord(resp_x, resp_y, resp_z);
+
+        CellPair cur_val  = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
+        CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
+
+        Cell cur_cell  = RedZone::GetZone(cur_val);
+        Cell resp_cell = RedZone::GetZone(resp_val);
+
+        if(cur_cell.DiffGrid(resp_cell))
+        {
+           MapManager::Instance().GetMap(c->GetMapId())->MoveCreatureToRespawn(c,cur_cell);
+        }
+    }
+}
+
 
 template<class T> void addUnitState(T *obj)
 {
@@ -96,6 +150,18 @@ ObjectGridLoader::Load(GridType &grid)
     grid.VisitGridObjects(loader);
 }
 
+void ObjectGridUnloader::MoveToRespawnN()
+{
+    for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
+    {
+        for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
+        {
+            ObjectGridRespawnMover mover;
+            mover.Move(i_grid(x, y));
+        }
+    }
+}
+
 void
 ObjectGridUnloader::Unload(GridType &grid)
 {
@@ -114,11 +180,7 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
     ObjectAccessor::Instance().RemoveAllObjectsInRemoveList();
 
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        //DEBUG_LOG("Unloader Crash1 check: (%p)",iter->second);
         delete iter->second;
-        //DEBUG_LOG("Unloader Crash2 check: (%p)",iter->second);
-    }
 
     m.clear();
 }
