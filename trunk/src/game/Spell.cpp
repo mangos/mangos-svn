@@ -1636,11 +1636,11 @@ uint8 Spell::CheckMana(uint32 *mana)
     Powers powerType = Powers(m_spellInfo->powerType);
 
     uint32 currentPower = m_caster->GetPower(powerType);
-    uint32 manaCost = m_spellInfo->manaCost;
+    int32 manaCost = m_spellInfo->manaCost;
     if(m_spellInfo->manaCostPerlevel)
-        manaCost += uint32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
+        manaCost += int32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
     if(m_spellInfo->ManaCostPercentage)
-        manaCost += uint32(m_spellInfo->ManaCostPercentage/100*m_caster->GetMaxPower(powerType));
+        manaCost += int32(m_spellInfo->ManaCostPercentage/100*m_caster->GetMaxPower(powerType));
 
     Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
@@ -1651,6 +1651,10 @@ uint8 Spell::CheckMana(uint32 *mana)
         ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
 
     manaCost += m_caster->GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER);
+
+    if (manaCost < 0)
+        manaCost = 0;
+
     *mana = manaCost;
 
     if(currentPower < manaCost)
