@@ -34,6 +34,8 @@ DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt)
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore(ItemDisplayTemplateEntryfmt);
 
+DBCStorage <LockEntry> sLockStore(LockEntryfmt);
+
 DBCStorage <SkillLineAbility> sSkillLineAbilityStore(SkillLineAbilityfmt);
 
 DBCStorage <SpellItemEnchantment> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
@@ -50,7 +52,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 14;
+    const uint32 DBCFilesCount = 15;
 
     barGoLink bar( DBCFilesCount );
 
@@ -97,6 +99,13 @@ void LoadDBCStores(std::string dataPath)
         bar.step();
     else
         not_found_dbc_files.push_back("dbc/ItemSet.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/Lock.dbc");
+    if(sLockStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/Lock.dbc");
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SkillLineAbility.dbc");

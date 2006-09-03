@@ -537,136 +537,37 @@ void Spell::EffectOpenLock(uint32 i)
         sLog.outDebug( "WORLD: Open Lock - No Player Caster!");
         return;
     }
-    LootType loottype;
+
+    LootType loottype = LOOT_CORPSE;
+    LockEntry *lockInfo = sLockStore.LookupEntry(gameObjTarget->GetGOInfo()->sound0);
+    uint16 skill = 999;
+
     if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_HERBALISM)
     {
-        uint32 displayid= gameObjTarget->GetUInt32Value (GAMEOBJECT_DISPLAYID);
-        uint32 requiredskill;
-        switch(displayid)
-        {
-            case 269:
-            case 270:
-                requiredskill=1;
-                break;
-
-            case 414:
-                requiredskill=15;
-                break;
-            case 268:
-                requiredskill=50;
-                break;
-            case 271:
-                requiredskill=70;
-                break;
-            case 700:
-                requiredskill=85;
-                break;
-            case 358:
-                requiredskill=100;
-                break;
-            case 371:
-                requiredskill=115;
-                break;
-            case 357:
-                requiredskill=120;
-                break;
-            case 320:
-                requiredskill=125;
-                break;
-            case 677:
-                requiredskill=150;
-                break;
-            case 697:
-                requiredskill=160;
-                break;
-            case 701:
-                requiredskill=185;
-                break;
-            case 699:
-                requiredskill=195;
-                break;
-            case 2312:
-                requiredskill=205;
-                break;
-            case 698:
-                requiredskill=215;
-                break;
-            default:
-                requiredskill=1;
-                sLog.outString("Unknown herb %u",displayid);
-                break;
-        }
-        if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM)<requiredskill)
-        {
-            SendCastResult(CAST_FAIL_FAILED);
-            return;
-        }
-        if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +75 )
-            up_skillvalue = 4;
-        else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +50 )
-            up_skillvalue = 3;
-        else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +25 )
-            up_skillvalue = 2;
-        else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill)
-            up_skillvalue = 1;
-        else up_skillvalue = 0;
+        skill = ((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM);
         loottype = LOOT_SKINNING;
-
-    }else if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_MINING)
+    } else
+    if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_MINING)
     {
-        uint32 id= gameObjTarget->GetGOInfo()->sound0;
-        uint32 requiredskill=1;
-        switch(id)
-        {
-            case 939:
-                requiredskill=275;
-                break;
-
-            case 38:
-                requiredskill=1;
-                break;
-            case 39:
-                requiredskill=60;
-                break;
-            case 25:                                        //Indurium Mineral Vein
-
-                break;
-            case 40:
-                requiredskill=70;
-                break;
-
-            case 42:
-                requiredskill=120;
-                break;
-
-            case 400:
-                requiredskill=260;
-                break;
-
-            default:
-                requiredskill=1;
-                sLog.outString("Unknown vein %u",id);
-                break;
-        }
-        if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) < requiredskill)
-        {
-            SendCastResult(CAST_FAIL_FAILED);
-            return;
-        }
-        if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) >= requiredskill +75 )
-            up_skillvalue = 4;
-        else if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) >= requiredskill +50 )
-            up_skillvalue = 3;
-        else if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) >= requiredskill +25 )
-            up_skillvalue = 2;
-        else if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) >= requiredskill)
-            up_skillvalue = 1;
-        else up_skillvalue = 0;
-
+        skill = ((Player*)m_caster)->GetSkillValue(SKILL_MINING);
         loottype = LOOT_SKINNING;
     }
-    else
-        loottype = LOOT_CORPSE;
+
+    if((skill != 999) && (skill < lockInfo->requiredskill))
+    {
+            SendCastResult(CAST_FAIL_FAILED);
+            return;
+    }
+
+    if( skill >= (lockInfo->requiredskill +75) )
+        up_skillvalue = 4;
+    else if( skill >= (lockInfo->requiredskill +50) )
+        up_skillvalue = 3;
+    else if( skill >= (lockInfo->requiredskill +25) )
+        up_skillvalue = 2;
+    else if( skill >= lockInfo->requiredskill)
+        up_skillvalue = 1;
+    else up_skillvalue = 0;
 
     if(loottype == LOOT_CORPSE)
     {
@@ -674,7 +575,6 @@ void Spell::EffectOpenLock(uint32 i)
     }
 
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
-
 }
 
 void Spell::EffectSummonChangeItem(uint32 i)
