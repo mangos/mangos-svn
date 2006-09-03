@@ -88,9 +88,14 @@ void Creature::CreateTrainerSpells()
     {
         fields = result->Fetch();
 
-        spellinfo = sSpellStore.LookupEntry(fields[0].GetUInt32());
+        uint32 spellid = fields[0].GetUInt32();
+        spellinfo = sSpellStore.LookupEntry(spellid);
 
-        if(!spellinfo) continue;
+        if(!spellinfo) 
+        {
+            sLog.outError("Trainer (GUID: %u ID: %u ) have in list non existed spell %u",GetGUIDLow(),GetEntry(),spellid);
+            continue;
+        }
 
         tspell = new TrainerSpell;
         tspell->spell = spellinfo;
@@ -99,6 +104,12 @@ void Creature::CreateTrainerSpells()
         tspell->reqskill = fields[3].GetUInt32();
         tspell->reqskillvalue = fields[4].GetUInt32();
         tspell->reqlevel = fields[5].GetUInt32();
+
+        if(tspell->reqspell && !sSpellStore.LookupEntry(tspell->reqspell))
+        {
+            sLog.outError("Trainer (GUID: %u ID: %u ) have for spell %u non-existed required spell %u (requirement ignored)",GetGUIDLow(),GetEntry(),spellid,tspell->reqspell);
+            tspell->reqspell = 0;
+        }
 
         m_tspells.push_back(tspell);
 
