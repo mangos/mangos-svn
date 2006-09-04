@@ -2967,7 +2967,7 @@ void Player::CheckExploreSystem()
         {
             sLog.outError("PLAYER: Player %u discovered unknown area (x: %u y: %u map: %u", GetGUID(), m_positionX,m_positionY,GetMapId());
         }
-        else if(p->area_level)
+        else if(p->area_level > 0)
         {
             uint32 XP = uint32(p->area_level*10*sWorld.getRate(RATE_XP_EXPLORE));
             uint32 area = p->ID;
