@@ -300,7 +300,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                    if(!Target || Target->GetGUID() == m_caster->GetGUID())
+                    if(!Target)
                         continue;
                     if(m_caster->GetDistanceSq(Target) < radius * radius )
                         TagUnitMap.push_back(Target);
