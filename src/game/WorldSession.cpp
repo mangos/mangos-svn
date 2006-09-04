@@ -300,7 +300,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_LOOT_METHOD,              STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              },
         { CMSG_LOOT_ROLL,                STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      },
 
-		{ CMSG_GUILD_QUERY,             STATUS_AUTHED, &WorldSession::HandleGuildQueryOpcode               },
+        { CMSG_GUILD_QUERY,             STATUS_AUTHED, &WorldSession::HandleGuildQueryOpcode               },
         { CMSG_GUILD_CREATE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildCreateOpcode              },
         { CMSG_GUILD_INVITE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildInviteOpcode              },
         { CMSG_GUILD_REMOVE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildRemoveOpcode              },

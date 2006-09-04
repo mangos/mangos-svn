@@ -337,7 +337,7 @@ void Aura::Update(uint32 diff)
             float x,y,z,angle,speed,pos_x,pos_y,pos_z;
             m_target->CombatStop();
             angle = m_target->GetAngle( caster->GetPositionX(), caster->GetPositionY() );
-            // If the m_target is player,and if the speed is too slow,change it :P 
+            // If the m_target is player,and if the speed is too slow,change it :P
             if(m_target->GetTypeId() != TYPEID_PLAYER)
                 speed = m_target->GetSpeed(MOVE_RUN);
             else speed = m_target->GetSpeed();

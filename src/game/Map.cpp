@@ -559,7 +559,7 @@ void Map::MoveAllCreaturesInMoveList()
 
             if( !cm.old_cell.DiffGrid(cm.new_cell) )        // in same grid
             {
-                { 
+                {
                     assert(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()] != NULL);
                     WriteGuard guard(i_info[cm.old_cell.GridX()][cm.old_cell.GridY()]->i_lock);
                     if( !cm.old_cell.DiffGrid(cm.new_cell) )
@@ -630,7 +630,6 @@ void Map::MoveCreatureToRespawn(Creature *c, Cell cur_cell)
         ObjectAccessor::Instance().AddObjectToRemoveList(c);
     }
 }
-
 
 bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
 {

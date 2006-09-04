@@ -230,23 +230,24 @@ void CliInfo(char*,pPrintf zprintf)
     zprintf("|    Account    |   Character   |      IP       |  GM  |\x0d\x0a");
     zprintf("========================================================\x0d\x0a");
 
-    int linesize = 1+15+1+15+1+15+1+6+3; // see format string
+    int linesize = 1+15+1+15+1+15+1+6+3;                    // see format string
     char* buf = new char[resultDB->GetRowCount()*linesize+1];
     char* bufPos = buf;
 
-    do{
+    do
+    {
 
         Field * fieldsDB = resultDB->Fetch();
         std::string name = fieldsDB[0].GetCppString();
         uint32 account = fieldsDB[1].GetUInt32();
 
-        QueryResult *resultLogin = loginDatabase.PQuery( 
+        QueryResult *resultLogin = loginDatabase.PQuery(
             "SELECT `username`,`last_ip`,`gmlevel` FROM `account` WHERE `id` = '%u'",account );
 
         if(resultLogin)
         {
             Field *fieldsLogin = resultLogin->Fetch();
-            bufPos+=sprintf(bufPos,"|%15s|%15s|%15s|%6d|\x0d\x0a", 
+            bufPos+=sprintf(bufPos,"|%15s|%15s|%15s|%6d|\x0d\x0a",
                 fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsLogin[2].GetUInt32());
 
             delete resultLogin;
@@ -265,7 +266,6 @@ void CliInfo(char*,pPrintf zprintf)
 
     delete[] buf;
 }
-
 
 void CliBanList(char*,pPrintf zprintf)
 {

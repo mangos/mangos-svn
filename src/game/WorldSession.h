@@ -221,7 +221,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGuildAddRankOpcode(WorldPacket& recvPacket);
         void HandleGuildDelRankOpcode(WorldPacket& recvPacket);
         void HandleGuildChangeInfoOpcode(WorldPacket& recvPacket);
-		void HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket);
+        void HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket);
         void SendCommandResult(uint32 typecmd,std::string str,uint32 cmdresult);
 
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);

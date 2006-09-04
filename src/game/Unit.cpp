@@ -992,7 +992,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
             damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);
         else
             damage = 0;
-            
+
         DealDamage (pVictim, uint32(damage*sWorld.getRate(RATE_CREATURE_DAMAGE)), 0, true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())

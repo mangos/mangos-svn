@@ -2230,7 +2230,7 @@ void Player::BuildPlayerRepop()
     data << (uint32)(CORPSE_RECLAIM_DELAY*1000);
     GetSession()->SendPacket( &data );
 
-    // to prevent cheating 
+    // to prevent cheating
     corpse->ResetGhostTime();
 
     //TODO: Check/research this
@@ -5635,8 +5635,8 @@ Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
         return m_items[slot];
-    else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END 
-        || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END ) 
+    else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END
+        || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END )
     {
         Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
         if ( pBag )
@@ -7327,8 +7327,6 @@ void Player::ClearTrade()
     for(int i=0; i<7; i++)
         tradeItems[i] = NULL_SLOT;
 }
-
-
 
 void Player::UpdateEnchantTime(uint32 time)
 {

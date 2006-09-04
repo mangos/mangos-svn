@@ -555,8 +555,8 @@ void Spell::EffectOpenLock(uint32 i)
 
     if((skill != 999) && (skill < lockInfo->requiredskill))
     {
-            SendCastResult(CAST_FAIL_FAILED);
-            return;
+        SendCastResult(CAST_FAIL_FAILED);
+        return;
     }
 
     if( skill >= (lockInfo->requiredskill +75) )
