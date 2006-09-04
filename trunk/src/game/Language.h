@@ -171,10 +171,10 @@
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in db, exiting."
 
 #define LANG_LEARNSK_SYNTAX              "Syntax: .learnsk skillId level max"
-#define LANG_LEARNED_SKILL               "You've learned skill %u"
+#define LANG_LEARNED_SKILL               "Player %s learned skill %u"
 #define LANG_INVALID_SKILL_ID            "Invalid skill id (%u)"
 #define LANG_UNLEARNSK_SYNTAX            "Syntax: .unlearnsk skillId"
-#define LANG_UNLEARNED_SKILL             "You've unlearned skill %u"
+#define LANG_UNLEARNED_SKILL             "Player %s unlearned skill %u"
 #define LANG_UNKNOWN_SKILL               "You don't know that skill."
 #define LANG_LEARNING_GM_SKILLS          "%s - Learning default GM spells/skills."
 #define LANG_KNOWN_SPELL                 "You already know that spell."
