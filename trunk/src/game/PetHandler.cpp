@@ -139,6 +139,17 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             break;
         case 49408:                                         //0xc100    spell
         {
+            uint64 selectguid = _player->GetSelection();
+            Unit* unit_target=ObjectAccessor::Instance().GetUnit(*_player,selectguid);
+            if(!unit_target) 
+                return;
+
+            FactionTemplateResolver target_faction = unit_target->getFactionTemplateEntry();
+            FactionTemplateResolver owner_faction = _player->getFactionTemplateEntry();
+
+            if(owner_faction.IsFriendlyTo(target_faction))  // do not spell attack of friends
+                return;
+
             pet->clearUnitState(UNIT_STAT_FOLLOW);
             SpellEntry *spellInfo = sSpellStore.LookupEntry(spellid );
             if(!spellInfo)
@@ -149,11 +160,9 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
             Spell *spell = new Spell(pet, spellInfo, false, 0);
             WPAssert(spell);
-            uint64 selectguid = _player->GetSelection();
-            Unit* unit_target=ObjectAccessor::Instance().GetUnit(*_player,selectguid);
-            if(unit_target == NULL) return;
+
             SpellCastTargets targets;
-            targets.setUnitTarget( unit_target );           //(Unit*)_player;
+            targets.setUnitTarget( unit_target );
             spell->prepare(&targets);
             break;
         }
