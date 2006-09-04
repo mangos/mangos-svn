@@ -411,6 +411,10 @@ class MANGOS_DLL_SPEC Player : public Unit
             if(isAlive() && !cur)
             {
                 _ApplyAllItemMods();
+
+                // restore default warrior stance 
+                if(getClass()== WARRIOR) 
+                    CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true); 
             }
         };
 
