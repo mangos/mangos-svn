@@ -339,7 +339,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         virtual void DeleteFromDB();                        // overwrited in Pet
 
         Loot loot;
-        bool pickPocketed;
+        bool lootForPickPocketed;
+        bool lootForBody;
 
         SpellEntry *reachWithSpellAttack(Unit *pVictim);
         uint32 m_spells[CREATURE_MAX_SPELLS];
