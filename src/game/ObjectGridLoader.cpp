@@ -31,7 +31,7 @@ class MANGOS_DLL_DECL ObjectGridRespawnMover
         void Move(GridType &grid);
 
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
-        template<> void Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 };
 
 void
@@ -43,9 +43,8 @@ ObjectGridRespawnMover::Move(GridType &grid)
 
 
 
-template<>
 void
-ObjectGridRespawnMover::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &m)
+ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
     if( m.size() == 0 )
         return;
