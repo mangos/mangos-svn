@@ -402,20 +402,15 @@ class MANGOS_DLL_SPEC Player : public Unit
         void setDeathState(DeathState s)
         {
             bool cur = isAlive();
-            Unit::setDeathState(s);
-
             if(s == JUST_DIED && cur)
             {
                 _RemoveAllItemMods();
                 UnsummonPet();
             }
+            Unit::setDeathState(s);
             if(isAlive() && !cur)
             {
                 _ApplyAllItemMods();
-
-                // restore default warrior stance
-                if(getClass()== WARRIOR)
-                    CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
             }
         };
 
