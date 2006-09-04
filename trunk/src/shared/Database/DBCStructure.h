@@ -161,7 +161,7 @@ struct AreaTableEntry
     uint32    ID;
     uint32    zone;
     uint32    exploreFlag;
-    uint32    area_level;
+    int32     area_level;
 };
 struct FactionEntry
 {
