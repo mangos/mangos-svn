@@ -182,7 +182,7 @@ namespace MaNGOS
                 if( mob_level > gray_level )
                 {
                     uint32 ZD = GetZeroDifference(pl_level);
-                    return ( (pl_level*5 + 45) * (1 - (pl_level - mob_level)/ZD) );
+                    return uint32( (pl_level*5 + 45) * (1 - float(pl_level - mob_level)/ZD) );
                 }
                 return 0;
             }
