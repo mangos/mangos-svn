@@ -90,7 +90,7 @@ bool GossipSelectWithCode( Player *player, Creature *_Creature, uint32 sender, u
     Script *tmpscript = NULL;
 
     tmpscript = GetScriptByName(_Creature->GetCreatureInfo()->ScriptName);
-    if(!tmpscript || tmpscript->pGossipSelectWithCode) return false;
+    if(!tmpscript || !tmpscript->pGossipSelectWithCode) return false;
 
     player->PlayerTalkClass->ClearMenus();
     return tmpscript->pGossipSelectWithCode(player,_Creature,sender,action,sCode);
