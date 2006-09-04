@@ -3956,9 +3956,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         if(loot_type == LOOT_PICKPOKETING)
         {
-            if ( !creature->pickPocketed )
+            if ( !creature->lootForPickPocketed )
             {
-                creature->pickPocketed = true;
+                creature->lootForPickPocketed = true;
                 loot->clear();
 
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
@@ -3969,18 +3969,22 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         }
         else
         {
-            if (creature->pickPocketed)
+            if (creature->lootForPickPocketed)
             {
-                creature->pickPocketed = false;
+                creature->lootForPickPocketed = false;
                 loot->clear();
             }
 
             if(loot->empty())
             {
-                if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-                    FillLoot(this,loot,lootid,LootTemplates_Creature);
+                if(!creature->lootForBody)
+                {
+                    creature->lootForBody = true;
+                    if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
+                        FillLoot(this,loot,lootid,LootTemplates_Creature);
 
-                creature->generateMoneyLoot();
+                    creature->generateMoneyLoot();
+                }
 
                 if (loot_type == LOOT_SKINNING)
                     creature->getSkinLoot();
@@ -5635,8 +5639,8 @@ Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
         return m_items[slot];
-    else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END
-        || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END )
+    else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END 
+        || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END ) 
     {
         Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
         if ( pBag )
