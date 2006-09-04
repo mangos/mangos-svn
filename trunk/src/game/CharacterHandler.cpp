@@ -178,7 +178,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
                         break;
                 }
             }
-            if(team != team_)
+
+            if(team != team_ && GetSecurity() < 2)
             {
                 data.Initialize( SMSG_CHAR_CREATE );
                 data << (uint8)0x33;

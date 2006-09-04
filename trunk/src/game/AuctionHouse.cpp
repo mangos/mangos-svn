@@ -337,7 +337,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     uint32 cnt = 0;
     for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
     {
-        if ((itr->second->auctioneer == GUID_LOPART(auctioneer)) && (itr->second->owner == pl->GetGUIDLow()))
+        if (itr->second->owner == pl->GetGUIDLow())
         {
             cnt++;
         }
@@ -355,7 +355,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     uint32 cnter = 1;
     for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
     {
-        if ((itr->second->auctioneer == GUID_LOPART(auctioneer)) && (itr->second->owner == pl->GetGUIDLow()) && (cnter < 51))
+        if (itr->second->owner == pl->GetGUIDLow() && (cnter < 51))
         {
             AuctionEntry *Aentry = itr->second;
             data << Aentry->Id;
