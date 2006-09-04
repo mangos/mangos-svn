@@ -467,16 +467,17 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_BATTLEMASTER_HELLO,       STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundHelloOpcode       },
         { CMSG_BATTLEMASTER_JOIN,        STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundJoinOpcode        },
         { MSG_BATTLEGROUND_PLAYER_POSITIONS, STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPlayerPositionsOpcode},
-        { MSG_PVP_LOG_DATA,              STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPVPlogdataOpcode },
-        { CMSG_BATTLEFIELD_PORT,         STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPlayerPortOpcode },
-        { CMSG_BATTLEFIELD_LIST,         STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundListOpcode       },
-        { CMSG_LEAVE_BATTLEFIELD,        STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundLeaveOpcode      },
+        { MSG_PVP_LOG_DATA,              STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPVPlogdataOpcode  },
+        { CMSG_BATTLEFIELD_PORT,         STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPlayerPortOpcode  },
+        { CMSG_BATTLEFIELD_LIST,         STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundListOpcode        },
+        { CMSG_LEAVE_BATTLEFIELD,        STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundLeaveOpcode       },
 
         { CMSG_SET_ACTIONBAR_TOGGLES,    STATUS_LOGGEDIN, &WorldSession::HandleSetActionBar                  },
         { CMSG_FIELD_WATCHED_FACTION_SHOW_BAR, STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionIndexOpcode },
 
-        { CMSG_LOOT_ROLL,              STATUS_LOGGEDIN, &WorldSession::HandleLootRoll              },
+        { CMSG_LOOT_ROLL,                STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      },
         { CMSG_WARDEN_DATA,              STATUS_LOGGEDIN, &WorldSession::HandleWardenDataOpcode              },
+        { CMSG_WORLD_TELEPORT,           STATUS_LOGGEDIN, &WorldSession::HandleWorldTeleportOpcode           },
 
         { 0,                             0,               NULL                                               }
     };

@@ -1170,3 +1170,33 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 
 }
+
+void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
+{
+    // write in client console: worldport 469 452 6454 2536 180 or /console worldport 469 452 6454 2536 180):
+    // Received opcode CMSG_WORLD_TELEPORT
+    // Time is ***, map=469, x=452.000000, y=6454.000000, z=2536.000000, orient=3.141593
+
+    sLog.outDebug("Received opcode CMSG_WORLD_TELEPORT");
+    WorldPacket data;
+    uint32 time;
+    uint32 mapid;
+    float PositionX;
+    float PositionY;
+    float PositionZ;
+    float Orientation;
+
+    recv_data >> time;                                      // time in m.sec.
+    recv_data >> mapid;     
+    recv_data >> PositionX;
+    recv_data >> PositionY;
+    recv_data >> PositionZ;
+    recv_data >> Orientation;                               // o (3.141593 = 180 degrees)
+    DEBUG_LOG("Time %u sec, map=%u, x=%f, y=%f, z=%f, orient=%f", time/1000, mapid, PositionX, PositionY, PositionZ, Orientation);
+
+    if (GetSecurity() >= 3)
+    {
+        GetPlayer()->TeleportTo(mapid,PositionX,PositionY,PositionZ,Orientation);
+    }
+    sLog.outDebug("Received worldport command from player %s", GetPlayer()->GetName());
+}
