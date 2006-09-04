@@ -861,7 +861,7 @@ void Player::Update( uint32 p_time )
     // Played time
     if (now > m_Last_tick)
     {
-        uint32 elapsed = (now - m_Last_tick);
+        uint32 elapsed = uint32(now - m_Last_tick);
         m_Played_time[0] += elapsed;                        // Total played time
         m_Played_time[1] += elapsed;                        // Level played time
         m_Last_tick = now;
@@ -8598,7 +8598,7 @@ void Player::SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creatu
 bool Player::LoadFromDB( uint32 guid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic` FROM `character` WHERE `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic`,`totaltime`,`leveltime` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
         return false;
@@ -8679,6 +8679,8 @@ bool Player::LoadFromDB( uint32 guid )
     m_standing = fields[15].GetUInt32();
     m_rating = fields[16].GetFloat();
     m_cinematic = fields[17].GetUInt32();
+    m_Played_time[0]= fields[18].GetUInt32();
+    m_Played_time[1]= fields[19].GetUInt32();
 
     if( HasFlag(PLAYER_FLAGS, 8) )
         SetUInt32Value(PLAYER_FLAGS, 0);
@@ -9051,7 +9053,7 @@ void Player::SaveToDB()
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
-    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`) VALUES ("
+    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -9088,6 +9090,11 @@ void Player::SaveToDB()
 
     ss << ", ";
     ss << m_cinematic;
+
+    ss << ", ";
+    ss << m_Played_time[0];
+    ss << ", ";
+    ss << m_Played_time[1];
 
     ss << " )";
 
