@@ -73,6 +73,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     }
                     break;
                 case 0x0001:                                //spellid=1792  //FOLLOW
+                    pet->AttackStop();
                     pet->addUnitState(UNIT_STAT_FOLLOW);
                     (*pet)->Mutate(new TargetedMovementGenerator(*_player));
                     if(pet->isPet())
@@ -95,6 +96,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     if( player_faction.IsFriendlyTo(unit_faction))
                         return;
 
+                    if(TargetUnit!=pet->getVictim())
+                        pet->AttackStop();
                     pet->AI().AttackStart(TargetUnit);
                     data.Initialize(SMSG_AI_REACTION);
                     data << guid1 << uint32(00000002);
