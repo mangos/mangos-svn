@@ -244,6 +244,8 @@ CREATE TABLE `character` (
   `standing` int(11) NOT NULL default '0',
   `rating` float NOT NULL default '0',
   `cinematic` tinyint(3) unsigned NOT NULL default '0',
+  `totaltime` int(11) unsigned NOT NULL default '0',
+  `leveltime` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),

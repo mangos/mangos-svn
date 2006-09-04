@@ -1173,7 +1173,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 {
-    // write in client console: worldport 469 452 6454 2536 180 or /console worldport 469 452 6454 2536 180):
+    // write in client console: worldport 469 452 6454 2536 180 or /console worldport 469 452 6454 2536 180
     // Received opcode CMSG_WORLD_TELEPORT
     // Time is ***, map=469, x=452.000000, y=6454.000000, z=2536.000000, orient=3.141593
 

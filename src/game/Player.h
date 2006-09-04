@@ -396,8 +396,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_logintime;
         time_t m_Last_tick;
         uint32 m_Played_time[2];
-        int GetTotalPlayedTime() { return m_Played_time[0]; };
-        int GetLevelPlayedTime() { return m_Played_time[1]; };
+        uint32 GetTotalPlayedTime() { return m_Played_time[0]; };
+        uint32 GetLevelPlayedTime() { return m_Played_time[1]; };
 
         void setDeathState(DeathState s)
         {
