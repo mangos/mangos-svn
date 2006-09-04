@@ -41,8 +41,6 @@ ObjectGridRespawnMover::Move(GridType &grid)
     grid.VisitGridObjects(mover);
 }
 
-
-
 void
 ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
@@ -68,11 +66,10 @@ ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 
         if(cur_cell.DiffGrid(resp_cell))
         {
-           MapManager::Instance().GetMap(c->GetMapId())->MoveCreatureToRespawn(c,cur_cell);
+            MapManager::Instance().GetMap(c->GetMapId())->MoveCreatureToRespawn(c,cur_cell);
         }
     }
 }
-
 
 template<class T> void addUnitState(T *obj)
 {

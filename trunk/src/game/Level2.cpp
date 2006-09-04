@@ -574,7 +574,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
 
     Player* player = m_session->GetPlayer();
 
-    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`waittime`) VALUES ('%u','%u','%f', '%f', '%f','%u')", 
+    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`waittime`) VALUES ('%u','%u','%f', '%f', '%f','%u')",
         pCreature->GetGUIDLow(), point, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), wait);
 
     SendSysMessage(LANG_WAYPOINT_ADDED);

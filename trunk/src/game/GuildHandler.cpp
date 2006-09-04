@@ -165,12 +165,12 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
     Guild *guild;
-    
+
     sLog.outDebug( "WORLD: Received CMSG_GUILD_ACCEPT"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildIdInvited());
     if(!guild || GetPlayer()->GetGuildId()) return;
-	guild->InviteMember(GetPlayer());
+    guild->InviteMember(GetPlayer());
     GetPlayer()->SetInGuild(GetPlayer()->GetGuildIdInvited());
     GetPlayer()->SetRank( GR_INITIATE );
     GetPlayer()->SetGuildIdInvited(0);
@@ -692,23 +692,23 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug( "WORLD: Received MSG_SAVE_GUILD_EMBLEM"  );
 
-	uint32 stuff0;
-	uint32 stuff1;
+    uint32 stuff0;
+    uint32 stuff1;
 
-	uint32 EmblemStyle;
+    uint32 EmblemStyle;
     uint32 EmblemColor;
     uint32 BorderStyle;
     uint32 BorderColor;
     uint32 BackgroundColor;
 
-	recvPacket >> stuff0;
-	recvPacket >> stuff1;
+    recvPacket >> stuff0;
+    recvPacket >> stuff1;
 
-	recvPacket >> EmblemStyle;
-	recvPacket >> EmblemColor;
-	recvPacket >> BorderStyle;
-	recvPacket >> BorderColor;
-	recvPacket >> BackgroundColor;
+    recvPacket >> EmblemStyle;
+    recvPacket >> EmblemColor;
+    recvPacket >> BorderStyle;
+    recvPacket >> BorderColor;
+    recvPacket >> BackgroundColor;
 
     Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -717,13 +717,13 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-	if (guild->GetLeader() != GetPlayer()->GetGUID())
-	{
-		SendCommandResult(GUILD_CREATE_S,"",GUILD_PERMISSIONS);
+    if (guild->GetLeader() != GetPlayer()->GetGUID())
+    {
+        SendCommandResult(GUILD_CREATE_S,"",GUILD_PERMISSIONS);
         return;
-	}
+    }
 
-	guild->SetEmblem(EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
+    guild->SetEmblem(EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
 
-	guild->Query(this);
+    guild->Query(this);
 }

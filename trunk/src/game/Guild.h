@@ -180,7 +180,7 @@ class Guild
         void Roster(WorldSession *session);
         void Query(WorldSession *session);
 
-		void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
+        void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
 
     protected:
 

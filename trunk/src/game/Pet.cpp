@@ -200,7 +200,7 @@ void Pet::DeleteFromDB()
 }
 */
 
-void Pet::setDeathState(DeathState s)                    // overwrite virtual Creature::setDeathState and Unit::setDeathState
+void Pet::setDeathState(DeathState s)                       // overwrite virtual Creature::setDeathState and Unit::setDeathState
 {
     Creature::setDeathState(s);
     if(s == JUST_DIED)

@@ -91,7 +91,7 @@ void Creature::CreateTrainerSpells()
         uint32 spellid = fields[0].GetUInt32();
         spellinfo = sSpellStore.LookupEntry(spellid);
 
-        if(!spellinfo) 
+        if(!spellinfo)
         {
             sLog.outError("Trainer (GUID: %u ID: %u ) have in list non existed spell %u",GetGUIDLow(),GetEntry(),spellid);
             continue;
