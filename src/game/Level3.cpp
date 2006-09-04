@@ -283,7 +283,7 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
     if (skill > 0)
     {
         target->SetSkill(skill, level, max);
-        PSendSysMessage(LANG_LEARNED_SKILL, skill);
+        PSendSysMessage(LANG_LEARNED_SKILL, target->GetName(), skill);
     }
     else
         PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
@@ -321,7 +321,7 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
     if (target->GetSkillValue(skill))
     {
         target->SetSkill(skill, 0, 0);
-        PSendSysMessage(LANG_UNLEARNED_SKILL, skill);
+        PSendSysMessage(LANG_UNLEARNED_SKILL, target->GetName(), skill);
     } else
     {
         SendSysMessage(LANG_UNKNOWN_SKILL);
