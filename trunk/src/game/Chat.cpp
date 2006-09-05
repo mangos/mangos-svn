@@ -159,6 +159,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "reload",      3, &ChatHandler::HandleReloadCommand,           "",   NULL },
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
         { "tele",        1, &ChatHandler::HandleTeleCommand,             "",   NULL },
+        { "searchtele",  1, &ChatHandler::HandleSearchTeleCommand,       "",   NULL },
         { "addtele",     3, &ChatHandler::HandleAddTeleCommand,          "",   NULL },
         { "deltele",     3, &ChatHandler::HandleDelTeleCommand,          "",   NULL },
         { "reset",       3, &ChatHandler::HandleResetCommand,            "",   NULL },
