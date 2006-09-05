@@ -397,6 +397,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); }
         FactionTemplateEntry* getFactionTemplateEntry() const;
+        bool IsHostileTo(Unit const* unit) const;
+        bool IsHostileToAll() const;
+        bool IsFriendlyTo(Unit const* unit) const;
+        bool IsNeutralToAll() const;
 
         uint8 getStandState() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_1) & 0xFF); };
 

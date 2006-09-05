@@ -97,10 +97,7 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if(!unit->isTaxi())

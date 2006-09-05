@@ -33,7 +33,7 @@ int GuardAI::Permissible(const Creature *creature)
     return PERMIT_BASE_NO;
 }
 
-GuardAI::GuardAI(Creature &c) : i_creature(c), i_victimGuid(0), i_myFaction(c.getFactionTemplateEntry()), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
+GuardAI::GuardAI(Creature &c) : i_creature(c), i_victimGuid(0), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
 {
 }
 
@@ -44,10 +44,8 @@ void GuardAI::MoveInLineOfSight(Unit *u)
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
         {
-            FactionTemplateResolver your_faction = u->getFactionTemplateEntry();
-
             //Need add code to let guard suport player
-            if( i_myFaction.IsHostileTo(your_faction) || your_faction.IsHostileToAll() )
+            if( i_creature.IsHostileTo(u) || u->IsHostileToAll() )
                 AttackStart(u);
         }
     }

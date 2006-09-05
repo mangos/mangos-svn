@@ -539,7 +539,6 @@ namespace MaNGOS
         SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i) : i_data(data), i_spell(spell), i_index(i) {}
         inline void Visit(PlayerMapType &m)
         {
-            FactionTemplateResolver my_faction = i_spell.m_caster->getFactionTemplateEntry();
             float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
 
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
@@ -547,8 +546,7 @@ namespace MaNGOS
                 if( !itr->second->isAlive() )
                     continue;
 
-                FactionTemplateResolver its_faction = itr->second->getFactionTemplateEntry();
-                if( my_faction.IsFriendlyTo(its_faction) )
+                if( i_spell.m_caster->IsFriendlyTo(itr->second) )
                     continue;
 
                 if( itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
@@ -568,15 +566,13 @@ namespace MaNGOS
 
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
         {
-            FactionTemplateResolver my_faction = i_spell.m_caster->getFactionTemplateEntry();
             float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
             for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
                 if( !itr->second->isAlive() )
                     continue;
 
-                FactionTemplateResolver its_faction = itr->second->getFactionTemplateEntry();
-                if (my_faction.IsFriendlyTo( its_faction ))
+                if (i_spell.m_caster->IsFriendlyTo( itr->second ))
                     continue;
 
                 switch(i_push_type)

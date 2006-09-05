@@ -45,10 +45,7 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if( !unit->isTabardVendor())                            // it's not tabard vendor
@@ -81,10 +78,7 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if( !unit->isBanker())                                  // it's not banker
@@ -130,10 +124,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if(!unit->isCanTrainingOf(_player,true))
@@ -233,10 +224,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     if(!unit) return;
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if(!unit->isCanTrainingOf(_player,true))
@@ -324,10 +312,7 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if( !unit->isGuildMaster())                             // it's not guild master
@@ -353,10 +338,7 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with enemies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if( !unit->isAuctioner())                               // it's not auctioner
@@ -392,10 +374,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if(!Script->GossipHello( _player, unit ))
@@ -420,10 +399,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
@@ -567,10 +543,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    FactionTemplateResolver my_faction = unit->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
     if (itemGUID)

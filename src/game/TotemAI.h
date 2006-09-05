@@ -45,7 +45,6 @@ class MANGOS_DLL_DECL TotemAI : public CreatureAI
         Creature &i_totem;
         uint64 i_victimGuid;
         Unit* i_owner;
-        FactionTemplateResolver i_myFaction;
         TimeTracker i_tracker;
 };
 #endif

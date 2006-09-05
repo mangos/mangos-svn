@@ -29,8 +29,7 @@
 int
 ReactorAI::Permissible(const Creature *creature)
 {
-    FactionTemplateResolver fact_source(creature->getFactionTemplateEntry());
-    if( fact_source.IsNeutralToAll() )
+    if( creature->IsNeutralToAll() )
         return PERMIT_BASE_REACTIVE;
 
     return PERMIT_BASE_NO;
