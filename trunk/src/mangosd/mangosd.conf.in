@@ -99,6 +99,11 @@ Rate.XP.Explore = 1
 # Examples: 2 - creatures will damage 2x, 1.7 - 1.7x.
 Rate.Creature.Damage = 1
 
+#Aggro on/off.
+# 1 - on; 0 - off
+# Default: 1
+Rate.Aggro = 1
+
 # Default remote console port
 Ra.Port = 3443
 
