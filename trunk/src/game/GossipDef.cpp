@@ -392,7 +392,20 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
     data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney);
     data << uint32(pQuest->GetQuestInfo()->RewXP);
 
-    data << uint32(pQuest->GetQuestInfo()->RewSpell);
+    // check if RewSpell is teaching another spell
+    SpellEntry *rewspell = sSpellStore.LookupEntry(pQuest->GetQuestInfo()->RewSpell);
+    if(rewspell)
+    {
+        if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)            
+            data << uint32(rewspell->EffectTriggerSpell[0]);
+        else
+            data << uint32(pQuest->GetQuestInfo()->RewSpell);
+    }
+    else
+    {
+        sLog.outError("Quest %u have non-existed RewSpell %u, ignored.",pQuest->GetQuestInfo()->QuestId,pQuest->GetQuestInfo()->RewSpell);
+        data << uint32(0);
+    }
 
     data << uint32(pQuest->GetQuestInfo()->SrcItemId);
     data << uint32(pQuest->GetQuestInfo()->SpecialFlags);
@@ -492,7 +505,21 @@ void PlayerMenu::SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNex
 
     data << uint32(qInfo->RewOrReqMoney);
     data << uint32(0x00);
-    data << uint32(qInfo->RewSpell);
+
+    // check if RewSpell is teaching another spell
+    SpellEntry *rewspell = sSpellStore.LookupEntry(pQuest->GetQuestInfo()->RewSpell);
+    if(rewspell)
+    {
+        if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)            
+            data << uint32(rewspell->EffectTriggerSpell[0]);
+        else
+            data << uint32(pQuest->GetQuestInfo()->RewSpell);
+    }
+    else
+    {
+        sLog.outError("Quest %u have non-existed RewSpell %u, ignored.",quest_id,pQuest->GetQuestInfo()->RewSpell);
+        data << uint32(0);
+    }
 
     pSession->SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),quest_id );

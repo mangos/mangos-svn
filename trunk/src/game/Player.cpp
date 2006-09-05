@@ -7983,15 +7983,8 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             }
         }
 
-        if ( qInfo->RewSpell > 0 )
-        {
-            WorldPacket sdata;
-
-            sdata.Initialize (SMSG_LEARNED_SPELL);
-            sdata << qInfo->RewSpell;
-            GetSession()->SendPacket( &sdata );
-            addSpell( (uint16)qInfo->RewSpell,1);
-        }
+        if( qInfo->RewSpell > 0 )
+            CastSpell( this, qInfo->RewSpell, true);
 
         uint16 log_slot = GetQuestSlot( quest_id );
         if( log_slot )
