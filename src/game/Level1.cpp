@@ -1177,6 +1177,43 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     return true;
 }
 
+bool ChatHandler::HandleSearchTeleCommand(const char * args)
+{
+    QueryResult *result;
+	if(!*args)
+	{
+		SendSysMessage("Requires search parameter.");
+		return true;
+	}
+	char const* str = strtok((char*)args, " ");
+	result = sDatabase.PQuery("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",str);
+    if (!result)
+    {
+        SendSysMessage("There are no teleport locations matching your request.");
+        return true;
+    }
+	std::string reply;
+    for (uint64 i=0; i < result->GetRowCount(); i++)
+    {
+		Field *fields = result->Fetch();
+        reply += "  ";
+        reply += fields[0].GetCppString();
+		reply += '\n';
+        result->NextRow();
+    }
+    delete result;
+
+    if(reply.empty())
+        SendSysMessage("None locations found.");
+    else
+    {
+        reply = "Locations found are:\n" + reply;
+        SendSysMultilineMessage(reply.c_str());
+    }
+    return true;
+}
+
+
 bool ChatHandler::HandleWhispersCommand(const char* args)
 {
     char* px = strtok((char*)args, " ");
