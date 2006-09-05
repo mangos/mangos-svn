@@ -73,7 +73,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void AddObjectToRemoveList(GameObject    *obj);
         void AddObjectToRemoveList(Corpse        *obj);
         void AddObjectToRemoveList(DynamicObject *obj);
-        void RemoveAllObjectsInRemoveList();
+
+        void DoDelayedMovesAndRemoves();
 
         void RemoveCreatureCorpseFromPlayerView(Creature *);
         void RemoveBonesFromPlayerView(Object *);
@@ -89,6 +90,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
     private:
+        void RemoveAllObjectsInRemoveList();
 
         struct ObjectChangeAccumulator
         {

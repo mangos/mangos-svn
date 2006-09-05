@@ -643,14 +643,15 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
         DEBUG_LOG("Unloading grid[%u,%u] for map %u", x,y, i_id);
         ObjectGridUnloader unloader(*grid);
 
+        // Finish creature moves, remove and delete all creatures with delayed remove before moving to respawn grids
+        // Must know real mob position before move
+        ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
+
         // move creatures to respawn grids if this is diff.grid or to remove list
         unloader.MoveToRespawnN();
 
-        // Finish creature moves at map before unload (before remove list to more safest)
-        MoveAllCreaturesInMoveList();
-
-        // remove and delete all creatures with delayed remove before unload
-        ObjectAccessor::Instance().RemoveAllObjectsInRemoveList();
+        // Finish creature moves, remove and delete all creatures with delayed remove before unload
+        ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
 
         {
             WriteGuard guard(i_info[x][y]->i_lock);

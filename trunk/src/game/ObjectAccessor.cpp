@@ -213,6 +213,13 @@ void ObjectAccessor::_AddObjectToRemoveList(Object *obj)
     sLog.outDebug("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
 }
 
+void ObjectAccessor::DoDelayedMovesAndRemoves()
+{
+    MapManager::Instance().MoveAllCreaturesInMoveList();
+    RemoveAllObjectsInRemoveList();
+}
+
+
 void ObjectAccessor::RemoveAllObjectsInRemoveList()
 {
     if(i_objectsToRemove.empty())
