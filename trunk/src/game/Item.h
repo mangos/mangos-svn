@@ -142,9 +142,6 @@ class MANGOS_DLL_SPEC Item : public Object
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck);
         virtual void DeleteFromDB();
 
-        void SetDurability(uint32 Value);
-        void SetDurabilityToMax();
-
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
 
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }

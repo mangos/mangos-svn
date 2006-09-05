@@ -494,6 +494,15 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_SPIRITHEALER:
                         if( !pPlayer->isDead() )
                             cantalking=false;
+                        else
+                        {
+                            Corpse* corpse = pPlayer->GetCorpse();
+
+                            // prevent resurrect before 30-sec delay after body release not finished
+                            // but let in case lost corpse (spirit must be see in ghost mode any way)
+                            if(corpse && corpse->GetGhostTime() + CORPSE_RECLAIM_DELAY > time(NULL))
+                                cantalking=false;
+                        } 
                         break;
                     case GOSSIP_OPTION_VENDOR:
                         if(!GetItemCount())
@@ -596,7 +605,14 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         case GOSSIP_OPTION_SPIRITHEALER:
             if( player->isDead() )
-                player->GetSession()->SendSpiritResurrect();
+            {
+                Corpse* corpse = player->GetCorpse();
+
+                // prevent resurrect before 30-sec delay after body release not finished
+                // but let in case lost corpse (spirit must be see in ghost mode any way)
+                if(!corpse || corpse->GetGhostTime() + CORPSE_RECLAIM_DELAY <= time(NULL))
+                    player->GetSession()->SendSpiritResurrect();
+            } 
             break;
         case GOSSIP_OPTION_QUESTGIVER:
             player->PrepareQuestMenu( guid );

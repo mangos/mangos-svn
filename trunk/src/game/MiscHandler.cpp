@@ -765,9 +765,6 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     if (dist > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS)
         return;
 
-    //need a accurate value of Max distance
-    //need to judge Resurrect Time
-
     uint64 guid;
     recv_data >> guid;
 

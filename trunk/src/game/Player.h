@@ -769,7 +769,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void KillPlayer();
         void ResurrectPlayer();
         void BuildPlayerRepop();
-        void DurabilityLoss(double percent);
+        void DurabilityLossAll(double percent);
+        void DurabilityLoss(uint8 equip_pos, double percent);
+        void DurabilityRepairAll(bool cost);
+        void DurabilityRepair(uint16 pos, bool cost);
         void RepopAtGraveyard();
         void DuelComplete();
 
