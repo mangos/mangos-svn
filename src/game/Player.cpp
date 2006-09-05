@@ -2407,41 +2407,76 @@ Corpse* Player::GetCorpse() const
     return ObjectAccessor::Instance().GetCorpseForPlayer(*this);
 }
 
-void Player::DurabilityLoss(double percent)
+void Player::DurabilityLossAll(double percent)
 {
-    uint32 pDurability, pNewDurability;
+    for (uint16 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+        DurabilityLoss(i,percent);
+}
 
-    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
+void Player::DurabilityLoss(uint8 equip_pos, double percent)
+{
+    if(!m_items[equip_pos])
+        return;
+
+    uint32 pDurability =  m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_DURABILITY);
+           
+    if(!pDurability)
+        return;
+
+    uint32 pDurabilityLoss = (uint32)(pDurability*percent);
+                
+    if(pDurabilityLoss < 1 )
+        pDurabilityLoss = 1;
+
+    uint32 pNewDurability = pDurability - pDurabilityLoss;
+
+    // we have durability 25% or 0 we should modify item stats
+    // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
+    //        if ( pNewDurability == 0 || pNewDurability * 100 / pDurability < 25)
+    if ( pNewDurability == 0 )
+        _ApplyItemMods(m_items[equip_pos],equip_pos, false);
+
+    m_items[equip_pos]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
+}
+
+void Player::DurabilityRepairAll(bool cost)
+{
+    for (uint16 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+        DurabilityRepair(( (INVENTORY_SLOT_BAG_0 << 8) | i ),cost);
+}
+
+void Player::DurabilityRepair(uint16 pos, bool cost)
+{
+    Item* item = GetItemByPos(pos);
+
+    if(!item)
+        return;
+
+    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    if(!maxDurability)
+        return;
+
+    uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+    // some simple repair formula depending on durability lost
+    if(cost)
     {
-        if(m_items[i])
+        uint32 costs = maxDurability - curDurability;
+
+        if (GetMoney() < costs)
         {
-            pDurability =  m_items[i]->GetUInt32Value(ITEM_FIELD_DURABILITY);
-            if(pDurability)
-            {
-                pNewDurability = (uint32)(pDurability*percent);
-                if ( pNewDurability < 1 )
-                {
-                    pNewDurability = 1;
-                }
-                pNewDurability = (pDurability - pNewDurability);
-
-                if(pNewDurability < 0)
-                {
-                    pNewDurability = 0;
-                }
-
-                m_items[i]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
-
-                // we have durability 25% or 0 we should modify item stats
-                //        if ( pNewDurability == 0 || pNewDurability * 100 / pDurability < 25)
-                if ( pNewDurability == 0 )
-                {
-                    _ApplyItemMods(m_items[i],i, false);
-                }
-
-            }
+            DEBUG_LOG("You do not have enough money");
+            return;
         }
+
+        ModifyMoney( -int32(costs) );
     }
+
+    item->SetUInt32Value(ITEM_FIELD_DURABILITY, maxDurability);
+    
+    // reapply mods for total broken and repaired item if equiped
+    if(IsEquipmentPos(pos) && !curDurability)
+        _ApplyItemMods(item,pos & 255, true);
 }
 
 void Player::RepopAtGraveyard()
@@ -3556,6 +3591,11 @@ void Player::FlightComplete()
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 {
     if(slot >= INVENTORY_SLOT_BAG_END || !item) return;
+
+    // not apply/premove mods for broken item
+    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+    if(maxDurability && !curDurability) return;
 
     ItemPrototype const *proto = item->GetProto();
 

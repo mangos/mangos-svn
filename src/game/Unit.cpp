@@ -251,7 +251,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             DEBUG_LOG("We are dead, loosing 10 percents durability");
             if (durabilityLoss)
             {
-                ((Player*)pVictim)->DurabilityLoss(0.10);
+                ((Player*)pVictim)->DurabilityLossAll(0.10);
             }
             HostilList::iterator i;
             for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
@@ -398,7 +398,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if (randdurability == 10)
             {
                 DEBUG_LOG("HIT: We decrease durability with 5 percent");
-                ((Player*)pVictim)->DurabilityLoss(0.05);
+                ((Player*)pVictim)->DurabilityLossAll(0.05);
             }
         }
 
@@ -707,7 +707,7 @@ void Unit::CalDamageReduction(Unit *pVictim,uint32 School, const uint32 damage, 
         if (randdurability == 10)
         {
             DEBUG_LOG("BLOCK: We decrease durability with 5 percent");
-            ((Player*)pVictim)->DurabilityLoss(0.05);
+            ((Player*)pVictim)->DurabilityLossAll(0.05);
         }
     }
 }

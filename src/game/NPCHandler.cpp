@@ -432,6 +432,18 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 {
+    sLog.outDetail("WORLD: CMSG_SPIRIT_HEALER_ACTIVATE");
+
+    if( !GetPlayer()->isDead() )
+        return;
+
+    Corpse* corpse = GetPlayer()->GetCorpse();
+
+    // prevent resurrect before 30-sec delay after body release not finished
+    // but let in case lost corpse (spirit must be see in ghost mode any way)
+    if(corpse && corpse->GetGhostTime() + CORPSE_RECLAIM_DELAY > time(NULL))
+        return;
+
     SendSpiritResurrect();
 }
 
@@ -449,7 +461,7 @@ void WorldSession::SendSpiritResurrect()
     //Characters level 20 and up suffer from ten minutes of sickness.
     if (level > 10)
     {
-        SpellEntry *spellInfo = sSpellStore.LookupEntry( 15007 );
+        SpellEntry *spellInfo = sSpellStore.LookupEntry( SPELL_PASSIVE_RESURRACTION_SICKNESS );
         if(spellInfo)
         {
             for(uint32 i = 0;i<3;i++)
@@ -478,7 +490,7 @@ void WorldSession::SendSpiritResurrect()
     _player->SetPower(POWER_ENERGY, _player->GetMaxPower(POWER_ENERGY));
     _player->ApplyStats(true);
 
-    _player->DurabilityLoss(0.25);
+    _player->DurabilityLossAll(0.25);
     _player->SpawnCorpseBones();
 
     // update world right away
@@ -543,7 +555,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_REPAIR_ITEM");
     WorldPacket data;
-    Item* pItem;
+
     uint64 npcGUID, itemGUID;
 
     recv_data >> npcGUID >> itemGUID;
@@ -565,67 +577,15 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     {
         sLog.outDetail("ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
 
-        pItem = _player->GetItemByPos( _player->GetPosByGuid(itemGUID));
+        uint16 pos = _player->GetPosByGuid(itemGUID);
 
-        if (!pItem)
-        {
-            sLog.outDetail("PLAYER: Invalid item, GUID = %u", GUID_LOPART(itemGUID));
-            return;
-        }
-        uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-        if (durability != 0)
-        {
-            // some simple repair formula depending on durability lost
-            uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
-            uint32 costs = durability - curdur;
-
-            if (_player->GetMoney() >= costs)
-            {
-                _player->ModifyMoney( -int32(costs) );
-                // repair item
-                pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
-            }
-            else
-            {
-                DEBUG_LOG("You do not have enough money");
-            }
-
-        }
+        _player->DurabilityRepair(pos,true);
 
     }
     else
     {
         sLog.outDetail("ITEM: Repair all items, npcGUID = %u", GUID_LOPART(npcGUID));
 
-        for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
-        {
-            pItem = _player->GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-            if (pItem)
-            {
-                uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-                if (durability != 0)
-                {
-
-                    // some simple repair formula depending on durability lost
-                    uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
-                    uint32 costs = durability - curdur;
-
-                    if (_player->GetMoney() >= costs)
-                    {
-                        _player->ModifyMoney( -int32(costs) );
-                        // repair item
-                        pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
-                        // DEBUG_LOG("Item is: %d, maxdurability is: %d", srcitem, durability);
-                        // _player->_ApplyItemMods(srcitem,i, false);
-
-                    }
-                    else
-                    {
-                        DEBUG_LOG("You do not have enough money");
-                    }
-
-                }
-            }
-        }
+        _player->DurabilityRepairAll(true);
     }
 }
