@@ -2389,6 +2389,36 @@ FactionTemplateEntry* Unit::getFactionTemplateEntry() const
     return entry;
 }
 
+bool Unit::IsHostileToAll() const
+{
+    FactionTemplateResolver my_faction = getFactionTemplateEntry();
+
+    return my_faction.IsHostileToAll();
+}
+
+bool Unit::IsHostileTo(Unit const* unit) const
+{
+    FactionTemplateResolver my_faction = getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
+
+    return my_faction.IsHostileTo(your_faction) || my_faction.IsHostileToAll();
+}
+
+bool Unit::IsFriendlyTo(Unit const* unit) const
+{
+    FactionTemplateResolver my_faction = getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
+
+    return my_faction.IsFriendlyTo(your_faction);
+}
+
+bool Unit::IsNeutralToAll() const
+{
+    FactionTemplateResolver my_faction = getFactionTemplateEntry();
+
+    return my_faction.IsNeutralToAll();
+}
+
 bool Unit::Attack(Unit *victim)
 {
     if(victim == this)

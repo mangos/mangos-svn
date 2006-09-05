@@ -300,12 +300,10 @@ void Spell::EffectApplyAura(uint32 i)
         if (!spellInfo) return;
         if (spellInfo->EffectImplicitTargetA[0] == TARGET_S_E && m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            FactionTemplateResolver my_faction = m_caster->getFactionTemplateEntry();
             Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
             if (target)
             {
-                FactionTemplateResolver sel_faction = target->getFactionTemplateEntry();
-                if (!my_faction.IsFriendlyTo(sel_faction))
+                if (!m_caster->IsFriendlyTo(target))
                     Aur->SetTarget(target);
                 else
                     cancel();

@@ -41,10 +41,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     {
         uint32 questStatus = DIALOG_STATUS_NONE;
 
-        FactionTemplateResolver my_faction = pCreature->getFactionTemplateEntry();
-        FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-        if( !my_faction.IsHostileTo(your_faction))          // not show quest status to enemies
+        if( !pCreature->IsHostileTo(_player))                // not show quest status to enemies
         {
             questStatus = Script->NPCDialogStatus(_player, pCreature);
             if( questStatus > 6 )
@@ -68,10 +65,7 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
     if(!pCreature)
         return;
 
-    FactionTemplateResolver my_faction = pCreature->getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = _player->getFactionTemplateEntry();
-
-    if( my_faction.IsHostileTo(your_faction))               // do not talk with ememies
+    if(pCreature->IsHostileTo(_player))                     // do not talk with ememies
         return;
 
     if(Script->GossipHello( _player, pCreature ) )

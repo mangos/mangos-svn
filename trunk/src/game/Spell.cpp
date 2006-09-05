@@ -1543,9 +1543,7 @@ uint8 Spell::CanCast()
                     if( !(*itr)->isAlive() )
                         continue;
 
-                    FactionTemplateResolver my_faction = m_caster->getFactionTemplateEntry();
-                    FactionTemplateResolver its_faction = (*itr)->getFactionTemplateEntry();
-                    if( !its_faction.IsHostileTo(my_faction) && !its_faction.IsHostileToAll() )
+                    if( !(*itr)->IsHostileTo(m_caster) )
                         continue;
 
                     if((*itr)->GetTypeId() != TYPEID_PLAYER)

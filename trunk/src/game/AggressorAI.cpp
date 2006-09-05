@@ -29,14 +29,14 @@
 int
 AggressorAI::Permissible(const Creature *creature)
 {
-    FactionTemplateResolver fact_source(creature->getFactionTemplateEntry());
-    if( fact_source.IsHostileToAll() )
+    // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
+    if( !creature->IsNeutralToAll() )
         return PERMIT_BASE_PROACTIVE;
 
     return PERMIT_BASE_NO;
 }
 
-AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_victimGuid(0), i_myFaction(c.getFactionTemplateEntry()), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
+AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_victimGuid(0), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
 {
 }
 
@@ -48,8 +48,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
         {
-            FactionTemplateResolver your_faction = u->getFactionTemplateEntry();
-            if( i_myFaction.IsHostileTo( your_faction ) )
+            if( i_creature.IsHostileTo( u ) )
                 AttackStart(u);
             if(u->isStealth())
                 u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);

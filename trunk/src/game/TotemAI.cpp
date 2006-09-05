@@ -27,14 +27,13 @@
 int
 TotemAI::Permissible(const Creature *creature)
 {
-    FactionTemplateResolver fact_source(creature->getFactionTemplateEntry());
-    if( fact_source.IsHostileToAll() )
+    if( creature->isTotem() )
         return PERMIT_BASE_PROACTIVE;
 
     return PERMIT_BASE_NO;
 }
 
-TotemAI::TotemAI(Creature &c) : i_totem(c), i_victimGuid(0), i_myFaction(c.getFactionTemplateEntry()), i_tracker(TIME_INTERVAL_LOOK)
+TotemAI::TotemAI(Creature &c) : i_totem(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_LOOK)
 {
 }
 
@@ -101,6 +100,7 @@ TotemAI::UpdateAI(const uint32 diff)
         i_victimGuid = 0;
 
     // look for a new victim in range
+    FactionTemplateResolver myFaction = i_totem.getFactionTemplateEntry();
     std::list<Unit*> UnitList;
     MapManager::Instance().GetMap(i_totem.GetMapId())->GetUnitList(i_totem.GetPositionX(), i_totem.GetPositionY(),UnitList);
     for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
@@ -108,7 +108,7 @@ TotemAI::UpdateAI(const uint32 diff)
         if((*iter) && (*iter)->isTargetableForAttack()&& IsVisible(*iter))
         {
             FactionTemplateResolver its_faction = (*iter)->getFactionTemplateEntry();
-            if(i_myFaction.IsFriendlyTo(its_faction) || i_myFaction.IsNeutralToAll() || its_faction.IsNeutralToAll())
+            if(myFaction.IsFriendlyTo(its_faction) || myFaction.IsNeutralToAll() || its_faction.IsNeutralToAll())
                 continue;
             if(i_totem.GetDistanceSq(*iter) < max_range * max_range )
             {

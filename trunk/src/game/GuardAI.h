@@ -53,7 +53,6 @@ class MANGOS_DLL_DECL GuardAI : public CreatureAI
 
         Creature &i_creature;
         uint64 i_victimGuid;
-        FactionTemplateResolver i_myFaction;
         GuardState i_state;
         TimeTracker i_tracker;
 };

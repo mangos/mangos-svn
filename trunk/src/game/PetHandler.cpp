@@ -89,11 +89,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     Unit *TargetUnit = ObjectAccessor::Instance().GetUnit(*_player, selguid);
                     if(TargetUnit == NULL) return;
 
-                    FactionTemplateResolver unit_faction = TargetUnit->getFactionTemplateEntry();
-                    FactionTemplateResolver player_faction = GetPlayer()->getFactionTemplateEntry();
-
                     // not let attack friendly units.
-                    if( player_faction.IsFriendlyTo(unit_faction))
+                    if( GetPlayer()->IsFriendlyTo(TargetUnit))
                         return;
 
                     if(TargetUnit!=pet->getVictim())
@@ -144,10 +141,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             if(!unit_target) 
                 return;
 
-            FactionTemplateResolver target_faction = unit_target->getFactionTemplateEntry();
-            FactionTemplateResolver owner_faction = _player->getFactionTemplateEntry();
-
-            if(owner_faction.IsFriendlyTo(target_faction))  // do not spell attack of friends
+            // do not spell attack of friends
+            if(_player->IsFriendlyTo(unit_target))
                 return;
 
             pet->clearUnitState(UNIT_STAT_FOLLOW);
