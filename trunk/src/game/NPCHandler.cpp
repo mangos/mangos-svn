@@ -461,7 +461,7 @@ void WorldSession::SendSpiritResurrect()
     //Characters level 20 and up suffer from ten minutes of sickness.
     if (level > 10)
     {
-        SpellEntry *spellInfo = sSpellStore.LookupEntry( SPELL_PASSIVE_RESURRACTION_SICKNESS );
+        SpellEntry *spellInfo = sSpellStore.LookupEntry( SPELL_PASSIVE_RESURRECTION_SICKNESS );
         if(spellInfo)
         {
             for(uint32 i = 0;i<3;i++)
