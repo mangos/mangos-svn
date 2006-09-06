@@ -155,7 +155,7 @@ void WorldSession::LogoutPlayer(bool Save)
         guild = objmgr.GetGuildById(_player->GetGuildId());
         if(guild)
         {
-            guild->Loadplayerstatsbyguid(_player->GetGUID());
+            guild->LoadPlayerStatsByGuid(_player->GetGUID());
         }
         _player->UnsummonPet();
         _player->Uncharm();

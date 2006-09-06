@@ -148,8 +148,8 @@ class Guild
         void LoadGuildFromDB(uint32 GuildId);
         void LoadRanksFromDB(uint32 GuildId);
         void LoadMembersFromDB(uint32 GuildId);
-        void Loadplayerstats(MemberSlot *memslot);
-        void Loadplayerstatsbyguid(uint64 guid);
+        void LoadPlayerStats(MemberSlot *memslot);
+        void LoadPlayerStatsByGuid(uint64 guid);
 
         void SaveGuildToDB();
         void SaveRanksToDB();
