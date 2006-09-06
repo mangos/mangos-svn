@@ -134,7 +134,7 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
 
     Id = fields[0].GetUInt32();
     name = fields[1].GetCppString();
-    leaderGuid = fields[2].GetUInt64();
+    leaderGuid  = MAKE_GUID(fields[2].GetUInt32(),HIGHGUID_PLAYER);
     EmblemStyle = fields[3].GetUInt32();
     EmblemColor = fields[4].GetUInt32();
     BorderStyle = fields[5].GetUInt32();
@@ -198,10 +198,10 @@ void Guild::LoadMembersFromDB(uint32 GuildId)
     {
         fields = result->Fetch();
         newmember = new MemberSlot;
-        newmember->guid = fields[0].GetUInt64();
+        newmember->guid = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
         newmember->RankId = fields[1].GetUInt32();
         pl = ObjectAccessor::Instance().FindPlayer(newmember->guid);
-        if(!pl || !pl->IsInWorld()) Loadplayerstats(newmember);
+        if(!pl || !pl->IsInWorld()) LoadPlayerStats(newmember);
         newmember->Pnote = fields[2].GetCppString();
         newmember->OFFnote = fields[3].GetCppString();
         AddMember(newmember);
@@ -210,7 +210,7 @@ void Guild::LoadMembersFromDB(uint32 GuildId)
     delete result;
 }
 
-void Guild::Loadplayerstats(MemberSlot *memslot)
+void Guild::LoadPlayerStats(MemberSlot *memslot)
 {
     Field *fields;
 
@@ -230,7 +230,7 @@ void Guild::Loadplayerstats(MemberSlot *memslot)
     delete result;
 }
 
-void Guild::Loadplayerstatsbyguid(uint64 guid)
+void Guild::LoadPlayerStatsByGuid(uint64 guid)
 {
     Player *pl;
 
@@ -294,7 +294,7 @@ void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
 void Guild::SaveGuildToDB()
 {
     sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
-    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`MOTD`,`createdate`) VALUES('%u','%s','%u', '%s', NOW())", Id, name.c_str(), leaderGuid, MOTD.c_str());
+    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`MOTD`,`createdate`) VALUES('%u','%s','%u', '%s', NOW())", Id, name.c_str(), GUID_LOPART(leaderGuid), MOTD.c_str());
     sDatabase.PExecute("UPDATE `guild` SET EmblemStyle=%u, EmblemColor=%u, BorderStyle=%u, BorderColor=%u, BackgroundColor=%u WHERE guildid = %u", EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, Id);
     SaveRanksToDB();
     SaveGuildMembersToDB();
@@ -326,7 +326,7 @@ void Guild::SaveMemberToDB(MemberSlot *memslot)
 {
     if(!memslot) return;
     sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'",memslot->guid);
-    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')", Id, memslot->guid, memslot->RankId, memslot->Pnote.c_str(), memslot->OFFnote.c_str());
+    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')", Id, GUID_LOPART(memslot->guid), memslot->RankId, memslot->Pnote.c_str(), memslot->OFFnote.c_str());
 }
 
 void Guild::DelGuildFromDB()
