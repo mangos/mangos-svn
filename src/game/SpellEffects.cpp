@@ -537,7 +537,13 @@ void Spell::EffectOpenLock(uint32 i)
     }
 
     LootType loottype = LOOT_CORPSE;
-    LockEntry *lockInfo = sLockStore.LookupEntry(gameObjTarget->GetGOInfo()->sound0);
+    uint32 lockId = gameObjTarget->GetGOInfo()->sound0;
+    LockEntry *lockInfo = sLockStore.LookupEntry(lockId);
+    if (!lockInfo)
+    {
+        sLog.outError( "Spell::EffectOpenLock: object [guid = %u] has an unknown lockId: %u!", gameObjTarget->GetGUID() , lockId);
+        return;
+    }
     uint16 skill = 999;
 
     if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_HERBALISM)
