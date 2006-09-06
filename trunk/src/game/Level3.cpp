@@ -1562,6 +1562,13 @@ bool ChatHandler::HandleUnAuraCommand(const char* args)
     if (!px)
         return false;
 
+    std::string argstr = args;
+    if (argstr == "all")
+    {
+        m_session->GetPlayer()->RemoveAllAuras();
+        return true;
+    }
+
     uint32 spellID = (uint32)atoi(px);
     m_session->GetPlayer()->RemoveAurasDueToSpell(spellID);
 
@@ -2408,6 +2415,31 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     if(sDatabase.PExecute("DELETE FROM `game_tele` WHERE `name` = '%s'",name))
     {
         SendSysMessage("Teleport location deleted.");
+    }
+    return true;
+}
+
+bool ChatHandler::HandleListAurasCommand (const char * args)
+{
+    Unit *unit = this->getSelectedUnit();
+    if (!unit)
+        unit = this->m_session->GetPlayer();
+
+    Unit::AuraMap& uAuras = unit->GetAuras();
+    SendSysMessage(fmtstring("Target unit has %d auras:", uAuras.size()));
+    for (Unit::AuraMap::iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
+    {
+        SendSysMessage(fmtstring("id: %d eff: %d type: %d duration: %d ", itr->second->GetId(), itr->second->GetEffIndex(), itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration()) );
+    }
+    for (int i = 0; i < TOTAL_AURAS; i++)
+    {
+        Unit::AuraList& uAuraList = unit->GetAurasByType(i);
+        if (!uAuraList.size()) continue;
+        SendSysMessage(fmtstring("Target unit has %d auras of type %d:", uAuraList.size(), i));
+        for (Unit::AuraList::iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
+        {
+            SendSysMessage(fmtstring("id: %d eff: %d", (*itr)->GetId(), (*itr)->GetEffIndex()) );
+        }
     }
     return true;
 }
