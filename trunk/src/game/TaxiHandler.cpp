@@ -199,7 +199,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
     uint32 sourcenode;
     recv_data >> sourcenode;
 
-    uint32 sourcepath;
+    uint32 sourcepath = 0;
     uint32 totalcost = 0;
 
     uint32 prevnode = sourcenode;
@@ -213,9 +213,11 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
 
         recv_data >> lastnode;
         objmgr.GetTaxiPath( prevnode, lastnode, path, cost);
-        totalcost += cost;
+
         if(!path) 
             break;
+
+        totalcost += cost;
 
         if(prevnode == sourcenode)
             sourcepath = path;
