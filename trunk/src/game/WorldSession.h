@@ -87,6 +87,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendAuctionHello( uint64 guid );
         void SendTabardVendorActivate( uint64 guid );
         void SendTaxiStatus( uint64 guid );
+        void SendDoFlight( uint16 MountId, uint32 path );
         void SendSpiritResurrect();
         void SendBindPoint();
         void SendGMTicketGetTicket(uint32 status, char const* text);
@@ -227,6 +228,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);
         void HandleTaxiQueryAviableNodesOpcode(WorldPacket& recvPacket);
         void HandleActivateTaxiOpcode(WorldPacket& recvPacket);
+        void HandleActivateTaxiFarOpcode(WorldPacket& recvPacket);
+        void HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket);
 
         void HandleTabardVendorActivateOpcode(WorldPacket& recvPacket);
         void HandleBankerActivateOpcode(WorldPacket& recvPacket);

@@ -156,6 +156,138 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Sent SMSG_SHOWTAXINODES" );
 }
 
+void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
+{
+    WorldPacket data;
+
+    GetPlayer( )->Mount( MountId, true );
+    FlightPathMovementGenerator *flight(new FlightPathMovementGenerator(*_player, path));
+    Path &pathnodes(flight->GetPath());
+    assert( pathnodes.Size() > 0 );
+
+    uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
+    data.Initialize( SMSG_MONSTER_MOVE );
+    data << uint8(0xFF);
+    data << GetPlayer( )->GetGUID();
+    data << GetPlayer( )->GetPositionX( )
+        << GetPlayer( )->GetPositionY( )
+        << GetPlayer( )->GetPositionZ( );
+    data << GetPlayer( )->GetOrientation( );
+    data << uint8( 0 );
+    data << uint32( 0x00000300 );
+    data << uint32( traveltime );
+    data << uint32( pathnodes.Size( ) );
+    data.append( (char*)pathnodes.GetNodes( ), pathnodes.Size( ) * 4 * 3 );
+
+    //WPAssert( data.size() == 37 + pathnodes.Size( ) * 4 * 3 );
+    GetPlayer()->SendMessageToSet(&data, true);
+}
+
+void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
+{
+    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI_FAR" );
+
+    uint64 guid;
+    uint32 node_count, _totalcost;
+    uint16 MountId;
+    WorldPacket data;
+
+    recv_data >> guid >> _totalcost >> node_count;
+
+    // node_count = 1 (source node) + destination nodes
+
+    uint32 sourcenode;
+    recv_data >> sourcenode;
+
+    uint32 sourcepath;
+    uint32 totalcost = 0;
+
+    uint32 prevnode = sourcenode;
+    uint32 lastnode = 0;
+
+    GetPlayer()->ClearTaxiDestinations();
+
+    for(uint32 i = 1; i < node_count; ++i)
+    {
+        uint32 path, cost;
+
+        recv_data >> lastnode;
+        objmgr.GetTaxiPath( prevnode, lastnode, path, cost);
+        totalcost += cost;
+        if(!path) 
+            break;
+
+        if(prevnode == sourcenode)
+            sourcepath = path;
+
+        GetPlayer()->AddTaxiDestination(lastnode);
+
+        prevnode = lastnode;
+    }
+
+    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI_FAR from %d to %d" ,sourcenode,lastnode);
+
+    if( GetPlayer( )->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
+        return;
+
+    MountId = objmgr.GetTaxiMount(sourcenode);
+
+    data.Initialize( SMSG_ACTIVATETAXIREPLY );
+
+    if ( MountId == 0 || sourcepath == 0)
+    {
+        data << uint32( 1 );
+        SendPacket( &data );
+        return;
+    }
+
+    uint32 money = GetPlayer()->GetMoney();
+    if(money < totalcost )
+    {
+        data << uint32( 3 );
+        SendPacket( &data );
+        return;
+    }
+
+    // unsommon pet, it will be lost anyway
+    GetPlayer( )->UnsummonPet();
+
+    //CHECK DONE, DO FLIGHT
+
+    GetPlayer( )->SaveToDB();                               //For temporary avoid save player on air
+
+    GetPlayer( )->setDismountCost( money - totalcost);
+
+    data << uint32( 0 );
+
+    SendPacket( &data );
+    sLog.outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
+
+    SendDoFlight( MountId, sourcepath );
+}
+
+void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
+{
+    uint32 sourcenode,destinationnode;
+    uint16 MountId;
+    uint32 path, cost;
+    WorldPacket data;
+
+    sLog.outDebug( "WORLD: Received CMSG_MOVE_SPLINE_DONE" );
+
+    sourcenode      = GetPlayer()->GetTaxiSource();
+    destinationnode = GetPlayer()->NextTaxiDestination();
+    if ( destinationnode > 0 ) // if more destinations to go
+    {
+        sLog.outDebug( "WORLD: Taxi has to go from %d to %d", sourcenode, destinationnode );
+
+        MountId = objmgr.GetTaxiMount(sourcenode);
+        objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
+
+        SendDoFlight( MountId, path );
+    }
+}
+
 void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI" );
@@ -178,7 +310,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     data.Initialize( SMSG_ACTIVATETAXIREPLY );
 
-    if ( MountId == 0 || (path == 0 && cost == 0))
+    if ( MountId == 0 || path == 0 )
     {
         data << uint32( 1 );
         SendPacket( &data );
@@ -193,6 +325,9 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         return;
     }
 
+    GetPlayer()->ClearTaxiDestinations();
+    GetPlayer()->AddTaxiDestination(destinationnode);
+
     // unsommon pet, it will be lost anyway
     GetPlayer( )->UnsummonPet();
 
@@ -206,26 +341,6 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
-    FlightPathMovementGenerator *flight(new FlightPathMovementGenerator(*_player, path));
-    Path &pathnodes(flight->GetPath());
-    assert( pathnodes.Size() > 0 );
 
-    GetPlayer( )->Mount( MountId, true );
-
-    uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
-    data.Initialize( SMSG_MONSTER_MOVE );
-    data << uint8(0xFF);
-    data << GetPlayer( )->GetGUID();
-    data << GetPlayer( )->GetPositionX( )
-        << GetPlayer( )->GetPositionY( )
-        << GetPlayer( )->GetPositionZ( );
-    data << GetPlayer( )->GetOrientation( );
-    data << uint8( 0 );
-    data << uint32( 0x00000300 );
-    data << uint32( traveltime );
-    data << uint32( pathnodes.Size( ) );
-    data.append( (char*)pathnodes.GetNodes( ), pathnodes.Size( ) * 4 * 3 );
-
-    //WPAssert( data.size() == 37 + pathnodes.Size( ) * 4 * 3 );
-    GetPlayer()->SendMessageToSet(&data, true);
+    SendDoFlight( MountId, path );
 }
