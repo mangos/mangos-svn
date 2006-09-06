@@ -377,6 +377,15 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildEnumData( WorldPacket * p_data );
 
         uint8 ToggleAFK() { m_afk = !m_afk; return m_afk; };
+
+        void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
+        void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
+        uint32 GetTaxiSource() const { return m_TaxiDestinations.front(); }
+        uint32 NextTaxiDestination() { 
+            m_TaxiDestinations.pop_front();
+            return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front();
+        }
+
         bool isAcceptTickets() const;
         void SetAcceptTicket(bool on) { if(on) m_GMFlags |= GM_ACCEPT_TICKETS; else m_GMFlags &= ~GM_ACCEPT_TICKETS; }
         bool isAcceptWhispers() const { return m_GMFlags & GM_ACCEPT_WHISPERS; }
@@ -1042,6 +1051,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::list<Channel*> m_channels;
 
         bool m_dontMove;
+
+        std::deque<uint32> m_TaxiDestinations;
+
 
         float m_total_honor_points;
         float m_rating;

@@ -454,6 +454,7 @@ NameTableEntry g_worldOpcodeNames[] =
     {  CMSG_TAXIQUERYAVAILABLENODES,                        "CMSG_TAXIQUERYAVAILABLENODES"},
     {  CMSG_ACTIVATETAXI,                                   "CMSG_ACTIVATETAXI"},
     {  SMSG_ACTIVATETAXIREPLY,                              "SMSG_ACTIVATETAXIREPLY"},
+    {  CMSG_ACTIVATETAXI_FAR,                               "CMSG_ACTIVATETAXI_FAR"},
     {  SMSG_NEW_TAXI_PATH,                                  "SMSG_NEW_TAXI_PATH"},
     {  CMSG_TRAINER_LIST,                                   "CMSG_TRAINER_LIST"},
     {  SMSG_TRAINER_LIST,                                   "SMSG_TRAINER_LIST"},
