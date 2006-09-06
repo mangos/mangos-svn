@@ -213,7 +213,22 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_positionX = info->positionX;
     m_positionY = info->positionY;
     m_positionZ = info->positionZ;
+
+    // Taxi nodes setup
     memset(m_taximask, 0, sizeof(m_taximask));
+
+    // Automatically add the race's taxi hub to the character's taximask at creation time ( 1 << (taxi_node_id-1) )
+    switch(race)
+    {
+        case TAUREN:        m_taximask[0]= 1 << (22-1); break;
+        case HUMAN:         m_taximask[0]= 1 << ( 2-1); break;
+        case DWARF:         m_taximask[0]= 1 << ( 6-1); break;
+        case NIGHTELF:      m_taximask[0]= 1 << (27-1); break;
+        case GNOME:         m_taximask[0]= 1 << ( 6-1); break;
+        case ORC:           m_taximask[0]= 1 << (23-1); break;
+        case UNDEAD_PLAYER: m_taximask[0]= 1 << (11-1); break;
+        case TROLL:         m_taximask[0]= 1 << (23-1); break;
+    }
 
     uint8 powertype = 0;
     uint32 unitfield = 0;
