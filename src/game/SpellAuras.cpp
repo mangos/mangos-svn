@@ -732,10 +732,10 @@ void Aura::HandleAuraDummy(bool apply)
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
         {
             Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-            if(apply && !m_procCharges)
+            /*if(apply && !m_procCharges)
                 tAuraProcTriggerDamage.push_back(this);
             if(!apply && !m_duration)
-                tAuraProcTriggerDamage.remove(this);
+                tAuraProcTriggerDamage.remove(this);*/
 
             if(apply && !m_procCharges)
             {
