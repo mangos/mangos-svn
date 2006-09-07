@@ -380,7 +380,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
         void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
-        uint32 GetTaxiSource() const { return m_TaxiDestinations.front(); }
+        uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
         uint32 NextTaxiDestination() { 
             m_TaxiDestinations.pop_front();
             return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front();
