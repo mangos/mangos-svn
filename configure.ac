@@ -70,46 +70,41 @@ LTMS_AGE=$LIBMANGOSSCRIPT_MICRO_VERSION
 COMPILER_OPTIONS=""
 LINKER_OPTIONS=""
 
-INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/openssl -I/usr/local/include/openssl"
-AC_SUBST(INCLUDES)
-LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"
-AC_SUBST(LDFLAGS)
-
 # check for openssl path given
-AC_MSG_CHECKING(whether openssl path was given)
-MANGOSD_WITH_OPENSSL=
-AC_ARG_ENABLE(with-openssl,
-[  --with-openssl Specify openssl path],
++AC_ARG_WITH(openssl,
+[  --with-openssl=/path/to/openssl/dir    OpenSSL directory],
 [
-    if test "$enableval" != "" ; then
-        INCLUDES="-I$enableval/include/openssl -I/usr/include/mysql -I/usr/local/include/mysql"
-	AC_SUBST(INCLUDES)
-    elif test "$enableval" = "" ; then
-        AC_MSG_ERROR(Please choose openssl path)
-    fi
+  AC_CHECK_FILE($withval/include/openssl/ssl.h,
+  [
+    OPENSSL_INCLUDES="-I$withval/include"
+    OPENSSL_LDFLAGS="-L$withval/lib"],
+  [AC_MSG_ERROR([Directory '$withval' does not exist, or does not contain OpenSSL])]) ],
+ [
+  OPENSSL_INCLUDES=""
+  OPENSSL_LDFLAGS="" ])
 
-])
-AC_MSG_RESULT($MANGOSD_WITH_OPENSSL)
-
+AC_SUBST(OPENSSL_INCLUDES)
+AC_SUBST(OPENSSL_LDFLAGS)
 
 # check for mysql path given
-AC_MSG_CHECKING(whether mysql path was given)
-MANGOSD_WITH_MYSQL=
-AC_ARG_ENABLE(with-mysql,
-[  --with-mysql Specify mysql path],
+AC_ARG_WITH(mysql,
+[  --with-mysql=/path/to/mysql/dir        MySQL directory]],
 [
-    if test "$enableval" != "" ; then
-        INCLUDES="-I$enableval/include/mysql -I/usr/include/openssl -I/usr/local/include/openssl"
-	AC_SUBST(INCLUDES)
-        LDFLAGS="-L$enableval/lib/mysql"
-	AC_SUBST(LDFLAGS)
-    elif test "$enableval" = "" ; then
-        AC_MSG_ERROR(Please choose mysql path)
-    fi
+  AC_CHECK_FILE($withval/include/mysql.h,
+    [MYSQL_INCLUDES="-I$withval/include"
+    MYSQL_LDFLAGS="-L$withval/lib"],
+    [AC_MSG_ERROR([Directory '$withval' does not exist, or does not contain MySQL])]) ],
+[
+  MYSQL_INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql"
+  MYSQL_LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"])
 
-])
-AC_MSG_RESULT($MANGOSD_WITH_MYSQL)
+AC_SUBST(MYSQL_INCLUDES)
+AC_SUBST(MYSQL_LDFLAGS)
 
+INCLUDES="$MYSQL_INCLUDES $OPENSSL_INCLUDES"
+LDFLAGS="$MYSQL_LDFLAGS $OPENSSL_LDFLAGS"
+AC_SUBST(INCLUDES)
+AC_SUBST(LDFLAGS)
 
 
 dnl Checks for libraries.
@@ -136,7 +131,7 @@ AC_HEADER_TIME
 AC_CHECK_HEADERS(                                             \
    limits.h sys/ioctl.h unistd.h fcntl.h float.h mysql.h      \
    netdb.h netinet/in.h stddef.h sys/socket.h                 \
-   sys/time.h sys/timeb.h opensslv.h                          \
+   sys/time.h sys/timeb.h openssl/opensslv.h                          \
  ,[],[AC_MSG_ERROR([Missing required header])])
 
 CPPFLAGS=$CPPFLAGS_SAVE
