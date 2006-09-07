@@ -258,15 +258,15 @@ uint32 Aura::CalculateDamage()
 {
     SpellEntry* spellproto = GetSpellProto();
     uint32 value = 0;
-    uint32 level;
+    uint32 level = 0;
     if(!m_target)
         return 0;
     Unit* caster = GetCaster();
     if(!caster)
         caster = m_target;
-    level= caster->getLevel();
+    /*level= caster->getLevel();
     if( level > spellproto->maxLevel && spellproto->maxLevel > 0)
-        level = spellproto->maxLevel;
+        level = spellproto->maxLevel;*/
 
     float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[m_effIndex];
     float randomPointsPerLevel = spellproto->EffectDicePerLevel[m_effIndex];
@@ -731,11 +731,11 @@ void Aura::HandleAuraDummy(bool apply)
         Player *player = (Player*)caster;
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
         {
-            Unit::AuraList& tAuraPeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-            if(apply)
-                tAuraPeriodicDamage.push_back(this);
-            else
-                tAuraPeriodicDamage.remove(this);
+            Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+            if(apply && !m_procCharges)
+                tAuraProcTriggerDamage.push_back(this);
+            if(!apply && !m_duration)
+                tAuraProcTriggerDamage.remove(this);
 
             if(apply && !m_procCharges)
             {
@@ -1629,19 +1629,14 @@ void Aura::HandleAuraProcTriggerDamage(bool apply)
 
 void Aura::HandlePeriodicTriggerSpell(bool apply)
 {
-    if(apply)
+    if (m_periodicTimer <= 0)
+        m_periodicTimer += m_modifier.periodictime;
+
+    m_isPeriodic = apply;
+    m_isTrigger = apply;
+
+    if(!apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_isTrigger = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_isTrigger = false;
-        m_duration = 0;
         //probably it's temporary for taming creature..
 
         Unit* caster = GetCaster();
