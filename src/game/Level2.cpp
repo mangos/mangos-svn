@@ -414,7 +414,7 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
 
     if(!obj)
     {
-        PSendSysMessage("Game Object (GUID: %u) not found", obj->GetGUIDLow());
+        PSendSysMessage("Game Object (GUID: %u) not found", lowguid);
         return true;
     }
 
