@@ -281,7 +281,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
     destinationnode = GetPlayer()->NextTaxiDestination();
     if ( sourcenode > 0 && destinationnode > 0 )            // if more destinations to go
     {
-        sLog.outDebug( "WORLD: Taxi has to go from %d to %d", sourcenode, destinationnode );
+        sLog.outDebug( "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode );
 
         MountId = objmgr.GetTaxiMount(sourcenode);
         objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);

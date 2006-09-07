@@ -149,7 +149,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
             if( !Script->QuestSelect(_player, pCreature, pQuest ) )
             {
                 if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
-                    _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), true, false );
+                    _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), _player->CanRewardQuest(pQuest,false), false );
                 else if( status == QUEST_STATUS_INCOMPLETE )
                     _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), false, false );
                 else
@@ -177,7 +177,12 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
                     if( !Script->GOQuestAccept(_player, pGO, pQuest ) )
                     {
                         if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
-                            _player->PlayerTalkClass->SendQuestReward( quest, pCreature->GetGUID(), true, NULL, 0 );
+                        {
+                            if(_player->CanRewardQuest(pQuest,false))
+                                _player->PlayerTalkClass->SendQuestReward( quest, pCreature->GetGUID(), true, NULL, 0 );
+                            else
+                                _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
+                        }
                         else if( status == QUEST_STATUS_INCOMPLETE )
                             _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
                         else

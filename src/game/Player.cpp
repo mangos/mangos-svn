@@ -5611,20 +5611,11 @@ uint32 Player::GetBankItemCount( uint32 item ) const
             count += pItem->GetCount();
     }
     Bag *pBag;
-    ItemPrototype const *pBagProto;
     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
     {
         pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pBag )
-        {
-            pBagProto = pBag->GetProto();
-            if( pBagProto )
-            {
-                pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-                if( pItem && pItem->GetEntry() == item )
-                    count += pItem->GetCount();
-            }
-        }
+            count += pBag->GetItemCount(item);
     }
     return count;
 }
@@ -7658,7 +7649,7 @@ void Player::SendPreparedQuest( uint64 guid )
         if ( pQuest )
         {
             if( status == DIALOG_STATUS_REWARD && !GetQuestRewardStatus( quest_id ) )
-                PlayerTalkClass->SendRequestedItems( pQuest, guid, true, true );
+                PlayerTalkClass->SendRequestedItems( pQuest, guid, CanRewardQuest(pQuest,false), true );
             else if( status == DIALOG_STATUS_INCOMPLETE )
                 PlayerTalkClass->SendRequestedItems( pQuest, guid, false, true );
             else
@@ -7839,12 +7830,42 @@ bool Player::CanCompleteQuest( uint32 quest_id )
     return false;
 }
 
+bool Player::CanRewardQuest( Quest *pQuest, bool msg )
+{
+    if( pQuest )
+    {
+        // prevent recive reward with quest items in bank
+        if ( pQuest->GetQuestInfo()->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+        {
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+            {
+                if( pQuest->GetQuestInfo()->ReqItemCount[i]!= 0 && 
+                    GetItemCount(pQuest->GetQuestInfo()->ReqItemId[i]) < pQuest->GetQuestInfo()->ReqItemCount[i] )
+                {
+                    if(msg)
+                        SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+    return false;
+}
+
+
 bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 {
     if( pQuest )
     {
+        // prevent recive reward with quest items in bank
+        if(!CanRewardQuest(pQuest,msg))
+            return false;
+
         uint16 dest;
         uint8 msg;
+
         if ( pQuest->m_rewchoiceitemscount > 0 )
         {
             if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
