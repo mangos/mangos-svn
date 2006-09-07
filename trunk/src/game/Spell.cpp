@@ -1171,7 +1171,7 @@ void Spell::TakePower(uint32 mana)
     if (powerType == POWER_MANA)
     {
         // Set the five second timer
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_caster->GetTypeId() == TYPEID_PLAYER && mana > 0)
         {
             ((Player *)m_caster)->SetLastManaUse((uint32)getMSTime());
         }
