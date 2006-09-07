@@ -465,7 +465,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE build build_cpu build_vendor build_os host host_cpu host_vendor host_os EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL __PYTHON INCLUDES LIBOBJS ALLOCA WITH_PYTHON_SUBDIR WITH_PYTHON_SUBPACKAGE WITH_PYTHON_VERSION __DOXYGEN WITH_APIDOCS_TARGET WITH_APIDOCS LINKER_OPTIONS COMPILER_OPTIONS EXTRA_LINKER_OPTIONS EXTRA_COMPILER_OPTIONS MANGOSD_CONFIG MANGOSD_CONFIGDIR REALMD_CONFIG REALMD_CONFIGDIR MANGOSD_DATA MANGOSD_ENABLE_CLI MANGOSD_ENABLE_RA LT_RELEASE LT_CURRENT LT_AGE LT_REVISION LTMS_RELEASE LTMS_CURRENT LTMS_AGE LTMS_REVISION LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE build build_cpu build_vendor build_os host host_cpu host_vendor host_os EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL __PYTHON OPENSSL_INCLUDES OPENSSL_LDFLAGS MYSQL_INCLUDES MYSQL_LDFLAGS INCLUDES LIBOBJS ALLOCA WITH_PYTHON_SUBDIR WITH_PYTHON_SUBPACKAGE WITH_PYTHON_VERSION __DOXYGEN WITH_APIDOCS_TARGET WITH_APIDOCS LINKER_OPTIONS COMPILER_OPTIONS EXTRA_LINKER_OPTIONS EXTRA_COMPILER_OPTIONS MANGOSD_CONFIG MANGOSD_CONFIGDIR REALMD_CONFIG REALMD_CONFIGDIR MANGOSD_DATA MANGOSD_ENABLE_CLI MANGOSD_ENABLE_RA LT_RELEASE LT_CURRENT LT_AGE LT_REVISION LTMS_RELEASE LTMS_CURRENT LTMS_AGE LTMS_REVISION LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1038,8 +1038,6 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --with-openssl Specify openssl path
-  --with-mysql Specify mysql path
   --enable-cli Turn on command console system
   --enable-ra Turn on remote console system
 
@@ -1051,6 +1049,8 @@ Optional Packages:
                           both]
   --with-tags[=TAGS]
                           include additional configurations [automatic]
+  --with-openssl=/path/to/openssl/dir    OpenSSL directory
+  --with-mysql=/path/to/mysql/dir        MySQL directory]
   --with-python           build python bindings
   --with-apidocs          build MaNGOS API docs
 
@@ -18543,57 +18543,94 @@ LTMS_AGE=$LIBMANGOSSCRIPT_MICRO_VERSION
 COMPILER_OPTIONS=""
 LINKER_OPTIONS=""
 
-INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/openssl -I/usr/local/include/openssl"
-
-LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"
-
-
 # check for openssl path given
-echo "$as_me:$LINENO: checking whether openssl path was given" >&5
-echo $ECHO_N "checking whether openssl path was given... $ECHO_C" >&6
-MANGOSD_WITH_OPENSSL=
-# Check whether --enable-with-openssl or --disable-with-openssl was given.
-if test "${enable_with_openssl+set}" = set; then
-  enableval="$enable_with_openssl"
++
+# Check whether --with-openssl or --without-openssl was given.
+if test "${with_openssl+set}" = set; then
+  withval="$with_openssl"
 
-    if test "$enableval" != "" ; then
-        INCLUDES="-I$enableval/include/openssl -I/usr/include/mysql -I/usr/local/include/mysql"
-
-    elif test "$enableval" = "" ; then
-        { { echo "$as_me:$LINENO: error: Please choose openssl path" >&5
-echo "$as_me: error: Please choose openssl path" >&2;}
+  as_ac_File=`echo "ac_cv_file_$withval/include/openssl/ssl.h" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $withval/include/openssl/ssl.h" >&5
+echo $ECHO_N "checking for $withval/include/openssl/ssl.h... $ECHO_C" >&6
+if eval "test \"\${$as_ac_File+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  test "$cross_compiling" = yes &&
+  { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
+echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
    { (exit 1); exit 1; }; }
-    fi
+if test -r "$withval/include/openssl/ssl.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_File'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_File'}'`" >&6
+if test `eval echo '${'$as_ac_File'}'` = yes; then
 
+    OPENSSL_INCLUDES="-I$withval/include"
+    OPENSSL_LDFLAGS="-L$withval/lib"
+else
+  { { echo "$as_me:$LINENO: error: Directory '$withval' does not exist, or does not contain OpenSSL" >&5
+echo "$as_me: error: Directory '$withval' does not exist, or does not contain OpenSSL" >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
+else
+
+  OPENSSL_INCLUDES=""
+  OPENSSL_LDFLAGS=""
 fi;
-echo "$as_me:$LINENO: result: $MANGOSD_WITH_OPENSSL" >&5
-echo "${ECHO_T}$MANGOSD_WITH_OPENSSL" >&6
+
+
 
 
 # check for mysql path given
-echo "$as_me:$LINENO: checking whether mysql path was given" >&5
-echo $ECHO_N "checking whether mysql path was given... $ECHO_C" >&6
-MANGOSD_WITH_MYSQL=
-# Check whether --enable-with-mysql or --disable-with-mysql was given.
-if test "${enable_with_mysql+set}" = set; then
-  enableval="$enable_with_mysql"
 
-    if test "$enableval" != "" ; then
-        INCLUDES="-I$enableval/include/mysql -I/usr/include/openssl -I/usr/local/include/openssl"
+# Check whether --with-mysql or --without-mysql was given.
+if test "${with_mysql+set}" = set; then
+  withval="$with_mysql"
 
-        LDFLAGS="-L$enableval/lib/mysql"
-
-    elif test "$enableval" = "" ; then
-        { { echo "$as_me:$LINENO: error: Please choose mysql path" >&5
-echo "$as_me: error: Please choose mysql path" >&2;}
+  as_ac_File=`echo "ac_cv_file_$withval/include/mysql.h" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $withval/include/mysql.h" >&5
+echo $ECHO_N "checking for $withval/include/mysql.h... $ECHO_C" >&6
+if eval "test \"\${$as_ac_File+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  test "$cross_compiling" = yes &&
+  { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
+echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
    { (exit 1); exit 1; }; }
-    fi
+if test -r "$withval/include/mysql.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_File'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_File'}'`" >&6
+if test `eval echo '${'$as_ac_File'}'` = yes; then
+  MYSQL_INCLUDES="-I$withval/include"
+    MYSQL_LDFLAGS="-L$withval/lib"
+else
+  { { echo "$as_me:$LINENO: error: Directory '$withval' does not exist, or does not contain MySQL" >&5
+echo "$as_me: error: Directory '$withval' does not exist, or does not contain MySQL" >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
+else
 
+  MYSQL_INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql"
+  MYSQL_LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"
 fi;
-echo "$as_me:$LINENO: result: $MANGOSD_WITH_MYSQL" >&5
-echo "${ECHO_T}$MANGOSD_WITH_MYSQL" >&6
+
+
+
+
+INCLUDES="$MYSQL_INCLUDES $OPENSSL_INCLUDES"
+LDFLAGS="$MYSQL_LDFLAGS $OPENSSL_LDFLAGS"
+
 
 
 
@@ -19579,7 +19616,7 @@ fi
 for ac_header in \
    limits.h sys/ioctl.h unistd.h fcntl.h float.h mysql.h      \
    netdb.h netinet/in.h stddef.h sys/socket.h                 \
-   sys/time.h sys/timeb.h opensslv.h                          \
+   sys/time.h sys/timeb.h openssl/opensslv.h                          \
 
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -23211,6 +23248,10 @@ s,@FFLAGS@,$FFLAGS,;t t
 s,@ac_ct_F77@,$ac_ct_F77,;t t
 s,@LIBTOOL@,$LIBTOOL,;t t
 s,@__PYTHON@,$__PYTHON,;t t
+s,@OPENSSL_INCLUDES@,$OPENSSL_INCLUDES,;t t
+s,@OPENSSL_LDFLAGS@,$OPENSSL_LDFLAGS,;t t
+s,@MYSQL_INCLUDES@,$MYSQL_INCLUDES,;t t
+s,@MYSQL_LDFLAGS@,$MYSQL_LDFLAGS,;t t
 s,@INCLUDES@,$INCLUDES,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@ALLOCA@,$ALLOCA,;t t

@@ -381,7 +381,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
         void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
         uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
-        uint32 NextTaxiDestination() { 
+        uint32 NextTaxiDestination()
+        {
             m_TaxiDestinations.pop_front();
             return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front();
         }
@@ -421,9 +422,9 @@ class MANGOS_DLL_SPEC Player : public Unit
             {
                 _ApplyAllItemMods();
 
-                // restore default warrior stance 
-                if(getClass()== WARRIOR) 
-                    CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true); 
+                // restore default warrior stance
+                if(getClass()== WARRIOR)
+                    CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
             }
         };
 
@@ -1053,7 +1054,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_dontMove;
 
         std::deque<uint32> m_TaxiDestinations;
-
 
         float m_total_honor_points;
         float m_rating;

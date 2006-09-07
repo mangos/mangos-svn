@@ -2434,12 +2434,12 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
         return;
 
     uint32 pDurability =  m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_DURABILITY);
-           
+
     if(!pDurability)
         return;
 
     uint32 pDurabilityLoss = (uint32)(pDurability*percent);
-                
+
     if(pDurabilityLoss < 1 )
         pDurabilityLoss = 1;
 
@@ -2488,7 +2488,7 @@ void Player::DurabilityRepair(uint16 pos, bool cost)
     }
 
     item->SetUInt32Value(ITEM_FIELD_DURABILITY, maxDurability);
-    
+
     // reapply mods for total broken and repaired item if equiped
     if(IsEquipmentPos(pos) && !curDurability)
         _ApplyItemMods(item,pos & 255, true);
@@ -5694,8 +5694,8 @@ Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
         return m_items[slot];
-    else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END 
-        || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END ) 
+    else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END
+        || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END )
     {
         Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
         if ( pBag )

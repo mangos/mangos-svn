@@ -41,7 +41,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     {
         uint32 questStatus = DIALOG_STATUS_NONE;
 
-        if( !pCreature->IsHostileTo(_player))                // not show quest status to enemies
+        if( !pCreature->IsHostileTo(_player))               // not show quest status to enemies
         {
             questStatus = Script->NPCDialogStatus(_player, pCreature);
             if( questStatus > 6 )

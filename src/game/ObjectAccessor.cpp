@@ -219,7 +219,6 @@ void ObjectAccessor::DoDelayedMovesAndRemoves()
     RemoveAllObjectsInRemoveList();
 }
 
-
 void ObjectAccessor::RemoveAllObjectsInRemoveList()
 {
     if(i_objectsToRemove.empty())
