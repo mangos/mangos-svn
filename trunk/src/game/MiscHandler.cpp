@@ -987,13 +987,14 @@ void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)
     recv_data >> PositionZ;
     recv_data >> Orientation;
 
-    DEBUG_LOG("Guid " I64FMTD,guid);
-    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
-    DEBUG_LOG("unknown2 %u",unknown2);
-    DEBUG_LOG("X %f",PositionX);
-    DEBUG_LOG("Y %f",PositionY);
-    DEBUG_LOG("Z %f",PositionZ);
-    DEBUG_LOG("O %f",Orientation);
+// TODO for later may be we can use for anticheat
+//    DEBUG_LOG("Guid " I64FMTD,guid);
+//    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
+//    DEBUG_LOG("unknown2 %u",unknown2);
+//    DEBUG_LOG("X %f",PositionX);
+//    DEBUG_LOG("Y %f",PositionY);
+//    DEBUG_LOG("Z %f",PositionZ);
+//    DEBUG_LOG("O %f",Orientation);
 }
 
 void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
@@ -1023,13 +1024,14 @@ void WorldSession::HandleMooveRootAck(WorldPacket& recv_data)
     recv_data >> PositionZ;
     recv_data >> Orientation;
 
-    DEBUG_LOG("Guid " I64FMTD,guid);
-    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
-    DEBUG_LOG("unknown1 %u",unknown2);
-    DEBUG_LOG("X %f",PositionX);
-    DEBUG_LOG("Y %f",PositionY);
-    DEBUG_LOG("Z %f",PositionZ);
-    DEBUG_LOG("O %f",Orientation);
+// for later may be we can use for anticheat
+//    DEBUG_LOG("Guid " I64FMTD,guid);
+//    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
+//    DEBUG_LOG("unknown1 %u",unknown2);
+//    DEBUG_LOG("X %f",PositionX);
+//    DEBUG_LOG("Y %f",PositionY);
+//    DEBUG_LOG("Z %f",PositionZ);
+//    DEBUG_LOG("O %f",Orientation);
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)

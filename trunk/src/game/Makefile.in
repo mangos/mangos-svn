@@ -72,8 +72,9 @@ am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
 	BattleGroundHandler.$(OBJEXT) BattleGroundMgr.$(OBJEXT) \
 	Channel.$(OBJEXT) ChannelHandler.$(OBJEXT) \
 	CharacterHandler.$(OBJEXT) Chat.$(OBJEXT) \
-	ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) ConfusedMovementGenerator.$(OBJEXT) \
-	Container.$(OBJEXT) Corpse.$(OBJEXT) CreatureAI.$(OBJEXT) \
+	ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
+	ConfusedMovementGenerator.$(OBJEXT) Container.$(OBJEXT) \
+	Corpse.$(OBJEXT) CreatureAI.$(OBJEXT) \
 	CreatureAIRegistry.$(OBJEXT) CreatureAISelector.$(OBJEXT) \
 	Creature.$(OBJEXT) debugcmds.$(OBJEXT) \
 	DestinationHolder.$(OBJEXT) DuelHandler.$(OBJEXT) \
@@ -196,7 +197,11 @@ MANGOSD_CONFIGDIR = @MANGOSD_CONFIGDIR@
 MANGOSD_DATA = @MANGOSD_DATA@
 MANGOSD_ENABLE_CLI = @MANGOSD_ENABLE_CLI@
 MANGOSD_ENABLE_RA = @MANGOSD_ENABLE_RA@
+MYSQL_INCLUDES = @MYSQL_INCLUDES@
+MYSQL_LDFLAGS = @MYSQL_LDFLAGS@
 OBJEXT = @OBJEXT@
+OPENSSL_INCLUDES = @OPENSSL_INCLUDES@
+OPENSSL_LDFLAGS = @OPENSSL_LDFLAGS@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
