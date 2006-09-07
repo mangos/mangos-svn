@@ -502,7 +502,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                             // but let in case lost corpse (spirit must be see in ghost mode any way)
                             if(corpse && corpse->GetGhostTime() + CORPSE_RECLAIM_DELAY > time(NULL))
                                 cantalking=false;
-                        } 
+                        }
                         break;
                     case GOSSIP_OPTION_VENDOR:
                         if(!GetItemCount())
@@ -612,7 +612,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
                 // but let in case lost corpse (spirit must be see in ghost mode any way)
                 if(!corpse || corpse->GetGhostTime() + CORPSE_RECLAIM_DELAY <= time(NULL))
                     player->GetSession()->SendSpiritResurrect();
-            } 
+            }
             break;
         case GOSSIP_OPTION_QUESTGIVER:
             player->PrepareQuestMenu( guid );

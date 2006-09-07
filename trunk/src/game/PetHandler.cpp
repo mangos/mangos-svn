@@ -138,7 +138,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         {
             uint64 selectguid = _player->GetSelection();
             Unit* unit_target=ObjectAccessor::Instance().GetUnit(*_player,selectguid);
-            if(!unit_target) 
+            if(!unit_target)
                 return;
 
             // do not spell attack of friends

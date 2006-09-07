@@ -214,7 +214,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
         recv_data >> lastnode;
         objmgr.GetTaxiPath( prevnode, lastnode, path, cost);
 
-        if(!path) 
+        if(!path)
             break;
 
         totalcost += cost;
@@ -279,7 +279,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
 
     sourcenode      = GetPlayer()->GetTaxiSource();
     destinationnode = GetPlayer()->NextTaxiDestination();
-    if ( sourcenode > 0 && destinationnode > 0 ) // if more destinations to go
+    if ( sourcenode > 0 && destinationnode > 0 )            // if more destinations to go
     {
         sLog.outDebug( "WORLD: Taxi has to go from %d to %d", sourcenode, destinationnode );
 

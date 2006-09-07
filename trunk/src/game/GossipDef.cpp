@@ -398,7 +398,7 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
         SpellEntry *rewspell = sSpellStore.LookupEntry(pQuest->GetQuestInfo()->RewSpell);
         if(rewspell)
         {
-            if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)            
+            if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
                 data << uint32(rewspell->EffectTriggerSpell[0]);
             else
                 data << uint32(pQuest->GetQuestInfo()->RewSpell);
@@ -517,7 +517,7 @@ void PlayerMenu::SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNex
         SpellEntry *rewspell = sSpellStore.LookupEntry(pQuest->GetQuestInfo()->RewSpell);
         if(rewspell)
         {
-            if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)            
+            if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
                 data << uint32(rewspell->EffectTriggerSpell[0]);
             else
                 data << uint32(pQuest->GetQuestInfo()->RewSpell);
