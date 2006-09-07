@@ -279,7 +279,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
 
     sourcenode      = GetPlayer()->GetTaxiSource();
     destinationnode = GetPlayer()->NextTaxiDestination();
-    if ( destinationnode > 0 ) // if more destinations to go
+    if ( sourcenode > 0 && destinationnode > 0 ) // if more destinations to go
     {
         sLog.outDebug( "WORLD: Taxi has to go from %d to %d", sourcenode, destinationnode );
 
