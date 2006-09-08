@@ -163,8 +163,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void MoveAllCreaturesInMoveList();
                                                             // used only in MoveAllCreaturesInMoveList and ObjectGridUnloader
-        void MoveCreatureToRespawn(Creature *c, Cell cur_cell);
+        bool CreatureRespawnRelocation(Creature *c, Cell cur_cell);
     private:
+        bool CreatureCellRelocation(Creature *creature, Cell old_cell, Cell new_cell);
         void CreatureRelocationNotifying(Creature *creature, Cell newcell, CellPair newval);
 
         void AddCreatureToMoveList(Creature *c, Cell old_cell, Cell new_cell);
