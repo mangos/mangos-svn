@@ -278,15 +278,18 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_MOVE_SPLINE_DONE" );
 
     sourcenode      = GetPlayer()->GetTaxiSource();
-    destinationnode = GetPlayer()->NextTaxiDestination();
-    if ( sourcenode > 0 && destinationnode > 0 )            // if more destinations to go
+    if ( sourcenode > 0 )                                   // if more destinations to go
     {
-        sLog.outDebug( "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode );
+        destinationnode = GetPlayer()->NextTaxiDestination();
+        if ( destinationnode > 0 )            
+        {
+            sLog.outDebug( "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode );
 
-        MountId = objmgr.GetTaxiMount(sourcenode);
-        objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
+            MountId = objmgr.GetTaxiMount(sourcenode);
+            objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
 
-        SendDoFlight( MountId, path );
+            SendDoFlight( MountId, path );
+        }
     }
 }
 

@@ -416,7 +416,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             {
                 _RemoveAllItemMods();
                 UnsummonPet();
-                RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
             }
             Unit::setDeathState(s);
             if(isAlive() && !cur)

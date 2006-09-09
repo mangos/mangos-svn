@@ -801,7 +801,10 @@ void Player::Update( uint32 p_time )
     }
 
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
-        m_restTime ++;
+    {
+        if(m_restTime < 3*GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/2)
+            m_restTime ++;
+    }
 
     if(m_regenTimer > 0)
     {
