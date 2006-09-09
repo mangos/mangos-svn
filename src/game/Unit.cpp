@@ -306,7 +306,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
         else if(((Creature*)this)->isPet())
         {
-            Unit* owner = ((Pet*)this)->GetOwner();
+            Unit* owner = ((Creature*)this)->GetOwner();
 
             if(owner && owner->GetTypeId() == TYPEID_PLAYER)
             {
