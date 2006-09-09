@@ -867,8 +867,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         result = sDatabase.PQuery("SELECT `name` FROM `areatrigger_city` WHERE `id` = '%u'", Trigger_ID);
     if(result)
     {
-        if(GetPlayer()->isAlive())
-            GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         delete result;
     }
     else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
