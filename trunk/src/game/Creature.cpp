@@ -188,7 +188,7 @@ void Creature::AIM_Update(const uint32 &diff)
             if(isPet())
             {
                 // unsummon pet that lost owner
-                Unit* owner = ((Pet*)this)->GetOwner();
+                Unit* owner = GetOwner();
                 if(!owner||GetMapId()!=owner->GetMapId()||GetDistanceSq(owner) > OWNER_MAX_DISTANCE*OWNER_MAX_DISTANCE)
                 {
                     ((Pet*)this)->Unsummon();
@@ -1211,4 +1211,12 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
         return spellInfo;
     }
     return NULL;
+}
+
+Unit *Creature::GetOwner()
+{
+    uint64 ownerid = GetUInt64Value(UNIT_FIELD_SUMMONEDBY);
+    if(!ownerid)
+        return NULL;
+    return ObjectAccessor::Instance().GetUnit(*this, ownerid);
 }

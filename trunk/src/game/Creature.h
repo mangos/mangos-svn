@@ -243,6 +243,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isCanWalkOrFly() const;
         bool isCanTrainingOf(Player* player, bool msg) const;
 
+        Unit* GetOwner();
+
         void AIM_Update(const uint32 &);
         void AIM_Initialize(void);
         MotionMaster* operator->(void) { return &i_motionMaster; }
