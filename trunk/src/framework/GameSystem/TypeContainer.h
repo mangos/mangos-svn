@@ -97,10 +97,10 @@ class MANGOS_DLL_DECL TypeMapContainer
 {
     public:
 
-        template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl) { return MaNGOS::Find<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, hdl); }
+        template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl) { return MaNGOS::Find(i_elements, hdl,(SPECIFIC_TYPE*)NULL); }
 
         /// find a specific type of object in the container
-        template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl) const { return MaNGOS::Find<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, hdl); }
+        template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl) const { return MaNGOS::Find(i_elements, hdl,(SPECIFIC_TYPE*)NULL); }
 
         /// inserts a specific object into the container
         template<class SPECIFIC_TYPE> bool insert(OBJECT_HANDLE hdl, SPECIFIC_TYPE *obj)
