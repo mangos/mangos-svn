@@ -352,7 +352,7 @@ enum SpellSchools
 #define TEXTEMOTE_KNEEL                 59
 #define TEXTEMOTE_LAUGH                 60
 #define TEXTEMOTE_LAYDOWN               61
-#define TEXTEMOTE_MASSAGE               62
+#define TEXTEMOTE_MESSAGE               62
 #define TEXTEMOTE_MOAN                  63
 #define TEXTEMOTE_MOON                  64
 #define TEXTEMOTE_MOURN                 65

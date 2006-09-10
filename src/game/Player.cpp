@@ -7673,7 +7673,7 @@ void Player::SendPreparedQuest( uint64 guid )
             GossipText * gossiptext = objmgr.GetGossipText(textid);
             if( !gossiptext )
             {
-                qe._Delay = TEXTEMOTE_MASSAGE;              //zyg: player emote
+                qe._Delay = TEXTEMOTE_MESSAGE;              //zyg: player emote
                 qe._Emote = TEXTEMOTE_HELLO;                //zyg: NPC emote
                 title = "Do Quest ?";
             }
