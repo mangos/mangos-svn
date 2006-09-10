@@ -318,7 +318,7 @@ Map::Find(T *obj) const
 
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
-    return ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<T>(obj->GetGUID())!=0;
+    return ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(obj->GetGUID())!=0;
 }
 
 void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
