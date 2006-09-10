@@ -70,12 +70,14 @@ typedef struct
 
 struct CreatureMover
 {
-    CreatureMover(Creature* c, Cell old_c, Cell new_c) : creature(c),old_cell(old_c), new_cell(new_c) {}
+    CreatureMover() : x(0), y(0), z(0), ang(0) {}
+    CreatureMover(float _x, float _y, float _z, float _ang) : x(_x), y(_y), z(_z), ang(_ang) {}
 
-    Creature* creature;
-    Cell old_cell;
-    Cell new_cell;
+    float x, y, z, ang;
 };
+
+typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
+
 
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
@@ -87,6 +89,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         void Remove(Player *, bool);
         template<class T> void Add(T *);
         template<class T> void Remove(T *, bool);
+        template<class T> bool Find(T *) const;
 
         void Update(const uint32&);
         uint64 CalculateGridMask(const uint32 &y) const;
@@ -168,8 +171,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         bool CreatureCellRelocation(Creature *creature, Cell old_cell, Cell new_cell);
         void CreatureRelocationNotifying(Creature *creature, Cell newcell, CellPair newval);
 
-        void AddCreatureToMoveList(Creature *c, Cell old_cell, Cell new_cell);
-        std::list<CreatureMover> i_creaturesToMove;
+        void AddCreatureToMoveList(Creature *c, float x, float y, float z, float ang);
+        CreatureMoveList i_creaturesToMove;
 
         bool loaded(const GridPair &) const;
         void EnsureGridLoadedForPlayer(const Cell&, Player*, bool add_player);
