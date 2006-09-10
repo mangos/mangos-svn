@@ -19,7 +19,6 @@
 #include "ObjectGridLoader.h"
 #include "Database/DatabaseEnv.h"
 #include "ObjectAccessor.h"
-#include "ObjectDefines.h"
 #include "Utilities.h"
 #include "MapManager.h"
 #include "RedZoneDistrict.h"
@@ -60,7 +59,6 @@ ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
         c->GetRespawnCoord(resp_x, resp_y, resp_z);
 
         CellPair cur_val  = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
-
         CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
 
         Cell cur_cell  = RedZone::GetZone(cur_val);
@@ -95,8 +93,6 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
     {
         do
         {
-
-
             Field *fields = result->Fetch();
             T *obj = new T;
             uint32 guid = fields[0].GetUInt32();
@@ -122,15 +118,6 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             }
 
             m[obj->GetGUID()] = obj;
-
-            if(!MapManager::Instance().GetMap(obj->GetMapId())->Find(obj))
-            {
-                Cell old_cell = RedZone::GetZone(cell);
-                sLog.outError("Object (GUID: %u TypeId: %u Entry: %u) loaded (X: %f Y: %f) to grid[%u,%u]cell[%u,%u] but not found.", obj->GetGUIDLow(), obj->GetGUIDHigh(), obj->GetEntry(), obj->GetPositionX(), obj->GetPositionY(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY());
-                m.erase(obj->GetGUID());
-                delete obj;
-                continue;
-            }
 
             addUnitState(obj);
             obj->AddToWorld();
@@ -202,14 +189,7 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
         return;
 
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        if(GUID_HIPART(iter->first)==HIGHGUID_UNIT && GUID_LOPART(iter->first)==9300)
-        {
-            sLog.outDebug("Creature (GUID: %u ) deleting.", GUID_LOPART(iter->first));
-        }
-
         delete iter->second;
-    }
 
     m.clear();
 }
