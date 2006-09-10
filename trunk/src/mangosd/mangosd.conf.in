@@ -7,6 +7,11 @@ RealmID = 1
 # 0 NORMAL 1 PVP 4 NORMAL 6 RP 8 RPPVP
 GameType = 1
 
+# Allow or not accounts to create characters in the 2 teams in any game type.
+# Defaullt: 0 (Not allowed)
+#           1 (Allowed)
+AllowTwoSideAccounts = 0
+
 # Data directory setting.
 # Important: DataDir needs to be quoted, as it is a string which may
 # contain space characters.
