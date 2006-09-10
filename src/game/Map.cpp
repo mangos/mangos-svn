@@ -601,7 +601,7 @@ void Map::MoveAllCreaturesInMoveList()
             if(!CreatureRespawnRelocation(c,old_cell))
             {
                 // ... or unload (if respawn grid also not loaded)
-                sLog.outDebug("Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.",c->GetGUIDLow(),c->GetEntry());
+                DEBUG_LOG("Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.",c->GetGUIDLow(),c->GetEntry());
                 ObjectAccessor::Instance().AddObjectToRemoveList(c);
             }
         }
