@@ -301,6 +301,26 @@ Map::Add(T *obj)
     cell_lock->Visit(cell_lock, player_notifier, *this);
 }
 
+template<class T>
+bool
+Map::Find(T *obj) const
+{
+    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        ERROR_LOG("Map::Add: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return false;
+    }
+
+    Cell cell = RedZone::GetZone(p);
+    if(!i_grids[cell.GridX()][cell.GridY()])
+        return false;
+
+    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    assert( grid != NULL );
+    return ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<T>(obj->GetGUID())!=0;
+}
+
 void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
@@ -357,10 +377,14 @@ void Map::Update(const uint32 &t_diff)
         {
             if( i_gridMask[i] & mask )
             {
+                // move all creatures with delayed move and remove in grid before new grid moves (and grid unload)
+                //ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
+
                 assert(i_grids[i][j] != NULL && i_info[i][j] != NULL);
                 NGridType &grid(*i_grids[i][j]);
                 GridInfo &info(*i_info[i][j]);
                 si_GridStates[grid.GetGridState()]->Update(*this, grid, info, i, j, t_diff);
+
             }
             mask <<= 1;
         }
@@ -513,14 +537,21 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
 
     Cell old_cell = RedZone::GetZone(old_val);
     Cell new_cell = RedZone::GetZone(new_val);
-    creature->Relocate(x, y, z, ang);
 
     // delay creature move for grid/cell to grid/cell moves
     if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
-        AddCreatureToMoveList(creature,old_cell,new_cell);
+    {
+        DEBUG_LOG("Creature (GUID: %u Entry: %u) added to moving list from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", creature->GetGUIDLow(), creature->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+        //assert((*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).GetGridObject<Creature>(creature->GetGUID())==creature);
+        AddCreatureToMoveList(creature,x,y,z,ang);
+        // in diffcell/diffgrid case notifiers called at finishing move creature in Map::MoveAllCreaturesInMoveList
+    }
     else
-        // diffcell/diffgrid case called at finishing move creature in Map::MoveAllCreaturesInMoveList
+    {
+        //assert((*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).GetGridObject<Creature>(creature->GetGUID())==creature);
+        creature->Relocate(x, y, z, ang);
         CreatureRelocationNotifying(creature,new_cell,new_val);
+    }
 }
 
 void Map::CreatureRelocationNotifying(Creature *creature, Cell new_cell, CellPair new_val)
@@ -536,46 +567,56 @@ void Map::CreatureRelocationNotifying(Creature *creature, Cell new_cell, CellPai
     }
 }
 
-void Map::AddCreatureToMoveList(Creature *c, Cell old_cell, Cell new_cell)
+void Map::AddCreatureToMoveList(Creature *c, float x, float y, float z, float ang)
 {
     if(!c) return;
 
-    i_creaturesToMove.push_back(CreatureMover(c,old_cell,new_cell));
-    sLog.outDebug("Creature (GUID: %u Entry: %u ) added to grid-to-grid moving list.",c->GetGUIDLow(),c->GetCreatureInfo()->Entry);
+    i_creaturesToMove[c] = CreatureMover(x,y,z,ang);
 }
 
 void Map::MoveAllCreaturesInMoveList()
 {
-    if(i_creaturesToMove.empty())
-        return;
-
-    //sLog.outDebug("Creature mover 1 check.");
     while(!i_creaturesToMove.empty())
     {
-        CreatureMover cm = i_creaturesToMove.front();
-        i_creaturesToMove.pop_front();
+        CreatureMoveList::iterator iter = i_creaturesToMove.begin();
+        Creature* c = iter->first;
 
-        if(!CreatureCellRelocation(cm.creature,cm.old_cell,cm.new_cell))
+        // calculate cells
+        CellPair old_val = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
+        CellPair new_val = MaNGOS::ComputeCellPair(iter->second.x, iter->second.y);
+
+        Cell old_cell = RedZone::GetZone(old_val);
+        Cell new_cell = RedZone::GetZone(new_val);
+
+        // update pos
+        c->Relocate(iter->second.x, iter->second.y, iter->second.z, iter->second.ang);
+
+        // now remove from list
+        i_creaturesToMove.erase(iter);
+
+        if(!CreatureCellRelocation(c,old_cell,new_cell))
         {
             // if creature can't be move in new cell/grid (not loaded) move it to repawn cell/grid
-            if(!CreatureRespawnRelocation(cm.creature,cm.old_cell))
+            // creature coordinates will be updated
+            if(!CreatureRespawnRelocation(c,old_cell))
             {
                 // ... or unload (if respawn grid also not loaded)
-                sLog.outDebug("Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.",cm.creature->GetGUIDLow(),cm.creature->GetCreatureInfo()->Entry);
-                ObjectAccessor::Instance().AddObjectToRemoveList(cm.creature);
+                sLog.outDebug("Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.",c->GetGUIDLow(),c->GetEntry());
+                ObjectAccessor::Instance().AddObjectToRemoveList(c);
             }
         }
     }
-    //sLog.outDebug("Creature mover 2 check.");
 }
 
 bool Map::CreatureCellRelocation(Creature *c, Cell old_cell, Cell new_cell)
 {
     if(!old_cell.DiffGrid(new_cell) )        // in same grid
     {
-        DEBUG_LOG("Creature (GUID: %u Entry: %u) moved in grid[%u,%u] from cell[%u,%u] to cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.CellX(), new_cell.CellY());
-
+        // if in same cell then none do
+        if(old_cell.DiffCell(new_cell))
         {
+            DEBUG_LOG("Creature (GUID: %u Entry: %u) moved in grid[%u,%u] from cell[%u,%u] to cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.CellX(), new_cell.CellY());
+
             assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
             WriteGuard guard(i_info[old_cell.GridX()][old_cell.GridY()]->i_lock);
             if( !old_cell.DiffGrid(new_cell) )
@@ -584,9 +625,13 @@ bool Map::CreatureCellRelocation(Creature *c, Cell old_cell, Cell new_cell)
                 (*i_grids[new_cell.GridX()][new_cell.GridY()])(new_cell.CellX(), new_cell.CellY()).AddGridObject<Creature>(c, c->GetGUID());
             }
         }
+        else
+        {
+            DEBUG_LOG("Creature (GUID: %u Entry: %u) move in same grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY());
+        }
     }
-    else                                            // in diff. grids
-        if(loaded(GridPair(new_cell.GridX(), new_cell.GridY())))
+    else                                                    // in diff. grids
+    if(loaded(GridPair(new_cell.GridX(), new_cell.GridY())))
     {
         DEBUG_LOG("Creature (GUID: %u Entry: %u) moved from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
 
@@ -616,12 +661,14 @@ bool Map::CreatureRespawnRelocation(Creature *c, Cell cur_cell )
     float resp_x, resp_y, resp_z;
     c->GetRespawnCoord(resp_x, resp_y, resp_z);
 
+    CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
+    Cell resp_cell = RedZone::GetZone(resp_val);
+
     c->CombatStop();
     (*c)->Clear();
     c->Relocate(resp_x, resp_y, resp_z, c->GetOrientation());
 
-    CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
-    Cell resp_cell = RedZone::GetZone(resp_val);
+    DEBUG_LOG("Creature (GUID: %u Entry: %u) will moved from grid[%u,%u]cell[%u,%u] to respawn grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), cur_cell.GridX(), cur_cell.GridY(), cur_cell.CellX(), cur_cell.CellY(), resp_cell.GridX(), resp_cell.GridY(), resp_cell.CellX(), resp_cell.CellY());
 
     // teleport it to respawn point (like normal respawn if player see)
     return CreatureCellRelocation(c,cur_cell,resp_cell);
@@ -879,3 +926,9 @@ template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
 template void Map::Remove(Corpse *, bool);
+
+template bool Map::Find(Creature *) const;
+template bool Map::Find(GameObject *) const;
+template bool Map::Find(DynamicObject *) const;
+template bool Map::Find(Corpse *) const;
+
