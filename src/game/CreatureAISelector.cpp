@@ -38,6 +38,10 @@ namespace FactorySelector
         assert( creature->GetCreatureInfo() != NULL );
         CreatureInfo const *cinfo=creature->GetCreatureInfo();
         std::string ainame=cinfo->AIName;
+
+        if (creature->isTamed())
+            ainame="PetAI";
+        else
         if( ainame=="")
         {
             if( creature->isGuard() )

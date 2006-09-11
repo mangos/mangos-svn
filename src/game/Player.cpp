@@ -9473,6 +9473,27 @@ void Player::UnsummonPet(Creature* pet)
     ObjectAccessor::Instance().AddObjectToRemoveList(pet);
 }
 
+void Player::UnTamePet(Creature* pet)
+{
+    if(!pet)
+        pet = GetPet();
+
+    if(!pet||!pet->isTamed()||pet->GetGUID()!=GetPetGUID()) return;
+
+    pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,pet->GetCreatureInfo()->faction);
+    SetPet(0);
+
+    pet->AIM_Initialize();
+
+    WorldPacket data;
+
+    data.Initialize(SMSG_PET_SPELLS);
+    data << uint64(0);
+    GetSession()->SendPacket(&data);
+}
+
+
+
 void Player::Uncharm()
 {
     Creature* charm = GetCharm();

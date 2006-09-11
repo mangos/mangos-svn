@@ -236,6 +236,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         virtual void Update( uint32 time );
         inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
 
+        bool isTamed() const { return m_isTamed; }
+        void SetTamed(bool isTamed) { m_isTamed = isTamed; }
+        void Untamed();
+
         bool isPet() const { return m_isPet; }
         bool isTotem() const { return m_isTotem; }
         bool isCivilian() const { return GetCreatureInfo()->civilian != 0; }
@@ -379,6 +383,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint8 m_emoteState;
         bool m_isPet;                                       // set only in Pet::Pet
         bool m_isTotem;                                     // set only in Totem::Totem
+        bool m_isTamed;
         void RegenerateMana();
         void RegenerateHealth();
         uint32 m_regenTimer;
