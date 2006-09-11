@@ -2506,7 +2506,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetStat(STAT_INTELLECT,info->intellect );
         player->SetStat(STAT_SPIRIT,info->spirit );
         player->SetArmor(info->basearmor );
-        player->SetUInt32Value(UNIT_FIELD_ATTACK_POWER, info->attackpower );
+        player->SetUInt32Value(UNIT_FIELD_ATTACK_POWER, 0 );
 
         player->SetHealth(info->health);
         player->SetMaxHealth(info->health);
@@ -2520,10 +2520,10 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetPower(   POWER_ENERGY, info->energy );
         player->SetMaxPower(POWER_ENERGY, info->energy );
 
-        player->SetFloatValue(UNIT_FIELD_MINDAMAGE, info->mindmg );
-        player->SetFloatValue(UNIT_FIELD_MAXDAMAGE, info->maxdmg );
-        player->SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, info->ranmindmg );
-        player->SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, info->ranmaxdmg );
+        player->SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
+        player->SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
+        player->SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
+        player->SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
 
         player->SetAttackTime(BASE_ATTACK,   2000 );        // melee attack time
         player->SetAttackTime(RANGED_ATTACK, 2000 );        // ranged attack time

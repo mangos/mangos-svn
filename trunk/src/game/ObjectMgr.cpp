@@ -127,7 +127,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     Field *player_fields, *items_fields, *spells_fields, *skills_fields, *actions_fields;
     PlayerCreateInfo *pPlayerCreateInfo;
 
-    QueryResult *player_result = sDatabase.PQuery("SELECT `createId`,`race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID`,`BaseStrength`,`BaseAgility`,`BaseStamina`,`BaseIntellect`,`BaseSpirit`,`BaseArmor`,`BaseHealth`,`BaseMana`,`BaseRage`,`BaseFocus`,`BaseEnergy`,`attackpower`,`mindmg`,`maxdmg`,`ranmindmg`,`ranmaxdmg` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", race, class_);
+    QueryResult *player_result = sDatabase.PQuery("SELECT `createId`,`race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID`,`BaseStrength`,`BaseAgility`,`BaseStamina`,`BaseIntellect`,`BaseSpirit`,`BaseArmor`,`BaseHealth`,`BaseMana`,`BaseRage`,`BaseFocus`,`BaseEnergy` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", race, class_);
 
     if(!player_result)
     {
@@ -160,11 +160,6 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     pPlayerCreateInfo->rage = player_fields[17].GetUInt32();
     pPlayerCreateInfo->focus = player_fields[18].GetUInt32();
     pPlayerCreateInfo->energy = player_fields[19].GetUInt32();
-    pPlayerCreateInfo->attackpower = player_fields[20].GetUInt32();
-    pPlayerCreateInfo->mindmg = player_fields[21].GetFloat();
-    pPlayerCreateInfo->maxdmg = player_fields[22].GetFloat();
-    pPlayerCreateInfo->ranmindmg = player_fields[23].GetFloat();
-    pPlayerCreateInfo->ranmaxdmg = player_fields[24].GetFloat();
 
     delete player_result;
 
