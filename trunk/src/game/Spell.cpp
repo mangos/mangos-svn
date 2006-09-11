@@ -1462,6 +1462,21 @@ uint8 Spell::CanCast()
                 }
                 break;
             }
+            case SPELL_EFFECT_LEAP:
+            case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
+            {
+                float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+                float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
+                float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
+                // teleport a bit above terrainlevel to avoid falling below it
+                float fz = MapManager::Instance().GetMap(m_caster->GetMapId())->GetHeight(fx,fy) + 1.5;
+
+                float caster_pos_z = m_caster->GetPositionZ();
+                // Control the caster to not climb or drop when +-fz > 8
+                if(!(fz<=caster_pos_z+8 && fz>=caster_pos_z-8))
+                    castResult = CAST_FAIL_FAILED_ATTEMPT;
+                break;
+            }
             default:break;
         }
 
