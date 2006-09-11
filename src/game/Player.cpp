@@ -256,7 +256,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetStat(STAT_INTELLECT,info->intellect );
     SetStat(STAT_SPIRIT,info->spirit );
     SetArmor(info->basearmor );
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER, info->attackpower );
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER, 0 );
 
     SetHealth(info->health);
     SetMaxHealth(info->health);
@@ -270,10 +270,10 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetPower(   POWER_ENERGY, info->energy );
     SetMaxPower(POWER_ENERGY, info->energy );
 
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, info->mindmg );
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, info->maxdmg );
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, info->ranmindmg );
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, info->ranmaxdmg );
+    SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
 
     SetAttackTime(BASE_ATTACK,   2000 );                    // melee attack time
     SetAttackTime(RANGED_ATTACK, 2000 );                    // ranged attack time

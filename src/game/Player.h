@@ -135,11 +135,6 @@ struct PlayerCreateInfo
     uint32 rage;
     uint32 focus;
     uint32 energy;
-    uint32 attackpower;
-    float mindmg;
-    float maxdmg;
-    float ranmindmg;
-    float ranmaxdmg;
     std::list<uint32> item_id;
     std::list<uint8> item_bagIndex;
     std::list<uint8> item_slot;
