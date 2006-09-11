@@ -87,7 +87,10 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         bool myCanStoreItem=false,hisCanStoreItem=false,myCanCompleteTrade=true,hisCanCompleteTrade=true;
         int i;
         uint16 dst;
-        if ( !GetPlayer()->pTrader ) return;
+
+        if ( !GetPlayer()->pTrader ) 
+            return;
+        
         _player->acceptTrade = true;
         if (_player->pTrader->acceptTrade )
         {
@@ -173,6 +176,8 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     {
                         sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
                         _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
+                        _player->ItemRemoved(myItems[i]->GetEntry(),myItems[i]->GetCount());
+                        _player->pTrader->ItemAdded(myItems[i]->GetEntry(),myItems[i]->GetCount());
                         _player->pTrader->StoreItem( dst, myItems[i], true);
                     }
                 }
@@ -183,6 +188,8 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     {
                         sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
                         _player->pTrader->RemoveItem(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);
+                        _player->pTrader->ItemRemoved(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
+                        _player->ItemAdded(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
                         _player->StoreItem( dst, hisItems[i], true);
                     }
                 }
@@ -215,6 +222,9 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
 
+    if ( !GetPlayer()->pTrader ) 
+        return;
+
     data.Initialize(SMSG_TRADE_STATUS);
     data << (uint32)7;
     _player->pTrader->GetSession()->SendPacket(&data);
@@ -225,6 +235,9 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
+
+    if(!_player->pTrader)
+        return;
 
     data.Initialize(SMSG_TRADE_STATUS);
     data << (uint32)2;

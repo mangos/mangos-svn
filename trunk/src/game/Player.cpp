@@ -6635,7 +6635,7 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
-        if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
+        if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP || pItem->GetProto()->Class == ITEM_CLASS_QUEST)
             pItem->SetBinding( true );
 
         uint8 bag = pos >> 8;
