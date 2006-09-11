@@ -149,7 +149,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     {
         data << pProto->ItemId;
         data << pProto->Class;
-        data << pProto->SubClass;
+        // client known only 0 subclass (and 1-2 obsolute subclasses)
+        data << (pProto->Class==ITEM_CLASS_CONSUMABLE ? uint32(0) : pProto->SubClass);
         data << pProto->Name1;
         data << pProto->Name2;
         data << pProto->Name3;
