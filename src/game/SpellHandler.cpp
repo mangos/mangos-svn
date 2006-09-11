@@ -193,21 +193,21 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 guid=_player->GetGUID();
             }
             break;
-		case GAMEOBJECT_TYPE_CUSTOM_TELEPORTER:
-			info = obj->GetGOInfo();
-			if(info)
-			{
-				AreaTrigger *fields = objmgr.GetAreaTrigger( info->sound0 );
-				if(fields){
-					sLog.outDebug( "Teleporting player %u with coordinates X: %f Y: %f Z: %f Orientation: %f Map: %u\n", _player->GetGUID(), fields->X,fields->Y,fields->Z,fields->Orientation,fields->mapId);
-					_player->TeleportTo(fields->mapId, fields->X,fields->Y,fields->Z,fields->Orientation);
-					sLog.outDebug( "Player %u teleported by %u\n", _player->GetGUID(), info->sound0);
-				}
-				else
-					sLog.outDebug( "Unknown areatrigger_template id %u\n", info->sound0);
-				delete fields;
-				return;
-			}
+        case GAMEOBJECT_TYPE_CUSTOM_TELEPORTER:
+            info = obj->GetGOInfo();
+            if(info)
+            {
+                AreaTrigger *fields = objmgr.GetAreaTrigger( info->sound0 );
+                if(fields){
+                    sLog.outDebug( "Teleporting player %u with coordinates X: %f Y: %f Z: %f Orientation: %f Map: %u\n", _player->GetGUID(), fields->X,fields->Y,fields->Z,fields->Orientation,fields->mapId);
+                    _player->TeleportTo(fields->mapId, fields->X,fields->Y,fields->Z,fields->Orientation);
+                    sLog.outDebug( "Player %u teleported by %u\n", _player->GetGUID(), info->sound0);
+                }
+                else
+                    sLog.outDebug( "Unknown areatrigger_template id %u\n", info->sound0);
+                delete fields;
+                return;
+            }
             break;
         default:
             sLog.outDebug( "Unknown Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
