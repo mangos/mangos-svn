@@ -908,15 +908,18 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
 {
     if(!unitTarget)
         return;
-    WorldPacket data;
 
+    uint32 mapid = m_caster->GetMapId();
     float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
     float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
-    float fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetHeight(fx,fy);
+    // teleport a bit above terrainlevel to avoid falling below it
+    float fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
 
-    unitTarget->BuildTeleportAckMsg(&data,fx,fy,fz+2,-m_caster->GetOrientation());
-    m_caster->SendMessageToSet( &data, true );
+    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation());
+    else
+        MapManager::Instance().GetMap(mapid)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, -m_caster->GetOrientation());
 }
 
 void Spell::EffectLearnSkill(uint32 i)
@@ -1853,15 +1856,17 @@ void Spell::EffectMomentMove(uint32 i)
 {
     if( m_spellInfo->rangeIndex== 1)                        //self range
     {
-        WorldPacket data;
-
+        uint32 mapid = m_caster->GetMapId();
         float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
         float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
         float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
-        float fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetHeight(fx,fy);
+        // teleport a bit above terrainlevel to avoid falling below it
+        float fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
 
-        m_caster->BuildTeleportAckMsg(&data,fx,fy,fz,m_caster->GetOrientation());
-        m_caster->SendMessageToSet( &data, true );
+        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation());
+        else
+            MapManager::Instance().GetMap(mapid)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, m_caster->GetOrientation());
     }
 }
 
