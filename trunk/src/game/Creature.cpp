@@ -44,7 +44,7 @@ Creature::Creature() :
 Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
 m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
 itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
-m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
+m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false), m_isTamed(false),
 m_regenTimer(2000), lootForPickPocketed(false),lootForBody(false)
 {
     m_valuesCount = UNIT_END;
@@ -175,23 +175,33 @@ void Creature::AIM_Update(const uint32 &diff)
                 loot.clear();
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;
+
+                if ( isTamed() )
+                    Untamed();
+
                 float x,y,z;
                 GetRespawnCoord(x, y, z);
                 MapManager::Instance().GetMap(GetMapId())->CreatureRelocation(this,x,y,z,GetOrientation());
             }
             else
                 m_deathTimer -= diff;
+
+
             break;
         }
         case ALIVE:
         {
-            if(isPet())
+            if(isPet() || isTamed())
             {
                 // unsummon pet that lost owner
                 Unit* owner = GetOwner();
                 if(!owner||GetMapId()!=owner->GetMapId()||GetDistanceSq(owner) > OWNER_MAX_DISTANCE*OWNER_MAX_DISTANCE)
                 {
-                    ((Pet*)this)->Unsummon();
+                    if(isPet())
+                        ((Pet*)this)->Unsummon();
+                    else
+                    if(isTamed())
+                        Untamed();
                     return;
                 }
             }
@@ -1219,4 +1229,23 @@ Unit *Creature::GetOwner()
     if(!ownerid)
         return NULL;
     return ObjectAccessor::Instance().GetUnit(*this, ownerid);
+}
+
+void Creature::Untamed()
+{
+    if(!isTamed())
+        return;
+
+    Unit* owner = GetOwner();
+
+    if(owner && owner->GetTypeId()==TYPEID_PLAYER)
+        ((Player*)owner)->UnTamePet(this);
+    else
+    {
+        if(owner)
+            owner->SetPet(0);
+        SetTamed(false);
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,GetCreatureInfo()->faction);
+        AIM_Initialize();
+    }
 }

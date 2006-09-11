@@ -1035,6 +1035,7 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+        creatureTarget->SetTamed(true);
         creatureTarget->AIM_Initialize();
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
