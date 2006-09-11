@@ -123,6 +123,8 @@ enum INVENTORY_CLASS
     ITEM_CLASS_JUNK          = 15,
 };
 
+// Client understand only 0 subclass for ITEM_CLASS_CONSUMABLE
+// but this value used in code as implementation workaround
 enum ITEM_SUBCLASS_CONSUMABLE
 {
     ITEM_SUBCLASS_FOOD                    = 1,
