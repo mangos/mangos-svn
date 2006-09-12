@@ -2094,6 +2094,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u'",guid);
 
     //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
     QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());

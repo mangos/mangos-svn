@@ -298,13 +298,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     SendPacket(&packet);
 
-    //! Handled Addons
-
-    //Create Addon Packet
-    sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
-
-    SendPacket(&SendAddonPacked);
-
     _session = new WorldSession(id, this);
 
     ASSERT(_session);
@@ -312,6 +305,17 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     sWorld.AddSession(_session);
 
     sLog.outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
+
+    // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
+    // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
+    Sleep(10);
+
+    //! Handled Addons
+
+    //Create Addon Packet
+    sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
+
+    SendPacket(&SendAddonPacked);
 
     return;
 }
