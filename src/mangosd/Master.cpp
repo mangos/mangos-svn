@@ -237,6 +237,7 @@ bool Master::_StartDB()
         exit(1);
 
     }
+
     sLog.outString("World Database: %s", dbstring.c_str() );
     if(!sDatabase.Initialize(dbstring.c_str()))
     {
