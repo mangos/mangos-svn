@@ -481,8 +481,6 @@ void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
     cur += (apply ? val : -val);
-    if(cur < 0)
-        cur = 0;
 
     SetFloatValue(index,cur);
 }
