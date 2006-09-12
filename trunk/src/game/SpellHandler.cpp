@@ -198,7 +198,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(info)
             {
                 AreaTrigger *fields = objmgr.GetAreaTrigger( info->sound0 );
-                if(fields){
+                if(fields)
+                {
                     sLog.outDebug( "Teleporting player %u with coordinates X: %f Y: %f Z: %f Orientation: %f Map: %u\n", _player->GetGUID(), fields->X,fields->Y,fields->Z,fields->Orientation,fields->mapId);
                     _player->TeleportTo(fields->mapId, fields->X,fields->Y,fields->Z,fields->Orientation);
                     sLog.outDebug( "Player %u teleported by %u\n", _player->GetGUID(), info->sound0);

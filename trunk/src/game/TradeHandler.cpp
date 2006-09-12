@@ -88,9 +88,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         int i;
         uint16 dst;
 
-        if ( !GetPlayer()->pTrader ) 
+        if ( !GetPlayer()->pTrader )
             return;
-        
+
         _player->acceptTrade = true;
         if (_player->pTrader->acceptTrade )
         {
@@ -222,7 +222,7 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
 
-    if ( !GetPlayer()->pTrader ) 
+    if ( !GetPlayer()->pTrader )
         return;
 
     data.Initialize(SMSG_TRADE_STATUS);
