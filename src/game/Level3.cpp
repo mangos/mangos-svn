@@ -997,7 +997,8 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
         {
             SpellEntry *spellInfo = sSpellStore.LookupEntry(i);
-            if (spellInfo && spellInfo->SpellFamilyName == family && !m_session->GetPlayer()->HasSpell(i))
+            SkillLineAbility *skillLine = sSkillLineAbilityStore.LookupEntry(i);
+            if (skillLine && spellInfo && spellInfo->SpellFamilyName == family && !m_session->GetPlayer()->HasSpell(i))
                 m_session->GetPlayer()->learnSpell((uint16)i);
         }
 
@@ -1545,7 +1546,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
             uint8 eff = spellInfo->Effect[i];
             if (eff>=TOTAL_SPELL_EFFECTS)
                 continue;
-            if (eff == 6)
+            if (eff == SPELL_EFFECT_APPLY_AURA || eff == SPELL_EFFECT_APPLY_AREA_AURA || eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
             {
                 Aura *Aur = new Aura(spellInfo, i, m_session->GetPlayer());
                 m_session->GetPlayer()->AddAura(Aur);

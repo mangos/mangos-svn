@@ -637,6 +637,7 @@ void Unit::CalDamageReduction(Unit *pVictim,uint32 School, const uint32 damage, 
     if(School > 0)
     {
         float tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
+        if (tmpvalue2 < 0) tmpvalue2 = 0;
         *resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
         if(*resist > damage - *absorb)
             *resist = damage - *absorb;
