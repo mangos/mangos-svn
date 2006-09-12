@@ -308,8 +308,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
+    #ifdef WIN32
     Sleep(10);
-
+    #else
+    sleep(10);
+    #endif
     //! Handled Addons
 
     //Create Addon Packet
