@@ -186,7 +186,6 @@ void Creature::AIM_Update(const uint32 &diff)
             else
                 m_deathTimer -= diff;
 
-
             break;
         }
         case ALIVE:

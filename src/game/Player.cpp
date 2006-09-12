@@ -7843,7 +7843,7 @@ bool Player::CanRewardQuest( Quest *pQuest, bool msg )
         {
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
             {
-                if( pQuest->GetQuestInfo()->ReqItemCount[i]!= 0 && 
+                if( pQuest->GetQuestInfo()->ReqItemCount[i]!= 0 &&
                     GetItemCount(pQuest->GetQuestInfo()->ReqItemId[i]) < pQuest->GetQuestInfo()->ReqItemCount[i] )
                 {
                     if(msg)
@@ -7857,7 +7857,6 @@ bool Player::CanRewardQuest( Quest *pQuest, bool msg )
     }
     return false;
 }
-
 
 bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 {
@@ -9492,8 +9491,6 @@ void Player::UnTamePet(Creature* pet)
     data << uint64(0);
     GetSession()->SendPacket(&data);
 }
-
-
 
 void Player::Uncharm()
 {

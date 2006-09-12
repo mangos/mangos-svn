@@ -561,7 +561,7 @@ void Map::CreatureRelocationNotifying(Creature *creature, Cell new_cell, CellPai
         CellLock<ReadGuard> cell_lock(new_cell, new_val);
         MaNGOS::CreatureRelocationNotifier relocationNotifier(*creature);
         new_cell.data.Part.reserved = ALL_DISTRICT;
-        new_cell.SetNoCreate(); // not trigger load unloaded grids at notifier call
+        new_cell.SetNoCreate();                             // not trigger load unloaded grids at notifier call
         TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, ContainerMapList<Player> > c2p_relocation(relocationNotifier);
         cell_lock->Visit(cell_lock, c2p_relocation, *this);
     }
@@ -610,7 +610,7 @@ void Map::MoveAllCreaturesInMoveList()
 
 bool Map::CreatureCellRelocation(Creature *c, Cell old_cell, Cell new_cell)
 {
-    if(!old_cell.DiffGrid(new_cell) )        // in same grid
+    if(!old_cell.DiffGrid(new_cell) )                       // in same grid
     {
         // if in same cell then none do
         if(old_cell.DiffCell(new_cell))
@@ -654,7 +654,6 @@ bool Map::CreatureCellRelocation(Creature *c, Cell old_cell, Cell new_cell)
     CreatureRelocationNotifying(c,new_cell,new_cell.cellPair());
     return true;
 }
-
 
 bool Map::CreatureRespawnRelocation(Creature *c, Cell cur_cell )
 {
@@ -931,4 +930,3 @@ template bool Map::Find(Creature *) const;
 template bool Map::Find(GameObject *) const;
 template bool Map::Find(DynamicObject *) const;
 template bool Map::Find(Corpse *) const;
-

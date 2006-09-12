@@ -291,7 +291,7 @@ enum SpellSchools
 #define GAMEOBJECT_TYPE_FISHINGHOLE     25
 #define GAMEOBJECT_TYPE_FLAGDROP        26
 // Custom gametypes, can create problems at sending to client
-#define GAMEOBJECT_TYPE_CUSTOM_TELEPORTER      27 
+#define GAMEOBJECT_TYPE_CUSTOM_TELEPORTER      27
 
 #define TEXTEMOTE_AGREE                 1
 #define TEXTEMOTE_AMAZE                 2
