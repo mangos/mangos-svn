@@ -310,8 +310,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
     #ifdef WIN32
     Sleep(10);
-    #else
-    sleep(10);
     #endif
     //! Handled Addons
 
