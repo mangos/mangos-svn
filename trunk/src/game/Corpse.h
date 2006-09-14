@@ -34,7 +34,7 @@ enum CorpseType
 class Corpse : public Object
 {
     public:
-        Corpse( );
+        explicit Corpse( CorpseType type = CORPSE_BONES );
         ~Corpse( );
 
         bool Create( uint32 guidlow );

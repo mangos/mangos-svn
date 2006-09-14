@@ -2363,7 +2363,7 @@ Corpse* Player::CreateCorpse()
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    Corpse* corpse = new Corpse();
+    Corpse* corpse = new Corpse(CORPSE_RESURRECTABLE);
     if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
     {
