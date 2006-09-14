@@ -35,6 +35,8 @@
 #define SPEED_SWIMBACK  4.5f
 #define SPEED_TURN      3.141594f
 
+#define OBJECT_CONTACT_DISTANCE 0.5
+
 enum ObjMoveType
 {
     MOVE_STOP       =0,
@@ -133,6 +135,8 @@ class MANGOS_DLL_SPEC Object
         float GetPositionX( ) const { return m_positionX; }
         float GetPositionY( ) const { return m_positionY; }
         float GetPositionZ( ) const { return m_positionZ; }
+        void GetPosition( float &x, float &y, float &z ) const
+        { x = m_positionX; y = m_positionY; z = m_positionZ; }
         float GetOrientation( ) const { return m_orientation; }
         void GetClosePoint( const Object* victim, float &x, float &y, float &z ) const;
         void GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const;

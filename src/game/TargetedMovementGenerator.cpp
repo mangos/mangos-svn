@@ -22,6 +22,7 @@
 #include "Creature.h"
 #include "MapManager.h"
 #include "Spell.h"
+#include "DestinationHolderImp.h"
 
 #define SMALL_ALPHA 0.05
 
@@ -51,6 +52,7 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
     i_target.GetContactPoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z, offset);
+    owner.addUnitState(UNIT_STAT_CHASE);
 }
 
 void
@@ -73,7 +75,6 @@ TargetedMovementGenerator::Initialize(Creature &owner)
     owner.setMoveRunFlag(true);
     _setAttackRadius(owner);
     _setTargetLocation(owner, 0);
-    owner.addUnitState(UNIT_STAT_CHASE);
 }
 
 void
@@ -113,21 +114,26 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     }
 
     Traveller<Creature> traveller(owner);
-    bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
-    if( owner.GetDistance2dSq( &i_target ) > 0.26f )
-        _setTargetLocation(owner, 0);
-    else if ( !owner.HasInArc( 0.1f, &i_target ) )
+    if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
     {
-        owner.SetInFront(&i_target);
-        if( i_target.GetTypeId() == TYPEID_PLAYER )
-            owner.SendUpdateToPlayer( (Player*)&i_target );
-    }
-    if( !owner.IsStopped() && reach && owner.canReachWithAttack(&i_target) )
-    {
-        owner.StopMoving();
-        if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
-            owner.Attack(&i_target);
-        owner.clearUnitState(UNIT_STAT_CHASE);
+        // put targeted movement generators on a higher priority
+        i_destinationHolder.ResetUpdate(50);
+        float dist = i_target.GetObjectSize() + owner.GetObjectSize() + OBJECT_CONTACT_DISTANCE;
+        // try to counter precision differences
+        if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.1) 
+            _setTargetLocation(owner, 0);
+        else if ( !owner.HasInArc( 0.1f, &i_target ) )
+        {
+            owner.SetInFront(&i_target);
+            if( i_target.GetTypeId() == TYPEID_PLAYER )
+                owner.SendUpdateToPlayer( (Player*)&i_target );
+        }
+        if( !owner.IsStopped() && i_destinationHolder.HasArrived())
+        {
+            owner.StopMoving();
+            if(owner.canReachWithAttack(&i_target) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
+                owner.Attack(&i_target);
+        }
     }
     /*
 

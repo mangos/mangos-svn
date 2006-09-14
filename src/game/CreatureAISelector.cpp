@@ -73,7 +73,7 @@ namespace FactorySelector
             }
         }
         ainame = (ai_factory == NULL) ? "NullCreatureAI" : ai_factory->name();
-        DEBUG_LOG("Creature %u used AI is %s.\n", creature->GetGUIDLow(), ainame.c_str() );
+        DEBUG_LOG("Creature %u used AI is %s.", creature->GetGUIDLow(), ainame.c_str() );
         return ( ai_factory == NULL ? new NullCreatureAI : ai_factory->Create(creature) );
     }
 

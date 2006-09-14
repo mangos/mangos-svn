@@ -614,8 +614,8 @@ bool Object::HasInArc(const float arcangle, const Object* obj) const
 void Object::GetContactPoint( const Object* obj, float &x, float &y, float &z ) const
 {
     float angle = GetAngle( obj );
-    x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + 0.5) * cos(angle);
-    y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + 0.5) * sin(angle);
+    x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + OBJECT_CONTACT_DISTANCE) * cos(angle);
+    y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + OBJECT_CONTACT_DISTANCE) * sin(angle);
     z = GetPositionZ();
 }
 

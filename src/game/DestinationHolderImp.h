@@ -65,6 +65,9 @@ template<typename TRAVELLER>
 void
 DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, float offset)
 {
+    if (i_destX == dest_x && i_destY == dest_y && i_destZ == dest_z)
+        return;
+
     i_fromX = traveller.GetPositionX();
     i_fromY = traveller.GetPositionY();
     i_fromZ = traveller.GetPositionZ();
@@ -108,18 +111,18 @@ bool
 DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update)
 {
     i_tracker.Update(diff);
-    float x,y,z;
-    GetLocationNow(x, y, z);
-    if( x == -431602080 )
-        return false;
-    if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
-    {
-        float ori = traveller.GetTraveller().GetAngle(x, y);
-        traveller.Relocation(x, y, z, ori);
-    }
     if( i_tracker.Passed() || force_update )
     {
         ResetUpdate();
+        float x,y,z;
+        GetLocationNow(x, y, z);
+        if( x == -431602080 )
+            return false;
+        if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
+        {
+            float ori = traveller.GetTraveller().GetAngle(x, y);
+            traveller.Relocation(x, y, z, ori);        
+        }
         return true;
     }
     return false;
@@ -144,5 +147,13 @@ DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
         y = i_fromY + ((i_destY - i_fromY) * percent_passed);
         z = i_fromZ + ((i_destZ - i_fromZ) * percent_passed);
     }
+}
+template<typename TRAVELLER>
+float
+DestinationHolder<TRAVELLER>::GetDistanceFromDestSq(const Object &obj) const
+{
+    float x,y,z;
+    obj.GetPosition(x,y,z);
+    return (i_destX-x)*(i_destX-x)+(i_destY-y)*(i_destY-y)+(i_destZ-z)*(i_destZ-z);
 }
 #endif

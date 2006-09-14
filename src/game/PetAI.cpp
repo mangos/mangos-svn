@@ -83,8 +83,8 @@ void PetAI::_stopAttack()
     if( !i_pet.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_pet.GetGUIDLow());
-        i_pet->MovementExpired();
         i_pet.StopMoving();
+        i_pet->Clear();
         i_pet->Idle();
         i_victimGuid = 0;
         i_pet.CombatStop();
@@ -113,14 +113,15 @@ void PetAI::_stopAttack()
 
     if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
     {
-        i_pet->MovementExpired();
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
+        i_pet->Clear();
         i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
     }
     else
     {
         i_pet.clearUnitState(UNIT_STAT_FOLLOW);
         i_pet.addUnitState(UNIT_STAT_STOPPED);
+        i_pet->Clear();
         i_pet->Idle();
     }
     i_victimGuid = 0;
@@ -183,8 +184,12 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         else if(i_owner && ((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
         {
-            i_pet.addUnitState(UNIT_STAT_FOLLOW);
-            i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
+            if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW))
+            {
+                i_pet.addUnitState(UNIT_STAT_FOLLOW);
+                i_pet->Clear();
+                i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
+            }
         }
     }
 }
@@ -202,6 +207,7 @@ void PetAI::_taggedToKill(Unit *u)
     if(i_pet.Attack(u))
     {
         i_pet.clearUnitState(UNIT_STAT_FOLLOW);
+        i_pet->Clear();
         i_victimGuid = u->GetGUID();
         i_pet->Mutate(new TargetedMovementGenerator(*u));
     }
