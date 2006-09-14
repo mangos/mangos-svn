@@ -84,24 +84,34 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
         SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
         return;
     }
-    else if( !player )
+
+    if( !player )
     {
         SendCommandResult(GUILD_INVITE_S,Invitedname,GUILD_PLAYER_NOT_FOUND);
         return;
     }
-    else if( player->GetGuildId() )
+
+    if ( player->GetTeam() != GetPlayer()->GetTeam() )
+    {
+        SendCommandResult(GUILD_INVITE_S,Invitedname,GUILD_NOT_ALLIED);
+        return;
+    }
+    
+    if( player->GetGuildId() )
     {
         plname = player->GetName();
         SendCommandResult(GUILD_INVITE_S,plname,ALREADY_IN_GUILD);
         return;
     }
-    else if( player->GetGuildIdInvited() )
+    
+    if( player->GetGuildIdInvited() )
     {
         plname = player->GetName();
         SendCommandResult(GUILD_INVITE_S,plname,ALREADY_INVITED_TO_GUILD);
         return;
     }
-    else if(!guild->HasRankRight(GetPlayer()->GetRank(),GR_RIGHT_INVITE))
+    
+    if(!guild->HasRankRight(GetPlayer()->GetRank(),GR_RIGHT_INVITE))
     {
         SendCommandResult(GUILD_INVITE_S,"",GUILD_PERMISSIONS);
         return;

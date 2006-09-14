@@ -149,7 +149,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
             uint32 sidea = GetPlayer()->GetTeam();
             uint32 sideb = player->GetTeam();
-            if( sidea != sideb )
+            if( sidea != sideb && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
             {
                 std::string msg_err = "Player "+to+" is not online (Names are case sensitive)";
                 sChatHandler.SendSysMessage(this ,msg_err.c_str() );
