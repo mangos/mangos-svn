@@ -55,6 +55,12 @@ UseProcessors = 0
 # Default: 1 (HIGH)
 ProcessPriority = 1
 
+# Compression level for update packages sended to client (0..9)
+#          0 (no compression) 
+# Default: 1 (speed) 
+#          9 (best compression) 
+Compression = 1
+
 
 # Maximum number of players in the world. Excluding GM's
 # Default: 100

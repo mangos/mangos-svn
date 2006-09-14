@@ -206,6 +206,12 @@ void World::SetInitialWorldSettings()
     regen_values[RATE_AGGRO]       = sConfig.GetFloatDefault("Rate.Aggro", 1);
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
+    m_configs[CONFIG_COMPRESSION] = sConfig.GetIntDefault("Compression", 1);
+    if(m_configs[CONFIG_COMPRESSION] < 0 || m_configs[CONFIG_COMPRESSION] > 9)
+    {
+        sLog.outError("Compression level (%i) must be in range 0..9. Using default compression level (1),.",m_configs[CONFIG_COMPRESSION]);
+        m_configs[CONFIG_COMPRESSION] = 1;
+    }
     m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);
     m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300000);
     m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
