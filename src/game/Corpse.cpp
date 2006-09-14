@@ -28,7 +28,7 @@
 #include "WorldPacket.h"
 #include "GossipDef.h"
 
-Corpse::Corpse() : Object()
+Corpse::Corpse( CorpseType type ) : Object()
 {
     m_objectType |= TYPE_CORPSE;
     m_objectTypeId = TYPEID_CORPSE;
@@ -36,7 +36,7 @@ Corpse::Corpse() : Object()
     m_valuesCount = CORPSE_END;
 
     m_POI = false;
-    m_type = CORPSE_RESURRECTABLE;
+    m_type = type;
     m_time = time(NULL) - 30;                               // to prevent resurrecting delay at load
 }
 
