@@ -112,7 +112,7 @@ bool Unit::haveOffhandWeapon() const
     {
         Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-        return tmpitem && (tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND);
+        return tmpitem && !tmpitem->IsBroken() && (tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND);
     }
     else
         return false;
@@ -1222,10 +1222,10 @@ float Unit::GetUnitParryChance() const
         if(player->HasSpell(SPELL_PASSIVE_PARRY_1) || player->HasSpell(SPELL_PASSIVE_PARRY_2))
         {
             Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            if(!tmpitem)
+            if(!tmpitem || tmpitem->IsBroken())
                 tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-            if(tmpitem && tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON)
+            if(tmpitem && !tmpitem->IsBroken() && tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON)
                 chance = GetFloatValue(PLAYER_PARRY_PERCENTAGE);
         }
     }
@@ -1244,7 +1244,7 @@ float Unit::GetUnitBlockChance() const
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Item *tmpitem = ((Player const*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-        if(tmpitem && tmpitem->GetProto()->Block)
+        if(tmpitem && !tmpitem->IsBroken() && tmpitem->GetProto()->Block)
             chance = GetFloatValue(PLAYER_BLOCK_PERCENTAGE);
     }
     else
@@ -1266,11 +1266,11 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(attType != EQUIPMENT_SLOT_MAINHAND && !item)
+        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken()))
             return 0;
 
                                                             // in range
-        uint32  skill = item ? item->GetSkill() : SKILL_UNARMED;
+        uint32  skill = item && !item->IsBroken() ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetSkillValue (skill);
     }
     else

@@ -1823,7 +1823,7 @@ uint8 Spell::CheckItems()
                 if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
                     break;
                 Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
-                if(!pItem)
+                if(!pItem || pItem->IsBroken())
                     return CAST_FAIL_MUST_HAVE_ITEM_EQUIPPED;
 
                 uint32 type = pItem->GetProto()->InventoryType;
