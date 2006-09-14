@@ -4034,19 +4034,19 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 loot->clear();
             }
 
-            if(loot->empty())
+            if(!creature->lootForBody)
             {
-                if(!creature->lootForBody)
-                {
-                    creature->lootForBody = true;
-                    if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-                        FillLoot(this,loot,lootid,LootTemplates_Creature);
+                creature->lootForBody = true;
+                if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
+                    FillLoot(this,loot,lootid,LootTemplates_Creature);
 
-                    creature->generateMoneyLoot();
-                }
+                creature->generateMoneyLoot();
+            }
 
-                if (loot_type == LOOT_SKINNING)
-                    creature->getSkinLoot();
+            if (!creature->lootForSkinning && loot_type == LOOT_SKINNING)
+            {
+                creature->lootForSkinning = true;
+                creature->getSkinLoot();
             }
         }
     }
@@ -6856,7 +6856,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
     {
         sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
         pItem->SetOwnerGUID(0);
-        pItem->SetSlot( 0 );
+        pItem->SetSlot( NULL_SLOT );
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
         pItem->DeleteFromDB();
         ItemPrototype const *pProto = pItem->GetProto();

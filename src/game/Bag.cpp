@@ -132,7 +132,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
                 }
 
                 Item *item = NewItemOrBag(proto);
-                item->SetSlot(slot);
+                item->SetSlot(NULL_SLOT);
                 if(!item->LoadFromDB(item_guid, owner_guid, 1))
                     continue;
                 StoreItem( slot, item, true );

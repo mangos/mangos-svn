@@ -446,13 +446,12 @@ void Spell::EffectCreateItem(uint32 i)
 
     uint32 num_to_add;
 
-    if(player->getLevel() >= m_spellInfo->spellLevel)
+    if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
+        num_to_add = m_spellInfo->EffectBasePoints[i]+1;
+    else if(player->getLevel() >= m_spellInfo->spellLevel)
         num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
     else
         num_to_add = 2;
-
-    if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
-        num_to_add = 1;
 
     uint16 dest;
     uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, newitemid, num_to_add, false);

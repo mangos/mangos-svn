@@ -366,7 +366,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void ApplyArmorMod(float val, bool apply) { ApplyResistanceMod(SPELL_SCHOOL_NORMAL, val, apply); }
         void ApplyArmorPercentMod(float val, bool apply) { ApplyResistancePercentMod(SPELL_SCHOOL_NORMAL, val, apply); }
 
-        float GetResistance(SpellSchools school) const { return (uint32)GetFloatValue(UNIT_FIELD_RESISTANCES+school); }
+        float GetResistance(SpellSchools school) const { return GetFloatValue(UNIT_FIELD_RESISTANCES+school); }
         void SetResistance(SpellSchools school, float val) { SetFloatValue(UNIT_FIELD_RESISTANCES+school,val); }
         void ApplyResistanceMod(SpellSchools school, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_RESISTANCES+school, val, apply); }
         void ApplyResistancePercentMod(SpellSchools school, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_RESISTANCES+school, val, apply); }
