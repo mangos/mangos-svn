@@ -63,14 +63,16 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 {
     uint32 clientcount = 0;
-    size_t datalen = 8;
-    uint32 countcheck = 0;
     WorldPacket data;
 
     sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
 
-    uint32 team = this->_player->GetTeam();
-    uint32 security = this->GetSecurity();
+    uint32 team = _player->GetTeam();
+    uint32 security = GetSecurity();
+
+    data.Initialize( SMSG_WHO );
+    data << uint32( 0 ); // clientcount place holder
+    data << uint32( 0 ); // clientcount place holder
 
     ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
@@ -81,25 +83,6 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         {
             clientcount++;
 
-            datalen = datalen + strlen(itr->second->GetName()) + 1 + 17;
-        }
-    }
-
-    data.Initialize( SMSG_WHO );
-    data << uint32( clientcount );
-    data << uint32( clientcount );
-
-    for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-    {
-
-        if( countcheck >= clientcount) break;
-
-        // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
-        // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-        if ( itr->second->GetName() && ( security > 0 || itr->second->GetTeam() == team && itr->second->GetSession()->GetSecurity() == 0 ) )
-        {
-            countcheck++;
-
             data.append(itr->second->GetName() , strlen(itr->second->GetName()) + 1);
             data << uint8( 0x00 );
             data << uint32( itr->second->getLevel() );
@@ -109,7 +92,9 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         }
     }
 
-    WPAssert(data.size() == datalen);
+    data.put( 0,              clientcount ); //insert right count
+    data.put( sizeof(uint32), clientcount ); //insert right count 
+
     SendPacket(&data);
 }
 
