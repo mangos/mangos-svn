@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*
 #if defined(_WIN32) || defined(__CYGWIN__)
 #pragma warning(disable:4786)
+#define FD_SETSIZE 1024
 #include <winsock.h>
 #else
 #include <netdb.h>

@@ -108,7 +108,7 @@ typedef int socklen_t;
 
 // 1.8.6: define FD_SETSIZE to something bigger than 64 if there are a lot of
 // simultaneous connections (must be done before including winsock.h)
-//#define FD_SETSIZE 1024
+#define FD_SETSIZE 1024
 #include <winsock.h>
 
 #define Errno WSAGetLastError()
