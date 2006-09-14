@@ -22,6 +22,8 @@
 #include "Platform/Define.h"
 #include "Timer.h"
 
+class Object;
+
 #define TRAVELLER_UPDATE_INTERVAL  300
 
 template<typename TRAVELLER>
@@ -45,6 +47,7 @@ class MANGOS_DLL_DECL DestinationHolder
         bool UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update);
         void UpdateLocation(TRAVELLER &traveller, float, float, float);
         void GetLocationNow(float &x, float &y, float &z) const;
+        float GetDistanceFromDestSq(const Object &obj) const;
 
     private:
         void _findOffSetPoint(float x1, float y1, float x2, float y2, float offset, float &x, float &y);

@@ -91,7 +91,8 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
     if(creature.hasUnitState(UNIT_STAT_ROOT) || creature.hasUnitState(UNIT_STAT_STUNDED))
         return;
     i_nextMoveTime.Update(diff);
-    i_destinationHolder.ResetUpdate();
+    Traveller<Creature> traveller(creature);
+    i_destinationHolder.UpdateTraveller(traveller, diff, false);
     if( i_nextMoveTime.Passed() )
     {
         if( creature.IsStopped() )

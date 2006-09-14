@@ -153,7 +153,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
     queryResult->NextRow();
 
-    DEBUG_LOG( "SQL: %s\n", sql );
+    DEBUG_LOG( "SQL: %s", sql );
     return queryResult;
 }
 
