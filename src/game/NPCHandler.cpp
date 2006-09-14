@@ -289,8 +289,6 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
         // trainer always return to original orientation
         unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
-
-        SendTrainerList( guid );
     }
 }
 

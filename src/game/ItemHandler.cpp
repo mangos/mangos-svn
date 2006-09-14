@@ -364,6 +364,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
         if( pCreature )
         {
+            vendorslot = 0;
             for(int i = 0; i < pCreature->GetItemCount(); i++)
             {
                 if ( pCreature->GetItemId(i) == item )
@@ -450,6 +451,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
         if( pCreature )
         {
+            vendorslot = 0;
             for(int i = 0; i < pCreature->GetItemCount(); i++)
             {
                 if ( pCreature->GetItemId(i) == item )
