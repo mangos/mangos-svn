@@ -833,7 +833,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     for(AuraList::iterator i = vDamageShields.begin(); i != vDamageShields.end(); ++i)
         pVictim->SpellNonMeleeDamageLog(this, (*i)->GetId(), (*i)->GetModifier()->m_amount);
 
-    // this unit's proc trigger damage
+    /*// this unit's proc trigger damage
     AuraList& mProcTriggerDamage = GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
     for(AuraList::iterator i = mProcTriggerDamage.begin(), next; i != mProcTriggerDamage.end(); i = next)
     {
@@ -923,7 +923,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 }
             }
         }
-    }
+    }*/
 
     if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {
