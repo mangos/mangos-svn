@@ -45,7 +45,7 @@ Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
 m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
 itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false), m_isTamed(false),
-m_regenTimer(2000), lootForPickPocketed(false),lootForBody(false)
+m_regenTimer(2000), lootForPickPocketed(false),lootForBody(false),lootForSkinning(false)
 {
     m_valuesCount = UNIT_END;
 
@@ -172,6 +172,7 @@ void Creature::AIM_Update(const uint32 &diff)
                 ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
                 lootForPickPocketed = false;
                 lootForBody         = false;
+                lootForSkinning     = false;
                 loot.clear();
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;

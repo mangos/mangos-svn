@@ -347,6 +347,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         Loot loot;
         bool lootForPickPocketed;
         bool lootForBody;
+        bool lootForSkinning;
 
         SpellEntry *reachWithSpellAttack(Unit *pVictim);
         uint32 m_spells[CREATURE_MAX_SPELLS];

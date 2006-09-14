@@ -107,6 +107,11 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
         return;
     if(i_creature.hasUnitState(UNIT_STAT_ROOT) || i_creature.hasUnitState(UNIT_STAT_STUNDED))
         return;
+
+    // prevent crash at empty waypoint path.
+    if(i_path.Size()==0)
+        return;
+
     i_nextMoveTime.Update(diff);
     CreatureTraveller traveller(creature);
     i_destinationHolder.UpdateTraveller(traveller, diff, false);
