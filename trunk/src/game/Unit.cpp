@@ -1954,7 +1954,7 @@ void Unit::ApplyStats(bool apply)
     }
 
     // Armor
-    val = 2*GetStat(STAT_AGILITY);
+    val = 2*(GetStat(STAT_AGILITY) - ((Player*)this)->GetCreateStat(STAT_AGILITY));
 
     ApplyArmorMod( val, apply);
 
