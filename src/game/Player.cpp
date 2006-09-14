@@ -1206,10 +1206,10 @@ void Player::RegenerateHealth()
         case MAGE:    addvalue = (Spirit*0.10)       * HealthIncreaseRate; break;
         case PALADIN: addvalue = (Spirit*0.25)       * HealthIncreaseRate; break;
         case PRIEST:  addvalue = (Spirit*0.10)       * HealthIncreaseRate; break;
-        case ROGUE:   addvalue = (Spirit*0.50 + 2.0) * HealthIncreaseRate; break;
+        case ROGUE:   addvalue = (Spirit*0.8 - 13.8) * HealthIncreaseRate; break;
         case SHAMAN:  addvalue = (Spirit*0.11)       * HealthIncreaseRate; break;
         case WARLOCK: addvalue = (Spirit*0.07 + 6.0) * HealthIncreaseRate; break;
-        case WARRIOR: addvalue = (Spirit*0.80)       * HealthIncreaseRate; break;
+        case WARRIOR: addvalue = (Spirit*1.5 - 26)       * HealthIncreaseRate; break;
     }
     if (HasSpell(SPELL_PASSIVE_REGENERATION))               // TODO: Should be aura controlled
     {
