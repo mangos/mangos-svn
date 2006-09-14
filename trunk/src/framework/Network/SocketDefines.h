@@ -23,6 +23,7 @@
 
 /* Windows socket definitions
  */
+#define FD_SETSIZE 1024
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 
