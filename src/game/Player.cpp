@@ -2653,7 +2653,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
         {
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
-            if (!tmpitem)
+            if (!tmpitem || tmpitem->IsBroken())
                 UpdateSkill(SKILL_UNARMED);
             else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
                 UpdateSkill(tmpitem->GetSkill());
@@ -2663,14 +2663,14 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
         {
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-            if (tmpitem)
+            if (tmpitem && !tmpitem->IsBroken())
                 UpdateSkill(tmpitem->GetSkill());
         };break;
         case RANGED_ATTACK:
         {
             Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
-            if (tmpitem)
+            if (tmpitem && !tmpitem->IsBroken())
                 UpdateSkill(tmpitem->GetSkill());
         };break;
     }
@@ -3612,9 +3612,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if(slot >= INVENTORY_SLOT_BAG_END || !item) return;
 
     // not apply/premove mods for broken item
-    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-    uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
-    if(maxDurability && !curDurability) return;
+    if(item->IsBroken()) return;
 
     ItemPrototype const *proto = item->GetProto();
 
@@ -3845,7 +3843,7 @@ void Player::CastItemEquipSpell(Item *item)
 
 void Player::CastItemCombatSpell(Item *item,Unit* Target)
 {
-    if(!item)
+    if(!item || item->IsBroken())
         return;
 
     ItemPrototype const *proto = item->GetProto();
@@ -5404,6 +5402,7 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
 
 void Player::SetSheath( uint32 sheathed )
 {
+    Item* item;
     switch (sheathed)
     {
         case 0:                                             // no prepeared weapon
@@ -5412,14 +5411,18 @@ void Player::SetSheath( uint32 sheathed )
             SetVirtualItemSlot(2,NULL);
             break;
         case 1:                                             // prepeared melee weapon
-            SetVirtualItemSlot(0,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND));
-            SetVirtualItemSlot(1,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND));
+        {
+            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            SetVirtualItemSlot(0,item && !item->IsBroken() ? item : NULL);
+            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            SetVirtualItemSlot(1,item && !item->IsBroken() ? item : NULL);
             SetVirtualItemSlot(2,NULL);
-            break;
+        };  break;
         case 2:                                             // prepeared ranged weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
-            SetVirtualItemSlot(2,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED));
+            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            SetVirtualItemSlot(2,item && !item->IsBroken() ? item : NULL);
             break;
         default:
             SetVirtualItemSlot(0,NULL);

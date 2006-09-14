@@ -1266,7 +1266,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
         {
             Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
-            if(!pItem)
+            if(!pItem  || pItem->IsBroken())
                 return;
 
             uint32 type = pItem->GetProto()->InventoryType;
