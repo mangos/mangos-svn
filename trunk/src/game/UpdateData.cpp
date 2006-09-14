@@ -22,6 +22,7 @@
 #include "UpdateData.h"
 #include "Log.h"
 #include "Opcodes.h"
+#include "World.h"
 #include <zlib/zlib.h>
 
 UpdateData::UpdateData() : m_blockCount(0)
@@ -47,7 +48,8 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     c_stream.zfree = (free_func)0;
     c_stream.opaque = (voidpf)0;
 
-    if (Z_OK != deflateInit(&c_stream, Z_BEST_SPEED))
+    // default Z_BEST_SPEED (1)
+    if (Z_OK != deflateInit(&c_stream, sWorld.getConfig(CONFIG_COMPRESSION)))
     {
         sLog.outError("Can't compress update packet (zlib: deflateInit).");
         *dst_size = 0;

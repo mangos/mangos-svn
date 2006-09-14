@@ -46,7 +46,7 @@ GameObject::~GameObject()
 {
     // crash possable at access to deleted GO in Unit::m_gameobj
     if(isReferenced())
-        sLog.outError("Delete GameObject (GUID: %u) that have references in Unit GO list. Crash possable later.",GetGUIDLow());
+        sLog.outError("Delete GameObject (GUID: %u Entry: %u ) that have references in Unit GO list. Crash possable later.",GetGUIDLow(),GetGOInfo()->id);
 }
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
@@ -65,7 +65,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
     if(!IsPositionValid())
     {
-        sLog.outError("ERROR: Gameobject (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",guidlow,name_id,x,y);
+        sLog.outError("ERROR: Gameobject (GUID: %u Entry: %u ) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",guidlow,name_id,x,y);
         return false;
     }
 
@@ -132,7 +132,7 @@ void GameObject::Delete()
     // prevent crash at access to deleted GO in Unit::m_gameobj
     if(isReferenced())
     {
-        sLog.outError("Attempt delete GameObject (GUID: %u) that have references in Unit GO list.",GetGUIDLow());
+        sLog.outError("Attempt delete GameObject (GUID: %u Entry: %u ) that have references in Unit GO list.",GetGUIDLow(),GetGOInfo()->id);
         return;
     }
 
