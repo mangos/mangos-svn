@@ -9347,7 +9347,7 @@ void Player::SavePet()
 {
     Creature* pet = GetPet();
     if(pet && pet->isPet())
-        pet->SaveToDB();
+       ((Pet*)pet)->SaveToDB();
 }
 
 void Player::outDebugValues() const
