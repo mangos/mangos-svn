@@ -104,7 +104,7 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
             creature.addUnitState(UNIT_STAT_ROAMING);
             CreatureTraveller traveller(creature);
             i_destinationHolder.SetDestination(traveller, x, y, z);
-            traveller.Relocation(x,y,z);
+            //traveller.Relocation(x,y,z);
             i_nextMoveTime.Reset( i_destinationHolder.GetTotalTravelTime() );
         }
         else
