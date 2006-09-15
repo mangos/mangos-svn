@@ -694,11 +694,19 @@ void Spell::EffectLearnSpell(uint32 i)
 
     if(!unitTarget)
         return;
-    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
-        unitTarget = m_targets.getUnitTarget();
 
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+    {
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(!m_caster->GetPet())
+                return;
+            Creature *pet = (Creature*)unitTarget;
+            if(pet->isPet() && pet == m_caster->GetPet())
+                EffectLearnPetSpell(i);
+        }
         return;
+    }
 
     Player *player = (Player*)unitTarget;
 
@@ -1135,7 +1143,7 @@ void Spell::EffectSummonPet(uint32 i)
 
         if(petentry == 416)                                 //imp
         {
-            NewSummon->m_spells[0] = 133;                   //133---fire bolt 1
+            NewSummon->m_spells[0] = 3110;                   //3110---fire bolt 1
             NewSummon->AddActState(STATE_RA_SPELL1);
         }
 
@@ -1186,10 +1194,8 @@ void Spell::EffectLearnPetSpell(uint32 i)
             break;
         }
     }
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        ((Player*)m_caster)->PetSpellInitialize();
-    }
+    _player->PetSpellInitialize();
+    //((Player*)m_caster)->SavePet();
 }
 
 void Spell::EffectAttackMe(uint32 i)
