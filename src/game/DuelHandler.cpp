@@ -40,53 +40,57 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     Player *pl;
     Player *plTarget;
 
-    pl     = GetPlayer();
+    pl       = GetPlayer();
     plTarget = pl->m_pDuel;
 
-    if(pl->GetGUID() != plTarget->GetGUID())
+    if(pl == plTarget || !plTarget                          // self request or not requestd
+        || pl->isInDuel()                                   // already in started duel
+        || plTarget ->isInDuel())                           // tagrget in started duel
     {
-
-        sLog.outDebug( "WORLD: received CMSG_DUEL_ACCEPTED" );
-        DEBUG_LOG("Player 1 is: " I64FMT, pl->GetGUID());
-        DEBUG_LOG("Player 2 is: " I64FMT, plTarget->GetGUID());
-
-        //Set players team
-        pl->SetUInt32Value(PLAYER_DUEL_TEAM, 1);
-        plTarget->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
-
-        #if 1
-        //******************************* TEMPORARY *********************************
-        //TODO: Set PvP ON and OFF to players is a little magic to Duel System works
-        //      It is not the right way to do... We need to fix it! :D
-        //
-        //Set players factions. These factios are into factionstemplate.dbc
-        pl->setFaction(BLUE_TEAM);                          //Blue faction
-        if(Creature* pet = pl->GetPet())
-            pet->setFaction(BLUE_TEAM);
-
-        plTarget->setFaction(RED_TEAM);                     //Red faction
-        if(Creature* pet = plTarget->GetPet())
-            pet->setFaction(RED_TEAM);
-
-        pl->StorePvpState();
-        plTarget->StorePvpState();
-
-        pl->SetPvP(false);
-        plTarget->SetPvP(true);
-        //******************************* TEMPORARY *********************************
-        #endif
-
-        pl->SetInDuel(true);
-        plTarget->SetInDuel(true);
-
-        WorldPacket data;
-
-        data.Initialize(SMSG_DUEL_COUNTDOWN);
-        data << (uint32)3000;                               // 3 seconds
-        pl->GetSession()->SendPacket(&data);
-        plTarget->GetSession()->SendPacket(&data);
-
+        // remove duel gameobject if exist and other cleanups
+        pl->DuelComplete();
+        return;
     }
+
+    sLog.outDebug( "WORLD: received CMSG_DUEL_ACCEPTED" );
+    DEBUG_LOG("Player 1 is: " I64FMT, pl->GetGUID());
+    DEBUG_LOG("Player 2 is: " I64FMT, plTarget->GetGUID());
+
+    //Set players team
+    pl->SetUInt32Value(PLAYER_DUEL_TEAM, 1);
+    plTarget->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
+
+    #if 1
+    //******************************* TEMPORARY *********************************
+    //TODO: Set PvP ON and OFF to players is a little magic to Duel System works
+    //      It is not the right way to do... We need to fix it! :D
+    //
+    //Set players factions. These factios are into factionstemplate.dbc
+    pl->setFaction(BLUE_TEAM);                          //Blue faction
+    if(Creature* pet = pl->GetPet())
+        pet->setFaction(BLUE_TEAM);
+
+    plTarget->setFaction(RED_TEAM);                     //Red faction
+    if(Creature* pet = plTarget->GetPet())
+        pet->setFaction(RED_TEAM);
+
+    pl->StorePvpState();
+    plTarget->StorePvpState();
+
+    pl->SetPvP(false);
+    plTarget->SetPvP(true);
+    //******************************* TEMPORARY *********************************
+    #endif
+
+    pl->SetInDuel(true);
+    plTarget->SetInDuel(true);
+
+    WorldPacket data;
+
+    data.Initialize(SMSG_DUEL_COUNTDOWN);
+    data << (uint32)3000;                               // 3 seconds
+    pl->GetSession()->SendPacket(&data);
+    plTarget->GetSession()->SendPacket(&data);
 
 }
 
@@ -96,47 +100,17 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: received CMSG_DUEL_CANCELLED" );
 
     uint64 guid;
-    Player *pl;
-    Player *plTarget;
     WorldPacket data;
 
     recvPacket >> guid;
 
-    pl       = GetPlayer();
-    plTarget = pl->m_pDuel;
+    // Duel not request yet
+    if(!GetPlayer()->isRequestedOrStartDuel())
+        return;
 
-    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-    data << (uint64)guid;
-    pl->GetSession()->SendPacket(&data);
-    plTarget->GetSession()->SendPacket(&data);
+    // Duel already started
+    if(GetPlayer()->isInDuel())
+       return;
 
-    data.Initialize(SMSG_DESTROY_OBJECT);
-    data << (uint64)guid;
-    pl->GetSession()->SendPacket(&data);
-    plTarget->GetSession()->SendPacket(&data);
-
-    data.Initialize(SMSG_DUEL_COMPLETE);
-    data << (uint8)0;
-    pl->GetSession()->SendPacket(&data);
-    plTarget->GetSession()->SendPacket(&data);
-
-    pl->m_isInDuel = false;
-    plTarget->m_isInDuel = false;
-
-    GameObject* obj = NULL;
-    if( pl )
-        obj = ObjectAccessor::Instance().GetGameObject(*pl, guid);
-
-    if(obj)
-    {
-        pl->RemoveGameObject(obj->GetSpellId(),false);
-        plTarget->RemoveGameObject(obj->GetSpellId(),false);
-        ObjectAccessor::Instance().AddObjectToRemoveList(obj);
-    }
-
-    pl->SetUInt64Value(PLAYER_DUEL_ARBITER,0);
-    plTarget->SetUInt64Value(PLAYER_DUEL_ARBITER,0);
-    pl->SetUInt32Value(PLAYER_DUEL_TEAM,0);
-    plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,0);
-
+    GetPlayer()->DuelComplete();
 }
