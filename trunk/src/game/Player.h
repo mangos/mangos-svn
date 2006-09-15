@@ -710,8 +710,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDuelVs(Player *plyr) { m_pDuel = plyr; }
         void SetInDuel(bool val) { m_isInDuel = val; }
         bool isInDuel() { return m_isInDuel; }
+        bool isRequestedOrStartDuel() { return m_pDuel != NULL; }
         void SetDuelSender(Player *plyr) { m_pDuelSender = plyr; }
         void CheckDuelDistance();
+        void DuelComplete();
 
         //Functions to store/restore temporary state of pvpOn
         void StorePvpState(){ pvpTemp = pvpOn; };
@@ -781,7 +783,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DurabilityRepairAll(bool cost);
         void DurabilityRepair(uint16 pos, bool cost);
         void RepopAtGraveyard();
-        void DuelComplete();
 
         void SetMovement(uint8 pType);
         void SetPlayerSpeed(uint8 SpeedType, float value, bool forced=false);

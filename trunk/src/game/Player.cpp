@@ -3504,26 +3504,67 @@ void Player::CheckDuelDistance()
 
 void Player::DuelComplete()
 {
-    if( !isInDuel() ) return;
+    // duel not requested
+    if(!m_pDuel)
+        return;
 
     WorldPacket data;
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
 
-    CombatStop();
-    m_pDuel->CombatStop();
+    // if dual really started
+    if(isInDuel())
+    {
+        CombatStop();
+        m_pDuel->CombatStop();
 
-    data.Initialize(SMSG_DUEL_WINNER);
-    data << (uint8)0;
-    data << m_pDuel->GetName();
-    data << (uint8)0;
-    data << GetName();
-    GetSession()->SendPacket(&data);
-    m_pDuel->GetSession()->SendPacket(&data);
+        data.Initialize(SMSG_DUEL_WINNER);
+        data << (uint8)0;
+        data << GetName();
+        data << (uint8)0;
+        data << m_pDuel->GetName();
+        SendMessageToSet(&data,true);
 
-    data.Initialize(SMSG_DUEL_COMPLETE);
-    data << (uint8)1;
-    GetSession()->SendPacket(&data);
-    m_pDuel->GetSession()->SendPacket(&data);
+        data.Initialize(SMSG_DUEL_COMPLETE);
+        data << (uint8)1;
+        GetSession()->SendPacket(&data);
+        m_pDuel->GetSession()->SendPacket(&data);
+
+
+        SetInDuel(false);
+        m_pDuel->SetInDuel(false);
+
+        #if 1
+        //Restore the state of pvpOn
+        RestorePvpState();
+        m_pDuel->RestorePvpState();
+        //Restore to correct factiontemplate
+        setFactionForRace(getRace());
+        m_pDuel->setFactionForRace(m_pDuel->getRace());
+        //Restore pet factiontemplate
+        if(Creature* pet = GetPet())
+        {
+            pet->CombatStop();
+            pet->setFaction(getFaction());
+        }
+        if(Creature* pet = m_pDuel->GetPet())
+        {
+            pet->CombatStop();
+            pet->setFaction(m_pDuel->getFaction());
+        }
+        #endif
+
+        //ResurrectPlayer();
+        if(!isAlive())
+            setDeathState(ALIVE);
+    }
+    else                                                    // duel not started
+    {
+        data.Initialize(SMSG_DUEL_COMPLETE);
+        data << (uint8)0;
+        GetSession()->SendPacket(&data);
+        m_pDuel->GetSession()->SendPacket(&data);
+    }
+
 
     data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
     data << duelFlagGUID;
@@ -3536,33 +3577,9 @@ void Player::DuelComplete()
     m_pDuel->GetSession()->SendPacket(&data);
 
     //Player kneel when finish the duel
-    HandleEmoteCommand(ANIM_EMOTE_BEG);
+    if(isInDuel())
+        HandleEmoteCommand(ANIM_EMOTE_BEG);
 
-    SetInDuel(false);
-    m_pDuel->SetInDuel(false);
-
-    #if 1
-    //Restore the state of pvpOn
-    RestorePvpState();
-    m_pDuel->RestorePvpState();
-    //Restore to correct factiontemplate
-    setFactionForRace(getRace());
-    m_pDuel->setFactionForRace(m_pDuel->getRace());
-    //Restore pet factiontemplate
-    if(Creature* pet = GetPet())
-    {
-        pet->CombatStop();
-        pet->setFaction(getFaction());
-    }
-    if(Creature* pet = m_pDuel->GetPet())
-    {
-        pet->CombatStop();
-        pet->setFaction(m_pDuel->getFaction());
-    }
-    #endif
-
-    //ResurrectPlayer();
-    setDeathState(ALIVE);
 
     //Remove Duel Flag object
     GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
@@ -3571,7 +3588,7 @@ void Player::DuelComplete()
     {
         RemoveGameObject(obj->GetSpellId(),false);
         m_pDuel->RemoveGameObject(obj->GetSpellId(),false);
-        ObjectAccessor::Instance().AddObjectToRemoveList(obj);
+        obj->Delete();
     }
 
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
@@ -3579,6 +3596,11 @@ void Player::DuelComplete()
     m_pDuel->SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     m_pDuel->SetUInt32Value(PLAYER_DUEL_TEAM, 0);
 
+    // cleanup pointers
+    m_pDuel->m_pDuelSender = NULL;
+    m_pDuel->m_pDuel = NULL;
+    m_pDuelSender = NULL;
+    m_pDuel = NULL;
 }
 
 static unsigned long    holdrand = 0x89abcdef;

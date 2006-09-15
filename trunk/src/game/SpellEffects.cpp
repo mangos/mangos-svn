@@ -1399,7 +1399,8 @@ void Spell::EffectDuel(uint32 i)
     Player *caster = (Player*)m_caster;
     Player *target = (Player*)unitTarget;
 
-    if( caster->isInDuel() || target->isInDuel() ) return;
+    // caster or target already have requested duel
+    if( caster->isRequestedOrStartDuel() || target->isRequestedOrStartDuel() ) return;
 
     //CREATE DUEL FLAG OBJECT
     GameObject* pGameObj = new GameObject();
