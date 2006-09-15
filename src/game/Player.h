@@ -489,7 +489,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag ;}
         uint32 GetWeaponProficiency() const { return m_WeaponProficiency;}
         uint32 GetArmorProficiency() const { return m_ArmorProficiency;}
+
+        Player* GetTrader() const { return pTrader; }
         void ClearTrade();
+        void TradeCancel(bool sendback);
 
         void UpdateEnchantTime(uint32 time);
         void ReducePoisonCharges(uint32 enchantId);
@@ -918,7 +921,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
         /*********************************************************/
-        Player* GetTrader() const { return pTrader; }
         uint32 GetMovementFlags() const { return m_movement_flags; }
         bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
         void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}

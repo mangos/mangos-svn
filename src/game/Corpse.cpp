@@ -134,8 +134,6 @@ bool Corpse::LoadFromDB(uint32 guid)
     uint32 mapid    = fields[4].GetUInt32();
     uint32 bones   = fields[6].GetUInt32();
 
-    m_type = (bones == 0) ? CORPSE_RESURRECTABLE : CORPSE_BONES;
-
     if(!LoadValues( fields[5].GetString() ))
     {
         sLog.outError("ERROR: Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
@@ -154,6 +152,9 @@ bool Corpse::LoadFromDB(uint32 guid)
         sLog.outError("ERROR: Corpse (guidlow %d, owner %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()),GetPositionX(),GetPositionY());
         return false;
     }
+
+    // set before return to prevent attempting remove Corpse (CORPSE_RESURRECTABLE) from World at Load fail
+    m_type = (bones == 0) ? CORPSE_RESURRECTABLE : CORPSE_BONES;
 
     return true;
 }
