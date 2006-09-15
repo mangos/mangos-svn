@@ -699,11 +699,12 @@ void Spell::EffectLearnSpell(uint32 i)
     {
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            if(!m_caster->GetPet())
+            Creature *pet = m_caster->GetPet();
+            
+            if( !pet || !pet->isPet() || pet!=unitTarget )
                 return;
-            Creature *pet = (Creature*)unitTarget;
-            if(pet->isPet() && pet == m_caster->GetPet())
-                EffectLearnPetSpell(i);
+
+            EffectLearnPetSpell(i);
         }
         return;
     }

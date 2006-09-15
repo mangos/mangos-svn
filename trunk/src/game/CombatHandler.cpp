@@ -52,11 +52,10 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
-    uint64 guid = GetPlayer()->GetGUID();
     uint32 sheathed;
     recv_data >> sheathed;
 
-    sLog.outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u guidhigh:%u value1:%u", GUID_LOPART(guid), GUID_HIPART(guid), sheathed );
+    sLog.outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u value1:%u", GetPlayer()->GetGUIDLow(), sheathed );
 
     GetPlayer()->SetSheath(sheathed);
 }

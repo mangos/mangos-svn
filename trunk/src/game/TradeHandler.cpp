@@ -261,18 +261,16 @@ void WorldSession::SendCancelTrade()
 
 void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
 {
-    if(_player->pTrader)
-    {
-        // prevent back cancel message (already processed)
-        _player->pTrader->pTrader = NULL;
-        _player->pTrader->GetSession()->SendCancelTrade();
-        _player->pTrader = NULL;
-    }
-    _player->ClearTrade();
+    // sended also after LOGOUT COMPLETE
+    if(_player)
+        _player->TradeCancel(true);
 }
 
 void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 {
+    if( GetPlayer()->pTrader )
+        return;
+
     WorldPacket data;
     uint64 ID;
 

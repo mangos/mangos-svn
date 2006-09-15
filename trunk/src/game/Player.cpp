@@ -145,6 +145,8 @@ Player::~Player ()
 
     CombatStop();
 
+    TradeCancel(false);
+
     RemoveAllAuras();
 
     uint32 eslot;
@@ -7405,6 +7407,21 @@ void Player::ClearTrade()
     acceptTrade = false;
     for(int i=0; i<7; i++)
         tradeItems[i] = NULL_SLOT;
+}
+
+void Player::TradeCancel(bool sendback)
+{
+    if(pTrader)
+    {
+        // prevent loop cancel message (already processed)
+        if(!sendback)
+            pTrader->pTrader = NULL;
+
+        WorldSession* ws = pTrader->GetSession();
+        pTrader = NULL;
+        ws->SendCancelTrade();
+    }
+    ClearTrade();
 }
 
 void Player::UpdateEnchantTime(uint32 time)
