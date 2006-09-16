@@ -510,9 +510,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     return true;
 }
 
-void Player::StartMirrorTimer(uint8 Type, uint32 MaxValue)
+void Player::StartMirrorTimer(MirrorTimerType Type, uint32 MaxValue)
 {
-    //TYPE: 0 = fartigua 1 = breath 2 = fire?
     WorldPacket data;
     uint32 BreathRegen = (uint32)-1;
     data.Initialize(SMSG_START_MIRROR_TIMER);
@@ -525,9 +524,11 @@ void Player::StartMirrorTimer(uint8 Type, uint32 MaxValue)
     GetSession()->SendPacket(&data);
 }
 
-void Player::ModifyMirrorTimer(uint8 Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen)
+void Player::ModifyMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen)
 {
-    //TYPE: 0 = fatigue 1 = breath 2 = fire
+    if(Type==BREATH_TIMER)
+        m_breathTimer = ((MaxValue + 1000) - CurrentValue) / Regen;
+
     WorldPacket data;
     data.Initialize(SMSG_START_MIRROR_TIMER);
     data << (uint32)Type;
@@ -539,8 +540,11 @@ void Player::ModifyMirrorTimer(uint8 Type, uint32 MaxValue, uint32 CurrentValue,
     GetSession()->SendPacket( &data );
 }
 
-void Player::StopMirrorTimer(uint8 Type)
+void Player::StopMirrorTimer(MirrorTimerType Type)
 {
+    if(Type==BREATH_TIMER)
+        m_breathTimer = 0;
+
     WorldPacket data;
     data.Initialize(SMSG_STOP_MIRROR_TIMER);
     data << (uint32)Type;
@@ -570,11 +574,9 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
     }
 
     //if have water breath , then remove bar
-    if(waterbreath)
+    if(waterbreath || !isAlive())
     {
-        StopMirrorTimer(1);
-
-        m_breathTimer = 0;
+        StopMirrorTimer(BREATH_TIMER);
         m_isunderwater = 0;
         return;
     }
@@ -591,7 +593,7 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
         if ( m_breathTimer <= UnderWaterTime && !(m_isunderwater & 0x04))
         {
             m_isunderwater|= 0x04;
-            StartMirrorTimer(1, UnderWaterTime);
+            StartMirrorTimer(BREATH_TIMER, UnderWaterTime);
         }
         //continius trigger drowning "Damage"
         if ((m_breathTimer == 0) && (m_isunderwater & 0x01))
@@ -604,23 +606,19 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
             m_breathTimer = 2000;
         }
     }
-
     //single trigger retract bar
     else if (!(m_isunderwater & 0x01) && !(m_isunderwater & 0x08) && (m_isunderwater & 0x02) && (m_breathTimer > 0) && isAlive())
     {
         m_isunderwater = 0x08;
 
         uint32 BreathRegen = 10;
-        ModifyMirrorTimer(1, UnderWaterTime, m_breathTimer,BreathRegen);
-        m_breathTimer = ((UnderWaterTime + 1000) - m_breathTimer) / BreathRegen;
+        ModifyMirrorTimer(BREATH_TIMER, UnderWaterTime, m_breathTimer,BreathRegen);
         m_isunderwater = 0x10;
     }
     //remove bar
     else if ((m_breathTimer < 50) && !(m_isunderwater & 0x01) && (m_isunderwater == 0x10))
     {
-        StopMirrorTimer(1);
-
-        m_breathTimer = 0;
+        StopMirrorTimer(BREATH_TIMER);
         m_isunderwater = 0;
     }
 }
@@ -2276,9 +2274,9 @@ void Player::BuildPlayerRepop()
     data << uint32(0x20) << uint8(0);
     GetSession()->SendPacket( &data );
 
-    StopMirrorTimer(0);                                     //disable timers(bars)
-    StopMirrorTimer(1);
-    StopMirrorTimer(2);
+    StopMirrorTimer(FATIGUE_TIMER);                         //disable timers(bars)
+    StopMirrorTimer(BREATH_TIMER);
+    StopMirrorTimer(FIRE_TIMER);
 
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_NOT_IN_PVP );
     SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
@@ -2342,9 +2340,9 @@ void Player::KillPlayer()
 {
     SetMovement(MOVE_ROOT);
 
-    StopMirrorTimer(0);
-    StopMirrorTimer(1);
-    StopMirrorTimer(2);
+    StopMirrorTimer(FATIGUE_TIMER);                         //disable timers(bars)
+    StopMirrorTimer(BREATH_TIMER);
+    StopMirrorTimer(FIRE_TIMER);
 
     setDeathState(CORPSE);
     SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
@@ -2968,7 +2966,8 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     // form checks
     if ( IsUnderWater() )
     {
-        if(m_form > 0 && m_form != FORM_AQUA && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE)
+        // remove travel forms 
+        if(m_form == FORM_TRAVEL || m_form == FORM_GHOSTWOLF)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
     // IsInWater check ignore bridge and underwater ways case, check additional z
