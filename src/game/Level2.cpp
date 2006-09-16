@@ -543,19 +543,26 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
 
 bool ChatHandler::HandleAddMoveCommand(const char* args)
 {
-    Creature* pCreature = getSelectedCreature();
+    if(!*args)
+        return false;
+
+    char* guid_str = strtok((char*)args, " ");
+    char* wait_str = strtok((char*)NULL, " ");
+
+    uint32 lowguid = atoi((char*)guid_str);
+
+    Creature* pCreature = NULL;
+
+    if(lowguid)
+        pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
 
     if(!pCreature)
     {
-        SendSysMessage(LANG_SELECT_CREATURE);
+        PSendSysMessage("Creature (GUID: %u) not found", lowguid);
         return true;
     }
 
-    int wait;
-    if(*args)
-        wait = atoi(args);
-    else
-        wait = 0;
+    int wait = wait_str ? atoi(wait_str) : 0;
 
     if(wait < 0)
         wait = 0;

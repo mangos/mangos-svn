@@ -595,7 +595,7 @@ INSERT INTO `command` VALUES
 ('addgrave',3,'Syntax: .addgrave (any|alliance|horde)\r\n\r\nAdd a graveyard at your current location for `any` or specific faction. If in radius 50f already exist graveyard then instead creating new this graveyard coordinates, orientation and faction updated. Current zone automaticly linked to created graveyard.'),
 ('additem',3,'Syntax: .additem #itemid [#itemcount] or .additem 0 #itemcount $itemname\r\n\r\nAdds the specified number of items of id #itemid to your or selected character inventory. If #itemcount is omitted, only one item will be added.\r\nWith the second syntax you can add an item with exact (!) name $itemname.'),
 ('additemset',3,'Syntax: .additemset #itemsetid\r\n\r\nAdd items from itemset of id #itemsetid to your or selected character inventory. Will add by one example each item from itemset.'),
-('addmove',2,'Syntax: .addmove [#waittime]\r\n\r\nAdd your current location as a waypoint for the selected creature. And optional add wait time.'),
+('addmove',2,'Syntax: .addmove #creature_guid [#waittime]\r\n\r\nAdd your current location as a waypoint for creature with guid #creature_guid. And optional add wait time.'),
 ('addtele',3,'Syntax: .addtele $name\r\n\r\nAdd current your position to .tele command target locations list with name $name.'),
 ('addsh',3,'Syntax: .addsh\r\n\r\nAdd a spirit healer to your current location.\r\n\r\nNot yet implemented.'),
 ('AddSpawn',2,'Not yet implemented.'),
