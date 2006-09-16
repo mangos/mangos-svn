@@ -547,13 +547,13 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
     {
         DEBUG_LOG("Creature (GUID: %u Entry: %u) added to moving list from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", creature->GetGUIDLow(), creature->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
-        assert(i_grids[old_cell.GridX()][old_cell.GridY()] && (*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).GetGridObject<Creature>(creature->GetGUID())==creature);
+        assert(i_grids[old_cell.GridX()][old_cell.GridY()] && (*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).GetGridObject<Creature>(creature->GetGUID())==creature || PrintGridError(creature,old_cell));
         AddCreatureToMoveList(creature,x,y,z,ang);
         // in diffcell/diffgrid case notifiers called at finishing move creature in Map::MoveAllCreaturesInMoveList
     }
     else
     {
-        assert(i_grids[old_cell.GridX()][old_cell.GridY()] && (*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).GetGridObject<Creature>(creature->GetGUID())==creature);
+        assert(i_grids[old_cell.GridX()][old_cell.GridY()] && (*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).GetGridObject<Creature>(creature->GetGUID())==creature || PrintGridError(creature,old_cell));
         creature->Relocate(x, y, z, ang);
         CreatureRelocationNotifying(creature,new_cell,new_val);
     }
@@ -929,6 +929,16 @@ float Map::IsUnderWater(float x, float y, float z)
     uint8 flag = GetTerrainType(x,y);
     return (z < (water_z-2)) && (flag & 0x01);
 }
+
+bool Map::PrintGridError(Unit* unit, Cell cell) const
+{
+    sLog.outError("ERROR: %s (GUID: %u) not find in grid[%u,%u]cell[%u,%u]",(unit->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creatuer"),unit->GetGUIDLow(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
+
+    // assert must fail after function call
+    return false;
+}
+
+
 
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);
