@@ -932,7 +932,7 @@ float Map::IsUnderWater(float x, float y, float z)
 
 bool Map::PrintGridError(Unit* unit, Cell cell) const
 {
-    sLog.outError("ERROR: %s (GUID: %u) not find in grid[%u,%u]cell[%u,%u]",(unit->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creatuer"),unit->GetGUIDLow(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
+    sLog.outError("ERROR: %s (GUID: %u) not find in grid[%u,%u]cell[%u,%u]",(unit->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature"),unit->GetGUIDLow(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
 
     // assert must fail after function call
     return false;

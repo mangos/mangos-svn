@@ -52,7 +52,7 @@ class Pet : public Creature
         void SetFealty(uint32 fealty) { m_fealty=fealty; }
         std::string GetName() { return m_name; }
         void SetName(std::string newname) { m_name=newname; }
-        bool LoadPetFromDB( Unit* owner,uint32 petentry );
+        bool LoadPetFromDB( Unit* owner,uint32 petentry = 0 );
         void SaveToDB();                                    // overwrited of Creature::SaveToDB
         void DeleteFromDB();                                // overwrited of Creature::DeleteFromDB
         void Unsummon();

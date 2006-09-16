@@ -9003,7 +9003,7 @@ void Player::LoadPet()
         if(in_pet)
             return;
         Pet *pet = new Pet();
-        pet->LoadPetFromDB(this,in_pet->GetEntry());
+        pet->LoadPetFromDB(this);
     }
 }
 
