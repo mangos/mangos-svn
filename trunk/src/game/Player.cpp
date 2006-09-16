@@ -9003,6 +9003,2221 @@ void Player::LoadPet()
         if(in_pet)
             return;
         Pet *pet = new Pet();
+        pet->LoadPetFromDB(this,in_pet->GetEntry());
+    }
+}
+
+void Player::_LoadQuestStatus()
+{
+    mQuestStatus.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 quest_id = fields[0].GetUInt32();
+            Quest* pQuest = objmgr.NewQuest(quest_id);
+            if( pQuest )
+            {
+                mQuestStatus[quest_id].m_quest = pQuest;
+                mQuestStatus[quest_id].m_status = fields[1].GetUInt32();
+                mQuestStatus[quest_id].m_rewarded = ( fields[2].GetUInt32() > 0 );
+                mQuestStatus[quest_id].m_explored = ( fields[3].GetUInt32() > 0 );
+
+                if( objmgr.GetQuestInfo(quest_id)->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !mQuestStatus[quest_id].m_rewarded )
+                    SetTimedQuest( quest_id );
+
+                mQuestStatus[quest_id].m_timer = 0;
+                mQuestStatus[quest_id].m_mobcount[0] = fields[5].GetUInt32();
+                mQuestStatus[quest_id].m_mobcount[1] = fields[6].GetUInt32();
+                mQuestStatus[quest_id].m_mobcount[2] = fields[7].GetUInt32();
+                mQuestStatus[quest_id].m_mobcount[3] = fields[8].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[0] = fields[9].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[1] = fields[10].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[2] = fields[11].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[3] = fields[12].GetUInt32();
+
+                sLog.outDebug("Quest status is {%u} for quest {%u}", mQuestStatus[quest_id].m_status, quest_id);
+            }
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::_LoadReputation()
+{
+    Factions newFaction;
+
+    factions.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            newFaction.ID               = fields[0].GetUInt32();
+            newFaction.ReputationListID = fields[1].GetUInt32();
+            newFaction.Standing         = fields[2].GetUInt32();
+            newFaction.Flags            = fields[3].GetUInt32();
+
+            factions.push_back(newFaction);
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+    else
+    {
+        //LoadReputationFromDBC();
+        //Set initial reputations
+        SetInitialFactions();
+    }
+}
+
+void Player::_LoadSpells()
+{
+    for (PlayerSpellList::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+        delete *itr;
+    m_spells.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            addSpell(fields[0].GetUInt16(), fields[2].GetUInt8(), fields[1].GetUInt16());
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::_LoadTutorials()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            for (int iI=0; iI<8; iI++)
+                m_Tutorials[iI] = fields[iI].GetUInt32();
+
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+/*********************************************************/
+/***                   SAVE SYSTEM                     ***/
+/*********************************************************/
+
+void Player::SaveToDB()
+{
+    if (isInFlight())
+    {
+        return;
+        Unmount();
+    }
+
+    // save state
+    uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
+    uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
+    uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
+
+    // Set player sit state to standing on save
+    RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+
+    //remove restflag when save
+    //this is becouse of the rename char stuff
+    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+
+    sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
+    outDebugValues();
+
+    if(isAlive())
+    {
+        _RemoveAllItemMods();
+        _RemoveAllAuraMods();
+    }
+
+    bool inworld = IsInWorld();
+    if (inworld)
+        RemoveFromWorld();
+
+    sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
+
+    std::ostringstream ss;
+    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`) VALUES ("
+        << GetGUIDLow() << ", "
+        << GetSession()->GetAccountId() << ", '"
+        << m_name << "', "
+        << m_race << ", "
+        << m_class << ", "
+        << m_mapId << ", "
+        << m_positionX << ", "
+        << m_positionY << ", "
+        << m_positionZ << ", "
+        << m_orientation << ", '";
+
+    uint16 i;
+    for( i = 0; i < m_valuesCount; i++ )
+    {
+        ss << GetUInt32Value(i) << " ";
+    }
+
+    ss << "', '";
+
+    for( i = 0; i < 8; i++ )
+        ss << m_taximask[i] << " ";
+
+    ss << "', ";
+    inworld ? ss << 1: ss << 0;
+
+    ss << ", ";
+    ss << m_highest_rank;
+
+    ss << ", ";
+    ss << m_standing;
+
+    ss << ", ";
+    ss << m_rating;
+
+    ss << ", ";
+    ss << m_cinematic;
+
+    ss << ", ";
+    ss << m_Played_time[0];
+    ss << ", ";
+    ss << m_Played_time[1];
+
+    ss << " )";
+
+    sDatabase.Execute( ss.str().c_str() );
+
+    SaveEnchant();
+    _SaveMail();
+    _SaveAuctions();
+    _SaveInventory();
+    _SaveQuestStatus();
+    _SaveTutorials();
+    _SaveSpells();
+    _SaveActions();
+    _SaveAuras();
+    _SaveReputation();
+    SavePet();
+
+    sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
+    outDebugValues();
+
+    if(isAlive())
+    {
+        _ApplyAllAuraMods();
+        _ApplyAllItemMods();
+    }
+
+    // restore state
+    SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
+    SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
+    SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
+
+    if (inworld)
+        AddToWorld();
+}
+
+void Player::_SaveActions()
+{
+    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",GetGUIDLow());
+
+    std::list<struct actions>::iterator itr;
+    for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
+    {
+        sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), (uint32)itr->button, (uint32)itr->action, (uint32)itr->type, (uint32)itr->misc);
+    }
+}
+
+void Player::_SaveAuctions()
+{
+    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",GetGUIDLow());
+
+    ObjectMgr::AuctionEntryMap::iterator itr;
+    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
+    {
+        AuctionEntry *Aentry = itr->second;
+        if ((Aentry) && (Aentry->owner == GetGUIDLow()))
+        {
+            Item *it = objmgr.GetAItem(Aentry->item);
+
+            sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
+            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, (uint64)Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
+
+            std::ostringstream ss;
+            ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
+                << it->GetGUIDLow() << ", '";
+            for(uint16 i = 0; i < it->GetValuesCount(); i++ )
+            {
+                ss << it->GetUInt32Value(i) << " ";
+            }
+            ss << "' )";
+            sDatabase.Execute( ss.str().c_str() );
+        }
+    }
+}
+
+void Player::_SaveAuras()
+{
+    sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
+
+    AuraMap const& auras = GetAuras();
+    for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+    {
+        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
+    }
+}
+
+void Player::_SaveInventory()
+{
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(), INVENTORY_SLOT_BAG_0);
+
+    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
+    {
+        if ( m_items[i] != 0 )
+        {
+            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), INVENTORY_SLOT_BAG_0, i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
+            m_items[i]->SaveToDB();
+        }
+    }
+}
+
+void Player::_SaveMail()
+{
+
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
+
+    std::list<Mail*>::iterator itr;
+    for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
+    {
+        Mail *m = (*itr);
+
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
+    }
+}
+
+void Player::_SaveQuestStatus()
+{
+    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",GetGUIDLow());
+
+    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    {
+        sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_timer, i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
+    }
+}
+
+void Player::_SaveReputation()
+{
+    std::list<Factions>::iterator itr;
+
+    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
+
+    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    {
+        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+    }
+}
+
+void Player::_SaveSpells()
+{
+    sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
+
+    for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    {
+        sDatabase.PExecute("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId,(*itr)->active);
+    }
+}
+
+void Player::_SaveTutorials()
+{
+    sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+}
+
+void Player::SavePet()
+{
+    Creature* pet = GetPet();
+    if(pet && pet->isPet())
+       ((Pet*)pet)->SaveToDB();
+}
+
+void Player::outDebugValues() const
+{
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetMaxHealth(), GetMaxPower(POWER_MANA));
+    sLog.outDebug("AGILITY is: \t\t%f\t\tSTRENGTH is: \t\t%f",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
+    sLog.outDebug("INTELLECT is: \t\t%f\t\tSPIRIT is: \t\t%f",GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%f\t\tSPIRIT is: \t\t%f",GetStat(STAT_STAMINA), GetStat(STAT_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%f\t\tBlock is: \t\t%f",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%f\t\tFireRes is: \t\t%f",GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
+    sLog.outDebug("NatureRes is: \t\t%f\t\tFrostRes is: \t\t%f",GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
+    sLog.outDebug("ShadowRes is: \t\t%f\t\tArcaneRes is: \t\t%f",GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetAttackTime(BASE_ATTACK), GetAttackTime(RANGED_ATTACK));
+}
+
+/*********************************************************/
+/***              LOW LEVEL FUNCTIONS:Notifiers        ***/
+/*********************************************************/
+
+void Player::SendOutOfRange(Object* obj)
+{
+    UpdateData his_data;
+    WorldPacket his_pk;
+    obj->BuildOutOfRangeUpdateBlock(&his_data);
+    his_data.BuildPacket(&his_pk);
+    GetSession()->SendPacket(&his_pk);
+}
+
+inline void Player::SendAttackSwingNotInRange()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingNotStanding()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_NOTSTANDING);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingDeadTarget()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_DEADTARGET);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingCantAttack()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_CANT_ATTACK);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingCancelAttack()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_CANCEL_COMBAT);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingBadFacingAttack()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_BADFACING);
+    GetSession()->SendPacket( &data );
+}
+
+void Player::PlaySound(uint32 Sound, bool OnlySelf)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_PLAY_SOUND);
+    data << Sound;
+    if (OnlySelf)
+        GetSession()->SendPacket( &data );
+    else
+        SendMessageToSet( &data, true );
+}
+
+void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
+{
+    WorldPacket data;
+    data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
+    data << Area;
+    data << Experience;
+    GetSession()->SendPacket(&data);
+}
+
+/*********************************************************/
+/***              Update timers                        ***/
+/*********************************************************/
+
+void Player::UpdatePVPFlag(time_t currTime)
+{
+    //Player is counting to set/unset pvp flag
+    if( !m_pvp_counting ) return;
+
+    //Is player is in a PvP action stop counting
+    if( isInCombatWithPlayer() || isInDuel() )
+    {
+        m_pvp_counting = false;
+        return;
+    }
+
+    if( GetPvP() )
+    {
+        //Wait 5 min until remove pvp mode
+        if( currTime < m_pvp_count + 300 ) return;
+
+        SetPvP(false);
+
+        sChatHandler.SendSysMessage(GetSession(), "PvP toggled off.");
+    }
+    else
+    {
+        SetPvP(true);
+    }
+}
+
+void Player::UnsummonPet(Creature* pet)
+{
+    if(!pet)
+        pet = GetPet();
+
+    if(!pet||pet->GetGUID()!=GetPetGUID()) return;
+
+    SetPet(0);
+
+    pet->CombatStop();
+
+    if(pet->isPet())
+        pet->SaveToDB();
+
+    WorldPacket data;
+    data.Initialize(SMSG_DESTROY_OBJECT);
+    data << pet->GetGUID();
+    SendMessageToSet (&data, true);
+
+    data.Initialize(SMSG_PET_SPELLS);
+    data << uint64(0);
+    GetSession()->SendPacket(&data);
+
+    ObjectAccessor::Instance().AddObjectToRemoveList(pet);
+}
+
+void Player::UnTamePet(Creature* pet)
+{
+    if(!pet)
+        pet = GetPet();
+
+    if(!pet||!pet->isTamed()||pet->GetGUID()!=GetPetGUID()) return;
+
+    pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,pet->GetCreatureInfo()->faction);
+    SetPet(0);
+
+    pet->AIM_Initialize();
+
+    WorldPacket data;
+
+    data.Initialize(SMSG_PET_SPELLS);
+    data << uint64(0);
+    GetSession()->SendPacket(&data);
+}
+
+void Player::Uncharm()
+{
+    Creature* charm = GetCharm();
+    if(!charm) return;
+
+    SetCharm(0);
+
+    CreatureInfo const *cinfo = charm->GetCreatureInfo();
+    charm->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+    charm->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+
+    charm->AIM_Initialize();
+    WorldPacket data;
+    data.Initialize(SMSG_PET_SPELLS);
+    data << uint64(0);
+    GetSession()->SendPacket(&data);
+}
+
+void Player::PetSpellInitialize()
+{
+    Creature* pet = GetPet();
+    if(!pet)
+        pet = GetCharm();
+    if(pet)
+    {
+
+        WorldPacket data;
+        uint16 Command = 7;
+        uint16 State = 6;
+
+        sLog.outDebug("Pet Spells Groups");
+
+        data.clear();
+        data.Initialize(SMSG_PET_SPELLS);
+
+        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+
+        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+
+        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                                                            //C100 = maybe group
+            data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
+
+        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+        GetSession()->SendPacket(&data);
+    }
+}
+
+int32 Player::GetTotalFlatMods(uint32 spellId, uint8 op)
+{
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo) return 0;
+    int32 total = 0;
+    for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
+    {
+        SpellModifier *mod = *itr;
+        if (!mod) continue;
+        if ((mod->mask & spellInfo->SpellFamilyFlags) == 0) continue;
+        if (mod->type == SPELLMOD_FLAT)
+            total += mod->value;
+    }
+    return total;
+}
+
+int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
+{
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo) return 0;
+    int32 total = 0;
+    for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
+    {
+        SpellModifier *mod = *itr;
+        if (!mod) continue;
+        if ((mod->mask & spellInfo->SpellFamilyFlags) == 0) continue;
+        if (mod->type == SPELLMOD_PCT)
+            total += mod->value;
+    }
+    return total;
+}
+
+void Player::ApplyBlockValueMod(int32 val,bool apply)
+{
+    ApplyModUInt32Var(m_BlockValue,val,apply);
+}
+
+void Player::RemoveAreaAurasFromGroup()
+{
+    Group* pGroup = objmgr.GetGroupByLeader(this->GetGroupLeader());
+    if(!pGroup)
+        return;
+
+    for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+    {
+        Unit* Member = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+        if(!Member)
+            continue;
+        Member->RemoveAreaAurasByOthers(GetGUID());
+        for (uint8 i = 0; i < 4; i++)
+            if (m_TotemSlot[i])
+                Member->RemoveAreaAurasByOthers(m_TotemSlot[i]);
+    }
+=======
+}
+
+void Player::UpdateEnchantTime(uint32 time)
+{
+    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
+    {
+        next=itr;
+        next++;
+        if(*itr)
+        {
+            if((*itr)->item)
+            {
+                if(!(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3))
+                {
+                    m_enchantDuration.erase(itr);
+                    continue;
+                }
+                if((*itr)->leftduration <= time)
+                {
+                    AddItemEnchant((*itr)->item,(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3),false);
+                    for(int y=0;y<3;y++)
+                        (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+y,0);
+                    m_enchantDuration.erase(itr);
+                    continue;
+                }
+                else if((*itr)->leftduration > time)
+                {
+                    (*itr)->leftduration -= time;
+                }
+            }
+        }
+    }
+}
+
+void Player::AddEnchantDuration(Item *item,uint32 slot,uint32 duration)
+{
+    if(!item || duration <= 0 )
+        return;
+    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
+    {
+        next=itr;
+        next++;
+        if(*itr)
+        {
+            if((*itr)->item)
+            {
+                if((*itr)->item->GetGUID() == item->GetGUID() && (*itr)->slot == slot)
+                {
+                    m_enchantDuration.erase(itr);
+                    break;
+                }
+            }
+        }
+    }
+    if(item && duration > 0 )
+    {
+        GetSession()->SendItemEnchantTimeUpdate(item->GetGUID(),slot,uint32(duration/1000));
+        EnchantDuration *ed = new EnchantDuration();
+        ed->item = item;
+        ed->leftduration = duration;
+        ed->slot = slot;
+        m_enchantDuration.push_back(ed);
+    }
+}
+
+void Player::ReducePoisonCharges(uint32 enchantId)
+{
+    if(!enchantId)
+        return;
+    uint32 pEnchantId = 0;
+    uint32 charges = 0;
+    Item *pItem;
+    uint16 pos;
+
+    for(int i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_RANGED; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+
+        pItem = GetItemByPos( pos );
+        if(!pItem)
+            continue;
+        for(int x=0;x<7;x++)
+        {
+            charges = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+2);
+            if(charges == 0)
+                continue;
+            if(charges <= 1)
+            {
+                AddItemEnchant(pItem,enchantId,false);
+                for(int y=0;y<3;y++)
+                    pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+y,0);
+                break;
+            }
+            else
+            {
+                pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+2,charges-1);
+                break;
+            }
+        }
+    }
+}
+
+void Player::SaveEnchant()
+{
+    uint32 duration = 0;
+
+    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();itr++)
+    {
+        if(*itr)
+        {
+            if((*itr)->item)
+            {
+                if((*itr)->leftduration > 0)
+                {
+                    (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+1,(*itr)->leftduration);
+                }
+            }
+        }
+    }
+}
+
+void Player::LoadEnchant()
+{
+    uint32 duration = 0;
+    Item *pItem;
+    uint16 pos;
+
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+
+        pItem = GetItemByPos( pos );
+        if(!pItem)
+            continue;
+        if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+            continue;
+        for(int x=0;x<7;x++)
+        {
+            duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
+            if( duration == 0 )
+                continue;
+            else if( duration > 0 )
+                AddEnchantDuration(pItem,x,duration);
+        }
+    }
+    Bag *pBag;
+    ItemPrototype const *pBagProto;
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        pBag = (Bag*)GetItemByPos( pos );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    pos = ((i << 8) | j);
+                    pItem = GetItemByPos( pos );
+                    if(!pItem)
+                        continue;
+                    if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+                        continue;
+                    for(int x=0;x<7;x++)
+                    {
+                        duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
+                        if( duration == 0 )
+                            continue;
+                        else if( duration > 0 )
+                            AddEnchantDuration(pItem,x,duration);
+                    }
+                }
+            }
+        }
+    }
+    for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        pBag = (Bag*)GetItemByPos( pos );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    pos = ((i << 8) | j);
+                    pItem = GetItemByPos( pos );
+                    if(!pItem)
+                        continue;
+                    if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+                        continue;
+                    for(int x=0;x<7;x++)
+                    {
+                        duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
+                        if( duration == 0 )
+                            continue;
+                        else if( duration > 0 )
+                            AddEnchantDuration(pItem,x,duration);
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+/*********************************************************/
+/***                    QUEST SYSTEM                   ***/
+/*********************************************************/
+
+void Player::PrepareQuestMenu( uint64 guid )
+{
+    Object *pObject;
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+    if( pCreature )
+        pObject = (Object*)pCreature;
+    else
+    {
+        GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*this, guid);
+        if( pGameObject )
+            pObject = (Object*)pGameObject;
+        else
+            return;
+    }
+
+    QuestMenu *qm = PlayerTalkClass->GetQuestMenu();
+    qm->ClearMenu();
+
+    for( std::list<Quest*>::iterator i = pObject->mInvolvedQuests.begin( ); i != pObject->mInvolvedQuests.end( ); i++ )
+    {
+        Quest* pQuest = *i;
+        if ( !pQuest )
+            continue;
+
+        uint32 quest_id = pQuest->GetQuestId();
+        uint32 status = GetQuestStatus( quest_id );
+
+        if ( status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus( quest_id ) )
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, false );
+        else if ( status == QUEST_STATUS_INCOMPLETE )
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, false );
+    }
+
+    for( std::list<Quest*>::iterator i = pObject->mQuests.begin( ); i != pObject->mQuests.end( ); i++ )
+    {
+        Quest* pQuest = *i;
+        if ( !pQuest )
+            continue;
+
+        uint32 quest_id = pQuest->GetQuestId();
+        uint32 status = GetQuestStatus( quest_id );
+
+        if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
+    }
+}
+
+void Player::SendPreparedQuest( uint64 guid )
+{
+    QuestMenu* pQuestMenu = PlayerTalkClass->GetQuestMenu();
+    if( !pQuestMenu || pQuestMenu->MenuItemCount() < 1 )
+        return;
+
+    uint32 status = pQuestMenu->GetItem(0).m_qIcon;
+    if ( pQuestMenu->MenuItemCount() == 1 )
+    {
+        uint32 quest_id = pQuestMenu->GetItem(0).m_qId;
+        Quest *pQuest = objmgr.NewQuest( quest_id );
+        if ( pQuest )
+        {
+            if( status == DIALOG_STATUS_REWARD && !GetQuestRewardStatus( quest_id ) )
+                PlayerTalkClass->SendRequestedItems( pQuest, guid, CanRewardQuest(pQuest,false), true );
+            else if( status == DIALOG_STATUS_INCOMPLETE )
+                PlayerTalkClass->SendRequestedItems( pQuest, guid, false, true );
+            else
+                PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
+            delete pQuest;
+        }
+    }
+    else
+    {
+        QEmote qe;
+        qe._Delay = 0;
+        qe._Emote = 0;
+        std::string title = "";
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+        if( pCreature )
+        {
+            uint32 textid = pCreature->GetNpcTextId();
+            GossipText * gossiptext = objmgr.GetGossipText(textid);
+            if( !gossiptext )
+            {
+                qe._Delay = TEXTEMOTE_MESSAGE;              //zyg: player emote
+                qe._Emote = TEXTEMOTE_HELLO;                //zyg: NPC emote
+                title = "Do Quest ?";
+            }
+            else
+            {
+                qe = gossiptext->Options[0].Emotes[0];
+                title = gossiptext->Options[0].Text_0;
+                if( &title == NULL )
+                    title = "";
+            }
+        }
+        PlayerTalkClass->SendQuestMenu( qe, title, guid );
+    }
+}
+
+Quest *Player::GetActiveQuest( uint32 quest_id ) const
+{
+    StatusMap::const_iterator itr = mQuestStatus.find(quest_id);
+
+    return (itr != mQuestStatus.end()) ?  itr->second.m_quest : NULL;
+}
+
+Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
+{
+    if( pQuest )
+    {
+        Object *pObject;
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+        if( pCreature )
+            pObject = (Object*)pCreature;
+        else
+        {
+            GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*this, guid);
+            if( pGameObject )
+                pObject = (Object*)pGameObject;
+            else
+                return NULL;;
+        }
+
+        uint32 quest = pQuest->GetQuestInfo()->NextQuestId;
+        for( std::list<Quest*>::iterator i = pObject->mQuests.begin( ); i != pObject->mQuests.end( ); i++ )
+        {
+            Quest *pQuest2 = *i;
+            if( pQuest2->GetQuestId() == quest )
+            {
+                if ( CanTakeQuest( pQuest2, false ) )
+                    return pQuest2;
+                else
+                    return NULL;
+            }
+        }
+    }
+    return NULL;
+}
+
+bool Player::CanSeeStartQuest( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false )
+            && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
+            && SatisfyQuestPreviousQuest( quest_id, false ) )
+            return ( getLevel() + 7 >= objmgr.GetQuestInfo(quest_id)->MinLevel );
+    }
+    return false;
+}
+
+bool Player::CanTakeQuest( Quest *pQuest, bool msg )
+{
+    if( pQuest)
+    {
+        uint32 quest_id = pQuest->GetQuestId();
+        return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestRace( quest_id, msg )
+            && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
+            && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg )
+            && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg ) );
+    }
+    return false;
+}
+
+bool Player::CanAddQuest( Quest *pQuest, bool msg )
+{
+    if( pQuest )
+    {
+        if(!GetQuestSlot( 0 ))
+            return false;
+
+        if( !SatisfyQuestLog( msg ) )
+            return false;
+
+        uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
+        if( srcitem > 0 )
+        {
+            uint32 count = pQuest->GetQuestInfo()->SrcItemCount;
+            uint16 dest;
+            if( count <= 0 )
+                count = 1;
+            uint8 msg = CanStoreNewItem( 0, NULL_SLOT, dest, srcitem, count, false );
+            if( msg != EQUIP_ERR_OK )
+            {
+                SendEquipError( msg, NULL, NULL );
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Player::CanCompleteQuest( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        if( mQuestStatus[quest_id].m_status == QUEST_STATUS_COMPLETE )
+            return true;
+
+        if ( mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE )
+        {
+            QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+
+            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+            {
+                for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                {
+                    if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
+                        return false;
+                }
+            }
+
+            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+            {
+                for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                {
+                    // GO activate objectives
+                    if( qInfo->ReqKillMobOrGOId <= 0 )
+                        continue;
+
+                    if( qInfo->ReqKillMobOrGOCount[i] != 0 && mQuestStatus[quest_id].m_mobcount[i] < qInfo->ReqKillMobOrGOCount[i] )
+                        return false;
+                }
+            }
+
+            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_EXPLORATION ) && !mQuestStatus[quest_id].m_explored )
+                return false;
+
+            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && mQuestStatus[quest_id].m_timer == 0 )
+                return false;
+
+            if ( qInfo->RewOrReqMoney < 0 )
+            {
+                if ( int32(GetMoney()) < -qInfo->RewOrReqMoney )
+                    return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Player::CanRewardQuest( Quest *pQuest, bool msg )
+{
+    if( pQuest )
+    {
+        // prevent recive reward with quest items in bank
+        if ( pQuest->GetQuestInfo()->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+        {
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+            {
+                if( pQuest->GetQuestInfo()->ReqItemCount[i]!= 0 &&
+                    GetItemCount(pQuest->GetQuestInfo()->ReqItemId[i]) < pQuest->GetQuestInfo()->ReqItemCount[i] )
+                {
+                    if(msg)
+                        SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+    return false;
+}
+
+bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
+{
+    if( pQuest )
+    {
+        // prevent recive reward with quest items in bank
+        if(!CanRewardQuest(pQuest,msg))
+            return false;
+
+        uint16 dest;
+        uint8 msg;
+
+        if ( pQuest->m_rewchoiceitemscount > 0 )
+        {
+            if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
+            {
+                msg = CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false );
+                if( msg != EQUIP_ERR_OK )
+                {
+                    SendEquipError( msg, NULL, NULL );
+                    return false;
+                }
+            }
+        }
+
+        if ( pQuest->m_rewitemscount > 0 )
+        {
+            for (int i = 0; i < QUEST_REWARDS_COUNT; i++)
+            {
+                if( pQuest->GetQuestInfo()->RewItemId[i] )
+                {
+                    msg = CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false );
+                    if( msg != EQUIP_ERR_OK )
+                    {
+                        SendEquipError( msg, NULL, NULL );
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+void Player::AddQuest( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint16 log_slot = GetQuestSlot( 0 );
+        assert(log_slot);
+
+        uint32 quest_id = pQuest->GetQuestId();
+        QuestInfo const* qInfo = pQuest->GetQuestInfo();
+
+        mQuestStatus[quest_id].m_quest = pQuest;
+        mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
+        mQuestStatus[quest_id].m_rewarded = false;
+        mQuestStatus[quest_id].m_explored = false;
+
+        if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+        {
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                mQuestStatus[quest_id].m_itemcount[i] = 0;
+        }
+        if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+        {
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                mQuestStatus[quest_id].m_mobcount[i] = 0;
+        }
+
+        GiveQuestSourceItem( quest_id );
+        AdjustQuestReqItemCount( quest_id );
+
+        SetUInt32Value(log_slot + 0, quest_id);
+        SetUInt32Value(log_slot + 1, 0);
+
+        if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+        {
+            uint32 limittime = qInfo->LimitTime;
+            SetTimedQuest( quest_id );
+            mQuestStatus[quest_id].m_timer = limittime * 60000;
+            uint64 ktime = 0;                               // unkwnown and dependent from server start time and player login time
+            uint32 qtime = static_cast<uint32>(time(NULL) - ktime) + limittime;
+            SetUInt32Value( log_slot + 2, qtime );
+        }
+        else
+        {
+            mQuestStatus[quest_id].m_timer = 0;
+            SetUInt32Value( log_slot + 2, 0 );
+        }
+    }
+}
+
+void Player::CompleteQuest( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        SetQuestStatus( quest_id, QUEST_STATUS_COMPLETE);
+
+        uint16 log_slot = GetQuestSlot( quest_id );
+        if( log_slot )
+        {
+            uint32 state = GetUInt32Value( log_slot + 1 );
+            state |= 1 << 24;
+            SetUInt32Value( log_slot + 1, state );
+        }
+
+        SendQuestComplete( quest_id );
+    }
+}
+
+void Player::IncompleteQuest( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        SetQuestStatus( quest_id, QUEST_STATUS_INCOMPLETE );
+
+        uint16 log_slot = GetQuestSlot( quest_id );
+        if( log_slot )
+        {
+            uint32 state = GetUInt32Value( log_slot + 1 );
+            state &= ~(1 << 24);
+            SetUInt32Value( log_slot + 1, state );
+        }
+    }
+}
+
+void Player::RewardQuest( Quest *pQuest, uint32 reward )
+{
+    if( pQuest )
+    {
+        uint32 quest_id = pQuest->GetQuestId();
+        QuestInfo const* qInfo = pQuest->GetQuestInfo();
+
+        uint16 dest;
+        for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
+        {
+            if ( qInfo->ReqItemId[i] )
+                RemoveItemCount( qInfo->ReqItemId[i], qInfo->ReqItemCount[i], true);
+        }
+
+        if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+            SetTimedQuest( 0 );
+        if ( pQuest->m_rewchoiceitemscount > 0 )
+        {
+            if( qInfo->RewChoiceItemId[reward] )
+            {
+                if( CanStoreNewItem( 0, NULL_SLOT, dest, qInfo->RewChoiceItemId[reward], qInfo->RewChoiceItemCount[reward], false ) == EQUIP_ERR_OK )
+                    StoreNewItem( dest, qInfo->RewChoiceItemId[reward], qInfo->RewChoiceItemCount[reward], true);
+            }
+        }
+
+        if ( pQuest->m_rewitemscount > 0 )
+        {
+            for (int i=0; i < QUEST_REWARDS_COUNT; i++)
+            {
+                if( qInfo->RewItemId[i] )
+                {
+                    if( CanStoreNewItem( 0, NULL_SLOT, dest, qInfo->RewItemId[i], qInfo->RewItemCount[i], false ) == EQUIP_ERR_OK )
+                        StoreNewItem( dest, qInfo->RewItemId[i], qInfo->RewItemCount[i], true);
+                }
+            }
+        }
+
+        if( qInfo->RewSpell > 0 )
+            CastSpell( this, qInfo->RewSpell, true);
+
+        uint16 log_slot = GetQuestSlot( quest_id );
+        if( log_slot )
+        {
+            SetUInt32Value(log_slot + 0, 0);
+            SetUInt32Value(log_slot + 1, 0);
+            SetUInt32Value(log_slot + 2, 0);
+        }
+
+        if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
+            GiveXP( uint32(pQuest->XPValue( this )*sWorld.getRate(RATE_XP_QUEST)), NULL );
+        else
+            ModifyMoney( MaNGOS::XP::xp_to_money(pQuest->XPValue( this )) );
+
+        ModifyMoney( qInfo->RewOrReqMoney );
+
+        if ( !qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+            mQuestStatus[quest_id].m_rewarded = true;
+        else
+            SetQuestStatus(quest_id, QUEST_STATUS_NONE);
+
+        SendQuestReward( pQuest );
+    }
+}
+
+void Player::FailQuest( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        IncompleteQuest( quest_id );
+
+        uint16 log_slot = GetQuestSlot( quest_id );
+        if( log_slot )
+            SetUInt32Value( log_slot + 2, 1 );
+        SendQuestFailed( quest_id );
+    }
+}
+
+void Player::FailTimedQuest( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        mQuestStatus[quest_id].m_timer = 0;
+
+        IncompleteQuest( quest_id );
+
+        uint16 log_slot = GetQuestSlot( quest_id );
+        if( log_slot )
+            SetUInt32Value( log_slot + 2, 1 );
+        SendQuestTimerFailed( quest_id );
+    }
+}
+
+bool Player::SatisfyQuestClass( uint32 quest_id, bool msg )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        uint32 reqclasses = qInfo->RequiredClass;
+        if ( reqclasses == QUEST_CLASS_NONE )
+            return true;
+        if( (reqclasses & getClassMask()) == 0 )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+            return false;
+        }
+        return true;
+
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestLevel( uint32 quest_id, bool msg )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        if( getLevel() < qInfo->MinLevel )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestLog( bool msg )
+{
+    uint16 log_slot = GetQuestSlot( 0 );
+    if( log_slot )
+        return true;
+    else
+    {
+        if( msg )
+        {
+            WorldPacket data;
+            data.Initialize( SMSG_QUESTLOG_FULL );
+            GetSession()->SendPacket( &data );
+            sLog.outDebug( "WORLD: Sent QUEST_LOG_FULL_MESSAGE" );
+        }
+        return false;
+    }
+}
+
+bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
+{
+    if( quest_id)
+    {
+        QuestRelations::iterator iter = sPrevQuests.lower_bound(quest_id);
+        QuestRelations::iterator end  = sPrevQuests.upper_bound(quest_id);
+
+        // First quest in series
+        if(iter == end)
+            return true;
+
+        // Have one form prev, quests in rewarded state
+        for(; iter != end; ++iter )
+        {
+            uint32 prevId = iter->second;
+
+            if( mQuestStatus.find( prevId ) != mQuestStatus.end() && mQuestStatus[prevId].m_rewarded )
+                return true;
+        }
+
+        // Have only prev. quests in non-rewarded state
+        if( msg )
+            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestRace( uint32 quest_id, bool msg )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        uint32 reqraces = qInfo->RequiredRaces;
+        if ( reqraces == QUEST_RACE_NONE )
+            return true;
+        if( (reqraces & getRaceMask()) == 0 )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_RACE );
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestReputation( uint32 quest_id, bool msg )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        uint32 faction_id = qInfo->RequiredRepFaction;
+        if(!faction_id)
+            return true;
+
+        return GetReputation(faction_id) >= qInfo->RequiredRepValue;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestSkill( uint32 quest_id, bool msg )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        uint32 reqskill = qInfo->RequiredSkill;
+        if( reqskill == QUEST_TRSKILL_NONE )
+            return true;
+        if( GetSkillValue( reqskill ) < qInfo->RequiredSkillValue )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestStatus( uint32 quest_id, bool msg )
+{
+    if( quest_id )
+    {
+        if  ( mQuestStatus.find( quest_id ) != mQuestStatus.end() )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_HAVE_QUEST );
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestTimed( uint32 quest_id, bool msg )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        if ( GetTimedQuest() != 0 && qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_HAVE_TIMED_QUEST );
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Player::GiveQuestSourceItem( uint32 quest_id )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+
+        uint32 srcitem = qInfo->SrcItemId;
+        if( srcitem > 0 )
+        {
+            uint16 dest;
+            uint32 count = qInfo->SrcItemCount;
+            if( count <= 0 )
+                count = 1;
+            uint8 msg = CanStoreNewItem( 0, NULL_SLOT, dest, srcitem, count, false );
+            if( msg == EQUIP_ERR_OK )
+            {
+                StoreNewItem(dest, srcitem, count, true);
+                return true;
+            }
+            else
+                SendEquipError( msg, NULL, NULL );
+            return false;
+        }
+    }
+    return true;
+}
+
+void Player::TakeQuestSourceItem( uint32 quest_id )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        uint32 srcitem = qInfo->SrcItemId;
+        if( srcitem > 0 )
+        {
+            uint32 count = qInfo->SrcItemCount;
+            if( count <= 0 )
+                count = 1;
+            DestroyItemCount(srcitem, count, true);
+        }
+    }
+}
+
+bool Player::GetQuestRewardStatus( uint32 quest_id )
+{
+    if( quest_id  )
+    {
+        if  ( mQuestStatus.find( quest_id ) == mQuestStatus.end() )
+            return false;
+        return mQuestStatus[quest_id ].m_rewarded;
+    }
+    return false;
+}
+
+uint32 Player::GetQuestStatus( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        if  ( mQuestStatus.find( quest_id ) != mQuestStatus.end() )
+            return mQuestStatus[quest_id].m_status;
+    }
+    return QUEST_STATUS_NONE;
+}
+
+void Player::SetQuestStatus( uint32 quest_id, uint32 status )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        if ( status == QUEST_STATUS_NONE )
+        {
+            mQuestStatus.erase( quest_id );
+
+            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+                SetTimedQuest( 0 );
+        }
+        else
+            mQuestStatus[quest_id].m_status = status;
+    }
+}
+
+void Player::AdjustQuestReqItemCount( uint32 quest_id )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+        {
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+            {
+                uint32 reqitemcount = qInfo->ReqItemCount[i];
+                if( reqitemcount != 0 )
+                {
+                    uint32 curitemcount = GetItemCount(qInfo->ReqItemId[i]) + GetBankItemCount(qInfo->ReqItemId[i]);
+                    mQuestStatus[quest_id].m_itemcount[i] = min(curitemcount, reqitemcount);
+                }
+            }
+        }
+    }
+}
+
+uint16 Player::GetQuestSlot( uint32 quest_id )
+{
+    for ( uint16 i = 0; i < 20; i++ )
+    {
+        if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest_id )
+            return PLAYER_QUEST_LOG_1_1 + 3*i;
+    }
+    return 0;
+}
+
+void Player::AreaExplored( uint32 questId )
+{
+    if( questId )
+    {
+        uint16 log_slot = GetQuestSlot( questId );
+        if( log_slot )
+        {
+            mQuestStatus[questId].m_explored = true;
+        }
+        if( CanCompleteQuest( questId ) )
+            CompleteQuest( questId );
+    }
+}
+
+void Player::ItemAdded( uint32 entry, uint32 count )
+{
+    uint32 quest;
+    uint32 reqitem;
+    uint32 reqitemcount;
+    uint32 curitemcount;
+    uint32 additemcount;
+    for( int i = 0; i < 20; i++ )
+    {
+        quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+        if ( quest != 0 && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
+        {
+            QuestInfo const *qInfo = objmgr.GetQuestInfo(quest);
+            if( qInfo && qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+            {
+                for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+                {
+                    reqitem = qInfo->ReqItemId[j];
+                    if ( reqitem == entry )
+                    {
+                        reqitemcount = qInfo->ReqItemCount[j];
+                        curitemcount = mQuestStatus[quest].m_itemcount[j];
+                        if ( curitemcount < reqitemcount )
+                        {
+                            additemcount = ( curitemcount + count <= reqitemcount ? count : reqitemcount - curitemcount);
+                            mQuestStatus[quest].m_itemcount[j] += additemcount;
+                            SendQuestUpdateAddItem( quest, j, additemcount );
+                        }
+                        if ( CanCompleteQuest( quest ) )
+                            CompleteQuest( quest );
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Player::ItemRemoved( uint32 entry, uint32 count )
+{
+    uint32 quest;
+    uint32 reqitem;
+    uint32 reqitemcount;
+    uint32 curitemcount;
+    uint32 remitemcount;
+    for( int i = 0; i < 20; i++ )
+    {
+        quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+        QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
+        if ( qInfo )
+        {
+            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+            {
+                for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+                {
+                    reqitem = qInfo->ReqItemId[j];
+                    if ( reqitem == entry )
+                    {
+                        reqitemcount = qInfo->ReqItemCount[j];
+                        if( mQuestStatus[quest].m_status != QUEST_STATUS_COMPLETE )
+                            curitemcount = mQuestStatus[quest].m_itemcount[j];
+                        else
+                            curitemcount = GetItemCount(entry) + GetBankItemCount(entry);
+                        if ( curitemcount - count < reqitemcount )
+                        {
+                            remitemcount = ( curitemcount <= reqitemcount ? count : count + reqitemcount - curitemcount);
+                            mQuestStatus[quest].m_itemcount[j] = curitemcount - remitemcount;
+                            IncompleteQuest( quest );
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Player::KilledMonster( uint32 entry, uint64 guid )
+{
+    uint32 quest;
+    uint32 reqkill;
+    uint32 reqkillcount;
+    uint32 curkillcount;
+    uint32 addkillcount = 1;
+    for( int i = 0; i < 20; i++ )
+    {
+        quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+        QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
+        if ( qInfo && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
+        {
+            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+            {
+                for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+                {
+                    reqkill = qInfo->ReqKillMobOrGOId[j];
+
+                    // GO activate qobjective or none
+                    if(reqkill <=0)
+                        continue;
+
+                    if ( reqkill == entry )
+                    {
+                        reqkillcount = qInfo->ReqKillMobOrGOCount[j];
+                        curkillcount = mQuestStatus[quest].m_mobcount[j];
+                        if ( curkillcount < reqkillcount )
+                        {
+                            mQuestStatus[quest].m_mobcount[j] = curkillcount + addkillcount;
+                            SendQuestUpdateAddKill( quest, guid, j, curkillcount, addkillcount);
+                        }
+                        if ( CanCompleteQuest( quest ) )
+                            CompleteQuest( quest );
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Player::MoneyChanged( uint32 count )
+{
+    uint32 quest;
+    for( int i = 0; i < 20; i++ )
+    {
+        quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+        if ( quest != 0 )
+        {
+            QuestInfo const *qInfo = objmgr.GetQuestInfo(quest);
+            if( qInfo && qInfo->RewOrReqMoney < 0 )
+            {
+                if( mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
+                {
+                    if(int32(count) >= -qInfo->RewOrReqMoney)
+                    {
+                        if ( CanCompleteQuest( quest ) )
+                            CompleteQuest( quest );
+                    }
+                }
+                else if( mQuestStatus[quest].m_status == QUEST_STATUS_COMPLETE )
+                {
+                    if(int32(count) < -qInfo->RewOrReqMoney)
+                        IncompleteQuest( quest );
+                }
+            }
+        }
+    }
+}
+
+bool Player::HaveQuestForItem( uint32 itemid )
+{
+    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    {
+        quest_status qs=i->second;
+
+        if (qs.m_status == QUEST_STATUS_INCOMPLETE)
+        {
+            if (!qs.m_quest) continue;
+
+            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+            {
+                QuestInfo const* qinfo = qs.m_quest->GetQuestInfo();
+                if(itemid == qinfo->ReqItemId[j] && qs.m_itemcount[j] < qinfo->ReqItemCount[j] )
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+void Player::SendQuestComplete( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTUPDATE_COMPLETE );
+        data << quest_id;
+        GetSession()->SendPacket( &data );
+        sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_COMPLETE quest = %u", quest_id );
+    }
+}
+
+void Player::SendQuestReward( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", quest );
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTGIVER_QUEST_COMPLETE );
+        data << quest;
+        data << uint32(0x03);
+        if ( getLevel() < 60 )
+        {
+            data << pQuest->XPValue( this );
+            data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney);
+        }
+        else
+        {
+            data << uint32(0);
+            data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney + pQuest->XPValue( this ));
+        }
+        data << uint32( pQuest->m_rewitemscount );
+
+        for (int i = 0; i < QUEST_REWARDS_COUNT; i++)
+        {
+            if ( pQuest->GetQuestInfo()->RewItemId[i] > 0 )
+                data << pQuest->GetQuestInfo()->RewItemId[i] << pQuest->GetQuestInfo()->RewItemCount[i];
+        }
+
+        GetSession()->SendPacket( &data );
+    }
+}
+
+void Player::SendQuestFailed( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTGIVER_QUEST_FAILED );
+        data << quest_id;
+        GetSession()->SendPacket( &data );
+        sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_FAILED");
+    }
+}
+
+void Player::SendQuestTimerFailed( uint32 quest_id )
+{
+    if( quest_id )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTUPDATE_FAILEDTIMER );
+        data << quest_id;
+        GetSession()->SendPacket( &data );
+        sLog.outDebug("WORLD: Sent SMSG_QUESTUPDATE_FAILEDTIMER");
+    }
+}
+
+void Player::SendCanTakeQuestResponse( uint32 msg )
+{
+    WorldPacket data;
+    data.Initialize( SMSG_QUESTGIVER_QUEST_INVALID );
+    data << msg;
+    GetSession()->SendPacket( &data );
+    sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_INVALID");
+}
+
+void Player::SendPushToPartyResponse( Player *pPlayer, uint32 msg )
+{
+    if( pPlayer )
+    {
+        WorldPacket data;
+        data.Initialize( MSG_QUEST_PUSH_RESULT );
+        data << pPlayer->GetGUID();
+        data << msg;
+        data << uint8(0);
+        GetSession()->SendPacket( &data );
+        sLog.outDebug("WORLD: Sent MSG_QUEST_PUSH_RESULT");
+    }
+}
+
+void Player::SendQuestUpdateAddItem( uint32 quest_id, uint32 item_idx, uint32 count )
+{
+    if( quest_id )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTUPDATE_ADD_ITEM );
+        sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_ITEM" );
+        data << objmgr.GetQuestInfo(quest_id)->ReqItemId[item_idx];
+        data << count;
+        GetSession()->SendPacket( &data );
+    }
+}
+
+void Player::SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count )
+{
+    assert(old_count + add_count < 64 && "mob count store in 6 bits 2^6 = 64 (0..63)");
+
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTUPDATE_ADD_KILL );
+        sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL" );
+        data << qInfo->QuestId;
+        data << qInfo->ReqKillMobOrGOId[ creature_idx ];
+        data << old_count + add_count;
+        data << qInfo->ReqKillMobOrGOCount[ creature_idx ];
+        data << guid;
+        GetSession()->SendPacket(&data);
+
+        uint16 log_slot = GetQuestSlot( quest_id );
+        uint32 kills = GetUInt32Value( log_slot + 1 );
+        kills = kills + (add_count << ( 6 * creature_idx ));
+        SetUInt32Value( log_slot + 1, kills );
+    }
+}
+
+/*********************************************************/
+/***                   LOAD SYSTEM                     ***/
+/*********************************************************/
+
+bool Player::LoadFromDB( uint32 guid )
+{
+
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic`,`totaltime`,`leveltime` FROM `character` WHERE `guid` = '%u'",guid);
+
+    if(!result)
+        return false;
+
+    Field *fields = result->Fetch();
+
+    Object::_Create( guid, HIGHGUID_PLAYER );
+
+    if(!LoadValues( fields[3].GetString()))
+    {
+        sLog.outError("ERROR: Player #%d have broken data in `data` field. Can't be loaded.",GUID_LOPART(guid));
+        delete result;
+        return false;
+    }
+
+    // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
+    for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+    {
+        SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), 0 );
+
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+        for(int i = 0; i < 9; ++i )
+            SetUInt32Value(VisibleBase + i, 0);
+
+        if (m_items[slot])
+        {
+            delete m_items[slot];
+            m_items[slot] = NULL;
+        }
+    }
+
+    m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF;
+
+    m_name = fields[4].GetCppString();
+
+    sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
+    outDebugValues();
+
+    m_race = fields[5].GetUInt8();
+    //Need to call it to initialize m_team (m_team can be calculated from m_race)
+    //Other way is to saves m_team into characters table.
+    setFactionForRace(m_race);
+    SetCharm(0);
+
+    m_class = fields[6].GetUInt8();
+
+    info = objmgr.GetPlayerCreateInfo(m_race, m_class);
+    if(!info)
+    {
+        sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
+        delete result;
+        return false;
+    }
+
+    m_createStats[STAT_AGILITY] = (float)info->agility;
+    m_createStats[STAT_INTELLECT] = (float)info->intellect;
+    m_createStats[STAT_SPIRIT] = (float)info->spirit;
+    m_createStats[STAT_STAMINA] = (float)info->stamina;
+    m_createStats[STAT_STRENGTH] = (float)info->strength;
+
+    m_positionX = fields[7].GetFloat();
+    m_positionY = fields[8].GetFloat();
+    m_positionZ = fields[9].GetFloat();
+    m_mapId = fields[10].GetUInt32();
+    m_orientation = fields[11].GetFloat();
+
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %d Y: ^%d). Teleport to default race/class locations.",guid,m_positionX,m_positionY);
+
+        m_mapId = info->mapId;
+        m_positionX = info->positionX;
+        m_positionY = info->positionY;
+        m_positionZ = info->positionZ;
+    }
+
+    m_highest_rank = fields[14].GetUInt32();
+    m_standing = fields[15].GetUInt32();
+    m_rating = fields[16].GetFloat();
+    m_cinematic = fields[17].GetUInt32();
+    m_Played_time[0]= fields[18].GetUInt32();
+    m_Played_time[1]= fields[19].GetUInt32();
+
+    if( HasFlag(PLAYER_FLAGS, 8) )
+        SetUInt32Value(PLAYER_FLAGS, 0);
+
+    if( HasFlag(PLAYER_FLAGS, 0x11) )
+        m_deathState = DEAD;
+
+    LoadTaxiMask( fields[12].GetString() );
+
+    delete result;
+
+    _LoadMail();
+
+    _LoadSpells();
+
+    _LoadActions();
+
+    _LoadQuestStatus();
+
+    _LoadTutorials();
+
+    _LoadAuras();
+
+    _LoadInventory();
+
+    _LoadReputation();
+
+    // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
+    // Skip _ApplyAllItemMods(); -- applied in _LoadInventory() by EquipItem calls at item load
+
+    sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
+    outDebugValues();
+
+    return true;
+}
+
+void Player::_LoadActions()
+{
+
+    m_actions.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            addAction(fields[0].GetUInt8(), fields[1].GetUInt16(), fields[2].GetUInt8(), fields[3].GetUInt8());
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::_LoadAuras()
+{
+    m_Auras.clear();
+
+    for(uint8 i = 0; i < 48; i++)
+        SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
+    for(uint8 j = 0; j < 6; j++)
+        SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
+
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`effect_index`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 spellid = fields[0].GetUInt32();
+            uint32 effindex = fields[1].GetUInt32();
+            int32 remaintime = (int32)fields[2].GetUInt32();
+
+            SpellEntry* spellproto = sSpellStore.LookupEntry(spellid);
+            if(!spellproto)
+            {
+                sLog.outError("Unknown aura (spellid %u, effindex %u), ignore.",spellid,effindex);
+                continue;
+            }
+
+            // FIXME: real caster not stored in DB currently
+            Aura* aura = new Aura(spellproto, effindex, this, this/*caster*/);
+            if (remaintime == -1)
+            {
+                sLog.outDebug("SpellAura (id=%u) has duration:%d ", spellid, remaintime);
+                //continue;
+                //temporary disable the Aura with Druation=-1 to avoid spell lost and action lost.
+                //need more fix about Aura Reload.
+            }
+            aura->SetAuraDuration(remaintime);
+            AddAura(aura);
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::LoadCorpse()
+{
+    if(Corpse* corpse = GetCorpse())
+    {
+        if(isAlive())
+            corpse->ConvertCorpseToBones();
+        else
+            corpse->UpdateForPlayer(this,true);
+    }
+}
+
+void Player::_LoadInventory()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
+
+    uint16 dest;
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint8  slot      = fields[0].GetUInt8();
+            uint32 item_guid = fields[1].GetUInt32();
+            uint32 item_id   = fields[2].GetUInt32();
+
+            ItemPrototype const * proto = objmgr.GetItemPrototype(item_id);
+
+            if(!proto)
+            {
+                sLog.outError( "Player::_LoadInventory: Player %s have unknown item (id: #%u) in inventory, skipped.", GetName(),item_id );
+                continue;
+            }
+
+            Item *item = NewItemOrBag(proto);
+            item->SetSlot(slot);
+
+            if(!item->LoadFromDB(item_guid, GetGUID(), 1))
+                continue;
+
+            dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
+            if( IsInventoryPos( dest ) )
+            {
+                if( CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                    StoreItem(dest, item, true);
+                else
+                    delete item;
+            }
+            else if( IsEquipmentPos( dest ) )
+            {
+                if( CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
+                    EquipItem(dest, item, true);
+                else
+                    delete item;
+            }
+            else if( IsBankPos( dest ) )
+            {
+                if( CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                    BankItem(dest, item, true);
+                else
+                    delete item;
+            }
+        } while (result->NextRow());
+
+        delete result;
+    }
+}
+
+void Player::_LoadMail()
+{
+
+    m_mail.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            Mail *be = new Mail;
+            be->messageID = fields[0].GetUInt32();
+            be->sender = fields[1].GetUInt32();
+            be->receiver = fields[2].GetUInt32();
+            be->subject = fields[3].GetCppString();
+            be->body = fields[4].GetCppString();
+            be->item = fields[5].GetUInt32();
+            be->time = fields[6].GetUInt32();
+            be->money = fields[7].GetUInt32();
+            be->COD = fields[8].GetUInt32();
+            be->checked = fields[9].GetUInt32();
+            m_mail.push_back(be);
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::LoadPet()
+{
+    uint64 pet_guid = GetPetGUID();
+    if(pet_guid)
+    {
+        Creature* in_pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
+        if(in_pet)
+            return;
+        Pet *pet = new Pet();
         pet->LoadPetFromDB(this);
     }
 }
@@ -9635,4 +11850,5 @@ void Player::RemoveAreaAurasFromGroup()
             if (m_TotemSlot[i])
                 Member->RemoveAreaAurasByOthers(m_TotemSlot[i]);
     }
+>>>>>>> .r2224
 }
