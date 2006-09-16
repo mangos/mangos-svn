@@ -1029,8 +1029,8 @@ void Aura::HandleBindSight(bool apply)
 
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    Player *player = (Player*)m_target;
-    player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
+
+    m_target->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
 }
 
 void Aura::HandleFarSight(bool apply)
@@ -1040,17 +1040,23 @@ void Aura::HandleFarSight(bool apply)
 
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    Player *player = (Player*)m_target;
-    player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
+
+    m_target->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
 }
 
 void Aura::HandleAuraTracCreatures(bool apply)
 {
+    if(m_target->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
     m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1) : 0 );
 }
 
 void Aura::HandleAuraTracResources(bool apply)
 {
+    if(m_target->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
     m_target->SetUInt32Value(PLAYER_TRACK_RESOURCES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1): 0 );
 }
 
@@ -1963,21 +1969,33 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
 
 void Aura::HandleAuraModParryPercent(bool apply)
 {
+    if(m_target->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
     m_target->ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModDodgePercent(bool apply)
 {
+    if(m_target->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
     m_target->ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModBlockPercent(bool apply)
 {
+    if(m_target->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
     m_target->ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModCritPercent(bool apply)
 {
+    if(m_target->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
     m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
