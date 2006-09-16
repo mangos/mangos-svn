@@ -35,22 +35,32 @@ Pet::Pet()
         m_spells[i]=0;
 }
 
-bool Pet::LoadPetFromDB( Unit* owner,uint32 petentry )
+bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
 {
     WorldPacket data;
     uint32 ownerid = owner->GetGUIDLow();
+    
+    QueryResult *result;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current` FROM `character_pet` WHERE `owner` = '%u' AND`entry` = '%u'",ownerid, petentry );
+    if(petentry)
+        // known entry
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry );
+    else
+        // current pet
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'",ownerid );
 
     if(!result)
         return false;
 
     Field *fields = result->Fetch();
 
+    // update for case "current = 1"
+    petentry = fields[1].GetUInt32();
+
     float px, py, pz;
     owner->GetClosePoint(NULL, px, py, pz);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
-    if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), fields[1].GetUInt32()))
+    if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), petentry))
     {
         delete result;
         return false;
@@ -126,6 +136,13 @@ bool Pet::LoadPetFromDB( Unit* owner,uint32 petentry )
     m_spells[2] = fields[8].GetUInt32();
     m_spells[3] = fields[9].GetUInt32();
     m_actState = fields[10].GetUInt32();
+
+    // set current pet as current
+    if(fields[13].GetUInt32() != 1)
+    {
+        sDatabase.PExecute("UPDATE `character_pet` SET `current` = '0' WHERE `owner` = '%u' AND `current` <> '0' AND `entry` <> '%u'",ownerid, petentry);
+        sDatabase.PExecute("UPDATE `character_pet` SET `current` = '1' WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry);
+    }
 
     delete result;
 
