@@ -225,6 +225,11 @@ bool Master::Run()
     _StopDB();
 
     sLog.outString( "Halting process..." );
+
+	#ifdef ENABLE_CLI
+	raise(SIGQUIT);
+    #endif
+
     return 0;
 }
 

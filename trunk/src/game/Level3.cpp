@@ -2189,7 +2189,7 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     Weather *wth = sWorld.FindWeather(zoneid);
     if(!wth)
     {
-        Weather *wth = new Weather(player);
+        wth = new Weather(player);
         sWorld.AddWeather(wth);
     }
 
