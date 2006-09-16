@@ -1104,11 +1104,31 @@ void Spell::EffectSummonPet(uint32 i)
 
     Pet* NewSummon = new Pet();
 
-    // is it need for somthing? it load wrong old type of pet instead creating new
-    //if(NewSummon->LoadPetFromDB( m_caster ))
-    //    return;
+    uint32 ownerid = m_caster->GetGUIDLow();
+    bool hasLoadPet = false;
+    QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `character_pet` WHERE `owner` = '%u'" , ownerid );
 
-    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            if (fields[0].GetUInt32() == petentry)
+            {
+                NewSummon->LoadPetFromDB(m_caster,petentry );
+                NewSummon->SaveToDB();
+                hasLoadPet = true;
+                break;
+            }
+        }
+        while( result->NextRow() );
+    }
+    delete result;
+
+    if(hasLoadPet)
+        return;
+    else if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
     {
         uint32 petlevel=m_caster->getLevel();
         NewSummon->SetLevel(petlevel);

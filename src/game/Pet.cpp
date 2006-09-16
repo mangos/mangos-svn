@@ -35,12 +35,12 @@ Pet::Pet()
         m_spells[i]=0;
 }
 
-bool Pet::LoadPetFromDB( Unit* owner )
+bool Pet::LoadPetFromDB( Unit* owner,uint32 petentry )
 {
     WorldPacket data;
     uint32 ownerid = owner->GetGUIDLow();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current` FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", ownerid );
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current` FROM `character_pet` WHERE `owner` = '%u' AND`entry` = '%u'",ownerid, petentry );
 
     if(!result)
         return false;
@@ -148,8 +148,8 @@ void Pet::SaveToDB()
         return;
 
     uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
-    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", owner );
-
+    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
+    sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
         GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
         m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS), m_name.c_str());
