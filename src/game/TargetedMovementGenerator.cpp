@@ -113,6 +113,10 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         return;
     }
 
+    // prevent crash after creature killed pet
+    if (!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.getVictim() != &i_target)
+        return;
+
     Traveller<Creature> traveller(owner);
     if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
     {
