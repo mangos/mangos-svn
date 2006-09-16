@@ -22,6 +22,15 @@
 #include "RandomMovementGenerator.h"
 #include "DestinationHolderImp.h"
 
+/*
+Here interpolation is disabled by default due to it causing crashing 
+in some compile environments.
+If your server can handle the small amount of lag this may cause
+and you can build without experiencing a significant increase in crashes
+then you may uncomment the following line to have correct random motion.
+*/
+//#define USE_INTERPOLATION
+
 void
 RandomMovementGenerator::Initialize(Creature &creature)
 {
@@ -91,8 +100,10 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
     if(creature.hasUnitState(UNIT_STAT_ROOT) || creature.hasUnitState(UNIT_STAT_STUNDED))
         return;
     i_nextMoveTime.Update(diff);
-    Traveller<Creature> traveller(creature);
+    #ifdef USE_INTERPOLATION
+    CreatureTraveller traveller(creature);    
     i_destinationHolder.UpdateTraveller(traveller, diff, false);
+    #endif
     if( i_nextMoveTime.Passed() )
     {
         if( creature.IsStopped() )
@@ -104,7 +115,9 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
             creature.addUnitState(UNIT_STAT_ROAMING);
             CreatureTraveller traveller(creature);
             i_destinationHolder.SetDestination(traveller, x, y, z);
-            //traveller.Relocation(x,y,z);
+            #ifndef USE_INTERPOLATION
+            traveller.Relocation(x,y,z);
+            #endif
             i_nextMoveTime.Reset( i_destinationHolder.GetTotalTravelTime() );
         }
         else
