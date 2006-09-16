@@ -236,6 +236,13 @@ enum LootType
     LOOT_PICKPOKETING = 4                                   // unsupported by client, sending LOOT_SKINNING instead
 };
 
+enum MirrorTimerType
+{
+    FATIGUE_TIMER = 0,
+    BREATH_TIMER,
+    FIRE_TIMER 
+};
+
 enum GMFlags
 {
     GM_ACCEPT_TICKETS  = 1,
@@ -988,9 +995,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void HandleDrowing (uint32 UnderWaterTime);
         void HandleLava();
         void HandleSobering();
-        void StartMirrorTimer(uint8 Type, uint32 MaxValue);
-        void ModifyMirrorTimer(uint8 Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen);
-        void StopMirrorTimer(uint8 Type);
+        void StartMirrorTimer(MirrorTimerType Type, uint32 MaxValue);
+        void ModifyMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen);
+        void StopMirrorTimer(MirrorTimerType Type);
         void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
         uint8 m_isunderwater;
 
