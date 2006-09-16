@@ -29,11 +29,10 @@
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDetail("WORLD: got use Item packet, data length = %i",recvPacket.size());
+    sLog.outDetail("WORLD: CMSG_USE_ITEM packet, data length = %i",recvPacket.size());
 
     Player* pUser = _player;
     uint8 bagIndex, slot, tmp3;
-    uint32 spellId;
 
     recvPacket >> bagIndex >> slot >> tmp3;
 
@@ -48,15 +47,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if(!proto)
     {
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );
-        return;
-    }
-
-    spellId = proto->Spells[0].SpellId;
-
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
-    if(!spellInfo)
-    {
-        sLog.outError("WORLD: unknown spell id %i", spellId);
         return;
     }
 
@@ -86,14 +76,27 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if( pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
         pItem->SetBinding( true );
 
-    Spell *spell = new Spell(pUser, spellInfo, false, 0);
-    WPAssert(spell);
+    for(int i = 0; i <5; ++i)
+    {
+        uint32 spellId = proto->Spells[i].SpellId;
 
-    SpellCastTargets targets;
-    targets.read(&recvPacket, pUser);
-    spell->m_CastItem = pItem;
-    spell->prepare(&targets);
+        if(!spellId)
+            continue;
 
+        SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+        if(!spellInfo)
+        {
+            sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ", spellId);
+            continue;
+        }
+
+        Spell *spell = new Spell(pUser, spellInfo, true, 0);
+
+        SpellCastTargets targets;
+        targets.read(&recvPacket, pUser);
+        spell->m_CastItem = pItem;
+        spell->prepare(&targets);
+    }
 }
 
 #define OPEN_CHEST 11437
