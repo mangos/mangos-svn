@@ -234,7 +234,7 @@ struct _Spell
 {
     uint32 SpellId;
     uint32 SpellTrigger;
-    uint32 SpellCharges;
+    int32  SpellCharges;
     uint32 SpellCooldown;
     uint32 SpellCategory;
     uint32 SpellCategoryCooldown;
