@@ -226,10 +226,6 @@ bool Master::Run()
 
     sLog.outString( "Halting process..." );
 
-	#ifdef ENABLE_CLI
-	raise(SIGQUIT);
-    #endif
-
     return 0;
 }
 
