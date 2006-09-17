@@ -187,7 +187,7 @@ class ByteBuffer
         };
         template <typename T> T read(size_t pos) const
         {
-            ASSERT(pos + sizeof(T) <= size());
+            ASSERT(pos + sizeof(T) <= size() || PrintPosError(false,pos,sizeof(T)));
             return *((T*)&_storage[pos]);
         }
 
@@ -245,7 +245,7 @@ class ByteBuffer
 
         void put(size_t pos, const uint8 *src, size_t cnt)
         {
-            ASSERT(pos + cnt <= size());
+            ASSERT(pos + cnt <= size() || PrintPosError(true,pos,cnt));
             memcpy(&_storage[pos], src, cnt);
         }
         void print_storage()
@@ -314,6 +314,13 @@ class ByteBuffer
         }
 
     protected:
+        bool PrintPosError(bool add, size_t pos, size_t esize) const
+        {
+            printf("ERROR: Attempt %s in ByteBuffer (pos: %u size: %u) value with size: %u",(add ? "put" : "get"),pos, size(), esize);
+
+            // assert must fail after function call
+            return false;
+        }
 
         size_t _rpos, _wpos;
         std::vector<uint8> _storage;
