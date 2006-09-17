@@ -76,6 +76,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if( pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
         pItem->SetBinding( true );
 
+    SpellCastTargets targets;
+    targets.read(&recvPacket, pUser);
+
     for(int i = 0; i <5; ++i)
     {
         uint32 spellId = proto->Spells[i].SpellId;
@@ -91,9 +94,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         }
 
         Spell *spell = new Spell(pUser, spellInfo, true, 0);
-
-        SpellCastTargets targets;
-        targets.read(&recvPacket, pUser);
         spell->m_CastItem = pItem;
         spell->prepare(&targets);
     }
