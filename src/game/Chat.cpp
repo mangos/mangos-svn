@@ -367,6 +367,14 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
     if(text[0] != '!' && text[0] != '.')
         return 0;
 
+    // ignore single . and ! in line
+    if(strlen(text) < 2)
+        return 0;
+
+    // ignore messages staring from many dots.
+    if(text[0] == '.' && text[1] == '.' || text[0] == '!' && text[1] == '!')
+        return 0;
+
     text++;
 
     if(!ExecuteCommandInTable(getCommandTable(), text))
