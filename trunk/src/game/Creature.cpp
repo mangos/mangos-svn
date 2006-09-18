@@ -1242,10 +1242,33 @@ void Creature::Untamed()
         ((Player*)owner)->UnTamePet(this);
     else
     {
+        SetMaxPower(POWER_HAPPINESS,0);
+        SetPower(POWER_HAPPINESS,0);
+        SetMaxPower(POWER_FOCUS,0);
+        SetPower(POWER_FOCUS,0);
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,GetCreatureInfo()->faction);
+        SetUInt64Value(UNIT_FIELD_CREATEDBY, 0);
         if(owner)
             owner->SetPet(0);
         SetTamed(false);
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,GetCreatureInfo()->faction);
         AIM_Initialize();
     }
+}
+void Creature::SaveTamedToPet()
+{
+    if(!isTamed())
+        return;
+
+    uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
+    std::string name;
+    if(GetOwner()->GetTypeId() == TYPEID_PLAYER)
+        name = ((Player*)GetOwner())->GetName();
+    else
+        name = ((Creature*)GetOwner())->GetCreatureInfo()->Name;
+    name.append("'s Pet");
+    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
+    sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
+    sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
+        GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+        m_spells[0], m_spells[1], m_spells[2], m_spells[3], STATE_RA_FOLLOW, GetPower(POWER_HAPPINESS), name.c_str());
 }

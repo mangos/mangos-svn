@@ -237,6 +237,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
 
         bool isTamed() const { return m_isTamed; }
+        void SaveTamedToPet();
         void SetTamed(bool isTamed) { m_isTamed = isTamed; }
         void Untamed();
 
