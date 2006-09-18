@@ -935,8 +935,12 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         else
         {
             sLog.outString("Spell Canceled!");
+            if( pVictim->m_currentSpell->m_spellInfo->Id == 1515 )
+            {
+                if(outcome != MELEE_HIT_CRIT && !pVictim->hasUnitState(UNIT_STAT_STUNDED))
+                    return;
+            }
             pVictim->m_currentSpell->cancel();
-
         }
     }
 }

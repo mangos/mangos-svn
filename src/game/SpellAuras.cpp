@@ -702,6 +702,8 @@ void Aura::TriggerSpell()
         sLog.outError("WORLD: unknown spell id %i\n",  GetSpellProto()->EffectTriggerSpell[m_effIndex]);
         return;
     }
+	if(GetSpellProto()->Id == 1515)
+		spellInfo = sSpellStore.LookupEntry( 13481 );
 
     Unit* caster = GetCaster();
 
@@ -751,7 +753,7 @@ void Aura::HandleAuraDummy(bool apply)
         if(m_target && m_target->GetTypeId() == TYPEID_PLAYER)
         {
             Player * player = (Player*)m_target;
-            uint32 spellid;
+            uint32 spellid = 0;
             uint32 itemflag = m_castItem->GetUInt32Value(ITEM_FIELD_FLAGS);
             if(apply)
             {
@@ -768,6 +770,8 @@ void Aura::HandleAuraDummy(bool apply)
                     case 20765:spellid = 20761;break;
                     default:break;
                 }
+				if(!spellid)
+					return;
                 m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),true);
                 player->SetSoulStone(m_castItem);
                 player->SetSoulStoneSpell(spellid);
@@ -776,6 +780,25 @@ void Aura::HandleAuraDummy(bool apply)
             {
                 m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),false);
             }
+        }
+    }
+    if(!apply)
+    {
+        //probably it's temporary for taming creature..
+        if( GetSpellProto()->Id == 19674 && caster && caster->isAlive())
+        {
+            SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
+            Spell spell(caster, spell_proto, true, 0);
+            Unit* target = NULL;
+            target = m_target;
+            if(!target || !target->isAlive())
+                return;
+            SpellCastTargets targets;
+            targets.setUnitTarget(target);
+            // prevent double stat apply for triggered auras
+            target->ApplyStats(true);
+            spell.prepare(&targets);
+            target->ApplyStats(false);
         }
     }
 }
@@ -1640,29 +1663,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
 
     m_isPeriodic = apply;
     m_isTrigger = apply;
-
-    if(!apply)
-    {
-        //probably it's temporary for taming creature..
-
-        Unit* caster = GetCaster();
-
-        if(GetSpellProto()->Id == 1515 && caster && caster->isAlive())
-        {
-            SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
-            Spell spell(caster, spell_proto, true, 0);
-            Unit* target = NULL;
-            target = m_target;
-            if(!target || !target->isAlive())
-                return;
-            SpellCastTargets targets;
-            targets.setUnitTarget(target);
-            // prevent double stat apply for triggered auras
-            target->ApplyStats(true);
-            spell.prepare(&targets);
-            target->ApplyStats(false);
-        }
-    }
 }
 
 void Aura::HandlePeriodicEnergize(bool apply)

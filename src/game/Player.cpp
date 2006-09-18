@@ -9364,6 +9364,10 @@ void Player::SavePet()
     Creature* pet = GetPet();
     if(pet && pet->isPet())
        ((Pet*)pet)->SaveToDB();
+    else if(pet && pet->isTamed())
+    {
+        pet->SaveTamedToPet();
+    }
 }
 
 void Player::outDebugValues() const
@@ -9522,6 +9526,12 @@ void Player::UnTamePet(Creature* pet)
     if(!pet||!pet->isTamed()||pet->GetGUID()!=GetPetGUID()) return;
 
     pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,pet->GetCreatureInfo()->faction);
+    pet->SetMaxPower(POWER_HAPPINESS,0);
+    pet->SetPower(POWER_HAPPINESS,0);
+    pet->SetMaxPower(POWER_FOCUS,0);
+    pet->SetPower(POWER_FOCUS,0);
+    pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, 0);
+    pet->SetTamed(false);
     SetPet(0);
 
     pet->AIM_Initialize();

@@ -1043,7 +1043,7 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->SetPower(   POWER_HAPPINESS,600000);
         creatureTarget->setPowerType(POWER_FOCUS);
         creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-        creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
+        //creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         creatureTarget->SetTamed(true);
@@ -1788,7 +1788,10 @@ void Spell::EffectDismissPet(uint32 i)
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    ((Player*)m_caster)->UnsummonPet();
+    if(m_caster->GetPet()->isPet())
+        ((Player*)m_caster)->UnsummonPet();
+    else if(m_caster->GetPet()->isTamed())
+        ((Player*)m_caster)->UnTamePet();
 }
 
 void Spell::EffectSummonObject(uint32 i)
