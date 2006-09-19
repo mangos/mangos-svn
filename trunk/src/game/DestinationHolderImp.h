@@ -121,7 +121,7 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff,
         if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
         {
             float ori = traveller.GetTraveller().GetAngle(x, y);
-            traveller.Relocation(x, y, z, ori);        
+            traveller.Relocation(x, y, z, ori);
         }
         return true;
     }
@@ -148,6 +148,7 @@ DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
         z = i_fromZ + ((i_destZ - i_fromZ) * percent_passed);
     }
 }
+
 template<typename TRAVELLER>
 float
 DestinationHolder<TRAVELLER>::GetDistanceFromDestSq(const Object &obj) const

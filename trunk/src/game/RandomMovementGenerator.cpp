@@ -23,7 +23,7 @@
 #include "DestinationHolderImp.h"
 
 /*
-Here interpolation is disabled by default due to it causing crashing 
+Here interpolation is disabled by default due to it causing crashing
 in some compile environments.
 If your server can handle the small amount of lag this may cause
 and you can build without experiencing a significant increase in crashes
@@ -101,7 +101,7 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
         return;
     i_nextMoveTime.Update(diff);
     #ifdef USE_INTERPOLATION
-    CreatureTraveller traveller(creature);    
+    CreatureTraveller traveller(creature);
     i_destinationHolder.UpdateTraveller(traveller, diff, false);
     #endif
     if( i_nextMoveTime.Passed() )

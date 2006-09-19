@@ -699,7 +699,7 @@ void Spell::EffectLearnSpell(uint32 i)
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             Creature *pet = m_caster->GetPet();
-            
+
             if( !pet || !pet->isPet() || pet!=unitTarget )
                 return;
 
@@ -1146,7 +1146,7 @@ void Spell::EffectSummonPet(uint32 i)
 
         if(petentry == 416)                                 //imp
         {
-            NewSummon->m_spells[0] = 3110;                   //3110---fire bolt 1
+            NewSummon->m_spells[0] = 3110;                  //3110---fire bolt 1
             NewSummon->AddActState(STATE_RA_SPELL1);
         }
 

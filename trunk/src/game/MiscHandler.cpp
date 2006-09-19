@@ -71,8 +71,8 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     uint32 security = GetSecurity();
 
     data.Initialize( SMSG_WHO );
-    data << uint32( 0 ); // clientcount place holder
-    data << uint32( 0 ); // clientcount place holder
+    data << uint32( 0 );                                    // clientcount place holder
+    data << uint32( 0 );                                    // clientcount place holder
 
     ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
@@ -92,8 +92,8 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         }
     }
 
-    data.put( 0,              clientcount ); //insert right count
-    data.put( sizeof(uint32), clientcount ); //insert right count 
+    data.put( 0,              clientcount );                //insert right count
+    data.put( sizeof(uint32), clientcount );                //insert right count
 
     SendPacket(&data);
 }

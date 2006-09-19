@@ -1254,6 +1254,7 @@ void Creature::Untamed()
         AIM_Initialize();
     }
 }
+
 void Creature::SaveTamedToPet()
 {
     if(!isTamed())
