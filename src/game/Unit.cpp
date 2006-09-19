@@ -939,7 +939,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             {
                 // Fix me: channel should be controled by channel interruption flag,
                 // this should be delete when that is ok.
-                if(outcome != MELEE_HIT_CRIT && !pVictim->hasUnitState(UNIT_STAT_STUNDED) && rand()%100 > 50)
+                if(outcome != MELEE_HIT_CRIT && !pVictim->hasUnitState(UNIT_STAT_STUNDED))
+                    return;
+                // give him a chance,sometimes crit is so frequently.
+                if(rand()%100 > 50)
                     return;
             }
             pVictim->m_currentSpell->cancel();
