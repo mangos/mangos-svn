@@ -240,7 +240,7 @@ enum MirrorTimerType
 {
     FATIGUE_TIMER = 0,
     BREATH_TIMER,
-    FIRE_TIMER 
+    FIRE_TIMER
 };
 
 enum GMFlags

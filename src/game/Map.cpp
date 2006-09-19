@@ -938,8 +938,6 @@ bool Map::PrintGridError(Unit* unit, Cell cell) const
     return false;
 }
 
-
-
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);
 template void Map::Add(DynamicObject *);

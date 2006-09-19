@@ -1137,15 +1137,14 @@ void Spell::TakeCastItem()
     if (ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_BOOK || ItemClass == ITEM_CLASS_QUEST)
     {
         //Soulstones (minor, greater, major, etc) not destroyed
-        if(proto->DisplayInfoID == 6009 && m_spellInfo->School == 5) 
+        if(proto->DisplayInfoID == 6009 && m_spellInfo->School == 5)
             return;
 
         //quest items with charges, not destroyed
-        if(ItemClass == ITEM_CLASS_QUEST)     
+        if(ItemClass == ITEM_CLASS_QUEST)
             for (int i=0; i <5; i++)
                 if (proto->Spells[i].SpellCharges > 1 || proto->Spells[i].SpellCharges == -1)
                     return;
-
 
         ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
 

@@ -66,11 +66,11 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     //      It is not the right way to do... We need to fix it! :D
     //
     //Set players factions. These factios are into factionstemplate.dbc
-    pl->setFaction(BLUE_TEAM);                          //Blue faction
+    pl->setFaction(BLUE_TEAM);                              //Blue faction
     if(Creature* pet = pl->GetPet())
         pet->setFaction(BLUE_TEAM);
 
-    plTarget->setFaction(RED_TEAM);                     //Red faction
+    plTarget->setFaction(RED_TEAM);                         //Red faction
     if(Creature* pet = plTarget->GetPet())
         pet->setFaction(RED_TEAM);
 
@@ -88,7 +88,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     WorldPacket data;
 
     data.Initialize(SMSG_DUEL_COUNTDOWN);
-    data << (uint32)3000;                               // 3 seconds
+    data << (uint32)3000;                                   // 3 seconds
     pl->GetSession()->SendPacket(&data);
     plTarget->GetSession()->SendPacket(&data);
 
@@ -110,7 +110,7 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 
     // Duel already started
     if(GetPlayer()->isInDuel())
-       return;
+        return;
 
     GetPlayer()->DuelComplete();
 }

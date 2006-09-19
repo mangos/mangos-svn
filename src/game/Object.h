@@ -136,7 +136,7 @@ class MANGOS_DLL_SPEC Object
         float GetPositionY( ) const { return m_positionY; }
         float GetPositionZ( ) const { return m_positionZ; }
         void GetPosition( float &x, float &y, float &z ) const
-        { x = m_positionX; y = m_positionY; z = m_positionZ; }
+            { x = m_positionX; y = m_positionY; z = m_positionZ; }
         float GetOrientation( ) const { return m_orientation; }
         void GetClosePoint( const Object* victim, float &x, float &y, float &z ) const;
         void GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const;

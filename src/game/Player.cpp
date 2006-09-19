@@ -2966,7 +2966,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     // form checks
     if ( IsUnderWater() )
     {
-        // remove travel forms 
+        // remove travel forms
         if(m_form == FORM_TRAVEL || m_form == FORM_GHOSTWOLF)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
@@ -3530,7 +3530,6 @@ void Player::DuelComplete()
         GetSession()->SendPacket(&data);
         m_pDuel->GetSession()->SendPacket(&data);
 
-
         SetInDuel(false);
         m_pDuel->SetInDuel(false);
 
@@ -3566,7 +3565,6 @@ void Player::DuelComplete()
         m_pDuel->GetSession()->SendPacket(&data);
     }
 
-
     data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
     data << duelFlagGUID;
     GetSession()->SendPacket(&data);
@@ -3580,7 +3578,6 @@ void Player::DuelComplete()
     //Player kneel when finish the duel
     if(isInDuel())
         HandleEmoteCommand(ANIM_EMOTE_BEG);
-
 
     //Remove Duel Flag object
     GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
@@ -9363,7 +9360,7 @@ void Player::SavePet()
 {
     Creature* pet = GetPet();
     if(pet && pet->isPet())
-       ((Pet*)pet)->SaveToDB();
+        ((Pet*)pet)->SaveToDB();
     else if(pet && pet->isTamed())
     {
         pet->SaveTamedToPet();
