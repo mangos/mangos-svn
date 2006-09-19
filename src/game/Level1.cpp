@@ -29,6 +29,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Language.h"
+#include "RedZoneDistrict.h"
 
 bool ChatHandler::HandleAnnounceCommand(const char* args)
 {
@@ -69,13 +70,17 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         return true;
     }
 
+    CellPair cell_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    Cell cell = RedZone::GetZone(cell_val);
+
+
     PSendSysMultilineMessage(LANG_MAP_POSITION,
         obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
-        obj->GetOrientation());
+        obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
 
     sLog.outDebug("Player %s GPS call unit " I64FMT " " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(), obj->GetGUID(),
         obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
-        obj->GetOrientation());
+        obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
 
     return true;
 }
