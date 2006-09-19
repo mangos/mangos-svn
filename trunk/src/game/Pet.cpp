@@ -56,6 +56,8 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
 
     // update for case "current = 1"
     petentry = fields[1].GetUInt32();
+    if(!petentry)
+        return false;
 
     float px, py, pz;
     owner->GetClosePoint(NULL, px, py, pz);

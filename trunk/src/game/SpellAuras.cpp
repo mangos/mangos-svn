@@ -702,8 +702,8 @@ void Aura::TriggerSpell()
         sLog.outError("WORLD: unknown spell id %i\n",  GetSpellProto()->EffectTriggerSpell[m_effIndex]);
         return;
     }
-	if(GetSpellProto()->Id == 1515)
-		spellInfo = sSpellStore.LookupEntry( 13481 );
+    if(GetSpellProto()->Id == 1515)
+        spellInfo = sSpellStore.LookupEntry( 13481 );
 
     Unit* caster = GetCaster();
 
@@ -770,8 +770,8 @@ void Aura::HandleAuraDummy(bool apply)
                     case 20765:spellid = 20761;break;
                     default:break;
                 }
-				if(!spellid)
-					return;
+                if(!spellid)
+                    return;
                 m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),true);
                 player->SetSoulStone(m_castItem);
                 player->SetSoulStoneSpell(spellid);
