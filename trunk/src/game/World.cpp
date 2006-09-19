@@ -207,9 +207,9 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
     m_configs[CONFIG_COMPRESSION] = sConfig.GetIntDefault("Compression", 1);
-    if(m_configs[CONFIG_COMPRESSION] < 0 || m_configs[CONFIG_COMPRESSION] > 9)
+    if(m_configs[CONFIG_COMPRESSION] < 1 || m_configs[CONFIG_COMPRESSION] > 9)
     {
-        sLog.outError("Compression level (%i) must be in range 0..9. Using default compression level (1),.",m_configs[CONFIG_COMPRESSION]);
+        sLog.outError("Compression level (%i) must be in range 1..9. Using default compression level (1),.",m_configs[CONFIG_COMPRESSION]);
         m_configs[CONFIG_COMPRESSION] = 1;
     }
     m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);

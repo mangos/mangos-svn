@@ -55,8 +55,7 @@ UseProcessors = 0
 # Default: 1 (HIGH)
 ProcessPriority = 1
 
-# Compression level for update packages sended to client (0..9)
-#          0 (no compression) 
+# Compression level for update packages sended to client (1..9)
 # Default: 1 (speed) 
 #          9 (best compression) 
 Compression = 1
