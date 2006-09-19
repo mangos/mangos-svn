@@ -79,6 +79,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     SpellCastTargets targets;
     targets.read(&recvPacket, pUser);
 
+    // use trigerred flag only for items with many spell casts and for not first cast
+    int count = 0;
+
     for(int i = 0; i <5; ++i)
     {
         uint32 spellId = proto->Spells[i].SpellId;
@@ -93,9 +96,11 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             continue;
         }
 
-        Spell *spell = new Spell(pUser, spellInfo, true, 0);
+        Spell *spell = new Spell(pUser, spellInfo, (count > 0) , 0);
         spell->m_CastItem = pItem;
         spell->prepare(&targets);
+
+        ++count;
     }
 }
 
