@@ -225,7 +225,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         case TAUREN:        m_taximask[0]= 1 << (22-1); break;
         case HUMAN:         m_taximask[0]= 1 << ( 2-1); break;
         case DWARF:         m_taximask[0]= 1 << ( 6-1); break;
-        case NIGHTELF:      m_taximask[0]= (1 << (26-1)) || (1 << (27-1)); break;
+        case NIGHTELF:      m_taximask[0]= (1 << (26-1)) | (1 << (27-1)); break;
         case GNOME:         m_taximask[0]= 1 << ( 6-1); break;
         case ORC:           m_taximask[0]= 1 << (23-1); break;
         case UNDEAD_PLAYER: m_taximask[0]= 1 << (11-1); break;
