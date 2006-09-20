@@ -109,7 +109,7 @@ class MANGOS_DLL_SPEC GameObject : public Object
 
         uint32      m_spellId;
         uint32      m_respawnTimer;
-        uint32      m_respawnDelayTimer;
+        uint32      m_respawnDelayTime;
         uint32      m_flags;
         LootState   m_lootState;
         uint32      m_refs;
