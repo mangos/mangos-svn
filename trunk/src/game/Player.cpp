@@ -948,21 +948,49 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << (uint32)m_petLevel;
     *p_data << (uint32)m_petFamilyId;
 
+    ItemPrototype const *items[20];
+    for (int i = 0; i < 20; i++)
+        items[i] = NULL;
+
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
+    if (result)
+    {
+        do
+        {
+            Field *fields  = result->Fetch();
+            uint8  slot    = fields[0].GetUInt8() & 255;
+            uint32 item_id = fields[1].GetUInt32();
+            if(!( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END ))
+                continue;
+
+            items[slot] = objmgr.GetItemPrototype(item_id);
+            if(!items[slot])
+            {
+                sLog.outError( "Player::BuildEnumData: Player %s have unknown item (id: #%u) in inventory, skipped.", GetName(),item_id );
+                continue;
+            }
+        } while (result->NextRow());
+        delete result;
+    }
+    else
+    {
+        sLog.outError( "Player::BuildEnumData: Player %s's inventory cannot be loaded.", GetName());
+        return;
+    }
+
     for (int i = 0; i < 20; i++)
     {
-        if (m_items[i] != NULL)
+        if (items[i] != NULL)
         {
-            *p_data << (uint32)m_items[i]->GetProto()->DisplayInfoID;
-            *p_data << (uint8)m_items[i]->GetProto()->InventoryType;
+            *p_data << (uint32)items[i]->DisplayInfoID;
+            *p_data << (uint8)items[i]->InventoryType;
         }
         else
         {
             *p_data << (uint32)0;
             *p_data << (uint8)0;
         }
-
     }
-
 }
 
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation)
