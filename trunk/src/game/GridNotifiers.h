@@ -44,6 +44,7 @@ namespace MaNGOS
         UpdateData i_data;
         VisibleNotifier(Player &player) : i_player(player) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
+        void Visit(std::map<OBJECT_HANDLE, GameObject *> &);
         void Notify(void);
 
         #ifdef WIN32

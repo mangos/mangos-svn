@@ -36,7 +36,7 @@ GameObject::GameObject() : Object(), m_refs(0)
 
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTimer = 0;
-    m_respawnDelayTimer = 25000;
+    m_respawnDelayTime = 25000;
     m_lootState = CLOSED;
 
     lootid=0;
@@ -112,6 +112,7 @@ void GameObject::Update(uint32 p_time)
                 else
                 {
                     m_respawnTimer = 0;
+                    MapManager::Instance().GetMap(GetMapId())->Add(this);
                 }
             }
             break;
@@ -122,7 +123,7 @@ void GameObject::Update(uint32 p_time)
             data.Initialize(SMSG_DESTROY_OBJECT);
             data << GetGUID();
             SendMessageToSet(&data, true);
-            m_respawnTimer = m_respawnDelayTimer;
+            m_respawnTimer = m_respawnDelayTime;
             break;
     }
 }
@@ -206,7 +207,7 @@ bool GameObject::LoadFromDB(uint32 guid)
     rotation2 = fields[8].GetFloat();
     rotation3 = fields[9].GetFloat();
     lootid=fields[10].GetUInt32();
-    m_respawnTimer=fields[11].GetUInt32();
+    m_respawnDelayTime=fields[11].GetUInt32();
     delete result;
 
     if (Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
