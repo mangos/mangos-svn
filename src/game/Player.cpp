@@ -1509,11 +1509,12 @@ void Player::SendInitialSpells()
     WorldPacket data;
     uint16 spellCount = 0;
 
-    PlayerSpellList::const_iterator itr;
+    PlayerSpellMap::const_iterator itr;
 
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if((*itr)->active)
+        if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+        if(itr->second->active)
             spellCount +=1;
     }
 
@@ -1523,10 +1524,10 @@ void Player::SendInitialSpells()
 
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if(!(*itr)->active)
+        if(!itr->second->active)
             continue;
-        data << uint16((*itr)->spellId);
-        data << uint16((*itr)->slotId);
+        data << uint16(itr->first);
+        data << uint16(itr->second->slotId);
     }
     data << uint16(0);
 
@@ -1570,7 +1571,7 @@ void Player::AddMail(Mail *m)
     m_mail.push_back(m);
 }
 
-bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
+bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uint16 slot_id)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -1579,55 +1580,51 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
         return false;
     }
 
-    for(int i=0;i<3;i++)
-        if(spellInfo->Effect[i] == 60)
+    PlayerSpellMap::iterator itr = m_spells.find(spell_id);
+    if (itr != m_spells.end())
     {
-        uint32 newflag = spellInfo->EquippedItemSubClass;
-        if(spellInfo->EquippedItemClass == 2 && !(GetWeaponProficiency() & newflag))
+        if (itr->second->state == PLAYERSPELL_REMOVED)
         {
-            AddWeaponProficiency(newflag);
-            GetSession()->SendProficiency(uint8(0x02),GetWeaponProficiency());
+            delete itr->second;
+            m_spells.erase(itr);
+            state = PLAYERSPELL_CHANGED;
         }
-        if(spellInfo->EquippedItemClass == 4 && !(GetArmorProficiency() & newflag))
-        {
-            AddArmorProficiency(newflag);
-            GetSession()->SendProficiency(uint8(0x04),GetArmorProficiency());
-        }
-        break;
+        else
+            return false;
     }
 
     PlayerSpell *newspell;
 
     newspell = new PlayerSpell;
-    newspell->spellId = spell_id;
     newspell->active = active;
+    newspell->state = state;
 
     WorldPacket data;
     if(newspell->active && !canStackSpellRank(spellInfo))
     {
-        PlayerSpellList::iterator itr;
+        PlayerSpellMap::iterator itr;
         for (itr = m_spells.begin(); itr != m_spells.end(); itr++)
         {
-            if(!*itr) continue;
-            SpellEntry *i_spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
+            if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+            SpellEntry *i_spellInfo = sSpellStore.LookupEntry(itr->first);
             if(!i_spellInfo) continue;
 
-            if(IsRankSpellDueToSpell(spellInfo,(*itr)->spellId))
+            if(IsRankSpellDueToSpell(spellInfo,itr->first))
             {
-                if((*itr)->active)
+                if(itr->second->active)
                 {
                     data.Initialize(SMSG_SUPERCEDED_SPELL);
 
-                    if(FindSpellRank(spell_id) >= FindSpellRank((*itr)->spellId))
+                    if(FindSpellRank(spell_id) >= FindSpellRank(itr->first))
                     {
-                        data << uint32((*itr)->spellId);
+                        data << uint32(itr->first);
                         data << uint32(spell_id);
-                        (*itr)->active = 0;
+                        itr->second->active = 0;
                     }
                     else
                     {
                         data << uint32(spell_id);
-                        data << uint32((*itr)->spellId);
+                        data << uint32(itr->first);
                         newspell->active = 0;
                     }
 
@@ -1637,72 +1634,22 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
         }
     }
 
-    uint8 op;
-    uint16 tmpslot=slot_id,val=0;
-    int16 tmpval=0;
-    uint16 mark=0;
-    uint32 shiftdata=0x01;
-    uint32 EffectVal;
-    uint32 Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
+    uint16 tmpslot=slot_id;
 
     if (tmpslot == 0xffff)
     {
         uint16 maxid = 0;
-        PlayerSpellList::iterator itr;
+        PlayerSpellMap::iterator itr;
         for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
         {
-            if ((*itr)->slotId > maxid) maxid = (*itr)->slotId;
+            if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+            if (itr->second->slotId > maxid) maxid = itr->second->slotId;
         }
         tmpslot = maxid + 1;
     }
 
-    for(int i=0;i<3;i++)
-    {
-        if(spellInfo->EffectItemType[i])
-        {
-            EffectVal=spellInfo->EffectItemType[i];
-            op=spellInfo->EffectMiscValue[i];
-            tmpval = spellInfo->EffectBasePoints[i]+1;
-
-            if(tmpval > 0)
-            {
-                val =  tmpval+1;
-                mark = 0x0;
-            }
-            else
-            {
-                val  = 0xFFFF + (tmpval+2);
-                mark = 0xFFFF;
-            }
-
-            switch(spellInfo->EffectApplyAuraName[i])
-            {
-                case 107:
-                    Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
-                    break;
-                case 108:
-                    Opcode=SMSG_SET_PCT_SPELL_MODIFIER;
-                    break;
-            }
-
-            for(uint8 i=0;i<32;i++)
-            {
-                if ( EffectVal&shiftdata )
-                {
-                    data.Initialize(Opcode);
-                    data << uint8(i);
-                    data << uint8(op);
-                    data << uint16(val);
-                    data << uint16(mark);
-                    GetSession()->SendPacket(&data);
-                }
-                shiftdata=shiftdata<<1;
-            }
-        }
-    }
-
     newspell->slotId = tmpslot;
-    m_spells.push_back(newspell);
+    m_spells[spell_id] = newspell;
 
     return true;
 }
@@ -1721,7 +1668,8 @@ void Player::learnSpell(uint16 spell_id)
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
 
-    addSpell(spell_id,1);
+    if (!addSpell(spell_id,1))
+        return;
 
     uint16 maxskill = getLevel()*5 > 300 ? 300 :getLevel()*5;
     switch(spell_id)
@@ -1842,15 +1790,39 @@ void Player::learnSpell(uint16 spell_id)
 
 bool Player::removeSpell(uint16 spell_id)
 {
-    PlayerSpellList::iterator itr;
-    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    PlayerSpellMap::iterator itr = m_spells.find(spell_id);
+    if (itr != m_spells.end())
     {
-        if ((*itr)->spellId == spell_id)
+        if(itr->second->state == PLAYERSPELL_REMOVED) return false;
+
+        WorldPacket data;
+        data.Initialize(SMSG_REMOVED_SPELL);
+        data << itr->first;
+        GetSession()->SendPacket(&data);
+
+        if(itr->second->state == PLAYERSPELL_NEW)
         {
-            delete *itr;
+            delete itr->second;
             m_spells.erase(itr);
-            return true;
         }
+        else
+            itr->second->state = PLAYERSPELL_REMOVED;
+
+        if (IsPassiveSpell(spell_id))
+            RemoveAurasDueToSpell(spell_id);
+        return true;
+    }
+    return false;
+}
+
+bool Player::_removeSpell(uint16 spell_id)
+{
+    PlayerSpellMap::iterator itr = m_spells.find(spell_id);
+    if (itr != m_spells.end())
+    {
+        delete itr->second;
+        m_spells.erase(itr);
+        return true;
     }
     return false;
 }
@@ -2039,31 +2011,26 @@ void Player::DestroyForPlayer( Player *target ) const
 
 bool Player::HasSpell(uint32 spell) const
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spell);
-
-    if (!spellInfo)
-    {
-        sLog.outError("Player::HasSpell: Non-existed in SpellStore spell #%u request.",spell);
-        return false;
-    }
+    PlayerSpellMap::const_iterator itr = m_spells.find((uint16)spell);
+    return (itr != m_spells.end() && itr->second->state != PLAYERSPELL_REMOVED);
 
     // Look in the effects of spell , if is a Learn Spell Effect, see if is equal to triggerspell
     // If inst, look if have this spell.
-    for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    /*for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         for(uint8 i=0;i<3;i++)
         {
             if(spellInfo->Effect[i]==36)                    // Learn Spell effect
             {
-                if ( (*itr)->spellId == spellInfo->EffectTriggerSpell[i] )
+                if ( itr->first == spellInfo->EffectTriggerSpell[i] )
                     return true;
             }
-            else if((*itr)->spellId == spellInfo->Id)
+            else if(itr->first == spellInfo->Id)
                 return true;
         }
     }
 
-    return false;
+    return false;*/
 }
 
 bool Player::CanLearnProSpell(uint32 spell)
@@ -2082,11 +2049,11 @@ bool Player::CanLearnProSpell(uint32 spell)
         && skill != SKILL_BLACKSMITHING && skill != SKILL_ALCHEMY && skill != SKILL_ENCHANTING
         && skill != SKILL_TAILORING && skill != SKILL_ENGINERING && skill != SKILL_SKINNING)
         return true;
-    for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        SpellEntry *pSpellInfo = sSpellStore.LookupEntry((*itr)->spellId);
-        if(!pSpellInfo)
-            continue;
+        if (itr->second->state == PLAYERSPELL_REMOVED) continue;
+        SpellEntry *pSpellInfo = sSpellStore.LookupEntry(itr->first);
+        if(!pSpellInfo) continue;
 
         if(pSpellInfo->Effect[1] == 118)
         {
@@ -8860,6 +8827,8 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadMail();
 
+    _LoadAuras();
+
     _LoadSpells();
 
     _LoadActions();
@@ -8867,8 +8836,6 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadQuestStatus();
 
     _LoadTutorials();
-
-    _LoadAuras();
 
     _LoadInventory();
 
@@ -8907,6 +8874,8 @@ void Player::_LoadActions()
 void Player::_LoadAuras()
 {
     m_Auras.clear();
+    for (int i = 0; i < TOTAL_AURAS; i++)
+        m_modAuras[i].clear();
 
     for(uint8 i = 0; i < 48; i++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
@@ -8933,13 +8902,6 @@ void Player::_LoadAuras()
 
             // FIXME: real caster not stored in DB currently
             Aura* aura = new Aura(spellproto, effindex, this, this/*caster*/);
-            if (remaintime == -1)
-            {
-                sLog.outDebug("SpellAura (id=%u) has duration:%d ", spellid, remaintime);
-                //continue;
-                //temporary disable the Aura with Druation=-1 to avoid spell lost and action lost.
-                //need more fix about Aura Reload.
-            }
             aura->SetAuraDuration(remaintime);
             AddAura(aura);
         }
@@ -9138,8 +9100,8 @@ void Player::_LoadReputation()
 
 void Player::_LoadSpells()
 {
-    for (PlayerSpellList::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
-        delete *itr;
+    for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+        delete itr->second;
     m_spells.clear();
 
     QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
@@ -9150,7 +9112,7 @@ void Player::_LoadSpells()
         {
             Field *fields = result->Fetch();
 
-            addSpell(fields[0].GetUInt16(), fields[2].GetUInt8(), fields[1].GetUInt16());
+            addSpell(fields[0].GetUInt16(), fields[2].GetUInt8(), PLAYERSPELL_UNCHANGED, fields[1].GetUInt16());
         }
         while( result->NextRow() );
 
@@ -9398,11 +9360,17 @@ void Player::_SaveReputation()
 
 void Player::_SaveSpells()
 {
-    sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
-
-    for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    for (PlayerSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
     {
-        sDatabase.PExecute("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId,(*itr)->active);
+        next++;
+        if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->state == PLAYERSPELL_CHANGED)
+            sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u' and `spell` = '%u'", GetGUIDLow(), itr->first);
+        if (itr->second->state == PLAYERSPELL_NEW || itr->second->state == PLAYERSPELL_CHANGED)
+            sDatabase.PExecute("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), itr->first, itr->second->slotId,itr->second->active);
+        if (itr->second->state == PLAYERSPELL_REMOVED)
+            _removeSpell(itr->first);
+        else
+            itr->second->state = PLAYERSPELL_UNCHANGED;
     }
 }
 

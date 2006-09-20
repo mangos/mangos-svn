@@ -2283,13 +2283,14 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
 
         if(unit_target->GetTypeId() == TYPEID_PLAYER)
         {
-            const PlayerSpellList& sp_list = ((Player *)unit_target)->getSpellList();
-            for (PlayerSpellList::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+            const PlayerSpellMap& sp_list = ((Player *)unit_target)->GetSpellMap();
+            for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
-                SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
-                if (!spellInfo || !IsPassiveSpell((*itr)->spellId)) continue;
+                if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+                SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
+                if (!spellInfo || !IsPassiveSpell(itr->first)) continue;
                 if (spellInfo->Stances & (1<<form))
-                    unit_target->CastSpell(unit_target, (*itr)->spellId, true);
+                    unit_target->CastSpell(unit_target, itr->first, true);
             }
         }
 
