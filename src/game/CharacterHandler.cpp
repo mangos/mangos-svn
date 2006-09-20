@@ -45,21 +45,18 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 
     if( result )
     {
+        Player *plr = new Player(this);
         do
         {
-            Player *plr = new Player(this);
-
             sLog.outError("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
 
-            if(plr->LoadFromDB( (*result)[0].GetUInt32() ))
+            if(plr->MinimalLoadFromDB( (*result)[0].GetUInt32() ))
                 plr->BuildEnumData( &data );
-
-            delete plr;
 
             num++;
         }
         while( result->NextRow() );
-
+        delete plr;
         delete result;
     }
 
