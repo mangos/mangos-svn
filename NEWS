@@ -10,6 +10,9 @@ https://svn.mangosproject.org/trac/MaNGOS/
 Visit our forums for support:
 http://www.mangosproject.org/
 
+Version 0.6
+ * Under discussion.
+
 Version 0.5
  * Core stability improvements, lots of threading and memory usage related
    bugs have been resolved.
