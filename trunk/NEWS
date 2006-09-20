@@ -11,7 +11,14 @@ Visit our forums for support:
 http://www.mangosproject.org/
 
 Version 0.5
- * Under discussion
+ * Core stability improvements, lots of threading and memory usage related
+   bugs have been resolved.
+ * MySQL Database backend has been cleaned up.
+ * Proper support for game clients of version 1.10.2 has been added.
+ * Support for auras, pets, spells, talents, totems, etc. has been added
+   or improved.
+ * Cross-platform issues have been resolved, MaNGOS should now build on
+   more platforms, including FreeBSD.
 
 Version 0.1
  * AI system

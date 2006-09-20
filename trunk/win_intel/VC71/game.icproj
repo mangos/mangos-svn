@@ -129,10 +129,16 @@
 	<References>
 	</References>
 	<Files>
-		<Filter 
+		<Filter
 			Name="World/Handlers"
 			Filter="">
-			<File 
+			<File
+				RelativePath="..\..\src\game\AddonHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\AddonHandler.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\AuctionHouse.cpp">
 			</File>
 			<File
@@ -150,218 +156,212 @@
 			<File
 				RelativePath="..\..\src\game\BattleGroundMgr.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Cell.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CellImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Channel.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Channel.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ChannelHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ChannelMgr.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CharacterHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Chat.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Chat.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ChatHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CombatHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\DuelHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GossipDef.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GossipDef.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GridDefines.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GridNotifiers.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GridNotifiers.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GridNotifiersImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GridStates.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GridStates.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Group.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Group.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GroupHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GuildHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ItemHandler.cpp">
 			</File>
-			<File 
+			<File
+				RelativePath="..\..\src\game\LootHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Mail.cpp">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Mail.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Map.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Map.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\MapManager.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\MapManager.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\MiscHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\MovementHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\NPCHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\NPCHandler.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ObjectGridLoader.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ObjectGridLoader.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Path.h">
 			</File>
-			<File 
-				RelativePath="..\..\src\game\Pet.cpp">
-			</File>
-			<File 
-				RelativePath="..\..\src\game\Pet.h">
-			</File>
-			<File 
-				RelativePath="..\..\src\game\PetAI.cpp">
-			</File>
-			<File 
-				RelativePath="..\..\src\game\PetAI.h">
-			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\PetHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\QueryHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\QuestDef.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\QuestDef.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\QuestHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ScriptCalls.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ScriptCalls.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\SkillHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Spell.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Spell.h">
 			</File>
-			<File 
+			<File
+				RelativePath="..\..\src\game\SpellAuraDefines.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\SpellAuras.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\SpellAuras.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\SpellEffects.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\SpellHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Stats.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\TaxiHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\TradeHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\UpdateData.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\UpdateData.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Weather.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Weather.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\World.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\World.h">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Object"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\game\AggressorAI.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\AggressorAI.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\AnimalRandomMovementGenerator.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Bag.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Bag.h">
 			</File>
 			<File
@@ -370,175 +370,187 @@
 			<File
 				RelativePath="..\..\src\game\ConfusedMovementGenerator.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Corpse.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Corpse.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Creature.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Creature.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CreatureAI.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CreatureAI.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CreatureAIImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CreatureAIRegistry.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CreatureAIRegistry.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CreatureAISelector.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\CreatureAISelector.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\DestinationHolder.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\DestinationHolder.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\DestinationHolderImp.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\DynamicObject.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\DynamicObject.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\FactionTemplateResolver.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\FlightMaster.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\FlightMaster.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Formulas.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GameObject.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GameObject.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GuardAI.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\GuardAI.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Guild.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Guild.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\HateMatrix.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\IdleMovementGenerator.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\IdleMovementGenerator.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Item.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Item.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ItemPrototype.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\LootMgr.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\LootMgr.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\MotionMaster.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\MotionMaster.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\MovementGenerator.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\MovementGenerator.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\NullCreatureAI.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\NullCreatureAI.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Object.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Object.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ObjectAccessor.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ObjectAccessor.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ObjectDefines.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ObjectMgr.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ObjectMgr.h">
 			</File>
-			<File 
+			<File
+				RelativePath="..\..\src\game\Pet.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Pet.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Player.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Player.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\RandomMovementGenerator.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\RandomMovementGenerator.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ReactorAI.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\ReactorAI.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\TargetedMovementGenerator.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\TargetedMovementGenerator.h">
 			</File>
 			<File
@@ -559,103 +571,106 @@
 			<File
 				RelativePath="..\..\src\game\TotemAI.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Traveller.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Unit.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Unit.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\UpdateFields.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\UpdateMask.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Utilities.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WaypointMovementGenerator.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WaypointMovementGenerator.h">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Server"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\game\GlobalEvents.cpp">
 			</File>
-			<File 
+			<File
+				RelativePath="..\..\src\game\GlobalEvents.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\NameTables.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Opcodes.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Opcodes.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\SharedDefines.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WorldLog.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WorldLog.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WorldSession.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WorldSession.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WorldSocket.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WorldSocket.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WorldSocketMgr.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\WorldSocketMgr.h">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Chat Commands"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\game\debugcmds.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Level0.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Level1.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Level2.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Level3.cpp">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Tool"
 			Filter="">
 			<File
 				RelativePath="..\..\src\game\Language.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\tools.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\game\Tools.h">
 			</File>
 		</Filter>

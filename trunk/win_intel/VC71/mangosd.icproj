@@ -28,7 +28,7 @@
 				Name="CppCmplrTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\mangosd"
-				PreprocessorDefinitions="VERSION=&quot;0.5-SVN&quot;;WIN32;NDEBUG;_CONSOLE;ENABLE_CLI"
+				PreprocessorDefinitions="VERSION=&quot;0.5&quot;;WIN32;NDEBUG;_CONSOLE;ENABLE_CLI"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -93,7 +93,7 @@
 				Name="CppCmplrTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\mangosd"
-				PreprocessorDefinitions="VERSION=&quot;0.5-SVN&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI"
+				PreprocessorDefinitions="VERSION=&quot;0.5&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -151,56 +151,56 @@
 	<References>
 	</References>
 	<Files>
-		<Filter 
+		<Filter
 			Name="doc"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\Authors">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\ChangeLog">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\Copying">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\Install">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\News">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\Readme">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\Thanks">
 			</File>
 		</Filter>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\CliRunnable.cpp">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\CliRunnable.h">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\Main.cpp">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\Master.cpp">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\Master.h">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\RASocket.cpp">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\RASocket.h">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\WorldRunnable.cpp">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\mangosd\WorldRunnable.h">
 		</File>
 	</Files>

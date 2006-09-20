@@ -106,277 +106,277 @@
 	<References>
 	</References>
 	<Files>
-		<Filter 
+		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\AtomicCount.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ConcurrentExecutor.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Condition.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ConditionImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\config.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\CountingSemaphore.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Debug.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\DeferredInterruptionScope.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\FastLock.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\FastMutex.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\FastRecursiveLock.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\FastRecursiveMutex.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\IntrusivePtr.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Monitor.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Monitor.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Mutex.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\MutexImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\PoolExecutor.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\PriorityCondition.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\PriorityInheritanceMutex.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\PriorityMutex.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\PrioritySemaphore.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\RecursiveMutex.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\RecursiveMutexImpl.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\RecursiveMutexImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Scheduling.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Semaphore.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\SemaphoreImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\State.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Status.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\SynchronousExecutor.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Thread.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ThreadedExecutor.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ThreadImpl.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ThreadImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ThreadLocalImpl.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ThreadOps.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ThreadOps.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ThreadQueue.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\ThreadQueue.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\Time.cxx">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\TimeStrategy.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zthread\TSS.h">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\AtomicCount.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Barrier.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\BiasedReadWriteLock.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\BlockingQueue.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\BoundedQueue.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Cancelable.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\ClassLockable.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\ConcurrentExecutor.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Condition.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Config.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\CountedPtr.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\CountingSemaphore.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Exceptions.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Executor.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\FairReadWriteLock.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\FastMutex.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\FastRecursiveMutex.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Guard.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\GuardedClass.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Lockable.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\LockedQueue.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\MonitoredQueue.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Mutex.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\NonCopyable.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\PoolExecutor.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Priority.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\PriorityCondition.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\PriorityInheritanceMutex.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\PriorityMutex.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\PrioritySemaphore.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Queue.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\ReadWriteLock.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\RecursiveMutex.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Runnable.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Semaphore.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Singleton.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\SynchronousExecutor.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Task.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Thread.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\ThreadedExecutor.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\ThreadLocal.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\ThreadLocalImpl.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Time.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\Waitable.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\include\zthread\ZThread.h">
 			</File>
 		</Filter>
