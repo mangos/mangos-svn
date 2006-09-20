@@ -816,7 +816,7 @@ enum OpCodes
     CMSG_FIELD_WATCHED_FACTION_SHOW_BAR             = 792,
 
     // unofficial opcodes:
-    SMSG_OUTDOORPVP_NOTIFY                          = 0x33b, // 827
+    SMSG_OUTDOORPVP_NOTIFY                          = 0x33b,// 827
 };
 
 enum FriendsResult
