@@ -8705,6 +8705,34 @@ void Player::SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creatu
 /***                   LOAD SYSTEM                     ***/
 /*********************************************************/
 
+bool Player::MinimalLoadFromDB( uint32 guid )
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map` FROM `character` WHERE `guid` = '%u'",guid);
+    if(!result)
+        return false;
+
+    Field *fields = result->Fetch();
+
+    if(!LoadValues( fields[0].GetString()))
+    {
+        sLog.outError("ERROR: Player #%d have broken data in `data` field. Can't be loaded.",GUID_LOPART(guid));
+        delete result;
+        return false;
+    }
+
+    m_name = fields[1].GetCppString();
+    m_positionX = fields[2].GetFloat();
+    m_positionY = fields[3].GetFloat();
+    m_positionZ = fields[4].GetFloat();
+    m_mapId = fields[5].GetUInt32();
+
+    for (int i = 0; i < 20; i++)
+        m_items[i] = NULL;
+
+    delete result;
+    return true;
+}
+
 bool Player::LoadFromDB( uint32 guid )
 {
 
