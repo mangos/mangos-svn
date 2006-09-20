@@ -1,3 +1,14 @@
+MaNGOS 0.6    (??? ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.6
+
+ MaNGOS 0.6 adds further improvements to the server core as well as to
+ the majority of game classes and the game content database.
+
+ * Fixed Bugs: ???
+ * Total number of changes: ???
+
+ The complete list of closed tickets can be found here:
+   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.6
+
 MaNGOS 0.5    (Sep 20, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.5
 
  MaNGOS 0.5 adds further improvements to the server core as well as to
