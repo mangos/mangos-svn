@@ -152,22 +152,8 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 
     if( m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo )
     {
-        p_caster = (Player*)m_caster;
-        /*
-        PlayerSpellList const& player_spells = p_caster->getSpellList();
-        for (PlayerSpellList::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
-        {
-            if ((*itr)->spellId != m_spellInfo->Id && (*itr)->active == 1)
-            {
-                spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
-                if(spellInfo && spellInfo->SpellIconID == m_spellInfo->SpellIconID && spellInfo->EffectMiscValue[0] ==10)
-                {
-                    casttime=casttime+(spellInfo->EffectBasePoints[0]+1);
-                }
-            }
-        }
-        */
-        p_caster->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
+        p_caster = ((Player*)m_caster);
+        ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
         casttime = int32(casttime/(100+p_caster->m_modCastSpeedPct)*100);
     }
 
@@ -737,16 +723,16 @@ void Spell::SendSpellCooldown()
     data << m_caster->GetGUID();
     if (catrec > 0)
     {
-        PlayerSpellList const& player_spells = _player->getSpellList();
-        for (PlayerSpellList::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
+        PlayerSpellMap const& player_spells = _player->GetSpellMap();
+        for (PlayerSpellMap::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
         {
-            if(!(*itr)->spellId || !(*itr)->active)
+            if(itr->second->state == PLAYERSPELL_REMOVED || !itr->second->active)
                 continue;
-            SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
             if( spellInfo->Category == m_spellInfo->Category)
             {
-                data << uint32((*itr)->spellId);
-                if ((*itr)->spellId != m_spellInfo->Id || rec == 0)
+                data << uint32(itr->second);
+                if (itr->first != m_spellInfo->Id || rec == 0)
                     data << uint32(catrec);
                 else
                     data << uint32(rec);

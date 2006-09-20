@@ -132,11 +132,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
             if(requested_rank > 0 )
             {
                 uint32 respellid = talentInfo->RankID[requested_rank-1];
-                data.Initialize(SMSG_REMOVED_SPELL);
-                data << respellid;
-                GetPlayer( )->GetSession()->SendPacket(&data);
                 GetPlayer( )->removeSpell((uint16)respellid);
-
                 GetPlayer()->RemoveAurasDueToSpell(respellid);
             }
             GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);

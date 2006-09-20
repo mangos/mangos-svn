@@ -1102,13 +1102,7 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
     for(uint32 spell=minS;spell<maxS;spell++)
     {
         if (target->HasSpell(spell))
-        {
-            WorldPacket data;
-            data.Initialize(SMSG_REMOVED_SPELL);
-            data << (uint32)spell;
-            target->GetSession()->SendPacket( &data );
             target->removeSpell(spell);
-        }
         else
             SendSysMessage(LANG_FORGET_SPELL);
     }
@@ -2457,7 +2451,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
     }
 
     std::string argstr = (char*)args;
-    if (argstr == "stats")
+    if (argstr == "stats" || argstr == "level")
     {
         PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo((uint32)player->getRace(), (uint32)player->getClass());
         if(!info) return false;
@@ -2471,7 +2465,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
             }
         }
 
-        Player::AuraMap p_Auras = player->GetAuras();
+        Player::AuraMap& p_Auras = player->GetAuras();
         for(Player::AuraMap::iterator itr = p_Auras.begin(); itr != p_Auras.end(); ++itr)
         {
             if (itr->second && !itr->second->IsPassive())
@@ -2480,6 +2474,12 @@ bool ChatHandler::HandleResetCommand (const char * args)
                 return true;
             }
         }
+
+        player->SetCreateStat(STAT_AGILITY, (float)info->agility);
+        player->SetCreateStat(STAT_INTELLECT, (float)info->intellect);
+        player->SetCreateStat(STAT_SPIRIT, (float)info->spirit);
+        player->SetCreateStat(STAT_STAMINA, (float)info->stamina);
+        player->SetCreateStat(STAT_STRENGTH, (float)info->strength);
 
         uint8 powertype = 0;
         uint32 unitfield = 0;
@@ -2552,43 +2552,27 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
 
         player->SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
+        player->SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
+        player->SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
         player->SetLevel(1);
-        player->SetUInt32Value(PLAYER_FIELD_POSSTAT0, 0);
-        player->SetUInt32Value(PLAYER_FIELD_POSSTAT1, 0);
-        player->SetUInt32Value(PLAYER_FIELD_POSSTAT2, 0);
-        player->SetUInt32Value(PLAYER_FIELD_POSSTAT3, 0);
-        player->SetUInt32Value(PLAYER_FIELD_POSSTAT4, 0);
-
-        //+5% HP if has skill Endurance
-        if (player->HasSpell(SPELL_PASSIVE_ENDURENCE))
-        {
-                                                            // only integer part
-            player->SetMaxHealth( uint32(player->GetMaxHealth() * 1.05));
-        }
-
-        // school resistances
-        if (player->HasSpell(SPELL_PASSIVE_FROST_RESISTANCE))
-        {
-            player->SetResistance(SPELL_SCHOOL_FROST, 10 );
-        }
-        if (player->HasSpell(SPELL_PASSIVE_NATURE_RESISTANCE))
-        {
-            player->SetResistance(SPELL_SCHOOL_NATURE, 10 );
-        }
-        if (player->HasSpell(SPELL_PASSIVE_SHADOW_RESISTANCE))
-        {
-            player->SetResistance(SPELL_SCHOOL_SHADOW, 10 );
-        }
-        if (player->HasSpell(SPELL_PASSIVE_ARCANE_RESISTANCE))
-        {
-            player->SetResistance(SPELL_SCHOOL_ARCANE, 10 );
-        }
+        player->SetPosStat(STAT_STRENGTH, 0);
+        player->SetPosStat(STAT_AGILITY, 0);
+        player->SetPosStat(STAT_STAMINA, 0);
+        player->SetPosStat(STAT_INTELLECT, 0);
+        player->SetPosStat(STAT_SPIRIT, 0);
 
         // reinitilize potential block chance (used if item with Block value equiped)
         player->SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 + (float(player->GetDefenceSkillValue()) - player->getLevel()*5)*0.04);
+        player->SetFloatValue(PLAYER_CRIT_PERCENTAGE, 5);
+        for (int i = 0; i < 7; i++)
+        {
+            player->SetResistance(SpellSchools(i), 0);
+            player->SetResistanceBuffMods(SpellSchools(i), true, 0);
+            player->SetResistanceBuffMods(SpellSchools(i), false, 0);
+        }
         return true;
     }
-    if (argstr == "talents")
+    if (argstr == "talents" || argstr == "level")
     {
         for (int i = 0; i < sTalentStore.GetNumRows(); i++)
         {
@@ -2598,17 +2582,14 @@ bool ChatHandler::HandleResetCommand (const char * args)
             {
                 SpellEntry *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[j]);
                 if (!spellInfo) continue;
-                PlayerSpellList s_list = player->getSpellList();
-                for(PlayerSpellList::iterator itr = s_list.begin(); itr != s_list.end(); ++itr)
+                const PlayerSpellMap& s_list = player->GetSpellMap();
+                for(PlayerSpellMap::const_iterator itr = s_list.begin(); itr != s_list.end(); ++itr)
                 {
-                    if ((*itr)->spellId == spellInfo->Id)
+                    if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+                    if (itr->first == spellInfo->Id)
                     {
-                        WorldPacket data;
-                        data.Initialize(SMSG_REMOVED_SPELL);
-                        data << (*itr)->spellId;
-                        player->GetSession()->SendPacket(&data);
-                        player->removeSpell((*itr)->spellId);
-                        player->RemoveAurasDueToSpell((*itr)->spellId);
+                        player->RemoveAurasDueToSpell(itr->first);
+                        player->removeSpell(itr->first);
                         break;
                     }
                 }
@@ -2618,6 +2599,29 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetUInt32Value(PLAYER_CHARACTER_POINTS1, tp);
         return true;
     }
+
+    if (argstr == "spells")
+    {
+        const PlayerSpellMap& pSpells = player->GetSpellMap();
+        for (PlayerSpellMap::const_iterator itr = pSpells.begin(), next = pSpells.begin(); itr != pSpells.end(); itr = next)
+        {
+            next++;
+            player->removeSpell(itr->first);
+        }
+
+        PlayerCreateInfo *info = player->GetPlayerInfo();
+        std::list<CreateSpellPair>::iterator spell_itr;
+        for (spell_itr = info->spell.begin(); spell_itr!=info->spell.end(); spell_itr++)
+        {
+            uint16 tspell = spell_itr->first;
+            if (tspell)
+            {
+                sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
+                player->learnSpell(tspell);
+            }
+        }
+    }
+
     return false;
 }
 

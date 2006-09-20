@@ -83,11 +83,19 @@ enum SpellModType
     SPELLMOD_PCT = 108
 };
 
+enum PlayerSpellState
+{
+    PLAYERSPELL_UNCHANGED = 0,
+    PLAYERSPELL_CHANGED = 1,
+    PLAYERSPELL_NEW = 2,
+    PLAYERSPELL_REMOVED = 3,
+};
+
 struct PlayerSpell
 {
-    uint16 spellId;
     uint16 slotId;
     uint8 active;
+    PlayerSpellState state;
 };
 
 struct SpellModifier
@@ -100,7 +108,7 @@ struct SpellModifier
     uint32 spellId;
 };
 
-typedef std::list<PlayerSpell*> PlayerSpellList;
+typedef HM_NAMESPACE::hash_map<uint16, PlayerSpell*> PlayerSpellMap;
 typedef std::list<SpellModifier*> SpellModList;
 
 struct actions
@@ -636,11 +644,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasSpell(uint32 spell) const;
         bool CanLearnProSpell(uint32 spell);
         void SendInitialSpells();
-        bool addSpell(uint16 spell_id,uint8 active,uint16 slot_id=0xffff);
+        bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
         void DealWithSpellDamage(DynamicObject &);
-        PlayerSpellList const& getSpellList() { return m_spells; };
+        PlayerSpellMap const& GetSpellMap() { return m_spells; };
 
         SpellModList *getSpellModList(int op) { return &m_spellMods[op]; }
         int32 GetTotalFlatMods(uint32 spellId, uint8 op);
@@ -1003,6 +1011,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 m_isunderwater;
 
         void outDebugValues() const;
+        bool _removeSpell(uint16 spell_id);
 
         uint64 m_lootGuid;
 
@@ -1046,7 +1055,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         std::list<struct Factions> factions;
         std::list<Mail*> m_mail;
-        PlayerSpellList m_spells;
+        PlayerSpellMap m_spells;
         std::list<struct actions> m_actions;
         SpellModList m_spellMods[32];
         std::list<struct EnchantDuration*> m_enchantDuration;
