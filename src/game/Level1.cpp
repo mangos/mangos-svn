@@ -73,7 +73,6 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     CellPair cell_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     Cell cell = RedZone::GetZone(cell_val);
 
-
     PSendSysMultilineMessage(LANG_MAP_POSITION,
         obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
