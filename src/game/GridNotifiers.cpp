@@ -83,6 +83,14 @@ VisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
 }
 
 void
+VisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+{
+    for(std::map<OBJECT_HANDLE, GameObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+        if(iter->second->isFinished())                      // show only respawned GO
+            iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+}
+
+void
 NotVisibleNotifier::Notify()
 {
     if( i_data.HasData() )
@@ -113,6 +121,10 @@ NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 void
 ObjectVisibleNotifier::Visit(PlayerMapType &m)
 {
+    // ignore not respawned gameobjects
+    if(i_object.GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject&)i_object).isFinished())
+        return;
+
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         UpdateData update_data;
@@ -189,7 +201,6 @@ ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m)
     }
 }
 
-template void VisibleNotifier::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
 template void VisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
 template void VisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
 

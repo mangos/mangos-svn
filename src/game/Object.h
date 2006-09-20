@@ -321,5 +321,6 @@ class MANGOS_DLL_SPEC Object
         // for output helpfull error messages from asserts
         bool PrintIndexError(uint32 index, bool set) const;
         Object(const Object&);                              // prevent generation copy constructor
+        Object& operator=(Object const&);                   // prevent generation assigment operator
 };
 #endif
