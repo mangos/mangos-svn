@@ -127,324 +127,324 @@
 	<References>
 	</References>
 	<Files>
-		<Filter 
+		<Filter
 			Name="Database"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\Database.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\Database.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\DatabaseEnv.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\DatabaseMysql.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\DatabaseMysql.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\DatabaseSqlite.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\DatabaseSqlite.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\Field.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\Field.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\QueryResult.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\QueryResultMysql.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\QueryResultMysql.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\QueryResultSqlite.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\QueryResultSqlite.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\SQLStorage.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Database\SQLStorage.h">
 			</File>
-			<Filter 
+			<Filter
 				Name="DataStores">
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Database\dbcfile.cpp">
 				</File>
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Database\dbcfile.h">
 				</File>
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Database\DBCfmt.cpp">
-					<FileConfiguration 
+					<FileConfiguration
 						Name="Release|Win32">
-						<Tool 
-							Name="CppCmplrTool"
+						<Tool
+							Name="VCCLCompilerTool"
 							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 					</FileConfiguration>
-					<FileConfiguration 
+					<FileConfiguration
 						Name="Debug|Win32">
-						<Tool 
-							Name="CppCmplrTool"
+						<Tool
+							Name="VCCLCompilerTool"
 							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 					</FileConfiguration>
 				</File>
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Database\DBCStores.cpp">
 				</File>
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Database\DBCStores.h">
 				</File>
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Database\DBCStructure.h">
 				</File>
 			</Filter>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Log"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Log.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Log.h">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Util"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Base.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Base.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\ByteBuffer.h">
 			</File>
-			<File 
-				RelativePath="..\..\src\shared\EventSystem.cpp">
-			</File>
-			<File 
-				RelativePath="..\..\src\shared\EventSystem.h">
-			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Errors.h">
 			</File>
-			<File 
+			<File
+				RelativePath="..\..\src\shared\EventSystem.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\shared\EventSystem.h">
+			</File>
+			<File
 				RelativePath="..\..\src\shared\MemoryLeaks.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\MemoryLeaks.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Mthread.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Mthread.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\ProgressBar.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\ProgressBar.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Timer.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Util.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Util.h">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Config"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Config\Config.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Config\Config.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Config\ConfigEnv.h">
 			</File>
-			<Filter 
+			<Filter
 				Name="dotconfpp"
 				Filter="">
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Config\dotconfpp\dotconfpp.cpp">
 				</File>
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Config\dotconfpp\dotconfpp.h">
 				</File>
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Config\dotconfpp\mempool.cpp">
 				</File>
-				<File 
+				<File
 					RelativePath="..\..\src\shared\Config\dotconfpp\mempool.h">
 				</File>
 			</Filter>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Auth"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Auth\AuthCrypt.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Auth\AuthCrypt.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Auth\BigNumber.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Auth\BigNumber.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Auth\Sha1.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Auth\Sha1.h">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Network"
 			Filter="">
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Base64.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Base64.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\CircularBuffer.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\CircularBuffer.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\ListenSocket.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Parse.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Parse.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\PoolSocket.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\PoolSocket.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\ResolvServer.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\ResolvServer.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\ResolvSocket.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\ResolvSocket.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Socket.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Socket.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\socket_include.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\socket_include.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\SocketHandler.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\SocketHandler.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\SocketThread.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\SocketThread.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\StdLog.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\StdoutLog.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\StdoutLog.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\TcpSocket.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\TcpSocket.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Thread.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Thread.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\UdpSocket.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\UdpSocket.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Utility.cpp">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\Network\Utility.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\src\shared\WorldPacket.h">
 			</File>
 		</Filter>
-		<File 
+		<File
 			RelativePath="..\..\src\shared\Common.h">
 		</File>
-		<File 
-			RelativePath="..\..\src\shared\SystemConfig.h">
-			<FileConfiguration 
+		<File
+			RelativePath="..\..\src\shared\SystemConfig.h.in">
+			<FileConfiguration
 				Name="Release|Win32">
-				<Tool 
-					Name="CustomTool"
-					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-"
-					Outputs="SystemConfig.h"/>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Performing Build SystemConfig.h"
+					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h"
+					Outputs="..\..\src\shared\SystemConfig.h"/>
 			</FileConfiguration>
-			<FileConfiguration 
+			<FileConfiguration
 				Name="Debug|Win32">
-				<Tool 
-					Name="CustomTool"
-					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-"
-					Outputs="SystemConfig.h"/>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Performing Build SystemConfig.h"
+					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h"
+					Outputs="..\..\src\shared\SystemConfig.h"/>
 			</FileConfiguration>
 		</File>
 	</Files>

@@ -106,82 +106,82 @@
 	<References>
 	</References>
 	<Files>
-		<Filter 
+		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\adler32.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\compress.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\crc32.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\deflate.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\example.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\gzio.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\infback.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\inffast.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\inflate.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\inftrees.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\trees.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\uncompr.c">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\zutil.c">
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\crc32.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\deflate.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\inffast.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\inffixed.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\inflate.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\inftrees.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\trees.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\zconf.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\zlib.h">
 			</File>
-			<File 
+			<File
 				RelativePath="..\..\dep\src\zlib\zutil.h">
 			</File>
 		</Filter>

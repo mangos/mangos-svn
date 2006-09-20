@@ -127,6 +127,12 @@
 			Name="World/Handlers"
 			Filter="">
 			<File
+				RelativePath="..\..\src\game\AddonHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\AddonHandler.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\AuctionHouse.cpp">
 			</File>
 			<File
@@ -220,6 +226,9 @@
 				RelativePath="..\..\src\game\ItemHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\LootHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Mail.cpp">
 			</File>
 			<File
@@ -259,18 +268,6 @@
 				RelativePath="..\..\src\game\Path.h">
 			</File>
 			<File
-				RelativePath="..\..\src\game\Pet.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\Pet.h">
-			</File>
-			<File
-				RelativePath="..\..\src\game\PetAI.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\PetAI.h">
-			</File>
-			<File
 				RelativePath="..\..\src\game\PetHandler.cpp">
 			</File>
 			<File
@@ -299,6 +296,9 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\Spell.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\SpellAuraDefines.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\SpellAuras.cpp">
@@ -504,6 +504,18 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\ObjectMgr.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Pet.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Pet.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Player.cpp">

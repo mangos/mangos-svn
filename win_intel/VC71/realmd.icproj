@@ -146,19 +146,22 @@
 	<References>
 	</References>
 	<Files>
-		<File 
+		<File
+			RelativePath="..\..\src\realmd\AuthCodes.h">
+		</File>
+		<File
 			RelativePath="..\..\src\realmd\AuthSocket.cpp">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\realmd\AuthSocket.h">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\realmd\Main.cpp">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\realmd\RealmList.cpp">
 		</File>
-		<File 
+		<File
 			RelativePath="..\..\src\realmd\RealmList.h">
 		</File>
 	</Files>
