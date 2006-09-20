@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: realmd
 -- ------------------------------------------------------
--- Server version	5.0.22-Debian_0ubuntu6.06-log
+-- Server version	5.0.22-Debian_0ubuntu6.06.2-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
