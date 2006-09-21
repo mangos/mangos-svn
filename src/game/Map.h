@@ -55,7 +55,7 @@ typedef MaNGOS::SingleThreaded<GridRWLock>::Lock NullGuard;
 
 struct GridInfo
 {
-    GridInfo(time_t expiry, bool unload = false ) : i_timer(expiry), i_unloadflag(unload) {}
+    GridInfo(time_t expiry, bool unload = true ) : i_timer(expiry), i_unloadflag(unload) {}
     GridRWLock i_lock;
     TimeTracker i_timer;
     bool i_unloadflag;

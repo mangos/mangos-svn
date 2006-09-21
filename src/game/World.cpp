@@ -306,26 +306,6 @@ void World::SetInitialWorldSettings()
     MaNGOS::Game::Initialize();
     sLog.outString( "WORLD: SetInitialWorldSettings done" );
 
-    // Transport holders
-    MapManager::Instance().LoadGrid(1, -14277, 582.542,true);
-    MapManager::Instance().LoadGrid(0, -14277, 582.542,true);
-    MapManager::Instance().LoadGrid(1, -1025, -383,true);
-    MapManager::Instance().LoadGrid(0,  2062.38, 292.998,true);
-    MapManager::Instance().LoadGrid(1, 1318.11, -4658,true);
-    MapManager::Instance().LoadGrid(0, -12464, 231.565,true);
-    MapManager::Instance().LoadGrid(1, 1360.85, -4631,true);
-    MapManager::Instance().LoadGrid(1, -4016, -4741,true);
-    MapManager::Instance().LoadGrid(0, -3905, -586,true);
-    MapManager::Instance().LoadGrid(1, 6594.37, 759.827,true);
-    MapManager::Instance().LoadGrid(1, 8533.65, 1025.06,true);
-    MapManager::Instance().LoadGrid(1, 6400.06, 801.932,true);
-    MapManager::Instance().LoadGrid(0, -3706, -587,true);
-    MapManager::Instance().LoadGrid(0, 2062.6, 235.264,true);
-    MapManager::Instance().LoadGrid(0, -12407, 211.838,true);
-    MapManager::Instance().LoadGrid(1, -4197, 3286.77,true);
-    MapManager::Instance().LoadGrid(1, -4348, 2444.37,true);
-    sLog.outString( "WORLD: Global Transport System Initilizing done" );
-
     sLog.outString( "WORLD: Starting Event System" );
     StartEventSystem();
 
