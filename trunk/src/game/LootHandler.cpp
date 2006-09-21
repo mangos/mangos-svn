@@ -165,7 +165,19 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         if (!go)
             return;
 
-        go->SetLootState(LOOTED);
+        loot = &go->loot;
+
+        vector<LootItem>::iterator i;
+        i = find_if(loot->items.begin(), loot->items.end(),
+            LootItem::not_looted);
+
+        if((i == loot->items.end()) && (loot->gold == 0))
+            go->SetLootState(GO_LOOTED);
+        else
+            go->SetLootState(GO_OPEN);
+
+        i = remove_if(loot->items.begin(), loot->items.end(), LootItem::looted);
+        loot->items.erase(i, loot->items.end());
     }
     else
     {

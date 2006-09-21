@@ -37,7 +37,8 @@ GameObject::GameObject() : Object(), m_refs(0)
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTimer = 0;
     m_respawnDelayTime = 25000;
-    m_lootState = CLOSED;
+    m_lootState = GO_CLOSED;
+    m_lootskill = true;
 
     lootid=0;
 }
@@ -102,7 +103,7 @@ void GameObject::Update(uint32 p_time)
 
     switch (m_lootState)
     {
-        case CLOSED:
+        case GO_CLOSED:
             if (m_respawnTimer > 0)
             {
                 if (m_respawnTimer > p_time)
@@ -116,9 +117,12 @@ void GameObject::Update(uint32 p_time)
                 }
             }
             break;
-        case LOOTED:
+        case GO_OPEN:
+            break;
+        case GO_LOOTED:
             loot.clear();
-            SetLootState(CLOSED);
+            SetLootState(GO_CLOSED);
+            SetLootSkill(true);
 
             data.Initialize(SMSG_DESTROY_OBJECT);
             data << GetGUID();

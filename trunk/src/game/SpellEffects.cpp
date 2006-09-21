@@ -572,8 +572,9 @@ void Spell::EffectOpenLock(uint32 i)
         up_skillvalue = 1;
     else up_skillvalue = 0;
 
-    if(loottype == LOOT_CORPSE)
+    if(loottype == LOOT_CORPSE && gameObjTarget->HaveLootSkill())
     {
+        gameObjTarget->SetLootSkill(false);
         ((Player*)m_caster)->UpdateSkillPro(m_spellInfo->Id);
     }
 
@@ -2164,6 +2165,17 @@ void Spell::EffectSkill(uint32 i)
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    // This hack like code, but another way get GO for prevent effect skill applying for partly looted go not found
+    if(m_spellInfo->Effect[0]==33 && !m_targetGOs[0].empty())
+    { 
+        GameObject* go = m_targetGOs[0].front();
+
+        if(!go->HaveLootSkill())
+            return;
+
+        go->SetLootSkill(false);
+    }
+
     Player *player = (Player*)m_caster;
 
     uint32 skill_id = m_spellInfo->EffectMiscValue[i];
@@ -2200,5 +2212,5 @@ void Spell::EffectSkill(uint32 i)
 
         player->UpdateSkill(skill_id);
     }else
-    player->UpdateSkillPro(m_spellInfo->Id);
+        player->UpdateSkillPro(m_spellInfo->Id);
 }
