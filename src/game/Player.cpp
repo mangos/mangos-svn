@@ -137,6 +137,7 @@ Player::Player (WorldSession *session): Unit()
     m_soulStoneSpell = 0;
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
+    m_canParry = false;
 }
 
 Player::~Player ()
@@ -391,6 +392,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_highest_rank = 0;
     m_standing = 0;
 
+    /*
     // Skill spec +5
     if (Player::HasSpell(SPELL_PASSIVE_SWORD_SPECIALIZATION))
     {
@@ -440,6 +442,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     {
         SetResistance(SPELL_SCHOOL_ARCANE, 10 );
     }
+    */
 
     // initilize potential block chance (used if item with Block value equiped)
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 );
@@ -568,10 +571,9 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
 
 void Player::HandleDrowing(uint32 UnderWaterTime)
 {
-    if (Player::HasSpell(SPELL_PASSIVE_UNDERWATER_BREATHING))
-    {
-        UnderWaterTime*=4;
-    }
+    AuraList& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
+    for(AuraList::iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
+        UnderWaterTime *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
     //if have water breath , then remove bar
     if(waterbreath || !isAlive())
@@ -1098,8 +1100,7 @@ void Player::RegenerateAll()
     uint32 regenDelay = 2000;
 
     // Not in combat or they have regeneration
-    // TODO: Replace the 20555 with test for if they have an aura of regeneration
-    if (!isInCombat() || Player::HasSpell(SPELL_PASSIVE_REGENERATION))
+    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
     {
         RegenerateHealth();
         if (!isInCombat())
@@ -1239,13 +1240,15 @@ void Player::RegenerateHealth()
         case WARLOCK: addvalue = (Spirit*0.13)       * HealthIncreaseRate; break;
         case WARRIOR: addvalue = (Spirit*1.5 - 26)   * HealthIncreaseRate; break;
     }
-    if (HasSpell(SPELL_PASSIVE_REGENERATION))               // TODO: Should be aura controlled
+
+    if (!isInCombat())
     {
-        if (isInCombat())
-            addvalue *= 0.10;
-        else
-            addvalue *= 1.10;
+        AuraList& mModHealthRegenPct = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
+        for(AuraList::iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
+            addvalue *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
     }
+    else
+        addvalue *= m_AuraModifiers[SPELL_AURA_MOD_REGEN_DURING_COMBAT] / 100.0f;
 
     switch (getStandState())
     {
@@ -1340,6 +1343,7 @@ void Player::GiveLevel()
     float newINT = GetStat(STAT_INTELLECT);
     float newSPI = GetStat(STAT_SPIRIT);
 
+    /*
     // Remove class and race bonuses from base stats
     if (Player::HasSpell(SPELL_PASSIVE_ENDURENCE))          //endurance skill support (+5% to total health)
         newHP = newHP / 1.05;
@@ -1348,7 +1352,7 @@ void Player::GiveLevel()
         newSPI = newSPI / 1.05;
 
     if (Player::HasSpell(SPELL_PASSIVE_EXPANSIVE_MIND))     //Expansive mind support (+5% to total Intellect)
-        newINT  = newINT / 1.05;
+        newINT  = newINT / 1.05;*/
 
     // Gain stats
     MPGain = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : uint32(newSPI / 2);
@@ -1364,6 +1368,7 @@ void Player::GiveLevel()
     newINT += INTGain;
     newSPI += SPIGain;
 
+    /*
     // Apply class and race bonuses to stats
     if (Player::HasSpell(SPELL_PASSIVE_ENDURENCE))          //endurance skill support (+5% to total health)
         newHP  = newHP * 1.05;
@@ -1372,7 +1377,7 @@ void Player::GiveLevel()
         newSPI  = newSPI * 1.05;
 
     if (Player::HasSpell(SPELL_PASSIVE_EXPANSIVE_MIND))     //Expansive mind support (+5% to total Intellect)
-        newINT = newINT * 1.05;
+        newINT = newINT * 1.05;*/
 
     // update level, talants, max level of skills
     SetLevel( level);
@@ -1592,23 +1597,6 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
         else
             return false;
     }
-	// add proficiency of weapon and armor for player
-    for(int i=0;i<3;i++)
-        if(spellInfo->Effect[i] == 60)
-    {
-        uint32 newflag = spellInfo->EquippedItemSubClass;
-        if(spellInfo->EquippedItemClass == 2 && !(GetWeaponProficiency() & newflag))
-        {
-            AddWeaponProficiency(newflag);
-            GetSession()->SendProficiency(uint8(0x02),GetWeaponProficiency());
-        }
-        if(spellInfo->EquippedItemClass == 4 && !(GetArmorProficiency() & newflag))
-        {
-            AddArmorProficiency(newflag);
-            GetSession()->SendProficiency(uint8(0x04),GetArmorProficiency());
-        }
-        break;
-    }
 
     PlayerSpell *newspell;
 
@@ -1667,6 +1655,13 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
 
     newspell->slotId = tmpslot;
     m_spells[spell_id] = newspell;
+
+    if (IsPassiveSpell(spell_id))
+    {
+        // if spell doesnt require a stance or the player is in the required stance
+        if ((!spellInfo->Stances && spell_id != 5419) || (spellInfo->Stances & (1<<(m_form-1)) || (spell_id == 5419 && m_form == FORM_TRAVEL)))
+            CastSpell(this, spell_id, true);
+    }
 
     return true;
 }
@@ -2584,7 +2579,7 @@ bool Player::UpdateSkill(uint32 skill_id)
     if(!skill_id) return false;
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
-        if (GetUInt32Value(PLAYER_SKILL(i)) == skill_id) break;
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill_id) break;
     if(i>=PLAYER_MAX_SKILLS) return false;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
@@ -2604,17 +2599,17 @@ bool Player::UpdateSkill(uint32 skill_id)
 
 void Player::UpdateSkillPro(uint32 spellid)
 {
-    SkillLineAbility *pSkill = sSkillLineAbilityStore.LookupEntry(spellid);
-    if(!pSkill)
+    SkillLineAbility *pAbility = sSkillLineAbilityStore.LookupEntry(spellid);
+    if(!pAbility)
         return;
-    uint32 minValue = pSkill->min_value;
-    uint32 maxValue = pSkill->max_value;
-    uint32 skill_id = pSkill->miscid;
+    uint32 minValue = pAbility->min_value;
+    uint32 maxValue = pAbility->max_value;
+    uint32 skill_id = pAbility->skillId;
 
     if(!skill_id)return;
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
-        if (GetUInt32Value(PLAYER_SKILL(i)) == skill_id) break;
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill_id) break;
     if(i>=PLAYER_MAX_SKILLS) return;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
@@ -2691,7 +2686,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
 void Player::ModifySkillBonus(uint32 skillid,int32 val)
 {
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
-        if (GetUInt32Value(PLAYER_SKILL(i)) == skillid)
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skillid)
     {
 
         SetUInt32Value(PLAYER_SKILL(i)+2,((int32)(GetUInt32Value(PLAYER_SKILL(i)+2)))+val);
@@ -2704,7 +2699,7 @@ void Player::UpdateMaxSkills()
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
         if (GetUInt32Value(PLAYER_SKILL(i)))
     {
-        uint32 pskill = GetUInt32Value(PLAYER_SKILL(i));
+        uint32 pskill = GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
         if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
             || pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
             || pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
@@ -2717,44 +2712,7 @@ void Player::UpdateMaxSkills()
             max_Skill = data%0x10000+300*0x10000;
 
         if(max!=1 && max != 300)
-        {
             SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill);
-            if (Player::HasSpell(SPELL_PASSIVE_SWORD_SPECIALIZATION))
-            {
-                if (GetUInt32Value(PLAYER_SKILL(i)) == 43 || GetUInt32Value(PLAYER_SKILL(i)) == 55)
-                {
-                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-                }
-            }
-            if (Player::HasSpell(SPELL_PASSIVE_MACE_SPECIALIZATION))
-            {
-                if (GetUInt32Value(PLAYER_SKILL(i))==54 || GetUInt32Value(PLAYER_SKILL(i))==160)
-                {
-                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-                }
-            }
-            if (Player::HasSpell(SPELL_PASSIVE_AXE_SPECIALIZATION))
-            {
-                if (GetUInt32Value(PLAYER_SKILL(i))==44 || GetUInt32Value(PLAYER_SKILL(i))==172)
-                {
-                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-                }
-            }
-            if (Player::HasSpell(SPELL_PASSIVE_THROWING_SPECIALIZATION))
-            {
-                if (GetUInt32Value(PLAYER_SKILL(i))==176)
-                {
-                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-                }
-            }
-            if (Player::HasSpell(SPELL_PASSIVE_BOW_SPECIALIZATION))
-            {
-                if (GetUInt32Value(PLAYER_SKILL(i))==45 || GetUInt32Value(PLAYER_SKILL(i))==226)
-                {
-                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-                }
-            }
-        }
     }
 }
 
@@ -2763,7 +2721,7 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
         if (GetUInt32Value(PLAYER_SKILL(i)))
     {
-        uint32 pskill = GetUInt32Value(PLAYER_SKILL(i));
+        uint32 pskill = GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
         if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
             || pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
             || pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
@@ -2788,7 +2746,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
     if(!id) return;
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
-        if (GetUInt32Value(PLAYER_SKILL(i)) == id) break;
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == id) break;
 
     if(i<PLAYER_MAX_SKILLS)                                 //has skill
     {
@@ -2798,6 +2756,15 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
         {
             SetUInt64Value(PLAYER_SKILL(i),0);
             SetUInt32Value(PLAYER_SKILL(i)+2,0);
+            // remove spells that depend on this skill when removing the skill
+            for (PlayerSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
+            {
+                next++;
+                if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+                SkillLineAbility *ability = sSkillLineAbilityStore.LookupEntry(itr->first);
+                if (ability && ability->skillId == id)
+                    removeSpell(itr->first);
+            }
         }
     }else if(currVal)                                       //add
     {
@@ -2805,8 +2772,23 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
         for (i=0; i < PLAYER_MAX_SKILLS; i++)
             if (!GetUInt32Value(PLAYER_SKILL(i)))
         {
-            SetUInt32Value(PLAYER_SKILL(i),id);
+            SkillLine *pSkill = sSkillLineStore.LookupEntry(id);
+            // enable unlearn button for professions only
+            if (pSkill->categoryId == 11)
+                SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
+            else
+                SetUInt32Value(PLAYER_SKILL(i),id);
             SetUInt32Value(PLAYER_SKILL(i)+1,maxVal*0x10000+currVal);
+            // apply skill bonuses
+            SetUInt32Value(PLAYER_SKILL(i)+2,0);
+            AuraList& mModSkill = GetAurasByType(SPELL_AURA_MOD_SKILL);
+            for(AuraList::iterator i = mModSkill.begin(); i != mModSkill.end(); ++i)
+                if ((*i)->GetModifier()->m_miscvalue == id)
+                    (*i)->ApplyModifier(true);
+            AuraList& mModSkillTalent = GetAurasByType(SPELL_AURA_MOD_SKILL_TALENT);
+            for(AuraList::iterator i = mModSkillTalent.begin(); i != mModSkillTalent.end(); ++i)
+                if ((*i)->GetModifier()->m_miscvalue == id)
+                    (*i)->ApplyModifier(true);
             return;
         }
 
@@ -2819,7 +2801,7 @@ bool Player::HasSkill(uint32 skill) const
     if(!skill)return false;
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
     {
-        if (GetUInt32Value(PLAYER_SKILL(i)) == skill)
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
         {
             return true;
         }
@@ -2832,7 +2814,7 @@ uint16 Player::GetSkillValue(uint32 skill) const
     if(!skill)return 0;
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
     {
-        if (GetUInt32Value(PLAYER_SKILL(i)) == skill)
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
         {
             return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+1))+GetUInt32Value(PLAYER_SKILL(i)+2);
         }
@@ -3254,12 +3236,10 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
         int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
         if(dif < 0) dif = 0;
         else if(dif > 5) dif = 5;
+        
+        int RepPoints = (uint32)(((5-dif)*0.20)*(100.0f + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]));
+        // correct would be multiplicative but currently only one such aura in game
 
-        int RepPoints;
-        if(HasSpell(SPELL_PASSIVE_DIPLOMACY))               //spell : diplomacy
-            RepPoints = (uint32)(((5-dif)*0.20)*110);       //human gain more 10% rep.
-        else
-            RepPoints = (uint32)(((5-dif)*0.20)*100);
         SetStanding(pCreature->getFaction(), (RepPoints > 0 ? RepPoints : 1) );
     }
 
@@ -5535,7 +5515,7 @@ uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
 
             // suggest offhand slot only if know dual wielding
             // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual weilding" ...
-            if(HasSpell( SPELL_PASSIVE_DUAL_WIELD ) )
+            if(CanDualWield())
                 slots[1] = EQUIPMENT_SLOT_OFFHAND;
         };break;
         case INVTYPE_SHIELD:
@@ -6191,7 +6171,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             {
                 if( type == INVTYPE_WEAPON || type == INVTYPE_WEAPONOFFHAND )
                 {
-                    if(!HasSpell( SPELL_PASSIVE_DUAL_WIELD ))
+                    if(!CanDualWield())
                         return EQUIP_ERR_CANT_DUAL_WIELD;
                 }
 
@@ -9333,7 +9313,14 @@ void Player::_SaveAuras()
     AuraMap const& auras = GetAuras();
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
+        SpellEntry *spellInfo = itr->second->GetSpellProto();
+        uint8 i;
+        for (i = 0; i < 3; i++)
+            if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT ||
+                spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
+                break;
+        if (i == 3 && !itr->second->IsPassive())
+            sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
     }
 }
 
@@ -9695,4 +9682,13 @@ void Player::RemoveAreaAurasFromGroup()
             if (m_TotemSlot[i])
                 Member->RemoveAreaAurasByOthers(m_TotemSlot[i]);
     }
+}
+
+// send Proficiency
+void Player::SendProficiency(uint8 pr1, uint32 pr2)
+{
+    WorldPacket data;
+    data.Initialize (SMSG_SET_PROFICIENCY);
+    data << pr1 << pr2;
+    GetSession()->SendPacket (&data);
 }

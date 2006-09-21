@@ -29,14 +29,9 @@
 #include <list>
 
 // Passive Spell codes explicit used in code
-#define SPELL_PASSIVE_DUAL_WIELD                674
 #define SPELL_PASSIVE_BATTLE_STANCE            2457
-#define SPELL_PASSIVE_PARRY_1                  3127
-#define SPELL_PASSIVE_UNDERWATER_BREATHING     5227
+/*#define SPELL_PASSIVE_ENDURENCE               20550
 #define SPELL_PASSIVE_RESURRECTION_SICKNESS   15007
-#define SPELL_PASSIVE_PARRY_2                 18848
-#define SPELL_PASSIVE_ENDURENCE               20550
-#define SPELL_PASSIVE_REGENERATION            20555
 #define SPELL_PASSIVE_THROWING_SPECIALIZATION 20558
 #define SPELL_PASSIVE_AXE_SPECIALIZATION      20574
 #define SPELL_PASSIVE_SHADOW_RESISTANCE       20579
@@ -52,7 +47,7 @@
 #define SPELL_PASSIVE_BOW_SPECIALIZATION      26290
 
 // Horde Racial Passives
-#define SPELL_HORDE_PASSIVE_NATURE_RESISTANCE 20551
+#define SPELL_HORDE_PASSIVE_NATURE_RESISTANCE 20551*/
 
 #define CREATURE_MAX_SPELLS     4
 #define PLAYER_MAX_SKILLS       127
@@ -457,6 +452,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAttacked()  const { return hasUnitState(UNIT_STAT_ATTACK_BY); }
 
         bool HasAuraType(uint32 auraType) const;
+        bool HasAura(uint32 spellId, uint32 effIndex) const
+        { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
+
         bool isStealth() const                              // cache this in a bool someday
         {
             return HasAuraType(SPELL_AURA_MOD_STEALTH);
@@ -546,7 +544,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_ShapeShiftForm;
         uint32 m_form;
         int32 m_modDamagePCT;
-        int32 m_RegenPCT;
         int32 m_modHitChance;
         int32 m_modSpellHitChance;
         int32 m_baseSpellCritChance;

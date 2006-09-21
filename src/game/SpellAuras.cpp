@@ -132,7 +132,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModPowerRegen,                             //SPELL_AURA_MOD_POWER_REGEN = 85,
     &Aura::HandleChannelDeathItem,                          //SPELL_AURA_CHANNEL_DEATH_ITEM = 86,
     &Aura::HandleModDamagePCTTaken,                         //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
-    &Aura::HandleModPCTRegen,                               //SPELL_AURA_MOD_PERCENT_REGEN = 88,
+    &Aura::HandleModPCTRegen,                               //SPELL_AURA_MOD_HEALTH_REGEN_PERCENT = 88,
     &Aura::HandlePeriodicDamagePCT,                         //SPELL_AURA_PERIODIC_DAMAGE_PERCENT = 89,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RESIST_CHANCE = 90,// Useless
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECT_RANGE = 91,
@@ -142,7 +142,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_GHOST = 95,
     &Aura::HandleNULL,                                      //SPELL_AURA_SPELL_MAGNET = 96,
     &Aura::HandleAuraManaShield,                            //SPELL_AURA_MANA_SHIELD = 97,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SKILL_TALENT = 98,
+    &Aura::HandleAuraModSkill,                              //SPELL_AURA_MOD_SKILL_TALENT = 98,
     &Aura::HandleAuraModAttackPower,                        //SPELL_AURA_MOD_ATTACK_POWER = 99,
     &Aura::HandleNULL,                                      //SPELL_AURA_AURAS_VISIBLE = 100,
     &Aura::HandleModResistancePercent,                      //SPELL_AURA_MOD_RESISTANCE_PCT = 101,
@@ -200,7 +200,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE_FLAT    =    153    ,//    Split Damage Flat
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STEALTH_LEVEL    =    154    ,//    Stealth Level Modifier
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_WATER_BREATHING    =    155    ,//    Mod Water Breathing
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_REPUTATION_ADJUST    =    156    ,//    Mod Reputation Gain
+    &Aura::HandleModReputationGain,                         //SPELL_AURA_MOD_REPUTATION_GAIN    =    156    ,//    Mod Reputation Gain
     &Aura::HandleNULL                                       //SPELL_AURA_PET_DAMAGE_MULTI    =    157    ,//    Mod Pet Damage
 };
 
@@ -651,7 +651,7 @@ void Aura::HandleAddModifier(bool apply)
         m_spellmod = mod;
 
         uint16 send_val=0, send_mark=0;
-        int16 tmpval=spellInfo->EffectBasePoints[m_effIndex]+1;
+        int16 tmpval=spellInfo->EffectBasePoints[m_effIndex];
         uint32 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
 
         if(tmpval != 0)
@@ -2083,7 +2083,7 @@ void Aura::HandleModDamagePCTTaken(bool apply)
 
 void Aura::HandleModPCTRegen(bool apply)
 {
-    m_target->m_RegenPCT = apply ? m_modifier.m_amount : 0;
+    // has no immediate effect when adding / removing 
 }
 
 void Aura::HandleModCreatureAttackPower(bool apply)
@@ -2158,6 +2158,11 @@ void Aura::HandleModPowerCostSchool(bool apply)
 /*********************************************************/
 /***                    OTHERS                         ***/
 /*********************************************************/
+
+void Aura::HandleModReputationGain(bool apply)
+{
+    // has no immediate effect when adding / removing 
+}
 
 void Aura::SendCoolDownEvent()
 {
