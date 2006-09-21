@@ -150,8 +150,6 @@ ReactorAI::stopAttack()
 
     Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
 
-    assert(!i_creature.getVictim() || i_creature.getVictim() == victim);
-
     if( !victim  )
     {
         DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
