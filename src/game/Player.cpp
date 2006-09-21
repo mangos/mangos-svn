@@ -4030,7 +4030,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         loot = &go->loot;
 
-        if(loot->empty())
+        if(go->getLootState() == GO_CLOSED)
         {
             uint32 lootid =  go->lootid;
 
@@ -4039,6 +4039,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
             if(loot_type == LOOT_FISHING)
                 go->getFishLoot(loot);
+
+            go->SetLootState(GO_OPEN);
         }
     }
     else

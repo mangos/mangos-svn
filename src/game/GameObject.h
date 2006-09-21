@@ -60,8 +60,9 @@ struct GameObjectInfo
 
 enum LootState
 {
-    CLOSED = 0,
-    LOOTED
+    GO_CLOSED = 0,
+    GO_OPEN,
+    GO_LOOTED
 };
 
 class MANGOS_DLL_SPEC GameObject : public Object
@@ -99,6 +100,8 @@ class MANGOS_DLL_SPEC GameObject : public Object
         void getFishLoot(Loot *loot);
 
         LootState getLootState() { return m_lootState; }
+        bool HaveLootSkill() const { return m_lootskill; }
+        void SetLootSkill(bool skill) { m_lootskill = skill; }
 
         Loot        loot;
         uint32      lootid;
@@ -112,6 +115,7 @@ class MANGOS_DLL_SPEC GameObject : public Object
         uint32      m_respawnDelayTime;
         uint32      m_flags;
         LootState   m_lootState;
+        bool        m_lootskill;
         uint32      m_refs;
 };
 #endif
