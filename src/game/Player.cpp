@@ -1592,6 +1592,23 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
         else
             return false;
     }
+	// add proficiency of weapon and armor for player
+    for(int i=0;i<3;i++)
+        if(spellInfo->Effect[i] == 60)
+    {
+        uint32 newflag = spellInfo->EquippedItemSubClass;
+        if(spellInfo->EquippedItemClass == 2 && !(GetWeaponProficiency() & newflag))
+        {
+            AddWeaponProficiency(newflag);
+            GetSession()->SendProficiency(uint8(0x02),GetWeaponProficiency());
+        }
+        if(spellInfo->EquippedItemClass == 4 && !(GetArmorProficiency() & newflag))
+        {
+            AddArmorProficiency(newflag);
+            GetSession()->SendProficiency(uint8(0x04),GetArmorProficiency());
+        }
+        break;
+    }
 
     PlayerSpell *newspell;
 
