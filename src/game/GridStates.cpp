@@ -45,13 +45,16 @@ IdleState::Update(Map &m, NGridType &grid, GridInfo &info, const uint32 &x, cons
 void
 RemovalState::Update(Map &m, NGridType &grid, GridInfo &info, const uint32 &x, const uint32 &y, const uint32 &t_diff) const
 {
-    info.i_timer.Update(t_diff);
-    if( info.i_timer.Passed() )
+    if(info.i_unloadflag)
     {
-        if( !m.UnloadGrid(x, y) )
+        info.i_timer.Update(t_diff);
+        if( info.i_timer.Passed() )
         {
-            sLog.outDebug("Grid[%u,%u] for map %u differed unloading due to players nearby", x, y, m.GetId());
-            m.ResetGridExpiry(info);
+            if( !m.UnloadGrid(x, y) )
+            {
+                sLog.outDebug("Grid[%u,%u] for map %u differed unloading due to players nearby", x, y, m.GetId());
+                m.ResetGridExpiry(info);
+            }
         }
     }
 }

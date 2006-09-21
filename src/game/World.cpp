@@ -203,7 +203,7 @@ void World::SetInitialWorldSettings()
     regen_values[RATE_XP_QUEST]    = sConfig.GetFloatDefault("Rate.XP.Quest", 1);
     regen_values[RATE_XP_EXPLORE]  = sConfig.GetFloatDefault("Rate.XP.Explore", 1);
     regen_values[RATE_CREATURE_DAMAGE] = sConfig.GetFloatDefault("Rate.Creature.Damage", 1);
-    regen_values[RATE_AGGRO]       = sConfig.GetFloatDefault("Rate.Aggro", 1);
+    regen_values[RATE_CREATURE_AGGRO]  = sConfig.GetFloatDefault("Rate.Creature.Aggro", 1);
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
     m_configs[CONFIG_COMPRESSION] = sConfig.GetIntDefault("Compression", 1);
@@ -212,6 +212,7 @@ void World::SetInitialWorldSettings()
         sLog.outError("Compression level (%i) must be in range 1..9. Using default compression level (1),.",m_configs[CONFIG_COMPRESSION]);
         m_configs[CONFIG_COMPRESSION] = 1;
     }
+    m_configs[CONFIG_GRID_UNLOAD]   = sConfig.GetIntDefault("GridUnload", 1);
     m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);
     m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300000);
     m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
@@ -304,6 +305,26 @@ void World::SetInitialWorldSettings()
 
     MaNGOS::Game::Initialize();
     sLog.outString( "WORLD: SetInitialWorldSettings done" );
+
+    // Transport holders
+    MapManager::Instance().LoadGrid(1, -14277, 582.542,true);
+    MapManager::Instance().LoadGrid(0, -14277, 582.542,true);
+    MapManager::Instance().LoadGrid(1, -1025, -383,true);
+    MapManager::Instance().LoadGrid(0,  2062.38, 292.998,true);
+    MapManager::Instance().LoadGrid(1, 1318.11, -4658,true);
+    MapManager::Instance().LoadGrid(0, -12464, 231.565,true);
+    MapManager::Instance().LoadGrid(1, 1360.85, -4631,true);
+    MapManager::Instance().LoadGrid(1, -4016, -4741,true);
+    MapManager::Instance().LoadGrid(0, -3905, -586,true);
+    MapManager::Instance().LoadGrid(1, 6594.37, 759.827,true);
+    MapManager::Instance().LoadGrid(1, 8533.65, 1025.06,true);
+    MapManager::Instance().LoadGrid(1, 6400.06, 801.932,true);
+    MapManager::Instance().LoadGrid(0, -3706, -587,true);
+    MapManager::Instance().LoadGrid(0, 2062.6, 235.264,true);
+    MapManager::Instance().LoadGrid(0, -12407, 211.838,true);
+    MapManager::Instance().LoadGrid(1, -4197, 3286.77,true);
+    MapManager::Instance().LoadGrid(1, -4348, 2444.37,true);
+    sLog.outString( "WORLD: Global Transport System Initilizing done" );
 
     sLog.outString( "WORLD: Starting Event System" );
     StartEventSystem();

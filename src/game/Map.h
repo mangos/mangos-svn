@@ -55,9 +55,10 @@ typedef MaNGOS::SingleThreaded<GridRWLock>::Lock NullGuard;
 
 struct GridInfo
 {
-    GridInfo(time_t expiry) : i_timer(expiry) {}
+    GridInfo(time_t expiry, bool unload = false ) : i_timer(expiry), i_unloadflag(unload) {}
     GridRWLock i_lock;
     TimeTracker i_timer;
+    bool i_unloadflag;
 };
 
 typedef struct
@@ -125,6 +126,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
             return( !i_grids[p.x_coord][p.y_coord] || i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_REMOVAL );
         }
 
+        bool GetUnloadFlag(const GridPair &p) const { return i_info[p.x_coord][p.y_coord]->i_unloadflag; }
+        void SetUnloadFlag(const GridPair &p, bool unload) { i_info[p.x_coord][p.y_coord]->i_unloadflag = unload; }
+        void LoadGrid(const Cell& cell, bool no_unload = false);
         bool UnloadGrid(const uint32 &x, const uint32 &y);
 
         void GetUnitList(float x, float y, std::list<Unit*> &unlist);

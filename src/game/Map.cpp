@@ -191,7 +191,7 @@ Map::EnsureGridCreated(const GridPair &p)
         if( !(i_gridMask[p.x_coord] & mask) )
         {
             i_grids[p.x_coord][p.y_coord] = new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
-            i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry);
+            i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry,sWorld.getConfig(CONFIG_GRID_UNLOAD));
             i_gridMask[p.x_coord] |= mask;
             //z coord
 
@@ -240,6 +240,27 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
     {
         WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).AddObject(player, player->GetGUID());
+    }
+}
+
+void
+Map::LoadGrid(const Cell& cell, bool no_unload)
+{
+    uint64 mask = EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
+    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+
+    assert(grid != NULL);
+    if( !(i_gridStatus[cell.GridX()] & mask) )
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        if( !(i_gridStatus[cell.GridX()] & mask) )
+        {
+            ObjectGridLoader loader(*grid, i_id, cell);
+            loader.LoadN();
+            i_gridStatus[cell.GridX()] |= mask;
+            if(no_unload)
+                i_info[cell.GridX()][cell.GridY()]->i_unloadflag = false;
+        }
     }
 }
 

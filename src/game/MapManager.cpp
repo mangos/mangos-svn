@@ -22,6 +22,7 @@
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "FlightMaster.h"
+#include "RedZoneDistrict.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
@@ -115,4 +116,11 @@ bool MapManager::ExistMAP(int mapid, float x,float y)
     int gy=63-p.y_coord;
 
     return Map::ExistMAP(mapid,gx,gy);
+}
+
+void MapManager::LoadGrid(int mapid, float x, float y, bool no_unload)
+{
+    CellPair p = MaNGOS::ComputeCellPair(x,y);
+    Cell cell = RedZone::GetZone(p);
+    GetMap(mapid)->LoadGrid(cell,no_unload);
 }

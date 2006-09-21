@@ -109,10 +109,11 @@ Rate.XP.Explore = 1
 # Examples: 2 - creatures will damage 2x, 1.7 - 1.7x.
 Rate.Creature.Damage = 1
 
-#Aggro on/off.
-# 1 - on; 0 - off
-# Default: 1
-Rate.Aggro = 1
+#Aggro radius percent or off.
+#          0   - off (0%)
+# Default: 1   - 100% 
+#          1.5 - 150%
+Rate.Creature.Aggro = 1
 
 # Default remote console port
 Ra.Port = 3443
@@ -125,6 +126,13 @@ Ra.MinLevel = 3
 
 # Kick client on wrong pass
 Ra.Secure = 1
+
+
+# Unload grids (if you have lot memory you can disbale it to speed up player move to new grids second time)
+#          0 (not unload grids)
+# Default: 1 (unload grids)
+GridUnload = 1;
+
 
 # All times are in milliseconds.
 
