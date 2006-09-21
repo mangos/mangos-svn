@@ -2860,6 +2860,16 @@ void Player::SendInitialActions()
 
 void Player::addAction(const uint8 button, const uint16 action, const uint8 type, const uint8 misc)
 {
+    // check cheating with adding non-known spells to action bar
+    if(type==0)
+    {
+        if(sSpellStore.LookupEntry(action) && !HasSpell(action))
+        {
+            sLog.outError( "Action %u not added into button %u for player %s: player don't known this spell", action, button, GetName() );
+            return;
+        }
+    }
+
     bool ButtonExists = false;
     std::list<struct actions>::iterator itr;
     for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
