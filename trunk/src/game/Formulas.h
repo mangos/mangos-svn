@@ -194,6 +194,9 @@ namespace MaNGOS
             if( xp_gain == 0 )
                 return 0;
 
+            if(u->GetTypeId()==TYPEID_UNIT && ((Creature*)u)->isElite())
+                xp_gain *= 2;
+
             xp_gain = pl->ApplyRestBonus(xp_gain);
             if( pl->GetRestTime() > 10000 )
             {

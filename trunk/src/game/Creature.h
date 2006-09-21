@@ -248,6 +248,13 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isCanWalkOrFly() const;
         bool isCanTrainingOf(Player* player, bool msg) const;
 
+        bool isElite() const
+        {
+            uint32 rank = GetCreatureInfo()->rank; 
+            return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
+        }
+
+
         Unit* GetOwner();
 
         void AIM_Update(const uint32 &);
