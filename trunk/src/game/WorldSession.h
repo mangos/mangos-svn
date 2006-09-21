@@ -78,7 +78,6 @@ class MANGOS_DLL_SPEC WorldSession
 
         void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
 
-        void SendProficiency (uint8 pr1, uint32 pr2);
         void SendCreatureQuery( uint32 entry, uint64 guid );
         void SendTrainerList( uint64 guid );
         void SendTrainerList( uint64 guid,std::string strTitle );
@@ -308,6 +307,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCancelAutoRepeatSpellOpcode(WorldPacket& recvPacket);
 
         void HandleLearnTalentOpcode(WorldPacket& recvPacket);
+        void HandleUnlearnSkillOpcode(WorldPacket& recvPacket);
 
         void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverHelloOpcode(WorldPacket& recvPacket);

@@ -383,6 +383,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_CANCEL_AUTO_REPEAT_SPELL, STATUS_LOGGEDIN, &WorldSession::HandleCancelAutoRepeatSpellOpcode   },
 
         { CMSG_LEARN_TALENT,             STATUS_LOGGEDIN, &WorldSession::HandleLearnTalentOpcode             },
+        { CMSG_UNLEARN_SKILL,            STATUS_LOGGEDIN, &WorldSession::HandleUnlearnSkillOpcode            },
 
         { CMSG_QUESTGIVER_STATUS_QUERY,  STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverStatusQueryOpcode   },
         { CMSG_QUESTGIVER_HELLO,         STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverHelloOpcode         },
@@ -486,15 +487,6 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
     };
 
     return table;
-}
-
-// send Proficiency
-void WorldSession::SendProficiency (uint8 pr1, uint32 pr2)
-{
-    WorldPacket data;
-    data.Initialize (SMSG_SET_PROFICIENCY);
-    data << pr1 << pr2;
-    SendPacket (&data);
 }
 
 void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )

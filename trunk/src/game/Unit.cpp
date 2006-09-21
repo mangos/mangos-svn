@@ -76,12 +76,10 @@ Unit::Unit() : Object()
 
     m_attacking = NULL;
     m_modDamagePCT = 0;
-    m_RegenPCT = 0;
     m_modHitChance = 0;
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
     m_modCastSpeedPct = 0;
-    m_scAuras.clear();
 }
 
 Unit::~Unit()
@@ -533,7 +531,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
-        int32 pdamage = mod->m_amount*(100+m_RegenPCT)/100;
+        int32 pdamage = mod->m_amount;
         if(GetHealth() + pdamage < GetMaxHealth() )
             SetHealth(GetHealth() + pdamage);
         else
@@ -566,8 +564,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
             break;
         }
-        tmpvalue2 = (100+m_RegenPCT)/100;
-        tmpvalue = uint32(tmpvalue*tmpvalue2);
         if(GetHealth() + tmpvalue < GetMaxHealth() )
             SetHealth(GetHealth() + tmpvalue);
         else SetHealth(GetMaxHealth());
@@ -1227,8 +1223,7 @@ float Unit::GetUnitParryChance() const
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Player const* player = (Player const*)this;
-                                                            // Parry passive skill
-        if(player->HasSpell(SPELL_PASSIVE_PARRY_1) || player->HasSpell(SPELL_PASSIVE_PARRY_2))
+        if(player->CanParry())
         {
             Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             if(!tmpitem || tmpitem->IsBroken())

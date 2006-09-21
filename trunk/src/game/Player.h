@@ -643,6 +643,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void PetSpellInitialize();
         bool HasSpell(uint32 spell) const;
         bool CanLearnProSpell(uint32 spell);
+        void SendProficiency(uint8 pr1, uint32 pr2);
         void SendInitialSpells();
         bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
@@ -868,6 +869,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetDeathTimer() const { return m_deathTimer; }
         uint32 GetBlockValue() const { return m_BlockValue; }
         void ApplyBlockValueMod(int32 val,bool apply);
+        bool CanParry() const { return m_canParry; }
+        void SetCanParry(bool value) { m_canParry = value; }
+        bool CanDualWield() const { return m_canDualWield; }
+        void SetCanDualWield(bool value) { m_canDualWield = value; }
 
         void ApplyItemMods(Item *item,uint8 slot,bool apply)
         {
@@ -1109,6 +1114,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item *m_soulStone;
         uint32 m_WeaponProficiency;
         uint32 m_ArmorProficiency;
+        bool m_canParry;
+        bool m_canDualWield;
 };
 
 int irand(int min, int max);

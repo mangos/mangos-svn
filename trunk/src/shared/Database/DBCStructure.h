@@ -36,13 +36,21 @@ struct TalentEntry
 struct emoteentry
 {
     uint32    Id;
-    uint32      textid;
+    uint32    textid;
+};
+struct SkillLine
+{
+    uint32    id;
+    uint32    categoryId;
+    char*     name[8];
+    char*     description[8];
+    uint32    spellIcon;
 };
 struct SkillLineAbility
 {
     uint32    id;
-    uint32    miscid;
-    uint32    spellid;
+    uint32    skillId;
+    uint32    spellId;
     uint32    unkown1;
     uint32    unkown2;
     uint32    unkown3;
@@ -89,11 +97,12 @@ struct SpellEntry
     uint32    rangeIndex;
     float     speed;
     uint32    modalNextSpell;
+    uint32    StackAmount;
     uint32    Totem[2];
     uint32    Reagent[8];
     uint32    ReagentCount[8];
-    int32    EquippedItemClass;
-    int32    EquippedItemSubClass;
+    int32     EquippedItemClass;
+    int32     EquippedItemSubClass;
     uint32    Effect[3];
     int32     EffectDieSides[3];
     uint32    EffectBaseDice[3];
@@ -114,15 +123,15 @@ struct SpellEntry
     uint32    SpellVisual;
     uint32    SpellIconID;
     uint32    activeIconID;
-    uint32      spellPriority;
-    uint32    SpellNameIndex[8];
+    uint32    spellPriority;
+    char*     SpellName[8];
     uint32    SpellNameFlag;
     char*     Rank[8];
     uint32    RankFlags;
     uint32    ManaCostPercentage;
     uint32    StartRecoveryCategory;
     uint32    StartRecoveryTime;
-    uint32      field156;
+    uint32    field156;
     uint32    SpellFamilyName;
     uint32    SpellFamilyFlags ;
     uint32    MaxAffectedTargets;

@@ -69,7 +69,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_EXTRA_ATTACKS = 19
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DODGE = 20
     &Spell::EffectNULL,                                     //SPELL_EFFECT_EVADE = 21
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PARRY = 22
+    &Spell::EffectParry,                                    //SPELL_EFFECT_PARRY = 22
     &Spell::EffectNULL,                                     //SPELL_EFFECT_BLOCK = 23
     &Spell::EffectCreateItem,                               //SPELL_EFFECT_CREATE_ITEM = 24
     &Spell::EffectNULL,                                     //SPELL_EFFECT_WEAPON = 25
@@ -87,7 +87,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE = 37 //Useless
     &Spell::EffectDispel,                                   //SPELL_EFFECT_DISPEL = 38
     &Spell::EffectNULL,                                     //SPELL_EFFECT_LANGUAGE = 39
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DUAL_WIELD = 40
+    &Spell::EffectDualWield,                                //SPELL_EFFECT_DUAL_WIELD = 40
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_WILD = 41
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_GUARDIAN = 42
     &Spell::EffectTeleUnitsFaceCaster,                      //SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER = 43
@@ -107,7 +107,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectLearnPetSpell,                            //SPELL_EFFECT_LEARN_PET_SPELL = 57
     &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE = 58
     &Spell::EffectOpenSecretSafe,                           //SPELL_EFFECT_OPEN_LOCK_ITEM = 59
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PROFICIENCY = 60
+    &Spell::EffectProficiency,                              //SPELL_EFFECT_PROFICIENCY = 60
     &Spell::EffectSendEvent,                                //SPELL_EFFECT_SEND_EVENT = 61
     &Spell::EffectPowerDrain,                               //SPELL_EFFECT_POWER_BURN = 62
     &Spell::EffectThreat,                                   //SPELL_EFFECT_THREAT = 63
@@ -380,10 +380,9 @@ void Spell::EffectHeal( uint32 i )
 {
     if( unitTarget && unitTarget->isAlive() )
     {
-        float pct = (100+unitTarget->m_RegenPCT)/100;
         uint32 curhealth = unitTarget->GetHealth();
         uint32 maxhealth = unitTarget->GetMaxHealth();
-        uint32 addhealth = uint32(damage*pct);
+        uint32 addhealth = damage;
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth);
         uint32 newhealth = curhealth + addhealth < maxhealth ? uint32(curhealth + addhealth) : maxhealth;
@@ -411,7 +410,6 @@ void Spell::EffectHealthLeach(uint32 i)
     sLog.outDebug("HealthLeach :%u", damage);
 
     uint32 tmpvalue = 0;
-    float pct = (100+unitTarget->m_RegenPCT)/100;
 
     if(unitTarget->GetHealth() - damage > 0)
     {
@@ -421,11 +419,11 @@ void Spell::EffectHealthLeach(uint32 i)
     {
         tmpvalue = uint32(unitTarget->GetHealth()*m_spellInfo->EffectMultipleValue[i]);
     }
-    if(m_caster->GetHealth() + tmpvalue*pct < m_caster->GetMaxHealth() )
-        m_caster->SetHealth(uint32(m_caster->GetHealth() + tmpvalue*pct));
+    if(m_caster->GetHealth() + tmpvalue < m_caster->GetMaxHealth() )
+        m_caster->SetHealth(uint32(m_caster->GetHealth() + tmpvalue));
     else m_caster->SetHealth(m_caster->GetMaxHealth());
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, uint32(tmpvalue*pct));
+        SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, uint32(tmpvalue));
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
 }
 
@@ -606,7 +604,25 @@ void Spell::EffectSummonChangeItem(uint32 i)
 void Spell::EffectOpenSecretSafe(uint32 i)
 {
     EffectOpenLock(i);                                      //no difference for now
+}
 
+void Spell::EffectProficiency(uint32 i)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player *p_target = (Player*)unitTarget;
+
+    uint32 newflag = m_spellInfo->EquippedItemSubClass;
+    if(m_spellInfo->EquippedItemClass == 2 && !(p_target->GetWeaponProficiency() & newflag))
+    {
+        p_target->AddWeaponProficiency(newflag);
+        p_target->SendProficiency(uint8(0x02),p_target->GetWeaponProficiency());
+    }
+    if(m_spellInfo->EquippedItemClass == 4 && !(p_target->GetArmorProficiency() & newflag))
+    {
+        p_target->AddArmorProficiency(newflag);
+        p_target->SendProficiency(uint8(0x04),p_target->GetArmorProficiency());
+    }
 }
 
 void Spell::EffectApplyAA(uint32 i)
@@ -824,6 +840,12 @@ void Spell::EffectLearnSpell(uint32 i)
 void Spell::EffectDispel(uint32 i)
 {
     m_caster->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i]);
+}
+
+void Spell::EffectDualWield(uint32 i)
+{
+    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)unitTarget)->SetCanDualWield(true);
 }
 
 void Spell::EffectPickPocket(uint32 i)
@@ -1895,6 +1917,14 @@ void Spell::EffectResurrect(uint32 i)
 
     ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
+}
+
+void Spell::EffectParry(uint32 i)
+{
+    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+    {
+        ((Player*)unitTarget)->SetCanParry(true);
+    }
 }
 
 void Spell::EffectMomentMove(uint32 i)

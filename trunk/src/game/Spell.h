@@ -382,10 +382,12 @@ class Spell
         void EffectOpenLock(uint32 i);
         void EffectSummonChangeItem(uint32 i);
         void EffectOpenSecretSafe(uint32 i);
+        void EffectProficiency(uint32 i);
         void EffectApplyAA(uint32 i);
         void EffectSummon(uint32 i);
         void EffectLearnSpell(uint32 i);
         void EffectDispel(uint32 i);
+        void EffectDualWield(uint32 i);
         void EffectPickPocket(uint32 i);
         void EffectSummonWild(uint32 i);
         void EffectTeleUnitsFaceCaster(uint32 i);
@@ -408,6 +410,7 @@ class Spell
         void EffectEnchantHeldItem(uint32 i);
         void EffectSummonObject(uint32 i);
         void EffectResurrect(uint32 i);
+        void EffectParry(uint32 i);
         void EffectMomentMove(uint32 i);                    //by vendy
         void EffectTransmitted(uint32 i);
         void EffectDisEnchant(uint32 i);
