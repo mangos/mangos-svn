@@ -275,9 +275,11 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         }
         m->COD = 0;
         pl->AddMail(m);
-        _player->StoreItem( dest, it, true);
-        objmgr.RemoveMItem(it->GetGUIDLow());
-        sDatabase.PExecute("DELETE FROM `mail_item` WHERE `guid` = '%u'", it->GetGUIDLow());
+
+        uint32 it_guidlow = it->GetGUIDLow();
+        _player->StoreItem( dest, it, true);                // item can be remove at adding to existed item stack
+        objmgr.RemoveMItem(it_guidlow);
+        sDatabase.PExecute("DELETE FROM `mail_item` WHERE `guid` = '%u'", it_guidlow);
         data.Initialize(SMSG_SEND_MAIL_RESULT);
         data << uint32(message);
         data << uint32(MAIL_ITEM_TAKEN);
