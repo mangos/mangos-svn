@@ -43,6 +43,9 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 
     TalentEntry *talentInfo = sTalentStore.LookupEntry( talent_id );
 
+    if(!talentInfo)
+        return;
+
     Player * player = GetPlayer();
 
     // Check if it requires another talent

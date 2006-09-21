@@ -1164,10 +1164,10 @@ float Creature::GetAttackDistance(Unit *pl)
     RetDistance -= (float)leveldif;
 
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
-    if(RetDistance < 5 && sWorld.getRate(RATE_AGGRO) != 0)
+    if(RetDistance < 5 && sWorld.getRate(RATE_CREATURE_AGGRO) != 0)
         RetDistance = 5;
 
-    return (RetDistance*sWorld.getRate(RATE_AGGRO));
+    return (RetDistance*sWorld.getRate(RATE_CREATURE_AGGRO));
 }
 
 CreatureInfo const *Creature::GetCreatureInfo() const
