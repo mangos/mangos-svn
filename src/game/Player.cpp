@@ -1835,8 +1835,7 @@ bool Player::removeSpell(uint16 spell_id)
         else
             itr->second->state = PLAYERSPELL_REMOVED;
 
-        if (IsPassiveSpell(spell_id))
-            RemoveAurasDueToSpell(spell_id);
+        RemoveAurasDueToSpell(spell_id);
         return true;
     }
     return false;
