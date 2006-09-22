@@ -468,7 +468,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         {
             return HasAuraType(SPELL_AURA_MOD_INVISIBILITY);
         }
-        bool isTargetableForAttack() const { return isAlive() && !isInFlight() /*&& !isStealth()*/; }
+        bool isTargetableForAttack();
         bool IsInWater() const;
         bool IsUnderWater() const;
         bool isInAccessablePlaceFor(Creature* c) const;

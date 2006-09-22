@@ -1270,6 +1270,21 @@ bool Player::isAcceptTickets() const
     return GetSession()->GetSecurity() >=2 && (m_GMFlags & GM_ACCEPT_TICKETS);
 }
 
+void Player::SetGameMaster(bool on) {
+    if(on)
+    {
+        m_GMFlags |= GM_ON;
+        setFaction(35);
+        SetFlag(PLAYER_BYTES_2, 0x8);
+    }
+    else
+    {
+        m_GMFlags &= ~GM_ON;
+        setFactionForRace(getRace());
+        RemoveFlag(PLAYER_BYTES_2, 0x8);
+    }
+}
+
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim)
 {
     WorldPacket data;

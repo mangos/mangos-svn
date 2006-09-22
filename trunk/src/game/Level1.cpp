@@ -48,14 +48,15 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
 
 bool ChatHandler::HandleGMOnCommand(const char* args)
 {
-    m_session->GetPlayer()->SetFlag(PLAYER_BYTES_2, 0x8);
+    m_session->GetPlayer()->SetGameMaster(true);
+    m_session->GetPlayer()->CombatStop();
 
     return true;
 }
 
 bool ChatHandler::HandleGMOffCommand(const char* args)
 {
-    m_session->GetPlayer()->RemoveFlag(PLAYER_BYTES_2, 0x8);
+    m_session->GetPlayer()->SetGameMaster(false);
 
     return true;
 }

@@ -2832,3 +2832,10 @@ void Unit::LeaveCombatState()
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 }
+
+bool Unit::isTargetableForAttack()
+{
+    if (GetTypeId()==TYPEID_PLAYER && ((Player *)this)->isGameMaster())
+        return false;
+    return isAlive() && !isInFlight() /*&& !isStealth()*/;
+}

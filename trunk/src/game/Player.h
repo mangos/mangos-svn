@@ -253,8 +253,9 @@ enum MirrorTimerType
 
 enum GMFlags
 {
-    GM_ACCEPT_TICKETS  = 1,
-    GM_ACCEPT_WHISPERS = 2
+    GM_ON = 1,
+    GM_ACCEPT_TICKETS  = 2,
+    GM_ACCEPT_WHISPERS = 4
 };
 
 #define IS_BACK_SLOT(s) (s == 0xFF)
@@ -401,6 +402,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetAcceptTicket(bool on) { if(on) m_GMFlags |= GM_ACCEPT_TICKETS; else m_GMFlags &= ~GM_ACCEPT_TICKETS; }
         bool isAcceptWhispers() const { return m_GMFlags & GM_ACCEPT_WHISPERS; }
         void SetAcceptWhispers(bool on) { if(on) m_GMFlags |= GM_ACCEPT_WHISPERS; else m_GMFlags &= ~GM_ACCEPT_WHISPERS; }
+        bool isGameMaster() const { return m_GMFlags & GM_ON; }
+        void SetGameMaster(bool on);
 
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}
