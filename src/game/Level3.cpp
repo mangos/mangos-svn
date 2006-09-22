@@ -2658,35 +2658,5 @@ bool ChatHandler::CancelShutdown (const char* args)
     return true;
 }
 
-bool ChatHandler::HandleSeparateFactionCommand(const char* args)
-{
-    char* px = strtok((char*)args, " ");
-
-    // ticket<end>
-    if (!px)
-    {
-        PSendSysMessage("SeparateFaction : %s", sWorld.getConfig(CONFIG_SEPARATE_FACTION) ?  "on" : "off");
-        return true;
-    }
-
-    // ticket on
-    if(strncmp(px,"on",3) == 0)
-    {
-        sWorld.setConfig(CONFIG_SEPARATE_FACTION,1);
-        SendSysMessage("SeparateFaction : on");
-        return true;
-    }
-
-    // ticket off
-    if(strncmp(px,"off",4) == 0)
-    {
-        sWorld.setConfig(CONFIG_SEPARATE_FACTION,0);
-        SendSysMessage("SeparateFaction : off");
-        return true;
-    }
-
-    return false;
-}
-
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false
