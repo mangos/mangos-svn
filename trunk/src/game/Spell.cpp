@@ -731,7 +731,7 @@ void Spell::SendSpellCooldown()
             SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
             if( spellInfo->Category == m_spellInfo->Category)
             {
-                data << uint32(itr->second);
+                data << uint32(itr->first);
                 if (itr->first != m_spellInfo->Id || rec == 0)
                     data << uint32(catrec);
                 else
@@ -769,11 +769,18 @@ void Spell::update(uint32 difftime)
         }
     }
 
-    if( ( m_timer != 0 && !m_meleeSpell) && (m_caster->GetTypeId() == TYPEID_PLAYER) &&
-        ( m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ() ) )
+    // check if the player caster has moved before the spell finished
+    if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
+        (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()))
     {
-        cancel();
+        // always cancel for channeled spells
+        if( m_spellState == SPELL_STATE_CASTING )
+            cancel();
+        // don't cancel for instant and melees pells
+        else if(!m_meleeSpell && casttime != 0)
+            cancel();
     }
+
     switch(m_spellState)
     {
         case SPELL_STATE_PREPARING:
