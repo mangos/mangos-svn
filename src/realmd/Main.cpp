@@ -83,11 +83,11 @@ int main(int argc, char **argv)
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
     if (confVersion < _REALMDCONFVERSION)
     {
-        sLog.outString("*****************************************************************************");
-        sLog.outString(" WARNING: Your realmd.conf version indicates your conf file is out of date!");
-        sLog.outString("          Please check for updates, as your current default values may cause");
-        sLog.outString("          strange behavior.");
-        sLog.outString("*****************************************************************************");
+        sLog.outError("*****************************************************************************");
+        sLog.outError(" WARNING: Your realmd.conf version indicates your conf file is out of date!");
+        sLog.outError("          Please check for updates, as your current default values may cause");
+        sLog.outError("          strange behavior.");
+        sLog.outError("*****************************************************************************");
         clock_t pause = 3000 + clock();
         while (pause > clock());
     }
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     ListenSocket<AuthSocket> authListenSocket(h);
     if ( authListenSocket.Bind(rmport))
     {
-        sLog.outString( "MaNGOS realmd can not bind to port %d", rmport );
+        sLog.outError( "MaNGOS realmd can not bind to port %d", rmport );
         exit(1);
     }
 

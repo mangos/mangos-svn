@@ -172,10 +172,10 @@ void World::SetInitialWorldSettings()
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
     if(!confVersion)
     {
-        sLog.outString("*****************************************************************************");
-        sLog.outString(" WARNING: mangosd.conf does not include a ConfVersion variable.");
-        sLog.outString("          Your conf file may be out of date!");
-        sLog.outString("*****************************************************************************");
+        sLog.outError("*****************************************************************************");
+        sLog.outError(" WARNING: mangosd.conf does not include a ConfVersion variable.");
+        sLog.outError("          Your conf file may be out of date!");
+        sLog.outError("*****************************************************************************");
         clock_t pause = 3000 + clock();
         while (pause > clock());
     }
@@ -183,11 +183,11 @@ void World::SetInitialWorldSettings()
     {
         if (confVersion < _MANGOSDCONFVERSION)
         {
-            sLog.outString("*****************************************************************************");
-            sLog.outString(" WARNING: Your mangosd.conf version indicates your conf file is out of date!");
-            sLog.outString("          Please check for updates, as your current default values may cause");
-            sLog.outString("          strange behavior.");
-            sLog.outString("*****************************************************************************");
+            sLog.outError("*****************************************************************************");
+            sLog.outError(" WARNING: Your mangosd.conf version indicates your conf file is out of date!");
+            sLog.outError("          Please check for updates, as your current default values may cause");
+            sLog.outError("          strange behavior.");
+            sLog.outError("*****************************************************************************");
             clock_t pause = 3000 + clock();
             while (pause > clock());
         }
@@ -229,6 +229,7 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
     m_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig.GetIntDefault("MaxPrimaryTradeSkill", 2);
     m_configs[CONFIG_WISPERING_TO_GM] = sConfig.GetIntDefault("WhisperingToGM",0);
+    m_configs[CONFIG_SEPARATE_FACTION] = sConfig.GetIntDefault("SeparateFaction",1);
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 
@@ -602,11 +603,15 @@ time_t World::_UpdateGameTime()
 
     if(m_ShutdownTimer > 0 && elapsed > 0)
     {
-        m_ShutdownTimer -= elapsed;
-        if(m_ShutdownTimer <= 0)
+        if( m_ShutdownTimer <= elapsed )
+        {
             m_stopEvent = true;
+        }
         else
+        {
+            m_ShutdownTimer -= elapsed;
             ShuttDownMsg();
+        }
     }
 
     m_gameTime += elapsed;

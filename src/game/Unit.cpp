@@ -80,6 +80,7 @@ Unit::Unit() : Object()
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
     m_modCastSpeedPct = 0;
+    m_CombatTimer = 0;
 }
 
 Unit::~Unit()
@@ -97,6 +98,17 @@ void Unit::Update( uint32 p_time )
 
     _UpdateSpells( p_time );
     _UpdateHostil( p_time );
+
+    if ( this->isInCombat() )
+    {
+        if ( m_CombatTimer <= p_time )
+        {
+            m_CombatTimer = 0;
+            LeaveCombatState();
+        }
+        else
+            m_CombatTimer -= p_time;
+    }
 
     if(uint32 base_att = getAttackTimer(BASE_ATTACK))
     {
@@ -230,6 +242,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
     if (health <= damage)
     {
+        LeaveCombatState();
+        //pVictim->LeaveCombatState();
+
         DEBUG_LOG("DealDamage: victim just died");
 
         DEBUG_LOG("SET JUST_DIED");
@@ -309,6 +324,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if(owner && owner->GetTypeId() == TYPEID_PLAYER)
             {
                 player = (Player*)owner;
+                player->LeaveCombatState();
             }
         }
 
@@ -364,6 +380,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         DEBUG_LOG("DealDamageAlive");
         pVictim->SetHealth(health - damage);
         Attack(pVictim);
+        
+        //Get in CombatState
+        GetInCombatState();
+        pVictim->GetInCombatState();
 
         if(pVictim->getTransForm())
         {
@@ -925,12 +945,12 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     {
         if (pVictim->m_currentSpell->getState() != SPELL_STATE_CASTING)
         {
-            sLog.outString("Spell Delayed!%d",(int32)(0.25f * pVictim->m_currentSpell->casttime));
+            sLog.outDetail("Spell Delayed!%d",(int32)(0.25f * pVictim->m_currentSpell->casttime));
             pVictim->m_currentSpell->Delayed((int32)(0.25f * pVictim->m_currentSpell->casttime));
         }
         else
         {
-            sLog.outString("Spell Canceled!");
+            sLog.outDetail("Spell Canceled!");
             if( pVictim->m_currentSpell->m_spellInfo->Id == 1515 )
             {
                 // Fix me: channel should be controled by channel interruption flag,
@@ -2440,7 +2460,8 @@ bool Unit::Attack(Unit *victim)
         AttackStop();
     }
     addUnitState(UNIT_STAT_ATTACKING);
-    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+    if(GetTypeId()!=TYPEID_PLAYER)
+        GetInCombatState();      //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
@@ -2465,8 +2486,8 @@ bool Unit::AttackStop()
     m_attacking->_removeAttacker(this);
     m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
-    if(m_attackers.empty())
-        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+    if(GetTypeId()!=TYPEID_PLAYER && m_attackers.empty())
+        LeaveCombatState();      //RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
     if(m_currentMeleeSpell)
         m_currentMeleeSpell->cancel();
@@ -2798,4 +2819,16 @@ void Unit::Unmount()
 
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
+}
+
+void Unit::GetInCombatState()
+{
+    m_CombatTimer = 6000;
+    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+}
+
+void Unit::LeaveCombatState()
+{
+    m_CombatTimer = 0;
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 }

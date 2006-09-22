@@ -7,6 +7,11 @@ RealmID = 1
 # 0 NORMAL 1 PVP 4 NORMAL 6 RP 8 RPPVP
 GameType = 1
 
+# Is SeparateFaction in :chat(say,yell);channel(chat)group(join);
+#		0 (false)
+#Default:	1 (true) 
+SeparateFaction = 1
+
 # Allow or not accounts to create characters in the 2 teams in any game type.
 # Defaullt: 0 (Not allowed)
 #           1 (Allowed)
@@ -28,8 +33,9 @@ WorldDatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
 LogFile = "Server.log"
 
 # Server console level of logging
-# 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
+# 0 = Minimum; 1 = Basic&Error; 2 = Detail; 3 = Full/Debug
 # Default: 0
+# recommend: 1
 LogLevel = 3
 
 # Packet logging for the worldserver

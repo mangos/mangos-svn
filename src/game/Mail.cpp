@@ -40,7 +40,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     recv_data >> item;
     recv_data >> money >> COD;
 
-    sLog.outString("Player %u is sending mail to %s with subject %s and body %s includes item %u and %u copper and %u COD copper",GUID_LOPART(sender),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(item),money,COD);
+    sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes item %u and %u copper and %u COD copper",GUID_LOPART(sender),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(item),money,COD);
     mID = objmgr.GenerateMailID();
 
     Player* pl = _player;
@@ -515,7 +515,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 
     recv_data >> unk1 >> unk2 >> mailid;
 
-    sLog.outString("HandleMailCreateTextItem unk1=%u,unk2=%u,mailid=%u",unk1,unk2,mailid);
+    sLog.outDetail("HandleMailCreateTextItem unk1=%u,unk2=%u,mailid=%u",unk1,unk2,mailid);
 
     WorldPacket Data;
 

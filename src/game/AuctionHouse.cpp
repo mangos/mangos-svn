@@ -310,7 +310,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->time = ((time_t)(etime * 60)) + base;
 
     AH->Id = objmgr.GenerateAuctionID();
-    sLog.outString("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes)",GUID_LOPART(item),GUID_LOPART(auctioneer),bid,buyout,time);
+    sLog.outDetail("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes)",GUID_LOPART(item),GUID_LOPART(auctioneer),bid,buyout,time);
     objmgr.AddAuction(AH);
     uint16 pos = pl->GetPosByGuid(item);
     Item *it = pl->GetItemByPos( pos );
@@ -342,7 +342,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
             cnt++;
         }
     }
-    sLog.outString("sending owner list with %u items",cnt);
+    sLog.outDetail("sending owner list with %u items",cnt);
     data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
     if (cnt < 51)
     {

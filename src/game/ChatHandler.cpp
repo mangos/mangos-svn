@@ -42,6 +42,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     recv_data >> lang;
     sLog.outDebug("CHAT: packet received. type %u, lang %u", type, lang );
 
+    if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 0)
+        lang = LANG_UNIVERSAL;
+
     switch(type)
     {
         case CHAT_MSG_SAY:
@@ -147,13 +150,16 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 sChatHandler.SendSysMessage(this ,msg_err.c_str() );
                 break;
             }
-            uint32 sidea = GetPlayer()->GetTeam();
-            uint32 sideb = player->GetTeam();
-            if( sidea != sideb && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
+            if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 1 && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
             {
-                std::string msg_err = "Player "+to+" is not online (Names are case sensitive)";
-                sChatHandler.SendSysMessage(this ,msg_err.c_str() );
-                break;
+                uint32 sidea = GetPlayer()->GetTeam();
+                uint32 sideb = player->GetTeam();
+                if( sidea != sideb )
+                {
+                    std::string msg_err = "Player "+to+" is not online (Names are case sensitive)";
+                    sChatHandler.SendSysMessage(this ,msg_err.c_str() );
+                    break;
+                }
             }
             sChatHandler.FillMessageData(&data, this, type, lang, NULL, 0, msg.c_str() );
             player->GetSession()->SendPacket(&data);

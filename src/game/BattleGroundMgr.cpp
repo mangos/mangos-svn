@@ -82,7 +82,7 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 MaxPlayersPerTeam, uint32 Leve
     bg->SetID(BattleGroundID);
 
     AddBattleGround(BattleGroundID, bg);
-    sLog.outString("BattleGroundMgr: Created new battleground: %u %s (Map %u, %u players per team, Levels %u-%u)", BattleGroundID, bg->m_Name.c_str(), bg->m_MapId, bg->m_MaxPlayersPerTeam, bg->m_LevelMin, bg->m_LevelMax);
+    sLog.outDetail("BattleGroundMgr: Created new battleground: %u %s (Map %u, %u players per team, Levels %u-%u)", BattleGroundID, bg->m_Name.c_str(), bg->m_MapId, bg->m_MaxPlayersPerTeam, bg->m_LevelMin, bg->m_LevelMax);
     return BattleGroundID;
 }
 
@@ -138,10 +138,10 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
     LevMin = 1;
     LevMax = 60;
-    sLog.outString("Creating battleground %s, %u-%u", bg_Name.c_str(), LevMin, LevMax);
+    sLog.outDetail("Creating battleground %s, %u-%u", bg_Name.c_str(), LevMin, LevMax);
     CreateBattleGround(MaxPlayersPerTeam, LevMin, LevMax, bg_Name, MapId, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
 
-    sLog.outString("Created initial battlegrounds.");
+    sLog.outDetail("Created initial battlegrounds.");
 }
 
 void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr)

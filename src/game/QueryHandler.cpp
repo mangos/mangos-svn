@@ -461,7 +461,7 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 
     SendPacket( &data );
 
-    sLog.outString( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
+    sLog.outDetail( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
 }
 
 void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
@@ -492,6 +492,6 @@ void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
         }
         SendPacket( &data );
 
-        sLog.outString( "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE " );
+        sLog.outDetail( "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE " );
     }
 }

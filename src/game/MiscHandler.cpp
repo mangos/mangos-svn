@@ -96,6 +96,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     data.put( sizeof(uint32), clientcount );                //insert right count
 
     SendPacket(&data);
+    sLog.outDebug( "WORLD: Send SMSG_WHO Message" );
 }
 
 void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
@@ -896,14 +897,14 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 {
-    sLog.outString( "WORLD: Received CMSG_SET_ACTION_BUTTON" );
+    sLog.outDetail( "WORLD: Received CMSG_SET_ACTION_BUTTON" );
     uint8 button, misc, type;
     uint16 action;
     recv_data >> button >> action >> type >> misc;
-    sLog.outString( "BUTTON: %u ACTION: %u TYPE: %u MISC: %u", button, action, type, misc );
+    sLog.outDetail( "BUTTON: %u ACTION: %u TYPE: %u MISC: %u", button, action, type, misc );
     if(action==0)
     {
-        sLog.outString( "MISC: Remove action from button %u", button );
+        sLog.outDetail( "MISC: Remove action from button %u", button );
 
         GetPlayer()->removeAction(button);
     }
@@ -911,17 +912,17 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     {
         if(type==64)
         {
-            sLog.outString( "MISC: Added Macro %u into button %u", action, button );
+            sLog.outDetail( "MISC: Added Macro %u into button %u", action, button );
             GetPlayer()->addAction(button,action,type,misc);
         }
         else if(type==0)
         {
-            sLog.outString( "MISC: Added Action %u into button %u", action, button );
+            sLog.outDetail( "MISC: Added Action %u into button %u", action, button );
             GetPlayer()->addAction(button,action,type,misc);
         }
         else if(type==128)
         {
-            sLog.outString( "MISC: Added Item %u into button %u", action, button );
+            sLog.outDetail( "MISC: Added Item %u into button %u", action, button );
             GetPlayer()->addAction(button,action,type,misc);
         }
     }

@@ -82,6 +82,9 @@ class HordeChannelMgr    : public ChannelMgr {};
 
 inline ChannelMgr* channelMgr(uint32 team)
 {
+    if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 0)
+        return &MaNGOS::Singleton<AllianceChannelMgr>::Instance(); //For Test,No Seprate Faction
+
     if(team==ALLIANCE)
         return &MaNGOS::Singleton<AllianceChannelMgr>::Instance();
     if(team==HORDE)

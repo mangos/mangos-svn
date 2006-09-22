@@ -275,7 +275,7 @@ void Weather::UpdateWeather()
     }
     char buf[256];
     sprintf((char*)buf, "Change the weather of zone %u to %s.", m_zone, wthstr);
-    sLog.outString(buf);
+    sLog.outDetail(buf);
     sWorld.SendZoneText(m_zone, buf);
 }
 

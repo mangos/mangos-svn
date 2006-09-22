@@ -307,7 +307,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+            GetInCombatState();      //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
         }
         void _removeAttacker(Unit *pAttacker)               // must be called only from Unit::AttackStop()
         {
@@ -319,7 +319,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             {
                 clearUnitState(UNIT_STAT_ATTACK_BY);
                 if(!m_attacking)
-                    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+                    LeaveCombatState();      //RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             }
         }
         Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
@@ -337,7 +337,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAllAttackers();
         bool isInCombatWithPlayer() const;
         Unit* getVictim() const { return m_attacking; }
-        void CombatStop() { AttackStop(); RemoveAllAttackers(); }
+        void CombatStop() { AttackStop(); RemoveAllAttackers();LeaveCombatState(); }
 
         void addUnitState(uint32 f) { m_state |= f; };
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
@@ -447,7 +447,12 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isGuard() const  { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUARD); }
 
         bool isInFlight()  const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
-        bool isInCombat()  const { return hasUnitState(UNIT_STAT_IN_COMBAT); }
+
+        //bool isInCombat()  const { return hasUnitState(UNIT_STAT_IN_COMBAT); }
+        bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
+        void GetInCombatState();
+        void LeaveCombatState();
+
         bool isAttacking() const { return hasUnitState(UNIT_STAT_ATTACKING); }
         bool isAttacked()  const { return hasUnitState(UNIT_STAT_ATTACK_BY); }
 
@@ -625,5 +630,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         void SendAttackStart(Unit* pVictim);                // only from Unit::AttackStart(Unit*)
 
         uint32 m_state;                                     // Even derived shouldn't modify
+        uint32 m_CombatTimer;
 };
 #endif

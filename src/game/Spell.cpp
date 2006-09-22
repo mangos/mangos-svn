@@ -1211,7 +1211,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     damage = CalculateDamage((uint8)i);
     uint8 eff = m_spellInfo->Effect[i];
 
-    sLog.outDebug( "WORLD: Spell FX id is %u", eff);
+    sLog.outDebug( "Spell: Effect : %u", eff);
     if(unitTarget)
     {
         //If m_immuneToEffect type contain this effect type, IMMUNE effect.
@@ -1234,7 +1234,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     if(eff<TOTAL_SPELL_EFFECTS)
     {
-        sLog.outDebug( "WORLD: Spell FX %d < TOTAL_SPELL_EFFECTS ", eff);
+        //sLog.outDebug( "WORLD: Spell FX %d < TOTAL_SPELL_EFFECTS ", eff);
         (*this.*SpellEffects[eff])(i);
     }
     /*
@@ -1901,7 +1901,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
         TeleportCoords const* TC = objmgr.GetTeleportCoords(id);
         if(!TC)
         {
-            sLog.outString( "SPELL: unknown Teleport Coords ID %i\n", id );
+            sLog.outError( "SPELL: unknown Teleport Coords ID %i\n", id );
             return;
         }
         ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,0.0f);

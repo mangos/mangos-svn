@@ -225,12 +225,8 @@ void CliInfo(char*,pPrintf zprintf)
         return;
     }
 
-    zprintf("Online users: %d\x0d\x0a",resultDB->GetRowCount());
-    zprintf("========================================================\x0d\x0a");
-    zprintf("|    Account    |   Character   |      IP       |  GM  |\x0d\x0a");
-    zprintf("========================================================\x0d\x0a");
 
-    int linesize = 1+15+1+15+1+15+1+6+3;                    // see format string
+    int linesize = 1+15+2+20+3+15+2+6+3;                    // see format string
     char* buf = new char[resultDB->GetRowCount()*linesize+1];
     char* bufPos = buf;
 
@@ -247,23 +243,27 @@ void CliInfo(char*,pPrintf zprintf)
         if(resultLogin)
         {
             Field *fieldsLogin = resultLogin->Fetch();
-            bufPos+=sprintf(bufPos,"|%15s|%15s|%15s|%6d|\x0d\x0a",
+            bufPos+=sprintf(bufPos,"|%15s| %20s | %15s |%6d|\x0d\x0a",
                 fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsLogin[2].GetUInt32());
 
             delete resultLogin;
         }
         else
-            bufPos += sprintf(bufPos,"|<Error>        |%15s|<Error>        |<Err> |\x0d\x0a",name.c_str());
+            bufPos += sprintf(bufPos,"|<Error>        | %20s |<Error>          |<Err> |\x0d\x0a",name.c_str());
 
     }while(resultDB->NextRow());
 
     *bufPos = '\0';
 
-    delete resultDB;
 
+    zprintf("Online users: %d\x0d\x0a",resultDB->GetRowCount());
+    zprintf("=================================================================\x0d\x0a");
+    zprintf("|    Account    |       Character      |       IP        |  GM  |\x0d\x0a");
+    zprintf("=================================================================\x0d\x0a");
     zprintf("%s",buf);
-    zprintf("========================================================\x0d\x0a");
+    zprintf("=================================================================\x0d\x0a");
 
+    delete resultDB;
     delete[] buf;
 }
 

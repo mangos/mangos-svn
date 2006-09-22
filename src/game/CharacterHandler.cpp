@@ -48,7 +48,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
         Player *plr = new Player(this);
         do
         {
-            sLog.outError("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
+            sLog.outDetail("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
 
             if(plr->MinimalLoadFromDB( (*result)[0].GetUInt32() ))
                 plr->BuildEnumData( &data );
@@ -182,7 +182,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
                 data.Initialize( SMSG_CHAR_CREATE );
                 data << (uint8)0x33;
                 SendPacket( &data );
-                return;
+                uint32 security = this->GetSecurity();
+                if(security<1) return;
             }
         }
     }
@@ -229,7 +230,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_CHAR_CREATE );
     data << (uint8)0x2E;
     SendPacket( &data );
-
+    
+    sLog.outBasic("Account: %d Create New Character:[%s]",GetAccountId(),name.c_str());
 }
 
 void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
@@ -244,6 +246,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 
     if(!plr->LoadFromDB( GUID_LOPART(guid) ))
         return;
+    sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),plr->GetName(),guid);
     plr->DeleteFromDB();
 
     delete plr;

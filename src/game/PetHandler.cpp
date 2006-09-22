@@ -45,7 +45,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     recv_data >> guid2;                                     //tag guid
 
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid1);
-    sLog.outString( "HandlePetAction.Pet %u flag is %u, spellid is %u, target %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
+    sLog.outDetail( "HandlePetAction.Pet %u flag is %u, spellid is %u, target %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
     if(!pet)
     {
         sLog.outError( "Pet %u not exist.\n", uint32(GUID_LOPART(guid1)) );
@@ -168,7 +168,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
 void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 {
-    sLog.outString( "HandlePetNameQuery.\n" );
+    sLog.outDetail( "HandlePetNameQuery.\n" );
     uint32 who;
     uint64 guid;
     //float state3;
@@ -196,12 +196,12 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 
 void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 {
-    sLog.outString( "HandlePetSetAction. CMSG_PET_SET_ACTION\n" );
+    sLog.outDetail( "HandlePetSetAction. CMSG_PET_SET_ACTION\n" );
 }
 
 void WorldSession::HandlePetRename( WorldPacket & recv_data )
 {
-    sLog.outString( "HandlePetRename. CMSG_PET_RENAME\n" );
+    sLog.outDetail( "HandlePetRename. CMSG_PET_RENAME\n" );
     /*
     uint32 state2;
     uint64 guid;
@@ -225,7 +225,7 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
 {
     uint64 guid;
     recv_data >> guid;                                      //pet guid
-    sLog.outString( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
+    sLog.outDetail( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(pet)
     {

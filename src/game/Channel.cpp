@@ -358,6 +358,8 @@ void Channel::Say(Player *p, const char *what, uint32 lang)
 {
     if(!what)
         return;
+    if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 0)
+        lang = LANG_UNIVERSAL;
 
     WorldPacket data;
     if(!IsOn(p))
