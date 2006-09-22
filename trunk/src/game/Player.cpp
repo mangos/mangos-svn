@@ -3028,12 +3028,17 @@ void Player::CheckExploreSystem()
         }
         else if(p->area_level > 0)
         {
-            uint32 XP = uint32(p->area_level*10*sWorld.getRate(RATE_XP_EXPLORE));
             uint32 area = p->ID;
-            GiveXP( XP, NULL );
-
-            SendExplorationExperience(area,XP);
-
+            if (getLevel() >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+            {        
+                SendExplorationExperience(area,0);
+            } 
+            else
+            {
+                uint32 XP = uint32(p->area_level*10*sWorld.getRate(RATE_XP_EXPLORE));
+                GiveXP( XP, NULL );
+                SendExplorationExperience(area,XP);
+            }
             sLog.outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), area);
         }
     }
