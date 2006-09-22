@@ -119,7 +119,6 @@ class ChatHandler
         bool HandleGPSCommand(const char* args);
         bool HandleTaxiCheatCommand(const char* args);
         bool HandleWhispersCommand(const char* args);
-        bool HandleSeparateFactionCommand(const char* args);
 
         bool HandleModifyHPCommand(const char* args);
         bool HandleModifyManaCommand(const char* args);

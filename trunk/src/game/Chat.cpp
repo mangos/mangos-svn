@@ -168,7 +168,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "delticket",   2, &ChatHandler::HandleDelTicketCommand,        "",   NULL },
         { "maxskill",    3, &ChatHandler::HandleMaxSkillCommand,         "",   NULL },
         { "whispers",    1, &ChatHandler::HandleWhispersCommand,         "",   NULL },
-        { "separatefaction",    3, &ChatHandler::HandleSeparateFactionCommand,         "",   NULL },
         { "gocreature",  2, &ChatHandler::HandleGoCreatureCommand,       "",   NULL },
         { "goobject",    2, &ChatHandler::HandleGoObjectCommand,         "",   NULL },
         { "targetobject",2, &ChatHandler::HandleTargetObjectCommand,     "",   NULL },

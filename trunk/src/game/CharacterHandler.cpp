@@ -182,8 +182,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
                 data.Initialize( SMSG_CHAR_CREATE );
                 data << (uint8)0x33;
                 SendPacket( &data );
-                uint32 security = this->GetSecurity();
-                if(security<1) return;
+                return;
             }
         }
     }
