@@ -258,6 +258,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    if ( !_player->HasSpell (spellId) )
+    {
+        //cheater? kick? ban?
+        return;
+    }
+
     Spell *spell ;
     spell = new Spell(_player, spellInfo, false, 0);
 

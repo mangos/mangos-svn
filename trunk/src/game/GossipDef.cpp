@@ -206,7 +206,7 @@ void PlayerMenu::SendTalking( uint32 textID )
 
     pSession->SendPacket( &data );
 
-    sLog.outString( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
+    sLog.outDetail( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
 }
 
 void PlayerMenu::SendTalking( char const * title, char const * text )
@@ -221,7 +221,7 @@ void PlayerMenu::SendTalking( char const * title, char const * text )
 
     pSession->SendPacket( &data );
 
-    sLog.outString( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
+    sLog.outDetail( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
 }
 
 /*********************************************************/

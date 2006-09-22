@@ -123,7 +123,7 @@ bool Master::Run()
     if (worldListenSocket.Bind(wsport))
     {
         _StopDB();
-        sLog.outString( "MaNGOS can not bind to that port" );
+        sLog.outError( "MaNGOS can not bind to that port" );
         exit(1);
     }
 
@@ -149,7 +149,7 @@ bool Master::Run()
     if (RAListenSocket.Bind(sConfig.GetIntDefault( "RA.Port", 3443 )))
     {
 
-        sLog.outString( "MaNGOS can not bind to that port" );
+        sLog.outError( "MaNGOS can not bind to that port" );
         // exit(1); go on with no RA
 
     }

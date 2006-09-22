@@ -66,7 +66,7 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
 
-    sLog.outString( "WORLD: Received CMSG_BANKER_ACTIVATE" );
+    sLog.outDetail( "WORLD: Received CMSG_BANKER_ACTIVATE" );
 
     recv_data >> guid;
 
@@ -357,7 +357,7 @@ void WorldSession::SendAuctionHello( uint64 guid )
 
 void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 {
-    sLog.outString( "WORLD: Received CMSG_GOSSIP_HELLO" );
+    sLog.outDetail( "WORLD: Received CMSG_GOSSIP_HELLO" );
 
     WorldPacket data;
     uint64 guid;

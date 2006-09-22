@@ -50,17 +50,20 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
 
-    uint32 sidea = GetPlayer()->GetTeam();
-    uint32 sideb = player->GetTeam();
-    //This may be the right respons. It is the same as for if(player == null)
-    if ( sidea != sideb )
+    if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 1)
     {
-        data.Initialize(SMSG_PARTY_COMMAND_RESULT);
-        data << uint32( 0 );
-        data << membername;
-        data << uint32( 0x00000001 );
-        SendPacket( &data );
-        return;
+        uint32 sidea = GetPlayer()->GetTeam();
+        uint32 sideb = player->GetTeam();
+        //This may be the right respons. It is the same as for if(player == null)
+        if ( sidea != sideb )
+        {
+            data.Initialize(SMSG_PARTY_COMMAND_RESULT);
+            data << uint32( 0 );
+            data << membername;
+            data << uint32( 0x00000001 );
+            SendPacket( &data );
+            return;
+        }
     }
 
     if ( GetPlayer()->IsInGroup() && (GetPlayer()->GetGroupLeader() != GetPlayer()->GetGUID() ))
@@ -137,6 +140,16 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 
     if ( !GetPlayer()->IsInvited() )
         return;
+
+    if ( GetPlayer()->IsInGroup() )
+    {
+        data.Initialize(SMSG_PARTY_COMMAND_RESULT);
+        data << uint32( 0x0 );
+        data << GetPlayer()->GetName();
+        data << uint32( 0x00000004 );
+        SendPacket( &data );
+        return;
+    }
 
     GetPlayer()->UnSetInvited();
 
@@ -334,7 +347,7 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 
     if(group==NULL)
     {
-        sLog.outString("Not in a group");
+        sLog.outDetail("Not in a group");
         return;
     }
 

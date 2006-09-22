@@ -214,12 +214,13 @@ m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0
 m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
 {
     assert(target);
-    sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
     m_duration = GetDuration(spellproto);
     if(m_duration == -1)
         m_permanent = true;
     m_isPassive = IsPassiveSpell(m_spellId);
     m_positive = IsPositiveEffect(m_spellId, m_effIndex);
+
+    sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d.", spellproto->Id, spellproto->EffectApplyAuraName[eff], m_duration, spellproto->EffectImplicitTargetA[eff]);
 
     uint32 type = 0;
     if(!m_positive)
@@ -699,7 +700,7 @@ void Aura::TriggerSpell()
 
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %i\n",  GetSpellProto()->EffectTriggerSpell[m_effIndex]);
+        sLog.outError("Auras: unknown TriggerSpell id %i\n from spell: %i",  GetSpellProto()->EffectTriggerSpell[m_effIndex],GetSpellProto()->Id);
         return;
     }
     if(GetSpellProto()->Id == 1515)
@@ -910,7 +911,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         case FORM_TREE:
             break;
         default:
-            sLog.outString("Unknown Shapeshift Type: %u", m_modifier.m_miscvalue);
+            sLog.outError("Auras: Unknown Shapeshift Type: %u", m_modifier.m_miscvalue);
     }
 
     if(apply)
@@ -958,8 +959,14 @@ void Aura::HandleAuraTransform(bool apply)
     {
         CreatureInfo const * ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
         if(!ci)
-            return;
-        m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
+        {
+            m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 16358); //pig pink ^_^
+            sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetSpellProto()->Id);
+        }
+        else
+        {
+            m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
+        }
         m_target->setTransForm(GetSpellProto()->Id);
     }
     else
@@ -1725,7 +1732,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
 {
     if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
     {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
+        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
         return;
     }
 
@@ -1748,7 +1755,7 @@ void Aura::HandleAuraModResistance(bool apply)
 {
     if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
     {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
+        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
         return;
     }
 
@@ -1771,7 +1778,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
 {
     if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
     {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
+        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
         return;
     }
 
@@ -1829,7 +1836,7 @@ void Aura::HandleAuraModStat(bool apply)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
     {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");
+        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");
         return;
     }
 
@@ -1853,7 +1860,7 @@ void Aura::HandleModPercentStat(bool apply)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
     {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
         return;
     }
 
@@ -1879,7 +1886,7 @@ void Aura::HandleModTotalPercentStat(bool apply)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
     {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
         return;
     }
 

@@ -208,7 +208,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
     catch(ByteBuffer::error &)
     {
-        sLog.outDetail("Incomplete packet");
+        sLog.outError("WorldSocket::_HandleAuthSession Get Incomplete packet");
         return;
     }
 
@@ -305,6 +305,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     sWorld.AddSession(_session);
 
     sLog.outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
+    sLog.outString( "Account: '%s' Login.", account.c_str() );
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )

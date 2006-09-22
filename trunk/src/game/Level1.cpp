@@ -314,7 +314,7 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
     chr->SetMaxPower(POWER_ENERGY,manam );
     chr->SetPower(POWER_ENERGY, mana );
 
-    sLog.outString(LANG_CURRENT_ENERGY,chr->GetMaxPower(POWER_ENERGY));
+    sLog.outDetail(LANG_CURRENT_ENERGY,chr->GetMaxPower(POWER_ENERGY));
 
     return true;
 }

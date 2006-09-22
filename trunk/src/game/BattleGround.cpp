@@ -291,7 +291,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
         }break;
         default:
         {
-            sLog.outString("WARNING: Unhandled AreaTrigger in Battleground: %d", Trigger);
+            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %d", Trigger);
             SendAreaTriggerMessage(Source, "Warning: Unhandled AreaTrigger in Battleground: %d", Trigger);
         }break;
     }

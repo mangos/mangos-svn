@@ -274,8 +274,7 @@ void Spell::EffectApplyAura(uint32 i)
         SendCastResult(castResult);
         return;
     }
-
-    sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
+    sLog.outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, unitTarget,m_caster, m_CastItem);
 
@@ -658,7 +657,7 @@ void Spell::EffectSummon(uint32 i)
         m_caster->GetPositionZ(),m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i]))
     {
-        sLog.outString("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
         delete spawnCreature;
         return;
     }
@@ -893,7 +892,7 @@ void Spell::EffectSummonWild(uint32 i)
         m_caster->GetPositionZ(),m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i]))
     {
-        sLog.outString("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
         delete spawnCreature;
         return;
     }
@@ -2061,7 +2060,7 @@ void Spell::EffectSummonCritter(uint32 i)
         m_caster->GetPositionZ(),m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i]))
     {
-        sLog.outString("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
         delete critter;
         return;
     }

@@ -217,7 +217,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid >> quest >> reward;
 
-    sLog.outString( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
+    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
 
     Quest *pQuest = objmgr.NewQuest(quest);
     if( pQuest )
@@ -256,7 +256,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     uint64 guid;
     recv_data >> guid >> quest;
 
-    sLog.outString( "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
+    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
     Quest *pQuest       = objmgr.NewQuest( quest );
     if( pQuest )
@@ -280,7 +280,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
 void WorldSession::HandleQuestgiverCancel(WorldPacket& recv_data )
 {
-    sLog.outString( "WORLD: Received CMSG_QUESTGIVER_CANCEL" );
+    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CANCEL" );
 
     _player->PlayerTalkClass->CloseGossip();
 }
@@ -290,7 +290,7 @@ void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
     uint8 slot1, slot2;
     recv_data >> slot1 >> slot2;
 
-    sLog.outString( "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u",slot1,slot2 );
+    sLog.outDetail( "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u",slot1,slot2 );
 
     if( slot1 || slot2 )
     {
@@ -313,7 +313,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
     uint32 quest;
     recv_data >> slot;
 
-    sLog.outString( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
+    sLog.outDetail( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
 
     if( slot < 20 )
     {
@@ -336,7 +336,7 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
     uint32 quest;
     recv_data >> quest;
 
-    sLog.outString( "WORLD: Received CMSG_QUEST_CONFIRM_ACCEPT quest = %u",quest );
+    sLog.outDetail( "WORLD: Received CMSG_QUEST_CONFIRM_ACCEPT quest = %u",quest );
 }
 
 void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
@@ -345,7 +345,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
     uint64 guid;
     recv_data >> guid >> quest;
 
-    sLog.outString( "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
+    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
     Quest *pQuest = objmgr.NewQuest( quest );
     if( pQuest )
@@ -360,7 +360,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 
 void WorldSession::HandleQuestAutoLaunch(WorldPacket& recvPacket)
 {
-    sLog.outString( "WORLD: Received CMSG_QUESTGIVER_QUEST_AUTOLAUNCH (Send your log to anakin if you see this message)" );
+    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_QUEST_AUTOLAUNCH (Send your log to anakin if you see this message)" );
 }
 
 void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
@@ -371,7 +371,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
 
     WorldPacket data;
 
-    sLog.outString( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
+    sLog.outDetail( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
 
     Quest *pQuest = objmgr.NewQuest( quest );
     if( pQuest )
@@ -452,7 +452,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
     uint8 msg;
     recvPacket >> guid >> msg;
 
-    sLog.outString( "WORLD: Received MSG_QUEST_PUSH_RESULT " );
+    sLog.outDetail( "WORLD: Received MSG_QUEST_PUSH_RESULT " );
 
     if( _player->GetDivider() != 0 )
     {
