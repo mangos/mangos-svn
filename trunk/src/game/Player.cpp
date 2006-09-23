@@ -2787,6 +2787,11 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             if (!GetUInt32Value(PLAYER_SKILL(i)))
         {
             SkillLine *pSkill = sSkillLineStore.LookupEntry(id);
+            if(!pSkill)
+            {
+ 	            sLog.outError("Skill not found in SkillLineStore: skill #%u", id);
+ 	            return;
+            }
             // enable unlearn button for professions only
             if (pSkill->categoryId == 11)
                 SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));

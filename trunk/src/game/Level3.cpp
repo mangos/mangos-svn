@@ -280,7 +280,7 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
         return true;
     }
 
-    if (skill > 0)
+    if(sSkillLineStore.LookupEntry(skill))
     {
         target->SetSkill(skill, level, max);
         PSendSysMessage(LANG_LEARNED_SKILL, target->GetName(), skill);
@@ -2623,6 +2623,23 @@ bool ChatHandler::HandleResetCommand (const char * args)
     }
 
     return false;
+}
+
+bool ChatHandler::HandleFixUnlearnCommand(const char * args)
+{
+    Player *player = getSelectedPlayer();
+    if (!player)
+        player = m_session->GetPlayer();
+
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        uint32 id = player->GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
+        SkillLine *pSkill = sSkillLineStore.LookupEntry(id);
+        // enable unlearn button for professions only
+        if (pSkill && pSkill->categoryId == 11)
+            player->SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
+    }
+    return true;
 }
 
 bool ChatHandler::HandleMaxSkillCommand(const char* args)

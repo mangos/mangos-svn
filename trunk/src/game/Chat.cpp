@@ -164,6 +164,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "deltele",     3, &ChatHandler::HandleDelTeleCommand,          "",   NULL },
         { "listauras",   3, &ChatHandler::HandleListAurasCommand,        "",   NULL },
         { "reset",       3, &ChatHandler::HandleResetCommand,            "",   NULL },
+        { "fixunlearn",  3, &ChatHandler::HandleFixUnlearnCommand,       "",   NULL },
         { "ticket",      2, &ChatHandler::HandleTicketCommand,           "",   NULL },
         { "delticket",   2, &ChatHandler::HandleDelTicketCommand,        "",   NULL },
         { "maxskill",    3, &ChatHandler::HandleMaxSkillCommand,         "",   NULL },
@@ -188,33 +189,36 @@ ChatCommand * ChatHandler::getCommandTable()
 
     if(first_call)
     {
-        for(uint32 i = 0; commandTable[i].Name != NULL; i++)
+        QueryResult *result = sDatabase.Query("SELECT `name`,`security`,`help` FROM `command`");
+        if (result)
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `security`,`help` FROM `command` WHERE `name` = '%s'", commandTable[i].Name);
-
-            if (result)
+            do
             {
-                commandTable[i].SecurityLevel = (uint16)(*result)[0].GetUInt16();
-                commandTable[i].Help = (*result)[1].GetCppString();
-                delete result;
-            }
-            if(commandTable[i].ChildCommands != NULL)
-            {
-                ChatCommand *ptable = commandTable[i].ChildCommands;
-                for(uint32 j = 0; ptable[j].Name != NULL; j++)
+                Field *fields = result->Fetch();
+                std::string name = fields[0].GetCppString();
+                for(uint32 i = 0; commandTable[i].Name != NULL; i++)
                 {
-                    QueryResult *result = sDatabase.PQuery("SELECT `security`,`help` FROM `command` WHERE `name` = '%s %s'", commandTable[i].Name, ptable[j].Name);
-
-                    if (result)
+                    if (name == commandTable[i].Name)
                     {
-                        ptable[j].SecurityLevel = (uint16)(*result)[0].GetUInt16();
-                        ptable[j].Help = (*result)[1].GetCppString();
-                        delete result;
+                        commandTable[i].SecurityLevel = (uint16)fields[1].GetUInt16();
+                        commandTable[i].Help = fields[2].GetCppString();
+                    }
+                    if(commandTable[i].ChildCommands != NULL)
+                    {
+                        ChatCommand *ptable = commandTable[i].ChildCommands;
+                        for(uint32 j = 0; ptable[j].Name != NULL; j++)
+                        {
+                            if (name == fmtstring("%s %s", commandTable[i].Name, ptable[j].Name))
+                            {
+                                ptable[j].SecurityLevel = (uint16)fields[1].GetUInt16();
+                                ptable[j].Help = fields[2].GetCppString();
+                            }
+                        }
                     }
                 }
-            }
+            } while(result->NextRow());
+            delete result;
         }
-
         first_call = false;
     }
 
