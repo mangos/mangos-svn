@@ -1231,14 +1231,14 @@ void Player::RegenerateHealth()
     switch (Class)
     {
         case DRUID:   addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
-        case HUNTER:  addvalue = (Spirit*0.25)       * HealthIncreaseRate; break;
-        case MAGE:    addvalue = (Spirit*0.17 - 1.7) * HealthIncreaseRate; break;
+        case HUNTER:  addvalue = (Spirit*0.43 - 5.5)       * HealthIncreaseRate; break;
+        case MAGE:    addvalue = (Spirit*0.11 + 1) * HealthIncreaseRate; break;
         case PALADIN: addvalue = (Spirit*0.25)       * HealthIncreaseRate; break;
-        case PRIEST:  addvalue = (Spirit*0.2)        * HealthIncreaseRate; break;
-        case ROGUE:   addvalue = (Spirit*0.8 - 13.8) * HealthIncreaseRate; break;
-        case SHAMAN:  addvalue = (Spirit*0.11)       * HealthIncreaseRate; break;
-        case WARLOCK: addvalue = (Spirit*0.13)       * HealthIncreaseRate; break;
-        case WARRIOR: addvalue = (Spirit*1.5 - 26)   * HealthIncreaseRate; break;
+        case PRIEST:  addvalue = (Spirit*0.15 + 1.4)        * HealthIncreaseRate; break;
+        case ROGUE:   addvalue = (Spirit*0.84 - 13) * HealthIncreaseRate; break;
+        case SHAMAN:  addvalue = (Spirit*0.28 - 3.6)       * HealthIncreaseRate; break;
+        case WARLOCK: addvalue = (Spirit*0.12 + 1.5)       * HealthIncreaseRate; break;
+        case WARRIOR: addvalue = (Spirit*1.26 - 22.6)   * HealthIncreaseRate; break;
     }
 
     if (!isInCombat())
