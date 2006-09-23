@@ -31,6 +31,7 @@
 #include "Database/Database.h"
 #include "Database/DatabaseMysql.h"
 #include "Database/DatabaseSqlite.h"
+#include "Database/DatabaseHandler.h"
 
 extern DatabaseMysql sDatabase;
 extern DatabaseMysql loginDatabase;

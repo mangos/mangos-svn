@@ -28,7 +28,7 @@ class QueryResultSqlite : public QueryResult
 
         ~QueryResultSqlite();
 
-        bool NextRow();
+		int NextRow();
 
     private:
         enum Field::DataTypes ConvertNativeType(const char* sqliteType) const;

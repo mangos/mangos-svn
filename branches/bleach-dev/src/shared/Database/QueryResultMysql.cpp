@@ -18,8 +18,9 @@
 
 #include "DatabaseEnv.h"
 
-QueryResultMysql::QueryResultMysql(MYSQL_RES *result, uint64 rowCount, uint32 fieldCount) :
-QueryResult(rowCount, fieldCount), mResult(result)
+QueryResultMysql::QueryResultMysql(MYSQL_RES *result, uint64 rowCount, uint32 fieldCount) : 
+	QueryResult(rowCount, fieldCount), 
+	mResult(result)
 {
 
     mCurrentRow = new Field[mFieldCount];
@@ -39,24 +40,24 @@ QueryResultMysql::~QueryResultMysql()
     EndQuery();
 }
 
-bool QueryResultMysql::NextRow()
+int QueryResultMysql::NextRow()
 {
     MYSQL_ROW row;
 
     if (!mResult)
-        return false;
+        return -1;
 
     row = mysql_fetch_row(mResult);
     if (!row)
     {
         EndQuery();
-        return false;
+        return 0;
     }
 
     for (uint32 i = 0; i < mFieldCount; i++)
         mCurrentRow[i].SetValue(row[i]);
 
-    return true;
+    return 1;
 }
 
 void QueryResultMysql::EndQuery()

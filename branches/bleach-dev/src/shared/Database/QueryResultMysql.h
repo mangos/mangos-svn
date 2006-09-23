@@ -33,7 +33,7 @@ class QueryResultMysql : public QueryResult
 
         ~QueryResultMysql();
 
-        bool NextRow();
+        int NextRow();
 
     private:
         enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;

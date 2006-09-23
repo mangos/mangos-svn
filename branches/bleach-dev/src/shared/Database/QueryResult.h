@@ -27,7 +27,7 @@ class QueryResult
 
         virtual ~QueryResult() {}
 
-        virtual bool NextRow() = 0;
+        virtual int NextRow() = 0;
 
         Field *Fetch() const { return mCurrentRow; }
 
@@ -37,9 +37,22 @@ class QueryResult
 
         uint64 GetRowCount() const { return mRowCount; }
 
+		
+		
+		/*QueryResult& operator*(const QueryResult* queryRes)
+		{
+			queryRes.mCurrentRow = mCurrentRow;
+			queryRes.SetFieldCount(GetFieldCount());
+			queryRes.SetRowCount(mRowCount);
+		}*/
+
     protected:
-        Field *mCurrentRow;
+		Field *mCurrentRow;
         uint32 mFieldCount;
         uint64 mRowCount;
+
+		/*uint32 SetFieldCount(uint32 mFC) { mFieldCount = mFC; }
+        uint64 SetRowCount(uint64 mRC){ mRowCount = mRC; }  */    
+
 };
 #endif

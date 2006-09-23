@@ -19,8 +19,7 @@
 #ifndef _DATABASEMYSQL_H
 #define _DATABASEMYSQL_H
 
-#include "Policies/Singleton.h"
-#include "zthread/FastMutex.h"
+#include <ace/Recursive_Thread_Mutex.h>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -31,26 +30,24 @@
 
 class DatabaseMysql : public Database
 {
-    friend class MaNGOS::OperatorNew<DatabaseMysql>;
-
     public:
         DatabaseMysql();
         ~DatabaseMysql();
 
         //! Initializes Mysql and connects to a server.
         /*! infoString should be formated like hostname;username;password;database. */
-        bool Initialize(const char *infoString);
+        int Initialize(const char *infoString);
+
         QueryResult* PQuery(const char *format,...);
         QueryResult* Query(const char *sql);
         bool Execute(const char *sql);
         bool PExecute(const char *format,...);
-
+		
         operator bool () const { return mMysql != NULL; }
 
     private:
-        ZThread::FastMutex mMutex;
+        ACE_Recursive_Thread_Mutex mutex_;
         MYSQL *mMysql;
 };
 
-#define sMySqlDatabase MaNGOS::Singleton<DatabaseMysql>::Instance()
 #endif

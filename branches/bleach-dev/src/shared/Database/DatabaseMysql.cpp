@@ -18,36 +18,38 @@
 
 #include "DatabaseEnv.h"
 #include "Util.h"
-#include "Policies/SingletonImp.h"
-
-INSTANTIATE_SINGLETON_1(DatabaseMysql);
-
-using namespace std;
 
 DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
 {
+	ACE_TRACE("DatabaseMysql::DatabaseMysql() : Database(), mMysql(0), m_error(0)");
+
     DatabaseRegistry::RegisterDatabase(this);
 }
 
 DatabaseMysql::~DatabaseMysql()
 {
+	ACE_TRACE("DatabaseMysql::~DatabaseMysql()");
+
     if (mMysql)
         mysql_close(mMysql);
+
 }
 
-bool DatabaseMysql::Initialize(const char *infoString)
+int
+DatabaseMysql::Initialize(const char *infoString)
 {
+	ACE_TRACE("DatabaseMysql::Initialize(const char *infoString)");
+
     MYSQL *mysqlInit;
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
     {
-        sLog.outError( "Could not initialize Mysql" );
-        return false;
+        ACE_ERROR_RETURN ((LM_ERROR, "Could not initialize Mysql.\n"), 0);
     }
 
-    vector<string> tokens = StrSplit(infoString, ";");
+    std::vector<std::string> tokens = StrSplit(infoString, ";");
 
-    vector<string>::iterator iter;
+    std::vector<std::string>::iterator iter;
 
     std::string host, port, user, password, database;
     iter = tokens.begin();
@@ -63,26 +65,24 @@ bool DatabaseMysql::Initialize(const char *infoString)
     if(iter != tokens.end())
         database = *iter++;
 
-    mysql_options(mysqlInit,MYSQL_SET_CHARSET_NAME,"utf8");
-    mMysql = mysql_real_connect(mysqlInit, host.c_str(), user.c_str(),
-        password.c_str(), database.c_str(), atoi(port.c_str()), 0, 0);
+    mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
+
+    mMysql = mysql_real_connect(mysqlInit, host.c_str(), user.c_str(), password.c_str(), database.c_str(), atoi(port.c_str()), 0, 0);
 
     if (mMysql)
-        sLog.outDetail( "Connected to MySQL database at %s\n",
-            host.c_str());
-    else
-        sLog.outError( "Could not connect to MySQL database at %s: %s\n",
-            host.c_str(),mysql_error(mysqlInit));
-
-    if(mMysql)
-        return true;
-    else
-        return false;
+	{
+		ACE_DEBUG( (LM_INFO, "Connected to MySQL database at %s.\n", host.c_str()));
+		return 1;
+	}
+	ACE_ERROR_RETURN ((LM_ERROR, "Could not connect to MySQL database at %s: %s.\n", host.c_str(), mysql_error(mysqlInit)), 0);
 }
 
-QueryResult* DatabaseMysql::PQuery(const char *format,...)
+QueryResult* DatabaseMysql::PQuery(const char *format, ...)
 {
-    if(!format) return NULL;
+	ACE_TRACE("DatabaseMysql::PQuery(const char *format, ...)");
+
+    if(!format)
+		return 0;
 
     va_list ap;
     char szQuery [1024];
@@ -91,10 +91,17 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
     va_end(ap);
 
     return Query(szQuery);
+
 }
 
 QueryResult* DatabaseMysql::Query(const char *sql)
 {
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (mutex_);
+	
+	ACE_TRACE("DatabaseMysql::Query(const char *sql)");
+	
+	ACE_DEBUG((LM_DEBUG, ACE_TEXT("SQL: %s\n"), sql ));
+
     if (!mMysql)
         return 0;
 
@@ -102,64 +109,57 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
-    {
-        // guarded block for thread-safe mySQL request
-        ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
+	if(mysql_query(mMysql, sql))
+	{
+		ACE_DEBUG((LM_ALERT, ACE_TEXT("%I-- %D - %M - MySQL Error(%s) -- %N:%l --\n"), mysql_error(mMysql) ));
+		return NULL;
+	}
 
-        if(mysql_query(mMysql, sql))
-        {
-            DEBUG_LOG( "SQL: %s\n", sql );
-            DEBUG_LOG( (std::string("query ERROR: ") + mysql_error(mMysql)).c_str() );
-            return NULL;
-        }
+	result = mysql_store_result(mMysql);
 
-        result = mysql_store_result(mMysql);
-
-        rowCount = mysql_affected_rows(mMysql);
-        fieldCount = mysql_field_count(mMysql);
-        // end guarded block
-    }
+	rowCount = mysql_affected_rows(mMysql);
+	fieldCount = mysql_field_count(mMysql);
 
     if (!result )
-        return NULL;
+        return 0;
 
     if (!rowCount)
-    {
+	{
         mysql_free_result(result);
-        return NULL;
+        return 0;
     }
 
     QueryResultMysql *queryResult = new QueryResultMysql(result, rowCount, fieldCount);
 
     queryResult->NextRow();
 
-    DEBUG_LOG( "SQL: %s\n", sql );
     return queryResult;
 }
 
 bool DatabaseMysql::Execute(const char *sql)
 {
+	ACE_TRACE("DatabaseMysql::Execute(const char *sql)");
+	
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (mutex_);
+
     if (!mMysql)
         return false;
 
-    {
-        // guarded block for thread-safe mySQL request
-        ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
+	if(mysql_query(mMysql, sql))
+	{
+		ACE_DEBUG( (LM_DEBUG, ACE_TEXT("SQL: %s\n"), sql ));
+		ACE_DEBUG( (LM_DEBUG, ACE_TEXT("query ERROR: %s\n"), mysql_error(mMysql) ));
+		return false;
+	}
 
-        DEBUG_LOG( (std::string("SQL: ") + sql).c_str() );
-        if(mysql_query(mMysql, sql))
-        {
-            DEBUG_LOG( (std::string("SQL ERROR: ") + mysql_error(mMysql)).c_str() );
-            return false;
-        }
-        // end guarded block
-    }
+	ACE_DEBUG( (LM_DEBUG, "SQL: %s.\n", sql ));
 
     return true;
 }
 
-bool DatabaseMysql::PExecute(const char * format,...)
+bool DatabaseMysql::PExecute(const char * format, ...)
 {
+	ACE_TRACE("DatabaseMysql::PExecute(const char *format, ...)");
     if (!format)
         return false;
     va_list ap;

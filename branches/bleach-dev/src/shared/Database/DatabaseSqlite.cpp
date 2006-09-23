@@ -28,7 +28,7 @@ DatabaseSqlite::~DatabaseSqlite()
         sqlite_close(mSqlite);
 }
 
-bool DatabaseSqlite::Initialize(const char *infoString)
+int DatabaseSqlite::Initialize(const char *infoString)
 {
     char *errmsg;
 

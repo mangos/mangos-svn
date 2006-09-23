@@ -16,10 +16,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "ConfigEnv.h"
-#include "Policies/SingletonImp.h"
+#include "Config/ConfigEnv.h"
 
-INSTANTIATE_SINGLETON_1(Config);
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+template class ACE_Singleton<Config, ACE_Recursive_Thread_Mutex>;
+#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+#pragma instantiate ACE_Singleton<Config, ACE_Recursive_Thread_Mutex>
+#elif defined (__GNUC__) && (defined (_AIX) || defined (__hpux))
+template ACE_Singleton<Config, ACE_Recursive_Thread_Mutex> * ACE_Singleton<Config, ACE_Recursive_Thread_Mutex>::singleton_;
+#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
 
 Config::Config() : mConf(0)
 {
@@ -33,7 +38,7 @@ Config::~Config()
 }
 
 
-bool Config::SetSource(const char *file, bool ignorecase)
+bool Config::SetSource(const ACE_TCHAR *file, bool ignorecase)
 {
     mConf = new DOTCONFDocument(ignorecase ?
         DOTCONFDocument::CASEINSENSETIVE :
@@ -50,7 +55,7 @@ bool Config::SetSource(const char *file, bool ignorecase)
 }
 
 
-bool Config::GetString(const char* name, std::string *value)
+bool Config::GetString(const ACE_TCHAR *name, std::string *value)
 {
     if(!mConf)
         return false;
@@ -59,13 +64,12 @@ bool Config::GetString(const char* name, std::string *value)
     if(!node || !node->getValue())
         return false;
 
-    *value = node->getValue();
+	*value = node->getValue();
 
     return true;
 }
 
-
-std::string Config::GetStringDefault(const char* name, const char* def)
+std::string Config::GetStringDefault(const ACE_TCHAR *name, const ACE_TCHAR *def)
 {
     if(!mConf)
         return std::string(def);
@@ -77,8 +81,7 @@ std::string Config::GetStringDefault(const char* name, const char* def)
     return std::string(node->getValue());
 }
 
-
-bool Config::GetBool(const char* name, bool *value)
+bool Config::GetBool(const ACE_TCHAR *name, bool *value)
 {
     if(!mConf)
         return false;
@@ -87,7 +90,7 @@ bool Config::GetBool(const char* name, bool *value)
     if(!node || !node->getValue())
         return false;
 
-    const char* str = node->getValue();
+    const ACE_TCHAR* str = node->getValue();
     if(strcmp(str, "true") == 0 || strcmp(str, "TRUE") == 0 ||
         strcmp(str, "yes") == 0 || strcmp(str, "YES") == 0 ||
         strcmp(str, "1") == 0)
@@ -101,14 +104,14 @@ bool Config::GetBool(const char* name, bool *value)
 }
 
 
-bool Config::GetBoolDefault(const char* name, const bool def)
+bool Config::GetBoolDefault(const ACE_TCHAR* name, const bool def)
 {
     bool val;
     return GetBool(name, &val) ? val : def;
 }
 
 
-bool Config::GetInt(const char* name, int *value)
+bool Config::GetInt(const ACE_TCHAR* name, int *value)
 {
     if(!mConf)
         return false;
@@ -123,7 +126,7 @@ bool Config::GetInt(const char* name, int *value)
 }
 
 
-bool Config::GetFloat(const char* name, float *value)
+bool Config::GetFloat(const ACE_TCHAR* name, float *value)
 {
     if(!mConf)
         return false;
@@ -138,14 +141,14 @@ bool Config::GetFloat(const char* name, float *value)
 }
 
 
-int Config::GetIntDefault(const char* name, const int def)
+int Config::GetIntDefault(const ACE_TCHAR* name, const int def)
 {
     int val;
     return GetInt(name, &val) ? val : def;
 }
 
 
-float Config::GetFloatDefault(const char* name, const float def)
+float Config::GetFloatDefault(const ACE_TCHAR* name, const float def)
 {
     float val;
     return (GetFloat(name, &val) ? val : def);

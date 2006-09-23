@@ -28,7 +28,7 @@ class Database
 
         virtual ~Database() {}
 
-        virtual bool Initialize(const char *infoString) = 0;
+        virtual int Initialize(const char *infoString) = 0;
 
         virtual QueryResult* Query(const char *sql) = 0;
         virtual QueryResult* PQuery(const char *format,...) = 0;

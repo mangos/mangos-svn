@@ -16,10 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined (CONFIG_H)
-#define CONFIG_H
+#ifndef _DOTCONFIG_H
+#define _DOTCONFIG_H
 
-#include <Policies/Singleton.h>
+#include <ace/Singleton.h>
 
 class Config 
 {
@@ -27,23 +27,25 @@ class Config
         Config();
         ~Config();
 
-        bool SetSource(const char *file, bool ignorecase = true);
+        bool SetSource(const ACE_TCHAR *file, bool ignorecase = true);
 
-        bool GetString(const char* name, std::string *value);
-        std::string GetStringDefault(const char* name, const char* def);
+        bool GetString(const ACE_TCHAR* name, std::string *value);
+        std::string GetStringDefault(const ACE_TCHAR* name, const ACE_TCHAR* def);
 
-        bool GetBool(const char* name, bool *value);
-        bool GetBoolDefault(const char* name, const bool def = false);
+        bool GetBool(const ACE_TCHAR* name, bool *value);
+        bool GetBoolDefault(const ACE_TCHAR* name, const bool def = false);
 
-        bool GetInt(const char* name, int *value);
-        int GetIntDefault(const char* name, const int def);
+        bool GetInt(const ACE_TCHAR* name, int *value);
+        int GetIntDefault(const ACE_TCHAR* name, const int def);
 
-        bool GetFloat(const char* name, float *value);
-        float GetFloatDefault(const char* name, const float def);
+        bool GetFloat(const ACE_TCHAR* name, float *value);
+        float GetFloatDefault(const ACE_TCHAR* name, const float def);
 
     private:
         DOTCONFDocument *mConf;
 };
 
-#define sConfig MaNGOS::Singleton<Config>::Instance()
+typedef ACE_Singleton<Config, ACE_Recursive_Thread_Mutex> ConfigSingleton;
+#define sConfig ConfigSingleton::instance()
+
 #endif

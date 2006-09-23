@@ -37,7 +37,7 @@ QueryResultSqlite::~QueryResultSqlite()
     EndQuery();
 }
 
-bool QueryResultSqlite::NextRow()
+int QueryResultSqlite::NextRow()
 {
     int startIndex;
     uint32 i;
