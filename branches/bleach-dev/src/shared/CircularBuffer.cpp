@@ -26,8 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <string.h>
 
-#include "Socket.h"
-#include "SocketHandler.h"
 #include "CircularBuffer.h"
 
 #ifdef _DEBUG
@@ -36,9 +34,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEB(x)
 #endif
 
-CircularBuffer::CircularBuffer(Socket& owner,size_t size)
-:m_owner(owner)
-,buf(new char[size])
+CircularBuffer::CircularBuffer(/*Socket& owner,*/size_t size)
+:/*m_owner(owner)
+,*/buf(new char[size])
 ,m_max(size)
 ,m_q(0)
 ,m_b(0)
@@ -58,7 +56,7 @@ bool CircularBuffer::Write(const char *s,size_t l)
 {
     if (m_q + l > m_max)
     {
-        m_owner.Handler().LogError(&m_owner, "CircularBuffer::Write", -1, "write buffer overflow");
+        //m_owner.Handler().LogError(&m_owner, "CircularBuffer::Write", -1, "write buffer overflow");
         return false;                             // overflow
     }
     m_count += (unsigned long)l;
@@ -86,7 +84,7 @@ bool CircularBuffer::Read(char *s,size_t l)
 {
     if (l > m_q)
     {
-        m_owner.Handler().LogError(&m_owner, s ? "CircularBuffer::Read" : "CircularBuffer::Write", -1, "attempt to read beyond buffer");
+        //m_owner.Handler().LogError(&m_owner, s ? "CircularBuffer::Read" : "CircularBuffer::Write", -1, "attempt to read beyond buffer");
         return false;                             // not enough chars
     }
     if (m_b + l > m_max)                          // block crosses circular border

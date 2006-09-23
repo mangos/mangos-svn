@@ -19,7 +19,7 @@ INCLUDES += -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework
 ## we don't want to need this here
 INCLUDES += -I$(srcdir)/../game -I$(srcdir)/../realmd 
 
-noinst_LIBRARIES = libshared.a libauth.a libconfig.a libdatabase.a libnetwork.a
+noinst_LIBRARIES = libshared.a libauth.a libconfig.a libdatabase.a
 
 libshared_a_SOURCES = \
     Base.h \
@@ -37,11 +37,15 @@ libshared_a_SOURCES = \
     Mthread.cpp \
     ProgressBar.h \
     ProgressBar.cpp \
-    Singleton.h \
     Timer.h \
     Util.h \
     Util.cpp \
-    WorldPacket.h
+    WorldPacket.h \
+    CircularBuffer.cpp \
+    CircularBuffer.h \
+    AuthCodes.h \
+    Configuration.cpp \
+    Configuration.h
 
 
 libauth_a_SOURCES = \
@@ -87,42 +91,9 @@ libdatabase_a_SOURCES = \
     Database/QueryResultSqlite.h \
     Database/DataStore.h \
     Database/DatabaseMysql.h \
-    Database/QueryResult.h 
-
-libnetwork_a_SOURCES = \
-    Network/Base64.cpp \
-    Network/Base64.h \
-    Network/CircularBuffer.cpp \
-    Network/CircularBuffer.h \
-    Network/ListenSocket.h \
-    Network/Parse.cpp \
-    Network/Parse.h \
-    Network/PoolSocket.cpp \
-    Network/PoolSocket.h \
-    Network/ResolvServer.cpp \
-    Network/ResolvServer.h \
-    Network/ResolvSocket.cpp \
-    Network/ResolvSocket.h \
-    Network/Socket.cpp \
-    Network/Socket.h \
-    Network/SocketHandler.cpp \
-    Network/SocketHandler.h \
-    Network/socket_include.cpp \
-    Network/socket_include.h \
-    Network/SocketThread.cpp \
-    Network/SocketThread.h \
-    Network/StdLog.h \
-    Network/StdoutLog.cpp \
-    Network/StdoutLog.h \
-    Network/TcpSocket.cpp \
-    Network/TcpSocket.h \
-    Network/Thread.cpp \
-    Network/Thread.h \
-    Network/UdpSocket.cpp \
-    Network/UdpSocket.h \
-    Network/Utility.cpp \
-    Network/Utility.h
-
+    Database/QueryResult.h \
+    Database/DatabaseHandler.h \
+    Database/DatabaseHandler.cpp
 
 # use our configured sysconfdir
 sysconfdir = @MANGOSD_CONFIGDIR@

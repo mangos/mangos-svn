@@ -73,10 +73,16 @@
 #include <sstream>
 #include <algorithm>
 
+#include <ace/Basic_Types.h>
+#include <ace/OS.h>
+#include <ace/Guard_T.h>
+#include <ace/Recursive_Thread_Mutex.h>
+#include <ace/Log_Msg.h>
+
 #include <zthread/FastMutex.h>
 #include <zthread/LockedQueue.h>
 #include <zthread/Runnable.h>
-#include <zthread/Thread.h>
+//#include <zthread/Thread.h>
 
 #if PLATFORM == PLATFORM_WIN32
 #  include <winsock2.h>

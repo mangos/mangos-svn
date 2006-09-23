@@ -25,16 +25,27 @@
 
 INSTANTIATE_SINGLETON_1( Log );
 
+/*#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+template class ACE_Singleton<Log, ACE_Recursive_Thread_Mutex>;
+#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+#pragma instantiate ACE_Singleton<Log, ACE_Recursive_Thread_Mutex>
+#elif defined (__GNUC__) && (defined (_AIX) || defined (__hpux))
+template ACE_Singleton<Log, ACE_Recursive_Thread_Mutex> * ACE_Singleton<Log, ACE_Recursive_Thread_Mutex>::singleton_;
+#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
+
+
+
 void Log::Initialize()
 {
-    std::string logfn=sConfig.GetStringDefault("ServerLogFile", "Server.log");
+   /* std::string logfn=sConfig.GetStringDefault("ServerLogFile", "Server.log");
     logfile = fopen(logfn.c_str(), "w");
-    m_logLevel = sConfig.GetIntDefault("LogLevel", 0);
+    m_logLevel = sConfig.GetIntDefault("LogLevel", 0);*/
 }
 
 void Log::outString( const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+		return;
     va_list ap;
     va_start(ap, str);
     vprintf( str, ap );
@@ -157,7 +168,7 @@ void Log::outMenu( const char * str, ... )
 
 void debug_log(const char * str, ...)
 {
-    if( !str ) return;
+    if( !str )return;
 
     char buf[100];
     va_list ap;

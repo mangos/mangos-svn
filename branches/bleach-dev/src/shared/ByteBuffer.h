@@ -22,7 +22,9 @@
 #include "Common.h"
 #include "Errors.h"
 
-class ByteBuffer
+#include <ace/Message_Block.h>
+
+class ByteBuffer : public ACE_Message_Block
 {
     public:
         class error
@@ -250,10 +252,10 @@ class ByteBuffer
         }
         void print_storage()
         {
-            printf("STORAGE_SIZE: %u\n", size() );
+            ACE_DEBUG((LM_DEBUG, "STORAGE_SIZE: %u\n", size() ));
             for(uint32 i = 0; i < size(); i++)
-                printf("%u - ", read<uint8>(i) );
-            printf("\n");
+                ACE_DEBUG((LM_DEBUG, "%u - ", read<uint8>(i) ));
+            ACE_DEBUG((LM_DEBUG, "\n"));
         }
 
         void textlike()
@@ -261,24 +263,24 @@ class ByteBuffer
             printf("STORAGE_SIZE: %u\n", size() );
             for(uint32 i = 0; i < size(); i++)
                 printf("%c", read<uint8>(i) );
-            printf("\n");
+            ACE_DEBUG((LM_DEBUG, "\n"));
         }
 
         void hexlike()
         {
             uint32 j = 1, k = 1;
-            printf("STORAGE_SIZE: %u\n", size() );
+            ACE_DEBUG((LM_DEBUG, "STORAGE_SIZE: %u\n", size() ));
             for(uint32 i = 0; i < size(); i++)
             {
                 if ((i == (j*8)) && ((i != (k*16))))
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        printf("| 0%X ", read<uint8>(i) );
+                        ACE_DEBUG((LM_DEBUG, "| 0%X ", read<uint8>(i) ));
                     }
                     else
                     {
-                        printf("| %X ", read<uint8>(i) );
+                       ACE_DEBUG((LM_DEBUG, "| %X ", read<uint8>(i) ));
                     }
 
                     j++;
@@ -287,11 +289,11 @@ class ByteBuffer
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        printf("\n0%X ", read<uint8>(i) );
+                        ACE_DEBUG((LM_DEBUG, "\n0%X ", read<uint8>(i) ));
                     }
                     else
                     {
-                        printf("\n%X ", read<uint8>(i) );
+                        ACE_DEBUG((LM_DEBUG, "\n%X ", read<uint8>(i) ));
                     }
 
                     k++;
@@ -301,16 +303,15 @@ class ByteBuffer
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        printf("0%X ", read<uint8>(i) );
+                        ACE_DEBUG((LM_DEBUG, "0%X ", read<uint8>(i) ));
                     }
                     else
                     {
-                        printf("%X ", read<uint8>(i) );
+                        ACE_DEBUG((LM_DEBUG, "%X ", read<uint8>(i) ));
                     }
                 }
             }
-            printf("\n");
-
+            ACE_DEBUG((LM_DEBUG, "\n"));
         }
 
     protected:

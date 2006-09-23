@@ -28,7 +28,7 @@ class Socket;
 class CircularBuffer
 {
     public:
-        CircularBuffer(Socket& owner,size_t size);
+        CircularBuffer(/*Socket& owner,*/size_t size);
         ~CircularBuffer();
 
 /** append l bytes from p to buffer */
@@ -53,10 +53,10 @@ class CircularBuffer
         unsigned long ByteCounter() { return m_count; }
 
     private:
-        Socket& GetOwner() const { return m_owner; }
-        CircularBuffer(const CircularBuffer& s) : m_owner( s.GetOwner() ) {}
+        //Socket& GetOwner() const { return m_owner; }
+        CircularBuffer(const CircularBuffer& s) /*: m_owner( s.GetOwner() )*/ {}
         CircularBuffer& operator=(const CircularBuffer& ) { return *this; }
-        Socket& m_owner;
+        //Socket& m_owner;
         char *buf;
         size_t m_max;
         size_t m_q;
