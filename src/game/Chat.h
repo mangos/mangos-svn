@@ -218,6 +218,7 @@ class ChatHandler
         bool HandleListAurasCommand (const char * args);
         bool HandleSearchTeleCommand(const char * args);
         bool HandleResetCommand (const char * args);
+        bool HandleFixUnlearnCommand (const char * args);
         bool HandleTicketCommand(const char* args);
         bool HandleDelTicketCommand(const char* args);
         bool HandleMaxSkillCommand(const char* args);

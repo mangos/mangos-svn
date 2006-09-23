@@ -199,6 +199,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_SKILL_STEP:
                 case SPELL_EFFECT_SELF_RESURRECT:
                 case SPELL_EFFECT_RESURRECT_NEW:
+                case SPELL_EFFECT_PROFICIENCY:
                     tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
                 case SPELL_EFFECT_SKILL:
