@@ -19,10 +19,8 @@
 #ifndef _REALMLIST_H
 #define _REALMLIST_H
 
-#include "Network/socket_include.h"
-#include "Policies/Singleton.h"
+#include <ace/Singleton.h>
 #include "Database/DatabaseEnv.h"
-#include "SystemConfig.h"
 
 struct Realm
 {
@@ -36,6 +34,7 @@ struct Realm
     uint8 color;
 
     uint8 timezone;
+	uint32 player_limit;
     uint32 m_ID;
 
     // Leave these db functions commented out in case we need to maintain connections
@@ -45,7 +44,7 @@ struct Realm
     //    DatabaseMysql dbRealm;
 
                                                             //, std::string dbstring)
-    Realm (uint32 ID, const char *Name, std::string Address, uint8 Icon, uint8 Color, uint8 Timezone)
+    Realm (uint32 ID, const char *Name, std::string Address, uint8 Icon, uint8 Color, uint8 Timezone, uint32 pl)
     {
         m_ID = ID;
         name = Name;
@@ -55,6 +54,7 @@ struct Realm
         icon = Icon;
         color = Color;
         timezone = Timezone;
+		player_limit = pl;
     }
 
     //    int dbinit()
@@ -75,30 +75,21 @@ class RealmList
         RealmList();
         ~RealmList();
 
-                                                            //, const char *dbstring );
-        void AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone);
+        void AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone, uint32 pl);
         int GetAndAddRealms(std::string dbstring);
-        void SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone );
+        void SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone, uint32 pl);
 
-        RealmMap::const_iterator begin() const { return _realms.begin(); }
-        RealmMap::const_iterator end() const { return _realms.end(); }
-        uint32 size() const { return _realms.size(); }
+        inline RealmMap::const_iterator begin() const { return _realms.begin(); }
+        inline RealmMap::const_iterator end() const { return _realms.end(); }
+        inline uint32 size() const { return _realms.size(); }
 
     private:
         RealmMap _realms;
-        /*
-                struct Patch
-                {
-                    uint8 Hash[16];
-                    char Platform[4];
-                };
-
-                //typedef std::map <uint32, Patch*> PatchMap;
-           //     PatchMap _patches;
-
-           */
 };
 
-//#define sRealmList MaNGOS::Singleton<RealmList>::Instance()
-extern DatabaseMysql dbRealmServer;
+typedef ACE_Singleton<RealmList, ACE_Recursive_Thread_Mutex> RealmListSingleton;
+#define sRealmList RealmListSingleton::instance()
+
+extern DatabaseMysql stDatabaseMysql;
+
 #endif

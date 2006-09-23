@@ -18,9 +18,15 @@
 
 #include "Common.h"
 #include "RealmList.h"
-#include "Policies/SingletonImp.h"
+#include "SystemConfig.h"
 
-INSTANTIATE_SINGLETON_1( RealmList );
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+template class ACE_Singleton<RealmList, ACE_Recursive_Thread_Mutex>;
+#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+#pragma instantiate ACE_Singleton<RealmList, ACE_Recursive_Thread_Mutex>
+#elif defined (__GNUC__) && (defined (_AIX) || defined (__hpux))
+template ACE_Singleton<RealmList, ACE_Recursive_Thread_Mutex> * ACE_Singleton<RealmList, ACE_Recursive_Thread_Mutex>::singleton_;
+#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
 
 RealmList::RealmList( )
 {
@@ -43,14 +49,15 @@ int RealmList::GetAndAddRealms(std::string dbstring)
 {
     int count = 0;
     //QueryResult *result = dbRealmServer.PQuery( "SELECT `name`,`address`,`icon`,`color`,`timezone`, `dbstring` FROM `realmlist` ORDER BY `name`;" );
-    QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`;" );
+    QueryResult *result = stDatabaseMysql.PQuery( "SELECT `id`, `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`;" );
+
     if(result)
     {
         do
         {
             Field *fields = result->Fetch();
                                                             //, fields[5].GetString());
-            AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt8(), fields[4].GetUInt8(), fields[5].GetUInt8());
+            AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt8(), fields[4].GetUInt8(), fields[5].GetUInt8(), 0);
             count++;
         } while( result->NextRow() );
         delete result;
@@ -65,12 +72,12 @@ int RealmList::GetAndAddRealms(std::string dbstring)
 }
 
                                                             //, const char *dbstring )
-void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone)
+void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone, uint32 pl)
 {
     if( _realms.find( name ) == _realms.end() )
     {
                                                             //, dbstring);
-        Realm *newRealm = new Realm(ID, name, address, icon, color, timezone);
+        Realm *newRealm = new Realm(ID, name, address, icon, color, timezone, pl);
 
         //        sLog.outString("Realm \"%s\", database \"%s\"", newRealm->name.c_str(), newRealm->m_dbstring.c_str() );
         //        if (dbstring[0] == 0) {
@@ -94,17 +101,18 @@ void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint
         }
         newRealm->address = addr;
         _realms[name] = newRealm;
-        sLog.outString("Added realm \"%s\".", newRealm->name.c_str());
+        ACE_DEBUG ( (LM_INFO, "Added realm \"%s\"", newRealm->name.c_str()) );
         //        }
     }
 }
 
-void RealmList::SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone )
+void RealmList::SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone , uint32 pl)
 {
     if( _realms.find( name ) != _realms.end( ) )
     {
         _realms[ name ]->icon = icon;
         _realms[ name ]->color = color;
         _realms[ name ]->timezone = timezone;
+		_realms[ name ]->player_limit = pl;
     }
 }

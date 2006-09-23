@@ -19,175 +19,219 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "RealmList.h"
-
 #include "Config/ConfigEnv.h"
 #include "Log.h"
-#include "Network/SocketHandler.h"
-#include "Network/ListenSocket.h"
-#include "AuthSocket.h"
 #include "SystemConfig.h"
 
-#include <signal.h>
-#include <iostream>
-bool StartDB(std::string &dbstring);
-void UnhookSignals();
-void HookSignals();
-//uint8 loglevel = DEFAULT_LOG_LEVEL;
+#include <ace/Event_Handler.h>
+#include <ace/OS.h>
+#include <ace/Log_Msg.h>
+#include <ace/Thread_Manager.h>
+#include <ace/TP_Reactor.h>
+#include <ace/Get_Opt.h>
+#include <ace/Service_Config.h>
+#include <ace/ARGV.h>
 
-bool stopEvent = false;
-RealmList m_realmList;
-DatabaseMysql dbRealmServer;
+#include "RealmAcceptor.h"
 
-int usage(const char *prog)
+DatabaseMysql stDatabaseMysql;
+
+/**
+ * This is the function Handles any signal that has happened.
+ *
+ * @param arg is expected to be of type (int signum)
+ */ 
+static void external_handler (int signum)
 {
-    sLog.outString("Usage: \n %s -c config_file [%s]",prog,_MANGOSD_CONFIG);
-    exit(1);
+	ACE_DEBUG ((LM_DEBUG, "\nsignal %S occurred in external handler!", signum));
+}
+
+/**
+ * This is the function initialize the Database.
+ *
+ * @param arg is expected to be of type (std::string &dbstring)
+ */
+
+static int StartDB(std::string &dbstring)
+{
+	ACE_TRACE("StartDB(std::string &dbstring)");
+
+    if(!sConfig->GetString("LoginDatabaseInfo", &dbstring))
+    {
+		ACE_ERROR_RETURN ((LM_ERROR, "Database not specified.\n"), -1);
+    }
+	ACE_DEBUG ((LM_DEBUG, ACE_TEXT("Database: %s\n"), dbstring.c_str()));
+    if(!stDatabaseMysql.Initialize(dbstring.c_str()))
+    {
+		ACE_ERROR_RETURN ((LM_ERROR, "Cannot connect to database.\n"), -1);
+    }
+    // Right now we just clear all logged in accounts on boot up
+    // We should query the realms and ask them.
+    stDatabaseMysql.PExecute("UPDATE `account` SET `online` = 0;");
+    ACE_RETURN(0);
+}
+
+/**
+ * This is variable is used to show realmd usage.
+ *
+ */
+const ACE_TCHAR usage_[] =
+ACE_TEXT( "usage: realmd [options]\n" )
+ACE_TEXT( "options:\n" )
+ACE_TEXT( "    -f , --foreground\n" )
+ACE_TEXT( "        Runs daemon on foreground.\n" )
+ACE_TEXT( "        Output is directed to console. Default output is to log file.\n" )
+ACE_TEXT( "    -c , --config\n" )
+ACE_TEXT( "        Sets configuration file to use. Default configuration file is used.\n" )
+ACE_TEXT( "    -d, --debug\n" )
+ACE_TEXT( "        Output debug messages.\n" )
+ACE_TEXT( "    -v V, --verbose=V\n" )
+ACE_TEXT( "        Sets verbose level. Default is 2.\n" )
+ACE_TEXT( "        0 - Prepends timestamp and message priority to each message.\n" )
+ACE_TEXT( "        1 - Prepends timestamp and message priority to each message.\n" )
+ACE_TEXT( "        2 - Verbose is disable.\n" );
+
+/**
+ * This is the function run by all threads in the thread pool.
+ *
+ * @param arg is expected to be of type (ACE_Reactor *)
+ */
+ACE_THR_FUNC_RETURN RealmdthreadFunc(void *arg)
+{
+    ACE_TRACE("RealmdthreadFunc(void *)");
+
+	ACE_Reactor *reactor = (ACE_Reactor *) arg;
+	reactor->run_reactor_event_loop();
+
     return 0;
 }
 
-int main(int argc, char **argv)
+/**
+ * The main function sets up the TP reactor.
+ */
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-    std::string cfg_file = _REALMD_CONFIG;
-    int c=1;
-    while( c < argc )
-    {
-        const char *tmp = argv[c];
-        if( *tmp == '-' && std::string(tmp +1) == "c" )
-        {
-            if( ++c >= argc )
-            {
-                std::cerr << "Runtime-Error: -c option requires an input argument" << std::endl;
-                usage(argv[0]);
-            }
-            else
-                cfg_file = argv[c];
-        }
-        else
-        {
-            std::cerr << "Runtime-Error: unsupported option " << tmp << std::endl;
+	ACE_Get_Opt get_opt (argc, argv, ACE_TEXT ("f:"));
 
-        }
-        ++c;
-    }
+    get_opt.long_option( ACE_TEXT( "foreground" ),	'f', ACE_Get_Opt::NO_ARG );
+	/*get_opt.long_option( ACE_TEXT( "debug" ),		'd', ACE_Get_Opt::NO_ARG );
+    get_opt.long_option( ACE_TEXT( "verbose" ),		'v',ACE_Get_Opt::ARG_REQUIRED );
+	get_opt.long_option( ACE_TEXT( "config" ),		'c',ACE_Get_Opt::ARG_REQUIRED );*/
 
-    if (!sConfig.SetSource(cfg_file.c_str()))
-    {
-        sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
-    }
-    else
-    {
-        sLog.outString("\nUsing configuration file %s.", cfg_file.c_str());
-    }
+	ACE_UINT32 debug = 0;
+	ACE_UINT32 foreground = 0;
+	ACE_UINT32 verbose = 2;
 
+	ACE_TString cfg = _REALMD_CONFIG;
+	ACE_TString longopt;
+
+	int c;
+	while ((c = get_opt()) != -1)
+	{
+		switch (c)
+		{
+			case 'f': foreground = 1; break;
+			/*case 'd': debug = 1; break;
+			case 'v': verbose = ACE_OS::atoi(get_opt.opt_arg()); break;
+			case 'c': cfg = get_opt.opt_arg(); break;*/
+			case 0:	longopt = get_opt.long_option();
+				if( longopt == "foreground" )
+				{
+					foreground = 1;
+				} 
+				/*else if( longopt == "debug" )
+				{
+					debug = 1;
+				}
+				else if ( longopt == "verbose" )
+				{
+					verbose = ACE_OS::atoi(get_opt.opt_arg());
+				}
+				else if ( longopt == "config" )
+				{
+					cfg = get_opt.opt_arg();
+				}
+				else if (longopt == "help")
+				{
+					ACE_ERROR_RETURN(( LM_ERROR, usage_ ), 0 );
+				}*/
+				else
+					ACE_ERROR_RETURN(( LM_ERROR, usage_ ), 0 );
+				break;
+			default:  ACE_ERROR_RETURN(( LM_ERROR, usage_ ), 0 );
+		}
+	}
+    if (!sConfig->SetSource(cfg.c_str()))
+    {
+		ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("Could not find configuration file %s\n"), cfg.c_str()), -1);
+    }
+	
+	std::string logfile = sConfig->GetStringDefault("RealmServerLogFile", "realmd.log");
+
+	/*LogCallback *logcallback = 0;
+	ACE_NEW_NORETURN (logcallback, LogCallback(argv[0], logfile.c_str(), debug, verbose));
+	if (logcallback == 0)
+	{
+		ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("[%D]:%M:%N:%l: ") ACE_TEXT("Failed to allocate logcallback.") ACE_TEXT ("(errno = %i: %m)\n"), errno), -1);
+	}
+	ACE_LOG_MSG->set_flags (ACE_Log_Msg::MSG_CALLBACK);
+	ACE_LOG_MSG->msg_callback (logcallback);
+
+	if(foreground == 0)
+	{
+		ACE_LOG_MSG->clr_flags (ACE_Log_Msg::STDERR);
+		ACE::daemonize(ACE_TEXT("/"), 0, argv[0]);
+	}*/
+	ACE_DEBUG ( (LM_INFO, ACE_TEXT("MaNGOS realm daemon %s\n"), _FULLVERSION) );
+	ACE_DEBUG ( (LM_INFO, ACE_TEXT("Using configuration file %s.\n"), cfg.c_str() ));
+    
     // Non-critical warning about conf file version
-    uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
+    uint32 confVersion = sConfig->GetIntDefault("ConfVersion", 0);
     if (confVersion < _REALMDCONFVERSION)
     {
-        sLog.outString("*****************************************************************************");
-        sLog.outString(" WARNING: Your realmd.conf version indicates your conf file is out of date!");
-        sLog.outString("          Please check for updates, as your current default values may cause");
-        sLog.outString("          strange behavior.");
-        sLog.outString("*****************************************************************************");
+        ACE_DEBUG ( (LM_WARNING, ACE_TEXT ("*****************************************************************************\n") ));
+        ACE_DEBUG ( (LM_WARNING, ACE_TEXT (" WARNING: Your realmd.conf version indicates your conf file is out of date!\n") ));
+        ACE_DEBUG ( (LM_WARNING, ACE_TEXT ("          Please check for updates, as your current default values may cause\n") ));
+        ACE_DEBUG ( (LM_WARNING, ACE_TEXT ("          strange behavior.\n") ));
+        ACE_DEBUG ( (LM_WARNING, ACE_TEXT ("*****************************************************************************\n") ));
         clock_t pause = 3000 + clock();
         while (pause > clock());
     }
 
-    sLog.outString( "MaNGOS realm daemon %s", _FULLVERSION );
-    sLog.outString( "<Ctrl-C> to stop.\n" );
+	// create a reactor from a TP reactor
+    ACE_TP_Reactor tpReactor;
+    ACE_Reactor reactor(&tpReactor);
 
-    std::string dbstring;
-    StartDB(dbstring);
+	RealmAcceptor peer_acceptor;
+	
+	if (peer_acceptor.open (ACE_INET_Addr (3724),
+                          &reactor, ACE_NONBLOCK) == -1)
+    ACE_ERROR_RETURN ((LM_ERROR,
+                       "%p\n",
+                       "open"),
+                      -1);
 
-    //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
-
-    port_t rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-
-    m_realmList.GetAndAddRealms(dbstring);
-    if (m_realmList.size() == 0)
+	std::string dbstring;
+    if(StartDB(dbstring))
+	{
+		ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT("[%D]:%M:%N:%l: ") ACE_TEXT("Couldn't Start Database.\n")), -1);
+	}
+	sRealmList->GetAndAddRealms(dbstring);
+    if (sRealmList->size() == 0)
     {
-        sLog.outError("No valid realms specified.");
-        exit(1);
+		ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT("[%D]:%M:%N:%l: ") ACE_TEXT("No valid realms specified.\n")), -1);
     }
 
-    SocketHandler h;
-    ListenSocket<AuthSocket> authListenSocket(h);
-    if ( authListenSocket.Bind(rmport))
-    {
-        sLog.outString( "MaNGOS realmd can not bind to port %d", rmport );
-        exit(1);
-    }
-
-    h.Add(&authListenSocket);
-
-    HookSignals();
-
-    while (!stopEvent)
-        h.Select(0, 100000);
-
-    UnhookSignals();
-
-    sLog.outString( "Halting process..." );
-    return 0;
+    ACE_Thread_Manager::instance()->spawn_n(sConfig->GetIntDefault("RealmNumberOfThreads", 5), RealmdthreadFunc, &reactor);
+	
+	ACE_Thread_Manager::instance()->wait();
+	return 0;
 }
 
-void OnSignal(int s)
-{
-    switch (s)
-    {
-        case SIGINT:
-        case SIGQUIT:
-        case SIGTERM:
-        case SIGABRT:
-            stopEvent = true;
-            break;
-        #ifdef _WIN32
-        case SIGBREAK:
-            stopEvent = true;
-            break;
-        #endif
-    }
-
-    signal(s, OnSignal);
-}
-
-bool StartDB(std::string &dbstring)
-{
-    if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
-    {
-        sLog.outError("Database not specified");
-        exit(1);
-    }
-
-    sLog.outString("Database: %s", dbstring.c_str() );
-    if(!dbRealmServer.Initialize(dbstring.c_str()))
-    {
-        sLog.outError("Cannot connect to database");
-        exit(1);
-
-    }
-
-    return true;
-}
-
-void HookSignals()
-{
-    signal(SIGINT, OnSignal);
-    signal(SIGQUIT, OnSignal);
-    signal(SIGTERM, OnSignal);
-    signal(SIGABRT, OnSignal);
-    #ifdef _WIN32
-    signal(SIGBREAK, OnSignal);
-    #endif
-}
-
-void UnhookSignals()
-{
-    signal(SIGINT, 0);
-    signal(SIGQUIT, 0);
-    signal(SIGTERM, 0);
-    signal(SIGABRT, 0);
-    #ifdef _WIN32
-    signal(SIGBREAK, 0);
-    #endif
-
-}
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+template class ACE_Acceptor <RealmHandler, ACE_SOCK_ACCEPTOR>;
+template class ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>;
+#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+#pragma instantiate ACE_Acceptor <RealmHandler, ACE_SOCK_ACCEPTOR>
+#pragma instantiate ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
+#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
