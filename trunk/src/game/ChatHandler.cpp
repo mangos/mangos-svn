@@ -197,11 +197,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
-    uint32 text_emote, unk;
+    uint32 text_emote, emoteNum;
     uint64 guid;
 
     recv_data >> text_emote;
-    recv_data >> unk;
+    recv_data >> emoteNum;
     recv_data >> guid;
 
     const char *nam = 0;
@@ -237,7 +237,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         data.Initialize(SMSG_TEXT_EMOTE);
         data << GetPlayer()->GetGUID();
         data << (uint32)text_emote;
-        data << (uint32)0xFF;
+        data << emoteNum;
         data << (uint32)namlen;
         if( namlen > 1 )
         {
