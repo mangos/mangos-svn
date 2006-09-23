@@ -21,6 +21,16 @@
 
 #include "Common.h"
 
+#include <ace/Event_Handler.h>
+#include <ace/Message_Queue.h>
+#include <ace/Synch.h>
+#include <ace/Reactor.h>
+
+
+#define MOVEMENT_WALKING 0x100
+#define MOVEMENT_JUMPING 0x2000
+#define MOVEMENT_FALLING 0x6000
+
 struct ItemPrototype;
 
 class Player;
@@ -41,40 +51,46 @@ enum SessionStatus
     STATUS_LOGGEDIN
 };
 
-class MANGOS_DLL_SPEC WorldSession
+enum eSessionTimers
+{
+	STIMER_NOTSET = -1,
+	STIMER_LOGOUT = 1,
+	STIMER_MAX
+};
+
+class MANGOS_DLL_SPEC WorldSession : public ACE_Event_Handler
 {
     public:
         WorldSession(uint32 id, WorldSocket *sock);
         ~WorldSession();
 
-        void SendPacket(WorldPacket* packet);
+		void SetSocket(WorldSocket *sock);
+		int QueuePacket(WorldPacket& packet);
+        int SendPacket(WorldPacket* packet);
+		//int Update(WorldPacket& packet);
+		int Update(uint32 diff);
 
-        uint32 GetSecurity() const { return _security; }
+		int LogoutPlayer(int Save, int fast);
+
+		
+		ACE_INLINE
+		uint32 GetSecurity() const { return _security; }
+		ACE_INLINE
         uint32 GetAccountId() const { return _accountId; }
+		ACE_INLINE
         Player* GetPlayer() { return _player; }
-        void SetSecurity(uint32 security) { _security = security; }
-        void SetSocket(WorldSocket *sock);
+		ACE_INLINE
+		void SetSecurity(uint32 security) { _security = security; }
+		ACE_INLINE
         void SetPlayer(Player *plr) { _player = plr; }
+		ACE_INLINE
+        int isLogingOut() { if (_logoutTime) return 1; return 0; }
+        /*ACE_INLINE
+		void LogoutRequest(time_t requestTime) { _logoutTime = requestTime; }*/
+		ACE_INLINE
+        int ShouldLogOut(time_t currTime) { if(_logoutTime > 0 && currTime >= _logoutTime + 20) return 1; return 0; }
 
-        bool isLogingOut()
-        {
-            if (_logoutTime) return true;
-            else return false;
-        }
-        void LogoutRequest(time_t requestTime)
-        {
-            _logoutTime = requestTime;
-        }
-
-        bool ShouldLogOut(time_t currTime) const
-        {
-            return (_logoutTime > 0 && currTime >= _logoutTime + 20);
-        }
-
-        void LogoutPlayer(bool Save);
-
-        void QueuePacket(WorldPacket& packet);
-        bool Update(uint32 diff);
+        
 
         void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
 
@@ -97,11 +113,18 @@ class MANGOS_DLL_SPEC WorldSession
         void SendItemEnchantTimeUpdate(uint64 Itemguid, uint64 Owner,uint32 ItemID,uint32 Duration);
 
     protected:
+		virtual int svc ();
+		int handle_timeout (const ACE_Time_Value &tv, const void *arg);
 
-        void HandleCharEnumOpcode(WorldPacket& recvPacket);
-        void HandleCharDeleteOpcode(WorldPacket& recvPacket);
-        void HandleCharCreateOpcode(WorldPacket& recvPacket);
-        void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
+		/* Character handle */
+        int HandleCharEnumOpcode(WorldPacket& recvPacket);
+		int HandleCharCreateOpcode(WorldPacket& recvPacket);
+        int HandleCharDeleteOpcode(WorldPacket& recvPacket);
+		int HandleChangePlayerNameOpcode(WorldPacket& recv_data);
+        int HandlePlayerLoginOpcode(WorldPacket& recvPacket);
+		int HandleLogoutRequestOpcode(WorldPacket& recvPacket);
+        int HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
+        int HandleLogoutCancelOpcode(WorldPacket& recvPacket);
 
         // played time
         void HandlePlayedTime(WorldPacket& recvPacket);
@@ -129,9 +152,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLootOpcode(WorldPacket& recvPacket);
         void HandleLootReleaseOpcode(WorldPacket& recvPacket);
         void HandleWhoOpcode(WorldPacket& recvPacket);
-        void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
-        void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
-        void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
+
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
@@ -179,7 +200,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMovementOpcodes(WorldPacket& recvPacket);
         void HandleFallOpcode( WorldPacket & recv_data );
         void HandleSetActiveMoverOpcode(WorldPacket &recv_data);
-        void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
+		int HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
 
         void HandleBattlefieldStatusOpcode(WorldPacket &recv_data);
         void HandleBattleMasterHelloOpcode(WorldPacket &recv_data);
@@ -342,7 +363,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleChannelModerate(WorldPacket& recvPacket);
 
         void HandleCompleteCinema(WorldPacket& recvPacket);
-        void HandleNextCinematicCamera(WorldPacket& recvPacket);
+        int HandleNextCinematicCamera(WorldPacket& recvPacket);
 
         void HandlePageQuerySkippedOpcode(WorldPacket& recvPacket);
         void HandlePageQueryOpcode(WorldPacket& recvPacket);
@@ -359,8 +380,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandlePetRename( WorldPacket & recv_data );
 
         void HandleSetActionBar(WorldPacket& recv_data);
-
-        void HandleChangePlayerNameOpcode(WorldPacket& recv_data);
 
         //BattleGround
         void HandleBattleGroundHelloOpcode(WorldPacket &recv_data);
@@ -384,6 +403,8 @@ class MANGOS_DLL_SPEC WorldSession
 
         time_t _logoutTime;
 
-        ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> _recvQueue;
+		long m_timer_id[STIMER_MAX];
+
+		ACE_Message_Queue<ACE_MT_SYNCH> _recvQueue;
 };
 #endif

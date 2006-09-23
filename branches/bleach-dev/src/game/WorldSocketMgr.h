@@ -16,26 +16,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __WORLDSOCKETMGR_H
-#define __WORLDSOCKETMGR_H
 
-#include "Policies/Singleton.h"
+#ifndef WORLDSOCKET_MGR_H
+#define WORLDSOCKET_MGR_H
 
-class WorldSocket;
+#include "WorldSocket.h"
+#include "ace/Acceptor.h"
 
-class WorldSocketMgr
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+# pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "ace/SOCK_Acceptor.h"
+
+class WorldSocketMgr : public ACE_Acceptor<WorldSocket,ACE_SOCK_ACCEPTOR>
 {
-    public:
-        WorldSocketMgr();
 
-        void AddSocket(WorldSocket *s);
-        void RemoveSocket(WorldSocket *s);
-        void Update(time_t diff);
+public:
+	WorldSocketMgr (void);
+	virtual ~WorldSocketMgr (void);
 
-    private:
-        typedef std::set<WorldSocket*> SocketSet;
-        SocketSet m_sockets;
+	void AddSocket(WorldSocket *s);
+	void RemoveSocket(WorldSocket *s);
+
+	virtual int make_svc_handler (WorldSocket * & sh);
+
+private:
+	typedef std::set<WorldSocket*> SocketSet;
+	SocketSet m_sockets;
+
+	ACE_Recursive_Thread_Mutex mutex_;
 };
 
-#define sWorldSocketMgr MaNGOS::Singleton<WorldSocketMgr>::Instance()
-#endif
+#endif /* WORLDSOCKET_MGR_H */

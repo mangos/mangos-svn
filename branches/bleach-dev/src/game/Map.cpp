@@ -32,16 +32,16 @@
 
 static GridState* si_GridStates[MAX_GRID_STATE];
 
-inline
+/*inline
 bool FileExists(const char * fn)
 {
     FILE *pf=fopen(fn,"rb");
     if(!pf)return false;
     fclose(pf);
     return true;
-}
+}*/
 
-GridMap * LoadMAP(int mapid,int x,int y)
+GridMap * Map::LoadMAP(int mapid,int x,int y)
 {
     char *tmp;
     static bool showcheckmapInfo=false;
@@ -49,7 +49,7 @@ GridMap * LoadMAP(int mapid,int x,int y)
 
     std::string dataPath="./";
 
-    if(!sConfig.GetString("DataDir",&dataPath))
+    if(!sConfig->GetString("DataDir",&dataPath))
         dataPath="./";
     else
     {
@@ -104,7 +104,6 @@ void Map::InitStateMachine()
 
 Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
 {
-    //    char tmp[32];
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
         i_gridMask[idx] = 0;
@@ -125,7 +124,6 @@ Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
 uint64
 Map::EnsureGridCreated(const GridPair &p)
 {
-    //char tmp[128];
     uint64 mask = CalculateGridMask(p.y_coord);
 
     if( !(i_gridMask[p.x_coord] & mask) )
@@ -136,8 +134,8 @@ Map::EnsureGridCreated(const GridPair &p)
             i_grids[p.x_coord][p.y_coord] = new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
             i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry);
             i_gridMask[p.x_coord] |= mask;
-            //z coord
 
+            //z coord
             int gx=63-p.x_coord;
             int gy=63-p.y_coord;
 

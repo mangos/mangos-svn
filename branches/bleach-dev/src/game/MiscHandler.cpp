@@ -37,12 +37,9 @@
 #include "Object.h"
 #include "BattleGround.h"
 #include "SpellAuras.h"
+#include "WorldSocket.h"
 
-//TODO add these to the proper header file
-
-#define MOVEMENT_WALKING 0x100
-#define MOVEMENT_JUMPING 0x2000
-#define MOVEMENT_FALLING 0x6000
+#include <ace/Time_Value.h>
 
 void my_esc( char * r, const char * s )
 {
@@ -116,82 +113,6 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
     WPAssert(data.size() == datalen);
     SendPacket(&data);
-}
-
-void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
-{
-    WorldPacket data;
-    Player* Target = GetPlayer();
-
-    sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
-
-    //Can not logout if...
-    if( Target->isInCombat() ||                             //...is in combat
-        Target->isInDuel()   ||                             //...is in Duel
-                                                            //...is jumping ...is falling
-        Target->HasMovementFlags( MOVEMENT_JUMPING | MOVEMENT_FALLING ))
-    {
-        data.Initialize( SMSG_LOGOUT_RESPONSE );
-        data << (uint8)0xC;
-        data << uint32(0);
-        data << uint8(0);
-        SendPacket( &data );
-        LogoutRequest(0);
-        return;
-    }
-
-    Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-
-    if(!Target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
-    {                                                       //in city no root no lock rotate
-        data.Initialize( SMSG_FORCE_MOVE_ROOT );
-        data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
-        SendPacket( &data );
-        Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-    }
-
-    data.Initialize( SMSG_LOGOUT_RESPONSE );
-    data << uint32(0);
-    data << uint8(0);
-    SendPacket( &data );
-    LogoutRequest(time(NULL));
-
-}
-
-void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
-{
-    sLog.outDebug( "WORLD: Recvd CMSG_PLAYER_LOGOUT Message" );
-    if (GetPlayer()->GetSession()->GetSecurity() > 0)
-    {
-        LogoutRequest(0);
-        LogoutPlayer(true);
-    }
-}
-
-void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
-{
-    WorldPacket data;
-
-    sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_CANCEL Message" );
-
-    LogoutRequest(0);
-
-    data.Initialize( SMSG_LOGOUT_CANCEL_ACK );
-    SendPacket( &data );
-
-    //!we can move again
-    data.Initialize( SMSG_FORCE_MOVE_UNROOT );
-    data << (uint8)0xFF << GetPlayer()->GetGUID();
-    SendPacket( &data );
-
-    //! Stand Up
-    //! Removes the flag so player stands
-    GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-
-    //! DISABLE_ROTATE
-    GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-
-    sLog.outDebug( "WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message" );
 }
 
 void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
@@ -960,29 +881,37 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleCompleteCinema( WorldPacket & recv_data )
 {
-    DEBUG_LOG( "WORLD: Player is watching cinema" );
+    DEBUG_LOG( "WORLD: Player is finished cinema" );
+	ACE_DEBUG( (LM_NOTICE, "TODO: WorldSession::HandleCompleteCinema( WorldPacket & recv_data ) needs to be written.\n"));
 }
 
-void WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )
+int
+WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )
 {
-    DEBUG_LOG( "WORLD: Which movie to play" );
+	ACE_TRACE("WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )\n");
+
+	DEBUG_LOG( "WORLD: Player is watching cinema" );
+	
+	return 0;
 }
 
 void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
 {
-
     DEBUG_LOG( "WORLD: Battleground status - not yet" );
+	ACE_DEBUG( (LM_NOTICE, "TODO: WorldSession::HandleCompleteCinema( WorldPacket & recv_data ) needs to be written.\n"));
 }
 
-void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
+int
+WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
-
-    DEBUG_LOG( "WORLD: Move time lag/synchronization fix - not yet" );
+    ACE_TRACE("WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )\n");
+	ACE_DEBUG( (LM_NOTICE, "TODO: WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data ) needs to be written.\n"));
+	return 0;
 }
 
 void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)
 {
-
+	ACE_TRACE("WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)\n");
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
     WorldPacket data;
     uint64 guid;
@@ -1117,12 +1046,6 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
     // we receive guid,x,y,z
 }
 
-void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
-{
-    // TODO
-    // need to be written
-}
-
 void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 {
     uint8 tmp;
@@ -1140,4 +1063,19 @@ void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
     data << TotalTimePlayed;
     data << LevelPlayedTime;
     SendPacket(&data);
+}
+
+// send Proficiency
+void WorldSession::SendProficiency (uint8 pr1, uint32 pr2)
+{
+    WorldPacket data;
+    data.Initialize (SMSG_SET_PROFICIENCY);
+    data << pr1 << pr2;
+    SendPacket (&data);
+}
+
+void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )
+{
+    uint32 spellid;
+    recv_data >> spellid;
 }

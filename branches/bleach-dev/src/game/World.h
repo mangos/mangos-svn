@@ -23,6 +23,8 @@
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include <string>
+#include <ace/Event_Handler.h>
+
 using namespace std;
 
 class Object;
@@ -142,7 +144,6 @@ class World
         void KickPlayer(char * playerName);
 
     protected:
-
         time_t _UpdateGameTime();
 
     private:

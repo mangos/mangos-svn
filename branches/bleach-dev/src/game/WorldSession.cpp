@@ -32,113 +32,251 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 
-WorldSession::WorldSession(uint32 id, WorldSocket *sock) : _player(0), _socket(sock),
-_security(0), _accountId(id), _logoutTime(0)
+WorldSession::WorldSession(uint32 id, WorldSocket *sock) : 
+	_player(0), 
+	_socket(sock),
+	_security(0), 
+	_accountId(id), 
+	_logoutTime(0)
 {
+	ACE_TRACE("WorldSession::WorldSession(uint32 id, WorldSocket *sock).\n");
+	ACE_Reactor *r = ACE_Reactor::instance();
+	this->reactor(r);
 
+	for(uint32 i ; i < STIMER_MAX; i++)
+	{
+		this->m_timer_id[i] = STIMER_NOTSET;
+	}
 }
 
 WorldSession::~WorldSession()
 {
-    WorldPacket *packet;
-
-    while(!_recvQueue.empty())
-    {
-        packet = _recvQueue.next();
-        delete packet;
-    }
+	ACE_TRACE("WorldSession::~WorldSession().\n");
+	
+	while((_recvQueue.is_empty() == 0))
+	{
+		ACE_Time_Value tv = ACE_Time_Value::zero;
+		ACE_Message_Block *mb = 0;
+		_recvQueue.dequeue_head(mb,&tv);
+		ACE_Message_Block::release (mb);
+	}
+	LogoutPlayer(0,1);
 }
 
-void WorldSession::SetSocket(WorldSocket *sock)
+void
+WorldSession::SetSocket(WorldSocket *sock)
 {
+	ACE_TRACE("WorldSession::SetSocket(WorldSocket *sock).\n");
     _socket = sock;
 }
 
-void WorldSession::SendPacket(WorldPacket* packet)
+int WorldSession::QueuePacket(WorldPacket& packet)
 {
-    if (_socket)
-        _socket->SendPacket(packet);
-}
+	ACE_TRACE("WorldSession::QueuePacket(WorldPacket& packet).\n");
 
-void WorldSession::QueuePacket(WorldPacket& packet)
-{
-    WorldPacket *pck = new WorldPacket(packet);
-    ASSERT(pck);
+	WorldPacket *pck = 0;
+	ACE_NEW_RETURN(pck, WorldPacket(packet), -1);
 
-    _recvQueue.add(pck);
-}
+	ACE_Time_Value tv = ACE_Time_Value::zero;
+	int qcount = _recvQueue.enqueue_tail(pck, &tv);
 
-bool WorldSession::Update(uint32 diff)
-{
-    WorldPacket *packet;
-    OpcodeHandler *table = _GetOpcodeHandlerTable();
-    uint32 i;
-
-    while (!_recvQueue.empty())
+	if ( qcount  <= 0 /* failed to putq */)
     {
-        packet = _recvQueue.next();
-
-        if(packet==NULL)
-            continue;
-
-        for (i = 0; table[i].handler != NULL; i++)
-        {
-            if (table[i].opcode == packet->GetOpcode())
-            {
-                if (table[i].status == STATUS_AUTHED ||
-                    (table[i].status == STATUS_LOGGEDIN && _player))
-                {
-                    (this->*table[i].handler)(*packet);
-                }
-                else
-                {
-                    sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",
-                        LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-                        packet->GetOpcode());
-                }
-
-                break;
-            }
-        }
-
-        if (table[i].handler == NULL)
-            sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
-                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-                packet->GetOpcode());
-
-        delete packet;
+		ACE_DEBUG ((LM_DEBUG, "%I-- %D - %M - Unable to enqueue Packet--\n"));
+		ACE_Message_Block::release (pck);
+		return -1;
     }
-
-    time_t currTime = time(NULL);
-    if (!_socket || ShouldLogOut(currTime))
-        LogoutPlayer(true);
-
-    if (!_socket)
-        return false;
-
-    return true;
+	return 0;
 }
 
-void WorldSession::LogoutPlayer(bool Save)
+int
+WorldSession::SendPacket(WorldPacket* packet)
 {
+	ACE_TRACE("WorldSession::SendPacket(WorldPacket* packet).\n");
+
+    if (_socket)
+	{
+        return _socket->SendPacket(packet);
+	}
+	return -1;
+}
+
+int WorldSession::svc ()
+{
+	ACE_DEBUG((LM_DEBUG, "WorldSession::svc ().\n"));
+	return 0;
+}
+
+int
+WorldSession::handle_timeout (const ACE_Time_Value &tv, const void *arg)
+{
+	ACE_DEBUG((LM_DEBUG, "WorldSession::handle_timeout (const ACE_Time_Value &tv, const void *arg).\n"));
+	long time_tag = static_cast <long> (reinterpret_cast <size_t> (arg));
+	ACE_UNUSED_ARG(tv);
+	int result = 0;
+	switch (time_tag)
+	{
+		case STIMER_LOGOUT:
+			ACE_DEBUG((LM_DEBUG, "WORLDSESSION:  TIMER STIMER_LOGOUT TRIGGERED.\n"));
+			this->m_timer_id[STIMER_LOGOUT] = STIMER_NOTSET;
+			LogoutPlayer(1,0);
+			result = 0;
+			break;
+		default:
+			ACE_DEBUG((LM_DEBUG, "WORLDSESSION: TIMER not found.\n"));
+			result = -1;
+			break;
+	}
+	return result;
+}
+
+int
+WorldSession::Update(uint32 diff)
+//WorldSession::Update(WorldPacket& pck)
+{
+	ACE_TRACE("WorldSession::Update(WorldPacket& pck).\n");
+
+	while((_recvQueue.is_empty() == 0))
+	{
+		ACE_Time_Value tv = ACE_Time_Value::zero;
+		ACE_Message_Block *mb = 0;
+		int qcount = _recvQueue.dequeue_head (mb, &tv);
+		if ( mb != 0 )
+		{
+			WorldPacket *packet = (WorldPacket *)mb;
+
+			uint32 status = STATUS_AUTHED;
+
+			if( _player ) 
+				status = STATUS_LOGGEDIN;
+
+			int result = 0;
+
+			switch ( status )
+			{
+				case STATUS_AUTHED:
+					switch(packet->GetOpcode())
+					{
+						case CMSG_CHAR_ENUM:
+							result = this->HandleCharEnumOpcode(*packet);
+							break;
+						case CMSG_CHAR_CREATE:
+							result = this->HandleCharCreateOpcode(*packet);
+							break;
+						case CMSG_CHAR_DELETE:
+							result = this->HandleCharDeleteOpcode(*packet);
+							break;
+						case CMSG_CHAR_RENAME:
+							result = this->HandleChangePlayerNameOpcode(*packet);
+							break;
+						case CMSG_PLAYER_LOGIN:
+							result = this->HandlePlayerLoginOpcode(*packet);
+							break;
+						default:
+							ACE_DEBUG((LM_NOTICE, "%I-- %D - %M - STATUS_AUTHED - Unable to handled OPCODE %s (0x%.4X) -- %N:%l --\n",
+								LookupName(packet->GetOpcode(), 
+								g_worldOpcodeNames),
+								packet->GetOpcode() ));
+							break;
+					}
+					break;
+				case STATUS_LOGGEDIN:
+					switch(packet->GetOpcode())
+					{
+						case CMSG_LOGOUT_REQUEST:
+							result = HandleLogoutRequestOpcode(*packet);
+							break;
+						case CMSG_PLAYER_LOGOUT:
+							result = HandlePlayerLogoutOpcode(*packet);
+							break;
+						case CMSG_LOGOUT_CANCEL:
+							result = HandleLogoutCancelOpcode(*packet);
+							break;
+						case CMSG_NEXT_CINEMATIC_CAMERA:
+							result = this->HandleNextCinematicCamera(*packet);
+							break;
+						case CMSG_MOVE_TIME_SKIPPED:
+							result = this->HandleMoveTimeSkippedOpcode(*packet);
+							break;
+						default:
+							ACE_DEBUG((LM_NOTICE, "%I-- %D - %M - STATUS_LOGGEDIN Unable to handled OPCODE %s (0x%.4X) -- %N:%l --\n",
+								LookupName(packet->GetOpcode(), 
+								g_worldOpcodeNames),
+								packet->GetOpcode() ));
+							break;
+					}
+					break;
+				default :
+					ACE_DEBUG((LM_NOTICE, "%I-- %D - %M - Unknow status -- %N:%l --\n",
+								LookupName(packet->GetOpcode(), 
+								g_worldOpcodeNames),
+								packet->GetOpcode() ));
+					result = -1;
+					break;
+			}
+			
+			uint32 i;
+			OpcodeHandler *table = _GetOpcodeHandlerTable();
+			for (i = 0; table[i].handler != NULL; i++)
+			{
+				if (table[i].opcode == packet->GetOpcode())
+				{
+					if (table[i].status == STATUS_AUTHED ||
+						(table[i].status == STATUS_LOGGEDIN && _player))
+					{
+						(this->*table[i].handler)(*packet);
+					}
+					break;
+				}
+			}
+
+			ACE_Message_Block::release (packet);
+
+		   /* time_t currTime = time(NULL);
+			if (!_socket || ShouldLogOut(currTime))
+				return LogoutPlayer(1,1);*/
+				
+			return result;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+	return 0;
+}
+
+int
+WorldSession::LogoutPlayer(int Save, int fast)
+{
+	ACE_TRACE("WorldSession::LogoutPlayer(bool Save).\n");
+
     if (_player)
     {
-        // logging out just after died
-        if (_player->GetDeathTimer())
-        {
-            _player->KillPlayer();
-            _player->BuildPlayerRepop();
-        }
+		if( fast == 0 )
+		{
+			// logging out just after died
+			if (_player->GetDeathTimer())
+			{
+				_player->KillPlayer();
+				_player->BuildPlayerRepop();
+			}
+		}
 
-        sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `guid` = '%u';", _player->GetGUID());
-        loginDatabase.PExecute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u';", GetAccountId());
+        bool sqlex = sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `guid` = '%u';", _player->GetGUID());
+		if(!sqlex)
+			return -1;
+
+        sqlex = loginDatabase.PExecute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u';", GetAccountId());
+		if(!sqlex)
+			return -1;
 
         if (_player->IsInGroup())
         {
             _player->UnSetInGroup();
-            Group *group;
+            Group *group = 0;
             group = objmgr.GetGroupByLeader(_player->GetGroupLeader());
-            if(group!=NULL)
+            if(group != 0)
             {
                 if (group->RemoveMember(_player->GetGUID()) > 1)
                     group->SendUpdate();
@@ -146,14 +284,14 @@ void WorldSession::LogoutPlayer(bool Save)
                 {
                     group->Disband();
                     objmgr.RemoveGroup(group);
-
                     delete group;
                 }
             }
         }
-        Guild *guild;
+
+        Guild *guild = 0;
         guild = objmgr.GetGuildById(_player->GetGuildId());
-        if(guild)
+        if(guild != 0)
         {
             guild->Loadplayerstatsbyguid(_player->GetGUID());
         }
@@ -175,33 +313,29 @@ void WorldSession::LogoutPlayer(bool Save)
                 _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+eslot,0);
             }
             _player->SaveToDB();
-
         }
         delete _player;
         _player = 0;
-
-        WorldPacket packet;
-
-        packet.Initialize( SMSG_LOGOUT_COMPLETE );
-        SendPacket( &packet );
-
-        sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
+		
+		//this->LogoutRequest(0);
+		if (fast == 0)
+		{
+			WorldPacket packet;
+			packet.Initialize( SMSG_LOGOUT_COMPLETE );
+			return SendPacket( &packet );
+		}
     }
-
-    LogoutRequest(0);
+	else
+	{
+		//this->LogoutRequest(0);
+		return 0;
+	}
 }
 
 OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 {
     static OpcodeHandler table[] =
     {
-
-        { CMSG_CHAR_ENUM,                STATUS_AUTHED,   &WorldSession::HandleCharEnumOpcode                },
-        { CMSG_CHAR_CREATE,              STATUS_AUTHED,   &WorldSession::HandleCharCreateOpcode              },
-        { CMSG_CHAR_DELETE,              STATUS_AUTHED,   &WorldSession::HandleCharDeleteOpcode              },
-        { CMSG_PLAYER_LOGIN,             STATUS_AUTHED,   &WorldSession::HandlePlayerLoginOpcode             },
-        { CMSG_CHAR_RENAME,              STATUS_AUTHED,   &WorldSession::HandleChangePlayerNameOpcode         },
-
         { CMSG_SET_ACTION_BUTTON,        STATUS_LOGGEDIN, &WorldSession::HandleSetActionButtonOpcode         },
         { CMSG_REPOP_REQUEST,            STATUS_LOGGEDIN, &WorldSession::HandleRepopRequestOpcode            },
         { CMSG_AUTOSTORE_LOOT_ITEM,      STATUS_LOGGEDIN, &WorldSession::HandleAutostoreLootItemOpcode       },
@@ -209,14 +343,14 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_LOOT,                     STATUS_LOGGEDIN, &WorldSession::HandleLootOpcode                    },
         { CMSG_LOOT_RELEASE,             STATUS_LOGGEDIN, &WorldSession::HandleLootReleaseOpcode             },
         { CMSG_WHO,                      STATUS_LOGGEDIN, &WorldSession::HandleWhoOpcode                     },
-        { CMSG_LOGOUT_REQUEST,           STATUS_LOGGEDIN, &WorldSession::HandleLogoutRequestOpcode           },
-        { CMSG_PLAYER_LOGOUT,            STATUS_LOGGEDIN, &WorldSession::HandlePlayerLogoutOpcode            },
-        { CMSG_LOGOUT_CANCEL,            STATUS_LOGGEDIN, &WorldSession::HandleLogoutCancelOpcode            },
+       
+
         { CMSG_GMTICKET_GETTICKET,       STATUS_LOGGEDIN, &WorldSession::HandleGMTicketGetTicketOpcode       },
         { CMSG_GMTICKET_CREATE,          STATUS_LOGGEDIN, &WorldSession::HandleGMTicketCreateOpcode          },
         { CMSG_GMTICKET_SYSTEMSTATUS,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketSystemStatusOpcode    },
         { CMSG_GMTICKET_DELETETICKET,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode          },
         { CMSG_GMTICKET_UPDATETEXT,      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode      },
+
         { CMSG_TOGGLE_PVP,               STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP                   },
 
         // played time
@@ -437,9 +571,9 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { MSG_QUERY_NEXT_MAIL_TIME,      STATUS_LOGGEDIN, &WorldSession::HandleMsgQueryNextMailtime          },
 
         { CMSG_COMPLETE_CINEMATIC,       STATUS_LOGGEDIN, &WorldSession::HandleCompleteCinema                },
-        { CMSG_NEXT_CINEMATIC_CAMERA,    STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera           },
+        //{ CMSG_NEXT_CINEMATIC_CAMERA,    STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera           },
 
-        { CMSG_MOVE_TIME_SKIPPED,        STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode         },
+        //{ CMSG_MOVE_TIME_SKIPPED,        STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode         },
 
         { CMSG_PAGE_TEXT_QUERY,          STATUS_LOGGEDIN, &WorldSession::HandlePageQueryOpcode               },
         { CMSG_READ_ITEM,                STATUS_LOGGEDIN, &WorldSession::HandleReadItem                      },
@@ -475,19 +609,4 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
     };
 
     return table;
-}
-
-// send Proficiency
-void WorldSession::SendProficiency (uint8 pr1, uint32 pr2)
-{
-    WorldPacket data;
-    data.Initialize (SMSG_SET_PROFICIENCY);
-    data << pr1 << pr2;
-    SendPacket (&data);
-}
-
-void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )
-{
-    uint32 spellid;
-    recv_data >> spellid;
 }

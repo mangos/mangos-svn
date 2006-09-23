@@ -326,7 +326,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 
 void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 {
-    PlayerMenu* pm=pPlayer->PlayerTalkClass;
+    PlayerMenu* pm = pPlayer->PlayerTalkClass;
     pm->ClearMenus();
     if(!m_goptions.size())
         LoadGossipOptions();

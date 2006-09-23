@@ -44,14 +44,17 @@
 #include "SystemConfig.h"
 #include "AddonHandler.h"
 #include "zlib/zlib.h"
+#include "WorldHandler.h"
+
+#include <ace/Reactor.h>
+#include <ace/TP_Reactor.h>
 
 #include <signal.h>
 
 INSTANTIATE_SINGLETON_1( World );
 
-World::World()
+World::World(): m_playerLimit(0)
 {
-    m_playerLimit = 0;
     m_allowMovement = true;
     m_Last_tick = time(NULL);
     m_ShutdownTimer = 0;
@@ -59,6 +62,7 @@ World::World()
 
 World::~World()
 {
+
 }
 
 Player* World::FindPlayerInZone(uint32 zone)
@@ -154,7 +158,7 @@ void World::SetInitialWorldSettings()
     strftime( minute, 3, "%M", tmPtr );
     strftime( second, 3, "%S", tmPtr );
 
-    if(!sConfig.GetString("DataDir",&dataPath))
+    if(!sConfig->GetString("DataDir",&dataPath))
         dataPath="./";
     else
     {
@@ -164,7 +168,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Using DataDir %s ...",dataPath.c_str());
 
     // Non-critical warning about conf file version
-    uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
+    uint32 confVersion = sConfig->GetIntDefault("ConfVersion", 0);
     if(!confVersion)
     {
         sLog.outString("*****************************************************************************");
@@ -188,29 +192,29 @@ void World::SetInitialWorldSettings()
         }
     }
 
-    regen_values[RATE_HEALTH]      = sConfig.GetFloatDefault("Rate.Health", 1);
-    regen_values[RATE_POWER_MANA]  = sConfig.GetFloatDefault("Rate.Power1", 1);
-    regen_values[RATE_POWER_RAGE]  = sConfig.GetFloatDefault("Rate.Power2", 1);
-    regen_values[RATE_POWER_FOCUS] = sConfig.GetFloatDefault("Rate.Power3", 1);
-    regen_values[RATE_DROP]        = sConfig.GetFloatDefault("Rate.Drop", 1);
-    regen_values[RATE_XP]          = sConfig.GetFloatDefault("Rate.XP", 1);
-    m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
-    m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
-    m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);
-    m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300000);
-    m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
-    m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600000);
-    m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", 8085);
-    m_configs[CONFIG_PORT_REALM] = sConfig.GetIntDefault("RealmServerPort", 3724);
-    m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", 10000);
-    m_configs[CONFIG_GETXP_DISTANCE] = sConfig.GetIntDefault("MaxDistance", 5500);
-    m_configs[CONFIG_GETXP_LEVELDIFF] = sConfig.GetIntDefault("MaxLevelDiff", 10);
-    m_configs[CONFIG_SIGHT_MONSTER] = sConfig.GetIntDefault("MonsterSight", 400);
-    m_configs[CONFIG_SIGHT_GUARDER] = sConfig.GetIntDefault("GuarderSight", 500);
-    m_configs[CONFIG_GAME_TYPE] = sConfig.GetIntDefault("GameType", 0);
-    m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
-    m_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig.GetIntDefault("MaxPrimaryTradeSkill", 2);
-    m_configs[CONFIG_WISPERING_TO_GM] = sConfig.GetIntDefault("WhisperingToGM",0);
+    regen_values[RATE_HEALTH]      = sConfig->GetFloatDefault("Rate.Health", 1);
+    regen_values[RATE_POWER_MANA]  = sConfig->GetFloatDefault("Rate.Power1", 1);
+    regen_values[RATE_POWER_RAGE]  = sConfig->GetFloatDefault("Rate.Power2", 1);
+    regen_values[RATE_POWER_FOCUS] = sConfig->GetFloatDefault("Rate.Power3", 1);
+    regen_values[RATE_DROP]        = sConfig->GetFloatDefault("Rate.Drop", 1);
+    regen_values[RATE_XP]          = sConfig->GetFloatDefault("Rate.XP", 1);
+    m_configs[CONFIG_LOG_LEVEL] = sConfig->GetIntDefault("LogLevel", 0);
+    m_configs[CONFIG_LOG_WORLD] = sConfig->GetIntDefault("LogWorld", 0);
+    m_configs[CONFIG_INTERVAL_SAVE] = sConfig->GetIntDefault("PlayerSaveInterval", 900000);
+    m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig->GetIntDefault("GridCleanUpDelay", 300000);
+    m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig->GetIntDefault("MapUpdateInterval", 100);
+    m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig->GetIntDefault("ChangeWeatherInterval", 600000);
+    m_configs[CONFIG_PORT_WORLD] = sConfig->GetIntDefault("WorldServerPort", 8085);
+    m_configs[CONFIG_PORT_REALM] = sConfig->GetIntDefault("RealmServerPort", 3724);
+    m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig->GetIntDefault("SocketSelectTime", 10000);
+    m_configs[CONFIG_GETXP_DISTANCE] = sConfig->GetIntDefault("MaxDistance", 5500);
+    m_configs[CONFIG_GETXP_LEVELDIFF] = sConfig->GetIntDefault("MaxLevelDiff", 10);
+    m_configs[CONFIG_SIGHT_MONSTER] = sConfig->GetIntDefault("MonsterSight", 400);
+    m_configs[CONFIG_SIGHT_GUARDER] = sConfig->GetIntDefault("GuarderSight", 500);
+    m_configs[CONFIG_GAME_TYPE] = sConfig->GetIntDefault("GameType", 0);
+    m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig->GetIntDefault("MaxPlayerLevel", 60);
+    m_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig->GetIntDefault("MaxPrimaryTradeSkill", 2);
+    m_configs[CONFIG_WISPERING_TO_GM] = sConfig->GetIntDefault("WhisperingToGM",0);
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 
@@ -218,7 +222,7 @@ void World::SetInitialWorldSettings()
     //sDatabase.PExecute("UPDATE `character` SET `online` = 0;");
 
     //Update realm list
-    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = %d;", m_configs[CONFIG_GAME_TYPE],sConfig.GetIntDefault("RealmID", 0));
+    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = %d;", m_configs[CONFIG_GAME_TYPE],sConfig->GetIntDefault("RealmID", 0));
 
     // remove bones after restart
     sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `bones_flag` = '1';");
@@ -269,41 +273,43 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_WEATHERS].SetInterval(1000);
     m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
 
+
     sLog.outString( "WORLD: Starting BattleGround System" );
     sBattleGroundMgr.CreateInitialBattleGrounds();
 
     MaNGOS::Game::Initialize();
     sLog.outString( "WORLD: SetInitialWorldSettings done" );
 
-    sLog.outString( "WORLD: Starting Event System" );
-    StartEventSystem();
+    /*sLog.outString( "WORLD: Starting Event System" );
+    StartEventSystem();*/
 
     //Start Addon stuff
-    bool temp = sConfig.GetBoolDefault("AddonDefault", 1);
+    bool temp = sConfig->GetBoolDefault("AddonDefault", 1);
     sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d (%s all addons not registared in DB)", temp, temp? "Enabled" : "Disabled"  );
     sAddOnHandler.SetAddonDefault(temp);
     sAddOnHandler._LoadFromDB();
 
-    sLog.outString( "WORLD: Starting Corpse Handler" );
+    //sLog.outString( "WORLD: Starting Corpse Handler" );
     // global event to erase corpses/bones
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
     // need good tests on windows
 
     //uint32 m_CorpsesEventID =
-    AddEvent(&HandleCorpsesErase,NULL,12000,false,true);
+    //AddEvent(&HandleCorpsesErase,NULL,12000,false,true);
 }
 
 void World::Update(time_t diff)
 {
-    for(int i = 0; i < WUPDATE_COUNT; i++)
+	for(int i = 0; i < WUPDATE_COUNT; i++)
         if(m_timers[i].GetCurrent()>=0)
             m_timers[i].Update(diff);
-    else m_timers[i].SetCurrent(0);
+		else
+			m_timers[i].SetCurrent(0);
 
     _UpdateGameTime();
 
-    if (m_timers[WUPDATE_AUCTIONS].Passed())
+	if (m_timers[WUPDATE_AUCTIONS].Passed())
     {
         m_timers[WUPDATE_AUCTIONS].Reset();
         ObjectMgr::AuctionEntryMap::iterator itr,next;
@@ -426,23 +432,6 @@ void World::Update(time_t diff)
             }
         }
     }
-    if (m_timers[WUPDATE_SESSIONS].Passed())
-    {
-        m_timers[WUPDATE_SESSIONS].Reset();
-
-        SessionMap::iterator itr, next;
-        for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
-        {
-            next = itr;
-            next++;
-
-            if(!itr->second->Update(diff))
-            {
-                delete itr->second;
-                m_sessions.erase(itr);
-            }
-        }
-    }
 
     if (m_timers[WUPDATE_WEATHERS].Passed())
     {
@@ -462,10 +451,28 @@ void World::Update(time_t diff)
         }
     }
 
-    if (m_timers[WUPDATE_OBJECTS].Passed())
+	if (m_timers[WUPDATE_OBJECTS].Passed())
     {
         m_timers[WUPDATE_OBJECTS].Reset();
         MapManager::Instance().Update(diff);
+    }
+
+	if (m_timers[WUPDATE_SESSIONS].Passed())
+    {
+        m_timers[WUPDATE_SESSIONS].Reset();
+
+        SessionMap::iterator itr, next;
+        for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
+        {
+            next = itr;
+            next++;
+
+            if(itr->second->Update(diff) == -1)
+            {
+                delete itr->second;
+                m_sessions.erase(itr);
+            }
+        }
     }
 }
 
@@ -550,7 +557,7 @@ void World::KickPlayer(char* playerName)
     }
     if (playerToKick)
     {
-        playerToKick->LogoutPlayer(true);
+        playerToKick->LogoutPlayer(1,0);
     }
 }
 

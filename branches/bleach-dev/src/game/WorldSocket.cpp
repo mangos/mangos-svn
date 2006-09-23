@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+
 #include "Common.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -23,16 +24,17 @@
 #include "Database/DatabaseEnv.h"
 #include "Auth/Sha1.h"
 #include "WorldPacket.h"
-#include "WorldSocket.h"
 #include "WorldSession.h"
 #include "World.h"
-#include "WorldSocketMgr.h"
 #include "NameTables.h"
-#include "Policies/SingletonImp.h"
 #include "WorldLog.h"
 #include "AddonHandler.h"
 #include "zlib/zlib.h"
-#include "../realmd/AuthCodes.h"
+#include "AuthCodes.h"
+
+#include "WorldSocketMgr.h"
+#include "WorldSocket.h"
+
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
 #if __GNUC__ && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
@@ -60,134 +62,478 @@ struct ServerPktHeader
 #pragma pack(pop)
 #endif
 
-WorldSocket::WorldSocket(SocketHandler &sh): TcpSocket(sh), _cmd(0), _remaining(0), _session(NULL)
+WorldSocket::WorldSocket ()
+	: flg_mask_ (ACE_Event_Handler::NULL_MASK),
+	ibuf(TCP_BUFSIZE_READ), obuf(TCP_BUFSIZE_READ),
+	_cmd(0), _remaining(0), _session(0), _seed(0xDEADBABE)
 {
-    _seed = _GetSeed();
+	ACE_TRACE("WorldSocket::WorldSocket ()");
+
 }
 
-WorldSocket::~WorldSocket()
+WorldSocket::~WorldSocket ()
 {
-    WorldPacket *packet;
+	ACE_TRACE("WorldSocket::~WorldSocket ()");
 
-    while(!_sendQueue.empty())
+	this->reactor (0);
+
+	for (; ;)
     {
-        packet = _sendQueue.next();
-        delete packet;
+		ACE_Time_Value tv = ACE_Time_Value::zero;
+		ACE_Message_Block *mb = 0;
+		if (this->getq (mb, &tv) < 0)
+			break;
+
+		ACE_Message_Block::release (mb);
     }
+
+	if(_session)
+	{
+		sWorld.RemoveSession(_session->GetAccountId());
+	}
 }
 
-uint32 WorldSocket::_GetSeed()
+int
+WorldSocket::check_destroy (void)
 {
-    return 0xDEADBABE;
+	ACE_TRACE("WorldSocket::check_destroy (void)");
+
+	if (flg_mask_ == ACE_Event_Handler::NULL_MASK)
+		return -1;
+	
+	return 0;
 }
 
-void WorldSocket::SendPacket(WorldPacket* packet)
+int
+WorldSocket::SendPacket(WorldPacket* packet)
 {
-    WorldPacket *pck = new WorldPacket(*packet);
-    ASSERT(pck);
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (mutex_);
 
-    _sendQueue.add(pck);
+	ACE_TRACE("WorldSocket::SendPacket(WorldPacket* packet)");
+
+	WorldPacket *pck = 0;
+	ACE_NEW_RETURN(pck, WorldPacket(*packet), -1);
+
+	ACE_Time_Value tv = ACE_Time_Value::zero;
+	int qcount = this->putq (pck, & tv);
+
+	if ( qcount  <= 0 /* failed to putq */)
+    {
+		ACE_DEBUG ((LM_DEBUG, "%I-- %D - %M - Unable to enqueue Packet--\n"));
+		ACE_Message_Block::release (pck);
+		return -1;
+    }
+	else if ( qcount >= 50 /* control flow */)
+	{
+		if (this->terminate_io (ACE_Event_Handler::READ_MASK) != 0)
+			return -1;
+	}
+	else
+	{
+		if (this->initiate_io (ACE_Event_Handler::READ_MASK) != 0)
+			return -1;
+	}
+
+	if (this->initiate_io (ACE_Event_Handler::WRITE_MASK) != 0)
+		return -1;
+
+	return 0;
 }
 
-void WorldSocket::OnAccept()
+int
+WorldSocket::open (void *_acceptor)
 {
-    WorldPacket packet;
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (mutex_);
+	
+	int one = 1;
 
-    sWorldSocketMgr.AddSocket(this);
+	ACE_TRACE("WorldSocket::open (void *_acceptor)");
+
+	WorldSocketMgr * sWorldSocketMgr = (WorldSocketMgr *) _acceptor;
+
+	this->reactor (sWorldSocketMgr->reactor ());
+
+	ACE_INET_Addr addr;
+
+	if (this->peer ().get_remote_addr (addr) == -1)
+		return -1;
+	
+	if(this->peer().set_option (ACE_IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one)) == -1)
+		return -1;
+
+	flg_mask_ = ACE_Event_Handler::NULL_MASK ;
+
+	if (this->reactor ()->register_handler (this, flg_mask_) == -1)
+		ACE_ERROR_RETURN ((LM_ERROR,
+			"(%P|%t) can't register with reactor\n"),
+            -1);
+
+	if(this->initiate_io (ACE_Event_Handler::READ_MASK) != 0)
+		return -1;
+	
+	WorldPacket packet;
 
     packet.Initialize( SMSG_AUTH_CHALLENGE );
     packet << _seed;
 
-    SendPacket(&packet);
+	if ( SendPacket(&packet) == -1)
+		return -1;
+
+	ACE_DEBUG ((LM_DEBUG,
+              "(%P|%t) connected with %s\n",
+              addr.get_host_name ()));
+
+	return check_destroy();
 }
 
-void WorldSocket::OnRead()
+int
+WorldSocket::initiate_io (ACE_Reactor_Mask mask)
 {
-    TcpSocket::OnRead();
+	ACE_TRACE("WorldSocket::initiate_io (ACE_Reactor_Mask mask)");
 
-    while(1)
+	if (ACE_BIT_ENABLED (flg_mask_, mask))
+		return 0;
+
+	if (this->reactor ()->schedule_wakeup  (this, mask) == -1)
+		return -1;
+
+	ACE_SET_BITS (flg_mask_, mask);
+	return 0;
+}
+
+int
+WorldSocket::terminate_io (ACE_Reactor_Mask mask)
+{
+	ACE_TRACE("WorldSocket::terminate_io (ACE_Reactor_Mask mask)");
+
+	if (ACE_BIT_DISABLED (flg_mask_, mask))
+		return 0;
+
+	if (this->reactor ()->cancel_wakeup (this, mask) == -1)
+		return -1;
+
+	ACE_CLR_BITS (flg_mask_, mask);
+	return 0;
+}
+
+int 
+WorldSocket::read_input (void)
+{
+	int err = 0;
+	char buf[TCP_BUFSIZE_READ];
+	ssize_t res = this->peer ().recv(buf, TCP_BUFSIZE_READ);
+	
+	if (res >= 0)
     {
-        if (!_remaining)
+		this->ibuf.Write(buf, res);
+    }
+	else
+		err = errno ;
+
+	if (err == EWOULDBLOCK)
+    {
+      err=0;
+      res=0;
+      return check_destroy ();
+    }
+
+	if (err !=0  || res <= 0)
+    {
+		return -1;
+    }
+	return 0;
+}
+
+int
+WorldSocket::handle_input (ACE_HANDLE handle /* = ACE_INVALID_HANDLE */)
+{
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (mutex_);
+	
+	ACE_TRACE("WorldSocket::handle_input (ACE_HANDLE handle /* = ACE_INVALID_HANDLE */)");
+
+	if ( read_input() == -1)
+	{
+		return -1;
+	}
+
+	while(1)
+	{
+		if (!_remaining)
+		{
+			if (ibuf.GetLength() < 6)
+				break;
+
+			ClientPktHeader hdr;
+
+			ibuf.Read((char *)&hdr, 6);
+			_crypt.DecryptRecv((uint8 *)&hdr, 6);
+
+			_remaining = ntohs(hdr.size) - 4;
+			_cmd = hdr.cmd;
+		}
+
+		if (ibuf.GetLength() < _remaining)
+			break;
+
+		WorldPacket packet;
+		packet.resize(_remaining);
+		packet.SetOpcode((uint16)_cmd);
+
+		if(_remaining)
+			ibuf.Read((char*)packet.contents(), _remaining);
+		
+		/*ACE_DEBUG ((LM_DEBUG, ACE_TEXT("%I-- %D - %M - Handle: %d - Opcode %s (0x%.4X) received --\n"),
+					(uint32)handle,
+					LookupName(packet.GetOpcode(), g_worldOpcodeNames),
+					packet.GetOpcode()));*/
+
+		if( sWorldLog.LogWorld() )
+		{
+			sWorldLog.Log("CLIENT:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
+				(uint32)handle,
+				_remaining,
+				LookupName(packet.GetOpcode(), g_worldOpcodeNames),
+				packet.GetOpcode());
+
+			uint32 p = 0;
+			while (p < packet.size())
+			{
+				for (uint32 j = 0; j < 16 && p < packet.size(); j++)
+					sWorldLog.Log("%.2X ", packet[p++]);
+
+				sWorldLog.Log("\n");
+			}
+
+			sWorldLog.Log("\n\n");
+		}
+		
+		_remaining = 0;
+
+		int result = 0;
+
+		switch (_cmd) {
+			case CMSG_PING:
+				result = _HandlePing(packet);
+				break;
+			case CMSG_AUTH_SESSION:
+				result = _HandleAuthSession(packet);
+				break;
+			default:
+				if (_session) {
+					result = _session->QueuePacket(packet);
+				} else {
+					ACE_DEBUG ((LM_WARNING, ACE_TEXT("%I-- %D - %M - Received out of place packet with cmdid 0x%.4X --\n"), _cmd));
+					result = -1;
+				}
+				break;
+		}
+		if ( result == -1)
+			return -1;
+	}
+
+	if(this->initiate_io (ACE_Event_Handler::WRITE_MASK) != 0)
+		return -1;
+
+	return check_destroy ();
+}
+
+int
+WorldSocket::write_output(void)
+{
+	int err = 0;
+	ssize_t res = 0;
+
+	res = this->peer().send(obuf.GetStart(), (int)obuf.GetL());
+
+	if (res < 0)
+		err = errno ;
+
+	if (err != 0  || res < 0)
+	{
+		return -1;
+	}
+	else
+	{
+		obuf.Remove(res);
+	}
+
+    while (obuf.Space() && m_mes.size())
+    {
+        ucharp_v::iterator it = m_mes.begin();
+        MES *p = *it;
+        if (obuf.Space() > p -> left())
         {
-            if (ibuf.GetLength() < 6)
-                break;
-
-            ClientPktHeader hdr;
-
-            ibuf.Read((char *)&hdr, 6);
-            _crypt.DecryptRecv((uint8 *)&hdr, 6);
-
-            _remaining = ntohs(hdr.size) - 4;
-            _cmd = hdr.cmd;
+            obuf.Write(p -> curbuf(),p -> left());
+            delete p;
+            m_mes.erase(m_mes.begin());
         }
-
-        if (ibuf.GetLength() < _remaining)
-            break;
-
-        WorldPacket packet;
-
-        packet.resize(_remaining);
-        packet.SetOpcode((uint16)_cmd);
-        if(_remaining) ibuf.Read((char*)packet.contents(), _remaining);
-
-        if( sWorldLog.LogWorld() )
+        else
         {
-            sWorldLog.Log("CLIENT:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
-                (uint32)GetSocket(),
-                _remaining,
-                LookupName(packet.GetOpcode(), g_worldOpcodeNames),
-                packet.GetOpcode());
-
-            uint32 p = 0;
-            while (p < packet.size())
-            {
-                for (uint32 j = 0; j < 16 && p < packet.size(); j++)
-                    sWorldLog.Log("%.2X ", packet[p++]);
-
-                sWorldLog.Log("\n");
-            }
-
-            sWorldLog.Log("\n\n");
+            size_t sz = obuf.Space();
+            obuf.Write(p -> curbuf(),sz);
+            p -> ptr += sz;
         }
+    }
 
-        _remaining = 0;
+	return 0;
+}
 
-        switch (_cmd)
+int
+WorldSocket::SendBuf(const char *buf,size_t len)
+{
+    int n = (int)obuf.GetLength();
+
+    /*if (!Ready())
+    {
+        Handler().LogError(this, "SendBuf", -1, "Attempt to write to a non-ready socket" );
+        if (GetSocket() == INVALID_SOCKET)
+            Handler().LogError(this, "SendBuf", 0, " * GetSocket() == INVALID_SOCKET", LOG_LEVEL_INFO);
+        if (Connecting())
+            Handler().LogError(this, "SendBuf", 0, " * Connecting()", LOG_LEVEL_INFO);
+        if (CloseAndDelete())
+            Handler().LogError(this, "SendBuf", 0, " * CloseAndDelete()", LOG_LEVEL_INFO);
+        return;
+    }*/
+
+    if (m_mes.size() || len > obuf.Space())
+    {
+        MES *p = new MES(buf,len);
+        m_mes.push_back(p);
+    }
+    if (m_mes.size())
+    {
+        while (obuf.Space() && m_mes.size())
         {
-            case CMSG_PING:
+            ucharp_v::iterator it = m_mes.begin();
+            MES *p = *it;
+            if (obuf.Space() > p -> left())
             {
-                _HandlePing(packet);
-                break;
+                obuf.Write(p -> curbuf(),p -> left());
+                delete p;
+                m_mes.erase(m_mes.begin());
             }
-            case CMSG_AUTH_SESSION:
+            else
             {
-                _HandleAuthSession(packet);
-                break;
-            }
-            default:
-            {
-                if (_session)
-                    _session->QueuePacket(packet);
-                else
-                    sLog.outDetail("Received out of place packet with cmdid 0x%.4X", _cmd);
+                size_t sz = obuf.Space();
+                obuf.Write(p -> curbuf(),sz);
+                p -> ptr += sz;
             }
         }
     }
-}
-
-void WorldSocket::OnDelete()
-{
-    if (_session)
+    else
     {
-        _session->SetSocket(0);
-        _session = 0;
+		obuf.Write(buf,len);
     }
-
-    sWorldSocketMgr.RemoveSocket(this);
+    if (!n)
+    {
+        return write_output();
+    }
+	return 0;
 }
 
-void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
+int
+WorldSocket::handle_output (ACE_HANDLE handle /* = ACE_INVALID_HANDLE */)
 {
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (mutex_);
+	
+	ACE_TRACE("WorldSocket::handle_output (ACE_HANDLE handle /* = ACE_INVALID_HANDLE */)");
+	
+	int qcount = 0;
+	while((this->msg_queue()->is_empty() == 0))
+	{
+		ACE_Time_Value tv = ACE_Time_Value::zero;
+		ACE_Message_Block *mb = 0;
+		qcount = this->getq (mb, &tv);
+		
+		if ( mb != 0 )
+		{
+			int err = 0;
+			ssize_t res = 0;
+
+			ServerPktHeader hdr;
+			WorldPacket *packet = (WorldPacket *)mb;
+
+			hdr.size = ntohs((uint16)packet->size() + 2);
+			hdr.cmd = packet->GetOpcode();
+
+			if( sWorldLog.LogWorld() )
+			{
+				sWorldLog.Log("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
+					(uint32)handle,
+					packet->size(),
+					LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+					packet->GetOpcode());
+
+				uint32 p = 0;
+				while (p < packet->size())
+				{
+					for (uint32 j = 0; j < 16 && p < packet->size(); j++)
+						sWorldLog.Log("%.2X ", (*packet)[p++]);
+
+					sWorldLog.Log("\n");
+				}
+
+				sWorldLog.Log("\n\n");
+			}
+
+			_crypt.EncryptSend((uint8*)&hdr, 4);
+
+			if( SendBuf((char*)&hdr, 4) == -1 )
+			{
+				ACE_Message_Block::release (mb);
+				return -1;
+			}
+
+			if(packet->size())
+			{
+				if( SendBuf((char*)packet->contents(), packet->size()) == -1 )
+				{
+					ACE_Message_Block::release (mb);
+					return -1;
+				}
+			}
+			ACE_Message_Block::release (mb);
+		}
+	}
+
+	if ( qcount <= 0)
+	{
+		if (this->terminate_io (ACE_Event_Handler::WRITE_MASK) != 0)
+			return -1;
+
+		if (this->initiate_io (ACE_Event_Handler::READ_MASK) != 0)
+			return -1;
+	}
+
+	return check_destroy ();
+}
+
+int
+WorldSocket::handle_timeout (const ACE_Time_Value &tv, const void *arg)
+{
+	ACE_DEBUG((LM_DEBUG, "WorldSocket::handle_timeout (const ACE_Time_Value &tv, const void *arg).\n"));
+	return 0;
+}
+
+int
+WorldSocket::handle_close (ACE_HANDLE handle, ACE_Reactor_Mask mask)
+{
+	ACE_TRACE("WorldSocket::handle_close (ACE_HANDLE handle, ACE_Reactor_Mask mask).\n");
+
+	this->reactor ()->remove_handler (this,
+                             ACE_Event_Handler::ALL_EVENTS_MASK |
+                             ACE_Event_Handler::DONT_CALL);  // Don't call handle_close
+	this->reactor (0);
+	this->destroy ();
+
+	return 0;
+}
+
+int
+WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
+{
+	ACE_TRACE("WorldSocket::_HandleAuthSession(WorldPacket& recvPacket).\n");
+
     uint8 digest[20];
     uint32 clientSeed;
     uint32 unk2;
@@ -205,24 +551,24 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         recvPacket >> account;
         recvPacket >> clientSeed;
         recvPacket.read(digest, 20);
+    } 
+	catch(ByteBuffer::error &)
+	{
+		ACE_ERROR_RETURN ((LM_DEBUG, "SOCKET: Incomplete packet.\n"), -1);
     }
-    catch(ByteBuffer::error &)
-    {
-        sLog.outDetail("Incomplete packet");
-        return;
-    }
+	
+	ACE_DEBUG((LM_DEBUG, ACE_TEXT("account %s.\n"), account.c_str()));
 
     QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey` FROM `account` WHERE `username` = '%s';", account.c_str());
 
     if ( !result )
-    {
+	{
 
         packet.Initialize( SMSG_AUTH_RESPONSE );
         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
         SendPacket( &packet );
-
-        sLog.outDetail( "SOCKET: Sent Auth Response (unknown account)." );
-        return;
+		
+		ACE_ERROR_RETURN ((LM_DEBUG, "SOCKET: Sent Auth Response (unknown account).\n"), -1);
     }
 
     id = (*result)[0].GetUInt32();
@@ -236,26 +582,21 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     {
 
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        //packet << uint8( 21 );
         packet << uint8( CSTATUS_FULL);
         SendPacket( &packet );
-        sLog.outBasic( "SOCKET: Sent Auth Response (server full)." );
-        return;
+		ACE_ERROR_RETURN ((LM_DEBUG, "SOCKET: Sent Auth Response (server full).\n"), -1);
     }
 
     WorldSession *session = sWorld.FindSession( id );
     if( session )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        //packet << uint8( 13 );
         packet << uint8( AUTH_ALREADY_ONLINE );
         SendPacket( &packet );
 
-        sLog.outDetail( "SOCKET: Sent Auth Response (already connected)." );
+        session->LogoutPlayer(0,1);
 
-        session->LogoutPlayer(false);
-
-        return;
+		ACE_ERROR_RETURN ((LM_DEBUG, "SOCKET: Sent Auth Response (already connected).\n"), -1);
     }
 
     Sha1Hash sha;
@@ -270,17 +611,13 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     sha.UpdateBigNumbers(&K, NULL);
     sha.Finalize();
 
-    if (memcmp(sha.GetDigest(), digest, 20))
+    if (ACE_OS::memcmp(sha.GetDigest(), digest, 20))
     {
-
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        //packet << uint8( 21 );
         packet << uint8( AUTH_FAILED );
-
         SendPacket( &packet );
 
-        sLog.outDetail( "SOCKET: Sent Auth Response (authentification failed)." );
-        return;
+		ACE_ERROR_RETURN ((LM_DEBUG, "SOCKET: Sent Auth Response (authentification failed).\n"), -1);
     }
 
     _crypt.SetKey(K.AsByteArray(), 40);
@@ -296,90 +633,39 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     packet << uint8( 0x02 );
     packet << uint32( 0x0 );
 
-    SendPacket(&packet);
+	if ( this->SendPacket(&packet) == -1 )
+	{
+		return -1;
+	}
 
-    //! Handled Addons
+	ACE_NEW_RETURN (_session, WorldSession(id, this) , -1);
 
-    //Create Addon Packet
-    sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
-
-    SendPacket(&SendAddonPacked);
-
-    _session = new WorldSession(id, this);
-
-    ASSERT(_session);
     _session->SetSecurity(security);
     sWorld.AddSession(_session);
 
-    sLog.outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
+    ACE_DEBUG((LM_DEBUG, "SOCKET: Client '%s' authed successfully.\n", account.c_str()));
+	
+	//! Handled Addons
+	//Create Addon Packet
+    sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
 
-    return;
+    return SendPacket(&SendAddonPacked);
 }
 
-void WorldSocket::_HandlePing(WorldPacket& recvPacket)
+int WorldSocket::_HandlePing(WorldPacket& recvPacket)
 {
     WorldPacket packet;
     uint32 ping;
 
-    try
-    {
-        recvPacket >> ping;
-    }
-    catch(ByteBuffer::error &)
-    {
-        sLog.outDetail("Incomplete packet");
-        return;
-    }
+	recvPacket >> ping;
 
     packet.Initialize( SMSG_PONG );
     packet << ping;
-    SendPacket(&packet);
 
-    return;
+    return SendPacket(&packet);
 }
 
-void WorldSocket::Update(time_t diff)
-{
-    WorldPacket *packet;
-    ServerPktHeader hdr;
-
-    while(!_sendQueue.empty())
-    {
-        packet = _sendQueue.next();
-
-        hdr.size = ntohs((uint16)packet->size() + 2);
-        hdr.cmd = packet->GetOpcode();
-
-        if( sWorldLog.LogWorld() )
-        {
-            sWorldLog.Log("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
-                (uint32)GetSocket(),
-                packet->size(),
-                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-                packet->GetOpcode());
-
-            uint32 p = 0;
-            while (p < packet->size())
-            {
-                for (uint32 j = 0; j < 16 && p < packet->size(); j++)
-                    sWorldLog.Log("%.2X ", (*packet)[p++]);
-
-                sWorldLog.Log("\n");
-            }
-
-            sWorldLog.Log("\n\n");
-        }
-
-        _crypt.EncryptSend((uint8*)&hdr, 4);
-
-        TcpSocket::SendBuf((char*)&hdr, 4);
-        if(packet->size()) TcpSocket::SendBuf((char*)packet->contents(), packet->size());
-
-        delete packet;
-    }
-}
-
-void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
+int WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
 {
     WorldPacket packet;
     packet.Initialize( SMSG_AUTH_RESPONSE );
@@ -388,5 +674,6 @@ void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
     packet << uint32 (0x00);                                //unknown
     packet << uint8 (0x00);                                 //unknown
     packet << uint32 (PlayersInQue);                        //amount of players in que
-    SendPacket(&packet);
+
+    return SendPacket(&packet);
 }

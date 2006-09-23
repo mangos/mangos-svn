@@ -186,6 +186,8 @@ libgame_a_SOURCES = \
 	WaypointMovementGenerator.h \
 	Weather.h \
 	World.h \
+	WorldHandler.h \
+	WorldHandler.cpp \
 	WorldLog.h \
 	WorldSession.h \
 	WorldSocket.h \

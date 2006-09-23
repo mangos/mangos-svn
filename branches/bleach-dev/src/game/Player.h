@@ -370,7 +370,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetAcceptWhispers(bool on) { if(on) m_GMFlags |= GM_ACCEPT_WHISPERS; else m_GMFlags &= ~GM_ACCEPT_WHISPERS; }
 
         const char* GetName() { return m_name.c_str(); };
-        PlayerCreateInfo* GetPlayerInfo(){return info;}
+        PlayerCreateInfo* GetPlayerInfo(){return m_info;}
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel();
@@ -525,7 +525,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
-        bool LoadFromDB(uint32 guid);
+        int LoadFromDB(uint32 guid);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -952,14 +952,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
         uint8 m_isunderwater;
 
-        void outDebugValues() const;
+		void ShowPlayerStats(std::string title);
 
         uint64 m_lootGuid;
 
         std::string m_name;
         std::string m_rank_name;
 
-        PlayerCreateInfo *info;
+        PlayerCreateInfo *m_info;
 
         uint32 m_race;
         uint32 m_class;

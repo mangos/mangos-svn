@@ -16,45 +16,88 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __WORLDSOCKET_H
-#define __WORLDSOCKET_H
 
-#include "Network/TcpSocket.h"
+#ifndef WORLD_SOCKET_H
+#define WORLD_SOCKET_H
+
 #include "Auth/BigNumber.h"
 #include "Auth/AuthCrypt.h"
 
+#include "ace/Svc_Handler.h"
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+# pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "ace/SOCK_Stream.h"
+#include "CircularBuffer.h"
+
+#define TCP_BUFSIZE_READ 16400
+
 class WorldPacket;
-class SocketHandler;
 class WorldSession;
 
-class WorldSocket : public TcpSocket
+class WorldSocket : public ACE_Svc_Handler <ACE_SOCK_STREAM, ACE_MT_SYNCH>
 {
-    public:
-        WorldSocket(SocketHandler&);
-        ~WorldSocket();
 
-        void SendPacket(WorldPacket* packet);
+public:
+	WorldSocket();
+    ~WorldSocket();
 
-        void OnAccept();
-        void OnRead();
-        void OnDelete();
+	int SendPacket(WorldPacket* packet);
+	int enQueuePacket(WorldPacket& packet);
 
-        void Update(time_t diff);
+	int open (void *acceptor);
+	int handle_close (ACE_HANDLE handle, ACE_Reactor_Mask mask);
 
-    protected:
-        void _HandleAuthSession(WorldPacket& recvPacket);
-        void _HandlePing(WorldPacket& recvPacket);
-        void SendAuthWaitQue(uint32 PlayersInQue);
+protected:
+	int handle_input (ACE_HANDLE handle);
+	int handle_output (ACE_HANDLE handle);
+	int handle_timeout (const ACE_Time_Value &tv, const void *arg);
 
-        static uint32 _GetSeed();
+	int _HandleAuthSession(WorldPacket& recvPacket);
+	int _HandlePing(WorldPacket& recvPacket);
 
-    private:
-        AuthCrypt _crypt;
-        uint32 _seed;
-        uint32 _cmd;
-        uint16 _remaining;
-        WorldSession* _session;
+	int SendAuthWaitQue(uint32 PlayersInQue);
 
-        ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> _sendQueue;
+private:
+	AuthCrypt _crypt;
+	uint32 _seed;
+	uint32 _cmd;
+	uint16 _remaining;
+	WorldSession* _session;
+	
+	int read_input(void);
+	int write_output(void);
+	int SendBuf(const char *buf,size_t len);
+	int initiate_io (ACE_Reactor_Mask mask);
+	int terminate_io (ACE_Reactor_Mask mask);
+	int	check_destroy (void);
+
+	int	flg_mask_;
+
+	ACE_Recursive_Thread_Mutex mutex_;
+	CircularBuffer ibuf;
+	CircularBuffer obuf;
+
+	struct MES
+    {
+        MES( const char *buf_in,size_t len_in)
+            :buf(new  char[len_in])
+            ,len(len_in)
+            ,ptr(0)
+        {
+            memcpy(buf,buf_in,len);
+        }
+        ~MES() { delete[] buf; }
+        size_t left() { return len - ptr; }
+        char *curbuf() { return buf + ptr; }
+        char *buf;
+        size_t len;
+        size_t ptr;
+    };
+    typedef std::list<MES *> ucharp_v;
+	ucharp_v m_mes;
 };
-#endif
+
+#endif /* REALM_HANDLER_H */

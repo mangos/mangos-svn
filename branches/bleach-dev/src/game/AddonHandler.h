@@ -50,7 +50,7 @@ class AddonHandler
         bool GetAddonDefault(void) { return m_Addon_Default; }
         void LoadAddonDefault(void)                         //load the default value from Conf file
         {
-            SetAddonDefault(sConfig.GetBoolDefault("AddonDefault", 1));
+            SetAddonDefault(sConfig->GetBoolDefault("AddonDefault", 1));
         }
 
     private:

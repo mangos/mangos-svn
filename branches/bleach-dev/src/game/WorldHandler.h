@@ -16,24 +16,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "WorldLog.h"
-#include "Policies/SingletonImp.h"
-#include "Config/ConfigEnv.h"
-#include "Log.h"
+#ifndef __WORLDHANDLER_H
+#define __WORLDHANDLER_H
 
-#define CLASS_LOCK MaNGOS::ClassLevelLockable<WorldLog, ZThread::FastMutex>
-INSTANTIATE_SINGLETON_2(WorldLog, CLASS_LOCK);
-INSTANTIATE_CLASS_MUTEX(WorldLog, ZThread::FastMutex);
+#include <ace/Task.h>
 
-#define WORLD_LOG_FILE_STRING   "world.log"
-
-void
-WorldLog::Initialize()
+class WorldHandler : public ACE_Task<ACE_MT_SYNCH>
 {
-    if( sConfig->GetBoolDefault("LogWorld", false) )
-    {
-        i_file = fopen(WORLD_LOG_FILE_STRING, "w");
-    }
-}
+	public:
+		WorldHandler ();
+		~WorldHandler ();
+		
+		virtual int svc (void);
+};
 
-#define sWorldLog WorldLog::Instance()
+#endif /* __WORLDHANDLER */

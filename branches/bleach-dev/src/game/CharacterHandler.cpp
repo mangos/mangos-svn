@@ -30,236 +30,325 @@
 #include "Auth/md5.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
+#include "Opcodes.h"
+#include "NameTables.h"
 
-void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
+#include "AuthCodes.h"
+
+int
+WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
+	ACE_TRACE("WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )");
+	
+	mysqlpp::Result *res = 0;
+	ACE_NEW_RETURN(res, mysqlpp::Result, -1);
 
-    data.Initialize(SMSG_CHAR_ENUM);
+	std::stringstream strbuf;
+	strbuf << "SELECT `guid` FROM `character` WHERE `account` = '" << (unsigned long)GetAccountId() << "' ORDER BY `guid`";
+	if ( sDatabaseMysql->PQuery(DATABASE_WORLD, strbuf.str() , *res) == 1 )
+	{
+		mysqlpp::Row::size_type size = res->size();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu' ORDER BY `guid`;", (unsigned long)GetAccountId());
+		ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - Loaded %d characters from DataBase -- %N:%l --\n", size));
 
-    uint8 num = 0;
+		WorldPacket data;
+		data.Initialize(SMSG_CHAR_ENUM);
+	
+		uint8 num = 0;
+		data << num;
+		
+		if ( size > 0 )
+		{
+			Player *plr = 0;
+			ACE_NEW_RETURN(plr, Player(this), -1);
 
-    data << num;
+			mysqlpp::Row::size_type i;
+			for (i = 0; i < size; i++)
+			{
+				mysqlpp::Row row = res->at(i);
+				int ld = plr->LoadFromDB( uint32(row.at(0)) );
+				if( ld == 1 )
+				{
+					ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - Loaded Player from DataBase -- %N:%l --\n" ));
+					plr->BuildEnumData( &data );
+					num++;
+				}
+				else if ( ld == -1 )
+				{
+					delete plr;
+					delete res;
+					ACE_ERROR_RETURN((LM_ALERT,  "%I-- %D - %M - Unable to loaded Player from DataBase -- %N:%l --\n" ), -1);
+				}
+			}
+			delete plr;
+		}
+		delete res;
 
-    if( result )
-    {
-        Player *plr;
-        do
-        {
-            plr = new Player(this);
-            ASSERT(plr);
-
-            sLog.outError("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
-
-            if(!plr->LoadFromDB( (*result)[0].GetUInt32() ))
-                continue;
-
-            plr->BuildEnumData( &data );
-
-            delete plr;
-
-            num++;
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-
-    data.put<uint8>(0, num);
-
-    SendPacket( &data );
+		data.put<uint8>(0, num);
+		return SendPacket( &data );
+	}
+	else
+	{
+		delete res;
+		ACE_ERROR_RETURN((LM_ALERT, "%I-- %D - %M - Unable to load characters from DataBase -- %N:%l --\n"), -1);
+	}
 }
 
-void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
+int
+WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 {
-    std::string name;
-    WorldPacket data;
+	ACE_TRACE("WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )\n");
+
+	mysqlpp::Result *res = 0;
+	ACE_NEW_RETURN(res, mysqlpp::Result, -1);
+	
+	std::string opcodehandler = LookupName(recv_data.GetOpcode(), g_worldOpcodeNames);
+	std::string name;
     uint8 race_;
 
     recv_data >> name;
     recv_data >> race_;
     recv_data.rpos(0);
+	
+	WorldPacket data;
+	data.Initialize(SMSG_CHAR_CREATE);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s';", name.c_str());
+	std::stringstream strbuf;
+	strbuf << "SELECT `guid` FROM `character` WHERE `name` = '" <<  name.c_str() << "'";
 
-    if ( result )
-    {
-        delete result;
+	if ( sDatabaseMysql->PQuery(DATABASE_WORLD, strbuf.str() , *res) == 1 )
+	{
 
-        data.Initialize(SMSG_CHAR_CREATE);
-        data << (uint8)0x31;
-        SendPacket( &data );
+		if( res->size() > 0 )
+		{
+			ACE_DEBUG((LM_INFO, "%I-- %D - %M - [%d:%s] Character already in use --\n" , _accountId, opcodehandler.c_str() ));
 
-        return;
-    }
+			delete res;
+			data << (uint8)CHAR_CREATE_IN_USE;
+			return SendPacket( &data );
+		}
+		else
+		{
+			strbuf.str("");
+			strbuf << "SELECT `guid` FROM `character` WHERE `account` = '" << (unsigned long)_accountId << "'";
+			if ( sDatabaseMysql->PQuery(DATABASE_WORLD, strbuf.str() , *res) == 1 )
+			{
+				if (res->size() >= 10)
+				{
+					ACE_DEBUG((LM_INFO, "%I-- %D - %M - [%d:%s]: Character error - Reach Maximum Limit --\n" , _accountId, opcodehandler.c_str() ));
+				}
+				else
+				{
+					/* TODO: check account character creation limit */
 
-    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu';", (unsigned long)GetAccountId());
+					/* TODO: check mangosd character creation limit */
 
-    if ( result )
-    {
-        if (result->GetRowCount() >= 10)
-        {
-            data.Initialize(SMSG_CHAR_CREATE);
-            data << (uint8)0x2F;
-            SendPacket( &data );
-            delete result;
-            return;
-        }
-        delete result;
-    }
+					/*uint32 GameType = sWorld.getConfig(CONFIG_GAME_TYPE);
+					if(GameType == 1 || GameType == 8)
+					{
+						strbuf.flush();
+						strbuf << "SELECT `race` FROM `character` WHERE `account` = '" << (unsigned long)GetAccountId() << "' LIMIT 1";
+						if ( sDatabaseMysql->PQuery(DATABASE_WORLD, strbuf.str() , *res) == 1 )
+						{
+							if (res->size() > 0)
+							{
+								Field * field = result2->Fetch();
+								uint8 race = field[0].GetUInt32();
+								delete result2;
+								uint32 team=0;
+								if(race > 0)
+								{
+									switch(race)
+									{
+										case HUMAN:
+											team = (uint32)ALLIANCE;
+											break;
+										case DWARF:
+											team = (uint32)ALLIANCE;
+											break;
+										case NIGHTELF:
+											team = (uint32)ALLIANCE;
+											break;
+										case GNOME:
+											team = (uint32)ALLIANCE;
+											break;
+										case ORC:
+											team = (uint32)HORDE;
+											break;
+										case UNDEAD_PLAYER:
+											team = (uint32)HORDE;
+											break;
+										case TAUREN:
+											team = (uint32)HORDE;
+											break;
+										case TROLL:
+											team = (uint32)HORDE;
+											break;
+									}
 
-    uint32 GameType = sWorld.getConfig(CONFIG_GAME_TYPE);
-    if(GameType == 1 || GameType == 8)
-    {
-        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%lu' LIMIT 1;", (unsigned long)GetAccountId());
-        if(result2)
-        {
-            Field * field = result2->Fetch();
-            uint8 race = field[0].GetUInt32();
-            delete result2;
-            uint32 team=0;
-            if(race > 0)
-            {
-                switch(race)
-                {
-                    case HUMAN:
-                        team = (uint32)ALLIANCE;
-                        break;
-                    case DWARF:
-                        team = (uint32)ALLIANCE;
-                        break;
-                    case NIGHTELF:
-                        team = (uint32)ALLIANCE;
-                        break;
-                    case GNOME:
-                        team = (uint32)ALLIANCE;
-                        break;
-                    case ORC:
-                        team = (uint32)HORDE;
-                        break;
-                    case UNDEAD_PLAYER:
-                        team = (uint32)HORDE;
-                        break;
-                    case TAUREN:
-                        team = (uint32)HORDE;
-                        break;
-                    case TROLL:
-                        team = (uint32)HORDE;
-                        break;
-                }
+								}
+								uint32 team_=0;
+								if(race_ > 0)
+								{
+									switch(race_)
+									{
+										case HUMAN:
+											team_ = (uint32)ALLIANCE;
+											break;
+										case DWARF:
+											team_ = (uint32)ALLIANCE;
+											break;
+										case NIGHTELF:
+											team_ = (uint32)ALLIANCE;
+											break;
+										case GNOME:
+											team_ = (uint32)ALLIANCE;
+											break;
+										case ORC:
+											team_ = (uint32)HORDE;
+											break;
+										case UNDEAD_PLAYER:
+											team_ = (uint32)HORDE;
+											break;
+										case TAUREN:
+											team_ = (uint32)HORDE;
+											break;
+										case TROLL:
+											team_ = (uint32)HORDE;
+											break;
+									}
+								}
+								if(team != team_)
+								{
+									data << (uint8)CHAR_CREATE_PVP_TEAMS_VIOLATION;
+									return SendPacket( &data );
+								}
+							}
+						}
+						else
+						{
+						}
+					}*/
 
-            }
-            uint32 team_=0;
-            if(race_ > 0)
-            {
-                switch(race_)
-                {
-                    case HUMAN:
-                        team_ = (uint32)ALLIANCE;
-                        break;
-                    case DWARF:
-                        team_ = (uint32)ALLIANCE;
-                        break;
-                    case NIGHTELF:
-                        team_ = (uint32)ALLIANCE;
-                        break;
-                    case GNOME:
-                        team_ = (uint32)ALLIANCE;
-                        break;
-                    case ORC:
-                        team_ = (uint32)HORDE;
-                        break;
-                    case UNDEAD_PLAYER:
-                        team_ = (uint32)HORDE;
-                        break;
-                    case TAUREN:
-                        team_ = (uint32)HORDE;
-                        break;
-                    case TROLL:
-                        team_ = (uint32)HORDE;
-                        break;
-                }
-            }
-            if(team != team_)
-            {
-                data.Initialize( SMSG_CHAR_CREATE );
-                data << (uint8)0x33;
-                SendPacket( &data );
-                return;
-            }
-        }
-    }
+					Player* pNewChar = 0;
+					ACE_NEW_RETURN(pNewChar, Player(this), -1);
 
-    Player * pNewChar = new Player(this);
-
-    if(pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data ))
-    {
-        // Player create
-        pNewChar->SaveToDB();
-
-        QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
-        uint32 charCount = 0;
-        if (resultCount)
-        {
-            Field *fields = resultCount->Fetch();
-            charCount = fields[0].GetUInt32();
-            delete resultCount;
-            loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = %d", charCount, GetAccountId(), realmID, charCount);
-        }
-
-        delete pNewChar;
-    }
-    else
-    {
-        // Player not create (race/class problem?)
-        delete pNewChar;
-
-        data.Initialize(SMSG_CHAR_CREATE);
-        data << (uint8)0x2F;
-        SendPacket( &data );
-
-        return;
-    }
-
-    // we have successfull creation
-    // note all error codes moved + 1
-    // 0x2E - Character created
-    // 0x30 - Char create failed
-    // 0x31 - Char name is in use
-    // 0x35 - Char delete Okay
-    // 0x36 - Char delete failed
-
-    data.Initialize( SMSG_CHAR_CREATE );
-    data << (uint8)0x2E;
-    SendPacket( &data );
-
+					if(pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data )) /* TODO: check any error on load */
+					{
+						// Player create
+						pNewChar->SaveToDB(); /* TODO: check for any error on save */
+						
+						strbuf.str("");
+						strbuf << "SELECT COUNT(guid) FROM `character` WHERE `account` = '" << GetAccountId() << "'";
+						if ( sDatabaseMysql->PQuery(DATABASE_WORLD, strbuf.str() , *res) == 1 )
+						{
+							if (res->size() > 0)
+							{
+								mysqlpp::Row row = res->at(0);
+								uint32 charCount = uint32(row.at(0));
+								strbuf.str("");
+								strbuf << "INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (" << charCount;
+								strbuf << "," << _accountId << ","<< realmID <<") ON DUPLICATE KEY UPDATE `numchars` = " << charCount;
+								if ( sDatabaseMysql->PExecute(DATABASE_LOGIN, strbuf.str()) == 1 )
+								{
+									delete res;
+									delete pNewChar;
+									ACE_DEBUG((LM_INFO, "%I-- %D - %M - [%d:%s]: Character sucessufully created --\n" , _accountId, opcodehandler.c_str() ));
+									data << (uint8)CHAR_CREATE_SUCCESS;
+									return SendPacket( &data );
+									
+								}
+								else
+								{
+									ACE_DEBUG((LM_ALERT, "%I-- %D - %M - [%d:%s]: Character error - Unable to insert characters -- %N:%l --\n" , _accountId, opcodehandler.c_str() ));
+									delete pNewChar;
+								}	
+							}
+							else
+							{
+								ACE_DEBUG((LM_ERROR, "%I-- %D - %M - [%d:%s]: Character error - Unable to count characters --\n" , _accountId, opcodehandler.c_str() ));
+								delete pNewChar;
+							}
+						}
+						else
+						{
+							ACE_DEBUG((LM_ALERT, "%I-- %D - %M - [%d:%s]: Unable to Count guid of Characters from DataBase -- %N:%l --\n", _accountId, opcodehandler.c_str() ));
+							delete pNewChar;
+						}
+					}
+					else
+					{
+						ACE_DEBUG((LM_ERROR, "%I-- %D - %M - [%d:%s]: Character error - Unable Create Player New Guid --\n" , _accountId, opcodehandler.c_str() ));
+						delete pNewChar;
+					}
+				} 
+			}
+			else
+			{
+				ACE_DEBUG((LM_ALERT, "%I-- %D - %M - [%d:%s]: Unable to Count Characters from DataBase -- %N:%l --\n", _accountId, opcodehandler.c_str() ));
+			}
+		} 
+	}
+	else
+	{
+		ACE_DEBUG((LM_ALERT, "%I-- %D - %M - [%d:%s]: Unable to check if Character is in use from DataBase -- %N:%l --\n", _accountId, opcodehandler.c_str() ));
+	}
+	delete res;
+	data << (uint8)CHAR_CREATE_ERROR;
+	return SendPacket( &data );
 }
 
-void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
+int
+WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 {
+	ACE_TRACE("WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )\n");
+
+	std::string opcodehandler = LookupName(recv_data.GetOpcode(), g_worldOpcodeNames);
+
     WorldPacket data;
+	data.Initialize(SMSG_CHAR_CREATE);
 
     uint64 guid;
     recv_data >> guid;
+	
+	Player* plr = 0;
+	ACE_NEW_RETURN(plr, Player(this), -1);
 
-    Player* plr = new Player(this);
-    ASSERT(plr);
+	int ld = plr->LoadFromDB( GUID_LOPART(guid) );
 
-    if(!plr->LoadFromDB( GUID_LOPART(guid) ))
-        return;
-    plr->DeleteFromDB();
-
-    delete plr;
-
-    data.Initialize(SMSG_CHAR_CREATE);
-    data << (uint8)0x34;
-    SendPacket( &data );
+    if( ld  == 1)
+	{
+		plr->DeleteFromDB(); /* todo: check for errors */
+		data << (uint8)CHAR_DELETE_SUCCESS;
+	}
+	else if ( ld == 0)
+	{
+		ACE_DEBUG((LM_ERROR, "%I-- %D - %M - [%d:%s]: Unable to find Character on database to delete -- %N:%l --\n", _accountId, opcodehandler.c_str() ));
+		data << (uint8)CHAR_DELETE_FAILED;
+	}
+	else
+	{
+		ACE_DEBUG((LM_ALERT, "%I-- %D - %M - [%d:%s]: Error loading Character from database -- %N:%l --\n", _accountId, opcodehandler.c_str() ));
+		data << (uint8)CHAR_DELETE_FAILED;
+	}
+	delete plr;
+	return SendPacket( &data );
 }
 
-void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
+int
+WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
 {
+    // TODO
+    // need to be written
+	ACE_DEBUG( (LM_NOTICE, "TODO: WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data) needs to be written.\n"));
+	return 0;
+}
+
+int
+WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
+{
+	ACE_TRACE("WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )\n");
+
     WorldPacket data;
     uint64 playerGuid = 0;
 
@@ -267,12 +356,12 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     recv_data >> playerGuid;
 
-    Player* plr = new Player(this);
-    ASSERT(plr);
+    Player* plr = 0;
+	ACE_NEW_RETURN(plr, Player(this), -1);
 
-    plr->SetSession(this);
-    if(!plr->LoadFromDB(GUID_LOPART(playerGuid)))
-        return;
+    if( plr->LoadFromDB(GUID_LOPART(playerGuid)) == -1)
+        return -1;
+
     //plr->_RemoveAllItemMods();
 
     SetPlayer(plr);
@@ -419,7 +508,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         SendPacket( &data );
     }
 
-    Player *pCurrChar = GetPlayer();
+	Player *pCurrChar = GetPlayer();
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_member` WHERE `guid` = '%u';",pCurrChar->GetGUIDLow());
 
@@ -436,6 +525,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u';", pCurrChar->GetGUID());
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u';", GetAccountId());
+
     plr->SetInGameTime( getMSTime() );
 
     std::string outstring = pCurrChar->GetName();
@@ -460,7 +550,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
 
     delete result;
-
+	
+	return 0;
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
@@ -552,4 +643,96 @@ void WorldSession::HandleSetWatchedFactionIndexOpcode(WorldPacket & recv_data)
     uint32 fact;
     recv_data >> fact;
     GetPlayer()->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fact);
+}
+
+int
+WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
+{
+    WorldPacket data;
+    Player* Target = GetPlayer();
+
+    ACE_DEBUG((LM_DEBUG, "WORLDSESSION: Received CMSG_LOGOUT_REQUEST Message.\n"));
+
+    //Can not logout if...
+    if( Target->isInCombat() ||                             //...is in combat
+        Target->isInDuel()   ||                             //...is in Duel
+                                                            //...is jumping ...is falling
+        Target->HasMovementFlags( MOVEMENT_JUMPING | MOVEMENT_FALLING ))
+    {
+        data.Initialize( SMSG_LOGOUT_RESPONSE );
+        data << (uint8)0xC;
+        data << uint32(0);
+        data << uint8(0);
+        return SendPacket( &data );
+    }
+
+    Target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+
+    if(!Target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
+    {                                                       //in city no root no lock rotate
+        data.Initialize( SMSG_FORCE_MOVE_ROOT );
+        data << (uint8)0xFF;
+		data << Target->GetGUID();
+		data << (uint32)2;
+        SendPacket( &data );
+
+        Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+    }
+	
+	
+	this->m_timer_id[STIMER_LOGOUT] = this->reactor()->schedule_timer(this,(const void *)STIMER_LOGOUT, ACE_Time_Value(20, 0));
+
+	if( m_timer_id[STIMER_LOGOUT] == -1 )
+		return -1;
+
+    data.Initialize( SMSG_LOGOUT_RESPONSE );
+    data << uint32(0);
+    data << uint8(0);
+    return SendPacket( &data );
+}
+
+int
+WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
+{
+	ACE_DEBUG((LM_DEBUG, "WORLDSESSION:  Recvd CMSG_PLAYER_LOGOUT Message.\n"));
+
+    if (_security > 0)
+    {
+        LogoutPlayer(1,0);
+    }
+	return 0;
+}
+
+int
+WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
+{
+	ACE_DEBUG((LM_DEBUG, "WORLDSESSION:  Recvd CMSG_LOGOUT_CANCEL Message.\n"));
+
+	WorldPacket data;
+    data.Initialize( SMSG_LOGOUT_CANCEL_ACK );
+    if (SendPacket( &data ) == -1)
+    {
+		return -1;
+    }
+
+	//cancel timer
+	if(this->m_timer_id[STIMER_LOGOUT] != STIMER_NOTSET)
+	{
+		this->reactor()->cancel_timer(this->m_timer_id[STIMER_LOGOUT]);
+	}
+    //!we can move again
+    data.Initialize( SMSG_FORCE_MOVE_UNROOT );
+    data << (uint8)0xFF;
+	data << _player->GetGUID();
+    if(SendPacket( &data ) == -1)
+	{
+		return -1;
+	}
+	
+    //! Stand Up
+    //! Removes the flag so player stands
+    GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+
+    //! DISABLE_ROTATE
+    GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 }

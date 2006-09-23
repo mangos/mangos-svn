@@ -33,9 +33,21 @@
 
 using namespace std;
 
-Object::Object( )
+Object::Object( ) :
+	m_objectTypeId(TYPEID_OBJECT), 
+	m_objectType(TYPE_OBJECT),
+	m_positionX(0.0f),  
+	m_positionY(0.0f), 
+	m_positionZ(0.0f),
+	m_mapId(0), 
+	m_uint32Values(0),
+	m_inWorld(0), 
+	m_minZ(0),
+	m_valuesCount(0), 
+	m_speed(1.0f), 
+	m_moveType(MOVE_STOP)
 {
-    m_objectTypeId      = TYPEID_OBJECT;
+    /*m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPE_OBJECT;
 
     m_positionX         = 0.0f;
@@ -54,7 +66,7 @@ Object::Object( )
     m_valuesCount       = 0;
 
     m_speed             = 1.0f;
-    m_moveType          = MOVE_STOP;
+    m_moveType          = MOVE_STOP;*/
 
     mSemaphoreTeleport  = false;
     m_inWorld           = false;

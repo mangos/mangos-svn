@@ -16,32 +16,42 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Common.h"
-#include "WorldSocket.h"
 #include "WorldSocketMgr.h"
-#include "Policies/SingletonImp.h"
 
-INSTANTIATE_SINGLETON_1( WorldSocketMgr );
-
-WorldSocketMgr::WorldSocketMgr()
+WorldSocketMgr::WorldSocketMgr (void)
 {
+
 }
 
-void WorldSocketMgr::AddSocket(WorldSocket *s)
+WorldSocketMgr::~WorldSocketMgr (void)
 {
+  this->reactor (0);
+}
+
+void
+WorldSocketMgr::AddSocket(WorldSocket *s)
+{
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (this->mutex_);
     m_sockets.insert(s);
 }
 
-void WorldSocketMgr::RemoveSocket(WorldSocket *s)
+void
+WorldSocketMgr::RemoveSocket(WorldSocket *s)
 {
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (this->mutex_);
     m_sockets.erase(s);
 }
 
-void WorldSocketMgr::Update(time_t diff)
+
+int
+WorldSocketMgr::make_svc_handler (WorldSocket *&sh)
 {
-    SocketSet::iterator i;
-    for(i = m_sockets.begin(); i != m_sockets.end(); i++)
-    {
-        (*i)->Update(diff);
-    }
+	ACE_Guard<ACE_Recursive_Thread_Mutex> locker (this->mutex_);
+
+	if( sh == 0 ) {
+		ACE_NEW_RETURN (sh, WorldSocket , -1);
+		return 0;
+	}
+	
+	return -1;
 }

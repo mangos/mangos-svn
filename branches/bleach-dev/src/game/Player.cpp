@@ -44,16 +44,14 @@
 
 #include <cmath>
 
-Player::Player (WorldSession *session): Unit()
+Player::Player (WorldSession *session): Unit() ,
+	m_session(session), m_info(0)
 {
     m_objectType |= TYPE_PLAYER;
-    m_objectTypeId = TYPEID_PLAYER;
+	m_objectTypeId = TYPEID_PLAYER;
 
-    m_valuesCount = PLAYER_END;
+	m_valuesCount = PLAYER_END;
 
-    m_session = session;
-
-    info = NULL;
     m_divider = 0;
     m_timedquest = 0;
 
@@ -140,6 +138,9 @@ Player::Player (WorldSession *session): Unit()
 
 Player::~Player ()
 {
+	if(IsInWorld())
+		RemoveFromWorld();
+
     uint32 eslot;
     for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
     {
@@ -151,6 +152,7 @@ Player::~Player ()
             delete m_buybackitems[eslot];
         }
     }
+	
     for(int i = 0; i < BANK_SLOT_BAG_END; i++)
     {
         if(m_items[i])
@@ -158,7 +160,7 @@ Player::~Player ()
     }
     CleanupChannels();
 
-    delete info;
+    delete m_info;
     delete PlayerTalkClass;
 }
 
@@ -173,8 +175,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     data >> race >> class_ >> gender >> skin >> face;
     data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
-    info = objmgr.GetPlayerCreateInfo((uint32)race, (uint32)class_);
-    if(!info) return false;
+    m_info = objmgr.GetPlayerCreateInfo((uint32)race, (uint32)class_);
+    if(!m_info)
+		return false;
 
     for (i = 0; i < BANK_SLOT_BAG_END; i++)
         m_items[i] = NULL;
@@ -192,10 +195,10 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_race = race;
     m_class = class_;
 
-    m_mapId = info->mapId;
-    m_positionX = info->positionX;
-    m_positionY = info->positionY;
-    m_positionZ = info->positionZ;
+    m_mapId = m_info->mapId;
+    m_positionX = m_info->positionX;
+    m_positionY = m_info->positionY;
+    m_positionZ = m_info->positionZ;
     memset(m_taximask, 0, sizeof(m_taximask));
 
     uint8 powertype = 0;
@@ -218,30 +221,30 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
     }
     else SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
-    SetStat(STAT_STRENGTH,info->strength );
-    SetStat(STAT_AGILITY,info->agility );
-    SetStat(STAT_STAMINA,info->stamina );
-    SetStat(STAT_INTELLECT,info->intellect );
-    SetStat(STAT_SPIRIT,info->spirit );
-    SetArmor(info->basearmor );
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER, info->attackpower );
+    SetStat(STAT_STRENGTH, m_info->strength );
+    SetStat(STAT_AGILITY, m_info->agility );
+    SetStat(STAT_STAMINA, m_info->stamina );
+    SetStat(STAT_INTELLECT, m_info->intellect );
+    SetStat(STAT_SPIRIT, m_info->spirit );
+    SetArmor(m_info->basearmor );
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER, m_info->attackpower );
 
-    SetHealth(info->health);
-    SetMaxHealth(info->health);
+    SetHealth(m_info->health);
+    SetMaxHealth(m_info->health);
 
-    SetPower(   POWER_MANA, info->mana );
-    SetMaxPower(POWER_MANA, info->mana );
+    SetPower(   POWER_MANA, m_info->mana );
+    SetMaxPower(POWER_MANA, m_info->mana );
     SetPower(   POWER_RAGE, 0 );
-    SetMaxPower(POWER_RAGE, info->rage );
-    SetPower(   POWER_FOCUS, info->focus );
-    SetMaxPower(POWER_FOCUS, info->focus );
-    SetPower(   POWER_ENERGY, info->energy );
-    SetMaxPower(POWER_ENERGY, info->energy );
+    SetMaxPower(POWER_RAGE, m_info->rage );
+    SetPower(   POWER_FOCUS, m_info->focus );
+    SetMaxPower(POWER_FOCUS, m_info->focus );
+    SetPower(   POWER_ENERGY, m_info->energy );
+    SetMaxPower(POWER_ENERGY, m_info->energy );
 
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, info->mindmg );
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, info->maxdmg );
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, info->ranmindmg );
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, info->ranmaxdmg );
+    SetFloatValue(UNIT_FIELD_MINDAMAGE, m_info->mindmg );
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE, m_info->maxdmg );
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_info->ranmindmg );
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_info->ranmaxdmg );
 
     SetAttackTime(BASE_ATTACK,   2000 );                    // melee attack time
     SetAttackTime(RANGED_ATTACK, 2000 );                    // ranged attack time
@@ -249,8 +252,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
 
-    SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId + gender );
-    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId + gender );
+    SetUInt32Value(UNIT_FIELD_DISPLAYID, m_info->displayId + gender );
+    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, m_info->displayId + gender );
 
     SetLevel( 1 );
 
@@ -300,13 +303,13 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     std::list<uint32>::iterator item_amount_itr;
     std::list<uint16>::iterator spell_itr, skill_itr[3], action_itr[4];
 
-    item_id_itr = info->item_id.begin();
-    item_bagIndex_itr = info->item_bagIndex.begin();
-    item_slot_itr = info->item_slot.begin();
-    item_amount_itr = info->item_amount.begin();
-    spell_itr = info->spell.begin();
+    item_id_itr = m_info->item_id.begin();
+    item_bagIndex_itr = m_info->item_bagIndex.begin();
+    item_slot_itr = m_info->item_slot.begin();
+    item_amount_itr = m_info->item_amount.begin();
+    spell_itr = m_info->spell.begin();
 
-    for (; spell_itr!=info->spell.end(); spell_itr++)
+    for (; spell_itr!=m_info->spell.end(); spell_itr++)
     {
         tspell = (*spell_itr);
         if (tspell)
@@ -317,9 +320,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     }
 
     for(i=0 ; i<3; i++)
-        skill_itr[i] = info->skill[i].begin();
+        skill_itr[i] = m_info->skill[i].begin();
 
-    for (; skill_itr[0]!=info->skill[0].end() && skill_itr[1]!=info->skill[1].end() && skill_itr[2]!=info->skill[2].end(); )
+    for (; skill_itr[0]!= m_info->skill[0].end() && skill_itr[1]!=m_info->skill[1].end() && skill_itr[2]!=m_info->skill[2].end(); )
     {
         for (i=0; i<3; i++)
             tskill[i] = (*skill_itr[i]);
@@ -335,9 +338,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     }
 
     for(i=0; i<4; i++)
-        action_itr[i] = info->action[i].begin();
+        action_itr[i] = m_info->action[i].begin();
 
-    for (; action_itr[0]!=info->action[0].end() && action_itr[1]!=info->action[1].end();)
+    for (; action_itr[0]!=m_info->action[0].end() && action_itr[1]!=m_info->action[1].end();)
     {
         for( i=0; i<4 ;i++)
             taction[i] = (*action_itr[i]);
@@ -416,7 +419,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     uint16 dest;
     uint8 msg;
     Item *pItem;
-    for (; item_id_itr!=info->item_id.end(); item_id_itr++, item_bagIndex_itr++, item_slot_itr++, item_amount_itr++)
+    for (; item_id_itr!=m_info->item_id.end(); item_id_itr++, item_bagIndex_itr++, item_slot_itr++, item_amount_itr++)
     {
         titem_id = (*item_id_itr);
         titem_bagIndex = (*item_bagIndex_itr);
@@ -893,8 +896,8 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << uint8(bytes);
 
     *p_data << uint8(getLevel());                           //1
-    uint32 zoneId = MapManager::Instance ().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 
+    uint32 zoneId = MapManager::Instance ().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
     *p_data << zoneId;
     *p_data << GetMapId();
 
@@ -927,9 +930,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
             *p_data << (uint32)0;
             *p_data << (uint8)0;
         }
-
     }
-
 }
 
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation)
@@ -8145,102 +8146,108 @@ void Player::SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature
 /***                   LOAD SYSTEM                     ***/
 /*********************************************************/
 
-bool Player::LoadFromDB( uint32 guid )
+int
+Player::LoadFromDB( uint32 guid )
 {
+	ACE_DEBUG( (LM_INFO, "%I-- %D - %M - Loading char guid %u from account %u -- %N:%l --\n", guid, GetSession()->GetAccountId()));
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
+	mysqlpp::Result *res = 0;
+	ACE_NEW_RETURN(res, mysqlpp::Result, -1);
 
-    if(!result)
-        return false;
+	std::ostringstream strbuf;
+	strbuf << "SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic` FROM `character` WHERE `guid` = '" << (unsigned long)guid << "';";
 
-    Field *fields = result->Fetch();
+	if ( sDatabaseMysql->PQuery(DATABASE_WORLD, strbuf.str() , *res) == 1 )
+	{
+		if( res->size() > 0)
+		{
+			mysqlpp::Row row = res->at(0);
 
-    Object::_Create( guid, HIGHGUID_PLAYER );
+			Object::_Create( guid, HIGHGUID_PLAYER ); /* need to check for any error */ 
 
-    LoadValues( fields[3].GetString() );
+			LoadValues(row.at(3)); /* need to check for any error */
 
-    // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
-    for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
-    {
-        SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), 0 );
+			m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF;
 
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
-        for(int i = 0; i < 9; ++i )
-            SetUInt32Value(VisibleBase + i, 0);
+			m_name = (const char *)row.at(4);
+			
+			std::stringstream title;
+			title << "Load Basic value of player " << m_name.c_str() << " is: ";
+			ShowPlayerStats(title.str());
 
-        if (m_items[slot])
-        {
-            delete m_items[slot];
-            m_items[slot] = NULL;
-        }
-    }
+			m_race = uint8(row.at(5));
 
-    m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF;
+			//Need to call it to initialize m_team (m_team can be calculated from m_race)
+			//Other way is to saves m_team into characters table.
+			setFactionForRace(m_race);
+			SetCharm(0);
 
-    m_name = fields[4].GetCppString();
+			m_class = uint8(row.at(6));
 
-    sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
-    outDebugValues();
+			m_info = objmgr.GetPlayerCreateInfo(m_race, m_class);
 
-    m_race = fields[5].GetUInt8();
-    //Need to call it to initialize m_team (m_team can be calculated from m_race)
-    //Other way is to saves m_team into characters table.
-    setFactionForRace(m_race);
-    SetCharm(0);
+			m_positionX = float(row.at(7));
+			m_positionY = float(row.at(8));
+			m_positionZ = float(row.at(9));
+			m_mapId = uint32(row.at(10));
+			m_orientation = float(row.at(11));
+			m_highest_rank = uint32(row.at(14));
+			m_standing = uint32(row.at(15));
+			m_rating = float(row.at(16));
+			m_cinematic = uint32(row.at(17));
 
-    m_class = fields[6].GetUInt8();
+			if( HasFlag(PLAYER_FLAGS, 8) )
+				SetUInt32Value(PLAYER_FLAGS, 0);
 
-    info = objmgr.GetPlayerCreateInfo(m_race, m_class);
+			if( HasFlag(PLAYER_FLAGS, 0x11) )
+				m_deathState = DEAD;
 
-    m_positionX = fields[7].GetFloat();
-    m_positionY = fields[8].GetFloat();
-    m_positionZ = fields[9].GetFloat();
-    m_mapId = fields[10].GetUInt32();
-    m_orientation = fields[11].GetFloat();
-    m_highest_rank = fields[14].GetUInt32();
-    m_standing = fields[15].GetUInt32();
-    m_rating = fields[16].GetFloat();
-    m_cinematic = fields[17].GetUInt32();
+			LoadTaxiMask( row.at(12) );
 
-    if( HasFlag(PLAYER_FLAGS, 8) )
-        SetUInt32Value(PLAYER_FLAGS, 0);
+			delete res;
 
-    if( HasFlag(PLAYER_FLAGS, 0x11) )
-        m_deathState = DEAD;
+			_LoadMail(); /* need to check for any error */
 
-    LoadTaxiMask( fields[12].GetString() );
+			_LoadSpells(); /* need to check for any error */
 
-    delete result;
+			_LoadActions(); /* need to check for any error */
 
-    _LoadMail();
+			_LoadQuestStatus(); /* need to check for any error */
 
-    _LoadSpells();
+			_LoadTutorials(); /* need to check for any error */
 
-    _LoadActions();
+			_LoadBids(); /* need to check for any error */
 
-    _LoadQuestStatus();
+			_LoadAuras(); /* need to check for any error */
 
-    _LoadTutorials();
+			_LoadInventory(); /* need to check for any error */
 
-    _LoadBids();
+			_LoadReputation(); /* need to check for any error */
 
-    _LoadAuras();
+			_LoadCorpse(); /* need to check for any error */
 
-    _LoadInventory();
+			_LoadPet(); /* need to check for any error */
 
-    _LoadReputation();
+			// Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
+			// Skip _ApplyAllItemMods(); -- applied in _LoadInventory() by EquipItem calls at item load
 
-    _LoadCorpse();
+			std::stringstream aftertitle;
+			aftertitle << "The value of player " << m_name.c_str() << " after load item and aura is: ";
+			ShowPlayerStats(aftertitle.str());
 
-    _LoadPet();
-
-    // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
-    // Skip _ApplyAllItemMods(); -- applied in _LoadInventory() by EquipItem calls at item load
-
-    sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
-    outDebugValues();
-
-    return true;
+			return 1;
+		}
+		else
+		{
+			delete res;
+			return 0;
+		}
+	}
+	else
+	{
+		delete res;
+		return -1;
+	}
 }
 
 void Player::_LoadActions()
@@ -8360,8 +8367,21 @@ void Player::_LoadCorpse()
 }
 
 void Player::_LoadInventory()
-{
-    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
+{	
+	for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+	{
+		SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), 0 );
+		int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+		for(int i = 0; i < 9; ++i )
+			SetUInt32Value(VisibleBase + i, 0);
+
+		if (m_items[slot])
+		{
+			delete m_items[slot];
+			m_items[slot] = NULL;
+		}
+	}
+    /*for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
     {
         if(m_items[i])
         {
@@ -8369,7 +8389,7 @@ void Player::_LoadInventory()
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + i*2), 0);
             m_items[i] = 0;
         }
-    }
+    }*/
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
 
@@ -8598,9 +8618,9 @@ void Player::SaveToDB()
 {
     if (isInFlight())
     {
-        return;
         SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
         RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
+		return;
     }
 
     // Set player sit state to standing on save
@@ -8612,7 +8632,7 @@ void Player::SaveToDB()
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
-    outDebugValues();
+    //ShowPlayerStats();
 
     if(isAlive())
     {
@@ -8621,14 +8641,14 @@ void Player::SaveToDB()
     }
 
     bool inworld = IsInWorld();
-    if (inworld)
-        RemoveFromWorld();
 
-    std::stringstream ss;
+    /*if (inworld)
+        RemoveFromWorld();*/
 
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
+	
+	std::stringstream ss;
 
-    ss.rdbuf()->str("");
     ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
@@ -8683,16 +8703,18 @@ void Player::SaveToDB()
     _SaveReputation();
     SavePet();
 
-    if(m_pCorpse) m_pCorpse->SaveToDB(false);
+    if(m_pCorpse)
+		m_pCorpse->SaveToDB(false);
 
     Creature *OldSummon = GetPet();
     if(OldSummon && OldSummon->isPet())
     {
         ((Pet*)OldSummon)->SavePetToDB();
     }
-
-    sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
-    outDebugValues();
+	
+	std::stringstream title;
+	title << "Save Basic value of player " << m_name.c_str() << " is: ";
+	ShowPlayerStats(title.str());
 
     if(isAlive())
     {
@@ -8702,8 +8724,8 @@ void Player::SaveToDB()
 
     //_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
 
-    if (inworld)
-        AddToWorld();
+    /*if (inworld)
+        AddToWorld();*/
 }
 
 void Player::_SaveActions()
@@ -8862,20 +8884,22 @@ void Player::SavePet()
     }
 }
 
-void Player::outDebugValues() const
+void Player::ShowPlayerStats(std::string title)
 {
-    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetMaxHealth(), GetMaxPower(POWER_MANA));
-    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
-    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
-    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetStat(STAT_STAMINA), GetStat(STAT_SPIRIT));
-    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%f",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
-    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
-    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
-    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetAttackTime(BASE_ATTACK), GetAttackTime(RANGED_ATTACK));
+	ACE_DEBUG((LM_INFO, "%I-- %D - %M - %s --\n", title.c_str()));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - HP is: \t\t\t%u\t\tMP is: \t\t\t%u\n",GetMaxHealth(), GetMaxPower(POWER_MANA) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u\n",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u\n",GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u\n",GetStat(STAT_STAMINA), GetStat(STAT_SPIRIT) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - Armor is: \t\t%u\t\tBlock is: \t\t%f\n",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - HolyRes is: \t\t%u\t\tFireRes is: \t\t%u\n",GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u\n",GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u\n",GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f\n",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f\n",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f\n",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) ));
+    ACE_DEBUG((LM_DEBUG, "%I-- %D - %M - ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u\n", GetAttackTime(BASE_ATTACK), GetAttackTime(RANGED_ATTACK) ));
+	ACE_DEBUG((LM_DEBUG, "%I-- %D - %M ----------------\n"));
 }
 
 /*********************************************************/

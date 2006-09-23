@@ -65,7 +65,7 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
         return;
 
     // let select not only active quest but also trade and etc in case trader with quest.
-    pCreature->prepareGossipMenu(_player,0);
+    pCreature->prepareGossipMenu(_player, 0);
     pCreature->sendPreparedGossip( _player );
     //_player->PrepareQuestMenu( guid );
     //_player->SendPreparedQuest( guid );

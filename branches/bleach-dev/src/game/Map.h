@@ -135,6 +135,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         }
 
     private:
+		GridMap * LoadMAP(int mapid,int x,int y);
         bool loaded(const GridPair &) const;
         void EnsureGridLoadedForPlayer(const Cell&, Player*, bool add_player);
         void NotifyPlayerVisibility(const Cell &, const CellPair &, Player *);

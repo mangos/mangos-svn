@@ -22,7 +22,6 @@
 
 NameTableEntry g_worldOpcodeNames[] =
 {
-
     {  MSG_NULL_ACTION,                                     "MSG_NULL_ACTION"},
     {  CMSG_BOOTME,                                         "CMSG_BOOTME"},
     {  CMSG_DBLOOKUP,                                       "CMSG_DBLOOKUP"},

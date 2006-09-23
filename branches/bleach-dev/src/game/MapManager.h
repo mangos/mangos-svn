@@ -46,7 +46,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
                 i_gridCleanUpDelay = t;
         }
 
-        inline void SetMapUpdateInterval(uint32 t)
+        /*inline void SetMapUpdateInterval(uint32 t)
         {
 
             if( t > 50 )
@@ -54,7 +54,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
                 i_timer.SetInterval(t);
                 i_timer.Reset();
             }
-        }
+        }*/
 
     private:
         MapManager();

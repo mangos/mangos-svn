@@ -16,24 +16,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "WorldLog.h"
-#include "Policies/SingletonImp.h"
-#include "Config/ConfigEnv.h"
-#include "Log.h"
+#include "Common.h"
+#include "World.h"
+#include "WorldHandler.h"
 
-#define CLASS_LOCK MaNGOS::ClassLevelLockable<WorldLog, ZThread::FastMutex>
-INSTANTIATE_SINGLETON_2(WorldLog, CLASS_LOCK);
-INSTANTIATE_CLASS_MUTEX(WorldLog, ZThread::FastMutex);
-
-#define WORLD_LOG_FILE_STRING   "world.log"
-
-void
-WorldLog::Initialize()
+WorldHandler::WorldHandler()
 {
-    if( sConfig->GetBoolDefault("LogWorld", false) )
-    {
-        i_file = fopen(WORLD_LOG_FILE_STRING, "w");
-    }
+
 }
 
-#define sWorldLog WorldLog::Instance()
+WorldHandler::~WorldHandler ()
+{
+
+}
+
+int
+WorldHandler::svc (void)
+{
+	ACE_Time_Value realCurrTime = ACE_Time_Value::zero , realPrevTime = ACE_Time_Value::zero;
+	ACE_Thread_Manager *thr_mgr = ACE_Thread_Manager::instance ();
+	while (thr_mgr->testcancel(ACE_OS::thr_self ()) == 0)
+	{
+		if (realPrevTime > realCurrTime)
+            realPrevTime = ACE_Time_Value::zero;
+
+		realCurrTime = ACE_OS::gettimeofday();
+		sWorld.Update(realCurrTime.msec() - realPrevTime.msec());
+		realPrevTime = realCurrTime;
+		ACE_OS::sleep(ACE_Time_Value (0, 100000));
+	}
+	return 0;
+
+}
