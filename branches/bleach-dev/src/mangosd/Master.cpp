@@ -17,38 +17,79 @@
  */
 
 #include "Master.h"
-#include "Network/SocketHandler.h"
-#include "Network/ListenSocket.h"
-#include "Network/TcpSocket.h"
-//#include "AuthSocket.h"
 #include "WorldSocket.h"
-#include "RASocket.h"
 #include "WorldSocketMgr.h"
-#include "WorldRunnable.h"
 #include "World.h"
-//#include "RealmList.h"
 #include "Log.h"
 #include "Timer.h"
 #include <signal.h>
 #include "MapManager.h"
-#include "Policies/SingletonImp.h"
 #include "AddonHandler.h"
+#include "WorldHandler.h"
 
-#ifdef ENABLE_CLI
+#include <ace/Event_Handler.h>
+#include <ace/Thread_Manager.h>
+#include <ace/TP_Reactor.h>
+
+/*#ifdef ENABLE_CLI
 #include "CliRunnable.h"
 
 INSTANTIATE_SINGLETON_1( CliRunnable );
-#endif
+#endif*/
 
-#pragma warning(disable:4305)
+//#pragma warning(disable:4305)
 
-INSTANTIATE_SINGLETON_1( Master );
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+template class ACE_Singleton<Master, ACE_Recursive_Thread_Mutex>;
+#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+#pragma instantiate ACE_Singleton<Master, ACE_Recursive_Thread_Mutex>
+#elif defined (__GNUC__) && (defined (_AIX) || defined (__hpux))
+template ACE_Singleton<Master, ACE_Recursive_Thread_Mutex> * ACE_Singleton<Master, ACE_Recursive_Thread_Mutex>::singleton_;
+#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
 
 volatile bool Master::m_stopEvent = false;
 
+static int m_thrgrp[THR_GRP_SIZE];
+
+static ACE_THR_FUNC_RETURN MapManagerWorker (void *)
+{
+	ACE_TRACE("MapManagerWorker (void *)");
+
+	ACE_DEBUG((LM_DEBUG, "(%t) Spawning MapManager thread...\n"));
+	ACE_Time_Value realCurrTime = ACE_Time_Value::zero , realPrevTime = ACE_Time_Value::zero;
+	ACE_Thread_Manager *thr_mgr = ACE_Thread_Manager::instance ();
+	while (thr_mgr->testcancel(ACE_OS::thr_self ()) == 0)
+	{
+		if (realPrevTime > realCurrTime)
+			realPrevTime = ACE_Time_Value::zero;
+
+		realCurrTime = ACE_OS::gettimeofday();
+		MapManager::Instance().Update(realCurrTime.msec() - realPrevTime.msec());
+		realPrevTime = realCurrTime;
+		ACE_OS::sleep(ACE_Time_Value (0, 100000));
+	}
+	ACE_DEBUG ((LM_DEBUG, "(%t) MapManager Thread Closed\n"));
+	return 0;
+}
+
+static ACE_THR_FUNC_RETURN MangosdthreadFunc(void *arg)
+{
+    ACE_TRACE("MangosdthreadFunc(void *)");
+
+	ACE_Reactor *reactor = (ACE_Reactor *) arg;
+	reactor->run_reactor_event_loop();
+
+	ACE_DEBUG ((LM_DEBUG, "(%t) Reactor Thread Closed\n"));
+
+    return 0;
+}
+
+
 void Master::_OnSignal(int s)
 {
-    switch (s)
+	//ACE_DEBUG ((LM_DEBUG, "(%t) received signal %d\n", s));
+
+    /*switch (s)
     {
         case SIGINT:
         case SIGQUIT:
@@ -61,9 +102,30 @@ void Master::_OnSignal(int s)
             Master::m_stopEvent = true;
             break;
         #endif
-    }
+    }*/
 
-    signal(s, _OnSignal);
+    ACE_OS::signal(s, (ACE_SignalHandler)_OnSignal);
+	
+	ACE_Thread_Manager *thr_mgr = ACE_Thread_Manager::instance ();
+
+	//ACE_DEBUG ((LM_DEBUG, "(%t) signaling group %d \n", m_thrgrp[THR_GRP_MAPMANAGER]));
+	/*if (thr_mgr->kill_grp (m_thrgrp[THR_GRP_MAPMANAGER], SIGINT) == -1)
+		ACE_ERROR ((LM_DEBUG, "(%t) %p\n", "kill_grp"));*/
+
+	/*if (thr_mgr->cancel_grp (m_thrgrp[THR_GRP_MAPMANAGER]) == -1)
+		ACE_ERROR ((LM_DEBUG, "(%t) %p\n", "cancel_grp"));
+	
+	ACE_Thread_Manager::instance()->wait_grp(m_thrgrp[THR_GRP_MAPMANAGER]);*/
+
+	ACE_DEBUG ((LM_DEBUG, "(%t) signaling group %d \n", m_thrgrp[THR_GRP_REACTOR]));
+	
+	/*if (thr_mgr->kill_grp (m_thrgrp[THR_GRP_REACTOR], SIGINT) == -1)
+		ACE_ERROR ((LM_DEBUG, "(%t) %p\n", "kill_grp"));*/
+
+	if (thr_mgr->cancel_grp (m_thrgrp[THR_GRP_REACTOR]) == -1)
+		ACE_ERROR ((LM_DEBUG, "(%t) %p\n", "cancel_grp"));
+	
+	ACE_Thread_Manager::instance()->wait_grp(m_thrgrp[THR_GRP_REACTOR]);
 }
 
 Master::Master()
@@ -76,6 +138,14 @@ Master::~Master()
 
 bool Master::Run()
 {
+	// create a reactor from a TP reactor
+	// Register a signal handler.
+	_HookSignals();
+
+    ACE_TP_Reactor tpReactor;
+    ACE_Reactor new_reactor(&tpReactor);
+	ACE_Reactor::instance (&new_reactor);
+
     sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n\n" );
 
@@ -90,172 +160,77 @@ bool Master::Run()
     sLog.outString( "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM");
     sLog.outString( "        MM  MMM http://www.mangosproject.org");
     sLog.outString( "        MMMMMM\n\n");
+	
+	if(_StartDB())
+		ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT("[%D]:%M:%N:%l: ") ACE_TEXT("Couldn't Start Database.\n")), -1);
 
-    _StartDB();
+    sWorld.SetPlayerLimit( sConfig->GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
+    sWorld.SetMotd( sConfig->GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server.").c_str() );
 
-    //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
-
-    sWorld.SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
-    sWorld.SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
     sWorld.SetInitialWorldSettings();
 
-    port_t wsport, rmport;
-    rmport = sWorld.getConfig(CONFIG_PORT_REALM);           //sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-    wsport = sWorld.getConfig(CONFIG_PORT_WORLD);           //sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
+    uint32 rmport = sWorld.getConfig(CONFIG_PORT_REALM);           
+    uint32 wsport = sWorld.getConfig(CONFIG_PORT_WORLD);
 
-    uint32 socketSelecttime;
-                                                            //sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME );
-    socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);
+	WorldSocketMgr peer_acceptor;
+	
+	if (peer_acceptor.open (ACE_INET_Addr (wsport), &new_reactor, ACE_NONBLOCK) == -1)
+		ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "open"), -1);
+	
+	WorldHandler *wh = 0;
+	ACE_NEW_RETURN(wh,WorldHandler, -1);
+	m_thrgrp[THR_GRP_SESSION] = wh->activate(THR_NEW_LWP | THR_DETACHED);
 
-    //sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
-    //sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
-    //sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
-    //sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
-    //sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
-    //sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
+    m_thrgrp[THR_GRP_REACTOR] = ACE_Thread_Manager::instance()->spawn_n(5 , ACE_THR_FUNC(MangosdthreadFunc), &new_reactor);
 
-    //uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);
-    //sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
-    //grid_clean_up_delay *= 1000;
-    //MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
+	//m_thrgrp[THR_GRP_MAPMANAGER] = ACE_Thread_Manager::instance()->spawn(ACE_THR_FUNC(MapManagerWorker), 0, THR_NEW_LWP | THR_DETACHED);
 
-    //uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
-    //sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
-    //MapManager::Instance().SetMapUpdateInterval(map_update_interval);
+	ACE_Thread_Manager::instance()->wait();
 
-    //    sRealmList.setServerPort(wsport);
-    //    sRealmList.GetAndAddRealms ();
-    SocketHandler h;
-    ListenSocket<WorldSocket> worldListenSocket(h);
-    //    ListenSocket<AuthSocket> authListenSocket(h);
-
-    if (worldListenSocket.Bind(wsport))
-    {
-        _StopDB();
-        sLog.outString( "MaNGOS can not bind to that port" );
-        exit(1);
-    }
-
-    h.Add(&worldListenSocket);
-    //    h.Add(&authListenSocket);
-
-    _HookSignals();
-
-    ZThread::Thread t(new WorldRunnable);
-
-    //#ifndef WIN32
-    t.setPriority ((ZThread::Priority )2);
-    //#endif
-
-    #ifdef ENABLE_CLI
-    ZThread::Thread td1(new CliRunnable);
-    #endif
-
-    #ifdef ENABLE_RA
-
-    ListenSocket<RASocket> RAListenSocket(h);
-
-    if (RAListenSocket.Bind(sConfig.GetIntDefault( "RA.Port", 3443 )))
-    {
-
-        sLog.outString( "MaNGOS can not bind to that port" );
-        // exit(1); go on with no RA
-
-    }
-    // patch by SegaL. Only for HT and dual core. Ypu may apply it at your own risk.
-    //int Aff;
-    //Aff = sConfig.GetIntDefault("Affinity", 0);
-    //if(!Aff)
-    //{
-    //  sLog.outError("Affinity ID not defined");
-    //  exit(1);
-    //}
-    //else
-    //{
-    //  sLog.outString("Set Affinity running as %d", Aff);
-    //}
-    //HANDLE hProcess = GetCurrentProcess();
-    //SetProcessAffinityMask(hProcess,Aff);
-    //SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS);
-
-    h.Add(&RAListenSocket);
-    #endif
-    uint32 realCurrTime, realPrevTime;
-    realCurrTime = realPrevTime = getMSTime();
-    while (!Master::m_stopEvent)
-    {
-
-        if (realPrevTime > realCurrTime)
-            realPrevTime = 0;
-
-        realCurrTime = getMSTime();
-        sWorldSocketMgr.Update( realCurrTime - realPrevTime );
-        realPrevTime = realCurrTime;
-
-        //h.Select(0, 100000);
-        h.Select(0, socketSelecttime);
-    }
-
-    sLog.outString( "WORLD: Saving Addons" );
-    sAddOnHandler._SaveToDB();
-
-    _UnhookSignals();
-
-    t.wait();
-
-    _StopDB();
-
-    sLog.outString( "Halting process..." );
-    return 0;
+	return 0;
 }
 
-bool Master::_StartDB()
+int
+Master::_StartDB()
 {
+    ACE_TRACE("StartDB()");
     std::string dbstring;
-    if(!sConfig.GetString("WorldDatabaseInfo", &dbstring))
-    {
-        sLog.outError("Database not specified");
-        exit(1);
+    if(!sConfig->GetString("WorldDatabaseInfo", &dbstring))
+       ACE_ERROR_RETURN ((LM_ERROR, "World Database not specified.\n"), -1);
 
-    }
     sLog.outString("World Database: %s", dbstring.c_str() );
     if(!sDatabase.Initialize(dbstring.c_str()))
-    {
-        sLog.outError("Cannot connect to world database");
-        exit(1);
-    }
+       ACE_ERROR_RETURN ((LM_ERROR, "Cannot connect to World database.\n"), -1);
 
-    if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
-    {
-        sLog.outError("Login database not specified");
-        exit(1);
+    if(!sConfig->GetString("LoginDatabaseInfo", &dbstring))
+        ACE_ERROR_RETURN ((LM_ERROR, "Login Database not specified.\n"), -1);
 
-    }
     sLog.outString("Login Database: %s", dbstring.c_str() );
     if(!loginDatabase.Initialize(dbstring.c_str()))
-    {
-        sLog.outError("Cannot connect to login database");
-        exit(1);
-    }
+        ACE_ERROR_RETURN ((LM_ERROR, "Cannot connect to login database.\n"), -1);
 
-    realmID = sConfig.GetIntDefault("RealmID", 0);
+    realmID = sConfig->GetIntDefault("RealmID", 0);
     if(!realmID)
-    {
-        sLog.outError("Realm ID not defined");
-        exit(1);
-    }
-    else
-    {
-        sLog.outString("Realm running as realm ID %d", realmID);
-    }
+		ACE_ERROR_RETURN ((LM_ERROR, "Realm ID not defined.\n"), -1);
 
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Realm running as realm ID %d.\n"), realmID));
+   
     sDatabase.PExecute("UPDATE `character` SET `online` = 0;");
+	
+	sConfig->GetString("WorldDatabaseInfo", &dbstring);
 
-    if (!mysql_thread_safe())
-        sLog.outError("ERROR: Used MySQL library isn't thread-safe.");
+	if(sDatabaseMysql->AddDatabase(dbstring.c_str(), DATABASE_WORLD) == 0)
+	{
+		ACE_ERROR_RETURN ((LM_ERROR, "Cannot connect to World database: %s.\n", sDatabaseMysql->GetDatabaseError(DATABASE_WORLD)), -1);
+	}
+	sConfig->GetString("LoginDatabaseInfo", &dbstring);
+	if(sDatabaseMysql->AddDatabase(dbstring.c_str(), DATABASE_LOGIN) == 0)
+	{
+		ACE_ERROR_RETURN ((LM_ERROR, "Cannot connect to Login database: %s.\n", sDatabaseMysql->GetDatabaseError(DATABASE_LOGIN)), -1);
+	}
 
     clearOnlineAccounts();
-    return true;
+    return 0;
 }
 
 void Master::_StopDB()
@@ -274,15 +249,19 @@ void Master::clearOnlineAccounts()
 
 void Master::_HookSignals()
 {
-    signal(SIGINT, _OnSignal);
+	ACE_Sig_Action sa ((ACE_SignalHandler) _OnSignal, SIGINT);
+	ACE_UNUSED_ARG (sa);
+
+  /*  signal(SIGINT, );
     signal(SIGQUIT, _OnSignal);
     signal(SIGTERM, _OnSignal);
     signal(SIGABRT, _OnSignal);
     #ifdef _WIN32
     signal(SIGBREAK, _OnSignal);
-    #endif
+    #endif*/
 }
 
+/*
 void Master::_UnhookSignals()
 {
     signal(SIGINT, 0);
@@ -293,4 +272,12 @@ void Master::_UnhookSignals()
     signal(SIGBREAK, 0);
     #endif
 
-}
+}*/
+
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+template class ACE_Acceptor <WorldSocket, ACE_SOCK_ACCEPTOR>;
+template class ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>;
+#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
+#pragma instantiate ACE_Acceptor <WorldSocket, ACE_SOCK_ACCEPTOR>
+#pragma instantiate ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH>
+#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

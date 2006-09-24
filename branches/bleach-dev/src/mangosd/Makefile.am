@@ -22,16 +22,20 @@ bin_PROGRAMS = mangosd
 
 mangosd_SOURCES = \
     Main.cpp \
-    Master.cpp \
     Master.h \
-    WorldRunnable.cpp \
-    WorldRunnable.h \
-    CliRunnable.cpp \
-    CliRunnable.h \
-    RASocket.cpp \
-    RASocket.h
+    Master.cpp
 
-mangosd_LDADD = $(top_builddir)/src/game/libgame.a $(top_builddir)/src/shared/libdatabase.a $(top_builddir)/src/shared/libconfig.a $(top_builddir)/src/shared/libauth.a $(top_builddir)/src/shared/libshared.a $(top_builddir)/src/framework/libframework.a $(top_builddir)/src/shared/libnetwork.a -lZThread -lMaNGOSScript -lzlib
+mangosd_LDADD = $(top_builddir)/src/game/libgame.a \
+		$(top_builddir)/src/shared/libdatabase.a \
+		$(top_builddir)/src/shared/libconfig.a \
+		$(top_builddir)/src/shared/libauth.a \
+		$(top_builddir)/src/shared/libshared.a \
+		$(top_builddir)/src/framework/libframework.a \
+		-lZThread \
+		-lMaNGOSScript \
+		-lzlib \
+		-lACE \
+		-lmysqlpp
 
 mangosd_LDFLAGS = -L$(top_builddir)/dep/src/zthread \
                -L$(top_builddir)/dep/src/zlib \

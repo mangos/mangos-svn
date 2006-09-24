@@ -20,10 +20,19 @@
 #define _MASTER_H
 
 #include "Common.h"
-#include "Policies/Singleton.h"
 #include "Config/ConfigEnv.h"
 #include "Database/DatabaseEnv.h"
 #include "SystemConfig.h"
+
+#include <ace/Singleton.h>
+
+enum eThreadGroup
+{
+	THR_GRP_REACTOR = 0,
+	THR_GRP_MAPMANAGER,
+	THR_GRP_SESSION,
+	THR_GRP_SIZE
+};
 
 class Master
 {
@@ -34,16 +43,18 @@ class Master
 
         static volatile bool m_stopEvent;
     private:
-        bool _StartDB();
+        int _StartDB();
         void _StopDB();
 
         void _HookSignals();
-        void _UnhookSignals();
+        //void _UnhookSignals();
 
         static void _OnSignal(int s);
 
         void clearOnlineAccounts();
 };
 
-#define sMaster MaNGOS::Singleton<Master>::Instance()
+typedef ACE_Singleton<Master, ACE_Recursive_Thread_Mutex> MasterSingleton;
+#define sMaster MasterSingleton::instance()
+
 #endif

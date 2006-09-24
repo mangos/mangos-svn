@@ -63,25 +63,22 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = mangosd.conf
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sysconfdir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_mangosd_OBJECTS = Main.$(OBJEXT) Master.$(OBJEXT) \
-	WorldRunnable.$(OBJEXT) CliRunnable.$(OBJEXT) \
-	RASocket.$(OBJEXT)
+am_mangosd_OBJECTS = Main.$(OBJEXT) Master.$(OBJEXT)
 mangosd_OBJECTS = $(am_mangosd_OBJECTS)
 mangosd_DEPENDENCIES = $(top_builddir)/src/game/libgame.a \
 	$(top_builddir)/src/shared/libdatabase.a \
 	$(top_builddir)/src/shared/libconfig.a \
 	$(top_builddir)/src/shared/libauth.a \
 	$(top_builddir)/src/shared/libshared.a \
-	$(top_builddir)/src/framework/libframework.a \
-	$(top_builddir)/src/shared/libnetwork.a
+	$(top_builddir)/src/framework/libframework.a
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+depcomp = $(SHELL) $(top_srcdir)/aux_config/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -243,16 +240,21 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 mangosd_SOURCES = \
     Main.cpp \
-    Master.cpp \
     Master.h \
-    WorldRunnable.cpp \
-    WorldRunnable.h \
-    CliRunnable.cpp \
-    CliRunnable.h \
-    RASocket.cpp \
-    RASocket.h
+    Master.cpp
 
-mangosd_LDADD = $(top_builddir)/src/game/libgame.a $(top_builddir)/src/shared/libdatabase.a $(top_builddir)/src/shared/libconfig.a $(top_builddir)/src/shared/libauth.a $(top_builddir)/src/shared/libshared.a $(top_builddir)/src/framework/libframework.a $(top_builddir)/src/shared/libnetwork.a -lZThread -lMaNGOSScript -lzlib
+mangosd_LDADD = $(top_builddir)/src/game/libgame.a \
+		$(top_builddir)/src/shared/libdatabase.a \
+		$(top_builddir)/src/shared/libconfig.a \
+		$(top_builddir)/src/shared/libauth.a \
+		$(top_builddir)/src/shared/libshared.a \
+		$(top_builddir)/src/framework/libframework.a \
+		-lZThread \
+		-lMaNGOSScript \
+		-lzlib \
+		-lACE \
+		-lmysqlpp
+
 mangosd_LDFLAGS = -L$(top_builddir)/dep/src/zthread \
                -L$(top_builddir)/dep/src/zlib \
 	       -L$(top_builddir)/src/bindings/universal \
@@ -336,11 +338,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CliRunnable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Master.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RASocket.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldRunnable.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

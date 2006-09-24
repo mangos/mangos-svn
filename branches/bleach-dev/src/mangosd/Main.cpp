@@ -17,10 +17,15 @@
  */
 
 #include "Common.h"
-#include "Database/DatabaseEnv.h"
 #include "Config/ConfigEnv.h"
 #include "Log.h"
+#include "SystemConfig.h"
 #include "Master.h"
+#include "Configuration.h"
+
+#include <ace/Get_Opt.h>
+#include <ace/Service_Config.h>
+#include <ace/ARGV.h>
 
 #include <iostream>
 
@@ -62,11 +67,11 @@ int main(int argc, char **argv)
         ++c;
     }
 
-    if (!sConfig.SetSource(cfg_file.c_str()) )
+    if (!sConfig->SetSource(cfg_file.c_str()) )
     {
         sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
     }
-
-    sMaster.Run();
-    return 0;
+	
+	//sConfiguration->SetSource(ACE_TEXT("/home/fulgas/mangosd/etc/new_mangosd.conf"));
+	sMaster->Run();
 }
