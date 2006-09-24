@@ -9,7 +9,6 @@ What's new ?
 1. ACE framework (http://www.cs.wustl.edu/~schmidt/ACE.html)
 2. New Mysql Lib ( mysql++ http://tangentsoft.net/mysql++/)
 3. Remove dependency directory so that any deps can be installed anywhere. ( perhaps. I just don't like the idea of having MaNGOS with the deps. ) 
-4. 
 
 - Is it already a workin MaNGOS ?
 
@@ -36,3 +35,9 @@ As an example:
 - Using a new configuration file. 
 - Better log system
 - ...
+
+List of Dependencies
+
+- ACE
+- openssl
+- mysql++ 2.1.1 ( you need mysql to install )
