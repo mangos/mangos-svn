@@ -18,6 +18,8 @@ AC_INIT([MaNGOS],
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR(src/mangosd/Main.cpp)
 
+AC_CONFIG_AUX_DIR([aux_config])
+
 dnl Automake is needed for the build system.
 dnl
 AM_INIT_AUTOMAKE([1.6 dist-bzip2])
@@ -137,7 +139,7 @@ AC_HEADER_TIME
 AC_CHECK_HEADERS(                                             \
    limits.h sys/ioctl.h unistd.h fcntl.h float.h mysql.h      \
    netdb.h netinet/in.h stddef.h sys/socket.h                 \
-   sys/time.h sys/timeb.h opensslv.h                          \
+   sys/time.h sys/timeb.h opensslv.h ace/ACE.h mysql++/mysql++.h \
  ,[],[AC_MSG_ERROR([Missing required header])])
 
 CPPFLAGS=$CPPFLAGS_SAVE
