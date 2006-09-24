@@ -8858,6 +8858,9 @@ bool Player::LoadFromDB( uint32 guid )
 
     delete result;
 
+    // make sure the unit is considered out of combat for proper loading
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+
     _LoadMail();
 
     _LoadAuras();
