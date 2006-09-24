@@ -51,6 +51,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `ACE' library (-lACE). */
+#undef HAVE_LIBACE
+
 /* Define to 1 if you have the `compat' library (-lcompat). */
 #undef HAVE_LIBCOMPAT
 
@@ -87,6 +90,9 @@
 
 /* Define to 1 if you have the <mysql.h> header file. */
 #undef HAVE_MYSQL_H
+
+/* Define to 1 if you have the <mysql++/mysql++.h> header file. */
+#undef HAVE_MYSQL___MYSQL___H
 
 /* Define to 1 if you have the <netdb.h> header file. */
 #undef HAVE_NETDB_H

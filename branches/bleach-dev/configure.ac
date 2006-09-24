@@ -27,7 +27,6 @@ AM_MAINTAINER_MODE
 
 AC_PROG_CC(gcc cc)
 AC_PROG_CXX
-AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 AC_LANG([C++])
@@ -128,6 +127,8 @@ AC_CHECK_LIB( z, compress, [],[AC_MSG_ERROR([Missing zlib])] )
 AC_CHECK_LIB( compat, ftime )
 AC_CHECK_LIB( mysqlclient, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
 AC_CHECK_LIB( ssl, SHA1_Init, [], [AC_CHECK_LIB(ssl, SHA1_Init,[],[AC_MSG_ERROR([Missing openssl])])])
+
+AC_HAVE_LIBRARY(ACE)
 
 CPPFLAGS_SAVE=$CPPFLAGS
 CPPFLAGS=$INCLUDES $CPPFLAGS

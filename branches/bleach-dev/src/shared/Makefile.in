@@ -266,7 +266,6 @@ libshared_a_SOURCES = \
     Mthread.cpp \
     ProgressBar.h \
     ProgressBar.cpp \
-    Singleton.h \
     Timer.h \
     Util.h \
     Util.cpp \

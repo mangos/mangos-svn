@@ -3,8 +3,8 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = MaNGOS
-PROJECT_NUMBER         = 
+PROJECT_NAME           = mangos
+PROJECT_NUMBER         = 0.5-SVN
 OUTPUT_DIRECTORY       = 
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
@@ -15,7 +15,7 @@ ABBREVIATE_BRIEF       =
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = NO
-STRIP_FROM_PATH        = 
+STRIP_FROM_PATH        = ../
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = YES
@@ -67,11 +67,13 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../src/framework/ \
-			 ../src/game/ \
-                         ../src/realmlist/ \
-                         ../src/shared/ \
-                         ../src/mangosd/
+INPUT                  = ../src/bindings/python/ \
+                         ../src/bindings/universal/ \
+                         ../src/framework/ \
+                         ../src/game/ \
+                         ../src/mangosd/ \
+                         ../src/realmd/ \
+                         ../src/shared/
 FILE_PATTERNS          = *.cpp \
                          *.h \
 			 *.hpp
