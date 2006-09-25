@@ -204,7 +204,7 @@ void World::SetInitialWorldSettings()
     regen_values[RATE_XP_EXPLORE]  = sConfig.GetFloatDefault("Rate.XP.Explore", 1);
     regen_values[RATE_CREATURE_NORMAL_DAMAGE] = sConfig.GetFloatDefault("Rate.Creature.Normal.Damage", 1);
     regen_values[RATE_CREATURE_ELITE_ELITE_DAMAGE] = sConfig.GetFloatDefault("Rate.Creature.Elite.Elite.Damage", 1);
-    regen_values[RATE_CREATURE_ELITE_RAREETLITE_DAMAGE] = sConfig.GetFloatDefault("Rate.Creature.Elite.RAREELITE.Damage", 1);
+    regen_values[RATE_CREATURE_ELITE_RAREELITE_DAMAGE] = sConfig.GetFloatDefault("Rate.Creature.Elite.RAREELITE.Damage", 1);
     regen_values[RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE] = sConfig.GetFloatDefault("Rate.Creature.Elite.WORLDBOSS.Damage", 1);
     regen_values[RATE_CREATURE_ELITE_RARE_DAMAGE] = sConfig.GetFloatDefault("Rate.Creature.Elite.RARE.Damage", 1);
     regen_values[RATE_CREATURE_NORMAL_HP] = sConfig.GetFloatDefault("Rate.Creature.Normal.HP", 1);

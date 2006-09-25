@@ -1015,7 +1015,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
         else
             damage = 0;
 
-        DealDamage (pVictim, uint32 damage, 0, true);
+        DealDamage (pVictim, damage, 0, true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
         {
