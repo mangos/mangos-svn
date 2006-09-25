@@ -965,19 +965,19 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
             damagemod = sWorld.getRate(RATE_CREATURE_NORMAL_DAMAGE);
             break;
         case CREATURE_ELITE_ELITE:
-            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            healthmod = sWorld.getRate(RATE_CREATURE_ELITE_ELITE_HP);
             damagemod = sWorld.getRate(RATE_CREATURE_ELITE_ELITE_DAMAGE);
             break;
         case CREATURE_ELITE_RAREELITE:
-            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            healthmod = sWorld.getRate(RATE_CREATURE_ELITE_RAREELITE_HP);
             damagemod = sWorld.getRate(RATE_CREATURE_ELITE_RAREETLITE_DAMAGE);
             break;
         case CREATURE_ELITE_WORLDBOSS:
-            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            healthmod = sWorld.getRate(RATE_CREATURE_ELITE_WORLDBOSS_HP);
             damagemod = sWorld.getRate(RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE);
             break;
         case CREATURE_ELITE_RARE:
-            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            healthmod = sWorld.getRate(RATE_CREATURE_ELITE_RARE_HP);
             damagemod = sWorld.getRate(RATE_CREATURE_ELITE_RARE_DAMAGE);
             break;
         default:
