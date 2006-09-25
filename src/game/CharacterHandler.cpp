@@ -229,7 +229,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_CHAR_CREATE );
     data << (uint8)0x2E;
     SendPacket( &data );
-    
+
     sLog.outBasic("Account: %d Create New Character:[%s]",GetAccountId(),name.c_str());
 }
 

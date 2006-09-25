@@ -307,7 +307,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
-            GetInCombatState();      //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+            GetInCombatState();                             //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
         }
         void _removeAttacker(Unit *pAttacker)               // must be called only from Unit::AttackStop()
         {
@@ -319,7 +319,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             {
                 clearUnitState(UNIT_STAT_ATTACK_BY);
                 if(!m_attacking)
-                    LeaveCombatState();      //RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+                    LeaveCombatState();                     //RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             }
         }
         Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
@@ -458,7 +458,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         bool HasAuraType(uint32 auraType) const;
         bool HasAura(uint32 spellId, uint32 effIndex) const
-        { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
+            { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
 
         bool isStealth() const                              // cache this in a bool someday
         {

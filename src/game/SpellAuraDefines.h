@@ -192,7 +192,7 @@ enum MOD_TYPES
     SPELL_AURA_SPLIT_DAMAGE_FLAT    =   153 ,               //    Split Damage Flat
     SPELL_AURA_MOD_STEALTH_LEVEL    =   154 ,               //    Stealth Level Modifier
     SPELL_AURA_MOD_WATER_BREATHING  =   155 ,               //    Mod Water Breathing
-    SPELL_AURA_MOD_REPUTATION_GAIN    =   156 ,           //    Mod Reputation Gain
+    SPELL_AURA_MOD_REPUTATION_GAIN    =   156 ,             //    Mod Reputation Gain
     SPELL_AURA_PET_DAMAGE_MULTI =   157 ,                   //    Mod Pet Damage
 
     TOTAL_AURAS=158

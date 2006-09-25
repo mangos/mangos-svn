@@ -225,7 +225,6 @@ void CliInfo(char*,pPrintf zprintf)
         return;
     }
 
-
     int linesize = 1+15+2+20+3+15+2+6+3;                    // see format string
     char* buf = new char[resultDB->GetRowCount()*linesize+1];
     char* bufPos = buf;
@@ -254,7 +253,6 @@ void CliInfo(char*,pPrintf zprintf)
     }while(resultDB->NextRow());
 
     *bufPos = '\0';
-
 
     zprintf("Online users: %d\x0d\x0a",resultDB->GetRowCount());
     zprintf("=================================================================\x0d\x0a");

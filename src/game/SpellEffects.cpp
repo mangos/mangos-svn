@@ -2196,7 +2196,7 @@ void Spell::EffectSkill(uint32 i)
 
     // This hack like code, but another way get GO for prevent effect skill applying for partly looted go not found
     if(m_spellInfo->Effect[0]==33 && !m_targetGOs[0].empty())
-    { 
+    {
         GameObject* go = m_targetGOs[0].front();
 
         if(!go->HaveLootSkill())
@@ -2241,5 +2241,5 @@ void Spell::EffectSkill(uint32 i)
 
         player->UpdateSkill(skill_id);
     }else
-        player->UpdateSkillPro(m_spellInfo->Id);
+    player->UpdateSkillPro(m_spellInfo->Id);
 }
