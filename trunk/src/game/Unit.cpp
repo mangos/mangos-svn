@@ -738,10 +738,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         return;
     }
 
-    CreatureInfo const *cinfo = NULL;
-    if(pVictim->GetTypeId() != TYPEID_PLAYER)
-        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
-
     *damage += CalculateDamage (attType);
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
@@ -1019,7 +1015,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
         else
             damage = 0;
 
-        DealDamage (pVictim, uint32(damage*sWorld.getRate(RATE_CREATURE_DAMAGE)), 0, true);
+        DealDamage (pVictim, uint32 damage, 0, true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
         {
