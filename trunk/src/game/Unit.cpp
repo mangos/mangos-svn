@@ -380,7 +380,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         DEBUG_LOG("DealDamageAlive");
         pVictim->SetHealth(health - damage);
         Attack(pVictim);
-        
+
         //Get in CombatState
         GetInCombatState();
         pVictim->GetInCombatState();
@@ -2457,7 +2457,7 @@ bool Unit::Attack(Unit *victim)
     }
     addUnitState(UNIT_STAT_ATTACKING);
     if(GetTypeId()!=TYPEID_PLAYER)
-        GetInCombatState();      //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+        GetInCombatState();                                 //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
@@ -2483,7 +2483,7 @@ bool Unit::AttackStop()
     m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
     if(GetTypeId()!=TYPEID_PLAYER && m_attackers.empty())
-        LeaveCombatState();      //RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+        LeaveCombatState();                                 //RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
     if(m_currentMeleeSpell)
         m_currentMeleeSpell->cancel();

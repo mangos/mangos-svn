@@ -1270,7 +1270,8 @@ bool Player::isAcceptTickets() const
     return GetSession()->GetSecurity() >=2 && (m_GMFlags & GM_ACCEPT_TICKETS);
 }
 
-void Player::SetGameMaster(bool on) {
+void Player::SetGameMaster(bool on)
+{
     if(on)
     {
         m_GMFlags |= GM_ON;
@@ -2789,8 +2790,8 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             SkillLine *pSkill = sSkillLineStore.LookupEntry(id);
             if(!pSkill)
             {
- 	            sLog.outError("Skill not found in SkillLineStore: skill #%u", id);
- 	            return;
+                sLog.outError("Skill not found in SkillLineStore: skill #%u", id);
+                return;
             }
             // enable unlearn button for professions only
             if (pSkill->categoryId == 11)
@@ -3049,9 +3050,9 @@ void Player::CheckExploreSystem()
         {
             uint32 area = p->ID;
             if (getLevel() >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
-            {        
+            {
                 SendExplorationExperience(area,0);
-            } 
+            }
             else
             {
                 uint32 XP = uint32(p->area_level*10*sWorld.getRate(RATE_XP_EXPLORE));
@@ -3260,7 +3261,7 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
         int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
         if(dif < 0) dif = 0;
         else if(dif > 5) dif = 5;
-        
+
         int RepPoints = (uint32)(((5-dif)*0.20)*(100.0f + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]));
         // correct would be multiplicative but currently only one such aura in game
 
@@ -9344,7 +9345,7 @@ void Player::_SaveAuras()
         uint8 i;
         for (i = 0; i < 3; i++)
             if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT ||
-                spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
+            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
                 break;
         if (i == 3 && !itr->second->IsPassive())
             sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));

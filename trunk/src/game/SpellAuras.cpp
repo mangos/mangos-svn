@@ -960,7 +960,8 @@ void Aura::HandleAuraTransform(bool apply)
         CreatureInfo const * ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
         if(!ci)
         {
-            m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 16358); //pig pink ^_^
+                                                            //pig pink ^_^
+            m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 16358);
             sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetSpellProto()->Id);
         }
         else
@@ -2090,7 +2091,7 @@ void Aura::HandleModDamagePCTTaken(bool apply)
 
 void Aura::HandleModPCTRegen(bool apply)
 {
-    // has no immediate effect when adding / removing 
+    // has no immediate effect when adding / removing
 }
 
 void Aura::HandleModCreatureAttackPower(bool apply)
@@ -2168,7 +2169,7 @@ void Aura::HandleModPowerCostSchool(bool apply)
 
 void Aura::HandleModReputationGain(bool apply)
 {
-    // has no immediate effect when adding / removing 
+    // has no immediate effect when adding / removing
 }
 
 void Aura::SendCoolDownEvent()
