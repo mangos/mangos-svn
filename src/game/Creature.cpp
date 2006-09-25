@@ -945,20 +945,49 @@ void Creature::SaveToDB()
 
 bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 {
+    float healthmod = 0, damagemod = 0;
     Object::_Create(guidlow, HIGHGUID_UNIT);
     SetUInt32Value(OBJECT_FIELD_ENTRY,Entry);
     CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
     if(!cinfo)
     {
-        sLog.outError("Error: creature entry %u does not exist.",Entry);
+        sLog.outString("Error: creature entry %u does not exist.",Entry);
         return false;
     }
+    uint32 rank = cinfo->rank;
+
     SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID );
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,cinfo->DisplayID );
+    switch (rank) // define rates for each elite rank
+    {
+        case CREATURE_ELITE_NORMAL:
+            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            damagemod = sWorld.getRate(RATE_CREATURE_NORMAL_DAMAGE);
+			break;
+        case CREATURE_ELITE_ELITE:
+            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            damagemod = sWorld.getRate(RATE_CREATURE_ELITE_ELITE_DAMAGE);
+			break;
+        case CREATURE_ELITE_RAREELITE:
+            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            damagemod = sWorld.getRate(RATE_CREATURE_ELITE_RAREETLITE_DAMAGE);
+			break;
+        case CREATURE_ELITE_WORLDBOSS:
+            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            damagemod = sWorld.getRate(RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE);
+			break;
+        case CREATURE_ELITE_RARE:
+            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+            damagemod = sWorld.getRate(RATE_CREATURE_ELITE_RARE_DAMAGE);
+			break;
+		default:
+			break;
+     }
+    uint32 maxhealth = cinfo->maxhealth * healthmod;
+    SetMaxHealth(maxhealth);
+    SetUInt32Value(UNIT_FIELD_BASE_HEALTH,maxhealth);
+    SetHealth(maxhealth);
 
-    SetMaxHealth(cinfo->maxhealth );
-    SetUInt32Value(UNIT_FIELD_BASE_HEALTH,cinfo->maxhealth );
-    SetHealth(cinfo->maxhealth );
 
     SetMaxPower(POWER_MANA,cinfo->maxmana);                 //MAX Mana
     SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
@@ -968,6 +997,12 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
 
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
+    
+    SetFloatValue(UNIT_FIELD_MINDAMAGE,cinfo->mindmg * damagemod);
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE,cinfo->maxdmg * damagemod);
+    
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg * damagemod);
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg * damagemod);
 
     SetAttackTime(BASE_ATTACK,  cinfo->baseattacktime);
     SetAttackTime(RANGED_ATTACK,cinfo->rangeattacktime);
@@ -1001,11 +1036,6 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
     SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
 
-    SetFloatValue(UNIT_FIELD_MINDAMAGE,cinfo->mindmg);
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE,cinfo->maxdmg);
-
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg );
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg);
 
     if (cinfo->mount != 0)
         Mount(cinfo->mount);

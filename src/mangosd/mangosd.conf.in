@@ -113,7 +113,19 @@ Rate.XP.Explore = 1
 
 # Creature Damage Rate.
 # Examples: 2 - creatures will damage 2x, 1.7 - 1.7x.
-Rate.Creature.Damage = 1
+Rate.Creature.Normal.Damage = 1
+Rate.Creature.Elite.Elite.Damage = 1
+Rate.Creature.Elite.RAREELITE.Damage = 1
+Rate.Creature.Elite.WORLDBOSS.Damage = 1
+Rate.Creature.Elite.RARE.Damage = 1
+
+# Creature Health Ammount Modifier.
+# Examples: 2 - creatures have 2x health, 1.7 - 1.7x.
+Rate.Creature.Normal.HP = 1
+Rate.Creature.Elite.Elite.HP = 1
+Rate.Creature.Elite.RAREELITE.HP = 1
+Rate.Creature.Elite.WORLDBOSS.HP = 1
+Rate.Creature.Elite.RARE.HP = 1
 
 #Aggro radius percent or off.
 #          0   - off (0%)
