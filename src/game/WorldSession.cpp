@@ -461,6 +461,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_PET_ABANDON,              STATUS_LOGGEDIN, &WorldSession::HandlePetAbandon                    },
         { CMSG_PET_SET_ACTION,           STATUS_LOGGEDIN, &WorldSession::HandlePetSetAction                  },
         { CMSG_PET_RENAME,               STATUS_LOGGEDIN, &WorldSession::HandlePetRename                     },
+        { CMSG_STABLE_PET,               STATUS_LOGGEDIN, &WorldSession::HandleStablePet                     },
+        { CMSG_UNSTABLE_PET,             STATUS_LOGGEDIN, &WorldSession::HandleUnstablePet                   },
+        { CMSG_BUY_STABLE_SLOT,          STATUS_LOGGEDIN, &WorldSession::HandleBuyStableSlot                 },
+        { CMSG_STABLE_REVIVE_PET,        STATUS_LOGGEDIN, &WorldSession::HandleStableRevivePet               },
+        { CMSG_STABLE_SWAP_PET,          STATUS_LOGGEDIN, &WorldSession::HandleStableSwapPet                 },
 
         { CMSG_CANCEL_CHANNELLING ,      STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              },
 

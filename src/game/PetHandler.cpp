@@ -169,28 +169,26 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 {
     sLog.outDetail( "HandlePetNameQuery.\n" );
-    uint32 who;
+    uint32 petnumber;
     uint64 guid;
-    //float state3;
 
     std::string name = "ERROR_NO_NAME_FOR_PET_GUID";
 
-    recv_data >> who;
+    recv_data >> petnumber;
     recv_data >> guid;
 
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid);
-    if(pet && pet->isPet())
+    if(pet && (pet->isPet() || pet->isTamed()))
     {
         name   = ((Pet*)pet)->GetName();
-        //state3 = pet->GetStat(STAT_INTELLECT);
     }
+
     WorldPacket data;
     data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
-    //The value is random,This should be (who query):data << uint32(who);
-    data << uint32(0x4D4537);
+    data << uint32(petnumber);
     data << name.c_str();
-    //Unknown, Fix me;
-    data << uint32(0x426D3DC6);
+    data << uint8(0x00);
+    //data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
     _player->GetSession()->SendPacket(&data);
 }
 
@@ -202,23 +200,30 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 void WorldSession::HandlePetRename( WorldPacket & recv_data )
 {
     sLog.outDetail( "HandlePetRename. CMSG_PET_RENAME\n" );
-    /*
-    uint32 state2;
+
+    uint32 petnumber;
     uint64 guid;
 
     std::string name = "ERROR_NO_NAME_FOR_PET_GUID";
 
-    recv_data >> state2;
+    recv_data >> petnumber;
     recv_data >> guid;
     recv_data >> name;
     WorldPacket data;
 
+    Creature* pet = ObjectAccessor::Instance().GetCreature(*_player,guid);
+    if(pet && (pet->isPet() || pet->isTamed()))
+    {
+        name   = ((Pet*)pet)->GetName();
+    }
+
     data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
-    data << uint32(state2);
-    data << name;
-    data << uint32(0x426D3DC6);
+    data << uint32(petnumber);
+    data << name.c_str();
+    data << uint8(0x00);
+    //data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
     _player->GetSession()->SendPacket(&data);
-    */
+
 }
 
 void WorldSession::HandlePetAbandon( WorldPacket & recv_data )

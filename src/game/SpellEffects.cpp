@@ -673,7 +673,7 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
+    spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
     /*
@@ -700,6 +700,7 @@ void Spell::EffectSummon(uint32 i)
     {
         m_caster->SetPet(spawnCreature);
         ((Player*)m_caster)->PetSpellInitialize();
+        ((Player*)m_caster)->SavePet();
     }
 }
 
@@ -908,7 +909,7 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
+    spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
 
@@ -929,6 +930,7 @@ void Spell::EffectSummonWild(uint32 i)
     {
         m_caster->SetPet(spawnCreature);
         ((Player*)m_caster)->PetSpellInitialize();
+        ((Player*)m_caster)->SavePet();
     }
 }
 
@@ -1063,7 +1065,7 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->SetPower(   POWER_HAPPINESS,600000);
         creatureTarget->setPowerType(POWER_FOCUS);
         creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-        //creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
+        creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         creatureTarget->SetTamed(true);
@@ -1073,6 +1075,7 @@ void Spell::EffectTameCreature(uint32 i)
         {
             m_caster->SetPet(creatureTarget);
             ((Player*)m_caster)->PetSpellInitialize();
+            ((Player*)m_caster)->SavePet();
         }
     }
 }
@@ -1109,6 +1112,7 @@ void Spell::EffectSummonPet(uint32 i)
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             ((Player*)m_caster)->PetSpellInitialize();
+            ((Player*)m_caster)->SavePet();
         }
         return;
     }
@@ -1129,6 +1133,7 @@ void Spell::EffectSummonPet(uint32 i)
     if(result)
     {
         NewSummon->LoadPetFromDB(m_caster,petentry );
+        ((Player*)m_caster)->SavePet();
         return;
     }
 
@@ -1182,6 +1187,7 @@ void Spell::EffectSummonPet(uint32 i)
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             ((Player*)m_caster)->PetSpellInitialize();
+            ((Player*)m_caster)->SavePet();
         }
     }
     else
@@ -2083,12 +2089,13 @@ void Spell::EffectSummonCritter(uint32 i)
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)m_caster)->PetSpellInitialize();
+        ((Player*)m_caster)->SavePet();
     }
 }
 
 void Spell::EffectSummonDeadPet(uint32 i)
 {
-    if(m_caster->GetTypeId() != TYPEID_UNIT)
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
     Player *_player = (Player*)m_caster;
     Creature *_pet = m_caster->GetPet();
@@ -2109,7 +2116,7 @@ void Spell::EffectSummonDeadPet(uint32 i)
     name.append("'s Pet");
     pet->SetName( name );
     _player->PetSpellInitialize();
-
+    _player->SavePet();
 }
 
 void Spell::EffectTransmitted(uint32 i)
