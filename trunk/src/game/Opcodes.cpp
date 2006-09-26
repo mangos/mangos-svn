@@ -789,6 +789,7 @@ NameTableEntry g_worldOpcodeNames[] =
     {  CMSG_MINIGAME_MOVE,                                  "CMSG_MINIGAME_MOVE"},
     {  SMSG_MINIGAME_MOVE_FAILED,                           "SMSG_MINIGAME_MOVE_FAILED"},
     {  CMSG_GUILD_CHANGEINFO,                               "CMSG_GUILD_CHANGEINFO"},
+    {  SMSG_UNKNOWN_INFO,                                   "SMSG_UNKNOWN_INFO"},
     {                                                       // unofficial - first appeared in 1.12
         SMSG_OUTDOORPVP_NOTIFY,                              "SMSG_OUTDOORPVP_NOTIFY"
     },

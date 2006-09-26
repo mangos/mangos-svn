@@ -108,7 +108,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     }
     else if(owner->getClass() == CLASS_HUNTER && cinfo->type == CREATURE_TYPE_BEAST)
     {
-        SetUInt32Value(UNIT_FIELD_PETNUMBER, guid );
+        SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
         SetMaxPower(POWER_HAPPINESS,1000000);
         SetPower(   POWER_HAPPINESS,fields[11].GetUInt32());
         setPowerType(POWER_FOCUS);
@@ -125,11 +125,11 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     SetUInt32Value(UNIT_FIELD_FLAGS,0);
     SetUInt32Value(UNIT_FIELD_BYTES_1,0);
     SetUInt32Value(UNIT_FIELD_BYTES_2,1);
-    //SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
+    SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[4].GetUInt32());
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[5].GetUInt32());
     //SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-    SetUInt64Value(UNIT_FIELD_CREATEDBY, ownerid);
+    SetUInt64Value(UNIT_FIELD_CREATEDBY, owner->GetGUID());
 
     m_fealty = fields[11].GetUInt32();
     m_name = fields[12].GetCppString();

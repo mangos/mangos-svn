@@ -360,6 +360,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_spells[CREATURE_MAX_SPELLS];
 
         float GetAttackDistance(Unit *pl);
+        uint32 getloyalty(){ return m_loyalty;};
+        uint32 gettrainpoint(){ return m_trainpoint;};
     protected:
         void _LoadGoods();
         void _LoadQuests();
@@ -395,6 +397,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void RegenerateMana();
         void RegenerateHealth();
         uint32 m_regenTimer;
-
+        uint32 m_loyalty;
+        uint32 m_trainpoint;
 };
 #endif
