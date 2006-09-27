@@ -9218,8 +9218,9 @@ void Player::SaveToDB()
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
-    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`) VALUES ("
+    ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`) VALUES ("
         << GetGUIDLow() << ", "
+        << realmID << ", '"
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
         << m_race << ", "
