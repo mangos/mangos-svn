@@ -91,7 +91,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendBindPoint();
         void SendGMTicketGetTicket(uint32 status, char const* text);
         void SendCancelTrade();
-		void SendStablePet(uint64 guid );
+        void SendStablePet(uint64 guid );
 
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
@@ -243,11 +243,11 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
         void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
-		void HandleStablePet(WorldPacket& recvPacket);
-		void HandleUnstablePet(WorldPacket& recvPacket);
-		void HandleBuyStableSlot(WorldPacket& recvPacket);
-		void HandleStableRevivePet(WorldPacket& recvPacket);
-		void HandleStableSwapPet(WorldPacket& recvPacket);
+        void HandleStablePet(WorldPacket& recvPacket);
+        void HandleUnstablePet(WorldPacket& recvPacket);
+        void HandleBuyStableSlot(WorldPacket& recvPacket);
+        void HandleStableRevivePet(WorldPacket& recvPacket);
+        void HandleStableSwapPet(WorldPacket& recvPacket);
 
         void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
         void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
