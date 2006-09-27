@@ -520,11 +520,7 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `character_spell` ENABLE KEYS */;
 
 --
--- Table structure for table `character_ticket`
---
-
---
--- Table structure for table `character_pet`
+-- Table structure for table `character_stable`
 --
 
 DROP TABLE IF EXISTS `character_stable`;
@@ -547,7 +543,11 @@ CREATE TABLE `character_stable` (
 /*!40000 ALTER TABLE `character_stable` DISABLE KEYS */;
 LOCK TABLES `character_stable` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE character_stable ENABLE KEYS */;
+/*!40000 ALTER TABLE `character_stable` ENABLE KEYS */;
+
+--
+-- Table structure for table `character_ticket`
+--
 
 DROP TABLE IF EXISTS `character_ticket`;
 CREATE TABLE `character_ticket` (

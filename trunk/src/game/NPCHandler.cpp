@@ -580,13 +580,14 @@ void WorldSession::SendStablePet(uint64 guid )
             return;
         Creature *pet = _player->GetPet();
         CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(pet->GetEntry());
-        data << uint32(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER));              // petnumber
+                                                            // petnumber
+        data << uint32(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER));
         data << uint32(pet->GetEntry());
         data << uint32(pet->getLevel());
         //data << cinfo->Name;                                                    // petname
         data << uint8(0x00);
-        data << uint32(pet->getloyalty());                                        // loyalty
-        data << uint8(0x01);                                                    // slot
+        data << uint32(pet->getloyalty());                  // loyalty
+        data << uint8(0x01);                                // slot
     }
 
     result = sDatabase.PQuery("SELECT `owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint` FROM `character_stable` WHERE `owner` = '%u'",_player->GetGUIDLow());
@@ -600,13 +601,13 @@ void WorldSession::SendStablePet(uint64 guid )
             if(petentry)
             {
                 CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(petentry);
-                data << uint32(fields[2].GetUInt32());              // petnumber
+                data << uint32(fields[2].GetUInt32());      // petnumber
                 data << uint32(petentry);
                 data << uint32(fields[4].GetUInt32());
                 //data << cinfo->Name;
-                data << uint8(0x00);                                // petname,it should be plus 0x00 at the end,Fix me.
-                data << uint32(fields[5].GetUInt32());              // loyalty
-                data << uint8(fields[1].GetUInt32()+2);             // slot
+                data << uint8(0x00);                        // petname,it should be plus 0x00 at the end,Fix me.
+                data << uint32(fields[5].GetUInt32());      // loyalty
+                data << uint8(fields[1].GetUInt32()+2);     // slot
             }
         }while( result->NextRow() );
     }
@@ -791,7 +792,7 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
                 break;
             }
             */
-            break;                                               // temparay only one slot can be used.
+            break;                                          // temparay only one slot can be used.
         case 0:
             if(_player->GetMoney() < 500)
             {
@@ -802,7 +803,7 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
             {
                 sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,1,0,0,0,0,0)",_player->GetGUIDLow());
                 _player->SetMoney(_player->GetMoney() - 500);
-                data << uint8(0x0A);                             // success buy
+                data << uint8(0x0A);                        // success buy
                 break;
             }break;
         default :data << uint8(0x06);break;
