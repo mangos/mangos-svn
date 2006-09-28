@@ -216,6 +216,8 @@ class ObjectMgr
         AuctionEntryMap::iterator GetAuctionsEnd() {return mAuctions.end();}
 
         PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_);
+        inline uint8 GetLevelUpStatGain(uint8 Class, uint8 Race, uint8 FromLevel, Stats Stat) const
+        { return levelUpStatGains[Class][Race][FromLevel][(uint8)Stat+2]; }
 
         uint64 GetPlayerGUIDByName(const char *name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
@@ -263,6 +265,7 @@ class ObjectMgr
         void LoadAuctions();
         void LoadAuctionItems();
         void LoadMailedItems();
+        void LoadLvlUpGains();
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(uint32 guidhigh);
@@ -286,6 +289,10 @@ class ObjectMgr
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
+
+        // levelUpStatGains stats array index: hp, mana, str, agi, sta, int, spi
+        // E.G. - levelUpStatGains[p_class][p_race][p_level][0] will return hp increase for p_level.
+        uint8 ****levelUpStatGains;
 
         GroupSet            mGroupSet;
         GuildSet            mGuildSet;

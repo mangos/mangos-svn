@@ -31,6 +31,7 @@
 #define RACE_TAUREN                         6
 #define RACE_GNOME                          7
 #define RACE_TROLL                          8
+#define MAX_RACES                           9 
 
 #define CLASS_WARRIOR                       1
 #define CLASS_PALADIN                       2
@@ -43,6 +44,7 @@
 #define CLASS_WARLOCK                       9
 #define CLASS_UNK2                          10
 #define CLASS_DRUID                         11
+#define MAX_CLASSES                         12
 
 enum Stats
 {
@@ -50,7 +52,8 @@ enum Stats
     STAT_AGILITY                       = 1,
     STAT_STAMINA                       = 2,
     STAT_INTELLECT                     = 3,
-    STAT_SPIRIT                        = 4
+    STAT_SPIRIT                        = 4,
+    MAX_STATS                          = 5
 };
 
 enum Powers

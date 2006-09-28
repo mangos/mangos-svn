@@ -947,7 +947,7 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     float fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation());
+        ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation(), false);
     else
         MapManager::Instance().GetMap(mapid)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, -m_caster->GetOrientation());
 }
@@ -1944,7 +1944,7 @@ void Spell::EffectMomentMove(uint32 i)
         float fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
 
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation());
+            ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation(), false);
         else
             MapManager::Instance().GetMap(mapid)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, m_caster->GetOrientation());
     }
