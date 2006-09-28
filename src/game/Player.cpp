@@ -9220,7 +9220,7 @@ void Player::SaveToDB()
     std::ostringstream ss;
     ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`) VALUES ("
         << GetGUIDLow() << ", "
-        << realmID << ", '"
+        << realmID << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
         << m_race << ", "
