@@ -573,7 +573,7 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
 {
     AuraList& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
     for(AuraList::iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
-        UnderWaterTime *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+        UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
 
     //if have water breath , then remove bar
     if(waterbreath || !isAlive())
@@ -962,7 +962,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
             Field *fields  = result->Fetch();
             uint8  slot    = fields[0].GetUInt8() & 255;
             uint32 item_id = fields[1].GetUInt32();
-            if(!( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END ))
+            if(!( slot < EQUIPMENT_SLOT_END ))
                 continue;
 
             items[slot] = objmgr.GetItemPrototype(item_id);
@@ -5734,7 +5734,7 @@ Item* Player::GetItemByPos( uint16 pos ) const
 
 Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
 {
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot < BANK_SLOT_BAG_END ) )
         return m_items[slot];
     else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END
         || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END )
@@ -5771,7 +5771,7 @@ bool Player::IsEquipmentPos( uint16 pos ) const
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END ) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot < EQUIPMENT_SLOT_END ) )
         return true;
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END ) )
         return true;
@@ -6764,7 +6764,7 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetGUID() );
         pItem->SetSlot( slot );
 
-        if( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+        if( slot < EQUIPMENT_SLOT_END )
         {
             int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
             SetUInt32Value(VisibleBase, pItem->GetEntry());
@@ -6807,10 +6807,10 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             m_items[slot] = NULL;
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot >= EQUIPMENT_SLOT_START && slot < INVENTORY_SLOT_BAG_END )
+            if ( slot < INVENTORY_SLOT_BAG_END )
             {
                 _ApplyItemMods(pItem, slot, false);
-                if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+                if ( slot < EQUIPMENT_SLOT_END )
                 {
                     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
                     for (int i = VisibleBase; i < VisibleBase + 12; ++i)
@@ -6914,7 +6914,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+            if ( slot < EQUIPMENT_SLOT_END )
             {
                 _ApplyItemMods(pItem, slot, false);
                 int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
