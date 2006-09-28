@@ -382,7 +382,7 @@ void ObjectMgr::LoadLvlUpGains()
     levelUpStatGains = new uint8***[MAX_CLASSES];
     for (uint8 i1 = 0; i1 < MAX_CLASSES; i1++)
     {
-        levelUpStatGains[i1] = new uint8**[MAX_CLASSES];
+        levelUpStatGains[i1] = new uint8**[MAX_RACES];
         for (uint8 i2 = 0; i2 < MAX_RACES; i2++)
         {
             levelUpStatGains[i1][i2] = new uint8*[sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)];
@@ -390,7 +390,7 @@ void ObjectMgr::LoadLvlUpGains()
             {
                 levelUpStatGains[i1][i2][i3] = new uint8[MAX_STATS+2];
                 for (uint8 i4 = 0; i4 < MAX_STATS+2; i4++)
-                    levelUpStatGains[i1][i2][i3][14] = 0;
+                    levelUpStatGains[i1][i2][i3][i4] = 0;
             }
         }
     }

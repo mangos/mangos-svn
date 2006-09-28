@@ -382,8 +382,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         Attack(pVictim);
 
         //Get in CombatState
-        GetInCombatState();
-        pVictim->GetInCombatState();
+        if(pVictim != this)
+        {
+            GetInCombatState();
+            pVictim->GetInCombatState();
+        }
 
         if(pVictim->getTransForm())
         {
