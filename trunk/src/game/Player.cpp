@@ -995,21 +995,8 @@ void Player::BuildEnumData( WorldPacket * p_data )
     }
 }
 
-void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation)
+void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange)
 {
-    CombatStop();
-
-    // remove selection
-    if(GetSelection())
-    {
-        Unit* unit = ObjectAccessor::Instance().GetUnit(*this, GetSelection());
-        if(unit)
-            SendOutOfRange(unit);
-    }
-
-    // unsommon pet if lost
-    Creature* pet = GetPet();
-
     if(this->GetMapId() == mapid)
     {
         // near teleport
@@ -1044,9 +1031,24 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SendInitialSpells();
     }
 
-    // unsommon pet if lost
-    if(!pet||GetMapId()!=pet->GetMapId()||GetDistanceSq(pet) > OWNER_MAX_DISTANCE*OWNER_MAX_DISTANCE )
-        UnsummonPet(pet);
+    if (outofrange)
+    {
+        CombatStop();
+
+        // remove selection
+        if(GetSelection())
+        {
+            Unit* unit = ObjectAccessor::Instance().GetUnit(*this, GetSelection());
+            if(unit)
+                SendOutOfRange(unit);
+        }
+
+        // unsommon pet if lost
+        Creature* pet = GetPet();
+        if(!pet) return;
+        if(GetMapId() != pet->GetMapId() || GetDistanceSq(pet) > OWNER_MAX_DISTANCE*OWNER_MAX_DISTANCE )
+            UnsummonPet(pet);
+    }
 }
 
 void Player::AddToWorld()
@@ -1359,43 +1361,23 @@ void Player::GiveLevel()
     float newINT = GetStat(STAT_INTELLECT);
     float newSPI = GetStat(STAT_SPIRIT);
 
-    /*
-    // Remove class and race bonuses from base stats
-    if (Player::HasSpell(SPELL_PASSIVE_ENDURENCE))          //endurance skill support (+5% to total health)
-        newHP = newHP / 1.05;
-
-    if (Player::HasSpell(SPELL_PASSIVE_HUMAN_SPIRIT))       //Human Spirit skill support (+5% to total spirit)
-        newSPI = newSPI / 1.05;
-
-    if (Player::HasSpell(SPELL_PASSIVE_EXPANSIVE_MIND))     //Expansive mind support (+5% to total Intellect)
-        newINT  = newINT / 1.05;*/
-
     // Gain stats
-    MPGain = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : uint32(newSPI / 2);
-    HPGain = uint32(newSTA / 2);
     BuildLvlUpStats(&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
 
     // Apply gain stats
-    newMP  += MPGain;
-    newHP  += HPGain;
     newSTR += STRGain;
     newSTA += STAGain;
     newAGI += AGIGain;
     newINT += INTGain;
     newSPI += SPIGain;
 
-    /*
-    // Apply class and race bonuses to stats
-    if (Player::HasSpell(SPELL_PASSIVE_ENDURENCE))          //endurance skill support (+5% to total health)
-        newHP  = newHP * 1.05;
+    MPGain = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : uint32(newSPI / 2);
+    HPGain = uint32(newSTA / 2);
 
-    if (Player::HasSpell(SPELL_PASSIVE_HUMAN_SPIRIT))       //Human Spirit skill support (+5% to total spirit)
-        newSPI  = newSPI * 1.05;
+    newMP  += MPGain;
+    newHP  += HPGain;
 
-    if (Player::HasSpell(SPELL_PASSIVE_EXPANSIVE_MIND))     //Expansive mind support (+5% to total Intellect)
-        newINT = newINT * 1.05;*/
-
-    // update level, talants, max level of skills
+        // update level, talants, max level of skills
     SetLevel( level);
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
 
@@ -1454,75 +1436,86 @@ void Player::GiveLevel()
 
 void Player::BuildLvlUpStats(uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI)
 {
-    uint8 _class=getClass();
-    uint8 lvl=getLevel();
+    uint8 _class = getClass();
+    uint8 lvl    = getLevel();
+    uint8 race  = getRace();
 
-    switch(_class)
+    if (lvl < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
-        case WARRIOR:
-            *STR += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
-            *STA += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
-            *AGI += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
-            *INT += (lvl > 9 && !(lvl%2) ? 1: 0);
-            *SPI += (lvl > 9 && !(lvl%2) ? 1: 0);
-            break;
-        case PALADIN:
-            *STR += (lvl > 3  ? 1: 0);
-            *STA += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
-            *AGI += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
-            *INT += (lvl > 6 && (lvl%2) ? 1: 0);
-            *SPI += (lvl > 7 ? 1: 0);
-            break;
-        case HUNTER:
-            *STR += (lvl > 4  ? 1: 0);
-            *STA += (lvl > 4  ? 1: 0);
-            *AGI += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
-            *INT += (lvl > 8 && (lvl%2) ? 1: 0);
-            *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
-            break;
-        case ROGUE:
-            *STR += (lvl > 5  ? 1: 0);
-            *STA += (lvl > 4  ? 1: 0);
-            *AGI += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
-            *INT += (lvl > 8 && !(lvl%2) ? 1: 0);
-            *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
-            break;
-        case PRIEST:
-            *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
-            *STA += (lvl > 5  ? 1: 0);
-            *AGI += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
-            *INT += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
-            *SPI += (lvl > 3  ? 1: 0);
-            break;
-        case SHAMAN:
-            *STR += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
-            *STA += (lvl > 4 ? 1: 0);
-            *AGI += (lvl > 7 && !(lvl%2) ? 1: 0);
-            *INT += (lvl > 5 ? 1: 0);
-            *SPI += (lvl > 4 ? 1: 0);
-            break;
-        case MAGE:
-            *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
-            *STA += (lvl > 5  ? 1: 0);
-            *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
-            *INT += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
-            *SPI += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
-            break;
-        case WARLOCK:
-            *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
-            *STA += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
-            *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
-            *INT += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
-            *SPI += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
-            break;
-        case DRUID:
-            *STR += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
-            *STA += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
-            *AGI += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
-            *INT += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
-            *SPI += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
+        *STR += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_STRENGTH);
+        *AGI += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_AGILITY);
+        *STA += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_STAMINA);
+        *INT += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_INTELLECT);
+        *SPI += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_SPIRIT); 
     }
-
+    else
+    {
+        switch(_class)
+        {
+            case WARRIOR:
+                *STR += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+                *STA += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+                *AGI += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+                *INT += (lvl > 9 && !(lvl%2) ? 1: 0);
+                *SPI += (lvl > 9 && !(lvl%2) ? 1: 0);
+                break;
+            case PALADIN:
+                *STR += (lvl > 3  ? 1: 0);
+                *STA += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+                *AGI += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
+                *INT += (lvl > 6 && (lvl%2) ? 1: 0);
+                *SPI += (lvl > 7 ? 1: 0);
+                break;
+            case HUNTER:
+                *STR += (lvl > 4  ? 1: 0);
+                *STA += (lvl > 4  ? 1: 0);
+                *AGI += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+                *INT += (lvl > 8 && (lvl%2) ? 1: 0);
+                *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
+                break;
+            case ROGUE:
+                *STR += (lvl > 5  ? 1: 0);
+                *STA += (lvl > 4  ? 1: 0);
+                *AGI += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
+                *INT += (lvl > 8 && !(lvl%2) ? 1: 0);
+                *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
+                break;
+            case PRIEST:
+                *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
+                *STA += (lvl > 5  ? 1: 0);
+                *AGI += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
+                *INT += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
+                *SPI += (lvl > 3  ? 1: 0);
+                break;
+            case SHAMAN:
+                *STR += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+                *STA += (lvl > 4 ? 1: 0);
+                *AGI += (lvl > 7 && !(lvl%2) ? 1: 0);
+                *INT += (lvl > 5 ? 1: 0);
+                *SPI += (lvl > 4 ? 1: 0);
+                break;
+            case MAGE:
+                *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
+                *STA += (lvl > 5  ? 1: 0);
+                *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
+                *INT += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
+                *SPI += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+                break;
+            case WARLOCK:
+                *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
+                *STA += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+                *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
+                *INT += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+                *SPI += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+                break;
+            case DRUID:
+                *STR += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
+                *STA += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
+                *AGI += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
+                *INT += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
+                *SPI += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
+        }
+    }
 }
 
 void Player::SendInitialSpells()
@@ -2603,7 +2596,7 @@ bool Player::UpdateSkill(uint32 skill_id)
 
     if ((!max) || (!value) || (value >= max)) return false;
 
-    if (uint32(value/max)*512 < urand(0,512))
+    if ((float)value/(float)max*512 < urand(0,512))
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
         return true;
@@ -2632,6 +2625,8 @@ void Player::UpdateSkillPro(uint32 spellid)
     uint16 max = SKILL_MAX(data);
 
     if ((!max) || (!value) || (value >= max)) return;
+    //generates chance for unsuccess gain
+    if ((value/(float)max)*512 > urand(0,512)) return;
     if(skill_id == SKILL_POISONS && value < 125)
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);

@@ -269,6 +269,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Initialize data stores...");
     LoadDBCStores(dataPath);
 
+    sLog.outString( "Loading levelup stat gains..." );
+    objmgr.LoadLvlUpGains();
+
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();
 

@@ -379,7 +379,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        void TeleportTo(uint32 mapid, float x, float y, float z, float orientation);
+        void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true);
 
         bool Create ( uint32 guidlow, WorldPacket &data );
 

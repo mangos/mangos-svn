@@ -359,6 +359,66 @@ void ObjectMgr::LoadMailedItems()
     delete result;
 }
 
+void ObjectMgr::LoadLvlUpGains()
+{
+    Field *fields;
+    uint32 count = 0;
+
+    QueryResult *result  = sDatabase.PQuery("SELECT `race`,`class`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi` FROM `player_levelupgains`");
+    if (!result)
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u levelup definitions", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    // allocate dynamic array
+    levelUpStatGains = new uint8***[MAX_CLASSES];
+    for (uint8 i1 = 0; i1 < MAX_CLASSES; i1++)
+    {
+        levelUpStatGains[i1] = new uint8**[MAX_CLASSES];
+        for (uint8 i2 = 0; i2 < MAX_RACES; i2++)
+        {
+            levelUpStatGains[i1][i2] = new uint8*[sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)];
+            for (uint8 i3 = 0; i3 < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); i3++)
+            {
+                levelUpStatGains[i1][i2][i3] = new uint8[MAX_STATS+2];
+                for (uint8 i4 = 0; i4 < MAX_STATS+2; i4++)
+                    levelUpStatGains[i1][i2][i3][14] = 0;
+            }
+        }
+    }
+
+    do
+    {
+        fields = result->Fetch();
+
+        uint8 current_class = fields[1].GetUInt8();
+        uint8 current_race = fields[0].GetUInt8();
+        uint8 current_level = fields[2].GetUInt8();
+        
+        for (int i = 0; i < MAX_STATS+2; i++)
+        {
+            levelUpStatGains[current_class][current_race][current_level][i] = fields[i+3].GetUInt8();
+        }
+
+        bar.step();
+        count++;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u levelup definitions", count );
+}
+
 void ObjectMgr::LoadGuilds()
 {
     Guild *newguild;
