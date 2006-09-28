@@ -985,7 +985,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
         default:
             break;
     }
-    uint32 maxhealth = cinfo->maxhealth * healthmod;
+    uint32 maxhealth = uint32(cinfo->maxhealth * healthmod);
     SetMaxHealth(maxhealth);
     SetUInt32Value(UNIT_FIELD_BASE_HEALTH,maxhealth);
     SetHealth(maxhealth);
