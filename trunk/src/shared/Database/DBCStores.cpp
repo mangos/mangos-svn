@@ -26,6 +26,8 @@
 
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 
+DBCStorage <CreatureFamily> sCreatureFamilyStore(CreatureFamilyfmt);
+
 DBCStorage <emoteentry> sEmoteStore(emoteentryfmt);
 
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
@@ -33,6 +35,7 @@ DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt)
 
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore(ItemDisplayTemplateEntryfmt);
+DBCStorage <ItemRandomProperties> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
 
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
 
@@ -53,7 +56,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 16;
+    const uint32 DBCFilesCount = 18;
 
     barGoLink bar( DBCFilesCount );
 
@@ -65,6 +68,13 @@ void LoadDBCStores(std::string dataPath)
         bar.step();
     else
         not_found_dbc_files.push_back("dbc/AreaTable.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/CreatureFamily.dbc");
+    if(sCreatureFamilyStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/CreatureFamily.dbc");
 
     tmpPath=dataPath;
     tmpPath.append("dbc/EmotesText.dbc");
@@ -93,6 +103,13 @@ void LoadDBCStores(std::string dataPath)
         bar.step();
     else
         not_found_dbc_files.push_back("dbc/ItemDisplayInfo.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/ItemRandomProperties.dbc");
+    if(sItemRandomPropertiesStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/ItemRandomProperties.dbc");
 
     tmpPath=dataPath;
     tmpPath.append("dbc/ItemSet.dbc");
@@ -239,6 +256,16 @@ int32 GetDuration(SpellEntry *spellInfo)
     if(!du)
         return 0;
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
+}
+
+char* GetPetName(uint32 petfamily)
+{
+    if(!petfamily)
+        return NULL;
+    CreatureFamily *pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
+    if(!pet_family)
+        return NULL;
+    return pet_family->Name?pet_family->Name:NULL;
 }
 
 uint32 FindSpellRank(uint32 spellId)

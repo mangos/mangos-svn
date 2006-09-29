@@ -916,14 +916,6 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetArmor(level*50);
     spawnCreature->AIM_Initialize();
 
-    std::string name;
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        name = ((Player*)m_caster)->GetName();
-    else
-        name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-    name.append("'s Pet");
-    spawnCreature->SetName( name );
-
     MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1077,6 +1069,18 @@ void Spell::EffectTameCreature(uint32 i)
             ((Player*)m_caster)->PetSpellInitialize();
             ((Player*)m_caster)->SavePet();
         }
+        /*
+        // Must added after saved
+        QueryResult *result;
+
+        result = sDatabase.PQuery("SELECT `id` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND `current` = '1'",m_caster->GetGUIDLow(), creatureTarget->GetEntry() );
+        if(result)
+        {
+            Field *fields = result->Fetch();
+            creatureTarget->SetUInt32Value(UNIT_FIELD_PETNUMBER,fields[0].GetUInt32());
+        }
+        delete result;
+        */
     }
 }
 
@@ -1128,11 +1132,10 @@ void Spell::EffectSummonPet(uint32 i)
     Pet* NewSummon = new Pet();
 
     uint32 ownerid = m_caster->GetGUIDLow();
-    QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'" , ownerid, petentry );
 
-    if(result)
+    if(!petentry)
     {
-        NewSummon->LoadPetFromDB(m_caster,petentry );
+        NewSummon->LoadPetFromDB(m_caster);
         ((Player*)m_caster)->SavePet();
         return;
     }
@@ -1160,13 +1163,6 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetStat(STAT_STAMINA,25);
         NewSummon->SetStat(STAT_INTELLECT,28);
         NewSummon->SetStat(STAT_SPIRIT,27);
-        std::string name;
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            name = ((Player*)m_caster)->GetName();
-        else
-            name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-        name.append("'s Pet");
-        NewSummon->SetName( name );
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
             NewSummon->m_spells[i] = 0;

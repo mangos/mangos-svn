@@ -17,10 +17,12 @@
  */
 
 const char AreaTableEntryfmt[]="ixinxxxxxxixxxxxxxxxx";
+const char CreatureFamilyfmt[]="nxxxxiiixxxxsxxxxx";
 const char emoteentryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="nixxxxxxxiiiiiiiiiixxxxxxxxxxxxxxxxxx";
 const char FactionTemplateEntryfmt[]="nxxiiixxxxixxx";
 const char ItemDisplayTemplateEntryfmt[]="ixxxxxxxxxxixxxxxxxxxxi";
+const char ItemRandomPropertiesfmt[]="nxiiixxxxxxxxxxx";
 const char ItemSetEntryfmt[]="dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LockEntryfmt[]="nxxxxxxxxxxxxxxxxixxxxxxxxxxxxxxx";
 const char SkillLinefmt[]="nixssssssssxssssssssxi";

@@ -9423,12 +9423,8 @@ void Player::_SaveTutorials()
 void Player::SavePet()
 {
     Creature* pet = GetPet();
-    if(pet && pet->isPet())
-        ((Pet*)pet)->SaveToDB();
-    else if(pet && pet->isTamed())
-    {
-        pet->SaveTamedToPet();
-    }
+    if(pet && (pet->isPet() || pet->isTamed()))
+        pet->SaveAsPet();
 }
 
 void Player::outDebugValues() const
@@ -9592,6 +9588,7 @@ void Player::UnTamePet(Creature* pet)
     pet->SetMaxPower(POWER_FOCUS,0);
     pet->SetPower(POWER_FOCUS,0);
     pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, 0);
+    pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,0);
     pet->SetTamed(false);
     SetPet(0);
 
@@ -9633,13 +9630,14 @@ void Player::PetSpellInitialize()
         WorldPacket data;
         uint16 Command = 7;
         uint16 State = 6;
+        uint8 addlist = 0;
 
         sLog.outDebug("Pet Spells Groups");
 
         data.clear();
         data.Initialize(SMSG_PET_SPELLS);
 
-        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x1010000);
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
@@ -9648,6 +9646,42 @@ void Player::PetSpellInitialize()
             data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+        if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
+        {
+            if(itr->second->active != 4)
+                continue;
+            addlist++;
+        }
+        data << uint8(addlist);
+
+        if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
+        {
+            if(itr->second->active != 4)
+                continue;
+            else
+            {
+                bool hasthisspell = false;
+
+                SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
+                data << uint16(spellInfo->EffectTriggerSpell[0]);
+                for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                {
+                    if(pet->m_spells[i] == spellInfo->EffectTriggerSpell[0])
+                    {
+                        data << uint16(0xC1);
+                        hasthisspell = true;
+                        break;
+                    }
+                }
+                if(!hasthisspell)
+                    data << uint16(0x01);
+            }
+        }
+            
+        data << uint8(0x01) << uint32(0x6010) << uint32(0x00) << uint32(0x00) << uint16(0x00);
 
         GetSession()->SendPacket(&data);
     }
