@@ -143,7 +143,7 @@ class Aura
         void HandleModTotalPercentStat(bool Apply);
 
         Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
-        ~Aura();
+        virtual ~Aura();
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
         Modifier* GetModifier() {return &m_modifier;}
@@ -170,12 +170,13 @@ class Aura
 
         bool IsPermanent() const { return m_permanent; }
         void SetPermanent(bool value) { m_permanent = value; }
-        bool IsAreaAura() const { return m_areaAura; }
+        bool IsAreaAura() const { return m_isAreaAura; }
         bool IsPeriodic() const { return m_isPeriodic; }
         bool IsTrigger() const { return m_isTrigger; }
         bool IsPassive() const { return m_isPassive; }
+        bool IsPersistent() const { return m_isPersistent; }
 
-        void Update(uint32 diff);
+        virtual void Update(uint32 diff);
         void ApplyModifier(bool Apply);
 
         void _AddAura();
@@ -191,7 +192,7 @@ class Aura
         int32 m_procCharges;
         int32 m_absorbDmg;
 
-    private:
+    protected:
         Modifier m_modifier;
         SpellModifier *m_spellmod;
         uint32 m_spellId;
@@ -209,13 +210,30 @@ class Aura
         bool m_permanent;
         bool m_isPeriodic;
         bool m_isTrigger;
-        bool m_areaAura;
+        bool m_isAreaAura;
         bool m_isPassive;
+        bool m_isPersistent;
 
         int32 m_periodicTimer;
         uint32 m_PeriodicEventId;
         bool m_updated;
         bool m_removeOnDeath;
+};
+
+class AreaAura : public Aura
+{
+    public:
+        AreaAura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        ~AreaAura();
+        void Update(uint32 diff);
+};
+
+class PersistentAreaAura : public Aura
+{
+    public:
+        PersistentAreaAura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        ~PersistentAreaAura();
+        void Update(uint32 diff);
 };
 
 typedef void(Aura::*pAuraHandler)(bool Apply);

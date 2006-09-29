@@ -26,47 +26,31 @@ struct SpellEntry;
 class DynamicObject : public Object
 {
     public:
-        DynamicObject( );
+        typedef std::set<Unit*> AffectedSet;
+        DynamicObject();
 
-        bool Create( uint32 guidlow, Unit * caster, SpellEntry * spell, float x, float y, float z, uint32 duration );
+        bool Create(uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius);
         void Update(uint32 p_time);
-        //void DealWithSpellDamage(Player &);
-        void DealWithSpellDamage(Unit &);
         void Delete();
         bool isFinished() {return deleteThis;}
-
-        void PeriodicTriggerDamage(uint32 damage, uint32 tick, float radius)
-        {
-            m_PeriodicDamage = damage;
-            m_PeriodicDamageTick = tick;
-            m_PeriodicDamageCurrentTick = tick;
-            m_PeriodicDamageRadius = radius;
-
-            m_DamageCurTimes = 0;
-            if(tick != 0 )
-                m_DamageMaxTimes = m_aliveDuration / tick;
-            else
-                m_DamageCurTimes = 0;
-        }
-        uint32 GetSpellId() { return m_spell->Id;}
+        uint32 GetSpellId() const { return m_spellId; }
+        uint32 GetEffIndex() const { return m_effIndex; }
+        uint32 GetDuration() const { return m_aliveDuration; }
+        Unit* GetCaster() const { return m_caster; }
+        float GetRadius() const { return m_radius; }
+        bool IsAffecting(Unit *unit) const { return m_affected.find(unit) != m_affected.end(); }
+        void AddAffected(Unit *unit) { m_affected.insert(unit); }
+        void RemoveAffected(Unit *unit) { m_affected.erase(unit); }
 
     protected:
-
         Unit* m_caster;
-        SpellEntry * m_spell;
-        uint32 m_PeriodicDamage;
-        uint32 m_PeriodicDamageTick;
-        int32 m_PeriodicDamageCurrentTick;
-        float m_PeriodicDamageRadius;
-
-        uint32 m_aliveDuration;
-
+        uint32 m_spellId;
+        uint32 m_effIndex;
+        int32 m_aliveDuration;
         time_t m_nextThinkTime;
-
-        std::list<Unit*> UnitList;
         bool deleteThis;
-        uint32 m_DamageMaxTimes;
-        uint32 m_DamageCurTimes;
-
+        float m_radius;
+        AffectedSet m_affected;
 };
+
 #endif

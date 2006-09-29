@@ -25,6 +25,7 @@
 #include "UpdateData.h"
 #include "CreatureAI.h"
 #include "Utilities.h"
+#include "SpellAuras.h"
 
 template<>
 inline void
@@ -179,4 +180,85 @@ MaNGOS::CreatureRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         if( iter->second->isAlive() && !iter->second->isInFlight())
             PlayerCreatureRelocationWorker(iter->second, &i_creature);
 }
+
+template<>
+inline void 
+MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *>  &m)
+{
+    for(std::map<OBJECT_HANDLE, Creature*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(itr->second->isAlive() && !itr->second->isInFlight() )
+        {
+            if (owner.GetCaster()->IsFriendlyTo(itr->second) ||
+                owner.GetDistanceSq(itr->second) > owner.GetRadius() * owner.GetRadius())
+                continue;
+
+            if (!owner.IsAffecting(itr->second))
+            {
+                SpellEntry *spellInfo = sSpellStore.LookupEntry(owner.GetSpellId());
+                PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, owner.GetEffIndex(), itr->second, owner.GetCaster());
+                itr->second->AddAura(Aur);
+                owner.AddAffected(itr->second);
+            }
+        }
+    }
+}
+
+template<>
+inline void 
+MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Player *>  &m)
+{
+    for(std::map<OBJECT_HANDLE, Player*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(itr->second->isAlive() && !itr->second->isInFlight() )
+        {
+            if (owner.GetCaster()->IsFriendlyTo(itr->second) ||
+                owner.GetDistanceSq(itr->second) > owner.GetRadius() * owner.GetRadius())
+                continue;
+
+            if (!owner.IsAffecting(itr->second))
+            {
+                SpellEntry *spellInfo = sSpellStore.LookupEntry(owner.GetSpellId());
+                PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, owner.GetEffIndex(), itr->second, owner.GetCaster());
+                itr->second->AddAura(Aur);
+                owner.AddAffected(itr->second);
+            }
+        }
+    }
+}
+
+template<class Check>
+void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+    i_object = i_check.GetResult();
+}
+
+template<class Check>
+void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+    i_object = i_check.GetResult();
+}
+
 #endif                                                      // MANGOS_GRIDNOTIFIERSIMPL_H

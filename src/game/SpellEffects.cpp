@@ -74,7 +74,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectCreateItem,                               //SPELL_EFFECT_CREATE_ITEM = 24
     &Spell::EffectNULL,                                     //SPELL_EFFECT_WEAPON = 25
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DEFENSE = 26
-    &Spell::EffectPresistentAA,                             //SPELL_EFFECT_PERSISTENT_AREA_AURA = 27
+    &Spell::EffectPersistentAA,                             //SPELL_EFFECT_PERSISTENT_AREA_AURA = 27
     &Spell::EffectSummon,                                   //SPELL_EFFECT_SUMMON = 28
     &Spell::EffectMomentMove,                               //SPELL_EFFECT_LEAP = 29
     &Spell::EffectEnergize,                                 //SPELL_EFFECT_ENERGIZE = 30
@@ -473,16 +473,12 @@ void Spell::EffectCreateItem(uint32 i)
     player->UpdateSkillPro(m_spellInfo->Id);
 }
 
-void Spell::EffectPresistentAA(uint32 i)
+void Spell::EffectPersistentAA(uint32 i)
 {
-
-    //if(m_AreaAura == true)
-    //    return;
-
-    //m_AreaAura = true;
-
+    float radius = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    int32 duration = GetDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject();
-    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(m_spellInfo)))
+    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
     {
         delete dynObj;
         return;
@@ -490,8 +486,6 @@ void Spell::EffectPresistentAA(uint32 i)
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
-    dynObj->PeriodicTriggerDamage(damage, m_spellInfo->EffectAmplitude[i], GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])));
-    //m_dynObjToDel.push_back(dynObj);
     m_caster->AddDynObject(dynObj);
     dynObj->AddToWorld();
     MapManager::Instance().GetMap(dynObj->GetMapId())->Add(dynObj);
@@ -631,11 +625,8 @@ void Spell::EffectApplyAA(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    Aura* Aur = new Aura(m_spellInfo, i, unitTarget, m_caster);
-    //Aur->SetModifier(m_spellInfo->EffectApplyAuraName[i],m_spellInfo->EffectBasePoints[i]+rand()%m_spellInfo->EffectDieSides[i]+1,0,m_spellInfo->EffectMiscValue[i],0);
+    AreaAura* Aur = new AreaAura(m_spellInfo, i, unitTarget, m_caster);
     unitTarget->AddAura(Aur);
-    //unitTarget->SetAura(aff); FIX-ME!
-
 }
 
 void Spell::EffectSummon(uint32 i)

@@ -1396,43 +1396,45 @@ void Unit::_UpdateSpells( uint32 time )
         }
     }
 
-    if(m_dynObj.empty())
-        return;
-    std::list<DynamicObject*>::iterator ite, dnext;
-    for (ite = m_dynObj.begin(); ite != m_dynObj.end(); ite = dnext)
+    if(!m_dynObj.empty())
     {
-        dnext = ite;
-        dnext++;
-        //(*i)->Update( difftime );
-        if( (*ite)->isFinished() )
+        std::list<DynamicObject*>::iterator ite, dnext;
+        for (ite = m_dynObj.begin(); ite != m_dynObj.end(); ite = dnext)
         {
-            (*ite)->Delete();
-            m_dynObj.erase(ite);
-            if(m_dynObj.empty())
-                break;
-            else
-                dnext = m_dynObj.begin();
+            dnext = ite;
+            dnext++;
+            //(*i)->Update( difftime );
+            if( (*ite)->isFinished() )
+            {
+                (*ite)->Delete();
+                m_dynObj.erase(ite);
+                if(m_dynObj.empty())
+                    break;
+                else
+                    dnext = m_dynObj.begin();
+            }
         }
     }
-    if(m_gameObj.empty())
-        return;
-    std::list<GameObject*>::iterator ite1, dnext1;
-    for (ite1 = m_gameObj.begin(); ite1 != m_gameObj.end(); ite1 = dnext1)
+    if(!m_gameObj.empty())
     {
-        dnext1 = ite1;
-        dnext1++;
-        //(*i)->Update( difftime );
-        if( (*ite1)->isFinished() )
+        std::list<GameObject*>::iterator ite1, dnext1;
+        for (ite1 = m_gameObj.begin(); ite1 != m_gameObj.end(); ite1 = dnext1)
         {
-            (*ite1)->RemoveRef();
-            if(!(*ite1)->isReferenced())
-                (*ite1)->Delete();
+            dnext1 = ite1;
+            dnext1++;
+            //(*i)->Update( difftime );
+            if( (*ite1)->isFinished() )
+            {
+                (*ite1)->RemoveRef();
+                if(!(*ite1)->isReferenced())
+                    (*ite1)->Delete();
 
-            m_gameObj.erase(ite1);
-            if(m_gameObj.empty())
-                break;
-            else
-                dnext1 = m_gameObj.begin();
+                m_gameObj.erase(ite1);
+                if(m_gameObj.empty())
+                    break;
+                else
+                    dnext1 = m_gameObj.begin();
+            }
         }
     }
 }
@@ -1540,11 +1542,6 @@ void Unit::DeMorph()
     SetUInt32Value(UNIT_FIELD_DISPLAYID, displayid);
 }
 
-void Unit::DealWithSpellDamage(DynamicObject &obj)
-{
-    obj.DealWithSpellDamage(*this);
-}
-
 long Unit::GetTotalAuraModifier(uint32 ModifierID)
 {
     uint32 modifier = 0;
@@ -1578,12 +1575,15 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     // take out same spell
     if (i != m_Auras.end())
     {
-        (*i).second->SetAuraDuration(Aur->GetAuraDuration());
+        /*(*i).second->SetAuraDuration(Aur->GetAuraDuration());
         if ((*i).second->GetTarget())
             if ((*i).second->GetTarget()->GetTypeId() == TYPEID_PLAYER )
                 (*i).second->UpdateAuraDuration();
         delete Aur;
-        return false;
+        return false;*/
+        // passive and persistent auras can stack with themselves any number of times
+        if (!Aur->IsPassive() && !Aur->IsPersistent() && m_Auras.count(spellEffectPair(Aur->GetId(), Aur->GetEffIndex())) >= Aur->GetSpellProto()->StackAmount)
+            RemoveAura(i);
     }
 
     if (!Aur->IsPassive())                                  // passive auras stack with all
@@ -1596,7 +1596,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
 
     Aur->_AddAura();
-    m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
+    m_Auras.insert(AuraMap::value_type(spellEffectPair(Aur->GetId(), Aur->GetEffIndex()), Aur));
     if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
     {
         m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
@@ -2285,6 +2285,15 @@ void Unit::RemoveDynObject(uint32 spellid)
                 next = m_dynObj.begin();
         }
     }
+}
+
+DynamicObject * Unit::GetDynObject(uint32 spellId, uint32 effIndex)
+{
+    std::list<DynamicObject*>::iterator i;
+    for (i = m_dynObj.begin(); i != m_dynObj.end(); ++i)
+        if ((*i)->GetSpellId() == spellId && (*i)->GetEffIndex() == effIndex)
+            return *i;
+    return NULL;
 }
 
 void Unit::AddGameObject(GameObject* gameObj)

@@ -211,7 +211,7 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster, Item*
 m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0),m_castItem(castItem),
 m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
+m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0), m_isPersistent(false)
 {
     assert(target);
     m_duration = GetDuration(spellproto);
@@ -237,13 +237,31 @@ m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0)
         damage = CalculateDamage();
     }
 
-    m_areaAura = spellproto->Effect[eff]==SPELL_EFFECT_APPLY_AREA_AURA ? true : false;
-
     m_effIndex = eff;
     SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);
 }
 
 Aura::~Aura()
+{
+}
+
+AreaAura::AreaAura(SpellEntry* spellproto, uint32 eff, Unit *target, 
+Unit *caster, Item* castItem) : Aura(spellproto, eff, target, caster, castItem)
+{
+    m_isAreaAura = true;
+}
+
+AreaAura::~AreaAura()
+{
+}
+
+PersistentAreaAura::PersistentAreaAura(SpellEntry* spellproto, uint32 eff, Unit *target, 
+Unit *caster, Item* castItem) : Aura(spellproto, eff, target, caster, castItem)
+{
+    m_isPersistent = true;
+}
+
+PersistentAreaAura::~PersistentAreaAura()
 {
 }
 
@@ -336,7 +354,6 @@ void Aura::Update(uint32 diff)
         if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS,(UNIT_STAT_FLEEING<<16)))
         {
             float x,y,z,angle,speed,pos_x,pos_y,pos_z;
-            m_target->CombatStop();
             angle = m_target->GetAngle( caster->GetPositionX(), caster->GetPositionY() );
             // If the m_target is player,and if the speed is too slow,change it :P
             if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -360,78 +377,6 @@ void Aura::Update(uint32 diff)
                     m_target->SendMonsterMove(x,y,z,false,true,diff);
                     if(m_target->GetTypeId() != TYPEID_PLAYER)
                         m_target->Relocate(x,y,z,m_target->GetOrientation());
-                }
-            }
-        }
-    }
-
-    if(m_areaAura && m_target)
-    {
-        // update for the caster of the aura
-        if(m_caster_guid == m_target->GetGUID())
-        {
-            Unit* caster = m_target;
-
-            uint64 leaderGuid = 0;
-            if (caster->GetTypeId() == TYPEID_PLAYER)
-                leaderGuid = ((Player*)caster)->GetGroupLeader();
-            else if(((Creature*)caster)->isTotem())
-            {
-                Unit *owner = ((Totem*)caster)->GetOwner();
-                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                    leaderGuid = ((Player*)owner)->GetGroupLeader();
-            }
-
-            Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
-            float radius =  GetRadius(sSpellRadius.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
-            if(pGroup)
-            {
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
-                {
-                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                    if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive())
-                        continue;
-                    Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
-
-                    if(caster->GetDistanceSq(Target) > radius * radius )
-                    {
-                        // remove auras of the same caster from out of range players
-                        if (t_aura)
-                            if (t_aura->GetCasterGUID() == m_caster_guid)
-                                Target->RemoveAura(m_spellId, m_effIndex);
-                    }
-                    else
-                    {
-                        // apply aura to players in range that dont have it yet
-                        if (!t_aura)
-                        {
-                            Aura *aur = new Aura(GetSpellProto(), m_effIndex, Target, caster);
-                            Target->AddAura(aur);
-                        }
-                    }
-                }
-            }
-            else if (caster->GetTypeId() != TYPEID_PLAYER && ((Creature*)caster)->isTotem())
-            {
-                // add / remove auras from the totem's owner
-                Unit *owner = ((Totem*)caster)->GetOwner();
-                if (owner)
-                {
-                    Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
-                    if(caster->GetDistanceSq(owner) > radius * radius )
-                    {
-                        if (o_aura)
-                            if (o_aura->GetCasterGUID() == m_caster_guid)
-                                owner->RemoveAura(m_spellId, m_effIndex);
-                    }
-                    else
-                    {
-                        if (!o_aura)
-                        {
-                            Aura *aur = new Aura(GetSpellProto(), m_effIndex, owner, caster);
-                            owner->AddAura(aur);
-                        }
-                    }
                 }
             }
         }
@@ -463,6 +408,107 @@ void Aura::Update(uint32 diff)
             }
         }
     }
+}
+
+void AreaAura::Update(uint32 diff)
+{
+    // update for the caster of the aura
+    if(m_caster_guid == m_target->GetGUID())
+    {
+        Unit* caster = m_target;
+
+        uint64 leaderGuid = 0;
+        if (caster->GetTypeId() == TYPEID_PLAYER)
+            leaderGuid = ((Player*)caster)->GetGroupLeader();
+        else if(((Creature*)caster)->isTotem())
+        {
+            Unit *owner = ((Totem*)caster)->GetOwner();
+            if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                leaderGuid = ((Player*)owner)->GetGroupLeader();
+        }
+
+        Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
+        float radius =  GetRadius(sSpellRadius.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
+        if(pGroup)
+        {
+            for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+            {
+                Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive())
+                    continue;
+                Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
+
+                if(caster->GetDistanceSq(Target) > radius * radius )
+                {
+                    // remove auras of the same caster from out of range players
+                    if (t_aura)
+                        if (t_aura->GetCasterGUID() == m_caster_guid)
+                            Target->RemoveAura(m_spellId, m_effIndex);
+                }
+                else
+                {
+                    // apply aura to players in range that dont have it yet
+                    if (!t_aura)
+                    {
+                        Aura *aur = new Aura(GetSpellProto(), m_effIndex, Target, caster);
+                        Target->AddAura(aur);
+                    }
+                }
+            }
+        }
+        else if (caster->GetTypeId() != TYPEID_PLAYER && ((Creature*)caster)->isTotem())
+        {
+            // add / remove auras from the totem's owner
+            Unit *owner = ((Totem*)caster)->GetOwner();
+            if (owner)
+            {
+                Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
+                if(caster->GetDistanceSq(owner) > radius * radius )
+                {
+                    if (o_aura)
+                        if (o_aura->GetCasterGUID() == m_caster_guid)
+                            owner->RemoveAura(m_spellId, m_effIndex);
+                }
+                else
+                {
+                    if (!o_aura)
+                    {
+                        Aura *aur = new Aura(GetSpellProto(), m_effIndex, owner, caster);
+                        owner->AddAura(aur);
+                    }
+                }
+            }
+        }
+    }
+
+    Aura::Update(diff);
+}
+
+void PersistentAreaAura::Update(uint32 diff)
+{
+    bool remove = false;
+
+    // remove the aura if its caster or the dynamic object causing it was removed
+    // or if the target moves too far from the dynamic object
+    Unit *caster = GetCaster();
+    if (caster)
+    {
+        DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex());
+        if (dynObj)
+        {
+            if (m_target->GetDistanceSq(dynObj) > dynObj->GetRadius() * dynObj->GetRadius())
+                remove = true;
+        }
+        else
+            remove = true;
+    }
+    else
+        remove = true;
+    
+    Aura::Update(diff);
+
+    if(remove)
+        m_target->RemoveAura(GetId(), GetEffIndex());
 }
 
 void Aura::ApplyModifier(bool apply)
@@ -503,7 +549,7 @@ void Aura::_AddAura()
         aura = m_target->GetAura(m_spellId, i);
         if(aura)
         {
-            if (i != m_effIndex)
+            //if (i != m_effIndex)
             {
                 samespell = true;
                 slot = aura->GetAuraSlot();
@@ -560,6 +606,10 @@ void Aura::_AddAura()
 
             m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
         }
+        else
+        {
+            /* TODO: increase count */
+        }
 
         SetAuraSlot( slot );
         if( m_target->GetTypeId() == TYPEID_PLAYER )
@@ -580,6 +630,13 @@ void Aura::_RemoveAura()
     m_target->ApplyStats(true);
 
     Unit* caster = GetCaster();
+
+    if(caster && IsPersistent())
+    {
+        DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex());
+        if (dynObj)
+            dynObj->RemoveAffected(m_target);
+    }
                                                             //passive auras do not get put in slots
     if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
         return;
@@ -592,13 +649,28 @@ void Aura::_RemoveAura()
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
         return;
 
-    // only remove icon when the last aura of the spell is removed
-    for(uint32 i = 0; i < 3; i++)
+    // count all auras from each effect of the spell
+    Unit::AuraMap& t_Auras = m_target->GetAuras();
+    uint8 count[3], totalcount = 0;
+    for(uint8 i = 0; i < 3; i++)
     {
-        aura = m_target->GetAura(m_spellId, i);
-        if(aura && i != m_effIndex)
-            return;
+        count[i] = t_Auras.count(Unit::spellEffectPair(m_spellId, i));
+        totalcount += count[i];
     }
+
+    /*
+    count[m_effIndex]--;
+    // all counts should be the same after the last effect of a spell was taken out
+    for(uint8 i = 0; i < 3; i++)
+        if (count[i] > count[m_effIndex])
+            break;
+    if (i == 3)
+        TODO: decrease count for spell
+    */
+
+    // only remove icon when the last aura of the spell is removed
+    if (totalcount > 1)
+        return;
 
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
 
@@ -735,10 +807,10 @@ void Aura::HandleAuraDummy(bool apply)
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
         {
             Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-            /*if(apply && !m_procCharges)
+            if(apply)
                 tAuraProcTriggerDamage.push_back(this);
-            if(!apply && !m_duration)
-                tAuraProcTriggerDamage.remove(this);*/
+            else
+                tAuraProcTriggerDamage.remove(this);
 
             if(apply && !m_procCharges)
             {

@@ -29,6 +29,9 @@
 #include "SpellAuras.h"
 #include "MapManager.h"
 #include "RedZoneDistrict.h"
+#include "GridNotifiers.h"
+#include "CellImpl.h"
+#include "GridNotifiersImpl.h"
 
 DynamicObject::DynamicObject() : Object()
 {
@@ -38,24 +41,26 @@ DynamicObject::DynamicObject() : Object()
     m_valuesCount = DYNAMICOBJECT_END;
 }
 
-bool DynamicObject::Create( uint32 guidlow, Unit *caster, SpellEntry * spell, float x, float y, float z, uint32 duration )
+bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius )
 {
     Object::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0, (uint8)-1);
-    m_spell = spell;
-    m_caster = caster;
 
-    SetUInt32Value( OBJECT_FIELD_ENTRY, spell->Id );
+    SetUInt32Value( OBJECT_FIELD_ENTRY, spellId );
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );
     SetUInt64Value( DYNAMICOBJECT_CASTER, caster->GetGUID() );
     SetUInt32Value( DYNAMICOBJECT_BYTES, 0x00000001 );
-    SetUInt32Value( DYNAMICOBJECT_SPELLID, spell->Id );
-    SetFloatValue( DYNAMICOBJECT_RADIUS, (float)GetRadius(sSpellRadius.LookupEntry(spell->EffectRadiusIndex[0] )));
+    SetUInt32Value( DYNAMICOBJECT_SPELLID, spellId );
+    SetFloatValue( DYNAMICOBJECT_RADIUS, radius);
     SetFloatValue( DYNAMICOBJECT_POS_X, x );
     SetFloatValue( DYNAMICOBJECT_POS_Y, y );
     SetFloatValue( DYNAMICOBJECT_POS_Z, z );
 
     m_aliveDuration = duration;
+    m_radius = radius;
     deleteThis = false;
+    m_effIndex = effIndex;
+    m_spellId = spellId;
+    m_caster = caster;
     return true;
 }
 
@@ -77,36 +82,19 @@ void DynamicObject::Update(uint32 p_time)
         }
     }
 
-    m_PeriodicDamageCurrentTick -= p_time;
-    if (m_PeriodicDamageCurrentTick < 0)
-    {
-        m_PeriodicDamageCurrentTick += m_PeriodicDamageTick;
-        DealWithSpellDamage(*m_caster);
-    }
+    // TODO: make a timer and update this in larger intervals
+
+    CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
+    Cell cell = RedZone::GetZone(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+
+    MaNGOS::DynamicObjectUpdater notifier(*this);
+    TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 }
 
-void DynamicObject::DealWithSpellDamage(Unit &caster)
-{
-    Modifier mod;
-    mod.m_auraname = 3;
-    mod.m_amount = m_PeriodicDamage;
-
-    UnitList.clear();
-    MapManager::Instance().GetMap(m_mapId)->GetUnitList(GetPositionX(), GetPositionY(),UnitList);
-    for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
-    {
-        if((*iter))
-        {
-            if((*iter)->isAlive()&& !(*iter)->isInFlight() )
-            {
-                if(m_caster->IsFriendlyTo(*iter))
-                    continue;
-                if(GetDistanceSq(*iter) < m_PeriodicDamageRadius * m_PeriodicDamageRadius )
-                    caster.PeriodicAuraLog((*iter),m_spell,&mod);
-            }
-        }
-    }
-}
 
 void DynamicObject::Delete()
 {
@@ -120,8 +108,6 @@ void DynamicObject::Delete()
     data << GetGUID();
     SendMessageToSet(&data,true);
 
-    m_PeriodicDamage = 0;
-    m_PeriodicDamageTick = 0;
     RemoveFromWorld();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
