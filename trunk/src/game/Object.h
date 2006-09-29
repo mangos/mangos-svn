@@ -25,7 +25,10 @@
 #include "QuestDef.h"
 
 #include <set>
+
+#ifndef M_PI
 #define M_PI            3.14159265358979323846
+#endif
 
 #define SPEED_STOP      0.0f
 #define SPEED_WALK      2.5f

@@ -36,7 +36,7 @@ typedef fd_set SelectSet;
  */
 #include <sys/socket.h>
 #include <netinet/in.h>
-#ifdef __APPLE__
+#ifdef __APPLE_CC__
 #include <sys/select.h>
 #endif
 

@@ -85,7 +85,7 @@ typedef in_port_t port_t;
 #  define IPV6_ADD_MEMBERSHIP IPV6_JOIN_GROUP
 #  define IPV6_DROP_MEMBERSHIP IPV6_LEAVE_GROUP
 
-#elif defined MACOSX
+#elif defined __APPLE_CC__
 // ----------------------------------------
 // Mac OS X
 #include <string.h>

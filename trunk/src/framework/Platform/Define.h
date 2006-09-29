@@ -38,13 +38,18 @@
 #define MANGOS_LOAD_LIBRARY(a) dlopen(a,RTLD_NOW)
 #define MANGOS_CLOSE_LIBRARY dlclose
 #define MANGOS_GET_PROC_ADDR dlsym
+
+#if defined(__APPLE_CC__) && defined(BIG_ENDIAN)
+#define MANGOS_IMPORT __attribute__ ((longcall))
+#else 
 #define MANGOS_IMPORT __attribute__ ((cdecl))
+#endif
+
 #define MANGOS_SCRIPT_EXT ".so"
 #define MANGOS_SCRIPT_NAME "libMaNGOSScript"
 #endif
 
 #ifdef WIN32
-
 #ifdef MANGOS_WIN32_DLL_IMPORT
 
 #define MANGOS_DLL_DECL __declspec(dllimport)

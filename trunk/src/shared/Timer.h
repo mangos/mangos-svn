@@ -26,7 +26,7 @@
 #   include <mmsystem.h>
 #   include <time.h>
 #else
-# ifdef __FreeBSD__
+# if defined(__FreeBSD__) || defined(__APPLE_CC__)
 #   include <time.h>
 # endif
 #   include <sys/timeb.h>
