@@ -51,9 +51,10 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
             sLog.outDetail("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
 
             if(plr->MinimalLoadFromDB( (*result)[0].GetUInt32() ))
+            {
                 plr->BuildEnumData( &data );
-
-            num++;
+                num++;
+            }
         }
         while( result->NextRow() );
         delete plr;
