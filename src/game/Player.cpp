@@ -1377,7 +1377,7 @@ void Player::GiveLevel()
     newMP  += MPGain;
     newHP  += HPGain;
 
-        // update level, talants, max level of skills
+    // update level, talants, max level of skills
     SetLevel( level);
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
 
@@ -1446,7 +1446,7 @@ void Player::BuildLvlUpStats(uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uin
         *AGI += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_AGILITY);
         *STA += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_STAMINA);
         *INT += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_INTELLECT);
-        *SPI += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_SPIRIT); 
+        *SPI += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_SPIRIT);
     }
     else
     {

@@ -217,7 +217,7 @@ class ObjectMgr
 
         PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_);
         inline uint8 GetLevelUpStatGain(uint8 Class, uint8 Race, uint8 FromLevel, Stats Stat) const
-        { return levelUpStatGains[Class][Race][FromLevel][(uint8)Stat+2]; }
+            { return levelUpStatGains[Class][Race][FromLevel][(uint8)Stat+2]; }
 
         uint64 GetPlayerGUIDByName(const char *name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
