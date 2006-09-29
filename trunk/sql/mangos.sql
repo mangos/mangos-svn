@@ -400,7 +400,8 @@ CREATE TABLE `character_pet` (
   `spell4` int(11) unsigned NOT NULL default '0',
   `action` int(11) unsigned NOT NULL default '0',
   `fealty` int(11) unsigned NOT NULL default '0',
-  `name` varchar(50) NOT NULL default 'pet',
+  `loyalty` int(11) unsigned NOT NULL default '1',
+  `trainpoint` int(11) unsigned NOT NULL default '0',
   `current` tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)
