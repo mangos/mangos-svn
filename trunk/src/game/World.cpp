@@ -259,7 +259,7 @@ void World::SetInitialWorldSettings()
     //sDatabase.PExecute("UPDATE `character` SET `online` = 0");
 
     //Update realm list
-    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", m_configs[CONFIG_GAME_TYPE],sConfig.GetIntDefault("RealmID", 0));
+    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", m_configs[CONFIG_GAME_TYPE],sConfig.GetIntDefault("RealmID", 1));
 
     // remove bones after restart
     sDatabase.PExecute("DELETE FROM `corpse` WHERE `bones_flag` = '1'");
