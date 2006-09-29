@@ -67,6 +67,7 @@ uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
 float GetMaxRange(SpellRange *range);
 int32 GetDuration(SpellEntry *spellInfo);
+char* GetPetName(uint32 petfamily);
 uint32 FindSpellRank(uint32 spellId);
 bool canStackSpellRank(SpellEntry *spellInfo);
 bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2);
@@ -123,11 +124,13 @@ class DBCStorage
 };
 
 extern DBCStorage <AreaTableEntry>           sAreaStore;
+extern DBCStorage <CreatureFamily>           sCreatureFamilyStore;
 extern DBCStorage <SpellCastTime>            sCastTime;
 extern DBCStorage <emoteentry>               sEmoteStore;
 extern DBCStorage <FactionEntry>             sFactionStore;
 extern DBCStorage <FactionTemplateEntry>     sFactionTemplateStore;
 extern DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore;
+extern DBCStorage <ItemRandomProperties>     sItemRandomPropertiesStore;
 extern DBCStorage <ItemSetEntry>             sItemSetStore;
 extern DBCStorage <LockEntry>                sLockStore;
 extern DBCStorage <SkillLine>                sSkillLineStore;

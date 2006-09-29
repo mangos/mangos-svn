@@ -214,9 +214,23 @@ struct SpellItemEnchantment
     uint32      aura_id;
     uint32      slot;
 };
-
 struct LockEntry
 {
     uint32      ID;
     uint32      requiredskill;
+};
+struct CreatureFamily
+{
+    uint32    ID;
+    uint32    unknown_1;
+    uint32    unknown_2;
+    uint32    petfood_id;
+    char*     Name;
+};
+struct ItemRandomProperties
+{
+    uint32    ID;
+    uint32    enchant_id_1;
+    uint32    enchant_id_2;
+    uint32    enchant_id_3;
 };

@@ -237,7 +237,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
 
         bool isTamed() const { return m_isTamed; }
-        void SaveTamedToPet();
+        void SaveAsPet();
         void SetTamed(bool isTamed) { m_isTamed = isTamed; }
         void Untamed();
 
@@ -362,6 +362,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         float GetAttackDistance(Unit *pl);
         uint32 getloyalty(){ return m_loyalty;};
         uint32 gettrainpoint(){ return m_trainpoint;};
+        void setloyalty(uint32 loyalty){m_loyalty = loyalty;};
+        void settrainpoint(uint32 trainpoint){m_trainpoint = trainpoint;};
     protected:
         void _LoadGoods();
         void _LoadQuests();
