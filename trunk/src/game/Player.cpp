@@ -2941,11 +2941,6 @@ bool Player::IsGroupMember(Player *plyr)
     return false;
 }
 
-void Player::DealWithSpellDamage(DynamicObject &obj)
-{
-    obj.DealWithSpellDamage(*this);
-}
-
 bool Player::SetPosition(float x, float y, float z, float orientation)
 {
     Map *m = MapManager::Instance().GetMap(m_mapId);

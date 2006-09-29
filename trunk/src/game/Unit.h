@@ -288,7 +288,7 @@ class MANGOS_DLL_SPEC Unit : public Object
     public:
         typedef std::set<Unit*> AttackerSet;
         typedef std::pair<uint32, uint32> spellEffectPair;
-        typedef std::map< spellEffectPair, Aura*> AuraMap;
+        typedef std::multimap< spellEffectPair, Aura*> AuraMap;
         typedef std::list<Aura *> AuraList;
         virtual ~Unit ( );
 
@@ -486,7 +486,6 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Walkback, bool Run, uint32 Time);
 
-        virtual void DealWithSpellDamage(DynamicObject &);
         virtual void MoveOutOfRange(Player &) {  };
 
         bool isAlive() const { return (m_deathState == ALIVE); };
@@ -580,6 +579,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveDynObject(uint32 spellid);
         void AddGameObject(GameObject* gameObj);
         void RemoveGameObject(uint32 spellid, bool del);
+        DynamicObject *GetDynObject(uint32 spellId, uint32 effIndex);
         uint32 CalculateDamage(WeaponAttackType attType);
         void SetStateFlag(uint32 index, uint32 newFlag );
         void RemoveStateFlag(uint32 index, uint32 oldFlag );

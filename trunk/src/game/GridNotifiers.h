@@ -218,6 +218,41 @@ namespace MaNGOS
 
     };
 
+    template<class Check>
+    struct MANGOS_DLL_DECL UnitSearcher
+    {
+        Unit* &i_object;
+        Check & i_check;
+
+        UnitSearcher(Unit* & result, Check & check) : i_object(result),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    class AnyUnfriendlyUnitInObjectRangeCheck
+    {
+        public:
+            AnyUnfriendlyUnitInObjectRangeCheck(Object* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range), i_result(NULL) {}
+            bool operator()(Unit* u)
+            {
+                if(!i_funit->IsFriendlyTo(u) && i_obj->GetDistanceSq(u) < i_range * i_range)
+                {
+                    i_result = u;
+                    return true;
+                }
+                return false;
+            }
+            Unit *GetResult() const { return i_result; }
+        private:
+            float i_range;
+            Unit* i_result;
+            Unit* const i_funit;
+            Object* const i_obj;
+    };
+
     struct MANGOS_DLL_DECL GridUnitListNotifier
     {
         std::list<Unit*> &i_data;
@@ -260,6 +295,18 @@ namespace MaNGOS
         #endif
     };
 
+    struct MANGOS_DLL_DECL DynamicObjectUpdater
+    {
+        DynamicObject &owner;
+        DynamicObjectUpdater(DynamicObject &owner) : owner(owner) {}
+
+        template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m) {}
+        #ifdef WIN32
+        template<> inline void Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
+        template<> inline void Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+        #endif
+    };
+
     #ifndef WIN32
 
     template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
@@ -271,6 +318,8 @@ namespace MaNGOS
     template<> void PlayerRelocationNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void PlayerRelocationNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void CreatureRelocationNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
+    template<> inline void DynamicObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Player *> &);
+    template<> inline void DynamicObjectUpdater::Visit<Player>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &m ) {}
     template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m ) {}
     template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m ) {}
