@@ -402,7 +402,7 @@ void ObjectMgr::LoadLvlUpGains()
         uint8 current_class = fields[1].GetUInt8();
         uint8 current_race = fields[0].GetUInt8();
         uint8 current_level = fields[2].GetUInt8();
-        
+
         for (int i = 0; i < MAX_STATS+2; i++)
         {
             levelUpStatGains[current_class][current_race][current_level][i] = fields[i+3].GetUInt8();

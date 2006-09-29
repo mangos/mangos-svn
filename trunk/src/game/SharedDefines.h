@@ -31,7 +31,7 @@
 #define RACE_TAUREN                         6
 #define RACE_GNOME                          7
 #define RACE_TROLL                          8
-#define MAX_RACES                           9 
+#define MAX_RACES                           9
 
 #define CLASS_WARRIOR                       1
 #define CLASS_PALADIN                       2
