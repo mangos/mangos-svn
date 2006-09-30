@@ -485,15 +485,15 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     uint32 absorb=0;
     uint32 resist=0;
 
-    uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
-    CalDamageReduction(pVictim,spellInfo->School,pdamage, &absorb, &resist);
-
     //WorldPacket data;
-    if(m_modSpellHitChance+100 < urand(0,100))
+    if(SpellMissChanceCalc(pVictim) > urand(0,10000))
     {
         SendAttackStateUpdate(HITINFO_MISS, pVictim->GetGUID(), 1, spellInfo->School, 0, 0,0,1,0);
         return;
     }
+
+	uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
+    CalDamageReduction(pVictim,spellInfo->School,pdamage, &absorb, &resist);
 
     // Only send absorbed message if we actually absorbed some damage
     if( damage <= absorb+resist && absorb)
@@ -738,13 +738,17 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     if (outcome == MELEE_HIT_MISS)
     {
         *hitInfo |= HITINFO_MISS;
+		if(GetTypeId()== TYPEID_PLAYER)
+			((Player*)this)->UpdateWeaponSkill(attType);
         return;
     }
 
     *damage += CalculateDamage (attType);
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
-        ((Player*)this)->UpdateWeaponSkill(attType);
+	     ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
+    if(GetTypeId() != TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
+         ((Player*)pVictim)->UpdateCombatSkills(this, attType, outcome, true);
 
     switch (outcome)
     {
@@ -753,6 +757,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                                                             // 0xEA
             *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;
             *damage *= 2;
+
+			if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
+				((Player*)this)->UpdateWeaponSkill(attType);
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
             break;
@@ -1050,12 +1057,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     // dual wield has 24% base chance to miss instead of 5%, also
     // base miss rate is 5% and can't get higher than 60%
-    if(haveOffhandWeapon())
-    {
-        tmp = 2400 - skillBonus - m_modHitChance*100;
-    }
-    else
-        tmp = 500 - skillBonus - m_modHitChance*100;
+    tmp = MeleeMissChanceCalc(pVictim) - skillBonus;
 
     if(tmp > 6000)
         tmp = 6000;
@@ -1138,15 +1140,16 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     // mobs can score crushing blows if they're 3 or more levels above victim
     // or when their weapon skill is 15 or more above victim's defense skill
-    if ( (GetTypeId() != TYPEID_PLAYER)
-        && ((getLevel() >= pVictim->getLevel() + 3) || (skillDiff >= 15)))
+    tmp = pVictim->GetDefenceSkillValue();
+	uint32 tmpmax = pVictim->getLevel() * 5;        
+	// having defense above your maximum (from items, talents etc.) has no effect
+	tmp = tmp > tmpmax ? tmpmax : tmp;
+	// tmp = mob's level * 5 - player's current defense skill
+	tmp = getLevel() * 5 - tmp;
+    if (GetTypeId() != TYPEID_PLAYER && (tmp >= 15 || getLevel() >= pVictim->getLevel() + 3))
     {
-        // tmp = player's max defense skill - player's current defense skill
-        tmp = 5*pVictim->getLevel() - pVictim->GetDefenceSkillValue();
-        // having defense above your maximum (from items, talents etc.) has no effect
         // add 2% chance per lacking skill point, min. is 15%
-        // FIXME: chance should go up with mob lvl
-        tmp = 1500 + (tmp > 0 ? tmp*200 : 0);
+        tmp = tmp * 200 - 1500;
         if (roll < (sum += tmp))
         {
             DEBUG_LOG ("RollMeleeOutcomeAgainst: CRUSHING <%d, %d)", sum-tmp, sum);
@@ -1220,10 +1223,59 @@ void Unit::SendAttackStop(Unit* victim)
         ((Creature*)victim)->AI().AttackStop(this);
 }
 
+int32 Unit::SpellMissChanceCalc(Unit *pVictim) const
+{
+	if(!pVictim)
+		return 0;
+
+    int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 700 : 1100; // PvP : PvE spell misschances per leveldif > 2
+
+	int32 leveldif = pVictim->getLevel() - getLevel();
+	if(leveldif < 0)
+		leveldif = 0;
+
+	int32 misschance = 400 - m_modSpellHitChance*100;
+	if(leveldif < 3)
+		misschance += leveldif * 100;
+	else
+		misschance += (leveldif - 2) * chance;
+
+	return misschance < 100 ? 100 : misschance;
+}
+
+int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
+{
+	if(!pVictim)
+		return 0;
+
+	int32 misschance = haveOffhandWeapon() ? 2400 : 500; //base misschance for DW : melee attacks
+
+	int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 500 : 700;           // PvP : PvE melee misschances per leveldif > 2
+
+	int32 leveldif = pVictim->getLevel() - getLevel();
+	if(leveldif < 0)
+		leveldif = 0;
+
+    if(leveldif < 3)
+		misschance += leveldif * 100 - m_modHitChance*100;
+	else
+		misschance += (leveldif - 2) * chance - m_modHitChance*100;
+	
+	return misschance > 6000 ? 6000 : misschance;
+}
+
 uint16 Unit::GetDefenceSkillValue() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
         return ((Player*)this)->GetSkillValue (SKILL_DEFENSE);
+    else
+        return GetUnitMeleeSkill();
+}
+
+uint16 Unit::GetPureDefenceSkillValue() const
+{
+    if(GetTypeId() == TYPEID_PLAYER)
+        return ((Player*)this)->GetPureSkillValue(SKILL_DEFENSE);
     else
         return GetUnitMeleeSkill();
 }
@@ -1295,6 +1347,30 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
                                                             // in range
         uint32  skill = item && !item->IsBroken() ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetSkillValue (skill);
+    }
+    else
+        return GetUnitMeleeSkill();
+}
+
+uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
+{
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        uint16  slot;
+        switch (attType)
+        {
+            case BASE_ATTACK: slot = EQUIPMENT_SLOT_MAINHAND; break;
+            case OFF_ATTACK: slot = EQUIPMENT_SLOT_OFFHAND; break;
+            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED; break;
+        }
+        Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
+
+        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken()))
+            return 0;
+
+                                                            // in range
+        uint32  skill = item && !item->IsBroken() ? item->GetSkill() : SKILL_UNARMED;
+        return ((Player*)this)->GetPureSkillValue (skill);
     }
     else
         return GetUnitMeleeSkill();
