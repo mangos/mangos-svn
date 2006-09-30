@@ -363,11 +363,14 @@ void Aura::Update(uint32 diff)
             pos_y = m_target->GetPositionY();
             uint32 mapid = m_target->GetMapId();
             pos_z = MapManager::Instance().GetMap(mapid)->GetHeight(pos_x,pos_y);
-            // Control the max Distance; 30 for temp.
-            if(m_target->GetDistanceSq(caster) <= 30*30)
+            // Control the max Distance; 20 for temp.
+            if(m_target->GetDistanceSq(caster) <= 20*20)
             {
-                x = m_target->GetPositionX() + speed*diff * sin(angle)/1000;
-                y = m_target->GetPositionY() + speed*diff * cos(angle)/1000;
+				if( m_target->GetPositionX() < caster->GetPositionX() || m_target->GetPositionY() > caster->GetPositionY() )
+					x = m_target->GetPositionX() + speed*diff * sin(angle)/1000;
+				else
+					x = m_target->GetPositionX() - speed*diff * sin(angle)/1000;
+                y = m_target->GetPositionY() - speed*diff * cos(angle)/1000;
                 mapid = m_target->GetMapId();
                 z = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
                 // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
@@ -1296,11 +1299,7 @@ void Aura::HandleModFear(bool Apply)
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
-        m_target->AttackStop();
-
-        Unit* caster = GetCaster();
-        if(caster)
-            caster->AttackStop();
+        // m_target->AttackStop();
 
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
@@ -1314,7 +1313,7 @@ void Aura::HandleModFear(bool Apply)
         m_target->clearUnitState(UNIT_STAT_FLEEING);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
         if(m_target->GetTypeId() != TYPEID_PLAYER)
-            (*((Creature*)m_target))->Initialize((Creature*)m_target);
+			m_target->Attack(GetCaster());
     }
     m_target->SendMessageToSet(&data,true);
 }
