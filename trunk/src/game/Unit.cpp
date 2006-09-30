@@ -351,9 +351,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                         Player *pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
                         if(!pGroupGuy)
                             continue;
-                        if(GetDistanceSq(pGroupGuy) > sWorld.getConfig(CONFIG_GETXP_DISTANCE))
+                        if(pVictim->GetDistanceSq(pGroupGuy) > sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                             continue;
-                        if(uint32(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel())) > sWorld.getConfig(CONFIG_GETXP_LEVELDIFF))
+                        if(uint32(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel())) > sWorld.getConfig(CONFIG_GROUP_XP_LEVELDIFF))
                             continue;
                         pGroupGuy->GiveXP(xp, pVictim);
                         pGroupGuy->KilledMonster(entry, pVictim->GetGUID());
