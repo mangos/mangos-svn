@@ -805,7 +805,7 @@ void Player::Update( uint32 p_time )
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
         if(m_restTime < 3*GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/2)
-            m_restTime ++;
+            m_restTime += p_time;
     }
 
     if(m_regenTimer > 0)
@@ -1191,16 +1191,6 @@ void Player::Regenerate(Powers power)
 
     if (power != POWER_RAGE)
     {
-        switch (getStandState())
-        {
-            case PLAYER_STATE_SIT_CHAIR:
-            case PLAYER_STATE_SIT_LOW_CHAIR:
-            case PLAYER_STATE_SIT_MEDIUM_CHAIR:
-            case PLAYER_STATE_SIT_HIGH_CHAIR:
-            case PLAYER_STATE_SIT:          addvalue *= 2.0; break;
-            case PLAYER_STATE_SLEEP:        addvalue *= 3.0; break;
-            case PLAYER_STATE_KNEEL:        addvalue *= 1.5; break;
-        }
         curValue += uint32(addvalue);
         if (curValue > maxValue) curValue = maxValue;
     }
@@ -1258,9 +1248,10 @@ void Player::RegenerateHealth()
         case PLAYER_STATE_SIT_LOW_CHAIR:
         case PLAYER_STATE_SIT_MEDIUM_CHAIR:
         case PLAYER_STATE_SIT_HIGH_CHAIR:
-        case PLAYER_STATE_SIT:          addvalue *= 2.0; break;
-        case PLAYER_STATE_SLEEP:        addvalue *= 3.0; break;
-        case PLAYER_STATE_KNEEL:        addvalue *= 1.5; break;
+        case PLAYER_STATE_SIT:
+        case PLAYER_STATE_SLEEP:
+        case PLAYER_STATE_KNEEL:
+            addvalue *= 1.5; break;
     }
     curValue += uint32(addvalue);
     if (curValue > maxValue) curValue = maxValue;
@@ -2693,6 +2684,60 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     }
 }
 
+void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHitOutcome outcome, bool defence)
+{
+	switch(outcome)
+	{
+	case MELEE_HIT_CRIT:
+		return;
+	case MELEE_HIT_DODGE:	
+		return;
+	case MELEE_HIT_PARRY:
+		return;
+	case MELEE_HIT_BLOCK:
+		return;
+
+	default:
+		break;
+	}
+    
+    uint32 plevel = getLevel();                         // if defence than pVictim == attacker
+	uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
+	uint32 moblevel = pVictim->getLevel();
+	if(moblevel < greylevel)
+	    return;
+    
+    if (moblevel > plevel + 5)
+	    moblevel = plevel + 5;
+
+    uint32 lvldif = moblevel - greylevel;
+	if(lvldif < 3)
+	    lvldif = 3;
+
+    uint32 skilldif = 5 * plevel - (defence ? GetPureDefenceSkillValue() : GetPureWeaponSkillValue(attType));
+	if(skilldif <= 0)
+        return; 
+
+    float chance = 3 * lvldif * skilldif / plevel;
+	if(!defence)
+	{
+	    if(getClass() == WARRIOR || getClass() == ROGUE)
+		    chance *= 0.1 * GetStat(STAT_INTELLECT);
+    }
+
+    chance = chance < 1 ? 1 : chance;                   //minimum chance to increase skill is 1%
+		
+	if(chance > urand(0,100))
+	{
+	    if(defence)
+            UpdateDefense();
+        else
+		    UpdateWeaponSkill(attType);
+		}
+    else 
+	    return;
+}
+
 void Player::ModifySkillBonus(uint32 skillid,int32 val)
 {
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
@@ -2832,6 +2877,19 @@ uint16 Player::GetSkillValue(uint32 skill) const
         if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
         {
             return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+1))+GetUInt32Value(PLAYER_SKILL(i)+2);
+        }
+    }
+    return 0;
+}
+
+uint16 Player::GetPureSkillValue(uint32 skill) const
+{
+    if(!skill)return 0;
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
+        {
+            return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+1));
         }
     }
     return 0;
