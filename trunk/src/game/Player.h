@@ -817,11 +817,11 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void UpdateDefense();
         void UpdateWeaponSkill (WeaponAttackType attType);
-		void UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHitOutcome outcome, bool defence);
+        void UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHitOutcome outcome, bool defence);
 
         void SetSkill(uint32 id, uint16 currVal, uint16 maxVal);
         uint16 GetSkillValue(uint32 skill) const;
-		uint16 GetPureSkillValue(uint32 skill) const;
+        uint16 GetPureSkillValue(uint32 skill) const;
         bool HasSkill(uint32 skill) const;
 
         void SetDontMove(bool dontMove);
