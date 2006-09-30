@@ -23,6 +23,7 @@ struct ItemSetEntry
     uint32    required_skill_id;
     uint32    required_skill_value;
 };
+
 struct TalentEntry
 {
     uint32    TalentID;
@@ -33,11 +34,13 @@ struct TalentEntry
     uint32    DependsOn;
     uint32    DependsOnRank;
 };
+
 struct emoteentry
 {
     uint32    Id;
     uint32    textid;
 };
+
 struct SkillLine
 {
     uint32    id;
@@ -46,6 +49,7 @@ struct SkillLine
     char*     description[8];
     uint32    spellIcon;
 };
+
 struct SkillLineAbility
 {
     uint32    id;
@@ -61,6 +65,7 @@ struct SkillLineAbility
     uint32    max_value;
     uint32    min_value;
 };
+
 struct SpellEntry
 {
     uint32    Id;
@@ -136,6 +141,7 @@ struct SpellEntry
     uint32    SpellFamilyFlags ;
     uint32    MaxAffectedTargets;
 };
+
 struct SpellCastTime
 {
     uint32    ID;
@@ -154,17 +160,20 @@ struct SpellRadius
     float     Radius;
     float     Radius2;
 };
+
 struct SpellRange
 {
     uint32    ID;
     float     minRange;
     float     maxRange;
 };
+
 struct SpellDuration
 {
     uint32    ID;
     int32     Duration[3];
 };
+
 struct AreaTableEntry
 {
     uint32    ID;
@@ -172,6 +181,7 @@ struct AreaTableEntry
     uint32    exploreFlag;
     int32     area_level;
 };
+
 struct FactionEntry
 {
     uint32      ID;
@@ -187,6 +197,7 @@ struct FactionEntry
     uint32      something9;
     uint32      team;
 };
+
 struct FactionTemplateEntry
 {
     uint32      ID;
@@ -195,12 +206,14 @@ struct FactionTemplateEntry
     uint32      hostile;
     uint32      faction;
 };
+
 struct ItemDisplayTemplateEntry
 {
     uint32      ID;
     uint32      seed;
     uint32      randomPropertyID;
 };
+
 struct SpellItemEnchantment
 {
     uint32      ID;
@@ -214,11 +227,13 @@ struct SpellItemEnchantment
     uint32      aura_id;
     uint32      slot;
 };
+
 struct LockEntry
 {
     uint32      ID;
     uint32      requiredskill;
 };
+
 struct CreatureFamily
 {
     uint32    ID;
@@ -227,6 +242,7 @@ struct CreatureFamily
     uint32    petfood_id;
     char*     Name;
 };
+
 struct ItemRandomProperties
 {
     uint32    ID;
