@@ -366,10 +366,10 @@ void Aura::Update(uint32 diff)
             // Control the max Distance; 20 for temp.
             if(m_target->GetDistanceSq(caster) <= 20*20)
             {
-				if( m_target->GetPositionX() < caster->GetPositionX() || m_target->GetPositionY() > caster->GetPositionY() )
-					x = m_target->GetPositionX() + speed*diff * sin(angle)/1000;
-				else
-					x = m_target->GetPositionX() - speed*diff * sin(angle)/1000;
+                if( m_target->GetPositionX() < caster->GetPositionX() || m_target->GetPositionY() > caster->GetPositionY() )
+                    x = m_target->GetPositionX() + speed*diff * sin(angle)/1000;
+                else
+                    x = m_target->GetPositionX() - speed*diff * sin(angle)/1000;
                 y = m_target->GetPositionY() - speed*diff * cos(angle)/1000;
                 mapid = m_target->GetMapId();
                 z = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
@@ -1313,7 +1313,7 @@ void Aura::HandleModFear(bool Apply)
         m_target->clearUnitState(UNIT_STAT_FLEEING);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
         if(m_target->GetTypeId() != TYPEID_PLAYER)
-			m_target->Attack(GetCaster());
+            m_target->Attack(GetCaster());
     }
     m_target->SendMessageToSet(&data,true);
 }
