@@ -2686,56 +2686,56 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
 
 void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHitOutcome outcome, bool defence)
 {
-	switch(outcome)
-	{
-	case MELEE_HIT_CRIT:
-		return;
-	case MELEE_HIT_DODGE:	
-		return;
-	case MELEE_HIT_PARRY:
-		return;
-	case MELEE_HIT_BLOCK:
-		return;
+    switch(outcome)
+    {
+    case MELEE_HIT_CRIT:
+        return;
+    case MELEE_HIT_DODGE:    
+        return;
+    case MELEE_HIT_PARRY:
+        return;
+    case MELEE_HIT_BLOCK:
+        return;
 
-	default:
-		break;
-	}
+    default:
+        break;
+    }
     
     uint32 plevel = getLevel();                         // if defence than pVictim == attacker
-	uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
-	uint32 moblevel = pVictim->getLevel();
-	if(moblevel < greylevel)
-	    return;
+    uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
+    uint32 moblevel = pVictim->getLevel();
+    if(moblevel < greylevel)
+        return;
     
     if (moblevel > plevel + 5)
-	    moblevel = plevel + 5;
+        moblevel = plevel + 5;
 
     uint32 lvldif = moblevel - greylevel;
-	if(lvldif < 3)
-	    lvldif = 3;
+    if(lvldif < 3)
+        lvldif = 3;
 
     uint32 skilldif = 5 * plevel - (defence ? GetPureDefenceSkillValue() : GetPureWeaponSkillValue(attType));
-	if(skilldif <= 0)
+    if(skilldif <= 0)
         return; 
 
     float chance = 3 * lvldif * skilldif / plevel;
-	if(!defence)
-	{
-	    if(getClass() == WARRIOR || getClass() == ROGUE)
-		    chance *= 0.1 * GetStat(STAT_INTELLECT);
+    if(!defence)
+    {
+        if(getClass() == WARRIOR || getClass() == ROGUE)
+            chance *= 0.1 * GetStat(STAT_INTELLECT);
     }
 
     chance = chance < 1 ? 1 : chance;                   //minimum chance to increase skill is 1%
-		
-	if(chance > urand(0,100))
-	{
-	    if(defence)
+        
+    if(chance > urand(0,100))
+    {
+        if(defence)
             UpdateDefense();
         else
-		    UpdateWeaponSkill(attType);
-		}
+            UpdateWeaponSkill(attType);
+        }
     else 
-	    return;
+        return;
 }
 
 void Player::ModifySkillBonus(uint32 skillid,int32 val)

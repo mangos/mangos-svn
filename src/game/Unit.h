@@ -410,7 +410,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK);
         int32 SpellMissChanceCalc(Unit *pVictim) const;
-		int32 MeleeMissChanceCalc(const Unit *pVictim) const;
+        int32 MeleeMissChanceCalc(const Unit *pVictim) const;
 
         float GetUnitDodgeChance()    const;
         float GetUnitParryChance()    const;
@@ -420,9 +420,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual uint32 GetBlockValue() const =0;
         uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
         uint16 GetDefenceSkillValue() const;
-		uint16 GetPureDefenceSkillValue() const;
+        uint16 GetPureDefenceSkillValue() const;
         uint16 GetWeaponSkillValue(WeaponAttackType attType) const;
-		uint16 GetPureWeaponSkillValue(WeaponAttackType attType) const;
+        uint16 GetPureWeaponSkillValue(WeaponAttackType attType) const;
         uint32 GetWeaponProcChance() const;
         MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const;
 
