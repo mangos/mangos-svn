@@ -69,6 +69,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
     uint32 team = _player->GetTeam();
     uint32 security = GetSecurity();
+    bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
 
     data.Initialize( SMSG_WHO );
     data << uint32( 0 );                                    // clientcount place holder
@@ -79,7 +80,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     {
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-        if ( itr->second->GetName() && ( security > 0 || itr->second->GetTeam() == team && itr->second->GetSession()->GetSecurity() == 0 ) )
+        if ( itr->second->GetName() && ( security > 0 || ( itr->second->GetTeam() == team || allowTwoSideWhoList ) && itr->second->GetSession()->GetSecurity() == 0 ) )
         {
             clientcount++;
 

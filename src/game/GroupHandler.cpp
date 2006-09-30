@@ -50,7 +50,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 1)
+    if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
     {
         uint32 sidea = GetPlayer()->GetTeam();
         uint32 sideb = player->GetTeam();

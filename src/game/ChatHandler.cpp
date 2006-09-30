@@ -42,7 +42,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     recv_data >> lang;
     sLog.outDebug("CHAT: packet received. type %u, lang %u", type, lang );
 
-    if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 0)
+    if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
         lang = LANG_UNIVERSAL;
 
     switch(type)
@@ -150,7 +150,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 sChatHandler.SendSysMessage(this ,msg_err.c_str() );
                 break;
             }
-            if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 1 && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
+            if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
             {
                 uint32 sidea = GetPlayer()->GetTeam();
                 uint32 sideb = player->GetTeam();

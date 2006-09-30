@@ -82,7 +82,7 @@ class HordeChannelMgr    : public ChannelMgr {};
 
 inline ChannelMgr* channelMgr(uint32 team)
 {
-    if (sWorld.getConfig(CONFIG_SEPARATE_FACTION) == 0)
+    if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
                                                             //For Test,No Seprate Faction
         return &MaNGOS::Singleton<AllianceChannelMgr>::Instance();
 

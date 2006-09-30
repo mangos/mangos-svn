@@ -7,16 +7,6 @@ RealmID = 1
 # 0 NORMAL 1 PVP 4 NORMAL 6 RP 8 RPPVP
 GameType = 1
 
-# Is SeparateFaction in :chat(say,yell);channel(chat)group(join);
-#		0 (false)
-#Default:	1 (true) 
-SeparateFaction = 1
-
-# Allow or not accounts to create characters in the 2 teams in any game type.
-# Defaullt: 0 (Not allowed)
-#           1 (Allowed)
-AllowTwoSideAccounts = 0
-
 # Data directory setting.
 # Important: DataDir needs to be quoted, as it is a string which may
 # contain space characters.
@@ -85,6 +75,29 @@ MaxPlayerLevel = 60
 # Default: 2
 # Max : 9 
 MaxPrimaryTradeSkill = 2 
+
+# Max distance to creature for group memeber to get XP at creature death.
+# Default: 74
+MaxGroupXPDistance = 74
+
+# Max level different with creature for group member to get XP at creature death.
+# Default: 10
+MaxGroupXPLevelDiff = 10
+
+# Allow or not accounts to create characters in the 2 teams in any game type.
+# Defaullt: 0 (Not allowed)
+#           1 (Allowed)
+AllowTwoSide.Accounts = 0
+
+# Allow or not common :chat(say,yell);channel(chat)group(join);trade for players from different teams.
+# Defaullt: 0 (Not allowed)
+#           1 (Allowed)
+AllowTwoSide.Interaction = 0
+
+# Allow or not show player from both team in who list.
+# Defaullt: 0 (Not allowed)
+#           1 (Allowed)
+AllowTwoSide.WhoList = 0
 
 # Is GM accept whispers from player by default.
 # Default: 0 (false)
