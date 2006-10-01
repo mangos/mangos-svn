@@ -1330,8 +1330,8 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 // Current player expirience not update (must be update by caller)
 void Player::GiveLevel()
 {
-    uint32 MPGain,HPGain,STRGain,STAGain,AGIGain,INTGain,SPIGain;
-    MPGain=HPGain=STRGain=STAGain=AGIGain=INTGain=SPIGain=0;
+    uint32 MPGain,HPGain;
+    MPGain=HPGain=0;
 
     uint32 level = getLevel();
 
@@ -1346,24 +1346,26 @@ void Player::GiveLevel()
     float newMP  = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : GetMaxPower(POWER_MANA);
 
     float newHP  = GetMaxHealth();
-    float newSTR = GetStat(STAT_STRENGTH);
-    float newSTA = GetStat(STAT_STAMINA);
-    float newAGI = GetStat(STAT_AGILITY);
-    float newINT = GetStat(STAT_INTELLECT);
-    float newSPI = GetStat(STAT_SPIRIT);
+
+    float newStats[MAX_STATS];
+
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        newStats[i] = GetStat(Stats(i));
+
+    uint32 gainStats[MAX_STATS];
+
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        gainStats[i] = 0;
 
     // Gain stats
-    BuildLvlUpStats(&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
+    BuildLvlUpStats(&gainStats);
 
     // Apply gain stats
-    newSTR += STRGain;
-    newSTA += STAGain;
-    newAGI += AGIGain;
-    newINT += INTGain;
-    newSPI += SPIGain;
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        newStats[i] += gainStats[i];
 
-    MPGain = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : uint32(newSPI / 2);
-    HPGain = uint32(newSTA / 2);
+    MPGain = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : uint32(newStats[STAT_SPIRIT] / 2);
+    HPGain = uint32(newStats[STAT_STAMINA] / 2);
 
     newMP  += MPGain;
     newHP  += HPGain;
@@ -1387,11 +1389,8 @@ void Player::GiveLevel()
     SetHealth(   uint32(newHP));                            // only integer part
     SetMaxHealth(uint32(newHP));                            // only integer part
 
-    SetStat(STAT_STRENGTH, uint32(newSTR));                 // only integer part
-    SetStat(STAT_STAMINA,  uint32(newSTA));                 // only integer part
-    SetStat(STAT_AGILITY,  uint32(newAGI));                 // only integer part
-    SetStat(STAT_INTELLECT,uint32(newINT));                 // only integer part
-    SetStat(STAT_SPIRIT,   uint32(newSPI));                 // only integer part
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        SetStat(Stats(i), uint32(newStats[i]));              // only integer part
 
     // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
     UpdateBlockPercentage(0,1);
@@ -1412,11 +1411,8 @@ void Player::GiveLevel()
     data << uint32(0);
     data << uint32(0);
 
-    data << uint32(STRGain);
-    data << uint32(STAGain);
-    data << uint32(AGIGain);
-    data << uint32(INTGain);
-    data << uint32(SPIGain);
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        data << uint32(gainStats[i]);
 
     WPAssert(data.size() == 48);
     GetSession()->SendPacket(&data);
@@ -1425,7 +1421,7 @@ void Player::GiveLevel()
     m_Played_time[1] = 0;
 }
 
-void Player::BuildLvlUpStats(uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI)
+void Player::BuildLvlUpStats(uint32 (*gainStats)[MAX_STATS])
 {
     uint8 _class = getClass();
     uint8 lvl    = getLevel();
@@ -1433,78 +1429,75 @@ void Player::BuildLvlUpStats(uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uin
 
     if (lvl < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
-        *STR += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_STRENGTH);
-        *AGI += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_AGILITY);
-        *STA += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_STAMINA);
-        *INT += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_INTELLECT);
-        *SPI += objmgr.GetLevelUpStatGain(_class,race,lvl,STAT_SPIRIT);
+        for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+            (*gainStats)[i] += objmgr.GetLevelUpStatGain(_class,race,lvl,Stats(i));
     }
     else
     {
         switch(_class)
         {
             case WARRIOR:
-                *STR += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
-                *STA += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
-                *AGI += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
-                *INT += (lvl > 9 && !(lvl%2) ? 1: 0);
-                *SPI += (lvl > 9 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+                (*gainStats)[STAT_STAMINA]   += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+                (*gainStats)[STAT_AGILITY]   += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+                (*gainStats)[STAT_INTELLECT] += (lvl > 9 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 9 && !(lvl%2) ? 1: 0);
                 break;
             case PALADIN:
-                *STR += (lvl > 3  ? 1: 0);
-                *STA += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
-                *AGI += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
-                *INT += (lvl > 6 && (lvl%2) ? 1: 0);
-                *SPI += (lvl > 7 ? 1: 0);
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 3  ? 1: 0);
+                (*gainStats)[STAT_STAMINA]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+                (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
+                (*gainStats)[STAT_INTELLECT] += (lvl > 6 && (lvl%2) ? 1: 0);
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 7 ? 1: 0);
                 break;
             case HUNTER:
-                *STR += (lvl > 4  ? 1: 0);
-                *STA += (lvl > 4  ? 1: 0);
-                *AGI += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
-                *INT += (lvl > 8 && (lvl%2) ? 1: 0);
-                *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 4  ? 1: 0);
+                (*gainStats)[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
+                (*gainStats)[STAT_AGILITY]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+                (*gainStats)[STAT_INTELLECT] += (lvl > 8 && (lvl%2) ? 1: 0);
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
                 break;
             case ROGUE:
-                *STR += (lvl > 5  ? 1: 0);
-                *STA += (lvl > 4  ? 1: 0);
-                *AGI += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
-                *INT += (lvl > 8 && !(lvl%2) ? 1: 0);
-                *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 5  ? 1: 0);
+                (*gainStats)[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
+                (*gainStats)[STAT_AGILITY]   += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
+                (*gainStats)[STAT_INTELLECT] += (lvl > 8 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
                 break;
             case PRIEST:
-                *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
-                *STA += (lvl > 5  ? 1: 0);
-                *AGI += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
-                *INT += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
-                *SPI += (lvl > 3  ? 1: 0);
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
+                (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
+                (*gainStats)[STAT_INTELLECT] += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 3  ? 1: 0);
                 break;
             case SHAMAN:
-                *STR += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
-                *STA += (lvl > 4 ? 1: 0);
-                *AGI += (lvl > 7 && !(lvl%2) ? 1: 0);
-                *INT += (lvl > 5 ? 1: 0);
-                *SPI += (lvl > 4 ? 1: 0);
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+                (*gainStats)[STAT_STAMINA]   += (lvl > 4 ? 1: 0);
+                (*gainStats)[STAT_AGILITY]   += (lvl > 7 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_INTELLECT] += (lvl > 5 ? 1: 0);
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 4 ? 1: 0);
                 break;
             case MAGE:
-                *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
-                *STA += (lvl > 5  ? 1: 0);
-                *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
-                *INT += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
-                *SPI += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
+                (*gainStats)[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_INTELLECT] += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
                 break;
             case WARLOCK:
-                *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
-                *STA += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
-                *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
-                *INT += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
-                *SPI += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_STAMINA]   += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+                (*gainStats)[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
+                (*gainStats)[STAT_INTELLECT] += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
                 break;
             case DRUID:
-                *STR += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
-                *STA += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
-                *AGI += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
-                *INT += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
-                *SPI += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
+                (*gainStats)[STAT_STRENGTH]  += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
+                (*gainStats)[STAT_STAMINA]   += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
+                (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
+                (*gainStats)[STAT_INTELLECT] += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
+                (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
         }
     }
 }
