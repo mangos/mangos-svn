@@ -132,6 +132,7 @@ enum ITEM_SUBCLASS_CONSUMABLE
     ITEM_SUBCLASS_POTION                  = 3,
     ITEM_SUBCLASS_SCROLL                  = 4,
     ITEM_SUBCLASS_BANDAGE                 = 5,
+    ITEM_SUBCLASS_HEALSTONE               = 6,
 };
 
 enum ITEM_SUBCLASS_CONTAINER
