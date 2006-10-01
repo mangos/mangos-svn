@@ -190,6 +190,9 @@ namespace MaNGOS
 
         inline uint32 Gain(Player *pl, Unit *u)
         {
+            if(u->GetTypeId()==TYPEID_UNIT && ((Creature*)u)->isTotem())
+                return 0;
+
             uint32 xp_gain= BaseGain(pl->getLevel(), u->getLevel());
             if( xp_gain == 0 )
                 return 0;
