@@ -102,6 +102,7 @@ CREATE TABLE `realmlist` (
   `id` int(11) unsigned NOT NULL auto_increment,
   `name` varchar(32) NOT NULL default '',
   `address` varchar(32) NOT NULL default '127.0.0.1',
+  `port` int(11) NOT NULL default '8085',
   `icon` tinyint(3) unsigned NOT NULL default '0',
   `color` tinyint(3) unsigned NOT NULL default '0',
   `timezone` tinyint(3) unsigned NOT NULL default '0',

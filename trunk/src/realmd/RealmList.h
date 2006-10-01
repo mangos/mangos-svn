@@ -76,7 +76,7 @@ class RealmList
         ~RealmList();
 
                                                             //, const char *dbstring );
-        void AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone);
+        void AddRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone);
         int GetAndAddRealms(std::string dbstring);
         void SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone );
 
