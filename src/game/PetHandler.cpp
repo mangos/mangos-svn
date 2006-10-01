@@ -168,7 +168,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
 void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 {
-    sLog.outDetail( "HandlePetNameQuery.\n" );
+    //sLog.outDetail( "HandlePetNameQuery.\n" );
     uint32 petnumber;
     uint64 guid;
 
