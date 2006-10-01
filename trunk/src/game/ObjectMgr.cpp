@@ -369,11 +369,10 @@ void ObjectMgr::LoadLvlUpGains()
     {
         barGoLink bar( 1 );
 
-        bar.step();
-
         sLog.outString( "" );
         sLog.outString( ">> Loaded %u levelup definitions", count );
-        return;
+        sLog.outError( "Error loading player_levelupgains table or table empty.");
+        exit(1);
     }
 
     barGoLink bar( result->GetRowCount() );
