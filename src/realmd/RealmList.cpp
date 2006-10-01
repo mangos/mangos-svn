@@ -42,15 +42,14 @@ RealmList::~RealmList( )
 int RealmList::GetAndAddRealms(std::string dbstring)
 {
     int count = 0;
-    //QueryResult *result = dbRealmServer.PQuery( "SELECT `name`,`address`,`icon`,`color`,`timezone`, `dbstring` FROM `realmlist` ORDER BY `name`" );
-    QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`" );
+    QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`port`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`" );
     if(result)
     {
         do
         {
             Field *fields = result->Fetch();
                                                             //, fields[5].GetString());
-            AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt8(), fields[4].GetUInt8(), fields[5].GetUInt8());
+            AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8());
             count++;
         } while( result->NextRow() );
         delete result;
@@ -65,7 +64,7 @@ int RealmList::GetAndAddRealms(std::string dbstring)
 }
 
                                                             //, const char *dbstring )
-void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone)
+void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone)
 {
     if( _realms.find( name ) == _realms.end() )
     {
@@ -89,7 +88,7 @@ void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint
         if( addr.find(':', 0) == std::string::npos )
         {
             std::ostringstream ss;
-            ss << addr << ":" << DEFAULT_WORLDSERVER_PORT;
+            ss << addr << ":" << port;
             addr = ss.str();
         }
         newRealm->address = addr;
