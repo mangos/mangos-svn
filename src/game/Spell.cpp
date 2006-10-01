@@ -1889,7 +1889,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     if(!Target || Target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(m_spellInfo->Id == 8690 )
+    if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556 )
     {
         Field *fields;
         QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
