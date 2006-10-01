@@ -112,15 +112,19 @@ class DBCStorage
             }
             delete dbc;
 
+            // error in dbc file at loading
+            if(!data)
+                res = false;
+
             return res;
         }
 
         T** data;
         uint32 nCount;
+        const char * fmt;
 
     private:
         DBCFile * dbc;
-        const char * fmt;
 };
 
 extern DBCStorage <AreaTableEntry>           sAreaStore;
