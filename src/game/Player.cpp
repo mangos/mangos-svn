@@ -6726,6 +6726,7 @@ Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update )
     {
         ItemPrototype const *pProto = pItem->GetProto();
         ItemAdded( item, count );
+        pItem->SetItemRandomProperties();
         return StoreItem( pos, pItem, update );
     }
     return NULL;

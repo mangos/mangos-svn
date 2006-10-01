@@ -155,6 +155,7 @@ class MANGOS_DLL_SPEC Item : public Object
 
         uint32 GetSkill();
         uint32 GetSpell();
+        void SetItemRandomProperties();
     private:
         uint32 m_slot;
 };

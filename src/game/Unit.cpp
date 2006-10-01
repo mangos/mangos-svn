@@ -957,7 +957,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         else
         {
             sLog.outDetail("Spell Canceled!");
-            if( pVictim->m_currentSpell->m_spellInfo->Id == 1515 )
+            if( pVictim->m_currentSpell->m_spellInfo->Id == 1515 || pVictim->m_currentSpell->m_spellInfo->Id == 19674)
             {
                 // Fix me: channel should be controled by channel interruption flag,
                 // this should be delete when that is ok.
