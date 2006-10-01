@@ -7629,7 +7629,7 @@ void Player::LoadEnchant()
         pItem = GetItemByPos( pos );
         if(!pItem)
             continue;
-        if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+        if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
             continue;
         for(int x=0;x<7;x++)
         {
@@ -7657,7 +7657,7 @@ void Player::LoadEnchant()
                     pItem = GetItemByPos( pos );
                     if(!pItem)
                         continue;
-                    if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+                    if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
                         continue;
                     for(int x=0;x<7;x++)
                     {
@@ -7686,7 +7686,7 @@ void Player::LoadEnchant()
                     pItem = GetItemByPos( pos );
                     if(!pItem)
                         continue;
-                    if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+                    if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
                         continue;
                     for(int x=0;x<7;x++)
                     {
