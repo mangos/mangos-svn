@@ -85,12 +85,10 @@ void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint
         //        {
         std::string addr(address);
 
-        if( addr.find(':', 0) == std::string::npos )
-        {
-            std::ostringstream ss;
-            ss << addr << ":" << port;
-            addr = ss.str();
-        }
+        std::ostringstream ss;
+        ss << addr << ":" << port;
+        addr = ss.str();
+
         newRealm->address = addr;
         _realms[name] = newRealm;
         sLog.outString("Added realm \"%s\".", newRealm->name.c_str());
