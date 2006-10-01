@@ -1812,7 +1812,7 @@ void Spell::EffectFeedPet(uint32 i)
     SpellEntry *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     Spell _spell(m_caster, spellinfo, true, 0);
     SpellCastTargets targets;
-    targets.setUnitTarget(pet);
+    targets.setUnitTarget(m_caster);
     _spell.prepare(&targets);
 }
 

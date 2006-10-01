@@ -210,8 +210,8 @@ struct FactionTemplateEntry
 struct ItemDisplayTemplateEntry
 {
     uint32      ID;
-    uint32      seed;
-    uint32      randomPropertyID;
+    uint32      randomPropertyChance;
+    uint32      unknown;
 };
 
 struct SpellItemEnchantment
