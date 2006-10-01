@@ -49,7 +49,7 @@ class Group
         void AddMember(uint64 guid, const char* name)
         {
 
-            if (m_count < MAXGROUPSIZE-1)
+            if (m_count < MAXGROUPSIZE)
             {
                 m_members[m_count].guid = guid;
                 m_members[m_count].name = name;
