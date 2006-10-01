@@ -1715,9 +1715,11 @@ uint8 Spell::CheckItems()
     {
         if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass > 0)
         {
-            if(!(itemTarget->GetProto()->Class & m_spellInfo->EquippedItemClass))
+            // filter by equiped class (weapon or armor) - raw class value
+            if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
                 return CAST_FAIL_ITEM_NOT_READY;
-            else if(!(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
+            // filter by equiped subclass - bitmask of subclasses
+            if((( 1 << itemTarget->GetProto()->SubClass ) & m_spellInfo->EquippedItemSubClass) == 0 )
                 return CAST_FAIL_ITEM_NOT_READY;
         }
     }
@@ -1814,7 +1816,7 @@ uint8 Spell::CheckItems()
                 uint32 item_quality = itemTarget->GetProto()->Quality;
                 if(item_quality > 4 || item_quality < 2)
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
-                if(itemTarget->GetProto()->Class != 2 && itemTarget->GetProto()->Class != 4)
+                if(itemTarget->GetProto()->Class != ITEM_CLASS_WEAPON && itemTarget->GetProto()->Class != ITEM_CLASS_ARMOR)
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
                 break;
             }
