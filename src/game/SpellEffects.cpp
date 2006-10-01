@@ -1060,18 +1060,6 @@ void Spell::EffectTameCreature(uint32 i)
             ((Player*)m_caster)->PetSpellInitialize();
             ((Player*)m_caster)->SavePet();
         }
-        /*
-        // Must added after saved
-        QueryResult *result;
-
-        result = sDatabase.PQuery("SELECT `id` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND `current` = '1'",m_caster->GetGUIDLow(), creatureTarget->GetEntry() );
-        if(result)
-        {
-            Field *fields = result->Fetch();
-            creatureTarget->SetUInt32Value(UNIT_FIELD_PETNUMBER,fields[0].GetUInt32());
-        }
-        delete result;
-        */
     }
 }
 
@@ -1212,6 +1200,7 @@ void Spell::EffectLearnPetSpell(uint32 i)
             break;
         }
     }
+    _player->SavePet();
     _player->PetSpellInitialize();
 }
 

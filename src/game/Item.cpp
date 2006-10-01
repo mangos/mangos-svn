@@ -433,6 +433,22 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4,uint32(itemProto->Spells[4].SpellCharges));
     SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
     //SetUInt32Value(ITEM_FIELD_DURATION, itemProto->Delay); ITEM_FIELD_DURATION is time until item expires, not speed
+    if(itemProto->Quality == 1 || itemProto->Quality == 2)
+    {
+        if(itemProto->Class == 2 || itemProto->Class == 4)
+        {
+            // irand(1,2160) is wrong here,just for test.also wrong define in ItemDisplayTemplateEntry,
+            // we should find out the correct data in DBC
+            ItemRandomProperties *item_rand = sItemRandomPropertiesStore.LookupEntry(irand(1,2160));
+            if(item_rand)
+            {
+                SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
+                SetUInt32Value(ITEM_FIELD_ENCHANTMENT+9,item_rand->enchant_id_1);
+                SetUInt32Value(ITEM_FIELD_ENCHANTMENT+12,item_rand->enchant_id_2);
+                SetUInt32Value(ITEM_FIELD_ENCHANTMENT+15,item_rand->enchant_id_3);
+            }
+        }
+    }
     return true;
 }
 
