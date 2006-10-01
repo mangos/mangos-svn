@@ -52,6 +52,28 @@ DBCStorage <SpellRange> sSpellRange(SpellRangefmt);
 
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 
+typedef std::list<std::string> StoreProblemList;
+
+template<class T>
+inline void LoadDBC(barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& storage, std::string filename)
+{
+    if(storage.Load(filename.c_str()))
+        bar.step();
+    else
+    {
+        // sort problematic dbc to (1) non compatible and (2) non-existed
+        FILE * f=fopen(filename.c_str(),"rb");
+        if(f)
+        {
+            char buf[100];
+            snprintf(buf,100," (exist, but have %d fields instead %d) Wrong client version DBC file?",storage.nCount,strlen(storage.fmt));
+            errlist.push_back(filename + buf);
+            fclose(f);
+        }else
+            errlist.push_back(filename);
+    }
+}
+
 void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
@@ -60,154 +82,41 @@ void LoadDBCStores(std::string dataPath)
 
     barGoLink bar( DBCFilesCount );
 
-    std::list<std::string> not_found_dbc_files;
+    StoreProblemList bad_dbc_files;
 
-    tmpPath=dataPath;
-    tmpPath.append("dbc/AreaTable.dbc");
-    if(sAreaStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/AreaTable.dbc");
+    LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
+    LoadDBC(bar,bad_dbc_files,sCreatureFamilyStore,      dataPath+"dbc/CreatureFamily.dbc");
+    LoadDBC(bar,bad_dbc_files,sEmoteStore,               dataPath+"dbc/EmotesText.dbc");
+    LoadDBC(bar,bad_dbc_files,sFactionStore,             dataPath+"dbc/Faction.dbc");
+    LoadDBC(bar,bad_dbc_files,sFactionTemplateStore,     dataPath+"dbc/FactionTemplate.dbc");
+    LoadDBC(bar,bad_dbc_files,sItemDisplayTemplateStore, dataPath+"dbc/ItemDisplayInfo.dbc");
+    LoadDBC(bar,bad_dbc_files,sItemRandomPropertiesStore,dataPath+"dbc/ItemRandomProperties.dbc");
+    LoadDBC(bar,bad_dbc_files,sItemSetStore,             dataPath+"dbc/ItemSet.dbc");
+    LoadDBC(bar,bad_dbc_files,sLockStore,                dataPath+"dbc/Lock.dbc");
+    LoadDBC(bar,bad_dbc_files,sSkillLineStore,           dataPath+"dbc/SkillLine.dbc");
+    LoadDBC(bar,bad_dbc_files,sSkillLineAbilityStore,    dataPath+"dbc/SkillLineAbility.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellStore,               dataPath+"dbc/Spell.dbc");
+    LoadDBC(bar,bad_dbc_files,sCastTime,                 dataPath+"dbc/SpellCastTimes.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellDuration,            dataPath+"dbc/SpellDuration.dbc");
+    //LoadDBC(bar,bad_dbc_files,sSpellFocusObject,         dataPath+"dbc/SpellFocusObject.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellItemEnchantmentStore,dataPath+"dbc/SpellItemEnchantment.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellRadius,              dataPath+"dbc/SpellRadius.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellRange,               dataPath+"dbc/SpellRange.dbc");
+    LoadDBC(bar,bad_dbc_files,sTalentStore,              dataPath+"dbc/Talent.dbc");
 
-    tmpPath=dataPath;
-    tmpPath.append("dbc/CreatureFamily.dbc");
-    if(sCreatureFamilyStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/CreatureFamily.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/EmotesText.dbc");
-    if(sEmoteStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/EmotesText.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/Faction.dbc");
-    if(sFactionStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/Faction.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/FactionTemplate.dbc");
-    if(sFactionTemplateStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/FactionTemplate.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/ItemDisplayInfo.dbc");
-    if(sItemDisplayTemplateStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/ItemDisplayInfo.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/ItemRandomProperties.dbc");
-    if(sItemRandomPropertiesStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/ItemRandomProperties.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/ItemSet.dbc");
-    if(sItemSetStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/ItemSet.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/Lock.dbc");
-    if(sLockStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/Lock.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SkillLine.dbc");
-    if(sSkillLineStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SkillLine.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SkillLineAbility.dbc");
-    if(sSkillLineAbilityStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SkillLineAbility.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/Spell.dbc");
-    if(sSpellStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/Spell.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellCastTimes.dbc");
-    if(sCastTime.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellCastTimes.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellDuration.dbc");
-    if(sSpellDuration.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellDuration.dbc");
-
-    /*tmpPath=dataPath;
-    tmpPath.append("dbc/SpellFocusObject.dbc");
-    if(sSpellFocusObject.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellFocusObject.dbc");*/
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellItemEnchantment.dbc");
-    if(sSpellItemEnchantmentStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellItemEnchantment.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellRadius.dbc");
-    if(sSpellRadius.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellRadius.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellRange.dbc");
-    if(sSpellRange.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellRange.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/Talent.dbc");
-    if(sTalentStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/Talent.dbc");
-
-    if(not_found_dbc_files.size() >= DBCFilesCount )
+    if(bad_dbc_files.size() >= DBCFilesCount )
     {
-        sLog.outError("Incorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
+        sLog.outError("\nIncorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
         exit(1);
     }
-    else if(not_found_dbc_files.size() > 0 )
+    else if(bad_dbc_files.size() > 0 )
     {
 
         std::string str;
-        for(std::list<std::string>::iterator i = not_found_dbc_files.begin(); i != not_found_dbc_files.end(); ++i)
-            str += dataPath + *i + "\n";
+        for(std::list<std::string>::iterator i = bad_dbc_files.begin(); i != bad_dbc_files.end(); ++i)
+            str += *i + "\n";
 
-        sLog.outError("Some required *.dbc files (%u from %d) not found:\n%s",not_found_dbc_files.size(),DBCFilesCount,str.c_str());
+        sLog.outError("\nSome required *.dbc files (%u from %d) not found or not compatible:\n%s",bad_dbc_files.size(),DBCFilesCount,str.c_str());
         exit(1);
     }
 

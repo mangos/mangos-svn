@@ -92,10 +92,8 @@ void * DBCFile::AutoProduceData(const char * format,uint32 * records)
     uint32 offset=0;
 
     if(strlen(format)!=fieldCount)
-    {
-        printf("Error, probably dbc file format was updated (%d fields are in DBC).\n",fieldCount);
         return NULL;
-    }
+
     //get struct size
     for(uint32 x=0;x<fieldCount;x++)
         switch(format[x])

@@ -98,13 +98,13 @@ void Weather::ReGenerate()
     // 30% - weather worsens
     // 30% - weather gets better
     // 10% - radical change
-    int u = uint32((double)rand() / (RAND_MAX + 1) * (100));
+    uint32 u = uint32((double)rand() / (RAND_MAX + 1) * (100));
 
     if (u < 30)
         return;
 
     m_grade = (float)rand() / (float)RAND_MAX;
-    uint32 gtime = sWorld.GetGameTime();
+    time_t gtime = sWorld.GetGameTime();
     uint32 season = (gtime / (91 * 360)) % 4;
     char seasonName[7];
     switch (season)
@@ -204,16 +204,16 @@ void Weather::ReGenerate()
 
     if (u < 90)
     {
-        m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000;
+        m_grade = (double)rand() / (RAND_MAX + 1) * 0.3333;
     }
     else
     {
                                                             // Severe change, but how severe?
-        rnd = uint32((double)rand() / (RAND_MAX + 1) * (100));
+        rnd = uint32((double)rand() / (RAND_MAX + 1) * 100);
         if (rnd < 50)
-            m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000 + 0.3334;
+            m_grade = (double)rand() / (RAND_MAX + 1) * 0.3333 + 0.3334;
         else
-            m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000 + 0.6667;
+            m_grade = (double)rand() / (RAND_MAX + 1) * 0.3333 + 0.6667;
     }
 
     UpdateWeather();
