@@ -158,6 +158,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     }
 
     m_timer = casttime<0?0:casttime;
+    m_delayedTime = 0;
 
     m_meleeSpell = false;
 
@@ -503,6 +504,7 @@ void Spell::prepare(SpellCastTargets * targets)
     m_castPositionX = m_caster->GetPositionX();
     m_castPositionY = m_caster->GetPositionY();
     m_castPositionZ = m_caster->GetPositionZ();
+    m_castOrientation = m_caster->GetOrientation();
 
     result = CanCast();
     if(result != 0)
@@ -548,6 +550,8 @@ void Spell::cancel()
                 if (*iunit) (*iunit)->RemoveAurasDueToSpell(m_spellInfo->Id);
         m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
         SendChannelUpdate(0);
+        SendInterrupted(0);
+        SendCastResult(CAST_FAIL_INTERRUPTED);
     }
 
     finish();
@@ -777,7 +781,7 @@ void Spell::update(uint32 difftime)
         // always cancel for channeled spells
         if( m_spellState == SPELL_STATE_CASTING )
             cancel();
-        // don't cancel for instant and melees pells
+        // don't cancel for instant and melee spells
         else if(!m_meleeSpell && casttime != 0)
             cancel();
     }
@@ -801,9 +805,23 @@ void Spell::update(uint32 difftime)
         {
             if(m_timer > 0)
             {
-                // TODO:Fix me
-                // If m_spellInfo->ChannelInterruptFlags & m_caster->m_channelInterruptFlag,stop the channel;
-                // else channel can't be stoped,and can't attack the target when being attacked.
+                if( m_caster->GetTypeId() == TYPEID_PLAYER )
+                {
+                    // check if player has jumped before the channeling finished
+                    if( ((Player*)m_caster)->HasMovementFlags(MOVEMENT_JUMPING) )
+                        cancel();
+
+                    // check for incapacitating player states
+                    if( m_caster->hasUnitState(UNIT_STAT_STUNDED) ||
+                        m_caster->hasUnitState(UNIT_STAT_ROOT) ||
+                        m_caster->hasUnitState(UNIT_STAT_CONFUSED) )
+                        cancel();
+
+                    // check if player has turned if flag is set
+                    if( m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && m_castOrientation != m_caster->GetOrientation() )
+                        cancel();
+                }
+
                 if(difftime >= m_timer)
                     m_timer = 0;
                 else
@@ -1935,6 +1953,38 @@ void Spell::Delayed(int32 delaytime)
     data << uint32(delaytime);
 
     ((Player*)m_caster)->GetSession()->SendPacket(&data);
+}
+
+void Spell::DelayedChannel(int32 delaytime)
+{
+    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER || getState() != SPELL_STATE_CASTING)
+        return;
+
+    m_timer += delaytime;
+    uint32 appliedDelayTime = delaytime;
+    uint32 duration = GetDuration(m_spellInfo);
+
+    if(m_timer > duration)
+    {
+        appliedDelayTime -= (m_timer - duration);
+        m_timer = duration;
+    }
+
+    m_delayedTime += appliedDelayTime;
+
+    // Cancel spell if aggregate channeling delay is greater than base channeling duration
+    if(m_delayedTime >= duration)
+        cancel();
+
+    // FIX ME: find correct way to delay channeling
+    /*WorldPacket data;
+
+    data.Initialize(SMSG_SPELL_DELAYED);
+    data << m_caster->GetGUID();
+    data << appliedDelayTime;
+
+    ((Player*)m_caster)->GetSession()->SendPacket(&data);*/
+    SendChannelUpdate(m_timer);
 }
 
 void Spell::reflect(Unit *refunit)

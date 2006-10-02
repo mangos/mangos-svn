@@ -442,6 +442,22 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 }
             }
         }
+
+        if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && damage
+            && pVictim->m_currentSpell->getState() == SPELL_STATE_CASTING)
+        {
+            uint32 channelInterruptFlags = pVictim->m_currentSpell->m_spellInfo->ChannelInterruptFlags;
+            if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
+            {
+                sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpell->m_spellInfo->Id,(int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
+                pVictim->m_currentSpell->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
+            }
+            else if( (channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
+            {
+                sLog.outDetail("Spell %u canceled at damage!",pVictim->m_currentSpell->m_spellInfo->Id);
+                pVictim->m_currentSpell->cancel();
+            }
+        }
     }
 
     DEBUG_LOG("DealDamageEnd");
@@ -956,17 +972,17 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         }
         else
         {
-            sLog.outDetail("Spell Canceled!");
-            if( pVictim->m_currentSpell->m_spellInfo->Id == 1515 || pVictim->m_currentSpell->m_spellInfo->Id == 19674)
+            uint32 channelInterruptFlags = pVictim->m_currentSpell->m_spellInfo->ChannelInterruptFlags;
+            if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
             {
-                // Fix me: channel should be controled by channel interruption flag,
-                // this should be delete when that is ok.
-                if(outcome != MELEE_HIT_CRIT && !pVictim->hasUnitState(UNIT_STAT_STUNDED))
-                    return;
-                // give him a chance,sometimes crit is so frequently.
-                if(rand()%100 > 50)
-                    return;
+                sLog.outDetail("Spell Delayed!%d",(int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
+                pVictim->m_currentSpell->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
+                return;
             }
+            else if( !(channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
+                return;
+
+            sLog.outDetail("Spell Canceled!");
             pVictim->m_currentSpell->cancel();
         }
     }

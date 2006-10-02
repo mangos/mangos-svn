@@ -80,6 +80,14 @@ enum SpellCastFlags
     CAST_FLAG_AMMO               = 0x20
 };
 
+enum SpellChannelInterruptFlags
+{
+    CHANNEL_FLAG_DAMAGE      = 0x0002,
+    CHANNEL_FLAG_TURNING     = 0x0010,
+    CHANNEL_FLAG_DAMAGE2     = 0x0080,
+    CHANNEL_FLAG_DELAY       = 0x4000
+};
+
 enum SpellNotifyPushType
 {
     PUSH_IN_FRONT   = 0,
@@ -445,6 +453,7 @@ class Spell
         uint32 CalculateDamage(uint8 i);
         void HandleTeleport(uint32 id, Unit* Target);
         void Delayed(int32 delaytime);
+        void DelayedChannel(int32 delaytime);
         void reflect(Unit *refunit);
         inline uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
@@ -508,11 +517,13 @@ class Spell
 
         uint32 m_spellState;
         uint32 m_timer;
+        uint32 m_delayedTime;
         SpellEntry * m_TriggerSpell;
 
         float m_castPositionX;
         float m_castPositionY;
         float m_castPositionZ;
+        float m_castOrientation;
         bool m_Istriggeredpell;
         Aura* m_triggeredByAura;
         //bool m_AreaAura;
