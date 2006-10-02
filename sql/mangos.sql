@@ -116,7 +116,7 @@ CREATE TABLE `areatrigger_template` (
   `trigger_postion_x` FLOAT NOT NULL DEFAULT '0', 
   `trigger_position_y` FLOAT NOT NULL DEFAULT '0', 
   `trigger_position_z` FLOAT NOT NULL DEFAULT '0', 
-  `target_map` int(11) unsigned NOT NULL DEFAULT '0'; 
+  `target_map` int(11) unsigned NOT NULL DEFAULT '0',
   `target_position_x` float NOT NULL default '0',
   `target_position_y` float NOT NULL default '0',
   `target_position_z` float NOT NULL default '0',
