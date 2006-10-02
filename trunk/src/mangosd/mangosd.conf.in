@@ -40,6 +40,9 @@ LogWorld = 1
 #          "13 7 11 9" - for example :)
 LogColors = ""
 
+# Log file of gm commands
+# Default: "" (Disable)
+GmLogFile = ""
 
 # Used processors mask for multi-processors system (Used only at Windows)
 # Default: 0 (selected by OS)
