@@ -362,11 +362,37 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     uint32 newZone;
     WPAssert(GetPlayer());
 
-    // if player is resting stop resting
-    GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+  // if player is resting stop resting
+    if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
+    {
+     if(GetPlayer()->GetRestType()==2) //rest in city
+     {
+      //speed collect rest bonus (section/in hour)
+      float bubble=1;//0% Blizzlike
+      GetPlayer()->SetRestBonus( GetPlayer()->GetRestBonus()+ (time(NULL)-GetPlayer()->GetTimeInnEter())*0.0142108*bubble );
+      if(GetPlayer()->GetRestBonus()>1534)GetPlayer()->SetRestBonus(1534);
+      GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+     }
+    }
+
 
     recv_data >> newZone;
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
+     switch(newZone)
+    {
+        case 1497:
+        case 1519:
+        case 1537:
+        case 1637:
+        case 1638:
+        case 1657:
+        {
+            GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+            GetPlayer()->SetRestType(2);
+            GetPlayer()->InnEnter(time(NULL),0,0,0);
+            break;
+        }
+    }
 
 }
 
@@ -850,12 +876,17 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
 
     QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `areatrigger_tavern` WHERE `id` = '%u'", Trigger_ID);
-    if(!result)
-        result = sDatabase.PQuery("SELECT `name` FROM `areatrigger_city` WHERE `id` = '%u'", Trigger_ID);
     if(result)
     {
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-        delete result;
+        result = sDatabase.PQuery("SELECT `trigger_map`,`trigger_postion_x`,`trigger_position_y`,`trigger_position_z` FROM `areatrigger_template` WHERE `id` = '%u'", Trigger_ID);
+        if(result)
+        {
+            Field *fields = result->Fetch();
+            GetPlayer()->InnEnter(time(NULL),fields[1].GetFloat(),fields[2].GetFloat(),fields[3].GetFloat());
+            GetPlayer()->SetRestType(1);
+            delete result;
+        }
     }
     else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
     {

@@ -804,8 +804,17 @@ void Player::Update( uint32 p_time )
 
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if(m_restTime < 3*GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/2)
-            m_restTime += p_time;
+
+        if(GetRestType()==1) //rest in tavern
+        {
+	    if(sqrt((GetPositionX()-GetInnPosX())*(GetPositionX()-GetInnPosX())+(GetPositionY()-GetInnPosY())*(GetPositionY()-GetInnPosY())+(GetPositionZ()-GetInnPosZ())*(GetPositionZ()-GetInnPosZ()))>40)
+	{
+	//speed collect rest bonus (section/in hour)
+	float bubble=1;//0% Blizzlike
+	if(GetTimeInnEter()>0)SetRestBonus( GetRestBonus()+ (time(NULL)-GetTimeInnEter())*0.0142108*bubble );
+	RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+	}
+        }
     }
 
     if(m_regenTimer > 0)
@@ -4433,16 +4442,30 @@ void Player::AddWeather()
 
 uint32 Player::ApplyRestBonus(uint32 xp)
 {
-    uint32 bonus = m_restTime / 1000;
-    if(bonus < 1 )
-        bonus = 1;
-    if(bonus > 3 )
-        bonus = 3;
-    if(m_restTime < bonus * 1000)
-        m_restTime = 0;
-    else
-        m_restTime -= bonus * 1000;
-    return bonus * xp;
+    float xp_bl = (float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 20; //xp for 1 section
+    float blpoint_bl=0;//rested bonuse for 1 section
+    switch (getLevel())
+    {
+     case 1: {blpoint_bl=50.9;break;}
+     case 2: {blpoint_bl=51.05;break;}
+     case 3: {blpoint_bl=51.1;break;}
+     case 4: {blpoint_bl=51.1;break;}
+     default: {blpoint_bl=51.15;break;}
+    }
+    float rested_xp = (xp_bl/blpoint_bl) * GetRestBonus(); //xp for each rested bonus
+
+    float rest_xp_percent = rested_xp / ((float)xp / 100);        //% rest bonuse from total rest bonus
+    if(rest_xp_percent>100)rest_xp_percent=100;
+
+    sLog.outDetail("XP_GAIN: %f, value1=%f, rest_xp_percent=%f",(float)xp,(xp_bl/blpoint_bl),rest_xp_percent);
+
+    //recived    X  xp (+ Y  Rested Bonus)
+    rested_xp    = (float)xp        + ((float)xp / 100 * rest_xp_percent);
+
+    SetRestBonus( GetRestBonus() - ((xp_bl / blpoint_bl) * rested_xp) );
+
+    sLog.outDetail("Player gain %u xp (+ %u Rested Bonus). Rested bonus=%f",(uint32)rested_xp,(uint32)((float)xp / 100 * rest_xp_percent),GetRestBonus());
+    return (uint32)rested_xp;
 }
 
 uint8 Player::CheckFishingAble() const
@@ -8802,7 +8825,7 @@ bool Player::MinimalLoadFromDB( uint32 guid )
 bool Player::LoadFromDB( uint32 guid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic`,`totaltime`,`leveltime` FROM `character` WHERE `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
         return false;
@@ -8868,6 +8891,16 @@ bool Player::LoadFromDB( uint32 guid )
     m_positionZ = fields[9].GetFloat();
     m_mapId = fields[10].GetUInt32();
     m_orientation = fields[11].GetFloat();
+
+    rest_bonus = fields[20].GetFloat();
+    //speed collect rest bonus in offline, in logaut, far from tavern, city (section/in hour)
+    float bubble=0.0416; //100% Blizzlike
+    //speed collect rest bonus in offline, in logaut, far from tavern, city (section/in hour)
+    float bubble1=0.083; //100% Blizzlike
+    if((int)fields[22].GetUInt32()==1&&(int)fields[21].GetUInt32()>0)
+    SetRestBonus( GetRestBonus() + (time(NULL)-(int)fields[21].GetUInt32())*0.0142108*bubble1);
+    if((int)fields[22].GetUInt32()==0&&(int)fields[21].GetUInt32()>0)
+    SetRestBonus( GetRestBonus() + (time(NULL)-(int)fields[21].GetUInt32())*0.0142108*bubble);
 
     if(!IsPositionValid())
     {
@@ -9231,6 +9264,9 @@ void Player::SaveToDB()
     uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
     uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
 
+   int is_logout_resting=0;//logaut far from tavern\city
+   if(!IsInWorld()&&HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))is_logout_resting=1;//logaut, but in tavern\city
+
     // Set player sit state to standing on save
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
@@ -9255,7 +9291,7 @@ void Player::SaveToDB()
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
-    ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`) VALUES ("
+    ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`) VALUES ("
         << GetGUIDLow() << ", "
         << realmID << ", "
         << GetSession()->GetAccountId() << ", '"
@@ -9298,6 +9334,13 @@ void Player::SaveToDB()
     ss << m_Played_time[0];
     ss << ", ";
     ss << m_Played_time[1];
+
+    ss << ", ";
+    ss << rest_bonus;
+    ss << ", ";
+    ss << time(NULL);
+    ss << ", ";
+    ss << is_logout_resting;
 
     ss << " )";
 
