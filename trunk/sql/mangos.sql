@@ -16,27 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `areatrigger_city`
---
-
-DROP TABLE IF EXISTS `areatrigger_city`;
-CREATE TABLE `areatrigger_city` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `name` text,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
-
---
--- Dumping data for table `areatrigger_city`
---
-
-
-/*!40000 ALTER TABLE `areatrigger_city` DISABLE KEYS */;
-LOCK TABLES `areatrigger_city` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `areatrigger_city` ENABLE KEYS */;
-
---
 -- Table structure for table `areatrigger_graveyard`
 --
 
@@ -132,12 +111,16 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `areatrigger_template`;
 CREATE TABLE `areatrigger_template` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `name` text,
+  `trigger_map` int(11) unsigned NOT NULL DEFAULT '0', 
+  `trigger_postion_x` FLOAT NOT NULL DEFAULT '0', 
+  `trigger_position_y` FLOAT NOT NULL DEFAULT '0', 
+  `trigger_position_z` FLOAT NOT NULL DEFAULT '0', 
+  `target_map` int(11) unsigned NOT NULL DEFAULT '0'; 
   `target_position_x` float NOT NULL default '0',
   `target_position_y` float NOT NULL default '0',
   `target_position_z` float NOT NULL default '0',
   `target_orientation` float NOT NULL default '0',
-  `target_map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  `name` text,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
@@ -246,6 +229,9 @@ CREATE TABLE `character` (
   `cinematic` tinyint(3) unsigned NOT NULL default '0',
   `totaltime` int(11) unsigned NOT NULL default '0',
   `leveltime` int(11) unsigned NOT NULL default '0',
+  `logout_time` int(11) NOT NULL DEFAULT '0',
+  `is_logout_resting` int(11) NOT NULL DEFAULT '0',
+  `rest_bonus` FLOAT NOT NULL DEFAULT '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
