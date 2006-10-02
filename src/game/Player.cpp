@@ -6242,22 +6242,16 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 }
 
                 Item *mainItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
-                if(mainItem && mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON)
-                    return EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED;
-
-            }
-
-            if( type == INVTYPE_SHIELD )
-            {
-                assert(eslot==EQUIPMENT_SLOT_OFFHAND);
-                Item *twinItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
-                if( twinItem )
+                if(mainItem)
                 {
-                    uint32 twintype = twinItem->GetProto()->InventoryType;
-                    if( twintype == INVTYPE_2HWEAPON )
+                    if(mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON)
                         return EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED;
-                }
+                }else
+                    // not let equip offhand item if mainhand not equiped
+                    return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+
             }
+
             if( type == INVTYPE_2HWEAPON )
             {
                 uint8 twinslot = ( eslot == EQUIPMENT_SLOT_MAINHAND ? EQUIPMENT_SLOT_OFFHAND : EQUIPMENT_SLOT_MAINHAND );
