@@ -326,7 +326,7 @@ void Log::outDebug( const char * str, ... )
     if( m_logLevel > 2 )
     {
         if(m_colored)
-            SetColor(true,m_colors[LogDetails]);
+            SetColor(true,m_colors[LogDebug]);
 
         va_start(ap, str);
         vprintf( str, ap );
@@ -356,7 +356,7 @@ void Log::outCommand( const char * str, ... )
     if( m_logLevel > 1 )
     {
         if(m_colored)
-            SetColor(true,m_colors[LogDebug]);
+            SetColor(true,m_colors[LogDetails]);
 
         va_start(ap, str);
         vprintf( str, ap );

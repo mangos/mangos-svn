@@ -8998,7 +8998,7 @@ void Player::LoadCorpse()
 
 void Player::_LoadInventory()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u' ORDER BY `slot`",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
 
     uint16 dest;
     if (result)
