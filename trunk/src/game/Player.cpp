@@ -3886,9 +3886,9 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             if(proto->Spells[i].SpellId)
                 RemoveAurasDueToSpell(proto->Spells[i].SpellId );
 
-    for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+    for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
     {
-        uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
+        uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
         if(Enchant_id)
             AddItemEnchant(item,Enchant_id, apply);
     }
@@ -3962,9 +3962,9 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     }
 
     // item combat enchantments
-    for(int e_slot = 0; e_slot < 21; e_slot++)
+    for(int e_slot = 0; e_slot < 7; e_slot++)
     {
-        uint32 enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+e_slot);
+        uint32 enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+e_slot*3);
         SpellItemEnchantment *pEnchant;
         pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
@@ -5476,11 +5476,11 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
     {
         if(!item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3))
             return;
-        uint32 charges = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+5);
+        uint32 charges = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2);
         if(charges == 0)
             return;
         if(charges > 1)
-            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+5,charges-1);
+            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2,charges-1);
         else if(charges <= 1)
         {
             AddItemEnchant(item,item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3),false);
@@ -6811,12 +6811,12 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
             int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
             SetUInt32Value(VisibleBase, pItem->GetEntry());
             SetUInt32Value(VisibleBase + 1, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
-            SetUInt32Value(VisibleBase + 2, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3));
-            SetUInt32Value(VisibleBase + 3, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6));
-            SetUInt32Value(VisibleBase + 4, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 9));
-            SetUInt32Value(VisibleBase + 5, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 12));
-            SetUInt32Value(VisibleBase + 6, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 15));
-            SetUInt32Value(VisibleBase + 7, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
+            SetUInt32Value(VisibleBase + 2, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 1*3));
+            SetUInt32Value(VisibleBase + 3, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 2*3));
+            SetUInt32Value(VisibleBase + 4, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3*3));
+            SetUInt32Value(VisibleBase + 5, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 4*3));
+            SetUInt32Value(VisibleBase + 6, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 5*3));
+            SetUInt32Value(VisibleBase + 7, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6*3));
             SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
         }
 
@@ -6962,9 +6962,9 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                 int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
                 for (int i = VisibleBase; i < VisibleBase + 12; ++i)
                     SetUInt32Value(i, 0);
-                for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+                for(int enchant_slot = 0 ; enchant_slot < 7; enchant_slot++)
                 {
-                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
+                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                     if( Enchant_id)
                     {
                         SpellItemEnchantment *pEnchant;
