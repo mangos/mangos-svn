@@ -6706,14 +6706,15 @@ uint8 Player::CanUseAmmo( uint32 item ) const
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
-Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update )
+Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,bool fromLoot )
 {
     Item *pItem = CreateItem( item, count );
     if( pItem )
     {
         ItemPrototype const *pProto = pItem->GetProto();
         ItemAdded( item, count );
-        pItem->SetItemRandomProperties();
+        if(fromLoot)
+            pItem->SetItemRandomProperties();
         return StoreItem( pos, pItem, update );
     }
     return NULL;
@@ -9602,7 +9603,7 @@ void Player::UnsummonPet(Creature* pet)
     pet->CombatStop();
 
     if(pet->isPet())
-        pet->SaveToDB();
+        pet->SaveAsPet();
 
     WorldPacket data;
     data.Initialize(SMSG_DESTROY_OBJECT);
