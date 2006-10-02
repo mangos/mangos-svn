@@ -73,7 +73,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, item->itemid, 1, false );
     if ( msg == EQUIP_ERR_OK )
     {
-        player->StoreNewItem( dest, item->itemid, 1, true);
+        player->StoreNewItem( dest, item->itemid, 1, true ,true);
         item->is_looted = true;
 
         data.Initialize( SMSG_LOOT_REMOVED );
