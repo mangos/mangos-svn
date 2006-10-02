@@ -49,17 +49,22 @@ const int Color_count = int(WHITE)+1;
 class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThread::FastMutex> >
 {
     friend class MaNGOS::OperatorNew<Log>;
-    Log() : logfile(NULL), m_colored(false) { Initialize(); }
+    Log() : logfile(NULL), gmlogfile(NULL), m_colored(false) { Initialize(); }
     ~Log()
     {
         if( logfile != NULL )
             fclose(logfile);
         logfile = NULL;
+
+        if( gmlogfile != NULL )
+            fclose(gmlogfile);
+        gmlogfile = NULL;
     }
     public:
         void Initialize();
         void InitColors(std::string init_str);
         void outTitle( const char * str);
+        void outCommand( const char * str, ...);
         void outString( const char * str, ... );
         void outError( const char * err, ... );
         void outBasic( const char * str, ... );
@@ -69,9 +74,10 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
 
         void SetColor(bool stdout_stream, Color color);
         void ResetColor(bool stdout_stream);
-        void outTimestamp();
+        void outTimestamp(FILE* file);
     private:
         FILE* logfile;
+        FILE* gmlogfile;
         uint32 m_logLevel;
         bool m_colored;
         Color m_colors[4];

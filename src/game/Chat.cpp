@@ -344,7 +344,17 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
             return true;
         }
 
-        if(!(this->*(table[i].Handler))(text))
+        if((this->*(table[i].Handler))(text))
+        {
+            if(table[i].SecurityLevel > 0)
+            {
+                Player* p = m_session->GetPlayer();
+                sLog.outCommand("Command: %s [Player: %s X: %f Y: %f Z: %f Map: %u Selected: %s %u]",
+                    cmd.c_str(),p->GetName(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
+                    (GUID_HIPART(p->GetSelection())==HIGHGUID_UNIT ? "creature" : (GUID_HIPART(p->GetSelection())==HIGHGUID_PLAYER ? "player" : "none")),GUID_LOPART(p->GetSelection()));
+            }
+        }
+        else
         {
             if(table[i].Help != "")
                 SendSysMultilineMessage(table[i].Help.c_str());

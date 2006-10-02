@@ -154,11 +154,18 @@ void Log::Initialize()
 {
     std::string logfn=sConfig.GetStringDefault("LogFile", "Server.log");
     logfile = fopen(logfn.c_str(), "w");
+
+    std::string gmlogname = sConfig.GetStringDefault("GMLogFile", "");
+    if(gmlogname!="")
+    {
+        gmlogfile = fopen(gmlogname.c_str(), "a");
+    }
+
     m_logLevel = sConfig.GetIntDefault("LogLevel", 0);
     InitColors(sConfig.GetStringDefault("LogColors", ""));
 }
 
-void Log::outTimestamp()
+void Log::outTimestamp(FILE* file)
 {
     time_t t = time(NULL);
     tm* aTm = localtime(&t);
@@ -168,7 +175,7 @@ void Log::outTimestamp()
     //       HH     hour (2 digits 00-23)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
-    fprintf(logfile,"%-4d-%02d-%02d %02d:%02d:%02d ",aTm->tm_year+1900,aTm->tm_mon+1,aTm->tm_mday,aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
+    fprintf(file,"%-4d-%02d-%02d %02d:%02d:%02d ",aTm->tm_year+1900,aTm->tm_mon+1,aTm->tm_mday,aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
 }
 
 void Log::outTitle( const char * str)
@@ -212,7 +219,7 @@ void Log::outString( const char * str, ... )
     printf( "\n" );
     if(logfile)
     {
-        outTimestamp();
+        outTimestamp(logfile);
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -239,7 +246,7 @@ void Log::outError( const char * err, ... )
     fprintf( stderr, "\n" );
     if(logfile)
     {
-        outTimestamp();
+        outTimestamp(logfile);
         vfprintf(logfile, err, ap);
         fprintf(logfile, "\n" );
         va_end(ap);
@@ -270,7 +277,7 @@ void Log::outBasic( const char * str, ... )
 
     if(logfile)
     {
-        outTimestamp();
+        outTimestamp(logfile);
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -301,7 +308,7 @@ void Log::outDetail( const char * str, ... )
     }
     if(logfile)
     {
-        outTimestamp();
+        outTimestamp(logfile);
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
@@ -319,6 +326,36 @@ void Log::outDebug( const char * str, ... )
     if( m_logLevel > 2 )
     {
         if(m_colored)
+            SetColor(true,m_colors[LogDetails]);
+
+        va_start(ap, str);
+        vprintf( str, ap );
+        va_end(ap);
+
+        if(m_colored)
+            ResetColor(true);
+
+        printf( "\n" );
+    }
+    if(logfile)
+    {
+        outTimestamp(logfile);
+        va_start(ap, str);
+        vfprintf(logfile, str, ap);
+        fprintf(logfile, "\n" );
+        va_end(ap);
+        fflush(logfile);
+    }
+    fflush(stdout);
+}
+
+void Log::outCommand( const char * str, ... )
+{
+    if( !str ) return;
+    va_list ap;
+    if( m_logLevel > 1 )
+    {
+        if(m_colored)
             SetColor(true,m_colors[LogDebug]);
 
         va_start(ap, str);
@@ -332,12 +369,21 @@ void Log::outDebug( const char * str, ... )
     }
     if(logfile)
     {
-        outTimestamp();
+        outTimestamp(logfile);
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
         va_end(ap);
         fflush(logfile);
+    }
+    if(gmlogfile)
+    {
+        outTimestamp(gmlogfile);
+        va_start(ap, str);
+        vfprintf(gmlogfile, str, ap);
+        fprintf(gmlogfile, "\n" );
+        va_end(ap);
+        fflush(gmlogfile);
     }
     fflush(stdout);
 }
@@ -357,7 +403,7 @@ void Log::outMenu( const char * str, ... )
 
     if(logfile)
     {
-        outTimestamp();
+        outTimestamp(logfile);
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
