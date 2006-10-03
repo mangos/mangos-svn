@@ -310,6 +310,7 @@ void ChatHandler::PSendSysMessage(const char *format, ...)
 
 bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
 {
+    std::string fullcmd = text;                             // original `text` can't be used. It content destroyed in command code processing.
     std::string cmd = "";
 
     while (*text != ' ' && *text != '\0')
@@ -350,7 +351,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
             {
                 Player* p = m_session->GetPlayer();
                 sLog.outCommand("Command: %s [Player: %s X: %f Y: %f Z: %f Map: %u Selected: %s %u]",
-                    cmd.c_str(),p->GetName(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
+                    fullcmd.c_str(),p->GetName(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
                     (GUID_HIPART(p->GetSelection())==HIGHGUID_UNIT ? "creature" : (GUID_HIPART(p->GetSelection())==HIGHGUID_PLAYER ? "player" : "none")),GUID_LOPART(p->GetSelection()));
             }
         }

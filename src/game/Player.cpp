@@ -138,6 +138,14 @@ Player::Player (WorldSession *session): Unit()
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
     m_canParry = false;
+    ////////////////////Rest System/////////////////////        
+    time_inn_enter=0;
+    inn_pos_x=0;
+    inn_pos_y=0;
+    inn_pos_z=0;
+    rest_bonus=0;
+    rest_type=0;
+    ////////////////////Rest System/////////////////////     
 }
 
 Player::~Player ()
@@ -1288,20 +1296,15 @@ void Player::SetGameMaster(bool on)
     }
 }
 
-void Player::SendLogXPGain(uint32 GivenXP, Unit* victim)
+void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
 {
     WorldPacket data;
     data.Initialize( SMSG_LOG_XPGAIN );
     data << ( victim ? victim->GetGUID() : uint64(0) );
-    data << GivenXP;                                        // given experience
+    data << uint32(GivenXP+RestXP);                         // given experience
     data << ( victim ? (uint8)0 : (uint8)1 );               // 00-kill_xp type, 01-non_kill_xp type
-
-    if (isRested())
-        data << GivenXP;                                    // rested given experience
-    else
-        data << (GivenXP/2);                                // unrested given experience
-
-    data << float(1);                                       //still a unknown static
+    data << uint32(RestXP);                                 // rested given experience
+    data << float(1);                                       // 1 - none 0 - 100% group bonus output
     GetSession()->SendPacket(&data);
 }
 
@@ -1316,11 +1319,14 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
         return;
 
-    SendLogXPGain(xp,victim);
+    // XP resting bonus for kill
+    uint32 rested_bonus_xp = victim ? GetXPRestBonus(xp) : 0;
+
+    SendLogXPGain(xp,victim,rested_bonus_xp);
 
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
-    uint32 newXP = curXP + xp;
+    uint32 newXP = curXP + xp + rested_bonus_xp;
 
     while( newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
     {
@@ -4440,7 +4446,7 @@ void Player::AddWeather()
     }
 }
 
-uint32 Player::ApplyRestBonus(uint32 xp)
+uint32 Player::GetXPRestBonus(uint32 xp)
 {
     float xp_bl = (float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 20; //xp for 1 section
     float blpoint_bl=0;//rested bonuse for 1 section
@@ -4459,12 +4465,11 @@ uint32 Player::ApplyRestBonus(uint32 xp)
 
     sLog.outDetail("XP_GAIN: %f, value1=%f, rest_xp_percent=%f",(float)xp,(xp_bl/blpoint_bl),rest_xp_percent);
 
-    //recived    X  xp (+ Y  Rested Bonus)
-    rested_xp    = (float)xp        + ((float)xp / 100 * rest_xp_percent);
+    rested_xp    = ((float)xp / 100 * rest_xp_percent);
 
-    SetRestBonus( GetRestBonus() - ((xp_bl / blpoint_bl) * rested_xp) );
+    SetRestBonus( GetRestBonus() - ((xp_bl / blpoint_bl) * (xp + rested_xp) ));
 
-    sLog.outDetail("Player gain %u xp (+ %u Rested Bonus). Rested bonus=%f",(uint32)rested_xp,(uint32)((float)xp / 100 * rest_xp_percent),GetRestBonus());
+    sLog.outDetail("Player gain %u xp (+ %u Rested Bonus). Rested bonus=%f",xp+(uint32)rested_xp,(uint32)((float)xp / 100 * rest_xp_percent),GetRestBonus());
     return (uint32)rested_xp;
 }
 
