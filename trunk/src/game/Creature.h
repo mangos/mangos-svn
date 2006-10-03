@@ -240,6 +240,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SaveAsPet();
         void SetTamed(bool isTamed) { m_isTamed = isTamed; }
         void Untamed();
+        void GivePetXP(uint32 xp);
 
         bool isPet() const { return m_isPet; }
         bool isTotem() const { return m_isTotem; }
