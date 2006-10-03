@@ -7526,6 +7526,7 @@ void Player::UpdateEnchantTime(uint32 time)
             {
                 if(!(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3))
                 {
+                    delete *itr;
                     m_enchantDuration.erase(itr);
                     continue;
                 }
@@ -7534,6 +7535,7 @@ void Player::UpdateEnchantTime(uint32 time)
                     AddItemEnchant((*itr)->item,(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3),false);
                     for(int y=0;y<3;y++)
                         (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+y,0);
+                    delete *itr;
                     m_enchantDuration.erase(itr);
                     continue;
                 }
@@ -7546,9 +7548,10 @@ void Player::UpdateEnchantTime(uint32 time)
     }
 }
 
+// duration == 0 will remove item enchant
 void Player::AddEnchantDuration(Item *item,uint32 slot,uint32 duration)
 {
-    if(!item || duration <= 0 )
+    if(!item)
         return;
     for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
     {
@@ -7558,8 +7561,9 @@ void Player::AddEnchantDuration(Item *item,uint32 slot,uint32 duration)
         {
             if((*itr)->item)
             {
-                if((*itr)->item->GetGUID() == item->GetGUID() && (*itr)->slot == slot)
+                if((*itr)->item == item && (*itr)->slot == slot)
                 {
+                    delete *itr;
                     m_enchantDuration.erase(itr);
                     break;
                 }

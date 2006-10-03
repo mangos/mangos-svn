@@ -1823,10 +1823,9 @@ uint8 Spell::CheckItems()
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
             {
-                if((itemTarget->GetProto()->Class & m_spellInfo->EquippedItemClass) == 0)
+                if(m_spellInfo->EquippedItemClass > 0 && itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
-                if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENCHANT_HELD_ITEM &&
-                    itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+                if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENCHANT_HELD_ITEM && !itemTarget->IsEquipped())
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
                 break;
             }
