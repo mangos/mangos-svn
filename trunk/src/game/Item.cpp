@@ -583,6 +583,12 @@ uint32 Item::GetSpell()
     return 0;
 }
 
+bool Item::IsEquipped() const 
+{ 
+    return GetSlot() < EQUIPMENT_SLOT_END; 
+}
+
+
 void Item::SetItemRandomProperties()
 {
     /*
