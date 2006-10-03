@@ -319,6 +319,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
         else if(((Creature*)this)->isPet())
         {
+            Creature* pet = (Creature*)this;
             Unit* owner = ((Creature*)this)->GetOwner();
 
             if(owner && owner->GetTypeId() == TYPEID_PLAYER)
@@ -326,6 +327,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 player = (Player*)owner;
                 player->LeaveCombatState();
             }
+            uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
+            pet->GivePetXP(petxp);
         }
 
         // self or owner of pet
@@ -356,6 +359,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                         if(uint32(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel())) > sWorld.getConfig(CONFIG_GROUP_XP_LEVELDIFF))
                             continue;
                         pGroupGuy->GiveXP(xp, pVictim);
+                        if(player->GetPet())
+                            player->GetPet()->GivePetXP(xp/2);
                         pGroupGuy->KilledMonster(entry, pVictim->GetGUID());
                     }
                 }
@@ -363,6 +368,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 {
                     DEBUG_LOG("Player kill enemy alone");
                     player->GiveXP(xp, pVictim);
+                    if(player->GetPet())
+                        player->GetPet()->GivePetXP(xp);
                     player->KilledMonster(entry,pVictim->GetGUID());
                 }
             }
