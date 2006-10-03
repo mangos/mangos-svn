@@ -815,7 +815,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void DestroyForPlayer( Player *target ) const;
         void SendDelayResponse(const uint32);
-        void SendLogXPGain(uint32 GivenXP,Unit* victim);
+        void SendLogXPGain(uint32 GivenXP,Unit* victim,uint32 RestXP);
         void SendOutOfRange(Object* obj);
 
         //Low Level Packets
@@ -977,7 +977,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         bool isRested() const { return GetRestTime() >= 10000; }
-        uint32 ApplyRestBonus(uint32 xp);
+        uint32 GetXPRestBonus(uint32 xp);
         uint32 GetRestTime() const { return m_restTime;};
         void SetRestTime(uint32 v) { m_restTime = v;};
 

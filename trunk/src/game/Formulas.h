@@ -95,19 +95,6 @@ namespace MaNGOS
 
     }
 
-    namespace Misc
-    {
-        inline bool IsRest(Player *pl)
-        {
-            return true;
-        }
-
-        inline bool IsEliteUnit(Unit *u)
-        {
-            return false;
-        }
-    }
-
     namespace Combat
     {
 
@@ -199,8 +186,6 @@ namespace MaNGOS
 
             if(u->GetTypeId()==TYPEID_UNIT && ((Creature*)u)->isElite())
                 xp_gain *= 2;
-
-            xp_gain = pl->ApplyRestBonus(xp_gain);
 
             return (uint32)(xp_gain*sWorld.getRate(RATE_XP_KILL));
         }
