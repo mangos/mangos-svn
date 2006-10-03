@@ -399,8 +399,25 @@ void ObjectMgr::LoadLvlUpGains()
         fields = result->Fetch();
 
         uint8 current_class = fields[1].GetUInt8();
+        if(current_class >= MAX_CLASSES)
+        {
+            sLog.outError("Wrong class %u in `player_levelupgains` table, ignoring.",current_class);
+            continue;
+        }
+        
         uint8 current_race = fields[0].GetUInt8();
-        uint8 current_level = fields[2].GetUInt8();
+        if(current_race >= MAX_RACES)
+        {
+            sLog.outError("Wrong race %u in `player_levelupgains` table, ignoring.",current_race);
+            continue;
+        }
+
+        uint32 current_level = fields[2].GetUInt32();
+        if(current_level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        {
+            sLog.outError("Wrong level %u in `player_levelupgains` table, ignoring.",current_level);
+            continue;
+        }
 
         for (int i = 0; i < MAX_STATS+2; i++)
         {
