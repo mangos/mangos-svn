@@ -167,10 +167,7 @@ class ChatHandler
         bool HandleTargetObjectCommand(const char* args);
         bool HandleDelObjectCommand(const char* args);
 
-        // shutdown server
-        bool ShutDown(const char* args);
-        bool CancelShutdown (const char* args);
-
+        bool HandleShutDownCommand(const char* args);
         bool HandleSecurityCommand(const char* args);
         bool HandleWorldPortCommand(const char* args);
         bool HandleAddWeaponCommand(const char* args);

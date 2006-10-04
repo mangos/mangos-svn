@@ -173,10 +173,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "goobject",    2, &ChatHandler::HandleGoObjectCommand,         "",   NULL },
         { "targetobject",2, &ChatHandler::HandleTargetObjectCommand,     "",   NULL },
         { "delobject",   2, &ChatHandler::HandleDelObjectCommand,        "",   NULL },
-
-        // shutdown commands
-        { "shutdown",    3, &ChatHandler::ShutDown,          "",    NULL },
-        { "cshutdown",   3, &ChatHandler::CancelShutdown,                "",    NULL },
+        { "shutdown",    3, &ChatHandler::HandleShutDownCommand,         "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },

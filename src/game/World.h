@@ -102,6 +102,16 @@ enum EnviromentalDamage
     DAMAGE_FIRE = 5
 };
 
+// ServerMessages.dbc
+enum ServerMessageType
+{
+    SERVER_MSG_SHUTDOWN_TIME      = 1,
+    SERVER_MSG_RESTART_TIME       = 2,
+    SERVER_MSG_STRING             = 3,
+    SERVER_MSG_SHUTDOWN_CANCELLED = 4,
+    SERVER_MSG_RESTART_CANCELLED  = 5
+};
+
 class World
 {
     public:
@@ -137,8 +147,10 @@ class World
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
         void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0);
         void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0);
+        void SendServerMessage(ServerMessageType type, const char *text = "");
 
         void ShutdownServ(uint32 time);
+        void ShutdownCancel();
         void ShuttDownMsg();
 
         void Update(time_t diff);

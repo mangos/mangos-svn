@@ -637,24 +637,42 @@ time_t World::_UpdateGameTime()
 
 void World::ShutdownServ(uint32 time)
 {
-    m_ShutdownTimer = time;
+    if(time==0)
+        m_stopEvent = true;
+    else
+        m_ShutdownTimer = time;
 }
 
 void World::ShuttDownMsg()
 {
-    WorldPacket data;
-
-    data.Initialize(SMSG_SERVER_MESSAGE);
-
     std::ostringstream ss;
     ss << m_ShutdownTimer << " Second(s).";
 
-    data << uint32(1) << ss.str().c_str() << (uint8)0x00;
-
-    SendGlobalMessage( &data );
-
-    data.clear();
-    ss.clear();
+    SendServerMessage(SERVER_MSG_SHUTDOWN_TIME,ss.str().c_str());
 
     DEBUG_LOG("Server is shuttingdown in %d seconds",m_ShutdownTimer);
+}
+
+void World::ShutdownCancel()
+{
+    if(!m_ShutdownTimer)
+        return;
+
+    m_ShutdownTimer = 0;
+    SendServerMessage(SERVER_MSG_SHUTDOWN_CANCELLED);
+
+    DEBUG_LOG("Server shuttingdown cancelled.");
+}
+
+
+void World::SendServerMessage(ServerMessageType type, const char *text)
+{
+    WorldPacket data;
+
+    data.Initialize(SMSG_SERVER_MESSAGE);
+    data << uint32(type);
+    if(type <= SERVER_MSG_STRING)
+        data << text;
+
+    SendGlobalMessage( &data );
 }
