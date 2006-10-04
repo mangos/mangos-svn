@@ -1304,8 +1304,12 @@ void Creature::GivePetXP(uint32 xp)
     uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
     uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
     uint32 newXP = curXP + xp;
+
     if(newXP >= nextLvlXP && level+1 > GetOwner()->getLevel())
+	{
         SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, nextLvlXP-1);
+		return;
+	}
 
     while( newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
     {
