@@ -119,6 +119,13 @@ struct actions
     uint16 action;
 };
 
+enum ActionButtonType
+{
+    ACTION_BUTTON_SPELL = 0,
+    ACTION_BUTTON_MACRO = 64,
+    ACTION_BUTTON_ITEM  = 128
+};
+
 typedef std::pair<uint16, bool> CreateSpellPair;
 
 struct PlayerCreateInfo
