@@ -64,8 +64,8 @@ void SQLStorage::Load ()
     QueryResult *result  = sDatabase.PQuery("SELECT MAX(`entry`) FROM `%s`",table);
     if(!result)
     {
-        printf("Error loading %s table\n",table);
-        return;
+        sLog.outError("Error loading `%s` table (not exist?)\n",table);
+        exit(1);                                            // Stop server at loading non exited table or not accessable table
     }
 
     maxi= (*result)[0].GetUInt32()+1;
@@ -81,7 +81,7 @@ void SQLStorage::Load ()
 
     if(!result)
     {
-        printf("%s table is empty!\n",table);
+        sLog.outError("`%s` table is empty!\n",table);
         RecordCount = 0;
         return;
     }
@@ -92,9 +92,9 @@ void SQLStorage::Load ()
     if(iNumFields!=result->GetFieldCount())
     {
         RecordCount = 0;
-        printf("Error in %s table, probably sql file format was updated (there should be %d fields in sql).\n",table,iNumFields);
+        sLog.outError("Error in `%s` table, probably sql file format was updated (there should be %d fields in sql).\n",table,iNumFields);
         delete result;
-        return;
+        exit(1);                                            // Stop server at loading broken or non-compatiable table.
     }
 
     if(sizeof(char*)==sizeof(uint32))
