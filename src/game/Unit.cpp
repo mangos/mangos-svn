@@ -341,8 +341,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             {
                 DEBUG_LOG("DealDamageIsPvE");
                 uint32 xp = MaNGOS::XP::Gain(player, pVictim);
-                uint32 entry = 0;
-                entry = pVictim->GetUInt32Value(OBJECT_FIELD_ENTRY );
 
                 Group *pGroup = objmgr.GetGroupByLeader(player->GetGroupLeader());
                 if(pGroup)
@@ -361,7 +359,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                         pGroupGuy->GiveXP(xp, pVictim);
                         if(player->GetPet())
                             player->GetPet()->GivePetXP(xp/2);
-                        pGroupGuy->KilledMonster(entry, pVictim->GetGUID());
+                        pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
                     }
                 }
                 else
@@ -370,7 +368,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                     player->GiveXP(xp, pVictim);
                     if(player->GetPet())
                         player->GetPet()->GivePetXP(xp);
-                    player->KilledMonster(entry,pVictim->GetGUID());
+                    player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
                 }
             }
         }
