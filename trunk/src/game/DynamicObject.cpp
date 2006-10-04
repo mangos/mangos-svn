@@ -95,7 +95,6 @@ void DynamicObject::Update(uint32 p_time)
     cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 }
 
-
 void DynamicObject::Delete()
 {
     WorldPacket data;

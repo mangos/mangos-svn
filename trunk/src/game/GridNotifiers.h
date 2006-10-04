@@ -219,7 +219,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    struct MANGOS_DLL_DECL UnitSearcher
+        struct MANGOS_DLL_DECL UnitSearcher
     {
         Unit* &i_object;
         Check & i_check;

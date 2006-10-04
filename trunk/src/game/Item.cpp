@@ -583,11 +583,10 @@ uint32 Item::GetSpell()
     return 0;
 }
 
-bool Item::IsEquipped() const 
-{ 
-    return GetSlot() < EQUIPMENT_SLOT_END; 
+bool Item::IsEquipped() const
+{
+    return GetSlot() < EQUIPMENT_SLOT_END;
 }
-
 
 void Item::SetItemRandomProperties()
 {
@@ -656,7 +655,7 @@ void Item::SetItemRandomProperties()
                     }
                     else if(itemProto->Class == ITEM_CLASS_WEAPON)
                     {
-                        if((itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW 
+                        if((itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW
                             || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN) && irand(1,100) <= 50)
                         {
                             random_id = 1704 + uint32((1741-1704)/60*itemProto->ItemLevel);// of Marksmanship
@@ -692,53 +691,53 @@ void Item::SetItemRandomProperties()
                                     else if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
                                         enchant_id_1 = 174 + uint32(itemProto->ItemLevel/10);
                                     else if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW)
-                                        enchant_id_1 = 181 + uint32(itemProto->ItemLevel/10);
-                                    random_id = 120;
-                                }break;
-                                default:break;
-                            }
-                        }
-                    }
-                }
+    enchant_id_1 = 181 + uint32(itemProto->ItemLevel/10);
+    random_id = 120;
+    }break;
+    default:break;
+    }
+    }
+    }
+    }
 
-                if(itemProto->ItemLevel <= 10 && !random_id)
-                {
-                    random_id = irand(1,80);
-                }
-                else if(itemProto->ItemLevel <= 20 && !random_id)
-                {
-                    random_id = irand(81,156);
-                }
-                else if(itemProto->ItemLevel <= 30 && !random_id)
-                {
-                    random_id = irand(167,220);
-                }
-                else if(itemProto->ItemLevel <= 50 && !random_id)
-                {
-                    random_id = irand(308,434);
-                }
-                else if(itemProto->ItemLevel <= 60 && !random_id)
-                {
-                    random_id = irand(1267,1296);
-                }
+    if(itemProto->ItemLevel <= 10 && !random_id)
+    {
+    random_id = irand(1,80);
+    }
+    else if(itemProto->ItemLevel <= 20 && !random_id)
+    {
+    random_id = irand(81,156);
+    }
+    else if(itemProto->ItemLevel <= 30 && !random_id)
+    {
+    random_id = irand(167,220);
+    }
+    else if(itemProto->ItemLevel <= 50 && !random_id)
+    {
+    random_id = irand(308,434);
+    }
+    else if(itemProto->ItemLevel <= 60 && !random_id)
+    {
+    random_id = irand(1267,1296);
+    }
 
-                ItemRandomProperties *item_rand = sItemRandomPropertiesStore.LookupEntry(random_id);
+    ItemRandomProperties *item_rand = sItemRandomPropertiesStore.LookupEntry(random_id);
 
-                if(item_rand)
-                {
-                    if(random_id == 120)
-                    {
-                        SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,120);
-                        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+9,enchant_id_1);
-                        return;
-                    }
-                    SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
-                    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+9,item_rand->enchant_id_1);
-                    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+12,item_rand->enchant_id_2);
-                    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+15,item_rand->enchant_id_3);
-                }
-            }
-        }
+    if(item_rand)
+    {
+    if(random_id == 120)
+    {
+    SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,120);
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+9,enchant_id_1);
+    return;
+    }
+    SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+9,item_rand->enchant_id_1);
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+12,item_rand->enchant_id_2);
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+15,item_rand->enchant_id_3);
+    }
+    }
+    }
     }
     */
 }

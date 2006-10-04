@@ -245,7 +245,7 @@ Aura::~Aura()
 {
 }
 
-AreaAura::AreaAura(SpellEntry* spellproto, uint32 eff, Unit *target, 
+AreaAura::AreaAura(SpellEntry* spellproto, uint32 eff, Unit *target,
 Unit *caster, Item* castItem) : Aura(spellproto, eff, target, caster, castItem)
 {
     m_isAreaAura = true;
@@ -255,7 +255,7 @@ AreaAura::~AreaAura()
 {
 }
 
-PersistentAreaAura::PersistentAreaAura(SpellEntry* spellproto, uint32 eff, Unit *target, 
+PersistentAreaAura::PersistentAreaAura(SpellEntry* spellproto, uint32 eff, Unit *target,
 Unit *caster, Item* castItem) : Aura(spellproto, eff, target, caster, castItem)
 {
     m_isPersistent = true;
@@ -507,7 +507,7 @@ void PersistentAreaAura::Update(uint32 diff)
     }
     else
         remove = true;
-    
+
     Aura::Update(diff);
 
     if(remove)

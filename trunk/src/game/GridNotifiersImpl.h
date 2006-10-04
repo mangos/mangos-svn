@@ -182,7 +182,7 @@ MaNGOS::CreatureRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 }
 
 template<>
-inline void 
+inline void
 MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *>  &m)
 {
     for(std::map<OBJECT_HANDLE, Creature*>::iterator itr=m.begin(); itr != m.end(); ++itr)
@@ -205,7 +205,7 @@ MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *>  &m)
 }
 
 template<>
-inline void 
+inline void
 MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Player *>  &m)
 {
     for(std::map<OBJECT_HANDLE, Player*>::iterator itr=m.begin(); itr != m.end(); ++itr)
@@ -260,5 +260,4 @@ void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
     }
     i_object = i_check.GetResult();
 }
-
 #endif                                                      // MANGOS_GRIDNOTIFIERSIMPL_H

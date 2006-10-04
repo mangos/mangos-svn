@@ -404,7 +404,7 @@ void ObjectMgr::LoadLvlUpGains()
             sLog.outError("Wrong class %u in `player_levelupgains` table, ignoring.",current_class);
             continue;
         }
-        
+
         uint8 current_race = fields[0].GetUInt8();
         if(current_race >= MAX_RACES)
         {

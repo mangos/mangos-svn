@@ -70,7 +70,7 @@ inline void LoadDBC(barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& st
             errlist.push_back(filename + buf);
             fclose(f);
         }else
-            errlist.push_back(filename);
+        errlist.push_back(filename);
     }
 }
 

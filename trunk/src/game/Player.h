@@ -447,47 +447,47 @@ class MANGOS_DLL_SPEC Player : public Unit
                     CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
             }
         };
-        
-         void InnEnter (int time,float x,float y,float z)
+
+        void InnEnter (int time,float x,float y,float z)
         {
-         inn_pos_x = x;
-         inn_pos_y = y;
-         inn_pos_z = z;
-         time_inn_enter = time;
+            inn_pos_x = x;
+            inn_pos_y = y;
+            inn_pos_z = z;
+            time_inn_enter = time;
         };
         void SetRestBonus (float rest_bonus_new)
         {
-         if(rest_bonus_new<0)rest_bonus_new=0;
-         if(rest_bonus_new>1534)rest_bonus_new=1534;
-         rest_bonus = rest_bonus_new;
+            if(rest_bonus_new<0)rest_bonus_new=0;
+            if(rest_bonus_new>1534)rest_bonus_new=1534;
+            rest_bonus = rest_bonus_new;
         };
         void SetRestType(int n_r_type)
         {
-         rest_type = n_r_type;
+            rest_type = n_r_type;
         };
         float GetInnPosX ()
         {
-         return inn_pos_x;
+            return inn_pos_x;
         };
         float GetInnPosY ()
         {
-         return inn_pos_y;
+            return inn_pos_y;
         };
         float GetInnPosZ ()
         {
-         return inn_pos_z;
+            return inn_pos_z;
         };
         float GetRestBonus ()
         {
-         return rest_bonus;
+            return rest_bonus;
         };
         int GetTimeInnEter ()
         {
-         return time_inn_enter;
+            return time_inn_enter;
         };
         int GetRestType ()
         {
-         return rest_type;
+            return rest_type;
         };
 
         void UnsummonPet(Creature* pet = NULL);
@@ -1170,14 +1170,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_ArmorProficiency;
         bool m_canParry;
         bool m_canDualWield;
-        ////////////////////Rest System/////////////////////        
+        ////////////////////Rest System/////////////////////
         int time_inn_enter;
         float inn_pos_x;
         float inn_pos_y;
         float inn_pos_z;
         float rest_bonus;
         int rest_type;
-////////////////////Rest System/////////////////////   
+        ////////////////////Rest System/////////////////////
 };
 
 int irand(int min, int max);

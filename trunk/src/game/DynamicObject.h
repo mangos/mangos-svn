@@ -52,5 +52,4 @@ class DynamicObject : public Object
         float m_radius;
         AffectedSet m_affected;
 };
-
 #endif
