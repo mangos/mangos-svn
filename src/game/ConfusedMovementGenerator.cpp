@@ -46,7 +46,7 @@ ConfusedMovementGenerator::Initialize(Creature &creature)
     {
         const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
         const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
-            
+
         i_waypoints[idx][0] = x + wanderX;
         i_waypoints[idx][1] = y + wanderY;
 

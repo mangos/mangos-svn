@@ -362,23 +362,22 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     uint32 newZone;
     WPAssert(GetPlayer());
 
-  // if player is resting stop resting
+    // if player is resting stop resting
     if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-     if(GetPlayer()->GetRestType()==2) //rest in city
-     {
-      //speed collect rest bonus (section/in hour)
-      float bubble=1;//0% Blizzlike
-      GetPlayer()->SetRestBonus( GetPlayer()->GetRestBonus()+ (time(NULL)-GetPlayer()->GetTimeInnEter())*0.0142108*bubble );
-      if(GetPlayer()->GetRestBonus()>1534)GetPlayer()->SetRestBonus(1534);
-      GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-     }
+        if(GetPlayer()->GetRestType()==2)                   //rest in city
+        {
+            //speed collect rest bonus (section/in hour)
+            float bubble=1;                                 //0% Blizzlike
+            GetPlayer()->SetRestBonus( GetPlayer()->GetRestBonus()+ (time(NULL)-GetPlayer()->GetTimeInnEter())*0.0142108*bubble );
+            if(GetPlayer()->GetRestBonus()>1534)GetPlayer()->SetRestBonus(1534);
+            GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        }
     }
-
 
     recv_data >> newZone;
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
-     switch(newZone)
+    switch(newZone)
     {
         case 1497:
         case 1519:

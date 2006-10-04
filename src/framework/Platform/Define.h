@@ -41,7 +41,7 @@
 
 #if defined(__APPLE_CC__) && defined(BIG_ENDIAN)
 #define MANGOS_IMPORT __attribute__ ((longcall))
-#else 
+#else
 #define MANGOS_IMPORT __attribute__ ((cdecl))
 #endif
 

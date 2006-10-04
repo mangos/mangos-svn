@@ -767,9 +767,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     *damage += CalculateDamage (attType);
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
-         ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
+        ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
     if(GetTypeId() != TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
-         ((Player*)pVictim)->UpdateCombatSkills(this, attType, outcome, true);
+        ((Player*)pVictim)->UpdateCombatSkills(this, attType, outcome, true);
 
     switch (outcome)
     {
@@ -1162,7 +1162,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     // mobs can score crushing blows if they're 3 or more levels above victim
     // or when their weapon skill is 15 or more above victim's defense skill
     tmp = pVictim->GetDefenceSkillValue();
-    uint32 tmpmax = pVictim->getLevel() * 5;        
+    uint32 tmpmax = pVictim->getLevel() * 5;
     // having defense above your maximum (from items, talents etc.) has no effect
     tmp = tmp > tmpmax ? tmpmax : tmp;
     // tmp = mob's level * 5 - player's current defense skill
@@ -1249,7 +1249,8 @@ int32 Unit::SpellMissChanceCalc(Unit *pVictim) const
     if(!pVictim)
         return 0;
 
-    int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 700 : 1100; // PvP : PvE spell misschances per leveldif > 2
+                                                            // PvP : PvE spell misschances per leveldif > 2
+    int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 700 : 1100;
 
     int32 leveldif = pVictim->getLevel() - getLevel();
     if(leveldif < 0)
@@ -1269,9 +1270,10 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
     if(!pVictim)
         return 0;
 
-    int32 misschance = haveOffhandWeapon() ? 2400 : 500; //base misschance for DW : melee attacks
+    int32 misschance = haveOffhandWeapon() ? 2400 : 500;    //base misschance for DW : melee attacks
 
-    int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 500 : 700;           // PvP : PvE melee misschances per leveldif > 2
+                                                            // PvP : PvE melee misschances per leveldif > 2
+    int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 500 : 700;
 
     int32 leveldif = pVictim->getLevel() - getLevel();
     if(leveldif < 0)
@@ -1281,7 +1283,7 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
         misschance += leveldif * 100 - m_modHitChance*100;
     else
         misschance += (leveldif - 2) * chance - m_modHitChance*100;
-    
+
     return misschance > 6000 ? 6000 : misschance;
 }
 

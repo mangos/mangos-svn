@@ -138,14 +138,14 @@ Player::Player (WorldSession *session): Unit()
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
     m_canParry = false;
-    ////////////////////Rest System/////////////////////        
+    ////////////////////Rest System/////////////////////
     time_inn_enter=0;
     inn_pos_x=0;
     inn_pos_y=0;
     inn_pos_z=0;
     rest_bonus=0;
     rest_type=0;
-    ////////////////////Rest System/////////////////////     
+    ////////////////////Rest System/////////////////////
 }
 
 Player::~Player ()
@@ -813,15 +813,15 @@ void Player::Update( uint32 p_time )
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
 
-        if(GetRestType()==1) //rest in tavern
+        if(GetRestType()==1)                                //rest in tavern
         {
-	    if(sqrt((GetPositionX()-GetInnPosX())*(GetPositionX()-GetInnPosX())+(GetPositionY()-GetInnPosY())*(GetPositionY()-GetInnPosY())+(GetPositionZ()-GetInnPosZ())*(GetPositionZ()-GetInnPosZ()))>40)
-	{
-	//speed collect rest bonus (section/in hour)
-	float bubble=1;//0% Blizzlike
-	if(GetTimeInnEter()>0)SetRestBonus( GetRestBonus()+ (time(NULL)-GetTimeInnEter())*0.0142108*bubble );
-	RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-	}
+            if(sqrt((GetPositionX()-GetInnPosX())*(GetPositionX()-GetInnPosX())+(GetPositionY()-GetInnPosY())*(GetPositionY()-GetInnPosY())+(GetPositionZ()-GetInnPosZ())*(GetPositionZ()-GetInnPosZ()))>40)
+            {
+                //speed collect rest bonus (section/in hour)
+                float bubble=1;                             //0% Blizzlike
+                if(GetTimeInnEter()>0)SetRestBonus( GetRestBonus()+ (time(NULL)-GetTimeInnEter())*0.0142108*bubble );
+                RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+            }
         }
     }
 
@@ -1405,7 +1405,7 @@ void Player::GiveLevel()
     SetMaxHealth(uint32(newHP));                            // only integer part
 
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetStat(Stats(i), uint32(newStats[i]));              // only integer part
+        SetStat(Stats(i), uint32(newStats[i]));             // only integer part
 
     // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
     UpdateBlockPercentage(0,1);
@@ -2696,25 +2696,25 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
 {
     switch(outcome)
     {
-    case MELEE_HIT_CRIT:
-        return;
-    case MELEE_HIT_DODGE:    
-        return;
-    case MELEE_HIT_PARRY:
-        return;
-    case MELEE_HIT_BLOCK:
-        return;
+        case MELEE_HIT_CRIT:
+            return;
+        case MELEE_HIT_DODGE:
+            return;
+        case MELEE_HIT_PARRY:
+            return;
+        case MELEE_HIT_BLOCK:
+            return;
 
-    default:
-        break;
+        default:
+            break;
     }
-    
-    uint32 plevel = getLevel();                         // if defence than pVictim == attacker
+
+    uint32 plevel = getLevel();                             // if defence than pVictim == attacker
     uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
     uint32 moblevel = pVictim->getLevel();
     if(moblevel < greylevel)
         return;
-    
+
     if (moblevel > plevel + 5)
         moblevel = plevel + 5;
 
@@ -2724,7 +2724,7 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
 
     uint32 skilldif = 5 * plevel - (defence ? GetPureDefenceSkillValue() : GetPureWeaponSkillValue(attType));
     if(skilldif <= 0)
-        return; 
+        return;
 
     float chance = 3 * lvldif * skilldif / plevel;
     if(!defence)
@@ -2733,16 +2733,16 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
             chance *= 0.1 * GetStat(STAT_INTELLECT);
     }
 
-    chance = chance < 1 ? 1 : chance;                   //minimum chance to increase skill is 1%
-        
+    chance = chance < 1 ? 1 : chance;                       //minimum chance to increase skill is 1%
+
     if(chance > urand(0,100))
     {
         if(defence)
             UpdateDefense();
         else
             UpdateWeaponSkill(attType);
-        }
-    else 
+    }
+    else
         return;
 }
 
@@ -4448,19 +4448,20 @@ void Player::AddWeather()
 
 uint32 Player::GetXPRestBonus(uint32 xp)
 {
-    float xp_bl = (float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 20; //xp for 1 section
-    float blpoint_bl=0;//rested bonuse for 1 section
+                                                            //xp for 1 section
+    float xp_bl = (float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 20;
+    float blpoint_bl=0;                                     //rested bonuse for 1 section
     switch (getLevel())
     {
-     case 1: {blpoint_bl=50.9;break;}
-     case 2: {blpoint_bl=51.05;break;}
-     case 3: {blpoint_bl=51.1;break;}
-     case 4: {blpoint_bl=51.1;break;}
-     default: {blpoint_bl=51.15;break;}
+        case 1: {blpoint_bl=50.9;break;}
+        case 2: {blpoint_bl=51.05;break;}
+        case 3: {blpoint_bl=51.1;break;}
+        case 4: {blpoint_bl=51.1;break;}
+        default: {blpoint_bl=51.15;break;}
     }
-    float rested_xp = (xp_bl/blpoint_bl) * GetRestBonus(); //xp for each rested bonus
+    float rested_xp = (xp_bl/blpoint_bl) * GetRestBonus();  //xp for each rested bonus
 
-    float rest_xp_percent = rested_xp / ((float)xp / 100);        //% rest bonuse from total rest bonus
+    float rest_xp_percent = rested_xp / ((float)xp / 100);  //% rest bonuse from total rest bonus
     if(rest_xp_percent>100)rest_xp_percent=100;
 
     sLog.outDetail("XP_GAIN: %f, value1=%f, rest_xp_percent=%f",(float)xp,(xp_bl/blpoint_bl),rest_xp_percent);
@@ -6275,8 +6276,8 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                     if(mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON)
                         return EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED;
                 }else
-                    // not let equip offhand item if mainhand not equiped
-                    return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+                // not let equip offhand item if mainhand not equiped
+                return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
 
             }
 
@@ -8606,7 +8607,6 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
 
                     reqkill = qInfo->ReqCreatureOrGOId[j];
 
-
                     if ( reqkill == entry )
                     {
                         reqkillcount = qInfo->ReqCreatureOrGOCount[j];
@@ -8652,7 +8652,6 @@ void Player::CastedCreature( uint32 entry, uint64 guid, uint32 spell_id )
                         continue;
 
                     reqCast = qInfo->ReqCreatureOrGOId[j];
-
 
                     if ( reqCast == entry )
                     {
@@ -8955,13 +8954,13 @@ bool Player::LoadFromDB( uint32 guid )
 
     rest_bonus = fields[20].GetFloat();
     //speed collect rest bonus in offline, in logaut, far from tavern, city (section/in hour)
-    float bubble=0.0416; //100% Blizzlike
+    float bubble=0.0416;                                    //100% Blizzlike
     //speed collect rest bonus in offline, in logaut, far from tavern, city (section/in hour)
-    float bubble1=0.083; //100% Blizzlike
+    float bubble1=0.083;                                    //100% Blizzlike
     if((int)fields[22].GetUInt32()==1&&(int)fields[21].GetUInt32()>0)
-    SetRestBonus( GetRestBonus() + (time(NULL)-(int)fields[21].GetUInt32())*0.0142108*bubble1);
+        SetRestBonus( GetRestBonus() + (time(NULL)-(int)fields[21].GetUInt32())*0.0142108*bubble1);
     if((int)fields[22].GetUInt32()==0&&(int)fields[21].GetUInt32()>0)
-    SetRestBonus( GetRestBonus() + (time(NULL)-(int)fields[21].GetUInt32())*0.0142108*bubble);
+        SetRestBonus( GetRestBonus() + (time(NULL)-(int)fields[21].GetUInt32())*0.0142108*bubble);
 
     if(!IsPositionValid())
     {
@@ -9325,8 +9324,9 @@ void Player::SaveToDB()
     uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
     uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
 
-   int is_logout_resting=0;//logaut far from tavern\city
-   if(!IsInWorld()&&HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))is_logout_resting=1;//logaut, but in tavern\city
+    int is_logout_resting=0;                                //logaut far from tavern\city
+                                                            //logaut, but in tavern\city
+    if(!IsInWorld()&&HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))is_logout_resting=1;
 
     // Set player sit state to standing on save
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
@@ -9794,7 +9794,7 @@ void Player::PetSpellInitialize()
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
         if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
-        for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
+            for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
         {
             if(itr->second->active != 4)
                 continue;
@@ -9803,7 +9803,7 @@ void Player::PetSpellInitialize()
         data << uint8(addlist);
 
         if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
-        for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
+            for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
         {
             if(itr->second->active != 4)
                 continue;
@@ -9826,7 +9826,7 @@ void Player::PetSpellInitialize()
                     data << uint16(0x01);
             }
         }
-            
+
         data << uint8(0x01) << uint32(0x6010) << uint32(0x00) << uint32(0x00) << uint16(0x00);
 
         GetSession()->SendPacket(&data);

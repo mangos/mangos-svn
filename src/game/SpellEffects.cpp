@@ -1026,11 +1026,10 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3))
             {
                 p_caster->AddItemEnchant(itemTarget,old_enchant_id,false);
-                // duration == 0 wiil remove EnchantDuration 
+                // duration == 0 wiil remove EnchantDuration
                 p_caster->AddEnchantDuration(itemTarget,1,0);
             }
         }
-
 
         for(int x=0;x<3;x++)
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+x,0);
@@ -1581,7 +1580,6 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     // must be equipped
     if(!itemTarget->IsEquipped())
         return;
-
 
     if (m_spellInfo->EffectMiscValue[i])
     {
