@@ -49,7 +49,7 @@ bool Quest::LoadQuest( uint32 quest )
         {
             if ( pQuestInfo->ReqItemId[i] )
                 m_reqitemscount++;
-            if ( pQuestInfo->ReqKillMobOrGOId[i] )
+            if ( pQuestInfo->ReqCreatureOrGOId[i] )
                 m_reqmobs_or_GO_count++;
         }
 

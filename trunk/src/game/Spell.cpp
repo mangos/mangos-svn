@@ -670,6 +670,11 @@ void Spell::cast()
 
     //}
 
+    // cast at creature quest objectives update
+    if( m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT )
+    {
+        ((Player*)m_caster)->CastedCreature(unitTarget->GetEntry(),unitTarget->GetGUID(),m_spellInfo->Id);
+    }
 }
 
 void Spell::SendSpellCooldown()

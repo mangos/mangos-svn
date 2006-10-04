@@ -359,8 +359,8 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
     data << pQuest->m_reqmobs_or_GO_count;
     for (uint32 i=0; i <QUEST_OBJECTIVES_COUNT; i++)
     {
-        data << qInfo->ReqKillMobOrGOId[i];
-        data << qInfo->ReqKillMobOrGOCount[i];
+        data << uint32(qInfo->ReqCreatureOrGOId[i]);
+        data << qInfo->ReqCreatureOrGOCount[i];
     }
 
     pSession->SendPacket( &data );
@@ -440,7 +440,7 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
     {
-        data << uint32(pQuest->GetQuestInfo()->ReqKillMobOrGOId[iI])  << uint32(pQuest->GetQuestInfo()->ReqKillMobOrGOCount[iI]);
+        data << uint32(pQuest->GetQuestInfo()->ReqCreatureOrGOId[iI])  << uint32(pQuest->GetQuestInfo()->ReqCreatureOrGOCount[iI]);
         data << uint32(pQuest->GetQuestInfo()->ReqItemId[iI]) << uint32(pQuest->GetQuestInfo()->ReqItemCount[iI]);
     }
 

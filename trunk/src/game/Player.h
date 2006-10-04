@@ -603,6 +603,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ItemAdded( uint32 entry, uint32 count );
         void ItemRemoved( uint32 entry, uint32 count );
         void KilledMonster( uint32 entry, uint64 guid );
+        void CastedCreature( uint32 entry, uint64 guid, uint32 spell_id );
         void MoneyChanged( uint32 value );
         bool HaveQuestForItem( uint32 itemid );
 
@@ -613,7 +614,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendCanTakeQuestResponse( uint32 msg );
         void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
         void SendQuestUpdateAddItem( uint32 quest_id, uint32 item_idx, uint32 count );
-        void SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count );
+        void SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count );
 
         uint64 GetDivider() { return m_divider; };
         void SetDivider( uint64 guid ) { m_divider = guid; };

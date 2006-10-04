@@ -7940,15 +7940,15 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 }
             }
 
-            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
-                    // GO activate objectives
-                    if( qInfo->ReqKillMobOrGOId <= 0 )
+                    // skip GO activate objectives
+                    if( qInfo->ReqCreatureOrGOId <= 0 )
                         continue;
 
-                    if( qInfo->ReqKillMobOrGOCount[i] != 0 && mQuestStatus[quest_id].m_mobcount[i] < qInfo->ReqKillMobOrGOCount[i] )
+                    if( qInfo->ReqCreatureOrGOCount[i] != 0 && mQuestStatus[quest_id].m_mobcount[i] < qInfo->ReqCreatureOrGOCount[i] )
                         return false;
                 }
             }
@@ -8058,7 +8058,7 @@ void Player::AddQuest( Quest *pQuest )
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 mQuestStatus[quest_id].m_itemcount[i] = 0;
         }
-        if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+        if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
         {
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 mQuestStatus[quest_id].m_mobcount[i] = 0;
@@ -8592,24 +8592,76 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
         QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
         if ( qInfo && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
         {
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
-                    reqkill = qInfo->ReqKillMobOrGOId[j];
-
-                    // GO activate qobjective or none
-                    if(reqkill <=0)
+                    // skip GO activate objective or none
+                    if(qInfo->ReqCreatureOrGOId[j] <=0)
                         continue;
+
+                    // skip Cast at creature objective
+                    if(qInfo->ReqSpell[j] !=0 )
+                        continue;
+
+                    reqkill = qInfo->ReqCreatureOrGOId[j];
+
 
                     if ( reqkill == entry )
                     {
-                        reqkillcount = qInfo->ReqKillMobOrGOCount[j];
+                        reqkillcount = qInfo->ReqCreatureOrGOCount[j];
                         curkillcount = mQuestStatus[quest].m_mobcount[j];
                         if ( curkillcount < reqkillcount )
                         {
                             mQuestStatus[quest].m_mobcount[j] = curkillcount + addkillcount;
-                            SendQuestUpdateAddKill( quest, guid, j, curkillcount, addkillcount);
+                            SendQuestUpdateAddCreature( quest, guid, j, curkillcount, addkillcount);
+                        }
+                        if ( CanCompleteQuest( quest ) )
+                            CompleteQuest( quest );
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Player::CastedCreature( uint32 entry, uint64 guid, uint32 spell_id )
+{
+    uint32 quest;
+    uint32 reqCast;
+    uint32 reqCastCount;
+    uint32 curCastCount;
+    uint32 addCastCount = 1;
+    for( int i = 0; i < 20; i++ )
+    {
+        quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+        QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
+        if ( qInfo && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
+        {
+            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
+            {
+                for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+                {
+                    // skip GO activate objective or none
+                    if(qInfo->ReqCreatureOrGOId[j] <=0)
+                        continue;
+
+                    // skip kill creature objective or wrong spell casts
+                    if(qInfo->ReqSpell[j] != spell_id )
+                        continue;
+
+                    reqCast = qInfo->ReqCreatureOrGOId[j];
+
+
+                    if ( reqCast == entry )
+                    {
+                        reqCastCount = qInfo->ReqCreatureOrGOCount[j];
+                        curCastCount = mQuestStatus[quest].m_mobcount[j];
+                        if ( curCastCount < reqCastCount )
+                        {
+                            mQuestStatus[quest].m_mobcount[j] = curCastCount + addCastCount;
+                            SendQuestUpdateAddCreature( quest, guid, j, curCastCount, addCastCount);
                         }
                         if ( CanCompleteQuest( quest ) )
                             CompleteQuest( quest );
@@ -8775,7 +8827,7 @@ void Player::SendQuestUpdateAddItem( uint32 quest_id, uint32 item_idx, uint32 co
     }
 }
 
-void Player::SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count )
+void Player::SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count )
 {
     assert(old_count + add_count < 64 && "mob count store in 6 bits 2^6 = 64 (0..63)");
 
@@ -8786,9 +8838,9 @@ void Player::SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creatu
         data.Initialize( SMSG_QUESTUPDATE_ADD_KILL );
         sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL" );
         data << qInfo->QuestId;
-        data << qInfo->ReqKillMobOrGOId[ creature_idx ];
+        data << uint32(qInfo->ReqCreatureOrGOId[ creature_idx ]);
         data << old_count + add_count;
-        data << qInfo->ReqKillMobOrGOCount[ creature_idx ];
+        data << qInfo->ReqCreatureOrGOCount[ creature_idx ];
         data << guid;
         GetSession()->SendPacket(&data);
 

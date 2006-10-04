@@ -127,7 +127,7 @@ enum __QuestSpecialFlags                                    //according to mango
     QUEST_SPECIAL_FLAGS_EXPLORATION   = 2,
     QUEST_SPECIAL_FLAGS_SPEAKTO       = 4,
 
-    QUEST_SPECIAL_FLAGS_KILL          = 8,
+    QUEST_SPECIAL_FLAGS_KILL_OR_CAST  = 8,
     QUEST_SPECIAL_FLAGS_TIMED         = 16,
     QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,                 //?
 
@@ -170,8 +170,9 @@ struct QuestInfo
     char* ObjectiveText[4];
     uint32 ReqItemId[ QUEST_OBJECTIVES_COUNT ];
     uint32 ReqItemCount[ QUEST_OBJECTIVES_COUNT ];
-    uint32 ReqKillMobOrGOId[ QUEST_OBJECTIVES_COUNT ];
-    uint32 ReqKillMobOrGOCount[ QUEST_OBJECTIVES_COUNT ];
+    int32  ReqCreatureOrGOId[ QUEST_OBJECTIVES_COUNT ];     // >0 Creature <0 Gameobject
+    uint32 ReqCreatureOrGOCount[ QUEST_OBJECTIVES_COUNT ];
+    uint32 ReqSpell[ QUEST_OBJECTIVES_COUNT ];
     //uint32 ReqQuests[ QUEST_DEPLINK_COUNT ];
     uint32 RewChoiceItemId[ QUEST_REWARD_CHOICES_COUNT ];
     uint32 RewChoiceItemCount[ QUEST_REWARD_CHOICES_COUNT ];
