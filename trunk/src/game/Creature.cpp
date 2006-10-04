@@ -1321,6 +1321,8 @@ void Creature::GivePetXP(uint32 xp)
         level = getLevel();
         nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
 
+        SetHealth( 28 + 10 * level);
+        SetMaxHealth( 28 + 10 * level);
         SetUInt32Value(UNIT_TRAINING_POINTS, level<<16 /* + (spell point)*/ );
         SetStat(STAT_STRENGTH,uint32(20+level*1.55));
         SetStat(STAT_AGILITY,uint32(20+level*0.64));
