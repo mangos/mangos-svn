@@ -2916,8 +2916,8 @@ void Player::SendInitialActions()
         if (itr->button == button)
         {
             data << uint16(itr->action);
-            data << uint8(itr->type);
             data << uint8(itr->misc);
+            data << uint8(itr->type);
             ++itr;
         }
         else

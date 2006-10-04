@@ -932,7 +932,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     sLog.outDetail( "WORLD: Received CMSG_SET_ACTION_BUTTON" );
     uint8 button, misc, type;
     uint16 action;
-    recv_data >> button >> action >> type >> misc;
+    recv_data >> button >> action >> misc >> type;
     sLog.outDetail( "BUTTON: %u ACTION: %u TYPE: %u MISC: %u", button, action, type, misc );
     if(action==0)
     {
@@ -942,21 +942,23 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     }
     else
     {
-        if(type==64)
+        if(type==ACTION_BUTTON_MACRO)
         {
             sLog.outDetail( "MISC: Added Macro %u into button %u", action, button );
             GetPlayer()->addAction(button,action,type,misc);
         }
-        else if(type==0)
+        else if(type==ACTION_BUTTON_SPELL)
         {
             sLog.outDetail( "MISC: Added Action %u into button %u", action, button );
             GetPlayer()->addAction(button,action,type,misc);
         }
-        else if(type==128)
+        else if(type==ACTION_BUTTON_ITEM)
         {
             sLog.outDetail( "MISC: Added Item %u into button %u", action, button );
             GetPlayer()->addAction(button,action,type,misc);
         }
+        else
+            sLog.outError( "MISC: Unknown action button type %u for action %u into button %u", type, action, button );
     }
 }
 
