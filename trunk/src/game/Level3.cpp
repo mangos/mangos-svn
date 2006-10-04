@@ -2656,7 +2656,7 @@ bool ChatHandler::HandleMaxSkillCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::ShutDown (const char* args)
+bool ChatHandler::HandleShutDownCommand(const char* args)
 {
     if(!*args)
     {
@@ -2664,14 +2664,15 @@ bool ChatHandler::ShutDown (const char* args)
         return false;
     }
 
-    uint32 time = atoi(args);
-    sWorld.ShutdownServ(time);
-    return true;
-}
-
-bool ChatHandler::CancelShutdown (const char* args)
-{
-    sWorld.ShutdownServ(0);
+    if(std::string(args)=="stop")
+    {
+        sWorld.ShutdownCancel();
+    }
+    else
+    {
+        uint32 time = atoi(args);
+        sWorld.ShutdownServ(time);
+    }
     return true;
 }
 
