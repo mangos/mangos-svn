@@ -1295,7 +1295,7 @@ void Creature::GivePetXP(uint32 xp)
         return;
 
     uint32 level = getLevel();
-	CreatureInfo const *cinfo = GetCreatureInfo();
+    CreatureInfo const *cinfo = GetCreatureInfo();
 
     // XP to money conversion processed in Player::RewardQuest
     if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
@@ -1306,10 +1306,10 @@ void Creature::GivePetXP(uint32 xp)
     uint32 newXP = curXP + xp;
 
     if(newXP >= nextLvlXP && level+1 > GetOwner()->getLevel())
-	{
+    {
         SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, nextLvlXP-1);
-		return;
-	}
+        return;
+    }
 
     while( newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
     {
@@ -1323,6 +1323,9 @@ void Creature::GivePetXP(uint32 xp)
 
         SetHealth( 28 + 10 * level);
         SetMaxHealth( 28 + 10 * level);
+        // pet damage will grow up with the pet level,*1.5f for temp
+        SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(level-cinfo->level)*1.5f);
+        SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(level-cinfo->level)*1.5f);
         SetUInt32Value(UNIT_TRAINING_POINTS, level<<16 /* + (spell point)*/ );
         SetStat(STAT_STRENGTH,uint32(20+level*1.55));
         SetStat(STAT_AGILITY,uint32(20+level*0.64));
@@ -1331,9 +1334,6 @@ void Creature::GivePetXP(uint32 xp)
         SetStat(STAT_SPIRIT,uint32(20+level*0.36));
         SetArmor(level*50);
     }
-	// pet damage will grow up with the pet level,*1.5f for temp
-	SetUInt32Value(UNIT_FIELD_MINDAMAGE, uint32(cinfo->mindmg + (level-cinfo->level)*1.5f));
-	SetUInt32Value(UNIT_FIELD_MAXDAMAGE, uint32(cinfo->maxdmg + (level-cinfo->level)*1.5f));
 
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, newXP);
 }
