@@ -375,10 +375,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\Stats.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\TaxiHandler.cpp"
 				>
 			</File>

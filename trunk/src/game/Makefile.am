@@ -177,7 +177,6 @@ libgame_a_SOURCES = \
 	SharedDefines.h \
 	SpellAuras.h \
 	Spell.h \
-	Stats.h \
 	TargetedMovementGenerator.h \
 	TaxiMovementGenerator.h \
 	Tools.h \
