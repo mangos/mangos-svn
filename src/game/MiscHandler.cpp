@@ -878,7 +878,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     if(result)
     {
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-        result = sDatabase.PQuery("SELECT `trigger_map`,`trigger_postion_x`,`trigger_position_y`,`trigger_position_z` FROM `areatrigger_template` WHERE `id` = '%u'", Trigger_ID);
+        result = sDatabase.PQuery("SELECT `trigger_map`,`trigger_position_x`,`trigger_position_y`,`trigger_position_z` FROM `areatrigger_template` WHERE `id` = '%u'", Trigger_ID);
         if(result)
         {
             Field *fields = result->Fetch();
