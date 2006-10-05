@@ -168,7 +168,7 @@ ReactorAI::stopAttack()
     }
 
     // TargetedMovementGenerator can be already remove at i_creature death and not updated i_victimGuid
-    if( i_creature->top()->GetMovementGeneratorType() == MovementGenerator::TARGETED_MOTION_TYPE )
+    if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
         static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
 
     i_victimGuid = 0;

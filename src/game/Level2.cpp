@@ -584,6 +584,13 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`waittime`) VALUES ('%u','%u','%f', '%f', '%f','%u')",
         pCreature->GetGUIDLow(), point, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), wait);
 
+    // update movement type
+    if(pCreature->GetDefaultMovementType()!=WAYPOINT_MOTION_TYPE)
+    {
+        pCreature->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
+        sDatabase.PExecute("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", pCreature->GetDefaultMovementType(),pCreature->GetGUIDLow());
+    }
+
     SendSysMessage(LANG_WAYPOINT_ADDED);
 
     return true;

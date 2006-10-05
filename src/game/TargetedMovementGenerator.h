@@ -35,7 +35,7 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
         void Initialize(Creature &);
         void Reset(Creature &);
         void Update(Creature &, const uint32 &);
-        MovementGeneratorType GetMovementGeneratorType() { return MovementGenerator::TARGETED_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() { return TARGETED_MOTION_TYPE; }
 
         void TargetedHome(Creature &);
 

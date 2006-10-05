@@ -691,6 +691,7 @@ CREATE TABLE `creature` (
   `state` int(11) unsigned NOT NULL default '0',
   `npcflags` int(11) unsigned NOT NULL default '0',
   `faction` int(11) unsigned NOT NULL default '0',
+  `MovementType` int(11) unsigned NOT NULL default '0',
   `auras` longtext,
   PRIMARY KEY  (`guid`),
   KEY `idx_map` (`map`)
@@ -888,7 +889,7 @@ CREATE TABLE `creature_template` (
   `mingold` int(30) unsigned NOT NULL default '0',
   `maxgold` int(30) unsigned NOT NULL default '0',
   `AIName` varchar(128) NOT NULL default '',
-  `MoveName` varchar(128) NOT NULL default '',
+  `MovementType` int(11) unsigned NOT NULL default '0',
   `ScriptName` varchar(128) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';

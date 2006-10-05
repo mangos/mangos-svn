@@ -290,7 +290,7 @@ void ScriptedAI::DoGoHome()
 {
     if( !m_creature->getVictim() && m_creature->isAlive() )
     {
-        if( (*m_creature)->top()->GetMovementGeneratorType() == MovementGenerator::TARGETED_MOTION_TYPE )
+        if( (*m_creature)->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
             (*m_creature)->Mutate(new TargetedMovementGenerator(*m_creature));
 
         static_cast<TargetedMovementGenerator *>((*m_creature)->top())->TargetedHome(*m_creature);

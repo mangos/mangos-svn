@@ -72,7 +72,7 @@ namespace FactorySelector
                 }
             }
         }
-        ainame = (ai_factory == NULL) ? "NullCreatureAI" : ai_factory->name();
+        ainame = (ai_factory == NULL) ? "NullCreatureAI" : ai_factory->key();
         DEBUG_LOG("Creature %u used AI is %s.", creature->GetGUIDLow(), ainame.c_str() );
         return ( ai_factory == NULL ? new NullCreatureAI : ai_factory->Create(creature) );
     }
@@ -81,7 +81,7 @@ namespace FactorySelector
     {
         MovementGeneratorRegistry &mv_registry(MovementGeneratorRepository::Instance());
         assert( creature->GetCreatureInfo() != NULL );
-        const MovementGeneratorCreator *mv_factory = mv_registry.GetRegistryItem( creature->GetCreatureInfo()->MovementGen);
+        const MovementGeneratorCreator *mv_factory = mv_registry.GetRegistryItem( creature->GetDefaultMovementType());
 
         /* if( mv_factory == NULL  )
         {

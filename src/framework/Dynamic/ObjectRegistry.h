@@ -28,12 +28,12 @@
 
 /** ObjectRegistry holds all registry item of the same type
  */
-template<class T>
+template<class T, class Key = std::string>
 class MANGOS_DLL_DECL ObjectRegistry
 {
-    typedef std::map<std::string, T *> RegistryMapType;
+    typedef std::map<Key, T *> RegistryMapType;
     RegistryMapType i_registeredObjects;
-    friend class MaNGOS::OperatorNew<ObjectRegistry<T> >;
+    friend class MaNGOS::OperatorNew<ObjectRegistry<T, Key> >;
 
     // protected for friend use since it should be a singleton
     ObjectRegistry() {}
@@ -47,16 +47,16 @@ class MANGOS_DLL_DECL ObjectRegistry
     public:
 
         /// Returns a registry item
-        const T* GetRegistryItem(const char *name) const
+        const T* GetRegistryItem(Key key) const
         {
-            typename RegistryMapType::const_iterator iter = i_registeredObjects.find(name);
+            typename RegistryMapType::const_iterator iter = i_registeredObjects.find(key);
             return( iter == i_registeredObjects.end() ? NULL : iter->second );
         }
 
         /// Inserts a registry item
-        bool InsertItem(T *obj, const char *name, bool override = false)
+        bool InsertItem(T *obj, Key key, bool override = false)
         {
-            typename RegistryMapType::iterator iter = i_registeredObjects.find(name);
+            typename RegistryMapType::iterator iter = i_registeredObjects.find(key);
             if( iter != i_registeredObjects.end() )
             {
                 if( !override )
@@ -65,14 +65,14 @@ class MANGOS_DLL_DECL ObjectRegistry
                 i_registeredObjects.erase(iter);
             }
 
-            i_registeredObjects[name] = obj;
+            i_registeredObjects[key] = obj;
             return true;
         }
 
         /// Removes a registry item
-        void RemoveItem(const char *name, bool delete_object = true)
+        void RemoveItem(Key key, bool delete_object = true)
         {
-            typename RegistryMapType::iterator iter = i_registeredObjects.find(name);
+            typename RegistryMapType::iterator iter = i_registeredObjects.find(key);
             if( iter != i_registeredObjects.end() )
             {
                 if( delete_object )
@@ -82,13 +82,13 @@ class MANGOS_DLL_DECL ObjectRegistry
         }
 
         /// Returns true if registry contains an item
-        bool HasItem(const char *name) const
+        bool HasItem(Key key) const
         {
-            return (i_registeredObjects.find(name) != i_registeredObjects.end());
+            return (i_registeredObjects.find(key) != i_registeredObjects.end());
         }
 
         /// Return a list of registered items
-        unsigned int GetRegisteredItems(std::vector<std::string> &l) const
+        unsigned int GetRegisteredItems(std::vector<Key> &l) const
         {
             unsigned int sz = l.size();
             l.resize(sz + i_registeredObjects.size());

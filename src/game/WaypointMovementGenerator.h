@@ -73,7 +73,7 @@ class MANGOS_DLL_DECL WaypointMovementGenerator : public MovementGenerator, publ
 
         void Reset(Creature &c) { ReloadPath(c); }
         void Update(Creature &creature, const uint32 &diff);
-        MovementGeneratorType GetMovementGeneratorType() { return MovementGenerator::WAYPOINT_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() { return WAYPOINT_MOTION_TYPE; }
 
         // now path movement implmementation
         void LoadPath(Creature &c) { _load(c); }

@@ -46,7 +46,7 @@ Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
 m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
 itemcount(0),m_loyalty(1),m_trainpoint(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false), m_isTamed(false),
-m_regenTimer(2000), lootForPickPocketed(false),lootForBody(false),lootForSkinning(false)
+m_regenTimer(2000), lootForPickPocketed(false),lootForBody(false),lootForSkinning(false), m_defaultMovementType(IDLE_MOTION_TYPE)
 {
     m_valuesCount = UNIT_END;
 
@@ -941,6 +941,7 @@ void Creature::SaveToDB()
 
         << GetUInt32Value(UNIT_NPC_FLAGS) << ","            //npcflags
         << getFaction() << ","
+        << GetDefaultMovementType() << ","                  // default movement generator type
         << "'')";                                           // should save auras
 
     sDatabase.Execute( ss.str( ).c_str( ) );
@@ -1048,13 +1049,21 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     SetSpeed( cinfo->speed ) ;
 
+    if(cinfo->MovementType < MAX_DB_MOTION_TYPE)
+        m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
+    else
+    {
+        m_defaultMovementType = IDLE_MOTION_TYPE;
+        sLog.outError("Creature template %u have wrong movement generator type value %u, ignore and set to IDLE.",Entry,cinfo->MovementType);
+    }
+
     return true;
 }
 
 bool Creature::LoadFromDB(uint32 guid)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
     if(!result)
         return false;
 
@@ -1080,6 +1089,17 @@ bool Creature::LoadFromDB(uint32 guid)
     m_respawnDelay =(fields[6].GetUInt32()+fields[7].GetUInt32())*1000/2;
     m_respawnTimer = fields[13].GetUInt32();
     m_deathState = (DeathState)fields[14].GetUInt32();
+
+    {
+        uint32 mtg = fields[17].GetUInt32();
+        if(mtg < MAX_DB_MOTION_TYPE)
+            m_defaultMovementType = MovementGeneratorType(mtg);
+        else
+        {
+            m_defaultMovementType = IDLE_MOTION_TYPE;
+            sLog.outError("Creature (GUID: %u ID: %u) have wrong movement generator type value %u, ignore and set to IDLE.",guid,GetEntry(),mtg);
+        }
+    }
 
     delete result;
 

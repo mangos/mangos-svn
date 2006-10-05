@@ -23,6 +23,7 @@
 #include "Unit.h"
 #include "UpdateMask.h"
 #include "MotionMaster.h"
+#include "MovementGenerator.h"
 #include "ItemPrototype.h"
 #include "LootMgr.h"
 
@@ -194,7 +195,7 @@ struct CreatureInfo
     uint32  mingold;
     uint32  maxgold;
     char const* AIName;
-    char const* MovementGen;
+    uint32  MovementType;
     char const* ScriptName;
 };
 
@@ -365,6 +366,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 gettrainpoint(){ return m_trainpoint;};
         void setloyalty(uint32 loyalty){m_loyalty = loyalty;};
         void settrainpoint(uint32 trainpoint){m_trainpoint = trainpoint;};
+
+        MovementGeneratorType GetDefaultMovementType() const { return m_defaultMovementType; }
+        void SetDefaultMovementType(MovementGeneratorType mgt) { m_defaultMovementType = mgt; }
     protected:
         void _LoadGoods();
         void _LoadQuests();
@@ -402,5 +406,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_regenTimer;
         uint32 m_loyalty;
         uint32 m_trainpoint;
+        MovementGeneratorType m_defaultMovementType;
 };
 #endif
