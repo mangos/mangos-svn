@@ -27,7 +27,6 @@
 #include "GossipDef.h"
 #include "Player.h"
 #include "Opcodes.h"
-#include "Stats.h"
 #include "Log.h"
 #include "LootMgr.h"
 #include "Chat.h"

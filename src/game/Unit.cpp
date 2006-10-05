@@ -28,7 +28,6 @@
 #include "Player.h"
 #include "Creature.h"
 #include "Spell.h"
-#include "Stats.h"
 #include "Group.h"
 #include "SpellAuras.h"
 #include "MapManager.h"

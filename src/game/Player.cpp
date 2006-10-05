@@ -29,7 +29,6 @@
 #include "QuestDef.h"
 #include "GossipDef.h"
 #include "Spell.h"
-#include "Stats.h"
 #include "UpdateData.h"
 #include "Channel.h"
 #include "Chat.h"
@@ -2941,9 +2940,15 @@ void Player::SendInitialActions()
 void Player::addAction(const uint8 button, const uint16 action, const uint8 type, const uint8 misc)
 {
     // check cheating with adding non-known spells to action bar
-    if(type==0)
+    if(type==ACTION_BUTTON_SPELL)
     {
-        if(sSpellStore.LookupEntry(action) && !HasSpell(action))
+        if(!sSpellStore.LookupEntry(action))
+        {
+            sLog.outError( "Action %u not added into button %u for player %s: spell not exist", action, button, GetName() );
+            return;
+        }
+
+        if(!HasSpell(action))
         {
             sLog.outError( "Action %u not added into button %u for player %s: player don't known this spell", action, button, GetName() );
             return;
@@ -8998,13 +9003,13 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadSpells();
 
-    _LoadActions();
-
     _LoadQuestStatus();
 
     _LoadTutorials();
 
     _LoadInventory();
+
+    _LoadActions();
 
     _LoadReputation();
 
