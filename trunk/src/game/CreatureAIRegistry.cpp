@@ -43,8 +43,8 @@ namespace AIRegistry
         (new CreatureAIFactory<PetAI>("PetAI"))->RegisterSelf();
         (new CreatureAIFactory<TotemAI>("TotemAI"))->RegisterSelf();
 
-        (new MovementGeneratorFactory<RandomMovementGenerator>("Random"))->RegisterSelf();
-        (new MovementGeneratorFactory<WaypointMovementGenerator>("Waypoint"))->RegisterSelf();
+        (new MovementGeneratorFactory<RandomMovementGenerator>(RANDOM_MOTION_TYPE))->RegisterSelf();
+        (new MovementGeneratorFactory<WaypointMovementGenerator>(WAYPOINT_MOTION_TYPE))->RegisterSelf();
     }
 }
 

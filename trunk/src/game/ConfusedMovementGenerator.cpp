@@ -128,5 +128,5 @@ ConfusedMovementGenerator::Permissible(const Creature *creature)
         || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_STABLE))
         return CANNOT_HANDLE_TYPE;
 
-    return MovementGenerator::CONFUSED_MOTION_TYPE;
+    return CONFUSED_MOTION_TYPE;
 }

@@ -33,7 +33,7 @@ class MANGOS_DLL_DECL RandomMovementGenerator : public MovementGenerator
         void Initialize(Creature &);
         void Reset(Creature &);
         void Update(Creature &, const uint32 &);
-        MovementGeneratorType GetMovementGeneratorType() { return MovementGenerator::RANDOM_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() { return RANDOM_MOTION_TYPE; }
 
         static int Permissible(const Creature *);
     private:

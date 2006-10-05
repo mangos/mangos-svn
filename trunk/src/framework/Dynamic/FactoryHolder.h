@@ -26,23 +26,23 @@
 
 /** FactoryHolder holds a factory object of a specific type
  */
-template<class T>
+template<class T, class Key = std::string>
 class MANGOS_DLL_DECL FactoryHolder
 {
     public:
-        typedef ObjectRegistry<FactoryHolder<T> > FactoryHolderRegistry;
+        typedef ObjectRegistry<FactoryHolder<T, Key >, Key > FactoryHolderRegistry;
         typedef MaNGOS::Singleton<FactoryHolderRegistry > FactoryHolderRepository;
 
-        FactoryHolder(const char*s) : i_name(s) {}
-        inline std::string name(void) const { return i_name; }
+        FactoryHolder(Key k) : i_key(k) {}
+        inline Key key() const { return i_key; }
 
-        void RegisterSelf(void) { FactoryHolderRepository::Instance().InsertItem(this, i_name.c_str()); }
+        void RegisterSelf(void) { FactoryHolderRepository::Instance().InsertItem(this, i_key); }
         void DeregisterSelf(void) { FactoryHolderRepository::Instance().RemoveItem(this, false); }
 
         /// Abstract Factory create method
         virtual T* Create(void *data = NULL) const = 0;
     private:
-        std::string i_name;
+        Key i_key;
 };
 
 /** Permissible is a classic way of letting the object decide

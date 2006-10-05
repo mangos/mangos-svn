@@ -162,5 +162,5 @@ RandomMovementGenerator::Permissible(const Creature *creature)
         || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_STABLE))
         return CANNOT_HANDLE_TYPE;
 
-    return MovementGenerator::RANDOM_MOTION_TYPE;
+    return RANDOM_MOTION_TYPE;
 }

@@ -29,20 +29,22 @@ class Creature;
 
 #define     CANNOT_HANDLE_TYPE   -1
 
+// values 0 ... MAX_DB_MOTION_TYPE-1 used in DB
+enum MovementGeneratorType
+{
+    IDLE_MOTION_TYPE      = 0,                      // IdleMovementGenerator.h
+    RANDOM_MOTION_TYPE    = 1,                      // RandomMovementGenerator.h
+    WAYPOINT_MOTION_TYPE  = 2,                      // WaypointMovementGenerator.h
+    MAX_DB_MOTION_TYPE,                             // *** this and later motion types can't be setted in DB.
+    ANIMAL_RANDOM_MOTION_TYPE = MAX_DB_MOTION_TYPE, // AnimalRandomMovementGenerator.h
+    CONFUSED_MOTION_TYPE,                           // ConfusedMovementGenerator.h
+    TARGETED_MOTION_TYPE,                           // TargetedMovementGenerator.h
+    TAXI_MOTION_TYPE,                               // TaxiMovementGenerator.h
+};
+
 class MANGOS_DLL_SPEC MovementGenerator
 {
     public:
-        enum MovementGeneratorType
-        {
-            IDLE_MOTION_TYPE = 0,                           // IdleMovementGenerator.h
-            RANDOM_MOTION_TYPE,                             // RandomMovementGenerator.h
-            TARGETED_MOTION_TYPE,                           // TargetedMovementGenerator.h
-            ANIMAL_RANDOM_MOTION_TYPE,                      // AnimalRandomMovementGenerator.h
-            CONFUSED_MOTION_TYPE,                           // ConfusedMovementGenerator.h
-            TAXI_MOTION_TYPE,                               // TaxiMovementGenerator.h
-            WAYPOINT_MOTION_TYPE,                           // WaypointMovementGenerator.h
-        };
-
         virtual ~MovementGenerator();
 
         virtual void Initialize(Creature &) = 0;
@@ -54,22 +56,22 @@ class MANGOS_DLL_SPEC MovementGenerator
         virtual MovementGeneratorType GetMovementGeneratorType() = 0;
 };
 
-struct SelectableMovement : public FactoryHolder<MovementGenerator>, public Permissible<Creature>
+struct SelectableMovement : public FactoryHolder<MovementGenerator,MovementGeneratorType>, public Permissible<Creature>
 {
-    SelectableMovement(const char *id) : FactoryHolder<MovementGenerator>(id) {}
+    SelectableMovement(MovementGeneratorType mgt) : FactoryHolder<MovementGenerator,MovementGeneratorType>(mgt) {}
 };
 
 template<class REAL_MOVEMENT>
 struct MovementGeneratorFactory : public SelectableMovement
 {
-    MovementGeneratorFactory(const char *name) : SelectableMovement(name) {}
+    MovementGeneratorFactory(MovementGeneratorType mgt) : SelectableMovement(mgt) {}
 
     MovementGenerator* Create(void *) const;
 
     int Permit(const Creature *c) const { return REAL_MOVEMENT::Permissible(c); }
 };
 
-typedef FactoryHolder<MovementGenerator> MovementGeneratorCreator;
-typedef FactoryHolder<MovementGenerator>::FactoryHolderRegistry MovementGeneratorRegistry;
-typedef FactoryHolder<MovementGenerator>::FactoryHolderRepository MovementGeneratorRepository;
+typedef FactoryHolder<MovementGenerator,MovementGeneratorType> MovementGeneratorCreator;
+typedef FactoryHolder<MovementGenerator,MovementGeneratorType>::FactoryHolderRegistry MovementGeneratorRegistry;
+typedef FactoryHolder<MovementGenerator,MovementGeneratorType>::FactoryHolderRepository MovementGeneratorRepository;
 #endif

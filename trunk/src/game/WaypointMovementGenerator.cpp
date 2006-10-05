@@ -94,7 +94,7 @@ WaypointMovementGenerator::Permissible(const Creature *c)
     if (si_waypointHolders.find(c->GetGUIDLow()) != si_waypointHolders.end())
     {
         DEBUG_LOG("Creature [guid=%u] returns waypoint movement permit.", c->GetGUIDLow());
-        return MovementGenerator::WAYPOINT_MOTION_TYPE;
+        return WAYPOINT_MOTION_TYPE;
     }
 
     return CANNOT_HANDLE_TYPE;

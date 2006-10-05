@@ -25,7 +25,7 @@ extern DatabaseMysql  sDatabase;
 
 const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiiis";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
-const char CreatureInfofmt[]="iissiiiiiififfiiiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiisss";
+const char CreatureInfofmt[]="iissiiiiiififfiiiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiisis";
 const char Questsfmt[]="iiiiiiiiiiiiiiiiiissssssssssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffi";
 
 SQLStorage sItemStorage(ItemPrototypefmt,"item_template");
