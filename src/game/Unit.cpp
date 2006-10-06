@@ -587,12 +587,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
             pVictim->SetHealth(pVictim->GetMaxHealth());
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(pVictim, spellProto->Id, pdamage);
-        if(pVictim->GetTypeId() == TYPEID_UNIT)
-        {
-            Creature *ctarget = (Creature*)pVictim;
-            if(ctarget->isPet())
-                SendHealSpellOnPlayerPet(pVictim, spellProto->Id, pdamage);
-        }
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_LEECH)
     {
@@ -647,12 +641,16 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         if(GetPower(POWER_MANA) + tmpvalue < GetMaxPower(POWER_MANA) )
             SetPower(POWER_MANA,GetPower(POWER_MANA) + tmpvalue);
         else SetPower(POWER_MANA,GetMaxPower(POWER_MANA));
+        if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
+            SendHealSpellOnPlayerPet(this, spellProto->Id, tmpvalue, POWER_MANA);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
     {
         if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
             return;
         SetPower(Powers(mod->m_miscvalue),GetPower(Powers(mod->m_miscvalue))+mod->m_amount);
+        if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
+            SendHealSpellOnPlayerPet(pVictim, spellProto->Id, mod->m_amount, Powers(mod->m_miscvalue));
     }
 }
 
@@ -2720,14 +2718,14 @@ void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage)
     SendMessageToSet(&data, true);
 }
 
-void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage)
+void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype)
 {
     WorldPacket data;
     data.Initialize(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE);
     data << uint8(0xFF) << pVictim->GetGUID();
     data << uint8(0xFF) << GetGUID();
     data << SpellID;
-    data << uint32(0x01);
+    data << uint32(powertype);
     data << Damage;
     data << uint8(0);
     SendMessageToSet(&data, true);

@@ -478,7 +478,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isInAccessablePlaceFor(Creature* c) const;
 
         void SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage);
-        void SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage);
+        void SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype);
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
         void CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem = NULL);
