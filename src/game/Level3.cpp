@@ -1460,10 +1460,13 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     float z = float(chr->GetPositionZ());
     float o = float(chr->GetOrientation());
 
+    float rot2 = sin(o/2);
+    float rot3 = cos(o/2);
+
     GameObject* pGameObj = new GameObject();
     uint32 lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-    if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
+    if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, rot2, rot3))
     {
         delete pGameObj;
         return false;
