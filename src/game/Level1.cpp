@@ -537,28 +537,18 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 
     if (flag != 0)
     {
+        chr->SetTaxiCheater(true);
         sprintf((char*)buf,LANG_YOURS_TAXIS_ADDED,
             m_session->GetPlayer()->GetName());
     }
     else
     {
+        chr->SetTaxiCheater(false);
         sprintf((char*)buf,LANG_YOURS_TAXIS_REMOVED,
             m_session->GetPlayer()->GetName());
     }
     FillSystemMessageData(&data, m_session, buf);
     chr->GetSession()->SendPacket(&data);
-
-    for (uint8 i=0; i<8; i++)
-    {
-        if (flag != 0)
-        {
-            m_session->GetPlayer()->SetTaximask(i, 0xFFFFFFFF);
-        }
-        else
-        {
-            m_session->GetPlayer()->SetTaximask(i, 0);
-        }
-    }
 
     return true;
 }

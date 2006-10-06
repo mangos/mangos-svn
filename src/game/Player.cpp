@@ -8598,8 +8598,10 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
     for( int i = 0; i < 20; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+
         if(!quest)
-            break;
+            continue;
+
         QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
         if ( qInfo && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
         {
@@ -8646,6 +8648,10 @@ void Player::CastedCreature( uint32 entry, uint64 guid, uint32 spell_id )
     for( int i = 0; i < 20; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+
+        if(!quest)
+            continue;
+
         QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
         if ( qInfo && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
         {

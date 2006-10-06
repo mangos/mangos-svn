@@ -89,6 +89,35 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleGoXYCommand(const char* args)
+{
+    char* px = strtok((char*)args, " ");
+    char* py = strtok(NULL, " ");
+    char* pmapid = strtok(NULL, " ");
+
+    if (!px || !py)
+        return false;
+
+    float x = (float)atof(px);
+    float y = (float)atof(py);
+    uint32 mapid;
+	if (pmapid) 
+	     mapid = (uint32)atoi(pmapid);
+	else mapid = m_session->GetPlayer()->GetMapId();
+
+    if(!MapManager::ExistMAP(mapid,x,y))
+    {
+		PSendSysMessage(".goxy: target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        return true;
+    }
+
+    Map *map = MapManager::Instance().GetMap(mapid);
+    float z = max(map->GetHeight(x, y), map->GetWaterLevel(x, y));
+    m_session->GetPlayer()->TeleportTo(mapid, x, y, z, m_session->GetPlayer()->GetOrientation());
+
+    return true;
+}
+
 bool ChatHandler::HandleWorldPortCommand(const char* args)
 {
     char* pContinent = strtok((char*)args, " ");
