@@ -495,6 +495,23 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleModifyTalentCommand (const char* args)
+{  
+    int tp = atoi((char*)args);
+    if (tp>0)
+    {
+        Player* player = m_session->GetPlayer();
+        if(!player)
+        {
+            SendSysMessage(LANG_NO_CHAR_SELECTED);
+            return true;
+        }
+        player->SetUInt32Value(PLAYER_CHARACTER_POINTS1, tp);
+        return true;
+    }
+    return false;
+}
+
 bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 {
     WorldPacket data;

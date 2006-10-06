@@ -2508,6 +2508,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetStat(STAT_SPIRIT,info->spirit );
         player->SetArmor(info->basearmor );
         player->SetUInt32Value(UNIT_FIELD_ATTACK_POWER, 0 );
+        player->SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 0 );
 
         player->SetHealth(info->health);
         player->SetMaxHealth(info->health);
