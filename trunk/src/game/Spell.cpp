@@ -89,7 +89,10 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 
     if(m_targetMask & TARGET_FLAG_STRING)
         *data >> m_strTarget;
-
+    if(m_targetMask & 0x8000)
+    {
+        //0x8000 TARGET_CORPSE NEED TO ADD
+    }
 }
 
 void SpellCastTargets::write ( WorldPacket * data)
@@ -117,7 +120,10 @@ void SpellCastTargets::write ( WorldPacket * data)
 
     if(m_targetMask & TARGET_FLAG_STRING)
         *data << m_strTarget;
-
+    if(m_targetMask & 0x8000)
+    {
+        //0x8000 TARGET_CORPSE NEED TO ADD
+    }
 }
 
 Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )

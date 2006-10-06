@@ -72,6 +72,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void outDebug( const char * str, ... );
         void outMenu( const char * str, ... );
 
+        void SetLogLevel(char * Level);
         void SetColor(bool stdout_stream, Color color);
         void ResetColor(bool stdout_stream);
         void outTimestamp(FILE* file);
