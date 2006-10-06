@@ -236,6 +236,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         virtual void Update( uint32 time );
         inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
+        inline void GetRespawnDist(float &d) const { d = m_respawnradius; }
 
         bool isTamed() const { return m_isTamed; }
         void SaveAsPet();

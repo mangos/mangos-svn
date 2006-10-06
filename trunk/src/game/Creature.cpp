@@ -1062,7 +1062,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 bool Creature::LoadFromDB(uint32 guid)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
     if(!result)
         return false;
 
@@ -1075,22 +1075,23 @@ bool Creature::LoadFromDB(uint32 guid)
         return false;
     }
 
-    SetHealth(fields[11].GetUInt32());
-    SetPower(POWER_MANA,fields[12].GetUInt32());
+    SetHealth(fields[12].GetUInt32());
+    SetPower(POWER_MANA,fields[13].GetUInt32());
 
-    SetUInt32Value(UNIT_NPC_FLAGS,fields[15].GetUInt32());
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[16].GetUInt32());
+    SetUInt32Value(UNIT_NPC_FLAGS,fields[16].GetUInt32());
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[17].GetUInt32());
 
-    respawn_cord[0] = fields[8].GetFloat();
-    respawn_cord[1] = fields[9].GetFloat();
-    respawn_cord[2] = fields[10].GetFloat();
+    m_respawnradius = fields[8].GetFloat();
+    respawn_cord[0] = fields[9].GetFloat();
+    respawn_cord[1] = fields[10].GetFloat();
+    respawn_cord[2] = fields[11].GetFloat();
 
     m_respawnDelay =(fields[6].GetUInt32()+fields[7].GetUInt32())*1000/2;
-    m_respawnTimer = fields[13].GetUInt32();
-    m_deathState = (DeathState)fields[14].GetUInt32();
+    m_respawnTimer = fields[14].GetUInt32();
+    m_deathState = (DeathState)fields[15].GetUInt32();
 
     {
-        uint32 mtg = fields[17].GetUInt32();
+        uint32 mtg = fields[18].GetUInt32();
         if(mtg < MAX_DB_MOTION_TYPE)
             m_defaultMovementType = MovementGeneratorType(mtg);
         else
