@@ -134,6 +134,7 @@ class ChatHandler
         bool HandleModifyBitCommand(const char* args);
         bool HandleModifyFactionCommand(const char* args);
         bool HandleModifySpellCommand(const char* args);
+        bool HandleModifyTalentCommand (const char* args);
         bool HandleReloadCommand(const char* args);
         bool HandleLoadScriptsCommand(const char* args);
         bool HandleSendQuestPartyMsgCommand(const char* args);

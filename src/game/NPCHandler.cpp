@@ -609,8 +609,7 @@ void WorldSession::SendStablePet(uint64 guid )
                 data << uint32(fields[2].GetUInt32());      // petnumber
                 data << uint32(petentry);
                 data << uint32(fields[4].GetUInt32());
-                //data << cinfo->Name;
-                data << uint8(0x00);                        // petname,it should be plus 0x00 at the end,Fix me.
+                data << cinfo->Name;
                 data << uint32(fields[5].GetUInt32());      // loyalty
                 data << uint8(fields[1].GetUInt32()+2);     // slot
             }
@@ -669,7 +668,7 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
             {
                 sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u' AND `slot` = '%u'", _player->GetGUIDLow(),slot);
                 sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,%u,%u,%u,%u,%u,%u)",
-                    _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->gettrainpoint());
+                    _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->getUsedTrainPoint());
                 data << uint8(0x08);
                 flag = true;
                 _player->UnsummonPet();
@@ -870,7 +869,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
 
         sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u' AND `slot` = '%u'", _player->GetGUIDLow(),slot);
         sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,%u,%u,%u,%u,%u,%u)",
-            _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->gettrainpoint());
+            _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->getUsedTrainPoint());
         if(pet->isPet())
             _player->UnsummonPet();
         else if(pet->isTamed())

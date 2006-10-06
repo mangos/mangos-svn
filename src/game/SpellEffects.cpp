@@ -667,6 +667,7 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+    spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
     /*
     spawnCreature->SetStat(STAT_STRENGTH,int(20+level*1.55));
     spawnCreature->SetStat(STAT_AGILITY,int(20+level*0.64));
@@ -903,6 +904,7 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+    spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
 
     spawnCreature->SetArmor(level*50);
     spawnCreature->AIM_Initialize();
@@ -1155,6 +1157,7 @@ void Spell::EffectSummonPet(uint32 i)
         uint32 petlevel=m_caster->getLevel();
         NewSummon->SetLevel(petlevel);
         NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
+        NewSummon->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
         NewSummon->SetHealth(    28 + 10 * petlevel);
         NewSummon->SetMaxHealth( 28 + 10 * petlevel);
@@ -2126,6 +2129,7 @@ void Spell::EffectSummonDeadPet(uint32 i)
     pet->setDeathState( ALIVE );
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
     pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
+    pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
     pet->SetHealth( uint32(pet->GetMaxHealth()*damage/100));
 
     pet->AIM_Initialize();

@@ -43,7 +43,7 @@
 Creature::Creature() :
 Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
 m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
-itemcount(0),m_loyalty(1),m_trainpoint(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
+itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false), m_isTamed(false),
 m_regenTimer(2000), lootForPickPocketed(false),lootForBody(false),lootForSkinning(false), m_defaultMovementType(IDLE_MOTION_TYPE)
 {
@@ -1314,7 +1314,6 @@ void Creature::GivePetXP(uint32 xp)
         return;
 
     uint32 level = getLevel();
-    CreatureInfo const *cinfo = GetCreatureInfo();
 
     // XP to money conversion processed in Player::RewardQuest
     if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
@@ -1339,22 +1338,45 @@ void Creature::GivePetXP(uint32 xp)
 
         level = getLevel();
         nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
-
-        SetHealth( 28 + 10 * level);
-        SetMaxHealth( 28 + 10 * level);
-        // pet damage will grow up with the pet level,*1.5f for temp
-        SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(level-cinfo->level)*1.5f);
-        SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(level-cinfo->level)*1.5f);
-        SetUInt32Value(UNIT_TRAINING_POINTS, level<<16 /* + (spell point)*/ );
-        SetStat(STAT_STRENGTH,uint32(20+level*1.55));
-        SetStat(STAT_AGILITY,uint32(20+level*0.64));
-        SetStat(STAT_STAMINA,uint32(20+level*1.27));
-        SetStat(STAT_INTELLECT,uint32(20+level*0.18));
-        SetStat(STAT_SPIRIT,uint32(20+level*0.36));
-        SetArmor(level*50);
+        GivePetLevel(level);
     }
 
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, newXP);
+}
+
+void Creature::GivePetLevel(uint32 level)
+{
+    if(!level)
+        return;
+    uint32 loyalty = 1;
+    CreatureInfo const *cinfo = GetCreatureInfo();
+    // pet damage will grow up with the pet level,*1.5f for temp
+    SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(level-cinfo->level)*1.5f);
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(level-cinfo->level)*1.5f);
+    SetUInt32Value(UNIT_TRAINING_POINTS, (level<<16) + getUsedTrainPoint());
+    SetUInt32Value(UNIT_FIELD_BYTES_1,(getloyalty()<<8));
+    SetHealth( 28 + 10 * level);
+    SetMaxHealth( 28 + 10 * level);
+    SetStat(STAT_STRENGTH,uint32(20+level*1.55));
+    SetStat(STAT_AGILITY,uint32(20+level*0.64));
+    SetStat(STAT_STAMINA,uint32(20+level*1.27));
+    SetStat(STAT_INTELLECT,uint32(20+level*0.18));
+    SetStat(STAT_SPIRIT,uint32(20+level*0.36));
+    SetArmor(level*50);
+
+    if(level - cinfo->level >= 21)
+        loyalty = 7;
+    else if(level - cinfo->level >= 15)
+        loyalty = 6;
+    else if(level - cinfo->level >= 10)
+        loyalty = 5;
+    else if(level - cinfo->level >= 6)
+        loyalty = 4;
+    else if(level - cinfo->level >= 3)
+        loyalty = 3;
+    else if(level - cinfo->level >= 1)
+        loyalty = 2;
+    SetUInt32Value(UNIT_FIELD_BYTES_1,(loyalty << 8));
 }
 
 void Creature::SaveAsPet()
@@ -1363,11 +1385,15 @@ void Creature::SaveAsPet()
         return;
     if(!GetEntry())
         return;
+    uint32 loyalty =1;
+    if(isTamed())
+        loyalty = 1;
+    else loyalty = getloyalty();
 
     uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,1)",
         GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], STATE_RA_FOLLOW, GetPower(POWER_HAPPINESS),getloyalty(),gettrainpoint() );
+        m_spells[0], m_spells[1], m_spells[2], m_spells[3], STATE_RA_FOLLOW, GetPower(POWER_HAPPINESS),loyalty,getUsedTrainPoint() );
 }

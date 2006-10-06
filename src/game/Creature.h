@@ -362,10 +362,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_spells[CREATURE_MAX_SPELLS];
 
         float GetAttackDistance(Unit *pl);
-        uint32 getloyalty(){ return m_loyalty;};
-        uint32 gettrainpoint(){ return m_trainpoint;};
-        void setloyalty(uint32 loyalty){m_loyalty = loyalty;};
-        void settrainpoint(uint32 trainpoint){m_trainpoint = trainpoint;};
+        uint32 getloyalty(){ return ((GetUInt32Value(UNIT_FIELD_BYTES_1) >> 8) & 0xFF);};
+        uint32 getUsedTrainPoint(){ return (GetUInt32Value(UNIT_TRAINING_POINTS) & 0xFFFF);};
+        void GivePetLevel(uint32 level);
 
         MovementGeneratorType GetDefaultMovementType() const { return m_defaultMovementType; }
         void SetDefaultMovementType(MovementGeneratorType mgt) { m_defaultMovementType = mgt; }
@@ -404,8 +403,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void RegenerateMana();
         void RegenerateHealth();
         uint32 m_regenTimer;
-        uint32 m_loyalty;
-        uint32 m_trainpoint;
         MovementGeneratorType m_defaultMovementType;
 };
 #endif

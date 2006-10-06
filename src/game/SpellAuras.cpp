@@ -1349,13 +1349,13 @@ void Aura::HandleModStealth(bool apply)
     if(apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
     }
     else
     {
         SendCoolDownEvent();
         m_target->m_stealthvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
     }
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->SendUpdateToPlayer((Player*)m_target);

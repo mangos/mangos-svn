@@ -357,7 +357,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                             continue;
                         pGroupGuy->GiveXP(xp, pVictim);
                         if(player->GetPet())
+                        {
+                            uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
                             player->GetPet()->GivePetXP(xp/2);
+                        }
                         pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
                     }
                 }
@@ -366,7 +369,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                     DEBUG_LOG("Player kill enemy alone");
                     player->GiveXP(xp, pVictim);
                     if(player->GetPet())
+                    {
+                        uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
                         player->GetPet()->GivePetXP(xp);
+                    }
                     player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
                 }
             }
@@ -575,12 +581,18 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
         int32 pdamage = mod->m_amount;
-        if(GetHealth() + pdamage < GetMaxHealth() )
-            SetHealth(GetHealth() + pdamage);
+        if(pVictim->GetHealth() + pdamage < pVictim->GetMaxHealth() )
+            pVictim->SetHealth(pVictim->GetHealth() + pdamage);
         else
-            SetHealth(GetMaxHealth());
+            pVictim->SetHealth(pVictim->GetMaxHealth());
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(pVictim, spellProto->Id, pdamage);
+        if(pVictim->GetTypeId() == TYPEID_UNIT)
+        {
+            Creature *ctarget = (Creature*)pVictim;
+            if(ctarget->isPet())
+                SendHealSpellOnPlayerPet(pVictim, spellProto->Id, pdamage);
+        }
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_LEECH)
     {
@@ -2715,6 +2727,7 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
     data << uint8(0xFF) << pVictim->GetGUID();
     data << uint8(0xFF) << GetGUID();
     data << SpellID;
+    data << uint32(0x01);
     data << Damage;
     data << uint8(0);
     SendMessageToSet(&data, true);

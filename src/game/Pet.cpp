@@ -100,10 +100,11 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     }
     else if(owner->getClass() == CLASS_HUNTER && cinfo->type == CREATURE_TYPE_BEAST)
     {
+        SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[12].GetUInt32()<<8));
         SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->level)*1.5f);
         SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->level)*1.5f);
         SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[13].GetUInt32() );
-        SetUInt32Value(UNIT_TRAINING_POINTS, getLevel()<<16 /* + (spell point)*/ );
+        SetUInt32Value(UNIT_TRAINING_POINTS, getLevel()<<16 + getUsedTrainPoint() );
         SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
         SetMaxPower(POWER_HAPPINESS,1000000);
         SetPower(   POWER_HAPPINESS,fields[11].GetUInt32());
@@ -114,15 +115,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
         SetStat(STAT_INTELLECT,uint32(20+petlevel*0.18));
         SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
         SetArmor(petlevel*50);
-        setloyalty(fields[12].GetUInt32());
-        settrainpoint(fields[13].GetUInt32());
     }
 
     SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
     SetPower(   POWER_MANA, 28 + 10 * petlevel);
-    SetUInt32Value(UNIT_FIELD_FLAGS,0);
-    SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-    SetUInt32Value(UNIT_FIELD_BYTES_2,1);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[4].GetUInt32());
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[5].GetUInt32());
@@ -174,7 +170,7 @@ void Pet::SaveToDB()
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,1)",
         GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),gettrainpoint());
+        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint());
 }
 
 void Pet::DeleteFromDB()
