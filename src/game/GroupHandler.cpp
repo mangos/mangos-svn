@@ -399,3 +399,18 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
 
     //sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
 }
+
+void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
+{
+sLog.outDebug("WORLD RECIEVE CMSG_REQUEST_PARTY_MEMBER_STATS");
+    uint64 Guid;
+    recv_data >> Guid;
+    //TODO: send SMSG_PARTY_MEMBER_STATS
+    //WorldPacket data;
+    //data.Initialize(SMSG_PARTY_MEMBER_STATS);
+    //data << uint8(0x0F);
+    //data << Guid;
+    //data << uint8(0);    //data << uint8(0x10);    //data << uint16(0x00);
+    //SendPacket( &data );
+//sLog.outDebug("WORLD SEND SMSG_PARTY_MEMBER_STATS");
+}

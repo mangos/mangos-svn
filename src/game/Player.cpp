@@ -1348,6 +1348,9 @@ void Player::GiveLevel()
     MPGain=HPGain=0;
 
     uint32 level = getLevel();
+    
+    if ( level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
+        return;
 
     level += 1;
 
@@ -2904,7 +2907,7 @@ uint16 Player::GetPureSkillValue(uint32 skill) const
 
 void Player::SendInitialActions()
 {
-    sLog.outString( "Initializing Action Buttons for '%u'", GetGUIDLow() );
+    sLog.outDetail( "Initializing Action Buttons for '%u'", GetGUIDLow() );
     WorldPacket data;
     uint16 button=0;
 
@@ -2934,7 +2937,7 @@ void Player::SendInitialActions()
         }
     }
     GetSession()->SendPacket( &data );
-    sLog.outString( "Action Buttons for '%u' Initialized", GetGUIDLow() );
+    sLog.outDetail( "Action Buttons for '%u' Initialized", GetGUIDLow() );
 }
 
 void Player::addAction(const uint8 button, const uint16 action, const uint8 type, const uint8 misc)
@@ -2978,7 +2981,7 @@ void Player::addAction(const uint8 button, const uint16 action, const uint8 type
         newaction.misc=misc;
         m_actions.push_back(newaction);
     }
-    sLog.outString( "Player '%u' Added Action '%u' to Button '%u'", GetGUIDLow(), action, button );
+    sLog.outDetail( "Player '%u' Added Action '%u' to Button '%u'", GetGUIDLow(), action, button );
 }
 
 void Player::removeAction(uint8 button)
@@ -2992,7 +2995,7 @@ void Player::removeAction(uint8 button)
             break;
         }
     }
-    sLog.outString( "Action Button '%u' Removed from Player '%u'", button, GetGUIDLow() );
+    sLog.outDetail( "Action Button '%u' Removed from Player '%u'", button, GetGUIDLow() );
 }
 
 void Player::SetDontMove(bool dontMove)
@@ -3726,7 +3729,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if(!proto) return;
 
-    sLog.outString("applying mods for item %u ",item->GetGUIDLow());
+    sLog.outDetail("applying mods for item %u ",item->GetGUIDLow());
     if(proto->ItemSet)
     {
         if (apply)
@@ -3864,13 +3867,13 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if (proto->Damage[0].DamageMin > 0 && MINDAMAGEFIELD)
     {
         ApplyModFloatValue(MINDAMAGEFIELD, proto->Damage[0].DamageMin, apply);
-        sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
+        sLog.outDetail("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
     }
 
     if (proto->Damage[0].DamageMax  > 0 && MAXDAMAGEFIELD)
     {
         ApplyModFloatValue(MAXDAMAGEFIELD, proto->Damage[0].DamageMax, apply);
-        sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
+        sLog.outDetail("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
     }
 
     if (proto->Delay)
@@ -8595,6 +8598,8 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
     for( int i = 0; i < 20; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
+        if(!quest)
+            break;
         QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
         if ( qInfo && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
         {

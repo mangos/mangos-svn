@@ -62,6 +62,7 @@ void CliLoadAddons(char*,pPrintf);
 void CliKick(char*,pPrintf);
 void CliMotd(char*,pPrintf);
 void CliCorpses(char*,pPrintf);
+void CliSetLogLevel(char*,pPrintf);
 
 #define CMD(a) a,(sizeof(a)-1)
 const CliCommand Commands[]=
@@ -83,6 +84,7 @@ const CliCommand Commands[]=
     {CMD("loadaddons"), & CliLoadAddons,"Load Addons data"},
     {CMD("kick"), & CliKick,"Kick user"},
     {CMD("motd"), & CliMotd,"Change or display motd"},
+    {CMD("setloglevel"), & CliSetLogLevel,"Set Log Level"},
     {CMD("corpses"), & CliCorpses,"Manually call corpses erase global even code"}
 };
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -596,4 +598,21 @@ void CliCorpses(char*,pPrintf)
 {
     CorpsesErase();
 }
+
+void CliSetLogLevel(char*Level,pPrintf zprintf)
+{
+    char *NewLevel;
+    int x=0;
+    while(Level[x]==' ')
+        x++;
+    NewLevel=&Level[x];
+
+    if (strlen(NewLevel) == 0)
+    {
+        zprintf("Syntax is: Bad LogLevel\x0d\x0a");
+        return;
+    }
+    sLog.SetLogLevel(NewLevel);
+}
+
 #endif

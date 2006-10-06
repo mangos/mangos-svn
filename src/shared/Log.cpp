@@ -150,6 +150,15 @@ void Log::ResetColor(bool stdout_stream)
     #endif
 }
 
+void Log::SetLogLevel(char *Level)
+{
+    uint32 NewLevel =atoi((char*)Level);
+    if ( NewLevel <0 )
+        NewLevel = 0;
+    m_logLevel = NewLevel;
+    printf( "LogLevel is %u\n",m_logLevel );
+}
+
 void Log::Initialize()
 {
     std::string logfn=sConfig.GetStringDefault("LogFile", "Server.log");
@@ -247,6 +256,7 @@ void Log::outError( const char * err, ... )
     if(logfile)
     {
         outTimestamp(logfile);
+        fprintf(logfile, "ERROR:" );
         vfprintf(logfile, err, ap);
         fprintf(logfile, "\n" );
         va_end(ap);
