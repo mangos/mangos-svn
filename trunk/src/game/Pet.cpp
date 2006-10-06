@@ -104,7 +104,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
         SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->level)*1.5f);
         SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->level)*1.5f);
         SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[13].GetUInt32() );
-        SetUInt32Value(UNIT_TRAINING_POINTS, getLevel()<<16 + getUsedTrainPoint() );
+        SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
         SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
         SetMaxPower(POWER_HAPPINESS,1000000);
         SetPower(   POWER_HAPPINESS,fields[11].GetUInt32());
