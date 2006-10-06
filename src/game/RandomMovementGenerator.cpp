@@ -34,9 +34,9 @@ then you may uncomment the following line to have correct random motion.
 void
 RandomMovementGenerator::Initialize(Creature &creature)
 {
-    const float wander_distance=16;
-    float x,y,z,z2;
+    float x,y,z,z2, wander_distance;
     creature.GetRespawnCoord(x, y, z);
+    creature.GetRespawnDist(wander_distance);
     uint32 mapid=creature.GetMapId();
 
     Map* map = MapManager::Instance().GetMap(mapid);
@@ -54,11 +54,11 @@ RandomMovementGenerator::Initialize(Creature &creature)
 
     for(unsigned int idx=1; idx < MAX_RAND_WAYPOINTS+1; ++idx)
     {
-        const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
-        const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
+        const float angle = (2*M_PI*rand())/RAND_MAX;
+        const float range = (wander_distance*rand())/RAND_MAX;
 
-        i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
-        i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
+        i_waypoints[idx][0] = i_waypoints[idx-1][0]+ range * cos(angle);
+        i_waypoints[idx][1] = i_waypoints[idx-1][1]+ range * sin(angle);
 
         // prevent invalid coordinates generation
         MaNGOS::NormalizeMapCoord(i_waypoints[idx][0]);
