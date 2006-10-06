@@ -258,11 +258,13 @@ enum MirrorTimerType
     FIRE_TIMER
 };
 
+// 2^n values
 enum GMFlags
 {
     GM_ON = 1,
     GM_ACCEPT_TICKETS  = 2,
-    GM_ACCEPT_WHISPERS = 4
+    GM_ACCEPT_WHISPERS = 4,
+    GM_TAXICHEAT       = 8                                  // can be applied to non-gm players
 };
 
 #define IS_BACK_SLOT(s) (s == 0xFF)
@@ -411,6 +413,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetAcceptWhispers(bool on) { if(on) m_GMFlags |= GM_ACCEPT_WHISPERS; else m_GMFlags &= ~GM_ACCEPT_WHISPERS; }
         bool isGameMaster() const { return m_GMFlags & GM_ON; }
         void SetGameMaster(bool on);
+        bool isTaxiCheater() const { return m_GMFlags & GM_TAXICHEAT; }
+        void SetTaxiCheater(bool on) { if(on) m_GMFlags |= GM_TAXICHEAT; else m_GMFlags &= ~GM_TAXICHEAT; }
 
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}

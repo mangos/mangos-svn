@@ -136,6 +136,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "standstate",  3, &ChatHandler::HandleStandStateCommand,       "",   NULL },
         { "start",       0, &ChatHandler::HandleStartCommand,            "",   NULL },
         { "taxicheat",   1, &ChatHandler::HandleTaxiCheatCommand,        "",   NULL },
+        { "goxy",        3, &ChatHandler::HandleGoXYCommand     ,        "",   NULL },
         { "worldport",   3, &ChatHandler::HandleWorldPortCommand,        "",   NULL },
         { "addweapon",   3, &ChatHandler::HandleAddWeaponCommand,        "",   NULL },
         { "allowmove",   3, &ChatHandler::HandleAllowMovementCommand,    "",   NULL },
