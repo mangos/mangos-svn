@@ -309,6 +309,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     SetUInt32Value(PLAYER_BYTES, ((skin) | (face << 8) | (hairStyle << 16) | (hairColor << 24)));
     SetUInt32Value(PLAYER_BYTES_2, (facialHair | (0xEE << 8) | (0x00 << 16) | (0x02 << 24)));
+	SetUInt32Value(PLAYER_BYTES_3, gender);
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
     SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
 
@@ -674,14 +675,14 @@ void Player::HandleSobering()
     {
         m_drunk -= (0xFFFF / 30);
     }
-    SetUInt32Value(PLAYER_BYTES_3, (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
+    SetUInt32Value(PLAYER_BYTES_3, (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | m_drunk);
 }
 
 void Player::SetDrunkValue(uint16 newDrunkValue)
 {
     m_drunk = newDrunkValue;
     SetUInt32Value(PLAYER_BYTES_3,
-        (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
+        (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | m_drunk);
 }
 
 void Player::Update( uint32 p_time )
@@ -3468,9 +3469,9 @@ void Player::UpdateHonor(void)
 
     //RANK (Patent)
     if( CalculateHonorRank(total_honor) )
-        SetUInt32Value(PLAYER_BYTES_3, (( CalculateHonorRank(total_honor) << 24) + 0x04000000) + m_drunk);
+        SetUInt32Value(PLAYER_BYTES_3, (( CalculateHonorRank(total_honor) << 24) + 0x04000000) + (m_drunk & 0xFFFE) + getGender());
     else
-        SetUInt32Value(PLAYER_BYTES_3, m_drunk);
+        SetUInt32Value(PLAYER_BYTES_3, (m_drunk & 0xFFFE) + getGender());
 
     //TODAY
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
@@ -8940,7 +8941,7 @@ bool Player::LoadFromDB( uint32 guid )
         }
     }
 
-    m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF;
+    m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE;
 
     m_name = fields[4].GetCppString();
 
