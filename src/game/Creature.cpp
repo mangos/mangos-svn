@@ -992,7 +992,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     uint32 level = urand (minlevel,maxlevel);
     SetLevel(level);
 
-    float rellevel = (float(level - minlevel))/(maxlevel - minlevel);
+    float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel))/(maxlevel - minlevel);
 
     uint32 minhealth = cinfo->minhealth;
     uint32 maxhealth = max(cinfo->maxhealth, cinfo->minhealth);
