@@ -750,10 +750,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             pvpOn = b;
 
-                                                            //PvP OFF
-            if(!b) SetFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP);
-                                                            //PvP ON
-            else  RemoveFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP);
+            if (!b) { //PvP OFF
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP);
+                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ICON);
+            } else { //PvP ON
+                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP);
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ICON);
+			}
 
             m_pvp_counting = false;
         };
