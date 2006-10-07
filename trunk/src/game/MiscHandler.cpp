@@ -345,14 +345,17 @@ void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
         return;
     }
 
-    if( GetPlayer()->GetPvP() )
+    if( !GetPlayer()->GetPvP() || GetPlayer()->m_pvp_counting )
     {
-        sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You will be unflagged for PvP combat after five minutes of non-PvP action in friendly territory.");
+        //sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You are now flagged PvP combat and will remain so until toggled off.");
+        GetPlayer()->SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+        GetPlayer()->SetPvP (true);
+        return;
     }
-    else
-    {
-        sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You are now flagged PvP combat and will remain so until toggled off.");
-    }
+
+    //sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You will be unflagged for PvP combat after five minutes of non-PvP action in friendly territory.");
+    
+    GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
     GetPlayer()->SetPVPCount(time(NULL));
 
 }

@@ -239,8 +239,12 @@ enum TYPE_OF_KILL
 
 enum PlayerFlags
 {
-    PLAYER_FLAGS_GHOST   = 0x10,
-    PLAYER_FLAGS_RESTING = 0x20,
+    PLAYER_FLAGS_GROUP_LEADER   = 0x0001,
+    PLAYER_FLAGS_GHOST          = 0x0010,
+    PLAYER_FLAGS_RESTING        = 0x0020,
+    PLAYER_FLAGS_IN_PVP         = 0x0200,
+    PLAYER_FLAGS_UNK            = 0x1000,   //played long time
+    PLAYER_FLAGS_UNK2           = 0x2000,   //played too long time
 };
 
 enum LootType
@@ -735,11 +739,11 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetPVPCount(time_t count)
         {
-            if(!m_pvp_counting)
-            {
+            //if(!m_pvp_counting)
+            //{
                 m_pvp_count = count;
                 m_pvp_counting = true;
-            }
+            //}
         }
 
         void SetPvP(bool b)
