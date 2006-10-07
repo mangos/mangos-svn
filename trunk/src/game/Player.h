@@ -607,7 +607,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void TakeQuestSourceItem( uint32 quest_id );
         bool GetQuestRewardStatus( uint32 quest_id );
         uint32 GetQuestStatus( uint32 quest_id );
-        void SetQuestStatus( uint32 quest_id, uint32 status );
+        void SetQuestStatus( uint32 quest_id, QuestStatus status );
         void AdjustQuestReqItemCount( uint32 questId );
         uint16 GetQuestSlot( uint32 quest_id );
         void AreaExplored( uint32 questId );
@@ -619,7 +619,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HaveQuestForItem( uint32 itemid );
 
         void SendQuestComplete( uint32 quest_id );
-        void SendQuestReward( Quest *pQuest );
+        void SendQuestReward( Quest *pQuest, uint32 XP );
         void SendQuestFailed( uint32 quest_id );
         void SendQuestTimerFailed( uint32 quest_id );
         void SendCanTakeQuestResponse( uint32 msg );

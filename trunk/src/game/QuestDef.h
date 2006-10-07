@@ -100,13 +100,14 @@ enum __QuestTradeSkill
     QUEST_TRSKILL_JEWELCRAFTING  = 14,
 };
 
-enum __QuestStatus
+enum QuestStatus
 {
     QUEST_STATUS_NONE           = 0,
     QUEST_STATUS_COMPLETE       = 1,
     QUEST_STATUS_UNAVAILABLE    = 2,
     QUEST_STATUS_INCOMPLETE     = 3,
     QUEST_STATUS_AVAILABLE      = 4,
+    MAX_QUEST_STATUS
 };
 
 enum __QuestGiverStatus
@@ -222,7 +223,9 @@ class Quest
 
 struct quest_status
 {
-    quest_status()
+    quest_status() 
+    : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),m_explored(false),
+    m_completed_once(false), m_timer(0)
     {
         memset(m_itemcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_mobcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
@@ -230,9 +233,10 @@ struct quest_status
 
     Quest *m_quest;
 
-    uint32 m_status;
+    QuestStatus m_status;
     bool m_rewarded;
     bool m_explored;
+    bool m_completed_once;                                  // for repeatable quests
     uint32 m_timer;
 
     uint32 m_itemcount[ QUEST_OBJECTIVES_COUNT ];
