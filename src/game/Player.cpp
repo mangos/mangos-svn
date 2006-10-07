@@ -9704,6 +9704,8 @@ void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
 
 void Player::UpdatePVPFlag(time_t currTime)
 {
+    if( !GetPvP() ) return;
+    
     //Player is counting to set/unset pvp flag
     if( !m_pvp_counting ) return;
 
@@ -9711,22 +9713,16 @@ void Player::UpdatePVPFlag(time_t currTime)
     if( isInCombatWithPlayer() || isInDuel() )
     {
         m_pvp_counting = false;
+        m_pvp_count = time(NULL);
         return;
     }
 
-    if( GetPvP() )
-    {
-        //Wait 5 min until remove pvp mode
-        if( currTime < m_pvp_count + 300 ) return;
+    //Wait 5 min until remove pvp mode
+    if( currTime < m_pvp_count + 300 ) return;
 
-        SetPvP(false);
+    SetPvP(false);
+    sChatHandler.SendSysMessage(GetSession(), "PvP toggled off.");
 
-        sChatHandler.SendSysMessage(GetSession(), "PvP toggled off.");
-    }
-    else
-    {
-        SetPvP(true);
-    }
 }
 
 void Player::UnsummonPet(Creature* pet)
