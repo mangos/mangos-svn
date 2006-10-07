@@ -986,16 +986,31 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
         default:
             break;
     }
-    uint32 maxhealth = uint32(cinfo->maxhealth * healthmod);
-    SetMaxHealth(maxhealth);
-    SetUInt32Value(UNIT_FIELD_BASE_HEALTH,maxhealth);
-    SetHealth(maxhealth);
 
-    SetMaxPower(POWER_MANA,cinfo->maxmana);                 //MAX Mana
-    SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
-    SetPower(POWER_MANA,cinfo->maxmana );
+    uint32 minlevel = cinfo->minlevel;
+    uint32 maxlevel = max(cinfo->maxlevel, cinfo->minlevel);
+    uint32 level = urand (minlevel,maxlevel);
+    SetLevel(level);
 
-    SetLevel(cinfo->level);
+    float rellevel = (float(level - minlevel))/(maxlevel - minlevel);
+
+    uint32 minhealth = cinfo->minhealth;
+    uint32 maxhealth = max(cinfo->maxhealth, cinfo->minhealth);
+    uint32 health = minhealth + uint32(rellevel*(maxhealth - minhealth)*healthmod);
+
+    SetMaxHealth(health);
+    SetUInt32Value(UNIT_FIELD_BASE_HEALTH,health);
+    SetHealth(health);
+
+    uint32 minmana = cinfo->minmana;
+    uint32 maxmana = max(cinfo->maxmana, cinfo->minmana);
+    uint32 mana = minmana + uint32(rellevel*(maxmana - minmana));
+
+    SetMaxPower(POWER_MANA,mana);                 //MAX Mana
+    SetUInt32Value(UNIT_FIELD_BASE_MANA, mana);
+    SetPower(POWER_MANA,mana );
+
+
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
 
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
@@ -1352,8 +1367,8 @@ void Creature::GivePetLevel(uint32 level)
     uint32 loyalty = 1;
     CreatureInfo const *cinfo = GetCreatureInfo();
     // pet damage will grow up with the pet level,*1.5f for temp
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(level-cinfo->level)*1.5f);
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(level-cinfo->level)*1.5f);
+    SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(level-cinfo->minlevel)*1.5f);
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(level-cinfo->minlevel)*1.5f);
     SetUInt32Value(UNIT_TRAINING_POINTS, (level<<16) + getUsedTrainPoint());
     SetUInt32Value(UNIT_FIELD_BYTES_1,(getloyalty()<<8));
     SetHealth( 28 + 10 * level);
@@ -1365,17 +1380,17 @@ void Creature::GivePetLevel(uint32 level)
     SetStat(STAT_SPIRIT,uint32(20+level*0.36));
     SetArmor(level*50);
 
-    if(level - cinfo->level >= 21)
+    if(level - cinfo->minlevel >= 21)
         loyalty = 7;
-    else if(level - cinfo->level >= 15)
+    else if(level - cinfo->minlevel >= 15)
         loyalty = 6;
-    else if(level - cinfo->level >= 10)
+    else if(level - cinfo->minlevel >= 10)
         loyalty = 5;
-    else if(level - cinfo->level >= 6)
+    else if(level - cinfo->minlevel >= 6)
         loyalty = 4;
-    else if(level - cinfo->level >= 3)
+    else if(level - cinfo->minlevel >= 3)
         loyalty = 3;
-    else if(level - cinfo->level >= 1)
+    else if(level - cinfo->minlevel >= 1)
         loyalty = 2;
     SetUInt32Value(UNIT_FIELD_BYTES_1,(loyalty << 8));
 }
