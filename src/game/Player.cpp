@@ -7839,7 +7839,7 @@ Quest *Player::GetActiveQuest( uint32 quest_id ) const
 {
     StatusMap::const_iterator itr = mQuestStatus.find(quest_id);
 
-    return (itr != mQuestStatus.end()) ?  itr->second.m_quest : NULL;
+    return itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE ?  itr->second.m_quest : NULL;
 }
 
 Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
@@ -8178,19 +8178,27 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             SetUInt32Value(log_slot + 2, 0);
         }
 
+        // Not give XP in case already completed once repeatable quest
+        uint32 XP = mQuestStatus[quest_id].m_completed_once && qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) 
+            ? 0 : uint32(pQuest->XPValue( this )*sWorld.getRate(RATE_XP_QUEST));
+
         if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
-            GiveXP( uint32(pQuest->XPValue( this )*sWorld.getRate(RATE_XP_QUEST)), NULL );
+            GiveXP( XP , NULL );
         else
-            ModifyMoney( MaNGOS::XP::xp_to_money(pQuest->XPValue( this )) );
+            ModifyMoney( MaNGOS::XP::xp_to_money(XP) );
 
         ModifyMoney( qInfo->RewOrReqMoney );
 
         if ( !qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
             mQuestStatus[quest_id].m_rewarded = true;
         else
+        {
             SetQuestStatus(quest_id, QUEST_STATUS_NONE);
+        }
 
-        SendQuestReward( pQuest );
+        SendQuestReward( pQuest, XP );
+
+        mQuestStatus[quest_id].m_completed_once = true;     // in repeated quest case prevent recive XP at second complete
     }
 }
 
@@ -8359,7 +8367,8 @@ bool Player::SatisfyQuestStatus( uint32 quest_id, bool msg )
 {
     if( quest_id )
     {
-        if  ( mQuestStatus.find( quest_id ) != mQuestStatus.end() )
+        StatusMap::iterator itr = mQuestStatus.find( quest_id );
+        if  ( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE )
         {
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_HAVE_QUEST );
@@ -8433,9 +8442,11 @@ bool Player::GetQuestRewardStatus( uint32 quest_id )
 {
     if( quest_id  )
     {
-        if  ( mQuestStatus.find( quest_id ) == mQuestStatus.end() )
-            return false;
-        return mQuestStatus[quest_id ].m_rewarded;
+        StatusMap::iterator itr = mQuestStatus.find( quest_id );
+        if  ( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE )
+            return mQuestStatus[quest_id ].m_rewarded;
+
+        return false;
     }
     return false;
 }
@@ -8450,20 +8461,15 @@ uint32 Player::GetQuestStatus( uint32 quest_id )
     return QUEST_STATUS_NONE;
 }
 
-void Player::SetQuestStatus( uint32 quest_id, uint32 status )
+void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
 {
     QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
     if( qInfo )
     {
-        if ( status == QUEST_STATUS_NONE )
-        {
-            mQuestStatus.erase( quest_id );
+        if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+            SetTimedQuest( 0 );
 
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
-                SetTimedQuest( 0 );
-        }
-        else
-            mQuestStatus[quest_id].m_status = status;
+        mQuestStatus[quest_id].m_status = status;
     }
 }
 
@@ -8750,7 +8756,7 @@ void Player::SendQuestComplete( uint32 quest_id )
     }
 }
 
-void Player::SendQuestReward( Quest *pQuest )
+void Player::SendQuestReward( Quest *pQuest, uint32 XP )
 {
     if( pQuest )
     {
@@ -8760,15 +8766,16 @@ void Player::SendQuestReward( Quest *pQuest )
         data.Initialize( SMSG_QUESTGIVER_QUEST_COMPLETE );
         data << quest;
         data << uint32(0x03);
+
         if ( getLevel() < 60 )
         {
-            data << pQuest->XPValue( this );
+            data << XP;
             data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney);
         }
         else
         {
             data << uint32(0);
-            data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney + pQuest->XPValue( this ));
+            data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney + XP);
         }
         data << uint32( pQuest->m_rewitemscount );
 
@@ -9209,7 +9216,7 @@ void Player::_LoadQuestStatus()
 {
     mQuestStatus.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
 
     if(result)
     {
@@ -9222,9 +9229,19 @@ void Player::_LoadQuestStatus()
             if( pQuest )
             {
                 mQuestStatus[quest_id].m_quest = pQuest;
-                mQuestStatus[quest_id].m_status = fields[1].GetUInt32();
-                mQuestStatus[quest_id].m_rewarded = ( fields[2].GetUInt32() > 0 );
-                mQuestStatus[quest_id].m_explored = ( fields[3].GetUInt32() > 0 );
+
+                uint32 qstatus = fields[1].GetUInt32();
+                if(qstatus < MAX_QUEST_STATUS)
+                    mQuestStatus[quest_id].m_status = QuestStatus(qstatus);
+                else
+                {
+                    mQuestStatus[quest_id].m_status = QUEST_STATUS_NONE;
+                    sLog.outError("Player %s have invalid quest %d status (%d), replaced by QUEST_STATUS_NONE(0).",GetName(),quest_id,qstatus);
+                }
+
+                mQuestStatus[quest_id].m_rewarded = ( fields[2].GetUInt8() > 0 );
+                mQuestStatus[quest_id].m_explored = ( fields[3].GetUInt8() > 0 );
+                mQuestStatus[quest_id].m_completed_once = ( fields[4].GetUInt8() > 0 );
 
                 if( objmgr.GetQuestInfo(quest_id)->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !mQuestStatus[quest_id].m_rewarded )
                     SetTimedQuest( quest_id );
@@ -9544,7 +9561,8 @@ void Player::_SaveQuestStatus()
 
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_timer, i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
+        sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", 
+            GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, i->second.m_timer, i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
     }
 }
 
