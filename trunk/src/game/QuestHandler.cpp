@@ -290,20 +290,20 @@ void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
     uint8 slot1, slot2;
     recv_data >> slot1 >> slot2;
 
+    if(slot1 == slot2 || slot1 >= 20 || slot2 >= 20)
+        return;
+
     sLog.outDetail( "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u",slot1,slot2 );
 
-    if( slot1 || slot2 )
+    uint32 temp1;
+    uint32 temp2;
+    for (int i = 0; i < 3; i++ )
     {
-        uint32 temp1;
-        uint32 temp2;
-        for (int i = 0; i < 3; i++ )
-        {
-            temp1 = _player->GetUInt32Value(3*slot1 + PLAYER_QUEST_LOG_1_1 + i);
-            temp2 = _player->GetUInt32Value(3*slot2 + PLAYER_QUEST_LOG_1_1 + i);
+        temp1 = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot1 + i);
+        temp2 = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot2 + i);
 
-            _player->SetUInt32Value(3*slot1 + PLAYER_QUEST_LOG_1_1 + i, temp2);
-            _player->SetUInt32Value(3*slot2 + PLAYER_QUEST_LOG_1_1 + i, temp1);
-        }
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot1 + i, temp2);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot2 + i, temp1);
     }
 }
 
@@ -317,11 +317,11 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
     if( slot < 20 )
     {
-        quest = _player->GetUInt32Value(3*slot + 200 + 0);
+        quest = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0);
 
-        _player->SetUInt32Value(3*slot + 200 + 0, 0);
-        _player->SetUInt32Value(3*slot + 200 + 1, 0);
-        _player->SetUInt32Value(3*slot + 200 + 2, 0);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0, 0);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 1, 0);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 2, 0);
 
         if( quest )
         {
