@@ -101,8 +101,8 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     else if(owner->getClass() == CLASS_HUNTER && cinfo->type == CREATURE_TYPE_BEAST)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[12].GetUInt32()<<8));
-        SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->level)*1.5f);
-        SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->level)*1.5f);
+        SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->minlevel)*1.5f);
+        SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->minlevel)*1.5f);
         SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[13].GetUInt32() );
         SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
         SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );

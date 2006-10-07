@@ -146,9 +146,12 @@ struct CreatureInfo
     uint32  DisplayID;
     char*   Name;
     char*   SubName;
+    uint32  minlevel;
+    uint32  maxlevel;
+    uint32  minhealth;
     uint32  maxhealth;
+    uint32  minmana;
     uint32  maxmana;
-    uint32  level;
     uint32  armor;
     uint32  faction;
     uint32  npcflag;
@@ -161,7 +164,6 @@ struct CreatureInfo
     uint32  rangeattacktime;
     uint32  Flags;
     uint32  mount;
-    uint32  level_max;
     uint32  dynamicflags;
     float   size;
     uint32  family;
