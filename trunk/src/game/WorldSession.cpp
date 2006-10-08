@@ -372,6 +372,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_AUTOSTORE_BAG_ITEM,       STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBagItemOpcode        },
         { CMSG_AUTOBANK_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleAutoBankItemOpcode            },
         { CMSG_AUTOSTORE_BANK_ITEM,      STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBankItemOpcode       },
+        { CMSG_ITEM_NAME_QUERY,          STATUS_LOGGEDIN, &WorldSession::HandleItemNameQueryOpcode           },
 
         { CMSG_ATTACKSWING,              STATUS_LOGGEDIN, &WorldSession::HandleAttackSwingOpcode             },
         { CMSG_ATTACKSTOP,               STATUS_LOGGEDIN, &WorldSession::HandleAttackStopOpcode              },
