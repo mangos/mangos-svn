@@ -153,6 +153,8 @@ void Bag::DeleteFromDB()
             m_bagslot[i]->DeleteFromDB();
         }
     }
+
+    Item::DeleteFromDB();
 }
 
 uint8 Bag::FindFreeBagSlot() const
