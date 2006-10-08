@@ -2203,6 +2203,18 @@ void Aura::HandleModDamagePercentDone(bool apply)
 {
     sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
 
+    // FIX ME: This is wrong code.
+    // It not work with 20218 18791 spells
+
+    // m_modifier.m_miscvalue is bitmask of spell schools
+    // 1 ( 0-bit ) - normal school damage
+    // 126 - full bitmask all magic damages
+    // 127 - full bitmask any damages
+    //
+    // mods must be applied base at equiped weapon class amd subclass comparison 
+    // with spell->EquippedItemClass and  EquippedItemSubClass
+    // m_modifier.m_miscvalue comparison with item generated damage types
+
     if(m_modifier.m_miscvalue == 1)
     {
         m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
