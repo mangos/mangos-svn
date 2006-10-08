@@ -339,26 +339,6 @@ void ObjectMgr::LoadAuctionItems()
     delete result;
 }
 
-void ObjectMgr::LoadMailedItems()
-{
-    QueryResult *result = sDatabase.Query( "SELECT `guid` FROM `mail_item`" );
-
-    if( !result )
-        return;
-    Field *fields;
-    do
-    {
-        fields = result->Fetch();
-        Item* item = new Item;
-        if(!item->LoadFromDB(fields[0].GetUInt32(), 0, 3))
-            continue;
-        AddMItem(item);
-    }
-    while( result->NextRow() );
-
-    delete result;
-}
-
 void ObjectMgr::LoadLvlUpGains()
 {
     Field *fields;
