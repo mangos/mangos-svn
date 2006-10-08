@@ -273,6 +273,18 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         return;
     //plr->_RemoveAllItemMods();
 
+    //set a count of unread mails:
+    QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    if (resultMails)
+    {
+        Field *fieldMail = resultMails->Fetch();
+        plr->unReadMails = fieldMail[0].GetUInt8();
+        delete resultMails;
+    }
+    else
+        plr->unReadMails = 0;
+
+
     SetPlayer(plr);
 
     data.Initialize( SMSG_ACCOUNT_DATA_MD5 );

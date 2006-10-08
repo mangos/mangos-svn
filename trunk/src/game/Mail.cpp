@@ -109,19 +109,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         uint16 pos = pl->GetPosByGuid(item);
         Item *it = pl->GetItemByPos( pos );
 
-        objmgr.RemoveMItem(it->GetGUIDLow());
-        objmgr.AddMItem(it);
-
-        std::ostringstream ss;
-        ss  << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
-            << it->GetGUIDLow() << ", '";
-        for(uint16 i = 0; i < it->GetValuesCount(); i++ )
-        {
-            ss << it->GetUInt32Value(i) << " ";
-        }
-        ss << "' )";
-        sDatabase.Execute( ss.str().c_str() );
-
+        //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (pos >> 8), (pos & 255), true );
     }
     pl->ModifyMoney( -30 - money );
@@ -142,11 +130,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->checked = 0;
 
         receive->AddMail(m);
-
-        data.Initialize(SMSG_RECEIVED_MAIL);
-        data << uint32(0);
-        SendPacket(&data);
-        receive->GetSession()->SendPacket(&data);
     }
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
@@ -162,9 +145,15 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
     recv_data >> message;
     Player *pl = _player;
     Mail *m = pl->GetMail(message);
-    m->checked = 1;
-    m->time = time(NULL) + (3 * 3600);
-    pl->AddMail(m);
+    if (m)
+    {
+        if (pl->unReadMails)
+            pl->unReadMails--;
+        m->checked = 1;
+        m->time = time(NULL) + (3 * 3600);
+        pl->m_mailsUpdated = true;
+        pl->SetMail(m);
+    }
 }
 
 void WorldSession::HandleMailDelete(WorldPacket & recv_data )
@@ -175,10 +164,15 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
     recv_data >> mailbox;
     recv_data >> message;
     Player *pl = _player;
+    // pl->m_mailsUpdated = true; there 's no need to change it .. because query deletes mail from DB...
     Mail *m = pl->GetMail(message);
-    if (m->item != 0)
+    if(m)
     {
-        objmgr.RemoveMItem(m->item);
+        //begin Transaction
+        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
+        /*if (m->item) //player cannot delete mail, when it has money , or item, that mail can be returned
+        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item);*/
+        //commit Transaction    
     }
     pl->RemoveMail(message);
 
@@ -198,12 +192,28 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     recv_data >> message;
     Player *pl = _player;
     Mail *m = pl->GetMail(message);
+
+    if(!m) 
+        return;
+
     m->receiver = m->sender;
     m->sender = pl->GetGUIDLow();
-    m->time = sWorld.GetGameTime() + (30 * 3600);
-    m->checked = 0;
+    m->time = time(NULL) + (30 * 3600);
     m->COD = 0;
-    pl->RemoveMail(message);
+    m->checked = 0;
+    uint64 rc = m->receiver;
+    Player *receive = objmgr.GetPlayer(rc);
+    if(receive)
+    {
+        if (m->item)
+        {
+            Item *pItem = pl->GetMItem(m->item);
+            receive->AddMItem(pItem);
+            pl->RemoveMItem(m->item);
+        }
+        receive->AddMail(m);
+    }
+    //pl->m_mailsUpdated = true; - not needed, query does all we need
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(message);
@@ -211,18 +221,10 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     data << uint32(0);
     SendPacket(&data);
 
-    uint64 rc = m->receiver;
-    std::string name;
-    objmgr.GetPlayerNameByGUID(rc,name);
-    Player *receive = objmgr.GetPlayer(name.c_str());
-    if (receive)
-    {
-        receive->AddMail(m);
-    }
-
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-                                                            //m->checked); //there was (long)m->time...
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", message); 
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
+
+    pl->RemoveMail(message);
 }
 
 void WorldSession::HandleTakeItem(WorldPacket & recv_data )
@@ -234,8 +236,12 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     recv_data >> mailbox;
     recv_data >> message;
     Player* pl = _player;
+    
     Mail* m = pl->GetMail(message);
-    Item *it = objmgr.GetMItem(m->item);
+    if (!m)
+        return;
+
+    Item *it = pl->GetMItem(m->item);
 
     uint8 msg = _player->CanStoreItem( 0, NULL_SLOT, dest, it, false );
     if( msg == EQUIP_ERR_OK )
@@ -259,14 +265,8 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             Player *receive = objmgr.GetPlayer((uint64)m->sender);
 
             if (receive)
-            {
-                WorldPacket data2;
-                data2.Initialize(SMSG_RECEIVED_MAIL);       //move this code to function Player::AddMail ;-)
-                data2 << uint32(0);
-                SendPacket(&data2);
-                receive->GetSession()->SendPacket(&data2);
                 receive->AddMail(mn);
-            }
+
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mn->messageID);
                                                             //added
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), 0, (uint64)mn->time, mn->money, 0, 0);
@@ -274,12 +274,12 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             pl->ModifyMoney( -int32(m->COD) );
         }
         m->COD = 0;
-        pl->AddMail(m);
+        pl->SetMail(m);
 
         uint32 it_guidlow = it->GetGUIDLow();
         _player->StoreItem( dest, it, true);                // item can be remove at adding to existed item stack
-        objmgr.RemoveMItem(it_guidlow);
-        sDatabase.PExecute("DELETE FROM `mail_item` WHERE `guid` = '%u'", it_guidlow);
+        pl->RemoveMItem(it_guidlow);
+
         data.Initialize(SMSG_SEND_MAIL_RESULT);
         data << uint32(message);
         data << uint32(MAIL_ITEM_TAKEN);
@@ -304,7 +304,10 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     recv_data >> mailbox;
     recv_data >> id;
     Player *pl = _player;
+
     Mail* m = pl->GetMail(id);
+    if(!m)
+        return;
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(id);
@@ -314,8 +317,9 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 
     pl->ModifyMoney(m->money);
     m->money = 0;
-    pl->AddMail(m);
 
+    pl->m_mailsUpdated = true;
+    pl->SetMail(m);
 }
 
 void WorldSession::HandleGetMail(WorldPacket & recv_data )
@@ -325,6 +329,11 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
 
     WorldPacket data;
     Player* pl = _player;
+
+    //load players mails, and mailed items
+    if(!pl->m_mailsLoaded)
+        pl ->_LoadMail();
+
     data.Initialize(SMSG_MAIL_LIST_RESULT);
     data << uint8(pl->GetMailSize());
     std::list<Mail*>::iterator itr;
@@ -344,7 +353,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << uint32(0);                                  // Unknown
         if ((*itr)->item != 0)
         {
-            if(Item* i = objmgr.GetMItem((*itr)->item))
+            if(Item* i = pl->GetMItem((*itr)->item))
                 data << uint32(i->GetUInt32Value(OBJECT_FIELD_ENTRY));
             else
             {
@@ -556,20 +565,8 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
 {
 
     WorldPacket Data;
-    bool checkmail=false;
-    Player *pl=_player;
 
-    std::list<Mail*>::iterator itr;
-    for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
-    {
-        if(!(*itr)->checked)
-        {
-            checkmail = true;
-            break;
-        }
-    }
-
-    if ( checkmail )
+    if( _player->unReadMails > 0 )
     {
         Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
         Data << uint32(0);

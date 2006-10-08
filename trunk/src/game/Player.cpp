@@ -145,6 +145,9 @@ Player::Player (WorldSession *session): Unit()
     rest_bonus=0;
     rest_type=0;
     ////////////////////Rest System/////////////////////
+
+    m_mailsLoaded = false;
+    m_mailsUpdated = false;
 }
 
 Player::~Player ()
@@ -1570,8 +1573,36 @@ void Player::RemoveMail(uint32 id)
     }
 }
 
+//called when mail's state changed, removes mail and adds it to the end - mails are sorted
+void Player::SetMail(Mail *m)
+{
+    if (!m_mailsLoaded)
+        return;
+
+    std::list<Mail*>::iterator itr;
+    for (itr = m_mail.begin(); itr != m_mail.end();)
+    {
+        if ((*itr)->messageID == m->messageID)
+            m_mail.erase(itr++);
+        else
+            ++itr;
+    }
+    m_mail.push_back(m);                                    //insert to the end
+}
+
+//call this function only when sending new mail 
 void Player::AddMail(Mail *m)
 {
+    WorldPacket data;
+
+    data.Initialize(SMSG_RECEIVED_MAIL);
+    data << uint32(0);
+    GetSession()->SendPacket(&data); 
+    unReadMails++;
+
+    if(!m_mailsLoaded)
+        return;
+
     std::list<Mail*>::iterator itr;
     for (itr = m_mail.begin(); itr != m_mail.end();)
     {
@@ -1584,7 +1615,7 @@ void Player::AddMail(Mail *m)
             ++itr;
         }
     }
-    m_mail.push_back(m);
+    m_mail.push_front(m);                                   //to insert new mail to beginning of maillist
 }
 
 bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uint16 slot_id)
@@ -9016,7 +9047,8 @@ bool Player::LoadFromDB( uint32 guid )
     // make sure the unit is considered out of combat for proper loading
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-    _LoadMail();
+    //mails are loaded only when needed ;-) - when player in game click on mailbox.
+    //_LoadMail(); 
 
     _LoadAuras();
 
@@ -9169,9 +9201,44 @@ void Player::_LoadInventory()
     }
 }
 
+// load mailed items which should receive current player
+void Player::_LoadMailedItems()
+{
+    QueryResult *result = sDatabase.PQuery( "SELECT `item` FROM `mail` WHERE `receiver` = '%u' AND `item` > 0", GetGUIDLow());
+
+    if( !result )
+        return;
+
+    Field *fields;
+    do
+    {
+        fields = result->Fetch();
+        Item* item = new Item;
+        if(!item->LoadFromDB(fields[0].GetUInt32(), 0, 1)) // load from item_instance table
+        {
+            delete item;
+            continue;
+        }
+        AddMItem(item);
+    }
+    while( result->NextRow() );
+
+    delete result;
+}
+
+
 void Player::_LoadMail()
 {
+    //delete old mails, and if old mail has item so delete it too
+    time_t base = time(NULL);
+    
+    //FIXME: mails with COD will not be returned, but deleted.
 
+    //delete old mails:
+    sDatabase.PExecute("DELETE FROM `item_instance` ii WHERE ii.`guid` IN (SELECT `item` FROM `mail` WHERE `time` < '%u' AND `receiver` = '%u'); DELETE FROM `mail` WHERE `time` < '%u' AND `receiver` = '%u'", base, GetGUIDLow(), base, GetGUIDLow());
+
+    _LoadMailedItems();
+    
     m_mail.clear();
 
     QueryResult *result = sDatabase.PQuery("SELECT `id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
@@ -9198,6 +9265,8 @@ void Player::_LoadMail()
 
         delete result;
     }
+
+    m_mailsLoaded = true;
 }
 
 void Player::LoadPet()
@@ -9442,7 +9511,10 @@ void Player::SaveToDB()
     sDatabase.Execute( ss.str().c_str() );
 
     SaveEnchant();
-    _SaveMail();
+
+    if(m_mailsUpdated)                                      //save mails only when needed
+        _SaveMail();
+
     _SaveAuctions();
     _SaveInventory();
     _SaveQuestStatus();
@@ -9544,6 +9616,8 @@ void Player::_SaveInventory()
 
 void Player::_SaveMail()
 {
+    if (!m_mailsLoaded) 
+        return;
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
 
@@ -9554,6 +9628,7 @@ void Player::_SaveMail()
 
         sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
     }
+    m_mailsUpdated = false;
 }
 
 void Player::_SaveQuestStatus()

@@ -162,31 +162,6 @@ class ObjectMgr
 
         static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
 
-        Item* GetMItem(uint32 id)
-        {
-            ItemMap::const_iterator itr = mMitems.find(id);
-            if (itr != mMitems.end())
-            {
-                return itr->second;
-            }
-            return NULL;
-        }
-        void AddMItem(Item* it)
-        {
-            ASSERT( it );
-            ASSERT( mMitems.find(it->GetGUIDLow()) == mMitems.end());
-            mMitems[it->GetGUIDLow()] = it;
-        }
-        bool RemoveMItem(uint32 id)
-        {
-            ItemMap::iterator i = mMitems.find(id);
-            if (i == mMitems.end())
-            {
-                return false;
-            }
-            mMitems.erase(i);
-            return true;
-        }
         Item* GetAItem(uint32 id)
         {
             ItemMap::const_iterator itr = mAitems.find(id);
@@ -264,7 +239,6 @@ class ObjectMgr
         void LoadTeleportCoords();
         void LoadAuctions();
         void LoadAuctionItems();
-        void LoadMailedItems();
         void LoadLvlUpGains();
 
         void SetHighestGuids();
@@ -299,7 +273,6 @@ class ObjectMgr
 
         ItemMap             mItems;
         ItemMap             mAitems;
-        ItemMap             mMitems;
 
         AuctionEntryMap     mAuctions;
 

@@ -105,14 +105,13 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 n->subject = "You have lost a bid";
                 n->body = "";
                 n->item = 0;
-                n->money = ah->bid;
                 n->time = time(NULL) + (30 * 3600);
+                n->money = ah->bid;
                 n->COD = 0;
                 n->checked = 0;
+
                 uint64 rc = ah->bidder;
-                std::string name;
-                objmgr.GetPlayerNameByGUID(rc,name);
-                Player *rpl = objmgr.GetPlayer(name.c_str());
+                Player *rpl = objmgr.GetPlayer(rc);
 
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", n->messageID);
                 sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", n->messageID , n->sender , n->receiver , n->subject.c_str() , n->body.c_str(), n->item , (uint64)n->time ,n->money ,n->COD ,n->checked);
@@ -198,11 +197,11 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             m->receiver = pl->GetGUIDLow();
             m->subject = "You won an item!";
             m->body = "";
-            m->checked = 0;
-            m->COD = 0;
-            m->money = 0;
             m->item = ah->item;
             m->time = time(NULL) + (29 * 3600);
+            m->money = 0;
+            m->COD = 0;
+            m->checked = 0;
 
             if (ah->bidder > 0)                             // mail to last bidder if there's one... + return money
             {
@@ -212,12 +211,12 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 mn2->receiver = ah->bidder;
                 mn2->subject = "You lost a bid!";
                 mn2->body = "Item has been bought";
-                mn2->checked = 0;
-                mn2->COD = 0;
-                mn2->money = ah->bid;
                 mn2->item = 0;
                 mn2->time = time(NULL) + (30 * 3600);
-                std::string name;
+                mn2->money = ah->bid;
+                mn2->COD = 0;
+                mn2->checked = 0;
+
                 Player *rpl2 = objmgr.GetPlayer((uint64)ah->bidder);
 
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
@@ -229,29 +228,15 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 }
             }
 
-            Item *it = objmgr.GetAItem(ah->item);
-
-            objmgr.AddMItem(it);
-            std::ostringstream ss;
-            ss << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
-                << it->GetGUIDLow() << ", '";
-            for(uint16 i = 0; i < it->GetValuesCount(); i++ )
-            {
-                ss << it->GetUInt32Value(i) << " ";
-            }
-            ss << "' )";
-            sDatabase.Execute( ss.str().c_str() );
-
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 
             uint64 rcpl = m->receiver;
-            std::string pname;
-            objmgr.GetPlayerNameByGUID(rcpl,pname);
-            Player *rpl = objmgr.GetPlayer(pname.c_str());
+            Player *rpl = objmgr.GetPlayer(rcpl);
             if (rpl)
             {
-                rpl->AddMail(m);
+                Item *it = objmgr.GetAItem(ah->item);
+                rpl->AddMItem(it);
             }
 
             sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",ah->Id);
@@ -268,19 +253,18 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             mn->receiver = ah->owner;
             mn->subject = "Your item sold!";
             mn->body = "";
-            mn->checked = 0;
-            mn->COD = 0;
-            mn->money = ah->buyout;
             mn->item = 0;
             mn->time = time(NULL) + (29 * 3600);
+            mn->money = ah->buyout;
+            mn->COD = 0;
+            mn->checked = 0;
+
 
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u';", mn->messageID);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, (uint64)mn->time, mn->money, 0, 0);
 
-            uint64 rcpln = mn->receiver;
-            std::string pnamen;
-            objmgr.GetPlayerNameByGUID(rcpln,pnamen);
-            Player *rpln = objmgr.GetPlayer(pnamen.c_str());
+            rcpl = mn->receiver;
+            Player *rpln = objmgr.GetPlayer(rcpl);
             if (rpln)
             {
                 rpln->AddMail(mn);
@@ -386,7 +370,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 {
     uint32 auctioneer;
     uint32 unk1;                                            // 0xF0001000
-    uint32 auctionID;                                       // but this is not auction id... it's another number...
+    uint32 auctionID;
     recv_data >> auctioneer >> unk1;
     recv_data >> auctionID;
     sLog.outError("DELETE AUCTION !!! auctioneer : %u, unknown: %u, AuctionID: %u", auctioneer, unk1, auctionID);

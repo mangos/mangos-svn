@@ -655,6 +655,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SaveToDB();
         void SavePet();
 
+        bool m_mailsLoaded;
+        bool m_mailsUpdated;
+
         void SetBindPoint(uint64 guid);
         void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
@@ -685,8 +688,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool HasSpaceForItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
 
-        void AddMail(Mail *m);
-
         std::map<uint32, struct quest_status> getQuestStatusMap() { return mQuestStatus; };
 
         const uint64& GetSelection( ) const { return m_curSelection; }
@@ -695,11 +696,52 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetSelection(const uint64 &guid) { m_curSelection = guid; }
         void SetTarget(const uint64 &guid) { m_curTarget = guid; }
 
+        void AddMail(Mail *m);
+        void SetMail(Mail *m);
+        void RemoveMail(uint32 id);
+
+
         uint32 GetMailSize() { return m_mail.size();};
         Mail* GetMail(uint32 id);
-        void RemoveMail(uint32 id);
+
         std::list<Mail*>::iterator GetmailBegin() { return m_mail.begin();};
         std::list<Mail*>::iterator GetmailEnd() { return m_mail.end();};
+
+        /*********************************************************/
+        /*** MAILED ITEMS SYSTEM ***/
+        /*********************************************************/
+ 
+        uint8 unReadMails; 
+
+        typedef HM_NAMESPACE::hash_map<uint32, Item*> ItemMap;
+
+        ItemMap mMitems; //template defined in objectmgr.cpp
+
+        Item* GetMItem(uint32 id)
+        {
+            ItemMap::const_iterator itr = mMitems.find(id);
+            if (itr != mMitems.end())
+                return itr->second;
+
+            return NULL;
+        }
+
+        void AddMItem(Item* it)
+        {
+            ASSERT( it );
+            //assert deleted, because items can be added before loading
+            mMitems[it->GetGUIDLow()] = it;
+        }
+
+        bool RemoveMItem(uint32 id)
+        {
+            ItemMap::iterator i = mMitems.find(id);
+            if (i == mMitems.end())
+                return false;
+
+            mMitems.erase(i);
+            return true;
+        }
 
         void PetSpellInitialize();
         bool HasSpell(uint32 spell) const;
@@ -1042,6 +1084,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadAuras();
         void _LoadInventory();
         void _LoadMail();
+        void _LoadMailedItems();
         void _LoadQuestStatus();
         void _LoadReputation();
         void _LoadSpells();
