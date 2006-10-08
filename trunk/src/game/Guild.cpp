@@ -218,7 +218,7 @@ void Guild::LoadPlayerStats(MemberSlot *memslot)
     // column 'zoneId' maybe now work?
     // FIXME: Get proper values for characters' zone and level.
     //QueryResult *result = sDatabase.PQuery("SELECT (`name`, `level`, `class`, `zoneId`) FROM `character` WHERE `guid` = '" I64FMTD "'", memslot->guid);
-    QueryResult *result = sDatabase.PQuery("SELECT `name`,`class`,`map`,`position_x`,`position_y`,`data` FROM `character` WHERE `guid` = '" I64FMTD "'", memslot->guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `name`,`class`,`map`,`position_x`,`position_y`,`data` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(memslot->guid));
     if(!result) return;
     fields = result->Fetch();
     vector<string> tokens = StrSplit(fields[5].GetString(), " ");
@@ -260,7 +260,8 @@ void Guild::DelMember(uint64 guid)
             break;
         }
     }
-    SaveGuildToDB();
+
+    DelMemberFromDB(guid);
 }
 
 void Guild::SetPNOTE(uint64 guid,std::string pnote)
@@ -271,10 +272,10 @@ void Guild::SetPNOTE(uint64 guid,std::string pnote)
         if ((*itr)->guid == guid)
         {
             (*itr)->Pnote = pnote;
+            sDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", (*itr)->Pnote.c_str(), GUID_LOPART((*itr)->guid));
             break;
         }
     }
-    SaveGuildMembersToDB();
 }
 
 void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
@@ -285,10 +286,10 @@ void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
         if ((*itr)->guid == guid)
         {
             (*itr)->OFFnote = offnote;
+            sDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", (*itr)->OFFnote.c_str(), GUID_LOPART((*itr)->guid));
             break;
         }
     }
-    SaveGuildMembersToDB();
 }
 
 void Guild::SaveGuildToDB()
@@ -325,7 +326,7 @@ void Guild::SaveGuildMembersToDB()
 void Guild::SaveMemberToDB(MemberSlot *memslot)
 {
     if(!memslot) return;
-    sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'",memslot->guid);
+    sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(memslot->guid));
     sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')", Id, GUID_LOPART(memslot->guid), memslot->RankId, memslot->Pnote.c_str(), memslot->OFFnote.c_str());
 }
 
@@ -333,16 +334,6 @@ void Guild::DelGuildFromDB()
 {
     sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
     sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid` = '%u'",Id);
-}
-
-void Guild::DelGuildMembersFromDB()
-{
-    std::list<MemberSlot*>::iterator itr;
-
-    for (itr = members.begin(); itr != members.end(); itr++)
-    {
-        DelMemberFromDB((*itr)->guid);
-    }
 }
 
 void Guild::DelMemberFromDB(uint64 guid)
@@ -398,7 +389,7 @@ void Guild::CreateRank(std::string name,uint32 rights)
     newrank->name = name;
     newrank->rights = rights;
     ranks.push_back(newrank);
-    SaveGuildToDB();
+    SaveRanksToDB();
 }
 
 std::string Guild::GetRankName(uint32 rankId)
@@ -446,7 +437,7 @@ void Guild::SetRankName(uint32 rankId, std::string name)
         }
         i++;
     }
-    SaveGuildToDB();
+    SaveRanksToDB();
 }
 
 void Guild::SetRankRights(uint32 rankId, uint32 rights)
@@ -464,7 +455,7 @@ void Guild::SetRankRights(uint32 rankId, uint32 rights)
         }
         i++;
     }
-    SaveGuildToDB();
+    SaveRanksToDB();
 }
 
 void Guild::Disband()
