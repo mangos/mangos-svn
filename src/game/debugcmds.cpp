@@ -78,12 +78,18 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
         return true;
     }
 
+    if(!args)
+        return false;
+
     char* icon_text = strtok((char*)args, " ");
+    char* flags_text = strtok(NULL, " ");
+    if(!icon_text || !flags_text)
+        return false;
+
     uint32 icon = atol(icon_text);
     if ( icon < 0 )
         icon = 0;
 
-    char* flags_text = strtok(NULL, " ");
     uint32 flags = atol(flags_text);
 
     sLog.outDetail("Command : POI, NPC = %u, icon = %u flags = %u", target->GetGUID(), icon,flags);

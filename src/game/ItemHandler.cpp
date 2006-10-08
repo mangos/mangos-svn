@@ -727,3 +727,22 @@ void WorldSession::SendItemEnchantTimeUpdate(uint64 Itemguid,uint32 slot,uint32 
     data << Duration;
     SendPacket(&data);
 }
+
+void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
+{
+    uint32 itemid;
+    recv_data >> itemid;
+    sLog.outDebug("WORLD: CMSG_ITEM_NAME_QUERY %u", itemid);
+    ItemPrototype const *pProto = objmgr.GetItemPrototype( itemid );
+    if( pProto )
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_ITEM_NAME_QUERY_RESPONSE);
+        data << pProto->ItemId;
+        data << pProto->Name1;
+        SendPacket(&data);
+        return;
+    }
+    else
+        sLog.outDebug("WORLD: CMSG_ITEM_NAME_QUERY for item %u failed (unknown item)", itemid);
+}
