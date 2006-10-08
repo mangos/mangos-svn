@@ -157,7 +157,6 @@ class Guild
         void SaveMemberToDB(MemberSlot *memslot);
 
         void DelGuildFromDB();
-        void DelGuildMembersFromDB();
         void DelMemberFromDB(uint64 guid);
 
         void BroadcastToGuild(WorldSession *session, std::string msg);
