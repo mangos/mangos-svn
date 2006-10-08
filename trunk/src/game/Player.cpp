@@ -2106,6 +2106,7 @@ void Player::DeleteFromDB()
     uint32 guid = GetGUIDLow();
 
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
@@ -2128,9 +2129,7 @@ void Player::DeleteFromDB()
     {
         if(m_items[i] == NULL)
             continue;
-        m_items[i]->DeleteFromDB();
-        if(m_items[i]->IsBag())
-            ((Bag*)m_items[i])->DeleteFromDB();
+        m_items[i]->DeleteFromDB();                         // Bag items delete also by virtual call Bag::DeleteFromDB
     }
 
     sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
@@ -2138,6 +2137,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u'",guid);
     // Temporary disabled, we need to lookup both auctionhouse and auctionhouse_items
     // together. auctionhouse_items are saved by item_guid not by player guid.
     // sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",guid);
