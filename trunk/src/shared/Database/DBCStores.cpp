@@ -24,7 +24,12 @@
 
 #include "DBCfmt.cpp"
 
+#include <map>
+
+typedef std::map<uint16,uint32> AreaFlagByAreaID;
+
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
+static AreaFlagByAreaID sAreaFlagByAreaID;
 
 DBCStorage <CreatureFamily> sCreatureFamilyStore(CreatureFamilyfmt);
 
@@ -85,6 +90,11 @@ void LoadDBCStores(std::string dataPath)
     StoreProblemList bad_dbc_files;
 
     LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
+
+    for(uint16 i = 1; i < sAreaStore.nCount; ++i)
+        if(AreaTableEntry* area = sAreaStore.LookupEntry(i))
+            sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
+
     LoadDBC(bar,bad_dbc_files,sCreatureFamilyStore,      dataPath+"dbc/CreatureFamily.dbc");
     LoadDBC(bar,bad_dbc_files,sEmoteStore,               dataPath+"dbc/EmotesText.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionStore,             dataPath+"dbc/Faction.dbc");
@@ -183,7 +193,7 @@ uint32 FindSpellRank(uint32 spellId)
     if(!spellInfo) return 0;
     for(int i=0;i<8;i++)
     {
-        if(strcmp(spellInfo->Rank[i], "") != 0)
+        if(spellInfo->Rank[i] && *spellInfo->Rank[i])
         {
             char *tmp = strstr(spellInfo->Rank[i], " ");
             if (!tmp) continue;
@@ -481,4 +491,18 @@ bool IsSingleTarget(uint32 spellId)
     // all other single target spells have if it has Attributes
     //if ( spellInfo->Attributes & (1<<30) ) return true;
     return false;
+}
+
+AreaTableEntry* GetAreaEntryByAreaID(uint32 area_id)
+{
+    AreaFlagByAreaID::iterator i = sAreaFlagByAreaID.find(area_id);
+    if(i == sAreaFlagByAreaID.end())
+        return NULL;
+
+    return sAreaStore.LookupEntry(i->second);
+}
+
+AreaTableEntry* GetAreaEntryByAreaFlag(uint32 area_flag)
+{
+    return sAreaStore.LookupEntry(area_flag);
 }

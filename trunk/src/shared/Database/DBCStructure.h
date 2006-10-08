@@ -179,6 +179,7 @@ struct AreaTableEntry
     uint32    ID;
     uint32    zone;
     uint32    exploreFlag;
+    uint32    zone_type;                                    // unknown value but 312 for all cities
     int32     area_level;
 };
 

@@ -380,20 +380,14 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 
     recv_data >> newZone;
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
-    switch(newZone)
+
+    AreaTableEntry* area = GetAreaEntryByAreaID(newZone);
+
+    if(area && area->zone_type == 312)                       // city
     {
-        case 1497:
-        case 1519:
-        case 1537:
-        case 1637:
-        case 1638:
-        case 1657:
-        {
-            GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-            GetPlayer()->SetRestType(2);
-            GetPlayer()->InnEnter(time(NULL),0,0,0);
-            break;
-        }
+        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        GetPlayer()->SetRestType(2);
+        GetPlayer()->InnEnter(time(NULL),0,0,0);
     }
 
 }

@@ -3136,7 +3136,7 @@ void Player::CheckExploreSystem()
     {
         SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
 
-        AreaTableEntry *p =sAreaStore.LookupEntry(areaFlag);
+        AreaTableEntry *p = GetAreaEntryByAreaFlag(areaFlag);
         if(!p)
         {
             sLog.outError("PLAYER: Player %u discovered unknown area (x: %u y: %u map: %u", GetGUID(), m_positionX,m_positionY,GetMapId());
