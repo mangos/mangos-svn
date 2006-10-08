@@ -1564,6 +1564,9 @@ void Player::RemoveMail(uint32 id)
     {
         if ((*itr)->messageID == id)
         {
+            //item should not be in bag , if it is sent by mail... , it can happen only on crash .. item will disappear
+            if ((*itr)->item)
+                sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", (*itr)->item);
             m_mail.erase(itr++);
         }
         else

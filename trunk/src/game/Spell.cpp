@@ -1743,7 +1743,7 @@ uint8 Spell::CheckItems()
     }
     if(itemTarget)
     {
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass > 0)
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
         {
             // filter by equiped class (weapon or armor) - raw class value
             if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
@@ -1834,7 +1834,7 @@ uint8 Spell::CheckItems()
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
             {
-                if(m_spellInfo->EquippedItemClass > 0 && itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
+                if(m_spellInfo->EquippedItemClass >= 0 && itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
                 if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENCHANT_HELD_ITEM && !itemTarget->IsEquipped())
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;

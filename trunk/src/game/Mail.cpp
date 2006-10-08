@@ -104,10 +104,11 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     data << uint32(MAIL_OK);
     SendPacket(&data);
 
+    Item *it = 0;
     if (item != 0)
     {
         uint16 pos = pl->GetPosByGuid(item);
-        Item *it = pl->GetItemByPos( pos );
+        it = pl->GetItemByPos( pos );
 
         //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (pos >> 8), (pos & 255), true );
@@ -130,6 +131,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->checked = 0;
 
         receive->AddMail(m);
+        if (it)
+            receive->AddMItem(it);
     }
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
