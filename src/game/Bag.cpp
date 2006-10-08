@@ -94,9 +94,9 @@ void Bag::SaveToDB()
     }
 }
 
-bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
+bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)
 {
-    if(!Item::LoadFromDB(guid, owner_guid, auctioncheck))
+    if(!Item::LoadFromDB(guid, owner_guid))
         return false;
 
     // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
@@ -133,8 +133,11 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
 
                 Item *item = NewItemOrBag(proto);
                 item->SetSlot(NULL_SLOT);
-                if(!item->LoadFromDB(item_guid, owner_guid, 1))
+                if(!item->LoadFromDB(item_guid, owner_guid))
+                {
+                    delete item;
                     continue;
+                }
                 StoreItem( slot, item, true );
             } while (result->NextRow());
 

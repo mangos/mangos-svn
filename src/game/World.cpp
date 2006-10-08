@@ -390,7 +390,6 @@ void World::Update(time_t diff)
                         sLog.outError("Auction item %u not found, and lost.",itr->second->item);
 
                     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
-                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",itr->second->item);
 
                     objmgr.RemoveAItem(itr->second->item);
                     objmgr.RemoveAuction(itr->second->Id);
@@ -448,7 +447,6 @@ void World::Update(time_t diff)
                         delete mn;
 
                     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
-                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",itr->second->item);
 
                     objmgr.RemoveAItem(itr->second->item);
                     objmgr.RemoveAuction(itr->second->Id);

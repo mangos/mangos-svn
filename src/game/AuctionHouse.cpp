@@ -127,8 +127,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             objmgr.RemoveAuction(ah->Id);
             objmgr.AddAuction(ah);
 
-            sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'", ah->Id);
-            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u');", ah->auctioneer, ah->item, ah->owner, ah->buyout, (uint64)ah->time, ah->bidder, ah->bid, ah->Id);
+            sDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u';", ah->bidder, ah->bid, ah->Id);
 
             pl->ModifyMoney(-int32(price));
 
@@ -240,7 +239,6 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             }
 
             sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",ah->Id);
-            sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",ah->item);
 
             data.Initialize( SMSG_AUCTION_LIST_RESULT );
             data << uint32(0);
@@ -301,19 +299,8 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     // DB can have outdate auction item with same guid
     objmgr.RemoveAItem(GUID_LOPART(item));
-    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u';", it->GetGUIDLow());
 
     objmgr.AddAItem(it);
-
-    std::ostringstream ss;
-    ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
-        << it->GetGUIDLow() << ", '";
-    for(uint16 i = 0; i < it->GetValuesCount(); i++ )
-    {
-        ss << it->GetUInt32Value(i) << " ";
-    }
-    ss << "' )";
-    sDatabase.Execute( ss.str().c_str() );
 
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
     WorldPacket data;

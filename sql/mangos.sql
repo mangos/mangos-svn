@@ -161,27 +161,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `auctionhouse` ENABLE KEYS */;
 
 --
--- Table structure for table `auctionhouse_item`
---
-
-DROP TABLE IF EXISTS `auctionhouse_item`;
-CREATE TABLE `auctionhouse_item` (
-  `guid` bigint(20) NOT NULL default '0',
-  `data` longtext,
-  PRIMARY KEY  (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `auctionhouse_item`
---
-
-
-/*!40000 ALTER TABLE `auctionhouse_item` DISABLE KEYS */;
-LOCK TABLES `auctionhouse_item` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `auctionhouse_item` ENABLE KEYS */;
-
---
 -- Table structure for table `bugreport`
 --
 
@@ -1505,27 +1484,6 @@ CREATE TABLE `mail` (
 LOCK TABLES `mail` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `mail` ENABLE KEYS */;
-
---
--- Table structure for table `mail_item`
---
-
-DROP TABLE IF EXISTS `mail_item`;
-CREATE TABLE `mail_item` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `data` longtext,
-  PRIMARY KEY  (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Mail System';
-
---
--- Dumping data for table `mail_item`
---
-
-
-/*!40000 ALTER TABLE `mail_item` DISABLE KEYS */;
-LOCK TABLES `mail_item` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `mail_item` ENABLE KEYS */;
 
 --
 -- Table structure for table `npc_gossip`
