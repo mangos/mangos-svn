@@ -80,6 +80,8 @@ bool IsPassiveSpell(uint32 spellId);
 bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
 bool IsSingleTarget(uint32 spellId);
+AreaTableEntry* GetAreaEntryByAreaID(uint32 area_id);
+AreaTableEntry* GetAreaEntryByAreaFlag(uint32 area_flag);
 
 template<class T>
 class DBCStorage
@@ -127,7 +129,7 @@ class DBCStorage
         DBCFile * dbc;
 };
 
-extern DBCStorage <AreaTableEntry>           sAreaStore;
+//extern DBCStorage <AreaTableEntry>           sAreaStore; -- accessed using 2 functions
 extern DBCStorage <CreatureFamily>           sCreatureFamilyStore;
 extern DBCStorage <SpellCastTime>            sCastTime;
 extern DBCStorage <emoteentry>               sEmoteStore;

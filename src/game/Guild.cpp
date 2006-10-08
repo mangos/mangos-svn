@@ -113,7 +113,7 @@ void Guild::InviteMember(Player* pl)
         newmember->Pnote = (std::string)"";
         newmember->level = (uint8)pl->getLevel();
         newmember->Class = (uint8)pl->getClass();
-        newmember->zoneId = (uint32)sAreaStore.LookupEntry(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()))->zone;
+        newmember->zoneId = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()))->zone;
         AddMember(newmember);
         SaveMemberToDB(newmember);
     }
@@ -226,7 +226,7 @@ void Guild::LoadPlayerStats(MemberSlot *memslot)
     memslot->name  = fields[0].GetCppString();
     memslot->level = fields[5].GetUInt8();
     memslot->Class = fields[1].GetUInt8();
-    memslot->zoneId = sAreaStore.LookupEntry(MapManager::Instance().GetMap(fields[2].GetUInt32())->GetAreaFlag(fields[3].GetFloat(),fields[4].GetFloat()))->zone;
+    memslot->zoneId = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(fields[2].GetUInt32())->GetAreaFlag(fields[3].GetFloat(),fields[4].GetFloat()))->zone;
     delete result;
 }
 
