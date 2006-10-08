@@ -1095,7 +1095,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         void _SaveActions();
-        void _SaveAuctions();
         void _SaveAuras();
         void _SaveInventory();
         void _SaveMail();

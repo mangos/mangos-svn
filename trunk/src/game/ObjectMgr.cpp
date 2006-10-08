@@ -321,7 +321,7 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadAuctionItems()
 {
-    QueryResult *result = sDatabase.Query( "SELECT `guid` FROM `auctionhouse_item`" );
+    QueryResult *result = sDatabase.Query( "SELECT `itemguid` FROM `auctionhouse`" );
 
     if( !result )
         return;
@@ -330,8 +330,11 @@ void ObjectMgr::LoadAuctionItems()
     {
         fields = result->Fetch();
         Item* item = new Item;
-        if(!item->LoadFromDB(fields[0].GetUInt32(),0, 2))
+        if(!item->LoadFromDB(fields[0].GetUInt32(),0))
+        {
+            delete item;
             continue;
+        }
         AddAItem(item);
     }
     while( result->NextRow() );

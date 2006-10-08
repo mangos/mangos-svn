@@ -2169,10 +2169,6 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u'",guid);
-    // Temporary disabled, we need to lookup both auctionhouse and auctionhouse_items
-    // together. auctionhouse_items are saved by item_guid not by player guid.
-    // sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",guid);
-    // sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",guid);
 }
 
 void Player::SetMovement(uint8 pType)
@@ -9170,8 +9166,11 @@ void Player::_LoadInventory()
             Item *item = NewItemOrBag(proto);
             item->SetSlot(slot);
 
-            if(!item->LoadFromDB(item_guid, GetGUID(), 1))
+            if(!item->LoadFromDB(item_guid, GetGUID()))
+            {
+                delete item;
                 continue;
+            }
 
             dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
             if( IsInventoryPos( dest ) )
@@ -9214,7 +9213,7 @@ void Player::_LoadMailedItems()
     {
         fields = result->Fetch();
         Item* item = new Item;
-        if(!item->LoadFromDB(fields[0].GetUInt32(), 0, 1)) // load from item_instance table
+        if(!item->LoadFromDB(fields[0].GetUInt32(), 0))
         {
             delete item;
             continue;
@@ -9515,7 +9514,6 @@ void Player::SaveToDB()
     if(m_mailsUpdated)                                      //save mails only when needed
         _SaveMail();
 
-    _SaveAuctions();
     _SaveInventory();
     _SaveQuestStatus();
     _SaveTutorials();
@@ -9551,34 +9549,6 @@ void Player::_SaveActions()
     for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
     {
         sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), (uint32)itr->button, (uint32)itr->action, (uint32)itr->type, (uint32)itr->misc);
-    }
-}
-
-void Player::_SaveAuctions()
-{
-    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",GetGUIDLow());
-
-    ObjectMgr::AuctionEntryMap::iterator itr;
-    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        AuctionEntry *Aentry = itr->second;
-        if ((Aentry) && (Aentry->owner == GetGUIDLow()))
-        {
-            Item *it = objmgr.GetAItem(Aentry->item);
-
-            sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
-            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, (uint64)Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
-
-            std::ostringstream ss;
-            ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
-                << it->GetGUIDLow() << ", '";
-            for(uint16 i = 0; i < it->GetValuesCount(); i++ )
-            {
-                ss << it->GetUInt32Value(i) << " ";
-            }
-            ss << "' )";
-            sDatabase.Execute( ss.str().c_str() );
-        }
     }
 }
 

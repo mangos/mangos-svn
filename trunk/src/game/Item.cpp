@@ -458,18 +458,9 @@ void Item::SaveToDB()
     sDatabase.Execute( ss.str().c_str() );
 }
 
-bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
+bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
 {
-    QueryResult *result;
-
-    if (auctioncheck == 1)
-    {
-        result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
-    }
-    else //if (auctioncheck == 2)
-    {
-        result = sDatabase.PQuery("SELECT `data` FROM `auctionhouse_item` WHERE `guid` = '%u'", guid);
-    }
+    QueryResult *result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
 
     if (!result) return false;
 
@@ -482,7 +473,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
         return false;
     }
 
-    if(auctioncheck==1 && GetOwnerGUID()!=owner_guid)
+    if(owner_guid != 0 && GetOwnerGUID()!=owner_guid)
     {
         sLog.outError("Item::LoadFromDB: item: %u have in DB owner guid: %u. Updated to correct: %u",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()), GUID_LOPART(owner_guid));
         SetOwnerGUID(owner_guid);
