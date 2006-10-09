@@ -638,8 +638,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetInGameTime( uint32 time ) { m_ingametime = time; };
 
-        uint32 GetTimedQuest() { return m_timedquest; };
-        void SetTimedQuest( uint32 quest_id ) { m_timedquest = quest_id; }
+        void AddTimedQuest( uint32 quest_id ) { m_timedquests.push_back(quest_id); }
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
@@ -1072,7 +1071,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
 
-        uint32 m_timedquest;
+        list<uint32> m_timedquests;
+
         uint64 m_divider;
         uint32 m_ingametime;
 
