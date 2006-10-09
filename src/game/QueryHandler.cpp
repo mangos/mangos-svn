@@ -38,7 +38,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     uint32 race = 0, gender = 0, cl = 0;
-    std::string name = "ERROR_NO_NAME_FOR_GUID";
+    std::string name = "<Non-existed now character>";
 
     Player *pChar = ObjectAccessor::Instance().FindPlayer(guid);
 
