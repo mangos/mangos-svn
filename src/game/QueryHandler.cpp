@@ -72,8 +72,8 @@ void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )
     WorldPacket data;
     data.Initialize( SMSG_QUERY_TIME_RESPONSE );
 
-    //    data << (uint32)time(NULL);
-    data << (uint32)getMSTime();
+    data << (uint32)time(NULL);
+    //data << (uint32)getMSTime();
     SendPacket( &data );
 }
 
