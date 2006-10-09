@@ -243,8 +243,8 @@ enum PlayerFlags
     PLAYER_FLAGS_GHOST          = 0x0010,
     PLAYER_FLAGS_RESTING        = 0x0020,
     PLAYER_FLAGS_IN_PVP         = 0x0200,
-    PLAYER_FLAGS_UNK            = 0x1000,   //played long time
-    PLAYER_FLAGS_UNK2           = 0x2000,   //played too long time
+    PLAYER_FLAGS_UNK            = 0x1000,                   //played long time
+    PLAYER_FLAGS_UNK2           = 0x2000,                   //played too long time
 };
 
 enum LootType
@@ -699,7 +699,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetMail(Mail *m);
         void RemoveMail(uint32 id);
 
-
         uint32 GetMailSize() { return m_mail.size();};
         Mail* GetMail(uint32 id);
 
@@ -709,12 +708,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /*** MAILED ITEMS SYSTEM ***/
         /*********************************************************/
- 
-        uint8 unReadMails; 
+
+        uint8 unReadMails;
 
         typedef HM_NAMESPACE::hash_map<uint32, Item*> ItemMap;
 
-        ItemMap mMitems; //template defined in objectmgr.cpp
+        ItemMap mMitems;                                    //template defined in objectmgr.cpp
 
         Item* GetMItem(uint32 id)
         {
@@ -782,8 +781,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             //if(!m_pvp_counting)
             //{
-                m_pvp_count = count;
-                m_pvp_counting = true;
+            m_pvp_count = count;
+            m_pvp_counting = true;
             //}
         }
 
@@ -791,13 +790,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             pvpOn = b;
 
-            if (!b) { //PvP OFF
+            if (!b)                                         //PvP OFF
+            {
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP);
                 RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ICON);
-            } else { //PvP ON
+            }                                               //PvP ON
+            else
+            {
                 RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP);
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ICON);
-			}
+            }
 
             m_pvp_counting = false;
         };

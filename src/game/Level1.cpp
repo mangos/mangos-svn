@@ -496,7 +496,7 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
 }
 
 bool ChatHandler::HandleModifyTalentCommand (const char* args)
-{  
+{
     int tp = atoi((char*)args);
     if (tp>0)
     {

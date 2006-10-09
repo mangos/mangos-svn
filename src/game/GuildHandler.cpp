@@ -174,7 +174,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
     Guild *guild;
-    Player *player = GetPlayer();    
+    Player *player = GetPlayer();
 
     sLog.outDebug( "WORLD: Received CMSG_GUILD_ACCEPT"  );
 

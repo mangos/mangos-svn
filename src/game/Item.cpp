@@ -589,41 +589,60 @@ void Item::SetItemRandomProperties()
         enchant_id_1 = random_id = 0;
 
         if(irand(1,100) <= 60 )
-        switch(irand(1,100)%14)
-        {
-            case 1:random_id = 501 + uint32((583-501)/150.0f*(float)itemProto->ItemLevel);break;// of the Wolf
-            case 2:random_id = 584 + uint32((668-584)/150.0f*(float)itemProto->ItemLevel);break;// of the Monkey
-            case 3:random_id = 669 + uint32((753-669)/150.0f*(float)itemProto->ItemLevel);break;// of the Tiger
-            case 4:random_id = 754 + uint32((838-754)/150.0f*(float)itemProto->ItemLevel);break;// of the Owl
-            case 5:random_id = 839 + uint32((923-839)/150.0f*(float)itemProto->ItemLevel);break;// of the Eagle
-            case 6:random_id = 924 + uint32((1008-924)/150.0f*(float)itemProto->ItemLevel);break;// of the Gorilla
-            case 7:random_id = 1009 + uint32((1093-1009)/150.0f*(float)itemProto->ItemLevel);break;// of the Whale
-            case 8:random_id = 1094 + uint32((1178-1094)/150.0f*(float)itemProto->ItemLevel);break;// of the Boar
-            case 9:random_id = 1179 + uint32((1263-1179)/150.0f*(float)itemProto->ItemLevel);break;// of the Bear
-            case 10:random_id = 1307 + uint32((1352-1307)/100.0f*(float)itemProto->ItemLevel);break;// of Arcane Resistance
-            case 11:random_id = 1353 + uint32((1398-1353)/100.0f*(float)itemProto->ItemLevel);break;// of Frost Resistance
-            case 12:random_id = 1399 + uint32((1444-1399)/100.0f*(float)itemProto->ItemLevel);break;// of Fire Resistance
-            case 13:random_id = 1445 + uint32((1490-1445)/100.0f*(float)itemProto->ItemLevel);break;// of Shadow Resistance
-            case 0:random_id = 1491 + uint32((1536-1491)/100.0f*(float)itemProto->ItemLevel);break;// of Nature Resistance
-            default:break;
-        }
+            switch(irand(1,100)%14)
+            {
+                                                            // of the Wolf
+                case 1:random_id = 501 + uint32((583-501)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of the Monkey
+                case 2:random_id = 584 + uint32((668-584)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of the Tiger
+                case 3:random_id = 669 + uint32((753-669)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of the Owl
+                case 4:random_id = 754 + uint32((838-754)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of the Eagle
+                case 5:random_id = 839 + uint32((923-839)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of the Gorilla
+                case 6:random_id = 924 + uint32((1008-924)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of the Whale
+                case 7:random_id = 1009 + uint32((1093-1009)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of the Boar
+                case 8:random_id = 1094 + uint32((1178-1094)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of the Bear
+                case 9:random_id = 1179 + uint32((1263-1179)/150.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Arcane Resistance
+                case 10:random_id = 1307 + uint32((1352-1307)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Frost Resistance
+                case 11:random_id = 1353 + uint32((1398-1353)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Fire Resistance
+                case 12:random_id = 1399 + uint32((1444-1399)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Shadow Resistance
+                case 13:random_id = 1445 + uint32((1490-1445)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Nature Resistance
+                case 0:random_id = 1491 + uint32((1536-1491)/100.0f*(float)itemProto->ItemLevel);break;
+                default:break;
+            }
 
         if(irand(1,100) <= 50 && !random_id)
         {
             if(itemProto->Class == ITEM_CLASS_ARMOR)
             {
                 if(itemProto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
-                    random_id = 1647 + uint32((1703-1647)/100.0f*(float)itemProto->ItemLevel);// of Blocking
+                                                            // of Blocking
+                    random_id = 1647 + uint32((1703-1647)/100.0f*(float)itemProto->ItemLevel);
                 else if(irand(1,100) <= 30)
-                    random_id = 1607 + uint32((1636-1607)/100.0f*(float)itemProto->ItemLevel);// of Defense
+                                                            // of Defense
+                    random_id = 1607 + uint32((1636-1607)/100.0f*(float)itemProto->ItemLevel);
             }
             else if(itemProto->Class == ITEM_CLASS_JEWELRY)
             {
                 switch(irand(1,3))
                 {
-                    case 1:random_id = 2026 + uint32((2064-2026)/100.0f*(float)itemProto->ItemLevel);break;// of Healing
-                    case 2:random_id = 2067 + uint32((2104-2067)/100.0f*(float)itemProto->ItemLevel);break;// of Concentration
-                    case 3:random_id = 2105 + uint32((2142-2105)/100.0f*(float)itemProto->ItemLevel);break;// of Regeneration
+                                                            // of Healing
+                    case 1:random_id = 2026 + uint32((2064-2026)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Concentration
+                    case 2:random_id = 2067 + uint32((2104-2067)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Regeneration
+                    case 3:random_id = 2105 + uint32((2142-2105)/100.0f*(float)itemProto->ItemLevel);break;
                     default:break;
                 }
             }
@@ -632,20 +651,29 @@ void Item::SetItemRandomProperties()
                 if((itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW
                     || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN) && irand(1,100) <= 50)
                 {
-                    random_id = 1704 + uint32((1741-1704)/100.0f*(float)itemProto->ItemLevel);// of Marksmanship
+                                                            // of Marksmanship
+                    random_id = 1704 + uint32((1741-1704)/100.0f*(float)itemProto->ItemLevel);
                 }
                 else
                 {
                     switch(irand(1,8))
                     {
-                        case 1:random_id = 1547 + uint32((1592-1547)/100.0f*(float)itemProto->ItemLevel);break;// of Attack Power
-                        case 2:random_id = 1742 + uint32((1798-1742)/100.0f*(float)itemProto->ItemLevel);break;// of Eluding
-                        case 3:random_id = 1799 + uint32((1836-1799)/100.0f*(float)itemProto->ItemLevel);break;// of Arcane Wrath
-                        case 4:random_id = 1837 + uint32((1874-1837)/100.0f*(float)itemProto->ItemLevel);break;// of Shadow Wrath
-                        case 5:random_id = 1875 + uint32((1912-1875)/100.0f*(float)itemProto->ItemLevel);break;// of Fiery Wrath
-                        case 6:random_id = 1913 + uint32((1950-1913)/100.0f*(float)itemProto->ItemLevel);break;// of Holy Wrath
-                        case 7:random_id = 1951 + uint32((1988-1951)/100.0f*(float)itemProto->ItemLevel);break;// of Frozen Wrath
-                        case 8:random_id = 1989 + uint32((2026-1989)/100.0f*(float)itemProto->ItemLevel);break;// of Nature's Wrath
+                                                            // of Attack Power
+                        case 1:random_id = 1547 + uint32((1592-1547)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Eluding
+                        case 2:random_id = 1742 + uint32((1798-1742)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Arcane Wrath
+                        case 3:random_id = 1799 + uint32((1836-1799)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Shadow Wrath
+                        case 4:random_id = 1837 + uint32((1874-1837)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Fiery Wrath
+                        case 5:random_id = 1875 + uint32((1912-1875)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Holy Wrath
+                        case 6:random_id = 1913 + uint32((1950-1913)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Frozen Wrath
+                        case 7:random_id = 1951 + uint32((1988-1951)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Nature's Wrath
+                        case 8:random_id = 1989 + uint32((2026-1989)/100.0f*(float)itemProto->ItemLevel);break;
                         default:break;
                     }
                 }

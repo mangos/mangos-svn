@@ -2211,7 +2211,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
     // 126 - full bitmask all magic damages
     // 127 - full bitmask any damages
     //
-    // mods must be applied base at equiped weapon class amd subclass comparison 
+    // mods must be applied base at equiped weapon class amd subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClass
     // m_modifier.m_miscvalue comparison with item generated damage types
 

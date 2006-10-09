@@ -614,5 +614,4 @@ void CliSetLogLevel(char*Level,pPrintf zprintf)
     }
     sLog.SetLogLevel(NewLevel);
 }
-
 #endif

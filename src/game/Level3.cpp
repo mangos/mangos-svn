@@ -101,13 +101,13 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     float x = (float)atof(px);
     float y = (float)atof(py);
     uint32 mapid;
-	if (pmapid) 
-	     mapid = (uint32)atoi(pmapid);
-	else mapid = m_session->GetPlayer()->GetMapId();
+    if (pmapid)
+        mapid = (uint32)atoi(pmapid);
+    else mapid = m_session->GetPlayer()->GetMapId();
 
     if(!MapManager::ExistMAP(mapid,x,y))
     {
-		PSendSysMessage(".goxy: target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        PSendSysMessage(".goxy: target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
         return true;
     }
 
