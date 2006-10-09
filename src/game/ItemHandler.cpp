@@ -221,12 +221,14 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->MaxDurability;
         data << pProto->Area;
         data << pProto->Unknown1;
+        data << pProto->Unknown1;                           // Added in 1.12.x client branch
     }
     else
     {
         data << item;
         for(int a = 0; a < 11; a++)
             data << uint64(0);
+        data << uint32(0);                                  // Added in 1.12.x client branch
         SendPacket( &data );
         return;
     }

@@ -362,6 +362,12 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
         data << uint32(0);
         data << uint16(0);
         data << uint8(0);
+
+        data << uint64(0);                                  // Added in 1.12.x client branch
+        data << uint64(0);                                  // Added in 1.12.x client branch
+        data << uint64(0);                                  // Added in 1.12.x client branch
+        data << uint64(0);                                  // Added in 1.12.x client branch
+        data << uint8(0);                                   // Added in 1.12.x client branch
         SendPacket( &data );
         return;
     }
@@ -371,7 +377,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     data << info->name;
     data << uint16(0);                                      //unknown
     data << uint8(0);                                       //unknown
-
+    data << uint8(0);                                       // Added in 1.12.x client branch
     data << uint32(info->sound0);
     data << uint32(info->sound1);
     data << uint32(info->sound2);
@@ -387,6 +393,10 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     data << uint64(0);
     data << uint64(0);
 
+    data << uint64(0);                                      // Added in 1.12.x client branch
+    data << uint64(0);                                      // Added in 1.12.x client branch
+    data << uint64(0);                                      // Added in 1.12.x client branch
+    data << uint64(0);                                      // Added in 1.12.x client branch
     SendPacket( &data );
 }
 

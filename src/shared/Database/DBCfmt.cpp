@@ -16,20 +16,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-const char AreaTableEntryfmt[]="ixinixxxxxixxxxxxxxxx";
+const char AreaTableEntryfmt[]="ixinxxxxxxixxxxxxxxxxxxxx";
 const char CreatureFamilyfmt[]="nxxxxiiixxxxsxxxxx";
 const char emoteentryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="nixxxxxxxiiiiiiiiiixxxxxxxxxxxxxxxxxx";
 const char FactionTemplateEntryfmt[]="nxxiiixxxxixxx";
 const char ItemDisplayTemplateEntryfmt[]="ixxxxxxxxxxixxxxxxxxxxi";
 const char ItemRandomPropertiesfmt[]="nxiiixxxxxxxxxxx";
-const char ItemSetEntryfmt[]="dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
+const char ItemSetEntryfmt[]="dxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LockEntryfmt[]="nxxxxxxxxxxxxxxxxixxxxxxxxxxxxxxx";
 const char SkillLinefmt[]="nixssssssssxssssssssxi";
 const char SkillLineAbilityfmt[]="iiniiiiiiiiixxx";
 const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
-const char SpellEntryfmt[]="niixiiiixiiiiixiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiixxxiiiiiiiiiiiiiiifffiiiiiiiiiiiifffixiiissssssssissssssssixxxxxxxxxxxxxxxxxxiiiiiiixxxxxxxxxx";
+const char SpellEntryfmt[]="niixiiiixiixxiiixiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiixiiiiiiiiiffffffiiixxxiiiiiiiiiiiiiiifffiiiiiiiiiiiifffixiiissssssssissssssssixxxxxxxxxxxxxxxxxxiiiiiiixxxxxxxxxx";
 const char SpellFocusObjectfmt[]="nsxxxxxxxx";
 const char SpellItemEnchantmentfmt[]="niixixxixxiixxxxxixxxxii";
 const char SpellRadiusfmt[]="nfxf";

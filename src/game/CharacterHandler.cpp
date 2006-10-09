@@ -251,8 +251,10 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 
     delete plr;
 
-    data.Initialize(SMSG_CHAR_CREATE);
-    data << (uint8)0x34;
+    //data.Initialize(SMSG_CHAR_CREATE);
+    //data << (uint8)0x34;
+    data.Initialize(SMSG_CHAR_DELETE);                      // Changed in 1.12.x client branch
+    data << (uint8)0x39;                                    // Changed in 1.12.x client branch
     SendPacket( &data );
 }
 

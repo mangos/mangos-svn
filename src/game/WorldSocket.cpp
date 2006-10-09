@@ -315,8 +315,14 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     //! Handled Addons
 
     //Create Addon Packet
-    sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
-
+    //sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
+    SendAddonPacked.Initialize(SMSG_ADDON_INFO);            // fix banned addon
+    SendAddonPacked << uint8( 0x41 );                       // fix banned addon
+    SendAddonPacked << uint8( 0x64 );                       // fix banned addon
+    SendAddonPacked << uint8( 0x64 );                       // fix banned addon
+    SendAddonPacked << uint8( 0x6f );                       // fix banned addon
+    SendAddonPacked << uint8( 0x6e );                       // fix banned addon
+    SendAddonPacked << uint8( 0x00 );                       // fix banned addon
     SendPacket(&SendAddonPacked);
 
     return;
