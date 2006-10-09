@@ -54,8 +54,7 @@ Player::Player (WorldSession *session): Unit()
 
     info = NULL;
     m_divider = 0;
-    m_timedquest = 0;
-
+    
     m_afk = 0;
 
     m_GMFlags = 0;
@@ -716,19 +715,24 @@ void Player::Update( uint32 p_time )
 
     CheckExploreSystem();
 
-    if( GetTimedQuest() != 0 )
+    if (m_timedquests.size() > 0)
     {
-        uint64 ttt = mQuestStatus[GetTimedQuest()].m_timer;
-        if( mQuestStatus[GetTimedQuest()].m_timer > 0 )
+        list<uint32>::iterator iter = m_timedquests.begin();
+        while (iter != m_timedquests.end())
         {
-            if( mQuestStatus[GetTimedQuest()].m_timer <= p_time )
-            {
-                FailTimedQuest( GetTimedQuest() );
-            }
-            else
-            {
-                mQuestStatus[GetTimedQuest()].m_timer -= p_time;
-            }
+            //if( mQuestStatus[*iter].m_timer > 0 )
+            //{
+                if( mQuestStatus[*iter].m_timer <= p_time )
+                {
+                    FailTimedQuest( *iter );
+                    iter = m_timedquests.begin();
+                }
+                else
+                {
+                    mQuestStatus[*iter].m_timer -= p_time;
+                    iter++;
+                }
+            //}
         }
     }
 
@@ -8114,7 +8118,7 @@ void Player::AddQuest( Quest *pQuest )
         if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
         {
             uint32 limittime = qInfo->LimitTime;
-            SetTimedQuest( quest_id );
+            AddTimedQuest( quest_id );
             mQuestStatus[quest_id].m_timer = limittime * 1000;
             uint32 qtime = static_cast<uint32>(time(NULL)) + limittime;
             SetUInt32Value( log_slot + 2, qtime );
@@ -8175,8 +8179,11 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
                 RemoveItemCount( qInfo->ReqItemId[i], qInfo->ReqItemCount[i], true);
         }
 
-        if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
-            SetTimedQuest( 0 );
+        //if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+        //    SetTimedQuest( 0 );
+        if (find(m_timedquests.begin(), m_timedquests.end(), qInfo->QuestId) != m_timedquests.end())
+            m_timedquests.remove(qInfo->QuestId);
+
         if ( pQuest->m_rewchoiceitemscount > 0 )
         {
             if( qInfo->RewChoiceItemId[reward] )
@@ -8425,7 +8432,7 @@ bool Player::SatisfyQuestTimed( uint32 quest_id, bool msg )
     QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
     if( qInfo )
     {
-        if ( GetTimedQuest() != 0 && qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
+        if ( (find(m_timedquests.begin(), m_timedquests.end(), quest_id) != m_timedquests.end()) && qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
         {
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_HAVE_TIMED_QUEST );
@@ -8509,7 +8516,8 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
     {
         if ((status == QUEST_STATUS_NONE) || (status == QUEST_STATUS_INCOMPLETE)) {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
-                SetTimedQuest( 0 );
+                if (find(m_timedquests.begin(), m_timedquests.end(), quest_id) != m_timedquests.end())
+                    m_timedquests.remove(qInfo->QuestId);
         }
 
         mQuestStatus[quest_id].m_status = status;
@@ -9329,7 +9337,7 @@ void Player::_LoadQuestStatus()
                 mQuestStatus[quest_id].m_completed_once = ( fields[4].GetUInt8() > 0 );
 
                 if( objmgr.GetQuestInfo(quest_id)->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !mQuestStatus[quest_id].m_rewarded )
-                    SetTimedQuest( quest_id );
+                    AddTimedQuest( quest_id );
 
                 if (fields[5].GetUInt32() <= sWorld.GetGameTime()) {
                     mQuestStatus[quest_id].m_timer = 1;
