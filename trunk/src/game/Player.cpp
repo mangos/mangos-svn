@@ -9237,7 +9237,8 @@ void Player::_LoadMail()
     //FIXME: mails with COD will not be returned, but deleted.
 
     //delete old mails:
-    sDatabase.PExecute("DELETE FROM `item_instance` ii WHERE ii.`guid` IN (SELECT `item` FROM `mail` WHERE `time` < '%u' AND `receiver` = '%u'); DELETE FROM `mail` WHERE `time` < '%u' AND `receiver` = '%u'", base, GetGUIDLow(), base, GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN (SELECT `item` FROM `mail` WHERE `time` < '" I64FMTD "' AND `receiver` = '%u')", (uint64)base, GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `time` < '" I64FMTD "' AND `receiver` = '%u'", (uint64)base, GetGUIDLow());
 
     _LoadMailedItems();
     
