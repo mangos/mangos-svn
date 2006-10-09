@@ -72,7 +72,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
     Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
 
-    SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
+    //    SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
     SetFloatValue(GAMEOBJECT_POS_X, x);
     SetFloatValue(GAMEOBJECT_POS_Y, y);
     SetFloatValue(GAMEOBJECT_POS_Z, z);

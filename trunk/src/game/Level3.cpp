@@ -36,6 +36,23 @@
 
 bool ChatHandler::HandleReloadCommand(const char* args)
 {
+    char* updatefield = strtok((char*)args, " ");
+
+    char* value = strtok(NULL, " ");
+
+    if (!updatefield || !value)
+        return false;
+
+    uint32 tupdatefield = (uint32)atoi(updatefield);
+    uint32 tvalue = (uint32)atoi(value);
+
+    Player *chr = m_session->GetPlayer();
+    if (chr == NULL)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+    chr->SetUInt32Value(tupdatefield, tvalue);
     return true;
 }
 

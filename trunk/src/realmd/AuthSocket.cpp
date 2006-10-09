@@ -254,6 +254,7 @@ void AuthSocket::_HandleLogonChallenge()
 
                             pkt.append(s.AsByteArray(), s.GetNumBytes());
                             pkt.append(unk3.AsByteArray(), 16);
+                            pkt << (uint8)0;                // Added in 1.12.x client branch
                         }
                     }
                     //    }

@@ -101,6 +101,7 @@ typedef struct
     uint8   M1[20];
     uint8   crc_hash[20];
     uint8   number_of_keys;
+    uint8   unk;                                            // Added in 1.12.x client branch
 } sAuthLogonProof_C;
 
 typedef struct
