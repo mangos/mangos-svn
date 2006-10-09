@@ -54,7 +54,7 @@ Player::Player (WorldSession *session): Unit()
 
     info = NULL;
     m_divider = 0;
-    
+
     m_afk = 0;
 
     m_GMFlags = 0;
@@ -311,7 +311,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     SetUInt32Value(PLAYER_BYTES, ((skin) | (face << 8) | (hairStyle << 16) | (hairColor << 24)));
     SetUInt32Value(PLAYER_BYTES_2, (facialHair | (0xEE << 8) | (0x00 << 16) | (0x02 << 24)));
-	SetUInt32Value(PLAYER_BYTES_3, gender);
+    SetUInt32Value(PLAYER_BYTES_3, gender);
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
     SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
 
@@ -722,16 +722,16 @@ void Player::Update( uint32 p_time )
         {
             //if( mQuestStatus[*iter].m_timer > 0 )
             //{
-                if( mQuestStatus[*iter].m_timer <= p_time )
-                {
-                    FailTimedQuest( *iter );
-                    iter = m_timedquests.begin();
-                }
-                else
-                {
-                    mQuestStatus[*iter].m_timer -= p_time;
-                    iter++;
-                }
+            if( mQuestStatus[*iter].m_timer <= p_time )
+            {
+                FailTimedQuest( *iter );
+                iter = m_timedquests.begin();
+            }
+            else
+            {
+                mQuestStatus[*iter].m_timer -= p_time;
+                iter++;
+            }
             //}
         }
     }
@@ -1357,7 +1357,7 @@ void Player::GiveLevel()
     MPGain=HPGain=0;
 
     uint32 level = getLevel();
-    
+
     if ( level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
         return;
 
@@ -1598,14 +1598,14 @@ void Player::SetMail(Mail *m)
     m_mail.push_back(m);                                    //insert to the end
 }
 
-//call this function only when sending new mail 
+//call this function only when sending new mail
 void Player::AddMail(Mail *m)
 {
     WorldPacket data;
 
     data.Initialize(SMSG_RECEIVED_MAIL);
     data << uint32(0);
-    GetSession()->SendPacket(&data); 
+    GetSession()->SendPacket(&data);
     unReadMails++;
 
     if(!m_mailsLoaded)
@@ -8217,7 +8217,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
         }
 
         // Not give XP in case already completed once repeatable quest
-        uint32 XP = mQuestStatus[quest_id].m_completed_once && qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) 
+        uint32 XP = mQuestStatus[quest_id].m_completed_once && qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE )
             ? 0 : uint32(pQuest->XPValue( this )*sWorld.getRate(RATE_XP_QUEST));
 
         if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
@@ -8247,9 +8247,10 @@ void Player::FailQuest( uint32 quest_id )
         IncompleteQuest( quest_id );
 
         uint16 log_slot = GetQuestSlot( quest_id );
-        if( log_slot ) {
+        if( log_slot )
+        {
             SetUInt32Value( log_slot + 2, 1 );
-            
+
             uint32 state = GetUInt32Value( log_slot + 1 );
             state |= 1 << 25;
             SetUInt32Value( log_slot + 1, state );
@@ -8267,9 +8268,10 @@ void Player::FailTimedQuest( uint32 quest_id )
         IncompleteQuest( quest_id );
 
         uint16 log_slot = GetQuestSlot( quest_id );
-        if( log_slot ) {
+        if( log_slot )
+        {
             SetUInt32Value( log_slot + 2, 1 );
-            
+
             uint32 state = GetUInt32Value( log_slot + 1 );
             state |= 1 << 25;
             SetUInt32Value( log_slot + 1, state );
@@ -8514,7 +8516,8 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
     QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
     if( qInfo )
     {
-        if ((status == QUEST_STATUS_NONE) || (status == QUEST_STATUS_INCOMPLETE)) {
+        if ((status == QUEST_STATUS_NONE) || (status == QUEST_STATUS_INCOMPLETE))
+        {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
                 if (find(m_timedquests.begin(), m_timedquests.end(), quest_id) != m_timedquests.end())
                     m_timedquests.remove(qInfo->QuestId);
@@ -9067,7 +9070,7 @@ bool Player::LoadFromDB( uint32 guid )
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
-    //_LoadMail(); 
+    //_LoadMail();
 
     _LoadAuras();
 
@@ -9248,12 +9251,11 @@ void Player::_LoadMailedItems()
     delete result;
 }
 
-
 void Player::_LoadMail()
 {
     //delete old mails, and if old mail has item so delete it too
     time_t base = time(NULL);
-    
+
     //FIXME: mails with COD will not be returned, but deleted.
 
     //delete old mails:
@@ -9261,7 +9263,7 @@ void Player::_LoadMail()
     sDatabase.PExecute("DELETE FROM `mail` WHERE `time` < '" I64FMTD "' AND `receiver` = '%u'", (uint64)base, GetGUIDLow());
 
     _LoadMailedItems();
-    
+
     m_mail.clear();
 
     QueryResult *result = sDatabase.PQuery("SELECT `id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
@@ -9339,10 +9341,11 @@ void Player::_LoadQuestStatus()
                 if( objmgr.GetQuestInfo(quest_id)->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !mQuestStatus[quest_id].m_rewarded )
                     AddTimedQuest( quest_id );
 
-                if (fields[5].GetUInt32() <= sWorld.GetGameTime()) {
+                if (fields[5].GetUInt32() <= sWorld.GetGameTime())
+                {
                     mQuestStatus[quest_id].m_timer = 1;
                 } else
-                    mQuestStatus[quest_id].m_timer = (fields[5].GetUInt32() - sWorld.GetGameTime()) * 1000;
+                mQuestStatus[quest_id].m_timer = (fields[5].GetUInt32() - sWorld.GetGameTime()) * 1000;
 
                 mQuestStatus[quest_id].m_mobcount[0] = fields[6].GetUInt32();
                 mQuestStatus[quest_id].m_mobcount[1] = fields[7].GetUInt32();
@@ -9614,7 +9617,7 @@ void Player::_SaveInventory()
 
 void Player::_SaveMail()
 {
-    if (!m_mailsLoaded) 
+    if (!m_mailsLoaded)
         return;
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
@@ -9635,7 +9638,7 @@ void Player::_SaveQuestStatus()
 
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", 
+        sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
             GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, i->second.m_timer / 1000 + sWorld.GetGameTime(), i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
     }
 }
@@ -9779,7 +9782,7 @@ void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
 void Player::UpdatePVPFlag(time_t currTime)
 {
     if( !GetPvP() ) return;
-    
+
     //Player is counting to set/unset pvp flag
     if( !m_pvp_counting ) return;
 

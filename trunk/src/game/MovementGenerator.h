@@ -32,14 +32,14 @@ class Creature;
 // values 0 ... MAX_DB_MOTION_TYPE-1 used in DB
 enum MovementGeneratorType
 {
-    IDLE_MOTION_TYPE      = 0,                      // IdleMovementGenerator.h
-    RANDOM_MOTION_TYPE    = 1,                      // RandomMovementGenerator.h
-    WAYPOINT_MOTION_TYPE  = 2,                      // WaypointMovementGenerator.h
-    MAX_DB_MOTION_TYPE,                             // *** this and later motion types can't be setted in DB.
-    ANIMAL_RANDOM_MOTION_TYPE = MAX_DB_MOTION_TYPE, // AnimalRandomMovementGenerator.h
-    CONFUSED_MOTION_TYPE,                           // ConfusedMovementGenerator.h
-    TARGETED_MOTION_TYPE,                           // TargetedMovementGenerator.h
-    TAXI_MOTION_TYPE,                               // TaxiMovementGenerator.h
+    IDLE_MOTION_TYPE      = 0,                              // IdleMovementGenerator.h
+    RANDOM_MOTION_TYPE    = 1,                              // RandomMovementGenerator.h
+    WAYPOINT_MOTION_TYPE  = 2,                              // WaypointMovementGenerator.h
+    MAX_DB_MOTION_TYPE,                                     // *** this and later motion types can't be setted in DB.
+    ANIMAL_RANDOM_MOTION_TYPE = MAX_DB_MOTION_TYPE,         // AnimalRandomMovementGenerator.h
+    CONFUSED_MOTION_TYPE,                                   // ConfusedMovementGenerator.h
+    TARGETED_MOTION_TYPE,                                   // TargetedMovementGenerator.h
+    TAXI_MOTION_TYPE,                                       // TaxiMovementGenerator.h
 };
 
 class MANGOS_DLL_SPEC MovementGenerator

@@ -1010,10 +1010,9 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     uint32 maxmana = max(cinfo->maxmana, cinfo->minmana);
     uint32 mana = minmana + uint32(rellevel*(maxmana - minmana));
 
-    SetMaxPower(POWER_MANA,mana);                 //MAX Mana
+    SetMaxPower(POWER_MANA,mana);                           //MAX Mana
     SetUInt32Value(UNIT_FIELD_BASE_MANA, mana);
     SetPower(POWER_MANA,mana );
-
 
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
 

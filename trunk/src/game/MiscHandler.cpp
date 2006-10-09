@@ -354,7 +354,7 @@ void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
     }
 
     //sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You will be unflagged for PvP combat after five minutes of non-PvP action in friendly territory.");
-    
+
     GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
     GetPlayer()->SetPVPCount(time(NULL));
 
@@ -383,7 +383,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 
     AreaTableEntry* area = GetAreaEntryByAreaID(newZone);
 
-    if(area && area->zone_type == 312)                       // city
+    if(area && area->zone_type == 312)                      // city
     {
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         GetPlayer()->SetRestType(2);

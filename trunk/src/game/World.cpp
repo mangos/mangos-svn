@@ -366,14 +366,14 @@ void World::Update(time_t diff)
 
                         Mail *m = new Mail;
                         m->messageID = objmgr.GenerateMailID();
-                        m->sender = 0; //there should be horde/ali AuctionHouse
+                        m->sender = 0;                      //there should be horde/ali AuctionHouse
                         m->receiver = itr->second->owner;
                         m->subject = "Your item failed to sell";
                         m->body = "";
                         m->item = itr->second->item;
                         m->time = time(NULL) + (29 * 3600);
                         m->money = 0;
-                        m->COD = 0; // there might be deposit
+                        m->COD = 0;                         // there might be deposit
                         m->checked = 0;
                         if (receive)
                         {
@@ -432,7 +432,6 @@ void World::Update(time_t diff)
                     mn->checked = 0;
 
                     Item *it = objmgr.GetAItem(itr->second->item);
-
 
                     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn->messageID);
                     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, (uint64)mn->time, 0, 0, 0);
@@ -642,7 +641,6 @@ void World::ShutdownCancel()
 
     DEBUG_LOG("Server shuttingdown cancelled.");
 }
-
 
 void World::SendServerMessage(ServerMessageType type, const char *text)
 {

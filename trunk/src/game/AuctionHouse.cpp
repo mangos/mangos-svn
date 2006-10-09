@@ -257,7 +257,6 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             mn->COD = 0;
             mn->checked = 0;
 
-
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u';", mn->messageID);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, (uint64)mn->time, mn->money, 0, 0);
 

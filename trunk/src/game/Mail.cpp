@@ -98,7 +98,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         return;
     }
 
-
     uint16 item_pos;
     Item *it = 0;
 
@@ -118,7 +117,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             return;
         }
     }
-
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(0);
@@ -193,7 +191,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
         /*if (m->item) //player cannot delete mail, when it has money , or item, that mail can be returned
         sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item);*/
-        //commit Transaction    
+        //commit Transaction
     }
     pl->RemoveMail(message);
 
@@ -214,7 +212,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     Player *pl = _player;
     Mail *m = pl->GetMail(message);
 
-    if(!m) 
+    if(!m)
         return;
 
     m->receiver = m->sender;
@@ -242,7 +240,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     data << uint32(0);
     SendPacket(&data);
 
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", message); 
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", message);
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 
     pl->RemoveMail(message);
@@ -257,7 +255,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     recv_data >> mailbox;
     recv_data >> message;
     Player* pl = _player;
-    
+
     Mail* m = pl->GetMail(message);
     if (!m)
         return;

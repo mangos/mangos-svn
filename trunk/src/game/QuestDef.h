@@ -223,9 +223,9 @@ class Quest
 
 struct quest_status
 {
-    quest_status() 
-    : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),m_explored(false),
-    m_completed_once(false), m_timer(0)
+    quest_status()
+        : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),m_explored(false),
+        m_completed_once(false), m_timer(0)
     {
         memset(m_itemcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_mobcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));

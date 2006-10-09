@@ -1332,7 +1332,7 @@ float Unit::GetUnitParryChance() const
             if(!tmpitem || tmpitem->IsBroken())
                 tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-            if(tmpitem && !tmpitem->IsBroken() && 
+            if(tmpitem && !tmpitem->IsBroken() &&
                 (tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || tmpitem->GetProto()->InventoryType == INVTYPE_2HWEAPON))
                 chance = GetFloatValue(PLAYER_PARRY_PERCENTAGE);
         }

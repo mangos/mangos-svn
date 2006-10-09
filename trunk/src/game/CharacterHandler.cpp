@@ -284,7 +284,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     else
         plr->unReadMails = 0;
 
-
     SetPlayer(plr);
 
     data.Initialize( SMSG_ACCOUNT_DATA_MD5 );

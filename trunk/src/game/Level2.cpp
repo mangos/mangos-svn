@@ -357,7 +357,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     }
 
     pCreature->SaveToDB();
-	pCreature->LoadFromDB(pCreature->GetGUIDLow()); // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+    pCreature->LoadFromDB(pCreature->GetGUIDLow());         // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
     MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
 
     sLog.outDebug(LANG_ADD_OBJ);
