@@ -51,7 +51,6 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint32 sheathed;
     recv_data >> sheathed;
 

@@ -98,20 +98,38 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         return;
     }
 
+
+    uint16 item_pos;
+    Item *it = 0;
+
+    if (item != 0)
+    {
+        item_pos = pl->GetPosByGuid(item);
+        it = pl->GetItemByPos( item_pos );
+
+        // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to mail)
+        if(it->IsBag() && !((Bag*)it)->IsEmpty())
+        {
+            data.Initialize(SMSG_SEND_MAIL_RESULT);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(MAIL_ERR_INTERNAL_ERROR);
+            SendPacket(&data);
+            return;
+        }
+    }
+
+
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(0);
     data << uint32(0);
     data << uint32(MAIL_OK);
     SendPacket(&data);
 
-    Item *it = 0;
     if (item != 0)
     {
-        uint16 pos = pl->GetPosByGuid(item);
-        it = pl->GetItemByPos( pos );
-
         //item reminds in item_instance table already, used it in mail now
-        pl->RemoveItem( (pos >> 8), (pos & 255), true );
+        pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
     }
     pl->ModifyMoney( -30 - money );
 
@@ -422,8 +440,6 @@ uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
     return srcitem->GetProto()->ItemId;
 }
 
-extern char *GetInventoryImageFilefromObjectClass(uint32 classNum, uint32 subclassNum, uint32 type, uint32 DisplayID);
-
 bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
 {
     //    int i;
@@ -528,8 +544,6 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     recv_data >> unk1 >> unk2 >> mailid;
 
     sLog.outDetail("HandleMailCreateTextItem unk1=%u,unk2=%u,mailid=%u",unk1,unk2,mailid);
-
-    WorldPacket Data;
 
     Item *item = new Item();
 

@@ -28,7 +28,6 @@
 #include "Policies/SingletonImp.h"
 
 using std::remove_copy_if;
-using std::ptr_fun;
 
 LootStore LootTemplates_Creature;
 LootStore LootTemplates_Fishing;
