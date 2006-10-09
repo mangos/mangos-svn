@@ -718,6 +718,7 @@ void Player::Update( uint32 p_time )
 
     if( GetTimedQuest() != 0 )
     {
+        uint64 ttt = mQuestStatus[GetTimedQuest()].m_timer;
         if( mQuestStatus[GetTimedQuest()].m_timer > 0 )
         {
             if( mQuestStatus[GetTimedQuest()].m_timer <= p_time )
@@ -8114,9 +8115,8 @@ void Player::AddQuest( Quest *pQuest )
         {
             uint32 limittime = qInfo->LimitTime;
             SetTimedQuest( quest_id );
-            mQuestStatus[quest_id].m_timer = limittime * 60000;
-            uint64 ktime = 0;                               // unkwnown and dependent from server start time and player login time
-            uint32 qtime = static_cast<uint32>(time(NULL) - ktime) + limittime;
+            mQuestStatus[quest_id].m_timer = limittime * 1000;
+            uint32 qtime = static_cast<uint32>(time(NULL)) + limittime;
             SetUInt32Value( log_slot + 2, qtime );
         }
         else
@@ -8240,8 +8240,13 @@ void Player::FailQuest( uint32 quest_id )
         IncompleteQuest( quest_id );
 
         uint16 log_slot = GetQuestSlot( quest_id );
-        if( log_slot )
+        if( log_slot ) {
             SetUInt32Value( log_slot + 2, 1 );
+            
+            uint32 state = GetUInt32Value( log_slot + 1 );
+            state |= 1 << 25;
+            SetUInt32Value( log_slot + 1, state );
+        }
         SendQuestFailed( quest_id );
     }
 }
@@ -8255,8 +8260,13 @@ void Player::FailTimedQuest( uint32 quest_id )
         IncompleteQuest( quest_id );
 
         uint16 log_slot = GetQuestSlot( quest_id );
-        if( log_slot )
+        if( log_slot ) {
             SetUInt32Value( log_slot + 2, 1 );
+            
+            uint32 state = GetUInt32Value( log_slot + 1 );
+            state |= 1 << 25;
+            SetUInt32Value( log_slot + 1, state );
+        }
         SendQuestTimerFailed( quest_id );
     }
 }
@@ -8497,8 +8507,10 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
     QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
     if( qInfo )
     {
-        if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
-            SetTimedQuest( 0 );
+        if ((status == QUEST_STATUS_NONE) || (status == QUEST_STATUS_INCOMPLETE)) {
+            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+                SetTimedQuest( 0 );
+        }
 
         mQuestStatus[quest_id].m_status = status;
     }
@@ -9319,15 +9331,19 @@ void Player::_LoadQuestStatus()
                 if( objmgr.GetQuestInfo(quest_id)->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !mQuestStatus[quest_id].m_rewarded )
                     SetTimedQuest( quest_id );
 
-                mQuestStatus[quest_id].m_timer = 0;
-                mQuestStatus[quest_id].m_mobcount[0] = fields[5].GetUInt32();
-                mQuestStatus[quest_id].m_mobcount[1] = fields[6].GetUInt32();
-                mQuestStatus[quest_id].m_mobcount[2] = fields[7].GetUInt32();
-                mQuestStatus[quest_id].m_mobcount[3] = fields[8].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[0] = fields[9].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[1] = fields[10].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[2] = fields[11].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[3] = fields[12].GetUInt32();
+                if (fields[5].GetUInt32() <= sWorld.GetGameTime()) {
+                    mQuestStatus[quest_id].m_timer = 1;
+                } else
+                    mQuestStatus[quest_id].m_timer = (fields[5].GetUInt32() - sWorld.GetGameTime()) * 1000;
+
+                mQuestStatus[quest_id].m_mobcount[0] = fields[6].GetUInt32();
+                mQuestStatus[quest_id].m_mobcount[1] = fields[7].GetUInt32();
+                mQuestStatus[quest_id].m_mobcount[2] = fields[8].GetUInt32();
+                mQuestStatus[quest_id].m_mobcount[3] = fields[9].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[0] = fields[10].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[1] = fields[11].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[2] = fields[12].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[3] = fields[13].GetUInt32();
 
                 sLog.outDebug("Quest status is {%u} for quest {%u}", mQuestStatus[quest_id].m_status, quest_id);
             }
@@ -9612,7 +9628,7 @@ void Player::_SaveQuestStatus()
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
         sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", 
-            GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, i->second.m_timer, i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
+            GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, i->second.m_timer / 1000 + sWorld.GetGameTime(), i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
     }
 }
 
