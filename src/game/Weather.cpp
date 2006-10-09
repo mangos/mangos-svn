@@ -98,7 +98,7 @@ void Weather::ReGenerate()
     // 30% - weather worsens
     // 30% - weather gets better
     // 10% - radical change
-    uint32 u = uint32((double)rand() / (RAND_MAX + 1) * (100));
+    uint32 u = uint32((double)rand() / (RAND_MAX + 1.0) * 100);
 
     if (u < 30)
         return;
@@ -157,7 +157,7 @@ void Weather::ReGenerate()
             if (m_grade > 0.6666667f)
             {
                                                             // Severe change, but how severe?
-                uint32 rnd = uint32((double)rand() / (RAND_MAX + 1) * (100));
+                uint32 rnd = uint32((double)rand() / (RAND_MAX + 1.0) * 100);
                 if (rnd < 50)
                 {
                     m_grade -= 0.6666667;
@@ -174,7 +174,10 @@ void Weather::ReGenerate()
     QueryResult *result;
     result = sDatabase.PQuery("SELECT `zone`,`spring_rain_chance`,`spring_snow_chance`,`spring_storm_chance`,`summer_rain_chance`,`summer_snow_chance`,`summer_storm_chance`,`fall_rain_chance`,`fall_snow_chance`,`fall_storm_chance`,`winter_rain_chance`,`winter_snow_chance`,`winter_storm_chance` FROM `game_weather` WHERE `zone` = '%u'", m_zone);
     if (!result)
+    {
+	sLog.outError("Weather data for zone %u not found in database", m_zone);
         return;
+    }
 
     uint32 chance1, chance2, chance3;
     Field *fields = result->Fetch();
@@ -192,7 +195,7 @@ void Weather::ReGenerate()
     chance2 = chance1 + chance2;
     chance3 = chance2 + chance3;
 
-    uint32 rnd = uint32((double)rand() / (RAND_MAX + 1) * (100));
+    uint32 rnd = uint32((double)rand() / (RAND_MAX + 1.0) * 100);
     if(rnd <= chance1)
         m_type = 1;
     else if(rnd <= chance2)
@@ -204,16 +207,16 @@ void Weather::ReGenerate()
 
     if (u < 90)
     {
-        m_grade = (double)rand() / (RAND_MAX + 1) * 0.3333;
+        m_grade = (double)rand() / (RAND_MAX + 1.0) * 0.3333;
     }
     else
     {
-                                                            // Severe change, but how severe?
-        rnd = uint32((double)rand() / (RAND_MAX + 1) * 100);
+        // Severe change, but how severe?
+        rnd = uint32((double)rand() / (RAND_MAX + 1.0) * 100);
         if (rnd < 50)
-            m_grade = (double)rand() / (RAND_MAX + 1) * 0.3333 + 0.3334;
+            m_grade = (double)rand() / (RAND_MAX + 1.0) * 0.3333 + 0.3334;
         else
-            m_grade = (double)rand() / (RAND_MAX + 1) * 0.3333 + 0.6667;
+            m_grade = (double)rand() / (RAND_MAX + 1.0) * 0.3333 + 0.6667;
     }
 
     UpdateWeather();
