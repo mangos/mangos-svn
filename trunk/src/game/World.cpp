@@ -253,7 +253,7 @@ void World::SetInitialWorldSettings()
         ||!MapManager::ExistMAP(1, 10311.3, 832.463)
         ||!MapManager::ExistMAP(1,-2917.58,-257.98))
     {
-        sLog.outError("Correct *.map files not found by path '%smap'. Please place *.map files in directory by this path or correct DataDir value in mangosd.conf file.",dataPath.c_str());
+        sLog.outError("Correct *.map files not found by path '%smaps'. Please place *.map files in directory by this path or correct DataDir value in mangosd.conf file.",dataPath.c_str());
         exit(1);
     }
 
