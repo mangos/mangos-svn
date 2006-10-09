@@ -76,6 +76,10 @@ Creature::~Creature()
 
 void Creature::CreateTrainerSpells()
 {
+    for(SpellsList::iterator i = m_tspells.begin(); i != m_tspells.end(); ++i)
+        delete *i;
+    m_tspells.clear();
+
     TrainerSpell *tspell;
     Field *fields;
     QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqspell`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
@@ -1133,7 +1137,6 @@ bool Creature::LoadFromDB(uint32 guid)
 
 void Creature::_LoadGoods()
 {
-
     itemcount = 0;
 
     QueryResult *result = sDatabase.PQuery("SELECT `item`, `maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());

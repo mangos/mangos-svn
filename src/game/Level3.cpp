@@ -1437,8 +1437,6 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     if (!*args)
         return false;
 
-    WorldPacket data;
-
     uint32 id = atoi((char*)args);
     if(!id)
     {

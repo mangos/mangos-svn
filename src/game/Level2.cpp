@@ -343,14 +343,6 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     uint32 id  = atoi(charID);
 
-    //QueryResult *result = sDatabase.PQuery("SELECT `modelid`,`flags`,`faction`,`level`,`name` FROM `creature_template` WHERE `entry` = '%u'", id);
-
-    //if(result)
-    //{
-    //Field *fields = result->Fetch();
-
-    //WorldPacket data;
-
     Player *chr = m_session->GetPlayer();
     float x = chr->GetPositionX();
     float y = chr->GetPositionY();
@@ -364,20 +356,13 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
         return false;
     }
 
-    pCreature->AIM_Initialize();
-    //pCreature->SetUInt32Value(UNIT_FIELD_HEALTH , 1); // temp set on 1 HP needs to be MAX HP (strange error)
+    pCreature->SaveToDB();
+	pCreature->LoadFromDB(pCreature->GetGUIDLow()); // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
 
     sLog.outDebug(LANG_ADD_OBJ);
 
-    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
-    pCreature->SaveToDB();
-
-    //delete result;
     return true;
-    //}
-    //else
-    //    delete result;
-    //return false;
 }
 
 bool ChatHandler::HandleDeleteCommand(const char* args)
