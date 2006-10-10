@@ -1623,9 +1623,6 @@ void Spell::EffectDisEnchant(uint32 i)
         return;
     uint32 item_level = itemTarget->GetProto()->ItemLevel;
     uint32 item_quality = itemTarget->GetProto()->Quality;
-    p_caster->DestroyItemCount(itemTarget->GetEntry(),1, true);
-
-    p_caster->UpdateSkillPro(m_spellInfo->Id);
 
     uint32 item;
     uint32 count = 0;
@@ -1812,6 +1809,16 @@ void Spell::EffectDisEnchant(uint32 i)
             }
         }
     }
+    else
+    {//Fix crash 
+        SendCastResult(CAST_FAIL_CANT_BE_DISENCHANTED);
+        //SendChannelUpdate(0);
+        return;
+    }
+
+    p_caster->DestroyItemCount(itemTarget->GetEntry(),1, true);
+    p_caster->UpdateSkillPro(m_spellInfo->Id);
+
     uint16 dest;
     uint8 msg = p_caster->CanStoreNewItem( 0, NULL_SLOT, dest, item, count, false );
     if( msg == EQUIP_ERR_OK )
