@@ -208,9 +208,9 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 AreaTrigger *fields = objmgr.GetAreaTrigger( info->sound0 );
                 if(fields)
                 {
-                    sLog.outDebug( "Teleporting player %u with coordinates X: %f Y: %f Z: %f Orientation: %f Map: %u\n", _player->GetGUID(), fields->X,fields->Y,fields->Z,fields->Orientation,fields->mapId);
+                    sLog.outDebug( "Teleporting player %u with coordinates X: %f Y: %f Z: %f Orientation: %f Map: %u\n", _player->GetGUIDLow(), fields->X,fields->Y,fields->Z,fields->Orientation,fields->mapId);
                     _player->TeleportTo(fields->mapId, fields->X,fields->Y,fields->Z,fields->Orientation);
-                    sLog.outDebug( "Player %u teleported by %u\n", _player->GetGUID(), info->sound0);
+                    sLog.outDebug( "Player %u teleported by %u\n", _player->GetGUIDLow(), info->sound0);
                 }
                 else
                     sLog.outDebug( "Unknown areatrigger_template id %u\n", info->sound0);

@@ -531,7 +531,7 @@ void Spell::EffectOpenLock(uint32 i)
     LockEntry *lockInfo = sLockStore.LookupEntry(lockId);
     if (!lockInfo)
     {
-        sLog.outError( "Spell::EffectOpenLock: object [guid = %u] has an unknown lockId: %u!", gameObjTarget->GetGUID() , lockId);
+        sLog.outError( "Spell::EffectOpenLock: gameobject [guid = %u] has an unknown lockId: %u!", gameObjTarget->GetGUIDLow() , lockId);
         return;
     }
     uint16 skill = 999;
@@ -1191,7 +1191,7 @@ void Spell::EffectSummonPet(uint32 i)
         MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);
 
         m_caster->SetPet(NewSummon);
-        sLog.outDebug("New Pet has guid %u", NewSummon->GetGUID());
+        sLog.outDebug("New Pet has guid %u", NewSummon->GetGUIDLow());
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {

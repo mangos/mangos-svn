@@ -1247,7 +1247,7 @@ void Unit::SendAttackStop(Unit* victim)
     data << (uint32)0;
 
     SendMessageToSet(&data, true);
-    sLog.outDetail("%u %X stopped attacking "I64FMT, GetGUIDLow(), GetGUIDHigh(), victim->GetGUID());
+    sLog.outDetail("%s %u stopped attacking %s %u", (GetTypeId()==TYPEID_PLAYER ? "player" : "creature"), GetGUIDLow(), (victim->GetTypeId()==TYPEID_PLAYER ? "player" : "creature"),victim->GetGUIDLow());
 
     if(victim->GetTypeId() == TYPEID_UNIT)
         ((Creature*)victim)->AI().AttackStop(this);

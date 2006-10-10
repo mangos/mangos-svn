@@ -130,7 +130,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->BuildPlayerRepop();
         }
 
-        sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `guid` = '%u'", _player->GetGUID());
+        sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `guid` = '%u'", _player->GetGUIDLow());
         loginDatabase.PExecute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u'", GetAccountId());
 
         if (_player->IsInGroup())
