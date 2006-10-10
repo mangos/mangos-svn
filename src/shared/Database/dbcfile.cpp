@@ -50,7 +50,7 @@ bool DBCFile::Load(const char *filename)
     fread(&recordSize,4,1,f);                               // Size of a record
     fread(&stringSize,4,1,f);                               // String size
 
-    if(fieldCount*4 != recordSize) return false;
+    if(fieldCount*4 != recordSize) return false;            // internal file structure check
 
     data = new unsigned char[recordSize*recordCount+stringSize];
     stringTable = data + recordSize*recordCount;
@@ -71,31 +71,11 @@ DBCFile::Record DBCFile::getRecord(size_t id)
     return Record(*this, data + id*recordSize);
 }
 
-void * DBCFile::AutoProduceData(const char * format,uint32 * records)
+uint32 DBCFile::GetFormatRecordSize(const char * format,int32* index_pos)
 {
-    /*
-    format STRING, NA, FLOAT,NA,INT <=>
-    struct{
-    char* field0,
-    float field1,
-    int field2
-    }entry;
-
-    this func will generate  entry[rows] data;
-    */
-    typedef char * ptr;
-    char * _data;
-    ptr* table;
-    int i=-1;
-
-    uint32 recordsize=0;
-    uint32 offset=0;
-
-    if(strlen(format)!=fieldCount)
-        return NULL;
-
-    //get struct size
-    for(uint32 x=0;x<fieldCount;x++)
+    uint32 recordsize = 0;
+    int32 i = -1;
+    for(uint32 x=0; format[x];++x)
         switch(format[x])
         {
             case FT_FLOAT:
@@ -113,6 +93,37 @@ void * DBCFile::AutoProduceData(const char * format,uint32 * records)
                 recordsize+=4;
                 break;
         }
+
+    if(index_pos)
+        *index_pos = i;
+    
+    return recordsize;
+}
+
+
+void * DBCFile::AutoProduceData(const char * format, uint32 * records)
+{
+    /*
+    format STRING, NA, FLOAT,NA,INT <=>
+    struct{
+    char* field0,
+    float field1,
+    int field2
+    }entry;
+
+    this func will generate  entry[rows] data;
+    */
+    typedef char * ptr;
+    char * _data;
+    ptr* table;
+    uint32 offset=0;
+
+    if(strlen(format)!=fieldCount)
+        return NULL;
+
+    //get struct size and index pos
+    int32 i;
+    uint32 recordsize=GetFormatRecordSize(format,&i);
 
     if(i>=0)
     {

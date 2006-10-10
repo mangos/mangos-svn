@@ -59,9 +59,20 @@ DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 
 typedef std::list<std::string> StoreProblemList;
 
+static bool LoadDBC_assert_print(uint32 fsize,uint32 rsize, std::string filename)
+{
+    sLog.outError("ERROR: Size of '%s' setted by format string (%u) not equal size of C++ structure (%u).",filename.c_str(),fsize,rsize);
+
+    // assert must fail after function call
+    return false;
+}
+
 template<class T>
 inline void LoadDBC(barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& storage, std::string filename)
 {
+    // compatibility format and C++ structure sizes
+    assert(DBCFile::GetFormatRecordSize(storage.fmt) == sizeof(T) || LoadDBC_assert_print(DBCFile::GetFormatRecordSize(storage.fmt),sizeof(T),filename));
+
     if(storage.Load(filename.c_str()))
         bar.step();
     else
