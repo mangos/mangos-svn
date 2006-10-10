@@ -3705,11 +3705,7 @@ void Player::DuelComplete()
     GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
 
     if(obj)
-    {
-        RemoveGameObject(obj->GetSpellId(),false);
-        m_pDuel->RemoveGameObject(obj->GetSpellId(),false);
-        obj->Delete();
-    }
+        m_pDuelSender->RemoveGameObject(obj,true);
 
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);

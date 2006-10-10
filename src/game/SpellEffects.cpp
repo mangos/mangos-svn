@@ -1495,8 +1495,6 @@ void Spell::EffectDuel(uint32 i)
         delete pGameObj;
         return;
     }
-    pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
-    pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
     pGameObj->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
 
     pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
@@ -1906,9 +1904,7 @@ void Spell::EffectSummonObject(uint32 i)
         delete pGameObj;
         return;
     }
-    pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i]);
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
-    pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
     pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
@@ -2179,8 +2175,6 @@ void Spell::EffectTransmitted(uint32 i)
         return;
     }
 
-    pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
-    pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
     pGameObj->SetUInt64Value(OBJECT_FIELD_CREATED_BY, m_caster->GetGUID() );
     pGameObj->SetUInt32Value(12, 0x3F63BB3C );
     pGameObj->SetUInt32Value(13, 0xBEE9E017 );

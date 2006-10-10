@@ -403,10 +403,17 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
         return true;
     }
 
-    if(obj->isReferenced())
+    uint64 owner_guid = obj->GetOwnerGUID();
+    if(owner_guid)
     {
-        PSendSysMessage("Game Object (GUID: %u) have references in some Unit GO list, can't be deleted.", obj->GetGUIDLow());
-        return true;
+        Unit* owner = ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(),owner_guid);
+        if(!owner && GUID_HIPART(owner_guid)!=HIGHGUID_PLAYER)
+        {
+            PSendSysMessage("Game Object (GUID: %u) have references in not found creature %u GO list, can't be deleted.", GUID_LOPART(owner_guid), obj->GetGUIDLow());
+            return true;
+        }
+
+        owner->RemoveGameObject(obj,false);
     }
 
     obj->Delete();

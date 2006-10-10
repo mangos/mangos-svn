@@ -583,6 +583,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddDynObject(DynamicObject* dynObj);
         void RemoveDynObject(uint32 spellid);
         void AddGameObject(GameObject* gameObj);
+        void RemoveGameObject(GameObject* gameObj, bool del);
         void RemoveGameObject(uint32 spellid, bool del);
         DynamicObject *GetDynObject(uint32 spellId, uint32 effIndex);
         uint32 CalculateDamage(WeaponAttackType attType);
