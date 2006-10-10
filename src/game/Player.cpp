@@ -999,11 +999,6 @@ void Player::BuildEnumData( WorldPacket * p_data )
         } while (result->NextRow());
         delete result;
     }
-    else
-    {
-        sLog.outError( "Player::BuildEnumData: Player %s's inventory cannot be loaded.", GetName());
-        return;
-    }
 
     for (int i = 0; i < 20; i++)
     {
