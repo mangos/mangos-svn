@@ -3642,9 +3642,9 @@ void Player::DuelComplete()
 
         data.Initialize(SMSG_DUEL_WINNER);
         data << (uint8)0;
-        data << GetName();
-        data << (uint8)0;
         data << m_pDuel->GetName();
+        data << (uint8)1;
+        data << GetName();
         SendMessageToSet(&data,true);
 
         data.Initialize(SMSG_DUEL_COMPLETE);
