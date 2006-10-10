@@ -60,6 +60,7 @@ class DBCFile
                     assert(stringOffset < file.stringSize);
                     return reinterpret_cast<char*>(file.stringTable + stringOffset);
                 }
+
             private:
                 Record(DBCFile &file, unsigned char *offset): offset(offset), file(file) {}
                 unsigned char *offset;
@@ -76,7 +77,8 @@ class DBCFile
         uint32 GetNumRows() const { return recordCount;}
         uint32 GetCols() const { return fieldCount; }
         bool IsLoaded() {return (data!=NULL);}
-        void *AutoProduceData(const char*,uint32 *);
+        void *AutoProduceData(const char*, uint32 *);
+        static uint32 GetFormatRecordSize(const char * format, int32 * index_pos = NULL);
     private:
 
         uint32 recordSize;

@@ -471,6 +471,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 
         { CMSG_CANCEL_CHANNELLING ,      STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              },
 
+        { CMSG_REQUEST_RAID_INFO,        STATUS_LOGGEDIN, &WorldSession::HandleRequestRaidInfoOpcode         },
+
         //BattleGround
 
         { CMSG_BATTLEFIELD_STATUS,       STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
