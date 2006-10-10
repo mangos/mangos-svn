@@ -78,7 +78,8 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
 
-    sLog.outDebug("Player %s GPS call unit " I64FMT " " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(), obj->GetGUID(),
+    sLog.outDebug("Player %s GPS call %s %u " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(), 
+        (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetGUIDLow(),
         obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
 

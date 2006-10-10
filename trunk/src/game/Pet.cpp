@@ -144,7 +144,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     AIM_Initialize();
     MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
     owner->SetPet(this);
-    sLog.outDebug("New Pet has guid %u", GetGUID());
+    sLog.outDebug("New Pet has guid %u", GetGUIDLow());
 
     //summon imp Template ID is 416
     if(owner->GetTypeId() == TYPEID_PLAYER)

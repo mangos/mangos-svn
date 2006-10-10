@@ -448,7 +448,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
     sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
 
-    sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUID());
+    sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
     plr->SetInGameTime( getMSTime() );
 

@@ -879,7 +879,7 @@ void Player::Update( uint32 p_time )
         {
             m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
             SaveToDB();
-            sLog.outBasic("Player '%u' '%s' Saved", this->GetGUID(), this->GetName());
+            sLog.outBasic("Player '%u' '%s' Saved", GetGUIDLow(), GetName());
         }
         else
         {
@@ -3139,7 +3139,7 @@ void Player::CheckExploreSystem()
         AreaTableEntry *p = GetAreaEntryByAreaFlag(areaFlag);
         if(!p)
         {
-            sLog.outError("PLAYER: Player %u discovered unknown area (x: %u y: %u map: %u", GetGUID(), m_positionX,m_positionY,GetMapId());
+            sLog.outError("PLAYER: Player %u discovered unknown area (x: %u y: %u map: %u", GetGUIDLow(), m_positionX,m_positionY,GetMapId());
         }
         else if(p->area_level > 0)
         {
@@ -3154,7 +3154,7 @@ void Player::CheckExploreSystem()
                 GiveXP( XP, NULL );
                 SendExplorationExperience(area,XP);
             }
-            sLog.outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), area);
+            sLog.outDetail("PLAYER: Player %u discovered a new area: %u", GetGUIDLow(), area);
         }
     }
 
