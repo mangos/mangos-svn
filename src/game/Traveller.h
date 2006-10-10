@@ -20,6 +20,8 @@
 #define MANGOS_TRAVELLER_H
 
 #include "MapManager.h"
+#include "Creature.h"
+#include "Player.h"
 #include <cassert>
 
 /** Traveller is a wrapper for units (creatures or players) that

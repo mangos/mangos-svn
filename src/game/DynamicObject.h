@@ -21,6 +21,7 @@
 
 #include "Object.h"
 
+class Unit;
 struct SpellEntry;
 
 class DynamicObject : public Object

@@ -20,17 +20,19 @@
 #define MANGOS_GRIDDEFINES_H
 
 #include "GameSystem/NGrid.h"
-#include "Player.h"
-#include "GameObject.h"
-#include "Creature.h"
-#include "DynamicObject.h"
-#include "Corpse.h"
 
 #include <cmath>
 
+// Forward class definitions
+class Corpse;
+class Creature;
+class DynamicObject;
+class GameObject;
+class Player;
+
 #define MAX_NUMBER_OF_GRIDS      64
 
-#define SIZE_OF_GRIDS            533.33333
+#define SIZE_OF_GRIDS            533.33333f
 #define CENTER_GRID_ID           (MAX_NUMBER_OF_GRIDS/2)
 
 #define CENTER_GRID_OFFSET      (SIZE_OF_GRIDS/2)

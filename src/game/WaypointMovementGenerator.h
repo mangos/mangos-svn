@@ -30,6 +30,8 @@
 #include "Path.h"
 #include "Traveller.h"
 
+#include "Player.h"
+
 #include <vector>
 #include <set>
 

@@ -20,6 +20,7 @@
 #include "WorldPacket.h"
 #include "MapManager.h"
 #include "Database/DBCStores.h"
+#include "Log.h"
 
 Totem::Totem()
 {
