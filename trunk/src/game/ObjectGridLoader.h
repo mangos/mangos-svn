@@ -42,22 +42,7 @@ class MANGOS_DLL_DECL ObjectGridLoader
 
         }
 
-        void LoadN(void)
-        {
-            i_gameObjects = 0; i_creatures = 0; i_corpses = 0;
-            i_cell.data.Part.cell_y = 0;
-            for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
-            {
-                i_cell.data.Part.cell_x = x;
-                for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
-                {
-                    i_cell.data.Part.cell_y = y;
-                    GridLoader<Player, AllObjectTypes> loader;
-                    loader.Load(i_grid(x, y), *this);
-                }
-            }
-            sLog.outDebug("%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses,i_grid.GetGridId(), i_mapId);
-        }
+        void LoadN(void);
 
     private:
         Cell i_cell;

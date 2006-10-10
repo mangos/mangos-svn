@@ -19,9 +19,7 @@
 #ifndef MANGOS_UTILITIES_H
 #define MANGOS_UTILITIES_H
 
-#include "CreatureAI.h"
-#include "Object.h"
-#include "Map.h"
+#include "Creature.h"
 
 #define SPIRIT_HEALER       6491
 

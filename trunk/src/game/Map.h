@@ -26,6 +26,11 @@
 #include "zthread/FairReadWriteLock.h"
 #include "GridDefines.h"
 #include "Cell.h"
+#include "Object.h"
+#include "Timer.h"
+
+class Unit;
+class WorldPacket;
 
 namespace ZThread
 {

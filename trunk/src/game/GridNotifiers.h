@@ -24,6 +24,13 @@
 #include "UpdateData.h"
 #include <iostream>
 
+#include "Corpse.h"
+#include "Object.h"
+#include "DynamicObject.h"
+#include "GameObject.h"
+#include "Player.h"
+#include "Unit.h"
+
 class Player;
 class Map;
 
