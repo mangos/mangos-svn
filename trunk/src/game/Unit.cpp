@@ -84,6 +84,14 @@ Unit::Unit() : Object()
 
 Unit::~Unit()
 {
+    // remove references to unit
+    std::list<GameObject*>::iterator i;
+    for (i = m_gameObj.begin(); i != m_gameObj.end();)
+    {
+        (*i)->SetOwnerGUID(0);
+        (*i)->Delete();
+        m_gameObj.erase(i++);
+    }
 }
 
 void Unit::Update( uint32 p_time )
@@ -1534,11 +1542,10 @@ void Unit::_UpdateSpells( uint32 time )
             //(*i)->Update( difftime );
             if( (*ite1)->isFinished() )
             {
-                (*ite1)->RemoveRef();
-                if(!(*ite1)->isReferenced())
-                    (*ite1)->Delete();
-
+                (*ite1)->SetOwnerGUID(0);
+                (*ite1)->Delete();
                 m_gameObj.erase(ite1);
+
                 if(m_gameObj.empty())
                     break;
                 else
@@ -2407,8 +2414,18 @@ DynamicObject * Unit::GetDynObject(uint32 spellId, uint32 effIndex)
 
 void Unit::AddGameObject(GameObject* gameObj)
 {
+    assert(gameObj && gameObj->GetOwnerGUID()==0);
     m_gameObj.push_back(gameObj);
-    gameObj->AddRef();
+    gameObj->SetOwnerGUID(GetGUID());
+}
+
+void Unit::RemoveGameObject(GameObject* gameObj, bool del)
+{
+    assert(gameObj && gameObj->GetOwnerGUID()==GetGUID());
+    gameObj->SetOwnerGUID(0);
+    m_gameObj.remove(gameObj);
+    if(del)
+        gameObj->Delete();
 }
 
 void Unit::RemoveGameObject(uint32 spellid, bool del)
@@ -2422,8 +2439,8 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
         next++;
         if(spellid == 0 || (*i)->GetSpellId() == spellid)
         {
-            (*i)->RemoveRef();
-            if(del && !(*i)->isReferenced())
+            (*i)->SetOwnerGUID(0);
+            if(del)
                 (*i)->Delete();
 
             m_gameObj.erase(i);

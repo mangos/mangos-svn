@@ -29,7 +29,7 @@
 #include "MapManager.h"
 #include "LootMgr.h"
 
-GameObject::GameObject() : Object(), m_refs(0)
+GameObject::GameObject() : Object()
 {
     m_objectType |= TYPE_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -46,8 +46,15 @@ GameObject::GameObject() : Object(), m_refs(0)
 GameObject::~GameObject()
 {
     // crash possable at access to deleted GO in Unit::m_gameobj
-    if(isReferenced())
-        sLog.outError("Delete GameObject (GUID: %u Entry: %u ) that have references in Unit GO list. Crash possable later.",GetGUIDLow(),GetGOInfo()->id);
+    uint64 owner_guid = GetOwnerGUID();
+    if(owner_guid)
+    {
+        Unit* owner = ObjectAccessor::Instance().GetUnit(*this,owner_guid);
+        if(owner)
+            owner->RemoveGameObject(this,false);
+        else if(GUID_HIPART(owner_guid)!=HIGHGUID_PLAYER)
+            sLog.outError("Delete GameObject (GUID: %u Entry: %u ) that have references in not found creature %u GO list. Crash possable later.",GetGUIDLow(),GetGOInfo()->id,GUID_LOPART(owner_guid));
+    }
 }
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
@@ -134,13 +141,6 @@ void GameObject::Update(uint32 p_time)
 
 void GameObject::Delete()
 {
-    // prevent crash at access to deleted GO in Unit::m_gameobj
-    if(isReferenced())
-    {
-        sLog.outError("Attempt delete GameObject (GUID: %u Entry: %u ) that have references in Unit GO list.",GetGUIDLow(),GetGOInfo()->id);
-        return;
-    }
-
     WorldPacket data;
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
     data << GetGUID();

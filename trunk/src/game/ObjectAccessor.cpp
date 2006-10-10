@@ -43,7 +43,7 @@ INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 
 Creature*
-ObjectAccessor::GetCreature(Unit const &u, uint64 guid)
+ObjectAccessor::GetCreature(Object const &u, uint64 guid)
 {
     CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
@@ -77,7 +77,7 @@ ObjectAccessor::GetCorpse(float x, float y, uint32 mapid, uint64 guid)
 }
 
 Unit*
-ObjectAccessor::GetUnit(Unit const &u, uint64 guid)
+ObjectAccessor::GetUnit(Object const &u, uint64 guid)
 {
     Unit *unit = NULL;
 

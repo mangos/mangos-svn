@@ -77,16 +77,8 @@ class MANGOS_DLL_SPEC GameObject : public Object
 
         bool IsTransport() const;
 
-        // GO links stored in Unit::m_gameObj
-        bool isReferenced() const { return m_refs !=0; }
-        void AddRef()                                       // for used in Unit::m_gameObj operations
-        {
-            ++m_refs;
-        }
-        void RemoveRef()                                    // for used in Unit::m_gameObj operations
-        {
-            if(m_refs) --m_refs;
-        }
+        void SetOwnerGUID(uint64 owner) { SetUInt64Value(OBJECT_FIELD_CREATED_BY, owner); }
+        uint64 GetOwnerGUID() const { return GetUInt64Value(OBJECT_FIELD_CREATED_BY); }
 
         void SaveToDB();
         bool LoadFromDB(uint32 guid);
@@ -116,6 +108,5 @@ class MANGOS_DLL_SPEC GameObject : public Object
         uint32      m_flags;
         LootState   m_lootState;
         bool        m_lootskill;
-        uint32      m_refs;
 };
 #endif
