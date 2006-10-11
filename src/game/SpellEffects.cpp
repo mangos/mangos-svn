@@ -1624,7 +1624,7 @@ void Spell::EffectDisEnchant(uint32 i)
     uint32 item_level = itemTarget->GetProto()->ItemLevel;
     uint32 item_quality = itemTarget->GetProto()->Quality;
 
-    uint32 item;
+    uint32 item = 0;
     uint32 count = 0;
     if(item_level >= 51)
     {
@@ -1809,7 +1809,9 @@ void Spell::EffectDisEnchant(uint32 i)
             }
         }
     }
-    else
+
+    
+    if ( item == 0 || count == 0 )
     {//Fix crash 
         SendCastResult(CAST_FAIL_CANT_BE_DISENCHANTED);
         //SendChannelUpdate(0);
