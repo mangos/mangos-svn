@@ -82,6 +82,12 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
 
 bool ChatHandler::HandleGoObjectCommand(const char* args)
 {
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
     if(!*args)
         return false;
 
@@ -116,6 +122,12 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
 
 bool ChatHandler::HandleGoCreatureCommand(const char* args)
 {
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
     if(!*args)
         return false;
 
@@ -264,6 +276,12 @@ bool ChatHandler::HandleNYICommand(const char* args)
 
 bool ChatHandler::HandleProgCommand(const char* args)
 {
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
     m_session->GetPlayer()->TeleportTo(451, 16391.80f, 16341.20f, 69.44f,0.0f);
 
     return true;

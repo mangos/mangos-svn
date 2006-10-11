@@ -1202,6 +1202,13 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     // Time is ***, map=469, x=452.000000, y=6454.000000, z=2536.000000, orient=3.141593
 
     sLog.outDebug("Received opcode CMSG_WORLD_TELEPORT");
+
+    if(GetPlayer()->isInFlight())
+    {
+        sLog.outDebug("Player '%s' in flight, ignore worldport command.",GetPlayer()->GetName());
+        return;
+    }
+
     WorldPacket data;
     uint32 time;
     uint32 mapid;

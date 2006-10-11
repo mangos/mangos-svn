@@ -698,8 +698,6 @@ void Spell::EffectSummon(uint32 i)
 
 void Spell::EffectLearnSpell(uint32 i)
 {
-    WorldPacket data;
-
     if(!unitTarget)
         return;
 
@@ -924,6 +922,9 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     if(!unitTarget)
         return;
 
+    if(unitTarget->isInFlight())
+        return;
+
     uint32 mapid = m_caster->GetMapId();
     float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
@@ -1066,8 +1067,6 @@ void Spell::EffectTameCreature(uint32 i)
 
     Creature* creatureTarget = (Creature*)unitTarget;
 
-    WorldPacket data;
-
     if(m_caster->getClass() == CLASS_HUNTER)
     {
         creatureTarget->AttackStop();
@@ -1098,7 +1097,6 @@ void Spell::EffectTameCreature(uint32 i)
 
 void Spell::EffectSummonPet(uint32 i)
 {
-    WorldPacket data;
     float px, py, pz;
     m_caster->GetClosePoint(NULL, px, py, pz);
 
@@ -1960,6 +1958,9 @@ void Spell::EffectParry(uint32 i)
 
 void Spell::EffectMomentMove(uint32 i)
 {
+    if(unitTarget->isInFlight())
+        return;
+
     if( m_spellInfo->rangeIndex== 1)                        //self range
     {
         uint32 mapid = m_caster->GetMapId();

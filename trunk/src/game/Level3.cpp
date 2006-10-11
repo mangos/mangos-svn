@@ -108,6 +108,12 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
 
 bool ChatHandler::HandleGoXYCommand(const char* args)
 {
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
     char* pmapid = strtok(NULL, " ");
@@ -137,6 +143,12 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
 
 bool ChatHandler::HandleWorldPortCommand(const char* args)
 {
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
     char* pContinent = strtok((char*)args, " ");
     if (!pContinent)
         return false;
@@ -246,6 +258,12 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
 
 bool ChatHandler::HandleGoCommand(const char* args)
 {
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
     char* pz = strtok(NULL, " ");
