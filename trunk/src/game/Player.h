@@ -402,6 +402,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint8 ToggleAFK() { m_afk = !m_afk; return m_afk; };
 
+        uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
+        void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
+
         void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
         void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
         uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
@@ -1090,6 +1093,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadQuestStatus();
         void _LoadReputation();
         void _LoadSpells();
+        void _LoadTaxiMask(const char* data);
         void _LoadTutorials();
 
         /*********************************************************/
@@ -1184,6 +1188,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool m_dontMove;
 
+        uint32 m_taximask[8];
         std::deque<uint32> m_TaxiDestinations;
 
         float m_total_honor_points;
