@@ -9053,7 +9053,7 @@ bool Player::LoadFromDB( uint32 guid )
     if( HasFlag(PLAYER_FLAGS, 0x11) )
         m_deathState = DEAD;
 
-    LoadTaxiMask( fields[12].GetString() );
+    _LoadTaxiMask( fields[12].GetString() );
 
     delete result;
 
@@ -9408,6 +9408,20 @@ void Player::_LoadSpells()
         while( result->NextRow() );
 
         delete result;
+    }
+}
+
+void Player::_LoadTaxiMask(const char* data)
+{
+    vector<string> tokens = StrSplit(data, " ");
+
+    int index;
+    vector<string>::iterator iter;
+
+    for (iter = tokens.begin(), index = 0;
+        (index < 8) && (iter != tokens.end()); ++iter, ++index)
+    {
+        m_taximask[index] = atol((*iter).c_str());
     }
 }
 

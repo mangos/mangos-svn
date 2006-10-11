@@ -378,20 +378,6 @@ bool Object::LoadValues(const char* data)
     return true;
 }
 
-void Object::LoadTaxiMask(const char* data)
-{
-    vector<string> tokens = StrSplit(data, " ");
-
-    int index;
-    vector<string>::iterator iter;
-
-    for (iter = tokens.begin(), index = 0;
-        (index < 8) && (iter != tokens.end()); ++iter, ++index)
-    {
-        m_taximask[index] = atol((*iter).c_str());
-    }
-}
-
 void Object::_SetUpdateBits(UpdateMask *updateMask, Player *target) const
 {
     *updateMask = m_updateMask;

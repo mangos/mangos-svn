@@ -149,9 +149,6 @@ class MANGOS_DLL_SPEC Object
         }
         bool IsPositionValid() const;
 
-        uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
-        void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
-
         void SetMapId(uint32 newMap) { m_mapId = newMap; }
 
         uint32 GetMapId() const { return m_mapId; }
@@ -223,7 +220,6 @@ class MANGOS_DLL_SPEC Object
         virtual void SendMessageToSet(WorldPacket *data, bool self);
 
         bool LoadValues(const char* data);
-        void LoadTaxiMask(const char* data);
 
         uint16 GetValuesCount() const { return m_valuesCount; }
 
@@ -297,7 +293,6 @@ class MANGOS_DLL_SPEC Object
         float m_positionY;
         float m_positionZ;
         float m_orientation;
-        uint32 m_taximask[8];
 
         float m_speed;
         uint8 m_moveType;
