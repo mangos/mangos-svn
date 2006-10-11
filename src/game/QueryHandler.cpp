@@ -62,6 +62,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 
     data << guid;
     data << name;
+    data << uint8(0);
     data << race << gender << cl;
 
     SendPacket( &data );
