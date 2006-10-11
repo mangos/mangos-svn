@@ -1532,7 +1532,9 @@ void Player::SendInitialSpells()
 
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+        if(itr->second->state == PLAYERSPELL_REMOVED) 
+            continue;
+
         if(itr->second->active)
             spellCount +=1;
     }
@@ -1543,8 +1545,12 @@ void Player::SendInitialSpells()
 
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
+        if(itr->second->state == PLAYERSPELL_REMOVED) 
+            continue;
+
         if(!itr->second->active)
             continue;
+
         data << uint16(itr->first);
         data << uint16(itr->second->slotId);
     }
