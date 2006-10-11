@@ -110,10 +110,16 @@ bool ChatHandler::HandleStartCommand(const char* args)
     chr->SetUInt32Value(PLAYER_FARSIGHT, 0x01);
 
     PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(
-        m_session->GetPlayer()->getRace(), m_session->GetPlayer()->getClass());
+        chr->getRace(), chr->getClass());
     ASSERT(info);
 
-    m_session->GetPlayer()->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,0.0f);
+    if(chr->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
+    chr->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,0.0f);
 
     return true;
 }
@@ -139,7 +145,7 @@ bool ChatHandler::HandleDismountCommand(const char* args)
 
     if(m_session->GetPlayer( )->isInFlight())
     {
-        SendSysMessage(LANG_CHAR_IN_FLIGHT);
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
     }
 

@@ -1918,6 +1918,9 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     if(!Target || Target->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    if(Target->isInFlight())
+        return;
+
     if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556 )
     {
         Field *fields;

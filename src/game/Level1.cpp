@@ -102,6 +102,13 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());
             return true;
         }
+
+        if(chr->isInFlight())
+        {
+            PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
+            return true;
+        }
+
         PSendSysMessage(LANG_SUMMONING, chr->GetName());
 
         char buf0[256];
@@ -123,7 +130,11 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
 bool ChatHandler::HandleGonameCommand(const char* args)
 {
-    WorldPacket data;
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
 
     if(!*args)
         return false;
@@ -131,18 +142,13 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     Player *chr = objmgr.GetPlayer(args);
     if (chr)
     {
-        if(chr->IsBeingTeleported()==true)
-        {
-            PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());
-            return true;
-        }
-
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());
 
         char buf0[256];
         sprintf((char*)buf0,LANG_APPEARING_TO, m_session->GetPlayer()->GetName());
+    
+        WorldPacket data;
         FillSystemMessageData(&data, m_session, buf0);
-
         chr->GetSession()->SendPacket(&data);
 
         m_session->GetPlayer()->TeleportTo(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),0.0f);
@@ -157,6 +163,12 @@ bool ChatHandler::HandleRecallCommand(const char* args)
 {
     if(!*args)
         return false;
+
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
 
     if (strncmp((char*)args,"sunr",5)==0)
         m_session->GetPlayer()->TeleportTo(1, -180.949f, -296.467f, 11.5384f,0.0f);
@@ -1139,6 +1151,12 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
 
 bool ChatHandler::HandleTeleCommand(const char * args)
 {
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
     QueryResult *result;
     if(!*args)
     {
