@@ -45,15 +45,18 @@ GameObject::GameObject() : Object()
 
 GameObject::~GameObject()
 {
-    // crash possable at access to deleted GO in Unit::m_gameobj
-    uint64 owner_guid = GetOwnerGUID();
-    if(owner_guid)
+    if(m_uint32Values)                                      // field array can be not exist if GameOBject not loaded 
     {
-        Unit* owner = ObjectAccessor::Instance().GetUnit(*this,owner_guid);
-        if(owner)
-            owner->RemoveGameObject(this,false);
-        else if(GUID_HIPART(owner_guid)!=HIGHGUID_PLAYER)
-            sLog.outError("Delete GameObject (GUID: %u Entry: %u ) that have references in not found creature %u GO list. Crash possable later.",GetGUIDLow(),GetGOInfo()->id,GUID_LOPART(owner_guid));
+        // crash possable at access to deleted GO in Unit::m_gameobj
+        uint64 owner_guid = GetOwnerGUID();
+        if(owner_guid)
+        {
+            Unit* owner = ObjectAccessor::Instance().GetUnit(*this,owner_guid);
+            if(owner)
+                owner->RemoveGameObject(this,false);
+            else if(GUID_HIPART(owner_guid)!=HIGHGUID_PLAYER)
+                sLog.outError("Delete GameObject (GUID: %u Entry: %u ) that have references in not found creature %u GO list. Crash possable later.",GetGUIDLow(),GetGOInfo()->id,GUID_LOPART(owner_guid));
+        }
     }
 }
 
