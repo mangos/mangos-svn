@@ -33,7 +33,6 @@
 
 #include "mpq.h"
 #include "huffman.h"
-#include <string.h>
 
 unsigned char table1502A630[] = {
 
@@ -828,5 +827,4 @@ int libmpq_huff_init_tree(struct huffman_tree *ht, struct huffman_tree_item *hi,
 			ht->qd3474[count].offs00 = 0;
 		}
 	}
-	return 0;
 }

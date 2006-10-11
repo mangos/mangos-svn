@@ -17,24 +17,22 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  $Id: common.cpp,v 1.1 2005/04/09 22:09:18 ufoz Exp $
+ *  $Id: common.c,v 1.12 2004/02/12 00:42:54 mbroemme Exp $
  */
 
+#include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "mpq.h"
-#include "common.h"
-
-//toupper
-#include <ctype.h>
+#include "libmpq/mpq.h"
+#include "libmpq/common.h"
 
 /*
  *  This function decrypts a MPQ block.
  */
-int libmpq_decrypt_block(mpq_archive *mpq_a, unsigned int *block, unsigned int length, unsigned int seed1) 
-{
+int libmpq_decrypt_block(mpq_archive *mpq_a, unsigned int *block, unsigned int length, unsigned int seed1) {
 	unsigned int seed2 = 0xEEEEEEEE;
 	unsigned int ch;
 
@@ -51,37 +49,24 @@ int libmpq_decrypt_block(mpq_archive *mpq_a, unsigned int *block, unsigned int l
 }
 
 /*
- *  This function hashes a string to a hash code.
- *  *o1 and *o2 will contain the resulting values.
- * type 1 and 2 are used for hashing filenames, type 3 for hashing the key that encrypts the hash table,
- * and type 4 for encrypting the actual data.
- */
-unsigned int libmpq_hash_string(mpq_archive *mpq_a, unsigned int type, const unsigned char *pbKey) {
-	unsigned int seed1 = 0x7FED7FED;
-	unsigned int seed2 = 0xEEEEEEEE;
-	unsigned int ch;			/* One key character */
-
-	/* Prepare seeds */
-	while (*pbKey != 0) {
-		ch = toupper(*pbKey++);
-		seed1 = mpq_a->buf[(type<<8) + ch] ^ (seed1 + seed2);
-		seed2 = ch + seed1 + seed2 + (seed2 << 5) + 3;
-	}
-	
-	return seed1;
-}
-/*
  *  This function decrypts the hashtable for the
  *  file informations.
  */
 int libmpq_decrypt_hashtable(mpq_archive *mpq_a, unsigned char *pbKey) {
-	unsigned int seed1, seed2;
-    unsigned int ch;			/* One key character */
+	unsigned int seed1 = 0x7FED7FED;
+	unsigned int seed2 = 0xEEEEEEEE;
+	unsigned int ch;			/* One key character */
 	unsigned int *pdwTable = (unsigned int *)(mpq_a->hashtable);
 	unsigned int length = mpq_a->header->hashtablesize * 4;
 
+	/* Prepare seeds */
+	while (*pbKey != 0) {
+		ch = toupper(*pbKey++);
+		seed1 = mpq_a->buf[0x300 + ch] ^ (seed1 + seed2);
+		seed2 = ch + seed1 + seed2 + (seed2 << 5) + 3;
+	}
+
 	/* Decrypt it */
-    seed1 = libmpq_hash_string(mpq_a, 3, pbKey);
 	seed2 = 0xEEEEEEEE;
 	while (length-- > 0) {
 		seed2 += mpq_a->buf[0x400 + (seed1 & 0xFF)];
@@ -93,31 +78,24 @@ int libmpq_decrypt_hashtable(mpq_archive *mpq_a, unsigned char *pbKey) {
 	return LIBMPQ_TOOLS_SUCCESS;
 }
 
-
-/*
- *  This function hashes a filename to a hash code.
- *  *o1 and *o2 will contain the resulting values.
- */
-int libmpq_hash_filename(mpq_archive *mpq_a, const unsigned char *pbKey, unsigned int *o1, unsigned int *o2) {
-	unsigned int seed1, seed2, seed3, seed4;
-
-	*o1 = libmpq_hash_string(mpq_a, 1, pbKey);
-	*o2 = libmpq_hash_string(mpq_a, 2, pbKey);
-
-	return LIBMPQ_TOOLS_SUCCESS;
-}
-
 /*
  *  This function decrypts the blocktable.
  */
 int libmpq_decrypt_blocktable(mpq_archive *mpq_a, unsigned char *pbKey) {
-	unsigned int seed1, seed2;
+	unsigned int seed1 = 0x7FED7FED;
+	unsigned int seed2 = 0xEEEEEEEE;
 	unsigned int ch;			/* One key character */
 	unsigned int *pdwTable = (unsigned int *)(mpq_a->blocktable);
 	unsigned int length = mpq_a->header->blocktablesize * 4;
 
+	/* Prepare seeds */
+	while(*pbKey != 0) {
+		ch = toupper(*pbKey++);
+		seed1 = mpq_a->buf[0x300 + ch] ^ (seed1 + seed2);
+		seed2 = ch + seed1 + seed2 + (seed2 << 5) + 3;
+	}         
+
 	/* Decrypt it */
-    seed1 = libmpq_hash_string(mpq_a, 3, pbKey);
 	seed2 = 0xEEEEEEEE;
 	while(length-- > 0) {
 		seed2 += mpq_a->buf[0x400 + (seed1 & 0xFF)];
@@ -126,6 +104,198 @@ int libmpq_decrypt_blocktable(mpq_archive *mpq_a, unsigned char *pbKey) {
 		seed2  = ch + seed2 + (seed2 << 5) + 3;
 		*pdwTable++ = ch;
 	}
+	return LIBMPQ_TOOLS_SUCCESS;
+}
+
+int libmpq_read_listfile(mpq_archive *mpq_a, FILE *fp) {
+	int mpq_size;
+	int mpq_ht_size;
+	int mpq_bt_size;
+	int mpq_blocksize;
+	int mpq_files;
+	int mpq_csize;
+	int mpq_fsize;
+	int entries;
+	char listdb_version[10];
+	char libmpq_version[10];
+	int listdb_temp_version = 0;
+	int libmpq_temp_version = 0;
+
+	/* first check header and version */
+	if (libmpq_conf_get_value(fp, "LIBMPQ_VERSION", mpq_a->mpq_l->mpq_version, LIBMPQ_CONF_TYPE_CHAR, sizeof(mpq_a->mpq_l->mpq_version))) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	} else {
+
+		/* copy to temp buffer for removing . characters */
+		snprintf(listdb_version, sizeof(listdb_version), mpq_a->mpq_l->mpq_version);
+
+		/* remove . characters from listfile version */
+		libmpq_conf_delete_char(listdb_version, ".");
+
+		/* get libmpq version */
+		snprintf(libmpq_version, sizeof(libmpq_version), "%i%i%i",LIBMPQ_MAJOR_VERSION, LIBMPQ_MINOR_VERSION, LIBMPQ_PATCH_VERSION);
+
+		/* convert to number */
+		listdb_temp_version = atoi(listdb_version);
+		libmpq_temp_version = atoi(libmpq_version);
+
+		/* check if installed libmpq version is valid for listfile version */
+		if ((libmpq_temp_version < listdb_temp_version) || (libmpq_temp_version == 0) || (listdb_temp_version == 0)) {
+			return LIBMPQ_CONF_EFILE_VERSION;
+		}
+	}
+
+	/* check listfile header, the following entries must be set */
+	if (libmpq_conf_get_value(fp, "MPQ_SIZE", &mpq_size, LIBMPQ_CONF_TYPE_INT, 0)) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+	if (libmpq_conf_get_value(fp, "MPQ_HASHTABLE_SIZE", &mpq_ht_size, LIBMPQ_CONF_TYPE_INT, 0)) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+	if (libmpq_conf_get_value(fp, "MPQ_BLOCKTABLE_SIZE", &mpq_bt_size, LIBMPQ_CONF_TYPE_INT, 0)) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+	if (libmpq_conf_get_value(fp, "MPQ_BLOCKSIZE", &mpq_blocksize, LIBMPQ_CONF_TYPE_INT, 0)) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+	if (libmpq_conf_get_value(fp, "MPQ_FILES", &mpq_files, LIBMPQ_CONF_TYPE_INT, 0)) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+	if (libmpq_conf_get_value(fp, "MPQ_COMPRESSED_SIZE", &mpq_csize, LIBMPQ_CONF_TYPE_INT, 0)) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+	if (libmpq_conf_get_value(fp, "MPQ_UNCOMPRESSED_SIZE", &mpq_fsize, LIBMPQ_CONF_TYPE_INT, 0)) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+	if (libmpq_conf_get_value(fp, "MPQ_NAME", mpq_a->mpq_l->mpq_name, LIBMPQ_CONF_TYPE_CHAR, PATH_MAX)) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+	if (libmpq_conf_get_value(fp, "MPQ_TYPE", mpq_a->mpq_l->mpq_type, LIBMPQ_CONF_TYPE_CHAR, sizeof(mpq_a->mpq_l->mpq_type))) {
+		return LIBMPQ_CONF_EFILE_CORRUPT;
+	}
+
+	/* these are optional parameters, if they are empty we set the struct members empty */
+	libmpq_conf_get_value(fp, "MPQ_GAME", mpq_a->mpq_l->mpq_game, LIBMPQ_CONF_TYPE_CHAR, sizeof(mpq_a->mpq_l->mpq_game));
+	libmpq_conf_get_value(fp, "MPQ_GAME_VERSION", mpq_a->mpq_l->mpq_game_version, LIBMPQ_CONF_TYPE_CHAR, sizeof(mpq_a->mpq_l->mpq_game_version));
+
+	/* check if we found a valid listfile for the given archive */
+	if (mpq_a->header->hashtablesize == mpq_ht_size && mpq_a->header->blocktablesize == mpq_bt_size && mpq_a->blocksize == mpq_blocksize && libmpq_archive_info(mpq_a, LIBMPQ_MPQ_ARCHIVE_SIZE) == mpq_size && libmpq_archive_info(mpq_a, LIBMPQ_MPQ_NUMFILES) == mpq_files && libmpq_archive_info(mpq_a, LIBMPQ_MPQ_COMPRESSED_SIZE) == mpq_csize && libmpq_archive_info(mpq_a, LIBMPQ_MPQ_UNCOMPRESSED_SIZE) == mpq_fsize) {
+
+		/* check if the filelist is correct */
+		if (!libmpq_conf_get_array(fp, "FILE_NAMES", &mpq_a->mpq_l->mpq_files, &entries)) {
+
+			/* we have a corrupt filelist, so return */
+			return LIBMPQ_CONF_EFILE_LIST_CORRUPT;
+		} else {
+
+			/* now check if filelist entries matches number of files in the archive. */
+			if (entries != libmpq_archive_info(mpq_a, LIBMPQ_MPQ_NUMFILES)) {
+				libmpq_free_listfile(mpq_a->mpq_l->mpq_files);
+				mpq_a->mpq_l->mpq_files = NULL;
+				return LIBMPQ_CONF_EFILE_LIST_CORRUPT;
+			}
+		}
+	}
+
+	return LIBMPQ_TOOLS_SUCCESS;
+}
+
+/*
+ *  This function frees up the space reserved by libmpq_get_listfile()
+ */
+int libmpq_free_listfile(char **filelist) {
+	int i = 0;
+	while (filelist[i]) {
+		free(filelist[i++]);
+	}
+	free(filelist);
+
+	return LIBMPQ_TOOLS_SUCCESS;
+}
+
+/*
+ *  This function reads the directory and the subdirectories
+ *  of the listfile database and adds a entry to the lisfile
+ *  array.
+ */
+int libmpq_detect_listfile_rec(char path[PATH_MAX], char ***filelist, int *fl_count, int *fl_size) {
+	char nextpath[PATH_MAX];
+	DIR *dp = opendir(path);
+	FILE *fp;
+	struct dirent *entry;
+	struct stat statbuf;
+	char buf[LIBMPQ_CONF_BUFSIZE];
+
+	if (dp == NULL) {
+		return LIBMPQ_CONF_EOPEN_DIR;
+	} else {
+		while ((entry = readdir(dp)) != NULL) {
+			if (strncmp(entry->d_name, ".", 1) == 0 || strncmp(entry->d_name, "..", 2) == 0) {
+				continue;
+			}
+			if (strnlen(path, PATH_MAX) + strnlen(entry->d_name, PATH_MAX) + 2 > sizeof nextpath) {
+				continue;
+			}
+
+			snprintf(nextpath, PATH_MAX, "%s/%s", path, entry->d_name);
+
+			/* check if file extension matches listdb file extension */
+			if (strncmp(&entry->d_name[strlen(entry->d_name) - strlen(LIBMPQ_CONF_EXT)], LIBMPQ_CONF_EXT, strlen(LIBMPQ_CONF_EXT)) == 0) {
+
+				/* check if it is really a listdb file */
+				if ((fp = fopen(nextpath, "r")) != NULL ) {
+					while (fgets(buf, LIBMPQ_CONF_BUFSIZE, fp) != NULL) {
+						char *line;
+
+						buf[strlen(buf) - 1] = '\0';
+
+						/* skip whitespace */
+						for (line = buf; isspace(*line); line++) {
+							continue;
+						}
+
+						/* skip empty line */
+						if (line[0] == '\0') {
+							continue;
+						}
+
+						/* skip comments */
+						if (line[0] == '#') {
+							continue;
+						}
+
+						/* search for listdb header; dirty but works :) */
+						if (!strncasecmp(line, LIBMPQ_CONF_HEADER, strlen(LIBMPQ_CONF_HEADER))) {
+
+							/* set the next filelist entry to a copy of the file path */
+							(*filelist)[(*fl_count)++] = strdup(nextpath);
+
+							/* increase the array size */
+							if ((*fl_count) == (*fl_size)) {
+								(*filelist) = realloc((*filelist), ((*fl_size) + LIBMPQ_CONF_FL_INCREMENT) * sizeof(char *));
+								(*fl_size) += LIBMPQ_CONF_FL_INCREMENT;
+							}
+
+							/* header found so we could stop reading the file. */
+							break;
+						}
+					}
+					fclose(fp);
+				}
+			}
+
+			if (stat(nextpath, &statbuf) < 0) {
+				continue;
+			}
+
+			/* if entry ia a subdirectory, read it */
+			if (S_ISDIR(statbuf.st_mode)) {
+				libmpq_detect_listfile_rec(nextpath, filelist, fl_count, fl_size);
+			}
+		}
+		closedir(dp);
+	}
+
 	return LIBMPQ_TOOLS_SUCCESS;
 }
 
@@ -215,7 +385,7 @@ int libmpq_read_hashtable(mpq_archive *mpq_a) {
 	 *  Allocate memory. Note that the block table should be as large as the
 	 *  hash table. (for later file additions)
 	 */
-	mpq_a->hashtable = (mpq_hash*)malloc(sizeof(mpq_hash) * mpq_a->header->hashtablesize);
+	mpq_a->hashtable = malloc(sizeof(mpq_hash) * mpq_a->header->hashtablesize);
 
 	if (!mpq_a->hashtable) {
 		return LIBMPQ_EALLOCMEM;
@@ -233,14 +403,13 @@ int libmpq_read_hashtable(mpq_archive *mpq_a) {
 	mpq_hash *mpq_h_end = mpq_a->hashtable + mpq_a->header->hashtablesize;
 	mpq_hash *mpq_h     = NULL;
 
-	libmpq_decrypt_hashtable(mpq_a, (unsigned char*)"(hash table)");
+	libmpq_decrypt_hashtable(mpq_a, "(hash table)");
 
 	/* Check hash table if is correctly decrypted */
 	for (mpq_h = mpq_a->hashtable; mpq_h < mpq_h_end; mpq_h++) {
-		// WoW: patch.MPQ breaks this
-		//if (mpq_h->locale != 0xFFFFFFFF && (mpq_h->locale & 0xFFFF0000) != 0) {
-		//	return LIBMPQ_EFILE_FORMAT;
-		//}
+		if (mpq_h->locale != 0xFFFFFFFF && (mpq_h->locale & 0xFFFF0000) != 0) {
+			return LIBMPQ_EFILE_FORMAT;
+		}
 
 		/* Remember the highest block table entry */
 		if (mpq_h->blockindex < LIBMPQ_HASH_ENTRY_DELETED && mpq_h->blockindex > 0) {
@@ -267,8 +436,8 @@ int libmpq_read_blocktable(mpq_archive *mpq_a) {
 	 *  Allocate memory. Note that the block table should be as large as the
 	 *  hash table. (for later file additions)
 	 */
-	mpq_a->blocktable = (mpq_block*)malloc(sizeof(mpq_block) * mpq_a->header->hashtablesize);
-	mpq_a->blockbuf   = (unsigned char*)malloc(mpq_a->blocksize);
+	mpq_a->blocktable = malloc(sizeof(mpq_block) * mpq_a->header->hashtablesize);
+	mpq_a->blockbuf   = malloc(mpq_a->blocksize);
 
 	if (!mpq_a->blocktable || !mpq_a->blockbuf) {
 		return LIBMPQ_EALLOCMEM;
@@ -293,7 +462,7 @@ int libmpq_read_blocktable(mpq_archive *mpq_a) {
 	unsigned int archivesize = mpq_a->header->archivesize + mpq_a->mpqpos;
 
 	if (mpq_a->header->offset != mpq_a->blocktable->filepos) {
-		libmpq_decrypt_blocktable(mpq_a, (unsigned char*)"(block table)");
+		libmpq_decrypt_blocktable(mpq_a, "(block table)");
 	}
 	for (mpq_b = mpq_a->blocktable; mpq_b < mpq_b_end; mpq_b++) {
 		if (mpq_b->filepos > archivesize || mpq_b->csize > archivesize) {
@@ -404,7 +573,7 @@ int libmpq_file_read_block(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int blo
 
 	/* Get work buffer for store read data */
 	if (mpq_f->mpq_b->flags & LIBMPQ_FILE_COMPRESSED) {
-		if ((tempbuf = (unsigned char*)malloc(toread)) == NULL) {
+		if ((tempbuf = malloc(toread)) == NULL) {
 			/* Hmmm... We should add a better error handling here :) */
 			return 0;
 		}
@@ -452,7 +621,7 @@ int libmpq_file_read_block(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int blo
 
 			/* Is the file compressed with PKWARE Data Compression Library? */
 			if (mpq_f->mpq_b->flags & LIBMPQ_FILE_COMPRESS_PKWARE) {
-				libmpq_pkzip_decompress(buffer, &outlength, (char*)&tempbuf[blockstart], blocksize);
+				libmpq_pkzip_decompress(buffer, &outlength, &tempbuf[blockstart], blocksize);
 			}
 
 			/*
@@ -462,7 +631,7 @@ int libmpq_file_read_block(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int blo
 			 *  last parameter.
 			 */
 			if (mpq_f->mpq_b->flags & LIBMPQ_FILE_COMPRESS_MULTI) {
-				libmpq_multi_decompress(buffer, &outlength, (char*)&tempbuf[blockstart], blocksize);
+				libmpq_multi_decompress(buffer, &outlength, &tempbuf[blockstart], blocksize);
 			}
 			bytesread += outlength;
 			buffer    += outlength;
@@ -512,7 +681,7 @@ int libmpq_file_read_file(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int file
 		if (mpq_f->accessed == FALSE || blockpos != mpq_a->blockpos) {   
 
 			/* Load one MPQ block into archive buffer */
-			loaded = libmpq_file_read_block(mpq_a, mpq_f, blockpos, (char*)mpq_a->blockbuf, mpq_a->blocksize);
+			loaded = libmpq_file_read_block(mpq_a, mpq_f, blockpos, mpq_a->blockbuf, mpq_a->blocksize);
 			if (loaded == 0) {
 				return 0;
 			}
@@ -571,7 +740,7 @@ int libmpq_file_read_file(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int file
 		if (mpq_f->accessed == FALSE || blockpos != mpq_a->blockpos) {
 
 			/* Load one MPQ block into archive buffer */
-			tocopy = libmpq_file_read_block(mpq_a, mpq_f, blockpos, (char*)mpq_a->blockbuf, mpq_a->blocksize);
+			tocopy = libmpq_file_read_block(mpq_a, mpq_f, blockpos, mpq_a->blockbuf, mpq_a->blocksize);
 			if (tocopy == 0) {
 				return 0;
 			}

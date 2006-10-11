@@ -967,7 +967,7 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
 {
     Cell const& cur_cell = c->GetCurrentCell();
 
-    if(!i_grids[cur_cell.GridX()][cur_cell.GridY()] || 
+    if(!i_grids[cur_cell.GridX()][cur_cell.GridY()] ||
         (*i_grids[cur_cell.GridX()][cur_cell.GridY()])(cur_cell.CellX(), cur_cell.CellY()).GetGridObject<Creature>(c->GetGUID())!=c)
     {
         sLog.outError("ERROR: %s (GUID: %u) not find in %s grid[%u,%u]cell[%u,%u]",

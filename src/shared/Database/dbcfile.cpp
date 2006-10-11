@@ -96,10 +96,9 @@ uint32 DBCFile::GetFormatRecordSize(const char * format,int32* index_pos)
 
     if(index_pos)
         *index_pos = i;
-    
+
     return recordsize;
 }
-
 
 void * DBCFile::AutoProduceData(const char * format, uint32 * records)
 {

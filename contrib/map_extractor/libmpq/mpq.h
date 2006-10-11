@@ -24,39 +24,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  $Id: mpq.h,v 1.1 2005/04/09 22:09:18 ufoz Exp $
+ *  $Id: mpq.h,v 1.8 2004/02/12 00:45:50 mbroemme Exp $
  */
 
 #ifndef _MPQ_H
 #define _MPQ_H
 
-#ifdef _WIN32
-#include <io.h>
-
-#define snprintf _snprintf
-//inline int open(const char* x, int y)
-//{
-//	return _open(x, y);
-//}
-//#define lseek _lseek
-#define PATH_MAX 259
-#else
-#include <dirent.h>
-//lseek ...
-#include <unistd.h>
-//PATH_MAX
-#ifdef __FreeBSD__
-#include<limits.h>
-#endif
-//#include <linux/limits.h>
-// size_t
-#include <stdlib.h>
-#define O_BINARY 0
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <linux/limits.h>
 
 #define LIBMPQ_MAJOR_VERSION		0		/* Major version number... maybe sometimes we reach version 1 :) */
 #define LIBMPQ_MINOR_VERSION		3		/* Minor version number - increased only for small changes */
@@ -80,10 +54,6 @@ extern "C" {
 #define LIBMPQ_HEADER_W3M		0x6D9E4B86	/* special value used by W3M Map Protector */
 #define LIBMPQ_FLAG_PROTECTED		0x00000002	/* Set on protected MPQs (like W3M maps) */
 #define LIBMPQ_HASH_ENTRY_DELETED	0xFFFFFFFE	/* Block index for deleted hash entry */
-#define LIBMPQ_LISTFILE_HASH1		0xfd657910 /* Hashes of files that are in any mpq */
-#define LIBMPQ_LISTFILE_HASH2		0x4e9b98a7
-#define LIBMPQ_ATTRFILE_HASH1		0xd38437cb
-#define LIBMPQ_ATTRFILE_HASH2		0x07dfeaec
 
 #define LIBMPQ_FILE_COMPRESS_PKWARE	0x00000100	/* Compression made by PKWARE Data Compression Library */
 #define LIBMPQ_FILE_COMPRESS_MULTI	0x00000200	/* Multiple compressions */
@@ -96,8 +66,6 @@ extern "C" {
 #define LIBMPQ_FILE_COMPRESSION_TYPE	3		/* MPQ compression type of given file */
 #define LIBMPQ_FILE_TYPE_INT		4		/* file is given by number */
 #define LIBMPQ_FILE_TYPE_CHAR		5		/* file is given by name */
-#define LIBMPQ_FILE_HASH1			6		/* hash value 1 */
-#define LIBMPQ_FILE_HASH2			7		/* hash value 2 */
 
 #define LIBMPQ_MPQ_ARCHIVE_SIZE		1		/* MPQ archive size */
 #define LIBMPQ_MPQ_HASHTABLE_SIZE	2		/* MPQ archive hashtable size */
@@ -126,20 +94,12 @@ extern "C" {
 #define min(a, b) ((a < b) ? a : b)
 #endif
 
-
 typedef unsigned int	mpq_buffer[LIBMPQ_TOOLS_BUFSIZE];
 typedef int		(*DECOMPRESS)(char *, int *, char *, int);
 typedef struct {
 	unsigned long	mask;		/* Decompression bit */
 	DECOMPRESS	decompress;	/* Decompression function */
 } decompress_table;
-
-// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
-#pragma pack(1)
-#else
-#pragma pack(push,1)
-#endif
 
 /* MPQ file header */
 typedef struct {
@@ -152,12 +112,8 @@ typedef struct {
 	unsigned int	blocktablepos;	/* File position of blockTable. Each entry has 16 bytes */
 	unsigned int	hashtablesize;	/* Number of entries in hash table */
 	unsigned int	blocktablesize;	/* Number of entries in the block table */
-} mpq_header;// __attribute__ ((packed)) mpq_header;
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
-#pragma pack()
-#else
-#pragma pack(pop)
-#endif
+} __attribute__ ((packed)) mpq_header;
+
 
 /* Hash entry. All files in the archive are searched by their hashes. */
 typedef struct {
@@ -194,6 +150,16 @@ typedef struct {
 	unsigned int	accessed;	/* Was something from the file already read? */
 } mpq_file;
 
+/* List handle structure */
+typedef struct {
+	unsigned char	mpq_version[10];	/* libmpq version required by the listfile */
+	unsigned char	mpq_name[PATH_MAX];	/* mpq archive name without full path */
+	unsigned char	mpq_type[20];		/* mpq archive type */
+	unsigned char	mpq_game[40];		/* blizzard title the file matches */
+	unsigned char	mpq_game_version[10];	/* game version */
+	unsigned char	**mpq_files;		/* filelist */
+} mpq_list;
+
 /* Archive handle structure used since Diablo 1.00 */
 typedef struct {
 	unsigned char	filename[PATH_MAX];	/* Opened archive file name */
@@ -212,29 +178,30 @@ typedef struct {
 
 	/* Non-Storm.dll members */
 
+	mpq_list	*mpq_l;		/* Handle to file list from database */
+
 	unsigned int	flags;		/* See LIBMPQ_TOOLS_FLAG_XXXXX */
 	unsigned int	maxblockindex;	/* The highest block table entry */
 } mpq_archive;
 
-char *libmpq_version();
-int libmpq_archive_open(mpq_archive *mpq_a, unsigned char *mpq_filename);
-int libmpq_archive_close(mpq_archive *mpq_a);
-int libmpq_archive_info(mpq_archive *mpq_a, unsigned int infotype);
-//int libmpq_file_extract(mpq_archive *mpq_a, const int number);\
-/// *dest must have enough space
-int libmpq_file_getdata(mpq_archive *mpq_a, const int number, unsigned char *dest);
-int libmpq_file_info(mpq_archive *mpq_a, unsigned int infotype, const int number);
-int libmpq_file_number(mpq_archive *mpq_a, const char *name);
-int libmpq_file_number_from_hash(mpq_archive *mpq_a, unsigned int hash1, unsigned int hash2);
-int libmpq_file_check(mpq_archive *mpq_a, void *file, int type);
-int libmpq_hash_filename(mpq_archive *mpq_a, const unsigned char *pbKey, unsigned int *seed1, unsigned int*seed2);
+extern char *libmpq_version();
+extern int libmpq_archive_open(mpq_archive *mpq_a, unsigned char *mpq_filename);
+extern int libmpq_archive_close(mpq_archive *mpq_a);
+extern int libmpq_archive_info(mpq_archive *mpq_a, unsigned int infotype);
+extern int libmpq_file_extract(mpq_archive *mpq_a, const int number);
+extern int libmpq_file_info(mpq_archive *mpq_a, unsigned int infotype, const int number);
+extern char *libmpq_file_name(mpq_archive *mpq_a, const int number);
+extern int libmpq_file_number(mpq_archive *mpq_a, const char *name);
+extern int libmpq_file_check(mpq_archive *mpq_a, void *file, int type);
+extern int libmpq_listfile_open(mpq_archive *mpq_a, char file[PATH_MAX]);
+extern int libmpq_listfile_close(mpq_archive *mpq_a);
 
-int libmpq_pkzip_decompress(char *out_buf, int *out_length, char *in_buf, int in_length);
-int libmpq_zlib_decompress(char *out_buf, int *out_length, char *in_buf, int in_length);
-int libmpq_huff_decompress(char *out_buf, int *out_length, char *in_buf, int in_length);
-int libmpq_wave_decompress_stereo(char *out_buf, int *out_length, char *in_buf, int in_length);
-int libmpq_wave_decompress_mono(char *out_buf, int *out_length, char *in_buf, int in_length);
-int libmpq_multi_decompress(char *out_buf, int *pout_length, char *in_buf, int in_length);
+extern int libmpq_pkzip_decompress(char *out_buf, int *out_length, char *in_buf, int in_length);
+extern int libmpq_zlib_decompress(char *out_buf, int *out_length, char *in_buf, int in_length);
+extern int libmpq_huff_decompress(char *out_buf, int *out_length, char *in_buf, int in_length);
+extern int libmpq_wave_decompress_stereo(char *out_buf, int *out_length, char *in_buf, int in_length);
+extern int libmpq_wave_decompress_mono(char *out_buf, int *out_length, char *in_buf, int in_length);
+extern int libmpq_multi_decompress(char *out_buf, int *pout_length, char *in_buf, int in_length);
 
 static decompress_table dcmp_table[] = {
 	{0x08, libmpq_pkzip_decompress},		/* Decompression with Pkware Data Compression Library */
@@ -243,11 +210,5 @@ static decompress_table dcmp_table[] = {
 	{0x80, libmpq_wave_decompress_stereo},		/* WAVE decompression for stereo waves */
 	{0x40, libmpq_wave_decompress_mono}		/* WAVE decompression for mono waves */
 };
-
-#ifdef __cplusplus
-};  // extern "C"
-#endif
-
-
 
 #endif					/* _MPQ_H */
