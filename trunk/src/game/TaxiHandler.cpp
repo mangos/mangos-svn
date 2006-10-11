@@ -283,6 +283,24 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
     sourcenode      = GetPlayer()->GetTaxiSource();
     if ( sourcenode > 0 )                                   // if more destinations to go
     {
+        // Add to taximask middle hubs in taxicheat mode (to privent haveing player with disbaled taxicheat and not having back flight path)
+        if (GetPlayer()->isTaxiCheater())
+        { 
+            uint8 field = (uint8)((sourcenode - 1) / 32);
+            uint32 submask = 1<<((sourcenode-1)%32);
+            if((GetPlayer( )->GetTaximask(field) & submask) != submask )
+            {
+                GetPlayer()->SetTaximask(field, (submask | GetPlayer( )->GetTaximask(field)) );
+
+                WorldPacket msg;
+                char buf[256];
+                sprintf((char*)buf, "You discovered a new taxi vendor.");
+                sChatHandler.FillSystemMessageData(&msg, GetPlayer()->GetSession(), buf);
+                GetPlayer( )->GetSession( )->SendPacket( &msg );
+
+            }
+        }
+
         destinationnode = GetPlayer()->NextTaxiDestination();
         if ( destinationnode > 0 )
         {
