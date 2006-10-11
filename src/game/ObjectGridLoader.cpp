@@ -59,29 +59,31 @@ ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
         next = iter; ++next;
 
         Creature * c = iter->second;
+        Cell const& cur_cell  = c->GetCurrentCell();
+
         float resp_x, resp_y, resp_z;
         c->GetRespawnCoord(resp_x, resp_y, resp_z);
-
-        CellPair cur_val  = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
         CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
-
-        Cell cur_cell  = RedZone::GetZone(cur_val);
         Cell resp_cell = RedZone::GetZone(resp_val);
+
 
         if(cur_cell.DiffGrid(resp_cell))
         {
-            MapManager::Instance().GetMap(c->GetMapId())->CreatureRespawnRelocation(c,cur_cell);
+            MapManager::Instance().GetMap(c->GetMapId())->CreatureRespawnRelocation(c);
             // false result ignored: will be unload with other creatures at grid
         }
     }
 }
 
-template<class T> void addUnitState(T *obj)
+template<class T> void addUnitState(T *obj, CellPair const& cell_pair)
 {
 }
 
-template<> void addUnitState(Creature *obj)
+template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
 {
+    Cell cell = RedZone::GetZone(cell_pair);
+
+    obj->SetCurrentCell(cell);
     if( MaNGOS::Utilities::IsSpiritHealer(obj) )
         obj->setDeathState(DEAD);
 }
@@ -123,7 +125,7 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
 
             m[obj->GetGUID()] = obj;
 
-            addUnitState(obj);
+            addUnitState(obj,cell);
             obj->AddToWorld();
             ++count;
 
