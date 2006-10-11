@@ -26,6 +26,7 @@
 #include "MovementGenerator.h"
 #include "ItemPrototype.h"
 #include "LootMgr.h"
+#include "Cell.h"
 
 struct SpellEntry;
 
@@ -371,6 +372,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         MovementGeneratorType GetDefaultMovementType() const { return m_defaultMovementType; }
         void SetDefaultMovementType(MovementGeneratorType mgt) { m_defaultMovementType = mgt; }
+
+        // for use only in LoadHelper, Map::Add Map::CreatureCellRelocation
+        Cell const& GetCurrentCell() const { return m_currentCell; }
+        void SetCurrentCell(Cell const& cell) { m_currentCell = cell; }
     protected:
         void _LoadGoods();
         void _LoadQuests();
@@ -407,5 +412,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void RegenerateHealth();
         uint32 m_regenTimer;
         MovementGeneratorType m_defaultMovementType;
+        Cell m_currentCell;                                        // store current cell where creature listed
 };
 #endif
