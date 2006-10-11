@@ -412,6 +412,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void RegenerateHealth();
         uint32 m_regenTimer;
         MovementGeneratorType m_defaultMovementType;
-        Cell m_currentCell;                                        // store current cell where creature listed
+        Cell m_currentCell;                                 // store current cell where creature listed
 };
 #endif

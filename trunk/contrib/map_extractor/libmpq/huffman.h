@@ -100,7 +100,4 @@ struct huffman_tree {
 	unsigned char table1502A630[];			/* Some table to make struct size flexible */
 };
 
-extern int libmpq_huff_init_tree(struct huffman_tree *ht, struct huffman_tree_item *hi, unsigned int cmp);
-
-
 #endif			/* _HUFFMAN_H */

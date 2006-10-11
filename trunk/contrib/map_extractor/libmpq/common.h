@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  $Id: common.h,v 1.1 2005/04/09 22:09:18 ufoz Exp $
+ *  $Id: common.h,v 1.4 2004/02/12 00:41:55 mbroemme Exp $
  */
 
 #define LIBMPQ_CONF_FL_INCREMENT	512			/* i hope we did not need more :) */
@@ -30,9 +30,3 @@
 
 #define LIBMPQ_CONF_EOPEN_DIR		-1			/* error on open directory */
 #define LIBMPQ_CONF_EVALUE_NOT_FOUND	-2			/* value for the option was not found */
-
-extern int libmpq_init_buffer(mpq_archive *mpq_a);
-extern int libmpq_read_hashtable(mpq_archive *mpq_a);
-extern int libmpq_read_blocktable(mpq_archive *mpq_a);
-extern int libmpq_file_read_block(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int blockpos, char *buffer, unsigned int blockbytes);
-extern int libmpq_file_read_file(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int filepos, char *buffer, unsigned int toread);

@@ -27,7 +27,6 @@
 #ifndef _EXPLODE_H
 #define _EXPLODE_H
 
-
 #define LIBMPQ_PKZIP_EXP_BUFFER_SIZE	12596		/* Size of decompress buffer */
 #define LIBMPQ_PKZIP_CMP_BINARY		0		/* Binary compression */
 #define LIBMPQ_PKZIP_CMP_ASCII		1		/* Ascii compression */
@@ -36,14 +35,6 @@
 #define LIBMPQ_PKZIP_CMP_INV_MODE	2
 #define LIBMPQ_PKZIP_CMP_BAD_DATA	3
 #define LIBMPQ_PKZIP_CMP_ABORT		4
-
-
-// Only GCC 4.1.0 and later support #pragma pack(oush,1) syntax
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
-#pragma pack(1)
-#else
-#pragma pack(push,1)
-#endif
 
 /* Compression structure (size: 12596 bytes on x86-32) */
 typedef struct {
@@ -73,14 +64,7 @@ typedef struct {
 	unsigned char	slen_bits[0x10];	/* 30F4 - Numbers of bits for skip copied block length */
 	unsigned char	clen_bits[0x10];	/* 3104 - Number of valid bits for copied block */
 	unsigned short	len_base[0x10];		/* 3114 - Buffer for */
-} pkzip_data_cmp; // __attribute__ ((packed)) pkzip_data_cmp;
-// Only GCC 4.1.0 and later support #pragma pack(pop) syntax
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
-#pragma pack()
-#else
-#pragma pack(pop)
-#endif
-
+} __attribute__ ((packed)) pkzip_data_cmp;
 
 typedef struct {
 	char		*in_buf;	/* Pointer to input data buffer */

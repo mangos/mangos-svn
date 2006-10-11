@@ -66,7 +66,6 @@ ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
         CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
         Cell resp_cell = RedZone::GetZone(resp_val);
 
-
         if(cur_cell.DiffGrid(resp_cell))
         {
             MapManager::Instance().GetMap(c->GetMapId())->CreatureRespawnRelocation(c);
@@ -184,7 +183,6 @@ void ObjectGridLoader::LoadN(void)
     }
     sLog.outDebug("%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses,i_grid.GetGridId(), i_mapId);
 }
-
 
 void ObjectGridUnloader::MoveToRespawnN()
 {

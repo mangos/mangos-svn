@@ -1810,9 +1810,8 @@ void Spell::EffectDisEnchant(uint32 i)
         }
     }
 
-    
     if ( item == 0 || count == 0 )
-    {//Fix crash 
+    {                                                       //Fix crash
         SendCastResult(CAST_FAIL_CANT_BE_DISENCHANTED);
         //SendChannelUpdate(0);
         return;
