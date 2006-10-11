@@ -59,11 +59,6 @@ GameObject::~GameObject()
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
 {
-    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
-
-    if (!goinfo)
-        return false;
-
     m_positionX = x;
     m_positionY = y;
     m_positionZ = z;
@@ -77,7 +72,17 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
         return false;
     }
 
+
     Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
+
+    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
+
+    if (!goinfo)
+    {
+        sLog.outError("Gameobject Create not exist entry. guidlow: %u id: %u map: %u  (X: %f Y: %f Z: %f) ang: %f rotation0: %f rotation1: %f ortation2: %f rotation3: %f",guidlow, name_id, mapid, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
+        return false;
+    }
+
 
     //    SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
     SetFloatValue(GAMEOBJECT_POS_X, x);
@@ -191,10 +196,8 @@ void GameObject::SaveToDB()
 
 bool GameObject::LoadFromDB(uint32 guid)
 {
-    float rotation0, rotation1, rotation2, rotation3;
 
     QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer` FROM `gameobject` WHERE `guid` = '%u'", guid);
-
     if( ! result )
         return false;
 
@@ -206,20 +209,24 @@ bool GameObject::LoadFromDB(uint32 guid)
     float z = fields[4].GetFloat();
     float ang = fields[5].GetFloat();
 
-    rotation0 = fields[6].GetFloat();
-    rotation1 = fields[7].GetFloat();
-    rotation2 = fields[8].GetFloat();
-    rotation3 = fields[9].GetFloat();
+    float rotation0 = fields[6].GetFloat();
+    float rotation1 = fields[7].GetFloat();
+    float rotation2 = fields[8].GetFloat();
+    float rotation3 = fields[9].GetFloat();
+
+    if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
+    {
+        delete result;
+        sLog.outError("GameObject::LoadFromDB(guid: %u) fail",guid);
+        return false;
+    }
+
     lootid=fields[10].GetUInt32();
     m_respawnDelayTime=fields[11].GetUInt32();
     delete result;
 
-    if (Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
-    {
-        _LoadQuests();
-        return true;
-    }
-    return false;
+    _LoadQuests();
+    return true;
 }
 
 void GameObject::DeleteFromDB()

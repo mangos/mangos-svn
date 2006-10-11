@@ -101,11 +101,14 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             Field *fields = result->Fetch();
             T *obj = new T;
             uint32 guid = fields[0].GetUInt32();
+            //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
             if(!obj->LoadFromDB(guid))
             {
                 delete obj;
+                sLog.outError("LoadHelper from table: %s for (guid: %u) Load fail ",table,guid);
                 continue;
             }
+            //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loaded ",table,guid);
 
             {
                 // Check loaded cell/grid integrity

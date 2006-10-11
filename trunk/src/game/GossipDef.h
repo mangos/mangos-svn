@@ -25,7 +25,7 @@
 
 class WorldSession;
 
-#define GOSSIP_MAX_MENU_ITEMS 15
+#define GOSSIP_MAX_MENU_ITEMS 16
 #define DEFAULT_GOSSIP_MESSAGE              0xffffff
 
 //POI defines
