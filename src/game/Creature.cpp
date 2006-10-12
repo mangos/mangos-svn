@@ -825,28 +825,6 @@ void Creature::LoadGossipOptions()
     delete result;
 }
 
-bool Creature::hasQuest(uint32 quest_id)
-{
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-    {
-        if ((*i)->GetQuestInfo()->QuestId == quest_id)
-            return true;
-    }
-
-    return false;
-}
-
-bool Creature::hasInvolvedQuest(uint32 quest_id)
-{
-    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
-    {
-        if ((*i)->GetQuestInfo()->QuestId == quest_id)
-            return true;
-    }
-
-    return false;
-}
-
 void Creature::generateMoneyLoot()
 {
     if (GetCreatureInfo()->maxgold > 0)

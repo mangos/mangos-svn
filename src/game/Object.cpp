@@ -632,6 +632,29 @@ bool Object::IsPositionValid() const
     return MaNGOS::IsValidMapCoord(m_positionX) && MaNGOS::IsValidMapCoord(m_positionY);
 }
 
+bool Object::hasQuest(uint32 quest_id)
+{
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
+    {
+        if ((*i)->GetQuestInfo()->QuestId == quest_id)
+            return true;
+    }
+
+    return false;
+}
+
+bool Object::hasInvolvedQuest(uint32 quest_id)
+{
+    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
+    {
+        if ((*i)->GetQuestInfo()->QuestId == quest_id)
+            return true;
+    }
+
+    return false;
+}
+
+
 bool Object::PrintIndexError(uint32 index, bool set) const
 {
     sLog.outError("ERROR: Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u",(set ? "set value to" : "get value from"),index,m_valuesCount,GetTypeId(),m_objectType);
