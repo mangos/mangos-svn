@@ -2263,20 +2263,32 @@ bool ChatHandler::HandleSetValue(const char* args)
     char* py = strtok(NULL, " ");
     char* pz = strtok(NULL, " ");
 
-    if (!px || !py)
+    if ((!px) || (!py) || (!pz))
         return false;
 
-    Unit* target = getSelectedUnit();
+ /*   Unit* target = getSelectedUnit();
     if(!target)
     {
         SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
         return true;
     }
 
-    uint64 guid = target->GetGUID();
+    uint64 guid = target->GetGUID();*/
 
     uint32 Opcode = (uint32)atoi(px);
-    if(Opcode >= target->GetValuesCount())
+    uint32 Opcode2 = (uint32)atoi(py);
+    uint32 Opcode3 = (uint32)atoi(pz);
+
+    WorldPacket tmpData;
+        tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
+        tmpData << uint32(Opcode);
+        tmpData << uint32(Opcode2);
+        tmpData << uint32(Opcode3); //uint32(MAIL_ERR_CANNOT_SEND_TO_SELF);
+        m_session->SendPacket(&tmpData);
+        PSendSysMessage("Sent %u %u %u for mail", Opcode, Opcode2, Opcode3);
+return true;
+
+/*    if(Opcode >= target->GetValuesCount())
     {
         PSendSysMessage(LANG_TOO_BIG_INDEX, Opcode, GUID_LOPART(guid), target->GetValuesCount());
         return false;
@@ -2301,7 +2313,7 @@ bool ChatHandler::HandleSetValue(const char* args)
         PSendSysMessage(LANG_SET_FLOAT_FIELD, GUID_LOPART(guid), Opcode,fValue);
     }
 
-    return true;
+    return true;*/
 }
 
 bool ChatHandler::HandleGetValue(const char* args)
