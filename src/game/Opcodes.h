@@ -810,14 +810,15 @@ enum OpCodes
     CMSG_GUILD_CHANGEINFO                           = 764-2,
     SMSG_UNKNOWN_INFO                               = 766,
 
-    CMSG_ACTIVATETAXI_FAR                            = 786,
+    CMSG_ACTIVATETAXI_FAR                           = 786,
     //griphon related = 786
 
     CMSG_FIELD_WATCHED_FACTION_INACTIVE             = 791,
     CMSG_FIELD_WATCHED_FACTION_SHOW_BAR             = 792,
 
     // unofficial opcodes:
-    SMSG_OUTDOORPVP_NOTIFY                          = 0x33b,// 827
+    SMSG_COMPRESSED_MOVE                            = 0x2FB, // 763
+    SMSG_OUTDOORPVP_NOTIFY                          = 0x33B, // 827
 };
 
 enum FriendsResult
