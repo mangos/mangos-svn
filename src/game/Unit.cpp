@@ -121,6 +121,9 @@ void Unit::Update( uint32 p_time )
     {
         setAttackTimer(BASE_ATTACK, (p_time >= base_att ? 0 : base_att - p_time) );
     }
+    if(GetHealth() < GetMaxHealth()*0.2)
+        SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<1));
+    else RemoveFlag(UNIT_FIELD_AURASTATE, uint32(1<<1));
 }
 
 bool Unit::haveOffhandWeapon() const
@@ -518,6 +521,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     uint32 absorb=0;
     uint32 resist=0;
+    uint32 procflag=0;
 
     //WorldPacket data;
     if(SpellMissChanceCalc(pVictim) > urand(0,10000))
@@ -541,6 +545,9 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, pdamage, spellInfo->School, absorb, resist, false, 0);
     DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), 0, true);
+
+    procflag |= PROC_FLAG_SPELL_DAMAGE;
+    ProcDamageAndSpell(pVictim,procflag,(procflag<<1));
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
@@ -772,6 +779,7 @@ void Unit::CalDamageReduction(Unit *pVictim,uint32 School, const uint32 damage, 
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType)
 {
+    pVictim->RemoveFlag(UNIT_FIELD_AURASTATE, uint32((1<<(AURA_STATE_PARRY-1)) | 1<<(AURA_STATE_DODGE-1)));
     MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim, attType);
     if (outcome == MELEE_HIT_MISS)
     {
@@ -827,6 +835,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 ((Player*)pVictim)->UpdateDefense();
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
             return;
 
         case MELEE_HIT_DODGE:
@@ -837,6 +846,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 ((Player*)pVictim)->UpdateDefense();
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
             return;
 
         case MELEE_HIT_BLOCK:
@@ -851,6 +861,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
+            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
             break;
 
         case MELEE_HIT_GLANCING:
@@ -892,98 +903,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     AuraList& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
     for(AuraList::iterator i = vDamageShields.begin(); i != vDamageShields.end(); ++i)
         pVictim->SpellNonMeleeDamageLog(this, (*i)->GetId(), (*i)->GetModifier()->m_amount);
-
-    /*// this unit's proc trigger damage
-    AuraList& mProcTriggerDamage = GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-    for(AuraList::iterator i = mProcTriggerDamage.begin(), next; i != mProcTriggerDamage.end(); i = next)
-    {
-        next = i; next++;
-        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & 20) == 0) continue;
-        uint32 chance = (*i)->GetSpellProto()->procChance;
-        if (chance > 100) chance = GetWeaponProcChance();
-        if (chance > rand_chance())
-        {
-            this->SpellNonMeleeDamageLog(pVictim,(*i)->GetId(), uint32(0.035 * (*i)->GetModifier()->m_amount));
-            if ((*i)->m_procCharges != -1)
-            {
-                (*i)->m_procCharges -= 1;
-                if((*i)->m_procCharges == 0)
-                {
-                    RemoveAurasDueToSpell((*i)->GetId());
-                    next = mProcTriggerDamage.begin();
-                }
-            }
-        }
-    }
-
-    // this unit's proc trigger spell
-    AuraList& mProcTriggerSpell = GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-    for(AuraList::iterator i = mProcTriggerSpell.begin(), next; i != mProcTriggerSpell.end(); i = next)
-    {
-        next = i; next++;
-        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & 20) == 0) continue;
-        uint32 chance = (*i)->GetSpellProto()->procChance;
-        if (chance > 100) chance = GetWeaponProcChance();
-        if (chance > rand_chance())
-        {
-            this->CastSpell(pVictim, (*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()], true);
-            if ((*i)->m_procCharges != -1)
-            {
-                (*i)->m_procCharges -= 1;
-                if((*i)->m_procCharges == 0)
-                {
-                    RemoveAurasDueToSpell((*i)->GetId());
-                    next = mProcTriggerSpell.begin();
-                }
-            }
-        }
-    }
-
-    // this victim's proc trigger damage
-    AuraList& vProcTriggerDamage = pVictim->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-    for(AuraList::iterator i = vProcTriggerDamage.begin(), next; i != vProcTriggerDamage.end(); i = next)
-    {
-        next = i; next++;
-        if(((*i)->GetSpellProto()->procFlags & 40) == 0) continue;
-        uint32 chance = (*i)->GetSpellProto()->procChance;
-        if (chance > 100) chance = GetWeaponProcChance();
-        if (chance > rand_chance())
-        {
-            pVictim->SpellNonMeleeDamageLog(this,(*i)->GetId(), uint32(0.035 * (*i)->GetModifier()->m_amount));
-            if ((*i)->m_procCharges != -1)
-            {
-                (*i)->m_procCharges -= 1;
-                if((*i)->m_procCharges == 0)
-                {
-                    pVictim->RemoveAurasDueToSpell((*i)->GetId());
-                    next = vProcTriggerDamage.begin();
-                }
-            }
-        }
-    }
-
-    // this victims's proc trigger spell
-    AuraList& vProcTriggerSpell = pVictim->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-    for(AuraList::iterator i = vProcTriggerSpell.begin(), next; i != vProcTriggerSpell.end(); i = next)
-    {
-        next = i; next++;
-        if(((*i)->GetSpellProto()->procFlags & 40) == 0) continue;
-        uint32 chance = (*i)->GetSpellProto()->procChance;
-        if (chance > 100) chance = GetWeaponProcChance();
-        if (chance > rand_chance())
-        {
-            pVictim->CastSpell(this, (*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()], true);
-            if ((*i)->m_procCharges != -1)
-            {
-                (*i)->m_procCharges -= 1;
-                if((*i)->m_procCharges == 0)
-                {
-                    pVictim->RemoveAurasDueToSpell((*i)->GetId());
-                    next = vProcTriggerSpell.begin();
-                }
-            }
-        }
-    }*/
 
     if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {
@@ -1042,6 +961,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
 
     uint32   damageType = NORMAL_DAMAGE;
     uint32   victimState = VICTIMSTATE_NORMAL;
+    uint32   procflag = PROC_FLAG_NONE;
 
     uint32   damage = 0;
     uint32   blocked_dmg = 0;
@@ -1049,6 +969,19 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
     uint32   resisted_dmg = 0;
 
     DoAttackDamage (pVictim, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+
+    if(attType == RANGED_ATTACK)
+    {
+        procflag |= PROC_FLAG_LONG_ATTACK;
+        if(damage > 0)
+            procflag |= PROC_FLAG_LONG_HIT;
+    }
+    else
+    {
+        procflag |= PROC_FLAG_SHORT_ATTACK;
+        if(damage > 0)
+            procflag |= PROC_FLAG_SHORT_HIT;
+    }
 
     if (hitInfo & HITINFO_MISS)
         //send miss
@@ -1071,6 +1004,11 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
                 ((Player*)this)->CastItemCombatSpell(((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,i),pVictim);
         }
     }
+
+    if(!pVictim->isAlive())
+        procflag = PROC_FLAG_DIE;
+
+    ProcDamageAndSpell(pVictim, procflag, (procflag<<1));
 
     if (GetTypeId() == TYPEID_PLAYER)
         DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg, absorbed %u, blocked %u, resisted %u.",
@@ -2501,6 +2439,171 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingT
     SendMessageToSet( &data, true );
 }
 
+void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
+{
+    // this unit's proc trigger damage
+    AuraList& mProcTriggerDamage = GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    for(AuraList::iterator i = mProcTriggerDamage.begin(), next; i != mProcTriggerDamage.end(); i = next)
+    {
+        next = i; next++;
+        uint32 procflag = procflag1;
+        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_SHORT_HIT)
+            procflag &= ~ PROC_FLAG_SHORT_ATTACK;
+        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_LONG_HIT)
+            procflag &= ~ PROC_FLAG_LONG_ATTACK;
+
+        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & procflag) == 0) continue;
+        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if (chance > 100) chance = GetWeaponProcChance();
+        if (chance > rand_chance())
+        {
+            uint32 damage;
+            if((*i)->GetSpellProto()->SpellIconID == 25 && (*i)->GetSpellProto()->SpellVisual == 5622)
+                damage = (*i)->GetModifier()->m_amount*GetAttackTime(BASE_ATTACK)/60/1000;
+            else damage = (*i)->GetModifier()->m_amount;
+            this->SpellNonMeleeDamageLog(pVictim,(*i)->GetId(), uint32(damage));
+            if ((*i)->m_procCharges != -1)
+            {
+                (*i)->m_procCharges -= 1;
+                if((*i)->m_procCharges == 0)
+                {
+                    RemoveAurasDueToSpell((*i)->GetId());
+                    next = mProcTriggerDamage.begin();
+                }
+            }
+        }
+    }
+
+    // this unit's proc trigger spell
+    AuraList& mProcTriggerSpell = GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+    for(AuraList::iterator i = mProcTriggerSpell.begin(), next; i != mProcTriggerSpell.end(); i = next)
+    {
+        next = i; next++;
+        uint32 procflag = procflag1;
+        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_SHORT_HIT)
+            procflag &= ~ PROC_FLAG_SHORT_ATTACK;
+        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_LONG_HIT)
+            procflag &= ~ PROC_FLAG_LONG_ATTACK;
+
+        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & procflag) == 0) continue;
+        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if (chance > 100) chance = GetWeaponProcChance();
+        if (chance > rand_chance())
+        {
+            this->CastSpell(pVictim, (*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()], true);
+            if ((*i)->m_procCharges != -1)
+            {
+                (*i)->m_procCharges -= 1;
+                if((*i)->m_procCharges == 0)
+                {
+                    RemoveAurasDueToSpell((*i)->GetId());
+                    next = mProcTriggerSpell.begin();
+                }
+            }
+        }
+    }
+
+    // this victim's proc trigger damage
+    AuraList& vProcTriggerDamage = pVictim->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    for(AuraList::iterator i = vProcTriggerDamage.begin(), next; i != vProcTriggerDamage.end(); i = next)
+    {
+        next = i; next++;
+        uint32 procflag = procflag2;
+        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_BE_SHORT_HIT)
+            procflag &= ~ PROC_FLAG_BE_SHORT_ATTACK;
+        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_BE_LONG_HIT)
+            procflag &= ~ PROC_FLAG_BE_LONG_ATTACK;
+
+        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & procflag) == 0) continue;
+        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if (chance > 100) chance = GetWeaponProcChance();
+        if (chance > rand_chance())
+        {
+            uint32 damage = uint32((*i)->GetModifier()->m_amount);
+            // Special for judgement of seal
+            if((*i)->GetSpellProto()->SpellVisual == 7395 && (*i)->GetSpellProto()->SpellIconID == 278)
+            {
+                damage = pVictim->CalculateDamage(BASE_ATTACK);
+            }
+            pVictim->SpellNonMeleeDamageLog(this,(*i)->GetId(), damage);
+            if ((*i)->m_procCharges != -1)
+            {
+                (*i)->m_procCharges -= 1;
+                if((*i)->m_procCharges == 0)
+                {
+                    pVictim->RemoveAurasDueToSpell((*i)->GetId());
+                    next = vProcTriggerDamage.begin();
+                }
+            }
+        }
+    }
+
+    // this victims's proc trigger spell
+    AuraList& vProcTriggerSpell = pVictim->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+    for(AuraList::iterator i = vProcTriggerSpell.begin(), next; i != vProcTriggerSpell.end(); i = next)
+    {
+        next = i; next++;
+        uint32 procflag = procflag2;
+        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_BE_SHORT_HIT)
+            procflag &= ~ PROC_FLAG_BE_SHORT_ATTACK;
+        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_BE_LONG_HIT)
+            procflag &= ~ PROC_FLAG_BE_LONG_ATTACK;
+
+        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & procflag) == 0) continue;
+        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if (chance > 100) chance = GetWeaponProcChance();
+        if (chance > rand_chance())
+        {
+            pVictim->CastSpell(this, (*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()], true);
+            // Special for judgement of seal
+            if( (*i)->GetSpellProto()->SpellFamilyFlags & (1<<19) )
+            {
+                if((*i)->GetSpellProto()->SpellIconID == 206)
+                {
+                    uint32 mana = 0;
+                    switch(FindSpellRank((*i)->GetSpellProto()->Id))
+                    {
+                        case 1:mana = 33;break;
+                        case 2:mana = 46;break;
+                        case 3:mana = 59;break;
+                        default:break;
+                    }
+                    SetPower(POWER_MANA,mana + GetPower(POWER_MANA));
+                    SendHealSpellOnPlayerPet(this,(*i)->GetSpellProto()->Id,mana,POWER_MANA);
+                }
+                if((*i)->GetSpellProto()->SpellIconID == 299)
+                {
+                    uint32 health = 0;
+                    switch(FindSpellRank((*i)->GetSpellProto()->Id))
+                    {
+                        case 1:health = 25;break;
+                        case 2:health = 34;break;
+                        case 3:health = 49;break;
+                        case 4:health = 61;break;
+                        default:break;
+                    }
+                    SetHealth(health + GetHealth());
+                    SendHealSpellOnPlayer(this,(*i)->GetSpellProto()->Id,health);
+                }
+            }
+            // Special for Static Electricity
+            if((*i)->GetSpellProto()->SpellFamilyName == 11 && ((*i)->GetSpellProto()->SpellFamilyFlags & (1<<10)))
+            {
+                pVictim->SpellNonMeleeDamageLog(this,(*i)->GetSpellProto()->Id,(*i)->GetModifier()->m_amount);
+            }
+            if ((*i)->m_procCharges != -1)
+            {
+                (*i)->m_procCharges -= 1;
+                if((*i)->m_procCharges == 0)
+                {
+                    pVictim->RemoveAurasDueToSpell((*i)->GetId());
+                    next = vProcTriggerSpell.begin();
+                }
+            }
+        }
+    }
+}
+
 void Unit::setPowerType(Powers new_powertype)
 {
     uint32 tem_bytes_0 = GetUInt32Value(UNIT_FIELD_BYTES_0);
@@ -2878,7 +2981,12 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
         if(cinfo && cinfo->type == uint32((*i)->GetModifier()->m_miscvalue))
             *pdamage += (*i)->GetModifier()->m_amount;
 
-    AuraList& mDamageTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
+    AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+            *pdamage += (*i)->GetModifier()->m_amount;
+
+    AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             *pdamage += (*i)->GetModifier()->m_amount;

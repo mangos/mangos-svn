@@ -286,33 +286,6 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     uint32 spellId;
     recvPacket >> spellId;
     _player->RemoveAurasDueToSpell(spellId);
-
-    SpellEntry *_spellInfo = sSpellStore.LookupEntry(spellId );
-    if(!_spellInfo)
-    {
-        sLog.outError("WORLD: unknown spell id %i\n", spellId);
-        return;
-    }
-    if(_spellInfo->SpellVisual == 5622)
-    {
-        SpellEntry *spellInfo = sSpellStore.LookupEntry(_spellInfo->EffectBasePoints[2]+1);
-        if(!spellInfo)
-            return;
-        Spell *p_spell = new Spell(_player,spellInfo,false,0);
-        if(!p_spell)
-            return;
-        SpellCastTargets targets;
-        Unit *ptarget = _player->getAttackerForHelper();
-        if(!ptarget)
-        {
-            ptarget = ObjectAccessor::Instance().GetUnit(*_player, _player->GetSelection());
-        }
-        if(!ptarget || ptarget->GetGUID() == _player->GetGUID())
-            return;
-        targets.setUnitTarget(ptarget);
-        p_spell->prepare(&targets);
-    }
-
 }
 
 void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)

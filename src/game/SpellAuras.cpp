@@ -613,7 +613,9 @@ void Aura::_AddAura()
         {
             /* TODO: increase count */
         }
-
+        
+        if(GetSpellProto()->SpellVisual == 5622)
+            m_target->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
         SetAuraSlot( slot );
         if( m_target->GetTypeId() == TYPEID_PLAYER )
             UpdateAuraDuration();
@@ -686,6 +688,8 @@ void Aura::_RemoveAura()
     value &= value1;
 
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
+    if(GetSpellProto()->SpellVisual == 5622)
+        m_target->RemoveFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
 }
 
 /*********************************************************/
@@ -821,6 +825,22 @@ void Aura::HandleAuraDummy(bool apply)
                 if (!m_procCharges)
                     m_procCharges = -1;
             }
+        }
+    }
+    if(GetSpellProto()->SpellVisual == 7395 && GetSpellProto()->SpellIconID == 278 && caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player *player = (Player*)caster;
+        Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+        if(apply)
+            tAuraProcTriggerDamage.push_back(this);
+        else
+            tAuraProcTriggerDamage.remove(this);
+
+        if(apply && !m_procCharges)
+        {
+            m_procCharges = GetSpellProto()->procCharges;
+            if (!m_procCharges)
+                m_procCharges = -1;
         }
     }
     if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 && caster
@@ -2196,7 +2216,7 @@ void Aura::HandleModDamageDone(bool apply)
 
 void Aura::HandleModDamageTaken(bool apply)
 {
-    // has no immediate effect when adding / removing
+
 }
 
 void Aura::HandleModDamagePercentDone(bool apply)

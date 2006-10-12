@@ -161,7 +161,33 @@ enum UnitFlags
     UNIT_FLAG_SKINNABLE      = 0x04000000,
     UNIT_FLAG_SHEATHE        = 0x40000000
 };
-
+enum ProcFlags
+{
+    PROC_FLAG_NONE            = 0x00000000,
+    PROC_FLAG_UNKOWN1         = 0x00000001,
+    PROC_FLAG_DIE             = 0x00000002,
+    PROC_FLAG_SHORT_ATTACK    = 0x00000004,
+    PROC_FLAG_BE_SHORT_ATTACK = 0x00000008,
+    PROC_FLAG_SHORT_HIT       = 0x00000010,
+    PROC_FLAG_BE_SHORT_HIT    = 0x00000020,
+    PROC_FLAG_LONG_ATTACK     = 0x00000040,
+    PROC_FLAG_BE_LONG_ATTACK  = 0x00000080,
+    PROC_FLAG_LONG_HIT        = 0x00000100,
+    PROC_FLAG_BE_LONG_HIT     = 0x00000200,
+    PROC_FLAG_HEAL_SPELL      = 0x00004000,
+    PROC_FLAG_SPELL_DAMAGE    = 0x00010000,
+    PROC_FLAG_BE_SPELL_DAMAGED= 0x00020000,
+};
+enum AuraState
+{
+    AURA_STATE_DODGE          = 1,
+    AURA_STATE_HEALTHLESS     = 2,
+    AURA_STATE_RACE           = 3,
+    AURA_STATE_UNKNOWN1       = 4,
+    AURA_STATE_JUDGEMENT      = 5,
+    AURA_STATE_UNKNOWN2       = 6,
+    AURA_STATE_PARRY          = 7                            // unsure.   
+};
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
 //some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
@@ -173,7 +199,7 @@ enum SpellImmunity
     IMMUNITY_SCHOOL                = 2,
     IMMUNITY_DAMAGE                = 3,
     IMMUNITY_DISPEL                = 4,
-    IMMUNITY_MECHANIC              = 5,
+    IMMUNITY_MECHANIC              = 5
 
 };
 
@@ -182,12 +208,12 @@ enum ImmuneToMechanic
     IMMUNE_MECHANIC_CHARM            =1,
     IMMUNE_MECHANIC_CONFUSED         =2,
     IMMUNE_MECHANIC_DISARM           =3,
-    IMMUNE_MECHANIC_UNKOWN4          =4,
+    IMMUNE_MECHANIC_ATTRACT          =4,
     IMMUNE_MECHANIC_FEAR             =5,
-    IMMUNE_MECHANIC_UNKOWN6          =6,
+    IMMUNE_MECHANIC_STUPID           =6,
     IMMUNE_MECHANIC_ROOT             =7,
-    IMMUNE_MECHANIC_UNKOWN8          =8,
-    IMMUNE_MECHANIC_UNKOWN9          =9,
+    IMMUNE_MECHANIC_PEACE            =8,
+    IMMUNE_MECHANIC_SILENCE          =9,
     IMMUNE_MECHANIC_SLEEP            =10,
     IMMUNE_MECHANIC_CHASE            =11,
     IMMUNE_MECHANIC_STUNDED          =12,
@@ -198,13 +224,14 @@ enum ImmuneToMechanic
     IMMUNE_MECHANIC_POLYMORPH        =17,
     IMMUNE_MECHANIC_BANISH           =18,
     IMMUNE_MECHANIC_SHIELDED         =19,
-    IMMUNE_MECHANIC_UNKOWN20         =20,
+    IMMUNE_MECHANIC_DURANCED         =20,
     IMMUNE_MECHANIC_MOUNT            =21,
-    IMMUNE_MECHANIC_UNKOWN22         =22,
-    IMMUNE_MECHANIC_UNKOWN23         =23,
+    IMMUNE_MECHANIC_PERSUADED        =22,
+    IMMUNE_MECHANIC_TURNED           =23,
     IMMUNE_MECHANIC_HORROR           =24,
     IMMUNE_MECHANIC_INVULNERABILITY  =25,
-    IMMUNE_MECHANIC_UNKOWN26         =26
+    IMMUNE_MECHANIC_INTERRUPTED      =26,
+    IMMUNE_MECHANIC_DAZED            =27
 };
 
 enum ImmuneToDispel
@@ -408,6 +435,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType);
         void CalDamageReduction(Unit *pVictim, uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist);
+        void ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2);
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK);
         int32 SpellMissChanceCalc(Unit *pVictim) const;
