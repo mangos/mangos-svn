@@ -566,12 +566,12 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     }
     else
     {
-        delete item;
         _player->SendEquipError( msg, item, NULL );
         data << uint32(mailid);
         data << uint32(0);
         data << uint32(MAIL_ERR_INTERNAL_ERROR);
-    }
+        delete item;
+   }
 
     SendPacket(&data);
 }
