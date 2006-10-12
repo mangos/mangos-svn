@@ -1286,8 +1286,22 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
+    uint32 procflag = 0;
 
     m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+
+    if(attType == RANGED_ATTACK)
+    {
+        procflag |= PROC_FLAG_LONG_ATTACK;
+        if(damage > 0)
+            procflag |= PROC_FLAG_LONG_HIT;
+    }
+    else
+    {
+        procflag |= PROC_FLAG_SHORT_ATTACK;
+        if(damage > 0)
+            procflag |= PROC_FLAG_SHORT_HIT;
+    }
 
     if (damage + bonus > 0)
         damage += bonus;
@@ -1303,6 +1317,11 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     m_caster->SendSpellNonMeleeDamageLog(unitTarget->GetGUID(), m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
     m_caster->DealDamage(unitTarget, damage, 0, true);
+
+    if(!unitTarget->isAlive())
+        procflag = PROC_FLAG_DIE;
+
+    m_caster->ProcDamageAndSpell(unitTarget, procflag, (procflag<<1));
 
     // take ammo
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1378,39 +1397,45 @@ void Spell::EffectScriptEffect(uint32 i)
         if ((m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) &&
             (m_spellInfo->SpellIconID == 70 || m_spellInfo->SpellIconID  == 242))
             EffectHeal( i );
-    }
-    else if((m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) &&
-        (m_spellInfo->SpellFamilyFlags & (1<<23)))
-    {
-        // paladin's judgement
-        if(!unitTarget || !unitTarget->isAlive())
-            return;
-        uint32 spellId2 = 0;
-        Unit::AuraMap& t_auras = unitTarget->GetAuras();
 
-        for(Unit::AuraMap::iterator itr = t_auras.begin(); itr != t_auras.end(); ++itr)
+        if(m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && (m_spellInfo->SpellFamilyFlags & (1<<23)))
         {
-            if (itr->second)
+            // paladin's judgement
+            if(!unitTarget || !unitTarget->isAlive())
+                return;
+            uint32 spellId2 = 0;
+            Unit::AuraMap& m_auras = m_caster->GetAuras();
+            Unit::AuraMap::iterator itr,next;
+
+            for(itr = m_auras.begin(); itr != m_auras.end(); itr = next)
             {
-                SpellEntry *spellInfo = itr->second->GetSpellProto();
-                if (!spellInfo) continue;
-                if (spellInfo->SpellVisual != 5622 || spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN) continue;
-                spellId2 = spellInfo->EffectBasePoints[2]+1;
-                if(!spellId2)
-                    continue;
-                break;
+                next = itr;
+                next++;
+                if (itr->second)
+                {
+                    SpellEntry *spellInfo = itr->second->GetSpellProto();
+                    if (!spellInfo) continue;
+                    if (spellInfo->SpellVisual != 5622 || spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN) continue;
+                    spellId2 = spellInfo->EffectBasePoints[2]+1;
+                    if(spellId2 <= 1)
+                        continue;
+                    m_caster->RemoveAurasDueToSpell(spellInfo->Id);
+                    next = m_auras.begin();
+                    break;
+                }
             }
+
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId2);
+            if(!spellInfo)
+                return;
+            Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
+            if(!p_spell)
+                return;
+            SpellCastTargets targets;
+            Unit *ptarget = unitTarget;
+            targets.setUnitTarget(ptarget);
+            p_spell->prepare(&targets);
         }
-        SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId2);
-        if(!spellInfo)
-            return;
-        Spell *p_spell = new Spell(m_caster,spellInfo,false,0);
-        if(!p_spell)
-            return;
-        SpellCastTargets targets;
-        Unit *ptarget = unitTarget;
-        targets.setUnitTarget(ptarget);
-        p_spell->prepare(&targets);
     }
     else
     {
