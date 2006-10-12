@@ -720,15 +720,19 @@ void Player::Update( uint32 p_time )
         list<uint32>::iterator iter = m_timedquests.begin();
         while (iter != m_timedquests.end())
         {
-            if( mQuestStatus[*iter].m_timer <= now )
+            //if( mQuestStatus[*iter].m_timer > 0 )
+            //{
+            if( mQuestStatus[*iter].m_timer <= p_time )
             {
                 FailTimedQuest( *iter );
                 iter = m_timedquests.begin();
             }
             else
             {
+                mQuestStatus[*iter].m_timer -= p_time;
                 iter++;
             }
+            //}
         }
     }
 
@@ -8112,8 +8116,8 @@ void Player::AddQuest( Quest *pQuest )
         {
             uint32 limittime = qInfo->LimitTime;
             AddTimedQuest( quest_id );
+            mQuestStatus[quest_id].m_timer = limittime * 1000;
             uint32 qtime = static_cast<uint32>(time(NULL)) + limittime;
-            mQuestStatus[quest_id].m_timer = qtime;
             SetUInt32Value( log_slot + 2, qtime );
         }
         else
