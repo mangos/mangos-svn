@@ -86,6 +86,13 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT+TYPE_GAMEOBJECT+TYPE_ITEM);
+    if(!pObject||!pObject->hasQuest(quest))
+    {
+        _player->PlayerTalkClass->CloseGossip();
+        return;
+    }
+
     QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
     if ( qInfo )
     {
@@ -107,22 +114,17 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
             if ( _player->CanCompleteQuest( quest ) )
                 _player->CompleteQuest( quest );
 
-            Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-            if( pCreature )
-                Script->QuestAccept(_player, pCreature, pQuest );
-            else
+            switch(pObject->GetTypeId())
             {
-                Item *pItem = 0;
-                pItem = _player->GetItemByPos( _player->GetPosByGuid( guid ));
-
-                if( pItem )
-                    Script->ItemQuestAccept(_player, pItem, pQuest );
-                else
-                {
-                    GameObject *pGO = ObjectAccessor::Instance().GetGameObject(*_player, guid);
-                    if( pGO )
-                        Script->GOQuestAccept(_player, pGO, pQuest );
-                }
+                case TYPEID_UNIT:
+                    Script->QuestAccept(_player, ((Creature*)pObject), pQuest );
+                    break;
+                case TYPEID_ITEM:
+                    Script->ItemQuestAccept(_player, ((Item*)pObject), pQuest );
+                    break;
+                case TYPEID_GAMEOBJECT:
+                    Script->GOQuestAccept(_player, ((GameObject*)pObject), pQuest );
+                    break;
             }
         }
         else
@@ -139,57 +141,53 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT+TYPE_GAMEOBJECT+TYPE_ITEM);
+    if(!pObject||!pObject->hasQuest(quest))
+    {
+        _player->PlayerTalkClass->CloseGossip();
+        return;
+    }
+
     Quest *pQuest = objmgr.NewQuest(quest);
     if ( pQuest )
     {
         uint32 status = _player->GetQuestStatus( quest );
-        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-        if( pCreature )
+        switch(pObject->GetTypeId())
         {
-            if( !Script->QuestSelect(_player, pCreature, pQuest ) )
-            {
-                if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
-                    _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), _player->CanRewardQuest(pQuest,false), false );
-                else if( status == QUEST_STATUS_INCOMPLETE )
-                    _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), false, false );
-                else
-                    _player->PlayerTalkClass->SendQuestDetails(pQuest, pCreature->GetGUID(), true);
-            }
-        }
-        else
-        {
-            Item *pItem;
-            pItem = _player->GetItemByPos( _player->GetPosByGuid( guid ));
-
-            if( pItem )
-            {
-                if( !Script->ItemQuestAccept(_player, pItem, pQuest ) )
+            case TYPEID_UNIT:
+                if( !Script->QuestSelect(_player, ((Creature*)pObject), pQuest ) )
+                {
+                    if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
+                        _player->PlayerTalkClass->SendRequestedItems( pQuest, pObject->GetGUID(), _player->CanRewardQuest(pQuest,false), false );
+                    else if( status == QUEST_STATUS_INCOMPLETE )
+                        _player->PlayerTalkClass->SendRequestedItems( pQuest, pObject->GetGUID(), false, false );
+                    else
+                        _player->PlayerTalkClass->SendQuestDetails(pQuest, pObject->GetGUID(), true);
+                }
+                break;
+            case TYPEID_ITEM:
+                if( !Script->ItemQuestAccept(_player, ((Item*)pObject), pQuest ) )
                 {
                     if( status == QUEST_STATUS_NONE && _player->CanTakeQuest( pQuest, true ) )
-                        _player->PlayerTalkClass->SendQuestDetails(pQuest, pItem->GetGUID(), true);
+                        _player->PlayerTalkClass->SendQuestDetails(pQuest, pObject->GetGUID(), true);
                 }
-            }
-            else
-            {
-                GameObject *pGO = ObjectAccessor::Instance().GetGameObject(*_player, guid);
-                if( pGO )
+                break;
+            case TYPEID_GAMEOBJECT:
+                if( !Script->GOQuestAccept(_player, ((GameObject*)pObject), pQuest ) )
                 {
-                    if( !Script->GOQuestAccept(_player, pGO, pQuest ) )
+                    if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
                     {
-                        if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
-                        {
-                            if(_player->CanRewardQuest(pQuest,false))
-                                _player->PlayerTalkClass->SendQuestReward( quest, pCreature->GetGUID(), true, NULL, 0 );
-                            else
-                                _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
-                        }
-                        else if( status == QUEST_STATUS_INCOMPLETE )
-                            _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
+                        if(_player->CanRewardQuest(pQuest,false))
+                            _player->PlayerTalkClass->SendQuestReward( quest, pObject->GetGUID(), true, NULL, 0 );
                         else
-                            _player->PlayerTalkClass->SendQuestDetails(pQuest, pCreature->GetGUID(), true);
+                            _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
                     }
+                    else if( status == QUEST_STATUS_INCOMPLETE )
+                        _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
+                    else
+                        _player->PlayerTalkClass->SendQuestDetails(pQuest, pObject->GetGUID(), true);
                 }
-            }
+                break;
         }
     }
     delete pQuest;
@@ -219,6 +217,10 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
 
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT+TYPE_GAMEOBJECT);
+    if(!pObject||!pObject->hasInvolvedQuest(quest))
+        return;
+
     Quest *pQuest = objmgr.NewQuest(quest);
     if( pQuest )
     {
@@ -226,25 +228,24 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
         {
             _player->RewardQuest( pQuest, reward );
 
-            if(Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid))
+            switch(pObject->GetTypeId())
             {
-                _player->CalculateReputation( pQuest, guid );
-                if( !(Script->ChooseReward( _player, pCreature, pQuest, reward )) )
-                {
-                    if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
-                        _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
-                }
+                case TYPEID_UNIT:
+                    _player->CalculateReputation( pQuest, guid );
+                    if( !(Script->ChooseReward( _player, ((Creature*)pObject), pQuest, reward )) )
+                    {
+                        if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
+                            _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
+                    }
+                    break;
+                case TYPEID_GAMEOBJECT:
+                    if( !Script->GOChooseReward( _player, ((GameObject*)pObject), pQuest, reward ) )
+                    {
+                        if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
+                            _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
+                    }
+                    break;
             }
-            else if(GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid))
-            {
-                if( !Script->GOChooseReward( _player, pGameObject, pQuest, reward ) )
-                {
-                    if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
-                        _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
-                }
-            }
-            else
-                sLog.outError("Unknown questgiver GUID #" I64FMTD " for reward choice (not creature and not gameobject), ignore.",guid);
         }
         delete pQuest;
     }
@@ -258,22 +259,15 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT+TYPE_GAMEOBJECT);
+    if(!pObject||!pObject->hasInvolvedQuest(quest))
+        return;
+
     Quest *pQuest       = objmgr.NewQuest( quest );
     if( pQuest )
     {
-        if(Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid))
-        {
-            if ( _player->CanCompleteQuest( quest ) )
-                _player->PlayerTalkClass->SendQuestReward( quest, guid, true, NULL, 0);
-        }
-        else if(GameObject *pGO = ObjectAccessor::Instance().GetGameObject(*_player, guid))
-        {
-            if ( _player->CanCompleteQuest( quest ) )
-                _player->PlayerTalkClass->SendQuestReward( quest, guid, true, NULL, 0);
-        }
-        else
-            sLog.outError("Unknown questgiver GUID #" I64FMTD " for reward request (not creature and not gameobject), ignore.",guid);
-
+        if ( _player->CanCompleteQuest( quest ) )
+            _player->PlayerTalkClass->SendQuestReward( quest, guid, true, NULL, 0);
         delete pQuest;
     }
 }

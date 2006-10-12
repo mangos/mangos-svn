@@ -261,6 +261,8 @@ class MANGOS_DLL_SPEC Object
         std::list<Quest*> mInvolvedQuests;
         void addQuest(Quest *quest) { mQuests.push_back(quest); }
         void addInvolvedQuest(Quest *quest) { mInvolvedQuests.push_back(quest); }
+        bool hasQuest(uint32 quest_id);
+        bool hasInvolvedQuest(uint32 quest_id);
 
     protected:
         Object ( );

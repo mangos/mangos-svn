@@ -88,6 +88,44 @@ ObjectAccessor::GetUnit(Object const &u, uint64 guid)
     return unit;
 }
 
+Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32 typemask)
+{
+    Object *obj = NULL;
+
+    if(typemask & TYPE_PLAYER)
+    {
+        obj = FindPlayer(guid);
+        if(obj) return obj;
+    }
+
+    if(typemask & TYPE_UNIT)
+    {
+        obj = GetCreature(p,guid);
+        if(obj) return obj;
+    }
+
+    if(typemask & TYPE_GAMEOBJECT)
+    {
+        obj = GetGameObject(p,guid);
+        if(obj) return obj;
+    }
+
+    if(typemask & TYPE_DYNAMICOBJECT)
+    {
+        obj = GetDynamicObject(p,guid);
+        if(obj) return obj;
+    }
+
+    if(typemask & TYPE_ITEM)
+    {
+        obj = p.GetItemByPos( p.GetPosByGuid( guid ));
+        if(obj) return obj;
+    }
+
+    return NULL;
+}
+
+
 Player*
 ObjectAccessor::GetPlayer(Unit const &u, uint64 guid)
 {
