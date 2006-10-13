@@ -25,6 +25,7 @@
 class Player;
 
 #define QUEST_OBJECTIVES_COUNT 4
+#define QUEST_SOURCE_ITEM_IDS_COUNT 4
 #define QUEST_REWARD_CHOICES_COUNT 6
 #define QUEST_REWARDS_COUNT 4
 #define QUEST_DEPLINK_COUNT 10
@@ -172,6 +173,8 @@ struct QuestInfo
     char* ObjectiveText[4];
     uint32 ReqItemId[ QUEST_OBJECTIVES_COUNT ];
     uint32 ReqItemCount[ QUEST_OBJECTIVES_COUNT ];
+    uint32 ReqSourceId[ QUEST_SOURCE_ITEM_IDS_COUNT ];
+    uint32 ReqSourceRef[ QUEST_SOURCE_ITEM_IDS_COUNT ];
     int32  ReqCreatureOrGOId[ QUEST_OBJECTIVES_COUNT ];     // >0 Creature <0 Gameobject
     uint32 ReqCreatureOrGOCount[ QUEST_OBJECTIVES_COUNT ];
     uint32 ReqSpell[ QUEST_OBJECTIVES_COUNT ];
