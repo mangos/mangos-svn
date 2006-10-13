@@ -218,7 +218,7 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_COMPRESSION] = sConfig.GetIntDefault("Compression", 1);
     if(m_configs[CONFIG_COMPRESSION] < 1 || m_configs[CONFIG_COMPRESSION] > 9)
     {
-        sLog.outError("Compression level (%i) must be in range 1..9. Using default compression level (1),.",m_configs[CONFIG_COMPRESSION]);
+        sLog.outError("Compression level (%i) must be in range 1..9. Using default compression level (1).",m_configs[CONFIG_COMPRESSION]);
         m_configs[CONFIG_COMPRESSION] = 1;
     }
     m_configs[CONFIG_GRID_UNLOAD] = sConfig.GetIntDefault("GridUnload", 1);
@@ -239,6 +239,12 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION] = sConfig.GetIntDefault("AllowTwoSide.Interaction",0);
     m_configs[CONFIG_ALLOW_TWO_SIDE_WHO_LIST] = sConfig.GetIntDefault("AllowTwoSide.WhoList", 0);
     m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
+    if(m_configs[CONFIG_MAX_PLAYER_LEVEL] > 255)
+    {
+        sLog.outError("MaxPlayerLevel (%i) must be in range 1..255. Set to 255.",m_configs[CONFIG_MAX_PLAYER_LEVEL]);
+        m_configs[CONFIG_MAX_PLAYER_LEVEL] = 255;
+    }
+
     m_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig.GetIntDefault("MaxPrimaryTradeSkill", 2);
     m_configs[CONFIG_WISPERING_TO_GM] = sConfig.GetIntDefault("WhisperingToGM",0);
 

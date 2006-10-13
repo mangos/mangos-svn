@@ -69,7 +69,7 @@ PlayerLimit = 100
 #          0 (false)
 AddonDefault = 1
 
-# Max level that can reached by player for expirience.
+# Max level that can reached by player for expirience (in range from 1 to 255).
 # Change not recommended
 # Default: 60
 MaxPlayerLevel = 60
