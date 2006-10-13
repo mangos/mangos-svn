@@ -8783,11 +8783,22 @@ bool Player::HaveQuestForItem( uint32 itemid )
         if (qs.m_status == QUEST_STATUS_INCOMPLETE)
         {
             if (!qs.m_quest) continue;
+            QuestInfo const* qinfo = qs.m_quest->GetQuestInfo();
 
+            // There should be no mixed ReqItem/ReqSource drop 
+            // This part for ReqItem drop
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                QuestInfo const* qinfo = qs.m_quest->GetQuestInfo();
+            {   
                 if(itemid == qinfo->ReqItemId[j] && qs.m_itemcount[j] < qinfo->ReqItemCount[j] )
+                    return true;
+            }
+            // This part - for ReqSource
+            for (int j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; j++)
+            {   
+                // examined item is a Source and total count of ReqItems and SourceItems is less than ReqItemCount
+                if (qinfo->ReqSourceId[j] == itemid && qinfo->ReqSourceRef[j] > 0 && qinfo->ReqSourceRef[j] <= QUEST_OBJECTIVES_COUNT
+                    && qs.m_itemcount[qinfo->ReqSourceRef[j]-1] + GetItemCount(itemid)+ GetBankItemCount(itemid)
+                        < qinfo->ReqItemCount[qinfo->ReqSourceRef[j]-1])
                     return true;
             }
         }

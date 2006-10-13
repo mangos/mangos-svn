@@ -444,7 +444,7 @@ void Spell::EffectCreateItem(uint32 i)
     uint32 num_to_add;
 
     if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
-        num_to_add = m_spellInfo->EffectBasePoints[i]+1;
+        num_to_add = max(m_spellInfo->EffectBasePoints[i]+1, 1);
     else if(player->getLevel() >= m_spellInfo->spellLevel)
         num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
     else
