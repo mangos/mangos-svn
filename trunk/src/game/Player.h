@@ -621,7 +621,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ItemAdded( uint32 entry, uint32 count );
         void ItemRemoved( uint32 entry, uint32 count );
         void KilledMonster( uint32 entry, uint64 guid );
-        void CastedCreature( uint32 entry, uint64 guid, uint32 spell_id );
+        void CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id );
         void MoneyChanged( uint32 value );
         bool HaveQuestForItem( uint32 itemid );
 

@@ -356,7 +356,7 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
         data << qInfo->ReqItemCount[i];
     }
 
-    data << pQuest->m_reqmobs_or_GO_count;
+    data << pQuest->m_reqCreatureOrGOcount;
     for (uint32 i=0; i <QUEST_OBJECTIVES_COUNT; i++)
     {
         data << uint32(qInfo->ReqCreatureOrGOId[i]);

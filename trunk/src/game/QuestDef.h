@@ -218,7 +218,7 @@ class Quest
         uint32 GetQuestId() const { return m_quest_id; }
 
         uint32 m_reqitemscount;
-        uint32 m_reqmobs_or_GO_count;
+        uint32 m_reqCreatureOrGOcount;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
 
@@ -235,8 +235,8 @@ struct quest_status
         : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),m_explored(false),
         m_completed_once(false), m_timer(0)
     {
-        memset(m_itemcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
-        memset(m_mobcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
+        memset(m_itemcount,    0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
+        memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
     }
 
     Quest *m_quest;
@@ -248,6 +248,6 @@ struct quest_status
     uint32 m_timer;
 
     uint32 m_itemcount[ QUEST_OBJECTIVES_COUNT ];
-    uint32 m_mobcount[ QUEST_OBJECTIVES_COUNT ];
+    uint32 m_creatureOrGOcount[ QUEST_OBJECTIVES_COUNT ];
 };
 #endif
