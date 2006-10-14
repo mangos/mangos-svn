@@ -1290,19 +1290,6 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
-    if(attType == RANGED_ATTACK)
-    {
-        procflag |= PROC_FLAG_LONG_ATTACK;
-        if(damage > 0)
-            procflag |= PROC_FLAG_LONG_HIT;
-    }
-    else
-    {
-        procflag |= PROC_FLAG_SHORT_ATTACK;
-        if(damage > 0)
-            procflag |= PROC_FLAG_SHORT_HIT;
-    }
-
     if (damage + bonus > 0)
         damage += bonus;
     else
@@ -1317,11 +1304,6 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     m_caster->SendSpellNonMeleeDamageLog(unitTarget->GetGUID(), m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
     m_caster->DealDamage(unitTarget, damage, 0, true);
-
-    if(!unitTarget->isAlive())
-        procflag = PROC_FLAG_DIE;
-
-    m_caster->ProcDamageAndSpell(unitTarget, procflag, (procflag<<1));
 
     // take ammo
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
