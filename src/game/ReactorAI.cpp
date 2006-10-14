@@ -50,6 +50,8 @@ ReactorAI::AttackStart(Unit *p)
             DEBUG_LOG("Tag unit LowGUID(%u) HighGUID(%u) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
             i_victimGuid = p->GetGUID();
             i_creature->Mutate(new TargetedMovementGenerator(*p));
+            if (p->GetTypeId() == TYPEID_PLAYER)
+                i_creature.SetLootRecipient((Player*)p);
         }
     }
 }

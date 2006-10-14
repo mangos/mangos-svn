@@ -27,6 +27,19 @@
 #include "ByteBuffer.h"
 #include "Util.h"
 
+#define ROLL_PASS  0
+#define ROLL_NEED  1
+#define ROLL_GREED 2
+
+enum LootMethod
+{
+    FREE_FOR_ALL      = 0,
+    ROUND_ROBIN       = 1,
+    MASTER_LOOT       = 2,
+    GROUP_LOOT        = 3,
+    NEED_BEFORE_GREED = 4
+};
+
 using std::vector;
 using std::list;
 
@@ -38,13 +51,15 @@ struct LootItem
     uint32  displayid;
     float   chance;
     float   questchance;
+    uint8   count;
     bool    is_looted;
+    
 
     LootItem()
-        : itemid(0), displayid(0), chance(0), questchance(0), is_looted(true) {}
+        : itemid(0), displayid(0), chance(0), questchance(0), is_looted(true), count(1) {}
 
-    LootItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance)
-        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), is_looted(false) {}
+    LootItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance, uint8 _count = 0)
+        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), count(_count), is_looted(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
@@ -53,18 +68,27 @@ struct LootItem
 
 struct Loot
 {
+    std::set<Player*> PlayersLooting;
     vector<LootItem> items;
     uint32 gold;
+    bool released;
 
-    Loot(uint32 _gold = 0) : gold(_gold) {}
+    Loot(uint32 _gold = 0) : gold(_gold), released(false) {}
 
     ~Loot()
     {
         items.clear();
+        PlayersLooting.clear();
     }
 
     bool empty() const { return items.empty() && gold == 0; }
     void clear() { items.clear(); gold = 0; }
+    void NotifyItemRemoved(uint8 lootIndex);
+    void NotifyMoneyRemoved();
+    void AddLooter(Player *player) { PlayersLooting.insert(player); }
+    void RemoveLooter(Player *player) { PlayersLooting.erase(player); }
+    void remove(uint8 lootSlot);
+    void remove(const LootItem & item);
 };
 
 typedef list<LootItem> LootItemList;
@@ -82,7 +106,7 @@ void LoadLootTables();
 inline ByteBuffer& operator<<(ByteBuffer& b, LootItem& li)
 {
     b << uint32(li.itemid);
-    b << uint32(1);                                         // nr of items of this type
+    b << uint32(li.count);                                  // nr of items of this type
     b << uint32(li.displayid);
     b << uint64(0) << uint8(0);
     return b;
@@ -91,10 +115,15 @@ inline ByteBuffer& operator<<(ByteBuffer& b, LootItem& li)
 inline ByteBuffer& operator<<(ByteBuffer& b, Loot& l)
 {
     b << l.gold;
-    b << uint8(l.items.size());
+
+    uint8 unlootedCount = 0;
+    for (uint8 i = 0; i < l.items.size(); i++)
+        if (!l.items[i].is_looted) unlootedCount++;
+    b << unlootedCount;
 
     for (uint8 i = 0; i < l.items.size(); i++)
-        b << uint8(i) << l.items[i];
+        if (!l.items[i].is_looted)
+            b << uint8(i) << l.items[i];
 
     return b;
 }

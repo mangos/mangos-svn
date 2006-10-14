@@ -329,9 +329,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetGossipCount( uint32 gossipid );
         void addGossipOption(GossipOption *gso) { m_goptions.push_back(gso); }
 
-        void generateMoneyLoot();
-        void getSkinLoot();
-
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
 
         void setDeathState(DeathState s)                    // overwrite virtual Unit::setDeathState
@@ -358,6 +355,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool lootForPickPocketed;
         bool lootForBody;
         bool lootForSkinning;
+        void generateMoneyLoot();
+        void getSkinLoot();
+        Player *GetLootRecipient() const;
+        void SetLootRecipient (Player *player);
 
         SpellEntry *reachWithSpellAttack(Unit *pVictim);
         uint32 m_spells[CREATURE_MAX_SPELLS];
@@ -380,6 +381,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void _RealtimeSetCreatureInfo();
 
         uint32 m_lootMoney;
+        uint64 m_lootRecipient;
 
         /// Timers
         uint32 m_deathTimer;                                // timer for death or corpse disappearance
