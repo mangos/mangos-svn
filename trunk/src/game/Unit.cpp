@@ -521,7 +521,6 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     uint32 absorb=0;
     uint32 resist=0;
-    uint32 procflag=0;
 
     //WorldPacket data;
     if(SpellMissChanceCalc(pVictim) > urand(0,10000))
@@ -545,9 +544,6 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, pdamage, spellInfo->School, absorb, resist, false, 0);
     DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), 0, true);
-
-    procflag |= PROC_FLAG_SPELL_DAMAGE;
-    ProcDamageAndSpell(pVictim,procflag,(procflag<<1));
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
