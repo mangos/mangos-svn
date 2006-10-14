@@ -28,7 +28,7 @@ class Group
         {
             m_count = 0;
             m_leaderGuid = 0;
-            m_lootMethod = 0;
+            m_lootMethod = FREE_FOR_ALL;
             m_looterGuid = 0;
             m_grouptype = 0;
         }
@@ -72,10 +72,10 @@ class Group
 
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
 
-        void SetLootMethod(uint32 method) { m_lootMethod = method; }
+        void SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
 
-        uint32 GetLootMethod() const { return m_lootMethod; }
+        LootMethod GetLootMethod() const { return m_lootMethod; }
         const uint64 & GetLooterGuid() const { return m_looterGuid; }
 
         uint32 GetMembersCount() const { return m_count; }
@@ -93,11 +93,29 @@ class Group
             return false;
         }
 
+        struct Roll
+        {
+            uint64 itemGUID;
+            uint32 itemid;
+            vector<uint64> playersRolling;
+            vector<uint64> totalNeed;
+            vector<uint64> totalGreed;
+            uint32 totalPass;
+			
+            Roll()
+                : totalPass(0), itemGUID(0), itemid(0) {}
+        };
+
         void BroadcastToGroup(WorldSession *session, std::string msg);
-        void SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntry, uint32 ItemInfo, uint32 CountDown);
-        void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType);
-        void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType);
-        void SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, uint32 ItemEntry, uint32 ItemInfo);
+        void SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntry, uint32 ItemInfo, uint32 CountDown, const Roll &r);
+        void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r);
+        void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r);
+        void SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, uint32 ItemEntry, uint32 ItemInfo, const Roll &r); 
+        void GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature);
+        void NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature); 
+        void CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise); 
+        
+        vector<Roll> RollId;
 
     protected:
 
@@ -115,7 +133,7 @@ class Group
         uint32 m_count;
         uint16 m_grouptype;
 
-        uint32 m_lootMethod;
+        LootMethod m_lootMethod;
         uint64 m_looterGuid;
 };
 #endif

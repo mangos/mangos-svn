@@ -157,3 +157,36 @@ void FillSkinLoot(Loot *Skinloot,uint32 itemid)
     uint32 displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
     Skinloot->items.push_back(LootItem(itemid,displayid,99,0));
 }
+
+void Loot::NotifyItemRemoved(uint8 lootIndex)
+{
+    // notifiy all players that are looting this that the item was removed
+    // convert the index to the slot the player sees
+    for(std::set<Player*>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
+        (*i)->SendNotifyLootItemRemoved(lootIndex);
+}
+
+void Loot::NotifyMoneyRemoved()
+{
+    // notifiy all players that are looting this that the money was removed
+    for(std::set<Player*>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
+        (*i)->SendNotifyLootMoneyRemoved();
+}
+
+void Loot::remove(uint8 lootSlot)
+{
+    if (lootSlot < items.size())
+        items.erase(items.begin() + lootSlot);
+}
+
+void Loot::remove(const LootItem & item)
+{
+    for(uint8 i = 0; i < items.size(); i++)
+    {
+        if (items[i].itemid == item.itemid)
+        {
+            remove(i);
+            break;
+        }
+    }
+}

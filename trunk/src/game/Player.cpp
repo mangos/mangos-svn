@@ -4121,7 +4121,8 @@ void Player::_ApplyAllItemMods()
 
 void Player::SendLoot(uint64 guid, LootType loot_type)
 {
-    Loot    *loot;
+    Loot    *loot = NULL;
+    bool NullLoot = false;
 
     if (IS_GAMEOBJECT_GUID(guid))
     {
@@ -4173,6 +4174,14 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         }
         else
         {
+            // the player whose group may loot the corpse
+            Player *recipient = creature->GetLootRecipient();
+            if (!recipient)
+            {
+                creature->SetLootRecipient(this);
+                recipient = this;
+            }
+
             if (creature->lootForPickPocketed)
             {
                 creature->lootForPickPocketed = false;
@@ -4186,6 +4195,33 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     FillLoot(this,loot,lootid,LootTemplates_Creature);
 
                 creature->generateMoneyLoot();
+
+                if (recipient->IsInGroup())
+                {
+                    // round robin style looting applies for all low
+                    // quality items in each loot metho except free for all
+                    Group *group = objmgr.GetGroupByLeader(recipient->GetGroupLeader());
+                    if (group->GetLootMethod() != FREE_FOR_ALL)
+                    {
+                        uint32 siz = group->GetMembersCount();
+                        uint32 pos = 0;
+                        for (pos = 0; pos<siz; pos++)
+                            if (group->GetMemberGUID(pos) == group->GetLooterGuid())
+                                break;
+                        group->SetLooterGuid(group->GetMemberGUID((pos+1)%siz));
+                    }
+
+                    switch (group->GetLootMethod())
+                    {
+                        case GROUP_LOOT:
+                            // GroupLoot delete items over threshold (threshold even not implemented), and roll them. Items with quality<threshold, round robin
+                            group->GroupLoot(recipient->GetGUID(), loot, creature);
+                            break;
+                        case NEED_BEFORE_GREED:
+                            group->NeedBeforeGreed(recipient->GetGUID(), loot, creature);
+                            break;
+                    }
+                }
             }
 
             if (!creature->lootForSkinning && loot_type == LOOT_SKINNING)
@@ -4193,7 +4229,19 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 creature->lootForSkinning = true;
                 creature->getSkinLoot();
             }
-        }
+
+            // temporary : send empty loot if the player should not be able
+            // to loot the creature
+            if (IsInGroup() && (GetGroupLeader() == recipient->GetGroupLeader()))
+            {
+                Group *group = objmgr.GetGroupByLeader(GetGroupLeader());
+                if (group && group->GetLootMethod() > 0)
+                    if (group->GetLooterGuid()!=GetGUID() && !loot->released )
+                        NullLoot = true;
+            }
+            else if(recipient->GetGUID()!=GetGUID())
+                NullLoot = true;
+       }
     }
 
     m_lootGuid = guid;
@@ -4201,6 +4249,12 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     // LOOT_PICKPOKETING unsupported by client, sending LOOT_SKINNING instead
     if(loot_type == LOOT_PICKPOKETING)
         loot_type = LOOT_SKINNING;
+
+    if (NullLoot)
+    {
+        Loot lootnull;
+        loot = &lootnull;
+    }
 
     WorldPacket data;
     data.Initialize (SMSG_LOOT_RESPONSE);
@@ -4210,7 +4264,26 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     data << *loot;
 
     SendDirectMessage(&data);
+
+    // add 'this' player as one of the players that are looting 'loot'
+    if (!NullLoot)
+        loot->AddLooter(this);
 }
+
+void Player::SendNotifyLootMoneyRemoved()
+{
+    WorldPacket data;
+    data.Initialize( SMSG_LOOT_CLEAR_MONEY );
+    GetSession()->SendPacket( &data );
+}
+
+void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
+{
+    WorldPacket data;
+    data.Initialize( SMSG_LOOT_REMOVED );
+    data << uint8(lootSlot);
+    GetSession()->SendPacket( &data );
+} 
 
 void Player::SendUpdateWordState(uint16 Field, uint16 Value)
 {
@@ -6741,6 +6814,32 @@ uint8 Player::CanUseItem( Item *pItem, bool check_alive ) const
         }
     }
     return EQUIP_ERR_ITEM_NOT_FOUND;
+}
+
+bool Player::CanUseItem( ItemPrototype const *pProto )
+{
+    // Used by group, function NeedBeforeGreed, to know if a prototype can be used by a player
+
+    if( pProto )
+    {
+        if( (pProto->AllowableClass & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
+            return false;
+        if( pProto->RequiredSkill != 0  )
+        {
+            if( GetSkillValue( pProto->RequiredSkill ) == 0 )
+                return false;
+            else if( GetSkillValue( pProto->RequiredSkill ) < pProto->RequiredSkillRank )
+                return false;
+        }
+        if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
+            return false;
+        if( GetHonorRank() < pProto->RequiredHonorRank )
+            return false;
+        if( getLevel() < pProto->RequiredLevel )
+            return false;
+        return true;
+    }
+    return false;
 }
 
 uint8 Player::CanUseAmmo( uint32 item ) const

@@ -249,4 +249,6 @@ AggressorAI::AttackStart(Unit *u)
     i_creature.Attack(u);
     i_creature.resetAttackTimer();
     i_creature->Mutate(new TargetedMovementGenerator(*u));
+    if (u->GetTypeId() == TYPEID_PLAYER)
+        i_creature.SetLootRecipient((Player*)u);
 }

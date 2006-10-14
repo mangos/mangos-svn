@@ -24,6 +24,7 @@
 #include "WorldSession.h"
 #include "LootMgr.h"
 #include "Object.h"
+#include "Group.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 {
@@ -76,9 +77,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         player->StoreNewItem( dest, item->itemid, 1, true ,true);
         item->is_looted = true;
 
-        data.Initialize( SMSG_LOOT_REMOVED );
-        data << uint8(lootSlot);
-        SendPacket( &data );
+        loot->NotifyItemRemoved(lootSlot);
 
         data.Initialize( SMSG_ITEM_PUSH_RESULT );
         data << player->GetGUID();
@@ -125,11 +124,39 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 
     if( pLoot )
     {
-        player->ModifyMoney( pLoot->gold );
+        if (player->IsInGroup())
+        {
+            WorldPacket data;
+            Group *group = objmgr.GetGroupByLeader(player->GetGroupLeader());
+            uint32 iMembers = group->GetMembersCount();
+
+            // it is probably more costly to call getplayer for each member
+            // than temporarily storing them in a vector
+            std::vector<Player*> playersNear;
+            playersNear.reserve(iMembers);
+            uint32 maxdist = sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
+            for (int i=0; i<iMembers; i++)
+            {
+                Player* playerGroup = objmgr.GetPlayer(group->GetMemberGUID(i));
+                if (player->GetDistance2dSq(playerGroup) < maxdist * maxdist)
+                    playersNear.push_back(playerGroup);
+            }
+
+            for (std::vector<Player*>::iterator i = playersNear.begin(); i != playersNear.end(); ++i)
+            {
+                (*i)->ModifyMoney( uint32((pLoot->gold)/(playersNear.size())) );
+                //Offset surely incorrect, but works
+				data.Initialize( SMSG_LOOT_MONEY_NOTIFY );
+                data << uint32((pLoot->gold)/(playersNear.size()));
+                (*i)->GetSession()->SendPacket( &data );
+            }
+        }
+        else
+        {
+            player->ModifyMoney( pLoot->gold );
+        } 
         pLoot->gold = 0;
-        WorldPacket data;
-        data.Initialize( SMSG_LOOT_CLEAR_MONEY );
-        SendPacket( &data );
+        pLoot->NotifyMoneyRemoved();
     }
 }
 
@@ -172,12 +199,12 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             LootItem::not_looted);
 
         if((i == loot->items.end()) && (loot->gold == 0))
+        {
             go->SetLootState(GO_LOOTED);
+            loot->clear();
+        }
         else
             go->SetLootState(GO_OPEN);
-
-        i = remove_if(loot->items.begin(), loot->items.end(), LootItem::looted);
-        loot->items.erase(i, loot->items.end());
     }
     else
     {
@@ -189,6 +216,14 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 
         loot = &pCreature->loot;
 
+        Player *recipient = pCreature->GetLootRecipient();
+        if (recipient && recipient->IsInGroup())
+        {
+            Group *group = objmgr.GetGroupByLeader(recipient->GetGroupLeader());
+            if (group->GetLooterGuid() == player->GetGUID())
+                loot->released = true;
+        } 
+
         vector<LootItem>::iterator i;
         i = find_if(loot->items.begin(), loot->items.end(),
             LootItem::not_looted);
@@ -199,9 +234,10 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
             if(pCreature->GetCreatureInfo()->SkinLootId)
                 pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            loot->clear();
         }
-
-        i = remove_if(loot->items.begin(), loot->items.end(), LootItem::looted);
-        loot->items.erase(i, loot->items.end());
     }
+
+    //Player is not looking at loot list, he doesn't need to see updates on the loot list
+    loot->RemoveLooter(player);
 }

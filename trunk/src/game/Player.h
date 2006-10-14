@@ -546,6 +546,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 CanUnequipItem( uint16 src, bool swap ) const;
         uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
         uint8 CanUseItem( Item *pItem, bool check_alive = true ) const;
+        bool CanUseItem( ItemPrototype const *pItem );
         uint8 CanUseAmmo( uint32 item ) const;
         Item* StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update,bool fromLoot = false );
         Item* StoreItem( uint16 pos, Item *pItem, bool update );
@@ -1006,6 +1007,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         ItemsSetEffect * ItemsSetEff[3];
         void FlightComplete(void);
         void SendLoot(uint64 guid, LootType loot_type);
+        void SendNotifyLootItemRemoved(uint8 lootSlot);
+        void SendNotifyLootMoneyRemoved();
         uint8 CheckFishingAble() const;
         void SetSoulStoneSpell(uint32 spellid) { m_soulStoneSpell = spellid; }
         void SetSoulStone(Item *item) {  m_soulStone = item;}

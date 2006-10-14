@@ -891,6 +891,22 @@ void Creature::getSkinLoot()
         FillSkinLoot(&loot,2934);
 }
 
+Player *Creature::GetLootRecipient() const
+{
+    if (!m_lootRecipient) return NULL;
+    else return ObjectAccessor::Instance().FindPlayer(m_lootRecipient);
+}
+
+void Creature::SetLootRecipient(Player *player)
+{
+    // set the player whose group should receive the right
+    // to loot the creature after it dies
+    // should be set to NULL after the loot disappears
+    if (!player) m_lootRecipient = 0;
+    else m_lootRecipient = player->GetGUID();
+}
+
+
 void Creature::SaveToDB()
 {
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
