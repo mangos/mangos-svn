@@ -1904,23 +1904,26 @@ void Spell::EffectSummonObject(uint32 i)
         if( m_caster )
             obj = ObjectAccessor::Instance().GetGameObject(*m_caster, guid);
 
-        if(obj)
-            ObjectAccessor::Instance().AddObjectToRemoveList(obj);
+        if(obj) obj->Delete();
         m_caster->m_ObjectSlot[slot] = 0;
     }
 
     GameObject* pGameObj = new GameObject();
     uint32 display_id = m_spellInfo->EffectMiscValue[i];
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, 0, 0))
+    float rot2 = sin(m_caster->GetOrientation()/2);
+    float rot3 = cos(m_caster->GetOrientation()/2);
+
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, rot2, rot3))
     {
         delete pGameObj;
         return;
     }
-    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
+
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
     pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
+    pGameObj->SetLootState(GO_CLOSED);
     m_caster->AddGameObject(pGameObj);
 
     sLog.outError("AddObject at Spell.cpp 1100");

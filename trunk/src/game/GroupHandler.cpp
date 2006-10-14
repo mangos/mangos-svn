@@ -382,7 +382,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
     if (group == NULL)
         return;
 
-    group->SetLootMethod( lootMethod );
+    group->SetLootMethod( LootMethod(lootMethod) );
     group->SetLooterGuid( lootMaster );
     group->SendUpdate();
 }

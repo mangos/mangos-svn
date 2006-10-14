@@ -122,7 +122,8 @@ void
 ObjectVisibleNotifier::Visit(PlayerMapType &m)
 {
     // ignore not respawned gameobjects
-    if(i_object.GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject&)i_object).isFinished())
+    if(i_object.GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject&)i_object).isFinished() && 
+        ((GameObject&)i_object).GetOwnerGUID() == 0)
         return;
 
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
