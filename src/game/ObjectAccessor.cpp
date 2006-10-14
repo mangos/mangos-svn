@@ -163,9 +163,9 @@ ObjectAccessor::GetDynamicObject(Unit const &u, uint64 guid)
 Player*
 ObjectAccessor::FindPlayer(uint64 guid)
 {
-    for(PlayersMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
-        if( iter->second->GetGUID() == guid )
-            return iter->second;
+    PlayersMapType::iterator itr = i_players.find(guid);
+    if (itr != i_players.end())
+        return itr->second;
     return NULL;
 }
 
