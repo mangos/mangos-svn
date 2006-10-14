@@ -42,6 +42,7 @@
 #include "Database/SQLStorage.h"
 
 extern SQLStorage sQuestsStorage;
+extern SQLStorage sCreatureStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sItemStorage;
 

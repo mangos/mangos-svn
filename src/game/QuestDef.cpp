@@ -23,7 +23,7 @@ Quest::Quest()
 {
     m_quest_id = 0;
     m_reqitemscount = 0;
-    m_reqmobs_or_GO_count = 0;
+    m_reqCreatureOrGOcount = 0;
     m_rewchoiceitemscount = 0;
     m_rewitemscount = 0;
 }
@@ -41,7 +41,7 @@ bool Quest::LoadQuest( uint32 quest )
     {
         m_quest_id = quest;
         m_reqitemscount = 0;
-        m_reqmobs_or_GO_count = 0;
+        m_reqCreatureOrGOcount = 0;
         m_rewitemscount = 0;
         m_rewchoiceitemscount = 0;
 
@@ -50,7 +50,7 @@ bool Quest::LoadQuest( uint32 quest )
             if ( pQuestInfo->ReqItemId[i] )
                 m_reqitemscount++;
             if ( pQuestInfo->ReqCreatureOrGOId[i] )
-                m_reqmobs_or_GO_count++;
+                m_reqCreatureOrGOcount++;
         }
 
         for (int i=0; i < QUEST_REWARD_CHOICES_COUNT; i++)

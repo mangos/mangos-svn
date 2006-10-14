@@ -676,10 +676,18 @@ void Spell::cast()
 
     //}
 
-    // cast at creature quest objectives update
-    if( m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT )
+    // cast at creature (or GO) quest objectives update
+    if( m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        ((Player*)m_caster)->CastedCreature(unitTarget->GetEntry(),unitTarget->GetGUID(),m_spellInfo->Id);
+        if( unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT )
+        {
+            ((Player*)m_caster)->CastedCreatureOrGO(unitTarget->GetEntry(),unitTarget->GetGUID(),m_spellInfo->Id);
+        }
+
+        if( gameObjTarget )
+        {
+            ((Player*)m_caster)->CastedCreatureOrGO(gameObjTarget->GetEntry(),gameObjTarget->GetGUID(),m_spellInfo->Id);
+        }
     }
 }
 

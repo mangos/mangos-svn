@@ -33,6 +33,7 @@
 #include "Channel.h"
 #include "Chat.h"
 #include "MapManager.h"
+#include "ObjectMgr.h"
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Group.h"
@@ -7990,7 +7991,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                     if( qInfo->ReqCreatureOrGOId <= 0 )
                         continue;
 
-                    if( qInfo->ReqCreatureOrGOCount[i] != 0 && mQuestStatus[quest_id].m_mobcount[i] < qInfo->ReqCreatureOrGOCount[i] )
+                    if( qInfo->ReqCreatureOrGOCount[i] != 0 && mQuestStatus[quest_id].m_creatureOrGOcount[i] < qInfo->ReqCreatureOrGOCount[i] )
                         return false;
                 }
             }
@@ -8103,7 +8104,7 @@ void Player::AddQuest( Quest *pQuest )
         if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
         {
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
-                mQuestStatus[quest_id].m_mobcount[i] = 0;
+                mQuestStatus[quest_id].m_creatureOrGOcount[i] = 0;
         }
 
         GiveQuestSourceItem( quest_id );
@@ -8679,10 +8680,10 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
                     if ( reqkill == entry )
                     {
                         reqkillcount = qInfo->ReqCreatureOrGOCount[j];
-                        curkillcount = mQuestStatus[quest].m_mobcount[j];
+                        curkillcount = mQuestStatus[quest].m_creatureOrGOcount[j];
                         if ( curkillcount < reqkillcount )
                         {
-                            mQuestStatus[quest].m_mobcount[j] = curkillcount + addkillcount;
+                            mQuestStatus[quest].m_creatureOrGOcount[j] = curkillcount + addkillcount;
                             SendQuestUpdateAddCreature( quest, guid, j, curkillcount, addkillcount);
                         }
                         if ( CanCompleteQuest( quest ) )
@@ -8695,10 +8696,9 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
     }
 }
 
-void Player::CastedCreature( uint32 entry, uint64 guid, uint32 spell_id )
+void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
 {
     uint32 quest;
-    uint32 reqCast;
     uint32 reqCastCount;
     uint32 curCastCount;
     uint32 addCastCount = 1;
@@ -8716,23 +8716,34 @@ void Player::CastedCreature( uint32 entry, uint64 guid, uint32 spell_id )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
-                    // skip GO activate objective or none
-                    if(qInfo->ReqCreatureOrGOId[j] <=0)
-                        continue;
-
-                    // skip kill creature objective or wrong spell casts
+                    // skip kill creature objective (0) or wrong spell casts
                     if(qInfo->ReqSpell[j] != spell_id )
                         continue;
 
-                    reqCast = qInfo->ReqCreatureOrGOId[j];
-
-                    if ( reqCast == entry )
+                    uint32 reqTarget = 0;
+                    // GO activate objective 
+                    if(qInfo->ReqCreatureOrGOId[j] < 0)
+                    {
+                        reqTarget = - qInfo->ReqCreatureOrGOId[j];
+                        assert(sGOStorage.LookupEntry<GameObject>(reqTarget));
+                    }
+                    // creature acivate objectives
+                    else if(qInfo->ReqCreatureOrGOId[j] > 0)
+                    {
+                        reqTarget = qInfo->ReqCreatureOrGOId[j];
+                        assert(sCreatureStorage.LookupEntry<Creature>(reqTarget));
+                    }
+                    // other not creature/GO related obejctives
+                    else
+                        continue;
+                       
+                    if ( reqTarget == entry )
                     {
                         reqCastCount = qInfo->ReqCreatureOrGOCount[j];
-                        curCastCount = mQuestStatus[quest].m_mobcount[j];
+                        curCastCount = mQuestStatus[quest].m_creatureOrGOcount[j];
                         if ( curCastCount < reqCastCount )
                         {
-                            mQuestStatus[quest].m_mobcount[j] = curCastCount + addCastCount;
+                            mQuestStatus[quest].m_creatureOrGOcount[j] = curCastCount + addCastCount;
                             SendQuestUpdateAddCreature( quest, guid, j, curCastCount, addCastCount);
                         }
                         if ( CanCompleteQuest( quest ) )
@@ -8795,11 +8806,20 @@ bool Player::HaveQuestForItem( uint32 itemid )
             // This part - for ReqSource
             for (int j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; j++)
             {   
-                // examined item is a Source and total count of ReqItems and SourceItems is less than ReqItemCount
-                if (qinfo->ReqSourceId[j] == itemid && qinfo->ReqSourceRef[j] > 0 && qinfo->ReqSourceRef[j] <= QUEST_OBJECTIVES_COUNT
-                    && qs.m_itemcount[qinfo->ReqSourceRef[j]-1] + GetItemCount(itemid)+ GetBankItemCount(itemid)
-                        < qinfo->ReqItemCount[qinfo->ReqSourceRef[j]-1])
-                    return true;
+                // examined item is a source item
+                if (qinfo->ReqSourceId[j] == itemid && qinfo->ReqSourceRef[j] > 0 && qinfo->ReqSourceRef[j] <= QUEST_OBJECTIVES_COUNT)
+                {
+                    uint32 idx = qinfo->ReqSourceRef[j]-1;
+                    // total count of created ReqItems and SourceItems is less than ReqItemCount
+                    if(qinfo->ReqItemId[idx] != 0 && 
+                        qs.m_itemcount[idx] + GetItemCount(itemid)+ GetBankItemCount(itemid) < qinfo->ReqItemCount[idx])
+                        return true;
+
+                    // total count of casted ReqCreatureOrGOs and SourceItems is less than ReqCreatureOrGOCount
+                    if (qinfo->ReqCreatureOrGOId[idx] != 0 && 
+                        qs.m_creatureOrGOcount[idx] + GetItemCount(itemid)+ GetBankItemCount(itemid) < qinfo->ReqCreatureOrGOCount[idx])
+                        return true;
+                }
             }
         }
     }
@@ -8913,7 +8933,7 @@ void Player::SendQuestUpdateAddItem( uint32 quest_id, uint32 item_idx, uint32 co
 
 void Player::SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count )
 {
-    assert(old_count + add_count < 64 && "mob count store in 6 bits 2^6 = 64 (0..63)");
+    assert(old_count + add_count < 64 && "mob/GO count store in 6 bits 2^6 = 64 (0..63)");
 
     QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
     if( qInfo )
@@ -9358,10 +9378,10 @@ void Player::_LoadQuestStatus()
                 } else
                 mQuestStatus[quest_id].m_timer = (fields[5].GetUInt32() - sWorld.GetGameTime()) * 1000;
 
-                mQuestStatus[quest_id].m_mobcount[0] = fields[6].GetUInt32();
-                mQuestStatus[quest_id].m_mobcount[1] = fields[7].GetUInt32();
-                mQuestStatus[quest_id].m_mobcount[2] = fields[8].GetUInt32();
-                mQuestStatus[quest_id].m_mobcount[3] = fields[9].GetUInt32();
+                mQuestStatus[quest_id].m_creatureOrGOcount[0] = fields[6].GetUInt32();
+                mQuestStatus[quest_id].m_creatureOrGOcount[1] = fields[7].GetUInt32();
+                mQuestStatus[quest_id].m_creatureOrGOcount[2] = fields[8].GetUInt32();
+                mQuestStatus[quest_id].m_creatureOrGOcount[3] = fields[9].GetUInt32();
                 mQuestStatus[quest_id].m_itemcount[0] = fields[10].GetUInt32();
                 mQuestStatus[quest_id].m_itemcount[1] = fields[11].GetUInt32();
                 mQuestStatus[quest_id].m_itemcount[2] = fields[12].GetUInt32();
@@ -9664,7 +9684,7 @@ void Player::_SaveQuestStatus()
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
         sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
-            GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, i->second.m_timer / 1000 + sWorld.GetGameTime(), i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
+            GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, i->second.m_timer / 1000 + sWorld.GetGameTime(), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
     }
 }
 
