@@ -28,6 +28,9 @@
 #include "Database/DatabaseEnv.h"
 #include "MapManager.h"
 #include "LootMgr.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 GameObject::GameObject() : Object()
 {
@@ -75,7 +78,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
         return false;
     }
 
-
     Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
 
     GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
@@ -85,7 +87,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
         sLog.outError("Gameobject Create not exist entry. guidlow: %u id: %u map: %u  (X: %f Y: %f Z: %f) ang: %f rotation0: %f rotation1: %f ortation2: %f rotation3: %f",guidlow, name_id, mapid, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
         return false;
     }
-
 
     //    SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
     SetFloatValue(GAMEOBJECT_POS_X, x);
@@ -128,7 +129,8 @@ void GameObject::Update(uint32 p_time)
                 else
                 {
                     m_respawnTimer = 0;
-                    MapManager::Instance().GetMap(GetMapId())->Add(this);
+                    if (GetTypeId() != GAMEOBJECT_TYPE_TRAP)
+                        MapManager::Instance().GetMap(GetMapId())->Add(this);
                 }
             }
             break;
@@ -144,6 +146,42 @@ void GameObject::Update(uint32 p_time)
             SendMessageToSet(&data, true);
             m_respawnTimer = m_respawnDelayTime;
             break;
+    }
+
+    SpellEntry *createSpell = sSpellStore.LookupEntry(m_spellId);
+    if (!createSpell)
+        return;
+    int i;
+    for (i = 0; i < 3; i++)
+        if (createSpell->Effect[i] == SPELL_EFFECT_SUMMON_OBJECT_SLOT1)
+            break;
+    if (i<3)
+    {
+        // traps
+        CellPair p(MaNGOS::ComputeCellPair(GetPositionX(),GetPositionY()));
+        Cell cell = RedZone::GetZone(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+
+        Unit* ok = NULL, *owner = GetOwner();
+        if (!owner)
+        {
+            m_respawnTimer = 0;
+            return;
+        }
+
+        float radius = GetRadius(sSpellRadius.LookupEntry(createSpell->EffectRadiusIndex[i]));
+        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
+        MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
+
+        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        CellLock<GridReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(GetMapId()));
+        if (ok)
+        {
+            owner->CastSpell(ok, GetGOInfo()->castsSpell, true);
+            // removed on unit update
+            m_respawnTimer = 0;
+        }
     }
 }
 
@@ -299,4 +337,9 @@ bool GameObject::IsTransport() const
     GameObjectInfo const * gInfo = GetGOInfo();
     if(!gInfo) return false;
     return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
+}
+
+Unit* GameObject::GetOwner() const
+{
+    return ObjectAccessor::Instance().GetUnit(*this, GetOwnerGUID());
 }
