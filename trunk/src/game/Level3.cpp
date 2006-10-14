@@ -2486,19 +2486,19 @@ bool ChatHandler::HandleListAurasCommand (const char * args)
         unit = this->m_session->GetPlayer();
 
     Unit::AuraMap& uAuras = unit->GetAuras();
-    SendSysMessage(fmtstring("Target unit has %d auras:", uAuras.size()));
+    PSendSysMessage("Target unit has %d auras:", uAuras.size());
     for (Unit::AuraMap::iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
     {
-        SendSysMessage(fmtstring("id: %d eff: %d type: %d duration: %d ", itr->second->GetId(), itr->second->GetEffIndex(), itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration()) );
+        PSendSysMessage("id: %d eff: %d type: %d duration: %d name: %s", itr->second->GetId(), itr->second->GetEffIndex(), itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetSpellProto()->SpellName[0]);
     }
     for (int i = 0; i < TOTAL_AURAS; i++)
     {
         Unit::AuraList& uAuraList = unit->GetAurasByType(i);
         if (!uAuraList.size()) continue;
-        SendSysMessage(fmtstring("Target unit has %d auras of type %d:", uAuraList.size(), i));
+        PSendSysMessage("Target unit has %d auras of type %d:", uAuraList.size(), i);
         for (Unit::AuraList::iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
         {
-            SendSysMessage(fmtstring("id: %d eff: %d", (*itr)->GetId(), (*itr)->GetEffIndex()) );
+            PSendSysMessage("id: %d eff: %d name: %s", (*itr)->GetId(), (*itr)->GetEffIndex(), (*itr)->GetSpellProto()->SpellName[0]);
         }
     }
     return true;
