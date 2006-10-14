@@ -8973,7 +8973,10 @@ bool Player::LoadFromDB( uint32 guid )
     QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
+    {
+        sLog.outError("ERROR: Player (GUID: %u) not found in table `character`, can't load. ",guid);
         return false;
+    }
 
     Field *fields = result->Fetch();
 

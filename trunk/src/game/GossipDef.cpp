@@ -364,6 +364,10 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
     }
 
     pSession->SendPacket( &data );
+
+    if(qInfo->DetailsEmote)
+        SendNPCEmote(qInfo->DetailsEmote,npcGUID);
+
     sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestId());
 }
 
@@ -595,5 +599,27 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
     data << uint32(0x04) << uint32(0x08) << uint32(0x10);
 
     pSession->SendPacket( &data );
+
+    if ( !Completable )
+    {
+        if(pQuest->GetQuestInfo()->IncompleteEmote)
+            SendNPCEmote(pQuest->GetQuestInfo()->IncompleteEmote,npcGUID);
+    }
+    else
+    {
+        if(pQuest->GetQuestInfo()->CompleteEmote)
+            SendNPCEmote(pQuest->GetQuestInfo()->CompleteEmote,npcGUID);
+    }
+
     sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestInfo()->QuestId );
+}
+
+void PlayerMenu::SendNPCEmote( uint32 emote, uint64 npcGUID )
+{
+    WorldPacket data;
+
+    data.Initialize( SMSG_EMOTE );
+    data << emote << npcGUID;
+    WPAssert(data.size() == 12);
+    pSession->SendPacket( &data );
 }

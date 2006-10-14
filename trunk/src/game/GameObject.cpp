@@ -202,7 +202,10 @@ bool GameObject::LoadFromDB(uint32 guid)
 
     QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer` FROM `gameobject` WHERE `guid` = '%u'", guid);
     if( ! result )
+    {
+        sLog.outError("ERROR: Gameobject (GUID: %u) not found in table `gameobject`, can't load. ",guid);
         return false;
+    }
 
     Field *fields = result->Fetch();
     uint32 entry = fields[0].GetUInt32();
@@ -220,7 +223,6 @@ bool GameObject::LoadFromDB(uint32 guid)
     if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
     {
         delete result;
-        sLog.outError("GameObject::LoadFromDB(guid: %u) fail",guid);
         return false;
     }
 

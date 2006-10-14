@@ -122,7 +122,10 @@ bool Corpse::LoadFromDB(uint32 guid)
     QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse` WHERE `guid` = '%u'",guid);
 
     if( ! result )
+    {
+        sLog.outError("ERROR: Corpse (GUID: %u) not found in table `corpse`, can't load. ",guid);
         return false;
+    }
 
     Field *fields = result->Fetch();
     //uint64 guid = fields[0].GetUInt64();

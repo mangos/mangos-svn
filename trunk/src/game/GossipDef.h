@@ -178,5 +178,6 @@ class MANGOS_DLL_SPEC PlayerMenu
         void SendUpdateQuestDetails ( Quest *pQuest );
         void SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt );
         void SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel );
+        void SendNPCEmote( uint32 emote, uint64 npcGUID );
 };
 #endif

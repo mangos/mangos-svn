@@ -2011,6 +2011,9 @@ CREATE TABLE `quest_template` (
   `PointX` float NOT NULL default '0',
   `PointY` float NOT NULL default '0',
   `PointOpt` int(2) unsigned NOT NULL default '0',
+  `DetailsEmote` int(11) NOT NULL default '0', 
+  `IncompleteEmote` int(11) NOT NULL default '0', 
+  `CompleteEmote` int(11) NOT NULL default '0';
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest System';
 
