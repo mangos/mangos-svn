@@ -136,7 +136,7 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
 
     if (tab == store.end())
     {
-        sLog.outError("Loot id #%u used in `creature_template` or `gameobject` or fishing but it doesn't have records in appropriate loot_template_* table.",loot_id);
+        sLog.outError("Loot id #%u used in `creature_template` or `gameobject` or fishing but it doesn't have records in appropriate *_loot_template table.",loot_id);
         return;
     }
 

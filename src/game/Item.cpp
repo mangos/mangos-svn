@@ -462,7 +462,11 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
 {
     QueryResult *result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
 
-    if (!result) return false;
+    if (!result) 
+    {
+        sLog.outError("ERROR: Item (GUID: %u owner: %u) not found in table `item_instance`, can't load. ",guid,owner_guid);
+        return false;
+    }
 
     Field *fields = result->Fetch();
 

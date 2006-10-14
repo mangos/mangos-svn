@@ -23,6 +23,7 @@
 #include "../../game/GameObject.h"
 #include "../../game/SharedDefines.h"
 #include "../../game/GossipDef.h"
+#include "../../game/QuestDef.h"
 #include "../../game/WorldSession.h"
 #include "../../game/CreatureAI.h"
 

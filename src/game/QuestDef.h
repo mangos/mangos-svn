@@ -120,7 +120,8 @@ enum __QuestGiverStatus
     DIALOG_STATUS_INCOMPLETE               = 3,
     DIALOG_STATUS_REWARD_REP               = 4,
     DIALOG_STATUS_AVAILABLE                = 5,
-    DIALOG_STATUS_REWARD                   = 6,
+    DIALOG_STATUS_REWARD_OLD               = 6,             // red dot on minimap
+    DIALOG_STATUS_REWARD                   = 7,             // yellow dot on minimap
 };
 
 enum __QuestSpecialFlags                                    //according to mangos-db-11-02-2006-for_1_9_x;
@@ -194,6 +195,9 @@ struct QuestInfo
     float PointX;
     float PointY;
     uint32 PointOpt;
+    uint32 DetailsEmote; 
+    uint32 IncompleteEmote; 
+    uint32 CompleteEmote;
 
     // simple data access functions
     bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }

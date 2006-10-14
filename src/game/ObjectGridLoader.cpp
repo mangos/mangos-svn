@@ -105,7 +105,6 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             if(!obj->LoadFromDB(guid))
             {
                 delete obj;
-                sLog.outError("LoadHelper from table: %s for (guid: %u) Load fail ",table,guid);
                 continue;
             }
             //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loaded ",table,guid);

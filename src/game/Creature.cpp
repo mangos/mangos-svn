@@ -1060,7 +1060,10 @@ bool Creature::LoadFromDB(uint32 guid)
 
     QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
     if(!result)
+    {
+        sLog.outError("ERROR: Creature (GUID: %u) not found in table `creature`, can't load. ",guid);
         return false;
+    }
 
     Field *fields = result->Fetch();
 
