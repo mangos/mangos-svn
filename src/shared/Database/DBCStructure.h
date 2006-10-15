@@ -251,3 +251,40 @@ struct ItemRandomProperties
     uint32    enchant_id_2;
     uint32    enchant_id_3;
 };
+
+struct TaxiNodesEntry
+{
+    uint32    ID;
+    uint32    map_id;
+    float     x;
+    float     y;
+    float     z;
+    char*     name;
+    uint32    horde_mount_type;
+    uint32    alliance_mount_type;
+};
+
+struct TaxiPathBySourceAndDestination
+{
+    TaxiPathBySourceAndDestination() : ID(0),price(0) {}
+    TaxiPathBySourceAndDestination(uint32 _id,uint32 _price) : ID(_id),price(_price) {}
+
+    uint32    ID;
+    uint32    price;
+};
+
+typedef std::map<uint32,TaxiPathBySourceAndDestination> TaxiPathSetForSource;
+typedef std::map<uint32,TaxiPathSetForSource> TaxiPathSetBySource;
+
+struct TaxiPathNode
+{
+    TaxiPathNode() : x(0),y(0),z(0) {}
+    TaxiPathNode(float _x, float _y, float _z) : x(_x),y(_y),z(_z) {}
+
+    float     x;
+    float     y;
+    float     z;
+};
+
+typedef std::vector<TaxiPathNode> TaxiPathNodeList;
+typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;

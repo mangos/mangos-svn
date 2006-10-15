@@ -633,21 +633,19 @@ void ObjectMgr::LoadAreaTriggerPoints()
 
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 {
+    TaxiPathSetBySource::iterator src_i = sTaxiPathSetBySource.find(curloc);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`destination` FROM `taxi_path` WHERE `taxi_path`.`source` = '%u' ORDER BY `destination`", curloc);
-
-    if( ! result )
+    if(src_i==sTaxiPathSetBySource.end())
         return false;
 
-    do
+    TaxiPathSetForSource& pathSet = src_i->second;
+
+    for(TaxiPathSetForSource::iterator  path_i = pathSet.begin(); path_i != pathSet.end(); ++path_i)
     {
-        Field *fields = result->Fetch();
-        uint8 destination = fields[0].GetUInt8();
+        uint8 destination = path_i->first;
         uint8 field = (uint8)((destination - 1) / 32);
         Mask[field] |= 1 << ( (destination - 1 ) % 32 );
-    }while( result->NextRow() );
-
-    delete result;
+    }
 
     return true;
 }
@@ -655,77 +653,113 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxi_node`.`id`, SQRT(pow(`taxi_node`.`position_x`-'%f',2)+pow(`taxi_node`.`position_y`-'%f',2)+pow(`taxi_node`.`position_z`-'%f',2)) AS `distance` FROM `taxi_node` WHERE `taxi_node`.`continent` = '%u' ORDER BY `distance` LIMIT 1", x, y, z, mapid);
+    bool found = false;
+    float dist;
+    uint32 id = 0;
+    for(uint32 i = 1; i <= sTaxiNodesStore.nCount; ++i)
+    {
+        TaxiNodesEntry* node = sTaxiNodesStore.LookupEntry(i);
+        if(node && node->map_id == mapid)
+        {
+            float dist2 = (node->x - x)*(node->x - x)+(node->y - y)*(node->y - y)+(node->z - z)*(node->z - z);
+            if(found)
+            {
+                if(dist2 < dist)
+                {
+                    dist = dist2;
+                    id = i;
+                }
+            }
+            else
+            {
+                found = true;
+                dist = dist2;
+                id = i;
+            }
+        }
+    }
 
-    if( ! result  )
-        return 0;
-
-    Field *fields = result->Fetch();
-    uint8 loc = fields[0].GetUInt8();
-
-    delete result;
-
-    return loc;
-
+    return id;
 }
 
 void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`price`, `taxi_path`.`id` FROM `taxi_path` WHERE `taxi_path`.`source` = '%u' AND `taxi_path`.`destination` = '%u'", source, destination);
-
-    if( ! result )
+    TaxiPathSetBySource::iterator src_i = sTaxiPathSetBySource.find(source);
+    if(src_i==sTaxiPathSetBySource.end())
     {
         path = 0;
         cost = 0;
         return;
     }
 
-    Field *fields = result->Fetch();
-    cost = fields[0].GetUInt32();
-    path = fields[1].GetUInt16();
+    TaxiPathSetForSource& pathSet = src_i->second;
 
-    delete result;
+    TaxiPathSetForSource::iterator dest_i = pathSet.find(destination);
+    if(dest_i==pathSet.end())
+    {
+        path = 0;
+        cost = 0;
+        return;
+    }
+
+    cost = dest_i->second.price;
+    path = dest_i->second.ID;
 }
 
-uint16 ObjectMgr::GetTaxiMount( uint32 id )
+uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team  )
 {
+    uint16 mount_id = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxi_node`.`mount` FROM `taxi_node` WHERE `taxi_node`.`id` = '%u'", id);
+    TaxiNodesEntry* node = sTaxiNodesStore.LookupEntry(id);
+    if(node)
+    {
+        if (team == ALLIANCE)
+            switch(node->alliance_mount_type)
+            {
+                case 541:
+                    mount_id = 1147;                                // alliance
+                    break;
+                case 3837:
+                    mount_id = 479;                                 // nightelf
+                    break;
+                //case 17760:
+                //  unknown outer bg mount?
+            }
+        else if (team == HORDE)
+            switch(node->horde_mount_type)
+            {
+                case 2224:
+                    mount_id = 295;                                 // horde
+                    break;
+                case 3574:
+                    mount_id = 1560;                                // undead 
+                    break;
+                //case 17760:
+                //  unknown outer bg mount?
+            }
 
-    if( ! result )
-        return 0;
-
-    Field *fields = result->Fetch();
-    uint16 mount_id = fields[0].GetUInt16();
-
-    delete result;
+    }
 
     return mount_id;
 }
 
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 {
-
-    QueryResult *result = sDatabase.PQuery("SELECT `taxi_pathnode`.`position_x`,`taxi_pathnode`.`position_y`,`taxi_pathnode`.`position_z` FROM `taxi_pathnode` WHERE `taxi_pathnode`.`path` = '%u'", path);
-
-    if( ! result )
+    if(path >= sTaxiPathNodesByPath.size())
         return;
 
-    uint16 count = result->GetRowCount();
-    sLog.outDebug(" ROW COUNT %u ",count);
-    pathnodes.Resize( count );
-    unsigned int i = 0;
+    TaxiPathNodeList& nodeList = sTaxiPathNodesByPath[path];
 
-    do
+    pathnodes.Resize(nodeList.size());
+
+    unsigned int i = 0;
+    for(int i = 0; i < nodeList.size(); ++i)
     {
-        Field *fields = result->Fetch();
-        pathnodes[ i ].x = fields[0].GetFloat();
-        pathnodes[ i ].y = fields[1].GetFloat();
-        pathnodes[ i ].z = fields[2].GetFloat();
-        i++;
-    } while( result->NextRow() );
-    delete result;
+        pathnodes[ i ].x = nodeList[i].x;
+        pathnodes[ i ].y = nodeList[i].y;
+        pathnodes[ i ].z = nodeList[i].z;
+    }
 }
 
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
