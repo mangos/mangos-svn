@@ -207,7 +207,7 @@ int SocketHandler::Select(long sec,long usec)
         m_add.erase(it);
     }
 
-#if __APPLE_CC__
+#ifdef __APPLE_CC__
     fd_set rfds;
     fd_set wfds;
     fd_set efds;
