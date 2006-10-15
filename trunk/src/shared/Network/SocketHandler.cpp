@@ -207,9 +207,18 @@ int SocketHandler::Select(long sec,long usec)
         m_add.erase(it);
     }
 
+#if __APPLE_CC__
+    fd_set rfds;
+    fd_set wfds;
+    fd_set efds;
+    FD_COPY(&m_rfds, &rfds);
+    FD_COPY(&m_wfds, &wfds);
+    FD_COPY(&m_efds, &efds);
+#else
     fd_set rfds = m_rfds;
     fd_set wfds = m_wfds;
     fd_set efds = m_efds;
+#endif
 
     tv.tv_sec = sec;
     tv.tv_usec = usec;
