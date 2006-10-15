@@ -20,7 +20,7 @@
 #define MANGOSSERVER_CORPSE_H
 
 #include "Object.h"
-#include "Database\DatabaseEnv.h"
+#include "Database/DatabaseEnv.h"
 
 enum CorpseType
 {
