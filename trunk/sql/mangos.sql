@@ -2013,7 +2013,7 @@ CREATE TABLE `quest_template` (
   `PointOpt` int(2) unsigned NOT NULL default '0',
   `DetailsEmote` int(11) NOT NULL default '0', 
   `IncompleteEmote` int(11) NOT NULL default '0', 
-  `CompleteEmote` int(11) NOT NULL default '0';
+  `CompleteEmote` int(11) NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest System';
 
@@ -2027,85 +2027,6 @@ LOCK TABLES `quest_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `quest_template` ENABLE KEYS */;
 
---
--- Table structure for table `taxi_node`
---
-
-DROP TABLE IF EXISTS `taxi_node`;
-CREATE TABLE `taxi_node` (
-  `id` tinyint(3) unsigned NOT NULL auto_increment,
-  `continent` tinyint(3) unsigned NOT NULL default '0',
-  `position_x` float default NULL,
-  `position_y` float default NULL,
-  `position_z` float default NULL,
-  `name` varchar(255) default NULL,
-  `flags` mediumint(11) unsigned default NULL,
-  `mount` smallint(5) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`id`),
-  KEY `taxinodes_index` (`continent`,`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
-
---
--- Dumping data for table `taxi_node`
---
-
-
-/*!40000 ALTER TABLE `taxi_node` DISABLE KEYS */;
-LOCK TABLES `taxi_node` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `taxi_node` ENABLE KEYS */;
-
---
--- Table structure for table `taxi_path`
---
-
-DROP TABLE IF EXISTS `taxi_path`;
-CREATE TABLE `taxi_path` (
-  `id` smallint(5) unsigned NOT NULL default '0',
-  `source` tinyint(3) unsigned default NULL,
-  `destination` tinyint(3) unsigned default NULL,
-  `price` mediumint(8) unsigned default NULL,
-  PRIMARY KEY  (`id`),
-  KEY `taxipath_index` (`source`,`destination`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
-
---
--- Dumping data for table `taxi_path`
---
-
-
-/*!40000 ALTER TABLE `taxi_path` DISABLE KEYS */;
-LOCK TABLES `taxi_path` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `taxi_path` ENABLE KEYS */;
-
---
--- Table structure for table `taxi_pathnode`
---
-
-DROP TABLE IF EXISTS `taxi_pathnode`;
-CREATE TABLE `taxi_pathnode` (
-  `id` smallint(5) unsigned NOT NULL default '0',
-  `path` smallint(5) unsigned default NULL,
-  `index` tinyint(3) unsigned default NULL,
-  `continent` tinyint(3) unsigned default NULL,
-  `position_x` float default NULL,
-  `position_y` float default NULL,
-  `position_z` float default NULL,
-  `unknown1` mediumint(8) unsigned default NULL,
-  `unknown2` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `taxi_pathnode`
---
-
-
-/*!40000 ALTER TABLE `taxi_pathnode` DISABLE KEYS */;
-LOCK TABLES `taxi_pathnode` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `taxi_pathnode` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

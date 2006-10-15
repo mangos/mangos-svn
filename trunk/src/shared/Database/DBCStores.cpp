@@ -54,8 +54,31 @@ DBCStorage <SpellDuration> sSpellDuration(SpellDurationfmt);
 //DBCStorage <SpellFocusObject> sSpellFocusObject(SpellFocusObjectfmt);
 DBCStorage <SpellRadius> sSpellRadius(SpellRadiusfmt);
 DBCStorage <SpellRange> sSpellRange(SpellRangefmt);
-
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
+DBCStorage <TaxiNodesEntry> sTaxiNodesStore(TaxiNodesEntryfmt);
+
+// DBC used only for initialization sTaxiPathSetBySource at startup.
+TaxiPathSetBySource sTaxiPathSetBySource;
+struct TaxiPathEntry
+{
+    uint32    ID;
+    uint32    from;
+    uint32    to;
+    uint32    price;
+};
+static DBCStorage <TaxiPathEntry> sTaxiPathStore(TaxiPathEntryfmt);
+
+// DBC used only for initialization sTaxiPathSetBySource at startup.
+TaxiPathNodesByPath sTaxiPathNodesByPath;
+struct TaxiPathNodeEntry
+{
+    uint32    path;
+    uint32    index;
+    float     x;
+    float     y;
+    float     z;
+};
+static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
 
 typedef std::list<std::string> StoreProblemList;
 
@@ -94,7 +117,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 18;
+    const uint32 DBCFilesCount = 21;
 
     barGoLink bar( DBCFilesCount );
 
@@ -102,7 +125,7 @@ void LoadDBCStores(std::string dataPath)
 
     LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
 
-    for(uint16 i = 1; i < sAreaStore.nCount; ++i)
+    for(uint32 i = 1; i <= sAreaStore.nCount; ++i)
         if(AreaTableEntry* area = sAreaStore.LookupEntry(i))
             sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
 
@@ -124,7 +147,35 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sSpellRadius,              dataPath+"dbc/SpellRadius.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellRange,               dataPath+"dbc/SpellRange.dbc");
     LoadDBC(bar,bad_dbc_files,sTalentStore,              dataPath+"dbc/Talent.dbc");
+    LoadDBC(bar,bad_dbc_files,sTaxiNodesStore,           dataPath+"dbc/TaxiNodes.dbc");
+    
+    //## TaxiPath.dbc ## Loaded only for initialization different structures
+    LoadDBC(bar,bad_dbc_files,sTaxiPathStore,            dataPath+"dbc/TaxiPath.dbc");
+    for(uint32 i = 1; i <= sTaxiPathStore.nCount; ++i)
+        if(TaxiPathEntry* entry = sTaxiPathStore.LookupEntry(i))
+            sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID,entry->price);
+    uint32 pathCount = sTaxiPathStore.nCount;
+    sTaxiPathStore.Clear();
 
+    //## TaxiPathNode.dbc ## Loaded only for initialization different structures
+    LoadDBC(bar,bad_dbc_files,sTaxiPathNodeStore,            dataPath+"dbc/TaxiPathNode.dbc");
+    // Calculate path nodes count
+    std::vector<uint32> pathLength;
+    pathLength.resize(pathCount+1);             // 0 and some other indexes not used
+    for(uint32 i = 1; i <= sTaxiPathNodeStore.nCount; ++i)
+        if(TaxiPathNodeEntry* entry = sTaxiPathNodeStore.LookupEntry(i))
+            ++pathLength[entry->path];
+    // Set path length
+    sTaxiPathNodesByPath.resize(pathCount+1);   // 0 and some other indexes not used
+    for(uint32 i = 1; i < sTaxiPathNodesByPath.size(); ++i)
+        sTaxiPathNodesByPath[i].resize(pathLength[i]);
+    // fill data
+    for(uint32 i = 1; i <= sTaxiPathNodeStore.nCount; ++i)
+        if(TaxiPathNodeEntry* entry = sTaxiPathNodeStore.LookupEntry(i))
+            sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->x,entry->y,entry->z);
+    sTaxiPathNodeStore.Clear();
+
+    // error checks
     if(bad_dbc_files.size() >= DBCFilesCount )
     {
         sLog.outError("\nIncorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());

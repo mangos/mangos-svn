@@ -202,7 +202,7 @@ class ObjectMgr
         bool GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask );
         uint32 GetNearestTaxiNode( float x, float y, float z, uint32 mapid );
         void GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost);
-        uint16 GetTaxiMount( uint32 id );
+        uint16 GetTaxiMount( uint32 id, uint32 team );
         void GetTaxiPathNodes( uint32 path, Path &pathnodes );
 
         void AddAreaTriggerPoint(AreaTriggerPoint *pArea);

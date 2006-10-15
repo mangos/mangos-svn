@@ -235,7 +235,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
     if( GetPlayer( )->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
         return;
 
-    MountId = objmgr.GetTaxiMount(sourcenode);
+    MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());
 
     data.Initialize( SMSG_ACTIVATETAXIREPLY );
 
@@ -306,7 +306,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
         {
             sLog.outDebug( "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode );
 
-            MountId = objmgr.GetTaxiMount(sourcenode);
+            MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());
             objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
 
             SendDoFlight( MountId, path );
@@ -332,7 +332,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         return;
 
     objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
-    MountId = objmgr.GetTaxiMount(sourcenode);
+    MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());
 
     data.Initialize( SMSG_ACTIVATETAXIREPLY );
 

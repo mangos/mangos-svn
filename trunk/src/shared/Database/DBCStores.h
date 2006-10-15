@@ -121,6 +121,8 @@ class DBCStorage
             return res;
         }
 
+        void Clear() {  delete[] ((char*)data); data = NULL; }
+
         T** data;
         uint32 nCount;
         const char * fmt;
@@ -148,6 +150,9 @@ extern DBCStorage <SpellRadius>              sSpellRadius;
 extern DBCStorage <SpellRange>               sSpellRange;
 extern DBCStorage <SpellEntry>               sSpellStore;
 extern DBCStorage <TalentEntry>              sTalentStore;
+extern DBCStorage <TaxiNodesEntry>           sTaxiNodesStore;
+extern TaxiPathSetBySource                   sTaxiPathSetBySource;
+extern TaxiPathNodesByPath                   sTaxiPathNodesByPath;
 
 void LoadDBCStores(std::string dataPath);
 #endif
