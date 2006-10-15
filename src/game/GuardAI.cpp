@@ -42,7 +42,7 @@ void GuardAI::MoveInLineOfSight(Unit *u)
     if( i_creature.getVictim() == NULL && u->isTargetableForAttack() && u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);
-        if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
+        if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
             //Need add code to let guard suport player
             if( i_creature.IsHostileTo(u) || u->IsHostileToAll() )

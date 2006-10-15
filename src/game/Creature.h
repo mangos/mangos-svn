@@ -223,6 +223,9 @@ enum UNIT_TYPE
     MECHANICAL = 9,
 };
 
+// max different by z coordinate for creature aggro reaction
+#define CREATURE_Z_ATTACK_RANGE 3
+
 class MANGOS_DLL_SPEC Creature : public Unit
 {
     CreatureAI *i_AI;

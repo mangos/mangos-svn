@@ -557,6 +557,14 @@ float Object::GetDistance2dSq(const Object* obj) const
     return ( dist > 0 ? dist * dist : 0);
 }
 
+float Object::GetDistanceZ(const Object* obj) const
+{
+    float dz = fabs(GetPositionZ() - obj->GetPositionZ());
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float dist = dz - sizefactor;
+    return ( dist > 0 ? dist : 0);
+}
+
 float Object::GetAngle(const Object* obj) const
 {
     if(!obj) return 0;

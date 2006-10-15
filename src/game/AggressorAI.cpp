@@ -46,7 +46,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
     if( !i_creature.getVictim() && u->isTargetableForAttack() && IsVisible(u) && u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);
-        if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
+        if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
             if( i_creature.IsHostileTo( u ) )
                 AttackStart(u);
