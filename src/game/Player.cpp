@@ -2630,12 +2630,12 @@ bool Player::UpdateSkill(uint32 skill_id)
     if(i>=PLAYER_MAX_SKILLS) return false;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
-    uint16 value = SKILL_VALUE(data);
-    uint16 max = SKILL_MAX(data);
+    uint32 value = SKILL_VALUE(data);
+    uint32 max = SKILL_MAX(data);
 
     if ((!max) || (!value) || (value >= max)) return false;
 
-    if ((float)value/(float)max*512 < urand(0,512))
+    if (value*512 < max*urand(0,512))
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
         return true;
@@ -2660,12 +2660,12 @@ void Player::UpdateSkillPro(uint32 spellid)
     if(i>=PLAYER_MAX_SKILLS) return;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
-    uint16 value = SKILL_VALUE(data);
-    uint16 max = SKILL_MAX(data);
+    uint32 value = SKILL_VALUE(data);
+    uint32 max = SKILL_MAX(data);
 
     if ((!max) || (!value) || (value >= max)) return;
     //generates chance for unsuccess gain
-    if ((value/(float)max)*512 > urand(0,512)) return;
+    if (value*512 > max*urand(0,512)) return;
     if(skill_id == SKILL_POISONS && value < 125)
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
@@ -8087,7 +8087,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
                     // skip GO activate objectives
-                    if( qInfo->ReqCreatureOrGOId <= 0 )
+                    if( qInfo->ReqCreatureOrGOId[i] <= 0 )
                         continue;
 
                     if( qInfo->ReqCreatureOrGOCount[i] != 0 && mQuestStatus[quest_id].m_creatureOrGOcount[i] < qInfo->ReqCreatureOrGOCount[i] )
