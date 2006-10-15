@@ -2135,7 +2135,7 @@ void Spell::EffectSummonDeadPet(uint32 i)
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
     Player *_player = (Player*)m_caster;
-    Creature *_pet = m_caster->GetPet();
+    Creature *_pet = _player->GetPet();
     if(!_pet)
         return;
     if(_pet->isAlive())
@@ -2143,16 +2143,10 @@ void Spell::EffectSummonDeadPet(uint32 i)
     Pet *pet = (Pet*)_pet;
     pet->setDeathState( ALIVE );
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
-    pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
-    pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
     pet->SetHealth( uint32(pet->GetMaxHealth()*damage/100));
 
     pet->AIM_Initialize();
 
-    std::string name;
-    name = _player->GetName();
-    name.append("'s Pet");
-    pet->SetName( name );
     _player->PetSpellInitialize();
     _player->SavePet();
 }
