@@ -117,9 +117,11 @@ void Corpse::DeleteFromDB()
     sDatabase.PExecute( "DELETE FROM `corpse_grid` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
-bool Corpse::LoadFromDB(uint32 guid)
+bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse` WHERE `guid` = '%u'",guid);
+    bool external = (result != NULL);
+    if (!external)
+        result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse` WHERE `guid` = '%u'",guid);
 
     if( ! result )
     {
@@ -140,7 +142,7 @@ bool Corpse::LoadFromDB(uint32 guid)
     if(!LoadValues( fields[5].GetString() ))
     {
         sLog.outError("ERROR: Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
-        delete result;
+        if (!external) delete result;
         return false;
     }
 
@@ -148,7 +150,7 @@ bool Corpse::LoadFromDB(uint32 guid)
     SetMapId(mapid);
     Relocate(positionX,positionY,positionZ,ort);
 
-    delete result;
+    if (!external) delete result;
 
     if(!IsPositionValid())
     {

@@ -26,6 +26,7 @@
 #include "MovementGenerator.h"
 #include "ItemPrototype.h"
 #include "LootMgr.h"
+#include "Database\DatabaseEnv.h"
 #include "Cell.h"
 
 struct SpellEntry;
@@ -347,7 +348,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         void Say(char const* text, uint32 language);
 
-        bool LoadFromDB(uint32 guid);
+        bool LoadFromDB(uint32 guid, QueryResult *result = NULL);
         virtual void SaveToDB();                            // overwrited in Pet
         virtual void DeleteFromDB();                        // overwrited in Pet
 

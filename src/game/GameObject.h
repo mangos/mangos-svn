@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "Object.h"
 #include "LootMgr.h"
+#include "Database\DatabaseEnv.h"
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
@@ -85,7 +86,7 @@ class MANGOS_DLL_SPEC GameObject : public Object
         Unit* GetOwner() const;
 
         void SaveToDB();
-        bool LoadFromDB(uint32 guid);
+        bool LoadFromDB(uint32 guid, QueryResult *result = NULL);
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }
         void SetRespawnTimer(uint32 respawn) { m_respawnTimer = respawn; }
@@ -94,7 +95,7 @@ class MANGOS_DLL_SPEC GameObject : public Object
         void SetSpellId(uint32 id) { m_spellId = id;}
         uint32 GetSpellId() { return m_spellId;}
         void getFishLoot(Loot *loot);
-        uint32 GetTypeId() { return GetUInt32Value(GAMEOBJECT_TYPE_ID); }
+        uint32 GetGoType() { return GetUInt32Value(GAMEOBJECT_TYPE_ID); }
 
         LootState getLootState() { return m_lootState; }
         bool HaveLootSkill() const { return m_lootskill; }
