@@ -1071,10 +1071,12 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     return true;
 }
 
-bool Creature::LoadFromDB(uint32 guid)
+bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
 {
+    bool external = (result != NULL);
+    if (!external)
+        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
     if(!result)
     {
         sLog.outError("ERROR: Creature (GUID: %u) not found in table `creature`, can't load. ",guid);
@@ -1086,7 +1088,7 @@ bool Creature::LoadFromDB(uint32 guid)
     if(!Create(guid,fields[1].GetUInt32(),fields[2].GetFloat(),fields[3].GetFloat(),
         fields[4].GetFloat(),fields[5].GetFloat(),fields[0].GetUInt32()))
     {
-        delete result;
+        if (!external) delete result;
         return false;
     }
 
@@ -1116,7 +1118,7 @@ bool Creature::LoadFromDB(uint32 guid)
         }
     }
 
-    delete result;
+    if(!external) delete result;
 
     if (HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ) )
         CreateTrainerSpells();

@@ -392,12 +392,19 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     uint64 Guid;
     uint32 NumberOfPlayers;
     uint8 Choise;
-    recv_data >> Guid;
+    recv_data >> Guid;                                      //guid of the item rolled
     recv_data >> NumberOfPlayers;
-    recv_data >> Choise;
+    recv_data >> Choise;                                    //0: pass, 1: need, 2: greed
     recv_data.hexlike();
+    
+    sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
 
-    //sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
+    if (GetPlayer()->IsInGroup())
+    {
+        Group *group;
+        group = objmgr.GetGroupByLeader(GetPlayer()->GetGroupLeader());
+        group->CountTheRoll(GetPlayer()->GetGUID(), Guid, NumberOfPlayers, Choise);
+    }
 }
 
 void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )

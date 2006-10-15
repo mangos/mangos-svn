@@ -87,28 +87,23 @@ template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
         obj->setDeathState(DEAD);
 }
 
-template<class T> void LoadHelper(const char* table, const uint32 &grid_id, const uint32 map_id, const CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count)
+template <class T>
+void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count)
 {
-    uint32 cell_id = (cell.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell.x_coord;
-
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `%s` WHERE `grid` = '%u' AND `cell` = '%u' AND `map` = '%u'", table, grid_id, cell_id, map_id);
-
     if( result )
-
     {
         do
         {
             Field *fields = result->Fetch();
             T *obj = new T;
-            uint32 guid = fields[0].GetUInt32();
+            uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
             //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
-            if(!obj->LoadFromDB(guid))
+            if(!obj->LoadFromDB(guid, result))
             {
                 delete obj;
                 continue;
             }
-            //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loaded ",table,guid);
-
+            else
             {
                 // Check loaded cell/grid integrity
                 Cell old_cell = RedZone::GetZone(cell);
@@ -140,8 +135,13 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
-    CellPair cell_pair(x, y);
-    LoadHelper<GameObject>("gameobject_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_gameObjects);
+    CellPair cell_pair(x,y);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    QueryResult *result = sDatabase.PQuery(
+        "SELECT `id`,`gameobject`.`map`,`gameobject`.`position_x`,`gameobject`.`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer`,`gameobject`.`guid`"
+        "FROM `gameobject` LEFT JOIN `gameobject_grid` ON `gameobject`.`guid` = `gameobject_grid`.`guid`"
+        "WHERE `grid` = '%u' AND `cell` = '%u' AND `gameobject_grid`.`map` = '%u'", i_grid.GetGridId(), cell_id, i_mapId);
+    LoadHelper(result, cell_pair, m, i_gameObjects);
 }
 
 void
@@ -150,7 +150,12 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
     CellPair cell_pair(x,y);
-    LoadHelper<Creature>("creature_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_creatures);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    QueryResult *result = sDatabase.PQuery(
+        "SELECT `id`,`creature`.`map`,`creature`.`position_x`,`creature`.`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`MovementType`,`auras`,`creature`.`guid`"
+        "FROM `creature` LEFT JOIN `creature_grid` ON `creature`.`guid` = `creature_grid`.`guid`"
+        "WHERE `grid` = '%u' AND `cell` = '%u' AND `creature_grid`.`map` = '%u'", i_grid.GetGridId(), cell_id, i_mapId);
+    LoadHelper(result, cell_pair, m, i_creatures);
 }
 
 void
@@ -159,7 +164,12 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
     CellPair cell_pair(x,y);
-    LoadHelper<Corpse>("corpse_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_corpses);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    QueryResult *result = sDatabase.PQuery(
+        "SELECT `corpse`.`position_x`,`corpse`.`position_y`,`position_z`,`orientation`,`corpse`.`map`,`data`,`bones_flag`,`corpse`.`guid` "
+        "FROM `corpse` LEFT JOIN `corpse_grid` ON `corpse`.`guid` = `corpse_grid`.`guid` "
+        "WHERE `grid` = '%u' AND `cell` = '%u' AND `corpse_grid`.`map` = '%u'", i_grid.GetGridId(), cell_id, i_mapId);
+    LoadHelper(result, cell_pair, m, i_corpses);
 }
 
 void

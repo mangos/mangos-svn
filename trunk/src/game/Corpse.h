@@ -20,6 +20,7 @@
 #define MANGOSSERVER_CORPSE_H
 
 #include "Object.h"
+#include "Database\DatabaseEnv.h"
 
 enum CorpseType
 {
@@ -41,7 +42,7 @@ class Corpse : public Object
         bool Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang );
 
         void SaveToDB();
-        bool LoadFromDB(uint32 guid);
+        bool LoadFromDB(uint32 guid, QueryResult *result = NULL);
 
         void DeleteFromWorld(bool remove);
         void DeleteFromDB();

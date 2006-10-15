@@ -129,7 +129,7 @@ void GameObject::Update(uint32 p_time)
                 else
                 {
                     m_respawnTimer = 0;
-                    if (GetTypeId() != GAMEOBJECT_TYPE_TRAP)
+                    if (GetGoType() != GAMEOBJECT_TYPE_TRAP)
                         MapManager::Instance().GetMap(GetMapId())->Add(this);
                 }
             }
@@ -235,11 +235,13 @@ void GameObject::SaveToDB()
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
 
-bool GameObject::LoadFromDB(uint32 guid)
+bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 {
+    bool external = (result != NULL);
+    if (!external)
+        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer` FROM `gameobject` WHERE `guid` = '%u'", guid);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer` FROM `gameobject` WHERE `guid` = '%u'", guid);
-    if( ! result )
+    if( !result )
     {
         sLog.outError("ERROR: Gameobject (GUID: %u) not found in table `gameobject`, can't load. ",guid);
         return false;
@@ -260,13 +262,13 @@ bool GameObject::LoadFromDB(uint32 guid)
 
     if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
     {
-        delete result;
+        if (!external) delete result;
         return false;
     }
 
     lootid=fields[10].GetUInt32();
     m_respawnDelayTime=fields[11].GetUInt32();
-    delete result;
+    if (!external) delete result;
 
     _LoadQuests();
     return true;
