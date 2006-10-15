@@ -22,7 +22,7 @@
 #include "Common.h"
 #include "Object.h"
 #include "LootMgr.h"
-#include "Database\DatabaseEnv.h"
+#include "Database/DatabaseEnv.h"
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)

@@ -26,7 +26,7 @@
 #include "MovementGenerator.h"
 #include "ItemPrototype.h"
 #include "LootMgr.h"
-#include "Database\DatabaseEnv.h"
+#include "Database/DatabaseEnv.h"
 #include "Cell.h"
 
 struct SpellEntry;
