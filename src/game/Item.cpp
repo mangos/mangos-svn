@@ -170,10 +170,10 @@ Item::Item( )
 uint32 GetRandPropertiesSeedfromDisplayInfoDBC(uint32 DisplayID)
 {
     /*
-    ItemDisplayTemplateEntry *itemDisplayTemplateEntry = sItemDisplayTemplateStore.LookupEntry( DisplayID );
+    ItemDisplayInfoEntry *itemDisplayInfoEntry = sItemDisplayInfoStore.LookupEntry( DisplayID );
 
-    if (itemDisplayTemplateEntry)
-        return itemDisplayTemplateEntry->randomPropertyChance;
+    if (itemDisplayInfoEntry)
+        return itemDisplayInfoEntry->randomPropertyChance;
     else
         return 0;
     */
@@ -183,10 +183,10 @@ uint32 GetRandPropertiesSeedfromDisplayInfoDBC(uint32 DisplayID)
 uint32 GetRandPropertiesIDfromDisplayInfoDBC(uint32 DisplayID)
 {
     /*
-    ItemDisplayTemplateEntry *itemDisplayTemplateEntry = sItemDisplayTemplateStore.LookupEntry( DisplayID );
+    ItemDisplayInfoEntry *itemDisplayInfoEntry = sItemDisplayInfoStore.LookupEntry( DisplayID );
 
-    if (itemDisplayTemplateEntry)
-        return itemDisplayTemplateEntry->unknown;
+    if (itemDisplayInfoEntry)
+        return itemDisplayInfoEntry->unknown;
     else
         return 0;
     */
@@ -198,22 +198,22 @@ extern char *fmtstring( char *format, ... );
 
 char *GetImageFilefromDisplayInfoDBC(uint32 DisplayID)
 {
-    ItemDisplayTemplateEntry *itemDisplayTemplateEntry = sItemDisplayTemplateStore.LookupEntry( DisplayID );
+    ItemDisplayInfoEntry *itemDisplayInfoEntry = sItemDisplayInfoStore.LookupEntry( DisplayID );
 
-    if (itemDisplayTemplateEntry)
-        return fmtstring("%s", itemDisplayTemplateEntry->imageFile);
+    if (itemDisplayInfoEntry)
+        return fmtstring("%s", itemDisplayInfoEntry->imageFile);
     else
         return fmtstring("");
 }
 
 char *GetInventoryImageFilefromDisplayInfoDBC(uint32 DisplayID)
 {
-    ItemDisplayTemplateEntry *itemDisplayTemplateEntry = sItemDisplayTemplateStore.LookupEntry( DisplayID );
+    ItemDisplayInfoEntry *itemDisplayInfoEntry = sItemDisplayInfoStore.LookupEntry( DisplayID );
 
-    if (itemDisplayTemplateEntry && itemDisplayTemplateEntry->invImageFile)
+    if (itemDisplayInfoEntry && itemDisplayInfoEntry->invImageFile)
     {
-        sLog.outDebug( "Image file is [%s].", itemDisplayTemplateEntry->invImageFile );
-        return fmtstring("%s", itemDisplayTemplateEntry->invImageFile);
+        sLog.outDebug( "Image file is [%s].", itemDisplayInfoEntry->invImageFile );
+        return fmtstring("%s", itemDisplayInfoEntry->invImageFile);
     }
     else
     {
@@ -712,7 +712,7 @@ void Item::SetItemRandomProperties()
         //    random_id = irand(1267,1296);
         //}
 
-        ItemRandomProperties *item_rand = sItemRandomPropertiesStore.LookupEntry(random_id);
+        ItemRandomPropertiesEntry *item_rand = sItemRandomPropertiesStore.LookupEntry(random_id);
 
         if(item_rand)
         {

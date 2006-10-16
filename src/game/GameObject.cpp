@@ -169,7 +169,7 @@ void GameObject::Update(uint32 p_time)
             return;
         }
 
-        float radius = GetRadius(sSpellRadius.LookupEntry(createSpell->EffectRadiusIndex[i]));
+        float radius = GetRadius(sSpellRadiusStore.LookupEntry(createSpell->EffectRadiusIndex[i]));
         MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
         MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
 

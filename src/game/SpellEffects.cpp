@@ -475,7 +475,7 @@ void Spell::EffectCreateItem(uint32 i)
 
 void Spell::EffectPersistentAA(uint32 i)
 {
-    float radius = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     int32 duration = GetDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject();
     if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
@@ -926,7 +926,7 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
         return;
 
     uint32 mapid = m_caster->GetMapId();
-    float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
     float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
     // teleport a bit above terrainlevel to avoid falling below it
@@ -972,8 +972,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
 
-        SpellItemEnchantment *pEnchant;
-        pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant)
             return;
 
@@ -1018,8 +1017,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             duration = m_spellInfo->EffectBasePoints[i]+1;
         if(duration <= 1)
             duration = 300;
-        SpellItemEnchantment *pEnchant;
-        pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant)
             return;
 
@@ -1595,8 +1593,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             duration = m_spellInfo->EffectBasePoints[i]+1;
         if(duration <= 1)
             duration = 300;
-        SpellItemEnchantment *pEnchant;
-        pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant)
             return;
 
@@ -1974,7 +1971,7 @@ void Spell::EffectMomentMove(uint32 i)
     if( m_spellInfo->rangeIndex== 1)                        //self range
     {
         uint32 mapid = m_caster->GetMapId();
-        float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+        float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
         float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
         float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
         // teleport a bit above terrainlevel to avoid falling below it
@@ -2156,8 +2153,8 @@ void Spell::EffectTransmitted(uint32 i)
     float fx,fy;
     WorldPacket data;
 
-    float min_dis = GetMinRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
-    float max_dis = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+    float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+    float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float diff = max_dis - min_dis + 1;
     float dis = (float)(rand()%(uint32)diff + (uint32)min_dis);
 

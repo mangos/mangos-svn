@@ -431,7 +431,7 @@ void AreaAura::Update(uint32 diff)
         }
 
         Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
-        float radius =  GetRadius(sSpellRadius.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
+        float radius =  GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
         if(pGroup)
         {
             for(uint32 p=0;p<pGroup->GetMembersCount();p++)

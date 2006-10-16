@@ -154,7 +154,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     if(info->Id == 75)                                      //auto shot
         m_autoRepeat = true;
 
-    casttime = GetCastTime(sCastTime.LookupEntry(m_spellInfo->CastingTimeIndex));
+    casttime = GetCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
 
     if( m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo )
     {
@@ -251,7 +251,7 @@ void Spell::FillTargetMap()
 
 void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::list<Item*> &TagItemMap,std::list<GameObject*> &TagGOMap)
 {
-    float radius =  GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float radius =  GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     switch(cur)
     {
         case TARGET_TOTEM_EARTH:
@@ -1527,7 +1527,7 @@ uint8 Spell::CanCast()
             case SPELL_EFFECT_LEAP:
             case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
             {
-                float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+                float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
                 float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
                 float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
                 // teleport a bit above terrainlevel to avoid falling below it
@@ -1651,7 +1651,7 @@ uint8 Spell::CheckRange()
     // self cast doesnt need range checking -- also for Starshards fix
     if (m_spellInfo->rangeIndex == 1) return 0;
 
-    SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
+    SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
     float max_range = GetMaxRange(srange);
     float min_range = GetMinRange(srange);
 
@@ -1786,14 +1786,6 @@ uint8 Spell::CheckItems()
 
     if(m_spellInfo->RequiresSpellFocus)
     {
-        /*SpellFocusObject* focusobj = sSpellFocusObject.LookupEntry(m_spellInfo->RequiresSpellFocus);
-        assert(focusobj);
-        char const* focusname = focusobj->Name;
-
-        // Find GO
-        SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
-        float range = GetMaxRange(srange);*/
-
         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;

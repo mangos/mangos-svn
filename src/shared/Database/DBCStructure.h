@@ -16,6 +16,70 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+struct AreaTableEntry
+{
+    uint32    ID;
+    uint32    zone;
+    uint32    exploreFlag;
+    uint32    zone_type;                                    // unknown value but 312 for all cities
+    int32     area_level;
+};
+
+struct CreatureFamilyEntry
+{
+    uint32    ID;
+    uint32    unknown_1;
+    uint32    unknown_2;
+    uint32    petfood_id;
+    char*     Name;
+};
+
+struct EmotesTextEntry
+{
+    uint32    Id;
+    uint32    textid;
+};
+
+struct FactionEntry
+{
+    uint32      ID;
+    int32       reputationListID;
+    uint32      something1;
+    uint32      something2;
+    uint32      something3;
+    uint32      something4;
+    uint32      something5;
+    uint32      something6;
+    uint32      something7;
+    uint32      something8;
+    uint32      something9;
+    uint32      team;
+};
+
+struct FactionTemplateEntry
+{
+    uint32      ID;
+    uint32      fightsupport;
+    uint32      friendly;
+    uint32      hostile;
+    uint32      faction;
+};
+
+struct ItemDisplayInfoEntry
+{
+    uint32      ID;
+    uint32      randomPropertyChance;
+    uint32      unknown;
+};
+
+struct ItemRandomPropertiesEntry
+{
+    uint32    ID;
+    uint32    enchant_id_1;
+    uint32    enchant_id_2;
+    uint32    enchant_id_3;
+};
+
 struct ItemSetEntry
 {
     uint32    spells[8];
@@ -24,24 +88,13 @@ struct ItemSetEntry
     uint32    required_skill_value;
 };
 
-struct TalentEntry
+struct LockEntry
 {
-    uint32    TalentID;
-    uint32    TalentTree;
-    uint32    Row;
-    uint32    Col;
-    uint32    RankID[5];
-    uint32    DependsOn;
-    uint32    DependsOnRank;
+    uint32      ID;
+    uint32      requiredskill;
 };
 
-struct emoteentry
-{
-    uint32    Id;
-    uint32    textid;
-};
-
-struct SkillLine
+struct SkillLineEntry
 {
     uint32    id;
     uint32    categoryId;
@@ -50,7 +103,7 @@ struct SkillLine
     uint32    spellIcon;
 };
 
-struct SkillLineAbility
+struct SkillLineAbilityEntry
 {
     uint32    id;
     uint32    skillId;
@@ -142,80 +195,39 @@ struct SpellEntry
     uint32    MaxAffectedTargets;
 };
 
-struct SpellCastTime
+struct SpellCastTimesEntry
 {
     uint32    ID;
     uint32    CastTime;
 };
 
-struct SpellFocusObject
+struct SpellFocusObjectEntry
 {
     uint32    ID;
     char*     Name;
 };
 
-struct SpellRadius
+struct SpellRadiusEntry
 {
     uint32    ID;
     float     Radius;
     float     Radius2;
 };
 
-struct SpellRange
+struct SpellRangeEntry
 {
     uint32    ID;
     float     minRange;
     float     maxRange;
 };
 
-struct SpellDuration
+struct SpellDurationEntry
 {
     uint32    ID;
     int32     Duration[3];
 };
 
-struct AreaTableEntry
-{
-    uint32    ID;
-    uint32    zone;
-    uint32    exploreFlag;
-    uint32    zone_type;                                    // unknown value but 312 for all cities
-    int32     area_level;
-};
-
-struct FactionEntry
-{
-    uint32      ID;
-    int32       reputationListID;
-    uint32      something1;
-    uint32      something2;
-    uint32      something3;
-    uint32      something4;
-    uint32      something5;
-    uint32      something6;
-    uint32      something7;
-    uint32      something8;
-    uint32      something9;
-    uint32      team;
-};
-
-struct FactionTemplateEntry
-{
-    uint32      ID;
-    uint32      fightsupport;
-    uint32      friendly;
-    uint32      hostile;
-    uint32      faction;
-};
-
-struct ItemDisplayTemplateEntry
-{
-    uint32      ID;
-    uint32      randomPropertyChance;
-    uint32      unknown;
-};
-
-struct SpellItemEnchantment
+struct SpellItemEnchantmentEntry
 {
     uint32      ID;
     uint32      display_type;
@@ -229,27 +241,15 @@ struct SpellItemEnchantment
     uint32      slot;
 };
 
-struct LockEntry
+struct TalentEntry
 {
-    uint32      ID;
-    uint32      requiredskill;
-};
-
-struct CreatureFamily
-{
-    uint32    ID;
-    uint32    unknown_1;
-    uint32    unknown_2;
-    uint32    petfood_id;
-    char*     Name;
-};
-
-struct ItemRandomProperties
-{
-    uint32    ID;
-    uint32    enchant_id_1;
-    uint32    enchant_id_2;
-    uint32    enchant_id_3;
+    uint32    TalentID;
+    uint32    TalentTree;
+    uint32    Row;
+    uint32    Col;
+    uint32    RankID[5];
+    uint32    DependsOn;
+    uint32    DependsOnRank;
 };
 
 struct TaxiNodesEntry
@@ -272,7 +272,6 @@ struct TaxiPathBySourceAndDestination
     uint32    ID;
     uint32    price;
 };
-
 typedef std::map<uint32,TaxiPathBySourceAndDestination> TaxiPathSetForSource;
 typedef std::map<uint32,TaxiPathSetForSource> TaxiPathSetBySource;
 
@@ -285,6 +284,5 @@ struct TaxiPathNode
     float     y;
     float     z;
 };
-
 typedef std::vector<TaxiPathNode> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
