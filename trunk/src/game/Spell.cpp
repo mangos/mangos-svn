@@ -1982,9 +1982,16 @@ void Spell::DelayedChannel(int32 delaytime)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER || getState() != SPELL_STATE_CASTING)
         return;
 
-    m_timer += delaytime;
-    uint32 appliedDelayTime = delaytime;
+    int32 appliedDelayTime = delaytime;
     uint32 duration = GetDuration(m_spellInfo);
+
+    if(m_timer + delaytime < 0)
+    {
+        appliedDelayTime = m_timer;
+        m_timer = 0;
+    }
+    else
+        m_timer += delaytime;
 
     if(m_timer > duration)
     {
@@ -1996,16 +2003,27 @@ void Spell::DelayedChannel(int32 delaytime)
 
     // Cancel spell if aggregate channeling delay is greater than base channeling duration
     if(m_delayedTime >= duration)
+    {
+        sLog.outDebug("Spell %u canceled because of accumulated delay: %i ms", m_spellInfo->Id, m_delayedTime);
         cancel();
+        return;
+    }
 
-    // FIX ME: find correct way to delay channeling
-    /*WorldPacket data;
+    sLog.outDebug("Spell %u delayed for %i ms, new duration: %u ms", m_spellInfo->Id, appliedDelayTime, m_timer);
 
-    data.Initialize(SMSG_SPELL_DELAYED);
-    data << m_caster->GetGUID();
-    data << appliedDelayTime;
+    for(int j = 0; j < 3; j++)
+    {
+        // Delay auras with fixed targets
+        for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
+            if (*iunit)
+                (*iunit)->DelayAura(m_spellInfo->Id, j, appliedDelayTime);
 
-    ((Player*)m_caster)->GetSession()->SendPacket(&data);*/
+        // Delay persistent area auras
+        DynamicObject* dynObj = m_caster->GetDynObject(m_spellInfo->Id, j);
+        if(dynObj)
+            dynObj->Delay(appliedDelayTime);
+    }
+
     SendChannelUpdate(m_timer);
 }
 

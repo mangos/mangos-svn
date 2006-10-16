@@ -42,6 +42,7 @@ class DynamicObject : public Object
         bool IsAffecting(Unit *unit) const { return m_affected.find(unit) != m_affected.end(); }
         void AddAffected(Unit *unit) { m_affected.insert(unit); }
         void RemoveAffected(Unit *unit) { m_affected.erase(unit); }
+        void Delay(int32 delaytime);
 
     protected:
         Unit* m_caster;

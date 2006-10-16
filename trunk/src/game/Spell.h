@@ -525,7 +525,7 @@ class Spell
 
         uint32 m_spellState;
         uint32 m_timer;
-        uint32 m_delayedTime;
+        int32 m_delayedTime;
         SpellEntry * m_TriggerSpell;
 
         float m_castPositionX;
