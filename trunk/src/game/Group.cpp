@@ -267,6 +267,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
 
     vector<LootItem>::iterator i;
     ItemPrototype const *item;
+    uint8 itemSlot = 0;
     uint8 THRESHOLD = 1;
     Player *player = objmgr.GetPlayer(playerGUID);
     Group *group = objmgr.GetGroupByLeader(player->GetGroupLeader());
@@ -296,10 +297,14 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             
             group->SendLootStartRoll(newitemGUID, r.totalPlayersRolling, i->itemid, 0, 60000, r);
             
-            RollId.push_back(r);
-            loot->remove(*i);
-            i--;
+            r.loot = loot;
+            r.itemSlot = itemSlot;
+            loot->items[itemSlot].is_blocked = true;
+            
+            RollId.push_back(r);            
         }
+
+        itemSlot++;
     }
 }
 
@@ -307,6 +312,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
 {
     vector<LootItem>::iterator i;
     ItemPrototype const *item;
+    uint8 itemSlot = 0;
     uint8 THRESHOLD = 1;
     Player *player = objmgr.GetPlayer(playerGUID);
     Group *group = objmgr.GetGroupByLeader(player->GetGroupLeader());
@@ -342,11 +348,15 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
             {
                 group->SendLootStartRoll(newitemGUID, r.totalPlayersRolling, i->itemid, 0, 60000, r);
             
+                r.loot = loot;
+                r.itemSlot = itemSlot;
+                loot->items[itemSlot].is_blocked = true;
+
                 RollId.push_back(r);
-                loot->remove(*i);
-                i--;
             }            
         }
+
+        itemSlot++;
     }
 }
 
@@ -361,6 +371,10 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
             // this condition means that player joins to the party after roll begins
             if (GetPlayerGroupSlot(playerGUID) >= i->totalPlayersRolling)
                 return;
+
+            if (i->loot)
+                if (i->loot->items.size() == 0)
+                    return;
             
             switch (Choise)
             {
@@ -424,9 +438,18 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                     uint16 dest;
                     uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, 1, false );
                     if ( msg == EQUIP_ERR_OK )
+                    {
+                        LootItem *item = &(i->loot->items[i->itemSlot]);
+                        item->is_looted = true;
+                        i->loot->NotifyItemRemoved(i->itemSlot);
                         player->StoreNewItem( dest, i->itemid, 1, true);
+                    }
                     else
+                    {
+                        LootItem *item = &(i->loot->items[i->itemSlot]);
+                        item->is_blocked = false;
                         player->SendEquipError( msg, NULL, NULL );
+                    }
                 }
                 else
                 {
@@ -457,13 +480,25 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                         uint16 dest;
                         uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, 1, false );
                         if ( msg == EQUIP_ERR_OK )
-                           player->StoreNewItem( dest, i->itemid, 1, true);
+                        {
+                            LootItem *item = &(i->loot->items[i->itemSlot]);
+                            item->is_looted = true;
+                            i->loot->NotifyItemRemoved(i->itemSlot);
+                            player->StoreNewItem( dest, i->itemid, 1, true);
+                        }
                         else
+                        {
+                            LootItem *item = &(i->loot->items[i->itemSlot]);
+                            item->is_blocked = false;
                             player->SendEquipError( msg, NULL, NULL );
+                        }
                     }
                     else
+                    {
                         SendLootAllPassed(i->itemGUID, NumberOfPlayers, i->itemid, 0, *i);
-                    //TODO: if all players choose pass, re-add item to loot so everyone can take it
+                        LootItem *item = &(i->loot->items[i->itemSlot]);
+                        item->is_blocked = false;
+                    }
                 }
 
                 RollId.erase(i);

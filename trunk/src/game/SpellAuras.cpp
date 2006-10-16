@@ -2343,7 +2343,7 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
         return;
 
     Unit *unit_target = aura->GetTarget();
-    /*uint32 spellId = 0;
+    uint32 spellId = 0;
     uint32 spellId2 = 0;
 
     switch(aura->GetModifier()->m_miscvalue)
@@ -2390,12 +2390,18 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             break;
     }
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );*/
+    if (apply)
+    {
+        if (spellId) unit_target->CastSpell(unit_target, spellId, true);
+        if (spellId2) unit_target->CastSpell(unit_target, spellId2, true);
+    }
+    else
+    {
+        unit_target->RemoveAurasDueToSpell(spellId);
+        unit_target->RemoveAurasDueToSpell(spellId2);
+    }
 
-    double healthPercentage = (double)unit_target->GetHealth() / (double)unit_target->GetMaxHealth();
-    uint32 form = aura->GetModifier()->m_miscvalue-1;
-
-    if(apply)
+    /*if(apply)
     {
         if(unit_target->m_ShapeShiftForm)
         {
@@ -2431,7 +2437,9 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
 
         if (aura->GetModifier()->m_miscvalue == FORM_TRAVEL)
             unit_target->RemoveAurasDueToSpell(5419);
-    }
+    }*/
 
+    double healthPercentage = (double)unit_target->GetHealth() / (double)unit_target->GetMaxHealth();
+    uint32 form = aura->GetModifier()->m_miscvalue-1;
     unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));
 }

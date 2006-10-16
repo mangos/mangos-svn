@@ -4123,7 +4123,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 {
     Loot    *loot = NULL;
     bool NullLoot = false;
-
+    
     if (IS_GAMEOBJECT_GUID(guid))
     {
         GameObject *go =
@@ -4230,17 +4230,22 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 creature->getSkinLoot();
             }
 
-            // temporary : send empty loot if the player should not be able
-            // to loot the creature
-            if (IsInGroup() && (GetGroupLeader() == recipient->GetGroupLeader()))
+            if (!IsInGroup() && recipient == this)
+                loot->permission = ALL_PERMISSION;
+            else
             {
-                Group *group = objmgr.GetGroupByLeader(GetGroupLeader());
-                if (group && group->GetLootMethod() > 0)
-                    if (group->GetLooterGuid()!=GetGUID() && !loot->released )
-                        NullLoot = true;
+                if (IsInGroup())
+                {
+                    Group *group = objmgr.GetGroupByLeader(recipient->GetGroupLeader());
+                    if ((GetGroupLeader() == recipient->GetGroupLeader()) && (group->GetLooterGuid() == GetGUID() || loot->released))
+                        loot->permission = ALL_PERMISSION;
+                    else
+                        if (GetGroupLeader() == recipient->GetGroupLeader())
+                            loot->permission = GROUP_PERMISSION;
+                        else
+                            loot->permission = NONE_PERMISSION;
+                }
             }
-            else if(recipient->GetGUID()!=GetGUID())
-                NullLoot = true;
        }
     }
 
@@ -4249,12 +4254,6 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     // LOOT_PICKPOKETING unsupported by client, sending LOOT_SKINNING instead
     if(loot_type == LOOT_PICKPOKETING)
         loot_type = LOOT_SKINNING;
-
-    if (NullLoot)
-    {
-        Loot lootnull;
-        loot = &lootnull;
-    }
 
     WorldPacket data;
     data.Initialize (SMSG_LOOT_RESPONSE);

@@ -70,6 +70,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         return;
     }
 
+    if (item->is_blocked)
+        return;
+
     uint16 dest;
     uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, item->itemid, 1, false );
     if ( msg == EQUIP_ERR_OK )
