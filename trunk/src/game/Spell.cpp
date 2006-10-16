@@ -166,6 +166,9 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     m_timer = casttime<0?0:casttime;
     m_delayedTime = 0;
 
+    for(int i=0;i<3;i++)
+        m_needAliveTarget[i] = false;
+
     m_meleeSpell = false;
 
     m_rangedShoot = ((m_spellInfo->Attributes & 18) == 18);
@@ -233,6 +236,8 @@ void Spell::FillTargetMap()
                     break;
             }
         }
+        if(IsChanneledSpell() && !tmpUnitMap.empty())
+            m_needAliveTarget[i] = true;
 
         m_targetUnits[i] = tmpUnitMap;
         m_targetItems[i] = tmpItemMap;
@@ -593,7 +598,7 @@ void Spell::cast()
         SendCastResult(castResult);
         SendSpellGo();
 
-        if(m_spellInfo->ChannelInterruptFlags != 0)
+        if(IsChanneledSpell())
         {
             m_spellState = SPELL_STATE_CASTING;
             SendChannelStart(GetDuration(m_spellInfo));
@@ -840,6 +845,23 @@ void Spell::update(uint32 difftime)
                     // check if player has turned if flag is set
                     if( m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && m_castOrientation != m_caster->GetOrientation() )
                         cancel();
+                }
+
+                // check if there are alive targets left
+                for(int i=0;i<3;i++)
+                {
+                    if(m_needAliveTarget[i])
+                    {
+                        bool targetLeft = false;
+                        for(std::list<Unit*>::iterator iunit= m_targetUnits[i].begin();iunit != m_targetUnits[i].end();++iunit)
+                            if(*iunit && (*iunit)->isAlive())
+                            {
+                                targetLeft = true;
+                                break;
+                            }
+                        if(!targetLeft)
+                            cancel();
+                    }
                 }
 
                 if(difftime >= m_timer)
