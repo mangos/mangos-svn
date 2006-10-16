@@ -114,6 +114,8 @@ class Group
             uint8 totalNeed;
             uint8 totalGreed;
             uint8 totalPass;
+            Loot *loot;
+            uint8 itemSlot;
 		
             Roll()
                 : totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemGUID(0), itemid(0) {}

@@ -1715,7 +1715,7 @@ uint8 Spell::CheckMana(uint32 *mana)
     if(m_spellInfo->manaCostPerlevel)
         manaCost += int32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
     if(m_spellInfo->ManaCostPercentage)
-        manaCost += int32(m_spellInfo->ManaCostPercentage/100*m_caster->GetMaxPower(powerType));
+        manaCost += int32(float(m_spellInfo->ManaCostPercentage)/100.0*m_caster->GetMaxPower(powerType));
 
     Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
@@ -1955,6 +1955,11 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     {
         Field *fields;
         QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
+        if(!result)
+        {
+            sLog.outError( "SPELL: No homebind location set for %i\n", m_caster->GetGUIDLow());
+            return;
+        }
         fields = result->Fetch();
 
         TeleportCoords* TC = new TeleportCoords();
