@@ -495,6 +495,7 @@ class Spell
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
         void ReSetTimer() { m_timer = casttime<0?0:casttime;}
         bool IsMeleeSpell() const { return m_meleeSpell; }
+        bool IsChanneledSpell() const { return m_spellInfo->ChannelInterruptFlags != 0; }
 
     protected:
 
@@ -502,6 +503,7 @@ class Spell
         bool m_autoRepeat;
         bool m_meleeSpell;
         bool m_rangedShoot;
+        bool m_needAliveTarget[3];
 
         // Current targets, to be used in SpellEffects
         Unit* unitTarget;
