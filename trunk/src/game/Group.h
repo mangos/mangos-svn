@@ -21,6 +21,15 @@
 
 #define MAXGROUPSIZE 5
 
+enum RollVote
+{
+    PASS              = 0,
+    NEED              = 1,
+    GREED             = 2,
+    NOT_EMITED_YET    = 3,
+    NOT_VALID         = 4
+};
+
 class Group
 {
     public:
@@ -63,6 +72,7 @@ class Group
         }
 
         uint32 RemoveMember(const uint64 &guid);
+        void RemoveRollsFromMember(const uint64 &guid);
         void ChangeLeader(const uint64 &guid);
 
         bool IsFull() const { return m_count == MAXGROUPSIZE; }
@@ -93,17 +103,20 @@ class Group
             return false;
         }
 
+        int8 GetPlayerGroupSlot(uint64 Guid);
+
         struct Roll
         {
             uint64 itemGUID;
             uint32 itemid;
-            vector<uint64> playersRolling;
-            vector<uint64> totalNeed;
-            vector<uint64> totalGreed;
-            uint32 totalPass;
-			
+            RollVote playerVote[MAXGROUPSIZE];              //vote position correspond with player position (in group)
+            uint8 totalPlayersRolling;
+            uint8 totalNeed;
+            uint8 totalGreed;
+            uint8 totalPass;
+		
             Roll()
-                : totalPass(0), itemGUID(0), itemid(0) {}
+                : totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemGUID(0), itemid(0) {}
         };
 
         void BroadcastToGroup(WorldSession *session, std::string msg);
