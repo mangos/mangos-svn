@@ -561,6 +561,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void RemoveAllAuras();
         void RemoveAllAurasOnDeath();
+        void DelayAura(uint32 spellId, uint32 effindex, int32 delaytime);
         //void SetAura(Aura* Aur){ m_Auras = Aur; }
         bool SetAurDuration(uint32 spellId, uint32 effindex, uint32 duration);
         uint32 GetAurDuration(uint32 spellId, uint32 effindex);
