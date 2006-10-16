@@ -2174,20 +2174,52 @@ void Unit::ApplyStats(bool apply)
 void Unit::_RemoveAllAuraMods()
 {
     ApplyStats(false);
-
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
-        (*i).second->ApplyModifier(false);
-
+    {
+        switch ((*i).second->GetModifier()->m_auraname)
+        {
+            case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+            case SPELL_AURA_MOD_RESISTANCE_PCT:
+                // these are already removed by applystats
+                break;
+            default:
+                (*i).second->ApplyModifier(false);
+        }
+    }
     ApplyStats(true);
+
+    // these must be removed after applystats
+    AuraList& mModTotalStatPct = GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+    for(AuraList::iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
+        (*i)->ApplyModifier(false);
+    AuraList& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
+    for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
+        (*i)->ApplyModifier(false);
 }
 
 void Unit::_ApplyAllAuraMods()
 {
+    // these must be applied before applystats
+    AuraList& mModTotalStatPct = GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+    for(AuraList::iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
+        (*i)->ApplyModifier(true);
+    AuraList& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
+    for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
+        (*i)->ApplyModifier(true);
     ApplyStats(false);
 
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
-        (*i).second->ApplyModifier(true);
-
+    {
+        switch ((*i).second->GetModifier()->m_auraname)
+        {
+            case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+            case SPELL_AURA_MOD_RESISTANCE_PCT:
+                // these are already applied by applystats
+                break;
+            default:
+                (*i).second->ApplyModifier(true);
+        }
+    }
     ApplyStats(true);
 }
 
