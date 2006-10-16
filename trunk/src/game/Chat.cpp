@@ -177,6 +177,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "targetobject",2, &ChatHandler::HandleTargetObjectCommand,     "",   NULL },
         { "delobject",   2, &ChatHandler::HandleDelObjectCommand,        "",   NULL },
         { "shutdown",    3, &ChatHandler::HandleShutDownCommand,         "",   NULL },
+        { "pinfo",       2, &ChatHandler::HandlePInfoCommand,            "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },

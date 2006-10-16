@@ -214,6 +214,8 @@
 #define LANG_NPCINFO_VENDOR              "*** Is a vendor!"
 #define LANG_NPCINFO_TRAINER             "*** Is a trainer!"
 
+#define LANG_PINFO_ACCOUNT               "Player %s (guid: %u) Account: %s (id: %u) GMLevel: %u Last IP: %s"
+
 #define LANG_YOU_SET_EXPLORE_ALL         "%s has explored all zones now."
 #define LANG_YOU_SET_EXPLORE_NOTHING     "%s has no more explored zones."
 #define LANG_YOURS_EXPLORE_SET_ALL       "%s has explored all zones for you."
