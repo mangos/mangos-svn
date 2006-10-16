@@ -400,7 +400,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     {
         DEBUG_LOG("DealDamageAlive");
         pVictim->SetHealth(health - damage);
-        Attack(pVictim);
+        if(GetTypeId() != TYPEID_PLAYER || !m_currentSpell || !m_currentSpell->IsAutoRepeat())
+            Attack(pVictim);
 
         //Get in CombatState
         if(pVictim != this)
