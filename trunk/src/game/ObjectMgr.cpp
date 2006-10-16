@@ -733,7 +733,7 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team  )
                     mount_id = 295;                                 // horde
                     break;
                 case 3574:
-                    mount_id = 1560;                                // undead 
+                    mount_id = 1566;                                // undead 
                     break;
                 //case 17760:
                 //  unknown outer bg mount?
