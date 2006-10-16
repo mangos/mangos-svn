@@ -791,6 +791,45 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
     return true;
 }
 
+bool ChatHandler::HandlePInfoCommand(const char* args)
+{
+    Player* target = NULL;
+
+    char* px = strtok((char*)args, " ");
+    if (px)
+    {
+        target = objmgr.GetPlayer(px);
+    }
+    else
+        target = getSelectedPlayer();
+
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    std::string username = "<error>";
+    std::string last_ip = "<error>";
+
+    QueryResult* result = loginDatabase.PQuery("SELECT `username`, `last_ip` FROM `account` WHERE `id` = '%u'",target->GetSession()->GetAccountId());
+    if(result)
+    {
+        Field* fields = result->Fetch();
+        username = fields[0].GetCppString();
+        if(m_session->GetSecurity() >= target->GetSession()->GetSecurity())
+            last_ip = fields[1].GetCppString();
+        else
+            last_ip = "-";
+
+        delete result;
+    }
+
+    PSendSysMessage(LANG_PINFO_ACCOUNT,  target->GetName(), target->GetGUIDLow(), username.c_str(), target->GetSession()->GetAccountId(), target->GetSession()->GetSecurity(), last_ip.c_str());
+
+    return true;
+}
+
 void ChatHandler::ShowTicket(uint64 guid, uint32 category, char const* text)
 {
     std::string name;
