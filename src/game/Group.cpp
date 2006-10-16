@@ -31,7 +31,7 @@ void Group::ChangeLeader(const uint64 &guid)
 {
     WorldPacket data;
     Player *player;
-    uint32 i = GetPlayerGroupSlot(guid);
+    int32 i = GetPlayerGroupSlot(guid);
     ASSERT( i >= 0 );
 
     m_leaderGuid=guid;
