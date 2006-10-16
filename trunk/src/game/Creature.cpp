@@ -1275,7 +1275,7 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
         }*/
         if(spellInfo->manaCost > GetPower(POWER_MANA))
             continue;
-        SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
+        SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetMaxRange(srange);
         float minrange = GetMinRange(srange);
         float dist = GetDistanceSq(pVictim);

@@ -223,7 +223,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         }
     }
 
-    emoteentry *em = sEmoteStore.LookupEntry(text_emote);
+    EmotesTextEntry *em = sEmotesTextStore.LookupEntry(text_emote);
     if (em)
     {
         uint32 emote_anim = em->textid;

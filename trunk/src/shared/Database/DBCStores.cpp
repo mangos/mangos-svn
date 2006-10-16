@@ -31,29 +31,29 @@ typedef std::map<uint16,uint32> AreaFlagByAreaID;
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 static AreaFlagByAreaID sAreaFlagByAreaID;
 
-DBCStorage <CreatureFamily> sCreatureFamilyStore(CreatureFamilyfmt);
+DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
 
-DBCStorage <emoteentry> sEmoteStore(emoteentryfmt);
+DBCStorage <EmotesTextEntry> sEmotesTextStore(emoteentryfmt);
 
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
 DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
 
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
-DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore(ItemDisplayTemplateEntryfmt);
-DBCStorage <ItemRandomProperties> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
+DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt);
+DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
 
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
 
-DBCStorage <SkillLine> sSkillLineStore(SkillLinefmt);
-DBCStorage <SkillLineAbility> sSkillLineAbilityStore(SkillLineAbilityfmt);
+DBCStorage <SkillLineEntry> sSkillLineStore(SkillLinefmt);
+DBCStorage <SkillLineAbilityEntry> sSkillLineAbilityStore(SkillLineAbilityfmt);
 
-DBCStorage <SpellItemEnchantment> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
+DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
 DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
-DBCStorage <SpellCastTime> sCastTime(SpellCastTimefmt);
-DBCStorage <SpellDuration> sSpellDuration(SpellDurationfmt);
-//DBCStorage <SpellFocusObject> sSpellFocusObject(SpellFocusObjectfmt);
-DBCStorage <SpellRadius> sSpellRadius(SpellRadiusfmt);
-DBCStorage <SpellRange> sSpellRange(SpellRangefmt);
+DBCStorage <SpellCastTimesEntry> sCastTimesStore(SpellCastTimefmt);
+DBCStorage <SpellDurationEntry> sSpellDurationStore(SpellDurationfmt);
+//DBCStorage <SpellFocusObjectEntry> sSpellFocusObjectStore(SpellFocusObjectfmt);
+DBCStorage <SpellRadiusEntry> sSpellRadiusStore(SpellRadiusfmt);
+DBCStorage <SpellRangeEntry> sSpellRangeStore(SpellRangefmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 DBCStorage <TaxiNodesEntry> sTaxiNodesStore(TaxiNodesEntryfmt);
 
@@ -130,22 +130,22 @@ void LoadDBCStores(std::string dataPath)
             sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
 
     LoadDBC(bar,bad_dbc_files,sCreatureFamilyStore,      dataPath+"dbc/CreatureFamily.dbc");
-    LoadDBC(bar,bad_dbc_files,sEmoteStore,               dataPath+"dbc/EmotesText.dbc");
+    LoadDBC(bar,bad_dbc_files,sEmotesTextStore,          dataPath+"dbc/EmotesText.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionStore,             dataPath+"dbc/Faction.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionTemplateStore,     dataPath+"dbc/FactionTemplate.dbc");
-    LoadDBC(bar,bad_dbc_files,sItemDisplayTemplateStore, dataPath+"dbc/ItemDisplayInfo.dbc");
+    LoadDBC(bar,bad_dbc_files,sItemDisplayInfoStore,     dataPath+"dbc/ItemDisplayInfo.dbc");
     LoadDBC(bar,bad_dbc_files,sItemRandomPropertiesStore,dataPath+"dbc/ItemRandomProperties.dbc");
     LoadDBC(bar,bad_dbc_files,sItemSetStore,             dataPath+"dbc/ItemSet.dbc");
     LoadDBC(bar,bad_dbc_files,sLockStore,                dataPath+"dbc/Lock.dbc");
     LoadDBC(bar,bad_dbc_files,sSkillLineStore,           dataPath+"dbc/SkillLine.dbc");
     LoadDBC(bar,bad_dbc_files,sSkillLineAbilityStore,    dataPath+"dbc/SkillLineAbility.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellStore,               dataPath+"dbc/Spell.dbc");
-    LoadDBC(bar,bad_dbc_files,sCastTime,                 dataPath+"dbc/SpellCastTimes.dbc");
-    LoadDBC(bar,bad_dbc_files,sSpellDuration,            dataPath+"dbc/SpellDuration.dbc");
-    //LoadDBC(bar,bad_dbc_files,sSpellFocusObject,         dataPath+"dbc/SpellFocusObject.dbc");
+    LoadDBC(bar,bad_dbc_files,sCastTimesStore,           dataPath+"dbc/SpellCastTimes.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellDurationStore,       dataPath+"dbc/SpellDuration.dbc");
+    //LoadDBC(bar,bad_dbc_files,sSpellFocusObjectStore,    dataPath+"dbc/SpellFocusObject.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellItemEnchantmentStore,dataPath+"dbc/SpellItemEnchantment.dbc");
-    LoadDBC(bar,bad_dbc_files,sSpellRadius,              dataPath+"dbc/SpellRadius.dbc");
-    LoadDBC(bar,bad_dbc_files,sSpellRange,               dataPath+"dbc/SpellRange.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellRadiusStore,         dataPath+"dbc/SpellRadius.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellRangeStore,          dataPath+"dbc/SpellRange.dbc");
     LoadDBC(bar,bad_dbc_files,sTalentStore,              dataPath+"dbc/Talent.dbc");
     LoadDBC(bar,bad_dbc_files,sTaxiNodesStore,           dataPath+"dbc/TaxiNodes.dbc");
     
@@ -197,7 +197,7 @@ void LoadDBCStores(std::string dataPath)
     sLog.outString( "" );
 }
 
-float GetRadius(SpellRadius *radius)
+float GetRadius(SpellRadiusEntry *radius)
 {
     if(radius)
         return radius->Radius;
@@ -205,7 +205,7 @@ float GetRadius(SpellRadius *radius)
         return 0;
 }
 
-uint32 GetCastTime(SpellCastTime *time)
+uint32 GetCastTime(SpellCastTimesEntry *time)
 {
     if(time)
         return time->CastTime;
@@ -213,7 +213,7 @@ uint32 GetCastTime(SpellCastTime *time)
         return 0;
 }
 
-float GetMaxRange(SpellRange *range)
+float GetMaxRange(SpellRangeEntry *range)
 {
     if(range)
         return range->maxRange;
@@ -221,7 +221,7 @@ float GetMaxRange(SpellRange *range)
         return 0;
 }
 
-float GetMinRange(SpellRange *range)
+float GetMinRange(SpellRangeEntry *range)
 {
     if(range)
         return range->minRange;
@@ -233,7 +233,7 @@ int32 GetDuration(SpellEntry *spellInfo)
 {
     if(!spellInfo)
         return 0;
-    SpellDuration *du = sSpellDuration.LookupEntry(spellInfo->DurationIndex);
+    SpellDurationEntry *du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
     if(!du)
         return 0;
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
@@ -243,7 +243,7 @@ char* GetPetName(uint32 petfamily)
 {
     if(!petfamily)
         return NULL;
-    CreatureFamily *pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
+    CreatureFamilyEntry *pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
     if(!pet_family)
         return NULL;
     return pet_family->Name?pet_family->Name:NULL;

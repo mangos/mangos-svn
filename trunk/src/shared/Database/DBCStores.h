@@ -62,10 +62,10 @@ enum SpellFamilyNames
     SPELLFAMILY_POTION = 13
 };
 
-float GetRadius(SpellRadius *radius);
-uint32 GetCastTime(SpellCastTime *time);
-float GetMinRange(SpellRange *range);
-float GetMaxRange(SpellRange *range);
+float GetRadius(SpellRadiusEntry *radius);
+uint32 GetCastTime(SpellCastTimesEntry *time);
+float GetMinRange(SpellRangeEntry *range);
+float GetMaxRange(SpellRangeEntry *range);
 int32 GetDuration(SpellEntry *spellInfo);
 char* GetPetName(uint32 petfamily);
 uint32 FindSpellRank(uint32 spellId);
@@ -131,28 +131,28 @@ class DBCStorage
         DBCFile * dbc;
 };
 
-//extern DBCStorage <AreaTableEntry>           sAreaStore; -- accessed using 2 functions
-extern DBCStorage <CreatureFamily>           sCreatureFamilyStore;
-extern DBCStorage <SpellCastTime>            sCastTime;
-extern DBCStorage <emoteentry>               sEmoteStore;
-extern DBCStorage <FactionEntry>             sFactionStore;
-extern DBCStorage <FactionTemplateEntry>     sFactionTemplateStore;
-extern DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore;
-extern DBCStorage <ItemRandomProperties>     sItemRandomPropertiesStore;
-extern DBCStorage <ItemSetEntry>             sItemSetStore;
-extern DBCStorage <LockEntry>                sLockStore;
-extern DBCStorage <SkillLine>                sSkillLineStore;
-extern DBCStorage <SkillLineAbility>         sSkillLineAbilityStore;
-extern DBCStorage <SpellDuration>            sSpellDuration;
-//extern DBCStorage <SpellFocusObject>         sSpellFocusObject;
-extern DBCStorage <SpellItemEnchantment>     sSpellItemEnchantmentStore;
-extern DBCStorage <SpellRadius>              sSpellRadius;
-extern DBCStorage <SpellRange>               sSpellRange;
-extern DBCStorage <SpellEntry>               sSpellStore;
-extern DBCStorage <TalentEntry>              sTalentStore;
-extern DBCStorage <TaxiNodesEntry>           sTaxiNodesStore;
-extern TaxiPathSetBySource                   sTaxiPathSetBySource;
-extern TaxiPathNodesByPath                   sTaxiPathNodesByPath;
+//extern DBCStorage <AreaTableEntry>            sAreaStore; -- accessed using 2 functions
+extern DBCStorage <CreatureFamilyEntry>       sCreatureFamilyStore;
+extern DBCStorage <SpellCastTimesEntry>       sCastTimesStore;
+extern DBCStorage <EmotesTextEntry>           sEmotesTextStore;
+extern DBCStorage <FactionEntry>              sFactionStore;
+extern DBCStorage <FactionTemplateEntry>      sFactionTemplateStore;
+extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore;
+extern DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore;
+extern DBCStorage <ItemSetEntry>              sItemSetStore;
+extern DBCStorage <LockEntry>                 sLockStore;
+extern DBCStorage <SkillLineEntry>            sSkillLineStore;
+extern DBCStorage <SkillLineAbilityEntry>     sSkillLineAbilityStore;
+extern DBCStorage <SpellDurationEntry>        sSpellDurationStore;
+//extern DBCStorage <SpellFocusObjectEntry>     sSpellFocusObjectStore;
+extern DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore;
+extern DBCStorage <SpellRadiusEntry>          sSpellRadiusStore;
+extern DBCStorage <SpellRangeEntry>           sSpellRangeStore;
+extern DBCStorage <SpellEntry>                sSpellStore;
+extern DBCStorage <TalentEntry>               sTalentStore;
+extern DBCStorage <TaxiNodesEntry>            sTaxiNodesStore;
+extern TaxiPathSetBySource                    sTaxiPathSetBySource;
+extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;
 
 void LoadDBCStores(std::string dataPath);
 #endif

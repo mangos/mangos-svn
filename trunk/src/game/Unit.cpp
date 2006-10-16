@@ -1889,7 +1889,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             }
 
             Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
-            float radius =  GetRadius(sSpellRadius.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
+            float radius =  GetRadius(sSpellRadiusStore.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
@@ -2317,8 +2317,7 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
     if(!item)
         return;
 
-    SpellItemEnchantment *pEnchant;
-    pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+    SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if(!pEnchant)
         return;
     uint32 enchant_display = pEnchant->display_type;
@@ -2928,7 +2927,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     // Damage Done
     int32 AdvertisedBenefit = 0;
     uint32 PenaltyFactor = 0;
-    uint32 CastingTime = GetCastTime(sCastTime.LookupEntry(spellProto->CastingTimeIndex));
+    uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 3500) CastingTime = 3500;
     if (CastingTime < 1500) CastingTime = 1500;
 

@@ -53,7 +53,7 @@ TotemAI::MoveInLineOfSight(Unit *u)
 
         SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
         if (!spellInfo) return;
-        SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
+        SpellRange* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float max_range = GetMaxRange(srange);
 
         if (i_totem.GetDistanceSq(u) < max_range * max_range)
@@ -85,7 +85,7 @@ TotemAI::UpdateAI(const uint32 diff)
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
     if (!spellInfo) return;
-    SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
+    SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
     float max_range = GetMaxRange(srange);
 
     Unit *victim = ObjectAccessor::Instance().GetUnit(*(Unit*)&i_totem, i_victimGuid);

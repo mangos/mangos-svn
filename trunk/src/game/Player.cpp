@@ -2646,7 +2646,7 @@ bool Player::UpdateSkill(uint32 skill_id)
 
 void Player::UpdateSkillPro(uint32 spellid)
 {
-    SkillLineAbility *pAbility = sSkillLineAbilityStore.LookupEntry(spellid);
+    SkillLineAbilityEntry *pAbility = sSkillLineAbilityStore.LookupEntry(spellid);
     if(!pAbility)
         return;
     uint32 minValue = pAbility->min_value;
@@ -2864,7 +2864,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             {
                 next++;
                 if(itr->second->state == PLAYERSPELL_REMOVED) continue;
-                SkillLineAbility *ability = sSkillLineAbilityStore.LookupEntry(itr->first);
+                SkillLineAbilityEntry *ability = sSkillLineAbilityStore.LookupEntry(itr->first);
                 if (ability && ability->skillId == id)
                     removeSpell(itr->first);
             }
@@ -2875,7 +2875,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
         for (i=0; i < PLAYER_MAX_SKILLS; i++)
             if (!GetUInt32Value(PLAYER_SKILL(i)))
         {
-            SkillLine *pSkill = sSkillLineStore.LookupEntry(id);
+            SkillLineEntry *pSkill = sSkillLineStore.LookupEntry(id);
             if(!pSkill)
             {
                 sLog.outError("Skill not found in SkillLineStore: skill #%u", id);
@@ -4022,8 +4022,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     for(int e_slot = 0; e_slot < 7; e_slot++)
     {
         uint32 enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+e_slot*3);
-        SpellItemEnchantment *pEnchant;
-        pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
         uint32 enchant_display = pEnchant->display_type;
         uint32 chance = pEnchant->value1 != 0 ? pEnchant->value1 : GetWeaponProcChance();
@@ -7136,8 +7135,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                     uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                     if( Enchant_id)
                     {
-                        SpellItemEnchantment *pEnchant;
-                        pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
+                        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
                         if(!pEnchant)
                             continue;
                         uint32 enchant_display = pEnchant->display_type;

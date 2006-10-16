@@ -1061,7 +1061,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
         {
             SpellEntry *spellInfo = sSpellStore.LookupEntry(i);
-            SkillLineAbility *skillLine = sSkillLineAbilityStore.LookupEntry(i);
+            SkillLineAbilityEntry *skillLine = sSkillLineAbilityStore.LookupEntry(i);
             if (skillLine && spellInfo && spellInfo->SpellFamilyName == family && !m_session->GetPlayer()->HasSpell(i))
                 m_session->GetPlayer()->learnSpell((uint16)i);
         }
@@ -2700,7 +2700,7 @@ bool ChatHandler::HandleFixUnlearnCommand(const char * args)
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
     {
         uint32 id = player->GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
-        SkillLine *pSkill = sSkillLineStore.LookupEntry(id);
+        SkillLineEntry *pSkill = sSkillLineStore.LookupEntry(id);
         // enable unlearn button for professions only
         if (pSkill && pSkill->categoryId == 11)
             player->SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));

@@ -563,7 +563,7 @@ namespace MaNGOS
         SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i) : i_data(data), i_spell(spell), i_index(i) {}
         inline void Visit(PlayerMapType &m)
         {
-            float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
+            float radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
 
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
@@ -590,7 +590,7 @@ namespace MaNGOS
 
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
         {
-            float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
+            float radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
             for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
                 if( !itr->second->isAlive() )
