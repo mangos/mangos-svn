@@ -40,6 +40,13 @@ enum LootMethod
     NEED_BEFORE_GREED = 4
 };
 
+enum Permission
+{
+    ALL_PERMISSION        =0,
+    GROUP_PERMISSION      =1,
+    NONE_PERMISSION       =3
+};
+
 using std::vector;
 using std::list;
 
@@ -53,13 +60,13 @@ struct LootItem
     float   questchance;
     uint8   count;
     bool    is_looted;
+    bool    is_blocked;
     
-
     LootItem()
-        : itemid(0), displayid(0), chance(0), questchance(0), is_looted(true), count(1) {}
+        : itemid(0), displayid(0), chance(0), questchance(0), is_looted(true), count(1), is_blocked(false) {}
 
     LootItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance, uint8 _count = 0)
-        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), count(_count), is_looted(false) {}
+        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), count(_count), is_looted(false), is_blocked(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
@@ -72,8 +79,9 @@ struct Loot
     vector<LootItem> items;
     uint32 gold;
     bool released;
+    Permission permission;
 
-    Loot(uint32 _gold = 0) : gold(_gold), released(false) {}
+    Loot(uint32 _gold = 0) : gold(_gold), released(false), permission(ALL_PERMISSION) {}
 
     ~Loot()
     {
@@ -114,17 +122,40 @@ inline ByteBuffer& operator<<(ByteBuffer& b, LootItem& li)
 
 inline ByteBuffer& operator<<(ByteBuffer& b, Loot& l)
 {
-    b << l.gold;
+    uint8 itemsShown = 0;
 
-    uint8 unlootedCount = 0;
-    for (uint8 i = 0; i < l.items.size(); i++)
-        if (!l.items[i].is_looted) unlootedCount++;
-    b << unlootedCount;
+    switch (l.permission)
+    {
+    case NONE_PERMISSION:
+        {
+            b << uint32(0);  //gold
+            b << itemsShown;
+        }
+        break;
+    case GROUP_PERMISSION:  // You are not the items propietary, so you can only see blocked rolled items (TODO: and quest items)
+        {
+            b << uint32(0);  //gold
+            for (uint8 i = 0; i < l.items.size(); i++)
+                if (!l.items[i].is_looted && l.items[i].is_blocked) itemsShown++;
+            b << itemsShown;
 
-    for (uint8 i = 0; i < l.items.size(); i++)
-        if (!l.items[i].is_looted)
-            b << uint8(i) << l.items[i];
+            for (uint8 i = 0; i < l.items.size(); i++)
+                if (!l.items[i].is_looted && l.items[i].is_blocked)
+                    b << uint8(i) << l.items[i];
+        }
+        break;
+    default:
+        {
+            b << l.gold;        
+            for (uint8 i = 0; i < l.items.size(); i++)
+                if (!l.items[i].is_looted) itemsShown++;
+            b << itemsShown;
 
+            for (uint8 i = 0; i < l.items.size(); i++)
+                if (!l.items[i].is_looted)
+                    b << uint8(i) << l.items[i];
+        }
+    }
     return b;
 }
 #endif
