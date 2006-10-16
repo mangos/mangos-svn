@@ -45,6 +45,7 @@ namespace MaNGOS
 
                     if(plr->GetGUID() == guid)
                     {
+                        delete result;
                         return standing;
                     }
                 }
