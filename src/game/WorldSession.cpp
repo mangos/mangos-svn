@@ -491,6 +491,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_LOOT_ROLL,                STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      },
         { CMSG_WARDEN_DATA,              STATUS_LOGGEDIN, &WorldSession::HandleWardenDataOpcode              },
         { CMSG_WORLD_TELEPORT,           STATUS_LOGGEDIN, &WorldSession::HandleWorldTeleportOpcode           },
+        { MSG_MINIMAP_PING,              STATUS_LOGGEDIN, &WorldSession::HandleMinimapPingOpcode             },
+        { MSG_RANDOM_ROLL,               STATUS_LOGGEDIN, &WorldSession::HandleRandomRollOpcode              },
 
         { 0,                             0,               NULL                                               }
     };

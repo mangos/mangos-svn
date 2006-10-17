@@ -28,6 +28,32 @@
 #include "Group.h"
 #include "ObjectAccessor.h"
 
+void WorldSession::SendToGroup(WorldPacket* data, bool to_self)
+{
+    Group *group = objmgr.GetGroupByLeader( GetPlayer()->GetGroupLeader() );
+
+    if (group == NULL)
+    {
+        if(to_self)
+            SendPacket(data);
+        return;
+    }
+
+    for (uint32 i = 0; i < group->GetMembersCount(); i++)
+    {
+        Player* player = ObjectAccessor::Instance().FindPlayer( group->GetMemberGUID(i) );
+        if (!player)
+            continue;
+
+        if(player == GetPlayer() && !to_self)
+            continue;
+
+        player->GetSession()->SendPacket( data );
+    }
+}
+
+
+
 void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -420,4 +446,48 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     //data << uint8(0);    //data << uint8(0x10);    //data << uint16(0x00);
     //SendPacket( &data );
     //sLog.outDebug("WORLD SEND SMSG_PARTY_MEMBER_STATS");
+}
+
+void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
+{
+    float x, y;
+    WorldPacket data;
+
+    recv_data >> x;
+    recv_data >> y;
+
+    sLog.outDebug("Received opcode MSG_MINIMAP_PING X: %f, Y: %f", x, y);
+
+    data.Initialize(MSG_MINIMAP_PING);
+    data << uint64(0);
+    data << x;
+    data << y;
+    SendToGroup(&data,true);
+}
+
+void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
+{
+    sLog.outDebug("Received opcode MSG_RANDOM_ROLL");
+    uint32 minimum, maximum, roll;
+    WorldPacket data;
+
+    recv_data >> minimum;
+    recv_data >> maximum;
+
+    if(minimum > maximum)
+        return;
+
+    if(maximum > 10000)                                     // < 32768 for urand call
+        return;
+
+    roll = urand(minimum, maximum);
+
+    sLog.outDebug("ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
+
+    data.Initialize(MSG_RANDOM_ROLL);
+    data << minimum;
+    data << maximum;
+    data << roll;
+    data << GetPlayer()->GetGUID();
+    SendToGroup( &data , true );
 }
