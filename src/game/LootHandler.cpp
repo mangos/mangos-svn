@@ -149,7 +149,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
             {
                 (*i)->ModifyMoney( uint32((pLoot->gold)/(playersNear.size())) );
                 //Offset surely incorrect, but works
-				data.Initialize( SMSG_LOOT_MONEY_NOTIFY );
+                data.Initialize( SMSG_LOOT_MONEY_NOTIFY );
                 data << uint32((pLoot->gold)/(playersNear.size()));
                 (*i)->GetSession()->SendPacket( &data );
             }
@@ -157,7 +157,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
         else
         {
             player->ModifyMoney( pLoot->gold );
-        } 
+        }
         pLoot->gold = 0;
         pLoot->NotifyMoneyRemoved();
     }
@@ -225,7 +225,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             Group *group = objmgr.GetGroupByLeader(recipient->GetGroupLeader());
             if (group->GetLooterGuid() == player->GetGUID())
                 loot->released = true;
-        } 
+        }
 
         vector<LootItem>::iterator i;
         i = find_if(loot->items.begin(), loot->items.end(),

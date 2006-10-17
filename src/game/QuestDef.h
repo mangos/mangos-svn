@@ -38,7 +38,7 @@ enum
     INVALIDREASON_HAVE_TIMED_QUEST     = 12,
     INVALIDREASON_HAVE_QUEST           = 13,
     INVALIDREASON_DONT_HAVE_REQ_ITEMS  = 19+1,
-    INVALIDREASON_DONT_HAVE_REQ_MONEY  = 21+1,    //1.12.1
+    INVALIDREASON_DONT_HAVE_REQ_MONEY  = 21+1,              //1.12.1
 };
 
 enum
@@ -195,8 +195,8 @@ struct QuestInfo
     float PointX;
     float PointY;
     uint32 PointOpt;
-    uint32 DetailsEmote; 
-    uint32 IncompleteEmote; 
+    uint32 DetailsEmote;
+    uint32 IncompleteEmote;
     uint32 CompleteEmote;
 
     // simple data access functions

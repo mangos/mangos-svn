@@ -146,7 +146,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
         char buf0[256];
         sprintf((char*)buf0,LANG_APPEARING_TO, m_session->GetPlayer()->GetName());
-    
+
         WorldPacket data;
         FillSystemMessageData(&data, m_session, buf0);
         chr->GetSession()->SendPacket(&data);

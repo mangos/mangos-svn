@@ -285,7 +285,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
     {
         // Add to taximask middle hubs in taxicheat mode (to privent haveing player with disbaled taxicheat and not having back flight path)
         if (GetPlayer()->isTaxiCheater())
-        { 
+        {
             uint8 field = (uint8)((sourcenode - 1) / 32);
             uint32 submask = 1<<((sourcenode-1)%32);
             if((GetPlayer( )->GetTaximask(field) & submask) != submask )

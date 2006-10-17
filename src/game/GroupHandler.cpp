@@ -52,8 +52,6 @@ void WorldSession::SendToGroup(WorldPacket* data, bool to_self)
     }
 }
 
-
-
 void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -422,7 +420,7 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     recv_data >> NumberOfPlayers;
     recv_data >> Choise;                                    //0: pass, 1: need, 2: greed
     recv_data.hexlike();
-    
+
     sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
 
     if (GetPlayer()->IsInGroup())

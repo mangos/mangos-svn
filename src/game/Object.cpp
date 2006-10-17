@@ -662,7 +662,6 @@ bool Object::hasInvolvedQuest(uint32 quest_id)
     return false;
 }
 
-
 bool Object::PrintIndexError(uint32 index, bool set) const
 {
     sLog.outError("ERROR: Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u",(set ? "set value to" : "get value from"),index,m_valuesCount,GetTypeId(),m_objectType);

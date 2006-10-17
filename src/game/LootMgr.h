@@ -61,7 +61,7 @@ struct LootItem
     uint8   count;
     bool    is_looted;
     bool    is_blocked;
-    
+
     LootItem()
         : itemid(0), displayid(0), chance(0), questchance(0), is_looted(true), count(1), is_blocked(false) {}
 
@@ -126,15 +126,15 @@ inline ByteBuffer& operator<<(ByteBuffer& b, Loot& l)
 
     switch (l.permission)
     {
-    case NONE_PERMISSION:
+        case NONE_PERMISSION:
         {
-            b << uint32(0);  //gold
+            b << uint32(0);                                 //gold
             b << itemsShown;
         }
         break;
-    case GROUP_PERMISSION:  // You are not the items propietary, so you can only see blocked rolled items (TODO: and quest items)
+        case GROUP_PERMISSION:                              // You are not the items propietary, so you can only see blocked rolled items (TODO: and quest items)
         {
-            b << uint32(0);  //gold
+            b << uint32(0);                                 //gold
             for (uint8 i = 0; i < l.items.size(); i++)
                 if (!l.items[i].is_looted && l.items[i].is_blocked) itemsShown++;
             b << itemsShown;
@@ -144,9 +144,9 @@ inline ByteBuffer& operator<<(ByteBuffer& b, Loot& l)
                     b << uint8(i) << l.items[i];
         }
         break;
-    default:
+        default:
         {
-            b << l.gold;        
+            b << l.gold;
             for (uint8 i = 0; i < l.items.size(); i++)
                 if (!l.items[i].is_looted) itemsShown++;
             b << itemsShown;

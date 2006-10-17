@@ -186,7 +186,7 @@ enum AuraState
     AURA_STATE_UNKNOWN1       = 4,
     AURA_STATE_JUDGEMENT      = 5,
     AURA_STATE_UNKNOWN2       = 6,
-    AURA_STATE_PARRY          = 7                            // unsure.   
+    AURA_STATE_PARRY          = 7                           // unsure.
 };
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,

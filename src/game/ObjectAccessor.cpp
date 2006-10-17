@@ -125,7 +125,6 @@ Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32
     return NULL;
 }
 
-
 Player*
 ObjectAccessor::GetPlayer(Unit const &u, uint64 guid)
 {
