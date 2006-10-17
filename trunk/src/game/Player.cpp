@@ -2563,8 +2563,6 @@ void Player::RepopAtGraveyard()
 
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
 
-        delete ClosestGrave;
-
         if(Corpse* corpse = GetCorpse())
             corpse->UpdateForPlayer(this,true);
     }
