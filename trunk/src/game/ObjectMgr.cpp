@@ -718,26 +718,26 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team  )
             switch(node->alliance_mount_type)
             {
                 case 541:
-                    mount_id = 1147;                                // alliance
+                    mount_id = 1147;                        // alliance
                     break;
                 case 3837:
-                    mount_id = 479;                                 // nightelf
+                    mount_id = 479;                         // nightelf
                     break;
                 //case 17760:
                 //  unknown outer bg mount?
             }
-        else if (team == HORDE)
-            switch(node->horde_mount_type)
-            {
-                case 2224:
-                    mount_id = 295;                                 // horde
-                    break;
-                case 3574:
-                    mount_id = 1566;                                // undead 
-                    break;
+            else if (team == HORDE)
+                switch(node->horde_mount_type)
+                {
+                    case 2224:
+                        mount_id = 295;                     // horde
+                        break;
+                    case 3574:
+                        mount_id = 1566;                    // undead
+                        break;
                 //case 17760:
                 //  unknown outer bg mount?
-            }
+                }
 
     }
 
@@ -788,7 +788,8 @@ WorldSafeLocsEntry *ObjectMgr::GetClosestGraveYard(float x, float y, float z, ui
     WorldSafeLocsEntry* entryNear = NULL;
     WorldSafeLocsEntry* entryFar = NULL;
 
-    do{
+    do
+    {
         Field *fields = result->Fetch();
         uint32 g_id   = fields[0].GetUInt32();
         uint32 g_team = fields[1].GetUInt32();

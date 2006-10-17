@@ -618,7 +618,7 @@ void Aura::_AddAura()
         {
             /* TODO: increase count */
         }
-        
+
         if(GetSpellProto()->SpellVisual == 5622)
             m_target->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
         SetAuraSlot( slot );

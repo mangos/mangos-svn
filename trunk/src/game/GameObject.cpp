@@ -48,7 +48,7 @@ GameObject::GameObject() : Object()
 
 GameObject::~GameObject()
 {
-    if(m_uint32Values)                                      // field array can be not exist if GameOBject not loaded 
+    if(m_uint32Values)                                      // field array can be not exist if GameOBject not loaded
     {
         // crash possable at access to deleted GO in Unit::m_gameobj
         uint64 owner_guid = GetOwnerGUID();

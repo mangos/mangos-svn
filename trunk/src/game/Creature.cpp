@@ -906,7 +906,6 @@ void Creature::SetLootRecipient(Player *player)
     else m_lootRecipient = player->GetGUID();
 }
 
-
 void Creature::SaveToDB()
 {
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());

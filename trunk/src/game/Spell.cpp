@@ -855,10 +855,10 @@ void Spell::update(uint32 difftime)
                         bool targetLeft = false;
                         for(std::list<Unit*>::iterator iunit= m_targetUnits[i].begin();iunit != m_targetUnits[i].end();++iunit)
                             if(*iunit && (*iunit)->isAlive())
-                            {
-                                targetLeft = true;
-                                break;
-                            }
+                        {
+                            targetLeft = true;
+                            break;
+                        }
                         if(!targetLeft)
                             cancel();
                     }

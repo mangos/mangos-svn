@@ -1533,7 +1533,7 @@ void Player::SendInitialSpells()
 
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if(itr->second->state == PLAYERSPELL_REMOVED) 
+        if(itr->second->state == PLAYERSPELL_REMOVED)
             continue;
 
         if(itr->second->active)
@@ -1546,7 +1546,7 @@ void Player::SendInitialSpells()
 
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if(itr->second->state == PLAYERSPELL_REMOVED) 
+        if(itr->second->state == PLAYERSPELL_REMOVED)
             continue;
 
         if(!itr->second->active)
@@ -4120,7 +4120,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 {
     Loot    *loot = NULL;
     bool NullLoot = false;
-    
+
     if (IS_GAMEOBJECT_GUID(guid))
     {
         GameObject *go =
@@ -4237,13 +4237,13 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     if ((GetGroupLeader() == recipient->GetGroupLeader()) && (group->GetLooterGuid() == GetGUID() || loot->released))
                         loot->permission = ALL_PERMISSION;
                     else
-                        if (GetGroupLeader() == recipient->GetGroupLeader())
-                            loot->permission = GROUP_PERMISSION;
-                        else
-                            loot->permission = NONE_PERMISSION;
+                    if (GetGroupLeader() == recipient->GetGroupLeader())
+                        loot->permission = GROUP_PERMISSION;
+                    else
+                        loot->permission = NONE_PERMISSION;
                 }
             }
-       }
+        }
     }
 
     m_lootGuid = guid;
@@ -4279,7 +4279,7 @@ void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
     data.Initialize( SMSG_LOOT_REMOVED );
     data << uint8(lootSlot);
     GetSession()->SendPacket( &data );
-} 
+}
 
 void Player::SendUpdateWordState(uint16 Field, uint16 Value)
 {
@@ -8815,7 +8815,7 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
                         continue;
 
                     uint32 reqTarget = 0;
-                    // GO activate objective 
+                    // GO activate objective
                     if(qInfo->ReqCreatureOrGOId[j] < 0)
                     {
                         reqTarget = - qInfo->ReqCreatureOrGOId[j];
@@ -8830,7 +8830,7 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
                     // other not creature/GO related obejctives
                     else
                         continue;
-                       
+
                     if ( reqTarget == entry )
                     {
                         reqCastCount = qInfo->ReqCreatureOrGOCount[j];
@@ -8890,27 +8890,27 @@ bool Player::HaveQuestForItem( uint32 itemid )
             if (!qs.m_quest) continue;
             QuestInfo const* qinfo = qs.m_quest->GetQuestInfo();
 
-            // There should be no mixed ReqItem/ReqSource drop 
+            // There should be no mixed ReqItem/ReqSource drop
             // This part for ReqItem drop
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {   
+            {
                 if(itemid == qinfo->ReqItemId[j] && qs.m_itemcount[j] < qinfo->ReqItemCount[j] )
                     return true;
             }
             // This part - for ReqSource
             for (int j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; j++)
-            {   
+            {
                 // examined item is a source item
                 if (qinfo->ReqSourceId[j] == itemid && qinfo->ReqSourceRef[j] > 0 && qinfo->ReqSourceRef[j] <= QUEST_OBJECTIVES_COUNT)
                 {
                     uint32 idx = qinfo->ReqSourceRef[j]-1;
                     // total count of created ReqItems and SourceItems is less than ReqItemCount
-                    if(qinfo->ReqItemId[idx] != 0 && 
+                    if(qinfo->ReqItemId[idx] != 0 &&
                         qs.m_itemcount[idx] + GetItemCount(itemid)+ GetBankItemCount(itemid) < qinfo->ReqItemCount[idx])
                         return true;
 
                     // total count of casted ReqCreatureOrGOs and SourceItems is less than ReqCreatureOrGOCount
-                    if (qinfo->ReqCreatureOrGOId[idx] != 0 && 
+                    if (qinfo->ReqCreatureOrGOId[idx] != 0 &&
                         qs.m_creatureOrGOcount[idx] + GetItemCount(itemid)+ GetBankItemCount(itemid) < qinfo->ReqCreatureOrGOCount[idx])
                         return true;
                 }

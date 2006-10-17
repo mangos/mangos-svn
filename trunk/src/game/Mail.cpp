@@ -571,7 +571,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
         data << uint32(0);
         data << uint32(MAIL_ERR_INTERNAL_ERROR);
         delete item;
-   }
+    }
 
     SendPacket(&data);
 }

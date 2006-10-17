@@ -295,4 +295,3 @@ struct WorldSafeLocsEntry
     float     y;
     float     z;
 };
-

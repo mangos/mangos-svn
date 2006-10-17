@@ -164,7 +164,7 @@ void Group::RemoveRollsFromMember(const uint64 &guid)
         for( int j = pos + 1; j < m_count; j++ )
             it->playerVote[j-1] = it->playerVote[j];
 
-        CountTheRoll(guid, it->itemGUID, m_count-1, 3); 
+        CountTheRoll(guid, it->itemGUID, m_count-1, 3);
     }
 }
 
@@ -213,7 +213,7 @@ void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry,
     data << uint32(0);                                      // unknown
     data << ItemInfo;                                       // ItemInfo this is related to special additionals to a item
     data << RollNumber;                                     // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
-    data << RollType;                                       // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll 
+    data << RollType;                                       // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
 
     for (int i = 0; i < m_count; i++)
     {
@@ -281,7 +281,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
             r.itemGUID = newitemGUID;
             r.itemid = i->itemid;
-            
+
             //a vector is filled with only near party members
             uint32 maxdist = sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
             for (int j = 0; j < m_count; j++)
@@ -294,14 +294,14 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
                 else
                     r.playerVote[j] = NOT_VALID;
             }
-            
+
             group->SendLootStartRoll(newitemGUID, r.totalPlayersRolling, i->itemid, 0, 60000, r);
-            
+
             r.loot = loot;
             r.itemSlot = itemSlot;
             loot->items[itemSlot].is_blocked = true;
-            
-            RollId.push_back(r);            
+
+            RollId.push_back(r);
         }
 
         itemSlot++;
@@ -326,7 +326,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
             r.itemGUID = newitemGUID;
             r.itemid = i->itemid;
-            
+
             //a vector is filled with only near party members
             uint32 maxdist = sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
             for (int j = 0; j < m_count; j++)
@@ -335,7 +335,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
                 if (playerToRoll->CanUseItem(item))
                 {
                     if (playerToRoll->GetDistance2dSq(creature) < maxdist*maxdist)
-                    {   
+                    {
                         r.playerVote[j] = NOT_EMITED_YET;
                         r.totalPlayersRolling++;
                     }
@@ -343,17 +343,17 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
                         r.playerVote[j] = NOT_VALID;
                 }
             }
-            
+
             if (r.totalPlayersRolling > 0)
             {
                 group->SendLootStartRoll(newitemGUID, r.totalPlayersRolling, i->itemid, 0, 60000, r);
-            
+
                 r.loot = loot;
                 r.itemSlot = itemSlot;
                 loot->items[itemSlot].is_blocked = true;
 
                 RollId.push_back(r);
-            }            
+            }
         }
 
         itemSlot++;
@@ -362,7 +362,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
 
 void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise)
 {
-	
+
     vector<Roll>::iterator i;
     for (i=RollId.begin(); i != RollId.end(); i++)
     {
@@ -375,34 +375,34 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
             if (i->loot)
                 if (i->loot->items.size() == 0)
                     return;
-            
+
             switch (Choise)
             {
-            case 0:     //Player choose pass
+                case 0:                                     //Player choose pass
                 {
                     SendLootRoll(0, playerGUID, i->itemid, 0, 128, 0, *i);
                     int8 pos = GetPlayerGroupSlot(playerGUID);
-                    if (pos == -1) //error pos
+                    if (pos == -1)                          //error pos
                         return;
                     i->playerVote[pos] = PASS;
                     i->totalPass++;
                 }
                 break;
-            case 1:     //player choose Need
+                case 1:                                     //player choose Need
                 {
                     SendLootRoll(0, playerGUID, i->itemid, 0, 1, 0, *i);
                     i->totalNeed++;
                     int8 pos = GetPlayerGroupSlot(playerGUID);
-                    if (pos == -1) //error pos
+                    if (pos == -1)                          //error pos
                         return;
                     i->playerVote[pos] = NEED;
                 }
                 break;
-            case 2:     //player choose Greed
+                case 2:                                     //player choose Greed
                 {
                     i->totalGreed++;
                     int8 pos = GetPlayerGroupSlot(playerGUID);
-                    if (pos == -1) //error pos
+                    if (pos == -1)                          //error pos
                         return;
                     i->playerVote[pos] = GREED;
                 }
@@ -427,7 +427,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                         uint8 randomN = rand() % 100;
                         rollresul[j] = randomN;
                         SendLootRoll(0, m_members[j].guid, i->itemid, 0, rollresul[j], 1, *i);
-                        if (maxresul < rollresul[j]) 
+                        if (maxresul < rollresul[j])
                         {
                             maxindex = j;
                             maxresul = rollresul[j];
@@ -468,7 +468,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                             uint8 randomN = rand() % 100;
                             rollresul[j] = randomN;
                             SendLootRoll(0, m_members[j].guid, i->itemid, 0, rollresul[j], 2, *i);
-                            if (maxresul < rollresul[j]) 
+                            if (maxresul < rollresul[j])
                             {
                                 maxindex = j;
                                 maxresul = rollresul[j];
@@ -476,7 +476,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                         }
                         SendLootRollWon(0, m_members[maxindex].guid, i->itemid, 0, rollresul[maxindex], 2, *i);
                         player = objmgr.GetPlayer(m_members[maxindex].guid);
-						
+
                         uint16 dest;
                         uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, 1, false );
                         if ( msg == EQUIP_ERR_OK )
