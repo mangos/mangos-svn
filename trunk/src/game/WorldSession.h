@@ -48,6 +48,7 @@ class MANGOS_DLL_SPEC WorldSession
         ~WorldSession();
 
         void SendPacket(WorldPacket* packet);
+        void SendToGroup(WorldPacket* data, bool to_self);
 
         uint32 GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
@@ -392,6 +393,8 @@ class MANGOS_DLL_SPEC WorldSession
 
         void HandleWardenDataOpcode(WorldPacket& recv_data);
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
+        void HandleMinimapPingOpcode(WorldPacket& recv_data);
+        void HandleRandomRollOpcode(WorldPacket& recv_data);
 
         OpcodeHandler* _GetOpcodeHandlerTable() const;
 
