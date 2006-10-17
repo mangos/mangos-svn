@@ -980,8 +980,9 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
     Cell xy_cell = RedZone::GetZone(xy_val);
     if(xy_cell != cur_cell)
     {
-        sLog.outError("ERROR: %s (GUID: %u) X: %u Y: (%s) in grid[%u,%u]cell[%u,%u] instead grid[%u,%u]cell[%u,%u]",
-            (c->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature"),c->GetGUIDLow(), (moved ? "final" : "original"),
+        sLog.outError("ERROR: %s (GUID: %u) X: %u Y: %u (%s) in grid[%u,%u]cell[%u,%u] instead grid[%u,%u]cell[%u,%u]",
+            (c->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature"),c->GetGUIDLow(), 
+            c->GetPositionX(),c->GetPositionY(),(moved ? "final" : "original"),
             cur_cell.GridX(), cur_cell.GridY(), cur_cell.CellX(), cur_cell.CellY(),
             xy_cell.GridX(),  xy_cell.GridY(),  xy_cell.CellX(),  xy_cell.CellY());
         return true;                                        // not crash at error, just output error in debug mode
