@@ -191,7 +191,6 @@ class ChatHandler
         bool HandleMorphCommand(const char* args);
         bool HandleAuraCommand(const char* args);
         bool HandleUnAuraCommand(const char* args);
-        bool HandleAddGraveCommand(const char* args);
         bool HandleLinkGraveCommand(const char* args);
         bool HandleNearGraveCommand(const char* args);
         bool HandleAddSHCommand(const char* args);
@@ -238,8 +237,6 @@ class ChatHandler
         WorldSession *m_session;
 
         // Utility methods for commands
-        bool GetCurrentGraveId(uint32& g_id);
-        void LinkGraveIfNeed(  uint32  g_id);
         void ShowTicket(uint64 guid, uint32 category, char const* text);
         uint32 GetTicketIDByNum(uint32 num);
 };

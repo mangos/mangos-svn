@@ -762,7 +762,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
     }
 }
 
-GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
+WorldSafeLocsEntry *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
 {
 
     // search for zone associated closest graveyard
@@ -771,43 +771,71 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
     // Simulate std. algorithm:
     //   found some graveyard associated to (ghost_zone,ghost_map)
     //
-    //   if mapId == graveyard.mapId (ghost in plain zone or city) and search graveyard at same map
+    //   if mapId == graveyard.mapId (ghost in plain zone or city or battleground) and search graveyard at same map
     //     then check `faction`
     //   if mapId != graveyard.mapId (ghost in instance) and search ANY graveyard associated
     //     then skip check `faction`
-    QueryResult *result = sDatabase.PQuery(
-        "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,"
-        "       `position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `game_graveyard`, `game_graveyard_zone` "
-        "WHERE  `game_graveyard`.`id` = `game_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
-        "        AND (`ghost_map` <> `map` OR `faction` = %u OR `faction` = 0 ) "
-        "ORDER BY `distance` ASC LIMIT 1", x, y, z, MapId, zoneId, team);
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`faction` FROM `game_graveyard_zone` WHERE  `ghost_map` = %u AND `ghost_zone` = %u", MapId, zoneId);
 
-    // or any nearest freandly graveyard at map (not for instance)
     if(! result)
     {
         sLog.outError("DB incomplite: Zone %u Map %u Team %u not have linked graveyard.",zoneId,MapId,team);
-        result = sDatabase.PQuery(
-            "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`, "
-            "       `position_x`,`position_y`,`position_z`, `orientation`, `map` "
-            "FROM `game_graveyard` "
-            "WHERE `map` = %u  AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1", x, y, z, MapId, team);
+        return NULL;
     }
 
-    // or not teleport ghost if fail
-    if( ! result )
-        return NULL;
+    bool foundNear = false;
+    float distNear;
+    WorldSafeLocsEntry* entryNear = NULL;
+    WorldSafeLocsEntry* entryFar = NULL;
 
-    Field *fields = result->Fetch();
-    GraveyardTeleport *pgrave = new GraveyardTeleport;
+    do{
+        Field *fields = result->Fetch();
+        uint32 g_id   = fields[0].GetUInt32();
+        uint32 g_team = fields[1].GetUInt32();
 
-    pgrave->X = fields[1].GetFloat();
-    pgrave->Y = fields[2].GetFloat();
-    pgrave->Z = fields[3].GetFloat();
-    pgrave->orientation = fields[4].GetFloat();
-    pgrave->MapId = fields[5].GetUInt32();
+        WorldSafeLocsEntry* entry = sWorldSafeLocsStore.LookupEntry(g_id);
+        if(!entry)
+        {
+            sLog.outError("Table `game_graveyard_zone` have record for not existed graveyard (WorldSafeLocs.dbc id) %u, skipped.",g_id);
+            continue;
+        }
+
+        // remember first graveyard at another map and ignore other
+        if(MapId != entry->map_id)
+        {
+            if(!entryFar)
+                entryFar = entry;
+            continue;
+        }
+
+        // skip enimy faction graveyard at same map (normal area, city, or battleground)
+        if(g_team != 0 && g_team != team)
+            continue;
+
+        // find now nearest graveyrd at same map
+        float dist2 = (entry->x - x)*(entry->x - x)+(entry->y - y)*(entry->y - y)+(entry->z - z)*(entry->z - z);
+        if(foundNear)
+        {
+            if(dist2 < distNear)
+            {
+                distNear = dist2;
+                entryNear = entry;
+            }
+        }
+        else
+        {
+            foundNear = true;
+            distNear = dist2;
+            entryNear = entry;
+        }
+    } while( result->NextRow() );
 
     delete result;
-    return pgrave;
+
+    if(entryNear)
+        return entryNear;
+
+    return entryFar;
 }
 
 AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
