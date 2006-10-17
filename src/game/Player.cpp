@@ -2554,14 +2554,14 @@ void Player::DurabilityRepair(uint16 pos, bool cost)
 
 void Player::RepopAtGraveyard()
 {
-    GraveyardTeleport *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId(), GetTeam() );
+    WorldSafeLocsEntry *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId(), GetTeam() );
 
     if(ClosestGrave)
     {
         // stop countdown until repop
         m_deathTimer = 0;
 
-        TeleportTo(ClosestGrave->MapId, ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
+        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
 
         delete ClosestGrave;
 

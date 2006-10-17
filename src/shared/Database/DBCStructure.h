@@ -286,3 +286,13 @@ struct TaxiPathNode
 };
 typedef std::vector<TaxiPathNode> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
+
+struct WorldSafeLocsEntry
+{
+    uint32    ID;
+    uint32    map_id;
+    float     x;
+    float     y;
+    float     z;
+};
+

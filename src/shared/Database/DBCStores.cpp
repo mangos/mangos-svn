@@ -80,6 +80,9 @@ struct TaxiPathNodeEntry
 };
 static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
 
+DBCStorage <WorldSafeLocsEntry> sWorldSafeLocsStore(WorldSafeLocsEntryfmt);
+
+
 typedef std::list<std::string> StoreProblemList;
 
 static bool LoadDBC_assert_print(uint32 fsize,uint32 rsize, std::string filename)
@@ -117,7 +120,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 21;
+    const uint32 DBCFilesCount = 22;
 
     barGoLink bar( DBCFilesCount );
 
@@ -158,7 +161,7 @@ void LoadDBCStores(std::string dataPath)
     sTaxiPathStore.Clear();
 
     //## TaxiPathNode.dbc ## Loaded only for initialization different structures
-    LoadDBC(bar,bad_dbc_files,sTaxiPathNodeStore,            dataPath+"dbc/TaxiPathNode.dbc");
+    LoadDBC(bar,bad_dbc_files,sTaxiPathNodeStore,        dataPath+"dbc/TaxiPathNode.dbc");
     // Calculate path nodes count
     std::vector<uint32> pathLength;
     pathLength.resize(pathCount+1);             // 0 and some other indexes not used
@@ -174,6 +177,8 @@ void LoadDBCStores(std::string dataPath)
         if(TaxiPathNodeEntry* entry = sTaxiPathNodeStore.LookupEntry(i))
             sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->x,entry->y,entry->z);
     sTaxiPathNodeStore.Clear();
+
+    LoadDBC(bar,bad_dbc_files,sWorldSafeLocsStore,       dataPath+"dbc/WorldSafeLocs.dbc");
 
     // error checks
     if(bad_dbc_files.size() >= DBCFilesCount )

@@ -153,6 +153,7 @@ extern DBCStorage <TalentEntry>               sTalentStore;
 extern DBCStorage <TaxiNodesEntry>            sTaxiNodesStore;
 extern TaxiPathSetBySource                    sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;
+extern DBCStorage <WorldSafeLocsEntry>        sWorldSafeLocsStore;
 
 void LoadDBCStores(std::string dataPath);
 #endif

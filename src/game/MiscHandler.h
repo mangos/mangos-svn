@@ -19,18 +19,6 @@
 #ifndef __MISCHANDLER_H
 #define __MISCHANDLER_H
 
-struct GraveyardTeleport
-{
-
-    float X;
-    float Y;
-    float Z;
-    float orientation;
-
-    uint32 MapId;
-
-};
-
 struct AreaTrigger
 {
 

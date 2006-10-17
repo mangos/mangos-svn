@@ -38,3 +38,4 @@ const char TalentEntryfmt[]="niiiiiiiixxxxixxixxxx";
 const char TaxiNodesEntryfmt[]="nifffsxxxxxxxxii";
 const char TaxiPathEntryfmt[]="niii";
 const char TaxiPathNodeEntryfmt[]="diixfffxx";
+const char WorldSafeLocsEntryfmt[]="nifffxxxxxxxxx";

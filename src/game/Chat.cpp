@@ -140,7 +140,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "worldport",   3, &ChatHandler::HandleWorldPortCommand,        "",   NULL },
         { "addweapon",   3, &ChatHandler::HandleAddWeaponCommand,        "",   NULL },
         { "allowmove",   3, &ChatHandler::HandleAllowMovementCommand,    "",   NULL },
-        { "addgrave",    3, &ChatHandler::HandleAddGraveCommand,         "",   NULL },
         { "linkgrave",   3, &ChatHandler::HandleLinkGraveCommand,        "",   NULL },
         { "neargrave",   3, &ChatHandler::HandleNearGraveCommand,        "",   NULL },
         { "addsh",       3, &ChatHandler::HandleAddSHCommand,            "",   NULL },
