@@ -322,20 +322,20 @@ void WorldSession::HandleGroupUninviteGuildOpcode( WorldPacket & recv_data )
 void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
-    std::string membername;
     Group *group;
     Player * player;
 
-    recv_data >> membername;
+    uint64 guid;
+    recv_data >> guid;
 
-    player = objmgr.GetPlayer(membername.c_str());
+    player = objmgr.GetPlayer(guid);
 
     if ( player == NULL )
     {
         data.Initialize( SMSG_PARTY_COMMAND_RESULT );
         data << uint32( 0x0 );
-        data << membername;
-        data << uint32( 0x00000001 );
+        data << uint8(0);
+        data << uint32( 0x00000006 );
 
         SendPacket( &data );
         return;
