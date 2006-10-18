@@ -827,6 +827,13 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
 
     PSendSysMessage(LANG_PINFO_ACCOUNT,  target->GetName(), target->GetGUIDLow(), username.c_str(), target->GetSession()->GetAccountId(), target->GetSession()->GetSecurity(), last_ip.c_str());
 
+    uint32 days = target->GetTotalPlayedTime() / (60*60*24);
+    uint32 hours = (target->GetTotalPlayedTime() % (60*60*24)) / (60*60);
+    uint32 gold = target->GetMoney() /(100*100);
+    uint32 silv = (target->GetMoney() % (100*100)) / 100;
+    uint32 copp = (target->GetMoney() % (100*100)) % 100;
+    PSendSysMessage(LANG_PINFO_LEVEL,  days, hours, target->getLevel(), gold,silv,copp );
+
     return true;
 }
 
