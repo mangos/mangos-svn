@@ -472,7 +472,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
         {
             friendstr[i].PlayerGUID = fields[0].GetUInt64();
             pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
-            if(pObj)
+            if( pObj && pObj->isGMVisibleFor(GetPlayer()))
             {
                 friendstr[i].Status = 1;
                 friendstr[i].Area = pObj->GetZoneId();
@@ -580,7 +580,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     if (friendGuid && friendResult==FRIEND_NOT_FOUND)
     {
-        if( pfriend && pfriend->IsInWorld())
+        if( pfriend && pfriend->IsInWorld() && pfriend->isGMVisibleFor(GetPlayer()))
         {
             friendResult = FRIEND_ADDED_ONLINE;
             friendArea = pfriend->GetZoneId();

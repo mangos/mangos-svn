@@ -63,7 +63,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         Player* FindPlayer(uint64);
         Player* FindPlayerByName(const char *name) ;
 
-        inline PlayersMapType& GetPlayers(void) { return i_players; }
+        PlayersMapType& GetPlayers() { return i_players; }
         void InsertPlayer(Player *);
         void RemovePlayer(Player *);
 

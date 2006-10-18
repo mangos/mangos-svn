@@ -30,6 +30,40 @@
 #include "ObjectAccessor.h"
 #include "Pet.h"
 
+void WorldSession::SendNameQueryOpcode(Player* p, bool to_less_security)
+{
+    WorldPacket data;
+    data.Initialize( SMSG_NAME_QUERY_RESPONSE );
+
+    data << p->GetGUID();
+    if(!to_less_security)
+        data << (p->isGMVisibleFor(GetPlayer()) ? p->GetName() : " ");
+    else
+        data << (p->isGMVisible() ? p->GetName() : " ");
+
+    data << uint8(0);
+    data << uint32(p->getRace());
+    data << uint32(p->getGender());
+    data << uint32(p->getClass());
+
+    if(!to_less_security)
+        SendPacket( &data );
+    else
+    {
+        typedef ObjectAccessor::PlayersMapType Players;
+        Players& players = ObjectAccessor::Instance().GetPlayers();
+        
+        for(Players::iterator pIter = players.begin(); pIter != players.end(); ++pIter)
+        {
+            if( (pIter->second != p)
+                && (pIter->second->GetSession()->GetSecurity() < p->GetSession()->GetSecurity()) )
+            {
+                pIter->second->GetSession()->SendPacket(&data);
+            }
+        }
+    }
+}
+
 void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -37,35 +71,28 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
-    uint32 race = 0, gender = 0, cl = 0;
-    std::string name = "<Non-existed now character>";
-
     Player *pChar = ObjectAccessor::Instance().FindPlayer(guid);
+
+    sLog.outDebug( "Received CMSG_NAME_QUERY for: " I64FMTD, guid);
 
     if (pChar == NULL)
     {
+        std::string name = "<Non-existed now character>";
+
         if (!objmgr.GetPlayerNameByGUID(guid, name))
             sLog.outError( "No player name found for this guid: %u", guid );
 
+        data.Initialize( SMSG_NAME_QUERY_RESPONSE );
+
+        data << guid;
+        data << name;
+        data << uint8(0);
+        data << uint32(0) << uint32(0) << uint32(0);
+
+        SendPacket( &data );
     }
     else
-    {
-        race = pChar->getRace();
-        gender = pChar->getGender();
-        cl = pChar->getClass();
-        name = pChar->GetName();
-    }
-
-    sLog.outDebug( "Received CMSG_NAME_QUERY for: %s", name.c_str() );
-
-    data.Initialize( SMSG_NAME_QUERY_RESPONSE );
-
-    data << guid;
-    data << name;
-    data << uint8(0);
-    data << race << gender << cl;
-
-    SendPacket( &data );
+        SendNameQueryOpcode(pChar);
 }
 
 void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )

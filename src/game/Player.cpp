@@ -1300,6 +1300,33 @@ void Player::SetGameMaster(bool on)
     }
 }
 
+void Player::SetGMVisible(bool on)
+{
+    if(on)
+    {
+        m_GMFlags &= ~GM_INVISIBLE; //remove flag
+
+        DeMorph();
+        RemoveAura(10032,1); //crash?
+    }
+    else
+    {
+        m_GMFlags |= GM_INVISIBLE; //add flag
+
+        SetAcceptWhispers(false);
+        SetGameMaster(true);
+
+        SetUInt32Value(UNIT_FIELD_DISPLAYID, 6908); //Set invisible model
+
+        SpellEntry *spellInfo = sSpellStore.LookupEntry( 10032 ); //Stealth spell
+        Aura *Aur = new Aura(spellInfo, 1, this);
+        AddAura(Aur);
+    }
+
+    // hide or show name
+    GetSession()->SendNameQueryOpcode(this,true);
+}
+
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
 {
     WorldPacket data;
