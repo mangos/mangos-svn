@@ -875,6 +875,21 @@ void Spell::EffectSummonWild(uint32 i)
     if(!pet_entry)
         return;
     uint32 level = m_caster->getLevel();
+
+    // level of pet summoned using engineering item based at engineering skill level
+    if(m_caster->GetTypeId()==TYPEID_PLAYER && m_CastItem)
+	{
+		ItemPrototype const *proto = m_CastItem->GetProto();
+        if(proto && proto->RequiredSkill == SKILL_ENGINERING)
+		{
+			uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINERING);
+			if(skill202)
+			{
+				level = skill202/5;
+			}
+		}
+	}
+
     Pet* spawnCreature = new Pet();
 
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
