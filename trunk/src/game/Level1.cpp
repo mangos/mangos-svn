@@ -61,6 +61,32 @@ bool ChatHandler::HandleGMOffCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleVisibleCommand(const char* args)
+{
+    int option = atoi((char*)args);
+
+    if (option != 0 && option != 1 || !*args)
+    {
+        SendSysMessage(LANG_USE_BOL);
+        PSendSysMessage("Your are: %s", m_session->GetPlayer()->isGMVisible() ?  "visible" : "invisible");
+        return true;
+    }
+
+
+    if ( option )
+    {
+        SendSysMessage( LANG_INVISIBLE_VISIBLE );
+        m_session->GetPlayer()->SetGMVisible(true);
+    }
+    else
+    {
+        SendSysMessage( LANG_INVISIBLE_INVISIBLE );
+        m_session->GetPlayer()->SetGMVisible(false);
+    }
+
+    return true;
+}
+
 bool ChatHandler::HandleGPSCommand(const char* args)
 {
     Object *obj = getSelectedUnit();
@@ -144,12 +170,15 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     {
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());
 
-        char buf0[256];
-        sprintf((char*)buf0,LANG_APPEARING_TO, m_session->GetPlayer()->GetName());
+        if (m_session->GetPlayer()->isGMVisibleFor(chr))
+        {
+            char buf0[256];
+            sprintf((char*)buf0,LANG_APPEARING_TO, m_session->GetPlayer()->GetName());
 
-        WorldPacket data;
-        FillSystemMessageData(&data, m_session, buf0);
-        chr->GetSession()->SendPacket(&data);
+            WorldPacket data;
+            FillSystemMessageData(&data, m_session, buf0);
+            chr->GetSession()->SendPacket(&data);
+        }
 
         m_session->GetPlayer()->TeleportTo(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),0.0f);
     }
