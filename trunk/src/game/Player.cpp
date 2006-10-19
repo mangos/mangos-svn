@@ -519,6 +519,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         }
     }
 
+    // remove applied original stats mods before item equipment
+    _RemoveStatsMods();
+
     if(class_ == WARRIOR)
         CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
     return true;
