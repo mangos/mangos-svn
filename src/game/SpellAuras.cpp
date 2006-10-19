@@ -2150,9 +2150,21 @@ void Aura::HandleModAttackSpeed(bool apply)
 
 void Aura::HandleHaste(bool apply)
 {
-    m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
-    m_target->ApplyAttackTimePercentMod(OFF_ATTACK,m_modifier.m_amount,apply);
-    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount,apply);
+    
+    if(m_modifier.m_amount >= 0)
+    {
+        // v*(1+percent/100)
+        m_target->ApplyAttackTimePercentMod(BASE_ATTACK,  m_modifier.m_amount,apply);
+        m_target->ApplyAttackTimePercentMod(OFF_ATTACK,   m_modifier.m_amount,apply);
+        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount,apply);
+    }
+    else
+    {
+        // v/(1+abs(percent)/100)
+        m_target->ApplyAttackTimePercentMod(BASE_ATTACK,  -m_modifier.m_amount,!apply);
+        m_target->ApplyAttackTimePercentMod(OFF_ATTACK,   -m_modifier.m_amount,!apply);
+        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,-m_modifier.m_amount,!apply);
+    }
 }
 
 void Aura::HandleRangedAmmoHaste(bool apply)
