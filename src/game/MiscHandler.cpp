@@ -600,17 +600,14 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     }
     else if(friendResult==FRIEND_ALREADY)
     {
-        data << (uint8)friendResult << (uint64)friendGuid;
         sLog.outDetail( "WORLD: %s Guid Already a Friend. ", friendName.c_str() );
     }
     else if(friendResult==FRIEND_SELF)
     {
-        data << (uint8)friendResult << (uint64)friendGuid;
         sLog.outDetail( "WORLD: %s Guid can't add himself. ", friendName.c_str() );
     }
     else
     {
-        data << (uint8)friendResult << (uint64)friendGuid;
         sLog.outDetail( "WORLD: %s Guid not found. ", friendName.c_str() );
     }
 
