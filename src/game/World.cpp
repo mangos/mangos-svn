@@ -263,9 +263,6 @@ void World::SetInitialWorldSettings()
         exit(1);
     }
 
-    //duplicate
-    //sDatabase.PExecute("UPDATE `character` SET `online` = 0");
-
     //Update realm list
     loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", m_configs[CONFIG_GAME_TYPE],sConfig.GetIntDefault("RealmID", 1));
 

@@ -219,7 +219,7 @@ void CliExit(char*,pPrintf zprintf)
 
 void CliInfo(char*,pPrintf zprintf)
 {
-    QueryResult *resultDB = sDatabase.Query("SELECT `name`,`account` FROM `character` WHERE `online` > 0");
+    QueryResult *resultDB = sDatabase.PQuery("SELECT `name`,`account` FROM `character` WHERE `online` > 0 AND `realm` = '%u'",realmID);
 
     if (!resultDB)
     {

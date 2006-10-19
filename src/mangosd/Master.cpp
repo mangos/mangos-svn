@@ -270,7 +270,7 @@ bool Master::_StartDB()
         sLog.outString("Realm running as realm ID %d", realmID);
     }
 
-    sDatabase.PExecute("UPDATE `character` SET `online` = 0");
+    sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `realm` = '%d'",realmID);
 
     clearOnlineAccounts();
     return true;
