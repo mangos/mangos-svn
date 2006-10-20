@@ -3164,6 +3164,13 @@ void Player::CheckExploreSystem()
     uint16 areaFlag=MapManager::Instance().GetMap(GetMapId())->GetAreaFlag(m_positionX,m_positionY);
     if(areaFlag==0xffff)return;
     int offset = areaFlag / 32;
+
+    if(offset >= 64)
+    {
+        sLog.outError("ERROR: Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u ( %u must be < 64 ).",areaFlag,m_positionX,m_positionY,offset,offset);
+        return;
+    }
+
     uint32 val = (uint32)(1 << (areaFlag % 32));
     uint32 currFields = GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
 

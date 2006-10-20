@@ -2038,6 +2038,12 @@ bool ChatHandler::HandleShowAreaCommand(const char* args)
     int offset = area / 32;
     uint32 val = (uint32)(1 << (area % 32));
 
+    if(offset >= 64)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        return true;
+    }
+
     uint32 currFields = chr->GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
     chr->SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
 
@@ -2063,6 +2069,12 @@ bool ChatHandler::HandleHideAreaCommand(const char* args)
 
     int offset = area / 32;
     uint32 val = (uint32)(1 << (area % 32));
+
+    if(offset >= 64)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        return true;
+    }
 
     uint32 currFields = chr->GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
     chr->SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields ^ val));
@@ -2283,6 +2295,12 @@ bool ChatHandler::HandleMod32Value(const char* args)
 
     uint32 Opcode = (uint32)atoi(px);
     int Value = atoi(py);
+
+    if(Opcode >= m_session->GetPlayer()->GetValuesCount())
+    {
+        PSendSysMessage(LANG_TOO_BIG_INDEX, Opcode, m_session->GetPlayer()->GetGUIDLow(), m_session->GetPlayer( )->GetValuesCount());
+        return false;
+    }
 
     sLog.outDebug( LANG_CHANGE_32BIT , Opcode, Value);
 
