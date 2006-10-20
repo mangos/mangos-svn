@@ -793,10 +793,10 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
             unloader.UnloadN();
             delete i_grids[x][y];
             i_grids[x][y] = NULL;
+            delete i_info[x][y];
+            i_info[x][y] = NULL;
         }
     }
-    delete i_info[x][y];
-    i_info[x][y] = NULL;
     //z coordinate
 
     int gx=63-x;
