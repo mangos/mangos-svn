@@ -137,11 +137,10 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
             // than temporarily storing them in a vector
             std::vector<Player*> playersNear;
             playersNear.reserve(iMembers);
-            uint32 maxdist = sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
             for (int i=0; i<iMembers; i++)
             {
                 Player* playerGroup = objmgr.GetPlayer(group->GetMemberGUID(i));
-                if (player->GetDistance2dSq(playerGroup) < maxdist * maxdist)
+                if (player->GetDistance2dSq(playerGroup) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     playersNear.push_back(playerGroup);
             }
 

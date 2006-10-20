@@ -45,15 +45,7 @@ INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 Creature*
 ObjectAccessor::GetCreature(Object const &u, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
-    Cell cell = RedZone::GetZone(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    Creature *obj=NULL;
-    MaNGOS::ObjectAccessorNotifier<Creature> searcher(obj, guid);
-    TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<Creature>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(u.GetMapId()));
-    return obj;
+    return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<Creature>(u, guid);
 }
 
 Corpse*
@@ -65,15 +57,7 @@ ObjectAccessor::GetCorpse(Unit const &u, uint64 guid)
 Corpse*
 ObjectAccessor::GetCorpse(float x, float y, uint32 mapid, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(x,y));
-    Cell cell = RedZone::GetZone(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    Corpse *obj=NULL;
-    MaNGOS::ObjectAccessorNotifier<Corpse> searcher(obj, guid);
-    TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<Corpse>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(mapid));
-    return obj;
+    return MapManager::Instance().GetMap(mapid)->GetObjectNear<Corpse>(x, y, guid);
 }
 
 Unit*
@@ -134,29 +118,13 @@ ObjectAccessor::GetPlayer(Unit const &u, uint64 guid)
 GameObject*
 ObjectAccessor::GetGameObject(Unit const &u, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
-    Cell cell = RedZone::GetZone(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    GameObject *obj=NULL;
-    MaNGOS::ObjectAccessorNotifier<GameObject> searcher(obj, guid);
-    TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<GameObject>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(u.GetMapId()));
-    return obj;
+    return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<GameObject>(u, guid);
 }
 
 DynamicObject*
 ObjectAccessor::GetDynamicObject(Unit const &u, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
-    Cell cell = RedZone::GetZone(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    DynamicObject *obj=NULL;
-    MaNGOS::ObjectAccessorNotifier<DynamicObject> searcher(obj, guid);
-    TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<DynamicObject>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(u.GetMapId()));
-    return obj;
+    return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<DynamicObject>(u, guid);
 }
 
 Player*

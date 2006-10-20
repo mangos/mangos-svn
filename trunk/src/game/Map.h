@@ -96,6 +96,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         template<class T> void Remove(T *, bool);
         template<class T> bool Find(T *) const;
 
+        template<class T> T* GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+        template<class T> T* GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
+
         void Update(const uint32&);
         uint64 CalculateGridMask(const uint32 &y) const;
 

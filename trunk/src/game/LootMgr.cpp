@@ -172,21 +172,3 @@ void Loot::NotifyMoneyRemoved()
     for(std::set<Player*>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
         (*i)->SendNotifyLootMoneyRemoved();
 }
-
-void Loot::remove(uint8 lootSlot)
-{
-    if (lootSlot < items.size())
-        items.erase(items.begin() + lootSlot);
-}
-
-void Loot::remove(const LootItem & item)
-{
-    for(uint8 i = 0; i < items.size(); i++)
-    {
-        if (items[i].itemid == item.itemid)
-        {
-            remove(i);
-            break;
-        }
-    }
-}
