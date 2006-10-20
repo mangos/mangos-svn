@@ -107,8 +107,14 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
     va_list ap;
     char szQuery [1024];
     va_start(ap, format);
-    vsnprintf( szQuery, 1024, format, ap );
+    int res = vsnprintf( szQuery, 1024, format, ap );
     va_end(ap);
+
+    if(res==-1)
+    {
+        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
+        return false;
+    }
 
     return Query(szQuery);
 }
@@ -182,11 +188,18 @@ bool DatabaseMysql::PExecute(const char * format,...)
 {
     if (!format)
         return false;
+
     va_list ap;
     char szQuery [1024];
     va_start(ap, format);
-    vsnprintf( szQuery, 1024, format, ap );
+    int res = vsnprintf( szQuery, 1024, format, ap );
     va_end(ap);
+
+    if(res==-1)
+    {
+        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
+        return false;
+    }
 
     return Execute(szQuery);
 }
