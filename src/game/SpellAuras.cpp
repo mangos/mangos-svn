@@ -1553,7 +1553,7 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
         if(apply)
             m_target->SetSpeed( m_target->GetSpeed() * (m_modifier.m_amount / 100.0f) );
         else
-            m_target->SetSpeed( m_target->GetSpeed() * (m_modifier.m_amount / 100.0f) );
+            m_target->SetSpeed( m_target->GetSpeed() * (100.0f / m_modifier.m_amount) );
     }
     WorldPacket data;
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
