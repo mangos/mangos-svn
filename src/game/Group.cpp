@@ -283,10 +283,9 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             r.itemid = i->itemid;
 
             //a vector is filled with only near party members
-            uint32 maxdist = sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
             for (int j = 0; j < m_count; j++)
             {
-                if (objmgr.GetPlayer(m_members[j].guid)->GetDistance2dSq(creature) < maxdist*maxdist)
+                if (objmgr.GetPlayer(m_members[j].guid)->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                 {
                     r.playerVote[j] = NOT_EMITED_YET;
                     r.totalPlayersRolling++;
@@ -328,13 +327,12 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
             r.itemid = i->itemid;
 
             //a vector is filled with only near party members
-            uint32 maxdist = sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
             for (int j = 0; j < m_count; j++)
             {
                 Player *playerToRoll = objmgr.GetPlayer(m_members[j].guid);
                 if (playerToRoll->CanUseItem(item))
                 {
-                    if (playerToRoll->GetDistance2dSq(creature) < maxdist*maxdist)
+                    if (playerToRoll->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     {
                         r.playerVote[j] = NOT_EMITED_YET;
                         r.totalPlayersRolling++;

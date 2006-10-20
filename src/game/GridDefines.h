@@ -39,10 +39,10 @@ class Player;
 
 #define MIN_GRID_DELAY          60*1000
 
-#define MAX_NUMBER_OF_CELLS     4
+#define MAX_NUMBER_OF_CELLS     8
 #define SIZE_OF_GRID_CELL       (SIZE_OF_GRIDS/MAX_NUMBER_OF_CELLS)
 
-#define CENTER_GRID_CELL_ID     128
+#define CENTER_GRID_CELL_ID     256
 #define CENTER_GRID_CELL_OFFSET (SIZE_OF_GRID_CELL/2)
 
 #define TOTAL_NUMBER_OF_CELLS_PER_MAP    (MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS)
@@ -60,7 +60,7 @@ typedef std::map<OBJECT_HANDLE, GameObject* > GameObjectMapType;
 typedef std::map<OBJECT_HANDLE, DynamicObject* > DynamicObjectMapType;
 typedef std::map<OBJECT_HANDLE, Corpse* > CorpseMapType;
 
-typedef NGrid<4, Player, AllObjectTypes> NGridType;
+typedef NGrid<8, Player, AllObjectTypes> NGridType;
 
 template<const unsigned int LIMIT>
 struct MANGOS_DLL_DECL CoordPair

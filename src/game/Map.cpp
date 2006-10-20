@@ -357,6 +357,49 @@ Map::Find(T *obj) const
     return ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(obj->GetGUID())!=0;
 }
 
+template <class T>
+T* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl)
+{
+    return GetObjectNear<T>(obj.GetPositionX(), obj.GetPositionY(), hdl);
+}
+
+template <class T>
+T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl)
+{
+    CellPair p = MaNGOS::ComputeCellPair(x,y);
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        ERROR_LOG("Map::GetObjectNear: invalid coordiates supplied X:%u Y:%u grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
+        return false;
+    }
+
+    CellPair xcell(p), cell_iter;
+    xcell << 1;
+    xcell -= 1;
+    for(; abs(int(p.x_coord - xcell.x_coord)) < 2; xcell >> 1)
+    {
+        for(cell_iter = xcell; abs(int(p.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+        {
+            Cell cell = RedZone::GetZone(cell_iter);
+            if(!i_grids[cell.GridX()][cell.GridY()])
+                continue;
+
+            NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+            assert( grid != NULL );
+
+            T *result = ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(hdl);
+            if (result) return result;
+
+            if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
+                break;
+        }
+
+        if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
+            break;
+    }
+    return NULL; 
+}
+
 void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
@@ -1005,3 +1048,13 @@ template bool Map::Find(Creature *) const;
 template bool Map::Find(GameObject *) const;
 template bool Map::Find(DynamicObject *) const;
 template bool Map::Find(Corpse *) const;
+
+template Creature* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+template Creature* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
+template GameObject* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+template GameObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
+template DynamicObject* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+template DynamicObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
+template Corpse* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+template Corpse* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
+
