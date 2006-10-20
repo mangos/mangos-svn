@@ -1540,13 +1540,13 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply)
 {
-    sLog.outDebug("Current Speed: %f \tmodify: %f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount <= 0)
     {//for new spell dbc
         if(apply)
             m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount) / 100.0f );
         else
-            m_target->SetSpeed( m_target->GetSpeed() * (100.0f - m_modifier.m_amount) / 100.0f );
+            m_target->SetSpeed( m_target->GetSpeed() * 100.0f / (100.0f + m_modifier.m_amount) );
     }
     else
     {//for old spell dbc
@@ -1562,7 +1562,7 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
     data << (uint32)0;
     data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo: %f", m_target->GetSpeed(MOVE_RUN));
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
