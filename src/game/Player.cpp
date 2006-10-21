@@ -8041,7 +8041,7 @@ bool Player::CanSeeStartQuest( uint32 quest_id )
 {
     if( quest_id )
     {
-        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false )
+        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) && SatisfyQuestExclusiveGroup( quest_id, false ) 
             && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
             && SatisfyQuestPreviousQuest( quest_id, false ) )
             return ( getLevel() + 7 >= objmgr.GetQuestInfo(quest_id)->MinLevel );
@@ -8054,8 +8054,8 @@ bool Player::CanTakeQuest( Quest *pQuest, bool msg )
     if( pQuest)
     {
         uint32 quest_id = pQuest->GetQuestId();
-        return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestRace( quest_id, msg )
-            && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
+        return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestExclusiveGroup( quest_id, msg ) 
+            && SatisfyQuestRace( quest_id, msg ) && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
             && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg )
             && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg ) );
     }
@@ -8476,7 +8476,9 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
         {
             uint32 prevId = iter->second;
 
-            if( mQuestStatus.find( prevId ) != mQuestStatus.end() && mQuestStatus[prevId].m_rewarded )
+            StatusMap::iterator i_prevstatus = mQuestStatus.find( prevId );
+
+            if( i_prevstatus != mQuestStatus.end() && i_prevstatus->second.m_rewarded )
                 return true;
         }
 
@@ -8565,6 +8567,39 @@ bool Player::SatisfyQuestTimed( uint32 quest_id, bool msg )
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_HAVE_TIMED_QUEST );
             return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if( qInfo )
+    {
+        if(!qInfo->ExclusiveGroup)
+            return true;
+
+        QuestRelations::iterator iter = sExclusiveQuestGroups.lower_bound(qInfo->ExclusiveGroup);
+        QuestRelations::iterator end  = sExclusiveQuestGroups.upper_bound(qInfo->ExclusiveGroup);
+
+        assert(iter!=end);          // always must be found if qInfo->ExclusiveGroup != 0
+
+        for(; iter != end; ++iter)
+        {
+            uint32 exclude_Id = iter->second;
+
+            // skip checked quest id, intrested only state of another quests in group
+            if(exclude_Id == quest_id)
+                continue;
+
+            StatusMap::iterator i_exstatus = mQuestStatus.find( exclude_Id );
+
+            // altearnative quest already start or complete
+            if( i_exstatus != mQuestStatus.end() 
+                && (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE) )
+                return false;
         }
         return true;
     }

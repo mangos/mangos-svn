@@ -48,6 +48,7 @@ extern SQLStorage sItemStorage;
 
 typedef std::multimap<uint32,uint32> QuestRelations;
 extern QuestRelations sPrevQuests;
+extern QuestRelations sExclusiveQuestGroups;
 
 class Group;
 class Path;
