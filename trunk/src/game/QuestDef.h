@@ -163,6 +163,7 @@ struct QuestInfo
     uint32 SpecialFlags;
     uint32 PrevQuestId;
     uint32 NextQuestId;
+    uint32 ExclusiveGroup;
     uint32 SrcItemId;
     uint32 SrcItemCount;
     char* Title;

@@ -616,6 +616,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestSkill( uint32 quest_id, bool msg );
         bool SatisfyQuestStatus( uint32 quest_id, bool msg );
         bool SatisfyQuestTimed( uint32 quest_id, bool msg );
+        bool SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg );
         bool GiveQuestSourceItem( uint32 quest_id );
         void TakeQuestSourceItem( uint32 quest_id );
         bool GetQuestRewardStatus( uint32 quest_id );

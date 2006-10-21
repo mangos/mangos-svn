@@ -39,6 +39,7 @@ extern SQLStorage sCreatureStorage;
 extern SQLStorage sQuestsStorage;
 
 QuestRelations sPrevQuests;
+QuestRelations sExclusiveQuestGroups;
 
 ObjectMgr::ObjectMgr()
 {
@@ -477,6 +478,9 @@ void ObjectMgr::LoadQuests()
 
         if(qinfo->NextQuestId )
             sPrevQuests.insert(QuestRelations::value_type(qinfo->NextQuestId,qinfo->QuestId));
+
+        if(qinfo->ExclusiveGroup)
+            sExclusiveQuestGroups.insert(QuestRelations::value_type(qinfo->ExclusiveGroup,qinfo->QuestId));
     };
 
     sLog.outString( ">> Loaded %u quests definitions", sQuestsStorage.RecordCount );
