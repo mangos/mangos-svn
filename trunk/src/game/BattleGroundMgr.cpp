@@ -36,7 +36,7 @@ BattleGroundMgr::~BattleGroundMgr()
     m_BattleGrounds.clear();
 }
 
-void BattleGroundMgr::BuildBattleGroundStatusPacket(Player *pl, uint32 MapID, uint8 InstanceID, uint8 StatusID, uint32 Time)
+void BattleGroundMgr::SendBattleGroundStatusPacket(Player *pl, uint32 MapID, uint8 InstanceID, uint8 StatusID, uint32 Time)
 {
     WorldPacket data;
     data.Initialize(SMSG_BATTLEFIELD_STATUS);               //0x2D4

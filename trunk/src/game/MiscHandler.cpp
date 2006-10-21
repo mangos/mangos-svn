@@ -899,7 +899,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             //Get current BattleGround the player is in
             BattleGround* TempBattlegrounds = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
             //Run the areatrigger code
-            TempBattlegrounds->HandleAreaTrigger(GetPlayer(),Trigger_ID);
+            if(TempBattlegrounds)
+                TempBattlegrounds->HandleAreaTrigger(GetPlayer(),Trigger_ID);
         }
         else
         {
