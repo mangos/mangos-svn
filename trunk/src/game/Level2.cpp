@@ -442,6 +442,120 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleTurnObjectCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    char* plowguid = strtok((char*)args, " ");
+
+    if(!plowguid)
+        return false;
+
+    uint32 lowguid = (uint32)atoi(plowguid);
+
+    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+
+    if(!obj)
+    {
+        PSendSysMessage("Game Object (GUID: %u) not found", lowguid);
+        return true;
+    }
+
+    char* po = strtok(NULL, " ");
+    float o;
+
+    if (po)
+    {
+        o = (float)atof(po);
+    }
+    else
+    {
+        Player *chr = m_session->GetPlayer();
+        o = chr->GetOrientation();
+    }
+
+    float rot2 = sin(o/2);
+    float rot3 = cos(o/2);
+
+    obj->Relocate(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), o);
+
+    obj->SetFloatValue(GAMEOBJECT_FACING, o);
+    obj->SetFloatValue(GAMEOBJECT_ROTATION+2, rot2);
+    obj->SetFloatValue(GAMEOBJECT_ROTATION+3, rot3);
+
+    obj->SaveToDB();
+    obj->Refresh();
+
+    PSendSysMessage("Game Object (GUID: %u) turned", obj->GetGUIDLow(), o);
+
+    return true;
+}
+
+bool ChatHandler::HandleMoveObjectCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    char* plowguid = strtok((char*)args, " ");
+
+    if(!plowguid)
+        return false;
+
+    uint32 lowguid = (uint32)atoi(plowguid);
+
+    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+
+    if(!obj)
+    {
+        PSendSysMessage("Game Object (GUID: %u) not found", lowguid);
+        return true;
+    }
+
+    char* px = strtok(NULL, " ");
+    char* py = strtok(NULL, " ");
+    char* pz = strtok(NULL, " ");
+
+    if (!px)
+    {
+        Player *chr = m_session->GetPlayer();
+
+        obj->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), obj->GetOrientation());
+
+        obj->SetFloatValue(GAMEOBJECT_POS_X, chr->GetPositionX());
+        obj->SetFloatValue(GAMEOBJECT_POS_Y, chr->GetPositionY());
+        obj->SetFloatValue(GAMEOBJECT_POS_Z, chr->GetPositionZ());
+    }
+    else
+    {
+        if(!py || !pz)
+            return false;
+
+        float x = (float)atof(px);
+        float y = (float)atof(py);
+        float z = (float)atof(pz);
+
+        if(!MapManager::ExistMAP(obj->GetMapId(),x,y))
+        {
+            PSendSysMessage(".move target map not exist (X: %f Y: %f MapId:%u)",x,y,obj->GetMapId());
+            return true;
+        }
+
+        obj->Relocate(x, y, z, obj->GetOrientation());
+
+        obj->SetFloatValue(GAMEOBJECT_POS_X, x);
+        obj->SetFloatValue(GAMEOBJECT_POS_Y, y);
+        obj->SetFloatValue(GAMEOBJECT_POS_Z, z);
+    }
+
+    obj->SaveToDB();
+    obj->Refresh();
+
+    PSendSysMessage("Game Object (GUID: %u) moved", obj->GetGUIDLow());
+
+    return true;
+}
+
 bool ChatHandler::HandleDeMorphCommand(const char* args)
 {
     sLog.outError(LANG_DEMORPHED,m_session->GetPlayer()->GetName());

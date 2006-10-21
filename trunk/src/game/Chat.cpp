@@ -175,6 +175,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "goobject",    2, &ChatHandler::HandleGoObjectCommand,         "",   NULL },
         { "targetobject",2, &ChatHandler::HandleTargetObjectCommand,     "",   NULL },
         { "delobject",   2, &ChatHandler::HandleDelObjectCommand,        "",   NULL },
+        { "turnobject",  2, &ChatHandler::HandleTurnObjectCommand,       "",   NULL },
+        { "moveobject",  2, &ChatHandler::HandleMoveObjectCommand,       "",   NULL },
         { "shutdown",    3, &ChatHandler::HandleShutDownCommand,         "",   NULL },
         { "pinfo",       2, &ChatHandler::HandlePInfoCommand,            "",   NULL },
         { "visible",     1, &ChatHandler::HandleVisibleCommand,          "",   NULL },

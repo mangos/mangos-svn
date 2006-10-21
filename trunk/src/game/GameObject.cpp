@@ -185,6 +185,17 @@ void GameObject::Update(uint32 p_time)
     }
 }
 
+void GameObject::Refresh()
+{
+    WorldPacket data;
+
+    data.Initialize(SMSG_DESTROY_OBJECT);
+    data << GetGUID();
+    SendMessageToSet(&data, true);
+
+    MapManager::Instance().GetMap(GetMapId())->Add(this);
+}
+
 void GameObject::Delete()
 {
     WorldPacket data;
