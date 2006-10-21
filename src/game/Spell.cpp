@@ -141,7 +141,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     m_castPositionX = m_castPositionY = m_castPositionZ = 0;
     m_TriggerSpell = NULL;
     m_targetCount = 0;
-    m_Istriggeredpell = triggered;
+    m_IsTriggeredSpell = triggered;
     //m_AreaAura = false;
     m_CastItem = NULL;
 
@@ -534,7 +534,7 @@ void Spell::prepare(SpellCastTargets * targets)
     if(IsAutoRepeat())
         m_spellState = SPELL_STATE_FINISHED;
 
-    if(m_Istriggeredpell)
+    if(m_IsTriggeredSpell)
         cast();
     else
     {
@@ -1682,7 +1682,7 @@ uint8 Spell::CheckRange()
             return CAST_FAIL_OUT_OF_RANGE;                  //0x56;
         if(dist < min_range * min_range)
             return CAST_FAIL_TOO_CLOSE;
-        if( m_caster != target && !m_Istriggeredpell && !m_caster->isInFront( target, max_range) )
+        if( m_caster != target && !m_IsTriggeredSpell && !m_caster->isInFront( target, max_range) )
             if (!IsPositiveSpell(m_spellInfo->Id) && casttime != 0 && !IsSingleTarget(m_spellInfo->Id))
                 return CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
     }

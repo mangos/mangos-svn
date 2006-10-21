@@ -78,7 +78,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     }
     SendList.clear();
     data << uint8(0x00);
-    GetPlayer( )->GetSession( )->SendPacket( &data );
+    SendPacket( &data );
 }
 
 void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
@@ -94,7 +94,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     // Calculate team
     GetPlayer()->SetBattleGroundTeam(sBattleGroundMgr.GenerateTeamByRace(GetPlayer()->getRace()));
 
-    //sBattleGroundMgr.BuildBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(),3);
+    //sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(),3);
 
     GetPlayer()->SetBattleGroundEntryPointMap(GetPlayer()->GetMapId());
     GetPlayer()->SetBattleGroundEntryPointO(GetPlayer()->GetOrientation());
@@ -107,9 +107,9 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 
     sBattleGroundMgr.SendToBattleGround(GetPlayer(),TeamID,1);
 
-    //sBattleGroundMgr.BuildBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(), 0x03, 0x001D2A00);
+    //sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(), 0x03, 0x001D2A00);
 
-    sBattleGroundMgr.BuildBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(), 0x03, 0x00);
+    sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(), 0x03, 0x00);
 
     // Adding Player to BattleGround id = 0
     sBattleGroundMgr.AddPlayerToBattleGround(GetPlayer(),1);
@@ -137,7 +137,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_da
         data << (float)(*itr)->GetPositionY();
     }
     data << uint8(0);
-    GetPlayer()->GetSession()->SendPacket(&data);
+    SendPacket(&data);
 }
 
 void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
@@ -170,7 +170,7 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
         data << itr->second.Unk3;
         data << itr->second.Unk4;*/
     }
-    GetPlayer()->GetSession()->SendPacket(&data);
+    SendPacket(&data);
 
     sLog.outDebug( "WORLD: Send MSG_PVP_LOG_DATA Message players:%u", bg->GetPlayerScoresSize());
 

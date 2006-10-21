@@ -163,7 +163,7 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     }
 
     if(SendPacket)
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(plr, m_MapId, m_ID, 0, 0);
+        sBattleGroundMgr.SendBattleGroundStatusPacket(plr, m_MapId, m_ID, 0, 0);
 
     // Log
     sLog.outDetail("BATTLEGROUND: Removed %s from BattleGround.", plr->GetName());

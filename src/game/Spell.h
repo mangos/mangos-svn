@@ -534,7 +534,7 @@ class Spell
         float m_castPositionY;
         float m_castPositionZ;
         float m_castOrientation;
-        bool m_Istriggeredpell;
+        bool m_IsTriggeredSpell;
         Aura* m_triggeredByAura;
         //bool m_AreaAura;
 
