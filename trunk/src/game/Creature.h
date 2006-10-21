@@ -335,19 +335,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
 
-        void setDeathState(DeathState s)                    // overwrite virtual Unit::setDeathState
-        {
-            if(s == JUST_DIED)
-            {
-                m_deathTimer = m_corpseDelay;
-
-                if(!IsStopped()) StopMoving();
-            }
-            Unit::setDeathState(s);
-
-            if(s == JUST_DIED)
-                Unit::setDeathState(CORPSE);
-        }
+        void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
 
         void Say(char const* text, uint32 language);
 
@@ -358,9 +346,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         Loot loot;
         bool lootForPickPocketed;
         bool lootForBody;
-        bool lootForSkinning;
         void generateMoneyLoot();
-        void getSkinLoot();
         Player *GetLootRecipient() const;
         void SetLootRecipient (Player *player);
 

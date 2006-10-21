@@ -45,7 +45,7 @@ Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
 m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
 itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false), m_isTamed(false),
-m_regenTimer(2000), lootForPickPocketed(false),lootForBody(false),lootForSkinning(false), m_defaultMovementType(IDLE_MOTION_TYPE)
+m_regenTimer(2000), lootForPickPocketed(false), lootForBody(false), m_defaultMovementType(IDLE_MOTION_TYPE)
 {
     m_valuesCount = UNIT_END;
 
@@ -144,12 +144,8 @@ void Creature::AIM_Update(const uint32 &diff)
     switch( m_deathState )
     {
         case JUST_DIED:
-        {
-            setDeathState( JUST_DIED );
-            SetUInt32Value(UNIT_NPC_FLAGS, 0);
-            i_AI->UpdateAI(diff);
+            assert(false); // Dont must be called, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
             break;
-        }
         case DEAD:
         {
             if( m_respawnTimer <= diff )
@@ -176,7 +172,6 @@ void Creature::AIM_Update(const uint32 &diff)
                 ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
                 lootForPickPocketed = false;
                 lootForBody         = false;
-                lootForSkinning     = false;
                 loot.clear();
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;
@@ -868,29 +863,6 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
     SendMonsterMove(x,y,z,WalkBack,run,time);
 }
 
-void Creature::getSkinLoot()
-{
-    CreatureInfo const *cinfo = GetCreatureInfo();
-
-    if(cinfo->type == CREATURE_TYPE_DRAGON)
-        FillSkinLoot(&loot,8165);
-    if(cinfo->family ==CREATURE_FAMILY_TURTLE)
-        FillSkinLoot(&loot,8167);
-    uint32 level = getLevel();
-    if(level > 48)
-        FillSkinLoot(&loot,(urand(0,10)<8 ? 8170 :8171));
-    else if(level > 36)
-        FillSkinLoot(&loot,(urand(0,10)<8 ? 4304 :8169));
-    else if(level > 25)
-        FillSkinLoot(&loot,(urand(0,10)<8 ? 4234 :4235));
-    else if(level > 15)
-        FillSkinLoot(&loot,(urand(0,10)<8 ? 2319 :4232));
-    else if(level > 3)
-        FillSkinLoot(&loot,(urand(0,10)<8 ? 2318 :783));
-    else if(level <= 3)
-        FillSkinLoot(&loot,2934);
-}
-
 Player *Creature::GetLootRecipient() const
 {
     if (!m_lootRecipient) return NULL;
@@ -1239,6 +1211,29 @@ float Creature::GetAttackDistance(Unit *pl)
 CreatureInfo const *Creature::GetCreatureInfo() const
 {
     return objmgr.GetCreatureTemplate(GetEntry());
+}
+
+void Creature::setDeathState(DeathState s)
+{
+    if(s == JUST_DIED)
+    {
+        m_deathTimer = m_corpseDelay;
+
+        if(!IsStopped()) StopMoving();
+    }
+    Unit::setDeathState(s);
+
+    if(s == JUST_DIED) {
+        SetUInt32Value(UNIT_NPC_FLAGS, 0);
+        if(GetCreatureInfo()->SkinLootId)
+        {
+            LootStore skinStore = LootTemplates_Skinning;
+            LootStore::iterator tab = skinStore.find(GetCreatureInfo()->SkinLootId);
+            if ( tab != skinStore.end() )
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+        }
+        Unit::setDeathState(CORPSE);
+    }
 }
 
 void Creature::Say(char const* message, uint32 language)

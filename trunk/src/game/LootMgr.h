@@ -76,7 +76,7 @@ struct LootItem
 struct Loot
 {
     std::set<Player*> PlayersLooting;
-    vector<LootItem> items;
+    std::vector<LootItem> items;
     uint32 gold;
     bool released;
     Permission permission;
@@ -106,9 +106,20 @@ extern LootStore LootTemplates_Creature;
 extern LootStore LootTemplates_Fishing;
 extern LootStore LootTemplates_Gameobject;
 extern LootStore LootTemplates_Pickpocketing;
+extern LootStore LootTemplates_Skinning;
+
+struct LootSkinningAltItem
+{
+    LootSkinningAltItem() : itemid(0), displayid(0) {}
+    LootSkinningAltItem(uint32 item, uint32 display) : itemid(item), displayid(display) {}
+    
+    uint32  itemid;
+    uint32  displayid;
+};
+typedef std::map<uint32,LootSkinningAltItem> LootSkinnigAlternative;
+extern LootSkinnigAlternative sLootSkinnigAlternative;
 
 void FillLoot(Player* player,Loot *loot, uint32 loot_id, LootStore& store);
-void FillSkinLoot(Loot *Skinloot,uint32 itemid);
 void LoadLootTables();
 
 inline ByteBuffer& operator<<(ByteBuffer& b, LootItem& li)

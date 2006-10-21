@@ -234,8 +234,6 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         {
             //this is probably wrong
             pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
-            if(pCreature->GetCreatureInfo()->SkinLootId)
-                pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             loot->clear();
         }
     }

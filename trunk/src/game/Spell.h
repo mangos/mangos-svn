@@ -250,8 +250,8 @@ enum SpellFailedReason
     CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND = 24 + 1 + 1,      //SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND
     CAST_FAIL_MUST_HAVE_XXXX_IN_OFFHAND = 25 + 1 + 1,       //SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND
     CAST_FAIL_INTERNAL_ERROR = 26 + 1 + 1,
-    CAST_FAIL_FAILED = 29,
-    CAST_FAIL_FIZZLED = 27 + 1,                             //changed
+    CAST_FAIL_FAILED = 29,                                  // Doesn't exist anymore? Used Fizzle value atm.
+    CAST_FAIL_FIZZLED = 27 + 1 + 1,                         // changed (+2) 12.1.1
     CAST_FAIL_YOU_ARE_FLEEING = 28 + 1 + 1,
     CAST_FAIL_FOOD_TOO_LOWLEVEL_FOR_PET = 29 + 1 + 1,
     CAST_FAIL_TARGET_IS_TOO_HIGH = 30 + 1 + 1,

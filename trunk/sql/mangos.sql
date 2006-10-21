@@ -1957,6 +1957,49 @@ LOCK TABLES `quest_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `quest_template` ENABLE KEYS */;
 
+--
+-- Table structure for table `skinning_loot_template`
+--
+
+DROP TABLE IF EXISTS `skinning_loot_template`;
+CREATE TABLE `skinning_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `chance` float NOT NULL default '100',
+  `questchance` float NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `skinning_loot_template`
+--
+
+/*!40000 ALTER TABLE `skinning_loot_template` DISABLE KEYS */;
+LOCK TABLES `skinning_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
+
+--
+-- Table structure for table `skinning_loot_template_alternative`
+--
+
+DROP TABLE IF EXISTS `skinning_loot_template_alternative`;
+CREATE TABLE `skinning_loot_template_alternative` (
+  `item` int(11) unsigned NOT NULL default '0',
+  `item2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `skinning_loot_template_alternative`
+--
+
+/*!40000 ALTER TABLE `skinning_loot_template` DISABLE KEYS */;
+LOCK TABLES `skinning_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
+
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

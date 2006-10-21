@@ -1474,25 +1474,40 @@ uint8 Spell::CanCast()
             }
             case SPELL_EFFECT_SKINNING:
             {
-                if (m_caster->GetTypeId() != TYPEID_PLAYER) return CAST_FAIL_FAILED;
-                if(!unitTarget) return CAST_FAIL_FAILED;
-                if(unitTarget->GetTypeId() != TYPEID_UNIT) return CAST_FAIL_FAILED;
-                CreatureInfo const *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
-                if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
-                {
-                    castResult = CAST_FAIL_INVALID_TARGET;
-                    break;
-                }
-                if(unitTarget->m_form == 99)
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT) 
+                    return CAST_FAIL_FAILED;
+
+                if( !(unitTarget->GetUInt32Value(UNIT_FIELD_FLAGS) & UNIT_FLAG_SKINNABLE) )
                 {
                     castResult = CAST_FAIL_NOT_SKINNABLE;
                     break;
                 }
-                int32 fishvalue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
-                int32 targetlevel = unitTarget->getLevel();
-                if(fishvalue < (targetlevel-5)*5)
-                    castResult = CAST_FAIL_FAILED;
-                break;
+                
+                if ( ( ((Creature*)unitTarget)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER ) 
+                    && ( !((Creature*)unitTarget)->lootForBody || !((Creature*)unitTarget)->loot.empty() ) )
+                {
+                    castResult = CAST_FAIL_CREATURE_MUST_BE_LOOTED_FIRST;
+                    break;
+                }
+
+                int32 SkinningValue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
+                int32 TargetLevel = unitTarget->getLevel();
+                int32 ReqValue = (SkinningValue < 100 ? (TargetLevel-10)*10 : TargetLevel*5);
+                if (ReqValue > SkinningValue) 
+                {
+                    castResult = CAST_FAIL_SKILL_NOT_HIGH_ENOUGH;
+                    break;                
+                }
+
+                // Fizzle at Preparing stage only
+                if (m_caster->m_currentSpell != this && ReqValue > irand(SkinningValue-25, SkinningValue+5) )
+                {
+                    castResult = CAST_FAIL_FIZZLED;
+                    // 10% chance to damage the skin when fizzled
+                    if ( urand(1, 100) <= 10 ) 
+                        unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+                }
+                break;                
             }
             case SPELL_EFFECT_SUMMON_DEAD_PET:
             {

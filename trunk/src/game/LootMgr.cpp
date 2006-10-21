@@ -33,6 +33,8 @@ LootStore LootTemplates_Creature;
 LootStore LootTemplates_Fishing;
 LootStore LootTemplates_Gameobject;
 LootStore LootTemplates_Pickpocketing;
+LootStore LootTemplates_Skinning;
+LootSkinnigAlternative sLootSkinnigAlternative;
 
 void UnloadLoot()
 {
@@ -40,6 +42,8 @@ void UnloadLoot()
     LootTemplates_Fishing.clear();
     LootTemplates_Gameobject.clear();
     LootTemplates_Pickpocketing.clear();
+    LootTemplates_Skinning.clear();
+    sLootSkinnigAlternative.clear();
 }
 
 void LoadLootTable(LootStore& lootstore,char const* tablename)
@@ -92,12 +96,47 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
         sLog.outError(">> Loaded 0 loot definitions. DB table `%s` is empty.",tablename);
 }
 
+void LoadSkinnigAlternativeTable()
+{
+    LootStore::iterator tab;
+    uint32 item, item2, displayid2;
+    uint32 count = 0;
+
+    QueryResult *result = sDatabase.Query("SELECT `item`, `item2` FROM `skinning_loot_template_alternative`");
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            item  = fields[0].GetUInt32();;
+            item2 = fields[1].GetUInt32();;
+
+            if(!item2)
+                continue;
+
+            ItemPrototype const *proto2 = objmgr.GetItemPrototype(item2);
+
+            displayid2 = (proto2 != NULL) ? proto2->DisplayInfoID : 0;
+
+            sLootSkinnigAlternative[item] = LootSkinningAltItem(item2, displayid2);
+
+            count++;
+        } while (result->NextRow());
+
+        delete result;
+    }
+}
+
 void LoadLootTables()
 {
     LoadLootTable(LootTemplates_Creature,     "creature_loot_template");
     LoadLootTable(LootTemplates_Fishing,      "fishing_loot_template");
     LoadLootTable(LootTemplates_Gameobject,   "gameobject_loot_template");
     LoadLootTable(LootTemplates_Pickpocketing,"pickpocketing_loot_template");
+    LoadLootTable(LootTemplates_Skinning,     "skinning_loot_template");
+    LoadSkinnigAlternativeTable();
 }
 
 // Result: true  - have chance for non quest items or active quest items (loot can be empty or non empty in this case)
@@ -121,7 +160,12 @@ struct NotChanceFor
         if(m_player && itm.questchance > 0 && m_player->HaveQuestForItem(itm.itemid))
             return itm.questchance <= rand_chance();
         else if(itm.chance > 0)
-            return itm.chance * sWorld.getRate(RATE_DROP_ITEMS) <= rand_chance();
+        {
+            if(itm.chance >= 100)
+                return itm.chance <= rand_chance();
+            else
+                return itm.chance * sWorld.getRate(RATE_DROP_ITEMS) <= rand_chance();
+        }
         else
             return true;
     }
@@ -148,14 +192,6 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
 
     new_end = remove_copy_if(tab->second.begin(), tab->second.end(), loot->items.begin(),not_chance_for);
     loot->items.erase(new_end, loot->items.end());
-}
-
-void FillSkinLoot(Loot *Skinloot,uint32 itemid)
-{
-    //Skinloot->items.clear();
-    ItemPrototype const *proto = objmgr.GetItemPrototype(itemid);
-    uint32 displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
-    Skinloot->items.push_back(LootItem(itemid,displayid,99,0));
 }
 
 void Loot::NotifyItemRemoved(uint8 lootIndex)
