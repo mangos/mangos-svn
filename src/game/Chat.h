@@ -168,6 +168,8 @@ class ChatHandler
         bool HandleGoObjectCommand(const char* args);
         bool HandleTargetObjectCommand(const char* args);
         bool HandleDelObjectCommand(const char* args);
+        bool HandleTurnObjectCommand(const char* args);
+        bool HandleMoveObjectCommand(const char* args);
         bool HandlePInfoCommand(const char* args);
 
         bool HandleShutDownCommand(const char* args);
