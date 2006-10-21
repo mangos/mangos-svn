@@ -2071,21 +2071,30 @@ void Spell::EffectSkinning(uint32 i)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    int32 fishvalue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
-    int32 targetlevel = unitTarget->getLevel();
+    int32 skinningValue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
+    int32 targetLevel = unitTarget->getLevel();
 
     ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_SKINNING);
+    unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-    if(fishvalue> (targetlevel +15)*5 )
+    int32 reqValue = targetLevel<20 ? (targetLevel-10)*10 : targetLevel*5;
+
+    if(skinningValue >= reqValue + 100)
         up_skillvalue = 4;
-    else if(fishvalue>= (targetlevel +10)*5 )
+    else if(skinningValue >= reqValue + 50)
         up_skillvalue = 3;
-    else if(fishvalue >= (targetlevel +5)*5 )
+    else if(skinningValue >= reqValue + 25)
         up_skillvalue = 2;
-    else if(fishvalue >= (targetlevel <= 5?(targetlevel-5)*5:targetlevel*5))
+    else if(skinningValue >= reqValue)
         up_skillvalue = 1;
     else up_skillvalue = 0;
-    unitTarget->m_form = 99;
+
+    uint8 minColorLevel = skinningValue<25 ? 1 : skinningValue<50 ? 2 : skinningValue<100 ? 3 : 4;
+    if(up_skillvalue > minColorLevel)
+        up_skillvalue = minColorLevel;
+
+    if( ((Creature*)unitTarget)->isElite() && up_skillvalue > 1 && up_skillvalue < 4)
+        up_skillvalue--;
 }
 
 void Spell::EffectCharge(uint32 i)
@@ -2257,6 +2266,7 @@ void Spell::EffectSkill(uint32 i)
     Player *player = (Player*)m_caster;
 
     uint32 skill_id = m_spellInfo->EffectMiscValue[i];
+
     if(skill_id == SKILL_FISHING && up_skillvalue != 4)
         up_skillvalue = player->CheckFishingAble();
     if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING

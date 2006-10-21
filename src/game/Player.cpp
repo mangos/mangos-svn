@@ -4254,10 +4254,22 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 }
             }
 
-            if (!creature->lootForSkinning && loot_type == LOOT_SKINNING)
+            if (loot_type == LOOT_SKINNING)
             {
-                creature->lootForSkinning = true;
-                creature->getSkinLoot();
+                loot->clear();
+                FillLoot(this,loot,creature->GetCreatureInfo()->SkinLootId,LootTemplates_Skinning);
+                for(std::vector<LootItem>::iterator i = loot->items.begin(); i != loot->items.end(); ++i)
+                {
+                    LootSkinnigAlternative::iterator i2iter = sLootSkinnigAlternative.find(i->itemid);
+                    if(i2iter != sLootSkinnigAlternative.end())
+                    {
+                        if(rand_chance() > 80)
+                        {
+                            i->itemid    = i2iter->second.itemid;
+                            i->displayid = i2iter->second.displayid;
+                        }
+                    }
+                }
             }
 
             if (!IsInGroup() && recipient == this)
