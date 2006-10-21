@@ -1994,10 +1994,10 @@ CREATE TABLE `skinning_loot_template_alternative` (
 -- Dumping data for table `skinning_loot_template_alternative`
 --
 
-/*!40000 ALTER TABLE `skinning_loot_template` DISABLE KEYS */;
-LOCK TABLES `skinning_loot_template` WRITE;
+/*!40000 ALTER TABLE `skinning_loot_template_alternative` DISABLE KEYS */;
+LOCK TABLES `skinning_loot_template_alternative` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
+/*!40000 ALTER TABLE `skinning_loot_template_alternative` ENABLE KEYS */;
 
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
