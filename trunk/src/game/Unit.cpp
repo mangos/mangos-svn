@@ -2979,6 +2979,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
 void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
 {
     if(!pVictim) return;
+
     //If m_immuneToDamage type contain magic, IMMUNE damage.
     for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_DAMAGE].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_DAMAGE].end(); itr = next)
     {
@@ -3004,6 +3005,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     CreatureInfo const *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
+
     if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet())
     {
         if(getPowerType() == POWER_FOCUS)
@@ -3017,25 +3019,31 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
         }
     }
 
+    // bonus result can be negative
+    int32 damage = *pdamage;
+
     AuraList& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
         if(cinfo && cinfo->type == uint32((*i)->GetModifier()->m_miscvalue))
-            *pdamage += (*i)->GetModifier()->m_amount;
+            damage += (*i)->GetModifier()->m_amount;
 
     AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-            *pdamage += (*i)->GetModifier()->m_amount;
+            damage += (*i)->GetModifier()->m_amount;
 
     AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-            *pdamage += (*i)->GetModifier()->m_amount;
+            damage += (*i)->GetModifier()->m_amount;
 
     AuraList& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
     for(AuraList::iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
         if(cinfo && (cinfo->type & uint32((*i)->GetModifier()->m_miscvalue)) != 0)
-            *pdamage += uint32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+            damage += uint32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+
+    // bonus result can be negative
+    *pdamage = damage < 0 ? 0 : damage;
 
     *pdamage = uint32(*pdamage * (m_modDamagePCT+100)/100);
 }
