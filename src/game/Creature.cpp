@@ -194,7 +194,7 @@ void Creature::AIM_Update(const uint32 &diff)
             {
                 // unsummon pet that lost owner
                 Unit* owner = GetOwner();
-                if(!owner||GetMapId()!=owner->GetMapId()||GetDistanceSq(owner) > OWNER_MAX_DISTANCE*OWNER_MAX_DISTANCE)
+                if(!owner||!IsWithinDistInMap(owner, OWNER_MAX_DISTANCE))
                 {
                     if(isPet())
                         ((Pet*)this)->Unsummon();

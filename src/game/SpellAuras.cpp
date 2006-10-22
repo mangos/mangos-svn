@@ -364,7 +364,7 @@ void Aura::Update(uint32 diff)
             uint32 mapid = m_target->GetMapId();
             pos_z = MapManager::Instance().GetMap(mapid)->GetHeight(pos_x,pos_y);
             // Control the max Distance; 20 for temp.
-            if(m_target->GetDistanceSq(caster) <= 20*20)
+            if(m_target->IsWithinDist(caster, 20))
             {
                 if( m_target->GetPositionX() < caster->GetPositionX() || m_target->GetPositionY() > caster->GetPositionY() )
                     x = m_target->GetPositionX() + speed*diff * sin(angle)/1000;
@@ -441,14 +441,7 @@ void AreaAura::Update(uint32 diff)
                     continue;
                 Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
 
-                if(caster->GetDistanceSq(Target) > radius * radius )
-                {
-                    // remove auras of the same caster from out of range players
-                    if (t_aura)
-                        if (t_aura->GetCasterGUID() == m_caster_guid)
-                            Target->RemoveAura(m_spellId, m_effIndex);
-                }
-                else
+                if(caster->IsWithinDist(Target, radius) )
                 {
                     // apply aura to players in range that dont have it yet
                     if (!t_aura)
@@ -456,6 +449,13 @@ void AreaAura::Update(uint32 diff)
                         Aura *aur = new Aura(GetSpellProto(), m_effIndex, Target, caster);
                         Target->AddAura(aur);
                     }
+                }
+                else
+                {
+                    // remove auras of the same caster from out of range players
+                    if (t_aura)
+                        if (t_aura->GetCasterGUID() == m_caster_guid)
+                            Target->RemoveAura(m_spellId, m_effIndex);
                 }
             }
         }
@@ -466,19 +466,19 @@ void AreaAura::Update(uint32 diff)
             if (owner)
             {
                 Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
-                if(caster->GetDistanceSq(owner) > radius * radius )
-                {
-                    if (o_aura)
-                        if (o_aura->GetCasterGUID() == m_caster_guid)
-                            owner->RemoveAura(m_spellId, m_effIndex);
-                }
-                else
+                if(caster->IsWithinDist(owner, radius))
                 {
                     if (!o_aura)
                     {
                         Aura *aur = new Aura(GetSpellProto(), m_effIndex, owner, caster);
                         owner->AddAura(aur);
                     }
+                }
+                else
+                {
+                    if (o_aura)
+                        if (o_aura->GetCasterGUID() == m_caster_guid)
+                            owner->RemoveAura(m_spellId, m_effIndex);
                 }
             }
         }
@@ -499,7 +499,7 @@ void PersistentAreaAura::Update(uint32 diff)
         DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex());
         if (dynObj)
         {
-            if (m_target->GetDistanceSq(dynObj) > dynObj->GetRadius() * dynObj->GetRadius())
+            if (!m_target->IsWithinDist(dynObj, dynObj->GetRadius()))
                 remove = true;
         }
         else

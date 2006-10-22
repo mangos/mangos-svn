@@ -749,7 +749,7 @@ void Player::Update( uint32 p_time )
             // default combat reach 10
             // TODO add weapon,skill check
 
-            float pldistance = 25.0f;
+            float pldistance = 5.0f;
 
             /*if(getClass() == WARRIOR)
                 pldistance += 1;
@@ -762,7 +762,7 @@ void Player::Update( uint32 p_time )
 
             if (isAttackReady(BASE_ATTACK))
             {
-                if( GetDistanceSq(pVictim) > pldistance )
+                if(!IsWithinDist(pVictim, pldistance))
                 {
                     setAttackTimer(BASE_ATTACK,1000);
                     SendAttackSwingNotInRange();
@@ -789,7 +789,7 @@ void Player::Update( uint32 p_time )
 
             if ( haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
-                if( GetDistanceSq(pVictim) > pldistance )
+                if(! IsWithinDist(pVictim, pldistance))
                 {
                     setAttackTimer(OFF_ATTACK,1000);
                 }
@@ -1070,7 +1070,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // unsommon pet if lost
         Creature* pet = GetPet();
         if(!pet) return;
-        if(GetMapId() != pet->GetMapId() || GetDistanceSq(pet) > OWNER_MAX_DISTANCE*OWNER_MAX_DISTANCE )
+        if(!IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
             UnsummonPet(pet);
     }
 }
@@ -3660,7 +3660,7 @@ void Player::CheckDuelDistance()
     GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
 
     //If the distance of duel flag is > 50
-    if( !obj || GetDistanceSq(obj) > (float)2500 )
+    if( !obj || !IsWithinDist(obj, 50))
     {
         DuelComplete();
     }
@@ -9349,6 +9349,9 @@ bool Player::LoadFromDB( uint32 guid )
     m_positionZ = fields[9].GetFloat();
     m_mapId = fields[10].GetUInt32();
     m_orientation = fields[11].GetFloat();
+    
+     // since last logout (in ms)
+    uint32 time_diff = (time(NULL) - fields[21].GetUInt32()) * 1000;
 
     rest_bonus = fields[20].GetFloat();
     //speed collect rest bonus in offline, in logaut, far from tavern, city (section/in hour)
@@ -9393,15 +9396,15 @@ bool Player::LoadFromDB( uint32 guid )
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
-    _LoadAuras();
+    _LoadAuras(time_diff);
 
-    _LoadSpells();
+    _LoadSpells(time_diff);
 
     _LoadQuestStatus();
 
     _LoadTutorials();
 
-    _LoadInventory();
+    _LoadInventory(time_diff);
 
     _LoadActions();
 
@@ -9437,7 +9440,7 @@ void Player::_LoadActions()
     }
 }
 
-void Player::_LoadAuras()
+void Player::_LoadAuras(uint32 timediff)
 {
     m_Auras.clear();
     for (int i = 0; i < TOTAL_AURAS; i++)
@@ -9466,7 +9469,15 @@ void Player::_LoadAuras()
                 continue;
             }
 
+            // negative effects should continue counting down after logout
+            if (remaintime != -1 && !IsPositiveEffect(spellid, effindex))
+            {
+                remaintime -= timediff;
+                if(remaintime <= 0) continue;
+            }
+
             // FIXME: real caster not stored in DB currently
+            
             Aura* aura = new Aura(spellproto, effindex, this, this/*caster*/);
             aura->SetAuraDuration(remaintime);
             AddAura(aura);
@@ -9488,7 +9499,7 @@ void Player::LoadCorpse()
     }
 }
 
-void Player::_LoadInventory()
+void Player::_LoadInventory(uint32 timediff)
 {
     QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u' ORDER BY `slot`",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
 
@@ -9721,7 +9732,7 @@ void Player::_LoadReputation()
     }
 }
 
-void Player::_LoadSpells()
+void Player::_LoadSpells(uint32 timediff)
 {
     for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
         delete itr->second;

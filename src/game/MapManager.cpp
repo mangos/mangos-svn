@@ -94,12 +94,12 @@ MapManager::Update(time_t diff)
     if( !i_timer.Passed() )
         return;
 
-    i_timer.Reset();
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->Update(diff);
+        iter->second->Update(i_timer.GetCurrent());
 
-    ObjectAccessor::Instance().Update(diff);
-    FlightMaster::Instance().FlightReportUpdate(diff);
+    ObjectAccessor::Instance().Update(i_timer.GetCurrent());
+    FlightMaster::Instance().FlightReportUpdate(i_timer.GetCurrent());
+    i_timer.SetCurrent(0);
 }
 
 void MapManager::MoveAllCreaturesInMoveList()

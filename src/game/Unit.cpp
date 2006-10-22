@@ -193,9 +193,7 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
     float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
     if( reach <= 0.0f )
         reach = 1.0f;
-    float distance = GetDistanceSq(pVictim);
-
-    return ( distance <= reach * reach );
+    return IsWithinDist(pVictim, reach);
 }
 
 void Unit::RemoveSpellsCausingAura(uint32 auraType)
@@ -1560,7 +1558,7 @@ void Unit::InterruptSpell()
 
 bool Unit::isInFront(Unit const* target, float radius)
 {
-    return GetDistanceSq(target)<=radius * radius && HasInArc( M_PI, target );
+    return IsWithinDist(target, radius) && HasInArc( M_PI, target );
 }
 
 void Unit::SetInFront(Unit const* target)

@@ -302,7 +302,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
                     if(!Target)
                         continue;
-                    if(m_caster->GetDistanceSq(Target) < radius * radius )
+                    if(m_caster->IsWithinDist(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -389,7 +389,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                    if(m_targets.getUnitTarget()->GetDistanceSq(Target) < radius * radius )
+                    if(m_targets.getUnitTarget()->IsWithinDist(Target, radius) )
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -424,7 +424,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
                     if(!Target || Target->GetGUID() == m_caster->GetGUID())
                         continue;
-                    if(Target->getFaction() == m_caster->getFaction() && m_caster->GetDistanceSq(Target) < radius * radius)
+                    if(Target->getFaction() == m_caster->getFaction() && m_caster->IsWithinDist(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -453,7 +453,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                    if(targetPlayer->GetDistanceSq(Target) < radius * radius &&
+                    if(targetPlayer->IsWithinDist(Target, radius) &&
                         targetPlayer->getClass() == Target->getClass())
                         TagUnitMap.push_back(Target);
                 }
@@ -1641,7 +1641,7 @@ uint8 Spell::CanCast()
                     if((*itr)->GetTypeId() != TYPEID_PLAYER)
                     {
                         float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster);
-                        if((*itr)->GetDistanceSq(m_caster) < attackdis*attackdis )
+                        if((*itr)->IsWithinDist(m_caster, attackdis))
                         {
                             castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
                             break;

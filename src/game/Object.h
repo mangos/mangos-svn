@@ -213,6 +213,8 @@ class MANGOS_DLL_SPEC Object
         float GetDistance2dSq( const Object* obj ) const;
         float GetDistanceSq(const float x, const float y, const float z) const;
         float GetDistanceZ(const Object* obj) const;
+        bool IsWithinDistInMap(const Object* obj, const float dist2compare) const;
+        bool IsWithinDist(const Object* obj, const float dist2compare) const;
         float GetAngle( const Object* obj ) const;
         float GetAngle( const float x, const float y ) const;
         bool HasInArc( const float arcangle, const Object* obj ) const;

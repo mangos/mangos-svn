@@ -1098,13 +1098,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         void _LoadActions();
-        void _LoadAuras();
-        void _LoadInventory();
+        void _LoadAuras(uint32 timediff);
+        void _LoadInventory(uint32 timediff);
         void _LoadMail();
         void _LoadMailedItems();
         void _LoadQuestStatus();
         void _LoadReputation();
-        void _LoadSpells();
+        void _LoadSpells(uint32 timediff);
         void _LoadTaxiMask(const char* data);
         void _LoadTutorials();
 
