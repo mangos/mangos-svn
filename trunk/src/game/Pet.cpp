@@ -82,14 +82,13 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
         }
         return true;
     }
-    uint32 petlevel=fields[3].GetUInt32();
-    SetLevel( petlevel);
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
+    uint32 petlevel=fields[3].GetUInt32();
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
-    SetHealth( 28 + 10 * petlevel);
-    SetMaxHealth( 28 + 10 * petlevel);
     if(owner->getClass() == CLASS_WARLOCK)
     {
+        petlevel=owner->getLevel();
+
         SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
         SetStat(STAT_STRENGTH,22);
         SetStat(STAT_AGILITY,22);
@@ -116,7 +115,9 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
         SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
         SetArmor(petlevel*50);
     }
-
+    SetLevel( petlevel);
+    SetHealth( 28 + 10 * petlevel);
+    SetMaxHealth( 28 + 10 * petlevel);
     SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
     SetPower(   POWER_MANA, 28 + 10 * petlevel);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
