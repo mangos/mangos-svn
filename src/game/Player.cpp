@@ -3181,7 +3181,7 @@ void Player::CheckExploreSystem()
         AreaTableEntry *p = GetAreaEntryByAreaFlag(areaFlag);
         if(!p)
         {
-            sLog.outError("PLAYER: Player %u discovered unknown area (x: %u y: %u map: %u", GetGUIDLow(), m_positionX,m_positionY,GetMapId());
+            sLog.outError("PLAYER: Player %u discovered unknown area (x: %f y: %f map: %u", GetGUIDLow(), m_positionX,m_positionY,GetMapId());
         }
         else if(p->area_level > 0)
         {
@@ -9783,11 +9783,9 @@ void Player::_LoadTutorials()
 
 void Player::SaveToDB()
 {
+    // saved before flight
     if (isInFlight())
-    {
         return;
-        Unmount();
-    }
 
     // save state
     uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
