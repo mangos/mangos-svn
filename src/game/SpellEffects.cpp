@@ -1156,9 +1156,8 @@ void Spell::EffectSummonPet(uint32 i)
 
     uint32 ownerid = m_caster->GetGUIDLow();
 
-    if(!petentry)
+    if(NewSummon->LoadPetFromDB(m_caster,petentry))
     {
-        NewSummon->LoadPetFromDB(m_caster);
         ((Player*)m_caster)->SavePet();
         return;
     }
