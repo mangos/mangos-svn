@@ -3808,9 +3808,36 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     }
 
     _RemoveStatsMods();
-    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
+	AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(false);
+
+    _ApplyItemBonuses(proto,slot,apply);
+
+	for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(true);
+    _ApplyStatsMods();
+
+    if(apply)
+        CastItemEquipSpell(item);
+    else
+        for (int i = 0; i < 5; i++)
+            if(proto->Spells[i].SpellId)
+                RemoveAurasDueToSpell(proto->Spells[i].SpellId );
+
+    for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
+    {
+        uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
+        if(Enchant_id)
+            AddItemEnchant(item,Enchant_id, apply);
+    }
+
+    sLog.outDebug("_ApplyItemMods complete.");
+}
+
+void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
+{
+	if(slot >= INVENTORY_SLOT_BAG_END || !proto) return;
 
     int32 val;
     std::string typestr;
@@ -3966,26 +3993,6 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
     }
-
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(true);
-    _ApplyStatsMods();
-
-    if(apply)
-        CastItemEquipSpell(item);
-    else
-        for (int i = 0; i < 5; i++)
-            if(proto->Spells[i].SpellId)
-                RemoveAurasDueToSpell(proto->Spells[i].SpellId );
-
-    for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
-    {
-        uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
-        if(Enchant_id)
-            AddItemEnchant(item,Enchant_id, apply);
-    }
-
-    sLog.outDebug("_ApplyItemMods complete.");
 }
 
 void Player::CastItemEquipSpell(Item *item)
@@ -4130,21 +4137,105 @@ bool Player::IsItemSpellToCombat(SpellEntry *spellInfo)
 void Player::_RemoveAllItemMods()
 {
     sLog.outDebug("_RemoveAllItemMods start.");
+
+	for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        if(m_items[i])
+		{
+            if(m_items[i]->IsBroken()) break;
+            ItemPrototype const *proto = m_items[i]->GetProto();
+            if(!proto) break;
+			if(proto->ItemSet)
+                RemoveItemsSetItem(this,proto);    
+
+			for (int m = 0; m < 5; m++)
+			{
+                if(proto->Spells[m].SpellId)
+                    RemoveAurasDueToSpell(proto->Spells[m].SpellId );
+			}
+
+			for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
+            {
+                uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
+                if(Enchant_id)
+                    AddItemEnchant(m_items[i],Enchant_id, false);
+            }
+		}
+    }
+
+	_RemoveStatsMods();
+
+	AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(false);
+
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if(m_items[i])
-            _ApplyItemMods(m_items[i],i, false);
+		{
+            if(m_items[i]->IsBroken()) break;
+            ItemPrototype const *proto = m_items[i]->GetProto();
+            if(!proto) break;
+            _ApplyItemBonuses(proto,i, false);
+		}
     }
+
+	for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(true);
+
+	_ApplyStatsMods();
+
     sLog.outDebug("_RemoveAllItemMods complete.");
 }
 
 void Player::_ApplyAllItemMods()
 {
+	sLog.outDebug("_ApplyAllItemMods start.");
+
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if(m_items[i])
-            _ApplyItemMods(m_items[i],i, true);
+		{
+            if(m_items[i]->IsBroken()) break;
+            ItemPrototype const *proto = m_items[i]->GetProto();
+            if(!proto) break;
+			if(proto->ItemSet)
+                AddItemsSetItem(this,m_items[i]);
+
+			CastItemEquipSpell(m_items[i]);
+
+			for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
+            {
+                uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
+                if(Enchant_id)
+                    AddItemEnchant(m_items[i],Enchant_id, true);
+            }
+		}
     }
+
+	_RemoveStatsMods();
+
+	AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(false);
+
+    for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        if(m_items[i])
+		{
+            if(m_items[i]->IsBroken()) break;
+            ItemPrototype const *proto = m_items[i]->GetProto();
+            if(!proto) break;
+            _ApplyItemBonuses(proto,i, true);
+		}
+    }
+
+	for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(true);
+
+	_ApplyStatsMods();
+
+	sLog.outDebug("_ApplyAllItemMods complete.");
 }
 
 /*Loot type MUST be
@@ -7003,34 +7094,8 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
-        // check also  BIND_WHEN_PICKED_UP for .additem or .additemset case by GM (not binded at adding to inventory)
-        if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
-            pItem->SetBinding( true );
-
-        uint8 bag = pos >> 8;
-        uint8 slot = pos & 255;
-
-        sLog.outDebug( "STORAGE: EquipItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
-
-        m_items[slot] = pItem;
-        SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), pItem->GetGUID() );
-        pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
-        pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetGUID() );
-        pItem->SetSlot( slot );
-
-        if( slot < EQUIPMENT_SLOT_END )
-        {
-            int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
-            SetUInt32Value(VisibleBase, pItem->GetEntry());
-            SetUInt32Value(VisibleBase + 1, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
-            SetUInt32Value(VisibleBase + 2, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 1*3));
-            SetUInt32Value(VisibleBase + 3, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 2*3));
-            SetUInt32Value(VisibleBase + 4, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3*3));
-            SetUInt32Value(VisibleBase + 5, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 4*3));
-            SetUInt32Value(VisibleBase + 6, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 5*3));
-            SetUInt32Value(VisibleBase + 7, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6*3));
-            SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
-        }
+        VisualizeItem( pos, pItem);
+		uint8 slot = pos & 255;
 
         if(isAlive())
             _ApplyItemMods(pItem, slot, true);
@@ -7041,6 +7106,56 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
             pItem->SendUpdateToPlayer( this );
         }
     }
+}
+
+void Player::QuickEquipItem( uint16 pos, Item *pItem)
+{
+    if( pItem )
+    {
+        VisualizeItem( pos, pItem);
+
+        if( IsInWorld() )
+        {
+            pItem->AddToWorld();
+            pItem->SendUpdateToPlayer( this );
+        }
+    }
+}
+
+void Player::VisualizeItem( uint16 pos, Item *pItem)
+{
+	if(!pItem)
+		return;
+
+    // check also  BIND_WHEN_PICKED_UP for .additem or .additemset case by GM (not binded at adding to inventory)
+    if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
+            pItem->SetBinding( true );
+
+    uint8 bag = pos >> 8;
+    uint8 slot = pos & 255;
+
+	sLog.outDebug( "STORAGE: EquipItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+
+    m_items[slot] = pItem;
+    SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), pItem->GetGUID() );
+    pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
+    pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetGUID() );
+    pItem->SetSlot( slot );
+
+    if( slot < EQUIPMENT_SLOT_END )
+    {
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+        SetUInt32Value(VisibleBase, pItem->GetEntry());
+        SetUInt32Value(VisibleBase + 1, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
+        SetUInt32Value(VisibleBase + 2, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 1*3));
+        SetUInt32Value(VisibleBase + 3, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 2*3));
+        SetUInt32Value(VisibleBase + 4, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3*3));
+        SetUInt32Value(VisibleBase + 5, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 4*3));
+        SetUInt32Value(VisibleBase + 6, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 5*3));
+        SetUInt32Value(VisibleBase + 7, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6*3));
+        SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
+    }
+
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
@@ -9293,7 +9408,7 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadReputation();
 
     // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
-    // Skip _ApplyAllItemMods(); -- applied in _LoadInventory() by EquipItem calls at item load
+    // Skip _ApplyAllItemMods(); -- already applied in _LoadInventory() 
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugValues();
@@ -9415,7 +9530,7 @@ void Player::_LoadInventory()
             else if( IsEquipmentPos( dest ) )
             {
                 if( CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
-                    EquipItem(dest, item, true);
+                    QuickEquipItem(dest, item);
                 else
                     delete item;
             }
@@ -9430,6 +9545,8 @@ void Player::_LoadInventory()
 
         delete result;
     }
+	if(isAlive())
+		_ApplyAllItemMods();
 }
 
 // load mailed items which should receive current player
