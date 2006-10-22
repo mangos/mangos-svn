@@ -122,17 +122,17 @@ MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         // Remove selection
         if(i_player.GetSelection()==iter->second->GetGUID())
                                                             // visibility distance
-            if(i_player.GetDistanceSq(iter->second) > 100*100)
+            if(!i_player.IsWithinDist(iter->second, 100))
                 i_player.SendOutOfRange(iter->second);
 
         if(iter->second->GetSelection()==i_player.GetGUID())
                                                             // visibility distance
-            if(i_player.GetDistanceSq(iter->second) > 100*100)
+            if(!i_player.IsWithinDist(iter->second, 100))
                 iter->second->SendOutOfRange(&i_player);
 
         // Cancel Trade
         if(i_player.GetTrader()==iter->second)
-            if(i_player.GetDistanceSq(iter->second) > 5*5)  // iteraction distance
+            if(!i_player.IsWithinDist(iter->second, 5))     // iteraction distance
                 i_player.GetSession()->SendCancelTrade();   // will clode both side trade windows
     }
 }
@@ -141,7 +141,7 @@ inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
 {
     // Remove selection
     if(pl->GetSelection()==c->GetGUID())
-        if(pl->GetDistanceSq(c) > 100*100)                  // visibility distance
+        if(!pl->IsWithinDist(c, 100))                       // visibility distance
             pl->SendOutOfRange(c);
 
     // Creature AI reaction
@@ -190,8 +190,7 @@ MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *>  &m)
     {
         if(itr->second->isAlive() && !itr->second->isInFlight() )
         {
-            if (owner.GetCaster()->IsFriendlyTo(itr->second) ||
-                owner.GetDistanceSq(itr->second) > owner.GetRadius() * owner.GetRadius())
+            if (owner.GetCaster()->IsFriendlyTo(itr->second) || !owner.IsWithinDist(itr->second, owner.GetRadius()))
                 continue;
 
             if (!owner.IsAffecting(itr->second))
@@ -213,8 +212,7 @@ MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Player *>  &m)
     {
         if(itr->second->isAlive() && !itr->second->isInFlight() )
         {
-            if (owner.GetCaster()->IsFriendlyTo(itr->second) ||
-                owner.GetDistanceSq(itr->second) > owner.GetRadius() * owner.GetRadius())
+            if (owner.GetCaster()->IsFriendlyTo(itr->second) || !owner.IsWithinDist(itr->second,owner.GetRadius()))
                 continue;
 
             if (!owner.IsAffecting(itr->second))

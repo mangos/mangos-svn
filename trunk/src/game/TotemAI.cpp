@@ -90,7 +90,7 @@ TotemAI::UpdateAI(const uint32 diff)
 
     Unit *victim = ObjectAccessor::Instance().GetUnit(*(Unit*)&i_totem, i_victimGuid);
     // stop attacking dead or out of range victims
-    if (victim && victim->isAlive() && i_totem.GetDistanceSq(victim) < max_range * max_range)
+    if (victim && victim->isAlive() && i_totem.IsWithinDist(victim, max_range))
     {
         // if totem is not casting and it has a victim .. cast again
         AttackStart(victim);
@@ -110,7 +110,7 @@ TotemAI::UpdateAI(const uint32 diff)
             FactionTemplateResolver its_faction = (*iter)->getFactionTemplateEntry();
             if(myFaction.IsFriendlyTo(its_faction) || myFaction.IsNeutralToAll() || its_faction.IsNeutralToAll())
                 continue;
-            if(i_totem.GetDistanceSq(*iter) < max_range * max_range )
+            if(i_totem.IsWithinDist(*iter, max_range) )
             {
                 i_victimGuid = (*iter)->GetGUID();
                 AttackStart(*iter);

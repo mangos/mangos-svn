@@ -217,7 +217,7 @@ namespace MaNGOS
 
                 float dist = go->GetGOInfo()->sound1;
 
-                return go->GetDistanceSq(i_unit) <= dist*dist;
+                return go->IsWithinDist(i_unit, dist);
             }
         private:
             uint32 i_focusId;
@@ -245,7 +245,7 @@ namespace MaNGOS
             AnyUnfriendlyUnitInObjectRangeCheck(Object* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range), i_result(NULL) {}
             bool operator()(Unit* u)
             {
-                if(!i_funit->IsFriendlyTo(u) && i_obj->GetDistanceSq(u) < i_range * i_range)
+                if(!i_funit->IsFriendlyTo(u) && i_obj->IsWithinDist(u, i_range))
                 {
                     i_result = u;
                     return true;
