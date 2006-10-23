@@ -297,7 +297,7 @@ void Spell::EffectApplyAura(uint32 i)
         // arcane missiles
         SpellEntry *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
         if (!spellInfo) return;
-        if (spellInfo->EffectImplicitTargetA[0] == TARGET_S_E && m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY && m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
             if (target)
