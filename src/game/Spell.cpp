@@ -230,7 +230,7 @@ void Spell::FillTargetMap()
                     break;
                 case SPELL_EFFECT_APPLY_AREA_AURA:
                     if(m_spellInfo->Attributes == 0x9050000)// AreaAura
-                        SetTargetMap(i,TARGET_AF_P,tmpUnitMap,tmpItemMap,tmpGOMap);
+                        SetTargetMap(i,TARGET_AREAEFFECT_PARTY,tmpUnitMap,tmpItemMap,tmpGOMap);
                     break;
                 default:
                     break;
@@ -259,7 +259,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         case TARGET_TOTEM_AIR:
         case TARGET_TOTEM_FIRE:
         case TARGET_SELF:
-        case TARGET_DY_OBJ:                                 //add by vendy
+        case TARGET_DYNAMIC_OBJECT:
         {
             TagUnitMap.push_back(m_caster);
         }break;
@@ -269,14 +269,14 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             if (!tmpUnit) break;
             TagUnitMap.push_back(tmpUnit);
         }break;
-        case TARGET_S_E:
+        case TARGET_SINGLE_ENEMY:
         {
             TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
-        case TARGET_AE_E:
+        case TARGET_ALL_ENEMY_IN_AREA:
         {
         }break;
-        case TARGET_AE_E_INSTANT:
+        case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
         {
             // targets the ground, not the units in the area
             if (m_spellInfo->Effect[i]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
@@ -292,7 +292,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
             }
         }break;
-        case TARGET_AC_P:
+        case TARGET_ALL_PARTY_AROUND_CASTER:
         {
             Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader()) : NULL;
             if(pGroup)
@@ -309,12 +309,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             else
                 TagUnitMap.push_back(m_caster);
         }break;
-        case TARGET_S_F:
-        case TARGET_S_F_2:
+        case TARGET_SINGLE_FRIEND:
+        case TARGET_SINGLE_FRIEND_2:
         {
             TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
-        case TARGET_AC_E:
+        case TARGET_ALL_ENEMIES_AROUND_CASTER:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
             Cell cell = RedZone::GetZone(p);
@@ -327,11 +327,11 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 
         }break;
-        case TARGET_S_GO:
+        case TARGET_GAMEOBJECT:
         {
             TagGOMap.push_back(m_targets.m_GOTarget);
         }break;
-        case TARGET_INFRONT:
+        case TARGET_IN_FRONT_OF_CASTER:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
             Cell cell = RedZone::GetZone(p);
@@ -348,14 +348,14 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         {
             TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
-        case TARGET_GOITEM:
+        case TARGET_GAMEOBJECT_ITEM:
         {
             if(m_targets.getUnitTarget())
                 TagUnitMap.push_back(m_targets.getUnitTarget());
             if(m_targets.m_itemTarget)
                 TagItemMap.push_back(m_targets.m_itemTarget);
         }break;
-        case TARGET_AE_E_CHANNEL:
+        case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
         {
             // targets the ground, not the units in the area
             if (m_spellInfo->Effect[i]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
@@ -375,11 +375,11 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         {
             if(m_spellInfo->Effect[i] != 83) TagUnitMap.push_back(m_caster);
         }break;
-        case TARGET_S_P:
+        case TARGET_SINGLE_PARTY:
         {
             TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
-        case TARGET_AF_P:
+        case TARGET_AREAEFFECT_PARTY:
         {
             Player* targetPlayer = m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER ? (Player*)m_targets.getUnitTarget() : NULL;
 
@@ -429,7 +429,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 }
             }
         }break;
-        case TARGET_AE_SELECTED:
+        case TARGET_CURRENT_SELECTED_ENEMY:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
             Cell cell = RedZone::GetZone(p);
@@ -443,7 +443,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         default:
         {
         }break;
-        case TARGET_AF_PC:
+        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
         {
             Player* targetPlayer = m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER ? (Player*)m_targets.getUnitTarget() : NULL;
 
@@ -642,13 +642,13 @@ void Spell::cast()
         {
             switch(m_spellInfo->EffectImplicitTargetA[j])
             {
-                case TARGET_S_E:
-                case TARGET_AE_E:
-                case TARGET_AE_E_INSTANT:
-                case TARGET_AC_E:
-                case TARGET_INFRONT:
+                case TARGET_SINGLE_ENEMY:
+                case TARGET_ALL_ENEMY_IN_AREA:
+                case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+                case TARGET_ALL_ENEMIES_AROUND_CASTER:
+                case TARGET_IN_FRONT_OF_CASTER:
                 case TARGET_DUELVSPLAYER:
-                case TARGET_AE_E_CHANNEL:
+                case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
                     //case TARGET_AE_SELECTED:
                     canreflect = true;
                     break;

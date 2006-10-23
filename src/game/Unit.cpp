@@ -1786,14 +1786,14 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
                 bool positive = true;
                 switch((*i).second->GetSpellProto()->EffectImplicitTargetA[(*i).second->GetEffIndex()])
                 {
-                    case TARGET_S_E:
-                    case TARGET_AE_E:
-                    case TARGET_AE_E_INSTANT:
-                    case TARGET_AC_E:
-                    case TARGET_INFRONT:
+                    case TARGET_SINGLE_ENEMY:
+                    case TARGET_ALL_ENEMY_IN_AREA:
+                    case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+                    case TARGET_ALL_ENEMIES_AROUND_CASTER:
+                    case TARGET_IN_FRONT_OF_CASTER:
                     case TARGET_DUELVSPLAYER:
-                    case TARGET_AE_E_CHANNEL:
-                    case TARGET_AE_SELECTED:
+                    case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
+                    case TARGET_CURRENT_SELECTED_ENEMY:
                         positive = false;
                         break;
 
