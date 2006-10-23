@@ -50,13 +50,15 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 {
     LootStore::iterator tab;
     uint32 item, displayid, entry;
-    uint32 count = 0;
+    uint32 maxcount = 0;
     float chance;
     float questchance;
 
+    uint32 count = 0;
+
     sLog.outString( "%s :", tablename);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `chance`, `questchance` FROM `%s`",tablename);
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `chance`, `questchance`, `maxcount` FROM `%s`",tablename);
 
     if (result)
     {
@@ -73,15 +75,16 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             item = fields[1].GetUInt32();;
             chance = fields[2].GetFloat();
             questchance = fields[3].GetFloat();
+            maxcount = fields[4].GetUInt32();
 
             ItemPrototype const *proto = objmgr.GetItemPrototype(item);
 
             displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
 
             if( chance < 0.000001 && questchance < 0.000001 )
-                ssNonLootableItems << "loot entry = " << entry << " item = " << item << "\n";
+                ssNonLootableItems << "loot entry = " << entry << " item = " << item << " maxcount = " << maxcount << "\n";
 
-            lootstore[entry].push_back( LootItem(item, displayid, chance, questchance) );
+            lootstore[entry].push_back( LootStoreItem(item, displayid, chance, questchance,maxcount) );
 
             count++;
         } while (result->NextRow());
@@ -139,30 +142,20 @@ void LoadLootTables()
     LoadSkinnigAlternativeTable();
 }
 
-// Result: true  - have chance for non quest items or active quest items (loot can be empty or non empty in this case)
-//         false - only quest loot for non active quests (loot empty)
-bool LootItem::lootable(LootItem &itm, Player* player)
-{
-    if(player && itm.questchance > 0 && player->HaveQuestForItem(itm.itemid))
-        return true;
-    else
-        return itm.chance > 0;
-}
-
 struct NotChanceFor
 {
     Player* m_player;
 
     explicit NotChanceFor(Player* _player) : m_player(_player) {}
 
-    bool operator() ( LootItem &itm )
+    bool operator() ( LootStoreItem &itm )
     {
         if(m_player && itm.questchance > 0 && m_player->HaveQuestForItem(itm.itemid))
             return itm.questchance <= rand_chance();
         else if(itm.chance > 0)
         {
             if(itm.chance >= 100)
-                return itm.chance <= rand_chance();
+                return false;
             else
                 return itm.chance * sWorld.getRate(RATE_DROP_ITEMS) <= rand_chance();
         }
@@ -184,14 +177,23 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
         return;
     }
 
-    vector <LootItem>::iterator new_end;
     loot->items.resize(tab->second.size());
 
     // fill loot with items that have a chance
     NotChanceFor not_chance_for(player);
 
-    new_end = remove_copy_if(tab->second.begin(), tab->second.end(), loot->items.begin(),not_chance_for);
-    loot->items.erase(new_end, loot->items.end());
+    size_t pos = 0;
+    for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+    {
+        uint8 lcount = 0;
+        for(uint8 i = 0; i < item_iter->maxcount; ++i)
+            if(!not_chance_for(*item_iter)) ++lcount;
+
+        if(lcount > 0)
+            loot->items[pos++] = LootItem(*item_iter,lcount);
+    }
+
+    loot->items.erase(loot->items.begin()+pos, loot->items.end());
 }
 
 void Loot::NotifyItemRemoved(uint8 lootIndex)

@@ -479,10 +479,12 @@ void WorldSession::SendSpiritResurrect()
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 {
-    SendBindPoint();
+    uint64 npcGUID;
+    recv_data >> npcGUID;
+    SendBindPoint(npcGUID);
 }
 
-void WorldSession::SendBindPoint()
+void WorldSession::SendBindPoint(uint64 npcGUID)
 {
     WorldPacket data;
 
@@ -512,12 +514,12 @@ void WorldSession::SendBindPoint()
 
     // send spell for bind 3286 bind magic
     data.Initialize(SMSG_SPELL_START );
-    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << _player->GetGUID() << uint16(3286);
+    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << npcGUID << uint16(3286);
     data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
     SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO);
-    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << _player->GetGUID() << uint16(3286);
+    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << npcGUID << uint16(3286);
     data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
     data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
     SendPacket( &data );

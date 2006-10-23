@@ -52,25 +52,40 @@ using std::list;
 
 class Player;
 
-struct LootItem
+struct LootStoreItem
 {
     uint32  itemid;
     uint32  displayid;
     float   chance;
     float   questchance;
+    uint8   maxcount;
+
+    LootStoreItem()
+        : itemid(0), displayid(0), chance(0), questchance(0), maxcount(1) {}
+
+    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance, uint8 _maxcount = 1)
+        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), maxcount(_maxcount) {}
+};
+
+struct LootItem
+{
+    uint32  itemid;
+    uint32  displayid;
     uint8   count;
     bool    is_looted;
     bool    is_blocked;
 
     LootItem()
-        : itemid(0), displayid(0), chance(0), questchance(0), is_looted(true), count(1), is_blocked(false) {}
+        : itemid(0), displayid(0), count(1), is_looted(true), is_blocked(false) {}
 
-    LootItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance, uint8 _count = 0)
-        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), count(_count), is_looted(false), is_blocked(false) {}
+    LootItem(uint32 _itemid, uint32 _displayid, uint8 _count = 1)
+        : itemid(_itemid), displayid(_displayid), count(_count), is_looted(false), is_blocked(false) {}
+
+    LootItem(LootStoreItem const& li,uint8 _count)
+        : itemid(li.itemid), displayid(li.displayid), count(_count), is_looted(false), is_blocked(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
-    static bool lootable(LootItem &itm, Player* player);
 };
 
 struct Loot
@@ -99,8 +114,8 @@ struct Loot
     void remove(const LootItem & item);
 };
 
-typedef list<LootItem> LootItemList;
-typedef HM_NAMESPACE::hash_map<uint32, LootItemList > LootStore;
+typedef list<LootStoreItem> LootStoreItemList;
+typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
 
 extern LootStore LootTemplates_Creature;
 extern LootStore LootTemplates_Fishing;
