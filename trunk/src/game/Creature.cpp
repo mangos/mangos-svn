@@ -642,7 +642,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         case GOSSIP_OPTION_INNKEEPER:
             //_player->SetBindPoint( guid );
-            player->GetSession()->SendBindPoint();
+            player->GetSession()->SendBindPoint(guid);
             break;
         case GOSSIP_OPTION_BANKER:
             player->GetSession()->SendShowBank( guid );
