@@ -439,6 +439,9 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4,uint32(itemProto->Spells[4].SpellCharges));
     SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
     //SetUInt32Value(ITEM_FIELD_DURATION, itemProto->Delay); ITEM_FIELD_DURATION is time until item expires, not speed
+
+    _LoadQuests();
+
     return true;
 }
 
@@ -485,12 +488,31 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
 
     delete result;
 
+    _LoadQuests();
+
     return true;
 }
 
 void Item::DeleteFromDB()
 {
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
+}
+
+void Item::_LoadQuests()
+{
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
+        delete *i;
+    mQuests.clear();
+
+    ItemPrototype const *itemProto = GetProto();
+    if(itemProto && itemProto->StartQuest)
+    {
+        Quest* quest = objmgr.NewQuest(itemProto->StartQuest);
+        if(quest)
+            addQuest(quest);
+        else
+            sLog.outError("Item (Entry: %u) can start quest %u but quest not exist, ignoring.",GetEntry(),itemProto->StartQuest);
+    }
 }
 
 ItemPrototype const *Item::GetProto() const
