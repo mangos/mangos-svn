@@ -169,7 +169,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
             continue;
         if((*itr)->reqskill)
         {
-            if(_player->GetSkillValue((*itr)->reqskill) >= (*itr)->reqskillvalue)
+            if(_player->GetPureSkillValue((*itr)->reqskill) >= (*itr)->reqskillvalue)
                 ReqskillValueFlag = true;
         }
         else ReqskillValueFlag = true;
