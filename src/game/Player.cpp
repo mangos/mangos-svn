@@ -137,6 +137,8 @@ Player::Player (WorldSession *session): Unit()
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
     m_canParry = false;
+    m_canDualWield = false;
+
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
     inn_pos_x=0;
