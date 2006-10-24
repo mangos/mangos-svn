@@ -58,7 +58,7 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     recv_data >> x >> y >> z >> orientation;
     recv_data >> FallTime;
 
-    if ( FallTime > 1100 && !Target->isDead())
+    if ( FallTime > 1100 && !Target->isDead() && !Target->isGameMaster())
     {
         uint32 MapID = Target->GetMapId();
         Map* Map = MapManager::Instance().GetMap(MapID);
