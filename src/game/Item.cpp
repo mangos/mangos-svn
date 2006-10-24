@@ -604,144 +604,159 @@ bool Item::IsEquipped() const
 void Item::SetItemRandomProperties()
 {
     ItemPrototype const *itemProto = GetProto();
+
+    // only for bounded item
     if(itemProto->Bonding != BIND_WHEN_PICKED_UP && itemProto->Bonding != BIND_WHEN_EQUIPED)
         return;
+
+    // only white or green item
     if(itemProto->Quality != ITEM_QUALITY_NORMAL && itemProto->Quality != ITEM_QUALITY_UNCOMMON)
         return;
-    if(itemProto->Class == ITEM_CLASS_WEAPON || itemProto->Class == ITEM_CLASS_JEWELRY || itemProto->Class == ITEM_CLASS_ARMOR)
-    {
-        // maybe just hack here,we should find out the correct random_id in DBC
-        uint32 random_id,enchant_id_1;
-        enchant_id_1 = random_id = 0;
 
-        if(irand(1,100) <= 60 )
-            switch(irand(1,100)%14)
-            {
+    // only for specific item classes
+    if(itemProto->Class != ITEM_CLASS_WEAPON && itemProto->Class != ITEM_CLASS_JEWELRY && itemProto->Class != ITEM_CLASS_ARMOR)
+        return;
+
+    // only if not other stats bonuses
+    for(uint8 i = 0; i < 10; i++)
+	{
+		if(itemProto->ItemStat[i].ItemStatValue > 0)
+			return;
+	}
+
+    // maybe just hack here,we should find out the correct random_id in DBC
+    uint32 random_id,enchant_id_1;
+    enchant_id_1 = random_id = 0;
+
+    if(irand(1,100) <= 60 )
+    {
+        switch(irand(1,100)%14)
+        {
                                                             // of the Wolf
-                case 1:random_id = 501 + uint32((583-501)/150.0f*(float)itemProto->ItemLevel);break;
+            case 1:random_id = 501 + uint32((583-501)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of the Monkey
-                case 2:random_id = 584 + uint32((668-584)/150.0f*(float)itemProto->ItemLevel);break;
+            case 2:random_id = 584 + uint32((668-584)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of the Tiger
-                case 3:random_id = 669 + uint32((753-669)/150.0f*(float)itemProto->ItemLevel);break;
+            case 3:random_id = 669 + uint32((753-669)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of the Owl
-                case 4:random_id = 754 + uint32((838-754)/150.0f*(float)itemProto->ItemLevel);break;
+            case 4:random_id = 754 + uint32((838-754)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of the Eagle
-                case 5:random_id = 839 + uint32((923-839)/150.0f*(float)itemProto->ItemLevel);break;
+            case 5:random_id = 839 + uint32((923-839)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of the Gorilla
-                case 6:random_id = 924 + uint32((1008-924)/150.0f*(float)itemProto->ItemLevel);break;
+            case 6:random_id = 924 + uint32((1008-924)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of the Whale
-                case 7:random_id = 1009 + uint32((1093-1009)/150.0f*(float)itemProto->ItemLevel);break;
+            case 7:random_id = 1009 + uint32((1093-1009)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of the Boar
-                case 8:random_id = 1094 + uint32((1178-1094)/150.0f*(float)itemProto->ItemLevel);break;
+            case 8:random_id = 1094 + uint32((1178-1094)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of the Bear
-                case 9:random_id = 1179 + uint32((1263-1179)/150.0f*(float)itemProto->ItemLevel);break;
+            case 9:random_id = 1179 + uint32((1263-1179)/150.0f*(float)itemProto->ItemLevel);break;
                                                             // of Arcane Resistance
-                case 10:random_id = 1307 + uint32((1352-1307)/100.0f*(float)itemProto->ItemLevel);break;
+            case 10:random_id = 1307 + uint32((1352-1307)/100.0f*(float)itemProto->ItemLevel);break;
                                                             // of Frost Resistance
-                case 11:random_id = 1353 + uint32((1398-1353)/100.0f*(float)itemProto->ItemLevel);break;
+            case 11:random_id = 1353 + uint32((1398-1353)/100.0f*(float)itemProto->ItemLevel);break;
                                                             // of Fire Resistance
-                case 12:random_id = 1399 + uint32((1444-1399)/100.0f*(float)itemProto->ItemLevel);break;
+            case 12:random_id = 1399 + uint32((1444-1399)/100.0f*(float)itemProto->ItemLevel);break;
                                                             // of Shadow Resistance
-                case 13:random_id = 1445 + uint32((1490-1445)/100.0f*(float)itemProto->ItemLevel);break;
+            case 13:random_id = 1445 + uint32((1490-1445)/100.0f*(float)itemProto->ItemLevel);break;
                                                             // of Nature Resistance
-                case 0:random_id = 1491 + uint32((1536-1491)/100.0f*(float)itemProto->ItemLevel);break;
+            case 0:random_id = 1491 + uint32((1536-1491)/100.0f*(float)itemProto->ItemLevel);break;
+                default:break;
+        }
+    }
+
+    if(irand(1,100) <= 50 && !random_id)
+    {
+        if(itemProto->Class == ITEM_CLASS_ARMOR)
+        {
+            if(itemProto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+                                                            // of Blocking
+                random_id = 1647 + uint32((1703-1647)/100.0f*(float)itemProto->ItemLevel);
+            else if(irand(1,100) <= 30)
+                                                            // of Defense
+                random_id = 1607 + uint32((1636-1607)/100.0f*(float)itemProto->ItemLevel);
+        }
+        else if(itemProto->Class == ITEM_CLASS_JEWELRY)
+        {
+            switch(irand(1,3))
+            {
+                                                            // of Healing
+                case 1:random_id = 2026 + uint32((2064-2026)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Concentration
+                case 2:random_id = 2067 + uint32((2104-2067)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Regeneration
+                case 3:random_id = 2105 + uint32((2142-2105)/100.0f*(float)itemProto->ItemLevel);break;
                 default:break;
             }
-
-        if(irand(1,100) <= 50 && !random_id)
+        }
+        else if(itemProto->Class == ITEM_CLASS_WEAPON)
         {
-            if(itemProto->Class == ITEM_CLASS_ARMOR)
+            if((itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW
+                || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN) && irand(1,100) <= 50)
             {
-                if(itemProto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
-                                                            // of Blocking
-                    random_id = 1647 + uint32((1703-1647)/100.0f*(float)itemProto->ItemLevel);
-                else if(irand(1,100) <= 30)
-                                                            // of Defense
-                    random_id = 1607 + uint32((1636-1607)/100.0f*(float)itemProto->ItemLevel);
+                                                            // of Marksmanship
+                random_id = 1704 + uint32((1741-1704)/100.0f*(float)itemProto->ItemLevel);
             }
-            else if(itemProto->Class == ITEM_CLASS_JEWELRY)
+            else
             {
-                switch(irand(1,3))
+                switch(irand(1,8))
                 {
-                                                            // of Healing
-                    case 1:random_id = 2026 + uint32((2064-2026)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Concentration
-                    case 2:random_id = 2067 + uint32((2104-2067)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Regeneration
-                    case 3:random_id = 2105 + uint32((2142-2105)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Attack Power
+                    case 1:random_id = 1547 + uint32((1592-1547)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Eluding
+                    case 2:random_id = 1742 + uint32((1798-1742)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Arcane Wrath
+                    case 3:random_id = 1799 + uint32((1836-1799)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Shadow Wrath
+                    case 4:random_id = 1837 + uint32((1874-1837)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Fiery Wrath
+                    case 5:random_id = 1875 + uint32((1912-1875)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Holy Wrath
+                    case 6:random_id = 1913 + uint32((1950-1913)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Frozen Wrath
+                    case 7:random_id = 1951 + uint32((1988-1951)/100.0f*(float)itemProto->ItemLevel);break;
+                                                            // of Nature's Wrath
+                    case 8:random_id = 1989 + uint32((2026-1989)/100.0f*(float)itemProto->ItemLevel);break;
                     default:break;
                 }
             }
-            else if(itemProto->Class == ITEM_CLASS_WEAPON)
-            {
-                if((itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW
-                    || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN) && irand(1,100) <= 50)
-                {
-                                                            // of Marksmanship
-                    random_id = 1704 + uint32((1741-1704)/100.0f*(float)itemProto->ItemLevel);
-                }
-                else
-                {
-                    switch(irand(1,8))
-                    {
-                                                            // of Attack Power
-                        case 1:random_id = 1547 + uint32((1592-1547)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Eluding
-                        case 2:random_id = 1742 + uint32((1798-1742)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Arcane Wrath
-                        case 3:random_id = 1799 + uint32((1836-1799)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Shadow Wrath
-                        case 4:random_id = 1837 + uint32((1874-1837)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Fiery Wrath
-                        case 5:random_id = 1875 + uint32((1912-1875)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Holy Wrath
-                        case 6:random_id = 1913 + uint32((1950-1913)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Frozen Wrath
-                        case 7:random_id = 1951 + uint32((1988-1951)/100.0f*(float)itemProto->ItemLevel);break;
-                                                            // of Nature's Wrath
-                        case 8:random_id = 1989 + uint32((2026-1989)/100.0f*(float)itemProto->ItemLevel);break;
-                        default:break;
-                    }
-                }
-            }
         }
+    }
 
-        if(itemProto->ItemLevel <= 15 && !random_id)
+    if(itemProto->ItemLevel <= 15 && !random_id)
+    {
+        random_id = irand(1,34);
+    }
+    else if(itemProto->ItemLevel <= 30 && !random_id)
+    {
+        switch(irand(1,4))
         {
-            random_id = irand(1,34);
+            case 1:random_id = irand(93,99);break;
+            case 2:random_id = irand(111,119);break;
+            case 3:random_id = irand(130,138);break;
+            case 4:random_id = irand(151,155);break;
+            default:break;
         }
-        else if(itemProto->ItemLevel <= 30 && !random_id)
-        {
-            switch(irand(1,4))
-            {
-                case 1:random_id = irand(93,99);break;
-                case 2:random_id = irand(111,119);break;
-                case 3:random_id = irand(130,138);break;
-                case 4:random_id = irand(151,155);break;
-                default:break;
-            }
-        }
-        else if(itemProto->ItemLevel <= 45 && !random_id)
-        {
-            random_id = irand(167,220);
-        }
-        else if(itemProto->ItemLevel <= 60 && !random_id)
-        {
-            random_id = irand(308,434);
-        }
-        //else if(itemProto->ItemLevel <= 60 && !random_id)
-        //{
-        //    random_id = irand(1267,1296);
-        //}
+    }
+    else if(itemProto->ItemLevel <= 45 && !random_id)
+    {
+        random_id = irand(167,220);
+    }
+    else if(itemProto->ItemLevel <= 60 && !random_id)
+    {
+        random_id = irand(308,434);
+    }
+    //else if(itemProto->ItemLevel <= 60 && !random_id)
+    //{
+    //    random_id = irand(1267,1296);
+    //}
 
-        ItemRandomPropertiesEntry *item_rand = sItemRandomPropertiesStore.LookupEntry(random_id);
+    ItemRandomPropertiesEntry *item_rand = sItemRandomPropertiesStore.LookupEntry(random_id);
 
-        if(item_rand)
-        {
-            SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
-            SetUInt32Value(ITEM_FIELD_ENCHANTMENT+9,item_rand->enchant_id_1);
-            SetUInt32Value(ITEM_FIELD_ENCHANTMENT+12,item_rand->enchant_id_2);
-            SetUInt32Value(ITEM_FIELD_ENCHANTMENT+15,item_rand->enchant_id_3);
-        }
+    if(item_rand)
+    {
+        SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
+        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+9,item_rand->enchant_id_1);
+        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+12,item_rand->enchant_id_2);
+        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+15,item_rand->enchant_id_3);
     }
 }
