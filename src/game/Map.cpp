@@ -397,7 +397,7 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl)
         if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
             break;
     }
-    return NULL; 
+    return NULL;
 }
 
 void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
@@ -1025,7 +1025,7 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
     if(xy_cell != cur_cell)
     {
         sLog.outError("ERROR: %s (GUID: %u) X: %f Y: %f (%s) in grid[%u,%u]cell[%u,%u] instead grid[%u,%u]cell[%u,%u]",
-            (c->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature"),c->GetGUIDLow(), 
+            (c->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature"),c->GetGUIDLow(),
             c->GetPositionX(),c->GetPositionY(),(moved ? "final" : "original"),
             cur_cell.GridX(), cur_cell.GridY(), cur_cell.CellX(), cur_cell.CellY(),
             xy_cell.GridX(),  xy_cell.GridY(),  xy_cell.CellX(),  xy_cell.CellY());
@@ -1058,4 +1058,3 @@ template DynamicObject* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl)
 template DynamicObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
 template Corpse* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
 template Corpse* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
-

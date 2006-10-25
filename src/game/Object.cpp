@@ -548,7 +548,7 @@ float Object::GetDistanceSq(const float x, const float y, const float z) const
     return ( dist > 0 ? dist * dist : 0);
 }
 
-float Object::GetDistance2dSq(const Object* obj) const //slow
+float Object::GetDistance2dSq(const Object* obj) const      //slow
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
@@ -567,8 +567,8 @@ float Object::GetDistanceZ(const Object* obj) const
 
 bool Object::IsWithinDistInMap(const Object* obj, const float dist2compare) const
 {
-	if (GetMapId()!=obj->GetMapId()) return false;
-	return IsWithinDist(obj, dist2compare);
+    if (GetMapId()!=obj->GetMapId()) return false;
+    return IsWithinDist(obj, dist2compare);
 }
 
 bool Object::IsWithinDist(const Object* obj, const float dist2compare) const

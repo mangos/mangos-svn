@@ -230,26 +230,26 @@ void Spell::EffectDummy(uint32 i)
         m_caster->SetPower(POWER_RAGE,0);
     }
 
-   // Preparation Rogue - immediately finishes the cooldown on other Rogue abilities 
-   if(m_spellInfo->Id == 14185 && m_caster->GetTypeId()==TYPEID_PLAYER) 
-   { 
-      const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap(); 
-      for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr) 
-      { 
-         uint32 classspell = itr->first; 
-         SpellEntry *spellInfo = sSpellStore.LookupEntry(classspell); 
+    // Preparation Rogue - immediately finishes the cooldown on other Rogue abilities
+    if(m_spellInfo->Id == 14185 && m_caster->GetTypeId()==TYPEID_PLAYER)
+    {
+        const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
+        for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+        {
+            uint32 classspell = itr->first;
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(classspell);
 
-         if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 &&
-            (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0)) 
-         { 
-            WorldPacket data; 
-            data.Initialize(SMSG_CLEAR_COOLDOWN); 
-            data << classspell << m_caster->GetGUID(); 
-            data << uint32(0);                                  
-            ((Player*)m_caster)->GetSession()->SendPacket(&data); 
-         } 
-      } 
-   }
+            if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 &&
+                (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_CLEAR_COOLDOWN);
+                data << classspell << m_caster->GetGUID();
+                data << uint32(0);
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+        }
+    }
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
@@ -899,17 +899,17 @@ void Spell::EffectSummonWild(uint32 i)
 
     // level of pet summoned using engineering item based at engineering skill level
     if(m_caster->GetTypeId()==TYPEID_PLAYER && m_CastItem)
-	{
-		ItemPrototype const *proto = m_CastItem->GetProto();
+    {
+        ItemPrototype const *proto = m_CastItem->GetProto();
         if(proto && proto->RequiredSkill == SKILL_ENGINERING)
-		{
-			uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINERING);
-			if(skill202)
-			{
-				level = skill202/5;
-			}
-		}
-	}
+        {
+            uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINERING);
+            if(skill202)
+            {
+                level = skill202/5;
+            }
+        }
+    }
 
     Pet* spawnCreature = new Pet();
 

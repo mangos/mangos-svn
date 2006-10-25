@@ -1474,7 +1474,7 @@ uint8 Spell::CanCast()
             }
             case SPELL_EFFECT_SKINNING:
             {
-                if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT) 
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
                     return CAST_FAIL_FAILED;
 
                 if( !(unitTarget->GetUInt32Value(UNIT_FIELD_FLAGS) & UNIT_FLAG_SKINNABLE) )
@@ -1482,8 +1482,8 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_NOT_SKINNABLE;
                     break;
                 }
-                
-                if ( ( ((Creature*)unitTarget)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER ) 
+
+                if ( ( ((Creature*)unitTarget)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
                     && ( !((Creature*)unitTarget)->lootForBody || !((Creature*)unitTarget)->loot.empty() ) )
                 {
                     castResult = CAST_FAIL_CREATURE_MUST_BE_LOOTED_FIRST;
@@ -1493,10 +1493,10 @@ uint8 Spell::CanCast()
                 int32 SkinningValue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
                 int32 TargetLevel = unitTarget->getLevel();
                 int32 ReqValue = (SkinningValue < 100 ? (TargetLevel-10)*10 : TargetLevel*5);
-                if (ReqValue > SkinningValue) 
+                if (ReqValue > SkinningValue)
                 {
                     castResult = CAST_FAIL_SKILL_NOT_HIGH_ENOUGH;
-                    break;                
+                    break;
                 }
 
                 // Fizzle at Preparing stage only
@@ -1504,10 +1504,10 @@ uint8 Spell::CanCast()
                 {
                     castResult = CAST_FAIL_FIZZLED;
                     // 10% chance to damage the skin when fizzled
-                    if ( urand(1, 100) <= 10 ) 
+                    if ( urand(1, 100) <= 10 )
                         unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
                 }
-                break;                
+                break;
             }
             case SPELL_EFFECT_SUMMON_DEAD_PET:
             {

@@ -72,7 +72,6 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
         return true;
     }
 
-
     if ( option )
     {
         SendSysMessage( LANG_INVISIBLE_VISIBLE );

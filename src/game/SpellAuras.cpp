@@ -1542,14 +1542,14 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
 {
     sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount <= 0)
-    {//for new spell dbc
+    {                                                       //for new spell dbc
         if(apply)
             m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount) / 100.0f );
         else
             m_target->SetSpeed( m_target->GetSpeed() * 100.0f / (100.0f + m_modifier.m_amount) );
     }
     else
-    {//for old spell dbc
+    {                                                       //for old spell dbc
         if(apply)
             m_target->SetSpeed( m_target->GetSpeed() * (m_modifier.m_amount / 100.0f) );
         else
@@ -2158,7 +2158,7 @@ void Aura::HandleModAttackSpeed(bool apply)
 
 void Aura::HandleHaste(bool apply)
 {
-    
+
     if(m_modifier.m_amount >= 0)
     {
         // v*(1+percent/100)

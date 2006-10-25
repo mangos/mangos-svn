@@ -127,7 +127,7 @@ struct LootSkinningAltItem
 {
     LootSkinningAltItem() : itemid(0), displayid(0) {}
     LootSkinningAltItem(uint32 item, uint32 display) : itemid(item), displayid(display) {}
-    
+
     uint32  itemid;
     uint32  displayid;
 };

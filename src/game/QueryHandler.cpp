@@ -52,7 +52,7 @@ void WorldSession::SendNameQueryOpcode(Player* p, bool to_less_security)
     {
         typedef ObjectAccessor::PlayersMapType Players;
         Players& players = ObjectAccessor::Instance().GetPlayers();
-        
+
         for(Players::iterator pIter = players.begin(); pIter != players.end(); ++pIter)
         {
             if( (pIter->second != p)

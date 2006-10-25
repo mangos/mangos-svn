@@ -269,7 +269,7 @@ enum GMFlags
     GM_ON = 1,
     GM_ACCEPT_TICKETS  = 2,
     GM_ACCEPT_WHISPERS = 4,
-    GM_TAXICHEAT       = 8,                                  // can be applied to non-gm players
+    GM_TAXICHEAT       = 8,                                 // can be applied to non-gm players
     GM_INVISIBLE       = 16
 };
 
@@ -556,8 +556,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update,bool fromLoot = false );
         Item* StoreItem( uint16 pos, Item *pItem, bool update );
         void EquipItem( uint16 pos, Item *pItem, bool update );
-		void QuickEquipItem( uint16 pos, Item *pItem);
-		void VisualizeItem( uint16 pos, Item *pItem);
+        void QuickEquipItem( uint16 pos, Item *pItem);
+        void VisualizeItem( uint16 pos, Item *pItem);
         Item* BankItem( uint16 pos, Item *pItem, bool update );
         void RemoveItem( uint8 bag, uint8 slot, bool update );
         void RemoveItemCount( uint32 item, uint32 count, bool update );
@@ -1001,7 +1001,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
-		void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
+        void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
 
         void CastItemEquipSpell(Item *item);
         void CastItemCombatSpell(Item *item,Unit* Target);
