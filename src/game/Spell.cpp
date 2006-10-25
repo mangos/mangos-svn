@@ -746,6 +746,10 @@ void Spell::SendSpellCooldown()
     if (rec < 0) rec = 0;
     if (catrec < 0) catrec = 0;
 
+    // no cooldown after applying spell mods
+    if( rec == 0 && catrec == 0)
+        return;
+
     WorldPacket data;
 
     data.clear();
