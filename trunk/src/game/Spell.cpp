@@ -1184,6 +1184,11 @@ void Spell::TakeCastItem()
 {
     if(!m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
+
+    // not remove cast item at triggered spell (equipping, weapon damage, etc)
+    if(m_IsTriggeredSpell)
+        return;
+
     ItemPrototype const *proto = m_CastItem->GetProto();
     uint32 ItemCount = m_CastItem->GetCount();
     uint32 ItemClass = proto->Class;
