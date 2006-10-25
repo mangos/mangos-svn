@@ -454,7 +454,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     std::string outstring = pCurrChar->GetName();
     outstring.append( " has come online." );
-    pCurrChar->BroadcastToFriends(outstring);
+    pCurrChar->BroadcastToFriendListers(outstring);
 
     // setting new speed if dead
     if ( pCurrChar->m_deathState == DEAD )
