@@ -737,12 +737,12 @@ void Spell::SendSpellCooldown()
         }
     }
 
-    // no cooldown
-    if( rec == 0 && catrec == 0)
-        return;
+    if(rec > 0)
+        _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec);
 
-    _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec);
-    _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
+    if(catrec > 0)
+        _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
+
     if (rec < 0) rec = 0;
     if (catrec < 0) catrec = 0;
 
