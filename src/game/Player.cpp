@@ -9142,7 +9142,7 @@ void Player::SendQuestReward( Quest *pQuest, uint32 XP )
         data << quest;
         data << uint32(0x03);
 
-        if ( getLevel() < 60 )
+        if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
         {
             data << XP;
             data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney);
