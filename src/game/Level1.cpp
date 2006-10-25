@@ -589,7 +589,7 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleModifyASpedCommand(const char* args)
+bool ChatHandler::HandleModifyASpeedCommand(const char* args)
 {
     WorldPacket data;
 
@@ -1294,5 +1294,31 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
         return true;
     }
 
+    return false;
+}
+
+bool ChatHandler::HandlePlaySoundCommand(const char* args)
+{
+    // USAGE: .playsound #soundid
+    // #soundid - ID decimal number from SoundEntries.dbc (1 column)
+    // this file have about 5000 sounds.
+    // In this realisation only caller can hear this sound.
+    if( *args )
+    {
+        int dwSoundId = atoi((char*)args);
+    	if( dwSoundId >= 0 )
+        {
+            WorldPacket data;
+            data.Initialize(SMSG_PLAY_OBJECT_SOUND);
+    		data << uint32(dwSoundId) << m_session->GetPlayer()->GetGUID();
+    		m_session->SendPacket(&data);
+
+            sLog.outDebug("Player %s use command .playsound with #soundid=%u", m_session->GetPlayer()->GetName(), dwSoundId);
+		    PSendSysMessage(LANG_YOU_HEAR_SOUND, dwSoundId);
+		    return true;
+        }
+    }
+
+    SendSysMessage(LANG_BAD_VALUE);
     return false;
 }

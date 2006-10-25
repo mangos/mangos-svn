@@ -59,7 +59,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "scale",       1, &ChatHandler::HandleModifyScaleCommand,      "",   NULL },
         { "bit",         1, &ChatHandler::HandleModifyBitCommand,        "",   NULL },
         { "bwalk",       1, &ChatHandler::HandleModifyBWalkCommand,      "",   NULL },
-        { "aspeed",      1, &ChatHandler::HandleModifyASpedCommand,      "",   NULL },
+        { "aspeed",      1, &ChatHandler::HandleModifyASpeedCommand,      "",   NULL },
         { "faction",     1, &ChatHandler::HandleModifyFactionCommand,    "",   NULL },
         { "spell",       1, &ChatHandler::HandleModifySpellCommand,      "",   NULL },
         { "tp",          1, &ChatHandler::HandleModifyTalentCommand,     "",   NULL },
@@ -180,6 +180,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "shutdown",    3, &ChatHandler::HandleShutDownCommand,         "",   NULL },
         { "pinfo",       2, &ChatHandler::HandlePInfoCommand,            "",   NULL },
         { "visible",     1, &ChatHandler::HandleVisibleCommand,          "",   NULL },
+        { "playsound",   1, &ChatHandler::HandlePlaySoundCommand,        "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
