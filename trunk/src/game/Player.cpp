@@ -2618,12 +2618,12 @@ void Player::CleanupChannels()
         (*i)->Leave(this,false);
 }
 
-void Player::BroadcastToFriends(std::string msg)
+void Player::BroadcastToFriendListers(std::string msg)
 {
     Field *fields;
     Player *pfriend;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GetGUIDLow());
 
     if(!result) return;
 

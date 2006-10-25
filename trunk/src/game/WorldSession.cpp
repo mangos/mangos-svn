@@ -177,6 +177,11 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->SaveToDB();
 
         }
+
+        std::string outstring = _player->GetName();
+        outstring.append( " go to offline." );
+        _player->BroadcastToFriendListers(outstring);
+
         delete _player;
         _player = 0;
 

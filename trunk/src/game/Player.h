@@ -929,7 +929,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void LeftChannel(Channel *c);
         void CleanupChannels();
 
-        void BroadcastToFriends(std::string msg);
+        void BroadcastToFriendListers(std::string msg);
 
         void UpdateDefense();
         void UpdateWeaponSkill (WeaponAttackType attType);
