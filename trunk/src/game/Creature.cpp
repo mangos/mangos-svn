@@ -144,7 +144,7 @@ void Creature::AIM_Update(const uint32 &diff)
     switch( m_deathState )
     {
         case JUST_DIED:
-            assert(false); // Dont must be called, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
+            assert(false);                                  // Dont must be called, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
             break;
         case DEAD:
         {
@@ -1223,7 +1223,8 @@ void Creature::setDeathState(DeathState s)
     }
     Unit::setDeathState(s);
 
-    if(s == JUST_DIED) {
+    if(s == JUST_DIED)
+    {
         SetUInt32Value(UNIT_NPC_FLAGS, 0);
         if(GetCreatureInfo()->SkinLootId)
         {

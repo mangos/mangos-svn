@@ -619,10 +619,10 @@ void Item::SetItemRandomProperties()
 
     // only if not other stats bonuses
     for(uint8 i = 0; i < 10; i++)
-	{
-		if(itemProto->ItemStat[i].ItemStatValue > 0)
-			return;
-	}
+    {
+        if(itemProto->ItemStat[i].ItemStatValue > 0)
+            return;
+    }
 
     // maybe just hack here,we should find out the correct random_id in DBC
     uint32 random_id,enchant_id_1;
@@ -660,7 +660,7 @@ void Item::SetItemRandomProperties()
             case 13:random_id = 1445 + uint32((1490-1445)/100.0f*(float)itemProto->ItemLevel);break;
                                                             // of Nature Resistance
             case 0:random_id = 1491 + uint32((1536-1491)/100.0f*(float)itemProto->ItemLevel);break;
-                default:break;
+            default:break;
         }
     }
 

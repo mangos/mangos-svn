@@ -1309,21 +1309,22 @@ void Player::SetGMVisible(bool on)
 {
     if(on)
     {
-        m_GMFlags &= ~GM_INVISIBLE; //remove flag
+        m_GMFlags &= ~GM_INVISIBLE;                         //remove flag
 
         DeMorph();
-        RemoveAura(10032,1); //crash?
+        RemoveAura(10032,1);                                //crash?
     }
     else
     {
-        m_GMFlags |= GM_INVISIBLE; //add flag
+        m_GMFlags |= GM_INVISIBLE;                          //add flag
 
         SetAcceptWhispers(false);
         SetGameMaster(true);
 
-        SetUInt32Value(UNIT_FIELD_DISPLAYID, 6908); //Set invisible model
+        SetUInt32Value(UNIT_FIELD_DISPLAYID, 6908);         //Set invisible model
 
-        SpellEntry *spellInfo = sSpellStore.LookupEntry( 10032 ); //Stealth spell
+                                                            //Stealth spell
+        SpellEntry *spellInfo = sSpellStore.LookupEntry( 10032 );
         Aura *Aur = new Aura(spellInfo, 1, this);
         AddAura(Aur);
     }
@@ -3810,13 +3811,13 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     }
 
     _RemoveStatsMods();
-	AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
+    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(false);
 
     _ApplyItemBonuses(proto,slot,apply);
 
-	for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(true);
     _ApplyStatsMods();
 
@@ -3839,7 +3840,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
 void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 {
-	if(slot >= INVENTORY_SLOT_BAG_END || !proto) return;
+    if(slot >= INVENTORY_SLOT_BAG_END || !proto) return;
 
     int32 val;
     std::string typestr;
@@ -4140,104 +4141,104 @@ void Player::_RemoveAllItemMods()
 {
     sLog.outDebug("_RemoveAllItemMods start.");
 
-	for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
+    for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if(m_items[i])
-		{
+        {
             if(m_items[i]->IsBroken()) break;
             ItemPrototype const *proto = m_items[i]->GetProto();
             if(!proto) break;
-			if(proto->ItemSet)
-                RemoveItemsSetItem(this,proto);    
+            if(proto->ItemSet)
+                RemoveItemsSetItem(this,proto);
 
-			for (int m = 0; m < 5; m++)
-			{
+            for (int m = 0; m < 5; m++)
+            {
                 if(proto->Spells[m].SpellId)
                     RemoveAurasDueToSpell(proto->Spells[m].SpellId );
-			}
+            }
 
-			for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
+            for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
             {
                 uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                 if(Enchant_id)
                     AddItemEnchant(m_items[i],Enchant_id, false);
             }
-		}
+        }
     }
 
-	_RemoveStatsMods();
+    _RemoveStatsMods();
 
-	AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
+    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(false);
 
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if(m_items[i])
-		{
+        {
             if(m_items[i]->IsBroken()) break;
             ItemPrototype const *proto = m_items[i]->GetProto();
             if(!proto) break;
             _ApplyItemBonuses(proto,i, false);
-		}
+        }
     }
 
-	for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(true);
 
-	_ApplyStatsMods();
+    _ApplyStatsMods();
 
     sLog.outDebug("_RemoveAllItemMods complete.");
 }
 
 void Player::_ApplyAllItemMods()
 {
-	sLog.outDebug("_ApplyAllItemMods start.");
+    sLog.outDebug("_ApplyAllItemMods start.");
 
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if(m_items[i])
-		{
+        {
             if(m_items[i]->IsBroken()) break;
             ItemPrototype const *proto = m_items[i]->GetProto();
             if(!proto) break;
-			if(proto->ItemSet)
+            if(proto->ItemSet)
                 AddItemsSetItem(this,m_items[i]);
 
-			CastItemEquipSpell(m_items[i]);
+            CastItemEquipSpell(m_items[i]);
 
-			for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
+            for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
             {
                 uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                 if(Enchant_id)
                     AddItemEnchant(m_items[i],Enchant_id, true);
             }
-		}
+        }
     }
 
-	_RemoveStatsMods();
+    _RemoveStatsMods();
 
-	AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
+    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(false);
 
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if(m_items[i])
-		{
+        {
             if(m_items[i]->IsBroken()) break;
             ItemPrototype const *proto = m_items[i]->GetProto();
             if(!proto) break;
             _ApplyItemBonuses(proto,i, true);
-		}
+        }
     }
 
-	for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(true);
 
-	_ApplyStatsMods();
+    _ApplyStatsMods();
 
-	sLog.outDebug("_ApplyAllItemMods complete.");
+    sLog.outDebug("_ApplyAllItemMods complete.");
 }
 
 /*Loot type MUST be
@@ -7097,7 +7098,7 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
     if( pItem )
     {
         VisualizeItem( pos, pItem);
-		uint8 slot = pos & 255;
+        uint8 slot = pos & 255;
 
         if(isAlive())
             _ApplyItemMods(pItem, slot, true);
@@ -7126,17 +7127,17 @@ void Player::QuickEquipItem( uint16 pos, Item *pItem)
 
 void Player::VisualizeItem( uint16 pos, Item *pItem)
 {
-	if(!pItem)
-		return;
+    if(!pItem)
+        return;
 
     // check also  BIND_WHEN_PICKED_UP for .additem or .additemset case by GM (not binded at adding to inventory)
     if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
-            pItem->SetBinding( true );
+        pItem->SetBinding( true );
 
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
 
-	sLog.outDebug( "STORAGE: EquipItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+    sLog.outDebug( "STORAGE: EquipItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
     m_items[slot] = pItem;
     SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), pItem->GetGUID() );
@@ -8170,7 +8171,7 @@ bool Player::CanSeeStartQuest( uint32 quest_id )
 {
     if( quest_id )
     {
-        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) && SatisfyQuestExclusiveGroup( quest_id, false ) 
+        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) && SatisfyQuestExclusiveGroup( quest_id, false )
             && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
             && SatisfyQuestPreviousQuest( quest_id, false ) )
             return ( getLevel() + 7 >= objmgr.GetQuestInfo(quest_id)->MinLevel );
@@ -8183,7 +8184,7 @@ bool Player::CanTakeQuest( Quest *pQuest, bool msg )
     if( pQuest)
     {
         uint32 quest_id = pQuest->GetQuestId();
-        return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestExclusiveGroup( quest_id, msg ) 
+        return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestExclusiveGroup( quest_id, msg )
             && SatisfyQuestRace( quest_id, msg ) && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
             && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg )
             && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg ) );
@@ -8713,7 +8714,7 @@ bool Player::SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg )
         QuestRelations::iterator iter = sExclusiveQuestGroups.lower_bound(qInfo->ExclusiveGroup);
         QuestRelations::iterator end  = sExclusiveQuestGroups.upper_bound(qInfo->ExclusiveGroup);
 
-        assert(iter!=end);          // always must be found if qInfo->ExclusiveGroup != 0
+        assert(iter!=end);                                  // always must be found if qInfo->ExclusiveGroup != 0
 
         for(; iter != end; ++iter)
         {
@@ -8726,7 +8727,7 @@ bool Player::SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg )
             StatusMap::iterator i_exstatus = mQuestStatus.find( exclude_Id );
 
             // altearnative quest already start or complete
-            if( i_exstatus != mQuestStatus.end() 
+            if( i_exstatus != mQuestStatus.end()
                 && (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE) )
                 return false;
         }
@@ -9351,8 +9352,8 @@ bool Player::LoadFromDB( uint32 guid )
     m_positionZ = fields[9].GetFloat();
     m_mapId = fields[10].GetUInt32();
     m_orientation = fields[11].GetFloat();
-    
-     // since last logout (in ms)
+
+    // since last logout (in ms)
     uint32 time_diff = (time(NULL) - fields[21].GetUInt32()) * 1000;
 
     rest_bonus = fields[20].GetFloat();
@@ -9413,7 +9414,7 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadReputation();
 
     // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
-    // Skip _ApplyAllItemMods(); -- already applied in _LoadInventory() 
+    // Skip _ApplyAllItemMods(); -- already applied in _LoadInventory()
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugValues();
@@ -9479,7 +9480,7 @@ void Player::_LoadAuras(uint32 timediff)
             }
 
             // FIXME: real caster not stored in DB currently
-            
+
             Aura* aura = new Aura(spellproto, effindex, this, this/*caster*/);
             aura->SetAuraDuration(remaintime);
             AddAura(aura);
@@ -9558,8 +9559,8 @@ void Player::_LoadInventory(uint32 timediff)
 
         delete result;
     }
-	if(isAlive())
-		_ApplyAllItemMods();
+    if(isAlive())
+        _ApplyAllItemMods();
 }
 
 // load mailed items which should receive current player
