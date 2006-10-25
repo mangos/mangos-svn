@@ -57,8 +57,8 @@ RandomMovementGenerator::Initialize(Creature &creature)
         const float angle = (2*M_PI*rand())/RAND_MAX;
         const float range = (wander_distance*rand())/RAND_MAX;
 
-        i_waypoints[idx][0] = i_waypoints[idx-1][0]+ range * cos(angle);
-        i_waypoints[idx][1] = i_waypoints[idx-1][1]+ range * sin(angle);
+        i_waypoints[idx][0] = x+ range * cos(angle);
+        i_waypoints[idx][1] = y+ range * sin(angle);
 
         // prevent invalid coordinates generation
         MaNGOS::NormalizeMapCoord(i_waypoints[idx][0]);
