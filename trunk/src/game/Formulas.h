@@ -120,26 +120,23 @@ namespace MaNGOS
             if( pl_level <= 5 )
                 return 0;
             else if( pl_level <= 39 )
-                return static_cast<uint32>((pl_level - 5 - ::floor(pl_level/10.0)));
+                return pl_level - 5 - pl_level/10;
             else
-                return static_cast<uint32>(pl_level - 1 - ::floor(pl_level/5.0));
+                return pl_level - 1 - pl_level/5;
         }
 
         inline XPColorChar GetColorCode(uint32 pl_level, uint32 mob_level)
         {
             if( mob_level >= pl_level + 5 )
                 return RED;
-            else if( mob_level == pl_level + 3 || mob_level == pl_level + 4 )
+            else if( mob_level >= pl_level + 3 )
                 return ORANGE;
-            else if( pl_level - 2 <= mob_level && mob_level <= pl_level + 2 )
+            else if( mob_level >= pl_level - 2 )
                 return YELLOW;
+            else if( mob_level > GetGrayLevel(pl_level) )
+                return GREEN;
             else
-            {
-                uint32 gray_level = GetGrayLevel(pl_level);
-                if( mob_level <= pl_level - 3 && mob_level > gray_level )
-                    return GREEN;
                 return GRAY;
-            }
         }
 
         inline uint32 GetZeroDifference(uint32 pl_level)
@@ -160,17 +157,15 @@ namespace MaNGOS
 
         inline uint32 BaseGain(uint32 pl_level, uint32 mob_level)
         {
-            if( pl_level == mob_level )
-                return (pl_level*5 + 45);
-            else if( mob_level > pl_level )
-                return static_cast<uint32>(( (pl_level*5 + 45) * (1 + 0.05*(mob_level - pl_level)) ) + 0.5);
+            if( mob_level >= pl_level )
+                return ((pl_level*5 + 45) * (20 + mob_level - pl_level)/10 + 1)/2;
             else
             {
                 uint32 gray_level = GetGrayLevel(pl_level);
                 if( mob_level > gray_level )
                 {
                     uint32 ZD = GetZeroDifference(pl_level);
-                    return uint32( (pl_level*5 + 45) * (1 - float(pl_level - mob_level)/ZD) );
+                    return (pl_level*5 + 45) * (ZD + mob_level - pl_level)/ZD;
                 }
                 return 0;
             }
