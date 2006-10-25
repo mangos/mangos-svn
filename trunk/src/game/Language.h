@@ -133,6 +133,7 @@
 #define LANG_YOURS_MONEY_TAKEN           "%s took %i copper from you."
 #define LANG_YOU_GIVE_MONEY              "You give %i copper to %s."
 #define LANG_YOURS_MONEY_GIVEN           "%s gave you %i copper."
+#define LANG_YOU_HEAR_SOUND              "You hear sound %u."
                                                             //log
 #define LANG_NEW_MONEY                   "USER2: %i, ADD: %i, RESULT: %i\n"
 
