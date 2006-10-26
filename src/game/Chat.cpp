@@ -153,6 +153,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "addspw",      2, &ChatHandler::HandleAddSpwCommand,           "",   NULL },
         { "additem",     3, &ChatHandler::HandleAddItemCommand,          "",   NULL },
         { "additemset",  3, &ChatHandler::HandleAddItemSetCommand,       "",   NULL },
+        { "lookupitem",  3, &ChatHandler::HandleLookupItemCommand,       "",   NULL },
         { "createguild", 3, &ChatHandler::HandleCreateGuildCommand,      "",   NULL },
         { "showhonor",   0, &ChatHandler::HandleShowHonor,               "",   NULL },
         { "update",      3, &ChatHandler::HandleUpdate,                  "",   NULL },

@@ -1307,6 +1307,31 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleLookupItemCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    QueryResult *result=sDatabase.PQuery("SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\"",args);
+    if(!result)
+    {
+        SendSysMessage("No items found!");
+        return true;
+    }
+    
+    do
+    {
+        Field *fields = result->Fetch();
+        uint16 id = fields[0].GetUInt16();
+        std::string name = fields[1].GetCppString();
+        PSendSysMessage("%d - %s",id,name.c_str());
+    } while (result->NextRow());
+    
+    delete result;
+    return true;
+}
+
+
 bool ChatHandler::HandleCreateGuildCommand(const char* args)
 {
     Guild *guild;
