@@ -32,6 +32,7 @@ using std::remove_copy_if;
 LootStore LootTemplates_Creature;
 LootStore LootTemplates_Fishing;
 LootStore LootTemplates_Gameobject;
+LootStore LootTemplates_Item;
 LootStore LootTemplates_Pickpocketing;
 LootStore LootTemplates_Skinning;
 LootSkinnigAlternative sLootSkinnigAlternative;
@@ -41,6 +42,7 @@ void UnloadLoot()
     LootTemplates_Creature.clear();
     LootTemplates_Fishing.clear();
     LootTemplates_Gameobject.clear();
+    LootTemplates_Item.clear();
     LootTemplates_Pickpocketing.clear();
     LootTemplates_Skinning.clear();
     sLootSkinnigAlternative.clear();
@@ -137,6 +139,7 @@ void LoadLootTables()
     LoadLootTable(LootTemplates_Creature,     "creature_loot_template");
     LoadLootTable(LootTemplates_Fishing,      "fishing_loot_template");
     LoadLootTable(LootTemplates_Gameobject,   "gameobject_loot_template");
+    LoadLootTable(LootTemplates_Item,         "item_loot_template");
     LoadLootTable(LootTemplates_Pickpocketing,"pickpocketing_loot_template");
     LoadLootTable(LootTemplates_Skinning,     "skinning_loot_template");
     LoadSkinnigAlternativeTable();

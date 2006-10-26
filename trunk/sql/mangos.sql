@@ -1225,6 +1225,30 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `item_instance` ENABLE KEYS */;
 
 --
+-- Table structure for table `item_loot_template`
+--
+
+DROP TABLE IF EXISTS `item_loot_template`;
+CREATE TABLE `item_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `chance` float NOT NULL default '100',
+  `questchance` float NOT NULL default '0',
+  `maxcount` int(11) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `item_loot_template`
+--
+
+
+/*!40000 ALTER TABLE `item_loot_template` DISABLE KEYS */;
+LOCK TABLES `item_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `item_loot_template` ENABLE KEYS */;
+
+--
 -- Table structure for table `item_page`
 --
 

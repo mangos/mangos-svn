@@ -384,6 +384,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_SETSHEATHED,              STATUS_LOGGEDIN, &WorldSession::HandleSetSheathedOpcode             },
 
         { CMSG_USE_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleUseItemOpcode                 },
+        { CMSG_OPEN_ITEM,                STATUS_LOGGEDIN, &WorldSession::HandleOpenItemOpcode                },
         { CMSG_CAST_SPELL,               STATUS_LOGGEDIN, &WorldSession::HandleCastSpellOpcode               },
         { CMSG_CANCEL_CAST,              STATUS_LOGGEDIN, &WorldSession::HandleCancelCastOpcode              },
         { CMSG_CANCEL_AURA,              STATUS_LOGGEDIN, &WorldSession::HandleCancelAuraOpcode              },

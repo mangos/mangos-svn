@@ -110,6 +110,48 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 #define OPEN_BOOTY_CHEST 5107
 #define OPEN_STRONGBOX 8517
 
+void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
+{
+    sLog.outDetail("WORLD: CMSG_OPEN_ITEM packet, data length = %i",recvPacket.size());
+
+    Player* pUser = _player;
+    uint8 bagIndex, slot;
+
+    recvPacket >> bagIndex >> slot;
+
+    sLog.outDetail("bagIndex: %u, slot: %u",bagIndex,slot);
+
+    Item *pItem = pUser->GetItemByPos(bagIndex, slot);
+    if(!pItem)
+    {
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+        return;
+    }
+
+    ItemPrototype const *proto = pItem->GetProto();
+    if(!proto)
+    {
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );
+        return;
+    }
+
+    // This part is for futur implementation of locked items
+    uint32 lockId = proto->LockID;
+    if(lockId)
+    {
+        LockEntry *lockInfo = sLockStore.LookupEntry(lockId);
+
+        if (!lockInfo)
+        {
+            sLog.outError( "WORLD::OpenItem: item [guid = %u] has an unknown lockId: %u!", pItem->GetGUIDLow() , lockId);
+            return;
+        }
+    }
+
+    pUser->SendLoot(pItem->GetGUID(),LOOT_CORPSE);
+
+}
+
 void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;

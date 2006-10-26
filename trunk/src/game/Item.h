@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "Object.h"
+#include "LootMgr.h"
 #include "ItemPrototype.h"
 
 struct SpellEntry;
@@ -157,6 +158,8 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetSkill();
         uint32 GetSpell();
         void SetItemRandomProperties();
+        Loot loot;
+
     protected:
         void _LoadQuests();
     private:
