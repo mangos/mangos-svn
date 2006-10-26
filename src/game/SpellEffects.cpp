@@ -980,7 +980,7 @@ void Spell::EffectLearnSkill(uint32 i)
         return;
 
     uint32 skillid =  m_spellInfo->EffectMiscValue[i];
-    uint16 skillval = ((Player*)unitTarget)->GetSkillValue(skillid);
+    uint16 skillval = ((Player*)unitTarget)->GetPureSkillValue(skillid);
     ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,damage*75);
 }
 
