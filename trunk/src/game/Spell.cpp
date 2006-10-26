@@ -1400,8 +1400,8 @@ uint8 Spell::CanCast()
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
 
-    // if(m_CastItem || itemTarget) - always check items (focus object can be required for any type casts)
-    castResult = CheckItems();
+    if(castResult == 0)
+        castResult = CheckItems();                          // always check items (focus object can be required for any type casts)
 
     if(castResult == 0)
         castResult = CheckRange();
