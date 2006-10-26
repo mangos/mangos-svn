@@ -1718,7 +1718,7 @@ uint8 Spell::CheckMana(uint32 *mana)
     if(m_spellInfo->powerType == -2)
     {
         uint32 currentHealth = m_caster->GetHealth();
-        uint32 healthCost = m_spellInfo->manaCost;
+        uint32 healthCost = m_spellInfo->manaCost + m_spellInfo->ManaCostPercentage*m_caster->GetMaxHealth()/100;
         *mana = healthCost;
         if(currentHealth <= healthCost)
             return CAST_FAIL_CANT_DO_THAT_YET;
