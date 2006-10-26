@@ -10260,42 +10260,40 @@ void Player::PetSpellInitialize()
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
         if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
-            for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
         {
-            if(itr->second->active != 4)
-                continue;
-            addlist++;
-        }
-        data << uint8(addlist);
-
-        if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
             for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
-        {
-            if(itr->second->active != 4)
-                continue;
-            else
             {
-                bool hasthisspell = false;
-
-                SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
-                data << uint16(spellInfo->EffectTriggerSpell[0]);
-                for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                {
-                    if(pet->m_spells[i] == spellInfo->EffectTriggerSpell[0])
-                    {
-                        data << uint16(0xC1);
-                        hasthisspell = true;
-                        break;
-                    }
-                }
-                if(!hasthisspell)
-                    data << uint16(0x01);
+                if(itr->second->active == 4)
+                    addlist++;
             }
+            data << uint8(addlist);
+
+            for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
+            {
+                if(itr->second->active == 4)
+                {
+                    bool hasthisspell = false;
+
+                    SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
+                    data << uint16(spellInfo->EffectTriggerSpell[0]);
+                    for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                    {
+                        if(pet->m_spells[i] == spellInfo->EffectTriggerSpell[0])
+                        {
+                            data << uint16(0xC1);
+                            hasthisspell = true;
+                            break;
+                        }
+                    }
+                    if(!hasthisspell)
+                        data << uint16(0x01);
+                }
+            }
+
+            data << uint8(0x01) << uint32(0x6010) << uint32(0x00) << uint32(0x00) << uint16(0x00);
+
+            GetSession()->SendPacket(&data);
         }
-
-        data << uint8(0x01) << uint32(0x6010) << uint32(0x00) << uint32(0x00) << uint16(0x00);
-
-        GetSession()->SendPacket(&data);
     }
 }
 
