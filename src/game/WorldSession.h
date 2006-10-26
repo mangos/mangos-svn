@@ -313,6 +313,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleSetSheathedOpcode(WorldPacket& recvPacket);
 
         void HandleUseItemOpcode(WorldPacket& recvPacket);
+        void HandleOpenItemOpcode(WorldPacket& recvPacket);
         void HandleCastSpellOpcode(WorldPacket& recvPacket);
         void HandleCancelCastOpcode(WorldPacket& recvPacket);
         void HandleCancelAuraOpcode(WorldPacket& recvPacket);

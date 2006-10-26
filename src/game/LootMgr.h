@@ -120,6 +120,7 @@ typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
 extern LootStore LootTemplates_Creature;
 extern LootStore LootTemplates_Fishing;
 extern LootStore LootTemplates_Gameobject;
+extern LootStore LootTemplates_Item;
 extern LootStore LootTemplates_Pickpocketing;
 extern LootStore LootTemplates_Skinning;
 

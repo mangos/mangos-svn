@@ -4274,6 +4274,16 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             go->SetLootState(GO_OPEN);
         }
     }
+    else if (IS_ITEM_GUID(guid))
+    {
+        Item *item = this->GetItemByPos( this->GetPosByGuid( guid ));
+
+        if (!item)
+            return;
+
+        loot = &item->loot;
+        FillLoot(this,loot,item->GetEntry(),LootTemplates_Item);
+    }
     else
     {
         Creature *creature =

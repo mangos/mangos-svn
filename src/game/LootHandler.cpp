@@ -46,6 +46,15 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
         loot = &go->loot;
     }
+    else if (IS_ITEM_GUID(lguid))
+    {
+        Item *pItem = player->GetItemByPos( player->GetPosByGuid( lguid ));
+        
+        if (!pItem)
+            return;
+        
+        loot = &pItem->loot;
+    }
     else
     {
         Creature* pCreature =
@@ -207,6 +216,12 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         }
         else
             go->SetLootState(GO_OPEN);
+    }
+    else if (IS_ITEM_GUID(lguid))
+    {
+        uint16 pos = player->GetPosByGuid( lguid );
+        player->DestroyItem( (pos >> 8),(pos & 255), true);
+        return;                                             // item can be looted only single player
     }
     else
     {
