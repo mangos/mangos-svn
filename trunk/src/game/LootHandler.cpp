@@ -49,10 +49,10 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     else if (IS_ITEM_GUID(lguid))
     {
         Item *pItem = player->GetItemByPos( player->GetPosByGuid( lguid ));
-        
+
         if (!pItem)
             return;
-        
+
         loot = &pItem->loot;
     }
     else

@@ -188,7 +188,7 @@ class ChatHandler
         bool HandleGetDistanceCommand(const char* args);
         bool HandleGameObjectCommand(const char* args);
         bool HandleAnimCommand(const char* args);
-		bool HandlePlaySoundCommand(const char* args);
+        bool HandlePlaySoundCommand(const char* args);
         bool HandleStandStateCommand(const char* args);
         bool HandleDieCommand(const char* args);
         bool HandleReviveCommand(const char* args);
