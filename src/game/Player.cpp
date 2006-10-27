@@ -1019,6 +1019,9 @@ void Player::BuildEnumData( WorldPacket * p_data )
             *p_data << (uint8)0;
         }
     }
+    // EQUIPMENT_SLOT_END always 0,0
+    *p_data << (uint32)0;
+    *p_data << (uint8)0;
 }
 
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange)
