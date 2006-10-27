@@ -19,6 +19,9 @@
 #ifndef MANGOS_BAG_H
 #define MANGOS_BAG_H
 
+// Maximum 20 Slots ( (CONTAINER_END - CONTAINER_FIELD_SLOT_1)/2
+#define MAX_BAG_SIZE 20
+
 #include "Object.h"
 #include "ItemPrototype.h"
 #include "Unit.h"
@@ -55,7 +58,7 @@ class Bag : public Item
     protected:
 
         // Bag Storage space
-        Item* m_bagslot[28];
+        Item* m_bagslot[MAX_BAG_SIZE];
 };
 
 inline Item* NewItemOrBag(ItemPrototype const * proto)

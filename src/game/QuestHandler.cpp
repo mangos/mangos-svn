@@ -284,7 +284,7 @@ void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
     uint8 slot1, slot2;
     recv_data >> slot1 >> slot2;
 
-    if(slot1 == slot2 || slot1 >= 20 || slot2 >= 20)
+    if(slot1 == slot2 || slot1 >= MAX_QUEST_LOG_SIZE || slot2 >= MAX_QUEST_LOG_SIZE)
         return;
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u",slot1,slot2 );
@@ -309,7 +309,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
 
-    if( slot < 20 )
+    if( slot < MAX_QUEST_LOG_SIZE )
     {
         quest = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0);
 
