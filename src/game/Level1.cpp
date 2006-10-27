@@ -1306,16 +1306,16 @@ bool ChatHandler::HandlePlaySoundCommand(const char* args)
     if( *args )
     {
         int dwSoundId = atoi((char*)args);
-    	if( dwSoundId >= 0 )
+        if( dwSoundId >= 0 )
         {
             WorldPacket data;
             data.Initialize(SMSG_PLAY_OBJECT_SOUND);
-    		data << uint32(dwSoundId) << m_session->GetPlayer()->GetGUID();
-    		m_session->SendPacket(&data);
+            data << uint32(dwSoundId) << m_session->GetPlayer()->GetGUID();
+            m_session->SendPacket(&data);
 
             sLog.outDebug("Player %s use command .playsound with #soundid=%u", m_session->GetPlayer()->GetName(), dwSoundId);
-		    PSendSysMessage(LANG_YOU_HEAR_SOUND, dwSoundId);
-		    return true;
+            PSendSysMessage(LANG_YOU_HEAR_SOUND, dwSoundId);
+            return true;
         }
     }
 

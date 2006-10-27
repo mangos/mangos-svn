@@ -1318,7 +1318,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         SendSysMessage("No items found!");
         return true;
     }
-    
+
     do
     {
         Field *fields = result->Fetch();
@@ -1326,11 +1326,10 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         std::string name = fields[1].GetCppString();
         PSendSysMessage("%d - %s",id,name.c_str());
     } while (result->NextRow());
-    
+
     delete result;
     return true;
 }
-
 
 bool ChatHandler::HandleCreateGuildCommand(const char* args)
 {
