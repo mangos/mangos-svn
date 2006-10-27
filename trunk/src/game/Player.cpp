@@ -981,8 +981,8 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << (uint32)m_petLevel;
     *p_data << (uint32)m_petFamilyId;
 
-    ItemPrototype const *items[20];
-    for (int i = 0; i < 20; i++)
+    ItemPrototype const *items[EQUIPMENT_SLOT_END];
+    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
         items[i] = NULL;
 
     QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
@@ -993,7 +993,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
             Field *fields  = result->Fetch();
             uint8  slot    = fields[0].GetUInt8() & 255;
             uint32 item_id = fields[1].GetUInt32();
-            if(!( slot < EQUIPMENT_SLOT_END ))
+            if( slot >= EQUIPMENT_SLOT_END )
                 continue;
 
             items[slot] = objmgr.GetItemPrototype(item_id);
@@ -1006,7 +1006,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
         delete result;
     }
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
         if (items[i] != NULL)
         {
@@ -8850,7 +8850,7 @@ void Player::AdjustQuestReqItemCount( uint32 quest_id )
 
 uint16 Player::GetQuestSlot( uint32 quest_id )
 {
-    for ( uint16 i = 0; i < 20; i++ )
+    for ( uint16 i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
     {
         if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest_id )
             return PLAYER_QUEST_LOG_1_1 + 3*i;
@@ -8879,7 +8879,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
     uint32 reqitemcount;
     uint32 curitemcount;
     uint32 additemcount;
-    for( int i = 0; i < 20; i++ )
+    for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( quest != 0 && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
@@ -8917,7 +8917,7 @@ void Player::ItemRemoved( uint32 entry, uint32 count )
     uint32 reqitemcount;
     uint32 curitemcount;
     uint32 remitemcount;
-    for( int i = 0; i < 20; i++ )
+    for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
@@ -8956,7 +8956,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
     uint32 reqkillcount;
     uint32 curkillcount;
     uint32 addkillcount = 1;
-    for( int i = 0; i < 20; i++ )
+    for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
 
@@ -9005,7 +9005,7 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
     uint32 reqCastCount;
     uint32 curCastCount;
     uint32 addCastCount = 1;
-    for( int i = 0; i < 20; i++ )
+    for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
 
@@ -9062,7 +9062,7 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
 void Player::MoneyChanged( uint32 count )
 {
     uint32 quest;
-    for( int i = 0; i < 20; i++ )
+    for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( quest != 0 )
@@ -9283,7 +9283,7 @@ bool Player::MinimalLoadFromDB( uint32 guid )
     m_positionZ = fields[4].GetFloat();
     m_mapId = fields[5].GetUInt32();
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < MAX_QUEST_LOG_SIZE; i++)
         m_items[i] = NULL;
 
     delete result;

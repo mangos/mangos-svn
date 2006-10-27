@@ -32,12 +32,12 @@ Bag::Bag( ): Item()
 
     m_valuesCount = CONTAINER_END;
 
-    memset(m_bagslot, 0, sizeof(Item *) * (20));            // Maximum 20 Slots
+    memset(m_bagslot, 0, sizeof(Item *) * MAX_BAG_SIZE);            // Maximum 20 Slots
 }
 
 Bag::~Bag()
 {
-    for(int i = 0; i<20; i++)
+    for(int i = 0; i<MAX_BAG_SIZE; i++)
     {
         if(m_bagslot[i])    delete m_bagslot[i];
     }
@@ -47,7 +47,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 {
     ItemPrototype const * itemProto = objmgr.GetItemPrototype(itemid);
 
-    if(!itemProto || itemProto->ContainerSlots > 20)
+    if(!itemProto || itemProto->ContainerSlots > MAX_BAG_SIZE)
         return false;
 
     Object::_Create( guidlow, HIGHGUID_CONTAINER );
@@ -67,7 +67,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, itemProto->ContainerSlots);
 
     // Cleanning 20 slots
-    for (uint8 i = 0; i < 20; i++)
+    for (uint8 i = 0; i < MAX_BAG_SIZE; i++)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
         m_bagslot[i] = NULL;
@@ -149,7 +149,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)
 
 void Bag::DeleteFromDB()
 {
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < MAX_BAG_SIZE; i++)
     {
         if (m_bagslot[i])
         {
@@ -172,12 +172,16 @@ uint8 Bag::FindFreeBagSlot() const
 
 void Bag::RemoveItem( uint8 slot, bool update )
 {
+    assert(slot < MAX_BAG_SIZE);
+
     m_bagslot[slot] = NULL;
     SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
 }
 
 void Bag::StoreItem( uint8 slot, Item *pItem, bool update )
 {
+    assert(slot < MAX_BAG_SIZE);
+
     if( pItem )
     {
         m_bagslot[slot] = pItem;
@@ -192,7 +196,7 @@ void Bag::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) co
 {
     Item::BuildCreateUpdateBlockForPlayer( data, target );
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < MAX_BAG_SIZE; i++)
     {
         if(m_bagslot[i])
             m_bagslot[i]->BuildCreateUpdateBlockForPlayer( data, target );
