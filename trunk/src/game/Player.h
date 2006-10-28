@@ -670,6 +670,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_mailsUpdated;
 
         void SetBindPoint(uint64 guid);
+        void SendTalentWipeConfirm();
         void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
         void Regenerate(Powers power);
@@ -761,6 +762,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
+        bool removeTalent();
         PlayerSpellMap const& GetSpellMap() { return m_spells; };
 
         SpellModList *getSpellModList(int op) { return &m_spellMods[op]; }

@@ -1914,6 +1914,44 @@ bool Player::removeSpell(uint16 spell_id)
     return false;
 }
 
+bool Player::removeTalent()
+{
+    //if(getLevel()<10)
+    //    return false;     //maybe some GM has talent with low level :P
+    uint32 costs = 10000;   //TODO: take correct money here.
+    if(GetMoney()<costs)
+        return false;
+    bool hasTalent = false;
+    for (int i = 0; i < sTalentStore.GetNumRows(); i++)
+    {
+        TalentEntry *talentInfo = sTalentStore.LookupEntry(i);
+        if (!talentInfo) continue;
+        for (int j = 0; j < 5; j++)
+        {
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[j]);
+            if (!spellInfo) continue;
+            const PlayerSpellMap& s_list = GetSpellMap();
+            for(PlayerSpellMap::const_iterator itr = s_list.begin(); itr != s_list.end(); ++itr)
+            {
+                if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+                if (itr->first == spellInfo->Id)
+                {
+                    hasTalent = true;
+                    RemoveAurasDueToSpell(itr->first);
+                    removeSpell(itr->first);
+                    break;
+                }
+            }
+        }
+    }
+    uint32 tp = getLevel() < 10 ? 0 : getLevel() - 9;
+    SetUInt32Value(PLAYER_CHARACTER_POINTS1, tp);
+
+    if(hasTalent)
+        ModifyMoney( int(costs * (-1)) );
+    return hasTalent;
+}
+
 bool Player::_removeSpell(uint16 spell_id)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
@@ -5755,6 +5793,15 @@ void Player::SetBindPoint(uint64 guid)
     GetSession()->SendPacket( &data );
 }
 
+void Player::SendTalentWipeConfirm( )
+{
+    WorldPacket data;
+    data.Initialize( MSG_TALENT_WIPE_CONFIRM );
+    data << (uint64)GetGUID();
+    data << (uint32)10000;  //TODO: make cost here
+    GetSession()->SendPacket( &data );
+}
+
 /*********************************************************/
 /***                    STORAGE SYSTEM                 ***/
 /*********************************************************/
@@ -9512,6 +9559,12 @@ void Player::LoadCorpse()
             corpse->ConvertCorpseToBones();
         else
             corpse->UpdateForPlayer(this,true);
+    }
+    else
+    {
+        //Prevent Dead Player login without corpse
+        if(!isAlive())
+            ResurrectPlayer();
     }
 }
 

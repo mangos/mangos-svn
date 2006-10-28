@@ -110,8 +110,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandlePlayedTime(WorldPacket& recvPacket);
 
         // new
-        void HandleMooveUnRootAck(WorldPacket& recvPacket);
-        void HandleMooveRootAck(WorldPacket& recvPacket);
+        void HandleMoveUnRootAck(WorldPacket& recvPacket);
+        void HandleMoveRootAck(WorldPacket& recvPacket);
         void HandleLookingForGroup(WorldPacket& recvPacket);
 
         // new inspect
@@ -320,6 +320,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCancelAutoRepeatSpellOpcode(WorldPacket& recvPacket);
 
         void HandleLearnTalentOpcode(WorldPacket& recvPacket);
+        void HandleTalentWipeOpcode(WorldPacket& recvPacket);
         void HandleUnlearnSkillOpcode(WorldPacket& recvPacket);
 
         void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
