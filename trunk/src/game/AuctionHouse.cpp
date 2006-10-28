@@ -66,7 +66,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
             data << uint32(1);
             data << uint32(0);
             data << uint32(0);
-            data << uint32(1);
+			data << uint32(it->GetCount());
             data << uint32(0);
             data << it->GetOwnerGUID();
             data << Aentry->bid;
@@ -166,7 +166,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                     data << uint32(1);
                     data << uint32(0);
                     data << uint32(0);
-                    data << uint32(1);
+					data << uint32(it->GetCount());
                     data << uint32(0);
                     data << it->GetOwnerGUID();
                     data << Aentry->bid;
@@ -301,7 +301,11 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     objmgr.AddAItem(it);
 
+	sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",AH->Id);
+	sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')", AH->auctioneer, AH->item, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->Id);
+
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
+	pl->SaveToDB(); // It's important, cos if a crash occours before player saves, item will belong both to AH and player
     WorldPacket data;
     ObjectMgr::AuctionEntryMap::iterator itr;
     uint32 cnt = 0;
@@ -334,7 +338,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
             data << uint32(0);
             data << uint32(0);
             data << uint32(0);
-            data << uint32(1);
+			data << uint32(it->GetCount());
             data << uint32(0);
             data << it->GetOwnerGUID();
             data << Aentry->bid;
@@ -397,7 +401,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
                         data << uint32(0);
                         data << uint32(0);
                         data << uint32(0);
-                        data << uint32(1);
+						data << uint32(item->GetCount());
                         data << uint32(0);
                         data << item->GetOwnerGUID();
                         data << Aentry->bid;
@@ -472,7 +476,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                                 data << uint32(0);
                                                 data << uint32(0);
                                                 data << uint32(0);
-                                                data << uint32(1);
+												data << uint32(item->GetCount());
                                                 data << uint32(0);
                                                 data << item->GetOwnerGUID();
                                                 data << Aentry->bid;
