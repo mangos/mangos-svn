@@ -234,8 +234,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { MSG_INSPECT_HONOR_STATS,   STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode                   },
 
         // new
-        { CMSG_FORCE_MOVE_UNROOT_ACK,   STATUS_LOGGEDIN, &WorldSession::HandleMooveUnRootAck                   },
-        { CMSG_FORCE_MOVE_ROOT_ACK, STATUS_LOGGEDIN, &WorldSession::HandleMooveRootAck               },
+        { CMSG_FORCE_MOVE_UNROOT_ACK,   STATUS_LOGGEDIN, &WorldSession::HandleMoveUnRootAck                   },
+        { CMSG_FORCE_MOVE_ROOT_ACK, STATUS_LOGGEDIN, &WorldSession::HandleMoveRootAck               },
         { CMSG_MOVE_WATER_WALK_ACK, STATUS_LOGGEDIN, &WorldSession::HandleMoveWaterWalkAck               },
 
         // repair item
@@ -391,6 +391,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_CANCEL_AUTO_REPEAT_SPELL, STATUS_LOGGEDIN, &WorldSession::HandleCancelAutoRepeatSpellOpcode   },
 
         { CMSG_LEARN_TALENT,             STATUS_LOGGEDIN, &WorldSession::HandleLearnTalentOpcode             },
+        { MSG_TALENT_WIPE_CONFIRM,       STATUS_LOGGEDIN, &WorldSession::HandleTalentWipeOpcode              },
         { CMSG_UNLEARN_SKILL,            STATUS_LOGGEDIN, &WorldSession::HandleUnlearnSkillOpcode            },
 
         { CMSG_QUESTGIVER_STATUS_QUERY,  STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverStatusQueryOpcode   },

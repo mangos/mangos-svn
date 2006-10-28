@@ -143,6 +143,37 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     }
 }
 
+void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
+{
+    sLog.outString("MSG_TALENT_WIPE_CONFIRM");
+    recv_data.hexlike();
+    uint64 GUID;
+    recv_data >> GUID;
+    Player * player = GetPlayer();
+    if(player->GetGUID()==GUID)
+    {
+        if(!(player->removeTalent()))
+        {
+            WorldPacket data;
+            data.Initialize( MSG_TALENT_WIPE_CONFIRM ); //you have not any talent
+            SendPacket( &data );
+            return;
+        }
+        // send spell 14867
+        WorldPacket data;
+        data.Initialize(SMSG_SPELL_START );
+        data << uint8(0xFF) << GUID << uint8(0xFF) << GUID << uint16(14867);
+        data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
+        SendPacket( &data );
+
+        data.Initialize(SMSG_SPELL_GO);
+        data << uint8(0xFF) << GUID << uint8(0xFF) << GUID << uint16(14867);
+        data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << GUID;
+        data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
+        SendPacket( &data );
+    }
+}
+
 void WorldSession::HandleUnlearnSkillOpcode(WorldPacket & recv_data)
 {
     uint32 skill_id;
