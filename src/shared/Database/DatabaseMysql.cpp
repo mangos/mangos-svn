@@ -32,14 +32,16 @@ void DatabaseMysql::ThreadEnd()
     mysql_thread_end();
 }
 
+size_t DatabaseMysql::db_count = 0;
+
+
 DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
 {
-    static bool first_time = true;
-
     // before first connection
-    if(first_time)
+    if( db_count++ == 0 )
     {
-        first_time = false;
+        // Mysql Library Init
+        mysql_library_init(-1, NULL, NULL);
 
         if (!mysql_thread_safe())
         {
@@ -53,6 +55,10 @@ DatabaseMysql::~DatabaseMysql()
 {
     if (mMysql)
         mysql_close(mMysql);
+    
+    //Free Mysql library pointers for last ~DB
+    if(--db_count == 0)
+        mysql_library_end();
 }
 
 bool DatabaseMysql::Initialize(const char *infoString)
@@ -88,16 +94,18 @@ bool DatabaseMysql::Initialize(const char *infoString)
         password.c_str(), database.c_str(), atoi(port.c_str()), 0, 0);
 
     if (mMysql)
+    {
         sLog.outDetail( "Connected to MySQL database at %s\n",
             host.c_str());
+        return true;
+    }
     else
+    {
         sLog.outError( "Could not connect to MySQL database at %s: %s\n",
             host.c_str(),mysql_error(mysqlInit));
-
-    if(mMysql)
-        return true;
-    else
+        mysql_close(mysqlInit);
         return false;
+    }
 }
 
 QueryResult* DatabaseMysql::PQuery(const char *format,...)
