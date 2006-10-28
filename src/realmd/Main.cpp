@@ -28,7 +28,7 @@
 #include "SystemConfig.h"
 
 #include <signal.h>
-#include <iostream>
+
 bool StartDB(std::string &dbstring);
 void UnhookSignals();
 void HookSignals();
@@ -38,46 +38,35 @@ bool stopEvent = false;
 RealmList m_realmList;
 DatabaseMysql dbRealmServer;
 
-int usage(const char *prog)
+void usage(const char *prog)
 {
-    sLog.outString("Usage: \n %s -c config_file [%s]",prog,_MANGOSD_CONFIG);
-    exit(1);
-    return 0;
+    sLog.outString("Usage: \n %s -c config_file [%s]", prog, _REALMD_CONFIG);
 }
 
 int main(int argc, char **argv)
 {
-    std::string cfg_file = _REALMD_CONFIG;
-    int c=1;
-    while( c < argc )
-    {
-        const char *tmp = argv[c];
-        if( *tmp == '-' && std::string(tmp +1) == "c" )
-        {
-            if( ++c >= argc )
-            {
-                std::cerr << "Runtime-Error: -c option requires an input argument" << std::endl;
-                usage(argv[0]);
-            }
-            else
-                cfg_file = argv[c];
-        }
-        else
-        {
-            std::cerr << "Runtime-Error: unsupported option " << tmp << std::endl;
+	char*	cfg_file=_REALMD_CONFIG;
 
-        }
-        ++c;
-    }
+	//Parse arguments
+	switch(argc) {
+		case 1:
+			break;
+		case 3:
+			if(strcmp(argv[1], "-c")==0) {
+				cfg_file=argv[2];
+				break;
+			}
+		default:
+			usage(argv[0]);
+			return 1;
+	}
 
-    if (!sConfig.SetSource(cfg_file.c_str()))
+    if (!sConfig.SetSource(cfg_file))
     {
-        sLog.outError("Could not find configuration file %s.", cfg_file.c_str());
+        sLog.outError("Could not find configuration file %s.", cfg_file);
+        return 1;
     }
-    else
-    {
-        sLog.outString("Using configuration file %s.", cfg_file.c_str());
-    }
+    sLog.outString("Using configuration file %s.", cfg_file);
 
     // Non-critical warning about conf file version
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
@@ -96,7 +85,8 @@ int main(int argc, char **argv)
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
     std::string dbstring;
-    StartDB(dbstring);
+    if(!StartDB(dbstring)) 
+        return 1;
 
     //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
 
@@ -106,7 +96,7 @@ int main(int argc, char **argv)
     if (m_realmList.size() == 0)
     {
         sLog.outError("No valid realms specified.");
-        exit(1);
+        return 1;
     }
 
     SocketHandler h;
@@ -114,7 +104,7 @@ int main(int argc, char **argv)
     if ( authListenSocket.Bind(rmport))
     {
         sLog.outError( "MaNGOS realmd can not bind to port %d", rmport );
-        exit(1);
+        return 1;
     }
 
     h.Add(&authListenSocket);
@@ -197,14 +187,14 @@ bool StartDB(std::string &dbstring)
     if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
     {
         sLog.outError("Database not specified");
-        exit(1);
+        return false;
     }
 
     sLog.outString("Database: %s", dbstring.c_str() );
     if(!dbRealmServer.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to database");
-        exit(1);
+        return false;
 
     }
 
