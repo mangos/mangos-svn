@@ -55,5 +55,7 @@ class DatabaseMysql : public Database
     private:
         ZThread::FastMutex mMutex;
         MYSQL *mMysql;
+
+        static size_t db_count;
 };
 #endif
