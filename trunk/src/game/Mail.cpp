@@ -370,10 +370,14 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
             data << uint32(0);                              // No messageID
         data << uint32(0);                                  // Unknown - 0x00000029
         data << uint32(0);                                  // Unknown
+        uint8 icount = 1;
         if ((*itr)->item != 0)
         {
             if(Item* i = pl->GetMItem((*itr)->item))
+            {
                 data << uint32(i->GetUInt32Value(OBJECT_FIELD_ENTRY));
+                icount = i->GetCount();
+            }
             else
             {
                 sLog.outError("Mail to %s marked as having item (mail item idx: %u), but item not found.",pl->GetName(),(*itr)->item);
@@ -386,7 +390,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << uint32(0);                                  // Unknown
         data << uint32(0);                                  // Unknown
         data << uint32(0);                                  // Unknown
-        data << uint8(1);                                   // Unknown - Count
+        data << uint8(icount);                              // Attached item stack count
         data << uint32(0xFFFFFFFF);                         // Unknown - Charges
         data << uint32(0);                                  // Unknown - MaxDurability
         data << uint32(0);                                  // Unknown - Durability
