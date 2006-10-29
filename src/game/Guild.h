@@ -100,6 +100,8 @@ struct MemberSlot
 
 struct RankInfo
 {
+    RankInfo(std::string _name, uint32 _rights) : name(_name), rights(_rights) {}
+
     std::string name;
     uint32 rights;
 };
@@ -111,9 +113,10 @@ class Guild
         ~Guild();
 
         void create(uint64 lGuid, std::string gname);
+        void Disband();
 
-        typedef std::list<MemberSlot*> MemberList;
-        typedef std::list<RankInfo*> RankList;
+        typedef std::list<MemberSlot> MemberList;
+        typedef std::list<RankInfo> RankList;
 
         uint32 GetId(){ return Id; }
         const uint64& GetLeader(){ return leaderGuid; }
@@ -131,39 +134,35 @@ class Guild
         uint32 GetBorderColor(){ return BorderColor; }
         uint32 GetBackgroundColor(){ return BackgroundColor; }
 
-        void SetLeader(uint64 guid){ leaderGuid = guid; }
-        void AddMember(MemberSlot *memslot){ members.push_back(memslot); }
-        void DelMember(uint64 guid);
-        void InviteMember(Player* pl);
+        void SetLeader(uint64 guid);
+        void AddMember(uint64 plGuid, uint32 plRank=(uint32)GR_INITIATE);
+        void ChangeRank(uint64 guid, uint32 newRank);
+        void DelMember(uint64 guid, bool isDisbanding=false);
 
-        void SetMOTD(std::string motd) { MOTD = motd; SaveGuildToDB();}
+        void SetMOTD(std::string motd);
         void SetGINFO(std::string ginfo){ GINFO = ginfo; }
         void SetPNOTE(uint64 guid,std::string pnote);
         void SetOFFNOTE(uint64 guid,std::string offnote);
+        void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
 
         uint32 GetMemberSize(){ return members.size(); }
-        std::list<MemberSlot*>::iterator membersbegin(){ return members.begin(); }
-        std::list<MemberSlot*>::iterator membersEnd(){ return members.end(); }
+        MemberList::iterator membersbegin(){ return members.begin(); }
+        MemberList::iterator membersEnd(){ return members.end(); }
 
         void LoadGuildFromDB(uint32 GuildId);
         void LoadRanksFromDB(uint32 GuildId);
         void LoadMembersFromDB(uint32 GuildId);
-        void LoadPlayerStats(MemberSlot *memslot);
+        void LoadPlayerStats(MemberSlot* memslot);
         void LoadPlayerStatsByGuid(uint64 guid);
-
-        void SaveGuildToDB();
-        void SaveRanksToDB();
-        void SaveGuildMembersToDB();
-        void SaveMemberToDB(MemberSlot *memslot);
-
-        void DelGuildFromDB();
-        void DelMemberFromDB(uint64 guid);
 
         void BroadcastToGuild(WorldSession *session, std::string msg);
         void BroadcastToOfficers(WorldSession *session, std::string msg);
+        void BroadcastMsg(const char* msg, WorldSession *session);
+        void BroadcastPacket(WorldPacket *packet);
 
         void CreateRank(std::string name,uint32 rights);
-        void DelRank(){ ranks.pop_back(); }
+        void AddRank(std::string name,uint32 rights);
+        void DelRank();
         std::string GetRankName(uint32 rankId);
         uint32 GetRankRights(uint32 rankId);
         uint32 GetNrRanks(){ return ranks.size(); }
@@ -174,12 +173,10 @@ class Guild
         {
             return ((GetRankRights(rankId) & right) != GR_RIGHT_EMPTY) ? true : false;
         }
-
-        void Disband();
+        
         void Roster(WorldSession *session);
         void Query(WorldSession *session);
-
-        void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
+        
 
     protected:
 

@@ -25,6 +25,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Guild.h"
 #include "UpdateMask.h"
 #include "Chat.h"
 #include "Auth/md5.h"
@@ -478,6 +479,18 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // Place charcter in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();
     pCurrChar->LoadPet();
+
+    if(this->GetPlayer()->GetGuildId() != 0)
+    {
+        data.Initialize(SMSG_GUILD_EVENT);
+        data << (uint8)GE_MOTD;
+        data << (uint8)1;
+        data << objmgr.GetGuildById(this->GetPlayer()->GetGuildId())->GetMOTD();
+
+        SendPacket(&data);
+
+        DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
+    }
 
 }
 
