@@ -989,7 +989,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 
 }
 
-void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)
+void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 {
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
@@ -1026,7 +1026,7 @@ void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
     sLog.outDebug( "WORLD: MSG_LOOKING_FOR_GROUP" );
 }
 
-void WorldSession::HandleMooveRootAck(WorldPacket& recv_data)
+void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 {
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
