@@ -449,23 +449,6 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg)
     }
 }
 
-void Guild::BroadcastMsg(const char* msg, WorldSession *session)
-{
-    Player *pl;
-    MemberList::iterator itr;
-
-    WorldPacket data;
-    sChatHandler.FillMessageData(&data, session, CHAT_MSG_GUILD, LANG_UNIVERSAL, NULL, 0, msg); 
-
-    for (itr = members.begin(); itr != members.end(); itr++)
-    {
-        pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
-        if (!pl || !pl->GetSession() || !HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN))
-            continue;
-       
-        pl->GetSession()->SendPacket(&data);
-    }
-}
 void Guild::BroadcastPacket(WorldPacket *packet)
 {
     MemberList::iterator itr;

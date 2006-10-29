@@ -308,16 +308,10 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     data.Initialize(SMSG_GUILD_EVENT);
     data << (uint8)GE_PROMOTION;
     data << (uint8)3;
-    data << player->GetName();
+    data << GetPlayer()->GetName();
     data << plName;
     data << guild->GetRankName(plRankId-1);
     guild->BroadcastPacket(&data);
-
-    std::ostringstream ss;
-    ss<<"Player: "<<plName<<" got promoted!";
-    guild->BroadcastMsg(ss.str().c_str(), this);
-    
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
 }
 
 void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
@@ -385,12 +379,6 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     data << plName;
     data << guild->GetRankName(plRankId+1);
     guild->BroadcastPacket(&data);
-
-    std::ostringstream ss;
-    ss<<"Player: "<<plName<<" got demoted!";
-    guild->BroadcastMsg(ss.str().c_str(), this);
-
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
 }
 
 void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)

@@ -24,18 +24,6 @@
 #include "dbcfile.h"
 #include "DBCStructure.h"
 
-struct AuctionEntry
-{
-    uint32 auctioneer;
-    uint32 item;
-    uint32 owner;
-    uint32 bid;
-    uint32 buyout;
-    time_t time;
-    uint32 bidder;
-    uint32 Id;
-};
-
 enum SpellSpecific
 {
     SPELL_NORMAL = 0,
@@ -82,6 +70,8 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
 bool IsSingleTarget(uint32 spellId);
 AreaTableEntry* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry* GetAreaEntryByAreaFlag(uint32 area_flag);
+
+void EscapeApostrophes(std::string & s); //used when inserting to Mysql
 
 template<class T>
 class DBCStorage

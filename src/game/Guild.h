@@ -157,7 +157,6 @@ class Guild
 
         void BroadcastToGuild(WorldSession *session, std::string msg);
         void BroadcastToOfficers(WorldSession *session, std::string msg);
-        void BroadcastMsg(const char* msg, WorldSession *session);
         void BroadcastPacket(WorldPacket *packet);
 
         void CreateRank(std::string name,uint32 rights);

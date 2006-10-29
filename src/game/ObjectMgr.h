@@ -54,6 +54,19 @@ class Group;
 class Path;
 class Guild;
 
+struct AuctionEntry
+{
+    uint32 Id;
+    uint32 auctioneer;
+    uint32 item;
+    uint32 owner;
+    uint32 bid;
+    uint32 buyout;
+    time_t time;
+    uint32 bidder;
+    uint32 location;
+};
+
 class ObjectMgr
 {
     public:

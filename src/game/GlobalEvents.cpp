@@ -91,8 +91,8 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 void CorpsesErase()
 {
     //sLog.outBasic("Global Event (corpses/bones removal)");
-    CorpsesErase(CORPSE_BONES,             20*60);          // 20 mins
-    CorpsesErase(CORPSE_RESURRECTABLE,3*24*60*60);          // 3 days
+    CorpsesErase(CORPSE_BONES, 20*MINUTE);
+    CorpsesErase(CORPSE_RESURRECTABLE,3*DAY);
 }
 
 void HandleCorpsesErase(void*)

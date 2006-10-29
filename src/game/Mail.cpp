@@ -116,6 +116,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             SendPacket(&data);
             return;
         }
+        it->SaveToDB();
     }
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
@@ -131,7 +132,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
     pl->ModifyMoney( -30 - money );
 
-    time_t etime = base + 3600 * ((COD > 0)? 3 : 30);       //time if COD 3 days, if no COD 30 days
+    time_t etime = base + DAY * ((COD > 0)? 3 : 30);       //time if COD 3 days, if no COD 30 days
     if (receive)
     {
         Mail* m = new Mail;
@@ -150,9 +151,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         if (it)
             receive->AddMItem(it);
     }
-
+    
+    // backslash all '
+    EscapeApostrophes(body);
+    EscapeApostrophes(subject);
+    
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-                                                            // there was (long)etime ;-) COD added
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (uint64)etime, money, COD, 0);
 }
 
@@ -169,7 +173,7 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
         if (pl->unReadMails)
             pl->unReadMails--;
         m->checked = 1;
-        m->time = time(NULL) + (3 * 3600);
+        m->time = time(NULL) + (3 * DAY);
         pl->m_mailsUpdated = true;
         pl->SetMail(m);
     }
@@ -187,11 +191,10 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
     Mail *m = pl->GetMail(message);
     if(m)
     {
-        //begin Transaction
+        if (m->item > 0)
+            return;
+        //there's no need to delete item from DB, client won't allow to delete mail, when it has an item
         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
-        /*if (m->item) //player cannot delete mail, when it has money , or item, that mail can be returned
-        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item);*/
-        //commit Transaction
     }
     pl->RemoveMail(message);
 
@@ -217,7 +220,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 
     m->receiver = m->sender;
     m->sender = pl->GetGUIDLow();
-    m->time = time(NULL) + (30 * 3600);
+    m->time = time(NULL) + (30 * DAY);
     m->COD = 0;
     m->checked = 0;
     uint64 rc = m->receiver;
@@ -240,8 +243,15 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     data << uint32(0);
     SendPacket(&data);
 
+    std::string body, subject;
+    body = m->body;
+    subject = m->subject;
+    //backslash all apostrophes
+    EscapeApostrophes(body);
+    EscapeApostrophes(subject);
+    
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", message);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 
     pl->RemoveMail(message);
 }
@@ -276,7 +286,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             mn->subject = m->subject;
             mn->body = "Your item sold, player paid a COD";
             mn->item = 0;
-            mn->time = time(NULL) + (30 * 3600);
+            mn->time = time(NULL) + (30 * DAY);
             mn->money = m->COD;
             mn->COD = 0;
             mn->checked = 0;
@@ -286,9 +296,10 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             if (receive)
                 receive->AddMail(mn);
 
+            std::string subject = mn->subject;
+            EscapeApostrophes(subject);
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mn->messageID);
-                                                            //added
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), 0, (uint64)mn->time, mn->money, 0, 0);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, subject.c_str(), mn->body.c_str(), 0, (uint64)mn->time, mn->money, 0, 0);
             // client tests, if player has enought money !!!
             pl->ModifyMoney( -int32(m->COD) );
         }
@@ -397,7 +408,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << uint32((*itr)->money);                      // Gold
         data << uint32((*itr)->COD);                        // COD
         data << uint32((*itr)->checked);                    // flags 0: not checked 1: checked 8: COD Payment: "Subject"
-        data << float(((*itr)->time - time(NULL)) / 3600);  // Time
+        data << float(((*itr)->time - time(NULL)) / DAY);   // Time
         data << uint32(0);                                  // Unknown
 
     }

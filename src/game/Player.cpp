@@ -1608,9 +1608,7 @@ void Player::RemoveMail(uint32 id)
     {
         if ((*itr)->messageID == id)
         {
-            //item should not be in bag , if it is sent by mail... , it can happen only on crash .. item will disappear
-            if ((*itr)->item)
-                sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", (*itr)->item);
+            //do not delete item. beacuse Player::removeMail() is called when returning mail to sender.
             m_mail.erase(itr++);
         }
         else
@@ -10118,8 +10116,13 @@ void Player::_SaveMail()
     for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
     {
         Mail *m = (*itr);
-
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
+        std::string subject, body;
+        //escape apostrophes
+        subject = m->subject;
+        body = m->body;
+        EscapeApostrophes(body);
+        EscapeApostrophes(subject);
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
     }
     m_mailsUpdated = false;
 }
@@ -10223,7 +10226,7 @@ void Player::SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid)
     vector<string> tokens = StrSplit((*result)[0].GetString(), " ");
 
     char buf[11];
-    _ui64toa((unsigned long int) value, buf, 10);
+    snprintf(buf,11,"%u",value);
     tokens[index] = buf;        
 
     std::ostringstream ss2;
