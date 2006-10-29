@@ -417,11 +417,18 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
     if( !GetPlayer()->isDead() )
         return;
 
-    Corpse* corpse = GetPlayer()->GetCorpse();
+    uint64 guid;
 
-    // prevent resurrect before 30-sec delay after body release not finished
-    // but let in case lost corpse (spirit must be see in ghost mode any way)
-    if(corpse && corpse->GetGhostTime() + CORPSE_RECLAIM_DELAY > time(NULL))
+    recv_data >> guid;
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: CMSG_SPIRIT_HEALER_ACTIVATE - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
+
+    // prevent cheating
+    if(!unit->isSpiritHealer() || !unit->IsWithinDistInMap(_player,5)) // iteraction distance
         return;
 
     SendSpiritResurrect();
