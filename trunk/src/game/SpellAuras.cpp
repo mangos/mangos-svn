@@ -2410,23 +2410,17 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             break;
     }
 
-    if (apply)
-    {
-        if (spellId) unit_target->CastSpell(unit_target, spellId, true);
-        if (spellId2) unit_target->CastSpell(unit_target, spellId2, true);
-    }
-    else
-    {
-        unit_target->RemoveAurasDueToSpell(spellId);
-        unit_target->RemoveAurasDueToSpell(spellId2);
-    }
+    uint32 form = aura->GetModifier()->m_miscvalue-1;
 
-    /*if(apply)
+    if(apply)
     {
         if(unit_target->m_ShapeShiftForm)
         {
             unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);
         }
+
+        if (spellId) unit_target->CastSpell(unit_target, spellId, true);
+        if (spellId2) unit_target->CastSpell(unit_target, spellId2, true);
 
         if(unit_target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -2440,12 +2434,12 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
                     unit_target->CastSpell(unit_target, itr->first, true);
             }
         }
-
-        if (aura->GetModifier()->m_miscvalue == FORM_TRAVEL)
-            unit_target->CastSpell(unit_target, 5419, true);
     }
     else
     {
+        unit_target->RemoveAurasDueToSpell(spellId);
+        unit_target->RemoveAurasDueToSpell(spellId2);
+
         Unit::AuraMap& tAuras = unit_target->GetAuras();
         for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
         {
@@ -2454,12 +2448,8 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             else
                 ++itr;
         }
-
-        if (aura->GetModifier()->m_miscvalue == FORM_TRAVEL)
-            unit_target->RemoveAurasDueToSpell(5419);
-    }*/
+    }
 
     double healthPercentage = (double)unit_target->GetHealth() / (double)unit_target->GetMaxHealth();
-    uint32 form = aura->GetModifier()->m_miscvalue-1;
     unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));
 }
