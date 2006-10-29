@@ -193,14 +193,8 @@ class ByteBuffer
 
         void read(uint8 *dest, size_t len)
         {
-            if (_rpos + len <= size())
-            {
-                memcpy(dest, &_storage[_rpos], len);
-            }
-            else
-            {
-                throw error();
-            }
+            ASSERT(_rpos  + len  <= size() || PrintPosError(false,_rpos,len));
+            memcpy(dest, &_storage[_rpos], len);
             _rpos += len;
         }
 
