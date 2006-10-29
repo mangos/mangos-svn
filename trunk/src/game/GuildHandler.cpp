@@ -171,10 +171,12 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     guild->DelMember(plGuid);
 
-    /* missing member-kicked message */
-    std::ostringstream ss;
-    ss<<"Player: "<<plName<<" got kicked!";
-    guild->BroadcastMsg(ss.str().c_str(), this);
+    data.Initialize(SMSG_GUILD_EVENT);
+    data << (uint8)GE_REMOVED;
+    data << (uint8)2;
+    data << plName;
+    data << GetPlayer()->GetName();
+    guild->BroadcastPacket(&data);
 }
 
 void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
