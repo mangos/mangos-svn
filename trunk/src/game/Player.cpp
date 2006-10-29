@@ -36,8 +36,9 @@
 #include "ObjectMgr.h"
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
-#include "Group.h"
 #include "Formulas.h"
+#include "Group.h"
+#include "Guild.h"
 #include "Pet.h"
 #include "SpellAuras.h"
 #include "Util.h"
@@ -2214,11 +2215,15 @@ bool Player::CanLearnProSpell(uint32 spell)
 
 void Player::DeleteFromDB()
 {
+    uint32 guid = GetGUIDLow();
+
     // convert corpse to bones if exist (to prevent exiting Corpse in World without DB entry)
     // bones will be deleted by corpse/bones deleting thread shortly
     SpawnCorpseBones();
 
-    uint32 guid = GetGUIDLow();
+    // remove from guild
+    if(GetGuildId() != 0)
+        objmgr.GetGuildById(GetGuildId())->DelMember(guid);
 
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
@@ -3692,6 +3697,39 @@ void Player::CalculateHonor(Unit *uVictim)
 
         UpdateHonor();
     }
+}
+
+uint32 Player::GetGuildIdFromDB(uint64 guid)
+{
+    std::ostringstream ss;
+    ss<<"SELECT `guildid` FROM `guild_member` WHERE `guid`='"<<guid<<"'";
+    QueryResult *result = sDatabase.Query( ss.str().c_str() );
+    if( result )
+        return (*result)[0].GetUInt32();
+    else
+        return 0;
+}
+
+uint32 Player::GetRankFromDB(uint64 guid)
+{
+    std::ostringstream ss;
+    ss<<"SELECT `rank` FROM `guild_member` WHERE `guid`='"<<guid<<"'";
+    QueryResult *result = sDatabase.Query( ss.str().c_str() );
+    if( result )
+        return (*result)[0].GetUInt32();
+    else
+        return 0;
+}
+
+uint32 Player::GetZoneIdFromDB(uint64 guid)
+{    
+    std::ostringstream ss;
+    ss<<"SELECT `map`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<guid<<"'";
+    QueryResult *result = sDatabase.Query( ss.str().c_str() );
+    if( !result )
+        return 0;
+
+    return MapManager::Instance().GetMap((*result)[0].GetUInt32())->GetZoneId((*result)[0].GetFloat(),(*result)[0].GetFloat());
 }
 
 //If players are too far way of duel flag... then player loose the duel
@@ -9340,6 +9378,45 @@ bool Player::MinimalLoadFromDB( uint32 guid )
     return true;
 }
 
+uint32 Player::GetUInt32ValueFromString(vector<string> const& data, uint16 index)
+{
+    return (uint32)atoi(data[index].c_str());
+}
+
+float Player::GetFloatValueFromString(vector<string> const& data, uint16 index)
+{
+    float result;
+    uint32 temp = Player::GetUInt32ValueFromString(data,index);
+    memcpy(&result, &temp, sizeof(result));
+    
+    return result;
+}
+
+uint32 Player::GetUInt32ValueFromDB(uint16 index, uint64 guid)
+{
+    std::ostringstream ss;
+    ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<guid<<"'";
+    QueryResult *result = sDatabase.Query( ss.str().c_str() );
+    if( !result )
+        return 0;
+
+    Field *fields = result->Fetch();
+
+    vector<string> tokens = StrSplit(fields[0].GetString(), " ");
+    delete result;
+
+    return GetUInt32ValueFromString(tokens,index);
+}
+
+float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
+{
+    float result;
+    uint32 temp = Player::GetUInt32ValueFromDB(index, guid);
+    memcpy(&result, &temp, sizeof(result));
+    
+    return result;
+}
+
 bool Player::LoadFromDB( uint32 guid )
 {
 
@@ -10133,6 +10210,40 @@ inline void Player::SendAttackSwingNotInRange()
     WorldPacket data;
     data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);
     GetSession()->SendPacket( &data );
+}
+
+void Player::SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid)
+{
+    std::ostringstream ss;
+    ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<guid<<"'";
+    QueryResult *result = sDatabase.Query( ss.str().c_str() );
+    if( !result )
+        return;
+
+    vector<string> tokens = StrSplit((*result)[0].GetString(), " ");
+
+    char buf[11];
+    _ui64toa((unsigned long int) value, buf, 10);
+    tokens[index] = buf;        
+
+    std::ostringstream ss2;
+    ss2<<"UPDATE `character` SET `data`='";
+    vector<string>::iterator iter;
+    int i=0;
+    for (iter = tokens.begin(); iter != tokens.end(); ++iter, ++i)
+    {
+        ss2<<tokens[i]<<" ";
+    }
+    ss2<<"' WHERE `guid`='"<<guid<<"'";
+
+    sDatabase.Execute(ss2.str().c_str());
+}
+
+void Player::SetFloatValueInDB(uint16 index, float value, uint64 guid)
+{
+    uint32 temp;
+    memcpy(&temp, &value, sizeof(value));
+    Player::SetUInt32ValueInDB(index, temp, guid);
 }
 
 inline void Player::SendAttackSwingNotStanding()

@@ -658,6 +658,11 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool LoadFromDB(uint32 guid);
         bool MinimalLoadFromDB(uint32 guid);
+        static uint32 GetUInt32ValueFromString(vector<string> const& data, uint16 index);
+        static float  GetFloatValueFromString(vector<string> const& data, uint16 index);
+        static uint32 GetUInt32ValueFromDB(uint16 index, uint64 guid);
+        static float  GetFloatValueFromDB(uint16 index, uint64 guid);
+        static uint32 GetZoneIdFromDB(uint64 guid);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -665,6 +670,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SaveToDB();
         void SavePet();
+        static void SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid);
+        static void SetFloatValueInDB(uint16 index, float value, uint64 guid);
 
         bool m_mailsLoaded;
         bool m_mailsUpdated;
@@ -839,12 +846,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UnSetInvited() { m_isInvited = false; }
         void UnSetInGroup() { m_isInGroup = false; }
 
+        void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); Player::SetUInt32ValueInDB(PLAYER_GUILDID, GuildId, this->GetGUID()); }
+        void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, rankId, this->GetGUID()); }
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
-        void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId);  }
-        void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); }
-
         uint32 GetGuildId() { return GetUInt32Value(PLAYER_GUILDID);  }
+        static uint32 GetGuildIdFromDB(uint64 guid);
         uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
+        static uint32 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
 
         void SetDuelVs(Player *plyr) { m_pDuel = plyr; }
