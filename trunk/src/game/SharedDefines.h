@@ -46,6 +46,13 @@
 #define CLASS_DRUID                         11
 #define MAX_CLASSES                         12
 
+enum TimeConstants
+{
+    MINUTE = 60,
+    HOUR   = MINUTE*60,
+    DAY    = HOUR*24
+};
+
 enum Stats
 {
     STAT_STRENGTH                      = 0,

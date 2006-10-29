@@ -572,3 +572,15 @@ AreaTableEntry* GetAreaEntryByAreaFlag(uint32 area_flag)
 {
     return sAreaStore.LookupEntry(area_flag);
 }
+
+void EscapeApostrophes(std::string & s)
+{
+    for (int i = 0; i < s.size(); i++)
+    {
+        if (s[i] == '\'')
+        {
+            s.insert(i, "\\");
+            ++i;
+        }
+    }
+}
