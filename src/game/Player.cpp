@@ -2256,6 +2256,27 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u'",guid);
+
+    // update guild chapter if chapter owner in game
+    QueryResult *resultGuild = sDatabase.PQuery("SELECT `ownerguid`,`charterguid` FROM `guild_charter_sign` WHERE `playerguid` = '%u'", GUID_LOPART(guid));
+    if(resultGuild)
+    {
+        Field *fields = resultCount->Fetch();
+        uint64 ownerguid   = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
+        uint64 charterguid = MAKE_GUID(fields[1].GetUInt32(),HIGHGUID_ITEM);
+        delete resultGuild;
+
+        sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `playerguid` = '%u'",guid);
+
+        // send update
+        Player* owner = objmgr.GetPlayer(ownerguid);
+        if(owner)
+            // guild name unknown and then send 0 as ownerguid to activate SQL query
+            owner->GetSession()->SendPetitionQueryOpcode(charterguid);
+    }
+
+    sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `ownerguid` = '%u'",guid);
 }
 
 void Player::SetMovement(uint8 pType)

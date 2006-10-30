@@ -92,7 +92,7 @@ MaxGroupXPLevelDiff = 10
 #           1 (Allowed)
 AllowTwoSide.Accounts = 0
 
-# Allow or not common :chat(say,yell);channel(chat)group(join);trade for players from different teams.
+# Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade for players from different teams.
 # Defaullt: 0 (Not allowed)
 #           1 (Allowed)
 AllowTwoSide.Interaction = 0

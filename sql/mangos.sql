@@ -1161,6 +1161,53 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `guild` ENABLE KEYS */;
 
 --
+-- Table structure for table `guild_charter`
+--
+
+DROP TABLE IF EXISTS `guild_charter`;
+CREATE TABLE `guild_charter` (
+  `ownerguid` int(10) unsigned NOT NULL,
+  `charterguid` int(10) unsigned default '0', 
+  `guildname` varchar(255) NOT NULL default '',
+  PRIMARY KEY (`ownerguid`),
+  UNIQUE KEY `index_ownerguid_charterguid` (`ownerguid`,`charterguid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+
+--
+-- Dumping data for table `guild_charter`
+--
+
+
+/*!40000 ALTER TABLE `guild_charter` DISABLE KEYS */;
+LOCK TABLES `guild_charter` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `guild_charter` ENABLE KEYS */;
+
+
+--
+-- Table structure for table `guild_charter_sign`
+--
+
+DROP TABLE IF EXISTS `guild_charter_sign`;
+CREATE TABLE `guild_charter_sign` (
+  `ownerguid` int(10) unsigned NOT NULL,
+  `charterguid` int(11) unsigned default '0', 
+  `playerguid` int(11) unsigned default '0',
+  PRIMARY KEY (`charterguid`,`playerguid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+
+--
+-- Dumping data for table `guild_charter_sign`
+--
+
+
+/*!40000 ALTER TABLE `guild_charter_sign` DISABLE KEYS */;
+LOCK TABLES `guild_charter_sign` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `guild_charter_sign` ENABLE KEYS */;
+
+
+--
 -- Table structure for table `guild_member`
 --
 

@@ -94,6 +94,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendGMTicketGetTicket(uint32 status, char const* text);
         void SendCancelTrade();
         void SendStablePet(uint64 guid );
+        void SendPetitionQueryOpcode( uint64 petitionguid);
 
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
@@ -188,6 +189,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         void HandleMovementOpcodes(WorldPacket& recvPacket);
         void HandleFallOpcode( WorldPacket & recv_data );
+        void HandleMoveFallResetOpcode(WorldPacket& recv_data); 
         void HandleSetActiveMoverOpcode(WorldPacket &recv_data);
         void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
 
@@ -207,6 +209,15 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
         void HandleLootRoll( WorldPacket &recv_data );
         void HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data );
+
+        void HandlePetitionBuyOpcode(WorldPacket& recv_data);
+        void HandlePetitionShowSignOpcode(WorldPacket& recv_data);
+        void HandlePetitionQueryOpcode(WorldPacket& recv_data);
+        void HandlePetitionRenameOpcode(WorldPacket& recv_data);
+        void HandlePetitionSignOpcode(WorldPacket& recv_data);
+        void HandlePetitionDeclineOpcode(WorldPacket& recv_data);
+        void HandleOfferPetitionOpcode(WorldPacket& recv_data);
+        void HandleTurnInPetitionOpcode(WorldPacket& recv_data);
 
         void HandleGuildQueryOpcode(WorldPacket& recvPacket);
         void HandleGuildCreateOpcode(WorldPacket& recvPacket);
