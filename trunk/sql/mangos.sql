@@ -1145,6 +1145,7 @@ CREATE TABLE `guild` (
   `BorderStyle` int(5) unsigned NOT NULL default '0',
   `BorderColor` int(5) unsigned NOT NULL default '0',
   `BackgroundColor` int(5) unsigned NOT NULL default '0',
+  `info` TEXT NOT NULL,
   `MOTD` varchar(255) NOT NULL default '',
   `createdate` datetime default NULL,
   PRIMARY KEY  (`guildid`)

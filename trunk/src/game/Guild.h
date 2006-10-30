@@ -140,7 +140,7 @@ class Guild
         void DelMember(uint64 guid, bool isDisbanding=false);
 
         void SetMOTD(std::string motd);
-        void SetGINFO(std::string ginfo){ GINFO = ginfo; }
+        void SetGINFO(std::string ginfo);
         void SetPNOTE(uint64 guid,std::string pnote);
         void SetOFFNOTE(uint64 guid,std::string offnote);
         void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
