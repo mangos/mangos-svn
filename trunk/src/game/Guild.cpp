@@ -157,7 +157,7 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
     LoadRanksFromDB(GuildId);
     LoadMembersFromDB(GuildId);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`MOTD` FROM `guild` WHERE `guildid` = '%u'", GuildId);
+    QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`MOTD`,`createdate` FROM `guild` WHERE `guildid` = '%u'", GuildId);
 
     if(!result)
         return;
@@ -173,30 +173,14 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
     BorderColor = fields[6].GetUInt32();
     BackgroundColor = fields[7].GetUInt32();
     MOTD = fields[8].GetCppString();
+    uint64 time = fields[9].GetUInt64(); //datetime is uint64 type ... YYYYmmdd:hh:mm:ss 
 
     delete result;
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%d\") FROM `guild` WHERE `guildid` = '%u'", GuildId);
-    if(!result1) return;
-    fields = result1->Fetch();
-    CreatedDay = fields[0].GetUInt32();
-
-    delete result1;
-
-    QueryResult *result2 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%s\") FROM `guild` WHERE `guildid` = '%u'","%m';", GuildId);
-    if(!result2) return;
-    fields = result2->Fetch();
-    CreatedMonth = fields[0].GetUInt32();
-
-    delete result2;
-
-    QueryResult *result3 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%s\") FROM `guild` WHERE `guildid` = '%u'", "%Y", GuildId);
-    if(!result3) return;
-    fields = result3->Fetch();
-    CreatedYear = fields[0].GetUInt32();
-
-    delete result3;
-
+    CreatedDay = (time /1000000)%100;
+    CreatedMonth = (time /100000000)%100;
+    CreatedYear = (time /10000000000)%10000;
+    sLog.outDebug("Guild %u Creation time Loaded day: %u, month: %u, year: %u", GuildId, CreatedDay, CreatedMonth, CreatedYear);
 }
 
 void Guild::LoadRanksFromDB(uint32 GuildId)

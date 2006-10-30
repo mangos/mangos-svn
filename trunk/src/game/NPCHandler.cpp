@@ -298,69 +298,6 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
-{
-    WorldPacket data;
-    uint64 guid;
-    unsigned char tdata[21] =
-    {
-        0x01, 0x01, 0x00, 0x00, 0x00, 0xe7, 0x16, 0x00, 0x00, 0xef, 0x23, 0x00, 0x00, 0xe8, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
-    };
-    recv_data >> guid;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
-    if (!unit)
-    {
-        sLog.outDebug( "WORLD: HandlePetitionShowListOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
-        return;
-    }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if( !unit->isGuildMaster())                             // it's not guild master
-        return;
-
-    data.Initialize( SMSG_PETITION_SHOWLIST );
-    data << guid;
-    data.append( tdata, sizeof(tdata) );
-    SendPacket( &data );
-}
-
-void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
-{
-    uint64 guid;
-
-    recv_data >> guid;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
-    if (!unit)
-    {
-        sLog.outDebug( "WORLD: HandleAuctionHelloOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
-        return;
-    }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if( !unit->isAuctioner())                               // it's not auctioner
-        return;
-
-    SendAuctionHello(guid);
-}
-
-void WorldSession::SendAuctionHello( uint64 guid )
-{
-    WorldPacket data;
-    data.Initialize( MSG_AUCTION_HELLO );
-    data << guid;
-    data << uint32(0);
-
-    SendPacket( &data );
-}
-
 void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 {
     sLog.outDetail( "WORLD: Received CMSG_GOSSIP_HELLO" );

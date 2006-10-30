@@ -25,6 +25,39 @@
 #include "Player.h"
 #include "UpdateMask.h"
 
+void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
+{
+    uint64 guid;
+
+    recv_data >> guid;
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: HandleAuctionHelloOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
+
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if( !unit->isAuctioner())                               // it's not auctioner
+        return;
+
+    SendAuctionHello(guid);
+}
+
+void WorldSession::SendAuctionHello( uint64 guid )
+{
+    WorldPacket data;
+    data.Initialize( MSG_AUCTION_HELLO );
+    data << guid;
+    data << uint32(0);
+
+    SendPacket( &data );
+}
+
 void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
 {
     uint64 guid;

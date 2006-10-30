@@ -93,6 +93,26 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     GetPlayer()->SendMessageToSet(&data, false);
 }
 
+void WorldSession::HandleMoveFallResetOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("Received opcode CMSG_MOVE_FALL_RESET");
+    uint64 unk5;
+    uint32 unk1, unk2;
+    float x, y, z, o, o1, o2, o3;
+    recv_data.hexlike();
+    recv_data >> unk1; // constant ??? (24577 for me)
+    recv_data >> unk2; // time?
+    recv_data >> x; // x coordinate
+    recv_data >> y; // y coordinate
+    recv_data >> z; // z coordinate
+    recv_data >> o; // orientation
+    recv_data >> unk5; // 0
+    recv_data >> o1; // orientation of ??
+    recv_data >> o2; // orientation of ??
+    recv_data >> o3; // orientation of ??
+    sLog.outDebug("CMSG_MOVE_FALL_RESET: %u %u %f %f %f %f " I64FMTD " %f %f %f", unk1, unk2, x, y, z, o, unk5, o1, o2, o3);
+}
+
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 flags, time;
