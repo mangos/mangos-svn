@@ -305,6 +305,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_LOOT_METHOD,              STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              },
         { CMSG_LOOT_ROLL,                STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      },
         { CMSG_REQUEST_PARTY_MEMBER_STATS,  STATUS_LOGGEDIN, &WorldSession::HandleRequestPartyMemberStatsOpcode},
+        { CMSG_REQUEST_RAID_INFO,        STATUS_LOGGEDIN, &WorldSession::HandleRequestRaidInfoOpcode         },
+        { MSG_RAID_ICON_TARGET,          STATUS_LOGGEDIN, &WorldSession::HandleRaidIconTargetOpcode          },
 
         { CMSG_PETITION_SHOWLIST,        STATUS_LOGGEDIN, &WorldSession::HandlePetitionShowListOpcode        },
         { CMSG_PETITION_BUY,             STATUS_LOGGEDIN, &WorldSession::HandlePetitionBuyOpcode             },
@@ -487,8 +489,6 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_STABLE_SWAP_PET,          STATUS_LOGGEDIN, &WorldSession::HandleStableSwapPet                 },
 
         { CMSG_CANCEL_CHANNELLING ,      STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              },
-
-        { CMSG_REQUEST_RAID_INFO,        STATUS_LOGGEDIN, &WorldSession::HandleRequestRaidInfoOpcode         },
 
         //BattleGround
 

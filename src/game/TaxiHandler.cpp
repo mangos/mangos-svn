@@ -65,17 +65,12 @@ void WorldSession::SendTaxiStatus( uint64 guid )
     data << guid;
 
     if ( (GetPlayer( )->GetTaximask(field) & submask) != submask )
-    {
         data << uint8( 0 );
-    }
     else
-    {
         data << uint8( 1 );
-    }
 
     SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_TAXINODE_STATUS" );
-
 }
 
 void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
@@ -123,10 +118,8 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
         GetPlayer()->SetTaximask(field, (submask | GetPlayer( )->GetTaximask(field)) );
 
         WorldPacket msg;
-        char buf[256];
-        sprintf((char*)buf, "You discovered a new taxi vendor.");
-        sChatHandler.FillSystemMessageData(&msg, GetPlayer()->GetSession(), buf);
-        GetPlayer( )->GetSession( )->SendPacket( &msg );
+        msg.Initialize(SMSG_NEW_TAXI_PATH);
+        _player->GetSession()->SendPacket( &msg );
 
         WorldPacket update;
         update.Initialize( SMSG_TAXINODE_STATUS );
@@ -283,7 +276,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
     sourcenode      = GetPlayer()->GetTaxiSource();
     if ( sourcenode > 0 )                                   // if more destinations to go
     {
-        // Add to taximask middle hubs in taxicheat mode (to privent haveing player with disbaled taxicheat and not having back flight path)
+        // Add to taximask middle hubs in taxicheat mode (to prevent having player with disabled taxicheat and not having back flight path)
         if (GetPlayer()->isTaxiCheater())
         {
             uint8 field = (uint8)((sourcenode - 1) / 32);
@@ -292,12 +285,8 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
             {
                 GetPlayer()->SetTaximask(field, (submask | GetPlayer( )->GetTaximask(field)) );
 
-                WorldPacket msg;
-                char buf[256];
-                sprintf((char*)buf, "You discovered a new taxi vendor.");
-                sChatHandler.FillSystemMessageData(&msg, GetPlayer()->GetSession(), buf);
-                GetPlayer( )->GetSession( )->SendPacket( &msg );
-
+                data.Initialize(SMSG_NEW_TAXI_PATH);
+                _player->GetSession()->SendPacket( &data );
             }
         }
 

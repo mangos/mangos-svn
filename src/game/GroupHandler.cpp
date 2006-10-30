@@ -457,10 +457,10 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
     sLog.outDebug("Received opcode MSG_MINIMAP_PING X: %f, Y: %f", x, y);
 
     data.Initialize(MSG_MINIMAP_PING);
-    data << uint64(0);
+    data << _player->GetGUID();
     data << x;
     data << y;
-    SendToGroup(&data,true);
+    SendToGroup(&data, false);
 }
 
 void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
@@ -486,6 +486,85 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
     data << minimum;
     data << maximum;
     data << roll;
-    data << GetPlayer()->GetGUID();
+    data << _player->GetGUID();
     SendToGroup( &data , true );
+}
+
+void WorldSession::HandleRaidIconTargetOpcode( WorldPacket & recv_data )
+{
+/*
+receive from client: uint8 icon, uint64 guid
+server send to client:
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 00 00 00 00 00 00 00 00 00 -- -- -- -- : !........... delete icon 0
+
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 01 40 bb e0 01 00 00 00 00 -- -- -- -- : !...@....... set icon 1
+
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 01 00 00 00 00 00 00 00 00 -- -- -- -- : !........... delete icon 1
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 02 40 bb e0 01 00 00 00 00 -- -- -- -- : !...@....... set icon 2
+
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 02 00 00 00 00 00 00 00 00 -- -- -- -- : !........... delete icon 2
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 03 40 bb e0 01 00 00 00 00 -- -- -- -- : !...@....... set icon 3
+
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 03 00 00 00 00 00 00 00 00 -- -- -- -- : !........... delete icon 3
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 04 40 bb e0 01 00 00 00 00 -- -- -- -- : !...@....... set icon 4
+
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 04 00 00 00 00 00 00 00 00 -- -- -- -- : !........... delete icon 4
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 05 40 bb e0 01 00 00 00 00 -- -- -- -- : !...@....... set icon 5
+
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 05 00 00 00 00 00 00 00 00 -- -- -- -- : !........... delete icon 5
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 06 40 bb e0 01 00 00 00 00 -- -- -- -- : !...@....... set icon 6
+
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 06 00 00 00 00 00 00 00 00 -- -- -- -- : !........... delete icon 6
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 07 40 bb e0 01 00 00 00 00 -- -- -- -- : !...@....... set icon 7
+
+Packet SMSG.(null) (801), len: 12
+0000: 21 03 00 07 00 00 00 00 00 00 00 00 -- -- -- -- : !........... delete icon 7
+*/
+    sLog.outDebug("Received opcode MSG_RAID_ICON_TARGET");
+    WorldPacket data;
+    uint8 icon;
+    uint64 guid;
+    recv_data.hexlike();
+    recv_data >> icon; // icon
+    recv_data >> guid; // guid
+    sLog.outDebug("Raid group icon %u for guid %u", icon, guid);
+    if(guid == 0) // none case
+    {
+        data.Initialize(MSG_RAID_ICON_TARGET);
+        data << (uint8)0; // may be used when in raid group?
+        data << icon; // icon to delete
+        data << guid; // 0
+        SendToGroup(&data, true);
+    }
+    else
+    {
+        // FIXME: before adding new icon we must remove old if any
+        //if(unit(get_by_guid)->GetRaidIcon()) (unit can be player, NPC, creature...)
+        //{
+        //    data.Initialize(MSG_RAID_ICON_TARGET);
+        //    data << (uint8)0; // may be used when in raid group?
+        //    data << unit(get_by_guid)->GetRaidIcon(); // delete current icon (if it already set), but how to get it?, need fix
+        //    data << (uint64)0;
+        //    SendToGroup(&data, true);
+        //}
+        data.Initialize(MSG_RAID_ICON_TARGET);
+        data << (uint8)0; // may be used when in raid group?
+        data << icon; // set new icon
+        data << guid;
+        SendToGroup(&data, true);
+    }
 }

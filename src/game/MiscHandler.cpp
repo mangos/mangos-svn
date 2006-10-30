@@ -348,7 +348,7 @@ void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
     if( !GetPlayer()->GetPvP() || GetPlayer()->m_pvp_counting )
     {
         //sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You are now flagged PvP combat and will remain so until toggled off.");
-        GetPlayer()->SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
         GetPlayer()->SetPvP (true);
         return;
     }
@@ -389,7 +389,6 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
         GetPlayer()->SetRestType(2);
         GetPlayer()->InnEnter(time(NULL),0,0,0);
     }
-
 }
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
@@ -425,6 +424,11 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
     {
         uint8 animstate;
         recv_data >> animstate;
+
+        WorldPacket data;
+        data.Initialize(SMSG_STANDSTATE_CHANGE_ACK);
+        data << animstate;
+        SendPacket(&data);
 
         uint32 bytes1 = _player->GetUInt32Value( UNIT_FIELD_BYTES_1 );
         bytes1 &=0xFFFFFF00;
@@ -1180,17 +1184,33 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
-
     WorldPacket data;
+    Player *pl;
     uint64 guid;
     recv_data >> guid;
     DEBUG_LOG("Party Stats guid is " I64FMTD,guid);
 
-    // TODO need to be finished ...
-    data.Initialize( MSG_INSPECT_HONOR_STATS );
-    data << guid;
-    SendPacket(&data);
-
+    pl = objmgr.GetPlayer(guid);
+    if(pl)
+    {
+        data.Initialize( MSG_INSPECT_HONOR_STATS );
+        data << guid; // player guid
+        data << (uint8)pl->GetUInt32Value(PLAYER_FIELD_HONOR_BAR); // Rank, filling bar, PLAYER_BYTES_3, ??
+        data << pl->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS); // Today Honorable and Dishonorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS); // Yesterday Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS); // Last Week Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS); // This Week Honorable kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS); // Lifetime Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS); // Lifetime Dishonorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION); // Yesterday Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION); // Last Week Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION); // This Week Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK); // Last Week Standing
+        data << (uint8)pl->GetHonorHighestRank(); // Highest Rank, ??
+        SendPacket(&data);
+    }
+    else
+        sLog.outDebug("Player %u not found!", guid);
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
@@ -1224,8 +1244,19 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     DEBUG_LOG("Time %u sec, map=%u, x=%f, y=%f, z=%f, orient=%f", time/1000, mapid, PositionX, PositionY, PositionZ, Orientation);
 
     if (GetSecurity() >= 3)
-    {
         GetPlayer()->TeleportTo(mapid,PositionX,PositionY,PositionZ,Orientation);
-    }
+    else
+        SendNotification("You do not have permission to perform that function");
     sLog.outDebug("Received worldport command from player %s", GetPlayer()->GetName());
+}
+
+void WorldSession::SendNotification(char* msg)
+{
+    if(msg)
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_NOTIFICATION);
+        data << msg;
+        SendPacket(&data);
+    }
 }
