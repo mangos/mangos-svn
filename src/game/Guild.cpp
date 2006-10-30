@@ -186,9 +186,10 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
 
     delete result;
 
-    CreatedDay = (time /1000000)%100;
-    CreatedMonth = (time /100000000)%100;
-    CreatedYear = (time /10000000000)%10000;
+    uint64 dTime = time /1000000;
+    CreatedDay   = dTime%100;
+    CreatedMonth = (dTime/100)%100;
+    CreatedYear  = (dTime/10000)%10000;
     sLog.outDebug("Guild %u Creation time Loaded day: %u, month: %u, year: %u", GuildId, CreatedDay, CreatedMonth, CreatedYear);
 }
 

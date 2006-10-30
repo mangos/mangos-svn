@@ -490,7 +490,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 
     location = AuctionerFactionToLocation(pCreature->getFaction());
 
-    sLog.outDebug("Auctionhouse search guid: " I64FMTD ", unk1: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, unk1, searchedname, levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
+    sLog.outDebug("Auctionhouse search guid: " I64FMTD ", unk1: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, unk1, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
 
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_LIST_RESULT );
