@@ -807,7 +807,7 @@ enum OpCodes
     SMSG_MINIGAME_STATE                             = 761-2,
     CMSG_MINIGAME_MOVE                              = 762-2,
     SMSG_MINIGAME_MOVE_FAILED                       = 763-2,
-    CMSG_GUILD_CHANGEINFO                           = 764-2,
+    CMSG_GUILD_CHANGEINFO                           = 764,//764-2,
     SMSG_UNKNOWN_INFO                               = 766,
 
     CMSG_ACTIVATETAXI_FAR                           = 786,

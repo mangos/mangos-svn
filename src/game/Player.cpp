@@ -181,6 +181,13 @@ Player::~Player ()
     }
     CleanupChannels();
 
+    //all mailed items should be deleted, also all mail should be dealocated
+    for (std::list<Mail*>::iterator itr =  m_mail.begin(); itr != m_mail.end();++itr)
+        delete *itr;
+
+    for (ItemMap::iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
+        delete iter->second;  //if item is duplicated... then server may crash ... but that item should be dealocated
+
     delete info;
     delete PlayerTalkClass;
 }

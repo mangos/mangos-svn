@@ -424,8 +424,6 @@ Server >>> [60 bytes] SMSG_MESSAGECHAT=0x96 -- dump/001957.s
 don't know how to cause this opcode, it is possible that charter-party has wrong properties \flags (are not present even names)...
 Here it is necessary to receive number of signatures, to compare with 9 and if it is equal - if guild, to add the players who have signed charter in guild, to remove charter-party and to send the answer...
 Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
-    //TODO fix me!
-    //i think this opcode should remove item from players bag and create new guild with all members
     sLog.outDebug("Received opcode CMSG_TURN_IN_PETITION");
     uint64 petitionguid;
     recv_data.hexlike();
