@@ -280,7 +280,7 @@ void ObjectMgr::LoadAuctions()
     if(!AuctionCount)
         return;
 
-    result = sDatabase.Query( "SELECT `auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`, `id` FROM `auctionhouse`" );
+    result = sDatabase.Query( "SELECT `id`,`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`location` FROM `auctionhouse`" );
 
     if( !result )
         return;
@@ -296,14 +296,16 @@ void ObjectMgr::LoadAuctions()
         bar.step();
 
         aItem = new AuctionEntry;
-        aItem->auctioneer = fields[0].GetUInt32();
-        aItem->item = fields[1].GetUInt32();
-        aItem->owner = fields[2].GetUInt32();
-        aItem->buyout = fields[3].GetUInt32();
-        aItem->time = fields[4].GetUInt32();
-        aItem->bidder = fields[5].GetUInt32();
-        aItem->bid = fields[6].GetUInt32();
-        aItem->Id = fields[7].GetUInt32();
+        aItem->Id = fields[0].GetUInt32();
+        aItem->auctioneer = fields[1].GetUInt32();
+        aItem->item = fields[2].GetUInt32();
+        aItem->owner = fields[3].GetUInt32();
+        aItem->buyout = fields[4].GetUInt32();
+        aItem->time = fields[5].GetUInt32();
+        aItem->bidder = fields[6].GetUInt32();
+        aItem->bid = fields[7].GetUInt32();
+        aItem->location = fields[8].GetUInt8();
+        
         AddAuction(aItem);
     } while (result->NextRow());
     delete result;

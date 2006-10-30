@@ -93,6 +93,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `auctionhouse`;
 CREATE TABLE `auctionhouse` (
+  `id` bigint(20) unsigned NOT NULL default '0',
   `auctioneerguid` int(32) NOT NULL default '0',
   `itemguid` int(32) NOT NULL default '0',
   `itemowner` int(32) NOT NULL default '0',
@@ -100,7 +101,7 @@ CREATE TABLE `auctionhouse` (
   `time` bigint(40) NOT NULL default '0',
   `buyguid` int(32) NOT NULL default '0',
   `lastbid` int(32) NOT NULL default '0',
-  `id` int(32) NOT NULL default '0'
+  `location` tinyint(3) unsigned NOT NULL default '3'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --

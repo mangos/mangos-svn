@@ -105,7 +105,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 n->subject = "You have lost a bid";
                 n->body = "";
                 n->item = 0;
-                n->time = time(NULL) + (30 * 3600);
+                n->time = time(NULL) + (30 * DAY);
                 n->money = ah->bid;
                 n->COD = 0;
                 n->checked = 0;
@@ -127,6 +127,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             objmgr.RemoveAuction(ah->Id);
             objmgr.AddAuction(ah);
 
+            // after this update we should save player!
             sDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u';", ah->bidder, ah->bid, ah->Id);
 
             pl->ModifyMoney(-int32(price));
@@ -197,7 +198,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             m->subject = "You won an item!";
             m->body = "";
             m->item = ah->item;
-            m->time = time(NULL) + (29 * 3600);
+            m->time = time(NULL) + (29 * DAY);
             m->money = 0;
             m->COD = 0;
             m->checked = 0;
@@ -211,7 +212,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 mn2->subject = "You lost a bid!";
                 mn2->body = "Item has been bought";
                 mn2->item = 0;
-                mn2->time = time(NULL) + (30 * 3600);
+                mn2->time = time(NULL) + (30 * DAY);
                 mn2->money = ah->bid;
                 mn2->COD = 0;
                 mn2->checked = 0;
@@ -252,7 +253,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             mn->subject = "Your item sold!";
             mn->body = "";
             mn->item = 0;
-            mn->time = time(NULL) + (29 * 3600);
+            mn->time = time(NULL) + (29 * DAY);
             mn->money = ah->buyout;
             mn->COD = 0;
             mn->checked = 0;
@@ -268,7 +269,28 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             }
             objmgr.RemoveAItem(ah->item);
             objmgr.RemoveAuction(ah->Id);
+            //now we can remove auction from ram...
+            //delete ah; // should be used in objmgr::removeauction function
         }
+    }
+}
+
+static uint8 AuctionerFactionToLocation(uint32 faction)
+{
+    switch (faction)
+    {
+        case 29: // orc
+        case 68: //undead
+        case 104: //tauren
+            return 1;
+            break;
+        case 12: //human
+        case 55: //dwarf
+        case 79:    //Nightelf 
+            return 2;
+            break;
+        default: /* 85 and so on ... neutral*/
+            return 3;
     }
 }
 
@@ -280,7 +302,14 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     recv_data >> bid >> buyout >> etime;
     Player *pl = GetPlayer();
 
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
+    if(!pCreature||!pCreature->isAuctioner())
+        return;
+
+    uint8 location = AuctionerFactionToLocation(pCreature->getFaction());
+
     AuctionEntry *AH = new AuctionEntry;
+    AH->Id = objmgr.GenerateAuctionID();
     AH->auctioneer = GUID_LOPART(auctioneer);
     AH->item = GUID_LOPART(item);
     AH->owner = pl->GetGUIDLow();
@@ -289,9 +318,9 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->buyout = buyout;
     time_t base = time(NULL);
     AH->time = ((time_t)(etime * 60)) + base;
+    AH->location = location;
 
-    AH->Id = objmgr.GenerateAuctionID();
-    sLog.outDetail("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes)",GUID_LOPART(item),GUID_LOPART(auctioneer),bid,buyout,time);
+    sLog.outDetail("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes) in location: %u", GUID_LOPART(item), GUID_LOPART(auctioneer), bid, buyout, GUID_LOPART(time), location);
     objmgr.AddAuction(AH);
     uint16 pos = pl->GetPosByGuid(item);
     Item *it = pl->GetItemByPos( pos );
@@ -301,35 +330,18 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     objmgr.AddAItem(it);
 
-	sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",AH->Id);
-	sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')", AH->auctioneer, AH->item, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->Id);
-
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
-	pl->SaveToDB(); // It's important, cos if a crash occours before player saves, item will belong both to AH and player
+    it->SaveToDB();
+    sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`location`) VALUES ('%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')", AH->Id, AH->auctioneer, AH->item, AH->owner, AH->buyout, AH->time, AH->bidder, AH->bid, AH->location);
+    pl->SaveToDB();
+
     WorldPacket data;
-    ObjectMgr::AuctionEntryMap::iterator itr;
-    uint32 cnt = 0;
-    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        if (itr->second->owner == pl->GetGUIDLow())
-        {
-            cnt++;
-        }
-    }
-    sLog.outDetail("sending owner list with %u items",cnt);
     data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
-    if (cnt < 51)
+    data << uint32(0); // initialize, but there should be count..
+    uint32 count = 0;
+    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
     {
-        data << uint32(cnt);
-    }
-    else
-    {
-        data << uint32(50);
-    }
-    uint32 cnter = 1;
-    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        if (itr->second->owner == pl->GetGUIDLow() && (cnter < 51))
+        if (itr->second->owner == pl->GetGUIDLow() && (count < 51))
         {
             AuctionEntry *Aentry = itr->second;
             data << Aentry->Id;
@@ -348,10 +360,11 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
             data << uint32((Aentry->time - base) * 1000);
             data << uint64(0);
             data << Aentry->bid;
-            cnter++;
+            count++;
         }
     }
-    data << cnt;
+    data.put( 0, count );                                   // add count to placeholder
+    data << count;
     SendPacket(&data);
 
 }
@@ -427,7 +440,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 {
     std::string searchedname, name;
-    uint8 levelmin, levelmax, usable;
+    uint8 levelmin, levelmax, usable, location;
     uint32 count, unk1, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
     uint64 guid;
 
@@ -438,6 +451,14 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     recv_data >> auctionSlotID >> auctionMainCategory >> auctionSubCategory;
     recv_data >> quality >> usable;
 
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    if(!pCreature||!pCreature->isAuctioner())
+            return;
+
+    location = AuctionerFactionToLocation(pCreature->getFaction());
+
+    sLog.outDebug("Auctionhouse search guid: " I64FMTD ", unk1: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, unk1, searchedname, levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
+
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_LIST_RESULT );
     count = 0;
@@ -445,7 +466,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
     {
         AuctionEntry *Aentry = itr->second;
-        if( Aentry )
+        if( Aentry && Aentry->location == location)
         {
             Item *item = objmgr.GetAItem(Aentry->item);
             if( item )
