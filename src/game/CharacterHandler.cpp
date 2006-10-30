@@ -480,16 +480,26 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     pCurrChar->LoadCorpse();
     pCurrChar->LoadPet();
 
-    if(this->GetPlayer()->GetGuildId() != 0)
+    if(pCurrChar->GetGuildId() != 0)
     {
-        data.Initialize(SMSG_GUILD_EVENT);
-        data << (uint8)GE_MOTD;
-        data << (uint8)1;
-        data << objmgr.GetGuildById(this->GetPlayer()->GetGuildId())->GetMOTD();
+        Guild* guild = objmgr.GetGuildById(pCurrChar->GetGuildId());
+        if(guild)
+        {
+            data.Initialize(SMSG_GUILD_EVENT);
+            data << (uint8)GE_MOTD;
+            data << (uint8)1;
+            data << guild->GetMOTD();
+            SendPacket(&data);
 
-        SendPacket(&data);
-
-        DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
+            DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
+        }
+        else
+        {
+            // remove wrong guild data
+            sLog.outError("Player %s (GUID: %u) marked as member not existed guild (id: %u), removing guild membership for player.",pCurrChar->GetName(),pCurrChar->GetGUIDLow(),pCurrChar->GetGuildId());
+            pCurrChar->SetUInt32Value(PLAYER_GUILDID,0);
+            pCurrChar->SetUInt32ValueInDB(PLAYER_GUILDID,0,pCurrChar->GetGUID());
+        }
     }
 
 }
