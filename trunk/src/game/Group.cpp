@@ -434,17 +434,16 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                     SendLootRollWon(0, m_members[maxindex].guid, i->itemid, 0, rollresul[maxindex], 1, *i);
                     player = objmgr.GetPlayer(m_members[maxindex].guid);
                     uint16 dest;
-                    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, 1, false );
+                    LootItem *item = &(i->loot->items[i->itemSlot]);
+                    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, item->count, false );
                     if ( msg == EQUIP_ERR_OK )
                     {
-                        LootItem *item = &(i->loot->items[i->itemSlot]);
                         item->is_looted = true;
                         i->loot->NotifyItemRemoved(i->itemSlot);
-                        player->StoreNewItem( dest, i->itemid, 1, true, true);
+                        player->StoreNewItem( dest, i->itemid, item->count, true, true);
                     }
                     else
                     {
-                        LootItem *item = &(i->loot->items[i->itemSlot]);
                         item->is_blocked = false;
                         player->SendEquipError( msg, NULL, NULL );
                     }
@@ -476,17 +475,16 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                         player = objmgr.GetPlayer(m_members[maxindex].guid);
 
                         uint16 dest;
-                        uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, 1, false );
+                        LootItem *item = &(i->loot->items[i->itemSlot]);
+                        uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, item->count, false );
                         if ( msg == EQUIP_ERR_OK )
                         {
-                            LootItem *item = &(i->loot->items[i->itemSlot]);
                             item->is_looted = true;
                             i->loot->NotifyItemRemoved(i->itemSlot);
-                            player->StoreNewItem( dest, i->itemid, 1, true, true);
+                            player->StoreNewItem( dest, i->itemid, item->count, true, true);
                         }
                         else
                         {
-                            LootItem *item = &(i->loot->items[i->itemSlot]);
                             item->is_blocked = false;
                             player->SendEquipError( msg, NULL, NULL );
                         }
