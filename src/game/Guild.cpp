@@ -102,6 +102,10 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
     if(Player::GetGuildIdFromDB(plGuid) != 0) // player already in guild
         return;
 
+    // remove oll player signs from another petitions
+    // this will be prevent attempt joining player to many guilds and corrupt guild data integrity
+    Player::RemovePetitionsAndSigns(plGuid);
+
     Player* pl = objmgr.GetPlayer(plGuid);
     if(pl)
     {

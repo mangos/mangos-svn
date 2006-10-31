@@ -854,6 +854,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
         static uint32 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
+        static void RemovePetitionsAndSigns(uint64 guid);
 
         void SetDuelVs(Player *plyr) { m_pDuel = plyr; }
         void SetInDuel(bool val) { m_isInDuel = val; }

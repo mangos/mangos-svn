@@ -79,6 +79,10 @@ MaxPlayerLevel = 60
 # Max : 9 
 MaxPrimaryTradeSkill = 2 
 
+# Min signatures count to creating guild (0..9).
+# Default: 9
+MinPetitionSigns = 9 
+
 # Max distance to creature for group memeber to get XP at creature death.
 # Default: 74
 MaxGroupXPDistance = 74
