@@ -132,6 +132,7 @@ class ObjectMgr
         void RemoveGroup(Group* group) { mGroupSet.erase( group ); }
 
         Guild* GetGuildById(const uint32 GuildId) const;
+        Guild* GetGuildByName(std::string guildname) const;
         void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 

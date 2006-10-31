@@ -175,7 +175,6 @@ class Guild
         
         void Roster(WorldSession *session);
         void Query(WorldSession *session);
-        
 
     protected:
 

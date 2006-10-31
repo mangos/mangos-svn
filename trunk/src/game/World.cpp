@@ -246,6 +246,7 @@ void World::SetInitialWorldSettings()
     }
 
     m_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig.GetIntDefault("MaxPrimaryTradeSkill", 2);
+    m_configs[CONFIG_MIN_PETITION_SIGNS] = sConfig.GetIntDefault("MinPetitionSigns", 9);  
     m_configs[CONFIG_WISPERING_TO_GM] = sConfig.GetIntDefault("WhisperingToGM",0);
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
