@@ -10446,8 +10446,12 @@ void Player::PetSpellInitialize()
                 if(itr->second->active == 4)
                     addlist++;
             }
-            data << uint8(addlist);
+        }
 
+        data << uint8(addlist);
+
+        if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        {
             for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
             {
                 if(itr->second->active == 4)
@@ -10469,11 +10473,11 @@ void Player::PetSpellInitialize()
                         data << uint16(0x01);
                 }
             }
-
-            data << uint8(0x01) << uint32(0x6010) << uint32(0x00) << uint32(0x00) << uint16(0x00);
-
-            GetSession()->SendPacket(&data);
         }
+
+        data << uint8(0x01) << uint32(0x6010) << uint32(0x00) << uint32(0x00) << uint16(0x00);
+
+        GetSession()->SendPacket(&data);
     }
 }
 
