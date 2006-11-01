@@ -211,6 +211,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_RESURRECT_NEW:
                 case SPELL_EFFECT_PROFICIENCY:
                 case SPELL_EFFECT_PARRY:
+                case SPELL_EFFECT_DUMMY:
                     tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
                 case SPELL_EFFECT_SKILL:
@@ -535,7 +536,7 @@ void Spell::prepare(SpellCastTargets * targets)
         m_spellState = SPELL_STATE_FINISHED;
 
     if(m_IsTriggeredSpell)
-        cast();
+        cast(true);
     else
     {
         m_caster->castSpell( this );
@@ -571,7 +572,7 @@ void Spell::cancel()
     m_caster->RemoveGameObject(m_spellInfo->Id,true);
 }
 
-void Spell::cast()
+void Spell::cast(bool skipCheck)
 {
     uint32 mana = 0;
     uint8 castResult = 0;
@@ -586,7 +587,10 @@ void Spell::cast()
         return;
     }
 
-    castResult = CanCast();
+    // triggered cast called from Spell::preper where it already checked 
+    if(!skipCheck)
+        castResult = CanCast();
+
     if(castResult == 0)
     {
         SendSpellCooldown();

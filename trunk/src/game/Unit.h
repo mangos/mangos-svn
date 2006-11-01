@@ -569,12 +569,11 @@ class MANGOS_DLL_SPEC Unit : public Object
         void castSpell(Spell * pSpell);
         void InterruptSpell();
         Spell * m_currentSpell;
+        Spell * m_oldSpell;
         Spell * m_currentMeleeSpell;
         uint32 m_addDmgOnce;
         uint64 m_TotemSlot[4];
         uint64 m_ObjectSlot[4];
-        uint32 m_triggerSpell;
-        uint32 m_triggerDamage;
         uint32 m_canMove;
         uint32 m_detectStealth;
         uint32 m_stealthvalue;

@@ -448,7 +448,7 @@ class Spell
         void prepare(SpellCastTargets * targets);
         void cancel();
         void update(uint32 difftime);
-        void cast();
+        void cast(bool skipCheck = false);
         void finish();
         void TakePower(uint32 mana);
         void TakeReagents();

@@ -53,6 +53,7 @@ Unit::Unit() : Object()
     m_form = 0;
     m_deathState = ALIVE;
     m_currentSpell = NULL;
+    m_oldSpell = NULL;
     m_currentMeleeSpell = NULL;
     m_addDmgOnce = 0;
     m_TotemSlot[0] = m_TotemSlot[1] = m_TotemSlot[2] = m_TotemSlot[3]  = 0;
@@ -1352,6 +1353,12 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
 
 void Unit::_UpdateSpells( uint32 time )
 {
+    if(m_oldSpell != NULL)
+    {
+        delete m_oldSpell;
+        m_oldSpell = NULL;
+    }
+
     if(m_currentSpell != NULL)
     {
         m_currentSpell->update(time);
@@ -1540,8 +1547,10 @@ void Unit::castSpell( Spell * pSpell )
         if(m_currentSpell)
         {
             m_currentSpell->cancel();
-            delete m_currentSpell;
-            m_currentSpell = NULL;
+            // let call spell from spell (single level recursion) and not crash at returning to procesiing old spell
+            if(m_oldSpell)
+                delete m_oldSpell;
+            m_oldSpell = m_currentSpell;
         }
         m_currentSpell = pSpell;
     }
