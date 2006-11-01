@@ -10555,7 +10555,7 @@ void Player::RemovePetitionsAndSigns(uint64 guid)
             uint64 ownerguid   = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
             uint64 charterguid = MAKE_GUID(fields[1].GetUInt32(),HIGHGUID_ITEM);
 
-            // send update  if chapter owner in game
+            // send update  if charter owner in game
             Player* owner = objmgr.GetPlayer(ownerguid);
             if(owner)
                 owner->GetSession()->SendPetitionQueryOpcode(charterguid);
