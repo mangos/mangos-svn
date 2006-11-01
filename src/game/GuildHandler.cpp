@@ -36,17 +36,17 @@
 //to create guild from game you should create petition
 void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 {
-/*
-4D 18 00 00 00 10 00 F0 | 00 00 00 00 00 00 00 00
-00 00 00 00 74 65 73 74 | 00 00 00 00 00 00 00 00
-00 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00
-00 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00
-00 00 00 00 00 00 00 00 | 01 00 00 00
-*/
+    /*
+    4D 18 00 00 00 10 00 F0 | 00 00 00 00 00 00 00 00
+    00 00 00 00 74 65 73 74 | 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 | 01 00 00 00
+    */
     if (_player->GetGuildId())
         return;
     sLog.outDebug("Received opcode CMSG_PETITION_BUY");
-    recv_data.hexlike(); // print the values
+    recv_data.hexlike();                                    // print the values
     uint64 guidNPC;
     uint64 unk3;
     uint32 unk4;
@@ -60,19 +60,19 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     uint64 unk11;
     uint64 unk12;
     uint32 unk13;
-    recv_data >> guidNPC; // NPC GUID
-    recv_data >> unk3; // 0
-    recv_data >> unk4; // 0
-    recv_data >> guildname; // Guild name
-    recv_data >> unk5; // 0
-    recv_data >> unk6; // 0
-    recv_data >> unk7; // 0
-    recv_data >> unk8; // 0
-    recv_data >> unk9; // 0
-    recv_data >> unk10; // 0
-    recv_data >> unk11; // 0
-    recv_data >> unk12; // 0
-    recv_data >> unk13; // 1
+    recv_data >> guidNPC;                                   // NPC GUID
+    recv_data >> unk3;                                      // 0
+    recv_data >> unk4;                                      // 0
+    recv_data >> guildname;                                 // Guild name
+    recv_data >> unk5;                                      // 0
+    recv_data >> unk6;                                      // 0
+    recv_data >> unk7;                                      // 0
+    recv_data >> unk8;                                      // 0
+    recv_data >> unk9;                                      // 0
+    recv_data >> unk10;                                     // 0
+    recv_data >> unk11;                                     // 0
+    recv_data >> unk12;                                     // 0
+    recv_data >> unk13;                                     // 1
     sLog.outDebug("Guildmaster with GUID %u tried sell petition: guildname %s", GUID_LOPART(guidNPC), guildname.c_str());
 
     // prevent cheating
@@ -88,9 +88,9 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     }
 
     //if player hasn't enought money.. maybe another opdoce needed ..
-    uint32 price = 1000; // 10 silver
+    uint32 price = 1000;                                    // 10 silver
     if( _player->GetMoney() < price)
-    {    //player hasn't got enought money
+    {                                                       //player hasn't got enought money
         _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, GUILD_CHARTER_ITEM_ID, 0);
         return;
     }
@@ -103,7 +103,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
         return;
     }
 
-    _player->ModifyMoney( -(int32)price ); 
+    _player->ModifyMoney( -(int32)price );
     _player->StoreNewItem( dest, GUILD_CHARTER_ITEM_ID, 1, true );
     Item *charter = _player->GetItemByPos(dest);
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
@@ -115,78 +115,78 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 {
-/*
-Client >>> [10 bytes] CMSG_PETITION_SHOW_SIGNATURES=0x1BE -- dump/001287.c
-0000: 00 00 8A E7 37 54 65 00  00 00                   | ....7Te. ..
-Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/001288.s
-0000: 8A E7 37 54 65 00 00 00  AE 60 80 00 00 00 00 00 | ..7Te... .`......
-0010: 01 00 00 00 00                                  | .....
-*/
+    /*
+    Client >>> [10 bytes] CMSG_PETITION_SHOW_SIGNATURES=0x1BE -- dump/001287.c
+    0000: 00 00 8A E7 37 54 65 00  00 00                   | ....7Te. ..
+    Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/001288.s
+    0000: 8A E7 37 54 65 00 00 00  AE 60 80 00 00 00 00 00 | ..7Te... .`......
+    0010: 01 00 00 00 00                                  | .....
+    */
     sLog.outDebug("Received opcode CMSG_PETITION_SHOW_SIGNATURES");
-    if(_player->GetGuildId()) 
+    if(_player->GetGuildId())
         return;
-    uint8 signs = 0; 
+    uint8 signs = 0;
     uint64 petitionguid;
     recv_data.hexlike();
-    recv_data >> petitionguid; // petition guid
+    recv_data >> petitionguid;                              // petition guid
 
-    QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid)); 
-    if(!result) 
-    { 
+    QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    if(!result)
+    {
         sLog.outError("any charter on server...");
         return;
     }
 
     delete result;
 
-    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid)); 
+    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
 
     // result==NULL also correct in case no sign yet
-    if(result) 
+    if(result)
         signs = result->GetRowCount();
 
     sLog.outDebug("CMSG_PETITION_SHOW_SIGNATURES petition entry: '%u'", GUID_LOPART(petitionguid));
 
     WorldPacket data;
     data.Initialize(SMSG_PETITION_SHOW_SIGNATURES);
-    data << petitionguid; // petition guid
-    data << _player->GetGUID(); // owner guid
-    data << GUID_LOPART(petitionguid); // guild guid (in mangos always same as GUID_LOPART(petitionguid)
-    data << signs; // sign's count
+    data << petitionguid;                                   // petition guid
+    data << _player->GetGUID();                             // owner guid
+    data << GUID_LOPART(petitionguid);                      // guild guid (in mangos always same as GUID_LOPART(petitionguid)
+    data << signs;                                          // sign's count
 
     for(uint8 i = 1; i <= signs; i++)
     {
         Field *fields = result->Fetch();
         uint64 plguid = fields[0].GetUInt64();
 
-        data << plguid; // Player GUID
-        data << (uint32)0; // there 0 ...
+        data << plguid;                                     // Player GUID
+        data << (uint32)0;                                  // there 0 ...
 
         result->NextRow();
     }
     delete result;
-    data.hexlike(); //only for testing
+    data.hexlike();                                         //only for testing
     SendPacket( &data );
 }
 
 void WorldSession::HandlePetitionQueryOpcode( WorldPacket & recv_data )
 {
-/*
-Client >>> [14 bytes] CMSG_PETITION_QUERY=0x1C6 -- dump/001229.c
-0000: 00 00 01 00 00 00 8A E7  37 54 65 00 00 00       | ........ 7Te...
-Server >>> [73 bytes] SMSG_PETITION_QUERY_RESPONSE=0x1C7 -- dump/001237.s
-0000: 01 00 00 00 AE 60 80 00  00 00 00 00 74 65 73 74 | .....`.. ....test
-0010: 67 75 69 6C 64 00 00 01  00 00 00 00 00 00 00 09 | guild... ........
-0020: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 | ........ ........
-0030: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 | ........ ........
-0040: 00 00 00 00 00 00 00 00  00                      | ........ .
-*/
+    /*
+    Client >>> [14 bytes] CMSG_PETITION_QUERY=0x1C6 -- dump/001229.c
+    0000: 00 00 01 00 00 00 8A E7  37 54 65 00 00 00       | ........ 7Te...
+    Server >>> [73 bytes] SMSG_PETITION_QUERY_RESPONSE=0x1C7 -- dump/001237.s
+    0000: 01 00 00 00 AE 60 80 00  00 00 00 00 74 65 73 74 | .....`.. ....test
+    0010: 67 75 69 6C 64 00 00 01  00 00 00 00 00 00 00 09 | guild... ........
+    0020: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 | ........ ........
+    0030: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 | ........ ........
+    0040: 00 00 00 00 00 00 00 00  00                      | ........ .
+    */
     sLog.outDebug("Received opcode CMSG_PETITION_QUERY");
     recv_data.hexlike();
     uint32 guildguid;
     uint64 petitionguid;
-    recv_data >> guildguid; // in mangos always same as GUID_LOPART(petitionguid)
-    recv_data >> petitionguid; // petition guid
+    recv_data >> guildguid;                                 // in mangos always same as GUID_LOPART(petitionguid)
+    recv_data >> petitionguid;                              // petition guid
     sLog.outDebug("CMSG_PETITION_QUERY Petition GUID %u Guild GUID %u", GUID_LOPART(petitionguid), guildguid);
 
     SendPetitionQueryOpcode(petitionguid);
@@ -195,7 +195,7 @@ Server >>> [73 bytes] SMSG_PETITION_QUERY_RESPONSE=0x1C7 -- dump/001237.s
 void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
 {
     uint64 ownerguid = 0;
-    std::string guildname = "NO_GUILD_NAME_FOR_GUID"; 
+    std::string guildname = "NO_GUILD_NAME_FOR_GUID";
     uint8 signs = 0;
 
     unsigned char tdata[51] =
@@ -213,7 +213,7 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
         Field* fields = result->Fetch();
         ownerguid = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
         guildname = fields[1].GetCppString();
-        signs     = fields[2].GetUInt8(); 
+        signs     = fields[2].GetUInt8();
         delete result;
     }
     else
@@ -224,9 +224,9 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
 
     WorldPacket data;
     data.Initialize(SMSG_PETITION_QUERY_RESPONSE);
-    data << GUID_LOPART(petitionguid); // guild guid (in mangos always same as GUID_LOPART(petition guid)
-    data << (uint64)ownerguid; // charter owner guid
-    data << guildname; // guildname
+    data << GUID_LOPART(petitionguid);                      // guild guid (in mangos always same as GUID_LOPART(petition guid)
+    data << (uint64)ownerguid;                              // charter owner guid
+    data << guildname;                                      // guildname
     data.append(tdata, sizeof(tdata));
     data.hexlike();
     SendPacket( &data );
@@ -234,17 +234,17 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
 
 void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 {
-/*
-06 00 00 00 00 00 00 00 | 64 61 61 64 61 77 64 00
-*/
+    /*
+    06 00 00 00 00 00 00 00 | 64 61 61 64 61 77 64 00
+    */
     sLog.outDebug("Received opcode MSG_PETITION_RENAME");
     recv_data.hexlike();
 
     uint64 petitionguid;
     std::string newguildname;
 
-    recv_data >> petitionguid; // guid
-    recv_data >> newguildname; // new guild name
+    recv_data >> petitionguid;                              // guid
+    recv_data >> newguildname;                              // new guild name
 
     uint16 pos = _player->GetPosByGuid(petitionguid);
     Item *item = _player->GetItemByPos( pos );
@@ -265,29 +265,29 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 {
-/*
-Client >>> [11 bytes] CMSG_PETITION_SIGN=0x1C0 -- dump/000676.c
-0000: 00 00 8A E7 37 54 65 00  00 00 01                | ....7Te. ...
-Server >>> [20 bytes] SMSG_PETITION_SIGN_RESULTS=0x1C1 -- dump/000677.s
-0000: 8A E7 37 54 65 00 00 00  45 F5 7D 00 00 00 00 00 | ..7Te... E.}.....
-0010: 00 00 00 00                                     | ....
-*/
+    /*
+    Client >>> [11 bytes] CMSG_PETITION_SIGN=0x1C0 -- dump/000676.c
+    0000: 00 00 8A E7 37 54 65 00  00 00 01                | ....7Te. ...
+    Server >>> [20 bytes] SMSG_PETITION_SIGN_RESULTS=0x1C1 -- dump/000677.s
+    0000: 8A E7 37 54 65 00 00 00  45 F5 7D 00 00 00 00 00 | ..7Te... E.}.....
+    0010: 00 00 00 00                                     | ....
+    */
     sLog.outDebug("Received opcode CMSG_PETITION_SIGN");
     recv_data.hexlike();
     Field *fields;
     uint64 petitionguid;
     uint64 ownerguid;
-    recv_data >> petitionguid; // petition guid
+    recv_data >> petitionguid;                              // petition guid
 
     uint8 signs = 0;
-    
+
     QueryResult *result = sDatabase.PQuery(
         "SELECT `ownerguid`, "
         "  (SELECT COUNT(`playerguid`) FROM `guild_charter_sign` WHERE `guild_charter_sign`.`charterguid` = '%u') AS signs "
         "FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid), GUID_LOPART(petitionguid));
 
-    if(!result) 
-    { 
+    if(!result)
+    {
         sLog.outError("any charter on server...");
         return;
     }
@@ -320,15 +320,15 @@ Server >>> [20 bytes] SMSG_PETITION_SIGN_RESULTS=0x1C1 -- dump/000677.s
     data.Initialize(SMSG_PETITION_SIGN_RESULTS);
     data << petitionguid;
     data << _player->GetGUID();
-    data << (uint32)0; // can be other values for error reporting(need check 2, 4)
+    data << (uint32)0;                                      // can be other values for error reporting(need check 2, 4)
     data.hexlike();
 
     // close at signer side
-    SendPacket( &data );        
+    SendPacket( &data );
 
     // update for owner if online
     if(Player* owner = objmgr.GetPlayer(ownerguid))
-        owner->GetSession()->SendPacket( &data );        
+        owner->GetSession()->SendPacket( &data );
 }
 
 void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
@@ -338,7 +338,7 @@ void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 
     uint64 petitionguid;
     uint64 ownerguid;
-    recv_data >> petitionguid; // petition guid
+    recv_data >> petitionguid;                              // petition guid
     sLog.outDebug("Petition %u declined by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
 
     QueryResult *result = sDatabase.PQuery("SELECT `ownerguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
@@ -361,22 +361,22 @@ void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
 {
-/*
-Client >>> [18 bytes] CMSG_OFFER_PETITION=0x1C3 -- dump/004811.c
-0000: 00 00 8A E7 37 54 65 00  00 00 45 F5 7D 00 00 00 | ....7Te. ..E.}...
-0010: 00 00                                           | ..
-Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/000647.s
-0000: 8A E7 37 54 65 00 00 00  AE 60 80 00 00 00 00 00 | ..7Te... .`......
-0010: 01 00 00 00 00                                  | .....
-*/
+    /*
+    Client >>> [18 bytes] CMSG_OFFER_PETITION=0x1C3 -- dump/004811.c
+    0000: 00 00 8A E7 37 54 65 00  00 00 45 F5 7D 00 00 00 | ....7Te. ..E.}...
+    0010: 00 00                                           | ..
+    Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/000647.s
+    0000: 8A E7 37 54 65 00 00 00  AE 60 80 00 00 00 00 00 | ..7Te... .`......
+    0010: 01 00 00 00 00                                  | .....
+    */
     sLog.outDebug("Received opcode CMSG_OFFER_PETITION");
     recv_data.hexlike();
 
     uint8 signs = 0;
     uint64 petitionguid, plguid;
     Player *player;
-    recv_data >> petitionguid; // petition guid
-    recv_data >> plguid; // player guid
+    recv_data >> petitionguid;                              // petition guid
+    recv_data >> plguid;                                    // player guid
     sLog.outDebug("OFFER PETITION: GUID1 %u, to player id: %u", GUID_LOPART(petitionguid), GUID_LOPART(plguid));
 
     player = ObjectAccessor::Instance().FindPlayer(plguid);
@@ -387,34 +387,34 @@ Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/000647.s
     if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && GetPlayer()->GetTeam() != player->GetTeam() )
         return;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid)); 
-    if(!result) 
-    { 
+    QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    if(!result)
+    {
         sLog.outError("any charter on server...");
         return;
     }
 
     delete result;
 
-    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid)); 
+    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
     // result==NULL also correct charter without signs
-    if(result) 
+    if(result)
         signs = result->GetRowCount();
 
     WorldPacket data;
     data.Initialize(SMSG_PETITION_SHOW_SIGNATURES);
-    data << petitionguid; // petition guid
-    data << _player->GetGUID(); // owner guid
-    data << GUID_LOPART(petitionguid); // guild guid (in mangos always same as GUID_LOPART(petition guid)
-    data << signs; // sign's count
+    data << petitionguid;                                   // petition guid
+    data << _player->GetGUID();                             // owner guid
+    data << GUID_LOPART(petitionguid);                      // guild guid (in mangos always same as GUID_LOPART(petition guid)
+    data << signs;                                          // sign's count
 
     for(uint8 i = 1; i <= signs; i++)
     {
         Field *fields = result->Fetch();
         uint64 plguid = fields[0].GetUInt64();
 
-        data << plguid; // Player GUID
-        data << (uint32)0; // there 0 ...
+        data << plguid;                                     // Player GUID
+        data << (uint32)0;                                  // there 0 ...
 
         result->NextRow();
     }
@@ -426,18 +426,18 @@ Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/000647.s
 
 void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 {
-/*
-Client >>> [10 bytes] CMSG_TURN_IN_PETITION=0x1C4 -- dump/001956.c
-0000: 00 00 8A E7 37 54 65 00  00 00                   | ....7Te. ..
-Server >>> [60 bytes] SMSG_MESSAGECHAT=0x96 -- dump/001957.s
-0000: 0A 00 00 00 00 AE 60 80  00 00 00 00 00 2A 00 00 | ......`. .....*..
-0010: 00 47 75 69 6C 64 20 63  68 61 72 74 65 72 20 68 | .Guild c harter h
-0020: 61 76 65 20 6E 6F 74 20  65 6E 6F 75 67 68 20 73 | ave not  enough s
-0030: 69 67 6E 61 74 75 72 65  73 2E 00 00             | ignature s...
+    /*
+    Client >>> [10 bytes] CMSG_TURN_IN_PETITION=0x1C4 -- dump/001956.c
+    0000: 00 00 8A E7 37 54 65 00  00 00                   | ....7Te. ..
+    Server >>> [60 bytes] SMSG_MESSAGECHAT=0x96 -- dump/001957.s
+    0000: 0A 00 00 00 00 AE 60 80  00 00 00 00 00 2A 00 00 | ......`. .....*..
+    0010: 00 47 75 69 6C 64 20 63  68 61 72 74 65 72 20 68 | .Guild c harter h
+    0020: 61 76 65 20 6E 6F 74 20  65 6E 6F 75 67 68 20 73 | ave not  enough s
+    0030: 69 67 6E 61 74 75 72 65  73 2E 00 00             | ignature s...
 
-don't know how to cause this opcode, it is possible that charter-party has wrong properties \flags (are not present even names)...
-Here it is necessary to receive number of signatures, to compare with 9 and if it is equal - if guild, to add the players who have signed charter in guild, to remove charter-party and to send the answer...
-Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
+    don't know how to cause this opcode, it is possible that charter-party has wrong properties \flags (are not present even names)...
+    Here it is necessary to receive number of signatures, to compare with 9 and if it is equal - if guild, to add the players who have signed charter in guild, to remove charter-party and to send the answer...
+    Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
     sLog.outDebug("Received opcode CMSG_TURN_IN_PETITION");
     WorldPacket data;
     uint64 petitionguid;
@@ -451,7 +451,7 @@ Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
     if(_player->GetGuildId())
     {
         data.Initialize(SMSG_TURN_IN_PETITION_RESULTS);
-        data << (uint32)2; // already in guild
+        data << (uint32)2;                                  // already in guild
         _player->GetSession()->SendPacket(&data);
     }
 
@@ -486,7 +486,7 @@ Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
     if(signs < sWorld.getConfig(CONFIG_MIN_PETITION_SIGNS))
     {
         data.Initialize(SMSG_TURN_IN_PETITION_RESULTS);
-        data << (uint32)4; // need more signatures...
+        data << (uint32)4;                                  // need more signatures...
         SendPacket(&data);
         return;
     }
@@ -497,7 +497,6 @@ Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
         delete result;
         return;
     }
-
 
     // and at last charter item check
     uint16 pos = _player->GetPosByGuid(petitionguid);
@@ -683,14 +682,14 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_REMOVE"  );
 
     recvPacket >> plName;
-    
+
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(player)
-        plGuid = player->GetGUID();    
+        plGuid = player->GetGUID();
     else
         plGuid = objmgr.GetPlayerGUIDByName(plName.c_str());
-    
+
     if(!guild)
     {
         SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
@@ -731,7 +730,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_ACCEPT"  );
 
     guild = objmgr.GetGuildById(player->GetGuildIdInvited());
-    if(!guild || player->GetGuildId()) 
+    if(!guild || player->GetGuildId())
         return;
 
     // not let enemies sign guild charter
@@ -814,7 +813,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(player)
     {
-        plGuid = player->GetGUID();    
+        plGuid = player->GetGUID();
         plGuildId = player->GetGuildId();
         plRankId = player->GetRank();
     }
@@ -881,7 +880,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(player)
     {
-        plGuid = player->GetGUID();    
+        plGuid = player->GetGUID();
         plGuildId = player->GetGuildId();
         plRankId = player->GetRank();
     }
@@ -937,7 +936,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
     Guild *guild;
     Player *player = GetPlayer();
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_LEAVE"  );    
+    sLog.outDebug( "WORLD: Received CMSG_GUILD_LEAVE"  );
 
     guild = objmgr.GetGuildById(player->GetGuildId());
     if(!guild)
@@ -950,7 +949,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
         SendCommandResult(GUILD_QUIT_S,"",GUILD_LEADER_LEAVE);
         return;
     }
-    
+
     if(player->GetGUID() == guild->GetLeader())
     {
         guild->Disband();
@@ -1100,7 +1099,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(player)
     {
-        plGuid = player->GetGUID();    
+        plGuid = player->GetGUID();
         plGuildId = player->GetGuildId();
     }
     else
@@ -1152,7 +1151,7 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(player)
     {
-        plGuid = player->GetGUID();    
+        plGuid = player->GetGUID();
         plGuildId = player->GetGuildId();
     }
     else

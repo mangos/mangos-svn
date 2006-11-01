@@ -186,7 +186,7 @@ Player::~Player ()
         delete *itr;
 
     for (ItemMap::iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
-        delete iter->second;  //if item is duplicated... then server may crash ... but that item should be dealocated
+        delete iter->second;                                //if item is duplicated... then server may crash ... but that item should be dealocated
 
     delete info;
     delete PlayerTalkClass;
@@ -1924,7 +1924,7 @@ bool Player::removeTalent()
 {
     //if(getLevel()<10)
     //    return false;     //maybe some GM has talent with low level :P
-    uint32 costs = 10000;   //TODO: take correct money here.
+    uint32 costs = 10000;                                   //TODO: take correct money here.
     if(GetMoney()<costs)
         return false;
     bool hasTalent = false;
@@ -3730,7 +3730,7 @@ uint32 Player::GetRankFromDB(uint64 guid)
 }
 
 uint32 Player::GetZoneIdFromDB(uint64 guid)
-{    
+{
     std::ostringstream ss;
     ss<<"SELECT `map`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<guid<<"'";
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
@@ -5844,7 +5844,7 @@ void Player::SendTalentWipeConfirm( )
     WorldPacket data;
     data.Initialize( MSG_TALENT_WIPE_CONFIRM );
     data << (uint64)GetGUID();
-    data << (uint32)10000;  //TODO: make cost here
+    data << (uint32)10000;                                  //TODO: make cost here
     GetSession()->SendPacket( &data );
 }
 
@@ -9396,7 +9396,7 @@ float Player::GetFloatValueFromString(vector<string> const& data, uint16 index)
     float result;
     uint32 temp = Player::GetUInt32ValueFromString(data,index);
     memcpy(&result, &temp, sizeof(result));
-    
+
     return result;
 }
 
@@ -9421,7 +9421,7 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
     float result;
     uint32 temp = Player::GetUInt32ValueFromDB(index, guid);
     memcpy(&result, &temp, sizeof(result));
-    
+
     return result;
 }
 
@@ -10237,7 +10237,7 @@ void Player::SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid)
 
     char buf[11];
     snprintf(buf,11,"%u",value);
-    tokens[index] = buf;        
+    tokens[index] = buf;
 
     std::ostringstream ss2;
     ss2<<"UPDATE `character` SET `data`='";
@@ -10550,7 +10550,8 @@ void Player::RemovePetitionsAndSigns(uint64 guid)
     QueryResult *result = sDatabase.PQuery("SELECT `ownerguid`,`charterguid` FROM `guild_charter_sign` WHERE `playerguid` = '%u'", guid);
     if(result)
     {
-        do {
+        do
+        {
             Field *fields = result->Fetch();
             uint64 ownerguid   = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
             uint64 charterguid = MAKE_GUID(fields[1].GetUInt32(),HIGHGUID_ITEM);
