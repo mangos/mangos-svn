@@ -31,6 +31,11 @@
 #define ROLL_NEED  1
 #define ROLL_GREED 2
 
+#define MAX_NR_LOOT_ITEMS 16
+// note: the client cannot show more than 16 items total
+#define MAX_NR_QUEST_ITEMS 32
+// unrelated to the number of quest items shown, just for reserve
+
 enum LootMethod
 {
     FREE_FOR_ALL      = 0,
@@ -40,7 +45,7 @@ enum LootMethod
     NEED_BEFORE_GREED = 4
 };
 
-enum Permission
+enum PermissionTypes
 {
     ALL_PERMISSION        =0,
     GROUP_PERMISSION      =1,
@@ -59,12 +64,13 @@ struct LootStoreItem
     float   chance;
     float   questchance;
     uint8   maxcount;
+    bool    is_ffa;                                         // free for all
 
     LootStoreItem()
-        : itemid(0), displayid(0), chance(0), questchance(0), maxcount(1) {}
+        : itemid(0), displayid(0), chance(0), questchance(0), maxcount(1), is_ffa(true) {}
 
-    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance, uint8 _maxcount = 1)
-        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), maxcount(_maxcount) {}
+    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance, bool _isffa = true, uint8 _maxcount = 1)
+        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), maxcount(_maxcount), is_ffa(_isffa) {}
 };
 
 struct LootItem
@@ -74,48 +80,76 @@ struct LootItem
     uint8   count;
     bool    is_looted;
     bool    is_blocked;
+    bool    is_ffa;                                         // free for all
 
     LootItem()
-        : itemid(0), displayid(0), count(1), is_looted(true), is_blocked(false) {}
+        : itemid(0), displayid(0), count(1), is_looted(true), is_blocked(false), is_ffa(true) {}
 
-    LootItem(uint32 _itemid, uint32 _displayid, uint8 _count = 1)
-        : itemid(_itemid), displayid(_displayid), count(_count), is_looted(false), is_blocked(false) {}
+    LootItem(uint32 _itemid, uint32 _displayid, bool _isffa, uint8 _count = 1)
+        : itemid(_itemid), displayid(_displayid), count(_count), is_looted(false), is_blocked(false), is_ffa(_isffa) {}
 
     LootItem(LootStoreItem const& li,uint8 _count)
-        : itemid(li.itemid), displayid(li.displayid), count(_count), is_looted(false), is_blocked(false) {}
+        : itemid(li.itemid), displayid(li.displayid), count(_count), is_looted(false), is_blocked(false), is_ffa(li.is_ffa) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
 };
 
+struct QuestItem
+{
+    uint8   index;                                          // position in quest_items;
+    bool    is_looted;
+
+    QuestItem()
+        : index(0), is_looted(false) {}
+
+    QuestItem(uint8 _index, bool _islooted = false)
+        : index(_index), is_looted(_islooted) {}
+};
+
+typedef std::vector<QuestItem> QuestItemList;
+typedef std::map<Player *, QuestItemList *> QuestItemMap;
+typedef vector<LootStoreItem> LootStoreItemList;
+typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
+
 struct Loot
 {
     std::set<Player*> PlayersLooting;
+    QuestItemMap PlayerQuestItems;
     std::vector<LootItem> items;
+    std::vector<LootItem> quest_items;
     uint32 gold;
+    uint8 unlootedCount;
     bool released;
-    Permission permission;
 
-    Loot(uint32 _gold = 0) : gold(_gold), released(false), permission(ALL_PERMISSION) {}
+    Loot(uint32 _gold = 0) : gold(_gold), released(false), unlootedCount(0) {}
+    ~Loot() { clear(); }
 
-    ~Loot()
+    void Loot::clear()
     {
-        items.clear();
-        PlayersLooting.clear();
+        items.clear(); gold = 0; PlayersLooting.clear(); 
+        for (QuestItemMap::iterator itr = PlayerQuestItems.begin(); itr != PlayerQuestItems.end(); ++itr)
+            delete itr->second;
+        PlayerQuestItems.clear();
     }
 
     bool empty() const { return items.empty() && gold == 0; }
-    void clear() { items.clear(); gold = 0; }
+    bool isLooted();
     void NotifyItemRemoved(uint8 lootIndex);
+    void NotifyQuestItemRemoved(uint8 questIndex);
     void NotifyMoneyRemoved();
     void AddLooter(Player *player) { PlayersLooting.insert(player); }
     void RemoveLooter(Player *player) { PlayersLooting.erase(player); }
-    void remove(uint8 lootSlot);
-    void remove(const LootItem & item);
 };
 
-typedef list<LootStoreItem> LootStoreItemList;
-typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
+struct LootView
+{
+    Loot &loot;
+    QuestItemList *qlist;
+    PermissionTypes permission;
+    LootView(Loot &_loot, QuestItemList *_qlist, PermissionTypes _permission = ALL_PERMISSION) 
+        : loot(_loot), qlist(_qlist), permission(_permission) {}
+};
 
 extern LootStore LootTemplates_Creature;
 extern LootStore LootTemplates_Fishing;
@@ -135,54 +169,9 @@ struct LootSkinningAltItem
 typedef std::map<uint32,LootSkinningAltItem> LootSkinnigAlternative;
 extern LootSkinnigAlternative sLootSkinnigAlternative;
 
+QuestItemList* FillQuestLoot(Player* player, Loot *loot);
 void FillLoot(Player* player,Loot *loot, uint32 loot_id, LootStore& store);
 void LoadLootTables();
 
-inline ByteBuffer& operator<<(ByteBuffer& b, LootItem& li)
-{
-    b << uint32(li.itemid);
-    b << uint32(li.count);                                  // nr of items of this type
-    b << uint32(li.displayid);
-    b << uint64(0) << uint8(0);
-    return b;
-}
-
-inline ByteBuffer& operator<<(ByteBuffer& b, Loot& l)
-{
-    uint8 itemsShown = 0;
-
-    switch (l.permission)
-    {
-        case NONE_PERMISSION:
-        {
-            b << uint32(0);                                 //gold
-            b << itemsShown;
-        }
-        break;
-        case GROUP_PERMISSION:                              // You are not the items propietary, so you can only see blocked rolled items (TODO: and quest items)
-        {
-            b << uint32(0);                                 //gold
-            for (uint8 i = 0; i < l.items.size(); i++)
-                if (!l.items[i].is_looted && l.items[i].is_blocked) itemsShown++;
-            b << itemsShown;
-
-            for (uint8 i = 0; i < l.items.size(); i++)
-                if (!l.items[i].is_looted && l.items[i].is_blocked)
-                    b << uint8(i) << l.items[i];
-        }
-        break;
-        default:
-        {
-            b << l.gold;
-            for (uint8 i = 0; i < l.items.size(); i++)
-                if (!l.items[i].is_looted) itemsShown++;
-            b << itemsShown;
-
-            for (uint8 i = 0; i < l.items.size(); i++)
-                if (!l.items[i].is_looted)
-                    b << uint8(i) << l.items[i];
-        }
-    }
-    return b;
-}
+ByteBuffer& operator<<(ByteBuffer& b, LootView& lv);
 #endif

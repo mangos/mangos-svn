@@ -66,20 +66,34 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         loot = &pCreature->loot;
     }
 
-    WorldPacket data;
     LootItem *item = NULL;
-    if (loot->items.size() > lootSlot)
+    QuestItem *qitem = NULL;
+    bool is_looted = true, is_qitem = false;
+    if (lootSlot >= loot->items.size())
     {
-        item = &(loot->items[lootSlot]);
+        lootSlot -= loot->items.size();
+        QuestItemMap::iterator itr = loot->PlayerQuestItems.find(player);
+        if (itr != loot->PlayerQuestItems.end() && lootSlot < itr->second->size())
+        {
+            qitem = &itr->second->at(lootSlot);
+            item = &loot->quest_items[qitem->index];
+            is_looted = qitem->is_looted;
+        }
+    }
+    else
+    {
+        item = &loot->items[lootSlot];
+        is_looted = item->is_looted;
     }
 
-    if ((item == NULL) || (item->is_looted))
+    if ((item == NULL) || is_looted)
     {
         player->SendEquipError( EQUIP_ERR_ALREADY_LOOTED, NULL, NULL );
         return;
     }
 
-    if (item->is_blocked)
+    // questitems use the blocked field for other purposes
+    if (!qitem && item->is_blocked)
         return;
 
     uint16 dest;
@@ -87,10 +101,22 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     if ( msg == EQUIP_ERR_OK )
     {
         player->StoreNewItem( dest, item->itemid, item->count, true ,true);
-        item->is_looted = true;
 
-        loot->NotifyItemRemoved(lootSlot);
+        if (qitem)
+        {
+            qitem->is_looted = true;
+            if (!item->is_ffa || loot->PlayerQuestItems.size() == 1)
+                player->SendNotifyLootItemRemoved(loot->items.size() + lootSlot);
+            else
+                loot->NotifyQuestItemRemoved(qitem->index);
+        }
+        else
+            loot->NotifyItemRemoved(lootSlot);
 
+        if (item->is_ffa) item->is_looted = true;
+        loot->unlootedCount--;
+
+        WorldPacket data;
         data.Initialize( SMSG_ITEM_PUSH_RESULT );
         data << player->GetGUID();
         data << uint64(0x00000000);
@@ -204,12 +230,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             return;
 
         loot = &go->loot;
-
-        vector<LootItem>::iterator i;
-        i = find_if(loot->items.begin(), loot->items.end(),
-            LootItem::not_looted);
-
-        if((i == loot->items.end()) && (loot->gold == 0))
+        if (loot->isLooted())
         {
             go->SetLootState(GO_LOOTED);
             loot->clear();
@@ -241,11 +262,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                 loot->released = true;
         }
 
-        vector<LootItem>::iterator i;
-        i = find_if(loot->items.begin(), loot->items.end(),
-            LootItem::not_looted);
-
-        if((i == loot->items.end()) && (loot->gold == 0))
+        if (loot->isLooted())
         {
             //this is probably wrong
             pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);

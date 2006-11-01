@@ -55,12 +55,12 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     uint32 maxcount = 0;
     float chance;
     float questchance;
-
     uint32 count = 0;
+    bool is_ffa = true;
 
     sLog.outString( "%s :", tablename);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `chance`, `questchance`, `maxcount` FROM `%s`",tablename);
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `chance`, `questchance`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
 
     if (result)
     {
@@ -78,6 +78,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             chance = fields[2].GetFloat();
             questchance = fields[3].GetFloat();
             maxcount = fields[4].GetUInt32();
+            is_ffa = fields[5].GetBool();
 
             ItemPrototype const *proto = objmgr.GetItemPrototype(item);
 
@@ -86,7 +87,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             if( chance < 0.000001 && questchance < 0.000001 )
                 ssNonLootableItems << "loot entry = " << entry << " item = " << item << " maxcount = " << maxcount << "\n";
 
-            lootstore[entry].push_back( LootStoreItem(item, displayid, chance, questchance,maxcount) );
+            lootstore[entry].push_back( LootStoreItem(item, displayid, chance, questchance,is_ffa,maxcount) );
 
             count++;
         } while (result->NextRow());
@@ -153,9 +154,7 @@ struct NotChanceFor
 
     bool operator() ( LootStoreItem &itm )
     {
-        if(m_player && itm.questchance > 0 && m_player->HaveQuestForItem(itm.itemid))
-            return itm.questchance <= rand_chance();
-        else if(itm.chance > 0)
+        if(itm.chance > 0)
         {
             if(itm.chance >= 100)
                 return false;
@@ -167,10 +166,29 @@ struct NotChanceFor
     }
 };
 
+struct QuestChanceFor
+{
+    Player* m_player;
+
+    explicit QuestChanceFor(Player* _player) : m_player(_player) {}
+
+    bool operator() ( LootStoreItem &itm )
+    {
+        if(itm.questchance > 0)
+        {
+            if (itm.questchance >= 100)
+                return false;
+            else
+                return itm.questchance <= rand_chance();
+        }
+        else
+            return true;
+    }
+};
+
 void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
 {
-    loot->items.clear();
-    loot->gold = 0;
+    loot->clear();
 
     LootStore::iterator tab = store.find(loot_id);
 
@@ -180,23 +198,61 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
         return;
     }
 
-    loot->items.resize(tab->second.size());
+    loot->items.reserve(min(tab->second.size(),MAX_NR_LOOT_ITEMS));
+    loot->quest_items.reserve(min(tab->second.size(),MAX_NR_QUEST_ITEMS));
 
-    // fill loot with items that have a chance
+    // fill loot with all normal and quest items that have a chance
     NotChanceFor not_chance_for(player);
+    QuestChanceFor quest_chance_for(player);
 
-    size_t pos = 0;
     for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
     {
-        uint8 lcount = 0;
+        uint8 lcount = 0, qcount = 0;
         for(uint8 i = 0; i < item_iter->maxcount; ++i)
+        {
             if(!not_chance_for(*item_iter)) ++lcount;
+            if(!quest_chance_for(*item_iter)) ++qcount;
+        }
 
         if(lcount > 0)
-            loot->items[pos++] = LootItem(*item_iter,lcount);
+            loot->items.push_back(LootItem(*item_iter,lcount));
+
+        if(qcount > 0)
+            loot->quest_items.push_back(LootItem(*item_iter,qcount));
+    
+        if (loot->items.size() == MAX_NR_LOOT_ITEMS || loot->quest_items.size() == MAX_NR_QUEST_ITEMS)
+            break;
+    }
+    loot->unlootedCount = loot->items.size();
+}
+
+QuestItemList* FillQuestLoot(Player* player, Loot *loot)
+{
+    if (loot->items.size() == MAX_NR_LOOT_ITEMS) return NULL;
+    QuestItemList *ql = new QuestItemList();
+    
+    for(uint8 i = 0; i < loot->quest_items.size(); i++)
+    {
+        LootItem &item = loot->quest_items[i];
+        if(!item.is_looted && player->HaveQuestForItem(item.itemid))
+        {
+            ql->push_back(QuestItem(i));
+            // questitems get blocked when they first apper in a
+            // player's quest vector
+            if (!item.is_ffa || !item.is_blocked) loot->unlootedCount++;
+            item.is_blocked = true;
+            if (loot->items.size() + ql->size() == MAX_NR_LOOT_ITEMS) break;
+        }
     }
 
-    loot->items.erase(loot->items.begin()+pos, loot->items.end());
+    if (ql->size() == 0)
+    {
+        delete ql;
+        return NULL;
+    }
+
+    loot->PlayerQuestItems[player] = ql;
+    return ql;
 }
 
 void Loot::NotifyItemRemoved(uint8 lootIndex)
@@ -212,4 +268,102 @@ void Loot::NotifyMoneyRemoved()
     // notifiy all players that are looting this that the money was removed
     for(std::set<Player*>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
         (*i)->SendNotifyLootMoneyRemoved();
+}
+
+void Loot::NotifyQuestItemRemoved(uint8 questIndex)
+{
+    // when a free for all questitem is looted
+    // all players will get notified of it being removed
+    // (other questitems can be looted by each group member)
+    // bit inefficient but isnt called often
+
+    uint8 i;
+    for(std::set<Player*>::iterator itr = PlayersLooting.begin(); itr != PlayersLooting.end(); ++itr)
+    {
+        QuestItemMap::iterator pq = PlayerQuestItems.find(*itr);
+        if (pq != PlayerQuestItems.end() && pq->second)
+        {
+            // find where/if the player has the given item in it's vector
+            QuestItemList& pql = *pq->second;
+            for (i = 0; i < pql.size(); i++)
+                if (pql[i].index == questIndex)
+                    break;
+
+            if (i < pql.size())
+                (*itr)->SendNotifyLootItemRemoved(items.size()+i);
+        }
+    }
+}
+
+inline ByteBuffer& operator<<(ByteBuffer& b, LootItem& li)
+{
+    b << uint32(li.itemid);
+    b << uint32(li.count);                                  // nr of items of this type
+    b << uint32(li.displayid);
+    b << uint64(0) << uint8(0);
+    return b;
+}
+
+ByteBuffer& operator<<(ByteBuffer& b, LootView& lv)
+{
+    Loot &l = lv.loot;
+    uint8 itemsShown = 0;
+
+    if (lv.qlist)
+    {
+        for (uint8 i = 0; i < lv.qlist->size(); i++)
+            if (!lv.qlist->at(i).is_looted) itemsShown++;
+    }
+
+    switch (lv.permission)
+    {
+        case NONE_PERMISSION:
+        {
+            b << uint32(0);                                 //gold
+            b << uint8(0);                                  //itemsShown
+            return b;
+        }
+        case GROUP_PERMISSION:
+        {
+            // You are not the items propietary, so you can only see 
+            // blocked rolled items and questitems
+            b << uint32(0);                                 //gold
+            for (uint8 i = 0; i < l.items.size(); i++)
+                if (!l.items[i].is_looted && l.items[i].is_blocked) itemsShown++;
+            b << itemsShown;
+
+            for (uint8 i = 0; i < l.items.size(); i++)
+                if (!l.items[i].is_looted && l.items[i].is_blocked)
+                    b << uint8(i) << l.items[i];
+        }
+        break;
+        default:
+        {
+            b << l.gold;
+            for (uint8 i = 0; i < l.items.size(); i++)
+                if (!l.items[i].is_looted) itemsShown++;
+            b << itemsShown;
+
+            for (uint8 i = 0; i < l.items.size(); i++)
+                if (!l.items[i].is_looted)
+                    b << uint8(i) << l.items[i];
+        }
+    }
+
+    if (lv.qlist)
+    {
+        for (QuestItemList::iterator i = lv.qlist->begin() ; i != lv.qlist->end(); ++i)
+        {
+            LootItem &item = l.quest_items[i->index];
+            if (!i->is_looted && !item.is_looted)
+                b << uint8(l.items.size() + i->index) << item;
+        }
+    }
+
+    return b;
+}
+
+bool Loot::isLooted()
+{
+    return gold == 0 && unlootedCount == 0;
 }

@@ -4337,6 +4337,7 @@ void Player::_ApplyAllItemMods()
 void Player::SendLoot(uint64 guid, LootType loot_type)
 {
     Loot    *loot = NULL;
+    PermissionTypes permission = ALL_PERMISSION;
 
     if (IS_GAMEOBJECT_GUID(guid))
     {
@@ -4464,27 +4465,37 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             }
 
             if (!IsInGroup() && recipient == this)
-                loot->permission = ALL_PERMISSION;
+                permission = ALL_PERMISSION;
             else
             {
                 if (IsInGroup())
                 {
                     Group *group = objmgr.GetGroupByLeader(recipient->GetGroupLeader());
                     if ((GetGroupLeader() == recipient->GetGroupLeader()) && (group->GetLooterGuid() == GetGUID() || loot->released || group->GetLootMethod() == FREE_FOR_ALL))
-                        loot->permission = ALL_PERMISSION;
+                        permission = ALL_PERMISSION;
                     else
                     if (GetGroupLeader() == recipient->GetGroupLeader())
-                        loot->permission = GROUP_PERMISSION;
+                        permission = GROUP_PERMISSION;
                     else
-                        loot->permission = NONE_PERMISSION;
+                        permission = NONE_PERMISSION;
                 }
                 else
-                    loot->permission = NONE_PERMISSION;
+                    permission = NONE_PERMISSION;
             }
         }
     }
 
     m_lootGuid = guid;
+
+    QuestItemList *q_list = NULL;
+    if (permission != NONE_PERMISSION)
+    {
+        QuestItemMap::iterator itr = loot->PlayerQuestItems.find(this);
+        if (itr == loot->PlayerQuestItems.end())
+            q_list = FillQuestLoot(this, loot);
+        else
+            q_list = itr->second;
+    }
 
     // LOOT_PICKPOKETING unsupported by client, sending LOOT_SKINNING instead
     if(loot_type == LOOT_PICKPOKETING)
@@ -4495,12 +4506,13 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
     data << guid;
     data << uint8(loot_type);
-    data << *loot;
+    data << LootView(*loot, q_list, permission);
 
     SendDirectMessage(&data);
 
     // add 'this' player as one of the players that are looting 'loot'
-    loot->AddLooter(this);
+    if (permission != NONE_PERMISSION)
+        loot->AddLooter(this);
 }
 
 void Player::SendNotifyLootMoneyRemoved()
