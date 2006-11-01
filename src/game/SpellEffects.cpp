@@ -208,31 +208,15 @@ void Spell::EffectDummy(uint32 i)
 {
     if(!unitTarget)
         return;
-    // starshards/curse of agony hack .. this applies to 1.10 only
-    if (m_triggeredByAura)
-    {
-        SpellEntry *trig_info = m_triggeredByAura->GetSpellProto();
-        if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
-            (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
-        {
-            Unit *tmpTarget = unitTarget;
-            unitTarget = m_triggeredByAura->GetTarget();
-            damage = trig_info->EffectBasePoints[i]+1;
-            EffectSchoolDMG(i);
-            unitTarget = tmpTarget;
-        }
-    }
-    if(m_spellInfo->SpellIconID == 1648)
-    {
-        uint32 dmg = damage;
-        dmg += uint32(m_caster->GetPower(POWER_RAGE)/10 * FindSpellRank(m_spellInfo->Id)*3);
-        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dmg);
-        m_caster->SetPower(POWER_RAGE,0);
-    }
+
+    // More spell specific code in begining
 
     // Preparation Rogue - immediately finishes the cooldown on other Rogue abilities
-    if(m_spellInfo->Id == 14185 && m_caster->GetTypeId()==TYPEID_PLAYER)
+    if(m_spellInfo->Id == 14185)
     {
+        if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+            return;
+
         const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
         for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
         {
@@ -249,6 +233,80 @@ void Spell::EffectDummy(uint32 i)
                 ((Player*)m_caster)->GetSession()->SendPacket(&data);
             }
         }
+        return;
+    }
+
+    // If spell cannibalize and his casted, check special requirements and cast aura Cannibalize is all ok
+    if(m_spellInfo->Id == 20577) 
+    {
+        // non-standard cast requirement check
+        SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+        float max_range = GetMaxRange(srange);
+        bool found=false;
+        FactionTemplateResolver myFaction = m_caster->getFactionTemplateEntry();
+        std::list<Unit*> UnitList;
+        MapManager::Instance().GetMap(m_caster->GetMapId())->GetUnitList(m_caster->GetPositionX(), m_caster->GetPositionY(),UnitList);
+        for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
+        {
+            FactionTemplateResolver its_faction = (*iter)->getFactionTemplateEntry();
+            if(myFaction.IsFriendlyTo(its_faction) || (*iter)->isAlive() || (*iter)->isInFlight() ||
+                (((Creature*)(*iter))->GetCreatureInfo()->type != CREATURE_TYPE_HUMANOID && ((Creature*)(*iter))->GetCreatureInfo()->type != CREATURE_TYPE_UNDEAD))
+                continue;
+
+            if(m_caster->IsWithinDist(*iter, max_range) )
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            SendCastResult(CAST_FAIL_NO_NEARBY_CORPSES_TO_EAT);
+            return;
+        }
+
+        // ok, main function spell can be casted
+
+        finish(); // prepere to replacing this cpell cast to main function spell
+
+        // casting
+        SpellEntry *spellInfo = sSpellStore.LookupEntry( 20578 );
+        Spell *spell = new Spell(m_caster, spellInfo, false, 0);
+        if(!spellInfo)
+        {
+            sLog.outError("WORLD: unknown spell id %i\n", 20578);
+            return;
+        }
+
+        SpellCastTargets targets;
+        targets.setUnitTarget(m_caster);
+        spell->prepare(&targets);
+        return;
+    }
+
+    // More generic code later
+
+    // starshards/curse of agony hack .. this applies to 1.10 only
+    if (m_triggeredByAura)
+    {
+        SpellEntry *trig_info = m_triggeredByAura->GetSpellProto();
+        if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
+            (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
+        {
+            Unit *tmpTarget = unitTarget;
+            unitTarget = m_triggeredByAura->GetTarget();
+            damage = trig_info->EffectBasePoints[i]+1;
+            EffectSchoolDMG(i);
+            unitTarget = tmpTarget;
+        }
+    }
+
+    if(m_spellInfo->SpellIconID == 1648)
+    {
+        uint32 dmg = damage;
+        dmg += uint32(m_caster->GetPower(POWER_RAGE)/10 * FindSpellRank(m_spellInfo->Id)*3);
+        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dmg);
+        m_caster->SetPower(POWER_RAGE,0);
     }
 }
 
