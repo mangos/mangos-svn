@@ -31,7 +31,7 @@
 #include "GossipDef.h"
 
 // Guild Charter ID in item_template
-#define GUILD_CHAPTER_ITEM_ID 5863
+#define GUILD_CHARTER_ITEM_ID 5863
 
 //to create guild from game you should create petition
 void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
@@ -80,10 +80,10 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     if(!pCreature||!pCreature->isGuildMaster())
         return;
 
-    ItemPrototype const *pProto = objmgr.GetItemPrototype( GUILD_CHAPTER_ITEM_ID );
+    ItemPrototype const *pProto = objmgr.GetItemPrototype( GUILD_CHARTER_ITEM_ID );
     if( !pProto )
     {
-        _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, GUILD_CHAPTER_ITEM_ID, 0);
+        _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, GUILD_CHARTER_ITEM_ID, 0);
         return;
     }
 
@@ -91,20 +91,20 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     uint32 price = 1000; // 10 silver
     if( _player->GetMoney() < price)
     {    //player hasn't got enought money
-        _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, GUILD_CHAPTER_ITEM_ID, 0);
+        _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, GUILD_CHARTER_ITEM_ID, 0);
         return;
     }
 
     uint16 dest;
-    uint8 msg = _player->CanStoreNewItem( 0, NULL_SLOT, dest, GUILD_CHAPTER_ITEM_ID, pProto->BuyCount, false );
+    uint8 msg = _player->CanStoreNewItem( 0, NULL_SLOT, dest, GUILD_CHARTER_ITEM_ID, pProto->BuyCount, false );
     if( msg != EQUIP_ERR_OK )
     {
-        _player->SendBuyError(msg, pCreature, GUILD_CHAPTER_ITEM_ID, 0);
+        _player->SendBuyError(msg, pCreature, GUILD_CHARTER_ITEM_ID, 0);
         return;
     }
 
     _player->ModifyMoney( -(int32)price ); 
-    _player->StoreNewItem( dest, GUILD_CHAPTER_ITEM_ID, 1, true );
+    _player->StoreNewItem( dest, GUILD_CHARTER_ITEM_ID, 1, true );
     Item *charter = _player->GetItemByPos(dest);
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
 
@@ -397,7 +397,7 @@ Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/000647.s
     delete result;
 
     result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid)); 
-    // result==NULL also correct chapter without signs
+    // result==NULL also correct charter without signs
     if(result) 
         signs = result->GetRowCount();
 
@@ -499,7 +499,7 @@ Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
     }
 
 
-    // and at last chapter item check
+    // and at last charter item check
     uint16 pos = _player->GetPosByGuid(petitionguid);
     Item *item = _player->GetItemByPos( pos );
     if(!item)
@@ -510,7 +510,7 @@ Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
 
     // OK!
 
-    // delete chapter item
+    // delete charter item
     _player->DestroyItem( (pos >> 8),(pos & 255), true);
 
     // create guild
@@ -530,8 +530,8 @@ Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
 
     delete result;
 
-    sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `chapterguid` = '%u'", GUID_LOPART(petitionguid));
-    sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `chapterguid` = '%u'", GUID_LOPART(petitionguid));
+    sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
 
     // Guild created
     sLog.outDebug("TURN IN PETITION GUID %u", GUID_LOPART(petitionguid));
@@ -633,7 +633,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    // not let enemies sign guild chapter
+    // not let enemies sign guild charter
     if ( !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && player->GetTeam() != GetPlayer()->GetTeam() )
     {
         SendCommandResult(GUILD_INVITE_S,Invitedname,GUILD_NOT_ALLIED);
@@ -734,7 +734,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
     if(!guild || player->GetGuildId()) 
         return;
 
-    // not let enemies sign guild chapter
+    // not let enemies sign guild charter
     if ( !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && player->GetTeam() != objmgr.GetPlayerTeamByGUID(guild->GetLeader()) )
         return;
 
