@@ -45,21 +45,23 @@ void usage(const char *prog)
 
 int main(int argc, char **argv)
 {
-	char*	cfg_file=_REALMD_CONFIG;
+    char*   cfg_file=_REALMD_CONFIG;
 
-	//Parse arguments
-	switch(argc) {
-		case 1:
-			break;
-		case 3:
-			if(strcmp(argv[1], "-c")==0) {
-				cfg_file=argv[2];
-				break;
-			}
-		default:
-			usage(argv[0]);
-			return 1;
-	}
+    //Parse arguments
+    switch(argc)
+    {
+        case 1:
+            break;
+        case 3:
+            if(strcmp(argv[1], "-c")==0)
+            {
+                cfg_file=argv[2];
+                break;
+            }
+        default:
+            usage(argv[0]);
+            return 1;
+    }
 
     if (!sConfig.SetSource(cfg_file))
     {
@@ -85,7 +87,7 @@ int main(int argc, char **argv)
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
     std::string dbstring;
-    if(!StartDB(dbstring)) 
+    if(!StartDB(dbstring))
         return 1;
 
     //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);

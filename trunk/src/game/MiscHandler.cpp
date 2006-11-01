@@ -1194,19 +1194,30 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     if(pl)
     {
         data.Initialize( MSG_INSPECT_HONOR_STATS );
-        data << guid; // player guid
-        data << (uint8)pl->GetUInt32Value(PLAYER_FIELD_HONOR_BAR); // Rank, filling bar, PLAYER_BYTES_3, ??
-        data << pl->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS); // Today Honorable and Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS); // Yesterday Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS); // Last Week Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS); // This Week Honorable kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS); // Lifetime Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS); // Lifetime Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION); // Yesterday Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION); // Last Week Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION); // This Week Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK); // Last Week Standing
-        data << (uint8)pl->GetHonorHighestRank(); // Highest Rank, ??
+        data << guid;                                       // player guid
+                                                            // Rank, filling bar, PLAYER_BYTES_3, ??
+        data << (uint8)pl->GetUInt32Value(PLAYER_FIELD_HONOR_BAR);
+                                                            // Today Honorable and Dishonorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
+                                                            // Yesterday Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
+                                                            // Last Week Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
+                                                            // This Week Honorable kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
+                                                            // Lifetime Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+                                                            // Lifetime Dishonorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+                                                            // Yesterday Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
+                                                            // Last Week Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
+                                                            // This Week Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
+                                                            // Last Week Standing
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
+        data << (uint8)pl->GetHonorHighestRank();           // Highest Rank, ??
         SendPacket(&data);
     }
     else

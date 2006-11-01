@@ -99,7 +99,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
             data << uint32(1);
             data << uint32(0);
             data << uint32(0);
-			data << uint32(it->GetCount());
+            data << uint32(it->GetCount());
             data << uint32(0);
             data << it->GetOwnerGUID();
             data << Aentry->bid;
@@ -200,7 +200,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                     data << uint32(1);
                     data << uint32(0);
                     data << uint32(0);
-					data << uint32(it->GetCount());
+                    data << uint32(it->GetCount());
                     data << uint32(0);
                     data << it->GetOwnerGUID();
                     data << Aentry->bid;
@@ -312,17 +312,17 @@ static uint8 AuctionerFactionToLocation(uint32 faction)
 {
     switch (faction)
     {
-        case 29: // orc
-        case 68: //undead
-        case 104: //tauren
+        case 29:                                            // orc
+        case 68:                                            //undead
+        case 104:                                           //tauren
             return 1;
             break;
-        case 12: //human
-        case 55: //dwarf
-        case 79:    //Nightelf 
+        case 12:                                            //human
+        case 55:                                            //dwarf
+        case 79:                                            //Nightelf
             return 2;
             break;
-        default: /* 85 and so on ... neutral*/
+        default:                                            /* 85 and so on ... neutral*/
             return 3;
     }
 }
@@ -370,7 +370,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
-    data << uint32(0); // initialize, but there should be count..
+    data << uint32(0);                                      // initialize, but there should be count..
     uint32 count = 0;
     for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
     {
@@ -383,7 +383,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
             data << uint32(0);
             data << uint32(0);
             data << uint32(0);
-			data << uint32(it->GetCount());
+            data << uint32(it->GetCount());
             data << uint32(0);
             data << it->GetOwnerGUID();
             data << Aentry->bid;
@@ -447,7 +447,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
                         data << uint32(0);
                         data << uint32(0);
                         data << uint32(0);
-						data << uint32(item->GetCount());
+                        data << uint32(item->GetCount());
                         data << uint32(0);
                         data << item->GetOwnerGUID();
                         data << Aentry->bid;
@@ -486,7 +486,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(!pCreature||!pCreature->isAuctioner())
-            return;
+        return;
 
     location = AuctionerFactionToLocation(pCreature->getFaction());
 
@@ -530,7 +530,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                                 data << uint32(0);
                                                 data << uint32(0);
                                                 data << uint32(0);
-												data << uint32(item->GetCount());
+                                                data << uint32(item->GetCount());
                                                 data << uint32(0);
                                                 data << item->GetOwnerGUID();
                                                 data << Aentry->bid;

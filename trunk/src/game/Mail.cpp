@@ -132,7 +132,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
     pl->ModifyMoney( -30 - money );
 
-    time_t etime = base + DAY * ((COD > 0)? 3 : 30);       //time if COD 3 days, if no COD 30 days
+    time_t etime = base + DAY * ((COD > 0)? 3 : 30);        //time if COD 3 days, if no COD 30 days
     if (receive)
     {
         Mail* m = new Mail;
@@ -151,11 +151,11 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         if (it)
             receive->AddMItem(it);
     }
-    
+
     // backslash all '
     EscapeApostrophes(body);
     EscapeApostrophes(subject);
-    
+
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (uint64)etime, money, COD, 0);
 }
@@ -249,7 +249,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     //backslash all apostrophes
     EscapeApostrophes(body);
     EscapeApostrophes(subject);
-    
+
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", message);
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 

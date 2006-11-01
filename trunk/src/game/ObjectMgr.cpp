@@ -319,7 +319,7 @@ void ObjectMgr::LoadAuctions()
         aItem->bidder = fields[6].GetUInt32();
         aItem->bid = fields[7].GetUInt32();
         aItem->location = fields[8].GetUInt8();
-        
+
         AddAuction(aItem);
     } while (result->NextRow());
     delete result;

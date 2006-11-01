@@ -97,9 +97,9 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
     uint8 plLevel, plClass;
     uint32 plZone;
 
-    if(!objmgr.GetPlayerNameByGUID(plGuid, plName)) // player doesnt exist
+    if(!objmgr.GetPlayerNameByGUID(plGuid, plName))         // player doesnt exist
         return;
-    if(Player::GetGuildIdFromDB(plGuid) != 0) // player already in guild
+    if(Player::GetGuildIdFromDB(plGuid) != 0)               // player already in guild
         return;
 
     // remove oll player signs from another petitions
@@ -137,7 +137,7 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
     members.push_back(newmember);
 
     sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')", Id, GUID_LOPART(newmember.guid), newmember.RankId, newmember.Pnote.c_str(), newmember.OFFnote.c_str());
-    
+
     if(pl)
     {
         pl->SetInGuild(Id);
@@ -150,9 +150,10 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
         Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, newmember.RankId, plGuid);
     }
 }
+
 void Guild::SetMOTD(std::string motd)
-{ 
-    MOTD = motd; 
+{
+    MOTD = motd;
 
     sDatabase.PExecute("UPDATE `guild` SET `MOTD`='%s' WHERE `guildid`='%u'", motd.c_str(), Id);
 }
@@ -186,7 +187,7 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
     BackgroundColor = fields[7].GetUInt32();
     GINFO = fields[8].GetCppString();
     MOTD = fields[9].GetCppString();
-    uint64 time = fields[10].GetUInt64(); //datetime is uint64 type ... YYYYmmdd:hh:mm:ss 
+    uint64 time = fields[10].GetUInt64();                   //datetime is uint64 type ... YYYYmmdd:hh:mm:ss
 
     delete result;
 
@@ -275,8 +276,8 @@ void Guild::LoadPlayerStatsByGuid(uint64 guid)
 }
 
 void Guild::SetLeader(uint64 guid)
-{ 
-    leaderGuid = guid; 
+{
+    leaderGuid = guid;
     this->ChangeRank(guid, GR_GUILDMASTER);
 
     sDatabase.PExecute("UPDATE `guild` SET `leaderguid`='%u' WHERE `guildid`='%u'", GUID_LOPART(guid), Id);
@@ -290,16 +291,16 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         ss<<"SELECT `guid` FROM `guild_member` WHERE `guildid`='"<<Id<<"' AND `guid`!='"<<this->leaderGuid<<"' ORDER BY `rank` ASC LIMIT 1";
         QueryResult *result = sDatabase.Query( ss.str().c_str() );
         if( result )
-        {        
+        {
             uint64 newLeaderGUID;
             Player *newLeader;
-            string newLeaderName, oldLeaderName;        
+            string newLeaderName, oldLeaderName;
 
             newLeaderGUID = (*result)[0].GetUInt64();
-            delete result;                        
+            delete result;
 
-            this->SetLeader(newLeaderGUID);                
-            
+            this->SetLeader(newLeaderGUID);
+
             newLeader = objmgr.GetPlayer(newLeaderGUID);
             if(newLeader)
             {
@@ -309,10 +310,10 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
             else
             {
                 Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, GR_GUILDMASTER, newLeaderGUID);
-                objmgr.GetPlayerNameByGUID(newLeaderGUID, newLeaderName);    
-            }    
+                objmgr.GetPlayerNameByGUID(newLeaderGUID, newLeaderName);
+            }
             objmgr.GetPlayerNameByGUID(guid, oldLeaderName);
-            
+
             WorldPacket data;
 
             data.Initialize(SMSG_GUILD_EVENT);
@@ -361,6 +362,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
 
     sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(guid));
 }
+
 void Guild::ChangeRank(uint64 guid, uint32 newRank)
 {
     MemberList::iterator itr;
@@ -458,6 +460,7 @@ void Guild::BroadcastPacket(WorldPacket *packet)
             player->GetSession()->SendPacket(packet);
     }
 }
+
 void Guild::CreateRank(std::string name,uint32 rights)
 {
     uint32 rid;
@@ -476,14 +479,16 @@ void Guild::CreateRank(std::string name,uint32 rights)
 
     ranks.push_back(RankInfo(name,rights));
 }
+
 void Guild::AddRank(std::string name,uint32 rights)
 {
     ranks.push_back(RankInfo(name,rights));
 }
+
 void Guild::DelRank()
-{ 
-    uint32 rank = ranks.size();    
-    //sDatabase.PExecute("UPDATE `guild_member` SET `rank`='%u' WHERE `rank`='%u' AND `guildid`='%u'", (rank-1), rank, Id);    
+{
+    uint32 rank = ranks.size();
+    //sDatabase.PExecute("UPDATE `guild_member` SET `rank`='%u' WHERE `rank`='%u' AND `guildid`='%u'", (rank-1), rank, Id);
     sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `rid`='%u' AND `guildid`='%u'", rank, Id);
 
     ranks.pop_back();
@@ -542,7 +547,7 @@ void Guild::SetRankRights(uint32 rankId, uint32 rights)
 {
     RankList::iterator itr;
 
-    if(rankId > ranks.size()-1) return;   
+    if(rankId > ranks.size()-1) return;
     uint32 i=0;
 
     for (itr = ranks.begin(); itr != ranks.end();itr++)
@@ -583,6 +588,7 @@ void Guild::Disband()
     sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid` = '%u'",Id);
     objmgr.RemoveGuild(this);
 }
+
 void Guild::Roster(WorldSession *session)
 {
     WorldPacket data;

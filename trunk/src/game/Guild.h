@@ -172,7 +172,7 @@ class Guild
         {
             return ((GetRankRights(rankId) & right) != GR_RIGHT_EMPTY) ? true : false;
         }
-        
+
         void Roster(WorldSession *session);
         void Query(WorldSession *session);
 

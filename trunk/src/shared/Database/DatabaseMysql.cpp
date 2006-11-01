@@ -34,7 +34,6 @@ void DatabaseMysql::ThreadEnd()
 
 size_t DatabaseMysql::db_count = 0;
 
-
 DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
 {
     // before first connection
@@ -55,7 +54,7 @@ DatabaseMysql::~DatabaseMysql()
 {
     if (mMysql)
         mysql_close(mMysql);
-    
+
     //Free Mysql library pointers for last ~DB
     if(--db_count == 0)
         mysql_library_end();

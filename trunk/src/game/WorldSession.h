@@ -190,7 +190,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         void HandleMovementOpcodes(WorldPacket& recvPacket);
         void HandleFallOpcode( WorldPacket & recv_data );
-        void HandleMoveFallResetOpcode(WorldPacket& recv_data); 
+        void HandleMoveFallResetOpcode(WorldPacket& recv_data);
         void HandleSetActiveMoverOpcode(WorldPacket &recv_data);
         void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
 

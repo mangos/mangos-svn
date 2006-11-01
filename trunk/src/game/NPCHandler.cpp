@@ -365,7 +365,8 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
     }
 
     // prevent cheating
-    if(!unit->isSpiritHealer() || !unit->IsWithinDistInMap(_player,5)) // iteraction distance
+                                                            // iteraction distance
+    if(!unit->isSpiritHealer() || !unit->IsWithinDistInMap(_player,5))
         return;
 
     SendSpiritResurrect();
