@@ -700,6 +700,7 @@ CREATE TABLE `creature_loot_template` (
   `chance` float NOT NULL default '100',
   `questchance` float NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
+  `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -852,6 +853,7 @@ CREATE TABLE `fishing_loot_template` (
   `chance` float NOT NULL default '100',
   `questchance` float NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
+  `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -1059,6 +1061,7 @@ CREATE TABLE `gameobject_loot_template` (
   `chance` float NOT NULL default '100',
   `questchance` float NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
+  `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -1286,6 +1289,7 @@ CREATE TABLE `item_loot_template` (
   `chance` float NOT NULL default '100',
   `questchance` float NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
+  `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -1749,6 +1753,7 @@ CREATE TABLE `pickpocketing_loot_template` (
   `chance` float NOT NULL default '100',
   `questchance` float NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
+  `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -2047,6 +2052,7 @@ CREATE TABLE `skinning_loot_template` (
   `chance` float NOT NULL default '100',
   `questchance` float NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
+  `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
