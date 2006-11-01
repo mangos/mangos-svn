@@ -125,7 +125,7 @@ struct Loot
     Loot(uint32 _gold = 0) : gold(_gold), released(false), unlootedCount(0) {}
     ~Loot() { clear(); }
 
-    void Loot::clear()
+    void clear()
     {
         items.clear(); gold = 0; PlayersLooting.clear(); 
         for (QuestItemMap::iterator itr = PlayerQuestItems.begin(); itr != PlayerQuestItems.end(); ++itr)
