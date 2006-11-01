@@ -27,6 +27,10 @@
 #include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
 
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
 using std::remove_copy_if;
 
 LootStore LootTemplates_Creature;
