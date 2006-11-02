@@ -56,6 +56,8 @@ void Guild::create(uint64 lGuid, std::string gname)
 
     if(!objmgr.GetPlayerNameByGUID(lGuid, lName))
         return;
+    if(objmgr.GetGuildByName(gname))
+        return;
 
     sLog.outDebug("GUILD: creating guild %s to leader: %u", gname.c_str(), GUID_LOPART(lGuid));
 
@@ -439,7 +441,7 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg)
         for (itr = members.begin(); itr != members.end(); itr++)
         {
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, session, CHAT_MSG_GUILD, LANG_UNIVERSAL, NULL, 0, msg.c_str());
+            sChatHandler.FillMessageData(&data, session, CHAT_MSG_OFFICER, LANG_UNIVERSAL, NULL, 0, msg.c_str());
 
             pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
 
