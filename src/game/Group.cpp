@@ -340,6 +340,8 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
                     else
                         r.playerVote[j] = NOT_VALID;
                 }
+                else
+                    r.playerVote[j] = NOT_VALID;
             }
 
             if (r.totalPlayersRolling > 0)
@@ -374,14 +376,15 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                 if (i->loot->items.size() == 0)
                     return;
 
+            int8 pos = GetPlayerGroupSlot(playerGUID);
+            if (pos == -1 || pos >= MAXGROUPSIZE)                          //error pos
+                return;
+
             switch (Choise)
             {
                 case 0:                                     //Player choose pass
                 {
                     SendLootRoll(0, playerGUID, i->itemid, 0, 128, 0, *i);
-                    int8 pos = GetPlayerGroupSlot(playerGUID);
-                    if (pos == -1)                          //error pos
-                        return;
                     i->playerVote[pos] = PASS;
                     i->totalPass++;
                 }
@@ -390,18 +393,12 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                 {
                     SendLootRoll(0, playerGUID, i->itemid, 0, 1, 0, *i);
                     i->totalNeed++;
-                    int8 pos = GetPlayerGroupSlot(playerGUID);
-                    if (pos == -1)                          //error pos
-                        return;
                     i->playerVote[pos] = NEED;
                 }
                 break;
                 case 2:                                     //player choose Greed
                 {
                     i->totalGreed++;
-                    int8 pos = GetPlayerGroupSlot(playerGUID);
-                    if (pos == -1)                          //error pos
-                        return;
                     i->playerVote[pos] = GREED;
                 }
                 break;
@@ -410,6 +407,8 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
             //end of the roll
             if (i->totalPass + i->totalGreed + i->totalNeed >= i->totalPlayersRolling)
             {
+                sLog.outDebug("Group::CountTheRoll - Finished item roll. itemSlot:%u;  total players rolling:%u; id of item:%u;", i->itemSlot, i->totalPlayersRolling, i->itemid);
+
                 if (i->totalNeed > 0)
                 {
                     vector<uint8> rollresul;
@@ -512,4 +511,14 @@ int8 Group::GetPlayerGroupSlot(uint64 Guid)
             return i;
     }
     return -1;
+}
+
+void Group::BroadcastPacket(WorldPacket *packet)
+{
+    for (uint32 i = 0; i < m_count; i++)
+    {
+        Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
+        if (pl && pl->GetSession())
+            pl->GetSession()->SendPacket(packet);
+    }
 }
