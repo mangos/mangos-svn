@@ -124,16 +124,16 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         data << uint8(0x00);
         data << uint8(0x00);
         data << uint8(0x00);
+        data << uint32(0xFFFFFFFF);
         data << uint8(0xFF);
         data << uint32(item->itemid);
         data << uint64(0);
+        data << uint32(1);
 
-        /*data << uint8(0x00);
-        data << uint8(0x00);
-        data << uint8(0x00);
-        data << uint32(0x00000000);
-        data << uint8(0x00);*/
-        SendPacket( &data );
+        if(player->GetGroupLeader())
+            objmgr.GetGroupByLeader(player->GetGroupLeader())->BroadcastPacket(&data);
+        else
+            SendPacket( &data );
     }
     else
         player->SendEquipError( msg, NULL, NULL );
