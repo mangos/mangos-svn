@@ -633,6 +633,11 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
     {
+        if(pVictim->getPowerType() != POWER_MANA)
+            return;
+        if(getPowerType() != POWER_MANA)
+            return;
+
         uint32 tmpvalue = 0;
         for(int x=0;x<3;x++)
         {
@@ -661,13 +666,21 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
             return;
 
-        ModifyPower(Powers(mod->m_miscvalue),mod->m_amount);
+        Power power = Powers(mod->m_miscvalue);
+
+        if(getPowerType()) != power)
+            return;
+
+        ModifyPower(power,mod->m_amount);
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayerPet(pVictim, spellProto->Id, mod->m_amount, Powers(mod->m_miscvalue));
+            SendHealSpellOnPlayerPet(pVictim, spellProto->Id, mod->m_amount, power);
     }
     else if(mod->m_auraname == SPELL_AURA_OBS_MOD_MANA)
     {
+        if(getPowerType() != POWER_MANA)
+            return;
+
         ModifyPower(POWER_MANA, mod->m_amount);
     }
 }
@@ -2616,16 +2629,19 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
             {
                 if((*i)->GetSpellProto()->SpellIconID == 206)
                 {
-                    uint32 mana = 0;
-                    switch(FindSpellRank((*i)->GetSpellProto()->Id))
+                    if(getPowerType() == POWER_MANA)
                     {
-                        case 1:mana = 33;break;
-                        case 2:mana = 46;break;
-                        case 3:mana = 59;break;
-                        default:break;
+                        uint32 mana = 0;
+                        switch(FindSpellRank((*i)->GetSpellProto()->Id))
+                        {
+                            case 1:mana = 33;break;
+                            case 2:mana = 46;break;
+                            case 3:mana = 59;break;
+                            default:break;
+                        }
+                        ModifyPower(POWER_MANA,mana);
+                        SendHealSpellOnPlayerPet(this,(*i)->GetSpellProto()->Id,mana,POWER_MANA);
                     }
-                    ModifyPower(POWER_MANA,mana);
-                    SendHealSpellOnPlayerPet(this,(*i)->GetSpellProto()->Id,mana,POWER_MANA);
                 }
                 if((*i)->GetSpellProto()->SpellIconID == 299)
                 {

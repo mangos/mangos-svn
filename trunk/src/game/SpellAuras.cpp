@@ -2120,6 +2120,9 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
 
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
 {
+    if(m_target->getPowerType() != POWER_ENERGY)
+        return;
+
     m_target->ApplyPowerPercentMod(POWER_ENERGY,m_modifier.m_amount,apply);
 }
 
