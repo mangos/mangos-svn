@@ -3772,7 +3772,6 @@ void Player::DuelComplete()
         data.Initialize(SMSG_DUEL_WINNER);
         data << (uint8)0;
         data << m_pDuel->GetName();
-        data << (uint8)1;
         data << GetName();
         SendMessageToSet(&data,true);
 
@@ -3816,25 +3815,14 @@ void Player::DuelComplete()
         m_pDuel->GetSession()->SendPacket(&data);
     }
 
-    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-    data << duelFlagGUID;
-    GetSession()->SendPacket(&data);
-    m_pDuel->GetSession()->SendPacket(&data);
-
-    data.Initialize(SMSG_DESTROY_OBJECT);
-    data << duelFlagGUID;
-    GetSession()->SendPacket(&data);
-    m_pDuel->GetSession()->SendPacket(&data);
+    //Remove Duel Flag object
+    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
+    if(obj)
+        m_pDuelSender->RemoveGameObject(obj,true);
 
     //Player kneel when finish the duel
     if(isInDuel())
         HandleEmoteCommand(ANIM_EMOTE_BEG);
-
-    //Remove Duel Flag object
-    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
-
-    if(obj)
-        m_pDuelSender->RemoveGameObject(obj,true);
 
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);
