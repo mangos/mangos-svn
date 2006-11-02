@@ -1117,18 +1117,14 @@ void Player::RemoveFromWorld()
 
 void Player::CalcRage( uint32 damage,bool attacker )
 {
-
-    uint32 maxRage = GetMaxPower(POWER_RAGE);
-    uint32 Rage = GetPower(POWER_RAGE);
+    uint32 addRage = 0;
 
     if(attacker)
-        Rage += (uint32)(10*damage/(getLevel()*0.5f));
+        addRage = (uint32)(10*damage/(getLevel()*0.5f));
     else
-        Rage += (uint32)(10*damage/(getLevel()*1.5f));
+        addRage = (uint32)(10*damage/(getLevel()*1.5f));
 
-    if(Rage > maxRage)  Rage = maxRage;
-
-    SetPower(POWER_RAGE, Rage);
+    ModifyPower(POWER_RAGE, addRage);
 }
 
 void Player::RegenerateAll()
@@ -1290,9 +1286,7 @@ void Player::RegenerateHealth()
         case PLAYER_STATE_KNEEL:
             addvalue *= 1.5; break;
     }
-    curValue += uint32(addvalue);
-    if (curValue > maxValue) curValue = maxValue;
-    SetHealth(curValue);
+    ModifyHealth(int32(addvalue));
 }
 
 bool Player::isAcceptTickets() const
@@ -2192,6 +2186,7 @@ bool Player::CanLearnProSpell(uint32 spell)
         && skill != SKILL_BLACKSMITHING && skill != SKILL_ALCHEMY && skill != SKILL_ENCHANTING
         && skill != SKILL_TAILORING && skill != SKILL_ENGINERING && skill != SKILL_SKINNING)
         return true;
+
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if (itr->second->state == PLAYERSPELL_REMOVED) continue;
@@ -2205,12 +2200,14 @@ bool Player::CanLearnProSpell(uint32 spell)
                 && pskill != SKILL_BLACKSMITHING && pskill != SKILL_ALCHEMY && pskill != SKILL_ENCHANTING
                 && pskill != SKILL_TAILORING && pskill != SKILL_ENGINERING && pskill != SKILL_SKINNING)
                 continue;
+
+            // not check prof count for not first prof. spells (when skill already known)
             if(pskill == skill)
-            {
                 return true;
-                break;
-            }
-            else value += 1;
+
+            // count only first rank prof. spells
+            if(FindSpellRank(pSpellInfo->Id)==1)
+                value += 1;
         }
     }
     if(value >= sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL))

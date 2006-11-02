@@ -339,17 +339,11 @@ void Aura::Update(uint32 diff)
         {
             Powers powertype = caster->getPowerType();
             uint32 curpower = caster->GetPower(powertype);
-            uint32 manaPerSecond = GetSpellProto()->manaPerSecond;
-            uint32 manaPerSecondPerLevel = uint32(GetSpellProto()->manaPerSecondPerLevel*caster->getLevel());
+            int32 manaPerSecond = GetSpellProto()->manaPerSecond;
+            int32 manaPerSecondPerLevel = uint32(GetSpellProto()->manaPerSecondPerLevel*caster->getLevel());
             m_timeCla = 1000;
-            if(manaPerSecond > curpower)
-                caster->SetPower(powertype,0);
-            else
-                caster->SetPower(powertype,curpower-manaPerSecond);
-            if(manaPerSecondPerLevel > curpower)
-                caster->SetPower(powertype,0);
-            else
-                caster->SetPower(powertype,curpower-manaPerSecondPerLevel);
+            caster->ModifyPower(powertype,-manaPerSecond);
+            caster->ModifyPower(powertype,-manaPerSecondPerLevel);
         }
         if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS,(UNIT_STAT_FLEEING<<16)))
         {
@@ -2044,7 +2038,9 @@ so this aura not fully working.
         m_modifier.m_amount = m_target->GetMaxHealth() * modifier/100;
     }
 
-    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+    if(m_target->GetHealth() < m_target->GetMaxHealth())
+        m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+    
     m_isPeriodic = apply;
 }
 void Aura::HandleAuraModTotalManaPercentRegen(bool apply)
@@ -2070,7 +2066,8 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply)
         }
     }
 
-    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+    if(m_target->GetHealth() < m_target->GetMaxHealth())
+        m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
     m_isPeriodic = apply;
 }
 
@@ -2082,8 +2079,7 @@ void Aura::HandleModRegen(bool apply)                       // eating
     if(apply && m_periodicTimer <= 0)
     {
         m_periodicTimer += 5000;
-        if (m_target->GetHealth() + m_modifier.m_amount <= m_target->GetMaxHealth())
-            m_target->SetHealth(m_target->GetHealth() + m_modifier.m_amount);
+        m_target->ModifyHealth(m_modifier.m_amount);
     }
 
     m_isPeriodic = apply;
@@ -2101,8 +2097,7 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
         // Prevent rage regeneration in combat with rage loss slowdown warrior talant and 0<->1 switching range out combat.
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
-            if (m_target->GetPower(pt) + m_modifier.m_amount <= m_target->GetMaxPower(pt))
-                m_target->SetPower(pt, m_target->GetPower(pt) + m_modifier.m_amount);
+            m_target->ModifyPower(pt, m_modifier.m_amount);
         }
     }
 
@@ -2120,9 +2115,7 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
     if(int32(powerType) != m_modifier.m_miscvalue)
         return;
 
-    uint32 newValue = m_target->GetPower(powerType);
-    apply ? newValue += m_modifier.m_amount : newValue -= m_modifier.m_amount;
-    m_target->SetPower(powerType,newValue);
+    m_target->ModifyPower(powerType, apply ? m_modifier.m_amount : - m_modifier.m_amount);
 }
 
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
