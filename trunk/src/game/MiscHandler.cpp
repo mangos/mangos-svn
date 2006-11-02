@@ -85,7 +85,10 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
             clientcount++;
 
             data.append(itr->second->GetName() , strlen(itr->second->GetName()) + 1);
-            data << uint8( 0x00 );
+            if(itr->second->GetGuildId()) // in fact just could use objmgr.GetGuildNameById(itr->second->GetGuildId()) cause getguildid() returns 0 with no guild and getguildnamebyid "" which equals uint8(0)
+                data << objmgr.GetGuildNameById(itr->second->GetGuildId());
+            else
+                data << uint8( 0 );
             data << uint32( itr->second->getLevel() );
             data << uint32( itr->second->getClass() );
             data << uint32( itr->second->getRace() );
