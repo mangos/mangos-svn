@@ -530,10 +530,11 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     }
 
     uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
+    bool crit = SpellCriticalBonus(spellInfo, (int32*)&pdamage);
     CalDamageReduction(pVictim,spellInfo->School,pdamage, &absorb, &resist);
 
     // Only send absorbed message if we actually absorbed some damage
-    if( damage <= absorb+resist && absorb)
+    if( pdamage <= absorb+resist && absorb)
     {
         SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim->GetGUID(), 1, spellInfo->School, pdamage, absorb,resist,1,0);
         return;
@@ -542,7 +543,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
 
-    SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, pdamage, spellInfo->School, absorb, resist, false, 0);
+    SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, pdamage, spellInfo->School, absorb, resist, false, 0, crit);
     DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), 0, true);
 }
 
@@ -556,7 +557,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     uint32 absorb=0;
     uint32 resist=0;
 
-    uint32 pdamage = SpellDamageBonus(pVictim, spellProto, mod->m_amount);
+    uint32 pdamage = mod->m_amount;
     CalDamageReduction(pVictim, spellProto->School, pdamage, &absorb, &resist);
 
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
@@ -577,6 +578,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
     {
+        pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
         SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, mod->m_amount, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
 
@@ -584,6 +586,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
     {
+        pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
         int32 pdamage = GetHealth()*(100+mod->m_amount)/100;
         SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
@@ -591,8 +594,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL || mod->m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
     {
-        pdamage = mod->m_amount;
-
+        pdamage = SpellHealingBonus(spellProto, pdamage);
         pVictim->ModifyHealth(pdamage);
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
@@ -2443,7 +2445,7 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
     }
 }
 
-void Unit::SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked)
+void Unit::SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit)
 {
     WorldPacket data;
     data.Initialize(SMSG_SPELLNONMELEEDAMAGELOG);
@@ -2457,7 +2459,8 @@ void Unit::SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Da
     data << (uint8)PhysicalDamage;
     data << uint8(0);
     data << Blocked;                                        //blocked
-    data << uint8(0);
+    data << uint8(CriticalHit ? 2 : 0);
+    data << uint32(0);
     SendMessageToSet( &data, true );
 }
 
@@ -2962,8 +2965,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500) * (float)(100 - PenaltyFactor) / 100;
     pdamage += uint32(ActualBenefit);
 
-    // Spell Criticals
-    bool crit = false;
+    return pdamage;
+}
+
+bool Unit::SpellCriticalBonus(SpellEntry *spellProto, int32 *peffect)
+{
     int32 critchance = m_baseSpellCritChance + int32(GetStat(STAT_INTELLECT)/100-1);
     critchance = critchance > 0 ? critchance :0;
 
@@ -2978,14 +2984,45 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     critchance = critchance > 0 ? critchance :0;
     if(critchance >= urand(0,100))
     {
-        int32 critbonus = pdamage / 2;
+        int32 critbonus = *peffect / 2;
         if (GetTypeId() == TYPEID_PLAYER)
             ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, critbonus);
-        pdamage += critbonus;
-        crit = true;
+        *peffect += critbonus;
+        return true;
     }
+    return false;
+}
 
-    return pdamage;
+uint32 Unit::SpellHealingBonus(SpellEntry *spellProto, uint32 healamount)
+{
+    // Healing Done
+    int32 AdvertisedBenefit = 0;
+    uint32 PenaltyFactor = 0;
+    uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+    if (CastingTime > 3500) CastingTime = 3500;
+    if (CastingTime < 1500) CastingTime = 1500;
+
+    AuraList& mHealingDone = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE);
+    for(AuraList::iterator i = mHealingDone.begin();i != mHealingDone.end(); ++i)
+        if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
+            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+
+    // TODO - fix PenaltyFactor and complete the formula from the wiki
+    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500) * (float)(100 - PenaltyFactor) / 100;
+    healamount += uint32(ActualBenefit);
+
+    // TODO: check for ALL/SPELLS type
+    AuraList& mHealingPct = GetAurasByType(SPELL_AURA_MOD_HEALING_PCT);
+    for(AuraList::iterator i = mHealingPct.begin();i != mHealingPct.end(); ++i)
+        healamount *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+    AuraList& mHealingDonePct = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
+    for(AuraList::iterator i = mHealingDonePct.begin();i != mHealingDonePct.end(); ++i)
+        healamount *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+
+    healamount += m_AuraModifiers[SPELL_AURA_MOD_HEALING];
+    if (int32(healamount) < 0) healamount = 0;
+
+    return healamount;
 }
 
 void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
