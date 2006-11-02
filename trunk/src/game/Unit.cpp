@@ -666,9 +666,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
             return;
 
-        Power power = Powers(mod->m_miscvalue);
+        Powers power = Powers(mod->m_miscvalue);
 
-        if(getPowerType()) != power)
+        if(getPowerType() != power)
             return;
 
         ModifyPower(power,mod->m_amount);
