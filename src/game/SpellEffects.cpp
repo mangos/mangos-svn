@@ -403,6 +403,8 @@ void Spell::EffectManaDrain(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
+    if(unitTarget->getPowerType() != drain_power)
+        return;
 
     uint32 curPower = unitTarget->GetPower(drain_power);
     float tmpvalue = m_spellInfo->EffectMultipleValue[i];
@@ -430,6 +432,8 @@ void Spell::EffectPowerDrain(uint32 i)
     if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
+        return;
+    if(unitTarget->getPowerType()!=POWER_MANA)
         return;
 
     uint32 curPower = unitTarget->GetPower(POWER_MANA);
@@ -577,6 +581,10 @@ void Spell::EffectEnergize(uint32 i)
         return;
 
     Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
+
+    if(unitTarget->getPowerType() != power)
+        return;
+
     unitTarget->ModifyPower(power,damage);
 }
 
