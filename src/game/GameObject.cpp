@@ -199,7 +199,7 @@ void GameObject::Refresh()
 void GameObject::Delete()
 {
     WorldPacket data;
-    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
+    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
     data << GetGUID();
     SendMessageToSet(&data, true);
     SetUInt32Value(GAMEOBJECT_STATE, 1);
