@@ -1000,27 +1000,40 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
     std::string name;
-    Player * player;
+    Player * newLeader;
+    uint64 newLeaderGUID;
+    uint32 newLeaderGuild;
     Player * oldLeader = GetPlayer();
     Guild *guild;
 
     sLog.outDebug( "WORLD: Received CMSG_GUILD_LEADER"  );
 
     recvPacket >> name;
-
-    player = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
+    
+    newLeader = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
+    if(newLeader)
+    {
+        newLeaderGUID = newLeader->GetGUID();
+        newLeaderGuild = newLeader->GetGuildId();
+    }
+    else
+    {
+        newLeaderGUID = objmgr.GetPlayerGUIDByName(name.c_str());
+        newLeaderGuild = Player::GetGuildIdFromDB(newLeaderGUID);
+    }
     guild = objmgr.GetGuildById(oldLeader->GetGuildId());
+
     if(!guild)
     {
         SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
         return;
     }
-    else if( !player )
+    else if( !newLeaderGUID )
     {
         SendCommandResult(GUILD_INVITE_S,name,GUILD_PLAYER_NOT_FOUND);
         return;
     }
-    if(oldLeader->GetGuildId() != player->GetGuildId())
+    if(oldLeader->GetGuildId() != newLeaderGuild)
     {
         SendCommandResult(GUILD_INVITE_S,name,GUILD_PLAYER_NOT_IN_GUILD_S);
         return;
@@ -1031,16 +1044,14 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    guild->SetLeader(player->GetGUID());
-    player->SetRank(GR_GUILDMASTER);
-    oldLeader->SetRank(GR_OFFICER);
+    guild->SetLeader(newLeaderGUID);
+    guild->ChangeRank(oldLeader->GetGUID(), GR_OFFICER);
 
     data.Initialize(SMSG_GUILD_EVENT);
     data << (uint8)GE_LEADER_CHANGED;
     data << (uint8)2;
     data << oldLeader->GetName();
-    data << player->GetName();
-    //SendPacket(&data);
+    data << name.c_str();
     guild->BroadcastPacket(&data);
 
     sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );

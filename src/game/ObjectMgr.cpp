@@ -121,6 +121,20 @@ Guild * ObjectMgr::GetGuildByName(std::string guildname) const
     return NULL;
 }
 
+std::string ObjectMgr::GetGuildNameById(const uint32 GuildId) const
+{
+    GuildSet::const_iterator itr;
+    for (itr = mGuildSet.begin(); itr != mGuildSet.end(); itr++)
+    {
+        if ((*itr)->GetId() == GuildId)
+        {
+            return (*itr)->GetName();
+        }
+    }
+
+    return "";
+}
+
 CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
 {
     return sCreatureStorage.LookupEntry<CreatureInfo>(id);

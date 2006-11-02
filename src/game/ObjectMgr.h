@@ -133,6 +133,7 @@ class ObjectMgr
 
         Guild* GetGuildById(const uint32 GuildId) const;
         Guild* GetGuildByName(std::string guildname) const;
+        std::string GetGuildNameById(const uint32 GuildId) const;
         void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
