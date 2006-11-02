@@ -589,9 +589,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         SendMessageToSet(&data,true);
         DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), procFlag, true);
     }
-    else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
+    else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL || mod->m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
     {
-        int32 pdamage = mod->m_amount;
+        pdamage = mod->m_amount;
+
         if(pVictim->GetHealth() + pdamage < pVictim->GetMaxHealth() )
             pVictim->SetHealth(pVictim->GetHealth() + pdamage);
         else
@@ -662,6 +663,15 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         SetPower(Powers(mod->m_miscvalue),GetPower(Powers(mod->m_miscvalue))+mod->m_amount);
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayerPet(pVictim, spellProto->Id, mod->m_amount, Powers(mod->m_miscvalue));
+    }
+    else if(mod->m_auraname == SPELL_AURA_OBS_MOD_MANA)
+    {
+        pdamage = mod->m_amount;
+
+        if(GetPower(POWER_MANA) + pdamage < GetMaxPower(POWER_MANA) )
+            SetPower(POWER_MANA, GetPower(POWER_MANA) + pdamage);
+        else 
+            SetPower(POWER_MANA,GetMaxPower(POWER_MANA));
     }
 }
 
