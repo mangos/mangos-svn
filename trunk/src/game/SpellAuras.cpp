@@ -64,8 +64,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModDetect,                                 //SPELL_AURA_MOD_DETECT = 17,
     &Aura::HandleInvisibility,                              //SPELL_AURA_MOD_INVISIBILITY = 18,
     &Aura::HandleInvisibilityDetect,                        //SPELL_AURA_MOD_INVISIBILITY_DETECTION = 19,
-    &Aura::HandleNULL,                                      //missing 20,
-    &Aura::HandleNULL,                                      //missing 21
+    &Aura::HandleAuraModTotalHealthPercentRegen,            //SPELL_AURA_OBS_MOD_HEALTH = 20
+    &Aura::HandleAuraModTotalManaPercentRegen,              //SPELL_AURA_OBS_MOD_MANA = 21
     &Aura::HandleAuraModResistance,                         //SPELL_AURA_MOD_RESISTANCE = 22,
     &Aura::HandlePeriodicTriggerSpell,                      //SPELL_AURA_PERIODIC_TRIGGER_SPELL = 23,
     &Aura::HandlePeriodicEnergize,                          //SPELL_AURA_PERIODIC_ENERGIZE = 24,
@@ -390,7 +390,12 @@ void Aura::Update(uint32 diff)
         m_periodicTimer -= diff;
         if(m_periodicTimer < 0)
         {
-            if (m_modifier.m_auraname == SPELL_AURA_MOD_REGEN || m_modifier.m_auraname == SPELL_AURA_MOD_POWER_REGEN)
+            if( m_modifier.m_auraname == SPELL_AURA_MOD_REGEN ||
+                m_modifier.m_auraname == SPELL_AURA_MOD_POWER_REGEN ||
+                                                            // Cannibalize, eating items and other spells
+                m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH ||
+                                                            // Eating items and other spells
+                m_modifier.m_auraname == SPELL_AURA_OBS_MOD_MANA ) 
             {
                 ApplyModifier(true);
                 return;
@@ -2013,6 +2018,61 @@ void Aura::HandleModTotalPercentStat(bool apply)
 /********************************/
 /***      HEAL & ENERGIZE     ***/
 /********************************/
+void Aura::HandleAuraModTotalHealthPercentRegen(bool apply)
+{
+/*
+Need additional checking for auras who reduce or increase healing, magic effect like Dumpen Magic,
+so this aura not fully working.
+*/
+    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0) 
+    {
+        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    }
+
+    uint32 duration = GetDuration(GetSpellProto());
+    if (duration == m_duration) // don't call first time.
+    {
+        m_periodicTimer += m_modifier.periodictime;
+        m_isPeriodic = apply;
+        return;
+    }
+
+    if(apply && m_periodicTimer <= 0)
+    {
+        m_periodicTimer += m_modifier.periodictime;
+        float modifier = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
+        m_modifier.m_amount = m_target->GetMaxHealth() * modifier/100;
+    }
+
+    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+    m_isPeriodic = apply;
+}
+void Aura::HandleAuraModTotalManaPercentRegen(bool apply)
+{
+    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
+        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+
+    uint32 duration = GetDuration(GetSpellProto());
+    if (duration == m_duration) // don't call first time.
+    {
+        m_periodicTimer += m_modifier.periodictime;
+        m_isPeriodic = apply;
+        return;
+    }
+
+    if(apply && m_periodicTimer <= 0 && m_target->getPowerType() == POWER_MANA)
+    {
+        m_periodicTimer += m_modifier.periodictime;
+        if (m_modifier.m_amount)
+        {
+            float modifier = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
+            m_modifier.m_amount = (m_target->GetMaxPower(POWER_MANA) * modifier)/100; // take percent (m_modifier.m_amount) max mana
+        }
+    }
+
+    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+    m_isPeriodic = apply;
+}
 
 void Aura::HandleModRegen(bool apply)                       // eating
 {

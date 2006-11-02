@@ -78,6 +78,8 @@ class Aura
         void HandleModDetect(bool Apply);
         void HandleInvisibility(bool Apply);
         void HandleInvisibilityDetect(bool Apply);
+        void HandleAuraModTotalHealthPercentRegen(bool Apply);
+        void HandleAuraModTotalManaPercentRegen(bool Apply);
         void HandleAuraModResistance(bool Apply);
         void HandleAuraModRoot(bool Apply);
         void HandleAuraModSilence(bool Apply);
