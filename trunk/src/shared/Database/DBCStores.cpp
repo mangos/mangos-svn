@@ -261,70 +261,25 @@ uint32 FindSpellRank(uint32 spellId)
     {
         if(spellInfo->Rank[i] && *spellInfo->Rank[i])
         {
+            // prof. rank case
+            if(!strncmp(spellInfo->Rank[i],"Apprentice",10))
+                return 1;
+            if(!strncmp(spellInfo->Rank[i],"Journeyman",10))
+                return 2;
+            if(!strncmp(spellInfo->Rank[i],"Expert",6))
+                return 3;
+            if(!strncmp(spellInfo->Rank[i],"Artisan",7))
+                return 4;
+
+            // Rank N case
             char *tmp = strstr(spellInfo->Rank[i], " ");
             if (!tmp) continue;
+
             return atoi(tmp+1);
         }
     }
+
     return 0;
-    /*
-    if(rankfield == 0)                                      //english client
-    {
-        switch(spellInfo->Rank[rankfield])
-        {
-            case 172:rank = 1;break;
-            case 2438:case 2449:rank = 2;break;
-            case 5271:case 5436:rank = 3;break;
-            case 16790:case 17435:rank = 4;break;
-            case 18149:case 18931:rank = 5;break;
-            case 13419:case 13986:rank = 6;break;
-            case 11757:case 12346:rank = 7;break;
-            case 70968:case 73268:rank = 8;break;
-            case 134222:case 136537:rank = 9;break;
-            case 134229:rank = 10;break;
-            case 134237:case 136552:rank = 11;break;
-            case 134245:case 136560:rank = 12;break;
-            case 134274:case 136589:rank = 13;break;
-            case 134282:case 136597:rank = 14;break;
-            case 134290:case 136605:rank = 15;break;
-            case 146442:case 148693:rank = 16;break;
-            case 48345:case 59695:rank = 1;break;           //rank of profession skill.
-            case 46478:case 48356:rank = 2;break;
-            case 84128:case 86418:rank = 3;break;
-            case 274133:case 277565:rank = 4;break;
-            case 822:rank = 0;break;                        //spell from creating related to race
-            default:rank = 0;break;
-        }
-    }
-    if(rankfield == 4)                                      //chinese client
-    {
-        switch(spellInfo->Rank[rankfield])
-        {
-            case 134:rank = 1;break;
-            case 2286:rank = 2;break;
-            case 5283:rank = 3;break;
-            case 17645:rank = 4;break;
-            case 19250:rank = 5;break;
-            case 13924:rank = 6;break;
-            case 12034:rank = 7;break;
-            case 70787:rank = 8;break;
-            case 129076:rank = 9;break;
-            case 129085:rank = 10;break;
-            case 129095:rank = 11;break;
-            case 129105:rank = 12;break;
-            case 129136:rank = 13;break;
-            case 129146:rank = 14;break;
-            case 129156:rank = 15;break;
-            case 140190:rank = 16;break;
-            case 49393:rank = 1;break;                      //rank of profession skill.
-            case 49400:rank = 2;break;
-            case 83240:rank = 3;break;
-            case 256953:rank = 4;break;
-            case 797:rank = 0;break;                        //spell from creating related to race
-            default:rank = 0;break;
-        }
-    }
-    return rank;*/
 }
 
 bool canStackSpellRank(SpellEntry *spellInfo)

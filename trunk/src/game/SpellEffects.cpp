@@ -408,20 +408,17 @@ void Spell::EffectManaDrain(uint32 i)
     float tmpvalue = m_spellInfo->EffectMultipleValue[i];
     if(!tmpvalue)
         tmpvalue = 1;
+
+    int32 new_damage;
     if(curPower < damage)
-    {
-        unitTarget->SetPower(drain_power,0);
-        damage = curPower;
-    }
+        new_damage = curPower;
     else
-        unitTarget->SetPower(drain_power,curPower-damage);
+        new_damage = damage;
+
+    unitTarget->ModifyPower(drain_power,-new_damage);
 
     if(drain_power == POWER_MANA)
-    {
-        uint32 new_mana = m_caster->GetPower(POWER_MANA)+uint32(damage*tmpvalue);
-        m_caster->SetPower(POWER_MANA,new_mana <= m_caster->GetMaxPower(POWER_MANA) ? new_mana : m_caster->GetMaxPower(POWER_MANA));
-    }
-
+        m_caster->ModifyPower(POWER_MANA,uint32(new_damage*tmpvalue));
 }
 
 void Spell::EffectSendEvent(uint32 i)
@@ -437,22 +434,19 @@ void Spell::EffectPowerDrain(uint32 i)
 
     uint32 curPower = unitTarget->GetPower(POWER_MANA);
     uint32 curHealth = unitTarget->GetHealth();
-    uint32 caster_curPower = m_caster->GetPower(POWER_MANA);
-    uint32 tmpvalue = 0;
+
+    int32 new_damage;
     if(curPower < damage)
-    {
-        unitTarget->SetPower(POWER_MANA,0);
-        tmpvalue = uint32(curPower*m_spellInfo->EffectMultipleValue[i]);
-    }
+        new_damage = curPower;
     else
-    {
-        tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
-        unitTarget->SetPower(POWER_MANA,curPower-damage);
-    }
-    if(caster_curPower + tmpvalue < m_caster->GetMaxPower(POWER_MANA))
-        m_caster->SetPower(POWER_MANA,caster_curPower + tmpvalue);
-    else m_caster->SetPower(POWER_MANA,m_caster->GetMaxPower(POWER_MANA));
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
+        new_damage = damage;
+
+    int32 tmpvalue = int32(new_damage*m_spellInfo->EffectMultipleValue[i]);
+    
+    unitTarget->ModifyPower(POWER_MANA,-new_damage);
+
+    m_caster->ModifyPower(POWER_MANA,tmpvalue);
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage);
 
 }
 
@@ -460,13 +454,11 @@ void Spell::EffectHeal( uint32 i )
 {
     if( unitTarget && unitTarget->isAlive() )
     {
-        uint32 curhealth = unitTarget->GetHealth();
-        uint32 maxhealth = unitTarget->GetMaxHealth();
-        uint32 addhealth = damage;
+        int32 addhealth = damage;
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth);
-        uint32 newhealth = curhealth + addhealth < maxhealth ? uint32(curhealth + addhealth) : maxhealth;
-        unitTarget->SetHealth( newhealth );
+
+        unitTarget->ModifyHealth( addhealth );
 
         //If the target is in combat, then player is in combat too
         if( m_caster != unitTarget &&
@@ -476,7 +468,6 @@ void Spell::EffectHeal( uint32 i )
         {
             ((Player*)m_caster)->SetPvP(true);
         }
-
     }
 }
 
@@ -489,22 +480,23 @@ void Spell::EffectHealthLeach(uint32 i)
 
     sLog.outDebug("HealthLeach :%u", damage);
 
-    uint32 tmpvalue = 0;
+    uint32 curPower = unitTarget->GetPower(POWER_MANA);
+    uint32 curHealth = unitTarget->GetHealth();
 
-    if(unitTarget->GetHealth() - damage > 0)
-    {
-        tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
-    }
+    int32 new_damage;
+    if(curHealth < damage)
+        new_damage = curHealth;
     else
-    {
-        tmpvalue = uint32(unitTarget->GetHealth()*m_spellInfo->EffectMultipleValue[i]);
-    }
-    if(m_caster->GetHealth() + tmpvalue < m_caster->GetMaxHealth() )
-        m_caster->SetHealth(uint32(m_caster->GetHealth() + tmpvalue));
-    else m_caster->SetHealth(m_caster->GetMaxHealth());
+        new_damage = damage;
+
+    int32 tmpvalue = int32(new_damage*m_spellInfo->EffectMultipleValue[i]);
+
+    m_caster->ModifyHealth(tmpvalue);
+
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, uint32(tmpvalue));
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
+
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage);
 }
 
 void Spell::EffectCreateItem(uint32 i)
@@ -584,12 +576,7 @@ void Spell::EffectEnergize(uint32 i)
         return;
 
     Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
-    uint32 curEnergy = unitTarget->GetPower(power);
-    uint32 maxEnergy = unitTarget->GetMaxPower(power);
-    if(curEnergy+damage > maxEnergy)
-        unitTarget->SetPower(power,maxEnergy);
-    else
-        unitTarget->SetPower(power,curEnergy+damage);
+    unitTarget->ModifyPower(power,damage);
 }
 
 void Spell::EffectOpenLock(uint32 i)
@@ -1443,12 +1430,7 @@ void Spell::EffectHealMaxHealth(uint32 i)
 
     uint32 heal = m_caster->GetMaxHealth();
 
-    uint32 curHealth = unitTarget->GetHealth();
-    uint32 maxHealth = unitTarget->GetMaxHealth();
-    if(curHealth+heal > maxHealth)
-        unitTarget->SetHealth(maxHealth);
-    else
-        unitTarget->SetHealth(curHealth+heal);
+    unitTarget->ModifyHealth(heal);
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         SendHealSpellOnPlayer((Player*)unitTarget, m_spellInfo->Id, heal);
@@ -1953,10 +1935,8 @@ void Spell::EffectFeedPet(uint32 i)
         return;
     if(!pet->isAlive())
         return;
-    uint32 feelty = pet->GetPower(POWER_HAPPINESS);
-    if(damage + feelty <  pet->GetMaxPower(POWER_HAPPINESS))
-        pet->SetPower(POWER_HAPPINESS,damage + feelty);
-    else pet->SetPower(POWER_HAPPINESS,pet->GetMaxPower(POWER_HAPPINESS));
+
+    pet->ModifyPower(POWER_HAPPINESS,damage);
 
     SpellEntry *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     Spell _spell(m_caster, spellinfo, true, 0);

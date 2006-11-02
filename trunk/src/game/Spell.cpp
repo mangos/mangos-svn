@@ -1227,8 +1227,7 @@ void Spell::TakePower(uint32 mana)
     // health as power used
     if(m_spellInfo->powerType == -2)
     {
-        uint32 currentHealth = m_caster->GetHealth();
-        m_caster->SetHealth(currentHealth - mana);
+        m_caster->ModifyHealth( -(int32)mana );
         return;
     }
 
@@ -1240,9 +1239,7 @@ void Spell::TakePower(uint32 mana)
 
     Powers powerType = Powers(m_spellInfo->powerType);
 
-    uint32 currentPower = m_caster->GetPower(powerType);
-
-    m_caster->SetPower(powerType, currentPower - mana);
+    m_caster->ModifyPower(powerType, -(int32)mana);
     if (powerType == POWER_MANA)
     {
         // Set the five second timer

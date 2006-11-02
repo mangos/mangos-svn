@@ -398,7 +398,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     else
     {
         DEBUG_LOG("DealDamageAlive");
-        pVictim->SetHealth(health - damage);
+        pVictim->ModifyHealth(- (int32)damage);
         if(GetTypeId() != TYPEID_PLAYER || !m_currentSpell || !m_currentSpell->IsAutoRepeat())
             Attack(pVictim);
 
@@ -593,10 +593,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     {
         pdamage = mod->m_amount;
 
-        if(pVictim->GetHealth() + pdamage < pVictim->GetMaxHealth() )
-            pVictim->SetHealth(pVictim->GetHealth() + pdamage);
-        else
-            pVictim->SetHealth(pVictim->GetMaxHealth());
+        pVictim->ModifyHealth(pdamage);
+
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(pVictim, spellProto->Id, pdamage);
     }
@@ -625,9 +623,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
             break;
         }
-        if(GetHealth() + tmpvalue < GetMaxHealth() )
-            SetHealth(GetHealth() + tmpvalue);
-        else SetHealth(GetMaxHealth());
+
+        ModifyHealth(tmpvalue);
+
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             pVictim->SendHealSpellOnPlayer(this, spellProto->Id, tmpvalue);
     }
@@ -638,21 +636,21 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         {
             if(mod->m_auraname != spellProto->EffectApplyAuraName[x])
                 continue;
-            if(pVictim->GetPower(POWER_MANA) - mod->m_amount > 0)
-            {
-                pVictim->SetPower(POWER_MANA,pVictim->GetPower(POWER_MANA) - mod->m_amount);
-                tmpvalue = uint32(mod->m_amount*spellProto->EffectMultipleValue[x]);
-            }
+
+            int32 amount;
+            if(pVictim->GetPower(POWER_MANA) > mod->m_amount)
+                amount = mod->m_amount;
             else
-            {
-                tmpvalue = uint32(pVictim->GetPower(POWER_MANA)*spellProto->EffectMultipleValue[x]);
-                pVictim->SetPower(POWER_MANA,0);
-            }
+                amount = pVictim->GetPower(POWER_MANA);
+
+            pVictim->ModifyPower(POWER_MANA, - amount);
+
+            tmpvalue = uint32(amount*spellProto->EffectMultipleValue[x]);
             break;
         }
-        if(GetPower(POWER_MANA) + tmpvalue < GetMaxPower(POWER_MANA) )
-            SetPower(POWER_MANA,GetPower(POWER_MANA) + tmpvalue);
-        else SetPower(POWER_MANA,GetMaxPower(POWER_MANA));
+
+        ModifyPower(POWER_MANA,tmpvalue);
+
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayerPet(this, spellProto->Id, tmpvalue, POWER_MANA);
     }
@@ -660,18 +658,15 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     {
         if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
             return;
-        SetPower(Powers(mod->m_miscvalue),GetPower(Powers(mod->m_miscvalue))+mod->m_amount);
+
+        ModifyPower(Powers(mod->m_miscvalue),mod->m_amount);
+
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayerPet(pVictim, spellProto->Id, mod->m_amount, Powers(mod->m_miscvalue));
     }
     else if(mod->m_auraname == SPELL_AURA_OBS_MOD_MANA)
     {
-        pdamage = mod->m_amount;
-
-        if(GetPower(POWER_MANA) + pdamage < GetMaxPower(POWER_MANA) )
-            SetPower(POWER_MANA, GetPower(POWER_MANA) + pdamage);
-        else 
-            SetPower(POWER_MANA,GetMaxPower(POWER_MANA));
+        ModifyPower(POWER_MANA, mod->m_amount);
     }
 }
 
@@ -2626,7 +2621,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                         case 3:mana = 59;break;
                         default:break;
                     }
-                    SetPower(POWER_MANA,mana + GetPower(POWER_MANA));
+                    ModifyPower(POWER_MANA,mana);
                     SendHealSpellOnPlayerPet(this,(*i)->GetSpellProto()->Id,mana,POWER_MANA);
                 }
                 if((*i)->GetSpellProto()->SpellIconID == 299)
@@ -2640,7 +2635,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                         case 4:health = 61;break;
                         default:break;
                     }
-                    SetHealth(health + GetHealth());
+                    ModifyHealth(health);
                     SendHealSpellOnPlayer(this,(*i)->GetSpellProto()->Id,health);
                 }
             }
@@ -2885,7 +2880,7 @@ void Unit::UnsummonTotem(int8 slot)
     }
 }
 
-void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage)
+void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
 {
     WorldPacket data;
     data.Initialize(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE);
@@ -2893,11 +2888,11 @@ void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage)
     data << uint8(0xFF) << GetGUID();
     data << SpellID;
     data << Damage;
-    data << uint8(0);
+    data << uint8(critical ? 1 : 0);
     SendMessageToSet(&data, true);
 }
 
-void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype)
+void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype, bool critical)
 {
     WorldPacket data;
     data.Initialize(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE);
@@ -2906,7 +2901,7 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
     data << SpellID;
     data << uint32(powertype);
     data << Damage;
-    data << uint8(0);
+    data << uint8(critical ? 1 : 0);
     SendMessageToSet(&data, true);
 }
 
@@ -3147,4 +3142,36 @@ bool Unit::isTargetableForAttack()
     if (GetTypeId()==TYPEID_PLAYER && ((Player *)this)->isGameMaster())
         return false;
     return isAlive() && !isInFlight() /*&& !isStealth()*/;
+}
+
+void Unit::ModifyHealth(int32 dVal) { 
+    int32 val = dVal + GetHealth();
+    if(val <= 0)
+    {
+        SetHealth(0);
+        return;
+    }
+
+    uint32 maxHealth = GetMaxHealth();
+
+    if(uint32(val) < maxHealth)
+        SetHealth(val); 
+    else
+        SetHealth(maxHealth); 
+}
+
+void Unit::ModifyPower(Powers power, int32 dVal) { 
+    int32 val = dVal + GetPower(power);
+    if(val <= 0)
+    {
+        SetPower(power,0);
+        return;
+    }
+
+    uint32 maxPower = GetMaxPower(power);
+
+    if(uint32(val) < maxPower)
+        SetPower(power,val); 
+    else
+        SetPower(power,maxPower); 
 }

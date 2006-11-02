@@ -247,9 +247,7 @@ void Creature::RegenerateMana()
     else
         addvalue = maxValue/3;
 
-    curValue += addvalue;
-    if (curValue > maxValue) curValue = maxValue;
-    SetPower(POWER_MANA, curValue);
+    ModifyPower(POWER_MANA, addvalue);
 }
 
 void Creature::RegenerateHealth()
@@ -277,9 +275,7 @@ void Creature::RegenerateHealth()
     else
         addvalue = maxValue/3;
 
-    curValue += addvalue;
-    if (curValue > maxValue) curValue = maxValue;
-    SetHealth(curValue);
+    ModifyHealth(addvalue);
 }
 
 void Creature::AIM_Initialize()
