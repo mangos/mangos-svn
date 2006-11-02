@@ -148,18 +148,7 @@ void World::SetInitialWorldSettings()
     srand((unsigned int)time(NULL));
     m_lastTick = time(NULL);
 
-    time_t tiempo;
-    char hour[3];
-    char minute[3];
-    char second[3];
-    struct tm *tmPtr;
-    tiempo = time(NULL);
-    tmPtr = localtime(&tiempo);
-    strftime( hour, 3, "%H", tmPtr );
-    strftime( minute, 3, "%M", tmPtr );
-    strftime( second, 3, "%S", tmPtr );
-
-    if(!sConfig.GetString("DataDir",&dataPath))
+   if(!sConfig.GetString("DataDir",&dataPath))
         dataPath="./";
     else
     {
@@ -255,7 +244,7 @@ void World::SetInitialWorldSettings()
 
     m_configs[CONFIG_WISPERING_TO_GM] = sConfig.GetIntDefault("WhisperingToGM",0);
 
-    m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
+    m_gameTime = time(NULL);
 
     // check existance map files (startup race areas).
     if(   !MapManager::ExistMAP(0,-6240.32, 331.033)
@@ -616,8 +605,7 @@ time_t World::_UpdateGameTime()
         }
     }
 
-    m_gameTime += elapsed;
-
+    m_gameTime = thisTime;
     m_Last_tick = thisTime;
 
     return m_gameTime;

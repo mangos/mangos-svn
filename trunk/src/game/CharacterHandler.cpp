@@ -403,11 +403,13 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     GetPlayer()->SetPvP( !GetPlayer()->HasFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP) );
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED);
-    time_t minutes = sWorld.GetGameTime( ) / 60;
-    time_t hours = minutes / 60; minutes %= 60;
-    time_t gameTime = minutes + ( hours << 6 );
-    data << (uint32)gameTime;
-    data << (float)0.017f;
+    time_t gameTime = sWorld.GetGameTime();
+    struct tm *lt = localtime(&gameTime);
+    uint32 xmitTime = (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 |
+                      (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
+                      lt->tm_hour << 6 | lt->tm_min;
+    data << xmitTime;
+    data << (uint32)0x3C888889; //(float)0.017f;
     SendPacket( &data );
 
     //Show cinematic at the first time that player login
