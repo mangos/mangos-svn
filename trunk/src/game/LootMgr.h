@@ -131,6 +131,7 @@ struct Loot
         for (QuestItemMap::iterator itr = PlayerQuestItems.begin(); itr != PlayerQuestItems.end(); ++itr)
             delete itr->second;
         PlayerQuestItems.clear();
+        quest_items.clear();
     }
 
     bool empty() const { return items.empty() && gold == 0; }
