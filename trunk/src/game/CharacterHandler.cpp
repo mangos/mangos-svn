@@ -506,6 +506,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }
 
+    // show time before shutdown if shudown planned.
+    if(sWorld.IsShutdowning())
+        sWorld.ShutdownMsg(true,pCurrChar);
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

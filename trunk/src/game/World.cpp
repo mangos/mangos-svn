@@ -600,8 +600,10 @@ time_t World::_UpdateGameTime()
         }
         else
         {
+
             m_ShutdownTimer -= elapsed;
-            ShuttDownMsg();
+            
+            ShutdownMsg();
         }
     }
 
@@ -616,17 +618,45 @@ void World::ShutdownServ(uint32 time)
     if(time==0)
         m_stopEvent = true;
     else
+    {
         m_ShutdownTimer = time;
+        ShutdownMsg(true);
+    }
 }
 
-void World::ShuttDownMsg()
+void World::ShutdownMsg(bool show, Player* player)
 {
-    std::ostringstream ss;
-    ss << m_ShutdownTimer << " Second(s).";
+    if ( show ||
+        (m_ShutdownTimer < 10) || 
+                                                            // < 30 sec; every 5 sec
+		(m_ShutdownTimer<30        && (m_ShutdownTimer % 5         )==0) ||
+                                                            // < 5 min ; every 1 min
+		(m_ShutdownTimer<5*MINUTE  && (m_ShutdownTimer % MINUTE    )==0) ||
+                                                            // < 30 min ; every 5 min
+		(m_ShutdownTimer<30*MINUTE && (m_ShutdownTimer % (5*MINUTE))==0) ||
+                                                            // < 12 h ; every 1 h
+		(m_ShutdownTimer<12*HOUR   && (m_ShutdownTimer % HOUR      )==0) ||
+                                                            // > 12 h ; every 12 h
+		(m_ShutdownTimer>12*HOUR   && (m_ShutdownTimer % (12*HOUR) )==0))
+	{ 
+        uint32 secs    = m_ShutdownTimer % MINUTE;
+        uint32 minutes = m_ShutdownTimer % HOUR / MINUTE;
+        uint32 hours   = m_ShutdownTimer % DAY  / HOUR;
+        uint32 days    = m_ShutdownTimer / DAY;
 
-    SendServerMessage(SERVER_MSG_SHUTDOWN_TIME,ss.str().c_str());
+        std::ostringstream ss;
+        if(days)
+            ss << days << " Day(s) ";
+        if(hours)
+            ss << hours << " Hour(s) ";
+        if(minutes)
+            ss << minutes << " Minute(s) ";
+        if(secs)
+            ss << secs << " Second(s).";
 
-    DEBUG_LOG("Server is shuttingdown in %d seconds",m_ShutdownTimer);
+        SendServerMessage(SERVER_MSG_SHUTDOWN_TIME,ss.str().c_str(),player);
+        DEBUG_LOG("Server is shuttingdown in %s",ss.str().c_str());
+	}
 }
 
 void World::ShutdownCancel()
@@ -640,7 +670,7 @@ void World::ShutdownCancel()
     DEBUG_LOG("Server shuttingdown cancelled.");
 }
 
-void World::SendServerMessage(ServerMessageType type, const char *text)
+void World::SendServerMessage(ServerMessageType type, const char *text, Player* player)
 {
     WorldPacket data;
 
@@ -649,5 +679,8 @@ void World::SendServerMessage(ServerMessageType type, const char *text)
     if(type <= SERVER_MSG_STRING)
         data << text;
 
-    SendGlobalMessage( &data );
+    if(player)
+        player->GetSession()->SendPacket(&data);
+    else
+        SendGlobalMessage( &data );
 }
