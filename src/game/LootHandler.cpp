@@ -41,7 +41,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         GameObject *go =
             ObjectAccessor::Instance().GetGameObject(*player, lguid);
 
-        if (!go)
+        if (!go || !go->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
             return;
 
         loot = &go->loot;
@@ -60,7 +60,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         Creature* pCreature =
             ObjectAccessor::Instance().GetCreature(*player, lguid);
 
-        if (!pCreature)
+        if (!pCreature || pCreature->isAlive() || !pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
             return;
 
         loot = &pCreature->loot;
@@ -150,13 +150,13 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
     if( IS_GAMEOBJECT_GUID( guid ) )
     {
         GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*GetPlayer(), guid);
-        if( pGameObject )
+        if( pGameObject && pGameObject->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
             pLoot = &pGameObject->loot;
     }
     else
     {
         Creature* pCreature = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
-        if ( pCreature )
+        if ( pCreature && !pCreature->isAlive() && pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
             pLoot = &pCreature->loot ;
     }
 
@@ -202,6 +202,7 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_LOOT");
     uint64 guid;
     recv_data >> guid;
+
     GetPlayer()->SendLoot(guid, LOOT_CORPSE);
 }
 
@@ -226,7 +227,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         GameObject *go =
             ObjectAccessor::Instance().GetGameObject(*player, lguid);
 
-        if (!go)
+        if ( !go || !go->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
             return;
 
         loot = &go->loot;
@@ -249,7 +250,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         Creature* pCreature =
             ObjectAccessor::Instance().GetCreature(*player, lguid);
 
-        if (!pCreature)
+        if ( !pCreature || pCreature->isAlive() || !pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
             return;
 
         loot = &pCreature->loot;

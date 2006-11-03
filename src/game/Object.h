@@ -39,6 +39,7 @@
 #define SPEED_TURN      3.141594f
 
 #define OBJECT_CONTACT_DISTANCE 0.5
+#define OBJECT_ITERACTION_DISTANCE 5
 
 enum ObjMoveType
 {
