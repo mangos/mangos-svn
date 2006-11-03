@@ -4332,7 +4332,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         GameObject *go =
             ObjectAccessor::Instance().GetGameObject(*this, guid);
 
-        if (!go)
+        if (!go || !go->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
             return;
 
         loot = &go->loot;
@@ -4365,7 +4365,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         Creature *creature =
             ObjectAccessor::Instance().GetCreature(*this, guid);
 
-        if (!creature)
+        if (!creature || creature->isAlive() || !creature->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
             return;
 
         loot   = &creature->loot;
