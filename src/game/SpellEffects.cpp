@@ -458,7 +458,7 @@ void Spell::EffectHeal( uint32 i )
 {
     if( unitTarget && unitTarget->isAlive() )
     {
-        int32 addhealth = damage;
+        int32 addhealth = unitTarget->SpellHealingBonus(m_spellInfo, damage);
         bool crit = unitTarget->SpellCriticalBonus(m_spellInfo, &addhealth);
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth, crit);

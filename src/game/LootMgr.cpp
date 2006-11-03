@@ -365,7 +365,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         {
             LootItem &item = l.quest_items[i->index];
             if (!i->is_looted && !item.is_looted)
-                b << uint8(l.items.size() + i->index) << item;
+                b << uint8(l.items.size() + i - lv.qlist->begin()) << item;
         }
     }
 
