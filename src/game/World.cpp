@@ -353,8 +353,9 @@ void World::Update(time_t diff)
         {
             next = itr;
             next++;
-            if (time(NULL) > (itr->second->time))
+            if (time(NULL) > (itr->second->time)) 
             {
+                // Auction Expired!
                 if (itr->second->bidder == 0)               // if noone bidded auction...
                 {
                     Item *it = objmgr.GetAItem(itr->second->item);
@@ -367,10 +368,22 @@ void World::Update(time_t diff)
                         m->messageID = objmgr.GenerateMailID();
                         m->sender = 0;                      //there should be horde/ali AuctionHouse
                         m->receiver = itr->second->owner;
-                        m->subject = "Your item failed to sell";
+
+                        std::ostringstream msgAuctionExpiredSubject;
+                        msgAuctionExpiredSubject << "Auction Expired: ";
+                        Item *theitem = objmgr.GetAItem(itr->second->item);
+                        if (theitem)
+                        {
+                            ItemPrototype const *theitemproto = theitem->GetProto();
+                            msgAuctionExpiredSubject << theitemproto->Name1;
+                        }
+                        else
+                            msgAuctionExpiredSubject << "Unknown";
+
+                        m->subject = msgAuctionExpiredSubject.str().c_str();
                         m->body = "";
                         m->item = itr->second->item;
-                        m->time = time(NULL) + (29 * 3600);
+                        m->time = time(NULL) + (29 * DAY);
                         m->money = 0;
                         m->COD = 0;                         // there might be deposit
                         m->checked = 0;
@@ -399,10 +412,49 @@ void World::Update(time_t diff)
                     m->messageID = objmgr.GenerateMailID();
                     m->sender = itr->second->bidder;
                     m->receiver = itr->second->owner;
-                    m->subject = "Your item sold!";
-                    m->body = "";
+
+                    std::ostringstream msgAuctionSuccessfullSubject;
+                    std::ostringstream msgAuctionSuccessfullBody;
+                    msgAuctionSuccessfullSubject << "Auction successfull: ";
+                    msgAuctionSuccessfullBody << "Item Sold: ";
+
+                    Item *theitem = objmgr.GetAItem(itr->second->item);
+                    if (theitem)
+                    {
+                        ItemPrototype const *theitemproto = theitem->GetProto();
+                        msgAuctionSuccessfullSubject << theitemproto->Name1;
+                        msgAuctionSuccessfullBody << theitemproto->Name1;
+                    }
+                    else
+                    {
+                        msgAuctionSuccessfullSubject << "Unknown";
+                        msgAuctionSuccessfullBody << "Unknown";
+                    }
+
+                    // If it was a buyout, show it so
+                    if (itr->second->bid == itr->second->buyout)
+                        msgAuctionSuccessfullSubject << " (buyout)";
+
+                    msgAuctionSuccessfullBody << "$B" << "Sold By: ";
+                    Player *auctionWinner = objmgr.GetPlayer(itr->second->bidder);
+                    if (auctionWinner)
+                    {
+                        // the auctionOwner is currently online, so lets get the name
+                        msgAuctionSuccessfullBody << auctionWinner->GetName() << "$B";
+                    }
+                    else
+                    {
+                        // the auctionOwner is currently offline, so lets get the name from the database
+                        std::string ownerName;
+                        if(objmgr.GetPlayerNameByGUID(itr->second->bidder,ownerName))
+                            msgAuctionSuccessfullBody << ownerName << "$B";
+                        else
+                            msgAuctionSuccessfullBody << "Unknown$B";
+                    }
+                    m->subject = msgAuctionSuccessfullSubject.str().c_str();
+                    m->body = msgAuctionSuccessfullBody.str().c_str();
                     m->item = 0;
-                    m->time = time(NULL) + (29 * 3600);
+                    m->time = time(NULL) + (29 * DAY);
                     m->money = itr->second->bid;
                     m->COD = 0;
                     m->checked = 0;
@@ -627,7 +679,7 @@ void World::ShutdownServ(uint32 time)
 void World::ShutdownMsg(bool show, Player* player)
 {
     if ( show ||
-        (m_ShutdownTimer < 10) || 
+        (m_ShutdownTimer < 10) ||
                                                             // < 30 sec; every 5 sec
 		(m_ShutdownTimer<30        && (m_ShutdownTimer % 5         )==0) ||
                                                             // < 5 min ; every 1 min
@@ -638,7 +690,7 @@ void World::ShutdownMsg(bool show, Player* player)
 		(m_ShutdownTimer<12*HOUR   && (m_ShutdownTimer % HOUR      )==0) ||
                                                             // > 12 h ; every 12 h
 		(m_ShutdownTimer>12*HOUR   && (m_ShutdownTimer % (12*HOUR) )==0))
-	{ 
+	{
         uint32 secs    = m_ShutdownTimer % MINUTE;
         uint32 minutes = m_ShutdownTimer % HOUR / MINUTE;
         uint32 hours   = m_ShutdownTimer % DAY  / HOUR;
