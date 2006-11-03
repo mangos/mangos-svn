@@ -143,12 +143,16 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    // not set flags if flight - must continue move until exit, not saved anyway.
+    if(!GetPlayer()->isInFlight())
+    {
+        Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-    data.Initialize( SMSG_FORCE_MOVE_ROOT );
-    data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
-    SendPacket( &data );
-    Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+        data.Initialize( SMSG_FORCE_MOVE_ROOT );
+        data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
+        SendPacket( &data );
+        Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+    }
 
     data.Initialize( SMSG_LOGOUT_RESPONSE );
     data << uint32(0);
@@ -174,17 +178,21 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_LOGOUT_CANCEL_ACK );
     SendPacket( &data );
 
-    //!we can move again
-    data.Initialize( SMSG_FORCE_MOVE_UNROOT );
-    data << (uint8)0xFF << GetPlayer()->GetGUID();
-    SendPacket( &data );
+    // not remove flags if flight - its not setted in Logout request code.
+    if(!GetPlayer()->isInFlight())
+    {
+        //!we can move again
+        data.Initialize( SMSG_FORCE_MOVE_UNROOT );
+        data << (uint8)0xFF << GetPlayer()->GetGUID();
+        SendPacket( &data );
 
-    //! Stand Up
-    //! Removes the flag so player stands
-    GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+        //! Stand Up
+        //! Removes the flag so player stands
+        GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-    //! DISABLE_ROTATE
-    GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+        //! DISABLE_ROTATE
+        GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+    }
 
     sLog.outDebug( "WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message" );
 }
