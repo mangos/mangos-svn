@@ -118,7 +118,10 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
     if(!*args)
         return false;
 
-    Player *chr = objmgr.GetPlayer(args);
+    std::string name = args;
+    normalizePlayerName(name);
+
+    Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
     {
 
@@ -164,7 +167,10 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     if(!*args)
         return false;
 
-    Player *chr = objmgr.GetPlayer(args);
+    std::string name = args;
+    normalizePlayerName(name);
+
+    Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
     {
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());

@@ -143,7 +143,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 n->COD = 0;
                 n->checked = 0;
 
-                uint64 rc = ah->bidder;
+                uint64 rc = MAKE_GUID(ah->bidder,HIGHGUID_PLAYER);
                 Player *rpl = objmgr.GetPlayer(rc);
 
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", n->messageID);
@@ -246,7 +246,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             m->COD = 0;
             m->checked = 0;
             
-            uint64 mrcpl = m->receiver;
+            uint64 mrcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
             Player *mrpln = objmgr.GetPlayer(mrcpl);
             if (mrpln)
             {
@@ -268,7 +268,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 mn2->COD = 0;
                 mn2->checked = 0;
 
-                Player *rpl2 = objmgr.GetPlayer((uint64)ah->bidder);
+                Player *rpl2 = objmgr.GetPlayer(MAKE_GUID(ah->bidder,HIGHGUID_PLAYER));
 
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
                 sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn2->messageID , mn2->sender , mn2->receiver , mn2->subject.c_str() , mn2->body.c_str(), mn2->item , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
@@ -282,7 +282,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 
-            uint64 rcpl = m->receiver;
+            uint64 rcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
             Player *rpl = objmgr.GetPlayer(rcpl);
             if (rpl)
             {
@@ -312,7 +312,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u';", mn->messageID);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, (uint64)mn->time, mn->money, 0, 0);
 
-            rcpl = mn->receiver;
+            rcpl = MAKE_GUID(mn->receiver,HIGHGUID_PLAYER);
             Player *rpln = objmgr.GetPlayer(rcpl);
             if (rpln)
             {
@@ -456,7 +456,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
                 sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID , m->sender , m->receiver , m->subject.c_str() , m->body.c_str(), m->item , (uint64)m->time ,m->money ,m->COD ,m->checked);
     
-                uint64 mrcpl = m->receiver;
+                uint64 mrcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
                 Player *mrpln = objmgr.GetPlayer(mrcpl);
                 if (mrpln)
                 {
@@ -480,7 +480,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn2->messageID , mn2->sender , mn2->receiver , mn2->subject.c_str() , mn2->body.c_str(), mn2->item , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
     
-            uint64 mrcpl2 = mn2->receiver;
+            uint64 mrcpl2 = MAKE_GUID(mn2->receiver,HIGHGUID_PLAYER);
             Player *mrpln2 = objmgr.GetPlayer(mrcpl2);
             if (mrpln2)
             {

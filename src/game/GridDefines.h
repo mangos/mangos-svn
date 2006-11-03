@@ -112,8 +112,9 @@ namespace MaNGOS
     template<class RET_TYPE, int CENTER_VAL>
         inline RET_TYPE Compute(float x, float y, float center_offset, float size)
     {
-        float x_offset = (x - center_offset)/size;
-        float y_offset = (y - center_offset)/size;
+        // calculate and store temporary values in double format for having same result as same mySQL calcalations
+        double x_offset = (double(x) - center_offset)/size;
+        double y_offset = (double(y) - center_offset)/size;
 
         int x_val = int(x_offset+CENTER_VAL + 0.5);
         int y_val = int(y_offset+CENTER_VAL + 0.5);

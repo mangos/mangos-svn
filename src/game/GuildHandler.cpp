@@ -683,6 +683,8 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
+    normalizePlayerName(plName);
+
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(player)
@@ -808,6 +810,8 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_PROMOTE"  );
 
     recvPacket >> plName;
+
+    normalizePlayerName(plName);
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -1009,6 +1013,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_LEADER"  );
 
     recvPacket >> name;
+    normalizePlayerName(name);
     
     newLeader = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     if(newLeader)
@@ -1105,6 +1110,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_SET_PUBLIC_NOTE"  );
 
     recvPacket >> name;
+    normalizePlayerName(name);
 
     player = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -1157,6 +1163,8 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_SET_OFFICER_NOTE"  );
 
     recvPacket >> plName;
+
+    normalizePlayerName(plName);
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());

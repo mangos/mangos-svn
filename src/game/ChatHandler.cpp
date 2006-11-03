@@ -142,6 +142,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string to, msg;
             recv_data >> to >> msg;
+            normalizePlayerName(to);
             Player *player = objmgr.GetPlayer(to.c_str());
             // send whispers from player to GM only if GM accept its (not show online state GM in other case)
             if(!player || GetSecurity() == 0 && player->GetSession()->GetSecurity() > 0 && !player->isAcceptWhispers())
