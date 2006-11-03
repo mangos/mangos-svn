@@ -274,6 +274,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if (durabilityLoss)
             {
                 ((Player*)pVictim)->DurabilityLossAll(0.10);
+                WorldPacket data;
+                data.Initialize(SMSG_DURABILITY_DAMAGE_DEATH); // durability lost message
+                ((Player*)pVictim)->GetSession()->SendPacket(&data);
             }
             HostilList::iterator i;
             for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
@@ -1404,9 +1407,14 @@ void Unit::_UpdateSpells( uint32 time )
                 }
                 else
                 {
-                    m_currentSpell->cancel();
-                    delete m_currentSpell;
-                    m_currentSpell = NULL;
+                    if(GetTypeId()==TYPEID_PLAYER)
+                    {
+                        WorldPacket data;
+                        data.Initialize(SMSG_CANCEL_AUTO_REPEAT); 
+                        ((Player*)this)->GetSession()->SendPacket(&data); 
+                    }
+                    else
+                        castSpell(NULL);
                 }
             }
         }
@@ -1552,7 +1560,7 @@ Unit* Unit::SelectHostilTarget()
 void Unit::castSpell( Spell * pSpell )
 {
 
-    if(pSpell->IsMeleeSpell())
+    if(pSpell && pSpell->IsMeleeSpell())
     {
         if(m_currentMeleeSpell)
         {

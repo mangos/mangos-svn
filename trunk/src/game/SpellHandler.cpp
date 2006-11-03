@@ -332,6 +332,6 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
 {
-    if(_player->m_currentSpell)
-        _player->m_currentSpell->cancel();
+    // cancel and preper for deleting
+    _player->castSpell(NULL);
 }
