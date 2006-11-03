@@ -200,6 +200,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     Object::_Create(guidlow, HIGHGUID_PLAYER);
 
     data >> m_name;
+
+    normalizePlayerName(m_name);
+
     data >> race >> class_ >> gender >> skin >> face;
     data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
