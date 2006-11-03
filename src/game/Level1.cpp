@@ -581,7 +581,13 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
         PSendSysMessage(LANG_YOU_GIVE_TAXIS, chr->GetName());
 
         if(chr != m_session->GetPlayer())
-            PSendSysMessage(LANG_YOURS_TAXIS_ADDED, m_session->GetPlayer()->GetName());
+        {
+            WorldPacket data;
+            char buf[256];
+            sprintf((char*)buf,LANG_YOURS_TAXIS_ADDED, m_session->GetPlayer()->GetName());
+            FillSystemMessageData(&data, m_session, buf);
+            chr->GetSession()->SendPacket(&data);
+        }
     }
     else
     {
@@ -589,7 +595,13 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
         PSendSysMessage(LANG_YOU_REMOVE_TAXIS, chr->GetName());
 
         if(chr != m_session->GetPlayer())
-            PSendSysMessage(LANG_YOURS_TAXIS_REMOVED, m_session->GetPlayer()->GetName());
+        {
+            WorldPacket data;
+            char buf[256];
+            sprintf((char*)buf,LANG_YOURS_TAXIS_REMOVED, m_session->GetPlayer()->GetName());
+            FillSystemMessageData(&data, m_session, buf);
+            chr->GetSession()->SendPacket(&data);
+        }
     }
 
     return true;
