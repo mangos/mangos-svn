@@ -561,6 +561,8 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     recv_data >> friendName;
 
+    normalizePlayerName(friendName);
+
     sLog.outDetail( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
 
@@ -661,6 +663,8 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     recv_data >> IgnoreName;
+
+    normalizePlayerName(IgnoreName);
 
     sLog.outDetail( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );

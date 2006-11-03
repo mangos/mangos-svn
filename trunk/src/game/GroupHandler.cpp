@@ -61,6 +61,8 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 
     recv_data >> membername;
 
+    normalizePlayerName(membername);
+
     player = objmgr.GetPlayer(membername.c_str());
 
     if ( player == NULL )
@@ -240,6 +242,8 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
     sLog.outDebug("WORLD: UNINVITE");
 
     recv_data >> membername;
+
+    normalizePlayerName(membername);
 
     player = objmgr.GetPlayer(membername.c_str());
     if ( player == NULL )

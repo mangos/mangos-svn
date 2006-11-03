@@ -170,16 +170,16 @@ void CliDelete(char*command,pPrintf zprintf)
         {
             Field *fields = result->Fetch();
 
-            uint32 guid = fields[0].GetUInt32();
+            uint32 guidlo = fields[0].GetUInt32();
 
             // kick if player currently
-            if(Player* p = objmgr.GetPlayer(guid))
+            if(Player* p = objmgr.GetPlayer(MAKE_GUID(guidlo,HIGHGUID_PLAYER)))
                 p->GetSession()->LogoutPlayer(false);
 
             WorldSession acc_s(account_id,NULL);            // some invalide session
             Player acc_player(&acc_s);
 
-            acc_player.LoadFromDB(guid);
+            acc_player.LoadFromDB(guidlo);
 
             acc_player.DeleteFromDB();
 

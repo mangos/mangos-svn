@@ -77,6 +77,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> race_;
     recv_data.rpos(0);
 
+    normalizePlayerName(name);
+
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
 
     if ( result )

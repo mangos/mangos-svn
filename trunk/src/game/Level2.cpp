@@ -912,7 +912,9 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     char* px = strtok((char*)args, " ");
     if (px)
     {
-        target = objmgr.GetPlayer(px);
+        std::string name = px;
+        normalizePlayerName(name);
+        target = objmgr.GetPlayer(name.c_str());
     }
     else
         target = getSelectedPlayer();
@@ -1132,7 +1134,10 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
         return true;
     }
 
-    uint64 guid = objmgr.GetPlayerGUIDByName(px);
+    std::string name = px;
+    normalizePlayerName(name);
+
+    uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
 
     if(!guid)
         return false;
