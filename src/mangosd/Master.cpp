@@ -270,8 +270,6 @@ bool Master::_StartDB()
         sLog.outString("Realm running as realm ID %d", realmID);
     }
 
-    sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `realm` = '%d'",realmID);
-
     clearOnlineAccounts();
     return true;
 }
@@ -284,6 +282,8 @@ void Master::_StopDB()
 void Master::clearOnlineAccounts()
 {
     // Cleanup online status for characters hosted at current realm
+    sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `realm` = '%d'",realmID);
+
     loginDatabase.PExecute(
         "UPDATE `account`,`realmcharacters` SET `account`.`online` = 0 "
         "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
