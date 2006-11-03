@@ -148,11 +148,12 @@ class World
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
         void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0);
         void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0);
-        void SendServerMessage(ServerMessageType type, const char *text = "");
+        void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
 
+        bool IsShutdowning() const { return m_ShutdownTimer > 0; }
         void ShutdownServ(uint32 time);
         void ShutdownCancel();
-        void ShuttDownMsg();
+        void ShutdownMsg(bool show = false, Player* player = NULL);
 
         void Update(time_t diff);
 
