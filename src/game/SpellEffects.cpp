@@ -261,6 +261,17 @@ void Spell::EffectDummy(uint32 i)
         }
         if (!found)
         {
+            // clear cooldown at fail
+            if(m_caster->GetTypeId()==TYPEID_PLAYER)
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_CLEAR_COOLDOWN);
+                data << uint32(20577);                      // spell id
+                data << m_caster->GetGUID();
+                data << uint32(0);
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+
             SendCastResult(CAST_FAIL_NO_NEARBY_CORPSES_TO_EAT);
             return;
         }
