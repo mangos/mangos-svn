@@ -30,7 +30,9 @@
 #ifndef _MPQ_H
 #define _MPQ_H
 
-#include <linux/limits.h>
+#include <limits.h>
+#define PATH_MAX 260
+
 
 #define LIBMPQ_MAJOR_VERSION		0		/* Major version number... maybe sometimes we reach version 1 :) */
 #define LIBMPQ_MINOR_VERSION		3		/* Minor version number - increased only for small changes */
@@ -60,6 +62,7 @@
 #define LIBMPQ_FILE_COMPRESSED		0x0000FF00	/* File is compressed */
 #define LIBMPQ_FILE_EXISTS		0x80000000	/* Set if file exists, reset when the file was deleted */
 #define LIBMPQ_FILE_ENCRYPTED		0x00010000	/* Indicates whether file is encrypted */
+#define LIBMPQ_FILE_HAS_METADATA    0x04000000
 
 #define LIBMPQ_FILE_COMPRESSED_SIZE	1		/* MPQ compressed filesize of given file */
 #define LIBMPQ_FILE_UNCOMPRESSED_SIZE	2		/* MPQ uncompressed filesize of given file */
@@ -112,7 +115,8 @@ typedef struct {
 	unsigned int	blocktablepos;	/* File position of blockTable. Each entry has 16 bytes */
 	unsigned int	hashtablesize;	/* Number of entries in hash table */
 	unsigned int	blocktablesize;	/* Number of entries in the block table */
-} __attribute__ ((packed)) mpq_header;
+} mpq_header;
+//} __attribute__ ((packed)) mpq_header;
 
 
 /* Hash entry. All files in the archive are searched by their hashes. */
@@ -188,7 +192,7 @@ extern char *libmpq_version();
 extern int libmpq_archive_open(mpq_archive *mpq_a, unsigned char *mpq_filename);
 extern int libmpq_archive_close(mpq_archive *mpq_a);
 extern int libmpq_archive_info(mpq_archive *mpq_a, unsigned int infotype);
-extern int libmpq_file_extract(mpq_archive *mpq_a, const int number);
+//extern int libmpq_file_extract(mpq_archive *mpq_a, const int number);
 extern int libmpq_file_info(mpq_archive *mpq_a, unsigned int infotype, const int number);
 extern char *libmpq_file_name(mpq_archive *mpq_a, const int number);
 extern int libmpq_file_number(mpq_archive *mpq_a, const char *name);
@@ -211,4 +215,6 @@ static decompress_table dcmp_table[] = {
 	{0x40, libmpq_wave_decompress_mono}		/* WAVE decompression for mono waves */
 };
 
+int libmpq_file_extract(mpq_archive *mpq_a, const int number, const char *filename);
+int libmpq_file_getdata(mpq_archive *mpq_a, mpq_hash mpq_h, const int number, unsigned char *dest);
 #endif					/* _MPQ_H */

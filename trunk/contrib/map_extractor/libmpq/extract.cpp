@@ -24,6 +24,10 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+#define HAVE_LIBZ
 #ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
@@ -31,6 +35,8 @@
 #include "mpq.h"
 #include "explode.h"
 #include "huffman.h"
+
+#include "wave.h"
 
 /*
  *  Support functions for PKWARE data compression library.
@@ -87,7 +93,7 @@ static void libmpq_pkzip_write_output_data(char *buf, unsigned int *size, void *
 
 int libmpq_pkzip_decompress(char *out_buf, int *out_length, char *in_buf, int in_length) {
 	pkzip_data info;					/* Data information */
-	char *work_buf = malloc(LIBMPQ_PKZIP_EXP_BUFFER_SIZE);	/* mpq_pkzip work buffer */
+	char *work_buf = (char *)malloc(LIBMPQ_PKZIP_EXP_BUFFER_SIZE);	/* mpq_pkzip work buffer */
 
 	/* Fill data information structure */
 	info.in_buf   = in_buf;
@@ -151,9 +157,9 @@ int libmpq_zlib_decompress(char *out_buf, int *out_length, char *in_buf, int in_
  *  1500F5F0
  */
 int libmpq_huff_decompress(char *out_buf, int *out_length, char *in_buf, int in_length) {
-	struct huffman_tree		*ht = malloc(sizeof(struct huffman_tree));
-	struct huffman_input_stream	*is = malloc(sizeof(struct huffman_input_stream));
-	struct huffman_tree_item	*hi = malloc(sizeof(struct huffman_tree_item));
+	struct huffman_tree		*ht = (huffman_tree *)malloc(sizeof(struct huffman_tree));
+	struct huffman_input_stream	*is = (huffman_input_stream *)malloc(sizeof(struct huffman_input_stream));
+	struct huffman_tree_item	*hi = (huffman_tree_item *)malloc(sizeof(struct huffman_tree_item));
 	memset(ht, 0, sizeof(struct huffman_tree));
 	memset(is, 0, sizeof(struct huffman_input_stream));
 	memset(hi, 0, sizeof(struct huffman_tree_item));
@@ -220,7 +226,7 @@ int libmpq_multi_decompress(char *out_buf, int *pout_length, char *in_buf, int i
 
 	/* If there is more than only one compression, we have to allocate extra buffer */
 	if (count >= 2) {
-		temp_buf = malloc(out_length);
+		temp_buf = (char *)malloc(out_length);
 	}
 
 	/* Apply all decompressions */

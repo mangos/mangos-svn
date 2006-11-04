@@ -30,3 +30,15 @@
 
 #define LIBMPQ_CONF_EOPEN_DIR		-1			/* error on open directory */
 #define LIBMPQ_CONF_EVALUE_NOT_FOUND	-2			/* value for the option was not found */
+
+int libmpq_init_buffer(mpq_archive *mpq_a);
+int libmpq_read_hashtable(mpq_archive *mpq_a);
+int libmpq_read_blocktable(mpq_archive *mpq_a);
+int libmpq_file_read_file(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int filepos, char *buffer, unsigned int toread);
+int libmpq_read_listfile(mpq_archive *mpq_a, FILE *fp);
+
+int libmpq_conf_get_value(FILE *fp, char *search_value, void *return_value, int type, int size);
+char *libmpq_conf_delete_char(char *buf, char *chars);
+int libmpq_conf_get_array(FILE *fp, char *search_value, char ***filelist, int *entries);
+int libmpq_free_listfile(char **filelist);
+int libmpq_read_listfile(mpq_archive *mpq_a, FILE *fp);

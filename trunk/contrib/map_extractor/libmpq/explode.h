@@ -64,7 +64,8 @@ typedef struct {
 	unsigned char	slen_bits[0x10];	/* 30F4 - Numbers of bits for skip copied block length */
 	unsigned char	clen_bits[0x10];	/* 3104 - Number of valid bits for copied block */
 	unsigned short	len_base[0x10];		/* 3114 - Buffer for */
-} __attribute__ ((packed)) pkzip_data_cmp;
+} pkzip_data_cmp;
+// __attribute__ ((packed)) pkzip_data_cmp;
 
 typedef struct {
 	char		*in_buf;	/* Pointer to input data buffer */

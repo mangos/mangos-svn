@@ -19,15 +19,17 @@
  *
  *  $Id: mpq.c,v 1.6 2004/02/12 00:49:00 mbroemme Exp $
  */
+#define _CRT_SECURE_NO_DEPRECATE
 
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <unistd.h>
+//#include <unistd.h>
+#include <io.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#include "libmpq/mpq.h"
-#include "libmpq/common.h"
+#include "mpq.h"
+#include "common.h"
 
 /*
  *  This function returns version information.
@@ -35,7 +37,7 @@
  */
 char *libmpq_version() {
 	static char version[10];
-	snprintf(version, sizeof(version), "%i.%i.%i", LIBMPQ_MAJOR_VERSION, LIBMPQ_MINOR_VERSION, LIBMPQ_PATCH_VERSION);
+	sprintf(version, "%i.%i.%i", LIBMPQ_MAJOR_VERSION, LIBMPQ_MINOR_VERSION, LIBMPQ_PATCH_VERSION);
 	return version;
 }
 
@@ -51,29 +53,31 @@ int libmpq_archive_open(mpq_archive *mpq_a, unsigned char *mpq_filename) {
 	struct stat fileinfo;
 
 	/* allocate memory */
-	mpq_a->mpq_l = malloc(sizeof(mpq_list));
+	mpq_a->mpq_l = (mpq_list *)malloc(sizeof(mpq_list));
 	memset(mpq_a->mpq_l, 0, sizeof(mpq_list));
-	mpq_a->header = malloc(sizeof(mpq_header));
+	mpq_a->header = (mpq_header *)malloc(sizeof(mpq_header));
 	memset(mpq_a->header, 0, sizeof(mpq_header));
 
 	/* Check if file exists and is readable */
-	fd = open(mpq_filename, O_RDONLY);
+	fd = _open((char *)mpq_filename, O_RDONLY | O_BINARY);
 	if (fd == LIBMPQ_EFILE) {
 		return LIBMPQ_EFILE;
 	}
 
 	/* fill the structures with informations */
-	strncpy(mpq_a->filename, mpq_filename, strlen(mpq_filename));
+	strcpy((char *)mpq_a->filename, (char *)mpq_filename);
 	libmpq_init_buffer(mpq_a);
 	mpq_a->fd               = fd;
 	mpq_a->header->id       = 0;
 	mpq_a->maxblockindex    = 0;
 	mpq_a->mpq_l->mpq_files = NULL;
 
+    mpq_a->mpqpos = 0; //k
+
 	while (!ncnt) {
 		mpq_a->header->id = 0;
-		lseek(mpq_a->fd, mpq_a->mpqpos, SEEK_SET);
-		rb = read(mpq_a->fd, mpq_a->header, sizeof(mpq_header));
+		_lseek(mpq_a->fd, mpq_a->mpqpos, SEEK_SET);
+		rb = _read(mpq_a->fd, mpq_a->header, sizeof(mpq_header));
 
 		/* if different number of bytes read, break the loop */
 		if (rb != sizeof(mpq_header)) {
@@ -87,12 +91,15 @@ int libmpq_archive_open(mpq_archive *mpq_a, unsigned char *mpq_filename) {
 		}
 
 		/* if valid signature has been found, break the loop */
-		if (mpq_a->header->id == LIBMPQ_ID_MPQ &&
+        if (mpq_a->header->id == LIBMPQ_ID_MPQ) {
+            ncnt = true;
+        }
+        /*if (mpq_a->header->id == LIBMPQ_ID_MPQ &&
 		    mpq_a->header->offset == sizeof(mpq_header) &&
 		    mpq_a->header->hashtablepos < mpq_a->header->archivesize &&
 		    mpq_a->header->blocktablepos < mpq_a->header->archivesize) {
 			ncnt = TRUE;
-		}
+		}*/
 
 		/* move to the next possible offset */
 		if (!ncnt) {
@@ -105,13 +112,13 @@ int libmpq_archive_open(mpq_archive *mpq_a, unsigned char *mpq_filename) {
 	fstat(mpq_a->fd, &fileinfo);
 
 	/* Normal MPQs must have position of */
-	if (mpq_a->header->hashtablepos + mpq_a->mpqpos < fileinfo.st_size &&
+	/*if (mpq_a->header->hashtablepos + mpq_a->mpqpos < fileinfo.st_size &&
 	    mpq_a->header->blocktablepos + mpq_a->mpqpos < fileinfo.st_size) {
 		mpq_a->header->hashtablepos  += mpq_a->mpqpos;
 		mpq_a->header->blocktablepos += mpq_a->mpqpos;
 	} else {
 		return LIBMPQ_EFILE_FORMAT;
-	}
+	}*/
 
 	/* Try to read and decrypt the hashtable */
 	if (libmpq_read_hashtable(mpq_a) != 0) {
@@ -138,7 +145,7 @@ int libmpq_archive_close(mpq_archive *mpq_a) {
 	free(mpq_a->mpq_l);
 
 	/* Check if file descriptor is valid. */
-	if ((close(mpq_a->fd)) == LIBMPQ_EFILE) {
+	if ((_close(mpq_a->fd)) == LIBMPQ_EFILE) {
 		return LIBMPQ_EFILE;
 	}
 
@@ -189,7 +196,7 @@ int libmpq_archive_info(mpq_archive *mpq_a, unsigned int infotype) {
  * This function returns some useful file information.
  */
 int libmpq_file_info(mpq_archive *mpq_a, unsigned int infotype, const int number) {
-	int blockindex = -1;
+	int blockindex = number; //-1;
 	int i = 0;
 	mpq_block *mpq_b = NULL;
 	mpq_hash *mpq_h = NULL;
@@ -200,18 +207,18 @@ int libmpq_file_info(mpq_archive *mpq_a, unsigned int infotype, const int number
 	}
 
 	/* search for correct hashtable */
-	for (i = 0; i < mpq_a->header->hashtablesize; i++) {
+	/*for (i = 0; i < mpq_a->header->hashtablesize; i++) {
 		if ((number - 1) == (mpq_a->hashtable[i]).blockindex) {
 			blockindex = (mpq_a->hashtable[i]).blockindex;
 			mpq_h = &(mpq_a->hashtable[i]);
 			break;
 		}
-	}
+	}*/
 
 	/* check if file was found */
-	if (blockindex == -1 || blockindex > mpq_a->header->blocktablesize) {
+	/*if (blockindex == -1 || blockindex > mpq_a->header->blocktablesize) {
 		return LIBMPQ_EFILE_NOT_FOUND;
-	}
+	}*/
 
 	/* check if sizes are correct */
 	mpq_b = mpq_a->blocktable + blockindex;
@@ -256,7 +263,7 @@ char *libmpq_file_name(mpq_archive *mpq_a, const int number) {
 	}
 
 	/* this is safe because we built a fallback filelist, if something was wrong. */
-	snprintf(tempfile, PATH_MAX, mpq_a->mpq_l->mpq_files[number - 1], number);
+	sprintf(tempfile, (char *)mpq_a->mpq_l->mpq_files[number - 1], number);
 
 	return tempfile;
 }
@@ -270,7 +277,7 @@ int libmpq_file_number(mpq_archive *mpq_a, const char *name) {
 	char tempfile[PATH_MAX];
 
 	for (i = 0; mpq_a->mpq_l->mpq_files[i]; i++) {
-		snprintf(tempfile, PATH_MAX, mpq_a->mpq_l->mpq_files[i], i + 1);
+		sprintf(tempfile, (char *)mpq_a->mpq_l->mpq_files[i], i + 1);
 		if (strncmp(tempfile, name, strlen(name)) == 0) {
 
 			/* if file found return the number */
@@ -303,7 +310,7 @@ int libmpq_file_check(mpq_archive *mpq_a, void *file, int type) {
 			}
 		case LIBMPQ_FILE_TYPE_CHAR:
 			for (i = 0; mpq_a->mpq_l->mpq_files[i]; i++) {
-				snprintf(tempfile, PATH_MAX, mpq_a->mpq_l->mpq_files[i], i);
+				sprintf(tempfile, (char *)mpq_a->mpq_l->mpq_files[i], i);
 				if (strncmp(tempfile, (char *)file, strlen((char *)file)) == 0) {
 
 					/* if file found break */
@@ -327,37 +334,37 @@ int libmpq_file_check(mpq_archive *mpq_a, void *file, int type) {
  *  This function extracts a file from a MPQ archive
  *  by the given number.
  */
-int libmpq_file_extract(mpq_archive *mpq_a, const int number) {
-	int blockindex = -1;
+int libmpq_file_extract(mpq_archive *mpq_a, const int number, const char *filename) {
+	int blockindex = number; //-1;
 	int fd = 0;
 	int i = 0;
 	char buffer[0x1000];
-	char tempfile[PATH_MAX];
+	//char tempfile[PATH_MAX];
 	unsigned int transferred = 1;
 	mpq_file *mpq_f = NULL;
 	mpq_block *mpq_b = NULL;
 	mpq_hash *mpq_h = NULL;
 
-	if (number < 1 || number > mpq_a->header->blocktablesize) {
+/*	if (number < 1 || number > mpq_a->header->blocktablesize) {
 		return LIBMPQ_EINV_RANGE;
-	}
-
-	snprintf(tempfile, PATH_MAX, libmpq_file_name(mpq_a, number));
-
+	}*/
+/*
+	sprintf(tempfile, libmpq_file_name(mpq_a, number));
+*/
 	/* check if mpq_f->filename could be written here. */
-	fd = open(tempfile, O_RDWR|O_CREAT|O_TRUNC, 0644);
+	fd = _open(filename, O_RDWR|O_CREAT|O_TRUNC, 0644);
 	if (fd == LIBMPQ_EFILE) {
 		return LIBMPQ_EFILE;
 	}
 
 	/* search for correct hashtable */
-	for (i = 0; i < mpq_a->header->hashtablesize; i++) {
+	/*for (i = 0; i < mpq_a->header->hashtablesize; i++) {
 		if ((number - 1) == (mpq_a->hashtable[i]).blockindex) {
 			blockindex = (mpq_a->hashtable[i]).blockindex;
 			mpq_h = &(mpq_a->hashtable[i]);
 			break;
 		}
-	}
+	}*/
 
 	/* check if file was found */
 	if (blockindex == -1 || blockindex > mpq_a->header->blocktablesize) {
@@ -376,7 +383,7 @@ int libmpq_file_extract(mpq_archive *mpq_a, const int number) {
 	}
 
 	/* allocate memory for file structure */
-	mpq_f = malloc(sizeof(mpq_file));
+	mpq_f = (mpq_file *)malloc(sizeof(mpq_file));
 	if (!mpq_f) {
 		return LIBMPQ_EALLOCMEM;
 	}
@@ -389,7 +396,7 @@ int libmpq_file_extract(mpq_archive *mpq_a, const int number) {
 	mpq_f->mpq_h          = mpq_h;
 	mpq_f->accessed       = FALSE;
 	mpq_f->blockposloaded = FALSE;
-	snprintf(mpq_f->filename, PATH_MAX, tempfile);
+	sprintf((char *)mpq_f->filename, filename);
 
 	/* allocate buffers for decompression. */
 	if (mpq_f->mpq_b->flags & LIBMPQ_FILE_COMPRESSED) {
@@ -399,7 +406,7 @@ int libmpq_file_extract(mpq_archive *mpq_a, const int number) {
 		 *  unsigned ints holding positions of each block relative from begin of
 		 *  file in the archive.
 		 */
-		if ((mpq_f->blockpos = malloc(sizeof(int) * mpq_f->nblocks + 1)) == NULL) {
+		if ((mpq_f->blockpos = (unsigned int *)malloc(sizeof(int) * mpq_f->nblocks + 1)) == NULL) {
 			return LIBMPQ_EALLOCMEM;
 		}
 	}
@@ -413,13 +420,13 @@ int libmpq_file_extract(mpq_archive *mpq_a, const int number) {
 			mpq_f->filepos  += transferred;
 		}
 
-		transferred = write(mpq_f->fd, buffer, transferred);
+		transferred = _write(mpq_f->fd, buffer, transferred);
 		if (transferred == 0) {
 			break;
 		}
 	}
 
-	close(fd);
+	_close(fd);
 
 	/* freeing the file structure */
 	free(mpq_f);
@@ -449,21 +456,21 @@ int libmpq_listfile_open(mpq_archive *mpq_a, char file[PATH_MAX]) {
 	}
 
 	/* check if file is a filename or directory */
-	if (S_ISDIR(statbuf.st_mode)) {
+	/*if (S_ISDIR(statbuf.st_mode)) {
 
-		/* allocate memory for the file list */
-		filelist = malloc(LIBMPQ_CONF_FL_INCREMENT * sizeof(char *));
+		// allocate memory for the file list
+		filelist = (char **)malloc(LIBMPQ_CONF_FL_INCREMENT * sizeof(char *));
 		fl_count = 0;
 		fl_size = LIBMPQ_CONF_FL_INCREMENT;
 
-		/* check if it is a valid listfile */
+		// check if it is a valid listfile
 		if (libmpq_detect_listfile_rec(file, &filelist, &fl_count, &fl_size)) {
 			filelist == NULL;
 		}
 
 		filelist[fl_count] = NULL;
 
-		/* return if no listfile was found */
+		// return if no listfile was found
 		if (filelist == NULL) {
 			result = LIBMPQ_CONF_EFILE_NOT_FOUND;
 		}
@@ -475,12 +482,12 @@ int libmpq_listfile_open(mpq_archive *mpq_a, char file[PATH_MAX]) {
 			}
 		}
 
-		/* freeing the listfile struct */
+		// freeing the listfile struct
 		libmpq_free_listfile(filelist);
-	}
+	}*/
 
 	/* if file is a regular file use it */
-	if (S_ISREG(statbuf.st_mode)) {
+	//if (S_ISREG(statbuf.st_mode)) {
 
 		/* if specific listfile was forced. */
 		if ((fp = fopen(file, "r")) != NULL ) {
@@ -489,24 +496,24 @@ int libmpq_listfile_open(mpq_archive *mpq_a, char file[PATH_MAX]) {
 		} else {
 			result = LIBMPQ_CONF_EFILE_OPEN;
 		}
-	}
+	//}
 
 	/* if error occured we need to create a fallback filelist. */
 	if (mpq_a->mpq_l->mpq_files == NULL) {
 
 		/* allocate memory for the file list */
-		mpq_a->mpq_l->mpq_files = malloc(LIBMPQ_CONF_FL_INCREMENT * sizeof(char *));
+		mpq_a->mpq_l->mpq_files = (unsigned char **)malloc(LIBMPQ_CONF_FL_INCREMENT * sizeof(char *));
 		fl_count_fb = 0;
 		fl_size_fb = LIBMPQ_CONF_FL_INCREMENT;
 
 		for (i = 0; i < libmpq_archive_info(mpq_a, LIBMPQ_MPQ_NUMFILES); i++) {
 
 			/* set the next filelist entry to a copy of the file */
-			mpq_a->mpq_l->mpq_files[fl_count_fb++] = strdup("file%06lu.xxx");
+			mpq_a->mpq_l->mpq_files[fl_count_fb++] = (unsigned char *)_strdup("file%06lu.xxx");
 
 			/* increase the array size */
 			if (fl_count_fb == fl_size_fb) {
-				mpq_a->mpq_l->mpq_files = realloc(mpq_a->mpq_l->mpq_files, (fl_size_fb + LIBMPQ_CONF_FL_INCREMENT) * sizeof(char *));
+				mpq_a->mpq_l->mpq_files = (unsigned char **)realloc(mpq_a->mpq_l->mpq_files, (fl_size_fb + LIBMPQ_CONF_FL_INCREMENT) * sizeof(char *));
 				fl_size_fb += LIBMPQ_CONF_FL_INCREMENT;
 			}
 		}
@@ -535,4 +542,81 @@ int libmpq_listfile_close(mpq_archive *mpq_a) {
 		}
 		free(mpq_a->mpq_l->mpq_files);
 	}
+    return 0;
+}
+
+int libmpq_file_getdata(mpq_archive *mpq_a, mpq_hash mpq_h, const int number, unsigned char *dest) {
+	int blockindex = number; //-1;
+	int i = 0;
+	mpq_file *mpq_f = NULL;
+	mpq_block *mpq_b = NULL;
+	int success = 0;
+
+	/*if (number < 1 || number > mpq_a->header->blocktablesize) {
+		return LIBMPQ_EINV_RANGE;
+	}*/
+
+	/* search for correct hashtable */
+	/*for (i = 0; i < mpq_a->header->hashtablesize; i++) {
+		if ((number - 1) == (mpq_a->hashtable[i]).blockindex) {
+			blockindex = (mpq_a->hashtable[i]).blockindex;
+			mpq_h = &(mpq_a->hashtable[i]);
+			break;
+		}
+	}*/
+
+	/* check if file was found */
+	if (blockindex == -1 || blockindex > mpq_a->header->blocktablesize) {
+		return LIBMPQ_EFILE_NOT_FOUND;
+	}
+
+	/* check if sizes are correct */
+	mpq_b = mpq_a->blocktable + blockindex;
+	if (mpq_b->filepos > (mpq_a->header->archivesize + mpq_a->mpqpos) || mpq_b->csize > mpq_a->header->archivesize) {
+		return LIBMPQ_EFILE_CORRUPT;
+	}
+
+	/* check if file exists */
+	if ((mpq_b->flags & LIBMPQ_FILE_EXISTS) == 0) {
+		return LIBMPQ_EFILE_NOT_FOUND;
+	}
+
+	/* allocate memory for file structure */
+	mpq_f = (mpq_file*)malloc(sizeof(mpq_file));
+	if (!mpq_f) {
+		return LIBMPQ_EALLOCMEM;
+	}
+
+	/* initialize file structure */
+	memset(mpq_f, 0, sizeof(mpq_file));
+	mpq_f->mpq_b          = mpq_b;
+	mpq_f->nblocks        = (mpq_f->mpq_b->fsize + mpq_a->blocksize - 1) / mpq_a->blocksize;
+	mpq_f->mpq_h          = &mpq_h;
+	mpq_f->accessed       = FALSE;
+	mpq_f->blockposloaded = FALSE;
+
+	/* allocate buffers for decompression. */
+	if (mpq_f->mpq_b->flags & LIBMPQ_FILE_COMPRESSED) {
+
+		/*
+		 *  Allocate buffer for block positions. At the begin of file are stored
+		 *  unsigned ints holding positions of each block relative from begin of
+		 *  file in the archive.
+		 */
+		if ((mpq_f->blockpos = (unsigned int*)malloc(sizeof(int) * (mpq_f->nblocks + 1))) == NULL) {
+			return LIBMPQ_EALLOCMEM;
+		}
+	}
+
+    if(libmpq_file_read_file(mpq_a, mpq_f, 0, (char*)dest, mpq_b->fsize) == mpq_b->fsize)
+        success = 1;
+
+    if (mpq_f->mpq_b->flags & LIBMPQ_FILE_COMPRESSED) {
+        // Free buffer for block positions
+		
+	       free(mpq_f->blockpos);
+	}
+	/* freeing the file structure */
+	free(mpq_f);
+	return success?LIBMPQ_TOOLS_SUCCESS:LIBMPQ_EFILE_CORRUPT;
 }
