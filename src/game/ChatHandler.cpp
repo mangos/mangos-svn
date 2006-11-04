@@ -147,8 +147,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             // send whispers from player to GM only if GM accept its (not show online state GM in other case)
             if(!player || GetSecurity() == 0 && player->GetSession()->GetSecurity() > 0 && !player->isAcceptWhispers())
             {
-                std::string msg_err = "Player "+to+" is not online (Names are case sensitive)";
-                sChatHandler.SendSysMessage(this ,msg_err.c_str() );
+                WorldPacket data;
+                data.Initialize(SMSG_CHAT_PLAYER_NOT_FOUND);
+                data<<to;
+                SendPacket(&data);
                 break;
             }
             if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
@@ -157,8 +159,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 uint32 sideb = player->GetTeam();
                 if( sidea != sideb )
                 {
-                    std::string msg_err = "Player "+to+" is not online (Names are case sensitive)";
-                    sChatHandler.SendSysMessage(this ,msg_err.c_str() );
+                    WorldPacket data;
+                    data.Initialize(SMSG_CHAT_PLAYER_NOT_FOUND);
+                    data<<to;
+                    SendPacket(&data);
                     break;
                 }
             }
@@ -187,7 +191,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         } break;
 
         case CHAT_MSG_AFK:
-            //player troggle's AFK
+            GetPlayer()->ToggleAFK();
+            break;
+
+        case CHAT_MSG_DND:
+            GetPlayer()->ToggleDND();
             break;
 
         default:

@@ -80,6 +80,12 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     if(!pCreature||!pCreature->isGuildMaster())
         return;
 
+    if(objmgr.GetGuildByName(guildname))
+    {
+        SendCommandResult(GUILD_CREATE_S,guildname,GUILD_NAME_EXISTS);
+        return;
+    }
+
     ItemPrototype const *pProto = objmgr.GetItemPrototype( GUILD_CHARTER_ITEM_ID );
     if( !pProto )
     {
@@ -250,6 +256,12 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
     Item *item = _player->GetItemByPos( pos );
     if(!item)
         return;
+
+    if(objmgr.GetGuildByName(newguildname))
+    {
+        SendCommandResult(GUILD_CREATE_S,newguildname,GUILD_NAME_EXISTS);
+        return;
+    }
 
     std::string db_newguildname = newguildname;
     EscapeApostrophes(db_newguildname);
@@ -488,12 +500,13 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
         data.Initialize(SMSG_TURN_IN_PETITION_RESULTS);
         data << (uint32)4;                                  // need more signatures...
         SendPacket(&data);
+        delete result;
         return;
     }
 
     if(objmgr.GetGuildByName(guildname))
     {
-        SendNotification("Guild with this name already exists.");
+        SendCommandResult(GUILD_CREATE_S,guildname,GUILD_NAME_EXISTS);
         delete result;
         return;
     }

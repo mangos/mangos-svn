@@ -465,95 +465,11 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data, dataI;
-
     sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST"  );
 
-    unsigned char nrignore=0;
-    uint8 i=0;
-    uint32 guid;
-    Field *fields;
-    Player* pObj;
-    FriendStr friendstr[255];
+    GetPlayer()->SendFriendlist();
 
-    guid=GetPlayer()->GetGUIDLow();
-
-    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
-    if(result)
-    {
-        fields = result->Fetch();
-
-        do
-        {
-            friendstr[i].PlayerGUID = fields[0].GetUInt64();
-            pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
-            if( pObj && pObj->isGMVisibleFor(GetPlayer()))
-            {
-                friendstr[i].Status = 1;
-                friendstr[i].Area = pObj->GetZoneId();
-                friendstr[i].Level = pObj->getLevel();
-                friendstr[i].Class = pObj->getClass();
-            }
-            else
-            {
-                friendstr[i].Status = 0;
-                friendstr[i].Area = 0;
-                friendstr[i].Level = 0;
-                friendstr[i].Class = 0;
-            }
-            i++;
-
-            // prevent overflow
-            if(i==255)
-                break;
-        } while( result->NextRow() );
-
-        delete result;
-    }
-
-    data.Initialize( SMSG_FRIEND_LIST );
-    data << i;
-
-    for (int j=0; j < i; j++)
-    {
-
-        sLog.outDetail( "WORLD: Adding Friend - Guid:" I64FMTD ", Status:%u, Area:%u, Level:%u Class:%u",friendstr[j].PlayerGUID, friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
-
-        data << friendstr[j].PlayerGUID << friendstr[j].Status ;
-        if (friendstr[j].Status != 0)
-            data << friendstr[j].Area << friendstr[j].Level << friendstr[j].Class;
-    }
-
-    SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
-
-    result = sDatabase.PQuery("SELECT COUNT(`friend`) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
-
-    if(!result) return;
-
-    fields = result->Fetch();
-    nrignore=fields[0].GetUInt32();
-    delete result;
-
-    dataI.Initialize( SMSG_IGNORE_LIST );
-    dataI << nrignore;
-
-    result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
-
-    if(!result) return;
-
-    do
-    {
-
-        fields = result->Fetch();
-        dataI << fields[0].GetUInt64();
-
-    }while( result->NextRow() );
-    delete result;
-
-    SendPacket( &dataI );
-    sLog.outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
-
+    GetPlayer()->SendIgnorelist();
 }
 
 void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )

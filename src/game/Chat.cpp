@@ -410,7 +410,6 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
 void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message )
 {
     uint32 messageLength = (message ? strlen(message) : 0) + 1;
-    uint8 afk = 0;
 
     data->Initialize(SMSG_MESSAGECHAT);
     *data << (uint8)type;
@@ -441,11 +440,10 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 
     *data << messageLength;
     *data << message;
-
-    if(type == CHAT_MSG_AFK && session != 0)
-        afk = session->GetPlayer()->ToggleAFK();
-
-    *data << afk;
+    if(session != 0)
+        *data << session->GetPlayer()->chatTag();
+    else
+        *data << uint8(0);
 }
 
 void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 displayId, uint32 npcFlags, uint32 factionId, uint32 level)

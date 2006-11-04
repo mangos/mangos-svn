@@ -389,7 +389,7 @@ void Channel::Say(Player *p, const char *what, uint32 lang)
         data << p->GetGUID();
         data << messageLength;
         data << what;
-        data << (uint8)0;
+        data << p->chatTag();
 
         SendToAll(&data);
 

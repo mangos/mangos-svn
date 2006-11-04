@@ -298,10 +298,45 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     SendPacket(&data);
 
+    Player *pCurrChar = GetPlayer();
+
+    pCurrChar->SendFriendlist();
+    pCurrChar->SendIgnorelist();
+
     sChatHandler.FillSystemMessageData(&data, this, sWorld.GetMotd());
     SendPacket( &data );
 
     DEBUG_LOG( "WORLD: Sent motd (SMSG_MESSAGECHAT)" );
+
+    if(pCurrChar->GetGuildId() != 0)
+    {
+        Guild* guild = objmgr.GetGuildById(pCurrChar->GetGuildId());
+        if(guild)
+        {
+            data.Initialize(SMSG_GUILD_EVENT);
+            data << (uint8)GE_MOTD;
+            data << (uint8)1;
+            data << guild->GetMOTD();
+            SendPacket(&data);
+            DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
+
+            WorldPacket data;
+            data.Initialize(SMSG_GUILD_EVENT);
+            data<<(uint8)GE_SIGNED_ON;
+            data<<(uint8)1;
+            data<<pCurrChar->GetName();
+            data<<(uint8)0<<(uint8)0<<(uint8)0;    
+            guild->BroadcastPacket(&data);
+            DEBUG_LOG( "WORLD: Sent guild-signed-on (SMSG_GUILD_EVENT)" );
+        }
+        else
+        {
+            // remove wrong guild data
+            sLog.outError("Player %s (GUID: %u) marked as member not existed guild (id: %u), removing guild membership for player.",pCurrChar->GetName(),pCurrChar->GetGUIDLow(),pCurrChar->GetGuildId());
+            pCurrChar->SetUInt32Value(PLAYER_GUILDID,0);
+            pCurrChar->SetUInt32ValueInDB(PLAYER_GUILDID,0,pCurrChar->GetGUID());
+        }
+    }
 
     // home bind stuff
     Field *fields;
@@ -437,8 +472,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         SendPacket( &data );
     }
 
-    Player *pCurrChar = GetPlayer();
-
     QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
 
     if(result)
@@ -457,9 +490,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
     plr->SetInGameTime( getMSTime() );
 
-    std::string outstring = pCurrChar->GetName();
-    outstring.append( " has come online." );
-    pCurrChar->BroadcastToFriendListers(outstring);
+    data.Initialize(SMSG_FRIEND_STATUS);
+    data<<uint8(FRIEND_ONLINE);
+    data<<pCurrChar->GetGUID();
+    data<<uint8(1);
+    data<<pCurrChar->GetAreaId();
+    data<<pCurrChar->getLevel();
+    data<<pCurrChar->getClass();
+    pCurrChar->BroadcastPacketToFriendListers(&data);
 
     // setting new speed if dead
     if ( pCurrChar->m_deathState == DEAD )
@@ -483,29 +521,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // Place charcter in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();
     pCurrChar->LoadPet();
-
-    if(pCurrChar->GetGuildId() != 0)
-    {
-        Guild* guild = objmgr.GetGuildById(pCurrChar->GetGuildId());
-        if(guild)
-        {
-            data.Initialize(SMSG_GUILD_EVENT);
-            data << (uint8)GE_MOTD;
-            data << (uint8)1;
-            data << guild->GetMOTD();
-            SendPacket(&data);
-
-            DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
-        }
-        else
-        {
-            // remove wrong guild data
-            sLog.outError("Player %s (GUID: %u) marked as member not existed guild (id: %u), removing guild membership for player.",pCurrChar->GetName(),pCurrChar->GetGUIDLow(),pCurrChar->GetGuildId());
-            pCurrChar->SetUInt32Value(PLAYER_GUILDID,0);
-            pCurrChar->SetUInt32ValueInDB(PLAYER_GUILDID,0,pCurrChar->GetGUID());
-        }
-    }
-
     // show time before shutdown if shudown planned.
     if(sWorld.IsShutdowning())
         sWorld.ShutdownMsg(true,pCurrChar);
