@@ -38,6 +38,8 @@ class Database
 
         virtual operator bool () const = 0;
 
+        virtual unsigned long escape_string(char *to, const char *from, unsigned long length) = 0;
+
         // must be called before first query in thread (one time for thread using one from existed Database objects)
         virtual void ThreadStart();
         // must be called before finish thread run (one time for thread using one from existed Database objects)
