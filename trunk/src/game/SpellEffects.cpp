@@ -236,6 +236,31 @@ void Spell::EffectDummy(uint32 i)
         return;
     }
 
+    // Cold Snap - immediately finishes the cooldown on Frost spells
+    if(m_spellInfo->Id == 12472)
+    {
+        if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+            return;
+
+        const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
+        for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+        {
+            uint32 classspell = itr->first;
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(classspell);
+
+            if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST && spellInfo->Id != 12472 &&
+                (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_CLEAR_COOLDOWN);
+                data << classspell << m_caster->GetGUID();
+                data << uint32(0);
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+        }
+        return;
+    }
+
     // If spell cannibalize and his casted, check special requirements and cast aura Cannibalize is all ok
     if(m_spellInfo->Id == 20577) 
     {
