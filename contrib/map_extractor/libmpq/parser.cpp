@@ -19,12 +19,14 @@
  *
  *  $Id: parser.c,v 1.5 2004/02/12 00:47:53 mbroemme Exp $
  */
+#define _CRT_SECURE_NO_DEPRECATE
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "libmpq/mpq.h"
-#include "libmpq/common.h"
+#include "mpq.h"
+#include "common.h"
+#include <ctype.h>
 
 /*
  *  This function deletes the specified characters, but leaves
@@ -145,7 +147,8 @@ int libmpq_conf_get_value(FILE *fp, char *search_value, void *return_value, int 
 		}
 
 		/* process the line */
-		if (!strncasecmp(line, search_value, strlen(search_value))) {
+		//if (!strncasecmp(line, search_value, strlen(search_value))) {
+        if (!strcmp(line, search_value)) {
 			found = libmpq_conf_parse_line(line, search_value, line, LIBMPQ_CONF_BUFSIZE);
 			if (found == 1) {
 				libmpq_conf_delete_char(line, "\"\\");
@@ -157,7 +160,7 @@ int libmpq_conf_get_value(FILE *fp, char *search_value, void *return_value, int 
 						*(int *)return_value = atoi(line);
 						break;
 					default:
-						strncpy(return_value, line, size);
+						strncpy((char *)return_value, line, size);
 						break;
 				}
 
@@ -175,7 +178,7 @@ int libmpq_conf_get_value(FILE *fp, char *search_value, void *return_value, int 
 				result = LIBMPQ_CONF_EVALUE_NOT_FOUND;
 				break;
 			default:
-				strncpy(return_value, "", size);
+				strncpy((char *)return_value, "", size);
 				result = LIBMPQ_CONF_EVALUE_NOT_FOUND;
 				break;
 		}
@@ -204,7 +207,7 @@ int libmpq_conf_get_array(FILE *fp, char *search_value, char ***filelist, int *e
 	*entries = 0;
 
 	/* allocate memory for the file list */
-	(*filelist) = malloc(LIBMPQ_CONF_FL_INCREMENT * sizeof(char *));
+	(*filelist) = (char **)malloc(LIBMPQ_CONF_FL_INCREMENT * sizeof(char *));
 	fl_count = 0;
 	fl_size = LIBMPQ_CONF_FL_INCREMENT;
 
@@ -246,11 +249,11 @@ int libmpq_conf_get_array(FILE *fp, char *search_value, char ***filelist, int *e
 				libmpq_conf_delete_char(temp, "\"\\");
 
 				/* set the next filelist entry to a copy of the file */
-				(*filelist)[fl_count++] = strdup(temp);
+				(*filelist)[fl_count++] = _strdup(temp);
 
 				/* increase the array size */
 				if (fl_count == fl_size) {
-					(*filelist) = realloc((*filelist), (fl_size + LIBMPQ_CONF_FL_INCREMENT) * sizeof(char *));
+					(*filelist) = (char **)realloc((*filelist), (fl_size + LIBMPQ_CONF_FL_INCREMENT) * sizeof(char *));
 					fl_size += LIBMPQ_CONF_FL_INCREMENT;
 				}
 
@@ -260,7 +263,8 @@ int libmpq_conf_get_array(FILE *fp, char *search_value, char ***filelist, int *e
 		}
 
 		/* process the line and search array start */
-		if (!strncasecmp(line, search_value, strlen(search_value))) {
+		//if (!strncasecmp(line, search_value, strlen(search_value))) {
+        if (!strcmp(line, search_value)) {
 
 			/* search value */
 			while (*(++line)) {

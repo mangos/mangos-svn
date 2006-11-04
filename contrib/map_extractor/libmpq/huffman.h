@@ -97,7 +97,9 @@ struct huffman_tree {
 	struct huffman_tree_item *items306C[0x102];	/* 306C - huffman_tree_item pointer array */
 	struct huffman_decompress qd3474[0x80];		/* 3474 - Array for quick decompression */
 
-	unsigned char table1502A630[];			/* Some table to make struct size flexible */
+	//unsigned char table1502A630[];			/* Some table to make struct size flexible */
 };
 
+int libmpq_huff_init_tree(struct huffman_tree *ht, struct huffman_tree_item *hi, unsigned int cmp);
+int libmpq_huff_do_decompress(struct huffman_tree *ht, struct huffman_input_stream *is, unsigned char *out_buf, unsigned int out_length);
 #endif			/* _HUFFMAN_H */

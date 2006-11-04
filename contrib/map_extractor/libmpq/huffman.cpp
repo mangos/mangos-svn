@@ -30,6 +30,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include <stdlib.h>
+#include <string.h>
 
 #include "mpq.h"
 #include "huffman.h"
@@ -827,4 +828,6 @@ int libmpq_huff_init_tree(struct huffman_tree *ht, struct huffman_tree_item *hi,
 			ht->qd3474[count].offs00 = 0;
 		}
 	}
+
+    return 0;
 }
