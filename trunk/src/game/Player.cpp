@@ -330,6 +330,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
 
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
+    SetFloatValue(PLAYER_CRIT_PERCENTAGE, 5);
+    SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
 
     /*
         SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
@@ -416,58 +418,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_highest_rank = 0;
     m_standing = 0;
 
-    /*
-    // Skill spec +5
-    if (Player::HasSpell(SPELL_PASSIVE_SWORD_SPECIALIZATION))
-    {
-        SetSkill(43,6 ,10);
-        SetSkill(55,6 ,10);
-    }
-    if (Player::HasSpell(SPELL_PASSIVE_MACE_SPECIALIZATION))
-    {
-        SetSkill(54,6 ,10);
-        SetSkill(160,6 ,10);
-    }
-    if (Player::HasSpell(SPELL_PASSIVE_AXE_SPECIALIZATION))
-    {
-        SetSkill(44,6 ,10);
-        SetSkill(172,6 ,10);
-    }
-    if (Player::HasSpell(SPELL_PASSIVE_THROWING_SPECIALIZATION))
-    {
-        SetSkill(176,6 ,10);
-    }
-    if (Player::HasSpell(SPELL_PASSIVE_BOW_SPECIALIZATION))
-    {
-        SetSkill(45,6 ,10);
-        SetSkill(226,6 ,10);
-    }
-
-    //+5% HP if has skill Endurance
-    if (Player::HasSpell(SPELL_PASSIVE_ENDURENCE))
-    {
-        SetMaxHealth( uint32(GetMaxHealth() * 1.05));       // only integer part
-    }
-
-    // school resistances
-    if (Player::HasSpell(SPELL_PASSIVE_FROST_RESISTANCE))
-    {
-        SetResistance(SPELL_SCHOOL_FROST, 10 );
-    }
-    if (Player::HasSpell(SPELL_PASSIVE_NATURE_RESISTANCE) || Player::HasSpell(SPELL_HORDE_PASSIVE_NATURE_RESISTANCE))
-    {
-        SetResistance(SPELL_SCHOOL_NATURE, 10 );
-    }
-    if (Player::HasSpell(SPELL_PASSIVE_SHADOW_RESISTANCE))
-    {
-        SetResistance(SPELL_SCHOOL_SHADOW, 10 );
-    }
-    if (Player::HasSpell(SPELL_PASSIVE_ARCANE_RESISTANCE))
-    {
-        SetResistance(SPELL_SCHOOL_ARCANE, 10 );
-    }
-    */
-
     // initilize potential block chance (used if item with Block value equiped)
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 );
     UpdateBlockPercentage(GetDefenceSkillValue(),getLevel());
@@ -534,9 +484,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     // remove applied original stats mods before item equipment
     _RemoveStatsMods();
-
-    if(class_ == WARRIOR)
-        CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
     return true;
 }
 
@@ -9763,6 +9710,9 @@ void Player::_LoadAuras(uint32 timediff)
 
         delete result;
     }
+
+    if(m_class == WARRIOR)
+        CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
 }
 
 void Player::LoadCorpse()

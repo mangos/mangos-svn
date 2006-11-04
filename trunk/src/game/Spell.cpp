@@ -429,6 +429,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                         TagUnitMap.push_back(Target);
                 }
             }
+            else
+                TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_CURRENT_SELECTED_ENEMY:
         {
@@ -995,7 +997,7 @@ void Spell::SendSpellGo()
     data << uint8(0xFF)<< target->GetGUID() << uint8(0xFF) << m_caster->GetGUID();
     data << m_spellInfo->Id;
 
-    data << uint16(0x0500);
+    data << uint16(0x0100);
     writeSpellGoTargets(&data);
 
     data << (uint8)0;
