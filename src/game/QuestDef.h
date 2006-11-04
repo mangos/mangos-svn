@@ -169,6 +169,7 @@ struct QuestInfo
     uint32 ExclusiveGroup;
     uint32 SrcItemId;
     uint32 SrcItemCount;
+    uint32 SrcSpell;
     char* Title;
     char* Details;
     char* Objectives;
