@@ -130,10 +130,13 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         data << uint64(0);
         data << uint32(1);
 
-        if(player->GetGroupLeader())
-            objmgr.GetGroupByLeader(player->GetGroupLeader())->BroadcastPacket(&data);
-        else
-            SendPacket( &data );
+        if (player->IsInGroup())
+        {
+            Group *group = objmgr.GetGroupByLeader(player->GetGroupLeader());
+            assert(group);
+            group->BroadcastPacket(&data);
+        }
+        else SendPacket( &data );
     }
     else
         player->SendEquipError( msg, NULL, NULL );
