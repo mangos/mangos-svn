@@ -367,6 +367,10 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         }
     }
 
+    // can train and help unlearn talentes (2 action -> chat menu)
+    if( isCanTrainingAndResetTalentsOf(pPlayer) )
+        return DIALOG_STATUS_CHAT;
+
     if ( result == DIALOG_STATUS_UNAVAILABLE )
         return result;
 
@@ -459,6 +463,14 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
     return true;
 }
 
+bool Creature::isCanTrainingAndResetTalentsOf(Player* pPlayer) const
+{
+    return pPlayer->getLevel() >= 10 
+        && GetCreatureInfo()->trainer_type == TRAINER_TYPE_CLASS 
+        && pPlayer->getClass() == GetCreatureInfo()->classNum;
+}
+
+
 void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 {
     PlayerMenu* pm=pPlayer->PlayerTalkClass;
@@ -487,12 +499,11 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                 switch (gso->Action)
                 {
                     case GOSSIP_OPTION_QUESTGIVER:
-                    {
-                        uint32 quest_status = getDialogStatus(pPlayer,DIALOG_STATUS_NONE);
-
-                        if(quest_status == DIALOG_STATUS_NONE || quest_status == DIALOG_STATUS_UNAVAILABLE)
+                        pPlayer->PrepareQuestMenu(GetGUID());
+                        if (pm->GetQuestMenu()->MenuItemCount() == 0)
                             cantalking=false;
-                    };  break;
+                        pm->GetQuestMenu()->ClearMenu();
+                        break;
                     case GOSSIP_OPTION_ARMORER:
                         cantalking=false;                   // added in special mode
                         break;
@@ -510,6 +521,10 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                         break;
                     case GOSSIP_OPTION_TRAINER:
                         if(!isCanTrainingOf(pPlayer,false))
+                            cantalking=false;
+                        break;
+                    case GOSSIP_OPTION_UNLEARNTALENTS:
+                        if(!isCanTrainingAndResetTalentsOf(pPlayer))
                             cantalking=false;
                         break;
                     case GOSSIP_OPTION_TAXIVENDOR:
@@ -616,6 +631,10 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         case GOSSIP_OPTION_TRAINER:
             player->GetSession()->SendTrainerList(guid);
+            break;
+        case GOSSIP_OPTION_UNLEARNTALENTS:
+            player->PlayerTalkClass->CloseGossip();
+            player->SendTalentWipeConfirm(guid);
             break;
         case GOSSIP_OPTION_TAXIVENDOR:
             player->GetSession()->SendTaxiStatus(guid);

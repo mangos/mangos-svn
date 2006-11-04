@@ -147,31 +147,43 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
 {
     sLog.outString("MSG_TALENT_WIPE_CONFIRM");
     recv_data.hexlike();
-    uint64 GUID;
-    recv_data >> GUID;
-    Player * player = GetPlayer();
-    if(player->GetGUID()==GUID)
-    {
-        if(!(player->removeTalent()))
-        {
-            WorldPacket data;
-            data.Initialize( MSG_TALENT_WIPE_CONFIRM );     //you have not any talent
-            SendPacket( &data );
-            return;
-        }
-        // send spell 14867
-        WorldPacket data;
-        data.Initialize(SMSG_SPELL_START );
-        data << uint8(0xFF) << GUID << uint8(0xFF) << GUID << uint16(14867);
-        data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
-        SendPacket( &data );
+    uint64 guid;
+    recv_data >> guid;
 
-        data.Initialize(SMSG_SPELL_GO);
-        data << uint8(0xFF) << GUID << uint8(0xFF) << GUID << uint16(14867);
-        data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << GUID;
-        data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
-        SendPacket( &data );
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: HandleTalentWipeOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
     }
+
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if( !unit->isTrainer())                                 // it's not trainer
+        return;
+
+    if(!(_player->resetTalents()))
+    {
+        WorldPacket data;
+        data.Initialize( MSG_TALENT_WIPE_CONFIRM );     //you have not any talent
+        SendPacket( &data );
+        return;
+    }
+
+    // send spell 14867
+    WorldPacket data;
+    data.Initialize(SMSG_SPELL_START );
+    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << guid << uint16(14867);
+    data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
+    SendPacket( &data );
+
+    data.Initialize(SMSG_SPELL_GO);
+    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << guid << uint16(14867);
+    data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
+    data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
+    SendPacket( &data );
 }
 
 void WorldSession::HandleUnlearnSkillOpcode(WorldPacket & recv_data)
