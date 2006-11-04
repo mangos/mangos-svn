@@ -565,7 +565,7 @@ void Aura::_AddAura()
     }
 
     // adding linked auras
-    if(m_modifier.m_auraname == 36)                         // add the shapeshift aura's boosts
+    if(m_modifier.m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // add the shapeshift aura's boosts
         HandleShapeshiftBoosts(true, this);
 
     m_target->ApplyStats(false);
@@ -630,7 +630,7 @@ void Aura::_AddAura()
 void Aura::_RemoveAura()
 {
     // removing linked auras added ad _AddAura call before removing aura
-    if(m_modifier.m_auraname == 36)                         // remove the shapeshift aura's boosts
+    if(m_modifier.m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // remove the shapeshift aura's boosts
         HandleShapeshiftBoosts(false, this);
 
     m_target->ApplyStats(false);
@@ -2445,6 +2445,9 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
         case FORM_CREATUREBEAR:
             spellId = 2882;
             break;
+        case FORM_BATTLESTANCE:
+            spellId = 21156;
+            break;
         case FORM_DEFENSIVESTANCE:
             spellId = 7376;
             break;
@@ -2457,7 +2460,6 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             spellId2 = 24907;
             break;
         case FORM_GHOSTWOLF:
-        case FORM_BATTLESTANCE:
         case FORM_AMBIENT:
         case FORM_GHOUL:
         case FORM_SHADOW:
