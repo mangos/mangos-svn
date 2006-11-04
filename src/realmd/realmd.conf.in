@@ -12,6 +12,12 @@ RealmServerPort = 3724
 # Default: "Server.log" - not recommended.
 LogFile = "Realmd.log"
 
+
+# Server console level of logging
+# 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
+# Default: 0
+LogLevel = 0
+
 # Color for messages (format "normal_color details_color debug_color error_color)
 # Colors: 0 - BLACK, 1 - RED, 2 - GREEN,  3 - BROWN, 4 - BLUE, 5 - MAGENTA, 6 -  CYAN, 7 - GREY, 
 #         8 - YELLOW, 9 - LRED, 10 - LGREEN, 11 - LBLUE, 12 - LMAGENTA, 13 - LCYAN, 14 - WHITE

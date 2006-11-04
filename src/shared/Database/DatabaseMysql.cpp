@@ -210,3 +210,11 @@ bool DatabaseMysql::PExecute(const char * format,...)
 
     return Execute(szQuery);
 }
+
+unsigned long DatabaseMysql::escape_string(char *to, const char *from, unsigned long length)
+{
+    if (!mMysql || !to || !from || !length)
+        return 0;
+
+    return(mysql_real_escape_string(mMysql, to, from, length));
+}

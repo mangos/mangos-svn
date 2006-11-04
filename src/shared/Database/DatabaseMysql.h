@@ -48,6 +48,8 @@ class DatabaseMysql : public Database
 
         operator bool () const { return mMysql != NULL; }
 
+        unsigned long escape_string(char *to, const char *from, unsigned long length);
+
         // must be call before first query in thread
         void ThreadStart();
         // must be call before finish thread run

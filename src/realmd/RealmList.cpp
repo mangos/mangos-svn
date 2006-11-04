@@ -16,41 +16,46 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/** \file
+    \ingroup realmd
+*/
+
 #include "Common.h"
 #include "RealmList.h"
 #include "Policies/SingletonImp.h"
+#include "Database/DatabaseEnv.h"
+#include "SystemConfig.h"
 
 INSTANTIATE_SINGLETON_1( RealmList );
+
+extern DatabaseMysql dbRealmServer;
 
 RealmList::RealmList( )
 {
 }
 
+/// Destroys the internal realm map
 RealmList::~RealmList( )
 {
     for( RealmMap::iterator i = _realms.begin(); i != _realms.end(); i++ )
         delete i->second;
 
     _realms.clear( );
-    /*  for( PatchMap::iterator i = _patches.begin(); i != _patches.end(); i++ )
-          delete i->second;
-
-      _patches.clear( );
-    */
 }
 
-int RealmList::GetAndAddRealms(std::string dbstring)
+/// Load the realm list from the database
+void RealmList::GetAndAddRealms(std::string dbstring)
 {
-    int count = 0;
+    ///- Get the content of the realmlist table in the database
     QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`port`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`" );
+
+    ///- Circle through results and add them to the realm map
     if(result)
     {
         do
         {
             Field *fields = result->Fetch();
-                                                            //, fields[5].GetString());
             AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8());
-            count++;
         } while( result->NextRow() );
         delete result;
     }
@@ -60,15 +65,17 @@ int RealmList::GetAndAddRealms(std::string dbstring)
     //    //AddRealm("localhost","127.0.0.1",1,0,1,dbstring.c_str());
     //    AddRealm("localhost","127.0.0.1",1,0,1);
     //}
-    return count;
+    return;
 }
 
                                                             //, const char *dbstring )
+/// Add a Realm to the realm list
 void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone)
 {
     if( _realms.find( name ) == _realms.end() )
     {
                                                             //, dbstring);
+        ///- If no Realm with same name exists, create it
         Realm *newRealm = new Realm(ID, name, address, icon, color, timezone);
 
         //        sLog.outString("Realm \"%s\", database \"%s\"", newRealm->name.c_str(), newRealm->m_dbstring.c_str() );
@@ -83,6 +90,8 @@ void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint
         //        }
         //        else
         //        {
+
+        ///- Append port to IP address.
         std::string addr(address);
 
         std::ostringstream ss;
@@ -90,18 +99,10 @@ void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint
         addr = ss.str();
 
         newRealm->address = addr;
+
+        ///- Add the new Realm to the list
         _realms[name] = newRealm;
         sLog.outString("Added realm \"%s\".", newRealm->name.c_str());
         //        }
-    }
-}
-
-void RealmList::SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone )
-{
-    if( _realms.find( name ) != _realms.end( ) )
-    {
-        _realms[ name ]->icon = icon;
-        _realms[ name ]->color = color;
-        _realms[ name ]->timezone = timezone;
     }
 }

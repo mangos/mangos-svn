@@ -16,57 +16,59 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+
+/// \addtogroup realmd
+/// @{
+/// \file
+
+
 #ifndef _REALMLIST_H
 #define _REALMLIST_H
 
-#include "Network/socket_include.h"
-#include "Policies/Singleton.h"
-#include "Database/DatabaseEnv.h"
-#include "SystemConfig.h"
+#include "Common.h"
+//#include "Database/DatabaseEnv.h"
 
+/// Storage object for a realm
 struct Realm
 {
 
     std::string name;
-
     std::string address;
-
     uint8 icon;
-
     uint8 color;
-
     uint8 timezone;
     uint32 m_ID;
 
     // Leave these db functions commented out in case we need to maintain connections
     // to the realm db's at some point.
     //    std::string m_dbstring;
-
     //    DatabaseMysql dbRealm;
 
                                                             //, std::string dbstring)
-    Realm (uint32 ID, const char *Name, std::string Address, uint8 Icon, uint8 Color, uint8 Timezone)
+    Realm (uint32 ID, const char *Name, const char *Address, uint8 Icon, uint8 Color, uint8 Timezone)
     {
         m_ID = ID;
         name = Name;
         address = Address;
-        //        m_dbstring = dbstring;
 
         icon = Icon;
         color = Color;
         timezone = Timezone;
     }
 
-    //    int dbinit()
-    //    {
-    //        return dbRealm.Initialize(m_dbstring.c_str());
-    //    }
+    /*
+          int dbinit()
+          {
+              return dbRealm.Initialize(m_dbstring.c_str());
+          }
+    */
 
     ~Realm ()
     {
     }
 };
 
+/// Storage object for the list of realms on the server
 class RealmList
 {
     public:
@@ -77,28 +79,14 @@ class RealmList
 
                                                             //, const char *dbstring );
         void AddRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone);
-        int GetAndAddRealms(std::string dbstring);
-        void SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone );
+        void GetAndAddRealms(std::string dbstring);
 
         RealmMap::const_iterator begin() const { return _realms.begin(); }
         RealmMap::const_iterator end() const { return _realms.end(); }
         uint32 size() const { return _realms.size(); }
 
     private:
-        RealmMap _realms;
-        /*
-                struct Patch
-                {
-                    uint8 Hash[16];
-                    char Platform[4];
-                };
-
-                //typedef std::map <uint32, Patch*> PatchMap;
-           //     PatchMap _patches;
-
-           */
+        RealmMap _realms; ///< Internal map of realms
 };
-
-//#define sRealmList MaNGOS::Singleton<RealmList>::Instance()
-extern DatabaseMysql dbRealmServer;
+/// @}
 #endif

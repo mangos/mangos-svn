@@ -16,51 +16,61 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup realmd Realm Daemon
+/// @{
+/// \file
+
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "RealmList.h"
 
 #include "Config/ConfigEnv.h"
 #include "Log.h"
-#include "Network/SocketHandler.h"
 #include "Network/ListenSocket.h"
 #include "AuthSocket.h"
 #include "SystemConfig.h"
 
-#include <signal.h>
-
 bool StartDB(std::string &dbstring);
 void UnhookSignals();
 void HookSignals();
-//uint8 loglevel = DEFAULT_LOG_LEVEL;
 
-bool stopEvent = false;
-RealmList m_realmList;
-DatabaseMysql dbRealmServer;
+bool stopEvent = false;                                     ///< Setting it to true stops the server 
+RealmList m_realmList;                                      ///< Holds the list of realms for this server
+DatabaseMysql dbRealmServer;                                ///< Accessor to the realm server database
 
+/// Print out the usage string for this program on the console.
 void usage(const char *prog)
 {
-    sLog.outString("Usage: \n %s -c config_file [%s]", prog, _REALMD_CONFIG);
+    sLog.outString("Usage: \n %s [-c config_file]",prog);
 }
 
+/// Launch the realm server
 int main(int argc, char **argv)
 {
-    char*   cfg_file=_REALMD_CONFIG;
-
-    //Parse arguments
-    switch(argc)
+    ///- Command line parsing to get the configuration file name
+    char* cfg_file = _REALMD_CONFIG;
+    int c=1;
+    while( c < argc )
     {
-        case 1:
-            break;
-        case 3:
-            if(strcmp(argv[1], "-c")==0)
+        const char *tmp = argv[c];
+        if( strcmp(argv[c],"-c") == 0)
+        {
+            if( ++c >= argc )
             {
-                cfg_file=argv[2];
-                break;
+                sLog.outError("Runtime-Error: -c option requires an input argument");
+                usage(argv[0]);
+                return 1;
             }
-        default:
+            else
+                cfg_file = argv[c];
+        }
+        else
+        {
+            sLog.outError("Runtime-Error: unsupported option %s",argv[c]);
             usage(argv[0]);
             return 1;
+        }
+        ++c;
     }
 
     if (!sConfig.SetSource(cfg_file))
@@ -70,7 +80,7 @@ int main(int argc, char **argv)
     }
     sLog.outString("Using configuration file %s.", cfg_file);
 
-    // Non-critical warning about conf file version
+    ///- Check the version of the configuration file
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
     if (confVersion < _REALMDCONFVERSION)
     {
@@ -86,20 +96,21 @@ int main(int argc, char **argv)
     sLog.outString( "MaNGOS realm daemon %s", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
+    ///- Initialise the database connection
     std::string dbstring;
     if(!StartDB(dbstring))
         return 1;
 
-    //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
-
-    port_t rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-
+    ///- Get the list of realms for the server
     m_realmList.GetAndAddRealms(dbstring);
     if (m_realmList.size() == 0)
     {
         sLog.outError("No valid realms specified.");
         return 1;
     }
+
+    ///- Launch the listening network socket
+    port_t rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
 
     SocketHandler h;
     ListenSocket<AuthSocket> authListenSocket(h);
@@ -111,8 +122,10 @@ int main(int argc, char **argv)
 
     h.Add(&authListenSocket);
 
+    ///- Catch termination signals
     HookSignals();
 
+    ///- Handle affinity for multiple processors and process priority on Windows
     #ifdef WIN32
     {
         HANDLE hProcess = GetCurrentProcess();
@@ -125,18 +138,18 @@ int main(int argc, char **argv)
 
             if(GetProcessAffinityMask(hProcess,&appAff,&sysAff))
             {
-                uint32 curAff = Aff & appAff;               // remove non accassable processors
+                uint32 curAff = Aff & appAff;               // remove non accessible processors
 
                 if(!curAff )
                 {
-                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessable for realmd. Accessable processors bitmask (hex): %x",Aff,appAff);
+                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessible for realmd. Accessible processors bitmask (hex): %x",Aff,appAff);
                 }
                 else
                 {
                     if(SetProcessAffinityMask(hProcess,curAff))
                         sLog.outString("Using processors (bitmask, hex): %x", curAff);
                     else
-                        sLog.outError("Can't set used processors (hex): %x",curAff);
+                        sLog.outError("Can't set used processors (hex): %x", curAff);
                 }
             }
             sLog.outString("");
@@ -155,15 +168,19 @@ int main(int argc, char **argv)
     }
     #endif
 
+    ///- Wait for a termination signal
     while (!stopEvent)
         h.Select(0, 100000);
 
+    ///- Remove signal handling before leaving
     UnhookSignals();
 
     sLog.outString( "Halting process..." );
     return 0;
 }
 
+/// Handle termination signals
+/** Put the global variable stopEvent to 'true' if a termination signal is caught **/
 void OnSignal(int s)
 {
     switch (s)
@@ -184,6 +201,7 @@ void OnSignal(int s)
     signal(s, OnSignal);
 }
 
+/// Initialize connection to the database
 bool StartDB(std::string &dbstring)
 {
     if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
@@ -197,12 +215,12 @@ bool StartDB(std::string &dbstring)
     {
         sLog.outError("Cannot connect to database");
         return false;
-
     }
 
     return true;
 }
 
+/// Define hook 'OnSignal' for all termination signals
 void HookSignals()
 {
     signal(SIGINT, OnSignal);
@@ -214,6 +232,7 @@ void HookSignals()
     #endif
 }
 
+/// Unhook the signals before leaving
 void UnhookSignals()
 {
     signal(SIGINT, 0);
@@ -225,3 +244,5 @@ void UnhookSignals()
     #endif
 
 }
+
+/// @}
