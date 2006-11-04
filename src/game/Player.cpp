@@ -8457,6 +8457,14 @@ bool Player::CanRewardQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
     {
+        // not completed quest (only cheating case, then ignore without message)
+        if(GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
+            return false;
+
+        // rewarded and not repeatable quest (only cheating case, then ignore without message)
+        if(GetQuestRewardStatus(pQuest->GetQuestId()) && !pQuest->GetQuestInfo()->HasSpecialFlag(QUEST_SPECIAL_FLAGS_REPEATABLE))
+            return false;
+
         // prevent recive reward with quest items in bank
         if ( pQuest->GetQuestInfo()->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
         {
@@ -8481,7 +8489,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 {
     if( pQuest )
     {
-        // prevent recive reward with quest items in bank
+        // prevent recive reward with quest items in bank or for not completed quest 
         if(!CanRewardQuest(pQuest,msg))
             return false;
 
