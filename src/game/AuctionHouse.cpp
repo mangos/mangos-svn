@@ -57,6 +57,7 @@ void WorldSession::SendAuctionHello( uint64 guid )
 
     SendPacket( &data );
 }
+
 // TODO : All bids show up as overbid : BUG!
 void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
 {
@@ -233,10 +234,49 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             m->messageID = objmgr.GenerateMailID();
             m->sender = ah->owner;
             m->receiver = pl->GetGUIDLow();
-            m->subject = "You won an item!";
-            m->body = "";
+
+            std::ostringstream msgAuctionWonSubject;
+            std::ostringstream msgAuctionWonBody;
+            msgAuctionWonSubject << "Auction won: ";
+            msgAuctionWonBody << "Item Purchased: ";
+
+            // Get the item info
+            Item *wonitem = objmgr.GetAItem(ah->item);
+            if (wonitem)
+            {
+                ItemPrototype const *wonitemproto = wonitem->GetProto();
+                msgAuctionWonSubject << wonitemproto->Name1;
+                msgAuctionWonBody << wonitemproto->Name1 << "$B";
+            }
+            else
+            {
+                msgAuctionWonSubject << "Unknown";
+                msgAuctionWonBody << "Unknown$B";
+            }
+
+            msgAuctionWonBody << "Sold By: ";
+            Player *auctionOwner = objmgr.GetPlayer((uint64)m->sender);
+            if (auctionOwner)
+            {
+                // the auctionOwner is currently online, so lets get the name
+                msgAuctionWonBody << auctionOwner->GetName() << "$B";
+            }
+            else
+            {
+                // the auctionOwner is currently offline, so lets get the name from the database
+                std::string ownerName;
+                if(objmgr.GetPlayerNameByGUID(m->sender,ownerName))
+                    msgAuctionWonBody << ownerName << "$B";
+                else
+                    msgAuctionWonBody << "Unknown$B";
+            }
+
+            // TODO Add message stating how much it costed
+            m->subject = msgAuctionWonSubject.str().c_str();
+            m->body = msgAuctionWonBody.str().c_str();
             m->item = ah->item;
             m->time = time(NULL) + (29 * DAY);
+
             // If we do a buyout and the prev bid was made by the same player ..
             if (ah->bidder == pl->GetGUIDLow()){
                m->money = ah->bid; // .. we return their cash                    
@@ -252,6 +292,10 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             {
                 mrpln->AddMail(m);
             }
+
+            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
+
             // mail to last bidder if there's one... + return money 
             // EXCEPT if lastbidder == newbidder
             if ((ah->bidder > 0) && (ah->bidder != pl->GetGUIDLow()))        
@@ -278,9 +322,6 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                     rpl2->AddMail(mn2);
                 }
             }
-
-            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 
             uint64 rcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
             Player *rpl = objmgr.GetPlayer(rcpl);
@@ -439,15 +480,15 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
         ItemPrototype const *proto = it->GetProto();
         if (it){
            
-            if (ah->bidder > 0){ // If we have a bidder, we have to send him the money he paid
+            if (ah->bidder > 0){                            // If we have a bidder, we have to send him the money he paid
                 Mail *m = new Mail;
                 m->messageID = objmgr.GenerateMailID();
                 m->sender = ah->owner;
                 m->receiver = ah->bidder;
-                m->subject = "Auction canceled. Returning your deposit.";
-                std::ostringstream msgCanceledDeposit;
-                msgCanceledDeposit << "The auction for " << proto->Name1 << " got canceled. Here is your money back.";
-                m->body = msgCanceledDeposit.str().c_str();
+                std::ostringstream msgAuctionCanceled;
+                msgAuctionCanceled << "Auction Was Canceled: "  << proto->Name1;
+                m->subject = msgAuctionCanceled.str().c_str();
+                m->body = "";
                 m->item = 0;
                 m->time = time(NULL) + (29 * DAY);
                 m->money = ah->bid;
@@ -468,10 +509,10 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             mn2->messageID = objmgr.GenerateMailID();
             mn2->sender = ah->owner;
             mn2->receiver = pl->GetGUIDLow();
-            mn2->subject = "Auction canceled. Returning your item.";
-            std::ostringstream msgCanceledItem;
-            msgCanceledItem << "The auction for " << proto->Name1 << " got canceled on your request. Here is your item back.";
-            mn2->body = msgCanceledItem.str().c_str();
+            std::ostringstream msgAuctionCanceledOwner;
+            msgAuctionCanceledOwner << "Auction Canceled: " << proto->Name1;
+            mn2->body = "";            
+            mn2->subject = msgAuctionCanceledOwner.str().c_str();
             mn2->item = ah->item;
             mn2->time = time(NULL) + (29 * DAY);
             mn2->money = 0;
@@ -610,11 +651,11 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 {
     std::string searchedname, name;
     uint8 levelmin, levelmax, usable, location;
-    uint32 count, unk1, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
+    uint32 count, totalcount, listfrom, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
     uint64 guid;
 
     recv_data >> guid;
-    recv_data >> unk1;
+    recv_data >> listfrom;
     recv_data >> searchedname;
     recv_data >> levelmin >> levelmax;
     recv_data >> auctionSlotID >> auctionMainCategory >> auctionSubCategory;
@@ -626,11 +667,12 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 
     location = AuctionerFactionToLocation(pCreature->getFaction());
 
-    sLog.outDebug("Auctionhouse search guid: " I64FMTD ", unk1: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, unk1, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
+    sLog.outDebug("Auctionhouse search guid: " I64FMTD ", list from: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, listfrom, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
 
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_LIST_RESULT );
-    count = 0;
+    count = 0; // Start value?
+    totalcount = 0;
     data << uint32(0);
     for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
     {
@@ -660,28 +702,29 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                             std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), ::tolower );
                                             if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
                                             {
-                                                count++;
-                                                data << Aentry->Id;
-                                                data << proto->ItemId;
-                                                data << uint32(0);
-                                                data << uint32(0);
-                                                data << uint32(0);
-                                                data << uint32(item->GetCount());
-                                                data << uint32(0);
-                                                data << item->GetOwnerGUID();
-                                                data << Aentry->bid;
-                                                data << uint32(0);
-                                                data << Aentry->buyout;
-                                                data << uint32((Aentry->time - time(NULL)) * 1000);
-                                                data << uint32(Aentry->bidder);
-                                                data << uint32(0);
-                                                if (uint32(Aentry->bidder) > 0){
+                                                 if ((count < 50) && (totalcount >= listfrom)){
+                                                    count++;      
+                                                    data << Aentry->Id;
+                                                    data << proto->ItemId;
+                                                    data << uint32(0);
+                                                    data << uint32(0);
+                                                    data << uint32(0);
+                                                    data << uint32(item->GetCount());
+                                                    data << uint32(0);
+                                                    data << item->GetOwnerGUID();
                                                     data << Aentry->bid;
-                                                }else{
-                                                     data << uint32(0);
+                                                    data << uint32(0);
+                                                    data << Aentry->buyout;
+                                                    data << uint32((Aentry->time - time(NULL)) * 1000);
+                                                    data << uint32(Aentry->bidder);
+                                                    data << uint32(0);
+                                                    if (uint32(Aentry->bidder) > 0){
+                                                        data << Aentry->bid;
+                                                    }else{
+                                                         data << uint32(0);
+                                                    }
                                                 }
-                                                if( count == 32 )
-                                                    break;
+                                                totalcount++;
                                             }
                                         }
                                     }
@@ -694,6 +737,6 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
         }
     }
     data.put<uint32>(0, count);
-    data << uint32(count);
+    data << uint32(totalcount);
     SendPacket(&data);
 }
