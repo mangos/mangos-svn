@@ -1917,14 +1917,18 @@ bool Player::removeSpell(uint16 spell_id)
     return false;
 }
 
-bool Player::removeTalent()
+bool Player::resetTalents()
 {
-    //if(getLevel()<10)
-    //    return false;     //maybe some GM has talent with low level :P
-    uint32 costs = 10000;                                   //TODO: take correct money here.
-    if(GetMoney()<costs)
+    uint32 level = getLevel();
+    if (level < 10 || (GetUInt32Value(PLAYER_CHARACTER_POINTS1) >= level - 9))
         return false;
-    bool hasTalent = false;
+
+    if (GetMoney() < resetTalentsCost())
+    {
+        SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
+        return false;
+    }
+
     for (int i = 0; i < sTalentStore.GetNumRows(); i++)
     {
         TalentEntry *talentInfo = sTalentStore.LookupEntry(i);
@@ -1939,7 +1943,6 @@ bool Player::removeTalent()
                 if(itr->second->state == PLAYERSPELL_REMOVED) continue;
                 if (itr->first == spellInfo->Id)
                 {
-                    hasTalent = true;
                     RemoveAurasDueToSpell(itr->first);
                     removeSpell(itr->first);
                     break;
@@ -1947,12 +1950,10 @@ bool Player::removeTalent()
             }
         }
     }
-    uint32 tp = getLevel() < 10 ? 0 : getLevel() - 9;
-    SetUInt32Value(PLAYER_CHARACTER_POINTS1, tp);
 
-    if(hasTalent)
-        ModifyMoney( int(costs * (-1)) );
-    return hasTalent;
+    SetUInt32Value(PLAYER_CHARACTER_POINTS1, level - 9);
+    ModifyMoney(-(int32)resetTalentsCost());
+    return true;
 }
 
 bool Player::_removeSpell(uint16 spell_id)
@@ -5839,12 +5840,12 @@ void Player::SetBindPoint(uint64 guid)
     GetSession()->SendPacket( &data );
 }
 
-void Player::SendTalentWipeConfirm( )
+void Player::SendTalentWipeConfirm(uint64 guid)
 {
     WorldPacket data;
     data.Initialize( MSG_TALENT_WIPE_CONFIRM );
-    data << (uint64)GetGUID();
-    data << (uint32)10000;                                  //TODO: make cost here
+    data << guid;
+    data << (uint32)resetTalentsCost();
     GetSession()->SendPacket( &data );
 }
 

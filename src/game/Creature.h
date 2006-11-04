@@ -57,7 +57,8 @@ enum Gossip_Option
     GOSSIP_OPTION_BATTLEFIELD       = 12,                   //UNIT_NPC_FLAG_BATTLEFIELDPERSON = 2048,
     GOSSIP_OPTION_AUCTIONEER        = 13,                   //UNIT_NPC_FLAG_AUCTIONEER        = 4096,
     GOSSIP_OPTION_STABLEPET         = 14,                   //UNIT_NPC_FLAG_STABLE            = 8192,
-    GOSSIP_OPTION_ARMORER           = 15                    //UNIT_NPC_FLAG_ARMORER           = 16384,
+    GOSSIP_OPTION_ARMORER           = 15,                   //UNIT_NPC_FLAG_ARMORER           = 16384,
+    GOSSIP_OPTION_UNLEARNTALENTS    = 16                    //UNIT_NPC_FLAG_TRAINER (bonus option for GOSSIP_OPTION_TRAINER)
 };
 
 enum Gossip_Guard
@@ -257,6 +258,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isCanSwimOrFly() const;
         bool isCanWalkOrFly() const;
         bool isCanTrainingOf(Player* player, bool msg) const;
+        bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;
 
         bool isElite() const
         {
