@@ -126,10 +126,17 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                     Script->GOQuestAccept(_player, ((GameObject*)pObject), pQuest );
                     break;
             }
+            _player->PlayerTalkClass->CloseGossip();
+
+            if( qInfo->SrcSpell > 0 )
+                _player->CastSpell( _player, qInfo->SrcSpell, true);
+
+            return;
         }
         else
             delete pQuest;
     }
+
     _player->PlayerTalkClass->CloseGossip();
 }
 
