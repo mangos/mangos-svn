@@ -866,7 +866,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         const uint64& GetGroupLeader() const { return m_groupLeader; }
 
         void UnSetInvited() { m_isInvited = false; }
-        void UnSetInGroup() { m_isInGroup = false; }
+        void UnSetInGroup() { m_isInGroup = false; m_groupLeader = 0; }
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); Player::SetUInt32ValueInDB(PLAYER_GUILDID, GuildId, this->GetGUID()); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, rankId, this->GetGUID()); }
