@@ -86,6 +86,8 @@ enum GuildEvents
     GE_LEADER_CHANGED  = 7,
     GE_DISBANDED       = 8,
     GE_TABARDCHANGE    = 9,
+    GE_SIGNED_ON       = 12,
+    GE_SIGNED_OFF      = 13,
 };
 
 struct MemberSlot

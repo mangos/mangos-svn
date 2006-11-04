@@ -241,6 +241,9 @@ enum TYPE_OF_KILL
 enum PlayerFlags
 {
     PLAYER_FLAGS_GROUP_LEADER   = 0x0001,
+    PLAYER_FLAGS_AFK            = 0x0002,
+    PLAYER_FLAGS_DND            = 0x0004,
+    PLAYER_FLAGS_GM             = 0x0008,
     PLAYER_FLAGS_GHOST          = 0x0010,
     PLAYER_FLAGS_RESTING        = 0x0020,
     PLAYER_FLAGS_IN_PVP         = 0x0200,
@@ -402,7 +405,24 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void BuildEnumData( WorldPacket * p_data );
 
-        uint8 ToggleAFK() { m_afk = !m_afk; return m_afk; };
+        uint8 ToggleAFK();
+        uint8 ToggleDND();
+        bool isAFK() { return m_afk; };
+        bool isDND() { return m_dnd; };
+        uint8 chatTag()
+        {
+            if(isGameMaster())
+                return 3;
+            else if(isDND())
+                return 2;
+            if(isAFK())
+                return 1;
+            else
+                return 0;
+        }
+
+        void SendFriendlist();
+        void SendIgnorelist();
 
         uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
@@ -942,7 +962,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void LeftChannel(Channel *c);
         void CleanupChannels();
 
-        void BroadcastToFriendListers(std::string msg);
+        void BroadcastPacketToFriendListers(WorldPacket *packet);
 
         void UpdateDefense();
         void UpdateWeaponSkill (WeaponAttackType attType);
@@ -1178,6 +1198,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* m_buybackitems[BUYBACK_SLOT_END - BUYBACK_SLOT_START];
 
         uint8 m_afk;
+        uint8 m_dnd;
 
         uint32 m_movement_flags;
 

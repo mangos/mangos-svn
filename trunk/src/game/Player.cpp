@@ -1035,6 +1035,133 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << (uint8)0;
 }
 
+uint8 Player::ToggleAFK()
+{
+    m_afk = !m_afk; 
+    if(this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK))
+        this->RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); 
+    else 
+        this->SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); 
+    
+    return m_afk;
+}
+
+uint8 Player::ToggleDND()
+{
+    m_dnd = !m_dnd; 
+    if(this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND))
+        this->RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
+    else 
+        this->SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
+    
+    return m_dnd; 
+}
+
+void Player::SendFriendlist()
+{
+    WorldPacket data;
+    uint8 i=0;
+    uint32 guid;
+    Field *fields;
+    Player* pObj;
+    FriendStr friendstr[255];
+
+    guid=this->GetGUIDLow();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
+    if(result)
+    {
+        fields = result->Fetch();
+
+        do
+        {
+            friendstr[i].PlayerGUID = fields[0].GetUInt64();
+            pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
+            if( pObj && pObj->isGMVisibleFor(this))
+            {
+                if(pObj->isAFK())
+                    friendstr[i].Status = 2;
+                else if(pObj->isDND())
+                    friendstr[i].Status = 4;
+                else
+                    friendstr[i].Status = 1;
+                friendstr[i].Area = pObj->GetZoneId();
+                friendstr[i].Level = pObj->getLevel();
+                friendstr[i].Class = pObj->getClass();
+            }
+            else
+            {
+                friendstr[i].Status = 0;
+                friendstr[i].Area = 0;
+                friendstr[i].Level = 0;
+                friendstr[i].Class = 0;
+            }
+            i++;
+
+            // prevent overflow
+            if(i==255)
+                break;
+        } while( result->NextRow() );
+
+        delete result;
+    }
+
+    data.Initialize( SMSG_FRIEND_LIST );
+    data << i;
+
+    for (int j=0; j < i; j++)
+    {
+
+        sLog.outDetail( "WORLD: Adding Friend - Guid:" I64FMTD ", Status:%u, Area:%u, Level:%u Class:%u",friendstr[j].PlayerGUID, friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
+
+        data << friendstr[j].PlayerGUID << friendstr[j].Status ;
+        if (friendstr[j].Status != 0)
+            data << friendstr[j].Area << friendstr[j].Level << friendstr[j].Class;
+    }
+
+    this->GetSession()->SendPacket( &data );
+    sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
+}
+
+void Player::SendIgnorelist()
+{
+    WorldPacket dataI;
+
+    unsigned char nrignore=0;
+    uint8 i=0;
+    uint32 guid;
+    Field *fields;
+
+    guid=this->GetGUIDLow();
+    
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`friend`) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
+
+    if(!result) return;
+
+    fields = result->Fetch();
+    nrignore=fields[0].GetUInt32();
+    delete result;
+
+    dataI.Initialize( SMSG_IGNORE_LIST );
+    dataI << nrignore;
+
+    result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
+
+    if(!result) return;
+
+    do
+    {
+
+        fields = result->Fetch();
+        dataI << fields[0].GetUInt64();
+
+    }while( result->NextRow() );
+    delete result;
+
+    this->GetSession()->SendPacket( &dataI );
+    sLog.outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
+}
+
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange)
 {
     if(this->GetMapId() == mapid)
@@ -1304,12 +1431,14 @@ void Player::SetGameMaster(bool on)
         m_GMFlags |= GM_ON;
         setFaction(35);
         SetFlag(PLAYER_BYTES_2, 0x8);
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
     }
     else
     {
         m_GMFlags &= ~GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_BYTES_2, 0x8);
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
     }
 }
 
@@ -2239,7 +2368,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u'",guid);
 
@@ -2673,7 +2802,7 @@ void Player::CleanupChannels()
         (*i)->Leave(this,false);
 }
 
-void Player::BroadcastToFriendListers(std::string msg)
+void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
 {
     Field *fields;
     Player *pfriend;
@@ -2687,11 +2816,10 @@ void Player::BroadcastToFriendListers(std::string msg)
         WorldPacket data;
         fields = result->Fetch();
 
-        sChatHandler.FillSystemMessageData(&data, 0, msg.c_str());
         pfriend = ObjectAccessor::Instance().FindPlayer(fields[0].GetUInt64());
 
         if (pfriend && pfriend->IsInWorld())
-            pfriend->GetSession()->SendPacket(&data);
+            pfriend->GetSession()->SendPacket(packet);
 
     }while( result->NextRow() );
     delete result;

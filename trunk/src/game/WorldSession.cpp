@@ -156,6 +156,14 @@ void WorldSession::LogoutPlayer(bool Save)
         if(guild)
         {
             guild->LoadPlayerStatsByGuid(_player->GetGUID());
+
+            WorldPacket data;
+            data.Initialize(SMSG_GUILD_EVENT);
+            data<<(uint8)GE_SIGNED_OFF;
+            data<<(uint8)1;
+            data<<_player->GetName();
+            data<<(uint8)0<<(uint8)0<<(uint8)0;    
+            guild->BroadcastPacket(&data);
         }
         _player->UnsummonPet();
         _player->Uncharm();
@@ -178,17 +186,17 @@ void WorldSession::LogoutPlayer(bool Save)
 
         }
 
-        std::string outstring = _player->GetName();
-        outstring.append( " go to offline." );
-        _player->BroadcastToFriendListers(outstring);
+        WorldPacket data;
+        data.Initialize(SMSG_FRIEND_STATUS);
+        data<<uint8(FRIEND_OFFLINE);
+        data<<_player->GetGUID();
+        _player->BroadcastPacketToFriendListers(&data);
 
         delete _player;
         _player = 0;
 
-        WorldPacket packet;
-
-        packet.Initialize( SMSG_LOGOUT_COMPLETE );
-        SendPacket( &packet );
+        data.Initialize( SMSG_LOGOUT_COMPLETE );
+        SendPacket( &data );
 
         sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
