@@ -411,8 +411,6 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
 
                 if (i->totalNeed > 0)
                 {
-                    vector<uint8> rollresul;
-                    rollresul.reserve(m_count);
                     uint8 maxresul = 0;
                     uint8 maxindex = 0;
                     Player *player;
@@ -422,15 +420,14 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                         if (i->playerVote[j] != NEED)
                             continue;
                         uint8 randomN = rand() % 100;
-                        rollresul[j] = randomN;
-                        SendLootRoll(0, m_members[j].guid, i->itemid, 0, rollresul[j], 1, *i);
-                        if (maxresul < rollresul[j])
+                        SendLootRoll(0, m_members[j].guid, i->itemid, 0, randomN, 1, *i);
+                        if (maxresul < randomN)
                         {
                             maxindex = j;
-                            maxresul = rollresul[j];
+                            maxresul = randomN;
                         }
                     }
-                    SendLootRollWon(0, m_members[maxindex].guid, i->itemid, 0, rollresul[maxindex], 1, *i);
+                    SendLootRollWon(0, m_members[maxindex].guid, i->itemid, 0, maxresul, 1, *i);
                     player = objmgr.GetPlayer(m_members[maxindex].guid);
                     uint16 dest;
                     LootItem *item = &(i->loot->items[i->itemSlot]);
@@ -451,8 +448,6 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                 {
                     if (i->totalGreed > 0)
                     {
-                        vector<uint8> rollresul;
-                        rollresul.reserve(m_count);
                         uint8 maxresul = 0;
                         uint8 maxindex = 0;
                         Player *player;
@@ -462,15 +457,14 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                             if (i->playerVote[j] != GREED)
                                 continue;
                             uint8 randomN = rand() % 100;
-                            rollresul[j] = randomN;
-                            SendLootRoll(0, m_members[j].guid, i->itemid, 0, rollresul[j], 2, *i);
-                            if (maxresul < rollresul[j])
+                            SendLootRoll(0, m_members[j].guid, i->itemid, 0, randomN, 2, *i);
+                            if (maxresul < randomN)
                             {
                                 maxindex = j;
-                                maxresul = rollresul[j];
+                                maxresul = randomN;
                             }
                         }
-                        SendLootRollWon(0, m_members[maxindex].guid, i->itemid, 0, rollresul[maxindex], 2, *i);
+                        SendLootRollWon(0, m_members[maxindex].guid, i->itemid, 0, maxresul, 2, *i);
                         player = objmgr.GetPlayer(m_members[maxindex].guid);
 
                         uint16 dest;
