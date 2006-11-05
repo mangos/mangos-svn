@@ -156,6 +156,7 @@ class World
         void ShutdownMsg(bool show = false, Player* player = NULL);
 
         void Update(time_t diff);
+        time_t GetLastTickTime() const { return m_Last_tick; }
 
         void setRate(Rates rate,float value) { regen_values[rate]=value; }
         float getRate(Rates rate) const { return regen_values[rate]; }
@@ -194,7 +195,6 @@ class World
         std::string m_motd;
 
         time_t m_gameTime;
-        time_t m_lastTick;
 
         time_t m_nextThinkTime;
         uint32 m_configs[CONFIG_VALUE_COUNT];

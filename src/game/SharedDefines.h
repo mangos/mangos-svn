@@ -50,7 +50,15 @@ enum TimeConstants
 {
     MINUTE = 60,
     HOUR   = MINUTE*60,
-    DAY    = HOUR*24
+    DAY    = HOUR*24,
+    MONTH  = DAY*30
+};
+
+enum MoneyConstants
+{
+    COPPER = 1,
+    SILVER = COPPER*100,
+    GOLD   = SILVER*100
 };
 
 enum Stats
