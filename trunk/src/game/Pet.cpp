@@ -62,7 +62,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     float px, py, pz;
     owner->GetClosePoint(NULL, px, py, pz);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
-    if(!Create(guid, owner->GetInstanceId(), px, py, pz, owner->GetOrientation(), petentry))
+    if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), petentry))
     {
         delete result;
         return false;
@@ -74,7 +74,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     if(cinfo->type == CREATURE_TYPE_CRITTER)
     {
         AIM_Initialize();
-        MapManager::Instance().GetMap(owner->GetInstanceId())->Add((Creature*)this);
+        MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
         owner->SetPet(this);
         if(owner->GetTypeId() == TYPEID_PLAYER)
         {
@@ -143,7 +143,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     delete result;
 
     AIM_Initialize();
-    MapManager::Instance().GetMap(owner->GetInstanceId())->Add((Creature*)this);
+    MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
     owner->SetPet(this);
     sLog.outDebug("New Pet has guid %u", GetGUIDLow());
 

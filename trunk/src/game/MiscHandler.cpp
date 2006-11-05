@@ -722,7 +722,7 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     GetPlayer()->ApplyStats(true);
 
     // update world right away
-    MapManager::Instance().GetMap(GetPlayer()->GetInstanceId())->Add(GetPlayer());
+    MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Add(GetPlayer());
 }
 
 void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)

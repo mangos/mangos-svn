@@ -149,8 +149,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
         uint32 GetId(void) const { return i_id; }
 
-        static bool ExistMAP(uint32 mapid, int x, int y);
-        GridMap * LoadMAP(uint32 mapid, int x, int y);
+        static bool ExistMAP(int mapid, int x, int y);
+        GridMap * LoadMAP(int mapid, int x, int y);
 
         static void InitStateMachine();
         static void DeleteStateMachine();
@@ -181,14 +181,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         // assert print helper
         bool CheckGridIntegrity(Creature* c, bool moved) const;
-
-        uint64 GetCreater(){ return m_creater;};
-        void SetCreater(uint64 createrguid){ m_creater = createrguid;};
-        uint32 GetInstance(){ return m_pInstanceid;};
-        void SetInstance(uint32 instanceid){ m_pInstanceid = instanceid;};
-
-        int32 lefttime;
-        int32 savetime;
     private:
         bool CreatureCellRelocation(Creature *creature, Cell new_cell);
         void CreatureRelocationNotifying(Creature *creature, Cell newcell, CellPair newval);
@@ -218,9 +210,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 
         time_t i_gridExpiry;
-        
-        uint64 m_creater;
-        uint32 m_pInstanceid;
 };
 
 inline

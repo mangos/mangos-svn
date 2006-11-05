@@ -355,8 +355,8 @@ void Aura::Update(uint32 diff)
             else speed = m_target->GetSpeed();
             pos_x = m_target->GetPositionX();
             pos_y = m_target->GetPositionY();
-            uint32 instanceId = m_target->GetInstanceId();
-            pos_z = MapManager::Instance().GetMap(instanceId)->GetHeight(pos_x,pos_y);
+            uint32 mapid = m_target->GetMapId();
+            pos_z = MapManager::Instance().GetMap(mapid)->GetHeight(pos_x,pos_y);
             // Control the max Distance; 20 for temp.
             if(m_target->IsWithinDist(caster, 20))
             {
@@ -365,8 +365,8 @@ void Aura::Update(uint32 diff)
                 else
                     x = m_target->GetPositionX() - speed*diff * sin(angle)/1000;
                 y = m_target->GetPositionY() - speed*diff * cos(angle)/1000;
-                instanceId = m_target->GetInstanceId();
-                z = MapManager::Instance().GetMap(instanceId)->GetHeight(x,y);
+                mapid = m_target->GetMapId();
+                z = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
                 // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
                 // fixed me if it needs checking when the position will be in water?
                 if(z<=pos_z+1.3 && z>=pos_z-1.3)
@@ -811,7 +811,7 @@ void Aura::TriggerSpell()
 void Aura::HandleAuraDummy(bool apply)
 {
     Unit* caster = GetCaster();
-    /* // Righteousness 
+
     if(GetSpellProto()->SpellVisual == 5622 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
         Player *player = (Player*)caster;
@@ -831,7 +831,6 @@ void Aura::HandleAuraDummy(bool apply)
             }
         }
     }
-    */
     if(GetSpellProto()->SpellVisual == 7395 && GetSpellProto()->SpellIconID == 278 && caster->GetTypeId() == TYPEID_PLAYER)
     {
         Player *player = (Player*)caster;

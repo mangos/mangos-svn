@@ -140,8 +140,6 @@ Player::Player (WorldSession *session): Unit()
     m_canParry = false;
     m_canDualWield = false;
 
-    leftInstanceTime = 0;
-
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
     inn_pos_x=0;
@@ -241,7 +239,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_class = class_;
 
     m_mapId = info->mapId;
-    m_instanceId = m_mapId;
     m_positionX = info->positionX;
     m_positionY = info->positionY;
     m_positionZ = info->positionZ;
@@ -657,65 +654,6 @@ void Player::SetDrunkValue(uint16 newDrunkValue)
         (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | m_drunk);
 }
 
-void Player::CkeckPlayerInInstance(uint32 p_time)
-{
-    WorldPacket data;
-    if(GetInstanceId()>1000)
-    {
-        Map* inmap = MapManager::Instance().GetMap(GetInstanceId());
-        if(GetLeftInstanceTime()>0)
-            SetLeftInstanceTime( GetLeftInstanceTime() - p_time );
-        if(inmap->lefttime <= 60000 && inmap->lefttime != -1 && GetLeftInstanceTime() == 0)
-        {
-            SetLeftInstanceTime(inmap->lefttime);
-            data.Initialize(SMSG_RAID_GROUP_ONLY);
-            data << uint32(inmap->lefttime);
-            data << uint32(1);
-            GetSession()->SendPacket( &data );    
-        }
-        else if(IsInGroup() && GetLeftInstanceTime() == 0)
-        {
-            bool in_group = false;
-            Group *grp = objmgr.GetGroupByLeader(GetGroupLeader());
-            for(int p =0;p<grp->GetMembersCount();p++)
-            {
-                Unit* Member = ObjectAccessor::Instance().FindPlayer(grp->GetMemberGUID(p));
-                if(inmap->GetCreater() == grp->GetMemberGUID(p))
-                {
-                    in_group = true;
-                    break;
-                }
-            }
-            if(!in_group && inmap->GetCreater() != GetGUID())
-            {
-                SetLeftInstanceTime(60000);
-                data.Initialize(SMSG_RAID_GROUP_ONLY);
-                data << uint32(60000);
-                data << uint32(1);
-                GetSession()->SendPacket( &data );
-            }
-        }
-        else if(inmap->GetCreater() != GetGUID() && GetLeftInstanceTime() == 0)
-        {
-            SetLeftInstanceTime(60000);
-            data.Initialize(SMSG_RAID_GROUP_ONLY);
-            data << uint32(60000);
-            data << uint32(1);
-            GetSession()->SendPacket( &data );
-        }
-        if(inmap->lefttime < 1000 && inmap->lefttime != -1)
-        {
-            TeleportHome();        
-        }
-        else if(GetLeftInstanceTime() < 1000 && GetLeftInstanceTime() != 0)
-        {
-            TeleportHome();
-            SetLeftInstanceTime(0);
-        }
-    }
-    else SetLeftInstanceTime(0);
-}
-
 void Player::Update( uint32 p_time )
 {
     if(!IsInWorld())
@@ -724,8 +662,6 @@ void Player::Update( uint32 p_time )
     WorldPacket data;
 
     Unit::Update( p_time );
-
-    CkeckPlayerInInstance(p_time);
 
     // update player only attacks
     if(uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
@@ -984,7 +920,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << uint8(bytes);
 
     *p_data << uint8(getLevel());                           //1
-    uint32 zoneId = MapManager::Instance ().GetMap(m_instanceId)->GetZoneId(m_positionX,m_positionY);
+    uint32 zoneId = MapManager::Instance ().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 
     *p_data << zoneId;
     *p_data << GetMapId();
@@ -1176,17 +1112,9 @@ void Player::SendIgnorelist()
     sLog.outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
 }
 
-void Player::TeleportHome()
+void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange)
 {
-    Field *fields;    QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", this->GetGUIDLow());    if(result)    {        fields = result->Fetch();        TeleportCoords* TC = new TeleportCoords();        TC->mapId = fields[0].GetUInt32();        TC->x = fields[2].GetFloat();        TC->y = fields[3].GetFloat();        TC->z = fields[4].GetFloat();        delete result;        TeleportTo(TC->mapId,TC->x,TC->y,TC->z,0.0f);        delete TC;
-    }
-}
-
-void Player::TeleportTo(uint32 instanceid, float x, float y, float z, float orientation, bool outofrange)
-{
-    uint32 mapid = instanceid > 1000 ? instanceid / 1000 : instanceid;
-
-    if( GetInstanceId() == instanceid )
+    if(this->GetMapId() == mapid)
     {
         // near teleport
         WorldPacket data;
@@ -1198,9 +1126,7 @@ void Player::TeleportTo(uint32 instanceid, float x, float y, float z, float orie
     }
     else
     {
-        // leave the current map/instance
-        MapManager::Instance().GetMap(GetInstanceId())->Remove(this, false);
-        
+        MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
         WorldPacket data;
         data.Initialize(SMSG_TRANSFER_PENDING);
         data << uint32(mapid);
@@ -1216,79 +1142,7 @@ void Player::TeleportTo(uint32 instanceid, float x, float y, float z, float orie
         SetDontMove(true);
         //SaveToDB();
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        //if its an instance;
-        //1 get instance from group;
-        //2 get instance from corpse,and resurrect player;
-        //3 create an new instance for player;
-        //then join in the instance
-        if( mapid !=0 &&  mapid != 1 && mapid !=349)
-        {
-            instanceid=0;
-            if(IsInGroup())
-            {
-                Group *grp = objmgr.GetGroupByLeader(GetGroupLeader());
-                for(int p =0;p<grp->GetMembersCount();p++)
-                {
-                    Unit* Member = ObjectAccessor::Instance().FindPlayer(grp->GetMemberGUID(p));
-                    if(Member->GetMapId() == mapid)
-                    {
-                        instanceid = Member->GetInstanceId();
-                        break;
-                    }
-                }
-            }
-            if(!instanceid && !isAlive())
-            {
-                instanceid = GetCorpse()->GetInstanceId();
-                // resurrect
-                ResurrectPlayer();
-
-                // spawnbones
-                SpawnCorpseBones();
-
-                // set health, mana
-                ApplyStats(false);
-                SetHealth(GetMaxHealth()/2);
-                SetPower(POWER_MANA,GetMaxPower(POWER_MANA)/2);
-                SetPower(POWER_RAGE, 0 );
-                SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-                ApplyStats(true);
-            }
-            if(!instanceid)
-                instanceid = MapManager::Instance().CreateMapCopy(mapid,GetGUID());
-            SetInstanceId(instanceid);
-
-            MapManager::Instance().GetMap(instanceid)->Add(this);
-
-            data.Initialize(SMSG_INSTANCE_JOIN);
-            data << uint32(mapid);
-            GetSession()->SendPacket(&data);
-        }
-        else
-        {
-            if(GetInstanceId() > 1000)
-            {
-                if(IsInGroup())
-                {
-                    Map* oldmap = MapManager::Instance().GetMap(GetInstanceId());
-                    Group *grp = objmgr.GetGroupByLeader(GetGroupLeader());
-                    for(int p =0;p<grp->GetMembersCount();p++)
-                    {
-                        Unit* Member = ObjectAccessor::Instance().FindPlayer(grp->GetMemberGUID(p));
-                        if(Member->GetInstanceId() == GetInstanceId())
-                        {
-                            oldmap->SetCreater(Member->GetGUID());
-                            break;
-                        }
-                    }
-                }
-            }
-            SetInstanceId(instanceid);
-            MapManager::Instance().GetMap(instanceid)->Add(this);
-        }
-        SaveToDB();
-        ///////////////////////////////////////////////////////////////////////////////////
+        MapManager::Instance().GetMap(GetMapId())->Add(this);
 
         // Resend spell list to client after far teleport.
         SendInitialSpells();
@@ -2627,7 +2481,7 @@ void Player::BuildPlayerRepop()
         corpse = CreateCorpse();
 
     // now show corpse for all
-    MapManager::Instance().GetMap(corpse->GetInstanceId())->Add(corpse);
+    MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
 
     // convert player body to ghost
     WorldPacket data;
@@ -2769,14 +2623,12 @@ Corpse* Player::CreateCorpse()
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
     Corpse* corpse = new Corpse(CORPSE_RESURRECTABLE);
-    if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetInstanceId(), GetPositionX(),
+    if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
     {
         delete corpse;
         return NULL;
     }
-
-    corpse->SetInstanceId(GetInstanceId());
 
     _uf = GetUInt32Value(UNIT_FIELD_BYTES_0);
     _pb = GetUInt32Value(PLAYER_BYTES);
@@ -3405,7 +3257,7 @@ bool Player::IsGroupMember(Player *plyr)
 
 bool Player::SetPosition(float x, float y, float z, float orientation)
 {
-    Map *m = MapManager::Instance().GetMap(m_instanceId);
+    Map *m = MapManager::Instance().GetMap(m_mapId);
 
     const float old_x = m_positionX;
     const float old_y = m_positionY;
@@ -3421,7 +3273,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     }
 
     // reread after Ma::Relocation
-    m = MapManager::Instance().GetMap(GetInstanceId());
+    m = MapManager::Instance().GetMap(GetMapId());
     x = m_positionX;
     y = m_positionY;
     z = m_positionZ;
@@ -3460,12 +3312,12 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
 
 void Player::SendMessageToSet(WorldPacket *data, bool self)
 {
-    MapManager::Instance().GetMap(m_instanceId)->MessageBoardcast(this, data, self);
+    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self);
 }
 
 void Player::SendMessageToOwnTeamSet(WorldPacket *data, bool self)
 {
-    MapManager::Instance().GetMap(m_instanceId)->MessageBoardcast(this, data, self,true);
+    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self,true);
 }
 
 void Player::SendDirectMessage(WorldPacket *data)
@@ -3483,7 +3335,7 @@ void Player::CheckExploreSystem()
         return;
 
     WorldPacket data;
-    uint16 areaFlag=MapManager::Instance().GetMap(GetInstanceId())->GetAreaFlag(m_positionX,m_positionY);
+    uint16 areaFlag=MapManager::Instance().GetMap(GetMapId())->GetAreaFlag(m_positionX,m_positionY);
     if(areaFlag==0xffff)return;
     int offset = areaFlag / 32;
 
@@ -3997,12 +3849,12 @@ uint32 Player::GetRankFromDB(uint64 guid)
 uint32 Player::GetZoneIdFromDB(uint64 guid)
 {
     std::ostringstream ss;
-    ss<<"SELECT `map`,`instanceid`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<guid<<"'";
+    ss<<"SELECT `map`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<guid<<"'";
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
     if( !result )
         return 0;
 
-    return MapManager::Instance().GetMap((*result)[1].GetUInt32())->GetZoneId((*result)[2].GetFloat(),(*result)[3].GetFloat());
+    return MapManager::Instance().GetMap((*result)[0].GetUInt32())->GetZoneId((*result)[0].GetFloat(),(*result)[0].GetFloat());
 }
 
 //If players are too far way of duel flag... then player loose the duel
@@ -9796,11 +9648,8 @@ bool Player::LoadFromDB( uint32 guid )
     m_positionX = fields[7].GetFloat();
     m_positionY = fields[8].GetFloat();
     m_positionZ = fields[9].GetFloat();
-    m_orientation = fields[11].GetFloat();
     m_mapId = fields[10].GetUInt32();
-    m_instanceId = fields[23].GetUInt32();
-    if(m_instanceId == 0)
-        m_instanceId = m_mapId;
+    m_orientation = fields[11].GetFloat();
 
     // since last logout (in ms)
     uint32 time_diff = (time(NULL) - fields[21].GetUInt32()) * 1000;
@@ -9820,7 +9669,6 @@ bool Player::LoadFromDB( uint32 guid )
         sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %d Y: ^%d). Teleport to default race/class locations.",guid,m_positionX,m_positionY);
 
         m_mapId = info->mapId;
-        m_instanceId = m_mapId;
         m_positionX = info->positionX;
         m_positionY = info->positionY;
         m_positionZ = info->positionZ;
@@ -10296,9 +10144,8 @@ void Player::SaveToDB()
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
-
     ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,"
-        "`map`,`instanceid`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
+        "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`) VALUES ("
         << GetGUIDLow() << ", "
@@ -10308,7 +10155,6 @@ void Player::SaveToDB()
         << m_race << ", "
         << m_class << ", "
         << m_mapId << ", "
-        << m_instanceId << ", "
         << m_positionX << ", "
         << m_positionY << ", "
         << m_positionZ << ", "
@@ -10373,14 +10219,6 @@ void Player::SaveToDB()
     _SaveAuras();
     _SaveReputation();
     SavePet();
-
-    if(GetInstanceId()>1000)
-    {
-        Map* inmap = MapManager::Instance().GetMap(GetInstanceId());
-        if(inmap)
-            MapManager::Instance().SaveCopys(GetInstanceId(),inmap->GetCreater(),inmap->lefttime);
-    }
-    
 
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
@@ -10553,12 +10391,12 @@ inline void Player::SendAttackSwingNotInRange()
     GetSession()->SendPacket( &data );
 }
 
-void Player::SavePositionInDB(uint32 mapid,uint32 instanceid,float x,float y,float z,float o,uint64 guid)
+void Player::SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint64 guid)
 {
     std::ostringstream ss2;
     ss2 << "UPDATE `character` SET `position_x`='"<<x<<"',`position_y`='"<<y
         << "',`position_z`='"<<z<<"',`orientation`='"<<o<<"',`map`='"<<mapid
-        <<"',`instanceid`='"<<instanceid<< "' WHERE `guid`='"<<guid<<"'";
+        << "' WHERE `guid`='"<<guid<<"'";
     sDatabase.Execute(ss2.str().c_str());
 }
 

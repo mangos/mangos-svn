@@ -167,7 +167,7 @@ void Creature::AIM_Update(const uint32 &diff)
                 setDeathState( ALIVE );
                 clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
-                MapManager::Instance().GetMap(GetInstanceId())->Add(this);
+                MapManager::Instance().GetMap(GetMapId())->Add(this);
             }
             else
                 m_respawnTimer -= diff;
@@ -191,7 +191,7 @@ void Creature::AIM_Update(const uint32 &diff)
 
                 float x,y,z;
                 GetRespawnCoord(x, y, z);
-                MapManager::Instance().GetMap(GetInstanceId())->CreatureRelocation(this,x,y,z,GetOrientation());
+                MapManager::Instance().GetMap(GetMapId())->CreatureRelocation(this,x,y,z,GetOrientation());
             }
             else
                 m_deathTimer -= diff;
@@ -305,7 +305,6 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
     respawn_cord[1] = y;
     respawn_cord[2] = z;
     m_mapId =mapid;
-    m_instanceId =mapid;
     m_positionX =x;
     m_positionY=y;
     m_positionZ=z;
@@ -687,7 +686,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
         QueryResult *result;
         Field *fields;
         uint32 mapid=GetMapId();
-        Map* map=MapManager::Instance().GetMap( mapid );    //no need to change to instanceid
+        Map* map=MapManager::Instance().GetMap( mapid );
         uint16 areaflag=map->GetAreaFlag(m_positionX,m_positionY);
         uint32 zoneid=map->GetZoneId(areaflag);
         std::string areaname= gossip->Option;
@@ -896,8 +895,7 @@ void Creature::SaveToDB()
     ss << "INSERT INTO `creature` VALUES ("
         << GetGUIDLow () << ","
         << GetEntry() << ","
-        //<< m_mapId <<","
-        << m_instanceId <<","
+        << m_mapId <<","
         << m_positionX << ","
         << m_positionY << ","
         << m_positionZ << ","

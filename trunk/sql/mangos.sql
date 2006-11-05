@@ -153,7 +153,6 @@ CREATE TABLE `character` (
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  `insatnceid` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   `orientation` float NOT NULL default '0',
   `taximask` longtext,
   `online` tinyint(3) unsigned NOT NULL default '0',
@@ -1255,33 +1254,11 @@ CREATE TABLE `guild_rank` (
 -- Dumping data for table `guild_rank`
 --
 
+
 /*!40000 ALTER TABLE `guild_rank` DISABLE KEYS */;
 LOCK TABLES `guild_rank` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `guild_rank` ENABLE KEYS */;
-
---
--- Table structure for table `instance`
---
-
-DROP TABLE IF EXISTS `instance`;
-CREATE TABLE `instance` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'instance id',
-  `mapid` int(11) unsigned NOT NULL default '0' COMMENT 'real mapid',
-  `state` int(11) NOT NULL default '0' COMMENT 'this instance state',
-  `players` int(11) NOT NULL COMMENT 'map creater guid who in this instance',
-  `lefttime` int(11) NOT NULL default '0' COMMENT 'this instance  left time',
-   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `instance`
---
-
-/*!40000 ALTER TABLE `instance` DISABLE KEYS */;
-LOCK TABLES `instance` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `instance` ENABLE KEYS */;
 
 --
 -- Table structure for table `item_instance`

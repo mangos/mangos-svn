@@ -43,7 +43,7 @@ DynamicObject::DynamicObject() : Object()
 
 bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius )
 {
-    Object::_Create(guidlow, 0xF0007000, caster->GetInstanceId(), x, y, z, 0, (uint8)-1);
+    Object::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0, (uint8)-1);
 
     SetUInt32Value( OBJECT_FIELD_ENTRY, spellId );
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );
@@ -92,7 +92,7 @@ void DynamicObject::Update(uint32 p_time)
     MaNGOS::DynamicObjectUpdater notifier(*this);
     TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetInstanceId()));
+    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 }
 
 void DynamicObject::Delete()
