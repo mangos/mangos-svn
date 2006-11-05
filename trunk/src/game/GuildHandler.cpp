@@ -1378,4 +1378,9 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
     guild->SetEmblem(EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
 
     guild->Query(this);
+
+    WorldPacket data;
+    data.Initialize(MSG_SAVE_GUILD_EMBLEM);
+    data << (uint32)0;
+    SendPacket( &data );
 }

@@ -909,7 +909,7 @@ void Aura::HandleAuraMounted(bool apply)
     {
         CreatureInfo const* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
         if(!ci)return;
-        uint32 displayId = ci->DisplayID;
+        uint32 displayId = ci->randomDisplayID();
         if(displayId != 0)
             m_target->Mount(displayId);
     }else
@@ -1065,7 +1065,7 @@ void Aura::HandleAuraTransform(bool apply)
         }
         else
         {
-            m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
+            m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->randomDisplayID());
         }
         m_target->setTransForm(GetSpellProto()->Id);
     }
