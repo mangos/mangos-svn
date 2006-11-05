@@ -1,8 +1,12 @@
+#define _CRT_SECURE_NO_DEPRECATE
+
 #include <stdio.h>
 #include <vector>
 #include "dbcfile.h"
 #include "adt.h"
 #include "mpq_libmpq.h"
+#include <io.h>
+#include <fcntl.h>
 
 extern unsigned int iRes;
 bool ConvertADT(char*,char*);
@@ -35,7 +39,7 @@ void ExtractMapsFromMpq()
 {
 	char mpq_filename[128];
 	char output_filename[256];
-	char tmp[256];
+//	char tmp[256];
 //	sprintf(tmp,"%s/Data/%s",input_path,filename);
 
 	//MPQArchive* p=new MPQArchive(tmp);
@@ -120,7 +124,7 @@ int main(int argc, char * arg[])
 	{
 		sprintf(tmp,"%s/Data/%s",input_path,archiveNames[i]);
 		archives.push_back(new MPQArchive(tmp));
-	}
+    }
 	
 
 
@@ -142,7 +146,7 @@ int main(int argc, char * arg[])
 	//map.dbc
 	
 	//areatable.dbc
-	dbc= new DBCFile("DBFilesClient\\AreaTable.dbc");
+	dbc = new DBCFile("DBFilesClient\\AreaTable.dbc");
 	dbc->open();
 
 	unsigned int area_count=dbc->getRecordCount ();
@@ -163,15 +167,35 @@ int main(int argc, char * arg[])
 
 	//areatable.dbc
 
-
-
-
 	ExtractMapsFromMpq();
-
-
 
 	delete [] areas;
 	delete [] map_ids;
-	
+
+/*  // This would be nice someday (don't have time to get it to work right now):
+    cout << "Extracting dbc files..." << endl;
+    for (size_t i=3; i>0; i--)
+	{
+		vector<string> files = archives[i]->GetFileList();
+        for (vector<string>::iterator iter = files.begin(); iter != files.end(); iter++) {
+            if (memcmp((void *)(iter->c_str()), "DBFilesClient\\", strlen("DBFilesClient\\")) == 0) {
+                string tmp = "./dbc/";
+                tmp += (iter->c_str() + strlen("DBFilesClient\\"));
+                //mpq_hash hash = archives[i]->GetHashEntry(iter->c_str());
+                //if ((hash.blockindex != 0xFFFFFFFF) && (hash.blockindex != 0)) {
+                    MPQFile m(iter->c_str());
+                    if(!m.isEof ()) {
+	                    int fd = _open(tmp.c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
+                        _write(fd, m.getBuffer(), m.getSize());
+                        _close(fd);
+                    }
+                    //if (libmpq_file_extract(&archives[i]->mpq_a, hash.blockindex, tmp.c_str())) {
+                    //    cout << "Error writing " << tmp.c_str() << endl;
+                    //}
+            }
+                //cout << iter->c_str() << endl;
+        }
+    }
+*/	
 	return (0); // Exit The Program
 }
