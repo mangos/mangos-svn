@@ -141,9 +141,13 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
         if(mysql_query(mMysql, sql))
         {
-            ERROR_LOG( "SQL: %s\n", sql );
-            ERROR_LOG( (std::string("query ERROR: ") + mysql_error(mMysql)).c_str() );
+            sLog.outError( "SQL: %s", sql );
+            sLog.outError("query ERROR: %s", mysql_error(mMysql));
             return NULL;
+        }
+        else
+        {
+            DEBUG_LOG( "SQL: %s", sql );
         }
 
         result = mysql_store_result(mMysql);
@@ -166,7 +170,6 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
     queryResult->NextRow();
 
-    DEBUG_LOG( "SQL: %s", sql );
     return queryResult;
 }
 
@@ -179,11 +182,15 @@ bool DatabaseMysql::Execute(const char *sql)
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
 
-        DEBUG_LOG( (std::string("SQL: ") + sql).c_str() );
         if(mysql_query(mMysql, sql))
         {
-            ERROR_LOG( (std::string("SQL ERROR: ") + mysql_error(mMysql)).c_str() );
+            sLog.outError("SQL: %s", sql);
+            sLog.outError("SQL ERROR: %s", mysql_error(mMysql));
             return false;
+        }
+        else
+        {
+            DEBUG_LOG("SQL: %s", sql);
         }
         // end guarded block
     }

@@ -312,7 +312,7 @@ Map::Add(T *obj)
 
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        ERROR_LOG("Map::Add: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        sLog.outError("Map::Add: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
@@ -344,7 +344,7 @@ Map::Find(T *obj) const
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        ERROR_LOG("Map::Add: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        sLog.outError("Map::Add: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return false;
     }
 
@@ -369,7 +369,7 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl)
     CellPair p = MaNGOS::ComputeCellPair(x,y);
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        ERROR_LOG("Map::GetObjectNear: invalid coordiates supplied X:%u Y:%u grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
+        sLog.outError("Map::GetObjectNear: invalid coordiates supplied X:%u Y:%u grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
         return false;
     }
 
@@ -424,7 +424,7 @@ void Map::MessageBoardcast(Object *obj, WorldPacket *msg)
 
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        ERROR_LOG("Map::MessageBoardcast: Object " I64FMTD " have invalide coordinates X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        sLog.outError("Map::MessageBoardcast: Object " I64FMTD " have invalide coordinates X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
@@ -513,7 +513,7 @@ Map::Remove(T *obj, bool remove)
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        ERROR_LOG("Map::Remove: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        sLog.outError("Map::Remove: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 
