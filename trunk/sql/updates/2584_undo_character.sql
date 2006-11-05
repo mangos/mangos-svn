@@ -1,1 +1,0 @@
-ALTER TABLE `character` DROP COLUMN `instanceid`;
