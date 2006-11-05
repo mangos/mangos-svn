@@ -253,7 +253,7 @@ void Guild::LoadPlayerStats(MemberSlot* memslot)
     memslot->Class = fields[1].GetUInt8();
 
     vector<string> tokens = StrSplit(fields[5].GetCppString(), " ");
-    memslot->level = Player::GetUInt32ValueFromString(tokens,UNIT_FIELD_LEVEL);
+    memslot->level = Player::GetUInt32ValueFromArray(tokens,UNIT_FIELD_LEVEL);
 
     AreaTableEntry* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(fields[2].GetUInt32())->GetAreaFlag(fields[3].GetFloat(),fields[4].GetFloat()));
     if (area)                                               // For example: .worldport -2313 478 48 1    Zone will be 0(unkonown), even though it's a usual cave
