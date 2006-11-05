@@ -212,6 +212,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
+    loginDatabase.escape_string(account);
+
     QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey` FROM `account` WHERE `username` = '%s'", account.c_str());
 
     if ( !result )
@@ -289,12 +291,12 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     //Send Auth is okey
     packet.Initialize( SMSG_AUTH_RESPONSE );
     packet << uint8( AUTH_OK );                             //0x0C
-    packet << uint8( 0xB0 );
-    packet << uint8( 0x09 );
-    packet << uint8( 0x02 );
-    packet << uint8( 0x00 );
-    packet << uint8( 0x02 );
-    packet << uint32( 0x0 );
+    //packet << uint8( 0xB0 ); - redundent
+    //packet << uint8( 0x09 );
+    //packet << uint8( 0x02 );
+    //packet << uint8( 0x00 );
+    //packet << uint8( 0x02 );
+    //packet << uint32( 0x0 );
 
     SendPacket(&packet);
 

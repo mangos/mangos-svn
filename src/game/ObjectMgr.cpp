@@ -250,11 +250,13 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     return pPlayerCreateInfo;
 }
 
+// name must be checked to correctness (if recived) before call this function
 uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 {
 
     uint64 guid = 0;
 
+    // Player name safe to sending to DB (checked at login) and this function using
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name);
 
     if(result)

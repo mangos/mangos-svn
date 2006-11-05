@@ -79,6 +79,19 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     normalizePlayerName(name);
 
+    // prevent sending (not from client) wrong names creating
+    std::string name2 = name;
+    sDatabase.escape_string(name);
+
+    // normal name will not affected by escape_string
+    if(name != name2)
+    {
+        data.Initialize( SMSG_CHAR_CREATE );
+        data << (uint8)0x33;
+        SendPacket( &data );
+        return;
+    }
+
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
 
     if ( result )

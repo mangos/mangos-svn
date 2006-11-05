@@ -147,8 +147,16 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 uint64 rc = MAKE_GUID(ah->bidder,HIGHGUID_PLAYER);
                 Player *rpl = objmgr.GetPlayer(rc);
 
+                //escape apostrophes
+                std::string subject = n->subject;
+                std::string body = n->body;
+                sDatabase.escape_string(body);
+                sDatabase.escape_string(subject);
+
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", n->messageID);
-                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", n->messageID , n->sender , n->receiver , n->subject.c_str() , n->body.c_str(), n->item , (uint64)n->time ,n->money ,n->COD ,n->checked);
+                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                    n->messageID , n->sender , n->receiver , subject.c_str() , body.c_str(), n->item , (uint64)n->time ,n->money ,n->COD ,n->checked);
 
                 if (rpl)
                 {
@@ -293,8 +301,16 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 mrpln->AddMail(m);
             }
 
+            //escape apostrophes
+            std::string subject = m->subject;
+            std::string body = m->body;
+            sDatabase.escape_string(body);
+            sDatabase.escape_string(subject);
+
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
+                m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 
             // mail to last bidder if there's one... + return money 
             // EXCEPT if lastbidder == newbidder
@@ -314,8 +330,16 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
                 Player *rpl2 = objmgr.GetPlayer(MAKE_GUID(ah->bidder,HIGHGUID_PLAYER));
 
+                //escape apostrophes
+                std::string subject = mn2->subject;
+                std::string body = mn2->body;
+                sDatabase.escape_string(body);
+                sDatabase.escape_string(subject);
+
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
-                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn2->messageID , mn2->sender , mn2->receiver , mn2->subject.c_str() , mn2->body.c_str(), mn2->item , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
+                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                    mn2->messageID , mn2->sender , mn2->receiver , subject.c_str() , body.c_str(), mn2->item , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
 
                 if (rpl2)
                 {
@@ -350,8 +374,18 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             mn->COD = 0;
             mn->checked = 0;
 
-            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u';", mn->messageID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, (uint64)mn->time, mn->money, 0, 0);
+            {
+                //escape apostrophes
+                std::string subject = mn->subject;
+                std::string body = mn->body;
+                sDatabase.escape_string(body);
+                sDatabase.escape_string(subject);
+
+                sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u';", mn->messageID);
+                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                    "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u');", 
+                    mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item, (uint64)mn->time, mn->money, 0, 0);
+            }
 
             rcpl = MAKE_GUID(mn->receiver,HIGHGUID_PLAYER);
             Player *rpln = objmgr.GetPlayer(rcpl);
@@ -494,8 +528,17 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
                 m->money = ah->bid;
                 m->COD = 0;
                 m->checked = 0;           
+
+                //escape apostrophes
+                std::string subject = m->subject;
+                std::string body = m->body;
+                sDatabase.escape_string(body);
+                sDatabase.escape_string(subject);
+
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
-                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID , m->sender , m->receiver , m->subject.c_str() , m->body.c_str(), m->item , (uint64)m->time ,m->money ,m->COD ,m->checked);
+                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                    m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
     
                 uint64 mrcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
                 Player *mrpln = objmgr.GetPlayer(mrcpl);
@@ -518,8 +561,17 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             mn2->money = 0;
             mn2->COD = 0;
             mn2->checked = 0;           
+
+            //escape apostrophes
+            std::string subject = mn2->subject;
+            std::string body = mn2->body;
+            sDatabase.escape_string(body);
+            sDatabase.escape_string(subject);
+
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn2->messageID , mn2->sender , mn2->receiver , mn2->subject.c_str() , mn2->body.c_str(), mn2->item , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                mn2->messageID , mn2->sender , mn2->receiver , subject.c_str() , body.c_str(), mn2->item , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
     
             uint64 mrcpl2 = MAKE_GUID(mn2->receiver,HIGHGUID_PLAYER);
             Player *mrpln2 = objmgr.GetPlayer(mrcpl2);

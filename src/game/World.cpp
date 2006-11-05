@@ -392,8 +392,16 @@ void World::Update(time_t diff)
                             receive->AddMItem(it);
                         }
 
+                        //escape apostrophes
+                        std::string subject = m->subject;
+                        std::string body = m->body;
+                        sDatabase.escape_string(body);
+                        sDatabase.escape_string(subject);
+
                         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, 0, 0, 0);
+                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, 0, 0, 0);
 
                         delete m;
                     }
@@ -458,8 +466,18 @@ void World::Update(time_t diff)
                     m->COD = 0;
                     m->checked = 0;
 
-                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
+                    {
+                        //escape apostrophes
+                        std::string subject = m->subject;
+                        std::string body = m->body;
+                        sDatabase.escape_string(body);
+                        sDatabase.escape_string(subject);
+
+                        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
+                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
+                    }
 
                     Player *rpl = objmgr.GetPlayer(MAKE_GUID(m->receiver,HIGHGUID_PLAYER));
                     if (rpl)
@@ -483,8 +501,18 @@ void World::Update(time_t diff)
 
                     Item *it = objmgr.GetAItem(itr->second->item);
 
-                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn->messageID);
-                    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, (uint64)mn->time, 0, 0, 0);
+                    {
+                        //escape apostrophes
+                        std::string subject = mn->subject;
+                        std::string body = mn->body;
+                        sDatabase.escape_string(body);
+                        sDatabase.escape_string(subject);
+
+                        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn->messageID);
+                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                            mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item, (uint64)mn->time, 0, 0, 0);
+                    }
 
                     Player *rpl1 = objmgr.GetPlayer(MAKE_GUID(mn->receiver,HIGHGUID_PLAYER));
                     if (rpl1)

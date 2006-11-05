@@ -35,18 +35,24 @@
 bool ChatHandler::HandleTargetObjectCommand(const char* args)
 {
 
+    Player* pl = m_session->GetPlayer();
     QueryResult *result;
 
     if(*args)
     {
         int32 id = atoi((char*)args);
         if(id)
-            result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i AND `id` = '%u' ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),id);
+            result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `gameobject` WHERE `map` = '%i' AND `id` = '%u' ORDER BY `order` ASC LIMIT 1",
+            pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(),id);
         else
+        {
+            std::string name = args;
+            sDatabase.escape_string(name);
             result = sDatabase.PQuery(
                 "SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` "
                 "FROM `gameobject`,`gameobject_template` WHERE `gameobject_template`.`entry` = `gameobject`.`id` AND `map` = %i AND `name` LIKE '%%%s%%' ORDER BY `order` ASC LIMIT 1",
-                m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),args);
+                pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(),name.c_str());
+        }
     }
     else
         result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId());
@@ -1021,7 +1027,11 @@ bool ChatHandler::HandleTicketCommand(const char* args)
         return true;
     }
 
-    uint64 guid = objmgr.GetPlayerGUIDByName(px);
+    std::string name = px;
+    normalizePlayerName(name);
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+
+    uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
 
     if(!guid)
         return false;
@@ -1136,6 +1146,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
 
     std::string name = px;
     normalizePlayerName(name);
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
 

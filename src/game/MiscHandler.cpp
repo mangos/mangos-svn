@@ -38,17 +38,6 @@
 #include "BattleGround.h"
 #include "SpellAuras.h"
 
-void my_esc( char * r, const char * s )
-{
-    int i, j;
-    for ( i = 0, j = 0; s[i]; i++ )
-    {
-        if ( s[i] == '"' || s[i] == '\\' || s[i] == '\'' ) r[j++] = '\\';
-        r[j++] = s[i];
-    }
-    r[j] = 0;
-}
-
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_REPOP_REQUEST Message" );
@@ -250,12 +239,11 @@ void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint32 guid = GetPlayer()->GetGUIDLow();
     std::string ticketText = "";
-    char * p, p1[512];
     uint8 buf[516];
     memcpy( buf, recv_data.contents(), sizeof buf <recv_data.size() ? sizeof buf : recv_data.size() );
-    p = (char *)buf + 1;
-    my_esc( p1, (const char *)buf + 1 );
-    ticketText = p1;
+
+    ticketText = (char *)buf + 1;
+    sDatabase.escape_string(ticketText);
     sDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), guid);
 
 }
@@ -283,14 +271,13 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
     guid = GetPlayer()->GetGUIDLow();
     std::string ticketText = "";
     Field *fields;
-    char * p, p1[512];
     uint8 buf[516];
     uint32   cat[] = { 0,5,1,2,0,6,4,7,0,8,3 };
     memcpy( buf, recv_data.contents(), sizeof buf < recv_data.size() ? sizeof buf : recv_data.size() );
     buf[272] = 0;
-    p = (char *)buf + 17;
-    my_esc( p1, (const char *)buf + 17 );
-    ticketText = p1;
+
+    ticketText = (char *)buf + 17;
+    sDatabase.escape_string(ticketText);
 
     QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'",guid);
 
@@ -486,6 +473,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     recv_data >> friendName;
 
     normalizePlayerName(friendName);
+    sDatabase.escape_string(friendName);                    // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDetail( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
@@ -589,6 +577,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     recv_data >> IgnoreName;
 
     normalizePlayerName(IgnoreName);
+    sDatabase.escape_string(IgnoreName);                    // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDetail( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
@@ -678,6 +667,9 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
     sLog.outDebug( type.c_str( ) );
     sLog.outDebug( content.c_str( ) );
 
+
+    sDatabase.escape_string(type);
+    sDatabase.escape_string(content);
     sDatabase.PExecute ("INSERT INTO `bugreport` (`type`,`content`) VALUES('%s', '%s')", type.c_str( ), content.c_str( ));
 
 }
