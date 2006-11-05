@@ -366,10 +366,10 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
     if (!GetPlayer()->IsInGroup())
         return;
 
-    GetPlayer()->UnSetInGroup();
-
     Group *group;
     group = objmgr.GetGroupByLeader(GetPlayer()->GetGroupLeader());
+
+    GetPlayer()->UnSetInGroup();
 
     sLog.outDebug( "GROUP: is in group?:%u",GetPlayer()->m_isInGroup);
 

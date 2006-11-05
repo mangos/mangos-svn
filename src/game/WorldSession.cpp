@@ -135,7 +135,6 @@ void WorldSession::LogoutPlayer(bool Save)
 
         if (_player->IsInGroup())
         {
-            _player->UnSetInGroup();
             Group *group;
             group = objmgr.GetGroupByLeader(_player->GetGroupLeader());
             if(group!=NULL)
@@ -150,6 +149,7 @@ void WorldSession::LogoutPlayer(bool Save)
                     delete group;
                 }
             }
+            _player->UnSetInGroup();
         }
         Guild *guild;
         guild = objmgr.GetGuildById(_player->GetGuildId());
