@@ -151,6 +151,9 @@ Player::Player (WorldSession *session): Unit()
 
     m_mailsLoaded = false;
     m_mailsUpdated = false;
+
+    m_resetTalentsCost = 0;
+    m_resetTalentsTime = 0;
 }
 
 Player::~Player ()
@@ -1993,13 +1996,48 @@ bool Player::removeSpell(uint16 spell_id)
     return false;
 }
 
+uint32 Player::resetTalentsCost() const
+{
+    // The first time reset costs 1 gold
+    if(m_resetTalentsCost < 1*GOLD)
+        return 1*GOLD;
+    // then 5 gold
+    else if(m_resetTalentsCost < 5*GOLD)
+        return 5*GOLD;
+    // After that it increases in increments of 5 gold 
+    else if(m_resetTalentsCost < 10*GOLD)
+        return 10*GOLD;
+    else
+    {
+        uint32 months = (sWorld.GetLastTickTime() - m_resetTalentsTime)/MONTH;
+        if(months > 0)
+        {
+            // This cost will be reduced by a rate of 5 gold per month
+            int32 new_cost = int32(m_resetTalentsCost) - 5*GOLD*months;
+            // to a minimum of 10 gold.
+            return (new_cost < 10*GOLD ? 10*GOLD : new_cost);
+        }
+        else
+        {
+            // After that it increases in increments of 5 gold 
+            int32 new_cost = m_resetTalentsCost + 5*GOLD;
+            // until it hits a cap of 50 gold. 
+            if(new_cost > 50*GOLD)
+                new_cost = 50*GOLD;
+            return new_cost;
+        }
+    }
+}
+
 bool Player::resetTalents()
 {
     uint32 level = getLevel();
     if (level < 10 || (GetUInt32Value(PLAYER_CHARACTER_POINTS1) >= level - 9))
         return false;
+    
+    uint32 cost = resetTalentsCost();
 
-    if (GetMoney() < resetTalentsCost())
+    if (GetMoney() < cost)
     {
         SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
         return false;
@@ -2028,7 +2066,10 @@ bool Player::resetTalents()
     }
 
     SetUInt32Value(PLAYER_CHARACTER_POINTS1, level - 9);
-    ModifyMoney(-(int32)resetTalentsCost());
+    ModifyMoney(-(int32)cost);
+    
+    m_resetTalentsCost = cost;
+    m_resetTalentsTime = time(NULL);
     return true;
 }
 
@@ -9539,8 +9580,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting` FROM `character` WHERE `guid` = '%u'",guid);
+    //                                             0      1       2         3      4      5      6       7            8            9            10    11            12         13       14             15         16       17          18          19          20           21            22                  23                  24
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
     {
@@ -9639,6 +9680,9 @@ bool Player::LoadFromDB( uint32 guid )
     m_cinematic = fields[17].GetUInt32();
     m_Played_time[0]= fields[18].GetUInt32();
     m_Played_time[1]= fields[19].GetUInt32();
+
+    m_resetTalentsCost = fields[23].GetUInt32();
+    m_resetTalentsTime = fields[24].GetUInt64();
 
     if( HasFlag(PLAYER_FLAGS, 8) )
         SetUInt32Value(PLAYER_FLAGS, 0);
@@ -10100,7 +10144,10 @@ void Player::SaveToDB()
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
-    ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`) VALUES ("
+    ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,"
+        "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
+        "`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,"
+        "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`) VALUES ("
         << GetGUIDLow() << ", "
         << realmID << ", "
         << GetSession()->GetAccountId() << ", '"
@@ -10147,9 +10194,13 @@ void Player::SaveToDB()
     ss << ", ";
     ss << rest_bonus;
     ss << ", ";
-    ss << time(NULL);
+    ss << (uint64)time(NULL);
     ss << ", ";
     ss << is_logout_resting;
+    ss << ", ";
+    ss << m_resetTalentsCost;
+    ss << ", ";
+    ss << (uint64)m_resetTalentsTime;
 
     ss << " )";
 

@@ -796,7 +796,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
         bool resetTalents();
-        uint32 resetTalentsCost() const { return getLevel()*10000; }
+        uint32 resetTalentsCost() const;
 
         PlayerSpellMap const& GetSpellMap() { return m_spells; };
 
@@ -1290,6 +1290,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         float rest_bonus;
         int rest_type;
         ////////////////////Rest System/////////////////////
+
+        uint32 m_resetTalentsCost;
+        time_t m_resetTalentsTime;
 };
 
 int irand(int min, int max);

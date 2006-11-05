@@ -165,6 +165,8 @@ CREATE TABLE `character` (
   `logout_time` int(11) NOT NULL DEFAULT '0',
   `is_logout_resting` int(11) NOT NULL DEFAULT '0',
   `rest_bonus` FLOAT NOT NULL DEFAULT '0',
+  `resettalents_cost` int(11) unsigned NOT NULL default '0',
+  `resettalents_time` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),

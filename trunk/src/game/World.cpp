@@ -146,7 +146,6 @@ void World::SetInitialWorldSettings()
     std::string dataPath="./";
 
     srand((unsigned int)time(NULL));
-    m_lastTick = time(NULL);
 
    if(!sConfig.GetString("DataDir",&dataPath))
         dataPath="./";
@@ -638,9 +637,6 @@ void World::KickPlayer(char* playerName)
 time_t World::_UpdateGameTime()
 {
     time_t thisTime = time(NULL);
-
-    if(m_lastTick == 0)
-        m_lastTick = thisTime;
 
     uint32 elapsed = uint32(thisTime - m_Last_tick);
 
