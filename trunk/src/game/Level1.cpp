@@ -126,6 +126,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -184,6 +185,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -1253,8 +1255,9 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         delete result;
         return true;
     }
-    char *name = (char*)args;
-    result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name);
+    std::string name = args;
+    sDatabase.escape_string(name);
+    result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
     if (!result)
     {
         SendSysMessage("Teleport location not found!");
@@ -1287,7 +1290,12 @@ bool ChatHandler::HandleSearchTeleCommand(const char * args)
         return true;
     }
     char const* str = strtok((char*)args, " ");
-    result = sDatabase.PQuery("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",str);
+    if(!str)
+        return false;
+
+    std::string namepart = str;
+    sDatabase.escape_string(namepart);
+    result = sDatabase.PQuery("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",namepart.c_str());
     if (!result)
     {
         SendSysMessage("There are no teleport locations matching your request.");

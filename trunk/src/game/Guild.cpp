@@ -74,10 +74,20 @@ void Guild::create(uint64 lGuid, std::string gname)
     }
     else Id = 1;
 
+    // gname already assigned to Guild::name, use it to encode string for DB
+    sDatabase.escape_string(gname);
+
+    std::string dbGINFO = GINFO;
+    std::string dbMOTD = MOTD;
+    sDatabase.escape_string(dbGINFO);
+    sDatabase.escape_string(dbMOTD);
+
     // sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid`='%u'", Id); - MAX(`guildid`)+1 not exist
     sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid`='%u'", Id);
     sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guildid`='%u'", Id);
-    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`info`,`MOTD`,`createdate`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) VALUES('%u','%s','%u', '%s', '%s', NOW(),'%u','%u','%u','%u','%u')", Id, name.c_str(), GUID_LOPART(leaderGuid), GINFO.c_str(), MOTD.c_str(), EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
+    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`info`,`MOTD`,`createdate`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) "
+        "VALUES('%u','%s','%u', '%s', '%s', NOW(),'%u','%u','%u','%u','%u')", 
+        Id, gname.c_str(), GUID_LOPART(leaderGuid), dbGINFO.c_str(), dbMOTD.c_str(), EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
 
     rname = "Guild Master";
     CreateRank(rname,GR_RIGHT_ALL);
@@ -138,7 +148,13 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
     newmember.zoneId = plZone;
     members.push_back(newmember);
 
-    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')", Id, GUID_LOPART(newmember.guid), newmember.RankId, newmember.Pnote.c_str(), newmember.OFFnote.c_str());
+    std::string dbPnote = newmember.Pnote;
+    std::string dbOFFnote = newmember.OFFnote;
+    sDatabase.escape_string(dbPnote);
+    sDatabase.escape_string(dbOFFnote);
+
+    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')", 
+        Id, GUID_LOPART(newmember.guid), newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
 
     if(pl)
     {
@@ -157,6 +173,8 @@ void Guild::SetMOTD(std::string motd)
 {
     MOTD = motd;
 
+    // motd now can be used for encoding to DB
+    sDatabase.escape_string(motd);
     sDatabase.PExecute("UPDATE `guild` SET `MOTD`='%s' WHERE `guildid`='%u'", motd.c_str(), Id);
 }
 
@@ -164,6 +182,8 @@ void Guild::SetGINFO(std::string ginfo)
 {
     GINFO = ginfo;
 
+    // ginfo now can be used for encoding to DB
+    sDatabase.escape_string(ginfo);
     sDatabase.PExecute("UPDATE `guild` SET `info`='%s' WHERE `guildid`='%u'", ginfo.c_str(), Id);
 }
 
@@ -397,7 +417,10 @@ void Guild::SetPNOTE(uint64 guid,std::string pnote)
         if (itr->guid == guid)
         {
             itr->Pnote = pnote;
-            sDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", itr->Pnote.c_str(), GUID_LOPART(itr->guid));
+
+            // pnote now can be used for encoding to DB
+            sDatabase.escape_string(pnote);
+            sDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", pnote.c_str(), GUID_LOPART(itr->guid));
             break;
         }
     }
@@ -411,7 +434,9 @@ void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
         if (itr->guid == guid)
         {
             itr->OFFnote = offnote;
-            sDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", itr->OFFnote.c_str(), GUID_LOPART(itr->guid));
+            // offnote now can be used for encoding to DB
+            sDatabase.escape_string(offnote);
+            sDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", offnote.c_str(), GUID_LOPART(itr->guid));
             break;
         }
     }
@@ -483,9 +508,12 @@ void Guild::CreateRank(std::string name,uint32 rights)
     }
     else
         rid = 0;
-    sDatabase.PExecute( "INSERT INTO `guild_rank` (`guildid`,`rid`,`rname`,`rights`) VALUES ('%u', '%u', '%s', '%u')", Id, rid, name.c_str(), rights );
 
     ranks.push_back(RankInfo(name,rights));
+
+    // name now can be used for encoding to DB
+    sDatabase.escape_string(name);
+    sDatabase.PExecute( "INSERT INTO `guild_rank` (`guildid`,`rid`,`rname`,`rights`) VALUES ('%u', '%u', '%s', '%u')", Id, rid, name.c_str(), rights );
 }
 
 void Guild::AddRank(std::string name,uint32 rights)
@@ -548,6 +576,9 @@ void Guild::SetRankName(uint32 rankId, std::string name)
         }
         i++;
     }
+
+    // name now can be used for encoding to DB
+    sDatabase.escape_string(name);
     sDatabase.PExecute("UPDATE `guild_rank` SET `rname`='%s' WHERE `rid`='%u' AND `guildid`='%u'", name.c_str(), (rankId+1), Id);
 }
 

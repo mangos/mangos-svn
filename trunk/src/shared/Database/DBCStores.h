@@ -71,8 +71,6 @@ bool IsSingleTarget(uint32 spellId);
 AreaTableEntry* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry* GetAreaEntryByAreaFlag(uint32 area_flag);
 
-void EscapeApostrophes(std::string & s);                    //used when inserting to Mysql
-
 template<class T>
 class DBCStorage
 {

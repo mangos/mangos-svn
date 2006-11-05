@@ -10292,13 +10292,16 @@ void Player::_SaveMail()
     for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
     {
         Mail *m = (*itr);
-        std::string subject, body;
+
         //escape apostrophes
-        subject = m->subject;
-        body = m->body;
-        EscapeApostrophes(body);
-        EscapeApostrophes(subject);
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
+        std::string subject = m->subject;
+        std::string body = m->body;
+        sDatabase.escape_string(body);
+        sDatabase.escape_string(subject);
+
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
     }
     m_mailsUpdated = false;
 }

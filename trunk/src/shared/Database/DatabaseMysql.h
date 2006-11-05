@@ -49,6 +49,7 @@ class DatabaseMysql : public Database
         operator bool () const { return mMysql != NULL; }
 
         unsigned long escape_string(char *to, const char *from, unsigned long length);
+        using Database::escape_string;
 
         // must be call before first query in thread
         void ThreadStart();

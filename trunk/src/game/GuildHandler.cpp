@@ -114,9 +114,10 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     Item *charter = _player->GetItemByPos(dest);
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
 
-    EscapeApostrophes(guildname);
+    sDatabase.escape_string(guildname);
     sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u' OR `charterguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
-    sDatabase.PExecute("INSERT INTO `guild_charter` (`ownerguid`, `charterguid`, `guildname`) VALUES ('%u', '%u', '%s')", _player->GetGUIDLow(), charter->GetGUIDLow(), guildname.c_str());
+    sDatabase.PExecute("INSERT INTO `guild_charter` (`ownerguid`, `charterguid`, `guildname`) VALUES ('%u', '%u', '%s')", 
+        _player->GetGUIDLow(), charter->GetGUIDLow(), guildname.c_str());
 }
 
 void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
@@ -264,8 +265,9 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
     }
 
     std::string db_newguildname = newguildname;
-    EscapeApostrophes(db_newguildname);
-    sDatabase.PExecute("UPDATE `guild_charter` SET `guildname` = '%s' WHERE `charterguid` = '%u'", db_newguildname.c_str(), GUID_LOPART(petitionguid));
+    sDatabase.escape_string(db_newguildname);
+    sDatabase.PExecute("UPDATE `guild_charter` SET `guildname` = '%s' WHERE `charterguid` = '%u'", 
+        db_newguildname.c_str(), GUID_LOPART(petitionguid));
 
     sLog.outDebug("Petition (GUID: %u) renamed to '%s'", GUID_LOPART(petitionguid), newguildname.c_str());
     WorldPacket data;
@@ -697,6 +699,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
     recvPacket >> plName;
 
     normalizePlayerName(plName);
+    sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -825,6 +828,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     recvPacket >> plName;
 
     normalizePlayerName(plName);
+    sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -892,6 +896,8 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_DEMOTE"  );
 
     recvPacket >> plName;
+    normalizePlayerName(plName);
+    sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -1027,6 +1033,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 
     recvPacket >> name;
     normalizePlayerName(name);
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
     
     newLeader = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     if(newLeader)
@@ -1124,6 +1131,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> name;
     normalizePlayerName(name);
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -1178,6 +1186,7 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     recvPacket >> plName;
 
     normalizePlayerName(plName);
+    sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());

@@ -1189,17 +1189,25 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     if (itemId == 0)
     {
-        char *citemName = strtok(NULL, "");
-        QueryResult *result = sDatabase.PQuery("SELECT entry FROM item_template WHERE name = '%s'", citemName);
-        if (!result)
+        char* citemName = strtok(NULL, "");
+        if(citemName)
         {
-            WorldPacket data;
-            FillSystemMessageData(&data, m_session, fmtstring("Could not find '%s'", citemName));
-            m_session->SendPacket(&data);
+            std::string itemName = citemName;
+            sDatabase.escape_string(itemName);
+            QueryResult *result = sDatabase.PQuery("SELECT entry FROM item_template WHERE name = '%s'", itemName.c_str());
+            if (!result)
+            {
+                PSendSysMessage("Could not find '%s'", citemName);
+                return true;
+            }
+            itemId = result->Fetch()->GetUInt16();
+            delete result;
+        }
+        else
+        {
+            PSendSysMessage("Could not find: '%s'", citemName);
             return true;
         }
-        itemId = result->Fetch()->GetUInt16();
-        delete result;
     }
 
     if (ccount) { count = atol(ccount); }
@@ -1311,8 +1319,10 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
 {
     if(!*args)
         return false;
+    std::string namepart = args;
+    sDatabase.escape_string(namepart);
 
-    QueryResult *result=sDatabase.PQuery("SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\"",args);
+    QueryResult *result=sDatabase.PQuery("SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
     if(!result)
     {
         SendSysMessage("No items found!");
@@ -2380,9 +2390,10 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     QueryResult *result;
     Player *player=m_session->GetPlayer();
     if (!player) return false;
-    char *name=(char*)args;
 
-    result = sDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s'",name);
+    std::string name = args;
+    sDatabase.escape_string(name);
+    result = sDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
     if (result)
     {
         SendSysMessage("Teleport location already exists!");
@@ -2396,10 +2407,13 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     float ort = player->GetOrientation();
     int mapid = player->GetMapId();
 
-    if(sDatabase.PExecute("INSERT INTO `game_tele` (`position_x`,`position_y`,`position_z`,`orientation`,`map`,`name`) VALUES (%f,%f,%f,%f,%d,'%s')",x,y,z,ort,mapid,name))
+    if(sDatabase.PExecute("INSERT INTO `game_tele` (`position_x`,`position_y`,`position_z`,`orientation`,`map`,`name`) VALUES (%f,%f,%f,%f,%d,'%s')",x,y,z,ort,mapid,name.c_str()))
     {
         SendSysMessage("Teleport location added.");
     }
+    else
+        SendSysMessage("Teleport location NOT added: db error.");
+
     return true;
 }
 
@@ -2408,8 +2422,10 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     if(!*args)
         return false;
 
-    char *name=(char*)args;
-    QueryResult *result=sDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s'",name);
+    std::string name = args;
+    sDatabase.escape_string(name);
+
+    QueryResult *result=sDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
     if (!result)
     {
         SendSysMessage("Teleport location not found!");
@@ -2417,10 +2433,12 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     }
     delete result;
 
-    if(sDatabase.PExecute("DELETE FROM `game_tele` WHERE `name` = '%s'",name))
+    if(sDatabase.PExecute("DELETE FROM `game_tele` WHERE `name` = '%s'",name.c_str()))
     {
         SendSysMessage("Teleport location deleted.");
     }
+    else
+        SendSysMessage("Teleport location NOT deleted: DB error.");
     return true;
 }
 
