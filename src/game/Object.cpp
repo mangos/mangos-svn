@@ -44,6 +44,7 @@ Object::Object( )
     m_orientation       = 0.0f;
 
     m_mapId             = 0;
+    m_instanceId        = 0;
 
     m_uint32Values      = 0;
 
@@ -93,7 +94,8 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, fl
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
     SetUInt32Value( OBJECT_FIELD_ENTRY,nameId);
-    m_mapId = mapid;
+    m_mapId = mapid;    //TODO: instace: this mapid here must be "instanceid" but not change it now.
+    m_instanceId = mapid;
     m_positionX = x;
     m_positionY = y;
     m_positionZ = z;
@@ -356,7 +358,7 @@ void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, f
 
 void Object::SendMessageToSet(WorldPacket *data, bool bToSelf)
 {
-    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data);
+    MapManager::Instance().GetMap(m_instanceId)->MessageBoardcast(this, data);
 }
 
 bool Object::LoadValues(const char* data)
@@ -520,12 +522,12 @@ void Object::RemoveFlag( uint16 index, uint32 oldFlag )
 
 uint32 Object::GetZoneId() const
 {
-    return MapManager::Instance().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
+    return MapManager::Instance().GetMap(m_instanceId)->GetZoneId(m_positionX,m_positionY);
 }
 
 uint32 Object::GetAreaId() const
 {
-    return MapManager::Instance().GetMap(m_mapId)->GetAreaId(m_positionX,m_positionY);
+    return MapManager::Instance().GetMap(m_instanceId)->GetAreaId(m_positionX,m_positionY);
 }
 
 float Object::GetDistanceSq(const Object* obj) const        //slow
@@ -567,7 +569,7 @@ float Object::GetDistanceZ(const Object* obj) const
 
 bool Object::IsWithinDistInMap(const Object* obj, const float dist2compare) const
 {
-    if (GetMapId()!=obj->GetMapId()) return false;
+    if (GetInstanceId()!=obj->GetInstanceId()) return false;
     return IsWithinDist(obj, dist2compare);
 }
 

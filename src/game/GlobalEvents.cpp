@@ -40,19 +40,19 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             float positionY = fields[2].GetFloat();
             //float positionZ = fields[4].GetFloat();
             //float ort       = fields[5].GetFloat();
-            uint32 mapid    = fields[3].GetUInt32();
+            uint32 instanceId    = fields[3].GetUInt32();
 
             uint64 guid = MAKE_GUID(guidlow,HIGHGUID_CORPSE);
 
-            sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,mapid);
+            sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f instanceId:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,instanceId);
 
             // not load grid if grid not loaded for corpse/bones removing
-            if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))
+            if(!MapManager::Instance().GetMap(instanceId)->IsRemovalGrid(positionX,positionY))
             {
                 // convert corpse to bones
                 if(type==CORPSE_RESURRECTABLE)
                 {
-                    Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
+                    Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,instanceId,guid);
                     if(corpse)
                         corpse->ConvertCorpseToBones();
                     else
@@ -66,7 +66,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                 else
                 {
                     // not load grid if grid not loaded for bones removing
-                    Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
+                    Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,instanceId,guid);
                     if(corpse)
                         corpse->DeleteFromWorld(true);
                     else

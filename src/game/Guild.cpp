@@ -113,7 +113,7 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
     {
         plLevel = (uint8)pl->getLevel();
         plClass = (uint8)pl->getClass();
-        plZone = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()))->zone;
+		plZone = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetInstanceId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()))->zone;
     }
     else
     {

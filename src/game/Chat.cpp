@@ -355,8 +355,8 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
             if(table[i].SecurityLevel > 0)
             {
                 Player* p = m_session->GetPlayer();
-                sLog.outCommand("Command: %s [Player: %s X: %f Y: %f Z: %f Map: %u Selected: %s %u]",
-                    fullcmd.c_str(),p->GetName(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
+                sLog.outCommand("Command: %s [Player: %s X: %f Y: %f Z: %f Map: %u Instance: %u Selected: %s %u]",
+                    fullcmd.c_str(),p->GetName(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),p->GetInstanceId(),
                     (GUID_HIPART(p->GetSelection())==HIGHGUID_UNIT ? "creature" : (GUID_HIPART(p->GetSelection())==HIGHGUID_PLAYER ? "player" : "none")),GUID_LOPART(p->GetSelection()));
             }
         }
@@ -485,7 +485,7 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
         pCreature->AIM_Initialize();
         sLog.outError("AddObject at Chat.cpp");
 
-        MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
+        MapManager::Instance().GetMap(pCreature->GetInstanceId())->Add(pCreature);
         pCreature->SaveToDB();
     */
 }

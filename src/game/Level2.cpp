@@ -41,15 +41,15 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
     {
         int32 id = atoi((char*)args);
         if(id)
-            result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i AND `id` = '%u' ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),id);
+			result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i AND `id` = '%u' ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetInstanceId(),id);
         else
             result = sDatabase.PQuery(
                 "SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` "
                 "FROM `gameobject`,`gameobject_template` WHERE `gameobject_template`.`entry` = `gameobject`.`id` AND `map` = %i AND `name` LIKE '%%%s%%' ORDER BY `order` ASC LIMIT 1",
-                m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),args);
+				m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetInstanceId(),args);
     }
     else
-        result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId());
+		result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetInstanceId());
 
     if (!result)
     {
@@ -366,9 +366,26 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     float y = chr->GetPositionY();
     float z = chr->GetPositionZ();
     float o = chr->GetOrientation();
+    uint32 instanceId = chr->GetInstanceId();
+
+    if(instanceId >= 10000)
+    {   //if in a instance, should also addspw to original map
+        uint32 mapId = chr->GetMapId();
+        Creature* pCreature2 = new Creature;
+        if (!pCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), mapId, x, y, z, o, id))
+        {
+            delete pCreature2;
+            return false;
+        }
+
+        pCreature2->SaveToDB();
+        //pCreature2->LoadFromDB(pCreature->GetGUIDLow());
+        //MapManager::Instance().GetMap(mapId)->Add(pCreature2);
+        sLog.outDebug("player is in instance now, spawn more one creature to original map");
+    }
 
     Creature* pCreature = new Creature;
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), instanceId, x, y, z, o, id))
     {
         delete pCreature;
         return false;
@@ -376,7 +393,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     pCreature->SaveToDB();
     pCreature->LoadFromDB(pCreature->GetGUIDLow());         // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
+    MapManager::Instance().GetMap(instanceId)->Add(pCreature);
 
     sLog.outDebug(LANG_ADD_OBJ);
 
@@ -535,9 +552,9 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
         float y = (float)atof(py);
         float z = (float)atof(pz);
 
-        if(!MapManager::ExistMAP(obj->GetMapId(),x,y))
+		if(!MapManager::ExistMAP(obj->GetInstanceId(),x,y))
         {
-            PSendSysMessage(".move target map not exist (X: %f Y: %f MapId:%u)",x,y,obj->GetMapId());
+			PSendSysMessage(".move target map not exist (X: %f Y: %f MapId:%u)",x,y,obj->GetInstanceId());
             return true;
         }
 

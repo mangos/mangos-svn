@@ -270,7 +270,7 @@ void Spell::EffectDummy(uint32 i)
         bool found=false;
         FactionTemplateResolver myFaction = m_caster->getFactionTemplateEntry();
         std::list<Unit*> UnitList;
-        MapManager::Instance().GetMap(m_caster->GetMapId())->GetUnitList(m_caster->GetPositionX(), m_caster->GetPositionY(),UnitList);
+		MapManager::Instance().GetMap(m_caster->GetInstanceId())->GetUnitList(m_caster->GetPositionX(), m_caster->GetPositionY(),UnitList);
         for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
         {
             FactionTemplateResolver its_faction = (*iter)->getFactionTemplateEntry();
@@ -602,7 +602,7 @@ void Spell::EffectPersistentAA(uint32 i)
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
     m_caster->AddDynObject(dynObj);
     dynObj->AddToWorld();
-    MapManager::Instance().GetMap(dynObj->GetMapId())->Add(dynObj);
+    MapManager::Instance().GetMap(dynObj->GetInstanceId())->Add(dynObj);
 
 }
 
@@ -756,7 +756,7 @@ void Spell::EffectSummon(uint32 i)
     Pet* spawnCreature = new Pet();
 
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-        m_caster->GetMapId(),
+        m_caster->GetInstanceId(),
         m_caster->GetPositionX(),m_caster->GetPositionY(),
         m_caster->GetPositionZ(),m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i]))
@@ -799,7 +799,7 @@ void Spell::EffectSummon(uint32 i)
     name.append("'s Pet");
     spawnCreature->SetName( name );
 
-    MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
+    MapManager::Instance().GetMap(m_caster->GetInstanceId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -1006,7 +1006,7 @@ void Spell::EffectSummonWild(uint32 i)
     Pet* spawnCreature = new Pet();
 
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-        m_caster->GetMapId(),
+        m_caster->GetInstanceId(),
         m_caster->GetPositionX(),m_caster->GetPositionY(),
         m_caster->GetPositionZ(),m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i]))
@@ -1035,7 +1035,7 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetArmor(level*50);
     spawnCreature->AIM_Initialize();
 
-    MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
+    MapManager::Instance().GetMap(m_caster->GetInstanceId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -1053,17 +1053,17 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     if(unitTarget->isInFlight())
         return;
 
-    uint32 mapid = m_caster->GetMapId();
+    uint32 instanceid = m_caster->GetInstanceId();
     float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
     float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
     // teleport a bit above terrainlevel to avoid falling below it
-    float fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
+    float fz = MapManager::Instance ().GetMap(instanceid)->GetHeight(fx,fy) + 1.5;
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation(), false);
+        ((Player*)unitTarget)->TeleportTo(instanceid, fx, fy, fz, -m_caster->GetOrientation(), false);
     else
-        MapManager::Instance().GetMap(mapid)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, -m_caster->GetOrientation());
+        MapManager::Instance().GetMap(instanceid)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, -m_caster->GetOrientation());
 }
 
 void Spell::EffectLearnSkill(uint32 i)
@@ -1245,10 +1245,11 @@ void Spell::EffectSummonPet(uint32 i)
             OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
             (*OldSummon)->Clear();
         }
-        MapManager::Instance().GetMap(m_caster->GetMapId())->Remove(OldSummon,false);
+        MapManager::Instance().GetMap(m_caster->GetInstanceId())->Remove(OldSummon,false);
         OldSummon->SetMapId(m_caster->GetMapId());
+        OldSummon->SetInstanceId(m_caster->GetInstanceId());
         OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-        MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
+        MapManager::Instance().GetMap(m_caster->GetInstanceId())->Add(OldSummon);
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             ((Player*)m_caster)->PetSpellInitialize();
@@ -1275,7 +1276,7 @@ void Spell::EffectSummonPet(uint32 i)
         return;
     }
 
-    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
+    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetInstanceId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
     {
         uint32 petlevel=m_caster->getLevel();
         NewSummon->SetLevel(petlevel);
@@ -1311,7 +1312,7 @@ void Spell::EffectSummonPet(uint32 i)
 
         NewSummon->SaveToDB();
         NewSummon->AIM_Initialize();
-        MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);
+        MapManager::Instance().GetMap(NewSummon->GetInstanceId())->Add((Creature*)NewSummon);
 
         m_caster->SetPet(NewSummon);
         sLog.outDebug("New Pet has guid %u", NewSummon->GetGUIDLow());
@@ -1611,7 +1612,7 @@ void Spell::EffectDuel(uint32 i)
 
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,m_caster->GetMapId(),
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,m_caster->GetInstanceId(),
         m_caster->GetPositionX()+(unitTarget->GetPositionX()-m_caster->GetPositionX())/2 ,
         m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2 ,
         m_caster->GetPositionZ(),
@@ -1630,7 +1631,7 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     m_caster->AddGameObject(pGameObj);
-    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
+    MapManager::Instance().GetMap(pGameObj->GetInstanceId())->Add(pGameObj);
     //END
 
     //Send request to opositor
@@ -1676,7 +1677,7 @@ void Spell::EffectSummonTotem(uint32 i)
     Totem* pTotem = new Totem();
 
     if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),
-        m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(),
+        m_caster->GetInstanceId(), m_caster->GetPositionX(), m_caster->GetPositionY(),
         m_caster->GetPositionZ(),m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i] ))
     {
@@ -2031,7 +2032,7 @@ void Spell::EffectSummonObject(uint32 i)
     float rot2 = sin(m_caster->GetOrientation()/2);
     float rot3 = cos(m_caster->GetOrientation()/2);
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, rot2, rot3))
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetInstanceId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, rot2, rot3))
     {
         delete pGameObj;
         return;
@@ -2045,7 +2046,7 @@ void Spell::EffectSummonObject(uint32 i)
 
     sLog.outError("AddObject at Spell.cpp 1100");
 
-    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
+    MapManager::Instance().GetMap(pGameObj->GetInstanceId())->Add(pGameObj);
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
     data << pGameObj->GetGUID();
     m_caster->SendMessageToSet(&data,true);
@@ -2090,17 +2091,17 @@ void Spell::EffectMomentMove(uint32 i)
 
     if( m_spellInfo->rangeIndex== 1)                        //self range
     {
-        uint32 mapid = m_caster->GetMapId();
+        uint32 instanceId = m_caster->GetInstanceId();
         float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
         float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
         float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
         // teleport a bit above terrainlevel to avoid falling below it
-        float fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
+        float fz = MapManager::Instance ().GetMap(instanceId)->GetHeight(fx,fy) + 1.5;
 
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation(), false);
+            ((Player*)unitTarget)->TeleportTo(instanceId, fx, fy, fz, m_caster->GetOrientation(), false);
         else
-            MapManager::Instance().GetMap(mapid)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, m_caster->GetOrientation());
+            MapManager::Instance().GetMap(instanceId)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, m_caster->GetOrientation());
     }
 }
 
@@ -2224,7 +2225,7 @@ void Spell::EffectSummonCritter(uint32 i)
     Pet* critter = new Pet();
 
     if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-        m_caster->GetMapId(),
+        m_caster->GetInstanceId(),
         m_caster->GetPositionX(),m_caster->GetPositionY(),
         m_caster->GetPositionZ(),m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i]))
@@ -2248,7 +2249,7 @@ void Spell::EffectSummonCritter(uint32 i)
     name.append("'s Pet");
     critter->SetName( name );
     m_caster->SetPet(critter);
-    MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)critter);
+    MapManager::Instance().GetMap(m_caster->GetInstanceId())->Add((Creature*)critter);
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)m_caster)->PetSpellInitialize();
@@ -2290,11 +2291,11 @@ void Spell::EffectTransmitted(uint32 i)
     fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
     fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
 
-    float fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetHeight(fx,fy);
+    float fz = MapManager::Instance ().GetMap(m_caster->GetInstanceId())->GetHeight(fx,fy);
 
     if(m_spellInfo->EffectMiscValue[i] == 35591)
     {
-        Map* map = MapManager::Instance().GetMap(m_caster->GetMapId());
+        Map* map = MapManager::Instance().GetMap(m_caster->GetInstanceId());
         if ( map->IsUnderWater(fx,fy,fz) )
         {
             SendCastResult(CAST_FAIL_CANT_BE_CAST_HERE);
@@ -2307,7 +2308,7 @@ void Spell::EffectTransmitted(uint32 i)
     GameObject* pGameObj = new GameObject();
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetMapId(),
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetInstanceId(),
         fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0))
     {
         delete pGameObj;
@@ -2325,7 +2326,7 @@ void Spell::EffectTransmitted(uint32 i)
     //m_caster->AddGameObject(pGameObj);
     //m_ObjToDel.push_back(pGameObj);
 
-    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
+    MapManager::Instance().GetMap(pGameObj->GetInstanceId())->Add(pGameObj);
     pGameObj->AddToWorld();
 
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);

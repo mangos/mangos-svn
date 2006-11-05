@@ -44,9 +44,12 @@ bool FileExists(const char * fn)
     return true;
 }
 
-bool Map::ExistMAP(int mapid,int x,int y)
+bool Map::ExistMAP(uint32 mapid,int x,int y)
 {
     std::string dataPath="./";
+
+	if(mapid>1000)
+		mapid = mapid/1000;
 
     if(sConfig.GetString("DataDir",&dataPath))
     {
@@ -83,11 +86,14 @@ bool Map::ExistMAP(int mapid,int x,int y)
     return true;
 }
 
-GridMap * Map::LoadMAP(int mapid,int x,int y)
+GridMap * Map::LoadMAP(uint32 mapid,int x,int y)
 {
     char *tmp;
     static bool showcheckmapInfo=false;
     static int oldx=0,oldy=0;
+
+	if(mapid>1000)
+		mapid = mapid/1000;
 
     std::string dataPath="./";
 
@@ -177,6 +183,9 @@ Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
             i_info[idx][j] = NULL;
         }
     }
+    m_pInstanceid = 0;
+    lefttime = -1;
+    savetime = 15*60*1000;
 }
 
 uint64

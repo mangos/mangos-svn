@@ -1614,11 +1614,13 @@ bool Unit::isInAccessablePlaceFor(Creature* c) const
 bool Unit::IsInWater() const
 {
     return MapManager::Instance().GetMap(GetMapId())->IsInWater(GetPositionX(),GetPositionY());
+    //no need to change to instanceid
 }
 
 bool Unit::IsUnderWater() const
 {
     return MapManager::Instance().GetMap(GetMapId())->IsUnderWater(GetPositionX(),GetPositionY(),GetPositionZ());
+    //no need to change to instanceid
 }
 
 void Unit::DeMorph()
