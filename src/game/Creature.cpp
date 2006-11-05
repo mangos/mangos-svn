@@ -40,6 +40,16 @@
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
 
+uint32 CreatureInfo::randomDisplayID() const
+{
+    if(DisplayID_f==0)
+        return DisplayID_m;
+    else if(DisplayID_m==0)
+        return DisplayID_f;
+    else
+        return urand(0,1) ? DisplayID_m : DisplayID_f;
+}
+
 Creature::Creature() :
 Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
 m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
@@ -927,8 +937,10 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     }
     uint32 rank = cinfo->rank;
 
-    SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID );
-    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,cinfo->DisplayID );
+    uint32 display_id = cinfo->randomDisplayID();
+
+    SetUInt32Value(UNIT_FIELD_DISPLAYID,display_id );
+    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,display_id );
     switch (rank)                                           // define rates for each elite rank
     {
         case CREATURE_ELITE_NORMAL:

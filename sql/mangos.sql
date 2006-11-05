@@ -767,7 +767,8 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_template`;
 CREATE TABLE `creature_template` (
   `entry` int(11) unsigned NOT NULL default '0',
-  `modelid` int(11) unsigned default '0',
+  `modelid_m` int(11) unsigned default '0',
+  `modelid_f` int(11) unsigned default '0',
   `name` varchar(100) NOT NULL default '0',
   `subname` varchar(100) default NULL,
   `minlevel` int(3) unsigned default '1',

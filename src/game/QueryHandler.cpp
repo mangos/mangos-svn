@@ -173,7 +173,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     data << (uint32)ci->rank;                               //rank           wdbFeild10
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    data << ci->DisplayID;                                  //DisplayID      wdbFeild13
+    data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
 
     data << (uint16)ci->civilian;                           //wdbFeild14
 
@@ -217,7 +217,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     data << (uint32)ci->rank;                               //rank           wdbFeild10
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    data << ci->DisplayID;                                  //DisplayID      wdbFeild13
+    data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
 
     data << (uint16)ci->civilian;                           //wdbFeild14
 
@@ -307,7 +307,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
     data << (uint32)ci->rank;                               //unknow         wdbFeild10
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    data << ci->DisplayID;                                  //DisplayID      wdbFeild13
+    data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
 
     data << (uint16)ci->civilian;                           //wdbFeild14
 

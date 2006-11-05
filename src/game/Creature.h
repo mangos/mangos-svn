@@ -146,7 +146,8 @@ struct TrainerSpell
 struct CreatureInfo
 {
     uint32  Entry;
-    uint32  DisplayID;
+    uint32  DisplayID_m;
+    uint32  DisplayID_f;
     char*   Name;
     char*   SubName;
     uint32  minlevel;
@@ -202,6 +203,8 @@ struct CreatureInfo
     char const* AIName;
     uint32  MovementType;
     char const* ScriptName;
+
+    uint32 randomDisplayID() const;
 };
 
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
