@@ -88,10 +88,8 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
 
 #ifdef MANGOS_DEBUG
 #define DEBUG_LOG MaNGOS::Singleton<Log>::Instance().outDebug
-#define ERROR_LOG MaNGOS::Singleton<Log>::Instance().outError
 #else
 #define DEBUG_LOG
-#define ERROR_LOG
 #endif
 #endif
 

@@ -4208,7 +4208,7 @@ void Player::CastItemEquipSpell(Item *item)
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
         {
-            ERROR_LOG("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
+            sLog.outError("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
             continue;
         }
 
@@ -4244,7 +4244,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
         {
-            ERROR_LOG("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
+            sLog.outError("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
             continue;
         }
 
