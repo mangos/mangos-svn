@@ -70,8 +70,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     m_positionZ = z;
     m_orientation = ang;
 
-    m_mapId = mapid;        //TODO: here m_mapId is not the real map id, should change it
-    m_instanceId = mapid;
+    m_mapId = mapid;
 
     if(!IsPositionValid())
     {
@@ -131,7 +130,7 @@ void GameObject::Update(uint32 p_time)
                 {
                     m_respawnTimer = 0;
                     if (GetGoType() != GAMEOBJECT_TYPE_TRAP)
-                        MapManager::Instance().GetMap(GetInstanceId())->Add(this);
+                        MapManager::Instance().GetMap(GetMapId())->Add(this);
                 }
             }
             break;
@@ -176,7 +175,7 @@ void GameObject::Update(uint32 p_time)
 
         TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(GetInstanceId()));
+        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(GetMapId()));
         if (ok)
         {
             owner->CastSpell(ok, GetGOInfo()->castsSpell, true);
@@ -194,7 +193,7 @@ void GameObject::Refresh()
     data << GetGUID();
     SendMessageToSet(&data, true);
 
-    MapManager::Instance().GetMap(GetInstanceId())->Add(this);
+    MapManager::Instance().GetMap(GetMapId())->Add(this);
 }
 
 void GameObject::Delete()
@@ -232,7 +231,7 @@ void GameObject::SaveToDB()
     ss << "INSERT INTO `gameobject` VALUES ( "
         << GetGUIDLow() << ", "
         << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
-        << GetInstanceId() << ", "
+        << GetMapId() << ", "
         << GetFloatValue(GAMEOBJECT_POS_X) << ", "
         << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
         << GetFloatValue(GAMEOBJECT_POS_Z) << ", "

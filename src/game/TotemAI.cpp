@@ -102,7 +102,7 @@ TotemAI::UpdateAI(const uint32 diff)
     // look for a new victim in range
     FactionTemplateResolver myFaction = i_totem.getFactionTemplateEntry();
     std::list<Unit*> UnitList;
-    MapManager::Instance().GetMap(i_totem.GetInstanceId())->GetUnitList(i_totem.GetPositionX(), i_totem.GetPositionY(),UnitList);
+    MapManager::Instance().GetMap(i_totem.GetMapId())->GetUnitList(i_totem.GetPositionX(), i_totem.GetPositionY(),UnitList);
     for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
     {
         if((*iter) && (*iter)->isTargetableForAttack()&& IsVisible(*iter))

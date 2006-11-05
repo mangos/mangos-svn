@@ -80,7 +80,7 @@ void Corpse::SaveToDB()
     std::ostringstream ss;
     ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`) VALUES ("
         << GetGUIDLow() << ", " << GetOwnerGUID() << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", "
-        << GetOrientation() << ", "  << GetZoneId() << ", "  << GetInstanceId() << ", '";
+        << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
     ss << "', NOW(), " << int(GetType()) << ")";
@@ -147,8 +147,7 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
     }
 
     // place
-    SetMapId(mapid);        //TODO: if need , here we should change instanceid to real mapid and saveit (setmapid)
-    SetInstanceId(mapid);
+    SetMapId(mapid);
     Relocate(positionX,positionY,positionZ,ort);
 
     if (!external) delete result;
@@ -193,7 +192,7 @@ void Corpse::RemoveFromWorld()
 
 void Corpse::UpdateForPlayer(Player* player, bool first)
 {
-    if(player && player->GetGUID() == GetOwnerGUID() && player->GetInstanceId() == GetInstanceId())
+    if(player && player->GetGUID() == GetOwnerGUID() && player->GetMapId() == GetMapId())
     {
         bool POI_range = (GetDistance2dSq(player) > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS);
 
@@ -215,7 +214,7 @@ void Corpse::ConvertCorpseToBones()
     Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID());
 
     // Removing outdated POI if at same map
-    if(player && player->GetInstanceId() == GetInstanceId())
+    if(player && player->GetMapId() == GetMapId())
         player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 0, 30, "" );
 
     DEBUG_LOG("Deleting Corpse and swpaning bones.\n");

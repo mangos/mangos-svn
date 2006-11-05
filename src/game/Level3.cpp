@@ -126,7 +126,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     uint32 mapid;
     if (pmapid)
         mapid = (uint32)atoi(pmapid);
-	else mapid = m_session->GetPlayer()->GetMapId();
+    else mapid = m_session->GetPlayer()->GetMapId();
 
     if(!MapManager::ExistMAP(mapid,x,y))
     {
@@ -134,8 +134,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
         return true;
     }
 
-    Map *map = MapManager::Instance().GetMap(m_session->GetPlayer()->GetInstanceId());
-    //note: should consider the instance
+    Map *map = MapManager::Instance().GetMap(mapid);
     float z = max(map->GetHeight(x, y), map->GetWaterLevel(x, y));
     m_session->GetPlayer()->TeleportTo(mapid, x, y, z, m_session->GetPlayer()->GetOrientation());
 
@@ -246,7 +245,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
 
             pCreature->AIM_Initialize();
 
-            MapManager::Instance().GetMap(pCreature->GetInstanceId())->Add(pCreature);
+            MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
 
             //pCreature->SaveToDB();
         }
@@ -1404,32 +1403,16 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     float y = chr->GetPositionY();
     float z = chr->GetPositionZ();
     float o = chr->GetOrientation();
-    uint32 instanceId = chr->GetInstanceId();
-    
-    if(instanceId>=10000 && strcmp(safe,"true") == 0)
-    {
-        //if in a instance, should also add go to original map
-        uint32 mapId = chr->GetMapId();
-        GameObject* pGameObj2 = new GameObject();
-        if(!pGameObj2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, mapId, x, y, z, o, 0, 0, 0, 0))
-        {
-            delete pGameObj2;
-            return false;
-        }
-        pGameObj2->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
-        pGameObj2->SaveToDB();
-        sLog.outDebug("player is in instance now, spawn one more go to original map");
-    }
 
     GameObject* pGameObj = new GameObject();
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, instanceId, x, y, z, o, 0, 0, 0, 0))
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
     {
         delete pGameObj;
         return false;
     }
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     sLog.outDebug(LANG_ADD_OBJ_LV3);
-    MapManager::Instance().GetMap(instanceId)->Add(pGameObj);
+    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     if(strcmp(safe,"true") == 0)
         pGameObj->SaveToDB();
@@ -1540,19 +1523,18 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     GameObject* pGameObj = new GameObject();
     uint32 lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-    if(!pGameObj->Create(lowGUID, goI->id, chr->GetInstanceId(), x, y, z, o, 0, 0, rot2, rot3))
+    if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, rot2, rot3))
     {
         delete pGameObj;
         return false;
     }
     //pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetMapId(chr->GetMapId());
-    pGameObj->SetInstanceId(chr->GetInstanceId());
     //pGameObj->SetNameId(id);
     sLog.outError(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
 
     pGameObj->SaveToDB();
-    MapManager::Instance().GetMap(pGameObj->GetInstanceId())->Add(pGameObj);
+    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     PSendSysMessage(LANG_GAMEOBJECT_ADD,id,goI->name,x,y,z);
 
@@ -1571,7 +1553,7 @@ bool ChatHandler::HandleAnimCommand(const char* args)
     data.Initialize( SMSG_EMOTE );
     data << anim_id << m_session->GetPlayer( )->GetGUID();
     WPAssert(data.size() == 12);
-    MapManager::Instance().GetMap(m_session->GetPlayer()->GetInstanceId())->MessageBoardcast(m_session->GetPlayer(), &data, true);
+    MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId())->MessageBoardcast(m_session->GetPlayer(), &data, true);
     return true;
 }
 
@@ -1834,7 +1816,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
 
     sLog.outError("AddObject at Level3.cpp line 1470");
     pCreature->AIM_Initialize();
-    MapManager::Instance().GetMap(pCreature->GetInstanceId())->Add(pCreature);
+    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
 
     pCreature->SaveToDB();
 

@@ -801,7 +801,6 @@ WorldSafeLocsEntry *ObjectMgr::GetClosestGraveYard(float x, float y, float z, ui
 
     // search for zone associated closest graveyard
     uint32 zoneId = MapManager::Instance().GetMap(MapId)->GetZoneId(x,y);
-    //no need to change to instanceid
 
     // Simulate std. algorithm:
     //   found some graveyard associated to (ghost_zone,ghost_map)

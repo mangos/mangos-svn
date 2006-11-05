@@ -30,8 +30,9 @@ ConfusedMovementGenerator::Initialize(Creature &creature)
     x = creature.GetPositionX();
     y = creature.GetPositionY();
     z = creature.GetPositionZ();
+    uint32 mapid=creature.GetMapId();
 
-    Map* map = MapManager::Instance().GetMap(creature.GetInstanceId());
+    Map* map = MapManager::Instance().GetMap(mapid);
     z2 = map->GetHeight(x,y);
     if( abs( z2 - z ) < 5 )
         z = z2;

@@ -818,7 +818,6 @@ enum OpCodes
 
     // unofficial opcodes:
     SMSG_COMPRESSED_MOVE                            = 0x2FB,// 763
-    SMSG_INSTANCE_JOIN                              = 0x300,// 800
     MSG_RAID_ICON_TARGET                            = 801,
     SMSG_OUTDOORPVP_NOTIFY                          = 0x33B,// 827
 };

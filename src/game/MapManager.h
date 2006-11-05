@@ -34,8 +34,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
     public:
 
-        Map* GetMap(uint32 instanceid);
-        bool isInstanceMap( uint32 mapid);
+        Map* GetMap(uint32);
         void Initialize(void);
         void Update(time_t);
 
@@ -57,16 +56,11 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
             }
         }
 
-        void LoadGrid(uint32 mapid, float x, float y, bool no_unload = false);
+        void LoadGrid(int mapid, float x, float y, bool no_unload = false);
 
-        static bool ExistMAP(uint32 mapid, float x, float y);
+        static bool ExistMAP(int mapid, float x, float y);
 
         void MoveAllCreaturesInMoveList();
-        uint32 CreateMapCopy(uint32 mapid,uint64 guid);
-        BOOL DeleteCopy(uint32 instanceID);
-        void LoadCopys();
-        void SaveCopys(uint32 instanceID,uint64 guid,int32 lefttime);
-        int m_instance[999][999];
     private:
         MapManager();
         ~MapManager();
@@ -84,6 +78,5 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;
-        uint32 Instances;
 };
 #endif
