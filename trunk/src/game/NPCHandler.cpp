@@ -418,7 +418,7 @@ void WorldSession::SendSpiritResurrect()
     _player->SpawnCorpseBones();
 
     // update world right away
-    MapManager::Instance().GetMap(_player->GetMapId())->Add(GetPlayer());
+    MapManager::Instance().GetMap(_player->GetInstanceId())->Add(GetPlayer());
 }
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )

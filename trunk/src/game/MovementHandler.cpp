@@ -32,7 +32,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
 
     GetPlayer()->RemoveFromWorld();
-    MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Add(GetPlayer());
+    MapManager::Instance().GetMap(GetPlayer()->GetInstanceId())->Add(GetPlayer());
     WorldPacket data;
     data.Initialize(SMSG_SET_REST_START);
     data << uint32(8129);
@@ -61,8 +61,7 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     if ( FallTime > 1100 && !Target->isDead() && !Target->isGameMaster() &&
         !Target->HasAuraType(SPELL_AURA_HOVER) && !Target->HasAuraType(SPELL_AURA_FEATHER_FALL) )
     {
-        uint32 MapID = Target->GetMapId();
-        Map* Map = MapManager::Instance().GetMap(MapID);
+        Map* Map = MapManager::Instance().GetMap( Target->GetInstanceId());
         float posz = Map->GetWaterLevel(x,y);
         guid = Target->GetGUID();
         float fallperc = float(FallTime)*10/11000;

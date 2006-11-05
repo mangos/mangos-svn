@@ -26,6 +26,8 @@
 #include "Group.h"
 #include "Chat.h"
 #include "ObjectAccessor.h"
+#include "MapManager.h"
+#include "Map.h"
 
 void Group::ChangeLeader(const uint64 &guid)
 {
@@ -109,6 +111,7 @@ void Group::SendUpdate()
 
 uint32 Group::RemoveMember(const uint64 &guid)
 {
+    WorldPacket data;
     uint32 i, j;
     bool leaderFlag = false;
 
@@ -117,6 +120,22 @@ uint32 Group::RemoveMember(const uint64 &guid)
     {
         player->RemoveAreaAurasByOthers();
         player->RemoveAreaAurasFromGroup();
+    }
+    if(player->GetInstanceId()>1000)
+    {
+        Map* inmap = MapManager::Instance().GetMap(player->GetInstanceId());
+        if(inmap->GetCreater() == guid)
+        {
+            for(int p =0;p< m_count;p++)
+            {
+                Unit* Member = ObjectAccessor::Instance().FindPlayer(m_members[p].guid);
+                if(Member->GetInstanceId() == player->GetInstanceId())
+                {
+                    inmap->SetCreater(Member->GetGUID());
+                    break;
+                }
+            }
+        }
     }
 
     RemoveRollsFromMember( guid);

@@ -399,6 +399,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true);
 
+        void TeleportHome();
+
         bool Create ( uint32 guidlow, WorldPacket &data );
 
         void Update( uint32 time );
@@ -608,6 +610,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void LoadCorpse();
         void LoadPet();
         void RemoveAreaAurasFromGroup();
+        time_t GetLeftInstanceTime(){return leftInstanceTime;};
+        void SetLeftInstanceTime(time_t time){ leftInstanceTime = time;};
+        void CkeckPlayerInInstance(uint32 p_time);
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -697,7 +702,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static void SetFloatValueInArray(vector<string>& data,uint16 index, float value);
         static void SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid);
         static void SetFloatValueInDB(uint16 index, float value, uint64 guid);
-        static void SavePositionInDB(uint32 mapid, float x,float y,float z,float o, uint64 guid);
+        static void SavePositionInDB(uint32 mapid,uint32 instanceid,float x,float y,float z,float o, uint64 guid);
 
         bool m_mailsLoaded;
         bool m_mailsUpdated;
@@ -1218,6 +1223,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint64 m_groupLeader;
         bool m_isInGroup;
         bool m_isInvited;
+        time_t leftInstanceTime;
 
         uint32 m_GuildIdInvited;
 

@@ -151,8 +151,10 @@ class MANGOS_DLL_SPEC Object
         bool IsPositionValid() const;
 
         void SetMapId(uint32 newMap) { m_mapId = newMap; }
-
         uint32 GetMapId() const { return m_mapId; }
+
+        void SetInstanceId(uint32 instanceid){ m_instanceId = instanceid;};
+        uint32 GetInstanceId() const { return (m_instanceId<10000 ? m_mapId : m_instanceId);};
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;
@@ -294,6 +296,7 @@ class MANGOS_DLL_SPEC Object
         uint8 m_objectTypeId;
 
         uint32 m_mapId;
+        uint32 m_instanceId;
 
         float m_positionX;
         float m_positionY;

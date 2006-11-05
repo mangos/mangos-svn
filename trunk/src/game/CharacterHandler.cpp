@@ -482,7 +482,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         delete result;
     }
 
-    MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
+	MapManager::Instance().GetMap(pCurrChar->GetInstanceId())->Add(pCurrChar);
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
     sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
 

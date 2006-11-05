@@ -54,7 +54,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);
         Creature* GetCreature(Object const &, uint64);
         Corpse*   GetCorpse(Unit const &u, uint64 guid);
-        Corpse*   GetCorpse(float x, float y, uint32 mapid, uint64 guid);
+        Corpse*   GetCorpse(float x, float y, uint32 instanceid, uint64 guid);
         Unit* GetUnit(Object const &, uint64);
         Player* GetPlayer(Unit const &, uint64);
         GameObject* GetGameObject(Unit const &, uint64);

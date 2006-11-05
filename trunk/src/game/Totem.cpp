@@ -53,7 +53,7 @@ void Totem::Summon()
 {
     WorldPacket data;
     sLog.outDebug("AddObject at Totem.cpp line 49");
-    MapManager::Instance().GetMap(GetMapId())->Add((Creature*)this);
+    MapManager::Instance().GetMap(GetInstanceId())->Add((Creature*)this);
 
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
     data << GetGUID();

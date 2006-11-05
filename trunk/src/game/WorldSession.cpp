@@ -170,7 +170,7 @@ void WorldSession::LogoutPlayer(bool Save)
         _player->UnsummonTotem();
 
         ObjectAccessor::Instance().RemovePlayer(_player);
-        MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
+        MapManager::Instance().GetMap(_player->GetInstanceId())->Remove(_player, false);
 
         if(Save)
         {

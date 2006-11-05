@@ -100,12 +100,16 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     Cell cell = RedZone::GetZone(cell_val);
 
     PSendSysMultilineMessage(LANG_MAP_POSITION,
-        obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
+        obj->GetMapId(),obj->GetInstanceId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
+
+    Map* inmap = MapManager::Instance().GetMap(obj->GetInstanceId());
+    PSendSysMultilineMessage("instance id:%u lefttime:%d",
+        obj->GetInstanceId() , inmap->lefttime );
 
     sLog.outDebug("Player %s GPS call %s %u " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetGUIDLow(),
-        obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
+        obj->GetMapId(), obj->GetInstanceId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
 
     return true;
@@ -150,7 +154,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         FillSystemMessageData(&data, m_session, buf0);
         chr->GetSession()->SendPacket( &data );
 
-        chr->TeleportTo(m_session->GetPlayer()->GetMapId(),
+        chr->TeleportTo(m_session->GetPlayer()->GetInstanceId(),
             m_session->GetPlayer()->GetPositionX(),
             m_session->GetPlayer()->GetPositionY(),
             m_session->GetPlayer()->GetPositionZ(),
@@ -161,6 +165,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         PSendSysMessage(LANG_SUMMONING, name.c_str()," (offline)");
 
         Player::SavePositionInDB(m_session->GetPlayer()->GetMapId(),
+			m_session->GetPlayer()->GetInstanceId(),
             m_session->GetPlayer()->GetPositionX(),
             m_session->GetPlayer()->GetPositionY(),
             m_session->GetPlayer()->GetPositionZ(),m_session->GetPlayer()->GetOrientation(),guid);
@@ -200,7 +205,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
             chr->GetSession()->SendPacket(&data);
         }
 
-        m_session->GetPlayer()->TeleportTo(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),m_session->GetPlayer()->GetOrientation());
+        m_session->GetPlayer()->TeleportTo(chr->GetInstanceId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),m_session->GetPlayer()->GetOrientation());
         return true;
     }
 
