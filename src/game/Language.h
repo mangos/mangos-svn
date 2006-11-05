@@ -79,7 +79,7 @@
 #define LANG_BROADCAST                   "BROADCAST: %s"
 #define LANG_MAP_POSITION                "Map: %u Zone: %u\nX: %f Y: %f Z: %f Orientation: %f grid[%u,%u]cell[%u,%u]"
 #define LANG_IS_TELEPORTED               "%s is already being teleported."
-#define LANG_SUMMONING                   "You are summoning %s."
+#define LANG_SUMMONING                   "You are summoning %s%s."
 #define LANG_SUMMONED_BY                 "You are being summoned by %s."
 #define LANG_NO_PLAYER                   "Player (%s) does not exist or is not logged in."
 #define LANG_APPEARING_AT                "Appearing at %s's location."

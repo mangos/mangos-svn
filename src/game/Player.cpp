@@ -9470,15 +9470,50 @@ bool Player::MinimalLoadFromDB( uint32 guid )
     return true;
 }
 
-uint32 Player::GetUInt32ValueFromString(vector<string> const& data, uint16 index)
+bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, uint64 guid)
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `character` WHERE `guid` = '%u'",guid);
+    if(!result)
+        return false;
+
+    Field *fields = result->Fetch();
+
+    x = fields[0].GetFloat();
+    y = fields[1].GetFloat();
+    z = fields[2].GetFloat();
+    o = fields[3].GetFloat();
+    mapid = fields[4].GetUInt32();
+
+    delete result;
+    return true;
+}
+
+bool Player::LoadValuesArrayFromDB(vector<string> & data, uint64 guid)
+{
+    std::ostringstream ss;
+    ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<guid<<"'";
+    QueryResult *result = sDatabase.Query( ss.str().c_str() );
+    if( !result )
+        return false;
+
+    Field *fields = result->Fetch();
+
+    data = StrSplit(fields[0].GetString(), " ");
+
+    delete result;
+
+    return true;
+}
+
+uint32 Player::GetUInt32ValueFromArray(vector<string> const& data, uint16 index)
 {
     return (uint32)atoi(data[index].c_str());
 }
 
-float Player::GetFloatValueFromString(vector<string> const& data, uint16 index)
+float Player::GetFloatValueFromArray(vector<string> const& data, uint16 index)
 {
     float result;
-    uint32 temp = Player::GetUInt32ValueFromString(data,index);
+    uint32 temp = Player::GetUInt32ValueFromArray(data,index);
     memcpy(&result, &temp, sizeof(result));
 
     return result;
@@ -9486,18 +9521,11 @@ float Player::GetFloatValueFromString(vector<string> const& data, uint16 index)
 
 uint32 Player::GetUInt32ValueFromDB(uint16 index, uint64 guid)
 {
-    std::ostringstream ss;
-    ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<guid<<"'";
-    QueryResult *result = sDatabase.Query( ss.str().c_str() );
-    if( !result )
+    vector<string> data;
+    if(!LoadValuesArrayFromDB(data,guid))
         return 0;
 
-    Field *fields = result->Fetch();
-
-    vector<string> tokens = StrSplit(fields[0].GetString(), " ");
-    delete result;
-
-    return GetUInt32ValueFromString(tokens,index);
+    return GetUInt32ValueFromArray(data,index);
 }
 
 float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
@@ -10312,23 +10340,20 @@ inline void Player::SendAttackSwingNotInRange()
     GetSession()->SendPacket( &data );
 }
 
-void Player::SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid)
+void Player::SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint64 guid)
 {
-    std::ostringstream ss;
-    ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<guid<<"'";
-    QueryResult *result = sDatabase.Query( ss.str().c_str() );
-    if( !result )
-        return;
+    std::ostringstream ss2;
+    ss2 << "UPDATE `character` SET `position_x`='"<<x<<"',`position_y`='"<<y
+        << "',`position_z`='"<<z<<"',`orientation`='"<<o<<"',`map`='"<<mapid
+        << "' WHERE `guid`='"<<guid<<"'";
+    sDatabase.Execute(ss2.str().c_str());
+}
 
-    vector<string> tokens = StrSplit((*result)[0].GetString(), " ");
-
-    char buf[11];
-    snprintf(buf,11,"%u",value);
-    tokens[index] = buf;
-
+bool Player::SaveValuesArrayInDB(vector<string> const& tokens, uint64 guid)
+{
     std::ostringstream ss2;
     ss2<<"UPDATE `character` SET `data`='";
-    vector<string>::iterator iter;
+    vector<string>::const_iterator iter;
     int i=0;
     for (iter = tokens.begin(); iter != tokens.end(); ++iter, ++i)
     {
@@ -10336,7 +10361,27 @@ void Player::SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid)
     }
     ss2<<"' WHERE `guid`='"<<guid<<"'";
 
-    sDatabase.Execute(ss2.str().c_str());
+    return sDatabase.Execute(ss2.str().c_str());
+}
+
+void Player::SetUInt32ValueInArray(vector<string>& tokens,uint16 index, uint32 value)
+{
+    char buf[11];
+    snprintf(buf,11,"%u",value);
+    tokens[index] = buf;
+}
+
+void Player::SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid)
+{
+    vector<string> tokens;
+    if(!LoadValuesArrayFromDB(tokens,guid))
+        return;
+
+    char buf[11];
+    snprintf(buf,11,"%u",value);
+    tokens[index] = buf;
+
+    SaveValuesArrayInDB(tokens,guid);
 }
 
 void Player::SetFloatValueInDB(uint16 index, float value, uint64 guid)

@@ -113,6 +113,12 @@ bool ChatHandler::HandleGPSCommand(const char* args)
 
 bool ChatHandler::HandleNamegoCommand(const char* args)
 {
+    if(m_session->GetPlayer()->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
     WorldPacket data;
 
     if(!*args)
@@ -137,7 +143,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             return true;
         }
 
-        PSendSysMessage(LANG_SUMMONING, chr->GetName());
+        PSendSysMessage(LANG_SUMMONING, chr->GetName(),"");
 
         char buf0[256];
         snprintf((char*)buf0,256,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
@@ -147,8 +153,17 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         chr->TeleportTo(m_session->GetPlayer()->GetMapId(),
             m_session->GetPlayer()->GetPositionX(),
             m_session->GetPlayer()->GetPositionY(),
-            m_session->GetPlayer()->GetPositionZ()
-            ,0.0f);
+            m_session->GetPlayer()->GetPositionZ(),
+            chr->GetOrientation());
+    }
+    else if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
+    {
+        PSendSysMessage(LANG_SUMMONING, name.c_str()," (offline)");
+
+        Player::SavePositionInDB(m_session->GetPlayer()->GetMapId(),
+            m_session->GetPlayer()->GetPositionX(),
+            m_session->GetPlayer()->GetPositionY(),
+            m_session->GetPlayer()->GetPositionZ(),m_session->GetPlayer()->GetOrientation(),guid);
     }
     else
         PSendSysMessage(LANG_NO_PLAYER, args);
@@ -185,10 +200,24 @@ bool ChatHandler::HandleGonameCommand(const char* args)
             chr->GetSession()->SendPacket(&data);
         }
 
-        m_session->GetPlayer()->TeleportTo(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),0.0f);
+        m_session->GetPlayer()->TeleportTo(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),m_session->GetPlayer()->GetOrientation());
+        return true;
     }
-    else
-        PSendSysMessage(LANG_NO_PLAYER, args);
+
+    if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
+    {
+        PSendSysMessage(LANG_APPEARING_AT, name.c_str());
+
+        float x,y,z,o;
+        uint32 map;
+        if(Player::LoadPositionFromDB(map,x,y,z,o,guid))
+        {
+            m_session->GetPlayer()->TeleportTo(map, x, y, z,m_session->GetPlayer()->GetOrientation());
+            return true;
+        }
+    }
+
+    PSendSysMessage(LANG_NO_PLAYER, args);
 
     return true;
 }

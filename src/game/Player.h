@@ -678,11 +678,13 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool LoadFromDB(uint32 guid);
         bool MinimalLoadFromDB(uint32 guid);
-        static uint32 GetUInt32ValueFromString(vector<string> const& data, uint16 index);
-        static float  GetFloatValueFromString(vector<string> const& data, uint16 index);
+        static bool   LoadValuesArrayFromDB(vector<string>& data,uint64 guid);
+        static uint32 GetUInt32ValueFromArray(vector<string> const& data, uint16 index);
+        static float  GetFloatValueFromArray(vector<string> const& data, uint16 index);
         static uint32 GetUInt32ValueFromDB(uint16 index, uint64 guid);
         static float  GetFloatValueFromDB(uint16 index, uint64 guid);
         static uint32 GetZoneIdFromDB(uint64 guid);
+        static bool   LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, uint64 guid);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -690,8 +692,12 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SaveToDB();
         void SavePet();
+        static bool SaveValuesArrayInDB(vector<string> const& data,uint64 guid);
+        static void SetUInt32ValueInArray(vector<string>& data,uint16 index, uint32 value);
+        static void SetFloatValueInArray(vector<string>& data,uint16 index, float value);
         static void SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid);
         static void SetFloatValueInDB(uint16 index, float value, uint64 guid);
+        static void SavePositionInDB(uint32 mapid, float x,float y,float z,float o, uint64 guid);
 
         bool m_mailsLoaded;
         bool m_mailsUpdated;
