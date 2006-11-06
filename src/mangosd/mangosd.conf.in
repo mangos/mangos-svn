@@ -109,7 +109,12 @@ AllowTwoSide.WhoList = 0
 # Is GM accept whispers from player by default.
 # Default: 0 (false)
 #          1 (true) 
-WhisperingToGM = 0
+GM.WhisperingTo = 0
+
+# Is GM showed in who list (if visible).
+# Default: 0 (false)
+#          1 (true) 
+GM.InWhoList = 0
 
 # Message of the Day. Displayed at worldlogin for every user.
 Motd = "Welcome to the Massive Network Game Object Server."

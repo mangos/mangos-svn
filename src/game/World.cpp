@@ -241,7 +241,8 @@ void World::SetInitialWorldSettings()
         m_configs[CONFIG_MIN_PETITION_SIGNS] = 9;
     }
 
-    m_configs[CONFIG_WISPERING_TO_GM] = sConfig.GetIntDefault("WhisperingToGM",0);
+    m_configs[CONFIG_GM_WISPERING_TO] = sConfig.GetIntDefault("GM.WhisperingTo",0);
+    m_configs[CONFIG_GM_IN_WHO_LIST]  = sConfig.GetIntDefault("GM.InWhoList",0);
 
     m_gameTime = time(NULL);
 

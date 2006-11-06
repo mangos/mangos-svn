@@ -60,7 +60,7 @@ Player::Player (WorldSession *session): Unit()
     m_GMFlags = 0;
     if(GetSession()->GetSecurity() >=2)
         SetAcceptTicket(true);
-    if(GetSession()->GetSecurity() >=1 && sWorld.getConfig(CONFIG_WISPERING_TO_GM))
+    if(GetSession()->GetSecurity() >=1 && sWorld.getConfig(CONFIG_GM_WISPERING_TO))
         SetAcceptWhispers(true);
 
     m_curTarget = 0;
