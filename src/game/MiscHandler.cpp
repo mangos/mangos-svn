@@ -489,7 +489,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             friendResult = FRIEND_ENEMY;
         else
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE guid='%u' AND `flags` = 'FRIEND' AND `friend` = '%u'", GetPlayer()->GetGUIDLow(), GUID_LOPART(friendGuid));
+            QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 'FRIEND' AND `friend` = '%u'", GetPlayer()->GetGUIDLow(), GUID_LOPART(friendGuid));
 
             if( result )
                 friendResult = FRIEND_ALREADY;
@@ -592,7 +592,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
             ignoreResult = FRIEND_IGNORE_SELF;
         else
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `guid`,`name`,`friend`,`flags` FROM `character_social` WHERE `flags` = 'IGNORE' AND `friend` = '%u'", GUID_LOPART(IgnoreGuid));
+            QueryResult *result = sDatabase.PQuery("SELECT `guid`,`name`,`friend`,`flags` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 'IGNORE' AND `friend` = '%u'", GetPlayer()->GetGUIDLow(), GUID_LOPART(IgnoreGuid));
 
             if( result )
                 ignoreResult = FRIEND_IGNORE_ALREADY;
