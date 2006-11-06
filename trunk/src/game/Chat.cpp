@@ -428,7 +428,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     {
         target_guid = session ? session->GetPlayer()->GetGUID() : 0;
     }
-    else if (type != CHAT_MSG_WHISPER_INFORM)
+    else if (type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
     {
         target_guid = 0;                                    // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
     }
@@ -440,7 +440,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 
     *data << messageLength;
     *data << message;
-    if(session != 0)
+    if(session != 0 && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
         *data << session->GetPlayer()->chatTag();
     else
         *data << uint8(0);

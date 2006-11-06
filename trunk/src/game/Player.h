@@ -405,21 +405,13 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void BuildEnumData( WorldPacket * p_data );
 
-        uint8 ToggleAFK();
-        uint8 ToggleDND();
-        bool isAFK() { return m_afk; };
-        bool isDND() { return m_dnd; };
-        uint8 chatTag()
-        {
-            if(isGameMaster())
-                return 3;
-            else if(isDND())
-                return 2;
-            if(isAFK())
-                return 1;
-            else
-                return 0;
-        }
+        bool ToggleAFK();
+        bool ToggleDND();
+        bool isAFK() { return this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); };
+        bool isDND() { return this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); };
+        uint8 chatTag();
+        std::string afkMsg;
+        std::string dndMsg;
 
         void SendFriendlist();
         void SendIgnorelist();
@@ -1202,9 +1194,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         Item* m_items[BUYBACK_SLOT_END];
         Item* m_buybackitems[BUYBACK_SLOT_END - BUYBACK_SLOT_START];
-
-        uint8 m_afk;
-        uint8 m_dnd;
 
         uint32 m_movement_flags;
 
