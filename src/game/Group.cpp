@@ -377,7 +377,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                     return;
 
             int8 pos = GetPlayerGroupSlot(playerGUID);
-            if (pos == -1 || pos >= MAXGROUPSIZE)                          //error pos
+            if (pos == -1 || pos >= MAXGROUPSIZE)           //error pos
                 return;
 
             switch (Choise)

@@ -127,7 +127,7 @@ struct Loot
 
     void clear()
     {
-        items.clear(); gold = 0; PlayersLooting.clear(); 
+        items.clear(); gold = 0; PlayersLooting.clear();
         for (QuestItemMap::iterator itr = PlayerQuestItems.begin(); itr != PlayerQuestItems.end(); ++itr)
             delete itr->second;
         PlayerQuestItems.clear();
@@ -148,7 +148,7 @@ struct LootView
     Loot &loot;
     QuestItemList *qlist;
     PermissionTypes permission;
-    LootView(Loot &_loot, QuestItemList *_qlist, PermissionTypes _permission = ALL_PERMISSION) 
+    LootView(Loot &_loot, QuestItemList *_qlist, PermissionTypes _permission = ALL_PERMISSION)
         : loot(_loot), qlist(_qlist), permission(_permission) {}
 };
 
@@ -176,5 +176,4 @@ void LoadLootTables();
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
-
 #endif

@@ -589,7 +589,7 @@ void Spell::cast(bool skipCheck)
         return;
     }
 
-    // triggered cast called from Spell::preper where it already checked 
+    // triggered cast called from Spell::preper where it already checked
     if(!skipCheck)
         castResult = CanCast();
 

@@ -74,7 +74,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
             clientcount++;
 
             data.append(itr->second->GetName() , strlen(itr->second->GetName()) + 1);
-            if(itr->second->GetGuildId()) // in fact just could use objmgr.GetGuildNameById(itr->second->GetGuildId()) cause getguildid() returns 0 with no guild and getguildnamebyid "" which equals uint8(0)
+            if(itr->second->GetGuildId())                   // in fact just could use objmgr.GetGuildNameById(itr->second->GetGuildId()) cause getguildid() returns 0 with no guild and getguildnamebyid "" which equals uint8(0)
                 data << objmgr.GetGuildNameById(itr->second->GetGuildId());
             else
                 data << uint8( 0 );
@@ -669,7 +669,6 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( type.c_str( ) );
     sLog.outDebug( content.c_str( ) );
-
 
     sDatabase.escape_string(type);
     sDatabase.escape_string(content);

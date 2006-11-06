@@ -86,7 +86,7 @@ void Guild::create(uint64 lGuid, std::string gname)
     sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid`='%u'", Id);
     sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guildid`='%u'", Id);
     sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`info`,`MOTD`,`createdate`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) "
-        "VALUES('%u','%s','%u', '%s', '%s', NOW(),'%u','%u','%u','%u','%u')", 
+        "VALUES('%u','%s','%u', '%s', '%s', NOW(),'%u','%u','%u','%u','%u')",
         Id, gname.c_str(), GUID_LOPART(leaderGuid), dbGINFO.c_str(), dbMOTD.c_str(), EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
 
     rname = "Guild Master";
@@ -153,7 +153,7 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
     sDatabase.escape_string(dbPnote);
     sDatabase.escape_string(dbOFFnote);
 
-    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')", 
+    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')",
         Id, GUID_LOPART(newmember.guid), newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
 
     if(pl)
@@ -278,7 +278,7 @@ void Guild::LoadPlayerStats(MemberSlot* memslot)
     AreaTableEntry* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(fields[2].GetUInt32())->GetAreaFlag(fields[3].GetFloat(),fields[4].GetFloat()));
     if (area)                                               // For example: .worldport -2313 478 48 1    Zone will be 0(unkonown), even though it's a usual cave
         memslot->zoneId = area->zone;                       // would cause null pointer exception
-    else 
+    else
         memslot->zoneId = 0;
 
     delete result;

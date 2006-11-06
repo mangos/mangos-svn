@@ -298,7 +298,7 @@ void AuthSocket::_HandleLogonChallenge()
     ByteBuffer pkt;
 
     _login = (const char*)ch->I;
-    
+
     //Escape the user login to avoid further SQL injection
     //Memory will be freed on AuthSocket object destruction
     _safelogin.resize(2*_login.size()+1);
@@ -312,10 +312,10 @@ void AuthSocket::_HandleLogonChallenge()
     int accepted_versions[]=EXPECTED_MANGOS_CLIENT_BUILD;
     for(int i=0;accepted_versions[i];i++)
         if(ch->build==accepted_versions[i])
-        {
-            valid_version=true;
-            break;
-        }
+    {
+        valid_version=true;
+        break;
+    }
 
     /// <ul><li> if this is a valid version
     if(valid_version)
@@ -421,9 +421,9 @@ void AuthSocket::_HandleLogonChallenge()
                 pkt<< (uint8) REALM_AUTH_NO_MATCH;
             }
         }
-    }                                                      //valid version
+    }                                                       //valid version
     else
-    ///<li> else
+        ///<li> else
     {
         ///- Check if we have the apropriate patch on the disk
         char tmp[64];
@@ -671,7 +671,7 @@ void AuthSocket::_HandleXferResume()
 /// Cancel patch transfer
 void AuthSocket::_HandleXferCancel()
 {
-	DEBUG_LOG("Entering _HandleXferCancel");
+    DEBUG_LOG("Entering _HandleXferCancel");
 
     ///- Close and delete the socket
     ibuf.Remove(1);                                         //clear input buffer
@@ -766,7 +766,7 @@ void Patcher::LoadPatchesInfo()
     WIN32_FIND_DATA fil;
     HANDLE hFil=FindFirstFile("./patches/*.mpq",&fil);
     if(hFil==INVALID_HANDLE_VALUE)
-        return;                   //no patches were found
+        return;                                             //no patches were found
 
     LoadPatchMD5(fil.cFileName);
 

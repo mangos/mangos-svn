@@ -161,7 +161,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+        "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
         mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (uint64)etime, money, COD, 0);
 }
 
@@ -258,7 +258,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", message);
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')", 
+        "VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')",
         m->messageID, pl->GetGUIDLow(), m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 
     pl->RemoveMail(message);
@@ -312,7 +312,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mn->messageID);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                 mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), 0, (uint64)mn->time, mn->money, 0, 0);
 
             // client tests, if player has enought money !!!

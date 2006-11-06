@@ -223,7 +223,7 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
 
         if(qcount > 0)
             loot->quest_items.push_back(LootItem(*item_iter,qcount));
-    
+
         if (loot->items.size() == MAX_NR_LOOT_ITEMS || loot->quest_items.size() == MAX_NR_QUEST_ITEMS)
             break;
     }
@@ -234,7 +234,7 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
 {
     if (loot->items.size() == MAX_NR_LOOT_ITEMS) return NULL;
     QuestItemList *ql = new QuestItemList();
-    
+
     for(uint8 i = 0; i < loot->quest_items.size(); i++)
     {
         LootItem &item = loot->quest_items[i];
@@ -334,7 +334,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         }
         case GROUP_PERMISSION:
         {
-            // You are not the items propietary, so you can only see 
+            // You are not the items propietary, so you can only see
             // blocked rolled items and questitems
             b << uint32(0);                                 //gold
             for (uint8 i = 0; i < l.items.size(); i++)

@@ -16,11 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 /// \addtogroup realmd
 /// @{
 /// \file
-
 
 #ifndef _REALMLIST_H
 #define _REALMLIST_H
@@ -86,7 +84,7 @@ class RealmList
         uint32 size() const { return _realms.size(); }
 
     private:
-        RealmMap _realms; ///< Internal map of realms
+        RealmMap _realms;                                   ///< Internal map of realms
 };
 /// @}
 #endif

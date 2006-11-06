@@ -128,7 +128,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
     Player *pl = GetPlayer();
     if ((ah) && (ah->owner != pl->GetGUIDLow()))
     {
-        if ((price < ah->buyout) || (ah->buyout == 0))        
+        if ((price < ah->buyout) || (ah->buyout == 0))
         {
             if (ah->bidder > 0)
             {
@@ -155,7 +155,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", n->messageID);
                 sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                     n->messageID , n->sender , n->receiver , subject.c_str() , body.c_str(), n->item , (uint64)n->time ,n->money ,n->COD ,n->checked);
 
                 if (rpl)
@@ -218,10 +218,13 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                     data << uint32((Aentry->time - time(NULL)) * 1000);
                     data << uint64(0);
                     // Is this needed?
-                    if (uint32(Aentry->bidder) > 0){
+                    if (uint32(Aentry->bidder) > 0)
+                    {
                         data << Aentry->bid;
-                    }else{
-                         data << uint32(0);
+                    }
+                    else
+                    {
+                        data << uint32(0);
                     }
                     cnter++;
                 }
@@ -286,14 +289,17 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             m->time = time(NULL) + (29 * DAY);
 
             // If we do a buyout and the prev bid was made by the same player ..
-            if (ah->bidder == pl->GetGUIDLow()){
-               m->money = ah->bid; // .. we return their cash                    
-            }else{
-               m->money = 0;  // Otherwise, just the item                              
+            if (ah->bidder == pl->GetGUIDLow())
+            {
+                m->money = ah->bid;                         // .. we return their cash
+            }
+            else
+            {
+                m->money = 0;                               // Otherwise, just the item
             }
             m->COD = 0;
             m->checked = 0;
-            
+
             uint64 mrcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
             Player *mrpln = objmgr.GetPlayer(mrcpl);
             if (mrpln)
@@ -312,9 +318,9 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                 m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
 
-            // mail to last bidder if there's one... + return money 
+            // mail to last bidder if there's one... + return money
             // EXCEPT if lastbidder == newbidder
-            if ((ah->bidder > 0) && (ah->bidder != pl->GetGUIDLow()))        
+            if ((ah->bidder > 0) && (ah->bidder != pl->GetGUIDLow()))
             {
                 Mail *mn2 = new Mail;
                 mn2->messageID = objmgr.GenerateMailID();
@@ -338,7 +344,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
                 sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                     mn2->messageID , mn2->sender , mn2->receiver , subject.c_str() , body.c_str(), mn2->item , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
 
                 if (rpl2)
@@ -383,7 +389,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u';", mn->messageID);
                 sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                    "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u');", 
+                    "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u');",
                     mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item, (uint64)mn->time, mn->money, 0, 0);
             }
 
@@ -507,14 +513,16 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     // Fetches the AH auction
     AuctionEntry *ah = objmgr.GetAuction(auctionID);
     Player *pl = GetPlayer();
-    
-    if ((ah)) // && (ah->owner != pl->GetGUIDLow()))
-    {              
+
+    if ((ah))                                               // && (ah->owner != pl->GetGUIDLow()))
+    {
         Item *it = objmgr.GetAItem(ah->item);
         ItemPrototype const *proto = it->GetProto();
-        if (it){
-           
-            if (ah->bidder > 0){                            // If we have a bidder, we have to send him the money he paid
+        if (it)
+        {
+
+            if (ah->bidder > 0)                             // If we have a bidder, we have to send him the money he paid
+            {
                 Mail *m = new Mail;
                 m->messageID = objmgr.GenerateMailID();
                 m->sender = ah->owner;
@@ -527,7 +535,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
                 m->time = time(NULL) + (29 * DAY);
                 m->money = ah->bid;
                 m->COD = 0;
-                m->checked = 0;           
+                m->checked = 0;
 
                 //escape apostrophes
                 std::string subject = m->subject;
@@ -537,15 +545,15 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 
                 sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
                 sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                     m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
-    
+
                 uint64 mrcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
                 Player *mrpln = objmgr.GetPlayer(mrcpl);
                 if (mrpln)
                 {
                     mrpln->AddMail(m);
-                }    
+                }
             }
             // Return the item
             Mail *mn2 = new Mail;
@@ -554,13 +562,13 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             mn2->receiver = pl->GetGUIDLow();
             std::ostringstream msgAuctionCanceledOwner;
             msgAuctionCanceledOwner << "Auction Canceled: " << proto->Name1;
-            mn2->body = "";            
+            mn2->body = "";
             mn2->subject = msgAuctionCanceledOwner.str().c_str();
             mn2->item = ah->item;
             mn2->time = time(NULL) + (29 * DAY);
             mn2->money = 0;
             mn2->COD = 0;
-            mn2->checked = 0;           
+            mn2->checked = 0;
 
             //escape apostrophes
             std::string subject = mn2->subject;
@@ -570,9 +578,9 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                 mn2->messageID , mn2->sender , mn2->receiver , subject.c_str() , body.c_str(), mn2->item , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
-    
+
             uint64 mrcpl2 = MAKE_GUID(mn2->receiver,HIGHGUID_PLAYER);
             Player *mrpln2 = objmgr.GetPlayer(mrcpl2);
             if (mrpln2)
@@ -581,19 +589,23 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
                 mrpln2->AddMItem(it);
                 mrpln2->AddMail(mn2);
             }
-        }else{
+        }
+        else
+        {
             // TODO Item not found - Error handling
             return;
         }
-    }else{
-          return;      
     }
-    
-    // Now remove the auction                           
+    else
+    {
+        return;
+    }
+
+    // Now remove the auction
     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",ah->Id);
     objmgr.RemoveAItem(ah->item);
     objmgr.RemoveAuction(ah->Id);
-    
+
     // And return an updated list of items
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
@@ -639,10 +651,10 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     }
     data.put<uint32>(0, count);
     data << uint32(count);
-    SendPacket(&data);        
-//    WorldPacket data;
-//    data << unk1 << auctionID;                              //need fix here, this code does nothing
-//    SendPacket(&data);
+    SendPacket(&data);
+    //    WorldPacket data;
+    //    data << unk1 << auctionID;                              //need fix here, this code does nothing
+    //    SendPacket(&data);
 }
 
 void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
@@ -723,7 +735,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_LIST_RESULT );
-    count = 0; // Start value?
+    count = 0;                                              // Start value?
     totalcount = 0;
     data << uint32(0);
     for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
@@ -754,8 +766,9 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                             std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), ::tolower );
                                             if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
                                             {
-                                                 if ((count < 50) && (totalcount >= listfrom)){
-                                                    count++;      
+                                                if ((count < 50) && (totalcount >= listfrom))
+                                                {
+                                                    count++;
                                                     data << Aentry->Id;
                                                     data << proto->ItemId;
                                                     data << uint32(0);
@@ -770,10 +783,13 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                                     data << uint32((Aentry->time - time(NULL)) * 1000);
                                                     data << uint32(Aentry->bidder);
                                                     data << uint32(0);
-                                                    if (uint32(Aentry->bidder) > 0){
+                                                    if (uint32(Aentry->bidder) > 0)
+                                                    {
                                                         data << Aentry->bid;
-                                                    }else{
-                                                         data << uint32(0);
+                                                    }
+                                                    else
+                                                    {
+                                                        data << uint32(0);
                                                     }
                                                 }
                                                 totalcount++;

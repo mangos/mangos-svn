@@ -34,7 +34,7 @@ bool StartDB(std::string &dbstring);
 void UnhookSignals();
 void HookSignals();
 
-bool stopEvent = false;                                     ///< Setting it to true stops the server 
+bool stopEvent = false;                                     ///< Setting it to true stops the server
 RealmList m_realmList;                                      ///< Holds the list of realms for this server
 DatabaseMysql dbRealmServer;                                ///< Accessor to the realm server database
 

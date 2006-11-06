@@ -262,7 +262,7 @@ void Spell::EffectDummy(uint32 i)
     }
 
     // If spell cannibalize and his casted, check special requirements and cast aura Cannibalize is all ok
-    if(m_spellInfo->Id == 20577) 
+    if(m_spellInfo->Id == 20577)
     {
         // non-standard cast requirement check
         SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
@@ -303,7 +303,7 @@ void Spell::EffectDummy(uint32 i)
 
         // ok, main function spell can be casted
 
-        finish(); // prepere to replacing this cpell cast to main function spell
+        finish();                                           // prepere to replacing this cpell cast to main function spell
 
         // casting
         SpellEntry *spellInfo = sSpellStore.LookupEntry( 20578 );
@@ -482,7 +482,7 @@ void Spell::EffectPowerDrain(uint32 i)
         new_damage = damage;
 
     int32 tmpvalue = int32(new_damage*m_spellInfo->EffectMultipleValue[i]);
-    
+
     unitTarget->ModifyPower(POWER_MANA,-new_damage);
 
     m_caster->ModifyPower(POWER_MANA,tmpvalue);
