@@ -171,6 +171,17 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,lang,NULL,player->GetGUID(),msg.c_str() );
             SendPacket(&data);
 
+            if(player->isAFK())
+            {
+                sChatHandler.FillMessageData(&data, this, CHAT_MSG_AFK, LANG_UNIVERSAL, NULL, player->GetGUID(), player->afkMsg.c_str());
+                SendPacket(&data);
+            }
+            if(player->isDND())
+            {
+                sChatHandler.FillMessageData(&data, this, CHAT_MSG_DND, LANG_UNIVERSAL, NULL, player->GetGUID(), player->dndMsg.c_str());
+                SendPacket(&data);
+            }
+
             // Auto enable whispers accepting at sending whispers
             if(!GetPlayer()->isAcceptWhispers())
             {
@@ -191,12 +202,32 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         } break;
 
         case CHAT_MSG_AFK:
-            GetPlayer()->ToggleAFK();
-            break;
+        {
+            std::string msg;
+            recv_data >> msg;            
+
+            GetPlayer()->afkMsg = msg;
+            if(msg.size() == 0 || !GetPlayer()->isAFK())
+            {
+                GetPlayer()->ToggleAFK();
+                if(GetPlayer()->isAFK() && GetPlayer()->isDND())
+                    GetPlayer()->ToggleDND();
+            }
+        } break;
 
         case CHAT_MSG_DND:
-            GetPlayer()->ToggleDND();
-            break;
+        {
+            std::string msg;
+            recv_data >> msg;
+            
+            GetPlayer()->dndMsg = msg;
+            if(msg.size() == 0 || !GetPlayer()->isDND())
+            {
+                GetPlayer()->ToggleDND();
+                if(GetPlayer()->isDND() && GetPlayer()->isAFK())
+                    GetPlayer()->ToggleAFK();
+            }
+        } break;
 
         default:
             sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);

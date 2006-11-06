@@ -253,7 +253,8 @@
 #define LANG_CHANGE_32BIT                ".Mod32Value:[OPCODE]:%u [VALUE]:%i"
 #define LANG_CHANGE_32BIT_FIELD          "You modified the value of Field:%u to Value: %u"
 
-#define LANG_SHUTTDOWN           "Syntax is .shutdown seconds"
+#define LANG_SHUTTDOWN                   "Syntax is .shutdown seconds"
 
 #define LANG_INVISIBLE_INVISIBLE         "You are now invisible."
 #define LANG_INVISIBLE_VISIBLE           "You are now visible."
+#define LANG_INVISIBLE_GUILD             "You can't used GM invisibility if you guild member."

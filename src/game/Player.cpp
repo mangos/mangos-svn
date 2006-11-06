@@ -57,8 +57,6 @@ Player::Player (WorldSession *session): Unit()
     info = NULL;
     m_divider = 0;
 
-    m_afk = 0;
-
     m_GMFlags = 0;
     if(GetSession()->GetSecurity() >=2)
         SetAcceptTicket(true);
@@ -985,26 +983,48 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << (uint8)0;
 }
 
-uint8 Player::ToggleAFK()
+bool Player::ToggleAFK()
 {
-    m_afk = !m_afk; 
-    if(this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK))
-        this->RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); 
+    if(HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK))
+        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); 
     else 
-        this->SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); 
+    {
+        // to prevent show <AFK> in invisiable mode
+        if(isGMVisible())
+            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); 
+        else
+            GetSession()->SendNotification("You invisible currently!");
+    }
     
-    return m_afk;
+    return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
 }
 
-uint8 Player::ToggleDND()
+bool Player::ToggleDND()
 {
-    m_dnd = !m_dnd; 
-    if(this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND))
-        this->RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
+    if(HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND))
+        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
     else 
-        this->SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
+    {
+        // to prevent show <DND> in invisiable mode
+        if(isGMVisible())
+            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
+        else
+            GetSession()->SendNotification("You invisible currently!");
+    }
     
-    return m_dnd; 
+    return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
+}
+
+uint8 Player::chatTag()
+{
+    if(isGameMaster())
+        return 3;
+    else if(isDND())
+        return 2;
+    if(isAFK())
+        return 1;
+    else
+        return 0;
 }
 
 void Player::SendFriendlist()
@@ -1381,7 +1401,10 @@ void Player::SetGameMaster(bool on)
         m_GMFlags |= GM_ON;
         setFaction(35);
         SetFlag(PLAYER_BYTES_2, 0x8);
-        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+
+        // to prevent show <GM> in invisible mode
+        if(isGMVisible())
+            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
     }
     else
     {
@@ -1398,15 +1421,28 @@ void Player::SetGMVisible(bool on)
     {
         m_GMFlags &= ~GM_INVISIBLE;                         //remove flag
 
+        // if in GM mode show <GM> befire removing invisibility
+        if(isGameMaster())
+            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+
         DeMorph();
         RemoveAura(10032,1);                                //crash?
+
     }
     else
     {
         m_GMFlags |= GM_INVISIBLE;                          //add flag
 
+        // remove <AFK> before go to invisible mode
+        if(isAFK())
+            ToggleAFK();
+
+        // remove <DND> before go to invisible mode
+        if(isDND())
+            ToggleDND();
+
         SetAcceptWhispers(false);
-        SetGameMaster(true);
+        SetGameMaster(true);                                // <GM> wiil be not added
 
         SetUInt32Value(UNIT_FIELD_DISPLAYID, 6908);         //Set invisible model
 
@@ -2181,6 +2217,7 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
     updateMask->SetBit(UNIT_FIELD_PET_NAME_TIMESTAMP);
     updateMask->SetBit(UNIT_DYNAMIC_FLAGS);
 
+    updateMask->SetBit(PLAYER_FLAGS);
     updateMask->SetBit(PLAYER_BYTES);
     updateMask->SetBit(PLAYER_BYTES_2);
     updateMask->SetBit(PLAYER_BYTES_3);
