@@ -338,7 +338,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             data<<(uint8)GE_SIGNED_ON;
             data<<(uint8)1;
             data<<pCurrChar->GetName();
-            data<<(uint8)0<<(uint8)0<<(uint8)0;    
+            data<<(uint8)0<<(uint8)0<<(uint8)0;
             guild->BroadcastPacket(&data);
             DEBUG_LOG( "WORLD: Sent guild-signed-on (SMSG_GUILD_EVENT)" );
         }
@@ -456,10 +456,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     time_t gameTime = sWorld.GetGameTime();
     struct tm *lt = localtime(&gameTime);
     uint32 xmitTime = (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 |
-                      (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
-                      lt->tm_hour << 6 | lt->tm_min;
+        (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
+        lt->tm_hour << 6 | lt->tm_min;
     data << xmitTime;
-    data << (uint32)0x3C888889; //(float)0.017f;
+    data << (uint32)0x3C888889;                             //(float)0.017f;
     SendPacket( &data );
 
     //Show cinematic at the first time that player login

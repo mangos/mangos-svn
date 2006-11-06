@@ -63,5 +63,4 @@ class AuthSocket: public TcpSocket
         std::string _safelogin;
 };
 /// @}
-
 #endif

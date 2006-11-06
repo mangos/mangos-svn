@@ -986,33 +986,33 @@ void Player::BuildEnumData( WorldPacket * p_data )
 bool Player::ToggleAFK()
 {
     if(HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK))
-        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); 
-    else 
+        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
+    else
     {
         // to prevent show <AFK> in invisiable mode
         if(isGMVisible())
-            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); 
+            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
         else
             GetSession()->SendNotification("You invisible currently!");
     }
-    
+
     return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
 }
 
 bool Player::ToggleDND()
 {
     if(HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND))
-        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
-    else 
+        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
+    else
     {
         // to prevent show <DND> in invisiable mode
         if(isGMVisible())
-            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
+            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
         else
             GetSession()->SendNotification("You invisible currently!");
     }
-    
-    return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); 
+
+    return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
 }
 
 uint8 Player::chatTag()
@@ -2034,7 +2034,7 @@ uint32 Player::resetTalentsCost() const
     // then 5 gold
     else if(m_resetTalentsCost < 5*GOLD)
         return 5*GOLD;
-    // After that it increases in increments of 5 gold 
+    // After that it increases in increments of 5 gold
     else if(m_resetTalentsCost < 10*GOLD)
         return 10*GOLD;
     else
@@ -2049,9 +2049,9 @@ uint32 Player::resetTalentsCost() const
         }
         else
         {
-            // After that it increases in increments of 5 gold 
+            // After that it increases in increments of 5 gold
             int32 new_cost = m_resetTalentsCost + 5*GOLD;
-            // until it hits a cap of 50 gold. 
+            // until it hits a cap of 50 gold.
             if(new_cost > 50*GOLD)
                 new_cost = 50*GOLD;
             return new_cost;
@@ -2064,7 +2064,7 @@ bool Player::resetTalents()
     uint32 level = getLevel();
     if (level < 10 || (GetUInt32Value(PLAYER_CHARACTER_POINTS1) >= level - 9))
         return false;
-    
+
     uint32 cost = resetTalentsCost();
 
     if (GetMoney() < cost)
@@ -2097,7 +2097,7 @@ bool Player::resetTalents()
 
     SetUInt32Value(PLAYER_CHARACTER_POINTS1, level - 9);
     ModifyMoney(-(int32)cost);
-    
+
     m_resetTalentsCost = cost;
     m_resetTalentsTime = time(NULL);
     return true;
@@ -8561,7 +8561,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 {
     if( pQuest )
     {
-        // prevent recive reward with quest items in bank or for not completed quest 
+        // prevent recive reward with quest items in bank or for not completed quest
         if(!CanRewardQuest(pQuest,msg))
             return false;
 
@@ -10331,7 +10331,7 @@ void Player::_SaveMail()
         sDatabase.escape_string(subject);
 
         sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
             m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
     }
     m_mailsUpdated = false;

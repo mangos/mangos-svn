@@ -116,7 +116,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 
     sDatabase.escape_string(guildname);
     sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u' OR `charterguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
-    sDatabase.PExecute("INSERT INTO `guild_charter` (`ownerguid`, `charterguid`, `guildname`) VALUES ('%u', '%u', '%s')", 
+    sDatabase.PExecute("INSERT INTO `guild_charter` (`ownerguid`, `charterguid`, `guildname`) VALUES ('%u', '%u', '%s')",
         _player->GetGUIDLow(), charter->GetGUIDLow(), guildname.c_str());
 }
 
@@ -266,7 +266,7 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 
     std::string db_newguildname = newguildname;
     sDatabase.escape_string(db_newguildname);
-    sDatabase.PExecute("UPDATE `guild_charter` SET `guildname` = '%s' WHERE `charterguid` = '%u'", 
+    sDatabase.PExecute("UPDATE `guild_charter` SET `guildname` = '%s' WHERE `charterguid` = '%u'",
         db_newguildname.c_str(), GUID_LOPART(petitionguid));
 
     sLog.outDebug("Petition (GUID: %u) renamed to '%s'", GUID_LOPART(petitionguid), newguildname.c_str());
@@ -1034,7 +1034,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     recvPacket >> name;
     normalizePlayerName(name);
     sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
-    
+
     newLeader = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     if(newLeader)
     {

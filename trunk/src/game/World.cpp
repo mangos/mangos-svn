@@ -147,7 +147,7 @@ void World::SetInitialWorldSettings()
 
     srand((unsigned int)time(NULL));
 
-   if(!sConfig.GetString("DataDir",&dataPath))
+    if(!sConfig.GetString("DataDir",&dataPath))
         dataPath="./";
     else
     {
@@ -353,7 +353,7 @@ void World::Update(time_t diff)
         {
             next = itr;
             next++;
-            if (time(NULL) > (itr->second->time)) 
+            if (time(NULL) > (itr->second->time))
             {
                 // Auction Expired!
                 if (itr->second->bidder == 0)               // if noone bidded auction...
@@ -401,7 +401,7 @@ void World::Update(time_t diff)
 
                         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
                         sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                             m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, 0, 0, 0);
 
                         delete m;
@@ -476,7 +476,7 @@ void World::Update(time_t diff)
 
                         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
                         sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                             m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
                     }
 
@@ -511,7 +511,7 @@ void World::Update(time_t diff)
 
                         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn->messageID);
                         sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
                             mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item, (uint64)mn->time, 0, 0, 0);
                     }
 
@@ -679,7 +679,7 @@ time_t World::_UpdateGameTime()
         {
 
             m_ShutdownTimer -= elapsed;
-            
+
             ShutdownMsg();
         }
     }
@@ -706,16 +706,16 @@ void World::ShutdownMsg(bool show, Player* player)
     if ( show ||
         (m_ShutdownTimer < 10) ||
                                                             // < 30 sec; every 5 sec
-		(m_ShutdownTimer<30        && (m_ShutdownTimer % 5         )==0) ||
+        (m_ShutdownTimer<30        && (m_ShutdownTimer % 5         )==0) ||
                                                             // < 5 min ; every 1 min
-		(m_ShutdownTimer<5*MINUTE  && (m_ShutdownTimer % MINUTE    )==0) ||
+        (m_ShutdownTimer<5*MINUTE  && (m_ShutdownTimer % MINUTE    )==0) ||
                                                             // < 30 min ; every 5 min
-		(m_ShutdownTimer<30*MINUTE && (m_ShutdownTimer % (5*MINUTE))==0) ||
+        (m_ShutdownTimer<30*MINUTE && (m_ShutdownTimer % (5*MINUTE))==0) ||
                                                             // < 12 h ; every 1 h
-		(m_ShutdownTimer<12*HOUR   && (m_ShutdownTimer % HOUR      )==0) ||
+        (m_ShutdownTimer<12*HOUR   && (m_ShutdownTimer % HOUR      )==0) ||
                                                             // > 12 h ; every 12 h
-		(m_ShutdownTimer>12*HOUR   && (m_ShutdownTimer % (12*HOUR) )==0))
-	{
+        (m_ShutdownTimer>12*HOUR   && (m_ShutdownTimer % (12*HOUR) )==0))
+    {
         uint32 secs    = m_ShutdownTimer % MINUTE;
         uint32 minutes = m_ShutdownTimer % HOUR / MINUTE;
         uint32 hours   = m_ShutdownTimer % DAY  / HOUR;
@@ -733,7 +733,7 @@ void World::ShutdownMsg(bool show, Player* player)
 
         SendServerMessage(SERVER_MSG_SHUTDOWN_TIME,ss.str().c_str(),player);
         DEBUG_LOG("Server is shuttingdown in %s",ss.str().c_str());
-	}
+    }
 }
 
 void World::ShutdownCancel()

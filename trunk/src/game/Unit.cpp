@@ -275,7 +275,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             {
                 ((Player*)pVictim)->DurabilityLossAll(0.10);
                 WorldPacket data;
-                data.Initialize(SMSG_DURABILITY_DAMAGE_DEATH); // durability lost message
+                                                            // durability lost message
+                data.Initialize(SMSG_DURABILITY_DAMAGE_DEATH);
                 ((Player*)pVictim)->GetSession()->SendPacket(&data);
             }
             HostilList::iterator i;
@@ -1410,8 +1411,8 @@ void Unit::_UpdateSpells( uint32 time )
                     if(GetTypeId()==TYPEID_PLAYER)
                     {
                         WorldPacket data;
-                        data.Initialize(SMSG_CANCEL_AUTO_REPEAT); 
-                        ((Player*)this)->GetSession()->SendPacket(&data); 
+                        data.Initialize(SMSG_CANCEL_AUTO_REPEAT);
+                        ((Player*)this)->GetSession()->SendPacket(&data);
                     }
                     else
                         castSpell(NULL);
@@ -3205,7 +3206,8 @@ bool Unit::isTargetableForAttack()
     return isAlive() && !isInFlight() /*&& !isStealth()*/;
 }
 
-void Unit::ModifyHealth(int32 dVal) { 
+void Unit::ModifyHealth(int32 dVal)
+{
     int32 val = dVal + GetHealth();
     if(val <= 0)
     {
@@ -3216,12 +3218,13 @@ void Unit::ModifyHealth(int32 dVal) {
     uint32 maxHealth = GetMaxHealth();
 
     if(uint32(val) < maxHealth)
-        SetHealth(val); 
+        SetHealth(val);
     else
-        SetHealth(maxHealth); 
+        SetHealth(maxHealth);
 }
 
-void Unit::ModifyPower(Powers power, int32 dVal) { 
+void Unit::ModifyPower(Powers power, int32 dVal)
+{
     int32 val = dVal + GetPower(power);
     if(val <= 0)
     {
@@ -3232,7 +3235,7 @@ void Unit::ModifyPower(Powers power, int32 dVal) {
     uint32 maxPower = GetMaxPower(power);
 
     if(uint32(val) < maxPower)
-        SetPower(power,val); 
+        SetPower(power,val);
     else
-        SetPower(power,maxPower); 
+        SetPower(power,maxPower);
 }

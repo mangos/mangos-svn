@@ -475,11 +475,10 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
 
 bool Creature::isCanTrainingAndResetTalentsOf(Player* pPlayer) const
 {
-    return pPlayer->getLevel() >= 10 
-        && GetCreatureInfo()->trainer_type == TRAINER_TYPE_CLASS 
+    return pPlayer->getLevel() >= 10
+        && GetCreatureInfo()->trainer_type == TRAINER_TYPE_CLASS
         && pPlayer->getClass() == GetCreatureInfo()->classNum;
 }
-
 
 void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 {

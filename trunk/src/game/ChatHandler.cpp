@@ -204,7 +204,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         case CHAT_MSG_AFK:
         {
             std::string msg;
-            recv_data >> msg;            
+            recv_data >> msg;
 
             GetPlayer()->afkMsg = msg;
             if(msg.size() == 0 || !GetPlayer()->isAFK())
@@ -219,7 +219,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string msg;
             recv_data >> msg;
-            
+
             GetPlayer()->dndMsg = msg;
             if(msg.size() == 0 || !GetPlayer()->isDND())
             {
