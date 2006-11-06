@@ -86,7 +86,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT+TYPE_GAMEOBJECT+TYPE_ITEM);
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_ITEM);
     if(!pObject||!pObject->hasQuest(quest))
     {
         _player->PlayerTalkClass->CloseGossip();
@@ -148,7 +148,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT+TYPE_GAMEOBJECT+TYPE_ITEM);
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_ITEM);
     if(!pObject||!pObject->hasQuest(quest) && !pObject->hasInvolvedQuest(quest))
     {
         _player->PlayerTalkClass->CloseGossip();
@@ -224,7 +224,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT+TYPE_GAMEOBJECT);
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
     if(!pObject||!pObject->hasInvolvedQuest(quest))
         return;
 
@@ -266,7 +266,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT+TYPE_GAMEOBJECT);
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
     if(!pObject||!pObject->hasInvolvedQuest(quest))
         return;
 

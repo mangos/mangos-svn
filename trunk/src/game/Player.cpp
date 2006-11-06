@@ -7683,6 +7683,20 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
     Item *pSrcItem = GetItemByPos( srcbag, srcslot );
     if( pSrcItem )
     {
+        // not let split all items (can be only at cheating)
+        if(pSrcItem->GetCount() == count)
+        {
+            SendEquipError( EQUIP_ERR_COULDNT_SPLIT_ITEMS, pSrcItem, NULL );
+            return;
+        }
+
+        // not let split more existed items (can be only at cheating)
+        if(pSrcItem->GetCount() < count)
+        {
+            SendEquipError( EQUIP_ERR_TRIED_TO_SPLIT_MORE_THAN_COUNT, pSrcItem, NULL );
+            return;
+        }
+
         sLog.outDebug( "STORAGE: SplitItem bag = %u, slot = %u, item = %u, count = %u", dstbag, dstslot, pSrcItem->GetEntry(), count);
         Item *pNewItem = CreateItem( pSrcItem->GetEntry(), count );
         if( pNewItem )
