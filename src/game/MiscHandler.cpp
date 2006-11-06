@@ -483,18 +483,20 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     if(friendGuid)
     {
         pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
-        QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", friendGuid);
-
-        if( result )
-            friendResult = FRIEND_ALREADY;
-
-        delete result;
-
         if(pfriend==GetPlayer())
             friendResult = FRIEND_SELF;
-
-        if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid))
+        else if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid))
             friendResult = FRIEND_ENEMY;
+        else
+        {
+            QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE guid='%u' AND `flags` = 'FRIEND' AND `friend` = '%u'", GetPlayer()->GetGUIDLow(), GUID_LOPART(friendGuid));
+
+            if( result )
+                friendResult = FRIEND_ALREADY;
+
+            delete result;
+        }
+
     }
 
     data.Initialize( SMSG_FRIEND_STATUS );
@@ -516,7 +518,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             GetPlayer()->GetGUIDLow(), friendName.c_str(), GUID_LOPART(friendGuid));
 
         sLog.outDetail( "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u. ",
-            friendName.c_str(), friendGuid, friendArea, friendLevel, friendClass);
+            friendName.c_str(), GUID_LOPART(friendGuid), friendArea, friendLevel, friendClass);
 
     }
     else if(friendResult==FRIEND_ALREADY)
@@ -555,9 +557,9 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 
     data << (uint8)FriendResult << (uint64)FriendGUID;
 
-    uint32 guid = GetPlayer()->GetGUIDLow();
+    uint32 guidlow = GetPlayer()->GetGUIDLow();
 
-    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' AND `friend` = '%u'",(uint32)guid, GUID_LOPART(FriendGUID));
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' AND `friend` = '%u'",guidlow, GUID_LOPART(FriendGUID));
 
     SendPacket( &data );
 
@@ -586,15 +588,17 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     if(IgnoreGuid)
     {
-        QueryResult *result = sDatabase.PQuery("SELECT `guid`,`name`,`friend`,`flags` FROM `character_social` WHERE `flags` = 'IGNORE' AND `friend` = '%u'", (uint32)IgnoreGuid);
-
-        if( result )
-            ignoreResult = FRIEND_IGNORE_ALREADY;
-
         if(IgnoreGuid==GetPlayer()->GetGUID())
             ignoreResult = FRIEND_IGNORE_SELF;
+        else
+        {
+            QueryResult *result = sDatabase.PQuery("SELECT `guid`,`name`,`friend`,`flags` FROM `character_social` WHERE `flags` = 'IGNORE' AND `friend` = '%u'", GUID_LOPART(IgnoreGuid));
 
-        delete result;
+            if( result )
+                ignoreResult = FRIEND_IGNORE_ALREADY;
+
+            delete result;
+        }
     }
 
     data.Initialize( SMSG_FRIEND_STATUS );
@@ -604,7 +608,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         ignoreResult = FRIEND_IGNORE_ADDED;
 
         sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')",
-            GetPlayer()->GetGUIDLow(), IgnoreName.c_str(), IgnoreGuid);
+            GetPlayer()->GetGUIDLow(), IgnoreName.c_str(), GUID_LOPART(IgnoreGuid));
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
     {
@@ -639,10 +643,9 @@ void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 
     data << (uint8)IgnoreResult << (uint64)IgnoreGUID;
 
-    uint32 guid;
-    guid=GetPlayer()->GetGUIDLow();
+    uint32 guidlow = GetPlayer()->GetGUIDLow();
 
-    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u' AND `friend` = '%u'",(uint32)guid, GUID_LOPART(IgnoreGUID));
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u' AND `friend` = '%u'",guidlow, GUID_LOPART(IgnoreGUID));
 
     SendPacket( &data );
 
