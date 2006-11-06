@@ -1031,14 +1031,11 @@ void Player::SendFriendlist()
 {
     WorldPacket data;
     uint8 i=0;
-    uint32 guid;
     Field *fields;
     Player* pObj;
     FriendStr friendstr[255];
 
-    guid=this->GetGUIDLow();
-
-    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",GetGUIDLow());
     if(result)
     {
         fields = result->Fetch();
@@ -1082,7 +1079,7 @@ void Player::SendFriendlist()
     for (int j=0; j < i; j++)
     {
 
-        sLog.outDetail( "WORLD: Adding Friend - Guid:" I64FMTD ", Status:%u, Area:%u, Level:%u Class:%u",friendstr[j].PlayerGUID, friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
+        sLog.outDetail( "WORLD: Adding Friend Guid: %u, Status:%u, Area:%u, Level:%u Class:%u",GUID_LOPART(friendstr[j].PlayerGUID), friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
 
         data << friendstr[j].PlayerGUID << friendstr[j].Status ;
         if (friendstr[j].Status != 0)
@@ -1099,12 +1096,9 @@ void Player::SendIgnorelist()
 
     unsigned char nrignore=0;
     uint8 i=0;
-    uint32 guid;
     Field *fields;
 
-    guid=this->GetGUIDLow();
-    
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`friend`) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`friend`) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
 
     if(!result) return;
 
@@ -1115,7 +1109,7 @@ void Player::SendIgnorelist()
     dataI.Initialize( SMSG_IGNORE_LIST );
     dataI << nrignore;
 
-    result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", guid);
+    result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
 
     if(!result) return;
 
