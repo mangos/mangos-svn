@@ -1149,15 +1149,14 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         if(!pEnchant)
             return;
 
-        // remove old enchanting before appling new if equiped
-        if(itemTarget->IsEquipped())
+        // remove old enchanting before applying new if equipped
+        if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3))
         {
-            if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3))
-            {
+            if(itemTarget->IsEquipped())
                 p_caster->AddItemEnchant(itemTarget,old_enchant_id,false);
-                // duration == 0 wiil remove EnchantDuration
-                p_caster->AddEnchantDuration(itemTarget,1,0);
-            }
+
+            // duration == 0 will remove EnchantDuration
+            p_caster->AddEnchantDuration(itemTarget,1,0);
         }
 
         for(int x=0;x<3;x++)
@@ -1168,12 +1167,14 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         if(m_spellInfo->SpellFamilyName == 8)
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2, 45+FindSpellRank(m_spellInfo->Id)*15);
 
-        // add new enchanting if equiped
+        // add new enchanting if equipped
         if(itemTarget->IsEquipped())
         {
             p_caster->AddItemEnchant(itemTarget,enchant_id,true);
-            p_caster->AddEnchantDuration(itemTarget,1,duration*1000);
         }
+
+        // set duration
+        p_caster->AddEnchantDuration(itemTarget,1,duration*1000);
 
         //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
         p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),pEnchant->display_type,duration);

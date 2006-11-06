@@ -2369,13 +2369,13 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
     {
         if(getClass() == CLASS_HUNTER)
         {
-            ApplyModUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,enchant_value1,apply);
-            ApplyModUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_value1,apply);
+            ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,enchant_value1,apply);
+            ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_value1,apply);
         }
         else
         {
-            ApplyModUInt32Value(UNIT_FIELD_MINDAMAGE,enchant_value1,apply);
-            ApplyModUInt32Value(UNIT_FIELD_MAXDAMAGE,enchant_value1,apply);
+            ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_value1,apply);
+            ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_value1,apply);
         }
     }
     else
