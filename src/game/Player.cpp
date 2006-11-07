@@ -1132,6 +1132,9 @@ void Player::SendIgnorelist()
 
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange)
 {
+    // prepering unsommon pet if lost (we must get pet before teleportation or will not find it later)
+    Creature* pet = GetPet();
+
     if(this->GetMapId() == mapid)
     {
         // near teleport
@@ -1179,9 +1182,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         }
 
         // unsommon pet if lost
-        Creature* pet = GetPet();
-        if(!pet) return;
-        if(!IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
+        if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
             UnsummonPet(pet);
     }
 }
