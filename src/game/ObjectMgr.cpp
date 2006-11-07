@@ -151,12 +151,10 @@ void ObjectMgr::LoadCreatureTemplates()
 
 PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 {
-    uint32 createId;
-
     Field *player_fields, *items_fields, *spells_fields, *skills_fields, *actions_fields;
     PlayerCreateInfo *pPlayerCreateInfo;
 
-    QueryResult *player_result = sDatabase.PQuery("SELECT `createId`,`race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID`,`BaseStrength`,`BaseAgility`,`BaseStamina`,`BaseIntellect`,`BaseSpirit`,`BaseArmor`,`BaseHealth`,`BaseMana`,`BaseRage`,`BaseFocus`,`BaseEnergy` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", race, class_);
+    QueryResult *player_result = sDatabase.PQuery("SELECT `race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID`,`BaseStrength`,`BaseAgility`,`BaseStamina`,`BaseIntellect`,`BaseSpirit`,`BaseArmor`,`BaseHealth`,`BaseMana`,`BaseRage`,`BaseFocus`,`BaseEnergy` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", race, class_);
 
     if(!player_result)
     {
@@ -168,27 +166,25 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     player_fields = player_result->Fetch();
 
-    pPlayerCreateInfo->createId = player_fields[0].GetUInt8();
-    createId = (uint32)pPlayerCreateInfo->createId;
-    pPlayerCreateInfo->race = player_fields[1].GetUInt8();
-    pPlayerCreateInfo->class_ = player_fields[2].GetUInt8();
-    pPlayerCreateInfo->mapId = player_fields[3].GetUInt32();
-    pPlayerCreateInfo->zoneId = player_fields[4].GetUInt32();
-    pPlayerCreateInfo->positionX = player_fields[5].GetFloat();
-    pPlayerCreateInfo->positionY = player_fields[6].GetFloat();
-    pPlayerCreateInfo->positionZ = player_fields[7].GetFloat();
-    pPlayerCreateInfo->displayId = player_fields[8].GetUInt16();
-    pPlayerCreateInfo->strength = player_fields[9].GetUInt8();
-    pPlayerCreateInfo->agility = player_fields[10].GetUInt8();
-    pPlayerCreateInfo->stamina = player_fields[11].GetUInt8();
-    pPlayerCreateInfo->intellect = player_fields[12].GetUInt8();
-    pPlayerCreateInfo->spirit = player_fields[13].GetUInt8();
-    pPlayerCreateInfo->basearmor = player_fields[14].GetUInt32();
-    pPlayerCreateInfo->health = player_fields[15].GetUInt32();
-    pPlayerCreateInfo->mana = player_fields[16].GetUInt32();
-    pPlayerCreateInfo->rage = player_fields[17].GetUInt32();
-    pPlayerCreateInfo->focus = player_fields[18].GetUInt32();
-    pPlayerCreateInfo->energy = player_fields[19].GetUInt32();
+    pPlayerCreateInfo->race = player_fields[0].GetUInt8();
+    pPlayerCreateInfo->class_ = player_fields[1].GetUInt8();
+    pPlayerCreateInfo->mapId = player_fields[2].GetUInt32();
+    pPlayerCreateInfo->zoneId = player_fields[3].GetUInt32();
+    pPlayerCreateInfo->positionX = player_fields[4].GetFloat();
+    pPlayerCreateInfo->positionY = player_fields[5].GetFloat();
+    pPlayerCreateInfo->positionZ = player_fields[6].GetFloat();
+    pPlayerCreateInfo->displayId = player_fields[7].GetUInt16();
+    pPlayerCreateInfo->strength = player_fields[8].GetUInt8();
+    pPlayerCreateInfo->agility = player_fields[9].GetUInt8();
+    pPlayerCreateInfo->stamina = player_fields[10].GetUInt8();
+    pPlayerCreateInfo->intellect = player_fields[11].GetUInt8();
+    pPlayerCreateInfo->spirit = player_fields[12].GetUInt8();
+    pPlayerCreateInfo->basearmor = player_fields[13].GetUInt32();
+    pPlayerCreateInfo->health = player_fields[14].GetUInt32();
+    pPlayerCreateInfo->mana = player_fields[15].GetUInt32();
+    pPlayerCreateInfo->rage = player_fields[16].GetUInt32();
+    pPlayerCreateInfo->focus = player_fields[17].GetUInt32();
+    pPlayerCreateInfo->energy = player_fields[18].GetUInt32();
 
     delete player_result;
 
