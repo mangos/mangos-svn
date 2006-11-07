@@ -440,7 +440,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 
     *data << messageLength;
     *data << message;
-    if(session != 0 && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
+    if(session != 0 && type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
         *data << session->GetPlayer()->chatTag();
     else
         *data << uint8(0);
