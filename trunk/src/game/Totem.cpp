@@ -67,6 +67,9 @@ void Totem::Summon()
 
 void Totem::UnSummon()
 {
+    if (m_type == TOTEM_LAST_BURST)
+        this->CastSpell(this, m_spell, true);
+
     WorldPacket data;
     data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
     data << GetGUID();
@@ -105,7 +108,15 @@ Unit *Totem::GetOwner()
 
 void Totem::SetSpell(uint32 spellId)
 {
-    m_spell = spellId;
+    //now, spellId is the spell of EffectSummonTotem , not the spell1 of totem!
+    m_spell = this->GetCreatureInfo()->spell1;
     if (GetDuration(sSpellStore.LookupEntry(m_spell)) != -1)
         m_type = TOTEM_ACTIVE;
+
+    if(spellId)
+    {
+        SpellEntry *spellinfo = sSpellStore.LookupEntry(spellId);
+        if ( spellinfo && spellinfo->SpellFamilyFlags == 0x28000000 )
+            m_type = TOTEM_LAST_BURST;      //For Fire Nova Totem and Corrupted Fire Nova Totem
+    }
 }
