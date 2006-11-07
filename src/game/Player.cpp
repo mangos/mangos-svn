@@ -352,21 +352,11 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_Played_time[1] = 0;
 
     uint32 titem_id;
-    uint8 titem_slot;
-    uint8 titem_bagIndex;
     uint32 titem_amount;
     uint16 tspell, tskill[3], taction[4];
-    std::list<uint32>::iterator item_id_itr;
-    std::list<uint8>::iterator item_bagIndex_itr;
-    std::list<uint8>::iterator item_slot_itr;
-    std::list<uint32>::iterator item_amount_itr;
     std::list<uint16>::iterator skill_itr[3], action_itr[4];
     std::list<CreateSpellPair>::iterator spell_itr;
 
-    item_id_itr = info->item_id.begin();
-    item_bagIndex_itr = info->item_bagIndex.begin();
-    item_slot_itr = info->item_slot.begin();
-    item_amount_itr = info->item_amount.begin();
     spell_itr = info->spell.begin();
 
     for (; spell_itr!=info->spell.end(); spell_itr++)
@@ -429,59 +419,73 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     uint16 dest;
     uint8 msg;
     Item *pItem;
-    for (; item_id_itr!=info->item_id.end(); item_id_itr++, item_bagIndex_itr++, item_slot_itr++, item_amount_itr++)
+    for (PlayerCreateInfoItems::iterator item_id_itr = info->item.begin(); item_id_itr!=info->item.end(); ++item_id_itr++)
     {
-        titem_id = (*item_id_itr);
-        titem_bagIndex = (*item_bagIndex_itr);
-        titem_slot = (*item_slot_itr);
-        titem_amount = (*item_amount_itr);
+        titem_id     = item_id_itr->item_id;
+        titem_amount = item_id_itr->item_amount;
 
         if (titem_id)
         {
-            sLog.outDebug("STORAGE: Creating initial item, itemId = %u, bagIndex = %u, slot = %u, count = %u",titem_id, titem_bagIndex, titem_slot, titem_amount);
+            sLog.outDebug("STORAGE: Creating initial item, itemId = %u, count = %u",titem_id, titem_amount);
 
             pItem = CreateItem( titem_id, titem_amount);
             if( pItem )
             {
-                dest = ((titem_bagIndex << 8) | titem_slot);
-                if( IsInventoryPos( dest ) )
+                msg = CanEquipItem( NULL_SLOT, dest, pItem, false );
+                if( msg == EQUIP_ERR_OK )
+                    EquipItem( dest, pItem, true);
+                else
                 {
-                    msg = CanStoreItem( titem_bagIndex, titem_slot, dest, pItem, false );
+                    // store in main bag to simplify second pass
+                    msg = CanStoreItem( INVENTORY_SLOT_BAG_0, NULL_SLOT, dest, pItem, false );
                     if( msg == EQUIP_ERR_OK )
                         StoreItem( dest, pItem, true);
                     else
                     {
-                        sLog.outDebug("STORAGE: Can't store item, error msg = %u",msg);
+                        sLog.outError("STORAGE: Can't equip or store initial item %u for race %u class %u , error msg = %u",titem_id,race,class_,msg);
                         delete pItem;
                     }
                 }
-                else if( IsEquipmentPos( dest ) )
+            }
+            else
+                sLog.outError("STORAGE: Can't create initial item %u (not existed item id) for race %u class %u , error msg = %u",titem_id,race,class_,msg);
+        }
+    }
+
+    // bags and main-hamd weapon must equiped ant this moment
+    // now second pass for not equiped (offhand weapon/shield if it attempt equiped before main-hand weapon) 
+    // or ammo not equiped in special bag
+    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        int16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+        pItem = GetItemByPos( pos );
+
+        if(pItem)
+        {
+            // equip offhand weapon/shield if it attempt equiped before main-hand weapon 
+            msg = CanEquipItem( NULL_SLOT, dest, pItem, false );
+            if( msg == EQUIP_ERR_OK )
+            {
+                RemoveItem(INVENTORY_SLOT_BAG_0, i,true);
+                EquipItem( dest, pItem, true);
+            }else
+            // move other items to more appropriate slots (ammo not equiped in special bag)
+            {
+                msg = CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
+                if( msg == EQUIP_ERR_OK )
                 {
-                    msg = CanEquipItem( titem_slot, dest, pItem, false );
-                    if( msg == EQUIP_ERR_OK )
-                        EquipItem( dest, pItem, true);
-                    else
-                    {
-                        sLog.outDebug("STORAGE: Can't equip item, error msg = %u",msg);
-                        delete pItem;
-                    }
+                    RemoveItem(INVENTORY_SLOT_BAG_0, i,true);
+                    StoreItem( dest, pItem, true);
                 }
-                else if( IsBankPos( dest ) )
-                {
-                    msg = CanBankItem( titem_bagIndex, titem_slot, dest, pItem, false );
-                    if( msg == EQUIP_ERR_OK )
-                        BankItem( dest, pItem, true);
-                    else
-                    {
-                        sLog.outDebug("STORAGE: Can't bank item, error msg = %u",msg);
-                        delete pItem;
-                    }
-                }
-                else
-                    delete pItem;
+
+                // if  this is ammo then use it
+                uint8 msg = CanUseAmmo( pItem->GetProto()->ItemId );
+                if( msg == EQUIP_ERR_OK )
+                    SetUInt32Value(PLAYER_AMMO_ID, pItem->GetProto()->ItemId);
             }
         }
     }
+    // all item positions resolved
 
     // remove applied original stats mods before item equipment
     _RemoveStatsMods();
@@ -7242,6 +7246,8 @@ uint8 Player::CanUseAmmo( uint32 item ) const
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
+        if( pProto->InventoryType!= INVTYPE_AMMO )
+            return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
         if( (pProto->AllowableClass & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
         if( pProto->RequiredSkill != 0  )
@@ -8477,7 +8483,7 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
             uint16 dest;
             if( count <= 0 )
                 count = 1;
-            uint8 msg = CanStoreNewItem( 0, NULL_SLOT, dest, srcitem, count, false );
+            uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, srcitem, count, false );
             if( msg != EQUIP_ERR_OK )
             {
                 SendEquipError( msg, NULL, NULL );
@@ -8586,7 +8592,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
         {
             if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
             {
-                msg = CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false );
+                msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false );
                 if( msg != EQUIP_ERR_OK )
                 {
                     SendEquipError( msg, NULL, NULL );
@@ -8601,7 +8607,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
             {
                 if( pQuest->GetQuestInfo()->RewItemId[i] )
                 {
-                    msg = CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false );
+                    msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false );
                     if( msg != EQUIP_ERR_OK )
                     {
                         SendEquipError( msg, NULL, NULL );
@@ -8720,7 +8726,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
         {
             if( qInfo->RewChoiceItemId[reward] )
             {
-                if( CanStoreNewItem( 0, NULL_SLOT, dest, qInfo->RewChoiceItemId[reward], qInfo->RewChoiceItemCount[reward], false ) == EQUIP_ERR_OK )
+                if( CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, qInfo->RewChoiceItemId[reward], qInfo->RewChoiceItemCount[reward], false ) == EQUIP_ERR_OK )
                     StoreNewItem( dest, qInfo->RewChoiceItemId[reward], qInfo->RewChoiceItemCount[reward], true);
             }
         }
@@ -8731,7 +8737,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             {
                 if( qInfo->RewItemId[i] )
                 {
-                    if( CanStoreNewItem( 0, NULL_SLOT, dest, qInfo->RewItemId[i], qInfo->RewItemCount[i], false ) == EQUIP_ERR_OK )
+                    if( CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, qInfo->RewItemId[i], qInfo->RewItemCount[i], false ) == EQUIP_ERR_OK )
                         StoreNewItem( dest, qInfo->RewItemId[i], qInfo->RewItemCount[i], true);
                 }
             }
@@ -9025,7 +9031,7 @@ bool Player::GiveQuestSourceItem( uint32 quest_id )
             uint32 count = qInfo->SrcItemCount;
             if( count <= 0 )
                 count = 1;
-            uint8 msg = CanStoreNewItem( 0, NULL_SLOT, dest, srcitem, count, false );
+            uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, srcitem, count, false );
             if( msg == EQUIP_ERR_OK )
             {
                 StoreNewItem(dest, srcitem, count, true);

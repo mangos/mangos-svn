@@ -102,7 +102,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     }
 
     uint16 dest;
-    uint8 msg = _player->CanStoreNewItem( 0, NULL_SLOT, dest, GUILD_CHARTER_ITEM_ID, pProto->BuyCount, false );
+    uint8 msg = _player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, GUILD_CHARTER_ITEM_ID, pProto->BuyCount, false );
     if( msg != EQUIP_ERR_OK )
     {
         _player->SendBuyError(msg, pCreature, GUILD_CHARTER_ITEM_ID, 0);

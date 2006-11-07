@@ -192,60 +192,59 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete player_result;
 
-    QueryResult *items_result = sDatabase.PQuery("SELECT `itemid`,`bagIndex`,`slot`,`amount` FROM `playercreateinfo_item` WHERE `createid` = '0' OR `createid` = '%u'", createId);
-
-    do
+    // add ordered by bagIndex big index at start (255 - is inventory/equiped bag index) to let add at beggining equiped items (including equiped bags)
+    QueryResult *items_result = sDatabase.PQuery("SELECT `itemid`,`amount` FROM `playercreateinfo_item` WHERE `race` = '%u' AND `class` = '%u'", race, class_ );
+    if(items_result)
     {
-        if(!items_result) break;
-        items_fields = items_result->Fetch();
-        pPlayerCreateInfo->item_id.push_back(items_fields[0].GetUInt32());
-        pPlayerCreateInfo->item_bagIndex.push_back(items_fields[1].GetUInt32());
-        pPlayerCreateInfo->item_slot.push_back(items_fields[2].GetUInt8());
-        pPlayerCreateInfo->item_amount.push_back(items_fields[3].GetUInt32());
-    } while (items_result->NextRow());
+        do
+        {
+            items_fields = items_result->Fetch();
+            pPlayerCreateInfo->item.push_back(PlayerCreateInfoItem( items_fields[0].GetUInt32(), items_fields[1].GetUInt32()));
+        } while (items_result->NextRow());
 
-    delete items_result;
+        delete items_result;
+    }
 
-    QueryResult *spells_result = sDatabase.PQuery("SELECT `Spell`,`Active` FROM `playercreateinfo_spell` WHERE `createid` = '0' OR `createid` = '%u'", createId);
-
-    do
+    QueryResult *spells_result = sDatabase.PQuery("SELECT `Spell`,`Active` FROM `playercreateinfo_spell` WHERE `race` = '%u' AND `class` = '%u'", race,class_);
+    if(spells_result)
     {
-        if(!spells_result) break;
-        spells_fields = spells_result->Fetch();
-        pPlayerCreateInfo->spell.push_back(CreateSpellPair(spells_fields[0].GetUInt16(), spells_fields[1].GetBool()));
+        do
+        {
+            spells_fields = spells_result->Fetch();
+            pPlayerCreateInfo->spell.push_back(CreateSpellPair(spells_fields[0].GetUInt16(), spells_fields[1].GetBool()));
+        } while( spells_result->NextRow() );
 
-    } while( spells_result->NextRow() );
+        delete spells_result;
+    }
 
-    delete spells_result;
-
-    QueryResult *skills_result = sDatabase.PQuery("SELECT `Skill`, `SkillMin`, `SkillMax` FROM `playercreateinfo_skill` WHERE `createid` = '0' OR `createid` = '%u'", createId);
-
-    do
+    QueryResult *skills_result = sDatabase.PQuery("SELECT `Skill`, `SkillMin`, `SkillMax` FROM `playercreateinfo_skill` WHERE `race` = '%u' AND `class` = '%u'", race,class_);
+    if(skills_result)
     {
-        if(!skills_result) break;
-        skills_fields = skills_result->Fetch();
-        pPlayerCreateInfo->skill[0].push_back(skills_fields[0].GetUInt16());
-        pPlayerCreateInfo->skill[1].push_back(skills_fields[1].GetUInt16());
-        pPlayerCreateInfo->skill[2].push_back(skills_fields[2].GetUInt16());
+        do
+        {
+            skills_fields = skills_result->Fetch();
+            pPlayerCreateInfo->skill[0].push_back(skills_fields[0].GetUInt16());
+            pPlayerCreateInfo->skill[1].push_back(skills_fields[1].GetUInt16());
+            pPlayerCreateInfo->skill[2].push_back(skills_fields[2].GetUInt16());
+        } while( skills_result->NextRow() );
 
-    } while( skills_result->NextRow() );
+        delete skills_result;
+    }
 
-    delete skills_result;
-
-    QueryResult *actions_result = sDatabase.PQuery("SELECT `button`, `action`, `type`, `misc` FROM `playercreateinfo_action` WHERE `createid` = '0' OR `createid` = '%u'", createId);
-
-    do
+    QueryResult *actions_result = sDatabase.PQuery("SELECT `button`, `action`, `type`, `misc` FROM `playercreateinfo_action` WHERE `race` = '%u' AND `class` = '%u'", race,class_);
+    if(actions_result)
     {
-        if(!actions_result) break;
-        actions_fields = actions_result->Fetch();
-        pPlayerCreateInfo->action[0].push_back(actions_fields[0].GetUInt16());
-        pPlayerCreateInfo->action[1].push_back(actions_fields[1].GetUInt16());
-        pPlayerCreateInfo->action[2].push_back(actions_fields[2].GetUInt16());
-        pPlayerCreateInfo->action[3].push_back(actions_fields[3].GetUInt16());
+        do
+        {
+            actions_fields = actions_result->Fetch();
+            pPlayerCreateInfo->action[0].push_back(actions_fields[0].GetUInt16());
+            pPlayerCreateInfo->action[1].push_back(actions_fields[1].GetUInt16());
+            pPlayerCreateInfo->action[2].push_back(actions_fields[2].GetUInt16());
+            pPlayerCreateInfo->action[3].push_back(actions_fields[3].GetUInt16());
+        } while( actions_result->NextRow() );
 
-    } while( actions_result->NextRow() );
-
-    delete actions_result;
+        delete actions_result;
+    }
 
     return pPlayerCreateInfo;
 }

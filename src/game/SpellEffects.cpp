@@ -565,7 +565,7 @@ void Spell::EffectCreateItem(uint32 i)
         num_to_add = 2;
 
     uint16 dest;
-    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, newitemid, num_to_add, false);
+    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add, false);
     if( msg != EQUIP_ERR_OK )
     {
         player->SendEquipError( msg, NULL, NULL );
@@ -697,7 +697,7 @@ void Spell::EffectSummonChangeItem(uint32 i)
         return;
 
     uint16 dest;
-    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, newitemid, 1, false);
+    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, 1, false);
 
     if( msg == EQUIP_ERR_OK )
     {
@@ -1946,7 +1946,7 @@ void Spell::EffectDisEnchant(uint32 i)
     p_caster->UpdateSkillPro(m_spellInfo->Id);
 
     uint16 dest;
-    uint8 msg = p_caster->CanStoreNewItem( 0, NULL_SLOT, dest, item, count, false );
+    uint8 msg = p_caster->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item, count, false );
     if( msg == EQUIP_ERR_OK )
         p_caster->StoreNewItem( dest, item, count, true );
     else
