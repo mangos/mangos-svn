@@ -1220,7 +1220,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     sLog.outDetail(LANG_ADDITEM, itemId, count);
     uint16 dest;
-    uint8 msg = plTarget->CanStoreNewItem( 0, NULL_SLOT, dest, itemId, count, false );
+    uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, count, false );
     if( msg == EQUIP_ERR_OK )
     {
         plTarget->StoreNewItem( dest, itemId, count, true);
@@ -1287,7 +1287,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
 
         uint16 dest;
 
-        uint8 msg = plTarget->CanStoreNewItem( 0, NULL_SLOT, dest, itemId, 1, false );
+        uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, 1, false );
         if( msg == EQUIP_ERR_OK )
         {
             plTarget->StoreNewItem( dest, itemId, 1, true);

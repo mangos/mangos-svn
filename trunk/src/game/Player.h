@@ -129,6 +129,16 @@ enum ActionButtonType
 
 typedef std::pair<uint16, bool> CreateSpellPair;
 
+struct PlayerCreateInfoItem
+{
+    PlayerCreateInfoItem(uint32 id, uint32 amount) : item_id(id), item_amount(amount) {}
+
+    uint32 item_id;
+    uint32 item_amount;
+};
+
+typedef std::list<PlayerCreateInfoItem> PlayerCreateInfoItems;
+
 struct PlayerCreateInfo
 {
     uint8 createId;
@@ -151,10 +161,7 @@ struct PlayerCreateInfo
     uint32 rage;
     uint32 focus;
     uint32 energy;
-    std::list<uint32> item_id;
-    std::list<uint8> item_bagIndex;
-    std::list<uint8> item_slot;
-    std::list<uint32> item_amount;
+    PlayerCreateInfoItems item;
     std::list<CreateSpellPair> spell;
     std::list<uint16> skill[3];
     std::list<uint16> action[4];

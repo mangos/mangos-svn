@@ -431,7 +431,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                     player = objmgr.GetPlayer(m_members[maxindex].guid);
                     uint16 dest;
                     LootItem *item = &(i->loot->items[i->itemSlot]);
-                    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, item->count, false );
+                    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, i->itemid, item->count, false );
                     if ( msg == EQUIP_ERR_OK )
                     {
                         item->is_looted = true;
@@ -469,7 +469,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
 
                         uint16 dest;
                         LootItem *item = &(i->loot->items[i->itemSlot]);
-                        uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, i->itemid, item->count, false );
+                        uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, i->itemid, item->count, false );
                         if ( msg == EQUIP_ERR_OK )
                         {
                             item->is_looted = true;

@@ -115,7 +115,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 if(myItems[i])
                 {
                     myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
-                    if(_player->pTrader->CanStoreItem( 0, NULL_SLOT, dst, myItems[i], false )== EQUIP_ERR_OK)
+                    if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, dst, myItems[i], false )== EQUIP_ERR_OK)
                     {
                         hisCanStoreItem = true;
                         sLog.outDebug("partner can accept item: %u",myItems[i]->GetGUIDLow());
@@ -129,7 +129,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 if(hisItems[i])
                 {
                     hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
-                    if(_player->CanStoreItem( 0, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
+                    if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
                     {
                         myCanStoreItem = true;
                         sLog.outDebug("you can accept item %u ",hisItems[i]->GetGUIDLow());
@@ -172,7 +172,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 if(myItems[i])
                 {
                     myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
-                    if(_player->pTrader->CanStoreItem( 0, NULL_SLOT, dst, myItems[i], false ) == EQUIP_ERR_OK)
+                    if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, dst, myItems[i], false ) == EQUIP_ERR_OK)
                     {
                         sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
                         _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
@@ -184,7 +184,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 if(hisItems[i])
                 {
                     hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
-                    if(_player->CanStoreItem( 0, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
+                    if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
                     {
                         sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
                         _player->pTrader->RemoveItem(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);

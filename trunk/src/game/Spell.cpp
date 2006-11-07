@@ -1870,7 +1870,7 @@ uint8 Spell::CheckItems()
                 if (m_spellInfo->EffectItemType[i])
                 {
                     uint16 dest;
-                    uint8 msg = p_caster->CanStoreNewItem(0, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], 1, false );
+                    uint8 msg = p_caster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], 1, false );
                     if (msg != EQUIP_ERR_OK )
                     {
                         p_caster->SendEquipError( msg, NULL, NULL );
