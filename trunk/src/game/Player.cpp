@@ -7541,6 +7541,14 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         pItem->DeleteFromDB();
         ItemPrototype const *pProto = pItem->GetProto();
 
+        for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();)
+        {
+            if((*itr)->item == pItem)
+                m_enchantDuration.erase(itr++);
+            else
+                ++itr;
+        }
+
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
             ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
@@ -7572,8 +7580,8 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                             SetArmor(GetArmor()-enchant_value1);
                         else if(enchant_display ==2)
                         {
-                            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
-                            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
+                            SetFloatValue(UNIT_FIELD_MINDAMAGE,GetFloatValue(UNIT_FIELD_MINDAMAGE)-enchant_value1);
+                            SetFloatValue(UNIT_FIELD_MAXDAMAGE,GetFloatValue(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
                         }
                         else
                         {
