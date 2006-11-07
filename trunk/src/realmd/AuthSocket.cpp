@@ -393,6 +393,7 @@ void AuthSocket::_HandleLogonChallenge()
                             BigNumber x;
                             x.SetBinary(sha.GetDigest(), sha.GetLength());
                             v = g.ModExp(x, N);
+                            dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _login.c_str() );
                             b.SetRand(19 * 8);
                             BigNumber gmod=g.ModExp(b, N);
                             B = ((v * 3) + gmod) % N;

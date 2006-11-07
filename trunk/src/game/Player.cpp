@@ -1558,12 +1558,8 @@ void Player::GiveLevel()
 
     // save new stats
     if(getClass() != WARRIOR && getClass() != ROGUE)
-    {
-        SetPower(   POWER_MANA, uint32(newMP));             // only integer part
         SetMaxPower(POWER_MANA, uint32(newMP));             // only integer part
-    }
 
-    SetHealth(   uint32(newHP));                            // only integer part
     SetMaxHealth(uint32(newHP));                            // only integer part
 
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
@@ -1576,6 +1572,12 @@ void Player::GiveLevel()
     _ApplyStatsMods();
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
+
+    // set current level health and mana to maximum after appling all mods.
+    if(getPowerType()==POWER_MANA)
+        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+
+    SetHealth(GetMaxHealth());
 
     // send levelup info to client
     WorldPacket data;

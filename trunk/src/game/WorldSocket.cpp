@@ -33,6 +33,7 @@
 #include "AddonHandler.h"
 #include "zlib/zlib.h"
 #include "../realmd/AuthCodes.h"
+#include <cwctype>                                          // needs for towupper
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
 #if __GNUC__ && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
@@ -194,6 +195,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 BuiltNumberClient;
     uint32 id, security;
     std::string account;
+    Sha1Hash I;
+    Sha1Hash sha1;
+    BigNumber v, s, g, N, x;
+    std::string password;
     WorldPacket packet, SendAddonPacked;
 
     BigNumber K;
@@ -214,7 +219,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     loginDatabase.escape_string(account);
 
-    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey` FROM `account` WHERE `username` = '%s'", account.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s` FROM `account` WHERE `username` = '%s'", account.c_str());
 
     if ( !result )
     {
@@ -225,6 +230,32 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
         sLog.outDetail( "SOCKET: Sent Auth Response (unknown account)." );
         return;
+    }
+
+    N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
+    g.SetDword(7);
+    password = (*result)[5].GetString();
+    std::transform(password.begin(), password.end(), password.begin(), std::towupper);
+
+    s.SetHexStr((*result)[7].GetString());
+    std::string sI = account + ":" + password;
+    I.UpdateData(sI);
+    I.Finalize();
+    sha1.UpdateData(s.AsByteArray(), s.GetNumBytes());
+    sha1.UpdateData(I.GetDigest(), 20);
+    sha1.Finalize();
+    x.SetBinary(sha1.GetDigest(), sha1.GetLength());                            
+    v = g.ModExp(x, N);
+
+    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), (*result)[6].GetString(), v.AsHexStr() );
+    if ( strcmp(v.AsHexStr(),(*result)[6].GetString() ) )
+    {
+         packet.Initialize( SMSG_AUTH_RESPONSE );
+         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
+         SendPacket( &packet );         
+         sLog.outDetail( "SOCKET: User not logged.");
+         delete result;
+         return;
     }
 
     id = (*result)[0].GetUInt32();
