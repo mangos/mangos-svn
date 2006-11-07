@@ -84,6 +84,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     for(int i = 0; i <5; ++i)
     {
+        if( proto->Spells[i].SpellTrigger != USE )
+            continue;
+
         uint32 spellId = proto->Spells[i].SpellId;
 
         if(!spellId)
@@ -92,7 +95,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
         if(!spellInfo)
         {
-            sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ", spellId);
+            sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ",proto->ItemId, spellId);
             continue;
         }
 
