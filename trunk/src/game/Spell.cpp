@@ -1215,7 +1215,8 @@ void Spell::TakeCastItem()
                 if (proto->Spells[i].SpellCharges > 1 || proto->Spells[i].SpellCharges == -1)
                     return;
 
-        ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
+        uint32 count = 1;
+        ((Player*)m_caster)->DestroyItemCount(m_CastItem, count, true);
 
         m_CastItem = NULL;
     }

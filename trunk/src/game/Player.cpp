@@ -4022,7 +4022,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 {
     if(slot >= INVENTORY_SLOT_BAG_END || !item) return;
 
-    // not apply/premove mods for broken item
+    // not apply/remove mods for broken item
     if(item->IsBroken()) return;
 
     ItemPrototype const *proto = item->GetProto();
@@ -4373,9 +4373,13 @@ void Player::_RemoveAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken()) break;
+            if(m_items[i]->IsBroken()) 
+                continue;
+            
             ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto) break;
+            if(!proto) 
+                continue;
+
             if(proto->ItemSet)
                 RemoveItemsSetItem(this,proto);
 
@@ -4404,9 +4408,11 @@ void Player::_RemoveAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken()) break;
+            if(m_items[i]->IsBroken()) 
+                continue;
             ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto) break;
+            if(!proto) 
+                continue;
             _ApplyItemBonuses(proto,i, false);
         }
     }
@@ -4427,9 +4433,13 @@ void Player::_ApplyAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken()) break;
+            if(m_items[i]->IsBroken()) 
+                continue;
+
             ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto) break;
+            if(!proto) 
+                continue;
+
             if(proto->ItemSet)
                 AddItemsSetItem(this,m_items[i]);
 
@@ -4454,9 +4464,13 @@ void Player::_ApplyAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken()) break;
+            if(m_items[i]->IsBroken()) 
+                continue;
+
             ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto) break;
+            if(!proto) 
+                continue;
+
             _ApplyItemBonuses(proto,i, true);
         }
     }
@@ -7624,7 +7638,9 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
     Item *pItem;
     ItemPrototype const *pProto;
     uint32 remcount = 0;
-    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+
+    // in inventory
+    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetEntry() == item )
@@ -7648,6 +7664,8 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             }
         }
     }
+
+    // in inventory bags
     Bag *pBag;
     ItemPrototype const *pBagProto;
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
@@ -7685,7 +7703,59 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             }
         }
     }
+
+    // in equipment and bag list
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            if( pItem->GetCount() + remcount <= count )
+            {
+                remcount += pItem->GetCount();
+                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+
+                if(remcount >=count)
+                    return;
+            }
+            else
+            {
+                pProto = pItem->GetProto();
+                ItemRemoved( pItem->GetEntry(), count - remcount );
+                pItem->SetCount( pItem->GetCount() - count + remcount );
+                if( IsInWorld() & update )
+                    pItem->SendUpdateToPlayer( this );
+                return;
+            }
+        }
+    }
 }
+
+void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
+{
+    if(!pItem)
+        return;
+
+    sLog.outDebug( "STORAGE: DestroyItemCount item (GUID: %u, Entry: %u) count = %u", pItem->GetGUIDLow(),pItem->GetEntry(), count);
+    
+    if( pItem->GetCount() <= count )
+    {
+        count-= pItem->GetCount();
+
+        uint16 pos = GetPosByGuid(pItem->GetGUID());
+        DestroyItem( (pos >> 8),(pos & 255), update);
+    }
+    else
+    {
+        ItemPrototype const* pProto  = pItem->GetProto();
+        ItemRemoved( pItem->GetEntry(), count);
+        pItem->SetCount( pItem->GetCount() - count );
+        count = 0;
+        if( IsInWorld() & update )
+            pItem->SendUpdateToPlayer( this );
+    }
+}
+    
 
 void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
 {

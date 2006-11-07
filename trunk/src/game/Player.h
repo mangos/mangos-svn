@@ -581,6 +581,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveItemCount( uint32 item, uint32 count, bool update );
         void DestroyItem( uint8 bag, uint8 slot, bool update );
         void DestroyItemCount( uint32 item, uint32 count, bool update );
+        void DestroyItemCount( Item* item, uint32& count, bool update );
         void SplitItem( uint16 src, uint16 dst, uint32 count );
         void SwapItem( uint16 src, uint16 dst );
         void AddItemToBuyBackSlot( uint32 slot, Item *pItem );
