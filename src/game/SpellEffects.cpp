@@ -1246,7 +1246,7 @@ void Spell::EffectSummonPet(uint32 i)
             OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
             (*OldSummon)->Clear();
         }
-        MapManager::Instance().GetMap(m_caster->GetMapId())->Remove(OldSummon,false);
+        MapManager::Instance().GetMap(OldSummon->GetMapId())->Remove(OldSummon,false);
         OldSummon->SetMapId(m_caster->GetMapId());
         OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
         MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
@@ -1687,7 +1687,8 @@ void Spell::EffectSummonTotem(uint32 i)
 
     m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
     pTotem->SetOwner(m_caster->GetGUID());
-    pTotem->SetSpell(pTotem->GetCreatureInfo()->spell1);
+    //pTotem->SetSpell(pTotem->GetCreatureInfo()->spell1);
+    pTotem->SetSpell(m_spellInfo->Id);      //use SummonTotem spellid
     pTotem->SetDuration(GetDuration(m_spellInfo));
     pTotem->SetHealth(5);
     pTotem->SetMaxHealth(5);
