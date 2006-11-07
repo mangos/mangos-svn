@@ -1440,15 +1440,13 @@ void Spell::EffectWeaponDmg(uint32 i)
             if(!pItem  || pItem->IsBroken())
                 return;
 
-            uint32 type = pItem->GetProto()->InventoryType;
-            uint32 ammo;
-            if( type == INVTYPE_THROWN )
-                ammo = pItem->GetEntry();
+            if( pItem->GetProto()->InventoryType == INVTYPE_THROWN )
+            {
+                uint32 count = 1;
+                ((Player*)m_caster)->DestroyItemCount( pItem, count, true);
+            }
             else
-                ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
-
-            if(ammo)
-                ((Player*)m_caster)->DestroyItemCount( ammo, 1, true);
+                ((Player*)m_caster)->DestroyItemCount( ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID) , 1, true);
         }
     }
 
@@ -1943,7 +1941,9 @@ void Spell::EffectDisEnchant(uint32 i)
         return;
     }
 
-    p_caster->DestroyItemCount(itemTarget->GetEntry(),1, true);
+
+    uint32 item_count = 1;
+    p_caster->DestroyItemCount(itemTarget,item_count, true);
     p_caster->UpdateSkillPro(m_spellInfo->Id);
 
     uint16 dest;
