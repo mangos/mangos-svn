@@ -2114,10 +2114,23 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
 
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
 {
-    if(m_target->getPowerType() != POWER_ENERGY)
-        return;
-
-    m_target->ApplyPowerPercentMod(POWER_ENERGY,m_modifier.m_amount,apply);
+    //not only energy, but also mana
+    //now search dbc only find mana increase with this aura type.
+    Powers powertype = POWER_MANA;
+    switch(m_target->getClass())
+    {
+        case WARRIOR:   powertype = POWER_RAGE;break;
+        case PALADIN:   powertype = POWER_MANA;break;
+        case HUNTER:    powertype = POWER_MANA;break;
+        case ROGUE:     powertype = POWER_ENERGY;break;
+        case PRIEST:    powertype = POWER_MANA;break;
+        case SHAMAN:    powertype = POWER_MANA;break;
+        case MAGE:      powertype = POWER_MANA;break;
+        case WARLOCK:   powertype = POWER_MANA;break;
+        case DRUID:     powertype = POWER_MANA;break;
+    }
+    m_target->ApplyMaxPowerPercentMod(powertype,m_modifier.m_amount,apply);
+    sLog.outDetail("MaxPowerPercentMod %s %d",(apply ? "+" : "-"), m_modifier.m_amount);
 }
 
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply)

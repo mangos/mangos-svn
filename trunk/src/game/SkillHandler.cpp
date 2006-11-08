@@ -118,19 +118,20 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
             SpellEntry *spellInfo = sSpellStore.LookupEntry( spellid );
             assert(spellInfo);                              // checked in addSpell
 
-            for(uint32 i = 0;i<3;i++)
-            {
-                uint8 eff = spellInfo->Effect[i];
-                if (eff>=TOTAL_SPELL_EFFECTS)
-                    continue;
+            // already apply in addSpell function
+            //for(uint32 i = 0;i<3;i++)
+            //{
+            //    uint8 eff = spellInfo->Effect[i];
+            //    if (eff>=TOTAL_SPELL_EFFECTS)
+            //        continue;
 
-                // Duration 21 = permanent
-                if ((eff == 6) && (spellInfo->DurationIndex == 21) && (spellInfo->rangeIndex == 1))
-                {
-                    Aura *Aur = new Aura(spellInfo, i, GetPlayer());
-                    GetPlayer()->AddAura(Aur);
-                }
-            }
+            //    // Duration 21 = permanent
+            //    if ((eff == 6) && (spellInfo->DurationIndex == 21) && (spellInfo->rangeIndex == 1))
+            //    {
+            //        Aura *Aur = new Aura(spellInfo, i, GetPlayer());
+            //        GetPlayer()->AddAura(Aur);
+            //    }
+            //}
 
             if(requested_rank > 0 )
             {
