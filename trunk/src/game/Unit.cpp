@@ -2522,23 +2522,26 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
     AuraList& mProcTriggerDamage = GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
     for(AuraList::iterator i = mProcTriggerDamage.begin(), next; i != mProcTriggerDamage.end(); i = next)
     {
-        next = i; next++;
+        next = i; ++next;
         uint32 procflag = procflag1;
-        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_SHORT_HIT)
+
+        SpellEntry *spellProto= (*i)->GetSpellProto();
+
+        if(spellProto->procFlags & PROC_FLAG_SHORT_HIT)
             procflag &= ~ PROC_FLAG_SHORT_ATTACK;
-        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_LONG_HIT)
+        if(spellProto->procFlags & PROC_FLAG_LONG_HIT)
             procflag &= ~ PROC_FLAG_LONG_ATTACK;
 
-        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & procflag) == 0) continue;
-        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if(spellProto->procFlags != 0 && (spellProto->procFlags & procflag) == 0) continue;
+        uint32 chance = spellProto->procChance;
         if (chance > 100) chance = GetWeaponProcChance();
         if (chance > rand_chance())
         {
             uint32 damage;
-            if((*i)->GetSpellProto()->SpellIconID == 25 && (*i)->GetSpellProto()->SpellVisual == 5622)
+            if(spellProto->SpellIconID == 25 && spellProto->SpellVisual == 5622)
                 damage = (*i)->GetModifier()->m_amount*GetAttackTime(BASE_ATTACK)/60/1000;
             else damage = (*i)->GetModifier()->m_amount;
-            this->SpellNonMeleeDamageLog(pVictim,(*i)->GetId(), uint32(damage));
+
             if ((*i)->m_procCharges != -1)
             {
                 (*i)->m_procCharges -= 1;
@@ -2548,6 +2551,9 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                     next = mProcTriggerDamage.begin();
                 }
             }
+
+            // do it after m_procCharges, call can remove aura
+            this->SpellNonMeleeDamageLog(pVictim,spellProto->Id, uint32(damage));
         }
     }
 
@@ -2557,26 +2563,34 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
     {
         next = i; next++;
         uint32 procflag = procflag1;
-        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_SHORT_HIT)
+
+        SpellEntry *spellProto = (*i)->GetSpellProto();
+
+        if(spellProto->procFlags & PROC_FLAG_SHORT_HIT)
             procflag &= ~ PROC_FLAG_SHORT_ATTACK;
-        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_LONG_HIT)
+        if(spellProto->procFlags & PROC_FLAG_LONG_HIT)
             procflag &= ~ PROC_FLAG_LONG_ATTACK;
 
-        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & procflag) == 0) continue;
-        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if(spellProto->procFlags != 0 && (spellProto->procFlags & procflag) == 0) continue;
+        uint32 chance = spellProto->procChance;
         if (chance > 100) chance = GetWeaponProcChance();
         if (chance > rand_chance())
         {
-            this->CastSpell(pVictim, (*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()], true);
+
+            uint32 i_spell_eff = (*i)->GetEffIndex();
+
             if ((*i)->m_procCharges != -1)
             {
                 (*i)->m_procCharges -= 1;
                 if((*i)->m_procCharges == 0)
                 {
-                    RemoveAurasDueToSpell((*i)->GetId());
+                    RemoveAurasDueToSpell(spellProto->Id);
                     next = mProcTriggerSpell.begin();
                 }
             }
+
+            // do it after m_procCharges, call can remove aura
+            this->CastSpell(pVictim, spellProto->EffectTriggerSpell[i_spell_eff], true);
         }
     }
 
@@ -2586,32 +2600,38 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
     {
         next = i; next++;
         uint32 procflag = procflag2;
-        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_BE_SHORT_HIT)
+
+        SpellEntry *spellProto = (*i)->GetSpellProto();
+
+        if(spellProto->procFlags & PROC_FLAG_BE_SHORT_HIT)
             procflag &= ~ PROC_FLAG_BE_SHORT_ATTACK;
-        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_BE_LONG_HIT)
+        if(spellProto->procFlags & PROC_FLAG_BE_LONG_HIT)
             procflag &= ~ PROC_FLAG_BE_LONG_ATTACK;
 
-        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & procflag) == 0) continue;
-        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if(spellProto->procFlags != 0 && (spellProto->procFlags & procflag) == 0) continue;
+        uint32 chance = spellProto->procChance;
         if (chance > 100) chance = GetWeaponProcChance();
         if (chance > rand_chance())
         {
             uint32 damage = uint32((*i)->GetModifier()->m_amount);
             // Special for judgement of seal
-            if((*i)->GetSpellProto()->SpellVisual == 7395 && (*i)->GetSpellProto()->SpellIconID == 278)
+            if(spellProto->SpellVisual == 7395 && spellProto->SpellIconID == 278)
             {
                 damage = pVictim->CalculateDamage(BASE_ATTACK);
             }
-            pVictim->SpellNonMeleeDamageLog(this,(*i)->GetId(), damage);
+
             if ((*i)->m_procCharges != -1)
             {
                 (*i)->m_procCharges -= 1;
                 if((*i)->m_procCharges == 0)
                 {
-                    pVictim->RemoveAurasDueToSpell((*i)->GetId());
+                    pVictim->RemoveAurasDueToSpell(spellProto->Id);
                     next = vProcTriggerDamage.begin();
                 }
             }
+
+            // do it after m_procCharges, call can remove aura
+            pVictim->SpellNonMeleeDamageLog(this,spellProto->Id, damage);
         }
     }
 
@@ -2621,26 +2641,49 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
     {
         next = i; next++;
         uint32 procflag = procflag2;
-        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_BE_SHORT_HIT)
+        SpellEntry *spellProto;
+
+        if (*i == NULL)
+            continue;
+        if ((spellProto = (*i)->GetSpellProto()) == NULL)
+            continue;
+
+        if(spellProto->procFlags & PROC_FLAG_BE_SHORT_HIT)
             procflag &= ~ PROC_FLAG_BE_SHORT_ATTACK;
-        if((*i)->GetSpellProto()->procFlags & PROC_FLAG_BE_LONG_HIT)
+        if(spellProto->procFlags & PROC_FLAG_BE_LONG_HIT)
             procflag &= ~ PROC_FLAG_BE_LONG_ATTACK;
 
-        if((*i)->GetSpellProto()->procFlags != 0 && ((*i)->GetSpellProto()->procFlags & procflag) == 0) continue;
-        uint32 chance = (*i)->GetSpellProto()->procChance;
+        if(spellProto->procFlags != 0 && (spellProto->procFlags & procflag) == 0) continue;
+        uint32 chance = spellProto->procChance;
         if (chance > 100) chance = GetWeaponProcChance();
         if (chance > rand_chance())
         {
-            pVictim->CastSpell(this, (*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()], true);
-            // Special for judgement of seal
-            if( (*i)->GetSpellProto()->SpellFamilyFlags & (1<<19) )
+            Aura* i_aura = *i;
+
+            pVictim->CastSpell(this, spellProto->EffectTriggerSpell[(*i)->GetEffIndex()], true);
+
+            // aura can be removed in call, check existance
             {
-                if((*i)->GetSpellProto()->SpellIconID == 206)
+                if(vProcTriggerSpell.size()==0)
+                    break;
+
+                if(next == vProcTriggerSpell.begin())
+                    continue;
+
+                AuraList::iterator i_new = next; --i_new;
+                if((*i_new) != i_aura)
+                    continue;
+            }
+
+            // Special for judgement of seal
+            if( spellProto->SpellFamilyFlags & (1<<19) )
+            {
+                if(spellProto->SpellIconID == 206)
                 {
                     if(getPowerType() == POWER_MANA)
                     {
                         uint32 mana = 0;
-                        switch(FindSpellRank((*i)->GetSpellProto()->Id))
+                        switch(FindSpellRank(spellProto->Id))
                         {
                             case 1:mana = 33;break;
                             case 2:mana = 46;break;
@@ -2648,13 +2691,13 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                             default:break;
                         }
                         ModifyPower(POWER_MANA,mana);
-                        SendHealSpellOnPlayerPet(this,(*i)->GetSpellProto()->Id,mana,POWER_MANA);
+                        SendHealSpellOnPlayerPet(this,spellProto->Id,mana,POWER_MANA);
                     }
                 }
-                if((*i)->GetSpellProto()->SpellIconID == 299)
+                if(spellProto->SpellIconID == 299)
                 {
                     uint32 health = 0;
-                    switch(FindSpellRank((*i)->GetSpellProto()->Id))
+                    switch(FindSpellRank(spellProto->Id))
                     {
                         case 1:health = 25;break;
                         case 2:health = 34;break;
@@ -2663,13 +2706,13 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                         default:break;
                     }
                     ModifyHealth(health);
-                    SendHealSpellOnPlayer(this,(*i)->GetSpellProto()->Id,health);
+                    SendHealSpellOnPlayer(this,spellProto->Id,health);
                 }
             }
             // Special for Static Electricity
-            if((*i)->GetSpellProto()->SpellFamilyName == 11 && ((*i)->GetSpellProto()->SpellFamilyFlags & (1<<10)))
+            if(spellProto->SpellFamilyName == 11 && (spellProto->SpellFamilyFlags & (1<<10)))
             {
-                pVictim->SpellNonMeleeDamageLog(this,(*i)->GetSpellProto()->Id,(*i)->GetModifier()->m_amount);
+                pVictim->SpellNonMeleeDamageLog(this,spellProto->Id,(*i)->GetModifier()->m_amount);
             }
             if ((*i)->m_procCharges != -1)
             {
