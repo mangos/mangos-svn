@@ -248,6 +248,7 @@ void Log::outError( const char * err, ... )
     va_list ap;
     va_start(ap, err);
     vfprintf( stderr, err, ap );
+    va_end(ap);
 
     if(m_colored)
         ResetColor(false);
@@ -257,6 +258,7 @@ void Log::outError( const char * err, ... )
     {
         outTimestamp(logfile);
         fprintf(logfile, "ERROR:" );
+        va_start(ap, err);
         vfprintf(logfile, err, ap);
         fprintf(logfile, "\n" );
         va_end(ap);
