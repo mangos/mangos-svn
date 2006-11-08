@@ -465,7 +465,9 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
     it->SaveToDB();
-    sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`location`) VALUES ('%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')", AH->Id, AH->auctioneer, AH->item, AH->owner, AH->buyout, AH->time, AH->bidder, AH->bid, AH->location);
+    sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`location`) "
+        "VALUES ('%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+        AH->Id, AH->auctioneer, AH->item, AH->owner, AH->buyout, AH->time, AH->bidder, AH->bid, AH->location);
     pl->SaveToDB();
 
     WorldPacket data;
@@ -529,7 +531,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
                 m->receiver = ah->bidder;
                 std::ostringstream msgAuctionCanceled;
                 msgAuctionCanceled << "Auction Was Canceled: "  << proto->Name1;
-                m->subject = msgAuctionCanceled.str().c_str();
+                m->subject = msgAuctionCanceled.str();
                 m->body = "";
                 m->item = 0;
                 m->time = time(NULL) + (29 * DAY);
@@ -563,7 +565,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             std::ostringstream msgAuctionCanceledOwner;
             msgAuctionCanceledOwner << "Auction Canceled: " << proto->Name1;
             mn2->body = "";
-            mn2->subject = msgAuctionCanceledOwner.str().c_str();
+            mn2->subject = msgAuctionCanceledOwner.str();
             mn2->item = ah->item;
             mn2->time = time(NULL) + (29 * DAY);
             mn2->money = 0;

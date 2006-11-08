@@ -16,6 +16,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+// Structures using to access raw DBC data and required packing to portability 
+
+// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 struct AreaTableEntry
 {
     uint32    ID;
@@ -264,6 +273,25 @@ struct TaxiNodesEntry
     uint32    alliance_mount_type;
 };
 
+struct WorldSafeLocsEntry
+{
+    uint32    ID;
+    uint32    map_id;
+    float     x;
+    float     y;
+    float     z;
+};
+
+
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
+
+
+// Structures not used for casting to loaded DBC data and not requred then packing
+
 struct TaxiPathBySourceAndDestination
 {
     TaxiPathBySourceAndDestination() : ID(0),price(0) {}
@@ -286,12 +314,3 @@ struct TaxiPathNode
 };
 typedef std::vector<TaxiPathNode> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
-
-struct WorldSafeLocsEntry
-{
-    uint32    ID;
-    uint32    map_id;
-    float     x;
-    float     y;
-    float     z;
-};
