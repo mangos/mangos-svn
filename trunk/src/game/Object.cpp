@@ -82,17 +82,15 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh )
     SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
-
+    _SetPackGUID(&m_PackGUID,GetGUID());
 }
 
 void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId )
 {
-    if(!m_uint32Values) _InitValues();
+    _Create(guidlow, guidhigh);
 
-    SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
-    SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
-    SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
     SetUInt32Value( OBJECT_FIELD_ENTRY,nameId);
+
     m_mapId = mapid;
     m_positionX = x;
     m_positionY = y;
@@ -327,7 +325,6 @@ void Object::BuildHeartBeatMsg(WorldPacket *data) const
     data->Initialize(MSG_MOVE_HEARTBEAT);                   //2
 
     *data << GetGUID();                                     //8
-
     *data << uint32(0);                                     //4
     *data << uint32(0);                                     //4
 
@@ -685,4 +682,18 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 
     // assert must fail after function call
     return false;
+}
+
+void Object::_SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const
+{
+   size_t mask_position = buffer->wpos();
+   *buffer << uint8(0);
+   for(uint8 i = 0; i < 8; i++)
+   {
+       if(((uint8*)&guid64)[i])
+       {
+           const_cast<uint8*>(buffer->contents())[mask_position] |= (1<<i);
+           *buffer << ((uint8*)&guid64)[i];
+       }
+   }
 }

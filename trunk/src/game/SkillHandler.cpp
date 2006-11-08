@@ -154,7 +154,7 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
 
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleTalentWipeOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: HandleTalentWipeOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
@@ -175,13 +175,15 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
     // send spell 14867
     WorldPacket data;
     data.Initialize(SMSG_SPELL_START );
-    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << guid << uint16(14867);
-    data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
+    data.append(_player->GetPackGUID());
+    data.append(unit->GetPackGUID());
+    data << uint16(14867) << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
     SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO);
-    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << guid << uint16(14867);
-    data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
+    data.append(_player->GetPackGUID());
+    data.append(unit->GetPackGUID());
+    data << uint16(14867) << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
     data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
     SendPacket( &data );
 }

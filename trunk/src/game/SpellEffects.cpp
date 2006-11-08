@@ -1426,9 +1426,9 @@ void Spell::EffectWeaponDmg(uint32 i)
             damage = uint32(damage * (m_spellInfo->EffectBasePoints[j]+1) / 100);
 
     if (hitInfo & nohitMask)
-        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget->GetGUID(), 1, m_spellInfo->School, damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
+        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, m_spellInfo->School, damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
 
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget->GetGUID(), m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
     m_caster->DealDamage(unitTarget, damage, 0, true);
 
     // take ammo

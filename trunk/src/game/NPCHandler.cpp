@@ -42,7 +42,7 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleTabardVendorActivateOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: HandleTabardVendorActivateOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
@@ -75,7 +75,7 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
 
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleBankerActivateOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: HandleBankerActivateOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
@@ -121,7 +121,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     if (!unit)
     {
-        sLog.outDebug( "WORLD: SendTrainerList - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: SendTrainerList - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
@@ -311,7 +311,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_GOSSIP_HELLO - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: CMSG_GOSSIP_HELLO - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
@@ -336,7 +336,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
@@ -360,7 +360,7 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_SPIRIT_HEALER_ACTIVATE - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: CMSG_SPIRIT_HEALER_ACTIVATE - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
@@ -425,10 +425,22 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 {
     uint64 npcGUID;
     recv_data >> npcGUID;
-    SendBindPoint(npcGUID);
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: CMSG_BINDER_ACTIVATE - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)));
+        return;
+    }
+
+    // prevent cheating
+    if(!unit->isSpiritHealer() || !unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
+        return;
+
+    SendBindPoint(unit);
 }
 
-void WorldSession::SendBindPoint(uint64 npcGUID)
+void WorldSession::SendBindPoint(Creature *npc)
 {
     WorldPacket data;
 
@@ -458,13 +470,15 @@ void WorldSession::SendBindPoint(uint64 npcGUID)
 
     // send spell for bind 3286 bind magic
     data.Initialize(SMSG_SPELL_START );
-    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << npcGUID << uint16(3286);
-    data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
+    data.append(_player->GetPackGUID());
+    data.append(npc->GetPackGUID());
+    data << uint16(3286) << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
     SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO);
-    data << uint8(0xFF) << _player->GetGUID() << uint8(0xFF) << npcGUID << uint16(3286);
-    data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
+    data.append(_player->GetPackGUID());
+    data.append(npc->GetPackGUID());
+    data << uint16(3286) << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
     data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
     SendPacket( &data );
     _player->PlayerTalkClass->CloseGossip();
@@ -482,7 +496,7 @@ void WorldSession::HandleListStabledPetsOpcode( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: MSG_LIST_STABLED_PETS - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)), npcGUID );
+        sLog.outDebug( "WORLD: MSG_LIST_STABLED_PETS - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
 
@@ -576,7 +590,7 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_STABLE_PET - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)), npcGUID );
+        sLog.outDebug( "WORLD: CMSG_STABLE_PET - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
 
@@ -642,7 +656,7 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_UNSTABLE_PET - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)), npcGUID );
+        sLog.outDebug( "WORLD: CMSG_UNSTABLE_PET - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
 
@@ -699,7 +713,7 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_BUY_STABLE_SLOT - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)), npcGUID );
+        sLog.outDebug( "WORLD: CMSG_BUY_STABLE_SLOT - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
 
@@ -778,7 +792,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_STABLE_SWAP_PET - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)), npcGUID );
+        sLog.outDebug( "WORLD: CMSG_STABLE_SWAP_PET - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
 
@@ -844,7 +858,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_REPAIR_ITEM - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)), npcGUID );
+        sLog.outDebug( "WORLD: CMSG_REPAIR_ITEM - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
 

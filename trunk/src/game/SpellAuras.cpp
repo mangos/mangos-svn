@@ -925,7 +925,7 @@ void Aura::HandleAuraWaterWalk(bool apply)
         data.Initialize(SMSG_MOVE_WATER_WALK);
     else
         data.Initialize(SMSG_MOVE_LAND_WALK);
-    data << uint8(0xFF) << m_target->GetGUID();
+    data.append(m_target->GetPackGUID());
     m_target->SendMessageToSet(&data,true);
 }
 
@@ -936,7 +936,7 @@ void Aura::HandleAuraFeatherFall(bool apply)
         data.Initialize(SMSG_MOVE_FEATHER_FALL);
     else
         data.Initialize(SMSG_MOVE_NORMAL_FALL);
-    data << uint8(0xFF) << m_target->GetGUID();
+    data.append(m_target->GetPackGUID());
     m_target->SendMessageToSet(&data,true);
 }
 
@@ -1148,7 +1148,7 @@ void Aura::HandleAuraSafeFall(bool apply)
         data.Initialize(SMSG_MOVE_FEATHER_FALL);
     else
         data.Initialize(SMSG_MOVE_NORMAL_FALL);
-    data << uint8(0xFF) << m_target->GetGUID();
+    data.append(m_target->GetPackGUID());
     m_target->SendMessageToSet(&data,true);
 }
 
@@ -1353,7 +1353,7 @@ void Aura::HandleAuraModStun(bool apply)
             ((Creature *)m_target)->StopMoving();
 
         data.Initialize(SMSG_FORCE_MOVE_ROOT);
-        data << uint8(0xFF) << m_target->GetGUID();
+        data.append(m_target->GetPackGUID());
         m_target->SendMessageToSet(&data,true);
         m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
     }
@@ -1363,7 +1363,7 @@ void Aura::HandleAuraModStun(bool apply)
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
 
         data.Initialize(SMSG_FORCE_MOVE_UNROOT);
-        data << uint8(0xFF) << m_target->GetGUID();
+        data.append(m_target->GetPackGUID());
         m_target->SendMessageToSet(&data,true);
     }
 }
@@ -1438,7 +1438,8 @@ void Aura::HandleAuraModRoot(bool apply)
         {
             WorldPacket data;
             data.Initialize(SMSG_FORCE_MOVE_ROOT);
-            data << uint8(0xFF) << m_target->GetGUID() << (uint32)2;
+            data.append(m_target->GetPackGUID());
+            data << (uint32)2;
             m_target->SendMessageToSet(&data,true);
         }
         else
@@ -1453,7 +1454,8 @@ void Aura::HandleAuraModRoot(bool apply)
         {
             WorldPacket data;
             data.Initialize(SMSG_FORCE_MOVE_UNROOT);
-            data << uint8(0xFF) << m_target->GetGUID() << (uint32)2;
+            data.append(m_target->GetPackGUID());
+            data << (uint32)2;
             m_target->SendMessageToSet(&data,true);
         }
     }
@@ -1509,8 +1511,7 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
     else
         m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << m_target->GetGUID();
+    data.append(m_target->GetPackGUID());
     data << (uint32)0;
     data << m_target->GetSpeed( MOVE_RUN );
 
@@ -1529,8 +1530,7 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
     else
         m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << m_target->GetGUID();
+    data.append(m_target->GetPackGUID());
     data << (uint32)0;
     data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
@@ -1556,8 +1556,7 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
     }
     WorldPacket data;
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << m_target->GetGUID();
+    data.append(m_target->GetPackGUID());
     data << (uint32)0;
     data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
@@ -1575,8 +1574,7 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
     else
         m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
     data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << m_target->GetGUID();
+    data.append(m_target->GetPackGUID());
     data << (uint32)0;
     data << m_target->GetSpeed( MOVE_SWIM );
     m_target->SendMessageToSet(&data,true);

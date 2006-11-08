@@ -2013,14 +2013,12 @@ bool ChatHandler::HandleHoverCommand(const char* args)
     if (flag)
     {
         data.Initialize(SMSG_MOVE_SET_HOVER);
-        data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
     }
     else
     {
         data.Initialize(SMSG_MOVE_UNSET_HOVER);
-        data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
     }
-
+    data.append(m_session->GetPlayer()->GetPackGUID());
     m_session->SendPacket( &data );
 
     if (flag)

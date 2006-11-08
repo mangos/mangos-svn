@@ -2433,25 +2433,25 @@ void Player::SetMovement(uint8 pType)
         case MOVE_ROOT:
         {
             data.Initialize(SMSG_FORCE_MOVE_ROOT);
-            data << uint8(0xFF) << GetGUID();
+            data.append(GetPackGUID());
             GetSession()->SendPacket( &data );
         }break;
         case MOVE_UNROOT:
         {
             data.Initialize(SMSG_FORCE_MOVE_UNROOT);
-            data << uint8(0xFF) << GetGUID();
+            data.append(GetPackGUID());
             GetSession()->SendPacket( &data );
         }break;
         case MOVE_WATER_WALK:
         {
             data.Initialize(SMSG_MOVE_WATER_WALK);
-            data << uint8(0xFF) << GetGUID();
+            data.append(GetPackGUID());
             GetSession()->SendPacket( &data );
         }break;
         case MOVE_LAND_WALK:
         {
             data.Initialize(SMSG_MOVE_LAND_WALK);
-            data << uint8(0xFF) << GetGUID();
+            data.append(GetPackGUID());
             GetSession()->SendPacket( &data );
         }break;
         default:break;
@@ -2469,8 +2469,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             SetSpeed( value / SPEED_RUN );
             if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE); }
             else { data.Initialize(MSG_MOVE_SET_RUN_SPEED); }
-            data << uint8(0xFF);
-            data << GetGUID();
+            data.append(GetPackGUID());
             data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
@@ -2480,8 +2479,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             SetSpeed( value / SPEED_WALKBACK );
             if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE); }
             else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED); }
-            data << uint8(0xFF);
-            data << GetGUID();
+            data.append(GetPackGUID());
             data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
@@ -2491,8 +2489,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             SetSpeed( value / SPEED_SWIM );
             if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE); }
             else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED); }
-            data << uint8(0xFF);
-            data << GetGUID();
+            data.append(GetPackGUID());
             data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
@@ -2501,8 +2498,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
         {
             SetSpeed( value / SPEED_SWIMBACK );
             data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED);
-            data << uint8(0xFF);
-            data << GetGUID();
+            data.append(GetPackGUID());
             data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
@@ -2551,20 +2547,21 @@ void Player::BuildPlayerRepop()
 
     //TODO: Check/research this
     data.Initialize(SMSG_SPELL_START );
-    data << uint8(0xFF) << GetGUID()                        //9
-        << uint8(0xFF) << GetGUID()                         //9
+    data.append(GetPackGUID());                             //9
+    data.append(GetPackGUID());                             //9
     //<< uint16(8326); //2
-        << uint32(20305)                                    //2
-        << uint16(0x02)
-
-        << uint32(0x00)<< uint16(0x00);                     //6
+    data << uint32(20305);                                    //2
+    data << uint16(2);
+    data << uint32(0) << uint16(0);                     //6
     GetSession()->SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO);
-    data << uint8(0xFF) << GetGUID() << uint8(0xFF) << GetGUID() << uint16(8326);
+    data.append(GetPackGUID());
+    data.append(GetPackGUID());
+    data << uint16(8326);
                                                             /// uint8(0x0D) = probably race + 2
-    data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << GetGUID();
-    data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
+    data << uint16(0) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << GetGUID();
+    data << uint32(0) << uint16(0x0200) << uint16(0);
     GetSession()->SendPacket( &data );
 
     data.Initialize(SMSG_UPDATE_AURA_DURATION);

@@ -88,7 +88,7 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
 
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleTaxiQueryAviableNodesOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: HandleTaxiQueryAviableNodesOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
@@ -163,8 +163,7 @@ void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
 
     uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
     data.Initialize( SMSG_MONSTER_MOVE );
-    data << uint8(0xFF);
-    data << GetPlayer( )->GetGUID();
+    data.append(GetPlayer()->GetPackGUID());
     data << GetPlayer( )->GetPositionX( )
         << GetPlayer( )->GetPositionY( )
         << GetPlayer( )->GetPositionZ( );
