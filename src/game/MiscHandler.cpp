@@ -373,10 +373,6 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     {
         if(GetPlayer()->GetRestType()==2)                   //rest in city
         {
-            //speed collect rest bonus (section/in hour)
-            float bubble=1;                                 //0% Blizzlike
-            GetPlayer()->SetRestBonus( GetPlayer()->GetRestBonus()+ (time(NULL)-GetPlayer()->GetTimeInnEter())*0.0142108*bubble );
-            if(GetPlayer()->GetRestBonus()>1534)GetPlayer()->SetRestBonus(1534);
             GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         }
     }
