@@ -3239,7 +3239,12 @@ bool Unit::isTargetableForAttack()
 
 void Unit::ModifyHealth(int32 dVal)
 {
-    int32 val = dVal + GetHealth();
+    if(dVal==0)
+        return;
+
+    uint32 curHealth = GetHealth();
+
+    int32 val = dVal + curHealth;
     if(val <= 0)
     {
         SetHealth(0);
@@ -3251,12 +3256,18 @@ void Unit::ModifyHealth(int32 dVal)
     if(uint32(val) < maxHealth)
         SetHealth(val);
     else
+    if(curHealth!=maxHealth)
         SetHealth(maxHealth);
 }
 
 void Unit::ModifyPower(Powers power, int32 dVal)
 {
-    int32 val = dVal + GetPower(power);
+    if(dVal==0)
+        return;
+
+    uint32 curPower = GetPower(power);
+
+    int32 val = dVal + curPower;
     if(val <= 0)
     {
         SetPower(power,0);
@@ -3268,5 +3279,6 @@ void Unit::ModifyPower(Powers power, int32 dVal)
     if(uint32(val) < maxPower)
         SetPower(power,val);
     else
+    if(curPower != maxPower)
         SetPower(power,maxPower);
 }

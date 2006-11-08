@@ -517,6 +517,7 @@ void Aura::ApplyModifier(bool apply)
 {
     uint8 aura = 0;
     aura = m_modifier.m_auraname;
+
     if(aura<TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply);
 }
@@ -568,9 +569,17 @@ void Aura::_AddAura()
     if(m_modifier.m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // add the shapeshift aura's boosts
         HandleShapeshiftBoosts(true, this);
 
+    // not call total regen auras at adding
+    if( m_modifier.m_auraname==SPELL_AURA_OBS_MOD_HEALTH || m_modifier.m_auraname==SPELL_AURA_OBS_MOD_MANA )
+        m_periodicTimer = m_modifier.periodictime;
+    else
+    if( m_modifier.m_auraname==SPELL_AURA_MOD_REGEN || m_modifier.m_auraname==SPELL_AURA_MOD_POWER_REGEN )
+        m_periodicTimer = 5000;
+
     m_target->ApplyStats(false);
     ApplyModifier(true);
     m_target->ApplyStats(true);
+
     sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
 
     Unit* caster = GetCaster();
@@ -2021,23 +2030,15 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
     }
 
-    uint32 duration = GetDuration(GetSpellProto());
-    if (duration == m_duration)                             // don't call first time.
-    {
-        m_periodicTimer += m_modifier.periodictime;
-        m_isPeriodic = apply;
-        return;
-    }
-
     if(apply && m_periodicTimer <= 0)
     {
         m_periodicTimer += m_modifier.periodictime;
         float modifier = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
         m_modifier.m_amount = m_target->GetMaxHealth() * modifier/100;
-    }
 
-    if(m_target->GetHealth() < m_target->GetMaxHealth())
-        m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+        if(m_target->GetHealth() < m_target->GetMaxHealth())
+            m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+    }
 
     m_isPeriodic = apply;
 }
@@ -2046,14 +2047,6 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply)
 {
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
-
-    uint32 duration = GetDuration(GetSpellProto());
-    if (duration == m_duration)                             // don't call first time.
-    {
-        m_periodicTimer += m_modifier.periodictime;
-        m_isPeriodic = apply;
-        return;
-    }
 
     if(apply && m_periodicTimer <= 0 && m_target->getPowerType() == POWER_MANA)
     {
@@ -2064,10 +2057,11 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply)
                                                             // take percent (m_modifier.m_amount) max mana
             m_modifier.m_amount = (m_target->GetMaxPower(POWER_MANA) * modifier)/100;
         }
+
+        if(m_target->GetPower(POWER_MANA) < m_target->GetMaxPower(POWER_MANA))
+            m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
     }
 
-    if(m_target->GetHealth() < m_target->GetMaxHealth())
-        m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
     m_isPeriodic = apply;
 }
 
