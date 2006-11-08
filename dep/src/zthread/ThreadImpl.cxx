@@ -401,17 +401,18 @@ namespace ZThread {
 
     ZTDEBUG("Thread starting...\n");
 
-    try {
+    // not catch exceptions, let program terminate
+    //try {
     
       task->run();
 
-    } catch(...) {
+    //} catch(...) {
 
       // Result of running a task that threw an exception.
-      ZTDEBUG("The task has thrown an unhandled exception\n");
+    //  ZTDEBUG("The task has thrown an unhandled exception\n");
 	  //assert(0); // UQ1: Go to debugger...
     
-    }
+    //}
 
     ZTDEBUG("Thread joining...\n"); 
     
