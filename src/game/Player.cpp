@@ -453,7 +453,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     }
 
     // bags and main-hamd weapon must equiped ant this moment
-    // now second pass for not equiped (offhand weapon/shield if it attempt equiped before main-hand weapon) 
+    // now second pass for not equiped (offhand weapon/shield if it attempt equiped before main-hand weapon)
     // or ammo not equiped in special bag
     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
@@ -462,7 +462,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
         if(pItem)
         {
-            // equip offhand weapon/shield if it attempt equiped before main-hand weapon 
+            // equip offhand weapon/shield if it attempt equiped before main-hand weapon
             msg = CanEquipItem( NULL_SLOT, dest, pItem, false );
             if( msg == EQUIP_ERR_OK )
             {
@@ -791,13 +791,13 @@ void Player::Update( uint32 p_time )
     {
         if(irand(0,100)<=3 && GetTimeInnEter() > 0)         //freeze update
         {
-             int time_inn = time(NULL)-GetTimeInnEter(); 
-             if (time_inn >= 10)                            //freeze update
-             {
-                 float bubble=1;                            //speed collect rest bonus (section/in hour)
-                 SetRestBonus( GetRestBonus()+ time_inn*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/144000)*bubble );
-                 UpdateInnerTime(time(NULL));
-             }
+            int time_inn = time(NULL)-GetTimeInnEter();
+            if (time_inn >= 10)                             //freeze update
+            {
+                float bubble=1;                             //speed collect rest bonus (section/in hour)
+                SetRestBonus( GetRestBonus()+ time_inn*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/144000)*bubble );
+                UpdateInnerTime(time(NULL));
+            }
         }
         if(GetRestType()==1)                                //rest in tavern
         {
@@ -2556,9 +2556,9 @@ void Player::BuildPlayerRepop()
     data.append(GetPackGUID());                             //9
     data.append(GetPackGUID());                             //9
     //<< uint16(8326); //2
-    data << uint32(20305);                                    //2
+    data << uint32(20305);                                  //2
     data << uint16(2);
-    data << uint32(0) << uint16(0);                     //6
+    data << uint32(0) << uint16(0);                         //6
     GetSession()->SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO);
@@ -4378,11 +4378,11 @@ void Player::_RemoveAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken()) 
+            if(m_items[i]->IsBroken())
                 continue;
-            
+
             ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto) 
+            if(!proto)
                 continue;
 
             if(proto->ItemSet)
@@ -4413,10 +4413,10 @@ void Player::_RemoveAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken()) 
+            if(m_items[i]->IsBroken())
                 continue;
             ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto) 
+            if(!proto)
                 continue;
             _ApplyItemBonuses(proto,i, false);
         }
@@ -4438,11 +4438,11 @@ void Player::_ApplyAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken()) 
+            if(m_items[i]->IsBroken())
                 continue;
 
             ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto) 
+            if(!proto)
                 continue;
 
             if(proto->ItemSet)
@@ -4469,11 +4469,11 @@ void Player::_ApplyAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken()) 
+            if(m_items[i]->IsBroken())
                 continue;
 
             ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto) 
+            if(!proto)
                 continue;
 
             _ApplyItemBonuses(proto,i, true);
@@ -7731,7 +7731,7 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
         return;
 
     sLog.outDebug( "STORAGE: DestroyItemCount item (GUID: %u, Entry: %u) count = %u", pItem->GetGUIDLow(),pItem->GetEntry(), count);
-    
+
     if( pItem->GetCount() <= count )
     {
         count-= pItem->GetCount();
@@ -7749,7 +7749,6 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
             pItem->SendUpdateToPlayer( this );
     }
 }
-    
 
 void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
 {
@@ -10908,8 +10907,7 @@ void Player::SetRestBonus (float rest_bonus_new)
         SetFlag(PLAYER_BYTES_2, 0x2000000);                 // Set Reststate = Normal
         RemoveFlag(PLAYER_BYTES_2, 0x1000000);              // Remove Reststate = Rested
     }
-    
-    //RestTickUpdate
-    SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, rest_bonus); 
-}
 
+    //RestTickUpdate
+    SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, rest_bonus);
+}

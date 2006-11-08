@@ -686,14 +686,14 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 
 void Object::_SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const
 {
-   size_t mask_position = buffer->wpos();
-   *buffer << uint8(0);
-   for(uint8 i = 0; i < 8; i++)
-   {
-       if(((uint8*)&guid64)[i])
-       {
-           const_cast<uint8*>(buffer->contents())[mask_position] |= (1<<i);
-           *buffer << ((uint8*)&guid64)[i];
-       }
-   }
+    size_t mask_position = buffer->wpos();
+    *buffer << uint8(0);
+    for(uint8 i = 0; i < 8; i++)
+    {
+        if(((uint8*)&guid64)[i])
+        {
+            const_cast<uint8*>(buffer->contents())[mask_position] |= (1<<i);
+            *buffer << ((uint8*)&guid64)[i];
+        }
+    }
 }
