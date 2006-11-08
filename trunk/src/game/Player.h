@@ -489,40 +489,20 @@ class MANGOS_DLL_SPEC Player : public Unit
             inn_pos_z = z;
             time_inn_enter = time;
         };
-        void SetRestBonus (float rest_bonus_new)
-        {
-            if(rest_bonus_new<0)rest_bonus_new=0;
-            if(rest_bonus_new>1534)rest_bonus_new=1534;
-            rest_bonus = rest_bonus_new;
-        };
-        void SetRestType(int n_r_type)
-        {
-            rest_type = n_r_type;
-        };
-        float GetInnPosX ()
-        {
-            return inn_pos_x;
-        };
-        float GetInnPosY ()
-        {
-            return inn_pos_y;
-        };
-        float GetInnPosZ ()
-        {
-            return inn_pos_z;
-        };
-        float GetRestBonus ()
-        {
-            return rest_bonus;
-        };
-        int GetTimeInnEter ()
-        {
-            return time_inn_enter;
-        };
-        int GetRestType ()
-        {
-            return rest_type;
-        };
+
+        float GetRestBonus() const { return rest_bonus; };
+        void SetRestBonus(float rest_bonus_new);
+
+        int GetRestType() const { return rest_type; };
+        void SetRestType(int n_r_type) { rest_type = n_r_type; };
+
+        float GetInnPosX () const { return inn_pos_x; };
+        float GetInnPosY () const { return inn_pos_y; };
+        float GetInnPosZ () const { return inn_pos_z; };
+
+        int GetTimeInnEter() const { return time_inn_enter; };
+        void UpdateInnerTime (int time) { time_inn_enter = time; };
+
 
         void UnsummonPet(Creature* pet = NULL);
         void UnTamePet(Creature* pet = NULL);
