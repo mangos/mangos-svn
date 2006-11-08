@@ -1291,11 +1291,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_resetTalentsTime;
 };
 
-int irand(int min, int max);
+int32 irand(int32 min, int32 max);
 
 inline uint32 urand(uint32 min, uint32 max)
 {
-    return irand(int(min), int(max));
+    return irand(int32(min), int32(max));
 }
 
 void AddItemsSetItem(Player*player,Item *item);
