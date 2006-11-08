@@ -1686,7 +1686,7 @@ void Spell::EffectSummonTotem(uint32 i)
     m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
     pTotem->SetOwner(m_caster->GetGUID());
     //pTotem->SetSpell(pTotem->GetCreatureInfo()->spell1);
-    pTotem->SetSpell(m_spellInfo->Id);      //use SummonTotem spellid
+    pTotem->SetSpell(m_spellInfo->Id);                      //use SummonTotem spellid
     pTotem->SetDuration(GetDuration(m_spellInfo));
     pTotem->SetHealth(5);
     pTotem->SetMaxHealth(5);
@@ -1940,7 +1940,6 @@ void Spell::EffectDisEnchant(uint32 i)
         //SendChannelUpdate(0);
         return;
     }
-
 
     uint32 item_count = 1;
     p_caster->DestroyItemCount(itemTarget,item_count, true);

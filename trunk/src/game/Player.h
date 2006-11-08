@@ -503,7 +503,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetTimeInnEter() const { return time_inn_enter; };
         void UpdateInnerTime (int time) { time_inn_enter = time; };
 
-
         void UnsummonPet(Creature* pet = NULL);
         void UnTamePet(Creature* pet = NULL);
         void Uncharm();

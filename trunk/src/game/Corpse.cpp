@@ -37,7 +37,7 @@ Corpse::Corpse( CorpseType type ) : Object()
 
     m_POI = false;
     m_type = type;
-    m_time = time(NULL) - CORPSE_RECLAIM_DELAY;                               // to prevent resurrecting delay at load
+    m_time = time(NULL) - CORPSE_RECLAIM_DELAY;             // to prevent resurrecting delay at load
 }
 
 Corpse::~Corpse()

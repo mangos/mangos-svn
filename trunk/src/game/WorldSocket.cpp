@@ -244,18 +244,18 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     sha1.UpdateData(s.AsByteArray(), s.GetNumBytes());
     sha1.UpdateData(I.GetDigest(), 20);
     sha1.Finalize();
-    x.SetBinary(sha1.GetDigest(), sha1.GetLength());                            
+    x.SetBinary(sha1.GetDigest(), sha1.GetLength());
     v = g.ModExp(x, N);
 
     sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), (*result)[6].GetString(), v.AsHexStr() );
     if ( strcmp(v.AsHexStr(),(*result)[6].GetString() ) )
     {
-         packet.Initialize( SMSG_AUTH_RESPONSE );
-         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
-         SendPacket( &packet );         
-         sLog.outDetail( "SOCKET: User not logged.");
-         delete result;
-         return;
+        packet.Initialize( SMSG_AUTH_RESPONSE );
+        packet << uint8( AUTH_UNKNOWN_ACCOUNT );
+        SendPacket( &packet );
+        sLog.outDetail( "SOCKET: User not logged.");
+        delete result;
+        return;
     }
 
     id = (*result)[0].GetUInt32();
