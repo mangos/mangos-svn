@@ -81,13 +81,14 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
         // Can't move
         WorldPacket data;
         data.Initialize( SMSG_FORCE_MOVE_ROOT );
-        data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
+        data.append(Target->GetPackGUID());
+        data << (uint32)2;
         SendPacket( &data );
     }
 
     WorldPacket data;
     data.Initialize( recv_data.GetOpcode() );
-    data << uint8(0xFF) << GetPlayer()->GetGUID();
+    data.append(GetPlayer()->GetPackGUID());
     data << flags << time;
     data << x << y << z << GetPlayer()->GetOrientation();
     GetPlayer()->SendMessageToSet(&data, false);
@@ -137,7 +138,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     {
         WorldPacket data;
         data.Initialize( opcode );
-        data << uint8(0xFF) << GetPlayer()->GetGUID();
+        data.append(GetPlayer()->GetPackGUID());
         data << flags << time;
         data << x << y << z << orientation;
         GetPlayer()->SendMessageToSet(&data, false);

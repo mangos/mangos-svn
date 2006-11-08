@@ -23,6 +23,7 @@
 
 struct ItemPrototype;
 
+class Creature;
 class Player;
 class WorldPacket;
 class WorldSocket;
@@ -91,7 +92,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTaxiStatus( uint64 guid );
         void SendDoFlight( uint16 MountId, uint32 path );
         void SendSpiritResurrect();
-        void SendBindPoint(uint64 guid);
+        void SendBindPoint(Creature* npc);
         void SendGMTicketGetTicket(uint32 status, char const* text);
         void SendCancelTrade();
         void SendStablePet(uint64 guid );

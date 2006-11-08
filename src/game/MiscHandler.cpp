@@ -142,7 +142,8 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
         data.Initialize( SMSG_FORCE_MOVE_ROOT );
-        data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
+        data.append(Target->GetPackGUID());
+        data << (uint32)2;
         SendPacket( &data );
         Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
     }
@@ -176,7 +177,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
     {
         //!we can move again
         data.Initialize( SMSG_FORCE_MOVE_UNROOT );
-        data << (uint8)0xFF << GetPlayer()->GetGUID();
+        data.append(GetPlayer()->GetPackGUID());
         SendPacket( &data );
 
         //! Stand Up

@@ -35,7 +35,7 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleAuctionHelloOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: HandleAuctionHelloOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 

@@ -20,6 +20,7 @@
 #define _OBJECT_H
 
 #include "Common.h"
+#include "ByteBuffer.h"
 #include "UpdateMask.h"
 #include "World.h"
 #include "QuestDef.h"
@@ -101,7 +102,7 @@ class MANGOS_DLL_SPEC Object
         const uint64& GetGUID() const { return GetUInt64Value(0); }
         const uint32& GetGUIDLow() const { return GetUInt32Value(0); }
         const uint32& GetGUIDHigh() const { return GetUInt32Value(1); }
-
+        const ByteBuffer& GetPackGUID() const { return m_PackGUID; }
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
 
         const uint8& GetTypeId() const { return m_objectTypeId; }
@@ -288,6 +289,7 @@ class MANGOS_DLL_SPEC Object
         virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const;
         void _BuildValuesUpdate( ByteBuffer *data, UpdateMask *updateMask  ) const;
+        void _SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const;
 
         uint16 m_objectType;
 
@@ -322,6 +324,8 @@ class MANGOS_DLL_SPEC Object
         bool m_objectUpdated;
 
     private:
+        ByteBuffer m_PackGUID;
+
         // for output helpfull error messages from asserts
         bool PrintIndexError(uint32 index, bool set) const;
         Object(const Object&);                              // prevent generation copy constructor

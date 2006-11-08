@@ -569,7 +569,7 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
 
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandlePetitionShowListOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        sLog.outDebug( "WORLD: HandlePetitionShowListOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
 
