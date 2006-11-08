@@ -3991,19 +3991,19 @@ void Player::DuelComplete()
     m_pDuel = NULL;
 }
 
-static unsigned long    holdrand = 0x89abcdef;
+static uint32 holdrand = 0x89abcdef;
 
-void Rand_Init(int seed)
+void Rand_Init(uint32 seed)
 {
     holdrand = seed;
 }
 
-int irand(int min, int max)
+int32 irand(int32 min, int32 max)
 {
     assert((max - min) < 32768);
 
     max++;
-    holdrand = (holdrand * 214013L) + 2531011L;
+    holdrand = (holdrand * 214013) + 2531011;
 
     return (((holdrand >> 17) * (max - min)) >> 15) + min;
 }
