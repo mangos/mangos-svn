@@ -443,6 +443,28 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `character_spell` ENABLE KEYS */;
 
 --
+-- Table structure for table `character_spell_cooldown`
+--
+
+DROP TABLE IF EXISTS `character_spell_cooldown`;
+CREATE TABLE `character_spell_cooldown` (
+  `guid`  int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier, Low part',
+  `spell` int(11) unsigned NOT NULL default '0' COMMENT 'Spell Identifier',
+  `time`  int(11) unsigned NOT NULL default '0',
+   PRIMARY KEY  (`guid`,`spell`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `character_spell_cooldown`
+--
+
+/*!40000 ALTER TABLE `character_spell_cooldown` DISABLE KEYS */;
+LOCK TABLES `character_spell_cooldown` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `character_spell_cooldown` ENABLE KEYS */;
+
+
+--
 -- Table structure for table `character_stable`
 --
 

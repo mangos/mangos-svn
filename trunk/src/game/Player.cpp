@@ -1579,11 +1579,10 @@ void Player::GiveLevel()
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
 
-    // set current level health and mana to maximum after appling all mods.
-    if(getPowerType()==POWER_MANA)
-        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-
+    // set current level health and mana/energy to maximum after appling all mods.
     SetHealth(GetMaxHealth());
+    SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
 
     // send levelup info to client
     WorldPacket data;
@@ -2038,6 +2037,121 @@ bool Player::removeSpell(uint16 spell_id)
     }
     return false;
 }
+
+void Player::_LoadSpellCooldowns()
+{
+    m_spellCooldowns.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'",GetGUIDLow());
+
+    if(result)
+    {
+        time_t curTime = time(NULL);
+
+        WorldPacket data;
+
+        data.Initialize(SMSG_SPELL_COOLDOWN);
+        data << GetGUID();
+
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 spell_id = fields[0].GetUInt32();
+            time_t db_time  = (time_t)fields[1].GetUInt64();
+
+            if(!sSpellStore.LookupEntry(spell_id))
+            {
+                sLog.outError("Player %u have unknown spell %u in `character_spell_cooldown`, skipping.",GetGUIDLow(),spell_id);
+                continue;
+            }
+
+
+            // skip outdated cooldown
+            if(db_time <= curTime)
+                continue;
+
+            data << uint32(spell_id);
+            data << uint32((db_time-curTime)*1000);         // in m.secs 
+
+            AddSpellCooldown(spell_id,db_time);
+            
+            sLog.outDebug("Player (GUID: %u) spell %u cooldown loaded (%u secs).",GetGUIDLow(),spell_id,uint32(db_time-curTime));
+        }
+        while( result->NextRow() );
+
+        delete result;
+
+        if(m_spellCooldowns.size() > 0)
+            GetSession()->SendPacket(&data);
+    }
+
+    // setup item coldowns
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        if(Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+        {
+            uint32 spell_id = pItem->GetProto()->Spells[i].SpellId;
+            if(spell_id != 0 && HaveSpellCooldown(spell_id))
+            {
+                sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
+                WorldPacket data;
+                data.Initialize(SMSG_ITEM_COOLDOWN);
+                data << pItem->GetGUID();
+                data << uint32(spell_id);
+                GetSession()->SendPacket(&data);
+                break;
+            }
+        }
+    }
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+        {
+            for(uint32 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
+            {
+                if(Item* pItem = GetItemByPos( i, j ))
+                {
+                    for(int i = 0; i < 5; ++i)
+                    {
+                        uint32 spell_id = pItem->GetProto()->Spells[i].SpellId;
+                        if(spell_id != 0 && HaveSpellCooldown(spell_id))
+                        {
+                            sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
+                            WorldPacket data;
+                            data.Initialize(SMSG_ITEM_COOLDOWN);
+                            data << pItem->GetGUID();
+                            data << uint32(spell_id);
+                            GetSession()->SendPacket(&data);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+void Player::_SaveSpellCooldowns()
+{
+    sDatabase.PExecute("DELETE FROM `character_spell_cooldown` WHERE `guid` = '%u'", GetGUIDLow());
+
+    time_t curTime = time(NULL);
+
+    // remove oudated and save active
+    for(SpellCooldowns::iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end();)
+    {
+        if(itr->second <= curTime)
+            m_spellCooldowns.erase(itr++);
+        else
+        {
+            sDatabase.PExecute("INSERT INTO `character_spell_cooldown` (`guid`,`spell`,`time`) VALUES ('%u', '%u', '" I64FMTD "')", GetGUIDLow(), itr->first, itr->second);
+            ++itr;
+        }
+    }
+}
+
 
 uint32 Player::resetTalentsCost() const
 {
@@ -3546,6 +3660,9 @@ void Player::SetInitialFactions()
 uint32 Player::GetReputation(uint32 faction_id) const
 {
     FactionEntry *factionEntry = sFactionStore.LookupEntry(faction_id);
+
+    if(!factionEntry)
+        return 0;
 
     std::list<struct Factions>::const_iterator itr;
     for(itr = factions.begin(); itr != factions.end(); ++itr)
@@ -9972,25 +10089,35 @@ void Player::_LoadInventory(uint32 timediff)
             dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
             if( IsInventoryPos( dest ) )
             {
-                if( CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
-                    StoreItem(dest, item, true);
-                else
+                if( !CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                {
                     delete item;
+                    continue;
+                }
+                
+                StoreItem(dest, item, true);
             }
             else if( IsEquipmentPos( dest ) )
             {
-                if( CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
-                    QuickEquipItem(dest, item);
-                else
+                if( !CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
+                {
                     delete item;
+                    continue;
+                }
+
+                QuickEquipItem(dest, item);
             }
             else if( IsBankPos( dest ) )
             {
-                if( CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
-                    BankItem(dest, item, true);
-                else
+                if( !CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                {
                     delete item;
+                    continue;
+                }
+
+                BankItem(dest, item, true);
             }
+
         } while (result->NextRow());
 
         delete result;
@@ -10341,6 +10468,7 @@ void Player::SaveToDB()
     _SaveQuestStatus();
     _SaveTutorials();
     _SaveSpells();
+    _SaveSpellCooldowns();
     _SaveActions();
     _SaveAuras();
     _SaveReputation();

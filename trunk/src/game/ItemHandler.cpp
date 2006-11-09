@@ -199,12 +199,17 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << (float)pProto->RangedModRange;
         for(int s = 0; s < 5; s++)
         {
+            // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
+            // use `item_template` only if spell not have own cooldowns
+            SpellEntry* spell = sSpellStore.LookupEntry(pProto->Spells[s].SpellId);
+            bool dbc_data = spell && ( spell->RecoveryTime > 0 || spell->CategoryRecoveryTime > 0 );
+
             data << pProto->Spells[s].SpellId;
             data << pProto->Spells[s].SpellTrigger;
             data << uint32(pProto->Spells[s].SpellCharges);
-            data << uint32(pProto->Spells[s].SpellCooldown);
-            data << pProto->Spells[s].SpellCategory;
-            data << uint32(pProto->Spells[s].SpellCategoryCooldown);
+            data << uint32(dbc_data ? spell->RecoveryTime         : pProto->Spells[s].SpellCooldown);
+            data << uint32(dbc_data ? spell->Category             : pProto->Spells[s].SpellCategory);
+            data << uint32(dbc_data ? spell->CategoryRecoveryTime : pProto->Spells[s].SpellCategoryCooldown);
         }
         data << pProto->Bonding;
         data << pProto->Description;

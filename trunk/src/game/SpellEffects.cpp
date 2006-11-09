@@ -226,9 +226,12 @@ void Spell::EffectDummy(uint32 i)
             if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 &&
                 (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
             {
+                ((Player*)m_caster)->RemoveSpellCooldown(classspell);
+
                 WorldPacket data;
                 data.Initialize(SMSG_CLEAR_COOLDOWN);
-                data << classspell << m_caster->GetGUID();
+                data << classspell;
+                data << m_caster->GetGUID();
                 data << uint32(0);
                 ((Player*)m_caster)->GetSession()->SendPacket(&data);
             }
@@ -251,9 +254,12 @@ void Spell::EffectDummy(uint32 i)
             if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST && spellInfo->Id != 12472 &&
                 (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
             {
+                ((Player*)m_caster)->RemoveSpellCooldown(classspell);
+
                 WorldPacket data;
                 data.Initialize(SMSG_CLEAR_COOLDOWN);
-                data << classspell << m_caster->GetGUID();
+                data << classspell;
+                data << m_caster->GetGUID();
                 data << uint32(0);
                 ((Player*)m_caster)->GetSession()->SendPacket(&data);
             }
@@ -289,6 +295,8 @@ void Spell::EffectDummy(uint32 i)
             // clear cooldown at fail
             if(m_caster->GetTypeId()==TYPEID_PLAYER)
             {
+                ((Player*)m_caster)->RemoveSpellCooldown(20577);
+
                 WorldPacket data;
                 data.Initialize(SMSG_CLEAR_COOLDOWN);
                 data << uint32(20577);                      // spell id

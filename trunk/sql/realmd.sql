@@ -26,6 +26,8 @@ CREATE TABLE `account` (
   `password` varchar(28) NOT NULL default '',
   `gmlevel` tinyint(3) unsigned NOT NULL default '0',
   `sessionkey` longtext,
+  `v` longtext,
+  `s` longtext,
   `email` varchar(50) NOT NULL default '',
   `joindate` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `banned` tinyint(3) unsigned NOT NULL default '0',

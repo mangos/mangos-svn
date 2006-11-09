@@ -434,7 +434,7 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
     }
 
     // prevent cheating
-    if(!unit->isSpiritHealer() || !unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
+    if(!unit->isInnkeeper() || !unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
         return;
 
     SendBindPoint(unit);

@@ -726,6 +726,7 @@ void Spell::SendSpellCooldown()
 
     // some special item spells without correct cooldown in SpellInfo
     // cooldown information stored in item prototype
+    // This used in same way in WorldSession::HandleItemQuerySingleOpcode data sending to client.
     if( rec == 0 && catrec == 0 && m_CastItem)
     {
         ItemPrototype const* proto = m_CastItem->GetProto();
@@ -756,34 +757,51 @@ void Spell::SendSpellCooldown()
     if( rec == 0 && catrec == 0)
         return;
 
+    time_t curTime = time(NULL);
+    
+    time_t recTime    = curTime+rec/1000;                   // in secs
+    time_t catrecTime = curTime+catrec/1000;                // in secs
+
     WorldPacket data;
 
-    data.clear();
     data.Initialize(SMSG_SPELL_COOLDOWN);
     data << m_caster->GetGUID();
+
+    // self spell cooldown
+    if (rec > 0)
+    {
+        data << uint32(m_spellInfo->Id);
+        data << uint32(rec);
+        _player->AddSpellCooldown(m_spellInfo->Id,recTime);
+    }
+    else
+    {
+        data << uint32(m_spellInfo->Id);
+        data << uint32(catrec);
+        _player->AddSpellCooldown(m_spellInfo->Id,catrecTime);
+    }
+
     if (catrec > 0)
     {
         PlayerSpellMap const& player_spells = _player->GetSpellMap();
         for (PlayerSpellMap::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
         {
+            if(m_spellInfo->Id==itr->first)
+                continue;
+
             if(itr->second->state == PLAYERSPELL_REMOVED || !itr->second->active)
                 continue;
+
             SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
             if( spellInfo->Category == m_spellInfo->Category)
             {
                 data << uint32(itr->first);
-                if (itr->first != m_spellInfo->Id || rec == 0)
-                    data << uint32(catrec);
-                else
-                    data << uint32(rec);
+                data << uint32(catrec);
+                _player->AddSpellCooldown(m_spellInfo->Id,catrecTime);
             }
         }
     }
-    else if (rec > 0)
-    {
-        data << uint32(m_spellInfo->Id);
-        data << uint32(rec);
-    }
+
     _player->GetSession()->SendPacket(&data);
 
     // show cooldown for item
@@ -1360,6 +1378,13 @@ void Spell::TriggerSpell()
 
 uint8 Spell::CanCast()
 {
+    // check cooldowns to prevent cheating
+    if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->HaveSpellCooldown(m_spellInfo->Id))
+    {
+        SendCastResult(CAST_FAIL_SPELL_NOT_READY_YET);
+        return CAST_FAIL_SPELL_NOT_READY_YET;
+    }
+
     uint8 castResult = 0;
 
     Unit *target = m_targets.getUnitTarget();
