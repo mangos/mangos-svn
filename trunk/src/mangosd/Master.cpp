@@ -201,6 +201,11 @@ bool Master::Run()
 
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
+    
+    // maximum counter for next ping
+    uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (MINUTE * 1000000 / socketSelecttime));
+    uint32 loopCounter = 0;
+
     while (!World::m_stopEvent)
     {
 
@@ -213,6 +218,15 @@ bool Master::Run()
 
         //h.Select(0, 100000);
         h.Select(0, socketSelecttime);
+
+        // ping if need
+        if( (++loopCounter) == numLoops )
+        {
+            loopCounter = 0;
+            sLog.outDetail("Ping MySQL to keep connection alive");
+            sDatabase.Query("SELECT 1 FROM `command` LIMIT 1");
+            loginDatabase.Query("SELECT 1 FROM `realmlist` LIMIT 1");
+        }
     }
 
     sLog.outString( "WORLD: Saving Addons" );

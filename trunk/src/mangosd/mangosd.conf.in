@@ -17,6 +17,8 @@ DataDir = "@MANGOSD_DATA@"
 LoginDatabaseInfo = "127.0.0.1;3306;mangos;mangos;realmd"
 WorldDatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
 
+# Settings for maximum database-ping interval (minutes between pings)
+MaxPingTime = 30
 
 # Logfile name
 # Default: "Server.log"

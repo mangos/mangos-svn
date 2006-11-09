@@ -5,6 +5,9 @@ ConfVersion=2006060401
 # Default: hostname;port;username;password;database
 LoginDatabaseInfo = "127.0.0.1;3306;mangos;mangos;realmd"
 
+# Settings for maximum database-ping interval (minutes between pings)
+MaxPingTime = 30
+
 # Default RealmServerPort
 RealmServerPort = 3724
 
