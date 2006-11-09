@@ -168,9 +168,21 @@ int main(int argc, char **argv)
     }
     #endif
 
-    ///- Wait for a termination signal
+    // maximum counter for next ping
+    uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (60 * 1000000 / 100000));
+    uint32 loopCounter = 0;
+
     while (!stopEvent)
+    {
         h.Select(0, 100000);
+
+        if( (++loopCounter) == numLoops )
+        {
+            loopCounter = 0;
+            sLog.outString("Ping MySQL to keep connection alive");
+            dbRealmServer.Query("SELECT 1 FROM `realmlist` LIMIT 1");
+        }
+    }
 
     ///- Remove signal handling before leaving
     UnhookSignals();
