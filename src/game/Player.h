@@ -112,6 +112,8 @@ struct SpellModifier
 typedef HM_NAMESPACE::hash_map<uint16, PlayerSpell*> PlayerSpellMap;
 typedef std::list<SpellModifier*> SpellModList;
 
+typedef std::map<uint32,time_t> SpellCooldowns;
+
 struct actions
 {
     uint8 button;
@@ -783,6 +785,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         int32 GetTotalPctMods(uint32 spellId, uint8 op);
         template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue);
 
+        bool HaveSpellCooldown(uint32 spell_id) const
+        { 
+            SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
+            return itr != m_spellCooldowns.end() && itr->second > time(NULL);
+        }
+        void AddSpellCooldown(uint32 spell_id, time_t end_time) { m_spellCooldowns[spell_id] = end_time; }
+        void RemoveSpellCooldown(uint32 spell_id) { m_spellCooldowns.erase(spell_id); }
+        void _LoadSpellCooldowns();
+        void _SaveSpellCooldowns();
+
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
         {
             m_resurrectGUID = guid;
@@ -1201,6 +1213,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::list<struct Factions> factions;
         std::list<Mail*> m_mail;
         PlayerSpellMap m_spells;
+        SpellCooldowns m_spellCooldowns;
+
         std::list<struct actions> m_actions;
         SpellModList m_spellMods[32];
         std::list<struct EnchantDuration*> m_enchantDuration;
