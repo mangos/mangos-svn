@@ -99,7 +99,7 @@ am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
 	SpellAuras.$(OBJEXT) Spell.$(OBJEXT) SpellEffects.$(OBJEXT) \
 	SpellHandler.$(OBJEXT) TargetedMovementGenerator.$(OBJEXT) \
 	TaxiHandler.$(OBJEXT) TaxiMovementGenerator.$(OBJEXT) \
-	tools.$(OBJEXT) Totem.$(OBJEXT) TotemAI.$(OBJEXT) \
+	tools.$(OBJEXT) Totem.$(OBJEXT) TotemAI.$(OBJEXT) Transports.$(OBJEXT)\
 	TradeHandler.$(OBJEXT) Unit.$(OBJEXT) UpdateData.$(OBJEXT) \
 	WaypointMovementGenerator.$(OBJEXT) Weather.$(OBJEXT) \
 	World.$(OBJEXT) WorldLog.$(OBJEXT) WorldSession.$(OBJEXT) \
@@ -349,6 +349,7 @@ libgame_a_SOURCES = \
 	Totem.cpp \
 	TotemAI.cpp \
 	TradeHandler.cpp \
+	Transports.cpp \
 	Unit.cpp \
 	UpdateData.cpp \
 	WaypointMovementGenerator.cpp \
@@ -430,6 +431,7 @@ libgame_a_SOURCES = \
 	Totem.h \
 	TotemAI.h \
 	Traveller.h \
+	Transports.h \
 	Unit.h \
 	UpdateData.h \
 	UpdateFields.h \
@@ -574,6 +576,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Totem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TotemAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TradeHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Transports.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Unit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UpdateData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WaypointMovementGenerator.Po@am__quote@

@@ -102,6 +102,7 @@ libgame_a_SOURCES = \
 	Totem.cpp \
 	TotemAI.cpp \
 	TradeHandler.cpp \
+	Transports.cpp \
 	Unit.cpp \
 	UpdateData.cpp \
 	WaypointMovementGenerator.cpp \
@@ -183,6 +184,7 @@ libgame_a_SOURCES = \
 	Totem.h \
 	TotemAI.h \
 	Traveller.h \
+	Transports.h \
 	Unit.h \
 	UpdateData.h \
 	UpdateFields.h \
