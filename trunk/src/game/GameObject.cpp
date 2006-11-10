@@ -250,7 +250,8 @@ void GameObject::SaveToDB()
         << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
         << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
         << lootid <<", "
-        << m_respawnDelayTime <<")";
+        << m_respawnDelayTime << ", "
+        << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ")";
 
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
