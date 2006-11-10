@@ -219,7 +219,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     loginDatabase.escape_string(account);
 
-    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s` FROM `account` WHERE `username` = '%s'", account.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `banned` FROM `account` WHERE `username` = '%s'", account.c_str());
 
     if ( !result )
     {
@@ -248,6 +248,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     v = g.ModExp(x, N);
 
     sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), (*result)[6].GetString(), v.AsHexStr() );
+    loginDatabase.PQuery("UPDATE `account` SET `sessionkey` = '0', `v` = '0', `s` = '0' WHERE `username` = '%s'", account.c_str());
     if ( strcmp(v.AsHexStr(),(*result)[6].GetString() ) )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE );
@@ -255,6 +256,28 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         SendPacket( &packet );
         sLog.outDetail( "SOCKET: User not logged.");
         delete result;
+        return;
+    }
+
+    if((*result)[4].GetUInt8() == 1)            // if ip is locked
+    {
+        if ( strcmp((*result)[3].GetString(),GetRemoteAddress().c_str()) )
+        {
+            packet.Initialize( SMSG_AUTH_RESPONSE );
+            packet << uint8( REALM_AUTH_ACCOUNT_FREEZED );
+            SendPacket( &packet );
+
+            sLog.outDetail( "SOCKET: Sent Auth Response (Account IP differs)." );
+            return;
+        }
+    }
+    if((*result)[8].GetUInt8() == 1)            // if account banned
+    {
+        packet.Initialize( SMSG_AUTH_RESPONSE );
+        packet << uint8( AUTH_BANNED );
+        SendPacket( &packet );
+
+        sLog.outDetail( "SOCKET: Sent Auth Response (Account banned)." );
         return;
     }
 
@@ -339,7 +362,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     sLog.outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
     sLog.outString( "Account: '%s' Login.", account.c_str() );
-
+    loginDatabase.PQuery("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'", account.c_str(),GetRemoteAddress().c_str());
+ 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
     #ifdef WIN32
