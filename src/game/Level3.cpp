@@ -1599,7 +1599,17 @@ bool ChatHandler::HandleDieCommand(const char* args)
 
 bool ChatHandler::HandleReviveCommand(const char* args)
 {
-    Player* SelectedPlayer = getSelectedPlayer();
+    Player* SelectedPlayer = NULL;
+
+    if (*args)
+    {
+        std::string name = args;
+        sDatabase.escape_string(name);
+        SelectedPlayer = objmgr.GetPlayer(name.c_str());
+    }
+    else
+        SelectedPlayer = getSelectedPlayer();
+
     if(!SelectedPlayer)
     {
         PSendSysMessage(LANG_NO_CHAR_SELECTED);
