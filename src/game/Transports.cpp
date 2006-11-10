@@ -293,8 +293,6 @@ void Transport::GenerateWaypoints(uint32 pathid)
 
     uint32 timer = t;
 
-    m_timer = getMSTime() % m_pathTime;
-
     sLog.outDetail("    Generated %d waypoints, total time %u.", m_WayPoints.size(), timer);
     
     m_curr = m_WayPoints.begin();
