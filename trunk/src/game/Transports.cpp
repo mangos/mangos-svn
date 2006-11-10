@@ -129,8 +129,8 @@ struct keyFrame {
 
 void Transport::GenerateWaypoints(uint32 pathid)
 {
-    Path path;   
-    objmgr.GetTaxiPathNodes(pathid, path);
+    TransportPath path;   
+    objmgr.GetTransportPathNodes(pathid, path);
 
     vector<keyFrame> keyFrames;
     int mapChange = 0;

@@ -26,10 +26,7 @@ class Path
     public:
         struct PathNode
         {
-            uint32 mapid;
             float x,y,z;
-            uint32 actionFlag;
-            uint32 delay;
         };
 
         inline void SetLength(const unsigned int sz)
@@ -40,7 +37,7 @@ class Path
         inline unsigned int Size(void) const { return i_nodes.size(); }
         inline void Resize(unsigned int sz) { i_nodes.resize(sz); }
         inline void Clear(void) { i_nodes.clear(); }
-        inline PathNode* GetNodes(void) { return static_cast<PathNode *>(&i_nodes[0]); }
+        inline PathNode* GetNodes() { return &i_nodes[0]; }
         float GetTotalLength(void)
         {
             float len = 0, xd, yd, zd;

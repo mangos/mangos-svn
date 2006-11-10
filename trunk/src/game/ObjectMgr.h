@@ -51,8 +51,9 @@ extern QuestRelations sPrevQuests;
 extern QuestRelations sExclusiveQuestGroups;
 
 class Group;
-class Path;
 class Guild;
+class Path;
+class TransportPath;
 
 struct AuctionEntry
 {
@@ -220,6 +221,7 @@ class ObjectMgr
         void GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost);
         uint16 GetTaxiMount( uint32 id, uint32 team );
         void GetTaxiPathNodes( uint32 path, Path &pathnodes );
+        void GetTransportPathNodes( uint32 path, TransportPath &pathnodes );
 
         void AddAreaTriggerPoint(AreaTriggerPoint *pArea);
         AreaTriggerPoint *GetAreaTriggerQuestPoint(uint32 Trigger_ID);
