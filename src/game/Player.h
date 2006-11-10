@@ -36,6 +36,7 @@ class Channel;
 class DynamicObject;
 class Creature;
 class PlayerMenu;
+class Transport;
 
 enum Team
 {
@@ -786,7 +787,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue);
 
         bool HaveSpellCooldown(uint32 spell_id) const
-        { 
+        {
             SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
             return itr != m_spellCooldowns.end() && itr->second > time(NULL);
         }
@@ -1098,6 +1099,20 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
         void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
 
+
+        // Transports
+        Transport * GetTransport() { return m_transport; }
+        void SetTransport(Transport * t) { m_transport = t; }
+
+        void SetTransOffset(float x, float y, float z, float orientation)
+            { m_transX = x; m_transY = y; m_transZ = z; m_transO = orientation; }
+        void GetTransOffset( float &x, float &y, float &z, float &o ) const
+            { x = m_transX; y = m_transY; z = m_transZ; o = m_transO; }
+        float GetTransOffsetX() const { return m_transX; }
+        float GetTransOffsetY() const { return m_transY; }
+        float GetTransOffsetZ() const { return m_transZ; }
+        float GetTransOffsetO() const { return m_transO; }
+
     protected:
 
         /*********************************************************/
@@ -1279,6 +1294,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         float rest_bonus;
         int rest_type;
         ////////////////////Rest System/////////////////////
+
+        // Transports
+        float m_transX;
+        float m_transY;
+        float m_transZ;
+        float m_transO;
+
+        Transport * m_transport;
 
         uint32 m_resetTalentsCost;
         time_t m_resetTalentsTime;

@@ -42,11 +42,18 @@
 #include "Pet.h"
 #include "SpellAuras.h"
 #include "Util.h"
+#include "Transports.h"
 
 #include <cmath>
 
 Player::Player (WorldSession *session): Unit()
 {
+    m_transport = NULL;
+    m_transX = 0.0f;
+    m_transY = 0.0f;
+    m_transZ = 0.0f;
+    m_transO = 0.0f;
+
     m_objectType |= TYPE_PLAYER;
     m_objectTypeId = TYPEID_PLAYER;
 
@@ -191,6 +198,10 @@ Player::~Player ()
 
     delete info;
     delete PlayerTalkClass;
+
+    if (m_transport) {
+        m_transport->RemovePassenger(this);
+    }
 }
 
 bool Player::Create( uint32 guidlow, WorldPacket& data )
@@ -1141,7 +1152,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // prepering unsommon pet if lost (we must get pet before teleportation or will not find it later)
     Creature* pet = GetPet();
 
-    if(this->GetMapId() == mapid)
+    if ((this->GetMapId() == mapid) && (!m_transport))
     {
         // near teleport
         WorldPacket data;
@@ -1157,15 +1168,22 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         WorldPacket data;
         data.Initialize(SMSG_TRANSFER_PENDING);
         data << uint32(mapid);
+        if (m_transport) {
+            data << m_transport->GetEntry() << GetMapId();
+        }
         GetSession()->SendPacket(&data);
 
         data.Initialize(SMSG_NEW_WORLD);
-        data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
+        if (m_transport) {
+            data << (uint32)mapid << m_transX << m_transY << m_transZ << m_transO;
+        } else {
+            data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
+        }
         GetSession()->SendPacket( &data );
 
         SetMapId(mapid);
-        Relocate(x,y,z,orientation);
-        SetPosition(x,y,z,orientation);
+        Relocate(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
+        SetPosition(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
         SetDontMove(true);
         //SaveToDB();
 
@@ -2076,10 +2094,10 @@ void Player::_LoadSpellCooldowns()
                 continue;
 
             data << uint32(spell_id);
-            data << uint32((db_time-curTime)*1000);         // in m.secs 
+            data << uint32((db_time-curTime)*1000);         // in m.secs
 
             AddSpellCooldown(spell_id,db_time);
-            
+
             sLog.outDebug("Player (GUID: %u) spell %u cooldown loaded (%u secs).",GetGUIDLow(),spell_id,uint32(db_time-curTime));
         }
         while( result->NextRow() );
@@ -9824,8 +9842,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-    //                                             0      1       2         3      4      5      6       7            8            9            10    11            12         13       14             15         16       17          18          19          20           21            22                  23                  24
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time` FROM `character` WHERE `guid` = '%u'",guid);
+    //                                             0      1       2         3      4      5      6       7            8            9            10    11            12         13       14             15         16       17          18          19          20           21            22                  23                  24                  25         26         27         28         29
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
     {
@@ -9889,11 +9907,27 @@ bool Player::LoadFromDB( uint32 guid )
     m_createStats[STAT_STAMINA] = (float)info->stamina;
     m_createStats[STAT_STRENGTH] = (float)info->strength;
 
+    uint32 transGUID = fields[27].GetUInt32();
     m_positionX = fields[7].GetFloat();
     m_positionY = fields[8].GetFloat();
     m_positionZ = fields[9].GetFloat();
     m_mapId = fields[10].GetUInt32();
     m_orientation = fields[11].GetFloat();
+
+    if (transGUID != 0) {
+        m_transX = fields[23].GetFloat();
+        m_transY = fields[24].GetFloat();
+        m_transZ = fields[25].GetFloat();
+        m_transO = fields[26].GetFloat();
+
+        for (int i = 0; i < MapManager::Instance().m_Transports.size(); i++) {
+            if ((MapManager::Instance().m_Transports[i])->GetGUIDLow() == transGUID) {
+                m_transport = MapManager::Instance().m_Transports[i];
+                m_transport->AddPassenger(this);
+                m_mapId = m_transport->GetMapId();
+            }
+        }
+    }
 
     // since last logout (in seconds)
     uint32 time_diff = (time(NULL) - fields[21].GetUInt32());
@@ -10098,7 +10132,7 @@ void Player::_LoadInventory(uint32 timediff)
                     delete item;
                     continue;
                 }
-                
+
                 StoreItem(dest, item, true);
             }
             else if( IsEquipmentPos( dest ) )
@@ -10404,7 +10438,8 @@ void Player::SaveToDB()
     ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,"
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,"
-        "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`) VALUES ("
+        "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`) VALUES ("
         << GetGUIDLow() << ", "
         << realmID << ", "
         << GetSession()->GetAccountId() << ", '"
@@ -10458,6 +10493,20 @@ void Player::SaveToDB()
     ss << m_resetTalentsCost;
     ss << ", ";
     ss << (uint64)m_resetTalentsTime;
+
+    ss << ", ";
+    ss << m_transX;
+    ss << ", ";
+    ss << m_transY;
+    ss << ", ";
+    ss << m_transZ;
+    ss << ", ";
+    ss << m_transO;
+    ss << ", ";
+    if (m_transport)
+        ss << m_transport->GetGUIDLow();
+    else
+        ss << "0";
 
     ss << " )";
 

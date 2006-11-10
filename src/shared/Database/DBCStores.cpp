@@ -74,9 +74,12 @@ struct TaxiPathNodeEntry
 {
     uint32    path;
     uint32    index;
+    uint32    mapid;
     float     x;
     float     y;
     float     z;
+    uint32    actionFlag;
+    uint32    delay;
 };
 static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
 
@@ -174,7 +177,7 @@ void LoadDBCStores(std::string dataPath)
     // fill data
     for(uint32 i = 1; i <= sTaxiPathNodeStore.nCount; ++i)
         if(TaxiPathNodeEntry* entry = sTaxiPathNodeStore.LookupEntry(i))
-            sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->x,entry->y,entry->z);
+            sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->mapid,entry->x,entry->y,entry->z,entry->actionFlag,entry->delay);
     sTaxiPathNodeStore.Clear();
 
     LoadDBC(bar,bad_dbc_files,sWorldSafeLocsStore,       dataPath+"dbc/WorldSafeLocs.dbc");

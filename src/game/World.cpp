@@ -270,6 +270,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Initialize data stores...");
     LoadDBCStores(dataPath);
 
+    sLog.outString( "Loading Game Object Templates..." );
+    objmgr.LoadGameobjectInfo();
+
     sLog.outString( "Loading levelup stat gains..." );
     objmgr.LoadLvlUpGains();
 
@@ -295,15 +298,14 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
-
+    
     objmgr.SetHighestGuids();
 
     sLog.outString( "Loading Loot Tables..." );
     LoadLootTables();
 
-    sLog.outString( "Loading Game Object Templates..." );
-    objmgr.LoadGameobjectInfo();
-
+    
+    
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
         exit(1);
@@ -319,6 +321,9 @@ void World::SetInitialWorldSettings()
     MaNGOS::Game::Initialize();
     sLog.outString( "WORLD: SetInitialWorldSettings done" );
 
+    sLog.outString( "Loading Transports..." );
+    MapManager::Instance().LoadTransports();
+    
     sLog.outString( "WORLD: Starting Event System" );
     StartEventSystem();
 

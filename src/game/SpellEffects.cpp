@@ -1622,7 +1622,7 @@ void Spell::EffectDuel(uint32 i)
         m_caster->GetPositionX()+(unitTarget->GetPositionX()-m_caster->GetPositionX())/2 ,
         m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2 ,
         m_caster->GetPositionZ(),
-        m_caster->GetOrientation(), 0, 0, 0, 0))
+        m_caster->GetOrientation(), 0, 0, 0, 0, 0))
     {
         delete pGameObj;
         return;
@@ -2040,7 +2040,7 @@ void Spell::EffectSummonObject(uint32 i)
     float rot2 = sin(m_caster->GetOrientation()/2);
     float rot3 = cos(m_caster->GetOrientation()/2);
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, rot2, rot3))
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, rot2, rot3, 0))
     {
         delete pGameObj;
         return;
@@ -2317,7 +2317,7 @@ void Spell::EffectTransmitted(uint32 i)
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetMapId(),
-        fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0))
+        fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 0))
     {
         delete pGameObj;
         return;

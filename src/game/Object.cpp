@@ -30,6 +30,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Log.h"
+#include "Transports.h"
 
 using namespace std;
 
@@ -152,7 +153,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         case TYPEID_GAMEOBJECT:
         case TYPEID_DYNAMICOBJECT:
         {
-            if(GUID_HIPART(GetGUID())==HIGHGUID_PLAYER_CORPSE)
+            if ((GUID_HIPART(GetGUID())==HIGHGUID_PLAYER_CORPSE) || (GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT))
                 _BuildMovementUpdate( &buf, 0x52, 0x0 );
             else
                 _BuildMovementUpdate( &buf, 0x50, 0x0 );
@@ -161,7 +162,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         //case TYPEID_AREATRIGGER:
         //break;
         default:                                            //know type
-            sLog.outDetail("Unknow Object Type %u Create Update Block.\n", m_objectTypeId);
+            sLog.outDetail("Unknown Object Type %u Create Update Block.\n", m_objectTypeId);
             break;
     }
 
@@ -223,14 +224,38 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     *data << (uint8)flags;
     if( m_objectTypeId==TYPEID_PLAYER )
     {
+        if(((Player*)this)->GetTransport()) {
+            flags2 |= 0x02000000;
+        }
         *data << (uint32)flags2;
-        *data << (uint32)0xB74D85D1;
-        *data << (float)m_positionX;
-        *data << (float)m_positionY;
-        *data << (float)m_positionZ;
-        *data << (float)m_orientation;
+
+        *data << (uint32)getMSTime();
+        
+        if (!((Player *)this)->GetTransport()) {
+            *data << (float)m_positionX;
+            *data << (float)m_positionY;
+            *data << (float)m_positionZ;
+            *data << (float)m_orientation;
+        } else {
+            //*data << ((Player *)this)->m_transport->GetPositionX() + (float)((Player *)this)->m_transX;
+            //*data << ((Player *)this)->m_transport->GetPositionY() + (float)((Player *)this)->m_transY;
+            //*data << ((Player *)this)->m_transport->GetPositionZ() + (float)((Player *)this)->m_transZ;
+
+            *data << ((Player *)this)->GetTransport()->GetPositionX();
+            *data << ((Player *)this)->GetTransport()->GetPositionY();
+            *data << ((Player *)this)->GetTransport()->GetPositionZ();
+            *data << ((Player *)this)->GetTransport()->GetOrientation();
+        
+            *data << (uint64)(((Player *)this)->GetTransport()->GetGUID());
+            *data << ((Player *)this)->GetTransOffsetX();
+            *data << ((Player *)this)->GetTransOffsetY();
+            *data << ((Player *)this)->GetTransOffsetZ();
+            *data << ((Player *)this)->GetTransOffsetO();
+        }
+        
         *data << (float)0;
-        if(flags2 == 0x2000)                                //update self
+
+        if(flags2 & 0x2000)                                //update self
         {
             *data << (float)0;
             *data << (float)1.0;
@@ -277,13 +302,28 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     }
     if( (m_objectTypeId==TYPEID_CORPSE) || (m_objectTypeId==TYPEID_GAMEOBJECT) || (m_objectTypeId==TYPEID_DYNAMICOBJECT))
     {
-        *data << (float)m_positionX;
-        *data << (float)m_positionY;
-        *data << (float)m_positionZ;
+        if(GUID_HIPART(GetGUID()) != HIGHGUID_TRANSPORT) {
+            *data << (float)m_positionX;
+            *data << (float)m_positionY;
+            *data << (float)m_positionZ;
+        } else {
+            *data << (uint32)0;
+            *data << (uint32)0;
+            *data << (uint32)0;
+        }
         *data << (float)m_orientation;
+        printf("\n\n%f %f %f %f\n\n", m_positionX, m_positionY, m_positionZ, m_orientation);
     }
 
-    *data << (uint32)0x6297848C;
+    *data << (uint32)0x1;
+
+    if ((GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT)) {
+        //*data << (uint32)getMSTime();
+        /*Transport *tp = ((Transport*)this);
+        uint32 updateTime = tp->m_nextNodeTime - (getMSTime() - tp->m_lastMovement) + 3000;*/
+        uint32 updT = (uint32)getMSTime();
+        *data << (uint32)updT; //updateTime;
+    }
 
     if(  GUID_HIPART(GetGUID()) == HIGHGUID_PLAYER_CORPSE)
         *data << (uint32)0xBD38BA14;                        //fix me

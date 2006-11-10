@@ -234,6 +234,7 @@ class ChatHandler
         bool HandleMod32Value(const char* args);
         bool HandleSendMailNotice(const char* args);
         bool HandleQueryNextMailTime(const char * args);
+        bool HandleOutOfRange(const char * args);
 
         Player*   getSelectedPlayer();
         Creature* getSelectedCreature();

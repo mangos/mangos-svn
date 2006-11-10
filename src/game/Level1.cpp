@@ -30,6 +30,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "RedZoneDistrict.h"
+#include "Transports.h"
 
 bool ChatHandler::HandleAnnounceCommand(const char* args)
 {
@@ -247,7 +248,7 @@ bool ChatHandler::HandleRecallCommand(const char* args)
         m_session->GetPlayer()->TeleportTo(1, -1196.22f, 29.0941f, 176.949f,0.0f);
     else if (strncmp((char*)args,"cross",6)==0)
         m_session->GetPlayer()->TeleportTo(1, -443.128f, -2598.87f, 96.2114f,0.0f);
-    else if (strncmp((char*)args,"ogri",5)==0)
+    else if (strncmp((char*)args,"orgr",5)==0)
         m_session->GetPlayer()->TeleportTo(1, 1676.21f, -4315.29f, 61.5293f,0.0f);
     else if (strncmp((char*)args,"neth",5)==0)
         m_session->GetPlayer()->TeleportTo(0, -10996.9f, -3427.67f, 61.996f,0.0f);
@@ -259,10 +260,12 @@ bool ChatHandler::HandleRecallCommand(const char* args)
         m_session->GetPlayer()->TeleportTo(0, -4981.25f, -881.542f, 501.66f,0.0f);
     else if (strncmp((char*)args,"under",6)==0)
         m_session->GetPlayer()->TeleportTo(0, 1586.48f, 239.562f, -52.149f,0.0f);
-    else if (strncmp((char*)args,"darr",5)==0)
+    else if (strncmp((char*)args,"darn",5)==0)
         m_session->GetPlayer()->TeleportTo(1, 10037.6f, 2496.8f, 1318.4f,0.0f);
     else if (strncmp((char*)args,"gm",5)==0)
         m_session->GetPlayer()->TeleportTo(1, 16202.5, 16205, 1,1.15);
+    else if (strncmp((char*)args,"g",2)==0)
+        m_session->GetPlayer()->TeleportTo(1, 1335.3f, -4646.8f, 53.54f, 3.6909f);
     else
         return false;
 

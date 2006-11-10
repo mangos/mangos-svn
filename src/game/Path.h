@@ -26,7 +26,10 @@ class Path
     public:
         struct PathNode
         {
+            uint32 mapid;
             float x,y,z;
+            uint32 actionFlag;
+            uint32 delay;
         };
 
         inline void SetLength(const unsigned int sz)

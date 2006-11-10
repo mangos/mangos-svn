@@ -1415,7 +1415,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     float o = chr->GetOrientation();
 
     GameObject* pGameObj = new GameObject();
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0, 0))
     {
         delete pGameObj;
         return false;
@@ -1533,7 +1533,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     GameObject* pGameObj = new GameObject();
     uint32 lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-    if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, rot2, rot3))
+    if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, rot2, rot3, 0))
     {
         delete pGameObj;
         return false;
@@ -2703,5 +2703,27 @@ bool ChatHandler::HandleShutDownCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleOutOfRange(const char* args) {
+    char* plowguid = strtok((char*)args, " ");
+
+    if(!plowguid)
+        return false;
+
+    uint32 lowguid = (uint32)atoi(plowguid);
+
+    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+
+    if(!obj)
+    {
+        PSendSysMessage("Game Object (GUID: %u) not found", lowguid);
+        return true;
+    }
+
+    m_session->GetPlayer()->SendOutOfRange(obj);
+
+    return true;
+}
+
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false
+

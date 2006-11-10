@@ -167,6 +167,11 @@ CREATE TABLE `character` (
   `rest_bonus` FLOAT NOT NULL DEFAULT '0',
   `resettalents_cost` int(11) unsigned NOT NULL default '0',
   `resettalents_time` bigint(20) unsigned NOT NULL default '0',
+  `trans_x` float NOT NULL default '0',
+  `trans_y` float NOT NULL default '0',
+  `trans_z` float NOT NULL default '0',
+  `trans_o` float NOT NULL default '0',
+  `transguid` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
@@ -1014,6 +1019,7 @@ CREATE TABLE `gameobject` (
   `rotation3` float NOT NULL default '0',
   `loot` int(11) unsigned NOT NULL default '0',
   `respawntimer` int(11) unsigned NOT NULL default '0',
+  `animprogress` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
 
