@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,7 @@
 #include "Map.h"
 #include "GridNotifiersImpl.h"
 #include "Config/ConfigEnv.h"
+#include "Transports.h"
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
@@ -1058,3 +1059,4 @@ template DynamicObject* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl)
 template DynamicObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
 template Corpse* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
 template Corpse* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
+>>>>>>> .r2620

@@ -23,6 +23,8 @@
 #include "Item.h"
 #include "Utilities.h"
 #include "Map.h"
+#include "MapManager.h"
+#include "Transports.h"
 
 using namespace MaNGOS;
 
@@ -55,11 +57,27 @@ PlayerNotifier::BuildForMySelf()
     {
         WorldPacket packet;
         UpdateData data;
+        
+        Transport *t = i_player.GetTransport();
+        if (t) {
+            t->BuildCreateUpdateBlockForPlayer(&data, &i_player);
+        }
+
         sLog.outDetail("Creating player data for himself %u", i_player.GetGUIDLow());
         i_player.BuildCreateUpdateBlockForPlayer(&data, &i_player);
         data.BuildPacket(&packet);
         i_player.GetSession()->SendPacket(&packet);
         i_player.AddToWorld();
+
+        // Hack to send out transports
+        WorldPacket packet2;
+        UpdateData transData;
+        for (int i = 0; i < MapManager::Instance().m_Transports.size(); i++) {
+            Transport *t = MapManager::Instance().m_Transports[i];
+            t->BuildCreateUpdateBlockForPlayer(&transData, &i_player);
+        }
+        transData.BuildPacket(&packet2);
+        i_player.GetSession()->SendPacket(&packet2);
     }
 }
 

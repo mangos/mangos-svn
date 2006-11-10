@@ -37,5 +37,5 @@ const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxx";
 const char TalentEntryfmt[]="niiiiiiiixxxxixxixxxx";
 const char TaxiNodesEntryfmt[]="nifffsxxxxxxxxii";
 const char TaxiPathEntryfmt[]="niii";
-const char TaxiPathNodeEntryfmt[]="diixfffxx";
+const char TaxiPathNodeEntryfmt[]="diiifffii";
 const char WorldSafeLocsEntryfmt[]="nifffxxxxxxxxx";

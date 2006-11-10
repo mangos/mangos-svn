@@ -24,6 +24,7 @@
 #include "zthread/Mutex.h"
 #include "Common.h"
 #include "Map.h"
+class Transport;
 
 class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex> >
 {
@@ -61,6 +62,11 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         static bool ExistMAP(int mapid, float x, float y);
 
         void MoveAllCreaturesInMoveList();
+
+        void LoadTransports();
+
+        vector<Transport *> m_Transports;
+        
     private:
         MapManager();
         ~MapManager();

@@ -31,6 +31,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "Transports.h"
 
 GameObject::GameObject() : Object()
 {
@@ -63,7 +64,7 @@ GameObject::~GameObject()
     }
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress)
 {
     m_positionX = x;
     m_positionY = y;
@@ -93,6 +94,12 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     SetFloatValue(GAMEOBJECT_POS_Y, y);
     SetFloatValue(GAMEOBJECT_POS_Z, z);
     SetFloatValue(GAMEOBJECT_FACING, ang);                  //this is not facing angle
+    
+    SetFloatValue (GAMEOBJECT_ROTATION, rotation0);
+    SetFloatValue (GAMEOBJECT_ROTATION+1, rotation1);
+    SetFloatValue (GAMEOBJECT_ROTATION+2, rotation2);
+    SetFloatValue (GAMEOBJECT_ROTATION+3, rotation3);
+
     SetFloatValue(OBJECT_FIELD_SCALE_X, goinfo->size);
 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
@@ -106,15 +113,17 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     SetUInt32Value (GAMEOBJECT_STATE, 1);
     SetUInt32Value (GAMEOBJECT_TYPE_ID, goinfo->type);
 
-    SetFloatValue (GAMEOBJECT_ROTATION, rotation0);
-    SetFloatValue (GAMEOBJECT_ROTATION+1, rotation1);
-    SetFloatValue (GAMEOBJECT_ROTATION+2, rotation2);
-    SetFloatValue (GAMEOBJECT_ROTATION+3, rotation3);
+    SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
     return true;
 }
 
 void GameObject::Update(uint32 p_time)
 {
+    if (GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT) {
+        //((Transport*)this)->Update(p_time);
+        return;
+    }
+
     WorldPacket     data;
 
     switch (m_lootState)
@@ -250,7 +259,7 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
-        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer` FROM `gameobject` WHERE `guid` = '%u'", guid);
+        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer`,`guid`,`animprogress` FROM `gameobject` WHERE `guid` = '%u'", guid);
 
     if( !result )
     {
@@ -270,8 +279,10 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
     float rotation1 = fields[7].GetFloat();
     float rotation2 = fields[8].GetFloat();
     float rotation3 = fields[9].GetFloat();
-
-    if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
+    
+    uint32 animprogress = fields[13].GetUInt32();
+    
+    if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress) )
     {
         if (!external) delete result;
         return false;
@@ -347,9 +358,10 @@ void GameObject::_LoadQuests()
 
 bool GameObject::IsTransport() const
 {
-    GameObjectInfo const * gInfo = GetGOInfo();
+    /*GameObjectInfo const * gInfo = GetGOInfo();
     if(!gInfo) return false;
-    return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
+    return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;*/
+    return false;
 }
 
 Unit* GameObject::GetOwner() const

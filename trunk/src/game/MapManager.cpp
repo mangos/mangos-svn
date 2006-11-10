@@ -23,6 +23,7 @@
 #include "ObjectAccessor.h"
 #include "FlightMaster.h"
 #include "RedZoneDistrict.h"
+#include "Transports.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
@@ -55,6 +56,9 @@ MapManager::~MapManager()
 {
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
         delete iter->second;
+
+    for(int i = 0; i < m_Transports.size(); i++)
+        delete m_Transports[i];
 
     sDatabase.PExecute("TRUNCATE table `creature_grid`");
     sDatabase.PExecute("TRUNCATE table `gameobject_grid`");
@@ -107,6 +111,9 @@ MapManager::Update(time_t diff)
 
     ObjectAccessor::Instance().Update(i_timer.GetCurrent());
     FlightMaster::Instance().FlightReportUpdate(i_timer.GetCurrent());
+    for (vector<Transport*>::iterator iter = m_Transports.begin(); iter != m_Transports.end(); iter++)
+        (*iter)->Update(i_timer.GetCurrent());
+
     i_timer.SetCurrent(0);
 }
 

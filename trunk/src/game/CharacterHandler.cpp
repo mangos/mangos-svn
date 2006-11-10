@@ -31,6 +31,7 @@
 #include "Auth/md5.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
+#include "Transports.h"
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
@@ -498,6 +499,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
     sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
+
+    if (pCurrChar->m_transport) {
+        pCurrChar->TeleportTo(pCurrChar->m_transport->GetMapId(), pCurrChar->m_transport->GetPositionX(), pCurrChar->m_transport->GetPositionY(), pCurrChar->m_transport->GetPositionZ(), pCurrChar->m_transport->GetOrientation(), true);
+    }
+
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
