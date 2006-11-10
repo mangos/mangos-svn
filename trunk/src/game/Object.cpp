@@ -312,17 +312,13 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << (uint32)0;
         }
         *data << (float)m_orientation;
-        printf("\n\n%f %f %f %f\n\n", m_positionX, m_positionY, m_positionZ, m_orientation);
     }
 
     *data << (uint32)0x1;
 
     if ((GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT)) {
-        //*data << (uint32)getMSTime();
-        /*Transport *tp = ((Transport*)this);
-        uint32 updateTime = tp->m_nextNodeTime - (getMSTime() - tp->m_lastMovement) + 3000;*/
         uint32 updT = (uint32)getMSTime();
-        *data << (uint32)updT; //updateTime;
+        *data << (uint32)updT;
     }
 
     if(  GUID_HIPART(GetGUID()) == HIGHGUID_PLAYER_CORPSE)
