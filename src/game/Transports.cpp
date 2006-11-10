@@ -110,27 +110,27 @@ bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, 
     return true;
 }
 
+struct keyFrame {
+    keyFrame(float _x, float _y, float _z, int _mapid, int _actionflag, int _delay)
+    { x = _x; y = _y; z = _z; mapid = _mapid; actionflag = _actionflag; delay = _delay; distFromPrev = -1; distSinceStop = -1; distUntilStop = -1; 
+      tFrom = 0; tTo = 0;}
+
+    float x;
+    float y;
+    float z;
+    int mapid;
+    int actionflag;
+    int delay;
+    float distSinceStop;
+    float distUntilStop;
+    float distFromPrev;
+    float tFrom, tTo;
+};
+
 void Transport::GenerateWaypoints(uint32 pathid)
 {
     Path path;   
     objmgr.GetTaxiPathNodes(pathid, path);
-    
-    struct keyFrame {
-        keyFrame(float _x, float _y, float _z, int _mapid, int _actionflag, int _delay)
-        { x = _x; y = _y; z = _z; mapid = _mapid; actionflag = _actionflag; delay = _delay; distFromPrev = -1; distSinceStop = -1; distUntilStop = -1; 
-          tFrom = 0; tTo = 0;}
-
-        float x;
-        float y;
-        float z;
-        int mapid;
-        int actionflag;
-        int delay;
-        float distSinceStop;
-        float distUntilStop;
-        float distFromPrev;
-        float tFrom, tTo;
-    };
 
     vector<keyFrame> keyFrames;
     int mapChange = 0;
@@ -301,8 +301,7 @@ void Transport::GenerateWaypoints(uint32 pathid)
     m_curr = GetNextWayPoint();
     m_next = GetNextWayPoint();
     m_pathTime = timer;
-    m_timer = getMSTime() % 295579;
-
+    
     m_lastMovement = getMSTime();
     m_nextNodeTime = m_curr->first;
 
@@ -366,7 +365,6 @@ bool Transport::RemovePassenger(Player* passenger) {
 
 
 void Transport::Update(uint32 p_time) {
-    //m_timer = (m_timer + p_time) % m_pathTime;
     if (m_WayPoints.size() <= 1)
         return;
 
