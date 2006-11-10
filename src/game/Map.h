@@ -110,8 +110,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void CreatureRelocation(Creature *creature, float x, float y, float, float);
 
-        void GameobjectRelocation(GameObject *go, float x, float y, float, float);
-
         template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
         void SetTimer(uint32 t)
