@@ -28,6 +28,9 @@ void Database::ThreadEnd()
 
 void Database::escape_string(std::string& str)
 {
+    if(str.size()==0)
+        return;
+
     char* buf = new char[str.size()*2+1];
     escape_string(buf,str.c_str(),str.size());
     str = buf;

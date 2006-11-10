@@ -1188,9 +1188,13 @@ void Spell::SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage,
 
 void Spell::SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal)
 {
+    Pet* pet = target->GetPet();
+    if(!pet)
+        return;
+
     WorldPacket data;
     data.Initialize(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE);
-    data.append(target->GetPackGUID());
+    data.append(pet->GetPackGUID());
     data.append(m_caster->GetPackGUID());
     data << SpellID;
     data << Damage;
