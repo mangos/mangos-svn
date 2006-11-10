@@ -111,14 +111,14 @@ bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, 
 }
 
 struct keyFrame {
-    keyFrame(float _x, float _y, float _z, int _mapid, int _actionflag, int _delay)
+    keyFrame(float _x, float _y, float _z, uint32 _mapid, int _actionflag, int _delay)
     { x = _x; y = _y; z = _z; mapid = _mapid; actionflag = _actionflag; delay = _delay; distFromPrev = -1; distSinceStop = -1; distUntilStop = -1; 
       tFrom = 0; tTo = 0;}
 
     float x;
     float y;
     float z;
-    int mapid;
+    uint32 mapid;
     int actionflag;
     int delay;
     float distSinceStop;

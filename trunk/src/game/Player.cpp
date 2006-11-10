@@ -9907,7 +9907,7 @@ bool Player::LoadFromDB( uint32 guid )
     m_createStats[STAT_STAMINA] = (float)info->stamina;
     m_createStats[STAT_STRENGTH] = (float)info->strength;
 
-    uint32 transGUID = fields[27].GetUInt32();
+    uint32 transGUID = fields[29].GetUInt32();
     m_positionX = fields[7].GetFloat();
     m_positionY = fields[8].GetFloat();
     m_positionZ = fields[9].GetFloat();
@@ -9915,13 +9915,14 @@ bool Player::LoadFromDB( uint32 guid )
     m_orientation = fields[11].GetFloat();
 
     if (transGUID != 0) {
-        m_transX = fields[23].GetFloat();
-        m_transY = fields[24].GetFloat();
-        m_transZ = fields[25].GetFloat();
-        m_transO = fields[26].GetFloat();
+        m_transX = fields[25].GetFloat();
+        m_transY = fields[26].GetFloat();
+        m_transZ = fields[27].GetFloat();
+        m_transO = fields[28].GetFloat();
 
         for (int i = 0; i < MapManager::Instance().m_Transports.size(); i++) {
-            if ((MapManager::Instance().m_Transports[i])->GetGUIDLow() == transGUID) {
+            if ((MapManager::Instance().m_Transports[i])->GetGUIDLow() == transGUID)
+            {
                 m_transport = MapManager::Instance().m_Transports[i];
                 m_transport->AddPassenger(this);
                 m_mapId = m_transport->GetMapId();
