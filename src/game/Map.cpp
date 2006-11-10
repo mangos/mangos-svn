@@ -1059,4 +1059,4 @@ template DynamicObject* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl)
 template DynamicObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
 template Corpse* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
 template Corpse* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
->>>>>>> .r2620
+
