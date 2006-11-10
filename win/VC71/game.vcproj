@@ -383,6 +383,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\Transports.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Transports.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\UpdateData.cpp"
 				>
 			</File>
