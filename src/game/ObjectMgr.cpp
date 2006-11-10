@@ -28,6 +28,7 @@
 #include "WorldSession.h"
 #include "Group.h"
 #include "Guild.h"
+#include "Transports.h"
 #include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
 
@@ -776,6 +777,24 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team  )
 }
 
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
+{
+    if(path >= sTaxiPathNodesByPath.size())
+        return;
+
+    TaxiPathNodeList& nodeList = sTaxiPathNodesByPath[path];
+
+    pathnodes.Resize(nodeList.size());
+
+    unsigned int i = 0;
+    for(int i = 0; i < nodeList.size(); ++i)
+    {
+        pathnodes[ i ].x = nodeList[i].x;
+        pathnodes[ i ].y = nodeList[i].y;
+        pathnodes[ i ].z = nodeList[i].z;
+    }
+}
+
+void ObjectMgr::GetTransportPathNodes( uint32 path, TransportPath &pathnodes )
 {
     if(path >= sTaxiPathNodesByPath.size())
         return;
