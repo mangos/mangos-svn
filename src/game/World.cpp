@@ -363,7 +363,7 @@ void World::Update(time_t diff)
                 // Auction Expired!
                 if (itr->second->bidder == 0)               // if noone bidded auction...
                 {
-                    Item *it = objmgr.GetAItem(itr->second->item);
+                    Item *it = objmgr.GetAItem(itr->second->item_guidlow);
                     if(it)
                     {
                         uint64 plGuid = itr->second->owner;
@@ -376,7 +376,7 @@ void World::Update(time_t diff)
 
                         std::ostringstream msgAuctionExpiredSubject;
                         msgAuctionExpiredSubject << "Auction Expired: ";
-                        Item *theitem = objmgr.GetAItem(itr->second->item);
+                        Item *theitem = objmgr.GetAItem(itr->second->item_guidlow);
                         if (theitem)
                         {
                             ItemPrototype const *theitemproto = theitem->GetProto();
@@ -387,7 +387,8 @@ void World::Update(time_t diff)
 
                         m->subject = msgAuctionExpiredSubject.str().c_str();
                         m->body = "";
-                        m->item = itr->second->item;
+                        m->item_guidlow = itr->second->item_guidlow;
+                        m->item_id = itr->second->item_id;
                         m->time = time(NULL) + (29 * DAY);
                         m->money = 0;
                         m->COD = 0;                         // there might be deposit
@@ -405,18 +406,18 @@ void World::Update(time_t diff)
                         sDatabase.escape_string(subject);
 
                         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, 0, 0, 0);
+                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
+                            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, 0, 0, 0);
 
                         delete m;
                     }
                     else
-                        sLog.outError("Auction item %u not found, and lost.",itr->second->item);
+                        sLog.outError("Auction item (GUID: %u) not found, and lost.",itr->second->item_guidlow);
 
                     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
 
-                    objmgr.RemoveAItem(itr->second->item);
+                    objmgr.RemoveAItem(itr->second->item_guidlow);
                     objmgr.RemoveAuction(itr->second->Id);
                 }
                 else
@@ -431,7 +432,7 @@ void World::Update(time_t diff)
                     msgAuctionSuccessfullSubject << "Auction successfull: ";
                     msgAuctionSuccessfullBody << "Item Sold: ";
 
-                    Item *theitem = objmgr.GetAItem(itr->second->item);
+                    Item *theitem = objmgr.GetAItem(itr->second->item_guidlow);
                     if (theitem)
                     {
                         ItemPrototype const *theitemproto = theitem->GetProto();
@@ -466,7 +467,8 @@ void World::Update(time_t diff)
                     }
                     m->subject = msgAuctionSuccessfullSubject.str().c_str();
                     m->body = msgAuctionSuccessfullBody.str().c_str();
-                    m->item = 0;
+                    m->item_guidlow = 0;
+                    m->item_id = 0;
                     m->time = time(NULL) + (29 * DAY);
                     m->money = itr->second->bid;
                     m->COD = 0;
@@ -480,9 +482,9 @@ void World::Update(time_t diff)
                         sDatabase.escape_string(subject);
 
                         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
+                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
+                            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, m->money, 0, 0);
                     }
 
                     Player *rpl = objmgr.GetPlayer(MAKE_GUID(m->receiver,HIGHGUID_PLAYER));
@@ -499,13 +501,14 @@ void World::Update(time_t diff)
                     mn->receiver = itr->second->bidder;
                     mn->subject = "Your won an item!";
                     mn->body = "";
-                    mn->item = itr->second->item;
+                    mn->item_guidlow = itr->second->item_guidlow;
+                    mn->item_id = itr->second->item_id;
                     mn->time = time(NULL) + (29 * 3600);
                     mn->money = 0;
                     mn->COD = 0;
                     mn->checked = 0;
 
-                    Item *it = objmgr.GetAItem(itr->second->item);
+                    Item *it = objmgr.GetAItem(itr->second->item_guidlow);
 
                     {
                         //escape apostrophes
@@ -515,9 +518,9 @@ void World::Update(time_t diff)
                         sDatabase.escape_string(subject);
 
                         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn->messageID);
-                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                            mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item, (uint64)mn->time, 0, 0, 0);
+                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`, `item_template`, `time`,`money`,`cod`,`checked`) "
+                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
+                            mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item_guidlow, mn->item_id, (uint64)mn->time, 0, 0, 0);
                     }
 
                     Player *rpl1 = objmgr.GetPlayer(MAKE_GUID(mn->receiver,HIGHGUID_PLAYER));
@@ -531,7 +534,7 @@ void World::Update(time_t diff)
 
                     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
 
-                    objmgr.RemoveAItem(itr->second->item);
+                    objmgr.RemoveAItem(itr->second->item_guidlow);
                     objmgr.RemoveAuction(itr->second->Id);
                 }
             }
