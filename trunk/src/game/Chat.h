@@ -226,6 +226,8 @@ class ChatHandler
         bool HandleTicketCommand(const char* args);
         bool HandleDelTicketCommand(const char* args);
         bool HandleMaxSkillCommand(const char* args);
+        bool HandleLookupSkillCommand(const char* args);
+        bool HandleLookupMobCommand(const char* args);
 
         //! Development Commands
         bool HandleSetValue(const char* args);
