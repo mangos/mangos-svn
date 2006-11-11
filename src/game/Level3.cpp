@@ -1591,7 +1591,7 @@ bool ChatHandler::HandleDieCommand(const char* args)
     if( target->isAlive() )
     {
         uint32 health = target->GetHealth();
-        m_session->GetPlayer()->DealDamage(target, target->GetHealth(), 0, false);
+        m_session->GetPlayer()->DealDamage(target, target->GetHealth(), DIRECT_DAMAGE, 0, false);
     }
 
     return true;
@@ -2736,4 +2736,5 @@ bool ChatHandler::HandleOutOfRange(const char* args) {
 
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false
+
 

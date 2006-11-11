@@ -194,7 +194,7 @@ void Spell::EffectInstaKill(uint32 i)
     if( unitTarget && unitTarget->isAlive() )
     {
         uint32 health = unitTarget->GetHealth();
-        m_caster->DealDamage(unitTarget, health, 0, false);
+        m_caster->DealDamage(unitTarget, health, DIRECT_DAMAGE, 0, false);
     }
 }
 
@@ -401,7 +401,7 @@ void Spell::EffectApplyAura(uint32 i)
 
     Aura* Aur = new Aura(m_spellInfo, i, unitTarget,m_caster, m_CastItem);
 
-    if (!Aur->IsPositive() && Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
+    if (!Aur->IsPositive())
     {
         switch (Aur->GetModifier()->m_auraname)
         {
@@ -409,7 +409,14 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_AURAS_VISIBLE:
                 break;
             default:
-                ((Creature*)Aur->GetTarget())->AI().AttackStart(m_caster);
+                if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
+                    ((Creature*)Aur->GetTarget())->AI().AttackStart(m_caster);
+                else
+                {
+                    m_caster->Attack(Aur->GetTarget());
+                    m_caster->GetInCombatState();
+                    Aur->GetTarget()->GetInCombatState();
+                }
         }
     }
 
@@ -1421,6 +1428,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
     uint32 procflag = 0;
+    bool criticalhit = false;
 
     m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
@@ -1436,8 +1444,11 @@ void Spell::EffectWeaponDmg(uint32 i)
     if (hitInfo & nohitMask)
         m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, m_spellInfo->School, damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
 
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, true, blocked_dmg);
-    m_caster->DealDamage(unitTarget, damage, 0, true);
+    if(hitInfo & HITINFO_CRITICALHIT)
+        criticalhit = true;
+
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
+    m_caster->DealDamage(unitTarget, damage, SPELL_DIRECT_DAMAGE, 0, true);
 
     // take ammo
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
