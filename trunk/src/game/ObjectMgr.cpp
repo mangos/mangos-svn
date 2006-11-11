@@ -306,7 +306,7 @@ void ObjectMgr::LoadAuctions()
     if(!AuctionCount)
         return;
 
-    result = sDatabase.Query( "SELECT `id`,`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`location` FROM `auctionhouse`" );
+    result = sDatabase.Query( "SELECT `id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`location` FROM `auctionhouse`" );
 
     if( !result )
         return;
@@ -324,13 +324,14 @@ void ObjectMgr::LoadAuctions()
         aItem = new AuctionEntry;
         aItem->Id = fields[0].GetUInt32();
         aItem->auctioneer = fields[1].GetUInt32();
-        aItem->item = fields[2].GetUInt32();
-        aItem->owner = fields[3].GetUInt32();
-        aItem->buyout = fields[4].GetUInt32();
-        aItem->time = fields[5].GetUInt32();
-        aItem->bidder = fields[6].GetUInt32();
-        aItem->bid = fields[7].GetUInt32();
-        aItem->location = fields[8].GetUInt8();
+        aItem->item_guidlow = fields[2].GetUInt32();
+        aItem->item_id = fields[3].GetUInt32();
+        aItem->owner = fields[4].GetUInt32();
+        aItem->buyout = fields[5].GetUInt32();
+        aItem->time = fields[6].GetUInt32();
+        aItem->bidder = fields[7].GetUInt32();
+        aItem->bid = fields[8].GetUInt32();
+        aItem->location = fields[9].GetUInt8();
 
         AddAuction(aItem);
     } while (result->NextRow());
@@ -350,16 +351,29 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadAuctionItems()
 {
-    QueryResult *result = sDatabase.Query( "SELECT `itemguid` FROM `auctionhouse`" );
+    QueryResult *result = sDatabase.Query( "SELECT `itemguid`,`item_template` FROM `auctionhouse`" );
 
     if( !result )
         return;
+
     Field *fields;
     do
     {
         fields = result->Fetch();
-        Item* item = new Item;
-        if(!item->LoadFromDB(fields[0].GetUInt32(),0))
+        uint32 item_guid = fields[0].GetUInt32();
+        uint32 item_id   = fields[1].GetUInt32();
+
+        ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
+
+        if(!proto)
+        {
+            sLog.outError( "ObjectMgr::LoadAuctionItems: Unknown item (GUID: %u id: #%u) in auction, skipped.", item_guid,item_id);
+            continue;
+        }
+
+        Item *item = NewItemOrBag(proto);
+
+        if(!item->LoadFromDB(item_guid,0))
         {
             delete item;
             continue;

@@ -36,7 +36,8 @@ struct Mail
     uint32 receiver;
     std::string subject;
     std::string body;
-    uint32 item;
+    uint32 item_guidlow;
+    uint32 item_id;
     time_t time;
     uint32 money;
     uint32 COD;

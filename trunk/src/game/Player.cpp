@@ -10168,7 +10168,7 @@ void Player::_LoadInventory(uint32 timediff)
 // load mailed items which should receive current player
 void Player::_LoadMailedItems()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT `item` FROM `mail` WHERE `receiver` = '%u' AND `item` > 0", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery( "SELECT `item`,`item_template` FROM `mail` WHERE `receiver` = '%u' AND `item` > 0", GetGUIDLow());
 
     if( !result )
         return;
@@ -10177,8 +10177,19 @@ void Player::_LoadMailedItems()
     do
     {
         fields = result->Fetch();
-        Item* item = new Item;
-        if(!item->LoadFromDB(fields[0].GetUInt32(), 0))
+        uint32 item_guid = fields[0].GetUInt32();
+        uint32 item_id   = fields[1].GetUInt32();
+
+        ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
+
+        if(!proto)
+        {
+            sLog.outError( "Bag::LoadFromDB: Player %d have unknown item (GUID: %u id: #%u) in mail, skipped.", GetGUIDLow(), item_guid, item_id);
+            continue;
+        }
+
+        Item *item = NewItemOrBag(proto);
+        if(!item->LoadFromDB(item_guid, 0))
         {
             delete item;
             continue;
@@ -10205,7 +10216,7 @@ void Player::_LoadMail()
 
     m_mail.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -10218,11 +10229,12 @@ void Player::_LoadMail()
             be->receiver = fields[2].GetUInt32();
             be->subject = fields[3].GetCppString();
             be->body = fields[4].GetCppString();
-            be->item = fields[5].GetUInt32();
-            be->time = fields[6].GetUInt32();
-            be->money = fields[7].GetUInt32();
-            be->COD = fields[8].GetUInt32();
-            be->checked = fields[9].GetUInt32();
+            be->item_guidlow = fields[5].GetUInt32();
+            be->item_id = fields[6].GetUInt32();
+            be->time = fields[7].GetUInt32();
+            be->money = fields[8].GetUInt32();
+            be->COD = fields[9].GetUInt32();
+            be->checked = fields[10].GetUInt32();
             m_mail.push_back(be);
         }
         while( result->NextRow() );
@@ -10607,9 +10619,9 @@ void Player::_SaveMail()
         sDatabase.escape_string(body);
         sDatabase.escape_string(subject);
 
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, m->COD, m->checked);
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
+            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, m->money, m->COD, m->checked);
     }
     m_mailsUpdated = false;
 }

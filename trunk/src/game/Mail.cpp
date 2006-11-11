@@ -144,7 +144,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->receiver = GUID_LOPART(rc);
         m->subject = subject;
         m->body = body;
-        m->item = GUID_LOPART(item);
+        m->item_guidlow = GUID_LOPART(item);
+        m->item_id = it->GetEntry();
         m->time = etime;
         m->money = money;
         m->COD = COD;
@@ -160,9 +161,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     sDatabase.escape_string(subject);
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-        mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (uint64)etime, money, COD, 0);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
+        mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), it->GetEntry(), (uint64)etime, money, COD, 0);
 }
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
@@ -196,7 +197,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
     Mail *m = pl->GetMail(message);
     if(m)
     {
-        if (m->item > 0)
+        if (m->item_guidlow > 0)
             return;
         //there's no need to delete item from DB, client won't allow to delete mail, when it has an item
         sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
@@ -232,11 +233,11 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     Player *receive = objmgr.GetPlayer(rc);
     if(receive)
     {
-        if (m->item)
+        if (m->item_guidlow)
         {
-            Item *pItem = pl->GetMItem(m->item);
+            Item *pItem = pl->GetMItem(m->item_guidlow);
             receive->AddMItem(pItem);
-            pl->RemoveMItem(m->item);
+            pl->RemoveMItem(m->item_guidlow);
         }
         receive->AddMail(m);
     }
@@ -257,9 +258,9 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     sDatabase.escape_string(subject);
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", message);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u','%u', '%s', '%s', '%u','" I64FMTD "','%u','%u','%u')",
-        m->messageID, pl->GetGUIDLow(), m->receiver, subject.c_str(), body.c_str(), m->item, (uint64)m->time, m->money, 0, 0);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`, `time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%u','%u', '%s', '%s', '%u', '%u', '" I64FMTD "','%u','%u','%u')",
+        m->messageID, pl->GetGUIDLow(), m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, m->money, 0, 0);
 
     pl->RemoveMail(message);
 }
@@ -278,12 +279,13 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     if (!m)
         return;
 
-    Item *it = pl->GetMItem(m->item);
+    Item *it = pl->GetMItem(m->item_guidlow);
 
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
     if( msg == EQUIP_ERR_OK )
     {
-        m->item = 0;
+        m->item_guidlow = 0;
+        m->item_id = 0;
 
         if (m->COD > 0)
         {
@@ -293,7 +295,8 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             mn->receiver = m->sender;
             mn->subject = m->subject;
             mn->body = "Your item sold, player paid a COD";
-            mn->item = 0;
+            mn->item_guidlow = 0;
+            mn->item_id = 0;
             mn->time = time(NULL) + (30 * DAY);
             mn->money = m->COD;
             mn->COD = 0;
@@ -311,9 +314,9 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             sDatabase.escape_string(subject);
 
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mn->messageID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), 0, (uint64)mn->time, mn->money, 0, 0);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
+                "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
+                mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item_guidlow, mn->item_id, (uint64)mn->time, mn->money, 0, 0);
 
             // client tests, if player has enought money !!!
             pl->ModifyMoney( -int32(m->COD) );
@@ -397,16 +400,16 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << uint32(0);                                  // Unknown - 0x00000029
         data << uint32(0);                                  // Unknown
         uint8 icount = 1;
-        if ((*itr)->item != 0)
+        if ((*itr)->item_guidlow != 0)
         {
-            if(Item* i = pl->GetMItem((*itr)->item))
+            if(Item* i = pl->GetMItem((*itr)->item_guidlow))
             {
                 data << uint32(i->GetUInt32Value(OBJECT_FIELD_ENTRY));
                 icount = i->GetCount();
             }
             else
             {
-                sLog.outError("Mail to %s marked as having item (mail item idx: %u), but item not found.",pl->GetName(),(*itr)->item);
+                sLog.outError("Mail to %s marked as having item (mail item idx: %u), but item not found.",pl->GetName(),(*itr)->item_guidlow);
                 data << uint32(0);
             }
         }
