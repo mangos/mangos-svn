@@ -135,6 +135,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
     pl->ModifyMoney( -30 - money );
 
+	uint32 item_id = 0;  //item prototype
     time_t etime = base + DAY * ((COD > 0)? 3 : 30);        //time if COD 3 days, if no COD 30 days
     if (receive)
     {
@@ -150,6 +151,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->money = money;
         m->COD = COD;
         m->checked = 0;
+		item_id = m->item_id;
 
         receive->AddMail(m);
         if (it)
@@ -163,7 +165,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-        mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), it->GetEntry(), (uint64)etime, money, COD, 0);
+        mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), item_id, (uint64)etime, money, COD, 0);
 }
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
