@@ -147,6 +147,16 @@ enum WeaponAttackType
     RANGED_ATTACK = 2
 };
 
+enum DamageEffectType
+{
+    DIRECT_DAMAGE = 0,
+    SPELL_DIRECT_DAMAGE = 1,
+    DOT = 2,
+    HEAL = 3,
+    NODAMAGE = 4,
+    SELF_DAMAGE = 5
+};
+
 // Value masks for UNIT_FIELD_FLAGS
 enum UnitFlags
 {
@@ -434,7 +444,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void Mount(uint32 mount, bool taxi = false);
         void Unmount();
 
-        void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
+        void DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType);
         void CalDamageReduction(Unit *pVictim, uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist);
         void ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2);

@@ -78,7 +78,7 @@ void TotemAI::AttackStop(Unit *)
 void
 TotemAI::UpdateAI(const uint32 diff)
 {
-    if (!i_totem.isTotem() || i_totem.m_currentSpell)
+    if (!i_totem.isTotem() || !i_totem.isAlive() || i_totem.m_currentSpell)
         return;
     if (((Totem*)&i_totem)->GetTotemType() != TOTEM_ACTIVE)
         return;
@@ -129,8 +129,8 @@ TotemAI::IsVisible(Unit *pl) const
 void
 TotemAI::AttackStart(Unit *u)
 {
+    if (!i_totem.isTotem() || !i_totem.isAlive()) return;
     if (i_totem.m_currentSpell) return;
-    if (!i_totem.isTotem()) return;
     SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
     if (GetDuration(spellInfo) != -1)
         i_totem.CastSpell(u, ((Totem*)&i_totem)->GetSpell(), false);

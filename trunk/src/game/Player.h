@@ -902,11 +902,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateSkillPro(uint32 spellid);
         uint32 GetSpellByProto(ItemPrototype *proto);
 
-        void UpdateBlockPercentage(int32 defSkillGrow, int32 levelGrow)
-        {
-            ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, (float(defSkillGrow) - levelGrow*5)*0.04, true);
-        }
-
+        void ApplyDefenseBonusesMod(float value, bool apply);
+        void UpdateBlockPercentage();
+        
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
 

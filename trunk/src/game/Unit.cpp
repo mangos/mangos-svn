@@ -107,11 +107,10 @@ void Unit::Update( uint32 p_time )
     _UpdateSpells( p_time );
     _UpdateHostil( p_time );
 
-    if ( this->isInCombat() )
+    if (isInCombat() && GetTypeId() == TYPEID_PLAYER ) //update combat timer only for players
     {
         if ( m_CombatTimer <= p_time )
         {
-            m_CombatTimer = 0;
             LeaveCombatState();
         }
         else
@@ -221,9 +220,11 @@ bool Unit::HasAuraType(uint32 auraType) const
     return (!m_modAuras[auraType].empty());
 }
 
-void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
+void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
+
+    if(!damage) return;
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -250,17 +251,21 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
     if (health <= damage)
     {
-        LeaveCombatState();
-        //pVictim->LeaveCombatState();
+        if(pVictim->GetTypeId() == TYPEID_UNIT) //leave combat mode when killing mobs
+            LeaveCombatState();
+        else
+            GetInCombatState();
+
+        pVictim->LeaveCombatState();
 
         DEBUG_LOG("DealDamage: victim just died");
-
-        DEBUG_LOG("SET JUST_DIED");
-        pVictim->setDeathState(JUST_DIED);
 
         DEBUG_LOG("DealDamageAttackStop");
         AttackStop();
         pVictim->CombatStop();
+
+        DEBUG_LOG("SET JUST_DIED");
+        pVictim->setDeathState(JUST_DIED);
 
         DEBUG_LOG("DealDamageHealth1");
         pVictim->SetHealth(0);
@@ -311,13 +316,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             DEBUG_LOG("DealDamageNotPlayer");
             pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 1);
         }
-
-        // rage from maked damage TO creatures and players (target dead case)
-        if( pVictim != this                                 // not generate rage for self damage (falls, ...)
-            &&  GetTypeId() == TYPEID_PLAYER
-            && (getPowerType() == POWER_RAGE)               // warrior and some druid forms
-            && !m_currentMeleeSpell)                        // not generate rage for special attacks
-            ((Player*)this)->CalcRage(damage,true);
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
         bool PvP = false;
@@ -393,20 +391,21 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         else
         {
             DEBUG_LOG("Monster kill Monster");
-            pVictim->CombatStop();
-            pVictim->addUnitState(UNIT_STAT_DIED);
         }
-        AttackStop();
     }
     else
     {
         DEBUG_LOG("DealDamageAlive");
         pVictim->ModifyHealth(- (int32)damage);
-        if(GetTypeId() != TYPEID_PLAYER || !m_currentSpell || !m_currentSpell->IsAutoRepeat())
+        if(damagetype != DOT)
+        {
             Attack(pVictim);
+            if(damagetype == DIRECT_DAMAGE) //start melee attacks only after melee hit
+                SendAttackStart(pVictim); 
+        }
 
         //Get in CombatState
-        if(pVictim != this)
+        if(pVictim != this && damagetype != DOT)
         {
             GetInCombatState();
             pVictim->GetInCombatState();
@@ -417,13 +416,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             pVictim->RemoveAurasDueToSpell(pVictim->getTransForm());
             pVictim->setTransForm(0);
         }
-
-        // rage from maked damage TO creatures and players
-        if( pVictim != this                                 // not generate rage for self damage (falls, ...)
-            &&  GetTypeId() == TYPEID_PLAYER
-            && (getPowerType() == POWER_RAGE)               // warrior and some druid forms
-            && !m_currentMeleeSpell)                        // not generate rage for special attacks
-            ((Player*)this)->CalcRage(damage,true);
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
@@ -528,7 +520,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     //WorldPacket data;
     if(SpellMissChanceCalc(pVictim) > urand(0,10000))
     {
-        SendAttackStateUpdate(HITINFO_MISS, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
+        SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
         return;
     }
 
@@ -547,7 +539,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
 
     SendSpellNonMeleeDamageLog(pVictim, spellID, pdamage, spellInfo->School, absorb, resist, false, 0, crit);
-    DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), 0, true);
+    DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), SPELL_DIRECT_DAMAGE, 0, true);
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
@@ -584,8 +576,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, mod->m_amount, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
-
-        DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), procFlag, true);
+        DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), DOT, procFlag, true);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
     {
@@ -593,7 +584,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         int32 pdamage = GetHealth()*(100+mod->m_amount)/100;
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
-        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), procFlag, true);
+        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, procFlag, true);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL || mod->m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
     {
@@ -620,7 +611,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
                 tmpvalue = uint32(pVictim->GetHealth()*tmpvalue2);
 
             SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, tmpvalue, spellProto->School, absorb, resist, false, 0);
-            DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), procFlag, false);
+            DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), DOT, procFlag, false);
             if (!pVictim->isAlive() && m_currentSpell)
                 if (m_currentSpell->m_spellInfo)
                     if (m_currentSpell->m_spellInfo->Id == spellProto->Id)
@@ -954,11 +945,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
         return;
 
     if (!pVictim->isAlive())
-    {
-        AttackStop();
-        pVictim->CombatStop();
         return;
-    }
 
     if(m_currentSpell)
         return;
@@ -1015,7 +1002,11 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
         else
             damage = 0;
 
-        DealDamage (pVictim, damage, 0, true);
+        DealDamage (pVictim, damage, DIRECT_DAMAGE, 0, true);
+
+        // rage from maked damage TO creatures and players (target dead case)
+        if(GetTypeId() == TYPEID_PLAYER && (getPowerType() == POWER_RAGE))
+            ((Player*)this)->CalcRage(damage,true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
         {
@@ -1042,6 +1033,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenceSkillValue();
     // bonus from skills is 0.04%
     int32    skillBonus = skillDiff * 4;
+    int32    skillBonus2 = 4 * ( GetWeaponSkillValue(attType) - pVictim->GetPureDefenceSkillValue() );
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
@@ -1076,7 +1068,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // stunned target cannot dodge and this is check in GetUnitDodgeChance()
-    tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
+    tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus2;
     if (tmp > 0 && roll < (sum += tmp))
     {
         DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum);
@@ -1097,7 +1089,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         // cannot parry or block attacks from behind, but can from forward
         tmp = (int32)(pVictim->GetUnitParryChance()*100);
         if (   (tmp > 0)                                    // check if unit _can_ parry
-            && ((tmp -= skillBonus) > 0)
+            && ((tmp -= skillBonus2) > 0)
             && (roll < (sum += tmp)))
         {
             DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum);
@@ -1106,7 +1098,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
         tmp = (int32)(pVictim->GetUnitBlockChance()*100);
         if (   (tmp > 0)                                    // check if unit _can_ block
-            && ((tmp -= skillBonus) > 0)
+            && ((tmp -= skillBonus2) > 0)
             && (roll < (sum += tmp)))
         {
             DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum);
@@ -1141,7 +1133,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     tmp = tmp > tmpmax ? tmpmax : tmp;
     // tmp = mob's level * 5 - player's current defense skill
     tmp = getLevel() * 5 - tmp;
-    if (GetTypeId() != TYPEID_PLAYER && (tmp >= 15 || getLevel() >= pVictim->getLevel() + 3))
+    if (GetTypeId() != TYPEID_PLAYER && (tmp >= 15))
     {
         // add 2% chance per lacking skill point, min. is 15%
         tmp = tmp * 200 - 1500;
@@ -2809,19 +2801,18 @@ bool Unit::Attack(Unit *victim)
         AttackStop();
     }
     addUnitState(UNIT_STAT_ATTACKING);
-    if(GetTypeId()!=TYPEID_PLAYER)
+    if(GetTypeId()==TYPEID_UNIT)
         GetInCombatState();                                 //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
-    if(!isAttackReady(BASE_ATTACK))
-        resetAttackTimer(BASE_ATTACK);
+    //if(!isAttackReady(BASE_ATTACK))
+        //resetAttackTimer(BASE_ATTACK);
 
     // delay offhand weapon attack to next attack time
     if(haveOffhandWeapon())
         resetAttackTimer(OFF_ATTACK);
 
-    SendAttackStart(victim);
     return true;
 }
 
@@ -3220,7 +3211,7 @@ void Unit::Unmount()
 
 void Unit::GetInCombatState()
 {
-    m_CombatTimer = 6000;
+    m_CombatTimer = 5000;
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 }
 

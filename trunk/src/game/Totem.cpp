@@ -32,7 +32,6 @@ Totem::Totem()
 
 void Totem::Update( uint32 time )
 {
-    Creature::Update( time );
     Unit *owner = GetOwner();
     if (!owner || !owner->isAlive() || !this->isAlive())
     {
@@ -47,6 +46,8 @@ void Totem::Update( uint32 time )
     }
     else
         m_duration -= time;
+
+    Creature::Update( time );
 }
 
 void Totem::Summon()

@@ -1125,10 +1125,12 @@ void Aura::HandleAuraModSkill(bool apply)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    SpellEntry* prot=GetSpellProto();
+    uint32 prot=GetSpellProto()->EffectMiscValue[0];
+    int32 points = GetSpellProto()->EffectBasePoints[0]+1;
 
-    ((Player*)m_target)->ModifySkillBonus(prot->EffectMiscValue[0],
-        (apply ? (prot->EffectBasePoints[0]+1): (-(prot->EffectBasePoints[0]+1))));
+    ((Player*)m_target)->ModifySkillBonus(prot,(apply ? points: -points));
+    if(prot == SKILL_DEFENSE)
+        ((Player*)m_target)->ApplyDefenseBonusesMod(points, apply);
 }
 
 void Aura::HandleChannelDeathItem(bool apply)

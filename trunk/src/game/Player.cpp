@@ -422,7 +422,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     // initilize potential block chance (used if item with Block value equiped)
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 );
-    UpdateBlockPercentage(GetDefenceSkillValue(),getLevel());
+    UpdateBlockPercentage();
 
     // apply original stats mods before item equipment that call before equip _RemoveStatsMods()
     _ApplyStatsMods();
@@ -556,7 +556,7 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
     //m_session->SendPacket(&data);
     //Let other players see that you get damage
     SendMessageToSet(&data, true);
-    DealDamage((Unit*)this, Amount, 0, true);
+    DealDamage((Unit*)this, Amount, SELF_DAMAGE, 0, true);
 }
 
 void Player::HandleDrowing(uint32 UnderWaterTime)
@@ -1594,7 +1594,7 @@ void Player::GiveLevel()
         SetStat(Stats(i), uint32(newStats[i]));             // only integer part
 
     // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
-    UpdateBlockPercentage(0,1);
+    UpdateBlockPercentage();
 
     // apply stats, aura, items mods
     _ApplyStatsMods();
@@ -2995,8 +2995,31 @@ void Player::UpdateDefense()
     if(UpdateSkill(SKILL_DEFENSE))
     {
         // update dependent from defense skill part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
-        UpdateBlockPercentage(1,0);
+        UpdateBlockPercentage();
     }
+}
+
+void Player::ApplyDefenseBonusesMod(float value, bool apply)
+{
+    ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, value * 0.04, apply);
+    ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE, value * 0.04, apply);
+    ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, value * 0.04, apply);
+}
+
+void Player::UpdateBlockPercentage()
+{
+    AuraList& mModBlockPercent = GetAurasByType(SPELL_AURA_MOD_BLOCK_PERCENT);
+    for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
+        (*i)->ApplyModifier(false);
+
+    float chance = 5 - (getLevel()*5 - GetPureDefenceSkillValue()) * 0.04;
+    chance = chance < 0 ? 0 : chance;
+
+    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, chance);
+
+    for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
+        (*i)->ApplyModifier(true);
+
 }
 
 //skill+1, checking for max value
@@ -3217,6 +3240,10 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
         {
             uint32 new_data = max * 0x10000 + max;
             SetUInt32Value(PLAYER_SKILL(i)+1,new_data);
+        }
+        if(pskill == SKILL_DEFENSE)
+        {
+            UpdateBlockPercentage();
         }
     }
 }
