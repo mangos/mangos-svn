@@ -1394,6 +1394,34 @@ uint8 Spell::CanCast()
     Unit *target = m_targets.getUnitTarget();
     if(target)
     {
+        //check creaturetype
+        uint32 SpellCreatureType = m_spellInfo->TargetCreatureType;
+        if(m_spellInfo->Id == 603)
+                SpellCreatureType = 0x7FF - 0x40;   //Curse of Doom
+
+        if(SpellCreatureType) 
+        {
+            uint32 TargetCreatureType = 0;
+            if(target->GetTypeId() == TYPEID_PLAYER) 
+                TargetCreatureType = 0x40;      //1<<(7-1)
+            else if ( target->GetTypeId() == TYPEID_UNIT )
+            {
+                uint32 CType = ((Creature*)target)->GetCreatureInfo()->type;
+                if(CType>=1)
+                    TargetCreatureType = 1 << ( ((Creature*)target)->GetCreatureInfo()->type - 1);
+                else
+                    TargetCreatureType = 0;
+            }
+
+            if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
+            {   
+                if(TargetCreatureType == 0x40)
+                    castResult = CAST_FAIL_CANT_TARGET_PLAYERS;
+                else
+                    castResult = CAST_FAIL_INVALID_TARGET;
+            }
+        }
+
         //If m_immuneToDispel type contain this spell type, IMMUNE spell.
         for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_DISPEL].begin(), next; itr != target->m_spellImmune[IMMUNITY_DISPEL].end(); ++itr)
         {
