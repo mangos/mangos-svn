@@ -1112,9 +1112,14 @@ void Spell::SendInterrupted(uint8 result)
     WorldPacket data;
 
     data.Initialize(SMSG_SPELL_FAILURE);
-    data.append(m_caster->GetPackGUID());
+    data.append(m_caster->GetGUID());
     data << m_spellInfo->Id;
     data << result;
+    m_caster->SendMessageToSet(&data, true);
+
+    data.Initialize(SMSG_SPELL_FAILED_OTHER);
+    data.append(m_caster->GetGUID());
+    data << m_spellInfo->Id;
     m_caster->SendMessageToSet(&data, true);
 }
 
