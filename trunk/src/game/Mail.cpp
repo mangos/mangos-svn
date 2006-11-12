@@ -104,7 +104,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     uint16 item_pos;
     Item *it = 0;
 
-    if (item != 0)
+    if (item)
     {
         item_pos = pl->GetPosByGuid(item);
         it = pl->GetItemByPos( item_pos );
@@ -145,8 +145,13 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->receiver = GUID_LOPART(rc);
         m->subject = subject;
         m->body = body;
-        m->item_guidlow = GUID_LOPART(item);
-        m->item_id = it->GetEntry();
+        if (it) { // if item attachment exists
+            m->item_id = it->GetEntry();
+            m->item_guidlow = GUID_LOPART(item);
+        } else {
+            m->item_id = 0;
+            m->item_guidlow = 0;
+        }
         m->time = etime;
         m->money = money;
         m->COD = COD;
