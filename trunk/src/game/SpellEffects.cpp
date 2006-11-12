@@ -248,6 +248,7 @@ void Spell::EffectDummy(uint32 i)
         const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
         for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
         {
+            if (itr->second->state == PLAYERSPELL_REMOVED) continue;
             uint32 classspell = itr->first;
             SpellEntry *spellInfo = sSpellStore.LookupEntry(classspell);
 
@@ -401,7 +402,7 @@ void Spell::EffectApplyAura(uint32 i)
 
     Aura* Aur = new Aura(m_spellInfo, i, unitTarget,m_caster, m_CastItem);
 
-    if (!Aur->IsPositive())
+    if (!Aur->IsPositive() && Aur->GetCasterGUID() != Aur->GetTarget()->GetGUID())
     {
         switch (Aur->GetModifier()->m_auraname)
         {
