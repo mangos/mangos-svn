@@ -215,8 +215,19 @@ m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0), m_isPersistent(false)
 {
     assert(target);
     m_duration = GetDuration(spellproto);
+    int32 maxduration = GetMaxDuration(spellproto);
     if(m_duration == -1)
         m_permanent = true;
+    if( m_duration != maxduration )
+    {
+        uint8 comboPoints=0;
+        if(caster->GetTypeId() == TYPEID_PLAYER)
+            comboPoints = (uint8)((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
+        if(caster->GetTypeId() == TYPEID_PLAYER)
+            caster->SetUInt32Value(PLAYER_FIELD_BYTES,((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
+        comboPoints = comboPoints < 5 ? comboPoints : 5;
+        m_duration += int32((maxduration - m_duration) * comboPoints / 5);
+    }
     m_isPassive = IsPassiveSpell(m_spellId);
     m_positive = IsPositiveEffect(m_spellId, m_effIndex);
 
@@ -792,7 +803,7 @@ void Aura::TriggerSpell()
 
     if(!spellInfo)
     {
-        sLog.outError("Auras: unknown TriggerSpell id %i\n from spell: %i",  GetSpellProto()->EffectTriggerSpell[m_effIndex],GetSpellProto()->Id);
+        sLog.outError("Auras: unknown TriggerSpell:%i From spell: %i",  GetSpellProto()->EffectTriggerSpell[m_effIndex],GetSpellProto()->Id);
         return;
     }
     if(GetSpellProto()->Id == 1515)
@@ -1037,11 +1048,11 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
             if (m_target->getRace() == TAUREN)
-        {
-            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
-        }
-        else
-            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
+            {
+                m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
+            }
+            else
+                m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
     }
     else
     {
