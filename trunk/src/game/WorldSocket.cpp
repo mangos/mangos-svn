@@ -362,7 +362,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     sLog.outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
     sLog.outString( "Account: '%s' Login.", account.c_str() );
-    loginDatabase.PQuery("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'", account.c_str(),GetRemoteAddress().c_str());
+    loginDatabase.PQuery("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), account.c_str());
  
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )

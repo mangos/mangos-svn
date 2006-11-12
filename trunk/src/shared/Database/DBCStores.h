@@ -55,6 +55,7 @@ uint32 GetCastTime(SpellCastTimesEntry *time);
 float GetMinRange(SpellRangeEntry *range);
 float GetMaxRange(SpellRangeEntry *range);
 int32 GetDuration(SpellEntry *spellInfo);
+int32 GetMaxDuration(SpellEntry *spellInfo);
 char* GetPetName(uint32 petfamily);
 uint32 FindSpellRank(uint32 spellId);
 bool canStackSpellRank(SpellEntry *spellInfo);
