@@ -62,15 +62,17 @@ struct LootStoreItem
     uint32  itemid;
     uint32  displayid;
     float   chance;
-    float   questchance;
+    int32   questChanceOrGroup;
     uint8   maxcount;
     bool    is_ffa;                                         // free for all
 
     LootStoreItem()
-        : itemid(0), displayid(0), chance(0), questchance(0), maxcount(1), is_ffa(true) {}
+        : itemid(0), displayid(0), chance(0), questChanceOrGroup(0), maxcount(1), is_ffa(true) {}
 
-    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance, bool _isffa = true, uint8 _maxcount = 1)
-        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), maxcount(_maxcount), is_ffa(_isffa) {}
+    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chance, int32 _questChanceOrGroup, bool _isffa = true, uint8 _maxcount = 1)
+        : itemid(_itemid), displayid(_displayid), chance(_chance), questChanceOrGroup(_questChanceOrGroup), maxcount(_maxcount), is_ffa(_isffa) {}
+
+    int32 GetGroupId() const { return -questChanceOrGroup -1; }
 };
 
 struct LootItem
@@ -158,17 +160,6 @@ extern LootStore LootTemplates_Gameobject;
 extern LootStore LootTemplates_Item;
 extern LootStore LootTemplates_Pickpocketing;
 extern LootStore LootTemplates_Skinning;
-
-struct LootSkinningAltItem
-{
-    LootSkinningAltItem() : itemid(0), displayid(0) {}
-    LootSkinningAltItem(uint32 item, uint32 display) : itemid(item), displayid(display) {}
-
-    uint32  itemid;
-    uint32  displayid;
-};
-typedef std::map<uint32,LootSkinningAltItem> LootSkinnigAlternative;
-extern LootSkinnigAlternative sLootSkinnigAlternative;
 
 QuestItemList* FillQuestLoot(Player* player, Loot *loot);
 void FillLoot(Player* player,Loot *loot, uint32 loot_id, LootStore& store);

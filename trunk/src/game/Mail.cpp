@@ -151,7 +151,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->money = money;
         m->COD = COD;
         m->checked = 0;
-		item_id = m->item_id;
+        item_id = m->item_id;
 
         receive->AddMail(m);
         if (it)

@@ -797,7 +797,7 @@ void Spell::SendSpellCooldown()
             {
                 data << uint32(itr->first);
                 data << uint32(catrec);
-                _player->AddSpellCooldown(m_spellInfo->Id,catrecTime);
+                _player->AddSpellCooldown(itr->first,catrecTime);
             }
         }
     }

@@ -1332,7 +1332,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
     do
     {
         Field *fields = result->Fetch();
-        uint16 id = fields[0].GetUInt16();
+        uint32 id = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
         PSendSysMessage("%d - %s",id,name.c_str());
     } while (result->NextRow());
