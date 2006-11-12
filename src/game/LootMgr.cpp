@@ -39,7 +39,6 @@ LootStore LootTemplates_Gameobject;
 LootStore LootTemplates_Item;
 LootStore LootTemplates_Pickpocketing;
 LootStore LootTemplates_Skinning;
-LootSkinnigAlternative sLootSkinnigAlternative;
 
 void UnloadLoot()
 {
@@ -49,7 +48,6 @@ void UnloadLoot()
     LootTemplates_Item.clear();
     LootTemplates_Pickpocketing.clear();
     LootTemplates_Skinning.clear();
-    sLootSkinnigAlternative.clear();
 }
 
 void LoadLootTable(LootStore& lootstore,char const* tablename)
@@ -58,13 +56,13 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     uint32 item, displayid, entry;
     uint32 maxcount = 0;
     float chance;
-    float questchance;
+    int32 questchance;
     uint32 count = 0;
     bool is_ffa = true;
 
     sLog.outString( "%s :", tablename);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `chance`, `questchance`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
 
     if (result)
     {
@@ -80,7 +78,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             entry = fields[0].GetUInt32();
             item = fields[1].GetUInt32();;
             chance = fields[2].GetFloat();
-            questchance = fields[3].GetFloat();
+            questchance = int32(fields[3].GetUInt32());
             maxcount = fields[4].GetUInt32();
             is_ffa = fields[5].GetBool();
 
@@ -88,7 +86,8 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
             displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
 
-            if( chance < 0.000001 && questchance < 0.000001 )
+            // non-quest (maybe group) loot with low chance
+            if( chance >= 0 && chance < 0.000001 && questchance <= 0 )
                 ssNonLootableItems << "loot entry = " << entry << " item = " << item << " maxcount = " << maxcount << "\n";
 
             lootstore[entry].push_back( LootStoreItem(item, displayid, chance, questchance,is_ffa,maxcount) );
@@ -100,43 +99,10 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
         sLog.outString( ">> Loaded %u loot definitions", count );
         if(ssNonLootableItems.str().size() > 0)
-            sLog.outError("Some items can't be succesfully looted: have in chance and questchance fields value < 0.000001 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
+            sLog.outError("Some items can't be succesfully looted: have in chance field value < 0.000001 with and quest chance ==0 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
     }
     else
         sLog.outError(">> Loaded 0 loot definitions. DB table `%s` is empty.",tablename);
-}
-
-void LoadSkinnigAlternativeTable()
-{
-    LootStore::iterator tab;
-    uint32 item, item2, displayid2;
-    uint32 count = 0;
-
-    QueryResult *result = sDatabase.Query("SELECT `item`, `item2` FROM `skinning_loot_template_alternative`");
-
-    if (result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-
-            item  = fields[0].GetUInt32();;
-            item2 = fields[1].GetUInt32();;
-
-            if(!item2)
-                continue;
-
-            ItemPrototype const *proto2 = objmgr.GetItemPrototype(item2);
-
-            displayid2 = (proto2 != NULL) ? proto2->DisplayInfoID : 0;
-
-            sLootSkinnigAlternative[item] = LootSkinningAltItem(item2, displayid2);
-
-            count++;
-        } while (result->NextRow());
-
-        delete result;
-    }
 }
 
 void LoadLootTables()
@@ -147,47 +113,82 @@ void LoadLootTables()
     LoadLootTable(LootTemplates_Item,         "item_loot_template");
     LoadLootTable(LootTemplates_Pickpocketing,"pickpocketing_loot_template");
     LoadLootTable(LootTemplates_Skinning,     "skinning_loot_template");
-    LoadSkinnigAlternativeTable();
 }
 
-struct NotChanceFor
+#define MaxLootGroups 8
+
+struct HasChance
 {
-    Player* m_player;
+    LootStore* m_store;
+    float RolledChance[MaxLootGroups];
+    float CumulativeChance[MaxLootGroups];
 
-    explicit NotChanceFor(Player* _player) : m_player(_player) {}
-
-    bool operator() ( LootStoreItem &itm )
+    explicit HasChance(LootStore* _store) : m_store(_store) 
     {
-        if(itm.chance > 0)
+        for (int i=0; i < MaxLootGroups; i++)
+            CumulativeChance[i] = 0.0;
+    }
+ 
+    LootStoreItem* operator() ( LootStoreItem& itm )
+    {
+        // Quest loot handled separately
+        if (itm.questChanceOrGroup > 0)    
+            return NULL;
+
+        // Non-grouped loot
+        if (itm.questChanceOrGroup == 0)
         {
-            if(itm.chance >= 100)
-                return false;
-            else
-                return itm.chance * sWorld.getRate(RATE_DROP_ITEMS) <= rand_chance();
+            if ( itm.chance > 0 && (itm.chance * sWorld.getRate(RATE_DROP_ITEMS) >= rand_chance()) )
+                return &itm;
+            return NULL;
         }
-        else
-            return true;
+
+        // Grouped loot
+        int32 GroupId = itm.GetGroupId();
+
+        if (GroupId < 0 || GroupId >=  MaxLootGroups)
+        {
+            sLog.outError("HasChance: wrong loot group in DB %i", itm.questChanceOrGroup);
+            return NULL;
+        }
+        if (itm.chance >= 0)
+        {
+            // Group of current loot - check for item chance in the group 
+            if (CumulativeChance[GroupId] == 0.0)
+                RolledChance[GroupId] = rand_chance();
+            if (CumulativeChance[GroupId] >= RolledChance[GroupId])
+                // An item from the group already accepted
+                return NULL;
+
+            CumulativeChance[GroupId] += itm.chance;
+            if (CumulativeChance[GroupId] >= RolledChance[GroupId])
+                return &itm;
+            return NULL;
+        }
+
+        // Reference to a group of another loot
+        int LootId = -int(itm.chance);
+        float Chance = rand_chance();
+        float CumulChance = 0.0;
+
+        LootStore::iterator tab = m_store->find(LootId);
+        for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+        {
+            if ( item_iter->GetGroupId() == GroupId &&  item_iter->chance > 0 )
+            {
+                CumulChance += item_iter->chance;
+                if ( CumulChance >= Chance )
+                    return &*item_iter;
+            }
+        }
+        return NULL;
     }
 };
 
-struct QuestChanceFor
+ struct HasQuestChance
 {
-    Player* m_player;
-
-    explicit QuestChanceFor(Player* _player) : m_player(_player) {}
-
-    bool operator() ( LootStoreItem &itm )
-    {
-        if(itm.questchance > 0)
-        {
-            if (itm.questchance >= 100)
-                return false;
-            else
-                return itm.questchance <= rand_chance();
-        }
-        else
-            return true;
-    }
+    // explicit HasQuestChanceFor() : {}
+    inline bool operator() ( LootStoreItem &itm )   { return itm.questChanceOrGroup > rand_chance(); }
 };
 
 void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
@@ -206,26 +207,20 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
     loot->quest_items.reserve(min(tab->second.size(),MAX_NR_QUEST_ITEMS));
 
     // fill loot with all normal and quest items that have a chance
-    NotChanceFor not_chance_for(player);
-    QuestChanceFor quest_chance_for(player);
+    HasChance      hasChance(&store);
+    HasQuestChance hasQuestChance;
 
     for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
     {
-        uint8 lcount = 0, qcount = 0;
-        for(uint8 i = 0; i < item_iter->maxcount; ++i)
+        // There are stats of count variations for 100% drop - so urand used
+        if ( loot->quest_items.size() < MAX_NR_QUEST_ITEMS && hasQuestChance(*item_iter) ) 
+            loot->quest_items.push_back(LootItem(*item_iter, urand(1, item_iter->maxcount)));
+        else if ( loot->items.size() < MAX_NR_LOOT_ITEMS ) 
         {
-            if(!not_chance_for(*item_iter)) ++lcount;
-            if(!quest_chance_for(*item_iter)) ++qcount;
+            LootStoreItem* LootedItem = hasChance(*item_iter);
+            if ( LootedItem )
+                loot->items.push_back(LootItem(*LootedItem, urand(1, LootedItem->maxcount)));
         }
-
-        if(lcount > 0)
-            loot->items.push_back(LootItem(*item_iter,lcount));
-
-        if(qcount > 0)
-            loot->quest_items.push_back(LootItem(*item_iter,qcount));
-
-        if (loot->items.size() == MAX_NR_LOOT_ITEMS || loot->quest_items.size() == MAX_NR_QUEST_ITEMS)
-            break;
     }
     loot->unlootedCount = loot->items.size();
 }

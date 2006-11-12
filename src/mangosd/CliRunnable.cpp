@@ -528,7 +528,11 @@ void CliRunnable::run()
 
     sLog.outString("");
     void CliHelp();
-    putchar(7);
+    
+    if(sConfig.GetIntDefault("BeepAtStart", 1) > 0)
+    {
+        putchar(7);
+    }
 
     while (!World::m_stopEvent)
     {

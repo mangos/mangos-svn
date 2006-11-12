@@ -727,8 +727,8 @@ DROP TABLE IF EXISTS `creature_loot_template`;
 CREATE TABLE `creature_loot_template` (
   `entry` int(11) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0',
-  `chance` float NOT NULL default '100',
-  `questchance` float NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
   `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
@@ -881,8 +881,8 @@ DROP TABLE IF EXISTS `fishing_loot_template`;
 CREATE TABLE `fishing_loot_template` (
   `entry` int(11) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0',
-  `chance` float NOT NULL default '100',
-  `questchance` float NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
   `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
@@ -1090,8 +1090,8 @@ DROP TABLE IF EXISTS `gameobject_loot_template`;
 CREATE TABLE `gameobject_loot_template` (
   `entry` int(11) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0',
-  `chance` float NOT NULL default '100',
-  `questchance` float NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
   `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
@@ -1318,8 +1318,8 @@ DROP TABLE IF EXISTS `item_loot_template`;
 CREATE TABLE `item_loot_template` (
   `entry` int(11) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0',
-  `chance` float NOT NULL default '100',
-  `questchance` float NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
   `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
@@ -1783,8 +1783,8 @@ DROP TABLE IF EXISTS `pickpocketing_loot_template`;
 CREATE TABLE `pickpocketing_loot_template` (
   `entry` int(11) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0',
-  `chance` float NOT NULL default '100',
-  `questchance` float NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
   `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
@@ -2084,8 +2084,8 @@ DROP TABLE IF EXISTS `skinning_loot_template`;
 CREATE TABLE `skinning_loot_template` (
   `entry` int(11) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0',
-  `chance` float NOT NULL default '100',
-  `questchance` float NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `maxcount` int(11) unsigned NOT NULL default '1',
   `quest_freeforall` int(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
@@ -2099,26 +2099,6 @@ CREATE TABLE `skinning_loot_template` (
 LOCK TABLES `skinning_loot_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
-
---
--- Table structure for table `skinning_loot_template_alternative`
---
-
-DROP TABLE IF EXISTS `skinning_loot_template_alternative`;
-CREATE TABLE `skinning_loot_template_alternative` (
-  `item` int(11) unsigned NOT NULL default '0',
-  `item2` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-
---
--- Dumping data for table `skinning_loot_template_alternative`
---
-
-/*!40000 ALTER TABLE `skinning_loot_template_alternative` DISABLE KEYS */;
-LOCK TABLES `skinning_loot_template_alternative` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `skinning_loot_template_alternative` ENABLE KEYS */;
 
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

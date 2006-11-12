@@ -198,3 +198,8 @@ PlayerSaveInterval = 900000
 
 # Default WorldServerPort
 WorldServerPort = 8085
+
+
+# Beep at managosd start finished (mostly work only at Unix/Linux systems)
+# Default: 1 
+BeepAtStart = 1
