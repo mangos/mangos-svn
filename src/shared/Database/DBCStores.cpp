@@ -246,6 +246,16 @@ int32 GetDuration(SpellEntry *spellInfo)
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
 }
 
+int32 GetMaxDuration(SpellEntry *spellInfo)
+{
+    if(!spellInfo)
+        return 0;
+    SpellDurationEntry *du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
+    if(!du)
+        return 0;
+    return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
+}
+
 char* GetPetName(uint32 petfamily)
 {
     if(!petfamily)
