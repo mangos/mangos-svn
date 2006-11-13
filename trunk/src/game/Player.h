@@ -449,8 +449,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetGMVisible(bool on);
         bool isGMVisibleFor(Player* p) const { return GetSession()->GetSecurity() <= p->GetSession()->GetSecurity() || isGMVisible(); }
 
-        const char* GetName() { return m_name.c_str(); };
-        PlayerCreateInfo* GetPlayerInfo(){return info;}
+        const char* GetName() const { return m_name.c_str(); };
+        PlayerCreateInfo const* GetPlayerInfo(){return info;}
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel();
@@ -978,7 +978,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void setFactionForRace(uint8 race);
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
-        uint32 GetReputation(uint32 faction_id) const;
+        uint32 GetStanding(uint32 faction) const;
         bool SetStanding(uint32 faction, int standing);
         bool ModifyFactionReputation(FactionEntry* factionEntry, int32 standing);
         void CalculateReputation(Unit *pVictim);
