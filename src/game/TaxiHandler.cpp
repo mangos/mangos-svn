@@ -113,6 +113,9 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
     if(!unit->isTaxi())
         return;
 
+    if(!unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
+        return;
+
     curloc = objmgr.GetNearestTaxiNode(
         GetPlayer( )->GetPositionX( ),
         GetPlayer( )->GetPositionY( ),
@@ -229,7 +232,12 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
 
     // starting node != nearest node (cheat?)
     if(curloc != sourcenode)
+    {
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
+        data << uint32( 4 );
+        SendPacket( &data );
         return;
+    }
 
 
     uint32 sourcepath = 0;
@@ -374,19 +382,32 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     // starting node != nearest node (cheat?)
     if(curloc != sourcenode)
+    {
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
+        data << uint32( 4 );
+        SendPacket( &data );
         return;
-
+    }
 
     if( GetPlayer( )->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
         return;
 
+    // not let flight if casting not finished
+    if(GetPlayer( )->m_currentSpell)
+    {
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
+        data << uint32( 7 );
+        SendPacket( &data );
+        return;
+    }
+
+
     objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
     MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());
 
-    data.Initialize( SMSG_ACTIVATETAXIREPLY );
-
     if ( MountId == 0 || path == 0 )
     {
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
         data << uint32( 1 );
         SendPacket( &data );
         return;
@@ -395,6 +416,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     uint32 money = GetPlayer()->GetMoney();
     if(money < cost )
     {
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
         data << uint32( 3 );
         SendPacket( &data );
         return;
@@ -406,15 +428,13 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     // unsommon pet, it will be lost anyway
     GetPlayer( )->UnsummonPet();
 
-    // interrupt any casting (to prevent mounting casting for example).
-    GetPlayer( )->InterruptSpell();
-
     //CHECK DONE, DO FLIGHT
 
     GetPlayer( )->SaveToDB();                               //For temporary avoid save player on air
 
     GetPlayer( )->setDismountCost( money - cost);
 
+    data.Initialize( SMSG_ACTIVATETAXIREPLY );
     data << uint32( 0 );
 
     SendPacket( &data );
