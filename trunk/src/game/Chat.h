@@ -28,6 +28,19 @@ class Creature;
 class Player;
 class Unit;
 
+struct LanguageDesc
+{
+    Language lang_id;
+    uint32   spell_id;
+    uint32   skill_id;
+};
+
+extern LanguageDesc lang_description[LANGUAGES_COUNT];
+
+LanguageDesc const* GetLanguageDescByID(uint32 lang);
+LanguageDesc const* GetLanguageDescBySpell(uint32 spell_id);
+LanguageDesc const* GetLanguageDescBySkill(uint32 skill_id);
+
 enum ChatMsg
 {
     CHAT_MSG_SAY                                  = 0x00,

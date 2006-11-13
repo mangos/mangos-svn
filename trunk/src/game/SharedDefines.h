@@ -129,21 +129,24 @@ enum SpellSchools
 #define SLOT_TABARD                         18
 #define SLOT_EMPTY                          19
 
-#define LANG_GLOBAL                         0
-#define LANG_UNIVERSAL                      0
-#define LANG_ORCISH                         1
-#define LANG_DARNASSIAN                     2
-#define LANG_TAURAHE                        3
-#define LANG_DWARVISH                       6
-#define LANG_COMMON                         7
-#define LANG_DEMONIC                        8
-#define LANG_TITAN                          9
-#define LANG_THELASSIAN                     10
-#define LANG_DRACONIC                       11
-#define LANG_KALIMAG                        12
-#define LANG_GNOMISH                        13
-#define LANG_TROLL                          14
-#define LANG_GUTTERSPEAK                    33
+enum Language {
+    LANG_GLOBAL         = 0, LANG_UNIVERSAL      = 0,
+    LANG_ORCISH         = 1,
+    LANG_DARNASSIAN     = 2,
+    LANG_TAURAHE        = 3,
+    LANG_DWARVISH       = 6,
+    LANG_COMMON         = 7,
+    LANG_DEMONIC        = 8,
+    LANG_TITAN          = 9,
+    LANG_THELASSIAN     = 10,
+    LANG_DRACONIC       = 11,
+    LANG_KALIMAG        = 12,
+    LANG_GNOMISH        = 13,
+    LANG_TROLL          = 14,
+    LANG_GUTTERSPEAK    = 33
+};
+
+#define LANGUAGES_COUNT 15
 
 // Spell Effects
 
@@ -848,8 +851,8 @@ enum SpellSchools
 #define SKILL_RACIAL_NIGHT_ELF          126
 #define SKILL_FIRST_AID                 129
 #define SKILL_FERAL_COMBAT              134
-#define SKILL_LANG_THALASSIAN           137
 #define SKILL_STAVES                    136
+#define SKILL_LANG_THALASSIAN           137
 #define SKILL_LANG_DRACONIC             138
 #define SKILL_LANG_DEMON_TONGUE         139
 #define SKILL_LANG_TITAN                140
