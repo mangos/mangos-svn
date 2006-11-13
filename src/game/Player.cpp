@@ -3672,12 +3672,22 @@ void Player::SetInitialFactions()
     }
 }
 
-uint32 Player::GetReputation(uint32 faction_id) const
+uint32 Player::GetStanding(uint32 faction) const
 {
-    FactionEntry *factionEntry = sFactionStore.LookupEntry(faction_id);
+    FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(faction);
 
+    if(!factionTemplateEntry)
+    {
+        sLog.outError("Player::GetStanding: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(),faction);
+        return 0;
+    }
+
+    FactionEntry *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
+
+    // Faction without recorded reputation. Just ignore.
     if(!factionEntry)
         return 0;
+
 
     std::list<struct Factions>::const_iterator itr;
     for(itr = factions.begin(); itr != factions.end(); ++itr)
@@ -9118,7 +9128,7 @@ bool Player::SatisfyQuestReputation( uint32 quest_id, bool msg )
         if(!faction_id)
             return true;
 
-        return GetReputation(faction_id) >= qInfo->RequiredRepValue;
+        return GetStanding(faction_id) >= qInfo->RequiredRepValue;
     }
     return false;
 }

@@ -2679,8 +2679,8 @@ bool ChatHandler::HandleResetCommand (const char * args)
             player->removeSpell(itr->first);
         }
 
-        PlayerCreateInfo *info = player->GetPlayerInfo();
-        std::list<CreateSpellPair>::iterator spell_itr;
+        PlayerCreateInfo const *info = player->GetPlayerInfo();
+        std::list<CreateSpellPair>::const_iterator spell_itr;
         for (spell_itr = info->spell.begin(); spell_itr!=info->spell.end(); spell_itr++)
         {
             uint16 tspell = spell_itr->first;
