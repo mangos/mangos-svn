@@ -1187,7 +1187,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetDontMove(true);
         //SaveToDB();
 
-        MapManager::Instance().GetMap(GetMapId())->Add(this);
+        //MapManager::Instance().GetMap(GetMapId())->Add(this);
 
         // Resend spell list to client after far teleport.
         SendInitialSpells();
@@ -9989,7 +9989,7 @@ bool Player::LoadFromDB( uint32 guid )
     delete result;
 
     // make sure the unit is considered out of combat for proper loading
-    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+    ClearInCombat();
 
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
@@ -10432,8 +10432,8 @@ void Player::SaveToDB()
     uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
     uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
 
-    int is_logout_resting=0;                                //logaut far from tavern\city
-                                                            //logaut, but in tavern\city
+    int is_logout_resting=0;                                //logout, far from tavern/city
+                                                            //logout, but in tavern/city
     if(!IsInWorld()&&HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))is_logout_resting=1;
 
     // Set player sit state to standing on save
@@ -10443,6 +10443,8 @@ void Player::SaveToDB()
     //remove restflag when save
     //this is becouse of the rename char stuff
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+
+    ClearInCombat(); // Remove combat flag
 
     sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
     outDebugValues();

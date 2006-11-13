@@ -415,8 +415,8 @@ void Spell::EffectApplyAura(uint32 i)
                 else
                 {
                     m_caster->Attack(Aur->GetTarget());
-                    m_caster->GetInCombatState();
-                    Aur->GetTarget()->GetInCombatState();
+                    m_caster->SetInCombat();
+                    Aur->GetTarget()->SetInCombat();
                 }
         }
     }
