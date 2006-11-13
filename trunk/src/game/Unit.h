@@ -345,7 +345,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
-            GetInCombatState();                             //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+            SetInCombat();
         }
         void _removeAttacker(Unit *pAttacker)               // must be called only from Unit::AttackStop()
         {
@@ -357,7 +357,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             {
                 clearUnitState(UNIT_STAT_ATTACK_BY);
                 if(!m_attacking)
-                    LeaveCombatState();                     //RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+                    ClearInCombat();
             }
         }
         Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
@@ -375,7 +375,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAllAttackers();
         bool isInCombatWithPlayer() const;
         Unit* getVictim() const { return m_attacking; }
-        void CombatStop() { AttackStop(); RemoveAllAttackers();LeaveCombatState(); }
+        void CombatStop() { AttackStop(); RemoveAllAttackers(); ClearInCombat(); }
 
         void addUnitState(uint32 f) { m_state |= f; };
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
@@ -495,8 +495,8 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         //bool isInCombat()  const { return hasUnitState(UNIT_STAT_IN_COMBAT); }
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
-        void GetInCombatState();
-        void LeaveCombatState();
+        void SetInCombat();
+        void ClearInCombat();
 
         bool isAttacking() const { return hasUnitState(UNIT_STAT_ATTACKING); }
         bool isAttacked()  const { return hasUnitState(UNIT_STAT_ATTACK_BY); }

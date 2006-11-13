@@ -47,7 +47,8 @@ void MapManager::LoadTransports()
 
         const GameObjectInfo *goinfo = objmgr.GetGameObjectInfo(entry);
         
-        t->GenerateWaypoints(goinfo->sound0);
+        vector<uint32> mapsUsed;
+        t->GenerateWaypoints(goinfo->sound0, mapsUsed);
 
         sLog.outString("Loading transport between %s, %s", name.c_str(), goinfo->name);
         t->m_name = goinfo->name;
@@ -58,6 +59,20 @@ void MapManager::LoadTransports()
         
         t->Create(entry, goinfo->displayId, mapid, x, y, z, o, 100);
         m_Transports.push_back(t);
+        
+        
+        for (int i = 0; i < mapsUsed.size(); i++) {
+            if (m_TransportsByMap.find(mapsUsed[i]) == m_TransportsByMap.end()) {
+                vector<Transport *> tmp;
+                m_TransportsByMap[t->m_WayPoints[i].mapid] = tmp;
+            }
+            vector<Transport *> *v = &(m_TransportsByMap[mapsUsed[i]]);
+            if (find(v->begin(), v->end(), t) == v->end()) {
+                v->push_back(t);
+                sLog.outString("%d ", mapsUsed[i]);
+            }
+        }
+        
         //If we someday decide to use the grid to track transports, here:
         //MapManager::Instance().LoadGrid(mapid,x,y,true);
         //MapManager::Instance().GetMap(t->GetMapId())->Add<GameObject>((GameObject *)t);        
@@ -127,19 +142,21 @@ struct keyFrame {
     float tFrom, tTo;
 };
 
-void Transport::GenerateWaypoints(uint32 pathid)
+void Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
 {
     TransportPath path;   
     objmgr.GetTransportPathNodes(pathid, path);
 
     vector<keyFrame> keyFrames;
     int mapChange = 0;
+    mapids.clear();
     for (int i = 1; i < path.Size() - 1; i++) {
         if (mapChange == 0) {
             if ((path[i].mapid == path[i+1].mapid)) {
                 keyFrame k(path[i].x, path[i].y, path[i].z, path[i].mapid, path[i].actionFlag, path[i].delay);
                 keyFrames.push_back(k);
-                //if ((path[i].mapid != path[i+1].mapid)) {
+                if (find(mapids.begin(), mapids.end(), k.mapid) == mapids.end())
+                    mapids.push_back(k.mapid);
             } else {
                 mapChange = 1;
             }

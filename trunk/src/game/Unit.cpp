@@ -111,7 +111,7 @@ void Unit::Update( uint32 p_time )
     {
         if ( m_CombatTimer <= p_time )
         {
-            LeaveCombatState();
+            ClearInCombat();
         }
         else
             m_CombatTimer -= p_time;
@@ -252,11 +252,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
     if (health <= damage)
     {
         if(pVictim->GetTypeId() == TYPEID_UNIT) //leave combat mode when killing mobs
-            LeaveCombatState();
+            ClearInCombat();
         else
-            GetInCombatState();
+            SetInCombat();
 
-        pVictim->LeaveCombatState();
+        pVictim->ClearInCombat();
 
         DEBUG_LOG("DealDamage: victim just died");
 
@@ -335,7 +335,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             if(owner && owner->GetTypeId() == TYPEID_PLAYER)
             {
                 player = (Player*)owner;
-                player->LeaveCombatState();
+                player->ClearInCombat();
             }
             uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
             pet->GivePetXP(petxp);
@@ -407,8 +407,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         //Get in CombatState
         if(pVictim != this && damagetype != DOT)
         {
-            GetInCombatState();
-            pVictim->GetInCombatState();
+            SetInCombat();
+            pVictim->SetInCombat();
         }
 
         if(pVictim->getTransForm())
@@ -2802,7 +2802,7 @@ bool Unit::Attack(Unit *victim)
     }
     addUnitState(UNIT_STAT_ATTACKING);
     if(GetTypeId()==TYPEID_UNIT)
-        GetInCombatState();                                 //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+        SetInCombat();
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
@@ -2827,7 +2827,7 @@ bool Unit::AttackStop()
     m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
     if(GetTypeId()!=TYPEID_PLAYER && m_attackers.empty())
-        LeaveCombatState();                                 //RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+        ClearInCombat();
 
     if(m_currentMeleeSpell)
         m_currentMeleeSpell->cancel();
@@ -3209,13 +3209,13 @@ void Unit::Unmount()
     RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
 }
 
-void Unit::GetInCombatState()
+void Unit::SetInCombat()
 {
     m_CombatTimer = 5000;
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 }
 
-void Unit::LeaveCombatState()
+void Unit::ClearInCombat()
 {
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);

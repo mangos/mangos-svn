@@ -72,12 +72,17 @@ PlayerNotifier::BuildForMySelf()
         // Hack to send out transports
         WorldPacket packet2;
         UpdateData transData;
-        for (int i = 0; i < MapManager::Instance().m_Transports.size(); i++) {
-            Transport *t = MapManager::Instance().m_Transports[i];
-            t->BuildCreateUpdateBlockForPlayer(&transData, &i_player);
+        if (MapManager::Instance().m_TransportsByMap.find(i_player.GetMapId()) != MapManager::Instance().m_TransportsByMap.end()) {
+            uint32 m = i_player.GetMapId();
+            for (int i = 0;
+                 i < MapManager::Instance().m_TransportsByMap[i_player.GetMapId()].size();
+                 i++) {
+                Transport *t = MapManager::Instance().m_TransportsByMap[i_player.GetMapId()][i];
+                t->BuildCreateUpdateBlockForPlayer(&transData, &i_player);
+            }
+            transData.BuildPacket(&packet2);
+            i_player.GetSession()->SendPacket(&packet2);
         }
-        transData.BuildPacket(&packet2);
-        i_player.GetSession()->SendPacket(&packet2);
     }
 }
 
