@@ -109,17 +109,20 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         item_pos = pl->GetPosByGuid(item);
         it = pl->GetItemByPos( item_pos );
 
-        // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to mail)
-        if(it->IsBag() && !((Bag*)it)->IsEmpty())
+        if(it)
         {
-            data.Initialize(SMSG_SEND_MAIL_RESULT);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(MAIL_ERR_INTERNAL_ERROR);
-            SendPacket(&data);
-            return;
+            // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to mail)
+            if(it->IsBag() && !((Bag*)it)->IsEmpty())
+            {
+                data.Initialize(SMSG_SEND_MAIL_RESULT);
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(MAIL_ERR_INTERNAL_ERROR);
+                SendPacket(&data);
+                return;
+            }
+            it->SaveToDB();
         }
-        it->SaveToDB();
     }
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
@@ -128,15 +131,18 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     data << uint32(MAIL_OK);
     SendPacket(&data);
 
-    if (item != 0)
+    if (it)
     {
         //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
     }
+
     pl->ModifyMoney( -30 - money );
 
-	uint32 item_id = 0;  //item prototype
+    uint32 item_id = it ? it->GetEntry() : 0;  //item prototype
+
     time_t etime = base + DAY * ((COD > 0)? 3 : 30);        //time if COD 3 days, if no COD 30 days
+
     if (receive)
     {
         Mail* m = new Mail;
@@ -146,7 +152,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->subject = subject;
         m->body = body;
         if (it) { // if item attachment exists
-            m->item_id = it->GetEntry();
+            m->item_id = item_id;
             m->item_guidlow = GUID_LOPART(item);
         } else {
             m->item_id = 0;
@@ -156,7 +162,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->money = money;
         m->COD = COD;
         m->checked = 0;
-        item_id = m->item_id;
 
         receive->AddMail(m);
         if (it)
