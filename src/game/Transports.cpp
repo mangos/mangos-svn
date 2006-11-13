@@ -47,10 +47,19 @@ void MapManager::LoadTransports()
 
         const GameObjectInfo *goinfo = objmgr.GetGameObjectInfo(entry);
         
-        vector<uint32> mapsUsed;
-        t->GenerateWaypoints(goinfo->sound0, mapsUsed);
-
         sLog.outString("Loading transport between %s, %s", name.c_str(), goinfo->name);
+
+        vector<uint32> mapsUsed;
+
+
+        if(!t->GenerateWaypoints(goinfo->sound0, mapsUsed))
+        // skip transports with empty waypoints list
+        {
+            sLog.outError("ERROR: Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO sound0 field.",goinfo->sound0); 
+            delete t;
+            continue;
+        }
+
         t->m_name = goinfo->name;
 
         float x, y, z, o;
@@ -142,10 +151,13 @@ struct keyFrame {
     float tFrom, tTo;
 };
 
-void Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
+bool Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
 {
     TransportPath path;   
     objmgr.GetTransportPathNodes(pathid, path);
+
+    if (!path.Size())
+        return false;
 
     vector<keyFrame> keyFrames;
     int mapChange = 0;
@@ -321,6 +333,8 @@ void Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
     m_nextNodeTime = m_curr->first;
 
     m_curMap = m_curr->second.mapid;
+
+    return true;
 }
 
 map<uint32, Transport::WayPoint>::iterator Transport::GetNextWayPoint() {
