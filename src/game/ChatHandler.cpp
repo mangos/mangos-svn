@@ -42,6 +42,14 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     recv_data >> lang;
     sLog.outDebug("CHAT: packet received. type %u, lang %u", type, lang );
 
+    // prevent talking at unknown language (cheating)
+    LanguageDesc const* langDesc = GetLanguageDescByID(lang);
+    if(!langDesc || langDesc->skill_id != 0 && !_player->HasSkill(langDesc->skill_id))
+    {
+        SendNotification("Unknown langauge");
+        return;
+    }
+
     if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
         lang = LANG_UNIVERSAL;
 
