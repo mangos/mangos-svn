@@ -1370,3 +1370,11 @@ bool ChatHandler::HandlePlaySoundCommand(const char* args)
     SendSysMessage(LANG_BAD_VALUE);
     return false;
 }
+
+bool ChatHandler::HandleSaveAllCommand(const char* args)
+{
+    ObjectAccessor::Instance().SaveAllPlayers();
+    SendSysMessage(LANG_PLAYERS_SAVED);
+    return true;
+}
+

@@ -66,6 +66,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         PlayersMapType& GetPlayers() { return i_players; }
         void InsertPlayer(Player *);
         void RemovePlayer(Player *);
+        void SaveAllPlayers();
 
         void AddUpdateObject(Object *obj);
         void RemoveUpdateObject(Object *obj);

@@ -131,6 +131,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "recall",      1, &ChatHandler::HandleRecallCommand,           "",   NULL },
         { "run",         2, &ChatHandler::HandleRunCommand,              "",   NULL },
         { "save",        0, &ChatHandler::HandleSaveCommand,             "",   NULL },
+        { "saveall",     1, &ChatHandler::HandleSaveAllCommand,          "",   NULL },
         { "security",    3, &ChatHandler::HandleSecurityCommand,         "",   NULL },
         { "AddSpawn",    2, &ChatHandler::HandleSpawnCommand,            "",   NULL },
         { "standstate",  3, &ChatHandler::HandleStandStateCommand,       "",   NULL },
