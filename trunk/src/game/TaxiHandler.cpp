@@ -55,6 +55,10 @@ void WorldSession::SendTaxiStatus( uint64 guid )
         GetPlayer( )->GetPositionZ( ),
         GetPlayer( )->GetMapId( ) );
 
+    // not found nearest 
+    if(curloc == 0)
+        return;
+
     sLog.outDebug( "WORLD: current location %u ",curloc);
 
     field = (uint8)((curloc - 1) / 32);
@@ -83,6 +87,17 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
     uint32 submask;
 
     recv_data >> guid;
+
+    if(_player->IsMounted())
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_CAST_RESULT);
+        data << uint32(0);
+        data << uint8(2);
+        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
+        SendPacket(&data);
+        return;
+    }
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
 
@@ -193,6 +208,29 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
 
     uint32 sourcenode;
     recv_data >> sourcenode;
+
+    // not let cheating with start flight mounted
+    if(_player->IsMounted())
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_CAST_RESULT);
+        data << uint32(0);
+        data << uint8(2);
+        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
+        SendPacket(&data);
+        return;
+    }
+
+    uint32 curloc = objmgr.GetNearestTaxiNode(
+        GetPlayer( )->GetPositionX( ),
+        GetPlayer( )->GetPositionY( ),
+        GetPlayer( )->GetPositionZ( ),
+        GetPlayer( )->GetMapId( ) );
+
+    // starting node != nearest node (cheat?)
+    if(curloc != sourcenode)
+        return;
+
 
     uint32 sourcepath = 0;
     uint32 totalcost = 0;
@@ -316,6 +354,29 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     recv_data >> guid >> sourcenode >> destinationnode;
     sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,sourcenode ,destinationnode);
 
+    // not let cheating with start flight mounted
+    if(_player->IsMounted())
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_CAST_RESULT);
+        data << uint32(0);
+        data << uint8(2);
+        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
+        SendPacket(&data);
+        return;
+    }
+
+    uint32 curloc = objmgr.GetNearestTaxiNode(
+        GetPlayer( )->GetPositionX( ),
+        GetPlayer( )->GetPositionY( ),
+        GetPlayer( )->GetPositionZ( ),
+        GetPlayer( )->GetMapId( ) );
+
+    // starting node != nearest node (cheat?)
+    if(curloc != sourcenode)
+        return;
+
+
     if( GetPlayer( )->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
         return;
 
@@ -344,6 +405,9 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     // unsommon pet, it will be lost anyway
     GetPlayer( )->UnsummonPet();
+
+    // interrupt any casting (to prevent mounting casting for example).
+    GetPlayer( )->InterruptSpell();
 
     //CHECK DONE, DO FLIGHT
 
