@@ -863,8 +863,8 @@ void Player::Update( uint32 p_time )
     {
         if(p_time >= m_nextSave)
         {
-            m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
-            SaveToDB();
+            // m_nextSave reseted in SaveToDB call
+            SaveToDB();                             
             sLog.outBasic("Player '%u' '%s' Saved", GetGUIDLow(), GetName());
         }
         else
@@ -10423,6 +10423,9 @@ void Player::_LoadTutorials()
 
 void Player::SaveToDB()
 {
+    // delay auto save at any saves (manual, in code, or autosave)
+    m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
+
     // saved before flight
     if (isInFlight())
         return;

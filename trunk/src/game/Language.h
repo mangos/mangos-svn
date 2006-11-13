@@ -27,6 +27,7 @@
 #define LANG_ACCOUNT_LEVEL               "Your account level is: %i"
 #define LANG_CONNECTED_USERS             "Number of users connected: %i"
 #define LANG_PLAYER_SAVED                "Player saved."
+#define LANG_PLAYERS_SAVED               "All players saved."
 #define LANG_GMS_ON_SRV                  "There are following active GMs on this server:"
 #define LANG_GMS_NOT_LOGGED              "There are no GMs currently logged in on this server."
 #define LANG_YOU_IN_FLIGHT               "You are flying and can't do it."
