@@ -55,7 +55,7 @@ void WorldSession::SendTaxiStatus( uint64 guid )
         GetPlayer( )->GetPositionZ( ),
         GetPlayer( )->GetMapId( ) );
 
-    // not found nearest 
+    // not found nearest
     if(curloc == 0)
         return;
 
@@ -239,7 +239,6 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
         return;
     }
 
-
     uint32 sourcepath = 0;
     uint32 totalcost = 0;
 
@@ -400,7 +399,6 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         SendPacket( &data );
         return;
     }
-
 
     objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
     MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());

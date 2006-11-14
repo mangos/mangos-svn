@@ -298,14 +298,12 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
-    
+
     objmgr.SetHighestGuids();
 
     sLog.outString( "Loading Loot Tables..." );
     LoadLootTables();
 
-    
-    
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
         exit(1);
@@ -323,7 +321,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Transports..." );
     MapManager::Instance().LoadTransports();
-    
+
     sLog.outString( "WORLD: Starting Event System" );
     StartEventSystem();
 

@@ -224,19 +224,23 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     *data << (uint8)flags;
     if( m_objectTypeId==TYPEID_PLAYER )
     {
-        if(((Player*)this)->GetTransport()) {
+        if(((Player*)this)->GetTransport())
+        {
             flags2 |= 0x02000000;
         }
         *data << (uint32)flags2;
 
         *data << (uint32)getMSTime();
-        
-        if (!((Player *)this)->GetTransport()) {
+
+        if (!((Player *)this)->GetTransport())
+        {
             *data << (float)m_positionX;
             *data << (float)m_positionY;
             *data << (float)m_positionZ;
             *data << (float)m_orientation;
-        } else {
+        }
+        else
+        {
             //*data << ((Player *)this)->m_transport->GetPositionX() + (float)((Player *)this)->m_transX;
             //*data << ((Player *)this)->m_transport->GetPositionY() + (float)((Player *)this)->m_transY;
             //*data << ((Player *)this)->m_transport->GetPositionZ() + (float)((Player *)this)->m_transZ;
@@ -245,17 +249,17 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << ((Player *)this)->GetTransport()->GetPositionY();
             *data << ((Player *)this)->GetTransport()->GetPositionZ();
             *data << ((Player *)this)->GetTransport()->GetOrientation();
-        
+
             *data << (uint64)(((Player *)this)->GetTransport()->GetGUID());
             *data << ((Player *)this)->GetTransOffsetX();
             *data << ((Player *)this)->GetTransOffsetY();
             *data << ((Player *)this)->GetTransOffsetZ();
             *data << ((Player *)this)->GetTransOffsetO();
         }
-        
+
         *data << (float)0;
 
-        if(flags2 & 0x2000)                                //update self
+        if(flags2 & 0x2000)                                 //update self
         {
             *data << (float)0;
             *data << (float)1.0;
@@ -302,11 +306,14 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     }
     if( (m_objectTypeId==TYPEID_CORPSE) || (m_objectTypeId==TYPEID_GAMEOBJECT) || (m_objectTypeId==TYPEID_DYNAMICOBJECT))
     {
-        if(GUID_HIPART(GetGUID()) != HIGHGUID_TRANSPORT) {
+        if(GUID_HIPART(GetGUID()) != HIGHGUID_TRANSPORT)
+        {
             *data << (float)m_positionX;
             *data << (float)m_positionY;
             *data << (float)m_positionZ;
-        } else {
+        }
+        else
+        {
             *data << (uint32)0;
             *data << (uint32)0;
             *data << (uint32)0;
@@ -316,7 +323,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
     *data << (uint32)0x1;
 
-    if ((GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT)) {
+    if ((GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT))
+    {
         uint32 updT = (uint32)getMSTime();
         *data << (uint32)updT;
     }

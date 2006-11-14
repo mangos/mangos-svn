@@ -67,7 +67,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
         vector<Transport *> m_Transports;
         map<uint32, vector< Transport * > > m_TransportsByMap;
-        
+
     private:
         MapManager();
         ~MapManager();

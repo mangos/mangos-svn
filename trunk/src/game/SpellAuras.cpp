@@ -1048,11 +1048,11 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
             if (m_target->getRace() == TAUREN)
-            {
-                m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
-            }
-            else
-                m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
+        {
+            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
+        }
+        else
+            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
     }
     else
     {

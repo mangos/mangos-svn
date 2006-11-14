@@ -301,7 +301,7 @@ class MANGOS_DLL_SPEC Object
         float m_positionY;
         float m_positionZ;
         float m_orientation;
-    
+
         float m_speed;
         uint8 m_moveType;
 

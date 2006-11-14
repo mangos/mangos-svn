@@ -1377,4 +1377,3 @@ bool ChatHandler::HandleSaveAllCommand(const char* args)
     SendSysMessage(LANG_PLAYERS_SAVED);
     return true;
 }
-

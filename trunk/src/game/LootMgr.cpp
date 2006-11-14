@@ -123,16 +123,16 @@ struct HasChance
     float RolledChance[MaxLootGroups];
     float CumulativeChance[MaxLootGroups];
 
-    explicit HasChance(LootStore* _store) : m_store(_store) 
+    explicit HasChance(LootStore* _store) : m_store(_store)
     {
         for (int i=0; i < MaxLootGroups; i++)
             CumulativeChance[i] = 0.0;
     }
- 
+
     LootStoreItem* operator() ( LootStoreItem& itm )
     {
         // Quest loot handled separately
-        if (itm.questChanceOrGroup > 0)    
+        if (itm.questChanceOrGroup > 0)
             return NULL;
 
         // Non-grouped loot
@@ -153,7 +153,7 @@ struct HasChance
         }
         if (itm.chance >= 0)
         {
-            // Group of current loot - check for item chance in the group 
+            // Group of current loot - check for item chance in the group
             if (CumulativeChance[GroupId] == 0.0)
                 RolledChance[GroupId] = rand_chance();
             if (CumulativeChance[GroupId] >= RolledChance[GroupId])
@@ -185,7 +185,7 @@ struct HasChance
     }
 };
 
- struct HasQuestChance
+struct HasQuestChance
 {
     // explicit HasQuestChanceFor() : {}
     inline bool operator() ( LootStoreItem &itm )   { return itm.questChanceOrGroup > rand_chance(); }
@@ -213,9 +213,9 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
     for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
     {
         // There are stats of count variations for 100% drop - so urand used
-        if ( loot->quest_items.size() < MAX_NR_QUEST_ITEMS && hasQuestChance(*item_iter) ) 
+        if ( loot->quest_items.size() < MAX_NR_QUEST_ITEMS && hasQuestChance(*item_iter) )
             loot->quest_items.push_back(LootItem(*item_iter, urand(1, item_iter->maxcount)));
-        else if ( loot->items.size() < MAX_NR_LOOT_ITEMS ) 
+        else if ( loot->items.size() < MAX_NR_LOOT_ITEMS )
         {
             LootStoreItem* LootedItem = hasChance(*item_iter);
             if ( LootedItem )

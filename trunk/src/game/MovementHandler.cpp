@@ -126,16 +126,20 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
 
-    if (flags & 0x2000000) { // Transport GUID present
+    if (flags & 0x2000000)                                  // Transport GUID present
+    {
         // if we boarded a transport, add us to it
         uint32 tGUIDl, tGUIDh;
         float tX, tY, tZ, tO;
         recv_data >> tGUIDl >> tGUIDh;
         recv_data >> tX >> tY >> tZ >> tO;
 
-        if (!GetPlayer()->m_transport) {
-            for (vector<Transport*>::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); iter++) {
-                if ((*iter)->GetGUIDLow() == tGUIDl) {
+        if (!GetPlayer()->m_transport)
+        {
+            for (vector<Transport*>::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); iter++)
+            {
+                if ((*iter)->GetGUIDLow() == tGUIDl)
+                {
                     GetPlayer()->m_transport = (*iter);
                     (*iter)->AddPassenger(GetPlayer());
                     continue;
@@ -146,9 +150,12 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         GetPlayer()->m_transY = tY;
         GetPlayer()->m_transZ = tZ;
         GetPlayer()->m_transO = tO;
-    } else {
+    }
+    else
+    {
         // if we were on a transport, leave
-        if (GetPlayer()->m_transport) {
+        if (GetPlayer()->m_transport)
+        {
             GetPlayer()->m_transport->RemovePassenger(GetPlayer());
             GetPlayer()->m_transport = NULL;
             GetPlayer()->m_transX = 0.0f;

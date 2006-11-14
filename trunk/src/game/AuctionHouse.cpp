@@ -475,7 +475,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
     it->SaveToDB();
     sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`location`) "
-        "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')", 
+        "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
         AH->Id, AH->auctioneer, AH->item_guidlow, AH->item_id, AH->owner, AH->buyout, AH->time, AH->bidder, AH->bid, AH->location);
     pl->SaveToDB();
 

@@ -259,7 +259,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    if((*result)[4].GetUInt8() == 1)            // if ip is locked
+    if((*result)[4].GetUInt8() == 1)                        // if ip is locked
     {
         if ( strcmp((*result)[3].GetString(),GetRemoteAddress().c_str()) )
         {
@@ -271,7 +271,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
             return;
         }
     }
-    if((*result)[8].GetUInt8() == 1)            // if account banned
+    if((*result)[8].GetUInt8() == 1)                        // if account banned
     {
         packet.Initialize( SMSG_AUTH_RESPONSE );
         packet << uint8( AUTH_BANNED );
@@ -363,7 +363,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     sLog.outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
     sLog.outString( "Account: '%s' Login.", account.c_str() );
     loginDatabase.PQuery("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), account.c_str());
- 
+
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
     #ifdef WIN32

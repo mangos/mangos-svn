@@ -129,7 +129,8 @@ enum SpellSchools
 #define SLOT_TABARD                         18
 #define SLOT_EMPTY                          19
 
-enum Language {
+enum Language
+{
     LANG_GLOBAL         = 0, LANG_UNIVERSAL      = 0,
     LANG_ORCISH         = 1,
     LANG_DARNASSIAN     = 2,
