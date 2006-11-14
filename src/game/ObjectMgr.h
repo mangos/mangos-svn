@@ -257,7 +257,7 @@ class ObjectMgr
         void LoadAreaTriggerPoints();
 
         void LoadTeleportCoords();
-        
+
         void LoadAuctions();
         void LoadAuctionItems();
         void LoadLvlUpGains();

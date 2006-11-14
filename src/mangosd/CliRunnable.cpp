@@ -528,7 +528,7 @@ void CliRunnable::run()
 
     sLog.outString("");
     void CliHelp();
-    
+
     if(sConfig.GetIntDefault("BeepAtStart", 1) > 0)
     {
         putchar(7);

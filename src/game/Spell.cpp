@@ -758,7 +758,7 @@ void Spell::SendSpellCooldown()
         return;
 
     time_t curTime = time(NULL);
-    
+
     time_t recTime    = curTime+rec/1000;                   // in secs
     time_t catrecTime = curTime+catrec/1000;                // in secs
 
@@ -1402,13 +1402,13 @@ uint8 Spell::CanCast()
         //check creaturetype
         uint32 SpellCreatureType = m_spellInfo->TargetCreatureType;
         if(m_spellInfo->Id == 603)
-                SpellCreatureType = 0x7FF - 0x40;   //Curse of Doom
+            SpellCreatureType = 0x7FF - 0x40;               //Curse of Doom
 
-        if(SpellCreatureType) 
+        if(SpellCreatureType)
         {
             uint32 TargetCreatureType = 0;
-            if(target->GetTypeId() == TYPEID_PLAYER) 
-                TargetCreatureType = 0x40;      //1<<(7-1)
+            if(target->GetTypeId() == TYPEID_PLAYER)
+                TargetCreatureType = 0x40;                  //1<<(7-1)
             else if ( target->GetTypeId() == TYPEID_UNIT )
             {
                 uint32 CType = ((Creature*)target)->GetCreatureInfo()->type;
@@ -1419,7 +1419,7 @@ uint8 Spell::CanCast()
             }
 
             if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
-            {   
+            {
                 if(TargetCreatureType == 0x40)
                     castResult = CAST_FAIL_CANT_TARGET_PLAYERS;
                 else

@@ -94,7 +94,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     SetFloatValue(GAMEOBJECT_POS_Y, y);
     SetFloatValue(GAMEOBJECT_POS_Z, z);
     SetFloatValue(GAMEOBJECT_FACING, ang);                  //this is not facing angle
-    
+
     SetFloatValue (GAMEOBJECT_ROTATION, rotation0);
     SetFloatValue (GAMEOBJECT_ROTATION+1, rotation1);
     SetFloatValue (GAMEOBJECT_ROTATION+2, rotation2);
@@ -119,7 +119,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
 void GameObject::Update(uint32 p_time)
 {
-    if (GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT) {
+    if (GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT)
+    {
         //((Transport*)this)->Update(p_time);
         return;
     }
@@ -260,7 +261,7 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
-        //                                0    1     2            3            4            5             6           7           8           9           10     11             12             13 
+        //                                0    1     2            3            4            5             6           7           8           9           10     11             12             13
         result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer`,`animprogress`,`guid` FROM `gameobject` WHERE `guid` = '%u'", guid);
 
     if( !result )
@@ -281,9 +282,9 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
     float rotation1 = fields[7].GetFloat();
     float rotation2 = fields[8].GetFloat();
     float rotation3 = fields[9].GetFloat();
-    
+
     uint32 animprogress = fields[12].GetUInt32();
-    
+
     if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress) )
     {
         if (!external) delete result;

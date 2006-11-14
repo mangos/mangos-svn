@@ -107,7 +107,7 @@ void Unit::Update( uint32 p_time )
     _UpdateSpells( p_time );
     _UpdateHostil( p_time );
 
-    if (isInCombat() && GetTypeId() == TYPEID_PLAYER ) //update combat timer only for players
+    if (isInCombat() && GetTypeId() == TYPEID_PLAYER )      //update combat timer only for players
     {
         if ( m_CombatTimer <= p_time )
         {
@@ -251,7 +251,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
     sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
     if (health <= damage)
     {
-        if(pVictim->GetTypeId() == TYPEID_UNIT) //leave combat mode when killing mobs
+        if(pVictim->GetTypeId() == TYPEID_UNIT)             //leave combat mode when killing mobs
             ClearInCombat();
         else
             SetInCombat();
@@ -400,8 +400,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         if(damagetype != DOT)
         {
             Attack(pVictim);
-            if(damagetype == DIRECT_DAMAGE) //start melee attacks only after melee hit
-                SendAttackStart(pVictim); 
+            if(damagetype == DIRECT_DAMAGE)                 //start melee attacks only after melee hit
+                SendAttackStart(pVictim);
         }
 
         //Get in CombatState
@@ -2807,7 +2807,7 @@ bool Unit::Attack(Unit *victim)
     m_attacking->_addAttacker(this);
 
     //if(!isAttackReady(BASE_ATTACK))
-        //resetAttackTimer(BASE_ATTACK);
+    //resetAttackTimer(BASE_ATTACK);
 
     // delay offhand weapon attack to next attack time
     if(haveOffhandWeapon())

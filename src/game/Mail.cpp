@@ -139,7 +139,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     pl->ModifyMoney( -30 - money );
 
-    uint32 item_id = it ? it->GetEntry() : 0;  //item prototype
+    uint32 item_id = it ? it->GetEntry() : 0;               //item prototype
 
     time_t etime = base + DAY * ((COD > 0)? 3 : 30);        //time if COD 3 days, if no COD 30 days
 
@@ -151,10 +151,13 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         m->receiver = GUID_LOPART(rc);
         m->subject = subject;
         m->body = body;
-        if (it) { // if item attachment exists
+        if (it)                                             // if item attachment exists
+        {
             m->item_id = item_id;
             m->item_guidlow = GUID_LOPART(item);
-        } else {
+        }
+        else
+        {
             m->item_id = 0;
             m->item_guidlow = 0;
         }

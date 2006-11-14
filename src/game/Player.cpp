@@ -199,7 +199,8 @@ Player::~Player ()
     delete info;
     delete PlayerTalkClass;
 
-    if (m_transport) {
+    if (m_transport)
+    {
         m_transport->RemovePassenger(this);
     }
 }
@@ -864,7 +865,7 @@ void Player::Update( uint32 p_time )
         if(p_time >= m_nextSave)
         {
             // m_nextSave reseted in SaveToDB call
-            SaveToDB();                             
+            SaveToDB();
             sLog.outBasic("Player '%u' '%s' Saved", GetGUIDLow(), GetName());
         }
         else
@@ -1168,15 +1169,19 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         WorldPacket data;
         data.Initialize(SMSG_TRANSFER_PENDING);
         data << uint32(mapid);
-        if (m_transport) {
+        if (m_transport)
+        {
             data << m_transport->GetEntry() << GetMapId();
         }
         GetSession()->SendPacket(&data);
 
         data.Initialize(SMSG_NEW_WORLD);
-        if (m_transport) {
+        if (m_transport)
+        {
             data << (uint32)mapid << m_transX << m_transY << m_transZ << m_transO;
-        } else {
+        }
+        else
+        {
             data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
         }
         GetSession()->SendPacket( &data );
@@ -1990,7 +1995,7 @@ void Player::learnSpell(uint16 spell_id)
         case 2842:                                          //poisons
             SetSkill(40,1,maxskill);
             break;
-        // Languages
+            // Languages
         case 668: case 669: case 670: case 671:  case 672:  case 813: case 814:
         case 815: case 816: case 817: case 7340: case 7341: case 17737:
             if(LanguageDesc const* lang = GetLanguageDescBySpell(spell_id))
@@ -2053,7 +2058,6 @@ void Player::_LoadSpellCooldowns()
                 sLog.outError("Player %u have unknown spell %u in `character_spell_cooldown`, skipping.",GetGUIDLow(),spell_id);
                 continue;
             }
-
 
             // skip outdated cooldown
             if(db_time <= curTime)
@@ -2139,7 +2143,6 @@ void Player::_SaveSpellCooldowns()
         }
     }
 }
-
 
 uint32 Player::resetTalentsCost() const
 {
@@ -3687,7 +3690,6 @@ uint32 Player::GetStanding(uint32 faction) const
     // Faction without recorded reputation. Just ignore.
     if(!factionEntry)
         return 0;
-
 
     std::list<struct Factions>::const_iterator itr;
     for(itr = factions.begin(); itr != factions.end(); ++itr)
@@ -9902,13 +9904,15 @@ bool Player::LoadFromDB( uint32 guid )
     m_mapId = fields[10].GetUInt32();
     m_orientation = fields[11].GetFloat();
 
-    if (transGUID != 0) {
+    if (transGUID != 0)
+    {
         m_transX = fields[25].GetFloat();
         m_transY = fields[26].GetFloat();
         m_transZ = fields[27].GetFloat();
         m_transO = fields[28].GetFloat();
 
-        for (int i = 0; i < MapManager::Instance().m_Transports.size(); i++) {
+        for (int i = 0; i < MapManager::Instance().m_Transports.size(); i++)
+        {
             if ((MapManager::Instance().m_Transports[i])->GetGUIDLow() == transGUID)
             {
                 m_transport = MapManager::Instance().m_Transports[i];
@@ -10423,7 +10427,7 @@ void Player::SaveToDB()
     //this is becouse of the rename char stuff
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
-    ClearInCombat(); // Remove combat flag
+    ClearInCombat();                                        // Remove combat flag
 
     sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
     outDebugValues();

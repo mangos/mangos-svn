@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-// Structures using to access raw DBC data and required packing to portability 
+// Structures using to access raw DBC data and required packing to portability
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
@@ -282,13 +282,11 @@ struct WorldSafeLocsEntry
     float     z;
 };
 
-
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
 #pragma pack()
 #else
 #pragma pack(pop)
 #endif
-
 
 // Structures not used for casting to loaded DBC data and not requred then packing
 

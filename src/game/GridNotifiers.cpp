@@ -57,9 +57,10 @@ PlayerNotifier::BuildForMySelf()
     {
         WorldPacket packet;
         UpdateData data;
-        
+
         Transport *t = i_player.GetTransport();
-        if (t) {
+        if (t)
+        {
             t->BuildCreateUpdateBlockForPlayer(&data, &i_player);
         }
 
@@ -72,11 +73,13 @@ PlayerNotifier::BuildForMySelf()
         // Hack to send out transports
         WorldPacket packet2;
         UpdateData transData;
-        if (MapManager::Instance().m_TransportsByMap.find(i_player.GetMapId()) != MapManager::Instance().m_TransportsByMap.end()) {
+        if (MapManager::Instance().m_TransportsByMap.find(i_player.GetMapId()) != MapManager::Instance().m_TransportsByMap.end())
+        {
             uint32 m = i_player.GetMapId();
             for (int i = 0;
-                 i < MapManager::Instance().m_TransportsByMap[i_player.GetMapId()].size();
-                 i++) {
+                i < MapManager::Instance().m_TransportsByMap[i_player.GetMapId()].size();
+                i++)
+            {
                 Transport *t = MapManager::Instance().m_TransportsByMap[i_player.GetMapId()][i];
                 t->BuildCreateUpdateBlockForPlayer(&transData, &i_player);
             }
