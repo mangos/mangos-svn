@@ -147,7 +147,6 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
 {
     sLog.outString("MSG_TALENT_WIPE_CONFIRM");
-    recv_data.hexlike();
     uint64 guid;
     recv_data >> guid;
 
