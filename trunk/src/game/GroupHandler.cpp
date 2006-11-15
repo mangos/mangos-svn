@@ -423,7 +423,6 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     recv_data >> Guid;                                      //guid of the item rolled
     recv_data >> NumberOfPlayers;
     recv_data >> Choise;                                    //0: pass, 1: need, 2: greed
-    recv_data.hexlike();
 
     sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
 
@@ -542,7 +541,6 @@ void WorldSession::HandleRaidIconTargetOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint8 icon;
     uint64 guid;
-    recv_data.hexlike();
     recv_data >> icon;                                      // icon
     recv_data >> guid;                                      // guid
     sLog.outDebug("Raid group icon %u for guid %u", icon, guid);

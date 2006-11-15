@@ -363,7 +363,6 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     uint8 bag, slot, count, vendorslot;
 
     recv_data >> vendorguid >> item >> bagguid >> slot >> count;
-    recv_data.hexlike();
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
@@ -450,7 +449,6 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     uint8 count, unk1, vendorslot;
 
     recv_data >> vendorguid >> item >> count >> unk1;
-    recv_data.hexlike();
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )

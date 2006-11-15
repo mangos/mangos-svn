@@ -46,7 +46,6 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     if (_player->GetGuildId())
         return;
     sLog.outDebug("Received opcode CMSG_PETITION_BUY");
-    recv_data.hexlike();                                    // print the values
     uint64 guidNPC;
     uint64 unk3;
     uint32 unk4;
@@ -134,7 +133,6 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
         return;
     uint8 signs = 0;
     uint64 petitionguid;
-    recv_data.hexlike();
     recv_data >> petitionguid;                              // petition guid
 
     QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
@@ -172,7 +170,6 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
         result->NextRow();
     }
     delete result;
-    data.hexlike();                                         //only for testing
     SendPacket( &data );
 }
 
@@ -189,7 +186,6 @@ void WorldSession::HandlePetitionQueryOpcode( WorldPacket & recv_data )
     0040: 00 00 00 00 00 00 00 00  00                      | ........ .
     */
     sLog.outDebug("Received opcode CMSG_PETITION_QUERY");
-    recv_data.hexlike();
     uint32 guildguid;
     uint64 petitionguid;
     recv_data >> guildguid;                                 // in mangos always same as GUID_LOPART(petitionguid)
@@ -235,7 +231,6 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
     data << (uint64)ownerguid;                              // charter owner guid
     data << guildname;                                      // guildname
     data.append(tdata, sizeof(tdata));
-    data.hexlike();
     SendPacket( &data );
 }
 
@@ -245,7 +240,6 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
     06 00 00 00 00 00 00 00 | 64 61 61 64 61 77 64 00
     */
     sLog.outDebug("Received opcode MSG_PETITION_RENAME");
-    recv_data.hexlike();
 
     uint64 petitionguid;
     std::string newguildname;
@@ -287,7 +281,6 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
     0010: 00 00 00 00                                     | ....
     */
     sLog.outDebug("Received opcode CMSG_PETITION_SIGN");
-    recv_data.hexlike();
     Field *fields;
     uint64 petitionguid;
     uint64 ownerguid;
@@ -335,7 +328,6 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
     data << petitionguid;
     data << _player->GetGUID();
     data << (uint32)0;                                      // can be other values for error reporting(need check 2, 4)
-    data.hexlike();
 
     // close at signer side
     SendPacket( &data );
@@ -348,7 +340,6 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("Received opcode MSG_PETITION_DECLINE");
-    recv_data.hexlike();
 
     uint64 petitionguid;
     uint64 ownerguid;
@@ -384,7 +375,6 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
     0010: 01 00 00 00 00                                  | .....
     */
     sLog.outDebug("Received opcode CMSG_OFFER_PETITION");
-    recv_data.hexlike();
 
     uint8 signs = 0;
     uint64 petitionguid, plguid;
@@ -434,7 +424,6 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
     }
 
     delete result;
-    data.hexlike();
     player->GetSession()->SendPacket( &data );
 }
 
@@ -459,7 +448,6 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
     uint32 ownerguidlo;
     std::string guildname;
 
-    recv_data.hexlike();
     recv_data >> petitionguid;
 
     if(_player->GetGuildId())
