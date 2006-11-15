@@ -301,3 +301,9 @@ bool ScriptedAI::needToStop() const
 {
     return ( !m_creature->getVictim()->isTargetableForAttack() || !m_creature->isAlive() );
 }
+
+void ScriptedAI::DoCastSpell(Unit* owner,uint32 spelId)
+{
+    if( (m_creature->getVictim()) && (m_creature->isAlive()) && (m_creature->getVictim()) )
+	     static_cast<TargetedMovementGenerator *>((*m_creature)->top())->spellAtack(*m_creature, spelId); 
+}

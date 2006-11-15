@@ -233,3 +233,16 @@ void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellIn
     owner.m_canMove = false;
     DEBUG_LOG("Spell Attack.");
 }
+
+void TargetedMovementGenerator::spellAtack(Creature &owner,uint32 spellId)
+{
+	SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
+
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown spell id %i\n", spellId);
+        return;
+    }
+
+    _spellAtack(owner, spellInfo);
+}
