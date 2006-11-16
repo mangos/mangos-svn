@@ -662,6 +662,14 @@ void Guild::Roster(WorldSession *session)
         }
         else
         {
+            uint64 logout_time = 0;
+            QueryResult *result = sDatabase.PQuery("SELECT `logout_time` FROM `character` WHERE `guid`='%u'", GUID_LOPART(itr->guid));
+            if(result)
+            {
+                logout_time = (*result)[0].GetUInt64();
+                delete result;
+            }
+
             data << itr->guid;
             data << (uint8)0;
             data << itr->name;
@@ -669,10 +677,11 @@ void Guild::Roster(WorldSession *session)
             data << itr->level;
             data << itr->Class;
             data << itr->zoneId;
-            data << (uint8)0;
+            data << (float(time(NULL)-logout_time) / DAY);
+            /*data << (uint8)0;
             data << (uint8)1;
             data << (uint8)1;
-            data << (uint8)1;
+            data << (uint8)1;*/
             data << itr->Pnote;
             data << itr->OFFnote;
         }
