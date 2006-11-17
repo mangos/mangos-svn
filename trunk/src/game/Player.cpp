@@ -4674,7 +4674,12 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             return;
 
         loot = &item->loot;
-        FillLoot(this,loot,item->GetEntry(),LootTemplates_Item);
+
+        if(!item->m_lootGenerated)
+        {
+            item->m_lootGenerated = true;
+            FillLoot(this,loot,item->GetEntry(),LootTemplates_Item);
+        }
     }
     else
     {
@@ -6895,7 +6900,6 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
         ItemPrototype const *pProto = pItem->GetProto();
         if( pProto )
         {
-            if(isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE)
             if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
                 return EQUIP_ERR_CANT_DO_IN_COMBAT;

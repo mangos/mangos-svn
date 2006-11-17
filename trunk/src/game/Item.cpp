@@ -165,6 +165,7 @@ Item::Item( )
 
     m_valuesCount = ITEM_END;
     m_slot = 0;
+    m_lootGenerated = false;
 }
 
 uint32 GetRandPropertiesSeedfromDisplayInfoDBC(uint32 DisplayID)
