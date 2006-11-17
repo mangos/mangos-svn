@@ -114,7 +114,10 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
         m_creature->CastSpell(victim,spelId,true);
     }
 
-	void DoCastSpell(Unit* owner,uint32 spelId);
+	void DoCastSpell(Unit* who,SpellEntry *spellInfo)
+	{
+		m_creature->CastSpell(who,spellInfo,true);
+	}
 
     void DoSay(char const* text, uint32 language)
     {
