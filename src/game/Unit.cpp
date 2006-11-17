@@ -719,20 +719,21 @@ void Unit::CalDamageReduction(Unit *pVictim,uint32 School, const uint32 damage, 
     if(!pVictim || !pVictim->isAlive() || !damage)
         return;
 
+    // Normal damage
     if(School == 0)
     {
         float armor = pVictim->GetArmor();
         float tmpvalue = armor / (pVictim->getLevel() * 85.0 + 400.0 +armor);
         if(tmpvalue < 0)
             tmpvalue = 0.0;
-        if(tmpvalue > 1.0)
-            tmpvalue = 1.0;
+        if(tmpvalue > 0.75)
+            tmpvalue = 0.75;
         *absorb += uint32(damage * tmpvalue);
         if(*absorb > damage)
             *absorb = damage;
     }
-
-    if(School > 0)
+    // Magic damage
+    else
     {
         float tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
         if (tmpvalue2 < 0) tmpvalue2 = 0;
