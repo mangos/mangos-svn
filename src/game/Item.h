@@ -159,6 +159,7 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetSpell();
         void SetItemRandomProperties();
         Loot loot;
+        bool m_lootGenerated;
 
     protected:
         void _LoadQuests();
