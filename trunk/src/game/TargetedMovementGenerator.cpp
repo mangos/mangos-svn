@@ -234,7 +234,7 @@ void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellIn
     DEBUG_LOG("Spell Attack.");
 }
 
-void TargetedMovementGenerator::spellAtack(Creature &owner,uint32 spellId)
+void TargetedMovementGenerator::spellAtack(Creature &owner,Unit &who,uint32 spellId)
 {
 	SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
 
@@ -244,5 +244,24 @@ void TargetedMovementGenerator::spellAtack(Creature &owner,uint32 spellId)
         return;
     }
 
-    _spellAtack(owner, spellInfo);
+    owner.StopMoving();
+    owner->Idle();
+    if(owner.m_currentSpell)
+    {
+        if(owner.m_currentSpell->m_spellInfo->Id == spellInfo->Id )
+            return;
+        else
+        {
+            owner.m_currentSpell->cancel();
+        }
+    }
+    Spell *spell = new Spell(&owner, spellInfo, false, 0);
+    spell->SetAutoRepeat(false);
+    //owner.addUnitState(UNIT_STAT_ATTACKING);
+    //owner.clearUnitState(UNIT_STAT_CHASE);
+    SpellCastTargets targets;
+    targets.setUnitTarget( &who );
+    spell->prepare(&targets);
+    owner.m_canMove = false;
+    DEBUG_LOG("Spell Attack.");
 }

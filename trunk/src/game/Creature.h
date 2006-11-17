@@ -356,6 +356,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetLootRecipient (Player *player);
 
         SpellEntry *reachWithSpellAttack(Unit *pVictim);
+		SpellEntry *reachWithSpellCure(Unit *pVictim);
+
         uint32 m_spells[CREATURE_MAX_SPELLS];
 
         float GetAttackDistance(Unit *pl);

@@ -226,9 +226,10 @@ void Creature::AIM_Update(const uint32 &diff)
             }
             if (m_regenTimer != 0)
                 break;
-            if (!isInCombat())
+			if (!isInCombat()){
                 RegenerateHealth();
-            RegenerateMana();
+                RegenerateMana();
+			}
             m_regenTimer = 2000;
             break;
         }
@@ -1260,6 +1261,8 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
     if(!pVictim)
         return NULL;
     SpellEntry *spellInfo;
+	bool bcontinue;
+
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
     {
         if(!m_spells[i])
@@ -1271,13 +1274,65 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
             continue;
         }
 
-        /*spell = new Spell(this, spellInfo, false, 0);
-        spell->m_targets = targets;
-        if(!spell)
-        {
-            sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
+        bcontinue = true;
+		for(uint32 j=0;j<3;j++)
+		{
+		    if( (spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE )       ||
+				(spellInfo->Effect[j] == SPELL_EFFECT_INSTAKILL)            ||
+                (spellInfo->Effect[j] == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE) ||
+				(spellInfo->Effect[j] == SPELL_EFFECT_HEALTH_LEECH )        
+			){
+                    bcontinue = false;
+				    break;
+			 }
+		}
+        if(bcontinue) continue;
+
+        if(spellInfo->manaCost > GetPower(POWER_MANA))
             continue;
-        }*/
+        SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+        float range = GetMaxRange(srange);
+        float minrange = GetMinRange(srange);
+        float dist = GetDistanceSq(pVictim);
+        //if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
+        //    continue;
+        if( dist > range * range || dist < minrange * minrange )
+            continue;
+        if(m_silenced)
+            continue;
+        return spellInfo;
+    }
+    return NULL;
+}
+
+SpellEntry *Creature::reachWithSpellCure(Unit *pVictim)
+{
+    if(!pVictim)
+        return NULL;
+    SpellEntry *spellInfo;
+	bool bcontinue;
+    for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+    {
+        if(!m_spells[i])
+            continue;
+        spellInfo = sSpellStore.LookupEntry(m_spells[i] );
+        if(!spellInfo)
+        {
+            sLog.outError("WORLD: unknown spell id %i\n", m_spells[i]);
+            continue;
+        }
+
+        bcontinue = true;
+		for(uint32 j=0;j<3;j++)
+		{
+		    if( (spellInfo->Effect[j] == SPELL_EFFECT_HEAL ) )
+			{
+                bcontinue = false;
+				break;
+			}
+		}			
+		if(bcontinue) continue;
+
         if(spellInfo->manaCost > GetPower(POWER_MANA))
             continue;
         SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
