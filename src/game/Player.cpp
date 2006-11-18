@@ -4189,11 +4189,16 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     _RemoveStatsMods();
     AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
+    AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+        (*i)->ApplyModifier(false);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(false);
 
     _ApplyItemBonuses(proto,slot,apply);
 
+    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+        (*i)->ApplyModifier(true);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(true);
     _ApplyStatsMods();
@@ -4547,6 +4552,10 @@ void Player::_RemoveAllItemMods()
         }
     }
 
+    AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+        (*i)->ApplyModifier(false);
+
     _RemoveStatsMods();
 
     AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
@@ -4570,6 +4579,9 @@ void Player::_RemoveAllItemMods()
         (*i)->ApplyModifier(true);
 
     _ApplyStatsMods();
+    
+    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+        (*i)->ApplyModifier(true);
 
     sLog.outDebug("_RemoveAllItemMods complete.");
 }
@@ -4577,6 +4589,39 @@ void Player::_RemoveAllItemMods()
 void Player::_ApplyAllItemMods()
 {
     sLog.outDebug("_ApplyAllItemMods start.");
+
+    AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+        (*i)->ApplyModifier(false);
+
+    _RemoveStatsMods();
+
+    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(false);
+
+    for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        if(m_items[i])
+        {
+            if(m_items[i]->IsBroken())
+                continue;
+
+            ItemPrototype const *proto = m_items[i]->GetProto();
+            if(!proto)
+                continue;
+
+            _ApplyItemBonuses(proto,i, true);
+            }
+        }
+
+    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
+        (*i)->ApplyModifier(true);
+
+    _ApplyStatsMods();
+
+    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+        (*i)->ApplyModifier(true);
 
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
@@ -4599,35 +4644,9 @@ void Player::_ApplyAllItemMods()
                 uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                 if(Enchant_id)
                     AddItemEnchant(m_items[i],Enchant_id, true);
-            }
         }
     }
-
-    _RemoveStatsMods();
-
-    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(false);
-
-    for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
-    {
-        if(m_items[i])
-        {
-            if(m_items[i]->IsBroken())
-                continue;
-
-            ItemPrototype const *proto = m_items[i]->GetProto();
-            if(!proto)
-                continue;
-
-            _ApplyItemBonuses(proto,i, true);
-        }
     }
-
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(true);
-
-    _ApplyStatsMods();
 
     sLog.outDebug("_ApplyAllItemMods complete.");
 }
@@ -7581,12 +7600,12 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
+            if ( slot < INVENTORY_SLOT_BAG_END )
+                _ApplyItemMods(pItem, slot, false);
+
             m_items[slot] = NULL;
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot < INVENTORY_SLOT_BAG_END )
-            {
-                _ApplyItemMods(pItem, slot, false);
                 if ( slot < EQUIPMENT_SLOT_END )
                 {
                     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
@@ -7594,7 +7613,6 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                         SetUInt32Value(i, 0);
                 }
             }
-        }
         else
         {
             Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
