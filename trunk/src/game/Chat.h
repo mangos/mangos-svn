@@ -138,7 +138,7 @@ class ChatHandler
         bool HandleModifyManaCommand(const char* args);
         bool HandleModifyRageCommand(const char* args);
         bool HandleModifyEnergyCommand(const char* args);
-        bool HandleModifyGoldCommand(const char* args);
+        bool HandleModifyMoneyCommand(const char* args);
         bool HandleModifyASpeedCommand(const char* args);
         bool HandleModifySpeedCommand(const char* args);
         bool HandleModifyBWalkCommand(const char* args);
@@ -240,7 +240,7 @@ class ChatHandler
         bool HandleDelTicketCommand(const char* args);
         bool HandleMaxSkillCommand(const char* args);
         bool HandleLookupSkillCommand(const char* args);
-        bool HandleLookupMobCommand(const char* args);
+        bool HandleLookupCreatureCommand(const char* args);
 
         //! Development Commands
         bool HandleSetValue(const char* args);

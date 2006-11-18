@@ -1107,14 +1107,12 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleModifyGoldCommand(const char* args)
+bool ChatHandler::HandleModifyMoneyCommand(const char* args)
 {
     WorldPacket data;
 
     if (!*args)
         return false;
-
-    int32 gold = atoi((char*)args);
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
@@ -1123,14 +1121,16 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
         return true;
     }
 
+    int32 addmoney = atoi((char*)args);
+
     uint32 moneyuser = m_session->GetPlayer()->GetMoney();
 
-    if(gold < 0)
+    if(addmoney < 0)
     {
-        int32 newmoney = moneyuser + gold;
+        int32 newmoney = moneyuser + addmoney;
 
-        sLog.outDetail(LANG_CURRENT_MONEY, moneyuser, gold, newmoney);
-        if(newmoney < 0 )
+        sLog.outDetail(LANG_CURRENT_MONEY, moneyuser, addmoney, newmoney);
+        if(newmoney <= 0 )
         {
 
             PSendSysMessage(LANG_YOU_TAKE_ALL_MONEY, chr->GetName());
@@ -1145,10 +1145,10 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
         else
         {
 
-            PSendSysMessage(LANG_YOU_TAKE_MONEY, abs(gold), chr->GetName());
+            PSendSysMessage(LANG_YOU_TAKE_MONEY, abs(addmoney), chr->GetName());
 
             char buf[256];
-            sprintf((char*)buf,LANG_YOURS_MONEY_TAKEN, m_session->GetPlayer()->GetName(), abs(gold));
+            sprintf((char*)buf,LANG_YOURS_MONEY_TAKEN, m_session->GetPlayer()->GetName(), abs(addmoney));
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
 
@@ -1158,17 +1158,17 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
     else
     {
 
-        PSendSysMessage(LANG_YOU_GIVE_MONEY, gold, chr->GetName());
+        PSendSysMessage(LANG_YOU_GIVE_MONEY, addmoney, chr->GetName());
 
         char buf[256];
-        sprintf((char*)buf,LANG_YOURS_MONEY_GIVEN, m_session->GetPlayer()->GetName(), gold);
+        sprintf((char*)buf,LANG_YOURS_MONEY_GIVEN, m_session->GetPlayer()->GetName(), addmoney);
         FillSystemMessageData(&data, m_session, buf);
         chr->GetSession()->SendPacket(&data);
 
-        chr->ModifyMoney( gold );
+        chr->ModifyMoney( addmoney );
     }
 
-    sLog.outDetail(LANG_NEW_MONEY, moneyuser, gold, chr->GetMoney() );
+    sLog.outDetail(LANG_NEW_MONEY, moneyuser, addmoney, chr->GetMoney() );
 
     return true;
 }

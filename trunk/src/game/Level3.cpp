@@ -1347,7 +1347,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleLookupMobCommand(const char* args)
+bool ChatHandler::HandleLookupCreatureCommand(const char* args)
 {
     if(!*args)
         return false;
