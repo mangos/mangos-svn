@@ -398,6 +398,7 @@ void Spell::EffectApplyAura(uint32 i)
         SendCastResult(castResult);
         return;
     }
+
     sLog.outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, unitTarget,m_caster, m_CastItem);
@@ -423,23 +424,40 @@ void Spell::EffectApplyAura(uint32 i)
 
     bool added = unitTarget->AddAura(Aur);
 
-    if (added && Aur->IsTrigger())
+    if (added)
     {
-        // arcane missiles
-        SpellEntry *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
-        if (!spellInfo) return;
-        if (spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY && m_caster->GetTypeId() == TYPEID_PLAYER)
+        // Check for Power Word: Shield
+        // TODO Make a way so it works for every related spell!
+        if(unitTarget->GetTypeId()==TYPEID_PLAYER)              // Negative buff should only be applied on players
         {
-            Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-            if (target)
+            // This should cover all Power Word: Shield spells
+            if ((m_spellInfo->SpellVisual == 784) && (m_spellInfo->SpellIconID == 566))
             {
-                if (!m_caster->IsFriendlyTo(target))
-                    Aur->SetTarget(target);
+                SpellEntry *WeakenedSoulSpellInfo = sSpellStore.LookupEntry( 6788 ); // Weakened Soul
+                Aura* WeakenedSoulAura = new Aura(WeakenedSoulSpellInfo, 0, unitTarget,m_caster, 0);
+                unitTarget->AddAura(WeakenedSoulAura, 0);
+                sLog.outDebug("Spell: Additinal Aura is: %u", WeakenedSoulSpellInfo->EffectApplyAuraName[i]);
+            } 
+        }
+
+        if(Aur->IsTrigger())
+        {
+            // arcane missiles
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+            if (!spellInfo) return;
+            if (spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY && m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+                if (target)
+                {
+                    if (!m_caster->IsFriendlyTo(target))
+                        Aur->SetTarget(target);
+                    else
+                        cancel();
+                }
                 else
                     cancel();
             }
-            else
-                cancel();
         }
     }
 }
