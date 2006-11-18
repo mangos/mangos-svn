@@ -1661,8 +1661,8 @@ uint8 Spell::CanCast()
         }
         if(!hasImmolate)
         {
-            SendCastResult(CAST_FAIL_FAILED);               // TODO: find a correct error message
-            return CAST_FAIL_FAILED;
+            SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
+            return CAST_FAIL_CANT_DO_THAT_YET;
         }
     }
 
