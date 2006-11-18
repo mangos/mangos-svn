@@ -360,7 +360,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         uint32 m_spells[CREATURE_MAX_SPELLS];
 
-        float GetAttackDistance(Unit *pl);
+        float GetAttackDistance(Unit *pl) const;
         uint32 getloyalty(){ return ((GetUInt32Value(UNIT_FIELD_BYTES_1) >> 8) & 0xFF);};
         uint32 getUsedTrainPoint(){ return (GetUInt32Value(UNIT_TRAINING_POINTS) & 0xFFFF);};
         void GivePetLevel(uint32 level);
@@ -371,6 +371,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         // for use only in LoadHelper, Map::Add Map::CreatureCellRelocation
         Cell const& GetCurrentCell() const { return m_currentCell; }
         void SetCurrentCell(Cell const& cell) { m_currentCell = cell; }
+
+        bool IsVisibleInGridForPlayer(Player* pl) const;
     protected:
         void _LoadGoods();
         void _LoadQuests();

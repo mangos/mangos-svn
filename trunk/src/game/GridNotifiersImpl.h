@@ -66,8 +66,7 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
     for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( (i_player.isAlive() && iter->second->isAlive() ) ||
-            (i_player.isDead() && iter->second->isDead()))
+        if( iter->second->IsVisibleInGridForPlayer(&i_player) )
         {
             iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
         }

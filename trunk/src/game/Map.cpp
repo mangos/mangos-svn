@@ -533,10 +533,11 @@ Map::Remove(T *obj, bool remove)
 
     {
         Cell cell = RedZone::GetZone(p);
-        CellLock<ReadGuard> cell_lock(cell, p);
-        MaNGOS::ObjectNotVisibleNotifier notifier(*obj);
+        cell.data.Part.reserved = ALL_DISTRICT;
+        MaNGOS::ObjectNotVisibleNotifier notifier(*static_cast<Object *>(obj));
         TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
-
+        CellLock<ReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, player_notifier, *this);
     }
 
     if( remove )

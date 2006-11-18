@@ -163,6 +163,7 @@ void Creature::AIM_Update(const uint32 &diff)
                 DEBUG_LOG("Respawning...");
 
                 RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+                SetUInt32Value(UNIT_NPC_FLAGS, objmgr.GetCreatureTemplate(this->GetEntry())->npcflag);
                 SetHealth(GetMaxHealth());
                 setDeathState( ALIVE );
                 clearUnitState(UNIT_STAT_ALL_STATE);
@@ -1194,12 +1195,12 @@ void Creature::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `creature_involvedrelation` WHERE `id` = '%u'", GetGUIDLow());
 }
 
-float Creature::GetAttackDistance(Unit *pl)
+float Creature::GetAttackDistance(Unit *pl) const
 {
-    uint32 playlevel     = pl->getLevel();
-    uint32 creaturelevel = getLevel();
+    int32 playerlevel   = pl->getLevel();
+    int32 creaturelevel = getLevel();
 
-    int32 leveldif       = playlevel - creaturelevel;
+    int32 leveldif       = playerlevel - creaturelevel;
 
     // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
     if ( leveldif < - 25)
@@ -1473,4 +1474,32 @@ void Creature::SaveAsPet()
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,1)",
         GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
         m_spells[0], m_spells[1], m_spells[2], m_spells[3], STATE_RA_FOLLOW, GetPower(POWER_HAPPINESS),loyalty,getUsedTrainPoint() );
+}
+
+bool Creature::IsVisibleInGridForPlayer(Player* pl) const
+{
+    // Live player see live creatures
+    if(pl->isAlive())
+        return isAlive();
+
+    // Dead player see live creatures near own corpse
+    if(pl->getDeathState() == CORPSE)
+    {
+        if(isAlive())
+        {
+            if(Corpse* corpse = pl->GetCorpse())
+            {
+                // 20 - aggro distance for same level, 25 - max additinal distance if player level less that creature level
+                if(corpse->IsWithinDistInMap(this,(20+25)*sWorld.getRate(RATE_CREATURE_AGGRO)))
+                    return true;
+            }
+        }
+    }
+
+    // Dead player see Spirit Healer
+    if(pl->isDead() && isSpiritHealer())
+        return true;
+
+    // and not see any other
+    return false;
 }
