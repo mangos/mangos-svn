@@ -2321,25 +2321,75 @@ void Aura::HandleModDamagePercentDone(bool apply)
     // 126 - full bitmask all magic damages
     // 127 - full bitmask any damages
     //
-    // mods must be applied base at equiped weapon class amd subclass comparison
+    // mods must be applied base at equiped weapon class and subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClass
     // m_modifier.m_miscvalue comparison with item generated damage types
+    if (!m_target)
+        return;
 
-    if(m_modifier.m_miscvalue == 1)
+    if((m_modifier.m_miscvalue & 1) != 0)
     {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
+        if (GetSpellProto()->EquippedItemClass == -1 || m_target->GetTypeId() != TYPEID_PLAYER)
+        {
+            m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
+        }
+        else
+        {
+            Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            if (pItem)
+            {
+                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) && 
+                    ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
+                {
+                    m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
+                    m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
+                }
+            }
+            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            if (pItem)
+            {
+                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) && 
+                    ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
+                {
+                    m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
+                    m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
+                }
+            }
+            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (pItem)
+            {
+                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) && 
+                    ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
+                {
+                    m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
+                    m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
+                }
+            }
+        }            
     }
-    if(m_modifier.m_miscvalue == 126)
+
+    //FIX ME: magic damage percent modifiers not implmented yet 
+    // For examples with 20218 18789 18791 spells
+    /*
+    // magic damage
+    if((m_modifier.m_miscvalue & 126) != 0)
     {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
+        for(int8 x=1;x < 7;x++)
+        {
+            if(m_modifier.m_miscvalue & int32(1<<x))
+            {
+                SpellSchools school = SpellSchools(SPELL_SCHOOL_NORMAL + x);
+
+                m_target->ApplyPercentModFloatValue(***, m_modifier.m_amount, apply );
+            }
+        }
     }
-    if(m_modifier.m_miscvalue == 127)
-    {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
-    }
+    */
 }
 
 /********************************/
