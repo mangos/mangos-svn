@@ -562,6 +562,9 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
 
 void Player::HandleDrowing(uint32 UnderWaterTime)
 {
+    if(!m_isunderwater)
+        return;
+
     AuraList& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
     for(AuraList::iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
         UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
