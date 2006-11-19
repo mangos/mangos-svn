@@ -365,7 +365,7 @@ void Transport::TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, flo
             continue;
         }
         
-        plr->TeleportTo(newMapid, x, y, z, true);
+        plr->TeleportTo(newMapid, x, y, z, true,false);
 
         WorldPacket data;
         data.SetOpcode(0x32B);
