@@ -458,7 +458,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     {
         GetPlayer()->SetMovement(MOVE_WATER_WALK);
 
-        if (GetPlayer()->getRace() == RACE_NIGHT_ELF)
+        if (GetPlayer()->getRace() == RACE_NIGHTELF)
         {
             pCurrChar->SetPlayerSpeed(MOVE_RUN, (float)12.75, true);
             pCurrChar->SetPlayerSpeed(MOVE_SWIM, (float)8.85, true);

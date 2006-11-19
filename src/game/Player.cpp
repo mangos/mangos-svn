@@ -288,7 +288,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         return false;
     }
 
-    if ( race == TAUREN )
+    if ( race == RACE_TAUREN )
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
     else 
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
@@ -1356,13 +1356,13 @@ void Player::Regenerate(Powers power)
 
             switch (Class)
             {
-                case DRUID:   addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
-                case HUNTER:  addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
-                case MAGE:    addvalue = (Spirit/4 + 12.5) * ManaIncreaseRate; break;
-                case PALADIN: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
-                case PRIEST:  addvalue = (Spirit/4 + 12.5) * ManaIncreaseRate; break;
-                case SHAMAN:  addvalue = (Spirit/5 + 17)   * ManaIncreaseRate; break;
-                case WARLOCK: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
+                case CLASS_DRUID:   addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
+                case CLASS_HUNTER:  addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
+                case CLASS_MAGE:    addvalue = (Spirit/4 + 12.5) * ManaIncreaseRate; break;
+                case CLASS_PALADIN: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
+                case CLASS_PRIEST:  addvalue = (Spirit/4 + 12.5) * ManaIncreaseRate; break;
+                case CLASS_SHAMAN:  addvalue = (Spirit/5 + 17)   * ManaIncreaseRate; break;
+                case CLASS_WARLOCK: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
             }
             break;
         case POWER_RAGE:                                    // Regenerate rage
@@ -1409,15 +1409,15 @@ void Player::RegenerateHealth()
 
     switch (Class)
     {
-        case DRUID:   addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
-        case HUNTER:  addvalue = (Spirit*0.43 - 5.5) * HealthIncreaseRate; break;
-        case MAGE:    addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
-        case PALADIN: addvalue = (Spirit*0.25)       * HealthIncreaseRate; break;
-        case PRIEST:  addvalue = (Spirit*0.15 + 1.4) * HealthIncreaseRate; break;
-        case ROGUE:   addvalue = (Spirit*0.84 - 13)  * HealthIncreaseRate; break;
-        case SHAMAN:  addvalue = (Spirit*0.28 - 3.6) * HealthIncreaseRate; break;
-        case WARLOCK: addvalue = (Spirit*0.12 + 1.5) * HealthIncreaseRate; break;
-        case WARRIOR: addvalue = (Spirit*1.26 - 22.6)* HealthIncreaseRate; break;
+        case CLASS_DRUID:   addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
+        case CLASS_HUNTER:  addvalue = (Spirit*0.43 - 5.5) * HealthIncreaseRate; break;
+        case CLASS_MAGE:    addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
+        case CLASS_PALADIN: addvalue = (Spirit*0.25)       * HealthIncreaseRate; break;
+        case CLASS_PRIEST:  addvalue = (Spirit*0.15 + 1.4) * HealthIncreaseRate; break;
+        case CLASS_ROGUE:   addvalue = (Spirit*0.84 - 13)  * HealthIncreaseRate; break;
+        case CLASS_SHAMAN:  addvalue = (Spirit*0.28 - 3.6) * HealthIncreaseRate; break;
+        case CLASS_WARLOCK: addvalue = (Spirit*0.12 + 1.5) * HealthIncreaseRate; break;
+        case CLASS_WARRIOR: addvalue = (Spirit*1.26 - 22.6)* HealthIncreaseRate; break;
     }
 
     if (!isInCombat())
@@ -1579,7 +1579,7 @@ void Player::GiveLevel()
     _RemoveStatsMods();
 
     // base stats
-    float newMP  = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : GetMaxPower(POWER_MANA);
+    float newMP  = (getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE) ? 0 : GetMaxPower(POWER_MANA);
 
     float newHP  = GetMaxHealth();
 
@@ -1600,7 +1600,7 @@ void Player::GiveLevel()
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         newStats[i] += gainStats[i];
 
-    MPGain = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : uint32(newStats[STAT_SPIRIT] / 2);
+    MPGain = (getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE) ? 0 : uint32(newStats[STAT_SPIRIT] / 2);
     HPGain = uint32(newStats[STAT_STAMINA] / 2);
 
     newMP  += MPGain;
@@ -1616,7 +1616,7 @@ void Player::GiveLevel()
     UpdateMaxSkills ();
 
     // save new stats
-    if(getClass() != WARRIOR && getClass() != ROGUE)
+    if(getClass() != CLASS_WARRIOR && getClass() != CLASS_ROGUE)
         SetMaxPower(POWER_MANA, uint32(newMP));             // only integer part
 
     SetMaxHealth(uint32(newHP));                            // only integer part
@@ -1673,63 +1673,63 @@ void Player::BuildLvlUpStats(uint32 (*gainStats)[MAX_STATS])
     {
         switch(_class)
         {
-            case WARRIOR:
+            case CLASS_WARRIOR:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
                 (*gainStats)[STAT_STAMINA]   += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
                 (*gainStats)[STAT_AGILITY]   += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
                 (*gainStats)[STAT_INTELLECT] += (lvl > 9 && !(lvl%2) ? 1: 0);
                 (*gainStats)[STAT_SPIRIT]    += (lvl > 9 && !(lvl%2) ? 1: 0);
                 break;
-            case PALADIN:
+            case CLASS_PALADIN:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 3  ? 1: 0);
                 (*gainStats)[STAT_STAMINA]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
                 (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
                 (*gainStats)[STAT_INTELLECT] += (lvl > 6 && (lvl%2) ? 1: 0);
                 (*gainStats)[STAT_SPIRIT]    += (lvl > 7 ? 1: 0);
                 break;
-            case HUNTER:
+            case CLASS_HUNTER:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 4  ? 1: 0);
                 (*gainStats)[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
                 (*gainStats)[STAT_AGILITY]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
                 (*gainStats)[STAT_INTELLECT] += (lvl > 8 && (lvl%2) ? 1: 0);
                 (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
                 break;
-            case ROGUE:
+            case CLASS_ROGUE:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 5  ? 1: 0);
                 (*gainStats)[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
                 (*gainStats)[STAT_AGILITY]   += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
                 (*gainStats)[STAT_INTELLECT] += (lvl > 8 && !(lvl%2) ? 1: 0);
                 (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
                 break;
-            case PRIEST:
+            case CLASS_PRIEST:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
                 (*gainStats)[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
                 (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
                 (*gainStats)[STAT_INTELLECT] += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
                 (*gainStats)[STAT_SPIRIT]    += (lvl > 3  ? 1: 0);
                 break;
-            case SHAMAN:
+            case CLASS_SHAMAN:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
                 (*gainStats)[STAT_STAMINA]   += (lvl > 4 ? 1: 0);
                 (*gainStats)[STAT_AGILITY]   += (lvl > 7 && !(lvl%2) ? 1: 0);
                 (*gainStats)[STAT_INTELLECT] += (lvl > 5 ? 1: 0);
                 (*gainStats)[STAT_SPIRIT]    += (lvl > 4 ? 1: 0);
                 break;
-            case MAGE:
+            case CLASS_MAGE:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
                 (*gainStats)[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
                 (*gainStats)[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
                 (*gainStats)[STAT_INTELLECT] += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
                 (*gainStats)[STAT_SPIRIT]    += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
                 break;
-            case WARLOCK:
+            case CLASS_WARLOCK:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
                 (*gainStats)[STAT_STAMINA]   += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
                 (*gainStats)[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
                 (*gainStats)[STAT_INTELLECT] += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
                 (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
                 break;
-            case DRUID:
+            case CLASS_DRUID:
                 (*gainStats)[STAT_STRENGTH]  += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
                 (*gainStats)[STAT_STAMINA]   += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
                 (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
@@ -2663,7 +2663,7 @@ void Player::BuildPlayerRepop()
     SetMovement(MOVE_UNROOT);
 
     // setting new speed
-    if (getRace() == RACE_NIGHT_ELF)
+    if (getRace() == RACE_NIGHTELF)
     {
         SetPlayerSpeed(MOVE_RUN, (float)12.75, true);
         SetPlayerSpeed(MOVE_SWIM, (float)8.85, true);
@@ -2721,7 +2721,7 @@ void Player::BuildPlayerRepop()
 
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x1000000);          //Set standing so always be standing
 
-    if (getRace() == RACE_NIGHT_ELF)
+    if (getRace() == RACE_NIGHTELF)
         SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);        //10045 correct wisp model
 
     SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
@@ -2759,7 +2759,7 @@ void Player::ResurrectPlayer()
     SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
     SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
 
-    if(getRace() == NIGHTELF)
+    if(getRace() == RACE_NIGHTELF)
     {
         DeMorph();
     }
@@ -3166,7 +3166,7 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
     float chance = 3 * lvldif * skilldif / plevel;
     if(!defence)
     {
-        if(getClass() == WARRIOR || getClass() == ROGUE)
+        if(getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE)
             chance *= 0.1 * GetStat(STAT_INTELLECT);
     }
 
@@ -9056,7 +9056,7 @@ bool Player::SatisfyQuestClass( uint32 quest_id, bool msg )
     if( qInfo )
     {
         uint32 reqclasses = qInfo->RequiredClass;
-        if ( reqclasses == QUEST_CLASS_NONE )
+        if ( reqclasses == 0 )
             return true;
         if( (reqclasses & getClassMask()) == 0 )
         {
@@ -9139,7 +9139,7 @@ bool Player::SatisfyQuestRace( uint32 quest_id, bool msg )
     if( qInfo )
     {
         uint32 reqraces = qInfo->RequiredRaces;
-        if ( reqraces == QUEST_RACE_NONE )
+        if ( reqraces == 0 )
             return true;
         if( (reqraces & getRaceMask()) == 0 )
         {
@@ -10096,7 +10096,7 @@ void Player::_LoadAuras(uint32 timediff)
         delete result;
     }
 
-    if(m_class == WARRIOR)
+    if(m_class == CLASS_WARRIOR)
         CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
 }
 

@@ -976,7 +976,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
     switch(m_modifier.m_miscvalue)
     {
         case FORM_CAT:
-            if(unit_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHTELF)
                 modelid = 892;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 8571;
@@ -986,24 +986,24 @@ void Aura::HandleAuraModShapeshift(bool apply)
             modelid = 632;
             break;
         case FORM_AQUA:
-            if(unit_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHTELF)
                 modelid = 2428;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2428;
             break;
         case FORM_BEAR:
-            if(unit_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHTELF)
                 modelid = 2281;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2289;
             PowerType = POWER_RAGE;
             break;
         case FORM_GHOUL:
-            if(unit_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHTELF)
                 modelid = 10045;
             break;
         case FORM_DIREBEAR:
-            if(unit_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHTELF)
                 modelid = 2281;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2289;
@@ -1016,7 +1016,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
             modelid = 1236;
             break;
         case FORM_MOONKIN:
-            if(unit_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHTELF)
                 modelid = 15374;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 15375;
@@ -1047,7 +1047,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
-            if (m_target->getRace() == TAUREN)
+            if (m_target->getRace() == RACE_TAUREN)
         {
             m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
         }
@@ -1056,7 +1056,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
     }
     else
     {
-        if (m_target->getRace() == TAUREN)
+        if (m_target->getRace() == RACE_TAUREN)
             unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
         else
             unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);

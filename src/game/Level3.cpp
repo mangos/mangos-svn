@@ -2572,7 +2572,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetCreateStat(STAT_STAMINA, (float)info->stamina);
         player->SetCreateStat(STAT_STRENGTH, (float)info->strength);
 
-        if ( player->getRace() == TAUREN )
+        if ( player->getRace() == RACE_TAUREN )
             player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
         else 
             player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);

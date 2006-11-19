@@ -57,35 +57,6 @@ enum
     QUEST_PARTY_MSG_FINISH_QUEST    = 8,
 };
 
-enum __QuestClass
-{
-    QUEST_CLASS_NONE            = 0,
-    QUEST_CLASS_WARRIOR         = 1,
-    QUEST_CLASS_PALADIN         = 2,
-    QUEST_CLASS_HUNTER          = 3,
-    QUEST_CLASS_ROGUE           = 4,
-    QUEST_CLASS_PRIEST          = 5,
-    QUEST_CLASS_UNK0            = 6,
-    QUEST_CLASS_SHAMAN          = 7,
-    QUEST_CLASS_MAGE            = 8,
-    QUEST_CLASS_WARLOCK         = 9,
-    QUEST_CLASS_UNK1            = 10,
-    QUEST_CLASS_DRUID           = 11,
-};
-
-enum __QuestRace
-{
-    QUEST_RACE_NONE            = 0,
-    QUEST_RACE_HUMAN           = 1,
-    QUEST_RACE_ORC             = 2,
-    QUEST_RACE_DWARF           = 3,
-    QUEST_RACE_NIGHTELF        = 4,
-    QUEST_RACE_UNDEAD          = 5,
-    QUEST_RACE_TAUREN          = 6,
-    QUEST_RACE_GNOME           = 7,
-    QUEST_RACE_TROLL           = 8,
-};
-
 enum __QuestTradeSkill
 {
     QUEST_TRSKILL_NONE           = 0,
