@@ -73,6 +73,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void outMenu( const char * str, ... );
 
         void SetLogLevel(char * Level);
+        void SetLogFileLevel(char * Level);
         void SetColor(bool stdout_stream, Color color);
         void ResetColor(bool stdout_stream);
         void outTimestamp(FILE* file);
@@ -80,6 +81,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         FILE* logfile;
         FILE* gmlogfile;
         uint32 m_logLevel;
+        uint32 m_logFileLevel;
         bool m_colored;
         Color m_colors[4];
 };

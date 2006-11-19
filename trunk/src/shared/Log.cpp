@@ -156,13 +156,27 @@ void Log::SetLogLevel(char *Level)
     if ( NewLevel <0 )
         NewLevel = 0;
     m_logLevel = NewLevel;
+
     printf( "LogLevel is %u\n",m_logLevel );
+}
+
+void Log::SetLogFileLevel(char *Level)
+{
+    uint32 NewLevel =atoi((char*)Level);
+    if ( NewLevel <0 )
+        NewLevel = 0;
+    m_logFileLevel = NewLevel;
+
+    printf( "LogFileLevel is %u\n",m_logFileLevel );
 }
 
 void Log::Initialize()
 {
     std::string logfn=sConfig.GetStringDefault("LogFile", "Server.log");
-    logfile = fopen(logfn.c_str(), "w");
+    if(logfn!="")
+    {
+        logfile = fopen(logfn.c_str(), "w");
+    }
 
     std::string gmlogname = sConfig.GetStringDefault("GMLogFile", "");
     if(gmlogname!="")
@@ -170,7 +184,8 @@ void Log::Initialize()
         gmlogfile = fopen(gmlogname.c_str(), "a");
     }
 
-    m_logLevel = sConfig.GetIntDefault("LogLevel", 0);
+    m_logLevel     = sConfig.GetIntDefault("LogLevel", 0);
+    m_logFileLevel = sConfig.GetIntDefault("LogFileLevel", 0);
     InitColors(sConfig.GetStringDefault("LogColors", ""));
 }
 
@@ -287,7 +302,7 @@ void Log::outBasic( const char * str, ... )
         printf( "\n" );
     }
 
-    if(logfile)
+    if(logfile && m_logFileLevel > 0)
     {
         outTimestamp(logfile);
         va_start(ap, str);
@@ -318,7 +333,7 @@ void Log::outDetail( const char * str, ... )
 
         printf( "\n" );
     }
-    if(logfile)
+    if(logfile && m_logFileLevel > 1)
     {
         outTimestamp(logfile);
         va_start(ap, str);
@@ -349,7 +364,7 @@ void Log::outDebug( const char * str, ... )
 
         printf( "\n" );
     }
-    if(logfile)
+    if(logfile && m_logFileLevel > 2)
     {
         outTimestamp(logfile);
         va_start(ap, str);
@@ -379,7 +394,7 @@ void Log::outCommand( const char * str, ... )
 
         printf( "\n" );
     }
-    if(logfile)
+    if(logfile && m_logFileLevel > 1)
     {
         outTimestamp(logfile);
         va_start(ap, str);
