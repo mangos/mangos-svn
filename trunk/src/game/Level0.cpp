@@ -107,11 +107,6 @@ bool ChatHandler::HandleAcctCommand(const char* args)
 bool ChatHandler::HandleStartCommand(const char* args)
 {
     Player *chr = m_session->GetPlayer();
-    chr->SetUInt32Value(PLAYER_FARSIGHT, 0x01);
-
-    PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(
-        chr->getRace(), chr->getClass());
-    ASSERT(info);
 
     if(chr->isInFlight())
     {
@@ -119,7 +114,19 @@ bool ChatHandler::HandleStartCommand(const char* args)
         return true;
     }
 
-    chr->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,0.0f);
+    if(chr->isInCombat())
+    {
+        SendSysMessage(LANG_YOU_IN_COMBAT);
+        return true;
+    }
+
+    chr->SetUInt32Value(PLAYER_FARSIGHT, 0x01);
+
+    PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(
+        chr->getRace(), chr->getClass());
+    ASSERT(info);
+
+    chr->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,chr->GetOrientation());
 
     return true;
 }
