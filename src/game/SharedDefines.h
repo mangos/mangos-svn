@@ -744,23 +744,6 @@ enum Language
 #define TRAINER_TYPE_TRADESKILLS        2
 #define TRAINER_TYPE_PETS               3
 
-#define SHAPESHIFT_FORM_CAT             1
-#define SHAPESHIFT_FORM_TREE            2
-#define SHAPESHIFT_FORM_TRAVEL          3
-#define SHAPESHIFT_FORM_AQUATIC         4
-#define SHAPESHIFT_FORM_BEAR            5
-#define SHAPESHIFT_AMBIENT              6
-#define SHAPESHIFT_GHOUL                7
-#define SHAPESHIFT_FORM_DIRE_BEAR       8
-#define SHAPESHIFT_CREATURE_BEAR        14
-#define SHAPESHIFT_GHOST_WOLF           16
-#define SHAPESHIFT_BATTLE_STANCE        17
-#define SHAPESHIFT_DEFENSIVE_STANCE     18
-#define SHAPESHIFT_BERSERKER_STANCE     19
-#define SHAPESHIFT_FORM_SHADOW          28
-#define SHAPESHIFT_STEALTH              30
-#define SHAPESHIFT_MOONKIN              31
-
 #define CREATURE_TYPE_BEAST             1
 #define CREATURE_TYPE_DRAGON            2
 #define CREATURE_TYPE_DEMON             3

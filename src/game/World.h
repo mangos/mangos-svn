@@ -69,6 +69,13 @@ enum WorldConfigs
     CONFIG_VALUE_COUNT
 };
 
+// bitmask
+enum LogFilters
+{
+    LOG_FILTER_TRANSPORT_MOVES = 1,
+    LOG_FILTER_CREATURE_MOVES  = 2
+};
+
 enum Rates
 {
     RATE_HEALTH=0,
@@ -175,13 +182,14 @@ class World
                 m_configs[index]=value;
         }
 
-        uint32 getConfig(uint32 index)
+        uint32 getConfig(uint32 index) const
         {
             if(index<CONFIG_VALUE_COUNT)
                 return m_configs[index];
             else
                 return 0;
         }
+        uint32 getLogFilter() const { return m_logFilter; }
 
         void KickPlayer(char * playerName);
 
@@ -210,6 +218,7 @@ class World
 
         time_t m_nextThinkTime;
         uint32 m_configs[CONFIG_VALUE_COUNT];
+        uint32 m_logFilter;
         time_t m_Last_tick;
         uint32 m_ShutdownTimer;
 };

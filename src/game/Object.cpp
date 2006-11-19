@@ -645,7 +645,7 @@ bool Object::HasInArc(const float arcangle, const Object* obj) const
     float arc = arcangle;
 
     // move arc to range 0.. 2*pi
-    while( arc > 2.0f * M_PI )
+    while( arc >= 2.0f * M_PI )
         arc -=  2.0f * M_PI;
     while( arc < 0 )
         arc +=  2.0f * M_PI;

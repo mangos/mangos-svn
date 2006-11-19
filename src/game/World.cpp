@@ -58,6 +58,7 @@ World::World()
     m_Last_tick = time(NULL);
     m_ShutdownTimer = 0;
     internalGameTime = 0;
+    m_logFilter = 0;
 }
 
 World::~World()
@@ -204,6 +205,12 @@ void World::SetInitialWorldSettings()
     regen_values[RATE_CREATURE_AGGRO]  = sConfig.GetFloatDefault("Rate.Creature.Aggro", 1);
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
+
+    if(sConfig.GetIntDefault("LogFilter_TransportMoves", 0)!=0)
+        m_logFilter |= LOG_FILTER_TRANSPORT_MOVES;
+    if(sConfig.GetIntDefault("LogFilter_CreatureMoves", 0)!=0)
+        m_logFilter |= LOG_FILTER_CREATURE_MOVES;
+
     m_configs[CONFIG_COMPRESSION] = sConfig.GetIntDefault("Compression", 1);
     if(m_configs[CONFIG_COMPRESSION] < 1 || m_configs[CONFIG_COMPRESSION] > 9)
     {
