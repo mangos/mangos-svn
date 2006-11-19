@@ -406,7 +406,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true);
+        void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true, bool ignore_transport = true);
 
         bool Create ( uint32 guidlow, WorldPacket &data );
 
@@ -790,6 +790,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
             return itr != m_spellCooldowns.end() && itr->second > time(NULL);
+        }
+        uint32 GetSpellCooldownDelay(uint32 spell_id) const
+        {
+            SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
+            time_t t = time(NULL);
+            return itr != m_spellCooldowns.end() && itr->second > t ? itr->second - t : 0;
         }
         void AddSpellCooldown(uint32 spell_id, time_t end_time) { m_spellCooldowns[spell_id] = end_time; }
         void RemoveSpellCooldown(uint32 spell_id) { m_spellCooldowns.erase(spell_id); }

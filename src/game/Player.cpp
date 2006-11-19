@@ -1155,10 +1155,21 @@ void Player::SendIgnorelist()
     sLog.outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
 }
 
-void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange)
+void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange, bool ignore_transport)
 {
     // prepering unsommon pet if lost (we must get pet before teleportation or will not find it later)
     Creature* pet = GetPet();
+
+    // if we were on a transport, leave
+    if (ignore_transport && m_transport)
+    {
+        m_transport->RemovePassenger(this);
+        m_transport = NULL;
+        m_transX = 0.0f;
+        m_transY = 0.0f;
+        m_transZ = 0.0f;
+        m_transO = 0.0f;
+    }
 
     if ((this->GetMapId() == mapid) && (!m_transport))
     {
@@ -1194,8 +1205,16 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         GetSession()->SendPacket( &data );
 
         SetMapId(mapid);
-        Relocate(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
-        SetPosition(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
+        if(m_transport)
+        {
+            Relocate(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
+            SetPosition(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
+        }
+        else
+        {
+            Relocate(x, y, z, orientation);
+            SetPosition(x, y, z, orientation);
+        }
         SetDontMove(true);
         //SaveToDB();
 

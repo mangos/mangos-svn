@@ -834,7 +834,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
         else
         {
-            GetPlayer()->TeleportTo(at->mapId,at->X,at->Y,at->Z,at->Orientation);
+            GetPlayer()->TeleportTo(at->mapId,at->X,at->Y,at->Z,at->Orientation,true,false);
         }
         delete at;
     }

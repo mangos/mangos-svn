@@ -200,7 +200,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 spellId = info->sound0;
                 //guid=GetPlayer()->GetGUID();
 
-                _player->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
+                _player->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),false,false);
                                                             //offset 3 is related to the DB
                 _player->SetUInt32Value(UNIT_FIELD_BYTES_1, _player->GetUInt32Value(UNIT_FIELD_BYTES_1) | (3 + spellId) );
 

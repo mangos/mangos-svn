@@ -437,7 +437,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     if (pCurrChar->m_transport)
     {
-        pCurrChar->TeleportTo(pCurrChar->m_transport->GetMapId(), pCurrChar->m_transport->GetPositionX(), pCurrChar->m_transport->GetPositionY(), pCurrChar->m_transport->GetPositionZ(), pCurrChar->m_transport->GetOrientation(), true);
+        pCurrChar->TeleportTo(pCurrChar->m_transport->GetMapId(), pCurrChar->m_transport->GetPositionX(), pCurrChar->m_transport->GetPositionY(), pCurrChar->m_transport->GetPositionZ(), pCurrChar->m_transport->GetOrientation(), true, false);
     }
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
