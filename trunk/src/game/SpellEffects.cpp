@@ -993,9 +993,10 @@ void Spell::EffectPickPocket(uint32 i)
     if( !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
         return;
 
-    if( unitTarget->getDeathState() == ALIVE &&             //victim is alive
-                                                            //victim have to be humanoid
-        ((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID )
+    //victim have to be alive and humanoid or undead
+    if( unitTarget->isAlive() && 
+        (((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID || 
+        ((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_UNDEAD))
     {
         int chance = 10 + m_caster->getLevel() - unitTarget->getLevel();
 
