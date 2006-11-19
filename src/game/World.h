@@ -114,6 +114,13 @@ enum ServerMessageType
     SERVER_MSG_RESTART_CANCELLED  = 5
 };
 
+struct ScriptInfo;
+struct ScriptAction {
+    Object* source;
+    Object* target;
+    ScriptInfo* script;
+};
+
 class World
 {
     public:
@@ -177,6 +184,10 @@ class World
         }
 
         void KickPlayer(char * playerName);
+
+        multimap<uint64, ScriptAction> scriptSchedule;
+        void ScriptsProcess();
+        uint64 internalGameTime;
 
     protected:
 

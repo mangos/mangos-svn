@@ -47,8 +47,13 @@ extern SQLStorage sGOStorage;
 extern SQLStorage sItemStorage;
 
 typedef std::multimap<uint32,uint32> QuestRelations;
+struct ScriptInfo;
+typedef multimap<uint32, ScriptInfo> ScriptMap;
+typedef map<uint32, ScriptMap > ScriptMapMap;
+
 extern QuestRelations sPrevQuests;
 extern QuestRelations sExclusiveQuestGroups;
+extern ScriptMapMap sScripts;
 
 class Group;
 class Guild;
@@ -67,6 +72,20 @@ struct AuctionEntry
     time_t time;
     uint32 bidder;
     uint32 location;
+};
+
+struct ScriptInfo
+{
+    uint32 id;
+    uint32 delay;
+    uint32 command;
+    uint32 datalong;
+    uint32 datalong2;
+    string datatext;
+    float x;
+    float y;
+    float z;
+    float o;
 };
 
 class ObjectMgr
@@ -140,6 +159,7 @@ class ObjectMgr
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
         static QuestInfo const* GetQuestInfo(uint32 id) { return sQuestsStorage.LookupEntry<QuestInfo>(id); }
+        
         Quest* NewQuest(uint32 id) const
         {
             Quest *rquest=new Quest;
@@ -250,6 +270,7 @@ class ObjectMgr
 
         void LoadGuilds();
         void LoadQuests();
+        void LoadScripts();
         void LoadCreatureTemplates();
         void LoadItemPrototypes();
 

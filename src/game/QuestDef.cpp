@@ -26,6 +26,9 @@ Quest::Quest()
     m_reqCreatureOrGOcount = 0;
     m_rewchoiceitemscount = 0;
     m_rewitemscount = 0;
+
+    m_offerRewardEmote = 0;
+    m_requestItemsEmote = 0;
 }
 
 QuestInfo const* Quest::GetQuestInfo() const
@@ -64,6 +67,9 @@ bool Quest::LoadQuest( uint32 quest )
             if ( pQuestInfo->RewItemId[i] )
                 m_rewitemscount++;
         }
+
+        m_offerRewardEmote = pQuestInfo->OfferRewardEmote;
+        m_requestItemsEmote = pQuestInfo->RequestItemsEmote;
         return true;
     }
     return false;

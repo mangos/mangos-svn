@@ -361,10 +361,10 @@ void GameObject::_LoadQuests()
 
 bool GameObject::IsTransport() const
 {
-    /*GameObjectInfo const * gInfo = GetGOInfo();
+    // If something is marked as a transport, don't transmit an out of range packet for it.
+    GameObjectInfo const * gInfo = GetGOInfo();
     if(!gInfo) return false;
-    return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;*/
-    return false;
+    return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
 }
 
 Unit* GameObject::GetOwner() const

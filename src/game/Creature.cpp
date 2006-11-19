@@ -511,9 +511,9 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                 {
                     case GOSSIP_OPTION_QUESTGIVER:
                         pPlayer->PrepareQuestMenu(GetGUID());
-                        if (pm->GetQuestMenu()->MenuItemCount() == 0)
-                            cantalking=false;
-                        pm->GetQuestMenu()->ClearMenu();
+                        //if (pm->GetQuestMenu()->MenuItemCount() == 0)
+                        cantalking=false;
+                        //pm->GetQuestMenu()->ClearMenu();
                         break;
                     case GOSSIP_OPTION_ARMORER:
                         cantalking=false;                   // added in special mode
@@ -595,7 +595,10 @@ void Creature::sendPreparedGossip( Player* player)
     if ( !gossipmenu || gossipmenu->MenuItemCount() == 0 )
         return;
 
-    if ( gossipmenu->MenuItemCount() == 1 && gossipmenu->MenuItemAction(0) != GOSSIP_OPTION_INNKEEPER )
+    QuestMenu * questmenu = player->PlayerTalkClass->GetQuestMenu();
+
+    //if ( gossipmenu->MenuItemCount() == 1 && gossipmenu->MenuItemAction(0) != GOSSIP_OPTION_INNKEEPER )
+    if ((gossipmenu->MenuItemCount() == 1) && (questmenu->MenuItemCount() == 0))
         OnGossipSelect( player, 0 );
     else
         player->PlayerTalkClass->SendGossipMenu( GetNpcTextId(), GetGUID() );
@@ -1155,7 +1158,7 @@ void Creature::_LoadQuests()
     Field *fields;
     Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `quest` FROM `creature_questrelation` WHERE `id` = '%u'", GetEntry ());
+    QueryResult *result = sDatabase.PQuery("SELECT `quest` FROM `creature_questrelation` WHERE `id` = '%u'", GetEntry());
 
     if(result)
     {
@@ -1254,6 +1257,14 @@ void Creature::Say(char const* message, uint32 language)
     WorldPacket data;
 
     sChatHandler.FillMessageData( &data, NULL, CHAT_MSG_SAY, language, NULL, 0, message );
+    SendMessageToSet( &data, false );
+}
+
+void Creature::MonsterSay(char const* message, uint32 language, uint64 targetGUID)
+{
+    WorldPacket data;
+
+    sChatHandler.FillMessageData( &data, NULL, CHAT_MSG_MONSTER_SAY, language, NULL, targetGUID, message, this );
     SendMessageToSet( &data, false );
 }
 

@@ -87,7 +87,7 @@ struct QuestMenuItem
 {
     uint32      m_qId;
     uint8       m_qIcon;
-    bool        m_qAvailable;
+    uint8       m_qAvailable;
     char*       m_qTitle;
 };
 
@@ -126,7 +126,7 @@ class QuestMenu
         QuestMenu();
         ~QuestMenu();
 
-        void AddMenuItem( uint32 QuestId, uint8 Icon , bool Available);
+        void AddMenuItem( uint32 QuestId, uint8 Icon , uint8 Available);
         void ClearMenu();
 
         uint8 MenuItemCount()

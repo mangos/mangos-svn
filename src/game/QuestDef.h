@@ -174,6 +174,9 @@ struct QuestInfo
     uint32 DetailsEmote;
     uint32 IncompleteEmote;
     uint32 CompleteEmote;
+    uint32 OfferRewardEmote;
+    uint32 RequestItemsEmote;
+    uint32 QuestCompleteScript;
 
     // simple data access functions
     bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }
@@ -197,6 +200,9 @@ class Quest
         uint32 m_reqCreatureOrGOcount;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
+
+        uint32 m_offerRewardEmote;
+        uint32 m_requestItemsEmote;
 
         bool LoadQuest( uint32 quest );
         uint32 XPValue( Player *pPlayer );
