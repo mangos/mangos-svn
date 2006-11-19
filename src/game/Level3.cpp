@@ -171,7 +171,7 @@ bool ChatHandler::HandleWorldPortCommand(const char* args)
         return true;
     }
 
-    m_session->GetPlayer()->TeleportTo(mapid, x, y, z,0.0f);
+    m_session->GetPlayer()->TeleportTo(mapid, x, y, z,m_session->GetPlayer()->GetOrientation());
 
     return true;
 }
@@ -283,7 +283,7 @@ bool ChatHandler::HandleGoCommand(const char* args)
         return true;
     }
 
-    m_session->GetPlayer()->TeleportTo(mapid, x, y, z,0.0f);
+    m_session->GetPlayer()->TeleportTo(mapid, x, y, z,m_session->GetPlayer()->GetOrientation());
 
     return true;
 }

@@ -2054,7 +2054,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
 
         delete result;
 
-        ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,0.0f);
+        ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,Target->GetOrientation());
         delete TC;
     }
     else
@@ -2065,7 +2065,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
             sLog.outError( "SPELL: unknown Teleport Coords ID %i\n", id );
             return;
         }
-        ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,0.0f);
+        ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,Target->GetOrientation());
     }
 }
 
