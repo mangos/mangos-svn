@@ -50,16 +50,16 @@ enum SpellFamilyNames
     SPELLFAMILY_POTION = 13
 };
 
-float GetRadius(SpellRadiusEntry *radius);
-uint32 GetCastTime(SpellCastTimesEntry *time);
-float GetMinRange(SpellRangeEntry *range);
-float GetMaxRange(SpellRangeEntry *range);
-int32 GetDuration(SpellEntry *spellInfo);
-int32 GetMaxDuration(SpellEntry *spellInfo);
+float GetRadius(SpellRadiusEntry const *radius);
+uint32 GetCastTime(SpellCastTimesEntry const*time);
+float GetMinRange(SpellRangeEntry const *range);
+float GetMaxRange(SpellRangeEntry const *range);
+int32 GetDuration(SpellEntry const *spellInfo);
+int32 GetMaxDuration(SpellEntry const *spellInfo);
 char* GetPetName(uint32 petfamily);
 uint32 FindSpellRank(uint32 spellId);
-bool canStackSpellRank(SpellEntry *spellInfo);
-bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2);
+bool canStackSpellRank(SpellEntry const *spellInfo);
+bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2);
 bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
@@ -76,7 +76,7 @@ template<class T>
 class DBCStorage
 {
     public:
-        DBCStorage(const char *f){data = NULL;fmt=f;}
+        DBCStorage(const char *f){data = NULL;fmt=f;fieldCount = 0; nCount =0; }
         ~DBCStorage(){if(data) delete [] data;};
 
         inline
@@ -99,6 +99,7 @@ class DBCStorage
             bool res = dbc->Load(fn);
             if (res)
             {
+                fieldCount = dbc->GetCols();
                 data=(T **) dbc->AutoProduceData(fmt,&nCount);
             }
             delete dbc;
@@ -114,6 +115,7 @@ class DBCStorage
 
         T** data;
         uint32 nCount;
+        uint32 fieldCount;
         const char * fmt;
 
     private:
@@ -121,6 +123,8 @@ class DBCStorage
 };
 
 //extern DBCStorage <AreaTableEntry>            sAreaStore; -- accessed using 2 functions
+extern DBCStorage <ChrClassesEntry>           sChrClassesStore;
+extern DBCStorage <ChrRacesEntry>             sChrRacesStore;
 extern DBCStorage <CreatureFamilyEntry>       sCreatureFamilyStore;
 extern DBCStorage <SpellCastTimesEntry>       sCastTimesStore;
 extern DBCStorage <EmotesTextEntry>           sEmotesTextStore;

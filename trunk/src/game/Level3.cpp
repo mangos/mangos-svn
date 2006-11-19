@@ -2544,32 +2544,39 @@ bool ChatHandler::HandleResetCommand (const char * args)
             }
         }
 
+        ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(player->getClass());
+        if(!cEntry)
+        {
+            sLog.outError("Class %u not found in DBÑ (Wrong DBC files?)",player->getClass());
+            return true;
+        }
+
+        uint8 powertype = cEntry->powerType;
+
+        uint32 unitfield;
+        if(powertype == POWER_RAGE)
+            unitfield = 0x1100EE00;
+        else if(powertype == POWER_ENERGY)
+            unitfield = 0x00000000;
+        else if(powertype == POWER_MANA)
+            unitfield = 0x0000EE00;
+        else
+        {
+            sLog.outError("Invalid default powertype %u for player (class %u)",powertype,player->getClass());
+            return true;
+        }
+
         player->SetCreateStat(STAT_AGILITY, (float)info->agility);
         player->SetCreateStat(STAT_INTELLECT, (float)info->intellect);
         player->SetCreateStat(STAT_SPIRIT, (float)info->spirit);
         player->SetCreateStat(STAT_STAMINA, (float)info->stamina);
         player->SetCreateStat(STAT_STRENGTH, (float)info->strength);
 
-        uint8 powertype = 0;
-        uint32 unitfield = 0;
-        switch(player->getClass())
-        {
-            case WARRIOR: powertype = 1; unitfield = 0x1100EE00; break;
-            case PALADIN: powertype = 0; unitfield = 0x0000EE00; break;
-            case HUNTER: powertype = 0; unitfield = 0x0000EE00; break;
-            case ROGUE: powertype = 3; unitfield = 0x00000000; break;
-            case PRIEST: powertype = 0; unitfield = 0x0000EE00; break;
-            case SHAMAN: powertype = 0; unitfield = 0x0000EE00; break;
-            case MAGE: powertype = 0; unitfield = 0x0000EE00; break;
-            case WARLOCK: powertype = 0; unitfield = 0x0000EE00; break;
-            case DRUID: powertype = 0; unitfield = 0x0000EE00; break;
-        }
-
         if ( player->getRace() == TAUREN )
-        {
             player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
-        }
-        else player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+        else 
+            player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+
         player->SetStat(STAT_STRENGTH,info->strength );
         player->SetStat(STAT_AGILITY,info->agility );
         player->SetStat(STAT_STAMINA,info->stamina );

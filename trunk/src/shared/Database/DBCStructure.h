@@ -34,6 +34,23 @@ struct AreaTableEntry
     int32     area_level;
 };
 
+struct ChrClassesEntry
+{
+    uint32      ClassID;
+    uint32      powerType;
+    char*       name;
+};
+
+struct ChrRacesEntry
+{
+    uint32      RaceID;
+    uint32      FactionID;                                  //facton template id
+    uint32      TeamID;                                     // 7-Alianse 1-Horde
+    uint32      startingTaxiMask;
+    uint32      startmovie;
+    char*       name;
+};
+
 struct CreatureFamilyEntry
 {
     uint32    ID;

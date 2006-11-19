@@ -31,6 +31,8 @@ typedef std::map<uint16,uint32> AreaFlagByAreaID;
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 static AreaFlagByAreaID sAreaFlagByAreaID;
 
+DBCStorage <ChrClassesEntry> sChrClassesStore(ChrClassesEntryfmt);
+DBCStorage <ChrRacesEntry> sChrRacesStore(ChrRacesEntryfmt);
 DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
 
 DBCStorage <EmotesTextEntry> sEmotesTextStore(emoteentryfmt);
@@ -110,7 +112,7 @@ inline void LoadDBC(barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& st
         if(f)
         {
             char buf[100];
-            snprintf(buf,100," (exist, but have %d fields instead %d) Wrong client version DBC file?",storage.nCount,strlen(storage.fmt));
+            snprintf(buf,100," (exist, but have %d fields instead %d) Wrong client version DBC file?",storage.fieldCount,strlen(storage.fmt));
             errlist.push_back(filename + buf);
             fclose(f);
         }else
@@ -122,7 +124,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 22;
+    const uint32 DBCFilesCount = 24;
 
     barGoLink bar( DBCFilesCount );
 
@@ -134,6 +136,8 @@ void LoadDBCStores(std::string dataPath)
         if(AreaTableEntry* area = sAreaStore.LookupEntry(i))
             sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
 
+    LoadDBC(bar,bad_dbc_files,sChrClassesStore,          dataPath+"dbc/ChrClasses.dbc");    
+    LoadDBC(bar,bad_dbc_files,sChrRacesStore,            dataPath+"dbc/ChrRaces.dbc");    
     LoadDBC(bar,bad_dbc_files,sCreatureFamilyStore,      dataPath+"dbc/CreatureFamily.dbc");
     LoadDBC(bar,bad_dbc_files,sEmotesTextStore,          dataPath+"dbc/EmotesText.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionStore,             dataPath+"dbc/Faction.dbc");
@@ -204,7 +208,7 @@ void LoadDBCStores(std::string dataPath)
     sLog.outString( "" );
 }
 
-float GetRadius(SpellRadiusEntry *radius)
+float GetRadius(SpellRadiusEntry const *radius)
 {
     if(radius)
         return radius->Radius;
@@ -212,7 +216,7 @@ float GetRadius(SpellRadiusEntry *radius)
         return 0;
 }
 
-uint32 GetCastTime(SpellCastTimesEntry *time)
+uint32 GetCastTime(SpellCastTimesEntry const *time)
 {
     if(time)
         return time->CastTime;
@@ -220,7 +224,7 @@ uint32 GetCastTime(SpellCastTimesEntry *time)
         return 0;
 }
 
-float GetMaxRange(SpellRangeEntry *range)
+float GetMaxRange(SpellRangeEntry const *range)
 {
     if(range)
         return range->maxRange;
@@ -228,7 +232,7 @@ float GetMaxRange(SpellRangeEntry *range)
         return 0;
 }
 
-float GetMinRange(SpellRangeEntry *range)
+float GetMinRange(SpellRangeEntry const *range)
 {
     if(range)
         return range->minRange;
@@ -236,21 +240,21 @@ float GetMinRange(SpellRangeEntry *range)
         return 0;
 }
 
-int32 GetDuration(SpellEntry *spellInfo)
+int32 GetDuration(SpellEntry const *spellInfo)
 {
     if(!spellInfo)
         return 0;
-    SpellDurationEntry *du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
+    SpellDurationEntry const *du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
     if(!du)
         return 0;
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
 }
 
-int32 GetMaxDuration(SpellEntry *spellInfo)
+int32 GetMaxDuration(SpellEntry const *spellInfo)
 {
     if(!spellInfo)
         return 0;
-    SpellDurationEntry *du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
+    SpellDurationEntry const *du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
     if(!du)
         return 0;
     return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
@@ -260,7 +264,7 @@ char* GetPetName(uint32 petfamily)
 {
     if(!petfamily)
         return NULL;
-    CreatureFamilyEntry *pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
+    CreatureFamilyEntry const *pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
     if(!pet_family)
         return NULL;
     return pet_family->Name?pet_family->Name:NULL;
@@ -268,7 +272,7 @@ char* GetPetName(uint32 petfamily)
 
 uint32 FindSpellRank(uint32 spellId)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo) return 0;
     for(int i=0;i<8;i++)
     {
@@ -295,7 +299,7 @@ uint32 FindSpellRank(uint32 spellId)
     return 0;
 }
 
-bool canStackSpellRank(SpellEntry *spellInfo)
+bool canStackSpellRank(SpellEntry const *spellInfo)
 {
     if(FindSpellRank(spellInfo->Id) == 0)
         return true;
@@ -318,15 +322,15 @@ bool canStackSpellRank(SpellEntry *spellInfo)
 
 bool IsPassiveSpell(uint32 spellId)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
         return false;
     return ((spellInfo->Attributes & (1<<6)) != 0);
 }
 
-bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2)
+bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2)
 {
-    SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+    SpellEntry const *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
     if(!spellInfo_1 || !spellInfo_2) return false;
     if(spellInfo_1->Id == spellId_2) return false;
 
@@ -339,8 +343,8 @@ bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2)
 
 bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
 {
-    SpellEntry *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
-    SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+    SpellEntry const *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
+    SpellEntry const *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
 
     if(!spellInfo_1 || !spellInfo_2)
         return false;
@@ -383,8 +387,8 @@ bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2)
 {
-    SpellEntry *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
-    SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+    SpellEntry const *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
+    SpellEntry const *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
     if(!spellInfo_1 || !spellInfo_2) return false;
     if(spellInfo_1->Id == spellId_2) return false;
 
