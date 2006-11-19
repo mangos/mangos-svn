@@ -17,6 +17,8 @@
  */
 
 const char AreaTableEntryfmt[]="ixinixxxxxixxxxxxxxxxxxxx";
+const char ChrClassesEntryfmt[]="nxxixsxxxxxxxxxxx";
+const char ChrRacesEntryfmt[]="nxixxxxxixxxxxixisxxxxxxxxxxx";
 const char CreatureFamilyfmt[]="nxxxxiiixxxxsxxxxx";
 const char emoteentryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="nixxxxxxxiiiiiiiiiixxxxxxxxxxxxxxxxxx";

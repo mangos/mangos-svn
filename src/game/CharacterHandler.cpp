@@ -133,67 +133,11 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
             delete result2;
             uint32 team=0;
             if(race > 0)
-            {
-                switch(race)
-                {
-                    case HUMAN:
-                        team = (uint32)ALLIANCE;
-                        break;
-                    case DWARF:
-                        team = (uint32)ALLIANCE;
-                        break;
-                    case NIGHTELF:
-                        team = (uint32)ALLIANCE;
-                        break;
-                    case GNOME:
-                        team = (uint32)ALLIANCE;
-                        break;
-                    case ORC:
-                        team = (uint32)HORDE;
-                        break;
-                    case UNDEAD_PLAYER:
-                        team = (uint32)HORDE;
-                        break;
-                    case TAUREN:
-                        team = (uint32)HORDE;
-                        break;
-                    case TROLL:
-                        team = (uint32)HORDE;
-                        break;
-                }
+                team = Player::TeamForRace(race);
 
-            }
             uint32 team_=0;
             if(race_ > 0)
-            {
-                switch(race_)
-                {
-                    case HUMAN:
-                        team_ = (uint32)ALLIANCE;
-                        break;
-                    case DWARF:
-                        team_ = (uint32)ALLIANCE;
-                        break;
-                    case NIGHTELF:
-                        team_ = (uint32)ALLIANCE;
-                        break;
-                    case GNOME:
-                        team_ = (uint32)ALLIANCE;
-                        break;
-                    case ORC:
-                        team_ = (uint32)HORDE;
-                        break;
-                    case UNDEAD_PLAYER:
-                        team_ = (uint32)HORDE;
-                        break;
-                    case TAUREN:
-                        team_ = (uint32)HORDE;
-                        break;
-                    case TROLL:
-                        team_ = (uint32)HORDE;
-                        break;
-                }
-            }
+                team_ = Player::TeamForRace(race_);
 
             if(team != team_ && GetSecurity() < 2 && !AllowTwoSideAccounts)
             {
@@ -468,22 +412,13 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     {
         GetPlayer()->setCinematic(1);
 
-        data.Initialize( SMSG_TRIGGER_CINEMATIC );
-
-        uint8 race = GetPlayer()->getRace();
-        switch (race)
+        ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(GetPlayer()->getRace());
+        if(rEntry)
         {
-            case HUMAN:         data << uint32(81);  break;
-            case ORC:           data << uint32(21);  break;
-            case DWARF:         data << uint32(41);  break;
-            case NIGHTELF:      data << uint32(61);  break;
-            case UNDEAD_PLAYER: data << uint32(2);   break;
-            case TAUREN:        data << uint32(141); break;
-            case GNOME:         data << uint32(101); break;
-            case TROLL:         data << uint32(121); break;
-            default:            data << uint32(0);
+            data.Initialize( SMSG_TRIGGER_CINEMATIC );
+            data << uint32(rEntry->startmovie);
+            SendPacket( &data );
         }
-        SendPacket( &data );
     }
 
     QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());

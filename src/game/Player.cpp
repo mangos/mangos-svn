@@ -257,38 +257,42 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     memset(m_taximask, 0, sizeof(m_taximask));
 
     // Automatically add the race's taxi hub to the character's taximask at creation time ( 1 << (taxi_node_id-1) )
-    switch(race)
+    ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
+    if(!rEntry)
     {
-        case TAUREN:        m_taximask[0]= 1 << (22-1); break;
-        case HUMAN:         m_taximask[0]= 1 << ( 2-1); break;
-        case DWARF:         m_taximask[0]= 1 << ( 6-1); break;
-        case NIGHTELF:      m_taximask[0]= (1 << (26-1)) | (1 << (27-1)); break;
-        case GNOME:         m_taximask[0]= 1 << ( 6-1); break;
-        case ORC:           m_taximask[0]= 1 << (23-1); break;
-        case UNDEAD_PLAYER: m_taximask[0]= 1 << (11-1); break;
-        case TROLL:         m_taximask[0]= 1 << (23-1); break;
+        sLog.outError("Race %u not found in DBÑ (Wrong DBC files?)",race);
+        return false;
     }
 
-    uint8 powertype = 0;
-    uint32 unitfield = 0;
-    switch(class_)
+    m_taximask[0] = rEntry->startingTaxiMask;
+
+    ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(class_);
+    if(!cEntry)
     {
-        case WARRIOR: powertype = 1; unitfield = 0x1100EE00; break;
-        case PALADIN: powertype = 0; unitfield = 0x0000EE00; break;
-        case HUNTER: powertype = 0; unitfield = 0x0000EE00; break;
-        case ROGUE: powertype = 3; unitfield = 0x00000000; break;
-        case PRIEST: powertype = 0; unitfield = 0x0000EE00; break;
-        case SHAMAN: powertype = 0; unitfield = 0x0000EE00; break;
-        case MAGE: powertype = 0; unitfield = 0x0000EE00; break;
-        case WARLOCK: powertype = 0; unitfield = 0x0000EE00; break;
-        case DRUID: powertype = 0; unitfield = 0x0000EE00; break;
+        sLog.outError("Class %u not found in DBÑ (Wrong DBC files?)",class_);
+        return false;
+    }
+
+    uint8 powertype = cEntry->powerType;
+
+    uint32 unitfield;
+    if(powertype == POWER_RAGE)
+        unitfield = 0x1100EE00;
+    else if(powertype == POWER_ENERGY)
+        unitfield = 0x00000000;
+    else if(powertype == POWER_MANA)
+        unitfield = 0x0000EE00;
+    else
+    {
+        sLog.outError("Invalid default powertype %u for player (class %u)",powertype,class_);
+        return false;
     }
 
     if ( race == TAUREN )
-    {
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
-    }
-    else SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+    else 
+        SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+
     SetStat(STAT_STRENGTH,info->strength );
     SetStat(STAT_AGILITY,info->agility );
     SetStat(STAT_STAMINA,info->stamina );
@@ -3554,55 +3558,35 @@ void Player::CheckExploreSystem()
 
 uint32 Player::TeamForRace(uint8 race)
 {
-    switch(race)
+    ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
+    if(!rEntry)
     {
-        case DWARF:
-        case GNOME:
-        case HUMAN:
-        case NIGHTELF:
-            return ALLIANCE;
-        case ORC:
-        case TAUREN:
-        case TROLL:
-        case UNDEAD_PLAYER:
-            return HORDE;
+        sLog.outError("Race %u not found in DBC: wrong DBC files?",uint32(race));
+        return ALLIANCE;
     }
-    return 0;
+
+    switch(rEntry->TeamID)
+    {
+        case 7: return ALLIANCE;
+        case 1: return HORDE;
+    }
+
+    sLog.outError("Race %u have wrong team id in DBC: wrong DBC files?",uint32(race),rEntry->TeamID);
+    return ALLIANCE;
 }
 
 void Player::setFactionForRace(uint8 race)
 {
     m_team = TeamForRace(race);
-    uint32 faction = 0;
-    switch(race)
-    {
-        case HUMAN:
-            faction = 1;
-            break;
-        case DWARF:
-            faction = 3;
-            break;
-        case NIGHTELF:
-            faction = 4;
-            break;
-        case GNOME:
-            faction = 115;
-            break;
 
-        case ORC:
-            faction = 2;
-            break;
-        case UNDEAD_PLAYER:
-            faction = 5;
-            break;
-        case TAUREN:
-            faction = 6;
-            break;
-        case TROLL:
-            faction = 116;
-            break;
+    ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
+    if(!rEntry)
+    {
+        sLog.outError("Race %u not found in DBC: wrong DBC files?",uint32(race));
+        return;
     }
-    setFaction( faction );
+
+    setFaction( rEntry->FactionID );
 }
 
 void Player::UpdateReputation() const
