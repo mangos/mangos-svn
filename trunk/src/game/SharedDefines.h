@@ -23,28 +23,40 @@
 #define GENDER_FEMALE                       1
 #define GENDER_NONE                         2
 
-#define RACE_HUMAN                          1
-#define RACE_ORC                            2
-#define RACE_DWARF                          3
-#define RACE_NIGHT_ELF                      4
-#define RACE_UNDEAD                         5
-#define RACE_TAUREN                         6
-#define RACE_GNOME                          7
-#define RACE_TROLL                          8
-#define MAX_RACES                           9
+// Race value is index in ChrRaces.dbc
+enum Races
+{
+    RACE_HUMAN          = 1,
+    RACE_ORC            = 2,
+    RACE_DWARF          = 3,
+    RACE_NIGHTELF       = 4,
+    // if it needs be to official, it's actually SCOURGE acording to the story/.dbc
+    RACE_UNDEAD_PLAYER  = 5,
+    RACE_TAUREN         = 6,
+    RACE_GNOME          = 7,
+    RACE_TROLL          = 8,
+    MAX_RACES           = 9,
+    // officialy, this exists but was never taken into use.. neutral faction which could
+    // learn some skills/spells from horde/alliance. maybe it'll be of some use later on.
+    RACE_GOBLIN = 9
+};
 
-#define CLASS_WARRIOR                       1
-#define CLASS_PALADIN                       2
-#define CLASS_HUNTER                        3
-#define CLASS_ROGUE                         4
-#define CLASS_PRIEST                        5
-#define CLASS_UNK1                          6
-#define CLASS_SHAMAN                        7
-#define CLASS_MAGE                          8
-#define CLASS_WARLOCK                       9
-#define CLASS_UNK2                          10
-#define CLASS_DRUID                         11
-#define MAX_CLASSES                         12
+// Class value is index in ChrClasses.dbc
+enum Classes
+{
+    CLASS_WARRIOR   = 1,
+    CLASS_PALADIN   = 2,
+    CLASS_HUNTER    = 3,
+    CLASS_ROGUE     = 4,
+    CLASS_PRIEST    = 5,
+    // CLASS_UNK1   = 6, unused
+    CLASS_SHAMAN    = 7,
+    CLASS_MAGE      = 8,
+    CLASS_WARLOCK   = 9,
+    // CLASS_UNK2   = 10,unused
+    CLASS_DRUID     = 11,
+    MAX_CLASSES     = 12
+};
 
 enum TimeConstants
 {

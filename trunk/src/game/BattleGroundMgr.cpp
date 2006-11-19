@@ -91,7 +91,7 @@ uint32 BattleGroundMgr::GenerateTeamByRace(uint8 Race)
     switch(Race)
     {
         case RACE_ORC:
-        case RACE_UNDEAD:
+        case RACE_UNDEAD_PLAYER:
         case RACE_TAUREN:
         case RACE_TROLL:
         {
@@ -99,7 +99,7 @@ uint32 BattleGroundMgr::GenerateTeamByRace(uint8 Race)
         }break;
         case RACE_HUMAN:
         case RACE_DWARF:
-        case RACE_NIGHT_ELF:
+        case RACE_NIGHTELF:
         case RACE_GNOME:
         {
             return 0;

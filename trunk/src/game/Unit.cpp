@@ -2103,7 +2103,7 @@ void Unit::ApplyStats(bool apply)
     ApplyMaxHealthMod( val2, apply);
 
     // MP
-    if(getClass() != WARRIOR && getClass() != ROGUE)
+    if(getClass() != CLASS_WARRIOR && getClass() != CLASS_ROGUE)
     {
         val2 = uint32((GetStat(STAT_INTELLECT) - ((Player*)this)->GetCreateStat(STAT_INTELLECT))*15);
 
@@ -2117,7 +2117,7 @@ void Unit::ApplyStats(bool apply)
     // && Melee DPS - (Damage Per Second)
 
     //Ranged
-    if(getClass() == HUNTER)
+    if(getClass() == CLASS_HUNTER)
         val2 = uint32(getLevel() * 2 + GetStat(STAT_AGILITY) * 2 - 20);
     else
         val2 = uint32(getLevel() + GetStat(STAT_AGILITY) * 2 - 20);
@@ -2142,15 +2142,15 @@ void Unit::ApplyStats(bool apply)
 
     switch(getClass())
     {
-        case WARRIOR: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
-        case PALADIN: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
-        case ROGUE:   val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
-        case HUNTER:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
-        case SHAMAN:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20); break;
-        case DRUID:   val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
-        case MAGE:    val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
-        case PRIEST:  val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
-        case WARLOCK: val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
+        case CLASS_WARRIOR: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_PALADIN: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_ROGUE:   val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
+        case CLASS_HUNTER:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
+        case CLASS_SHAMAN:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_DRUID:   val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_MAGE:    val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
+        case CLASS_PRIEST:  val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
+        case CLASS_WARLOCK: val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
     }
     tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
 
@@ -2174,8 +2174,8 @@ void Unit::ApplyStats(bool apply)
     ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val, apply);
 
     // critical
-    if(getClass() == HUNTER) classrate = 53;
-    else if(getClass() == ROGUE)  classrate = 29;
+    if(getClass() == CLASS_HUNTER) classrate = 53;
+    else if(getClass() == CLASS_ROGUE)  classrate = 29;
     else classrate = 20;
 
     val = 5 + GetStat(STAT_AGILITY)/classrate;
@@ -2183,11 +2183,11 @@ void Unit::ApplyStats(bool apply)
     ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE, val, apply);
 
     //dodge
-    if(getClass() == HUNTER) classrate = 26.5;
-    else if(getClass() == ROGUE)  classrate = 14.5;
+    if(getClass() == CLASS_HUNTER) classrate = 26.5;
+    else if(getClass() == CLASS_ROGUE)  classrate = 14.5;
     else classrate = 20;
                                                             ///*+(Defense*0,04);
-    if (getRace() == NIGHTELF)
+    if (getRace() == RACE_NIGHTELF)
         val = GetStat(STAT_AGILITY)/classrate + 1;
     else
         val = GetStat(STAT_AGILITY)/classrate;

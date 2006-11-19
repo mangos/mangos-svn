@@ -50,35 +50,6 @@ enum Team
     RED_TEAM = 1622,
 };
 
-enum Classes
-{
-    WARRIOR = 1,
-    PALADIN = 2,
-    HUNTER = 3,
-    ROGUE = 4,
-    PRIEST = 5,
-    SHAMAN = 7,
-    MAGE = 8,
-    WARLOCK = 9,
-    DRUID = 11,
-};
-
-enum Races
-{
-    HUMAN = 1,
-    ORC = 2,
-    DWARF = 3,
-    NIGHTELF = 4,
-    // if it needs be to official, it's actually SCOURGE acording to the story/.dbc
-    UNDEAD_PLAYER = 5,
-    TAUREN = 6,
-    GNOME = 7,
-    TROLL = 8,
-    // officialy, this exists but was never taken into use.. neutral faction which could
-    // learn some skills/spells from horde/alliance. maybe it'll be of some use later on.
-    GOBLIN = 9,
-};
-
 enum SpellModType
 {
     SPELLMOD_FLAT = 107,
@@ -480,7 +451,7 @@ class MANGOS_DLL_SPEC Player : public Unit
                 _ApplyAllItemMods();
 
                 // restore default warrior stance
-                if(getClass()== WARRIOR)
+                if(getClass()== CLASS_WARRIOR)
                     CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
             }
         };

@@ -414,22 +414,22 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
                     pPlayer->PlayerTalkClass->ClearMenus();
                     switch(GetCreatureInfo()->classNum)
                     {
-                        case DRUID:  pPlayer->PlayerTalkClass->SendGossipMenu( 4913,GetGUID()); break;
-                        case HUNTER: pPlayer->PlayerTalkClass->SendGossipMenu(10090,GetGUID()); break;
-                        case MAGE:   pPlayer->PlayerTalkClass->SendGossipMenu(  328,GetGUID()); break;
-                        case PALADIN:pPlayer->PlayerTalkClass->SendGossipMenu( 1635,GetGUID()); break;
-                        case PRIEST: pPlayer->PlayerTalkClass->SendGossipMenu( 4436,GetGUID()); break;
-                        case ROGUE:  pPlayer->PlayerTalkClass->SendGossipMenu( 4797,GetGUID()); break;
-                        case SHAMAN: pPlayer->PlayerTalkClass->SendGossipMenu( 5003,GetGUID()); break;
-                        case WARLOCK:pPlayer->PlayerTalkClass->SendGossipMenu( 5836,GetGUID()); break;
-                        case WARRIOR:pPlayer->PlayerTalkClass->SendGossipMenu( 4985,GetGUID()); break;
+                        case CLASS_DRUID:  pPlayer->PlayerTalkClass->SendGossipMenu( 4913,GetGUID()); break;
+                        case CLASS_HUNTER: pPlayer->PlayerTalkClass->SendGossipMenu(10090,GetGUID()); break;
+                        case CLASS_MAGE:   pPlayer->PlayerTalkClass->SendGossipMenu(  328,GetGUID()); break;
+                        case CLASS_PALADIN:pPlayer->PlayerTalkClass->SendGossipMenu( 1635,GetGUID()); break;
+                        case CLASS_PRIEST: pPlayer->PlayerTalkClass->SendGossipMenu( 4436,GetGUID()); break;
+                        case CLASS_ROGUE:  pPlayer->PlayerTalkClass->SendGossipMenu( 4797,GetGUID()); break;
+                        case CLASS_SHAMAN: pPlayer->PlayerTalkClass->SendGossipMenu( 5003,GetGUID()); break;
+                        case CLASS_WARLOCK:pPlayer->PlayerTalkClass->SendGossipMenu( 5836,GetGUID()); break;
+                        case CLASS_WARRIOR:pPlayer->PlayerTalkClass->SendGossipMenu( 4985,GetGUID()); break;
                     }
                 }
                 return false;
             }
             break;
         case TRAINER_TYPE_PETS:
-            if(pPlayer->getClass()!=HUNTER)
+            if(pPlayer->getClass()!=CLASS_HUNTER)
             {
                 pPlayer->PlayerTalkClass->ClearMenus();
                 pPlayer->PlayerTalkClass->SendGossipMenu(3620,GetGUID());
@@ -444,14 +444,14 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
                     pPlayer->PlayerTalkClass->ClearMenus();
                     switch(GetCreatureInfo()->classNum)
                     {
-                        case RACE_DWARF:     pPlayer->PlayerTalkClass->SendGossipMenu(5865,GetGUID()); break;
-                        case RACE_GNOME:     pPlayer->PlayerTalkClass->SendGossipMenu(4881,GetGUID()); break;
-                        case RACE_HUMAN:     pPlayer->PlayerTalkClass->SendGossipMenu(5861,GetGUID()); break;
-                        case RACE_NIGHT_ELF: pPlayer->PlayerTalkClass->SendGossipMenu(5862,GetGUID()); break;
-                        case RACE_ORC:       pPlayer->PlayerTalkClass->SendGossipMenu(5863,GetGUID()); break;
-                        case RACE_TAUREN:    pPlayer->PlayerTalkClass->SendGossipMenu(5864,GetGUID()); break;
-                        case RACE_TROLL:     pPlayer->PlayerTalkClass->SendGossipMenu(5816,GetGUID()); break;
-                        case RACE_UNDEAD:    pPlayer->PlayerTalkClass->SendGossipMenu( 624,GetGUID()); break;
+                        case RACE_DWARF:        pPlayer->PlayerTalkClass->SendGossipMenu(5865,GetGUID()); break;
+                        case RACE_GNOME:        pPlayer->PlayerTalkClass->SendGossipMenu(4881,GetGUID()); break;
+                        case RACE_HUMAN:        pPlayer->PlayerTalkClass->SendGossipMenu(5861,GetGUID()); break;
+                        case RACE_NIGHTELF:     pPlayer->PlayerTalkClass->SendGossipMenu(5862,GetGUID()); break;
+                        case RACE_ORC:          pPlayer->PlayerTalkClass->SendGossipMenu(5863,GetGUID()); break;
+                        case RACE_TAUREN:       pPlayer->PlayerTalkClass->SendGossipMenu(5864,GetGUID()); break;
+                        case RACE_TROLL:        pPlayer->PlayerTalkClass->SendGossipMenu(5816,GetGUID()); break;
+                        case RACE_UNDEAD_PLAYER:pPlayer->PlayerTalkClass->SendGossipMenu( 624,GetGUID()); break;
                     }
                 }
                 return false;
