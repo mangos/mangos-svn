@@ -8563,9 +8563,11 @@ void Player::PrepareQuestMenu( uint64 guid )
         uint32 status = GetQuestStatus( quest_id );
 
         if ( status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus( quest_id ) )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, false );
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD_REP, status );
         else if ( status == QUEST_STATUS_INCOMPLETE )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, false );
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, status );
+        else if (status == QUEST_STATUS_AVAILABLE )
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_CHAT, status);
     }
 
     for( std::list<Quest*>::iterator i = pObject->mQuests.begin( ); i != pObject->mQuests.end( ); i++ )
@@ -8935,7 +8937,7 @@ void Player::IncompleteQuest( uint32 quest_id )
     }
 }
 
-void Player::RewardQuest( Quest *pQuest, uint32 reward )
+void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
 {
     if( pQuest )
     {
@@ -9004,7 +9006,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             SetQuestStatus(quest_id, QUEST_STATUS_NONE);
         }
 
-        SendQuestReward( pQuest, XP );
+        SendQuestReward( pQuest, XP, questGiver );
 
         mQuestStatus[quest_id].m_completed_once = true;     // in repeated quest case prevent recive XP at second complete
     }
@@ -9645,7 +9647,7 @@ void Player::SendQuestComplete( uint32 quest_id )
     }
 }
 
-void Player::SendQuestReward( Quest *pQuest, uint32 XP )
+void Player::SendQuestReward( Quest *pQuest, uint32 XP, Object * questGiver )
 {
     if( pQuest )
     {
@@ -9675,6 +9677,34 @@ void Player::SendQuestReward( Quest *pQuest, uint32 XP )
         }
 
         GetSession()->SendPacket( &data );
+
+        if (pQuest->GetQuestInfo()->QuestCompleteScript != 0) {
+            ScriptMapMap::iterator s = sScripts.find(pQuest->GetQuestInfo()->QuestCompleteScript);
+            if (s == sScripts.end())
+                return;
+
+            ScriptMap *s2 = &(s->second);
+            ScriptMap::iterator iter;
+            bool immedScript = false;
+            for (iter = s2->begin(); iter != s2->end(); iter++) {
+                if (iter->first == 0) {
+                    ScriptAction sa;
+                    sa.source = questGiver;
+                    sa.script = &iter->second;
+                    sa.target = this;
+                    sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(0, sa));
+                    immedScript = true;
+                } else {
+                    ScriptAction sa;
+                    sa.source = questGiver;
+                    sa.script = &iter->second;
+                    sa.target = this;
+                    sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(sWorld.internalGameTime + iter->first, sa));
+                }
+            }
+            if (immedScript)
+                sWorld.ScriptsProcess();
+        }
     }
 }
 

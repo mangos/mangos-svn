@@ -41,6 +41,7 @@ extern SQLStorage sQuestsStorage;
 
 QuestRelations sPrevQuests;
 QuestRelations sExclusiveQuestGroups;
+ScriptMapMap sScripts;
 
 ObjectMgr::ObjectMgr()
 {
@@ -526,6 +527,43 @@ void ObjectMgr::LoadQuests()
     };
 
     sLog.outString( ">> Loaded %u quests definitions", sQuestsStorage.RecordCount );
+    sLog.outString( "" );
+}
+
+void ObjectMgr::LoadScripts()
+{
+
+    QueryResult *result = sDatabase.Query( "SELECT `id`,`delay`,`command`,`datalong`,`datalong2`,`datatext`, `x`, `y`, `z`, `o` FROM `scripts`" );
+
+    if( !result )
+        return;
+
+    uint32 count = 0;
+    do
+    {
+        Field *fields = result->Fetch();
+        ScriptInfo tmp;
+        tmp.id = fields[0].GetUInt32();
+        tmp.delay = fields[1].GetUInt32();
+        tmp.command = fields[2].GetUInt32();
+        tmp.datalong = fields[3].GetUInt32();
+        tmp.datalong2 = fields[4].GetUInt32();
+        tmp.datatext = fields[5].GetString();
+        tmp.x = fields[6].GetFloat();
+        tmp.y = fields[7].GetFloat();
+        tmp.z = fields[8].GetFloat();
+        tmp.o = fields[9].GetFloat();
+
+        if (sScripts.find(tmp.id) == sScripts.end()) {
+            multimap<uint32, ScriptInfo> emptyMap;
+            sScripts[tmp.id] = emptyMap;
+        }
+        sScripts[tmp.id].insert(pair<uint32, ScriptInfo>(tmp.delay, tmp));
+
+        count++;
+    } while( result->NextRow() );
+
+    sLog.outString( ">> Loaded %u script definitions", count );
     sLog.outString( "" );
 }
 

@@ -233,7 +233,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     {
         if( _player->CanRewardQuest( pQuest, reward, true ) )
         {
-            _player->RewardQuest( pQuest, reward );
+            _player->RewardQuest( pQuest, reward, pObject );
 
             switch(pObject->GetTypeId())
             {

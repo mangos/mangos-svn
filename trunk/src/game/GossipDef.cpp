@@ -131,7 +131,7 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
     {
         data << uint32( pQuestMenu->GetItem(iI).m_qId );
         data << uint32( pQuestMenu->GetItem(iI).m_qIcon );
-        data << uint32( !(pQuestMenu->GetItem(iI).m_qAvailable) );
+        data << uint32( pQuestMenu->GetItem(iI).m_qAvailable );
         data << pQuestMenu->GetItem(iI).m_qTitle;
     }
 
@@ -238,7 +238,7 @@ QuestMenu::~QuestMenu()
     ClearMenu();
 }
 
-void QuestMenu::AddMenuItem( uint32 QuestId, uint8 Icon, bool Available)
+void QuestMenu::AddMenuItem( uint32 QuestId, uint8 Icon, uint8 Available)
 {
     QuestInfo const *qinfo = objmgr.GetQuestInfo(QuestId);
     if (!qinfo) return;
@@ -290,7 +290,8 @@ void PlayerMenu::SendQuestMenu( QEmote eEmote, std::string Title, uint64 npcGUID
     {
         QuestMenuItem qmi=pQuestMenu->GetItem(iI);
         data << uint32( qmi.m_qId );
-        data << uint32((qmi.m_qAvailable)?5:3);
+        //data << uint32((qmi.m_qAvailable)?5:3);
+        data << uint32(qmi.m_qAvailable);
         //data << uint32( qmi.m_qIcon );
         data << uint32(0x00);
         data << qmi.m_qTitle;
@@ -365,8 +366,8 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
 
     pSession->SendPacket( &data );
 
-    if(qInfo->DetailsEmote)
-        SendNPCEmote(qInfo->DetailsEmote,npcGUID);
+    //if(qInfo->DetailsEmote)
+    //    SendNPCEmote(qInfo->DetailsEmote,npcGUID);
 
     sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestId());
 }
@@ -467,11 +468,12 @@ void PlayerMenu::SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNex
     data << npcGUID;
     data << quest_id;
     data << qInfo->Title;
-    data << qInfo->Details;
+    data << qInfo->CompletionText;
 
     data << uint32( EnbleNext );
 
-    if ( EmoteCnt > 0 )
+    Quest* pQuest =  pSession->GetPlayer()->GetActiveQuest(quest_id);
+    /*if ( EmoteCnt > 0 )
     {
         data << uint32( EmoteCnt );
 
@@ -480,9 +482,16 @@ void PlayerMenu::SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNex
             data << Emotes[iI]._Delay;
             data << Emotes[iI]._Emote;
         }
-    } else data << uint32( 0x00 );
-
-    Quest* pQuest =  pSession->GetPlayer()->GetActiveQuest(quest_id);
+    } else data << uint32( 0x00 ); */
+    // Must be extended later, but for now:
+    if (pQuest->m_offerRewardEmote == 0) {
+        data << uint32(0x00);
+    } else {
+        data << uint32(0x1);
+        data << uint32(0x0);
+        data << pQuest->m_offerRewardEmote;
+    }
+    
 
     ItemPrototype const *pItem;
 
@@ -535,6 +544,7 @@ void PlayerMenu::SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNex
     else
         data << uint32(0);
 
+    // more data here--zoneid uint32 + 0x00000000?
     pSession->SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),quest_id );
 }
@@ -548,24 +558,24 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
     data << pQuest->GetQuestInfo()->QuestId;
     data << pQuest->GetQuestInfo()->Title;
 
-    if ( !Completable )
-    {
+    //if ( !Completable )
+    //{
         if ( strlen(pQuest->GetQuestInfo()->IncompleteText)>0 )
             data << pQuest->GetQuestInfo()->IncompleteText;
         else
             data << pQuest->GetQuestInfo()->Details;
-    }
-    else
-    {
-        if ( strlen(pQuest->GetQuestInfo()->CompletionText)>0 )
-            data << pQuest->GetQuestInfo()->CompletionText;
-        else
-            data << pQuest->GetQuestInfo()->Details;
-    }
+    //}
+    //else
+    //{
+    //    if ( strlen(pQuest->GetQuestInfo()->CompletionText)>0 )
+    //        data << pQuest->GetQuestInfo()->CompletionText;
+    //    else
+    //        data << pQuest->GetQuestInfo()->Details;
+    //}
 
     data << uint32(0x00);
-    // Emote
-    data << uint32(0x01);
+    data << pQuest->m_requestItemsEmote; // Emote
+    
     // Close Window after cancel
     if (CloseOnCancel)
         data << uint32(0x01);
@@ -600,16 +610,16 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
 
     pSession->SendPacket( &data );
 
-    if ( !Completable )
-    {
-        if(pQuest->GetQuestInfo()->IncompleteEmote)
-            SendNPCEmote(pQuest->GetQuestInfo()->IncompleteEmote,npcGUID);
-    }
-    else
-    {
-        if(pQuest->GetQuestInfo()->CompleteEmote)
-            SendNPCEmote(pQuest->GetQuestInfo()->CompleteEmote,npcGUID);
-    }
+    //if ( !Completable )
+    //{
+    //    if(pQuest->GetQuestInfo()->IncompleteEmote)
+    //        SendNPCEmote(pQuest->GetQuestInfo()->IncompleteEmote,npcGUID);
+    //}
+    //else
+    //{
+    //    if(pQuest->GetQuestInfo()->CompleteEmote)
+    //        SendNPCEmote(pQuest->GetQuestInfo()->CompleteEmote,npcGUID);
+    //}
 
     sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestInfo()->QuestId );
 }

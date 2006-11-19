@@ -2132,6 +2132,9 @@ CREATE TABLE `quest_template` (
   `DetailsEmote` int(11) NOT NULL default '0', 
   `IncompleteEmote` int(11) NOT NULL default '0', 
   `CompleteEmote` int(11) NOT NULL default '0',
+  `OfferRewardEmote` int(11) unsigned NOT NULL default '0',
+  `RequestItemsEmote` int(11) unsigned NOT NULL default '1',
+  `CompleteScript` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest System';
 
@@ -2169,6 +2172,19 @@ LOCK TABLES `skinning_loot_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
 
+DROP TABLE IF EXISTS `scripts`;
+CREATE TABLE `scripts` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `delay` int(11) unsigned NOT NULL default '0',
+  `command` int(11) unsigned NOT NULL default '0',
+  `datalong` int(11) unsigned NOT NULL default '0',
+  `datalong2` int(11) unsigned NOT NULL default '0',
+  `datatext` text NOT NULL default "",
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0'
+);
 
 --
 -- Table structure for table `transports`

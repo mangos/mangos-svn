@@ -86,7 +86,7 @@ class ChatHandler
         ChatHandler();
         ~ChatHandler();
 
-        static void FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char* channelName, uint64 target_guid, const char* message );
+        static void FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char* channelName, uint64 target_guid, const char* message, Unit *speaker = NULL);
         static void FillSystemMessageData( WorldPacket *data, WorldSession* session, const char* message )
         {
             FillMessageData( data, session, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, message );

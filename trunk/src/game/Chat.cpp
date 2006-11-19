@@ -466,7 +466,7 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
 }
 
 //Note: target_guid used only in CHAT_MSG_WHISPER_INFORM mode (in this case channelName ignored)
-void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message )
+void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message, Unit *speaker)
 {
     uint32 messageLength = (message ? strlen(message) : 0) + 1;
 
@@ -487,10 +487,17 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     {
         target_guid = session ? session->GetPlayer()->GetGUID() : 0;
     }
+    else if (type == CHAT_MSG_MONSTER_SAY)
+    {
+        *data << (uint64)(((Creature *)speaker)->GetGUID());
+        *data << (uint32)(strlen(((Creature *)speaker)->GetCreatureInfo()->Name) + 1);
+        *data << ((Creature *)speaker)->GetCreatureInfo()->Name;
+    }
     else if (type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
     {
         target_guid = 0;                                    // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
     }
+    
 
     *data << target_guid;
 

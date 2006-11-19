@@ -221,10 +221,10 @@ m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0), m_isPersistent(false)
     if( m_duration != maxduration )
     {
         uint8 comboPoints=0;
-        if(caster->GetTypeId() == TYPEID_PLAYER)
+        if(caster->GetTypeId() == TYPEID_PLAYER) {
             comboPoints = (uint8)((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
-        if(caster->GetTypeId() == TYPEID_PLAYER)
             caster->SetUInt32Value(PLAYER_FIELD_BYTES,((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
+        }
         comboPoints = comboPoints < 5 ? comboPoints : 5;
         m_duration += int32((maxduration - m_duration) * comboPoints / 5);
     }

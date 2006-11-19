@@ -57,6 +57,7 @@ World::World()
     m_allowMovement = true;
     m_Last_tick = time(NULL);
     m_ShutdownTimer = 0;
+    internalGameTime = 0;
 }
 
 World::~World()
@@ -279,6 +280,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();
 
+    sLog.outString( "Loading Scripts..." );
+    objmgr.LoadScripts();
+
     sLog.outString( "Loading NPC Texts..." );
     objmgr.LoadGossipText();
 
@@ -347,6 +351,7 @@ void World::Update(time_t diff)
     else m_timers[i].SetCurrent(0);
 
     _UpdateGameTime();
+    internalGameTime += diff;
 
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {
@@ -578,10 +583,32 @@ void World::Update(time_t diff)
     {
         m_timers[WUPDATE_OBJECTS].Reset();
         MapManager::Instance().Update(diff);
+
+        if (scriptSchedule.size() > 0)
+            ScriptsProcess();
     }
 
     // move all creatures with delayed move and remove and delete all objects with delayed remove
     ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
+}
+
+void World::ScriptsProcess() {
+    if (scriptSchedule.size() == 0)
+        return;
+
+    multimap<uint64, ScriptAction>::iterator iter = scriptSchedule.begin();
+    while ((scriptSchedule.size() > 0) && (iter->first < internalGameTime)) {
+        if (iter->second.script->command == 0)
+            ((Creature *)iter->second.source)->MonsterSay(iter->second.script->datatext.c_str(), 0, iter->second.target->GetGUID());
+        else if (iter->second.script->command == 1)
+            ((Creature *)iter->second.source)->HandleEmoteCommand(iter->second.script->datalong);
+        else if (iter->second.script->command == 2)
+            ((Creature *)iter->second.source)->SetUInt32Value(iter->second.script->datalong, iter->second.script->datalong2);
+        scriptSchedule.erase(iter);
+
+        iter = scriptSchedule.begin();
+    }
+    return;
 }
 
 void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
@@ -692,7 +719,7 @@ time_t World::_UpdateGameTime()
 
     m_gameTime = thisTime;
     m_Last_tick = thisTime;
-
+    
     return m_gameTime;
 }
 
