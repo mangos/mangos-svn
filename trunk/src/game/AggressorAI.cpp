@@ -49,9 +49,11 @@ AggressorAI::MoveInLineOfSight(Unit *u)
         if(i_creature.IsWithinDist(u, attackRadius) && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
             if( i_creature.IsHostileTo( u ) )
+            {
                 AttackStart(u);
-            if(u->isStealth())
-                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                if(u->isStealth())
+                    u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            }
         }
     }
 }

@@ -39,7 +39,7 @@ void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
     recvPacket.print_storage();
 }
 
-void WorldSession::UpdateTrade()
+void WorldSession::SendUpdateTrade()
 {
     WorldPacket data;
     Player *pThis =_player;
@@ -51,11 +51,11 @@ void WorldSession::UpdateTrade()
     data << (uint8 ) 1;
     data << (uint32) 7;
     data << (uint32) 0;
-    data << (uint32)_player->tradeGold;
+    data << (uint32)pThis->pTrader->tradeGold;
     data << (uint32) 0;
     for(int i=0; i<7; i++)
     {
-        item = (pThis->tradeItems[i] != NULL_SLOT ? pThis->GetItemByPos( pThis->tradeItems[i] ) : NULL);
+        item = (pThis->pTrader->tradeItems[i] != NULL_SLOT ? pThis->pTrader->GetItemByPos( pThis->pTrader->tradeItems[i] ) : NULL);
 
         data << (uint8) i;
         if(item)
@@ -74,8 +74,8 @@ void WorldSession::UpdateTrade()
         for(int j=0; j<12; j++)
             data << (uint32) 0;
     }
-    pThis->pTrader->GetSession()->SendPacket(&data);
 
+    SendPacket(&data);
 }
 
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
@@ -354,18 +354,24 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 {
+    if(!_player->pTrader)
+        return;
+
     uint32 gold;
 
     recvPacket >> gold;
 
     _player->tradeGold = gold;
 
-    UpdateTrade();
+    _player->pTrader->GetSession()->SendUpdateTrade();
 
 }
 
 void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 {
+    if(!_player->pTrader)
+        return;
+
     uint8 tradeSlot;
     uint8 bag;
     uint8 slot;
@@ -374,19 +380,34 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
     recvPacket >> bag;
     recvPacket >> slot;
 
+    // check cheating, can't fail with correct client operations
+    Item* item = _player->GetItemByPos(bag,slot);
+    if(!item || item->IsBag() && !((Bag*)item)->IsEmpty())
+    {
+        // send to self (cancel trade at cheating attempt)
+        WorldPacket data;
+        data.Initialize(SMSG_TRADE_STATUS);
+        data << (uint32)3;
+        SendPacket(&data);
+        return;
+    }
+
     _player->tradeItems[tradeSlot] = (bag << 8) | slot;
 
-    UpdateTrade();
+    _player->pTrader->GetSession()->SendUpdateTrade();
 }
 
 void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 {
+    if(!_player->pTrader)
+        return;
+
     uint8 slot;
     recvPacket >> slot;
 
     _player->tradeItems[slot] = NULL_SLOT;
 
-    UpdateTrade();
+    _player->pTrader->GetSession()->SendUpdateTrade();
 }
 
 /*

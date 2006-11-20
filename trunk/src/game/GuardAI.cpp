@@ -39,14 +39,18 @@ GuardAI::GuardAI(Creature &c) : i_creature(c), i_victimGuid(0), i_state(STATE_NO
 
 void GuardAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_creature.getVictim() == NULL && u->isTargetableForAttack() && u->isInAccessablePlaceFor(&i_creature))
+    if( i_creature.getVictim() == NULL && u->isTargetableForAttack() && IsVisible(u) && u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.IsWithinDist(u,attackRadius) && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
             //Need add code to let guard suport player
             if( i_creature.IsHostileTo(u) || u->IsHostileToAll() )
+            {
                 AttackStart(u);
+                if(u->isStealth())
+                    u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            }
         }
     }
 }
@@ -223,8 +227,23 @@ void GuardAI::UpdateAI(const uint32 diff)
 
 bool GuardAI::IsVisible(Unit *pl) const
 {
-    return pl->isTargetableForAttack() &&
-        i_creature.GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_GUARDER);
+    bool seestealth = true;
+    uint32 sight = sWorld.getConfig(CONFIG_SIGHT_GUARDER);
+    float dist = i_creature.GetDistanceSq(pl);
+    float attackRadius = i_creature.GetAttackDistance(pl);
+    if(pl->isStealth())
+    {
+        int32 seevaluse;
+        int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;
+        seevaluse = 5  + i_creature.getLevel() * 5 + i_creature.m_detectStealth - pl->m_stealthvalue - (uint32)sqrt(dist/100) - 50 * notfront;
+        if(seevaluse<0)
+            seestealth = false;
+        else if(seevaluse>=int32(urand(0,30)))
+            seestealth = true;
+        else seestealth = false;
+    }
+                                                            // offset=1.0
+    return seestealth && (dist * 1.0 <= sight) ;
 }
 
 void GuardAI::AttackStart(Unit *u)
