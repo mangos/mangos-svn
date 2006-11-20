@@ -144,8 +144,8 @@ struct QuestInfo
     char* Title;
     char* Details;
     char* Objectives;
-    char* CompletionText;
-    char* IncompleteText;
+    char* OfferRewardText;
+    char* RequestItemsText;
     char* EndText;
     char* ObjectiveText[4];
     uint32 ReqItemId[ QUEST_OBJECTIVES_COUNT ];
@@ -177,6 +177,8 @@ struct QuestInfo
     uint32 OfferRewardEmote;
     uint32 RequestItemsEmote;
     uint32 QuestCompleteScript;
+    uint32 HaveQuestId;
+    uint32 Repeatable;
 
     // simple data access functions
     bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }

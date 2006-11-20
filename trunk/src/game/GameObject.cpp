@@ -64,7 +64,7 @@ GameObject::~GameObject()
     }
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 dynflags)
 {
     m_positionX = x;
     m_positionY = y;
@@ -114,6 +114,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     SetUInt32Value (GAMEOBJECT_TYPE_ID, goinfo->type);
 
     SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
+    SetUInt32Value (GAMEOBJECT_DYN_FLAGS, dynflags);
     return true;
 }
 
@@ -252,7 +253,8 @@ void GameObject::SaveToDB()
         << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
         << lootid <<", "
         << m_respawnDelayTime << ", "
-        << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ")";
+        << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
+        << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
 
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
@@ -261,8 +263,8 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
-        //                                0    1     2            3            4            5             6           7           8           9           10     11             12             13
-        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer`,`animprogress`,`guid` FROM `gameobject` WHERE `guid` = '%u'", guid);
+        //                                0    1     2            3            4            5             6           7           8           9           10     11             12             13         14
+        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer`,`animprogress`,`dynflags`,`guid` FROM `gameobject` WHERE `guid` = '%u'", guid);
 
     if( !result )
     {
@@ -284,8 +286,9 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
     float rotation3 = fields[9].GetFloat();
 
     uint32 animprogress = fields[12].GetUInt32();
+    uint32 dynflags = fields[13].GetUInt32();
 
-    if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress) )
+    if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, dynflags) )
     {
         if (!external) delete result;
         return false;

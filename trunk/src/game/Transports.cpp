@@ -66,7 +66,7 @@ void MapManager::LoadTransports()
         uint32 mapid;
         x = t->m_WayPoints[0].x; y = t->m_WayPoints[0].y; z = t->m_WayPoints[0].z; mapid = t->m_WayPoints[0].mapid; o = 1;
         
-        t->Create(entry, goinfo->displayId, mapid, x, y, z, o, 100);
+        t->Create(entry, goinfo->displayId, mapid, x, y, z, o, 100, 0);
         m_Transports.push_back(t);
         
         
@@ -91,7 +91,7 @@ void MapManager::LoadTransports()
     return;
 }
 
-bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress)
+bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
 {
     m_positionX = x;
     m_positionY = y;
@@ -130,6 +130,7 @@ bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, 
     SetUInt32Value (GAMEOBJECT_TYPE_ID, goinfo->type);
 
     SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
+    SetUInt32Value (GAMEOBJECT_DYN_FLAGS, dynflags);
 
     return true;
 }

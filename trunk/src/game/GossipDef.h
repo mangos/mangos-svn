@@ -172,12 +172,14 @@ class MANGOS_DLL_SPEC PlayerMenu
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
-        void SendQuestMenu ( QEmote eEmote, std::string Title, uint64 npcGUID );
-        void SendQuestStatus( uint32 questStatus, uint64 npcGUID );
-        void SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept);
-        void SendUpdateQuestDetails ( Quest *pQuest );
-        void SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt );
-        void SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel );
-        void SendNPCEmote( uint32 emote, uint64 npcGUID );
+        void SendQuestGiverStatus( uint32 questStatus, uint64 npcGUID );
+        
+        void SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint64 npcGUID );
+        
+        void SendQuestQueryResponse ( Quest *pQuest );
+        void SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept);
+
+        void SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt );
+        void SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel );
 };
 #endif

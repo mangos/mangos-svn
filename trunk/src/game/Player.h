@@ -585,6 +585,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestLevel( uint32 quest_id, bool msg );
         bool SatisfyQuestLog( bool msg );
         bool SatisfyQuestPreviousQuest( uint32 quest_id, bool msg );
+        bool SatisfyQuestHaveQuest( uint32 quest_id, bool msg );
         bool SatisfyQuestRace( uint32 quest_id, bool msg );
         bool SatisfyQuestReputation( uint32 quest_id, bool msg );
         bool SatisfyQuestSkill( uint32 quest_id, bool msg );
