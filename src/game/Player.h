@@ -520,7 +520,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
         uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive = true ) const;
         uint8 CanUnequipItem( uint16 src, bool swap ) const;
-        uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
+        uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive = true ) const;
         uint8 CanUseItem( Item *pItem, bool check_alive = true ) const;
         bool CanUseItem( ItemPrototype const *pItem );
         uint8 CanUseAmmo( uint32 item ) const;

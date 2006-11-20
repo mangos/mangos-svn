@@ -7013,7 +7013,7 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     return EQUIP_ERR_OK;
 }
 
-uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const
+uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive ) const
 {
     dest = 0;
     if( pItem )
@@ -7276,7 +7276,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                             {
                                 if( !HasBankBagSlot( slot ) )
                                     return EQUIP_ERR_MUST_PURCHASE_THAT_BAG_SLOT;
-                                if( uint8 cantuse = CanUseItem( pItem ) != EQUIP_ERR_OK )
+                                if( uint8 cantuse = CanUseItem( pItem, check_alive ) != EQUIP_ERR_OK )
                                     return cantuse;
                             }
                             else
@@ -10257,7 +10257,7 @@ void Player::_LoadInventory(uint32 timediff)
             }
             else if( IsBankPos( dest ) )
             {
-                if( !CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                if( !CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false, false ) == EQUIP_ERR_OK )
                 {
                     delete item;
                     continue;
