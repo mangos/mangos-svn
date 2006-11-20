@@ -491,19 +491,19 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castIte
 
     CastSpell(Victim,spellInfo,triggered,castItem);
 
-/*     if (castItem)
-        DEBUG_LOG("WORLD: cast Item spellId - %i", spellId);
+    /*     if (castItem)
+            DEBUG_LOG("WORLD: cast Item spellId - %i", spellId);
 
-    Spell *spell = new Spell(this, spellInfo, triggered, 0);
-    WPAssert(spell);
+        Spell *spell = new Spell(this, spellInfo, triggered, 0);
+        WPAssert(spell);
 
-    SpellCastTargets targets;
-    targets.setUnitTarget( Victim );
-    spell->m_CastItem = castItem;
-    spell->prepare(&targets);
-    m_canMove = false;
-    if (triggered) delete spell;
-*/
+        SpellCastTargets targets;
+        targets.setUnitTarget( Victim );
+        spell->m_CastItem = castItem;
+        spell->prepare(&targets);
+        m_canMove = false;
+        if (triggered) delete spell;
+    */
 }
 
 void Unit::CastSpell(Unit* Victim,SpellEntry *spellInfo, bool triggered, Item *castItem)
@@ -515,7 +515,7 @@ void Unit::CastSpell(Unit* Victim,SpellEntry *spellInfo, bool triggered, Item *c
     }
 
     if (castItem)
-		DEBUG_LOG("WORLD: cast Item spellId - %i", spellInfo->Id);
+        DEBUG_LOG("WORLD: cast Item spellId - %i", spellInfo->Id);
 
     Spell *spell = new Spell(this, spellInfo, triggered, 0);
     WPAssert(spell);

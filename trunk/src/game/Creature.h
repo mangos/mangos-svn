@@ -343,7 +343,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
 
         void Say(char const* text, uint32 language);
-        void MonsterSay(char const *text, uint32 language, uint64 targetGUID); 
+        void MonsterSay(char const *text, uint32 language, uint64 targetGUID);
 
         bool LoadFromDB(uint32 guid, QueryResult *result = NULL);
         virtual void SaveToDB();                            // overwrited in Pet
@@ -357,7 +357,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetLootRecipient (Player *player);
 
         SpellEntry *reachWithSpellAttack(Unit *pVictim);
-		SpellEntry *reachWithSpellCure(Unit *pVictim);
+        SpellEntry *reachWithSpellCure(Unit *pVictim);
 
         uint32 m_spells[CREATURE_MAX_SPELLS];
 

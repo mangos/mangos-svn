@@ -200,8 +200,8 @@ CreatureVisibleMovementNotifier::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-       if( i_creature.IsVisibleInGridForPlayer(iter->second) )
-       {
+        if( i_creature.IsVisibleInGridForPlayer(iter->second) )
+        {
             UpdateData update_data;
             WorldPacket packet;
             i_creature.BuildCreateUpdateBlockForPlayer(&update_data, iter->second);

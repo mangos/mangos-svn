@@ -159,7 +159,7 @@ class ObjectMgr
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
         static QuestInfo const* GetQuestInfo(uint32 id) { return sQuestsStorage.LookupEntry<QuestInfo>(id); }
-        
+
         Quest* NewQuest(uint32 id) const
         {
             Quest *rquest=new Quest;

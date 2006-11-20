@@ -290,7 +290,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     if ( race == RACE_TAUREN )
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
-    else 
+    else
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
     SetStat(STAT_STRENGTH,info->strength );
@@ -4585,7 +4585,7 @@ void Player::_RemoveAllItemMods()
         (*i)->ApplyModifier(true);
 
     _ApplyStatsMods();
-    
+
     for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         (*i)->ApplyModifier(true);
 
@@ -4618,8 +4618,8 @@ void Player::_ApplyAllItemMods()
                 continue;
 
             _ApplyItemBonuses(proto,i, true);
-            }
         }
+    }
 
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(true);
@@ -4650,8 +4650,8 @@ void Player::_ApplyAllItemMods()
                 uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                 if(Enchant_id)
                     AddItemEnchant(m_items[i],Enchant_id, true);
+            }
         }
-    }
     }
 
     sLog.outDebug("_ApplyAllItemMods complete.");
@@ -7613,13 +7613,13 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             m_items[slot] = NULL;
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-                if ( slot < EQUIPMENT_SLOT_END )
-                {
-                    int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
-                    for (int i = VisibleBase; i < VisibleBase + 12; ++i)
-                        SetUInt32Value(i, 0);
-                }
+            if ( slot < EQUIPMENT_SLOT_END )
+            {
+                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+                for (int i = VisibleBase; i < VisibleBase + 12; ++i)
+                    SetUInt32Value(i, 0);
             }
+        }
         else
         {
             Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
@@ -8580,14 +8580,15 @@ void Player::PrepareQuestMenu( uint64 guid )
         uint32 quest_id = pQuest->GetQuestId();
         uint32 status = GetQuestStatus( quest_id );
 
-        if ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && (CanTakeQuest(pQuest, false))) {
+        if ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && (CanTakeQuest(pQuest, false)))
+        {
             // perhaps find a better check for quests that autocomplete
             if (pQuest->GetQuestInfo()->Repeatable == 0)
                 qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, status );
             else
                 qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD_REP, status );
         } else if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
+        qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
     }
 }
 
@@ -8609,14 +8610,18 @@ void Player::SendPreparedQuest( uint64 guid )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanRewardQuest(pQuest,false), true );
             else if( status == DIALOG_STATUS_INCOMPLETE )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, false, true );
-            else {
+            else
+            {
                 // perhaps find a better auto-complete test
-                if ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && (CanTakeQuest(pQuest, false))) {
+                if ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && (CanTakeQuest(pQuest, false)))
+                {
                     //if (CanCompleteQuest(quest_id))
                     //    PlayerTalkClass->SendQuestGiverOfferReward(quest_id, guid, true, NULL, 0);
                     //else
                     PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanCompleteQuest(quest_id), true);
-                } else {
+                }
+                else
+                {
                     PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, guid, true );
                 }
             }
@@ -8712,7 +8717,7 @@ bool Player::CanTakeQuest( Quest *pQuest, bool msg )
         return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestExclusiveGroup( quest_id, msg )
             && SatisfyQuestRace( quest_id, msg ) && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
             && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg )
-            && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg ) 
+            && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg )
             && SatisfyQuestHaveQuest( quest_id, msg ) );
     }
     return false;
@@ -8757,19 +8762,19 @@ bool Player::CanCompleteQuest( uint32 quest_id )
 
         QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
 
-        if ((mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE) || 
+        if ((mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE) ||
             (strlen(qInfo->Objectives) == 0))
         {
-            
+
             //if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
             //{
-                for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
-                {
-                    //if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
-                    // Must do it this way because repeatable quests won't be counted:
-                    if (GetItemCount(qInfo->ReqItemId[i]) < qInfo->ReqItemCount[i])
-                        return false;
-                }
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+            {
+                //if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
+                // Must do it this way because repeatable quests won't be counted:
+                if (GetItemCount(qInfo->ReqItemId[i]) < qInfo->ReqItemCount[i])
+                    return false;
+            }
             //}
 
             if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
@@ -9180,7 +9185,6 @@ bool Player::SatisfyQuestHaveQuest( uint32 quest_id, bool msg )
 
     return true;
 }
-
 
 bool Player::SatisfyQuestRace( uint32 quest_id, bool msg )
 {
@@ -9725,7 +9729,8 @@ void Player::SendQuestReward( Quest *pQuest, uint32 XP, Object * questGiver )
 
         GetSession()->SendPacket( &data );
 
-        if (pQuest->GetQuestInfo()->QuestCompleteScript != 0) {
+        if (pQuest->GetQuestInfo()->QuestCompleteScript != 0)
+        {
             ScriptMapMap::iterator s = sScripts.find(pQuest->GetQuestInfo()->QuestCompleteScript);
             if (s == sScripts.end())
                 return;
@@ -9733,15 +9738,19 @@ void Player::SendQuestReward( Quest *pQuest, uint32 XP, Object * questGiver )
             ScriptMap *s2 = &(s->second);
             ScriptMap::iterator iter;
             bool immedScript = false;
-            for (iter = s2->begin(); iter != s2->end(); iter++) {
-                if (iter->first == 0) {
+            for (iter = s2->begin(); iter != s2->end(); iter++)
+            {
+                if (iter->first == 0)
+                {
                     ScriptAction sa;
                     sa.source = questGiver;
                     sa.script = &iter->second;
                     sa.target = this;
                     sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(0, sa));
                     immedScript = true;
-                } else {
+                }
+                else
+                {
                     ScriptAction sa;
                     sa.source = questGiver;
                     sa.script = &iter->second;

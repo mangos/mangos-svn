@@ -151,58 +151,59 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
         _player->PlayerTalkClass->CloseGossip();
         return;
     }
-    
+
     Quest *pQuest = objmgr.NewQuest(quest);
-    if ( pQuest ) {
+    if ( pQuest )
+    {
         _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
         delete pQuest;
     }
 
-/*
-    Quest *pQuest = objmgr.NewQuest(quest);
-    if ( pQuest )
-    {
-        uint32 status = _player->GetQuestStatus( quest );
-        switch(pObject->GetTypeId())
+    /*
+        Quest *pQuest = objmgr.NewQuest(quest);
+        if ( pQuest )
         {
-            case TYPEID_UNIT:
-                if( !Script->QuestSelect(_player, ((Creature*)pObject), pQuest ) )
-                {
-                    if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
-                        _player->PlayerTalkClass->SendQuestGiverRequestItems( pQuest, pObject->GetGUID(), _player->CanRewardQuest(pQuest,false), false );
-                    else if( status == QUEST_STATUS_INCOMPLETE )
-                        _player->PlayerTalkClass->SendQuestGiverRequestItems( pQuest, pObject->GetGUID(), false, false );
-                    else
-                        _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
-                }
-                break;
-            case TYPEID_ITEM:
-                if( !Script->ItemQuestAccept(_player, ((Item*)pObject), pQuest ) )
-                {
-                    if( status == QUEST_STATUS_NONE && _player->CanTakeQuest( pQuest, true ) )
-                        _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
-                }
-                break;
-            case TYPEID_GAMEOBJECT:
-                if( !Script->GOQuestAccept(_player, ((GameObject*)pObject), pQuest ) )
-                {
-                    if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
+            uint32 status = _player->GetQuestStatus( quest );
+            switch(pObject->GetTypeId())
+            {
+                case TYPEID_UNIT:
+                    if( !Script->QuestSelect(_player, ((Creature*)pObject), pQuest ) )
                     {
-                        if(_player->CanRewardQuest(pQuest,false))
-                            _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, pObject->GetGUID(), true, NULL, 0 );
+                        if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
+                            _player->PlayerTalkClass->SendQuestGiverRequestItems( pQuest, pObject->GetGUID(), _player->CanRewardQuest(pQuest,false), false );
+                        else if( status == QUEST_STATUS_INCOMPLETE )
+                            _player->PlayerTalkClass->SendQuestGiverRequestItems( pQuest, pObject->GetGUID(), false, false );
                         else
-                            _player->PlayerTalkClass->SendQuestQueryResponse( pQuest );
+                            _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
                     }
-                    else if( status == QUEST_STATUS_INCOMPLETE )
-                        _player->PlayerTalkClass->SendQuestQueryResponse( pQuest );
-                    else
-                        _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
-                }
-                break;
+                    break;
+                case TYPEID_ITEM:
+                    if( !Script->ItemQuestAccept(_player, ((Item*)pObject), pQuest ) )
+                    {
+                        if( status == QUEST_STATUS_NONE && _player->CanTakeQuest( pQuest, true ) )
+                            _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
+                    }
+                    break;
+                case TYPEID_GAMEOBJECT:
+                    if( !Script->GOQuestAccept(_player, ((GameObject*)pObject), pQuest ) )
+                    {
+                        if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
+                        {
+                            if(_player->CanRewardQuest(pQuest,false))
+                                _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, pObject->GetGUID(), true, NULL, 0 );
+                            else
+                                _player->PlayerTalkClass->SendQuestQueryResponse( pQuest );
+                        }
+                        else if( status == QUEST_STATUS_INCOMPLETE )
+                            _player->PlayerTalkClass->SendQuestQueryResponse( pQuest );
+                        else
+                            _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
+                    }
+                    break;
+            }
         }
-    }
-    delete pQuest;
-    _player->PlayerTalkClass->CloseGossip();*/
+        delete pQuest;
+        _player->PlayerTalkClass->CloseGossip();*/
 }
 
 void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )

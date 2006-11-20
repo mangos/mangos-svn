@@ -221,7 +221,8 @@ m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0), m_isPersistent(false)
     if( m_duration != maxduration )
     {
         uint8 comboPoints=0;
-        if(caster->GetTypeId() == TYPEID_PLAYER) {
+        if(caster->GetTypeId() == TYPEID_PLAYER)
+        {
             comboPoints = (uint8)((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
             caster->SetUInt32Value(PLAYER_FIELD_BYTES,((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
         }
@@ -2343,7 +2344,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
             Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             if (pItem)
             {
-                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) && 
+                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) &&
                     ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
@@ -2353,7 +2354,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
             pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
             if (pItem)
             {
-                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) && 
+                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) &&
                     ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
@@ -2363,17 +2364,17 @@ void Aura::HandleModDamagePercentDone(bool apply)
             pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
             if (pItem)
             {
-                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) && 
+                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) &&
                     ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
                 }
             }
-        }            
+        }
     }
 
-    //FIX ME: magic damage percent modifiers not implmented yet 
+    //FIX ME: magic damage percent modifiers not implmented yet
     // For examples with 20218 18789 18791 spells
     /*
     // magic damage

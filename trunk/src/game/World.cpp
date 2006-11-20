@@ -592,12 +592,14 @@ void World::Update(time_t diff)
     ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
 }
 
-void World::ScriptsProcess() {
+void World::ScriptsProcess()
+{
     if (scriptSchedule.size() == 0)
         return;
 
     multimap<uint64, ScriptAction>::iterator iter = scriptSchedule.begin();
-    while ((scriptSchedule.size() > 0) && (iter->first < internalGameTime)) {
+    while ((scriptSchedule.size() > 0) && (iter->first < internalGameTime))
+    {
         if (iter->second.script->command == 0)
             ((Creature *)iter->second.source)->MonsterSay(iter->second.script->datatext.c_str(), 0, iter->second.target->GetGUID());
         else if (iter->second.script->command == 1)
@@ -721,7 +723,7 @@ time_t World::_UpdateGameTime()
 
     m_gameTime = thisTime;
     m_Last_tick = thisTime;
-    
+
     return m_gameTime;
 }
 

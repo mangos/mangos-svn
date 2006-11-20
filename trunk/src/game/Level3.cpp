@@ -2574,7 +2574,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
 
         if ( player->getRace() == RACE_TAUREN )
             player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
-        else 
+        else
             player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
         player->SetStat(STAT_STRENGTH,info->strength );

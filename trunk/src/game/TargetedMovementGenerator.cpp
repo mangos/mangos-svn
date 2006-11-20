@@ -236,7 +236,7 @@ void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellIn
 
 void TargetedMovementGenerator::spellAtack(Creature &owner,Unit &who,uint32 spellId)
 {
-	SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
 
     if(!spellInfo)
     {

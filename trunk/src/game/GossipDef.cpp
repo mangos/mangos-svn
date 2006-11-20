@@ -475,7 +475,8 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     Quest* pQuest =  pSession->GetPlayer()->GetActiveQuest(quest_id);
 
     bool tmpQuest = false;
-    if (!pQuest) {
+    if (!pQuest)
+    {
         tmpQuest = true;
         pQuest = objmgr.NewQuest(quest_id);
     }
@@ -491,14 +492,16 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
         }
     } else data << uint32( 0x00 ); */
     // Must be extended later, but for now:
-    if (pQuest->m_offerRewardEmote == 0) {
+    if (pQuest->m_offerRewardEmote == 0)
+    {
         data << uint32(0x00);
-    } else {
+    }
+    else
+    {
         data << uint32(0x1);
         data << uint32(0x0);
         data << pQuest->m_offerRewardEmote;
     }
-    
 
     ItemPrototype const *pItem;
 
@@ -565,7 +568,8 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
     // items.  Otherwise, we'll skip straight to the OfferReward
 
     // We may wish a better check, perhaps checking the real quest requirements
-    if (strlen(pQuest->GetQuestInfo()->RequestItemsText) == 0) {
+    if (strlen(pQuest->GetQuestInfo()->RequestItemsText) == 0)
+    {
         SendQuestGiverOfferReward(pQuest->GetQuestInfo()->QuestId, npcGUID, true, NULL, 0);
         return;
     }
@@ -578,16 +582,16 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
     data << pQuest->GetQuestInfo()->Title;
 
     data << pQuest->GetQuestInfo()->RequestItemsText;
-    
+
     data << uint32(0x00);
-    data << pQuest->m_requestItemsEmote; // Emote
-    
+    data << pQuest->m_requestItemsEmote;                    // Emote
+
     // Close Window after cancel
     if (CloseOnCancel)
         data << uint32(0x01);
     else
         data << uint32(0x00);
-    
+
     // Req Money
     data << uint32(pQuest->GetQuestInfo()->RewOrReqMoney < 0 ? -pQuest->GetQuestInfo()->RewOrReqMoney : 0);
 
@@ -618,4 +622,3 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
     pSession->SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestInfo()->QuestId );
 }
-
