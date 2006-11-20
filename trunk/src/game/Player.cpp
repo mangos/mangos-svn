@@ -334,7 +334,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
-    SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_NOT_IN_PVP );
+    SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_ALLOW_SWIM );
 
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
                                                             //-1 is default value
@@ -2709,7 +2709,7 @@ void Player::BuildPlayerRepop()
     StopMirrorTimer(BREATH_TIMER);
     StopMirrorTimer(FIRE_TIMER);
 
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_NOT_IN_PVP );
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_ALLOW_SWIM );
     SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
     SetUInt32Value(UNIT_FIELD_AURA + 33, 0x5068 );          //!dono
 
@@ -2776,7 +2776,7 @@ void Player::KillPlayer()
     StopMirrorTimer(FIRE_TIMER);
 
     setDeathState(CORPSE);
-    SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
+    //SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
 
     SetFlag( UNIT_DYNAMIC_FLAGS, 0x00 );
 
@@ -10902,7 +10902,7 @@ void Player::UpdatePVPFlag(time_t currTime)
     if( currTime < m_pvp_count + 300 ) return;
 
     SetPvP(false);
-    sChatHandler.SendSysMessage(GetSession(), "PvP toggled off.");
+    //sChatHandler.SendSysMessage(GetSession(), "PvP toggled off.");
 
 }
 

@@ -395,7 +395,13 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     GetPlayer()->UpdateHonor();
 
-    GetPlayer()->SetPvP( !GetPlayer()->HasFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP) );
+    if(sWorld.getConfig(CONFIG_GAME_TYPE) == 1 || sWorld.getConfig(CONFIG_GAME_TYPE) == 8)
+    {
+        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);    
+        GetPlayer()->SetPvP(true);
+    }
+    else
+        GetPlayer()->SetPvP( GetPlayer()->HasFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_PVP) );
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED);
     time_t gameTime = sWorld.GetGameTime();

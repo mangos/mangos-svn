@@ -359,7 +359,8 @@ void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
     //sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You will be unflagged for PvP combat after five minutes of non-PvP action in friendly territory.");
 
     GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
-    GetPlayer()->SetPVPCount(time(NULL));
+    if(sWorld.getConfig(CONFIG_GAME_TYPE) != 1 && sWorld.getConfig(CONFIG_GAME_TYPE) != 8)
+        GetPlayer()->SetPVPCount(time(NULL));
 
 }
 
