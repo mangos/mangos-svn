@@ -24,40 +24,14 @@
 #include "WorldPacket.h"
 #include "Config/ConfigEnv.h"
 
-struct AddOns
-{
-    std::string Name;
-    uint64 CRC;
-    bool Enabled;
-};
-
 class AddonHandler
 {
     public:
         /* Construction */
         AddonHandler();
         ~AddonHandler();
-
                                                             //built addon packet
         void BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset);
-        bool GetAddonStatus(AddOns* Target, bool* Allowed); //get addon status, it checks the name.
-
-        void _SaveToDB(void);
-        void _LoadFromDB(void);
-        void _AddAddon(AddOns*);
-        uint8 _removeAddon(std::string*);
-        void SetAddonDefault(bool Value) { m_Addon_Default = Value; }
-        bool GetAddonDefault(void) { return m_Addon_Default; }
-        void LoadAddonDefault(void)                         //load the default value from Conf file
-        {
-            SetAddonDefault(sConfig.GetBoolDefault("AddonDefault", 1));
-        }
-
-    private:
-
-        //! Addon data
-        std::list<AddOns*> m_Addon_data;                    // contains all the addon names and crc checks
-        bool m_Addon_Default;
 };
 #define sAddOnHandler MaNGOS::Singleton<AddonHandler>::Instance()
 #endif

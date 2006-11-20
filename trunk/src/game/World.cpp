@@ -42,7 +42,6 @@
 #include "GlobalEvents.h"
 #include "BattleGroundMgr.h"
 #include "SystemConfig.h"
-#include "AddonHandler.h"
 #include "zlib/zlib.h"
 
 #include <signal.h>
@@ -335,12 +334,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "WORLD: Starting Event System" );
     StartEventSystem();
-
-    //Start Addon stuff
-    bool temp = sConfig.GetBoolDefault("AddonDefault", 1);
-    sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d (%s all addons not registered in DB)", temp, temp? "Enabled" : "Disabled"  );
-    sAddOnHandler.SetAddonDefault(temp);
-    sAddOnHandler._LoadFromDB();
 
     sLog.outString( "WORLD: Starting Corpse Handler" );
     // global event to erase corpses/bones

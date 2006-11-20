@@ -23,8 +23,6 @@
 #include "Policies/SingletonImp.h"
 #include "zlib/zlib.h"
 
-//TODO: Make level3 commands for this. .Loadaddons .Saveaddons .loadaddondefault
-
 INSTANTIATE_SINGLETON_1( AddonHandler );
 
 AddonHandler::AddonHandler()
@@ -33,87 +31,75 @@ AddonHandler::AddonHandler()
 
 AddonHandler::~AddonHandler()
 {
-    //clean the addon data when close
-    for(std::list<AddOns*>::iterator i = m_Addon_data.begin();i!=m_Addon_data.end();++i)
-        delete *i;
-    m_Addon_data.clear();
 }
 
-uint8 AddonHandler::_removeAddon(std::string* Name)
+void AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, uint32 Packetoffset)
 {
-    sLog.outDebug("Remove addon:%s",(*Name).c_str());
-    for(std::list<AddOns*>::iterator i = m_Addon_data.begin();i!=m_Addon_data.end();++i)
+    ByteBuffer AddOnPacked;
+    uLongf AddonRealSize;
+    uint32 CurrentPosition;
+    uint32 TempValue;
+
+    unsigned char tdata[257] = {
+        0x01, 0xC3, 0x5B, 0x50, 0x84, 0xB9, 0x3E, 0x32, 0x42, 0x8C, 0xD0, 0xC7, 0x48, 0xFA, 0x0E, 0x5D, 
+        0x54, 0x5A, 0xA3, 0x0E, 0x14, 0xBA, 0x9E, 0x0D, 0xB9, 0x5D, 0x8B, 0xEE, 0xB6, 0x84, 0x93, 0x45, 
+        0x75, 0xFF, 0x31, 0xFE, 0x2F, 0x64, 0x3F, 0x3D, 0x6D, 0x07, 0xD9, 0x44, 0x9B, 0x40, 0x85, 0x59, 
+        0x34, 0x4E, 0x10, 0xE1, 0xE7, 0x43, 0x69, 0xEF, 0x7C, 0x16, 0xFC, 0xB4, 0xED, 0x1B, 0x95, 0x28, 
+        0xA8, 0x23, 0x76, 0x51, 0x31, 0x57, 0x30, 0x2B, 0x79, 0x08, 0x50, 0x10, 0x1C, 0x4A, 0x1A, 0x2C, 
+        0xC8, 0x8B, 0x8F, 0x05, 0x2D, 0x22, 0x3D, 0xDB, 0x5A, 0x24, 0x7A, 0x0F, 0x13, 0x50, 0x37, 0x8F, 
+        0x5A, 0xCC, 0x9E, 0x04, 0x44, 0x0E, 0x87, 0x01, 0xD4, 0xA3, 0x15, 0x94, 0x16, 0x34, 0xC6, 0xC2, 
+        0xC3, 0xFB, 0x49, 0xFE, 0xE1, 0xF9, 0xDA, 0x8C, 0x50, 0x3C, 0xBE, 0x2C, 0xBB, 0x57, 0xED, 0x46, 
+        0xB9, 0xAD, 0x8B, 0xC6, 0xDF, 0x0E, 0xD6, 0x0F, 0xBE, 0x80, 0xB3, 0x8B, 0x1E, 0x77, 0xCF, 0xAD, 
+        0x22, 0xCF, 0xB7, 0x4B, 0xCF, 0xFB, 0xF0, 0x6B, 0x11, 0x45, 0x2D, 0x7A, 0x81, 0x18, 0xF2, 0x92, 
+        0x7E, 0x98, 0x56, 0x5D, 0x5E, 0x69, 0x72, 0x0A, 0x0D, 0x03, 0x0A, 0x85, 0xA2, 0x85, 0x9C, 0xCB, 
+        0xFB, 0x56, 0x6E, 0x8F, 0x44, 0xBB, 0x8F, 0x02, 0x22, 0x68, 0x63, 0x97, 0xBC, 0x85, 0xBA, 0xA8, 
+        0xF7, 0xB5, 0x40, 0x68, 0x3C, 0x77, 0x86, 0x6F, 0x4B, 0xD7, 0x88, 0xCA, 0x8A, 0xD7, 0xCE, 0x36, 
+        0xF0, 0x45, 0x6E, 0xD5, 0x64, 0x79, 0x0F, 0x17, 0xFC, 0x64, 0xDD, 0x10, 0x6F, 0xF3, 0xF5, 0xE0, 
+        0xA6, 0xC3, 0xFB, 0x1B, 0x8C, 0x29, 0xEF, 0x8E, 0xE5, 0x34, 0xCB, 0xD1, 0x2A, 0xCE, 0x79, 0xC3, 
+        0x9A, 0x0D, 0x36, 0xEA, 0x01, 0xE0, 0xAA, 0x91, 0x20, 0x54, 0xF0, 0x72, 0xD8, 0x1E, 0xC7, 0x89, 
+        0xD2
+    };
+
+    *Source >> TempValue;                                   //get real size of the packed structure
+
+    AddonRealSize = TempValue;                              //temp value becouse ZLIB only excepts uLongf
+
+    CurrentPosition = Source->rpos();                       //get the position of the pointer in the structure
+
+    AddOnPacked.resize(AddonRealSize);                      //resize target for zlib action
+
+    if (!uncompress((uint8*)AddOnPacked.contents(), &AddonRealSize, (uint8*)(*Source).contents() + CurrentPosition, (*Source).size() - CurrentPosition)!= Z_OK)
     {
-        //if name exists remove it and return 1
-        if ((*i)->Name == *Name)
+        Target->Initialize(SMSG_ADDON_INFO);
+
+        uint32 i = 0;                                      //offset for addon extraction
+        while(i != AddOnPacked.size())
         {
-            //remove addon, from mem and from sql
-            sDatabase.PExecute("DELETE FROM `game_addons` WHERE `addonname` = '%s'",(*i)->Name.c_str());
-            m_Addon_data.remove(*i);
-            return 1;
+            std::string AddonNames;
+            uint8 unk6;
+            uint32 crc, unk7;
+            AddOnPacked >> AddonNames >> crc >> unk7 >> unk6;
+
+            sLog.outDebug("ADDON: Name:%s CRC:%x Unknown1 :%x Unknown2 :%x", AddonNames.c_str(), crc, unk7, unk6);
+
+            if (crc == 0x1c776d01LL) //If addon is Standard addon CRC
+                *Target << (uint8)2 << (uint8)1 << (uint32)0 << (uint16)0;
+            else //if client hasn't this addon
+            {
+                *Target << (uint8)2 << (uint8)1;
+                Target->append(tdata, sizeof(tdata));
+                *Target << (uint32)0 << (uint8)0;
+            }
+            i += AddonNames.size() + 10;
         }
     }
-    //if name does not exists return 0
-    return 0;
-}
-
-void AddonHandler::_AddAddon(AddOns* newaddon)
-{
-    m_Addon_data.push_back( newaddon );
-}
-
-void AddonHandler::_SaveToDB()
-{
-
-    sLog.outDebug("Size of Addon:%d",m_Addon_data.size());
-    for(std::list<AddOns*>::iterator i = m_Addon_data.begin();i!=m_Addon_data.end();++i)
+    else
     {
-        sDatabase.PExecute("DELETE FROM `game_addons` WHERE `addonname` = '%s'",(*i)->Name.c_str());
-        //TODO FIX THE (uint32)
-        sDatabase.PExecute("INSERT INTO `game_addons` (`addonname`,`crc`,`enabled`) VALUES('%s','" I64FMTD "','%d')", (*i)->Name.c_str(),(*i)->CRC,(*i)->Enabled);
+        sLog.outDebug("Addon packet uncompress error :(");
     }
 }
 
-void AddonHandler::_LoadFromDB()
-{
-    //clean the addon data before use
-    m_Addon_data.clear();
-
-    QueryResult *result = sDatabase.Query( "SELECT `addonname`,`crc`,`enabled` FROM `game_addons`" );
-    if( !result )
-        return;
-
-    AddOns *newaddon;
-
-    do
-    {
-        Field *fields = result->Fetch();
-
-        newaddon = new AddOns;
-        newaddon->Name = fields[0].GetCppString();
-        newaddon->CRC = fields[1].GetUInt64();
-        newaddon->Enabled = fields[2].GetUInt8();           //fields[2].GetBool();
-
-        sLog.outDebug("LoadAddons from DB:%s State:%s", newaddon->Name.c_str(), newaddon->Enabled ? "Enabled" : "Disabled" );
-        _AddAddon(newaddon);
-    } while (result->NextRow());
-    delete result;
-}
-
-bool AddonHandler::GetAddonStatus(AddOns* Target, bool* Allowed)
-{
-    //sLog.outDebug("Get Addon Status");
-    for(std::list<AddOns*>::iterator i = m_Addon_data.begin();i!=m_Addon_data.end();++i)
-    {
-        if (!strcmp((*i)->Name.c_str(), Target->Name.c_str()))
-        {
-            *Allowed = (*i)->Enabled;
-            return false;
-        }
-    }
-    return true;
-}
-
+/* Code use in 1.10.2 when client not ignore ban state sended for addons. Saved for reference if client switch to use server ban state information 
 void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset)
 {
     ByteBuffer AddOnPacked;
@@ -188,3 +174,4 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
         //handle uncompress error
     }
 }
+*/
