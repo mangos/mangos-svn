@@ -97,6 +97,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendCancelTrade();
         void SendStablePet(uint64 guid );
         void SendPetitionQueryOpcode( uint64 petitionguid);
+        void SendUpdateTrade();
 
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
@@ -272,7 +273,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
         void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
 
-        void UpdateTrade();
         void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
         void HandleBeginTradeOpcode(WorldPacket& recvPacket);
         void HandleBusyTradeOpcode(WorldPacket& recvPacket);
