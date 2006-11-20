@@ -338,10 +338,12 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
         status = pPlayer->GetQuestStatus( quest_id );
-        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus( quest_id ) )
+        if ((status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
+            ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && pPlayer->CanTakeQuest(pQuest, false)))
         {
-            SetFlag(UNIT_DYNAMIC_FLAGS ,2);
-            if ( pQuest->GetQuestInfo()->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+            SetFlag(UNIT_DYNAMIC_FLAGS, 2);
+            
+            if ( pQuest->GetQuestInfo()->Repeatable )
                 return DIALOG_STATUS_REWARD_REP;
             else
                 return DIALOG_STATUS_REWARD;
@@ -369,7 +371,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             {
                 if ( pPlayer->SatisfyQuestLevel(quest_id, false) )
                 {
-                    if ( pQuest->GetQuestInfo()->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+                    if ( pQuest->GetQuestInfo()->Repeatable )
                         return DIALOG_STATUS_REWARD_REP;
                     else
                         return DIALOG_STATUS_AVAILABLE;
@@ -583,25 +585,30 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
     */
 }
 
-void Creature::sendPreparedGossip( Player* player)
+void Creature::sendPreparedGossip(Player* player)
 {
     if(!player)
         return;
+    
     GossipMenu* gossipmenu = player->PlayerTalkClass->GetGossipMenu();
 
-    if(!isServiceProvider())
-        player->SendPreparedQuest( GetGUID() );
-
-    if ( !gossipmenu || gossipmenu->MenuItemCount() == 0 )
+    //if(!isServiceProvider()) {
+    if (gossipmenu->MenuItemCount() == 0) {
+        player->SendPreparedQuest(GetGUID());
         return;
+    }
 
     QuestMenu * questmenu = player->PlayerTalkClass->GetQuestMenu();
 
     //if ( gossipmenu->MenuItemCount() == 1 && gossipmenu->MenuItemAction(0) != GOSSIP_OPTION_INNKEEPER )
-    if ((gossipmenu->MenuItemCount() == 1) && (questmenu->MenuItemCount() == 0))
-        OnGossipSelect( player, 0 );
+    //if ((gossipmenu->MenuItemCount() + questmenu->MenuItemCount() <= 1) && (GetNpcTextId() == DEFAULT_GOSSIP_MESSAGE))
+    //    if (gossipmenu->MenuItemCount() == 1) {
+    //        OnGossipSelect(player, 0);
+    //    } else {
+    if (questmenu->MenuItemCount() == 1)
+        player->SendPreparedQuest(GetGUID());
     else
-        player->PlayerTalkClass->SendGossipMenu( GetNpcTextId(), GetGUID() );
+        player->PlayerTalkClass->SendGossipMenu(GetNpcTextId(), GetGUID());
 }
 
 void Creature::OnGossipSelect(Player* player, uint32 option)

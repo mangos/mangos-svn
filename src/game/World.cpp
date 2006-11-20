@@ -604,6 +604,8 @@ void World::ScriptsProcess() {
             ((Creature *)iter->second.source)->HandleEmoteCommand(iter->second.script->datalong);
         else if (iter->second.script->command == 2)
             ((Creature *)iter->second.source)->SetUInt32Value(iter->second.script->datalong, iter->second.script->datalong2);
+        else if (iter->second.script->command == 3)
+            ((Unit *)iter->second.source)->SendMoveToPacket(iter->second.script->x, iter->second.script->y, iter->second.script->z, false);
         scriptSchedule.erase(iter);
 
         iter = scriptSchedule.begin();

@@ -8564,7 +8564,7 @@ void Player::PrepareQuestMenu( uint64 guid )
         uint32 status = GetQuestStatus( quest_id );
 
         if ( status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus( quest_id ) )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD_REP, status );
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, status );
         else if ( status == QUEST_STATUS_INCOMPLETE )
             qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, status );
         else if (status == QUEST_STATUS_AVAILABLE )
@@ -8580,7 +8580,13 @@ void Player::PrepareQuestMenu( uint64 guid )
         uint32 quest_id = pQuest->GetQuestId();
         uint32 status = GetQuestStatus( quest_id );
 
-        if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
+        if ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && (CanTakeQuest(pQuest, false))) {
+            // perhaps find a better check for quests that autocomplete
+            if (pQuest->GetQuestInfo()->Repeatable == 0)
+                qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, status );
+            else
+                qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD_REP, status );
+        } else if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
             qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
     }
 }
@@ -8594,16 +8600,26 @@ void Player::SendPreparedQuest( uint64 guid )
     uint32 status = pQuestMenu->GetItem(0).m_qIcon;
     if ( pQuestMenu->MenuItemCount() == 1 )
     {
+        // Auto open -- maybe also should verify there is no greeting
         uint32 quest_id = pQuestMenu->GetItem(0).m_qId;
         Quest *pQuest = objmgr.NewQuest( quest_id );
         if ( pQuest )
         {
             if( status == DIALOG_STATUS_REWARD && !GetQuestRewardStatus( quest_id ) )
-                PlayerTalkClass->SendRequestedItems( pQuest, guid, CanRewardQuest(pQuest,false), true );
+                PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanRewardQuest(pQuest,false), true );
             else if( status == DIALOG_STATUS_INCOMPLETE )
-                PlayerTalkClass->SendRequestedItems( pQuest, guid, false, true );
-            else
-                PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
+                PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, false, true );
+            else {
+                // perhaps find a better auto-complete test
+                if ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && (CanTakeQuest(pQuest, false))) {
+                    //if (CanCompleteQuest(quest_id))
+                    //    PlayerTalkClass->SendQuestGiverOfferReward(quest_id, guid, true, NULL, 0);
+                    //else
+                    PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanCompleteQuest(quest_id), true);
+                } else {
+                    PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, guid, true );
+                }
+            }
             delete pQuest;
         }
     }
@@ -8632,7 +8648,7 @@ void Player::SendPreparedQuest( uint64 guid )
                     title = "";
             }
         }
-        PlayerTalkClass->SendQuestMenu( qe, title, guid );
+        PlayerTalkClass->SendQuestGiverQuestList( qe, title, guid );
     }
 }
 
@@ -8682,7 +8698,7 @@ bool Player::CanSeeStartQuest( uint32 quest_id )
     {
         if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) && SatisfyQuestExclusiveGroup( quest_id, false )
             && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
-            && SatisfyQuestPreviousQuest( quest_id, false ) )
+            && SatisfyQuestPreviousQuest( quest_id, false ) && SatisfyQuestHaveQuest(quest_id, false) )
             return ( getLevel() + 7 >= objmgr.GetQuestInfo(quest_id)->MinLevel );
     }
     return false;
@@ -8696,7 +8712,8 @@ bool Player::CanTakeQuest( Quest *pQuest, bool msg )
         return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestExclusiveGroup( quest_id, msg )
             && SatisfyQuestRace( quest_id, msg ) && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
             && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg )
-            && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg ) );
+            && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg ) 
+            && SatisfyQuestHaveQuest( quest_id, msg ) );
     }
     return false;
 }
@@ -8734,21 +8751,26 @@ bool Player::CanCompleteQuest( uint32 quest_id )
 {
     if( quest_id )
     {
-        if( mQuestStatus[quest_id].m_status == QUEST_STATUS_COMPLETE )
+        QuestStatus qStatus = mQuestStatus[quest_id].m_status;
+        if( qStatus == QUEST_STATUS_COMPLETE )
             return true;
 
-        if ( mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE )
-        {
-            QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+        QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
 
-            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
-            {
+        if ((mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE) || 
+            (strlen(qInfo->Objectives) == 0))
+        {
+            
+            //if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+            //{
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
-                    if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
+                    //if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
+                    // Must do it this way because repeatable quests won't be counted:
+                    if (GetItemCount(qInfo->ReqItemId[i]) < qInfo->ReqItemCount[i])
                         return false;
                 }
-            }
+            //}
 
             if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
             {
@@ -8784,6 +8806,10 @@ bool Player::CanRewardQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
     {
+        // auto complete quest, return true (maybe need a better check)
+        if ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && CanTakeQuest(pQuest, false))
+            return true;
+
         // not completed quest (only cheating case, then ignore without message)
         if(GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
             return false;
@@ -9000,7 +9026,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
 
         ModifyMoney( qInfo->RewOrReqMoney );
 
-        if ( !qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+        if ( !qInfo->Repeatable )
             mQuestStatus[quest_id].m_rewarded = true;
         else
         {
@@ -9135,6 +9161,26 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
     }
     return false;
 }
+
+bool Player::SatisfyQuestHaveQuest( uint32 quest_id, bool msg )
+{
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if(!qInfo)
+        return false;
+
+    if (!qInfo->HaveQuestId)
+        return true;
+
+    StatusMap::iterator iter = mQuestStatus.find(qInfo->HaveQuestId);
+    if (iter == mQuestStatus.end())
+        return false;
+
+    if (iter->second.m_status == QUEST_STATUS_NONE)
+        return false;
+
+    return true;
+}
+
 
 bool Player::SatisfyQuestRace( uint32 quest_id, bool msg )
 {
