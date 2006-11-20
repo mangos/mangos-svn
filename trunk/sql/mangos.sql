@@ -898,29 +898,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `fishing_loot_template` ENABLE KEYS */;
 
 --
--- Table structure for table `game_addons`
---
-
-DROP TABLE IF EXISTS `game_addons`;
-CREATE TABLE `game_addons` (
-  `addonname` char(255) NOT NULL default '',
-  `crc` bigint(20) NOT NULL default '0',
-  `enabled` tinyint(4) NOT NULL default '0',
-  PRIMARY KEY  (`addonname`),
-  KEY `addonname` (`addonname`,`crc`,`enabled`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Addon system';
-
---
--- Dumping data for table `game_addons`
---
-
-
-/*!40000 ALTER TABLE `game_addons` DISABLE KEYS */;
-LOCK TABLES `game_addons` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `game_addons` ENABLE KEYS */;
-
---
 -- Table structure for table `game_graveyard_zone`
 --
 
