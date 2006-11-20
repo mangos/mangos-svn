@@ -805,25 +805,12 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetPvP(bool b)
         {
-            pvpOn = b;
-
-            if (!b)                                         //PvP OFF
-            {
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP);
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ICON);
-            }                                               //PvP ON
+            if (!b)                             
+                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);                                          
             else
-            {
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP);
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ICON);
-            }
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
 
             m_pvp_counting = false;
-        };
-
-        bool GetPvP()
-        {
-            return pvpOn;
         };
 
         inline std::list<struct actions> getActionList() { return m_actions; };
@@ -861,7 +848,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DuelComplete();
 
         //Functions to store/restore temporary state of pvpOn
-        void StorePvpState(){ pvpTemp = pvpOn; };
+        void StorePvpState(){ pvpTemp = GetPvP(); };
         void RestorePvpState(){ SetPvP(pvpTemp); };
 
         uint32 GetCurrentBuybackSlot() { return m_currentBuybackSlot; }
@@ -1233,7 +1220,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 tradeItems[7];
         uint32 tradeGold;
 
-        bool pvpOn;
         bool pvpTemp;
         Player *m_pDuel;
         bool m_isInDuel;
