@@ -78,11 +78,6 @@ Compression = 1
 # Default: 100
 PlayerLimit = 100
 
-# Default value for enabling addons, Allow then Deny or Deny then Allow
-# Default: 1 (true)
-#          0 (false)
-AddonDefault = 1
-
 # Max level that can reached by player for expirience (in range from 1 to 255).
 # Change not recommended
 # Default: 60

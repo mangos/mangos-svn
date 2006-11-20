@@ -22,7 +22,6 @@
 #include "Master.h"
 #include "Timer.h"
 #include "ScriptCalls.h"
-#include "AddonHandler.h"
 #include "GlobalEvents.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
@@ -81,7 +80,6 @@ const CliCommand Commands[]=
     {CMD("exit"), & CliExit,"Shutdown server"},
     {CMD("version"), & CliVersion,"Display server version"},
     {CMD("loadscripts"), & CliLoadScripts,"Load script library"},
-    {CMD("loadaddons"), & CliLoadAddons,"Load Addons data"},
     {CMD("kick"), & CliKick,"Kick user"},
     {CMD("motd"), & CliMotd,"Change or display motd"},
     {CMD("setloglevel"), & CliSetLogLevel,"Set Log Level"},
@@ -109,18 +107,6 @@ bool IsItIP(char* banip)
         return false;
 
     return true;
-}
-
-void CliLoadAddons(char*command,pPrintf zprintf)
-{
-    char *del;
-    int x=0;
-    while(command[x]==' ')
-        x++;
-    del=&command[x];
-    sAddOnHandler._LoadFromDB();
-
-    sWorld.SendWorldText("|cffff0000[System Message]:|rAddons reloaded", NULL);
 }
 
 void CliLoadScripts(char*command,pPrintf zprintf)

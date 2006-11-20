@@ -216,7 +216,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         sLog.outError("WorldSocket::_HandleAuthSession Get Incomplete packet");
         return;
     }
-
+    sLog.outDebug("Auth: client %u, unk2 %u, account %s, clientseed %u, digest %u", BuiltNumberClient, unk2, account.c_str(), clientSeed, digest);
     loginDatabase.escape_string(account);
 
     QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `banned` FROM `account` WHERE `username` = '%s'", account.c_str());
@@ -372,14 +372,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     //! Handled Addons
 
     //Create Addon Packet
-    //sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
-    SendAddonPacked.Initialize(SMSG_ADDON_INFO);            // fix banned addon
-    SendAddonPacked << uint8( 0x41 );                       // fix banned addon
-    SendAddonPacked << uint8( 0x64 );                       // fix banned addon
-    SendAddonPacked << uint8( 0x64 );                       // fix banned addon
-    SendAddonPacked << uint8( 0x6f );                       // fix banned addon
-    SendAddonPacked << uint8( 0x6e );                       // fix banned addon
-    SendAddonPacked << uint8( 0x00 );                       // fix banned addon
+    sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
     SendPacket(&SendAddonPacked);
 
     return;
@@ -453,9 +446,9 @@ void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
     WorldPacket packet;
     packet.Initialize( SMSG_AUTH_RESPONSE );
     packet << uint8( AUTH_WAIT_QUEUE );
-    packet << uint32 (0x00);                                //unknown
-    packet << uint32 (0x00);                                //unknown
-    packet << uint8 (0x00);                                 //unknown
+    //packet << uint32 (0x00);                                //unknown
+    //packet << uint32 (0x00);                                //unknown
+    //packet << uint8 (0x00);                                 //unknown
     packet << uint32 (PlayersInQue);                        //amount of players in que
     SendPacket(&packet);
 }
