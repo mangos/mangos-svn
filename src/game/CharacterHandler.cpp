@@ -397,7 +397,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     if(sWorld.getConfig(CONFIG_GAME_TYPE) == 1 || sWorld.getConfig(CONFIG_GAME_TYPE) == 8)
     {
-        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);    
+        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
         GetPlayer()->SetPvP(true);
     }
     else

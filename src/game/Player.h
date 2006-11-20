@@ -806,8 +806,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetPvP(bool b)
         {
-            if (!b)                             
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);                                          
+            if (!b)
+                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
             else
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
 

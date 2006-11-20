@@ -173,9 +173,9 @@ class MANGOS_DLL_SPEC PlayerMenu
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
         void SendQuestGiverStatus( uint32 questStatus, uint64 npcGUID );
-        
+
         void SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint64 npcGUID );
-        
+
         void SendQuestQueryResponse ( Quest *pQuest );
         void SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept);
 

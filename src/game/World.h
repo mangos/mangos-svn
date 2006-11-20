@@ -122,7 +122,8 @@ enum ServerMessageType
 };
 
 struct ScriptInfo;
-struct ScriptAction {
+struct ScriptAction
+{
     Object* source;
     Object* target;
     ScriptInfo* script;

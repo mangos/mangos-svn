@@ -554,7 +554,8 @@ void ObjectMgr::LoadScripts()
         tmp.z = fields[8].GetFloat();
         tmp.o = fields[9].GetFloat();
 
-        if (sScripts.find(tmp.id) == sScripts.end()) {
+        if (sScripts.find(tmp.id) == sScripts.end())
+        {
             multimap<uint32, ScriptInfo> emptyMap;
             sScripts[tmp.id] = emptyMap;
         }

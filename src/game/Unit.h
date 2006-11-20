@@ -524,7 +524,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
         void CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem = NULL);
-		void CastSpell(Unit* Victim,SpellEntry *spellInfo, bool triggered, Item *castItem= NULL);
+        void CastSpell(Unit* Victim,SpellEntry *spellInfo, bool triggered, Item *castItem= NULL);
 
         void DeMorph();
 

@@ -227,10 +227,11 @@ void Creature::AIM_Update(const uint32 &diff)
             }
             if (m_regenTimer != 0)
                 break;
-			if (!isInCombat()){
+            if (!isInCombat())
+            {
                 RegenerateHealth();
                 RegenerateMana();
-			}
+            }
             m_regenTimer = 2000;
             break;
         }
@@ -342,7 +343,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && pPlayer->CanTakeQuest(pQuest, false)))
         {
             SetFlag(UNIT_DYNAMIC_FLAGS, 2);
-            
+
             if ( pQuest->GetQuestInfo()->Repeatable )
                 return DIALOG_STATUS_REWARD_REP;
             else
@@ -589,11 +590,12 @@ void Creature::sendPreparedGossip(Player* player)
 {
     if(!player)
         return;
-    
+
     GossipMenu* gossipmenu = player->PlayerTalkClass->GetGossipMenu();
 
     //if(!isServiceProvider()) {
-    if (gossipmenu->MenuItemCount() == 0) {
+    if (gossipmenu->MenuItemCount() == 0)
+    {
         player->SendPreparedQuest(GetGUID());
         return;
     }
@@ -1280,7 +1282,7 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
     if(!pVictim)
         return NULL;
     SpellEntry *spellInfo;
-	bool bcontinue;
+    bool bcontinue;
 
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
     {
@@ -1294,17 +1296,18 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
         }
 
         bcontinue = true;
-		for(uint32 j=0;j<3;j++)
-		{
-		    if( (spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE )       ||
-				(spellInfo->Effect[j] == SPELL_EFFECT_INSTAKILL)            ||
+        for(uint32 j=0;j<3;j++)
+        {
+            if( (spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE )       ||
+                (spellInfo->Effect[j] == SPELL_EFFECT_INSTAKILL)            ||
                 (spellInfo->Effect[j] == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE) ||
-				(spellInfo->Effect[j] == SPELL_EFFECT_HEALTH_LEECH )        
-			){
-                    bcontinue = false;
-				    break;
-			 }
-		}
+                (spellInfo->Effect[j] == SPELL_EFFECT_HEALTH_LEECH )
+                )
+            {
+                bcontinue = false;
+                break;
+            }
+        }
         if(bcontinue) continue;
 
         if(spellInfo->manaCost > GetPower(POWER_MANA))
@@ -1329,7 +1332,7 @@ SpellEntry *Creature::reachWithSpellCure(Unit *pVictim)
     if(!pVictim)
         return NULL;
     SpellEntry *spellInfo;
-	bool bcontinue;
+    bool bcontinue;
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
     {
         if(!m_spells[i])
@@ -1342,15 +1345,15 @@ SpellEntry *Creature::reachWithSpellCure(Unit *pVictim)
         }
 
         bcontinue = true;
-		for(uint32 j=0;j<3;j++)
-		{
-		    if( (spellInfo->Effect[j] == SPELL_EFFECT_HEAL ) )
-			{
+        for(uint32 j=0;j<3;j++)
+        {
+            if( (spellInfo->Effect[j] == SPELL_EFFECT_HEAL ) )
+            {
                 bcontinue = false;
-				break;
-			}
-		}			
-		if(bcontinue) continue;
+                break;
+            }
+        }
+        if(bcontinue) continue;
 
         if(spellInfo->manaCost > GetPower(POWER_MANA))
             continue;

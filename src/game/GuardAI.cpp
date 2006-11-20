@@ -148,7 +148,7 @@ void GuardAI::UpdateAI(const uint32 diff)
         {
             DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
             _stopAttack();                                  // i_victimGuid == 0 && i_creature.getVictim() == NULL now
-			return;
+            return;
         }
 
         assert((i_victimGuid != 0) == (i_creature.getVictim() != NULL) && "i_victimGuid and i_creature.getVictim() not synchronized.");

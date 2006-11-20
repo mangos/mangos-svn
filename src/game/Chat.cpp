@@ -497,7 +497,6 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     {
         target_guid = 0;                                    // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
     }
-    
 
     *data << target_guid;
 
