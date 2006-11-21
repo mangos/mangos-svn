@@ -100,17 +100,17 @@ WaypointMovementGenerator::Permissible(const Creature *c)
     return CANNOT_HANDLE_TYPE;
 }
 
-void
+bool
 WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
     if(!&creature)
-        return;
+        return true;
     if(i_creature.hasUnitState(UNIT_STAT_ROOT) || i_creature.hasUnitState(UNIT_STAT_STUNDED))
-        return;
+        return true;
 
     // prevent crash at empty waypoint path.
     if(i_path.Size()==0)
-        return;
+        return true;
 
     i_nextMoveTime.Update(diff);
     CreatureTraveller traveller(creature);
@@ -134,6 +134,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
                 i_currentNode = 0;
         }
     }
+    return true;
 }
 
 std::set<uint32> WaypointMovementGenerator::si_waypointHolders;

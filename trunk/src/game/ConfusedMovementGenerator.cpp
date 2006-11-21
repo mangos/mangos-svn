@@ -79,13 +79,13 @@ ConfusedMovementGenerator::Reset(Creature &creature)
     creature.StopMoving();
 }
 
-void
+bool
 ConfusedMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
     if(!&creature)
-        return;
+        return true;
     if(creature.hasUnitState(UNIT_STAT_ROOT) || creature.hasUnitState(UNIT_STAT_STUNDED))
-        return;
+        return true;
     i_nextMoveTime.Update(diff);
     i_destinationHolder.ResetUpdate();
     if( i_nextMoveTime.Passed() )
@@ -111,6 +111,7 @@ ConfusedMovementGenerator::Update(Creature &creature, const uint32 &diff)
             i_nextMoveTime.Reset((rand() % 1500));
         }
     }
+    return true;
 }
 
 int

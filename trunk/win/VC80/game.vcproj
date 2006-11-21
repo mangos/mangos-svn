@@ -603,6 +603,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\HomeMovementGenerator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\HomeMovementGenerator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\IdleMovementGenerator.cpp"
 				>
 			</File>

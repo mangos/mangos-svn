@@ -19,7 +19,16 @@
 #include "MotionMaster.h"
 #include "CreatureAISelector.h"
 #include "Creature.h"
+#include "Traveller.h"
+#include "HomeMovementGenerator.h"
+#include "IdleMovementGenerator.h"
 #include <cassert>
+
+inline bool isStatic(MovementGenerator *mv)
+{ 
+    return (mv == &si_idleMovement); 
+}
+
 
 void
 MotionMaster::Initialize(Creature *creature)
@@ -36,7 +45,8 @@ MotionMaster::UpdateMotion(const uint32 &diff)
     if(i_owner->hasUnitState(UNIT_STAT_ROOT) || i_owner->hasUnitState(UNIT_STAT_STUNDED))
         return;
     assert( !empty() );
-    top()->Update(*i_owner, diff);
+    if (!top()->Update(*i_owner, diff))
+        MovementExpired();
 }
 
 void
@@ -70,4 +80,22 @@ MotionMaster::MovementExpired()
     top()->Reset(*i_owner);
 }
 
-IdleMovementGenerator MotionMaster::si_idleMovement;
+void
+MotionMaster::TargetedHome()
+{
+    if(top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
+        MovementExpired();
+
+    if(i_owner->hasUnitState(UNIT_STAT_FLEEING))
+        return;
+
+    DEBUG_LOG("Target home location %u", i_owner->GetGUIDLow());
+
+    Mutate(new HomeMovementGenerator());
+}
+
+void MotionMaster::Idle(void)
+{
+    if( !isStatic( top() ) )
+        push( &si_idleMovement );
+}

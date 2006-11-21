@@ -19,12 +19,11 @@
 #ifndef MANGOS_MOTIONMASTER_H
 #define MANGOS_MOTIONMASTER_H
 
-#include "IdleMovementGenerator.h"
+#include "MovementGenerator.h"
 #include <stack>
 
-class MANGOS_DLL_DECL MotionMaster : private std::stack<MovementGenerator *>
+class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 {
-    static IdleMovementGenerator si_idleMovement;
     public:
 
         MotionMaster() : i_owner(NULL) {}
@@ -41,21 +40,19 @@ class MANGOS_DLL_DECL MotionMaster : private std::stack<MovementGenerator *>
 
         void MovementExpired(void);
 
-        void Idle(void)
-        {
-            if( !isStatic( top() ) )
-                push( &si_idleMovement );
-        }
+        void Idle(void);
+
+        void TargetedHome();
 
         void Mutate(MovementGenerator *m)
         {
+            if (top()->GetMovementGeneratorType() == HOME_MOTION_TYPE)  // HomeMovement is not that important, delete it if meanwhile a new comes
+                MovementExpired();
             m->Initialize(*i_owner);
             push(m);
         }
 
     private:
-
-        inline bool isStatic(MovementGenerator *mv) const { return (mv == &si_idleMovement); }
         Creature *i_owner;
 };
 #endif

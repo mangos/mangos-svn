@@ -62,11 +62,11 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(float x1, float y1, float x2, flo
 }
 
 template<typename TRAVELLER>
-void
+uint32
 DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, float offset)
 {
     if (i_destX == dest_x && i_destY == dest_y && i_destZ == dest_z)
-        return;
+        return 0;
 
     i_fromX = traveller.GetPositionX();
     i_fromY = traveller.GetPositionY();
@@ -84,6 +84,7 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x,
     speed *= 0.001f;
     uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
     traveller.MoveTo(dest_x, dest_y, dest_z, travel_time);
+    return travel_time;
 }
 
 template<typename TRAVELLER>

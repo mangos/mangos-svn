@@ -131,9 +131,9 @@ void AggressorAI::_stopAttack()
     i_victimGuid = 0;
     i_creature.AttackStop();
 
-    // TargetedMovementGenerator can be already remove at i_creature death and not updated i_victimGuid
+    // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
     if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+        i_creature->TargetedHome();
 }
 
 void

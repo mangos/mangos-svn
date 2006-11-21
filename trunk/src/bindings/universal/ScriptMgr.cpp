@@ -289,12 +289,7 @@ void ScriptedAI::DoStopAttack()
 void ScriptedAI::DoGoHome()
 {
     if( !m_creature->getVictim() && m_creature->isAlive() )
-    {
-        if( (*m_creature)->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-            (*m_creature)->Mutate(new TargetedMovementGenerator(*m_creature));
-
-        static_cast<TargetedMovementGenerator *>((*m_creature)->top())->TargetedHome(*m_creature);
-    }
+        (*m_creature)->TargetedHome();
 }
 
 bool ScriptedAI::needToStop() const

@@ -19,6 +19,8 @@
 #include "IdleMovementGenerator.h"
 #include "Creature.h"
 
+IdleMovementGenerator si_idleMovement;
+
 void
 IdleMovementGenerator::Reset(Creature &owner)
 {
