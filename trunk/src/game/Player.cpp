@@ -280,12 +280,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         return false;
     }
 
-    SetCreateStat(STAT_AGILITY,  (float)info->levelInfo[0].stats[STAT_AGILITY]);
-    SetCreateStat(STAT_INTELLECT,(float)info->levelInfo[0].stats[STAT_INTELLECT]);
-    SetCreateStat(STAT_SPIRIT,   (float)info->levelInfo[0].stats[STAT_SPIRIT]);
-    SetCreateStat(STAT_STAMINA,  (float)info->levelInfo[0].stats[STAT_STAMINA]);
-    SetCreateStat(STAT_STRENGTH, (float)info->levelInfo[0].stats[STAT_STRENGTH]);
-
     if ( race == RACE_TAUREN )
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
     else
@@ -1608,15 +1602,22 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
 
     SetMaxHealth(info.health);
 
+    // save base values (bonuses already included in stored stats
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        SetCreateStat(Stats(i), info.stats[i]);
+
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetStat(Stats(i), info.stats[i]);
 
     // reset misc. values
     SetAttackTime(BASE_ATTACK,   2000 );
+    SetAttackTime(OFF_ATTACK,    2000 );
     SetAttackTime(RANGED_ATTACK, 2000 );
 
     SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
     SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, 0 );
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
 
@@ -1628,11 +1629,11 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 
-    SetPosStat(STAT_STRENGTH, 0);
-    SetPosStat(STAT_AGILITY, 0);
-    SetPosStat(STAT_STAMINA, 0);
-    SetPosStat(STAT_INTELLECT, 0);
-    SetPosStat(STAT_SPIRIT, 0);
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        SetPosStat(Stats(i), 0);
+
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        SetNegStat(Stats(i), 0);
 
     SetFloatValue(PLAYER_CRIT_PERCENTAGE, 5);
     SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
@@ -9958,12 +9959,6 @@ bool Player::LoadFromDB( uint32 guid )
         delete result;
         return false;
     }
-
-    SetCreateStat(STAT_AGILITY,  (float)info->levelInfo[0].stats[STAT_AGILITY]);
-    SetCreateStat(STAT_INTELLECT,(float)info->levelInfo[0].stats[STAT_INTELLECT]);
-    SetCreateStat(STAT_SPIRIT,   (float)info->levelInfo[0].stats[STAT_SPIRIT]);
-    SetCreateStat(STAT_STAMINA,  (float)info->levelInfo[0].stats[STAT_STAMINA]);
-    SetCreateStat(STAT_STRENGTH, (float)info->levelInfo[0].stats[STAT_STRENGTH]);
 
     uint32 transGUID = fields[29].GetUInt32();
     m_positionX = fields[7].GetFloat();
