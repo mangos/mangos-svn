@@ -34,7 +34,8 @@ TaxiMovementGenerator(const Creature &, float &x, float &y, float &z, float &ori
     return false;
 }
 
-void
+bool
 TaxiMovementGenerator::Update(Creature &, const uint32 &time_diff)
 {
+    return true;
 }

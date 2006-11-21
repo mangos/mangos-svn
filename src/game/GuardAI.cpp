@@ -125,14 +125,14 @@ void GuardAI::_stopAttack()
         DEBUG_LOG("Creature stopped attacking because victim outran him [guid=%u]", i_creature.GetGUIDLow());
     }
 
-    // TargetedMovementGenerator can be already remove at i_creature death and not updated i_victimGuid
-    if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
-
     i_state = STATE_NORMAL;
 
     i_victimGuid = 0;
     i_creature.AttackStop();
+
+    // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
+    if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
+        i_creature->TargetedHome();
 }
 
 void GuardAI::UpdateAI(const uint32 diff)
@@ -170,8 +170,8 @@ void GuardAI::UpdateAI(const uint32 diff)
                 if( i_tracker.Passed() )
                 {
                     DEBUG_LOG("Creature running back home [guid=%u]", i_creature.GetGUIDLow());
-                    static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
                     i_state = STATE_NORMAL;
+                    i_creature->TargetedHome();
                 }
                 /*else if( !i_creature.canReachWithAttack( i_pVictim ))
                 {

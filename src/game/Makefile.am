@@ -54,6 +54,7 @@ libgame_a_SOURCES = \
 	GuardAI.cpp \
 	Guild.cpp \
 	GuildHandler.cpp \
+	HomeMovementGenerator.cpp \
 	IdleMovementGenerator.cpp \
 	Item.cpp \
 	ItemHandler.cpp \
@@ -148,6 +149,7 @@ libgame_a_SOURCES = \
 	GuardAI.h \
 	Guild.h \
 	HateMatrix.h \
+	HomeMovementGenerator.h \
 	IdleMovementGenerator.h \
 	Item.h \
 	ItemPrototype.h \

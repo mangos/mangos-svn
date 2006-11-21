@@ -1635,8 +1635,24 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetNegStat(Stats(i), 0);
 
+    // Base crit/parry values
     SetFloatValue(PLAYER_CRIT_PERCENTAGE, 5);
     SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
+
+    // Base dodge values
+    switch(getClass())
+    {
+        case CLASS_PALADIN: SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.75); break;
+        case CLASS_HUNTER:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.64); break;
+        case CLASS_PRIEST:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 3.0 ); break;
+        case CLASS_SHAMAN:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 1.75); break;
+        case CLASS_MAGE:    SetFloatValue(PLAYER_DODGE_PERCENTAGE, 3.25); break;
+        case CLASS_WARLOCK: SetFloatValue(PLAYER_DODGE_PERCENTAGE, 2.0 ); break;
+        case CLASS_DRUID:   SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.75); break;
+        case CLASS_ROGUE:
+        case CLASS_WARRIOR:
+        default:            SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.0 ); break;
+    }
 
     // set armor (resistence 0) to original value (create_agility*2)
     SetArmor(m_createStats[STAT_AGILITY]*2);

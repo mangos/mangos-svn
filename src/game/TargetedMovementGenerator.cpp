@@ -83,39 +83,22 @@ TargetedMovementGenerator::Reset(Creature &owner)
     Initialize(owner);
 }
 
-void
-TargetedMovementGenerator::TargetedHome(Creature &owner)
-{
-    if(!&owner)
-        return;
-    if(owner.hasUnitState(UNIT_STAT_FLEEING))
-        return;
-    DEBUG_LOG("Target home location %u", owner.GetGUIDLow());
-    float x, y, z;
-    owner.GetRespawnCoord(x, y, z);
-    Traveller<Creature> traveller(owner);
-    i_destinationHolder.SetDestination(traveller, x, y, z);
-    traveller.Relocation(x,y,z);
-    i_targetedHome = true;
-    owner.clearUnitState(UNIT_STAT_ALL_STATE);
-}
-
-void
+bool
 TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 {
     if( !&owner || !owner.isAlive() || !&i_target || i_targetedHome )
-        return;
+        return true;
     if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) || owner.hasUnitState(UNIT_STAT_FLEEING))
-        return;
+        return true;
     if( !owner.isInCombat() && !owner.hasUnitState(UNIT_STAT_FOLLOW) )
     {
-        owner.AIM_Initialize();
-        return;
+        //owner.AIM_Initialize();   This case must be the one, when a creature aggroed you. By Initalized a new AI, we prevented to Ai::_stopAttack() to be executed properly.
+        return true;
     }
 
     // prevent crash after creature killed pet
     if (!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.getVictim() != &i_target)
-        return;
+        return true;
 
     Traveller<Creature> traveller(owner);
     if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
@@ -205,6 +188,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 }
             }
         }*/
+    return true;
 }
 
 void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellInfo)

@@ -40,6 +40,7 @@ enum MovementGeneratorType
     CONFUSED_MOTION_TYPE,                                   // ConfusedMovementGenerator.h
     TARGETED_MOTION_TYPE,                                   // TargetedMovementGenerator.h
     TAXI_MOTION_TYPE,                                       // TaxiMovementGenerator.h
+    HOME_MOTION_TYPE                                        // HomeMovementGenerator.h
 };
 
 class MANGOS_DLL_SPEC MovementGenerator
@@ -51,7 +52,7 @@ class MANGOS_DLL_SPEC MovementGenerator
 
         virtual void Reset(Creature &) = 0;
 
-        virtual void Update(Creature &, const uint32 &time_diff) = 0;
+        virtual bool Update(Creature &, const uint32 &time_diff) = 0;
 
         virtual MovementGeneratorType GetMovementGeneratorType() = 0;
 };

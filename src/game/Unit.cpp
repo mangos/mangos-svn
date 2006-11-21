@@ -2182,7 +2182,7 @@ void Unit::ApplyStats(bool apply)
     else if(getClass() == CLASS_ROGUE)  classrate = 29;
     else classrate = 20;
 
-    val = 5 + GetStat(STAT_AGILITY)/classrate;
+    val = GetStat(STAT_AGILITY)/classrate;
 
     ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE, val, apply);
 
@@ -2197,11 +2197,6 @@ void Unit::ApplyStats(bool apply)
         val = GetStat(STAT_AGILITY)/classrate;
 
     ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, val, apply);
-
-    //parry
-    val = float(5);
-
-    ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE, val, apply);
 
     // remove percent mods to see original stats when adding buffs/items
     if (!apply)

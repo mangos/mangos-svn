@@ -81,7 +81,7 @@ am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
 	GossipDef.$(OBJEXT) GridNotifiers.$(OBJEXT) \
 	GridStates.$(OBJEXT) Group.$(OBJEXT) GroupHandler.$(OBJEXT) \
 	GuardAI.$(OBJEXT) Guild.$(OBJEXT) GuildHandler.$(OBJEXT) \
-	IdleMovementGenerator.$(OBJEXT) Item.$(OBJEXT) \
+	HomeMovementGenerator.$(OBJEXT) IdleMovementGenerator.$(OBJEXT) Item.$(OBJEXT) \
 	ItemHandler.$(OBJEXT) Level0.$(OBJEXT) Level1.$(OBJEXT) \
 	Level2.$(OBJEXT) Level3.$(OBJEXT) LootHandler.$(OBJEXT) \
 	LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
@@ -301,6 +301,7 @@ libgame_a_SOURCES = \
 	GuardAI.cpp \
 	Guild.cpp \
 	GuildHandler.cpp \
+	HomeMovementGenerator.cpp \
 	IdleMovementGenerator.cpp \
 	Item.cpp \
 	ItemHandler.cpp \
@@ -395,6 +396,7 @@ libgame_a_SOURCES = \
 	GuardAI.h \
 	Guild.h \
 	HateMatrix.h \
+	HomeMovementGenerator.h \
 	IdleMovementGenerator.h \
 	Item.h \
 	ItemPrototype.h \
@@ -531,6 +533,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GuardAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Guild.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GuildHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HomeMovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IdleMovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ItemHandler.Po@am__quote@

@@ -92,13 +92,13 @@ RandomMovementGenerator::Reset(Creature &creature)
     creature.StopMoving();
 }
 
-void
+bool
 RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
     if(!&creature)
-        return;
+        return true;
     if(creature.hasUnitState(UNIT_STAT_ROOT) || creature.hasUnitState(UNIT_STAT_STUNDED))
-        return;
+        return true;
     i_nextMoveTime.Update(diff);
     #ifdef USE_INTERPOLATION
     CreatureTraveller traveller(creature);
@@ -145,6 +145,7 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
             }
         }
     }
+    return true;
 }
 
 int
