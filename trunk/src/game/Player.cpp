@@ -322,7 +322,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);    SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, 0);
     */
 
-    InitStatsForLevel(1,false);
+    InitStatsForLevel(1,false,false);
 
     // Played time
     m_Last_tick = time(NULL);
@@ -1533,32 +1533,38 @@ void Player::GiveLevel()
     InitStatsForLevel(level);
 }
 
-void Player::InitStatsForLevel(uint32 level, bool sendgain)
+void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
 {
     // Remove item, aura, stats bonuses
-    _RemoveAllItemMods();
-    _RemoveAllAuraMods();
-    _RemoveStatsMods();
+    if(remove_mods)
+    {
+        _RemoveAllItemMods();
+        _RemoveAllAuraMods();
+        _RemoveStatsMods();
+    }
 
     PlayerLevelInfo info;
 
     objmgr.GetPlayerLevelInfo(getRace(),getClass(),level,&info);
 
-    // send levelup info to client
-    WorldPacket data;
-    data.Initialize(SMSG_LEVELUP_INFO);
-    data << uint32(level);
-    data << uint32(int32(info.health) - GetMaxHealth());
-    data << uint32(int32(info.mana)   - GetMaxPower(POWER_MANA));
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
+    if(sendgain)
+    {
+        // send levelup info to client
+        WorldPacket data;
+        data.Initialize(SMSG_LEVELUP_INFO);
+        data << uint32(level);
+        data << uint32(int32(info.health) - GetMaxHealth());
+        data << uint32(int32(info.mana)   - GetMaxPower(POWER_MANA));
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
 
-    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        data << uint32(int32(info.stats[i]) - GetStat(Stats(i)));
+        for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+            data << uint32(int32(info.stats[i]) - GetStat(Stats(i)));
 
-    GetSession()->SendPacket(&data);
+        GetSession()->SendPacket(&data);
+    }
 
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
 
@@ -1644,9 +1650,12 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain)
     }
 
     // apply stats, aura, items mods
-    _ApplyStatsMods();
-    _ApplyAllAuraMods();
-    _ApplyAllItemMods();
+    if(remove_mods)
+    {
+        _ApplyStatsMods();
+        _ApplyAllAuraMods();
+        _ApplyAllItemMods();
+    }
 
     // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
     // must called with applied AuraMods (removed in call code)
@@ -10028,7 +10037,7 @@ bool Player::LoadFromDB( uint32 guid )
     delete result;
 
     // reset stats before loading any modifiers
-    InitStatsForLevel(getLevel(),false);
+    InitStatsForLevel(getLevel(),false,false);
 
     // make sure the unit is considered out of combat for proper loading
     ClearInCombat();

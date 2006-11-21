@@ -2074,7 +2074,7 @@ bool ChatHandler::HandleHoverCommand(const char* args)
 
 bool ChatHandler::HandleLevelUpCommand(const char* args)
 {
-    int nrlvl = atoi((char*)args);
+    int nrlvl = (!*args) ? 1 : atoi((char*)args);
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
