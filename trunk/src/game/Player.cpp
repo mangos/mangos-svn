@@ -7449,10 +7449,14 @@ Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,
     if( pItem )
     {
         ItemPrototype const *pProto = pItem->GetProto();
-        ItemAdded( item, count );
         if(fromLoot)
             pItem->SetItemRandomProperties();
-        return StoreItem( pos, pItem, update );
+
+        Item * retItem = StoreItem( pos, pItem, update );
+
+        ItemAddedQuestCheck( item, count );
+        
+        return retItem;
     }
     return NULL;
 }
@@ -7720,8 +7724,6 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
-            ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
-
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
             if ( slot < EQUIPMENT_SLOT_END )
@@ -7761,6 +7763,9 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             }
 
             m_items[slot] = NULL;
+            
+            ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
+
             if( IsInWorld() && update )
             {
                 pItem->RemoveFromWorld();
@@ -7772,10 +7777,11 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
             if( pBag )
             {
-                if( pProto && pProto->Class == ITEM_CLASS_QUEST )
-                    ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
                 pBag->RemoveItem(slot, update);
 
+                if( pProto && pProto->Class == ITEM_CLASS_QUEST )
+                    ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
+                
                 if( IsInWorld() && update )
                 {
                     pItem->RemoveFromWorld();
@@ -7811,8 +7817,8 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             else
             {
                 pProto = pItem->GetProto();
-                ItemRemoved( pItem->GetEntry(), count - remcount );
                 pItem->SetCount( pItem->GetCount() - count + remcount );
+                ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                 if( IsInWorld() & update )
                     pItem->SendUpdateToPlayer( this );
                 return;
@@ -7847,8 +7853,8 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                         else
                         {
                             pProto = pItem->GetProto();
-                            ItemRemoved( pItem->GetEntry(), count - remcount );
                             pItem->SetCount( pItem->GetCount() - count + remcount );
+                            ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                             if( IsInWorld() && update )
                                 pItem->SendUpdateToPlayer( this );
                             return;
@@ -7876,8 +7882,8 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             else
             {
                 pProto = pItem->GetProto();
-                ItemRemoved( pItem->GetEntry(), count - remcount );
                 pItem->SetCount( pItem->GetCount() - count + remcount );
+                ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                 if( IsInWorld() & update )
                     pItem->SendUpdateToPlayer( this );
                 return;
@@ -7903,8 +7909,8 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
     else
     {
         ItemPrototype const* pProto  = pItem->GetProto();
-        ItemRemoved( pItem->GetEntry(), count);
         pItem->SetCount( pItem->GetCount() - count );
+        ItemRemovedQuestCheck( pItem->GetEntry(), count);
         count = 0;
         if( IsInWorld() & update )
             pItem->SendUpdateToPlayer( this );
@@ -9429,7 +9435,7 @@ void Player::AreaExplored( uint32 questId )
     }
 }
 
-void Player::ItemAdded( uint32 entry, uint32 count )
+void Player::ItemAddedQuestCheck( uint32 entry, uint32 count )
 {
     uint32 quest;
     uint32 reqitem;
@@ -9467,7 +9473,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
     }
 }
 
-void Player::ItemRemoved( uint32 entry, uint32 count )
+void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
 {
     uint32 quest;
     uint32 reqitem;
