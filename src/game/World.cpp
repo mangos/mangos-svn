@@ -606,8 +606,14 @@ void World::ScriptsProcess()
             ((Creature *)iter->second.source)->HandleEmoteCommand(iter->second.script->datalong);
         else if (iter->second.script->command == 2)
             ((Creature *)iter->second.source)->SetUInt32Value(iter->second.script->datalong, iter->second.script->datalong2);
-        else if (iter->second.script->command == 3)
-            ((Unit *)iter->second.source)->SendMoveToPacket(iter->second.script->x, iter->second.script->y, iter->second.script->z, false);
+        else if (iter->second.script->command == 3) {
+            ((Unit *)iter->second.source)->SendMoveToPacket(iter->second.script->x, iter->second.script->y, iter->second.script->z, false, iter->second.script->datalong2 );
+            MapManager::Instance().GetMap(((Object *)iter->second.source)->GetMapId())->CreatureRelocation(((Creature *)iter->second.source), iter->second.script->x, iter->second.script->y, iter->second.script->z, 0);
+            //char buffff[255];
+            //sprintf(buffff, "M:%d", iter->second.script->datalong2);
+            //((Creature *)iter->second.source)->MonsterSay(buffff, 0, iter->second.target->GetGUID());
+        }
+
         scriptSchedule.erase(iter);
 
         iter = scriptSchedule.begin();

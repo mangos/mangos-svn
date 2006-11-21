@@ -138,24 +138,25 @@ bool Unit::haveOffhandWeapon() const
         return false;
 }
 
-void Unit::SendMoveToPacket(float x, float y, float z, bool run)
+void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitTime)
 {
     float dx = x - GetPositionX();
     float dy = y - GetPositionY();
     float dz = z - GetPositionZ();
-    float dist = ((dx*dx) + (dy*dy) + (dz*dz));
-    if(dist<0)
-        dist = 0;
-    else
-        dist = ::sqrt(dist);
-    double speed = GetSpeed(run ? MOVE_RUN : MOVE_WALK);
-    if(speed<=0)
-        speed = 2.5f;
-    speed *= 0.001f;
-    uint32 time = static_cast<uint32>(dist / speed + 0.5);
+    if (!transitTime) {
+        float dist = ((dx*dx) + (dy*dy) + (dz*dz));
+        if(dist<0)
+            dist = 0;
+        else
+            dist = ::sqrt(dist);
+        double speed = GetSpeed(run ? MOVE_RUN : MOVE_WALK);
+        if(speed<=0)
+            speed = 2.5f;
+        speed *= 0.001f;
+        transitTime = static_cast<uint32>(dist / speed + 0.5);
+    }
     //float orientation = (float)atan2((double)dy, (double)dx);
-    SendMonsterMove(x,y,z,false,run,time);
-
+    SendMonsterMove(x,y,z,false,run,transitTime);
 }
 
 void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Walkback, bool Run, uint32 Time)
@@ -165,8 +166,11 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Wal
     data.append(GetPackGUID());
                                                             // Point A, starting location
     data << GetPositionX() << GetPositionY() << GetPositionZ();
-    float orientation = GetOrientation();                   // little trick related to orientation
-    data << (uint32)((*((uint32*)&orientation)) & 0x30000000);
+    // unknown field - unrelated to orientation
+    // seems to increment about 1000 for every 1.7 seconds
+    // for now, we'll just use mstime
+    data << getMSTime();
+
     data << uint8(Walkback);                                // walkback when walking from A to B
     data << uint32(Run ? 0x00000100 : 0x00000000);          // flags
     /* Flags:
