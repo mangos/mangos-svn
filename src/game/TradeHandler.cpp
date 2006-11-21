@@ -176,7 +176,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     {
                         sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
                         _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
-                        _player->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
+                        _player->ItemRemovedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
                         _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
                         _player->pTrader->StoreItem( dst, myItems[i], true);
                     }
