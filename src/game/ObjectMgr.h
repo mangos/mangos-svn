@@ -229,9 +229,14 @@ class ObjectMgr
         AuctionEntryMap::iterator GetAuctionsBegin() {return mAuctions.begin();}
         AuctionEntryMap::iterator GetAuctionsEnd() {return mAuctions.end();}
 
-        PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_);
-        inline uint8 GetLevelUpStatGain(uint8 Class, uint8 Race, uint8 FromLevel, Stats Stat) const
-            { return levelUpStatGains[Class][Race][FromLevel][(uint8)Stat+2]; }
+        PlayerInfo const* GetPlayerInfo(uint32 race, uint32 class_) const { 
+            if(race   >= MAX_RACES)   return NULL;
+            if(class_ >= MAX_CLASSES) return NULL;
+            PlayerInfo const* info = &playerInfo[race][class_];
+            if(info->displayId==0) return NULL;
+            return info; 
+        }
+        void GetPlayerLevelInfo(uint32 race, uint32 class_,uint32 level, PlayerLevelInfo* info) const;
 
         uint64 GetPlayerGUIDByName(const char *name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
@@ -281,7 +286,7 @@ class ObjectMgr
 
         void LoadAuctions();
         void LoadAuctionItems();
-        void LoadLvlUpGains();
+        void LoadPlayerInfo();
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(uint32 guidhigh);
@@ -306,10 +311,6 @@ class ObjectMgr
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
 
-        // levelUpStatGains stats array index: hp, mana, str, agi, sta, int, spi
-        // E.G. - levelUpStatGains[p_class][p_race][p_level][0] will return hp increase for p_level.
-        uint8 ****levelUpStatGains;
-
         GroupSet            mGroupSet;
         GuildSet            mGuildSet;
 
@@ -324,7 +325,8 @@ class ObjectMgr
         TeleportMap         mTeleports;
 
     private:
-
+        void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
+        PlayerInfo **playerInfo; // [race][class]
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()

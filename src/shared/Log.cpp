@@ -172,7 +172,7 @@ void Log::SetLogFileLevel(char *Level)
 
 void Log::Initialize()
 {
-    std::string logfn=sConfig.GetStringDefault("LogFile", "Server.log");
+    std::string logfn=sConfig.GetStringDefault("LogFile", "");
     if(logfn!="")
     {
         logfile = fopen(logfn.c_str(), "w");

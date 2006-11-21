@@ -280,8 +280,8 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Game Object Templates..." );
     objmgr.LoadGameobjectInfo();
 
-    sLog.outString( "Loading levelup stat gains..." );
-    objmgr.LoadLvlUpGains();
+    sLog.outString( "Loading player create info & level stats..." );
+    objmgr.LoadPlayerInfo();
 
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();

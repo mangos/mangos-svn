@@ -122,9 +122,7 @@ bool ChatHandler::HandleStartCommand(const char* args)
 
     chr->SetUInt32Value(PLAYER_FARSIGHT, 0x01);
 
-    PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(
-        chr->getRace(), chr->getClass());
-    ASSERT(info);
+    PlayerInfo const *info = objmgr.GetPlayerInfo(chr->getRace(), chr->getClass());
 
     chr->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,chr->GetOrientation());
 

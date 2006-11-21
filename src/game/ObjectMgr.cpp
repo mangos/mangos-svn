@@ -151,102 +151,6 @@ void ObjectMgr::LoadCreatureTemplates()
     sLog.outString( "" );
 }
 
-PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
-{
-    Field *player_fields, *items_fields, *spells_fields, *skills_fields, *actions_fields;
-    PlayerCreateInfo *pPlayerCreateInfo;
-
-    QueryResult *player_result = sDatabase.PQuery("SELECT `race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID`,`BaseStrength`,`BaseAgility`,`BaseStamina`,`BaseIntellect`,`BaseSpirit`,`BaseArmor`,`BaseHealth`,`BaseMana`,`BaseRage`,`BaseFocus`,`BaseEnergy` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", race, class_);
-
-    if(!player_result)
-    {
-        sLog.outError("Warning: Can't get info for player creating with race %u and class %u (table 'playercreateinfo' is empty?)", race, class_);
-        return NULL;
-    }
-
-    pPlayerCreateInfo = new PlayerCreateInfo;
-
-    player_fields = player_result->Fetch();
-
-    pPlayerCreateInfo->race = player_fields[0].GetUInt8();
-    pPlayerCreateInfo->class_ = player_fields[1].GetUInt8();
-    pPlayerCreateInfo->mapId = player_fields[2].GetUInt32();
-    pPlayerCreateInfo->zoneId = player_fields[3].GetUInt32();
-    pPlayerCreateInfo->positionX = player_fields[4].GetFloat();
-    pPlayerCreateInfo->positionY = player_fields[5].GetFloat();
-    pPlayerCreateInfo->positionZ = player_fields[6].GetFloat();
-    pPlayerCreateInfo->displayId = player_fields[7].GetUInt16();
-    pPlayerCreateInfo->strength = player_fields[8].GetUInt8();
-    pPlayerCreateInfo->agility = player_fields[9].GetUInt8();
-    pPlayerCreateInfo->stamina = player_fields[10].GetUInt8();
-    pPlayerCreateInfo->intellect = player_fields[11].GetUInt8();
-    pPlayerCreateInfo->spirit = player_fields[12].GetUInt8();
-    pPlayerCreateInfo->basearmor = player_fields[13].GetUInt32();
-    pPlayerCreateInfo->health = player_fields[14].GetUInt32();
-    pPlayerCreateInfo->mana = player_fields[15].GetUInt32();
-    pPlayerCreateInfo->rage = player_fields[16].GetUInt32();
-    pPlayerCreateInfo->focus = player_fields[17].GetUInt32();
-    pPlayerCreateInfo->energy = player_fields[18].GetUInt32();
-
-    delete player_result;
-
-    // add ordered by bagIndex big index at start (255 - is inventory/equiped bag index) to let add at beggining equiped items (including equiped bags)
-    QueryResult *items_result = sDatabase.PQuery("SELECT `itemid`,`amount` FROM `playercreateinfo_item` WHERE `race` = '%u' AND `class` = '%u'", race, class_ );
-    if(items_result)
-    {
-        do
-        {
-            items_fields = items_result->Fetch();
-            pPlayerCreateInfo->item.push_back(PlayerCreateInfoItem( items_fields[0].GetUInt32(), items_fields[1].GetUInt32()));
-        } while (items_result->NextRow());
-
-        delete items_result;
-    }
-
-    QueryResult *spells_result = sDatabase.PQuery("SELECT `Spell`,`Active` FROM `playercreateinfo_spell` WHERE `race` = '%u' AND `class` = '%u'", race,class_);
-    if(spells_result)
-    {
-        do
-        {
-            spells_fields = spells_result->Fetch();
-            pPlayerCreateInfo->spell.push_back(CreateSpellPair(spells_fields[0].GetUInt16(), spells_fields[1].GetBool()));
-        } while( spells_result->NextRow() );
-
-        delete spells_result;
-    }
-
-    QueryResult *skills_result = sDatabase.PQuery("SELECT `Skill`, `SkillMin`, `SkillMax` FROM `playercreateinfo_skill` WHERE `race` = '%u' AND `class` = '%u'", race,class_);
-    if(skills_result)
-    {
-        do
-        {
-            skills_fields = skills_result->Fetch();
-            pPlayerCreateInfo->skill[0].push_back(skills_fields[0].GetUInt16());
-            pPlayerCreateInfo->skill[1].push_back(skills_fields[1].GetUInt16());
-            pPlayerCreateInfo->skill[2].push_back(skills_fields[2].GetUInt16());
-        } while( skills_result->NextRow() );
-
-        delete skills_result;
-    }
-
-    QueryResult *actions_result = sDatabase.PQuery("SELECT `button`, `action`, `type`, `misc` FROM `playercreateinfo_action` WHERE `race` = '%u' AND `class` = '%u'", race,class_);
-    if(actions_result)
-    {
-        do
-        {
-            actions_fields = actions_result->Fetch();
-            pPlayerCreateInfo->action[0].push_back(actions_fields[0].GetUInt16());
-            pPlayerCreateInfo->action[1].push_back(actions_fields[1].GetUInt16());
-            pPlayerCreateInfo->action[2].push_back(actions_fields[2].GetUInt16());
-            pPlayerCreateInfo->action[3].push_back(actions_fields[3].GetUInt16());
-        } while( actions_result->NextRow() );
-
-        delete actions_result;
-    }
-
-    return pPlayerCreateInfo;
-}
-
 // name must be checked to correctness (if recived) before call this function
 uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 {
@@ -386,80 +290,485 @@ void ObjectMgr::LoadAuctionItems()
     delete result;
 }
 
-void ObjectMgr::LoadLvlUpGains()
+void ObjectMgr::LoadPlayerInfo()
 {
-    Field *fields;
-    uint32 count = 0;
-
-    QueryResult *result  = sDatabase.PQuery("SELECT `race`,`class`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi` FROM `player_levelupgains`");
-    if (!result)
+    // allocate dynamic array
+    playerInfo = new PlayerInfo*[MAX_RACES];
+    for (uint8 race = 0; race < MAX_RACES; ++race)
     {
-        barGoLink bar( 1 );
-
-        sLog.outString( "" );
-        sLog.outString( ">> Loaded %u levelup definitions", count );
-        sLog.outError( "Error loading player_levelupgains table or table empty.");
-        exit(1);
+        playerInfo[race] = new PlayerInfo[MAX_CLASSES];
     }
 
-    barGoLink bar( result->GetRowCount() );
-
-    // allocate dynamic array
-    levelUpStatGains = new uint8***[MAX_CLASSES];
-    for (uint8 i1 = 0; i1 < MAX_CLASSES; i1++)
+    // Load playercreate
     {
-        levelUpStatGains[i1] = new uint8**[MAX_RACES];
-        for (uint8 i2 = 0; i2 < MAX_RACES; i2++)
+        //                                            0      1       2     3      4            5            6            7      
+        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID` FROM `playercreateinfo`");
+
+        uint32 count = 0;
+
+        if (!result)
         {
-            levelUpStatGains[i1][i2] = new uint8*[sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)];
-            for (uint8 i3 = 0; i3 < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); i3++)
+            barGoLink bar( 1 );
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create definitions", count );
+            sLog.outError( "Error loading `playercreateinfo` table or table empty.");
+            exit(1);
+        }
+
+        barGoLink bar( result->GetRowCount() );
+
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 current_race = fields[0].GetUInt32();
+            if(current_race >= MAX_RACES)
             {
-                levelUpStatGains[i1][i2][i3] = new uint8[MAX_STATS+2];
-                for (uint8 i4 = 0; i4 < MAX_STATS+2; i4++)
-                    levelUpStatGains[i1][i2][i3][i4] = 0;
+                sLog.outError("Wrong race %u in `playercreateinfo` table, ignoring.",current_race);
+                continue;
+            }
+
+            uint32 current_class = fields[1].GetUInt32();
+            if(current_class >= MAX_CLASSES)
+            {
+                sLog.outError("Wrong class %u in `playercreateinfo` table, ignoring.",current_class);
+                continue;
+            }
+
+            PlayerInfo* pInfo = &playerInfo[current_race][current_class];
+
+            pInfo->mapId     = fields[2].GetUInt32();
+            pInfo->zoneId    = fields[3].GetUInt32();
+            pInfo->positionX = fields[4].GetFloat();
+            pInfo->positionY = fields[5].GetFloat();
+            pInfo->positionZ = fields[6].GetFloat();
+            pInfo->displayId = fields[7].GetUInt16();
+
+            bar.step();
+            count++;
+        }
+        while (result->NextRow());
+
+        delete result;
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u player create definitions", count );
+    }
+
+    // Load playercreate items
+    {
+        //                                            0      1       2        3
+        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`itemid`,`amount` FROM `playercreateinfo_item`");
+
+        uint32 count = 0;
+
+        if (!result)
+        {
+            barGoLink bar( 1 );
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create items", count );
+            sLog.outError( "Error loading `playercreateinfo_item` table or table empty.");
+        }
+        else
+        {
+            barGoLink bar( result->GetRowCount() );
+
+            do
+            {
+                Field* fields = result->Fetch();
+
+                uint32 current_race = fields[0].GetUInt32();
+                if(current_race >= MAX_RACES)
+                {
+                    sLog.outError("Wrong race %u in `playercreateinfo_item` table, ignoring.",current_race);
+                    continue;
+                }
+
+                uint32 current_class = fields[1].GetUInt32();
+                if(current_class >= MAX_CLASSES)
+                {
+                    sLog.outError("Wrong class %u in `playercreateinfo_item` table, ignoring.",current_class);
+                    continue;
+                }
+
+                PlayerInfo* pInfo = &playerInfo[current_race][current_class];
+
+                pInfo->item.push_back(PlayerCreateInfoItem( fields[2].GetUInt32(), fields[3].GetUInt32()));
+
+                bar.step();
+                count++;
+            }
+            while(result->NextRow());
+
+            delete result;
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create items", count );
+        }
+    }
+
+    // Load playercreate spells
+    {
+        //                                            0      1       2       3
+        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`Spell`,`Active` FROM `playercreateinfo_spell`");
+
+        uint32 count = 0;
+
+        if (!result)
+        {
+            barGoLink bar( 1 );
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create spells", count );
+            sLog.outError( "Error loading `playercreateinfo_spell` table or table empty.");
+        }
+        else
+        {
+            barGoLink bar( result->GetRowCount() );
+
+            do
+            {
+                Field* fields = result->Fetch();
+
+                uint32 current_race = fields[0].GetUInt32();
+                if(current_race >= MAX_RACES)
+                {
+                    sLog.outError("Wrong race %u in `playercreateinfo_spell` table, ignoring.",current_race);
+                    continue;
+                }
+
+                uint32 current_class = fields[1].GetUInt32();
+                if(current_class >= MAX_CLASSES)
+                {
+                    sLog.outError("Wrong class %u in `playercreateinfo_spell` table, ignoring.",current_class);
+                    continue;
+                }
+
+                PlayerInfo* pInfo = &playerInfo[current_race][current_class];
+                pInfo->spell.push_back(CreateSpellPair(fields[2].GetUInt16(), fields[3].GetBool()));
+
+                bar.step();
+                count++;
+            }
+            while( result->NextRow() );
+
+            delete result;
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create spells", count );
+        }
+    }
+
+    // Load playercreate skills
+    {
+        //                                            0      1       2       3           4   
+        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`Skill`,`SkillMin`, `SkillMax` FROM `playercreateinfo_skill`");
+
+        uint32 count = 0;
+
+        if (!result)
+        {
+            barGoLink bar( 1 );
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create skills", count );
+            sLog.outError( "Error loading `playercreateinfo_skill` table or table empty.");
+        }
+        else
+        {
+            barGoLink bar( result->GetRowCount() );
+
+            do
+            {
+                Field* fields = result->Fetch();
+
+                uint32 current_race = fields[0].GetUInt32();
+                if(current_race >= MAX_RACES)
+                {
+                    sLog.outError("Wrong race %u in `playercreateinfo_skill` table, ignoring.",current_race);
+                    continue;
+                }
+
+                uint32 current_class = fields[1].GetUInt32();
+                if(current_class >= MAX_CLASSES)
+                {
+                    sLog.outError("Wrong class %u in `playercreateinfo_skill` table, ignoring.",current_class);
+                    continue;
+                }
+
+                PlayerInfo* pInfo = &playerInfo[current_race][current_class];
+                pInfo->skill[0].push_back(fields[2].GetUInt16());
+                pInfo->skill[1].push_back(fields[3].GetUInt16());
+                pInfo->skill[2].push_back(fields[4].GetUInt16());
+
+                bar.step();
+                count++;
+            }
+            while( result->NextRow() );
+
+            delete result;
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create skills", count );
+        }
+    }
+
+    // Load playercreate skills
+    {
+        //                                                    0      1       2        3        4      5
+        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`button`,`action`,`type`,`misc` FROM `playercreateinfo_action`");
+
+        uint32 count = 0;
+
+        if (!result)
+        {
+            barGoLink bar( 1 );
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create actions", count );
+            sLog.outError( "Error loading `playercreateinfo_action` table or table empty.");
+        }
+        else
+        {
+            barGoLink bar( result->GetRowCount() );
+
+            do
+            {
+                Field* fields = result->Fetch();
+
+                uint32 current_race = fields[0].GetUInt32();
+                if(current_race >= MAX_RACES)
+                {
+                    sLog.outError("Wrong race %u in `playercreateinfo_action` table, ignoring.",current_race);
+                    continue;
+                }
+
+                uint32 current_class = fields[1].GetUInt32();
+                if(current_class >= MAX_CLASSES)
+                {
+                    sLog.outError("Wrong class %u in `playercreateinfo_action` table, ignoring.",current_class);
+                    continue;
+                }
+
+                PlayerInfo* pInfo = &playerInfo[current_race][current_class];
+                pInfo->action[0].push_back(fields[2].GetUInt16());
+                pInfo->action[1].push_back(fields[3].GetUInt16());
+                pInfo->action[2].push_back(fields[4].GetUInt16());
+                pInfo->action[3].push_back(fields[5].GetUInt16());
+
+                bar.step();
+                count++;
+            }
+            while( result->NextRow() );
+
+            delete result;
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u player create actions", count );
+        }
+    }
+
+    // Loading levels data
+    {
+        //                                              0      1       2       3    4      5     6     7     8     9
+        QueryResult *result  = sDatabase.Query("SELECT `race`,`class`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi` FROM `player_levelstats`");
+
+        uint32 count = 0;
+
+        if (!result)
+        {
+            barGoLink bar( 1 );
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u levelup definitions", count );
+            sLog.outError( "Error loading player_levelupgains table or table empty.");
+            exit(1);
+        }
+
+        barGoLink bar( result->GetRowCount() );
+
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 current_race = fields[0].GetUInt32();
+            if(current_race >= MAX_RACES)
+            {
+                sLog.outError("Wrong race %u in `player_levelstats` table, ignoring.",current_race);
+                continue;
+            }
+
+            uint32 current_class = fields[1].GetUInt32();
+            if(current_class >= MAX_CLASSES)
+            {
+                sLog.outError("Wrong class %u in `player_levelstats` table, ignoring.",current_class);
+                continue;
+            }
+
+            uint32 current_level = fields[2].GetUInt32();
+            if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+            {
+                sLog.outError("Wrong level %u in `player_levelupgains` table, ignoring.",current_level);
+                continue;
+            }
+
+            PlayerInfo* pInfo = &playerInfo[current_race][current_class];
+
+            if(!pInfo->levelInfo)
+                pInfo->levelInfo = new PlayerLevelInfo[sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)];
+
+            PlayerLevelInfo* pLevelInfo = &pInfo->levelInfo[current_level-1];
+
+            pLevelInfo->health = fields[3].GetUInt16();
+            pLevelInfo->mana   = fields[4].GetUInt16();
+
+            for (int i = 0; i < MAX_STATS; i++)
+            {
+                pLevelInfo->stats[i] = fields[i+5].GetUInt8();
+            }
+
+            bar.step();
+            count++;
+        }
+        while (result->NextRow());
+
+        delete result;
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u level stats definitions", count );
+    }
+
+    // Fill gaps and check integrity
+    for (int race = 0; race < MAX_RACES; ++race)
+    {
+        // skip non existed races
+        if(!sChrRacesStore.LookupEntry(race))
+            continue;
+
+        for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
+        {
+            // skip non existed classes
+            if(!sChrClassesStore.LookupEntry(class_))
+                continue;
+
+            PlayerInfo* pInfo = &playerInfo[race][class_];
+
+            // skip non loaded combinations
+            if(!pInfo->displayId)
+                continue;
+
+            // fatal error if no level 1 data
+            if(!pInfo->levelInfo || pInfo->levelInfo[0].health == 0 )
+            {
+                sLog.outError("Race %i Class %i Level 1 not have stats data!",race,class_);
+                exit(1);
+            }
+
+            // fill level gaps
+            for (int level = 1; level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+            {
+                if(pInfo->levelInfo[level].health == 0)
+                {
+                    sLog.outError("Race %i Class %i Level %i not have stats data, using data for %i.",race,class_,level+1, level);
+                    pInfo->levelInfo[level] = pInfo->levelInfo[level-1];
+                }
             }
         }
     }
+}
 
-    do
+void ObjectMgr::GetPlayerLevelInfo(uint32 race, uint32 class_, uint32 level, PlayerLevelInfo* info) const
+{
+    if(level < 1) return;
+    if(race   >= MAX_RACES)   return;
+    if(class_ >= MAX_CLASSES) return;
+    PlayerInfo const* pInfo = &playerInfo[race][class_];
+    if(pInfo->displayId==0) return;
+
+    if(level <= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        *info = pInfo->levelInfo[level-1]; 
+    else
+        BuildPlayerLevelInfo(race,class_,level,info);
+}
+
+void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, PlayerLevelInfo* info) const
+{
+    // base data (last known level)
+    *info = playerInfo[race][_class].levelInfo[sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)-1];
+
+    for(int lvl = sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)-1; lvl < level; ++lvl)
     {
-        fields = result->Fetch();
-
-        uint8 current_class = fields[1].GetUInt8();
-        if(current_class >= MAX_CLASSES)
+        switch(_class)
         {
-            sLog.outError("Wrong class %u in `player_levelupgains` table, ignoring.",current_class);
-            continue;
+            case CLASS_WARRIOR:
+                info->stats[STAT_STRENGTH]  += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+                info->stats[STAT_STAMINA]   += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+                info->stats[STAT_AGILITY]   += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+                info->stats[STAT_INTELLECT] += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 9 && !(lvl%2) ? 1: 0);
+                break;
+            case CLASS_PALADIN:
+                info->stats[STAT_STRENGTH]  += (lvl > 3  ? 1: 0);
+                info->stats[STAT_STAMINA]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
+                info->stats[STAT_INTELLECT] += (lvl > 6 && (lvl%2) ? 1: 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 7 ? 1: 0);
+                break;
+            case CLASS_HUNTER:
+                info->stats[STAT_STRENGTH]  += (lvl > 4  ? 1: 0);
+                info->stats[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
+                info->stats[STAT_AGILITY]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[STAT_INTELLECT] += (lvl > 8 && (lvl%2) ? 1: 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
+                break;
+            case CLASS_ROGUE:
+                info->stats[STAT_STRENGTH]  += (lvl > 5  ? 1: 0);
+                info->stats[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
+                info->stats[STAT_AGILITY]   += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[STAT_INTELLECT] += (lvl > 8 && !(lvl%2) ? 1: 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
+                break;
+            case CLASS_PRIEST:
+                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
+                info->stats[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
+                info->stats[STAT_INTELLECT] += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[STAT_SPIRIT]    += (lvl > 3  ? 1: 0);
+                break;
+            case CLASS_SHAMAN:
+                info->stats[STAT_STRENGTH]  += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+                info->stats[STAT_STAMINA]   += (lvl > 4 ? 1: 0);
+                info->stats[STAT_AGILITY]   += (lvl > 7 && !(lvl%2) ? 1: 0);
+                info->stats[STAT_INTELLECT] += (lvl > 5 ? 1: 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 4 ? 1: 0);
+                break;
+            case CLASS_MAGE:
+                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
+                info->stats[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[STAT_INTELLECT] += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
+                info->stats[STAT_SPIRIT]    += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+                break;
+            case CLASS_WARLOCK:
+                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[STAT_STAMINA]   += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+                info->stats[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
+                info->stats[STAT_INTELLECT] += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+                break;
+            case CLASS_DRUID:
+                info->stats[STAT_STRENGTH]  += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
+                info->stats[STAT_STAMINA]   += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
+                info->stats[STAT_AGILITY]   += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
+                info->stats[STAT_INTELLECT] += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
+                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
         }
 
-        uint8 current_race = fields[0].GetUInt8();
-        if(current_race >= MAX_RACES)
-        {
-            sLog.outError("Wrong race %u in `player_levelupgains` table, ignoring.",current_race);
-            continue;
-        }
-
-        uint32 current_level = fields[2].GetUInt32();
-        if(current_level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
-        {
-            sLog.outError("Wrong level %u in `player_levelupgains` table, ignoring.",current_level);
-            continue;
-        }
-
-        for (int i = 0; i < MAX_STATS+2; i++)
-        {
-            levelUpStatGains[current_class][current_race][current_level][i] = fields[i+3].GetUInt8();
-        }
-
-        bar.step();
-        count++;
+        info->mana   += (_class == CLASS_WARRIOR || _class == CLASS_ROGUE) ? 0 : info->stats[STAT_SPIRIT] / 2;
+        info->health += info->stats[STAT_STAMINA] / 2;
     }
-    while (result->NextRow());
-
-    delete result;
-
-    sLog.outString( "" );
-    sLog.outString( ">> Loaded %u levelup definitions", count );
 }
 
 void ObjectMgr::LoadGuilds()

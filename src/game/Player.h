@@ -113,31 +113,31 @@ struct PlayerCreateInfoItem
 
 typedef std::list<PlayerCreateInfoItem> PlayerCreateInfoItems;
 
-struct PlayerCreateInfo
+struct PlayerLevelInfo
 {
-    uint8 race;
-    uint8 class_;
+    PlayerLevelInfo() : health(0), mana(0) { for(int i=0; i < MAX_STATS; ++i ) stats[i] = 0; }
+
+    uint8 stats[MAX_STATS];
+    uint16 health;
+    uint16 mana;
+};
+
+struct PlayerInfo
+{
+    PlayerInfo() : displayId(0),levelInfo(NULL) {}                     // existance checked by displayId != 0
+
     uint32 mapId;
     uint32 zoneId;
     float positionX;
     float positionY;
     float positionZ;
     uint16 displayId;
-    uint8 strength;
-    uint8 agility;
-    uint8 stamina;
-    uint8 intellect;
-    uint8 spirit;
-    uint32 basearmor;
-    uint32 health;
-    uint32 mana;
-    uint32 rage;
-    uint32 focus;
-    uint32 energy;
     PlayerCreateInfoItems item;
     std::list<CreateSpellPair> spell;
     std::list<uint16> skill[3];
     std::list<uint16> action[4];
+
+    PlayerLevelInfo* levelInfo; //[level-1] 0..MaxPlayerLevel-1
 };
 
 struct Areas
@@ -421,12 +421,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool isGMVisibleFor(Player* p) const { return GetSession()->GetSecurity() <= p->GetSession()->GetSecurity() || isGMVisible(); }
 
         const char* GetName() const { return m_name.c_str(); };
-        PlayerCreateInfo const* GetPlayerInfo(){return info;}
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel();
-
-        void BuildLvlUpStats(uint32 (*gainStats)[MAX_STATS]);
+        void InitStatsForLevel(uint32 level, bool sendgain = true);
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
@@ -748,7 +746,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
-        bool resetTalents();
+        bool resetTalents(bool no_cost = false);
         uint32 resetTalentsCost() const;
 
         PlayerSpellMap const& GetSpellMap() { return m_spells; };
@@ -875,9 +873,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         WorldSession* GetSession() const { return m_session; }
         void SetSession(WorldSession *s) { m_session = s; }
-
-        void CreateYourself( );
-        void DestroyYourself( );
 
         void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void DestroyForPlayer( Player *target ) const;
@@ -1154,7 +1149,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::string m_name;
         std::string m_rank_name;
 
-        PlayerCreateInfo *info;
         float m_createStats[5];
 
         uint32 m_race;
