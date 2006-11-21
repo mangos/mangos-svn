@@ -61,7 +61,6 @@ Player::Player (WorldSession *session): Unit()
 
     m_session = session;
 
-    info = NULL;
     m_divider = 0;
 
     m_GMFlags = 0;
@@ -196,7 +195,6 @@ Player::~Player ()
     for (ItemMap::iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
         delete iter->second;                                //if item is duplicated... then server may crash ... but that item should be dealocated
 
-    delete info;
     delete PlayerTalkClass;
 
     if (m_transport)
@@ -219,18 +217,12 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     data >> race >> class_ >> gender >> skin >> face;
     data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
-    info = objmgr.GetPlayerCreateInfo((uint32)race, (uint32)class_);
+    PlayerInfo const* info = objmgr.GetPlayerInfo(race, class_);
     if(!info)
     {
         sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
         return false;
     }
-
-    m_createStats[STAT_AGILITY] = (float)info->agility;
-    m_createStats[STAT_INTELLECT] = (float)info->intellect;
-    m_createStats[STAT_SPIRIT] = (float)info->spirit;
-    m_createStats[STAT_STAMINA] = (float)info->stamina;
-    m_createStats[STAT_STRENGTH] = (float)info->strength;
 
     for (i = 0; i < BANK_SLOT_BAG_END; i++)
         m_items[i] = NULL;
@@ -288,46 +280,22 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         return false;
     }
 
+    SetCreateStat(STAT_AGILITY,  (float)info->levelInfo[0].stats[STAT_AGILITY]);
+    SetCreateStat(STAT_INTELLECT,(float)info->levelInfo[0].stats[STAT_INTELLECT]);
+    SetCreateStat(STAT_SPIRIT,   (float)info->levelInfo[0].stats[STAT_SPIRIT]);
+    SetCreateStat(STAT_STAMINA,  (float)info->levelInfo[0].stats[STAT_STAMINA]);
+    SetCreateStat(STAT_STRENGTH, (float)info->levelInfo[0].stats[STAT_STRENGTH]);
+
     if ( race == RACE_TAUREN )
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
     else
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
-
-    SetStat(STAT_STRENGTH,info->strength );
-    SetStat(STAT_AGILITY,info->agility );
-    SetStat(STAT_STAMINA,info->stamina );
-    SetStat(STAT_INTELLECT,info->intellect );
-    SetStat(STAT_SPIRIT,info->spirit );
-    SetArmor(info->basearmor );
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER, 0 );
-
-    SetHealth(info->health);
-    SetMaxHealth(info->health);
-
-    SetPower(   POWER_MANA, info->mana );
-    SetMaxPower(POWER_MANA, info->mana );
-    SetPower(   POWER_RAGE, 0 );
-    SetMaxPower(POWER_RAGE, info->rage );
-    SetPower(   POWER_FOCUS, info->focus );
-    SetMaxPower(POWER_FOCUS, info->focus );
-    SetPower(   POWER_ENERGY, info->energy );
-    SetMaxPower(POWER_ENERGY, info->energy );
-
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
-
-    SetAttackTime(BASE_ATTACK,   2000 );                    // melee attack time
-    SetAttackTime(RANGED_ATTACK, 2000 );                    // ranged attack time
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
 
     SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId + gender );
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId + gender );
-
-    SetLevel( 1 );
 
     setFactionForRace(m_race);
 
@@ -343,17 +311,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(PLAYER_BYTES, ((skin) | (face << 8) | (hairStyle << 16) | (hairColor << 24)));
     SetUInt32Value(PLAYER_BYTES_2, (facialHair | (0xEE << 8) | (0x00 << 16) | (0x02 << 24)));
     SetUInt32Value(PLAYER_BYTES_3, gender);
-    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
     SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
 
-    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
-    SetFloatValue(PLAYER_CRIT_PERCENTAGE, 5);
-    SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
-
     /*
-        SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
-        SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
-
         SetUInt32Value(PLAYER_GUILDID, 0);
         SetUInt32Value(PLAYER_GUILDRANK, 0);
         SetUInt32Value(PLAYER_GUILD_TIMESTAMP, 0);
@@ -361,6 +321,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(PLAYER_FIELD_HONOR_RANK, 0);
         SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);    SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, 0);
     */
+
+    InitStatsForLevel(1,false);
 
     // Played time
     m_Last_tick = time(NULL);
@@ -370,8 +332,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     uint32 titem_id;
     uint32 titem_amount;
     uint16 tspell, tskill[3], taction[4];
-    std::list<uint16>::iterator skill_itr[3], action_itr[4];
-    std::list<CreateSpellPair>::iterator spell_itr;
+    std::list<uint16>::const_iterator skill_itr[3], action_itr[4];
+    std::list<CreateSpellPair>::const_iterator spell_itr;
 
     spell_itr = info->spell.begin();
 
@@ -425,8 +387,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_highest_rank = 0;
     m_standing = 0;
 
-    // initilize potential block chance (used if item with Block value equiped)
-    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 );
     UpdateBlockPercentage();
 
     // apply original stats mods before item equipment that call before equip _RemoveStatsMods()
@@ -435,7 +395,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     uint16 dest;
     uint8 msg;
     Item *pItem;
-    for (PlayerCreateInfoItems::iterator item_id_itr = info->item.begin(); item_id_itr!=info->item.end(); ++item_id_itr++)
+    for (PlayerCreateInfoItems::const_iterator item_id_itr = info->item.begin(); item_id_itr!=info->item.end(); ++item_id_itr++)
     {
         titem_id     = item_id_itr->item_id;
         titem_amount = item_id_itr->item_amount;
@@ -1563,9 +1523,6 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 // Current player expirience not update (must be update by caller)
 void Player::GiveLevel()
 {
-    uint32 MPGain,HPGain;
-    MPGain=HPGain=0;
-
     uint32 level = getLevel();
 
     if ( level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
@@ -1573,171 +1530,141 @@ void Player::GiveLevel()
 
     level += 1;
 
+    InitStatsForLevel(level);
+}
+
+void Player::InitStatsForLevel(uint32 level, bool sendgain)
+{
     // Remove item, aura, stats bonuses
     _RemoveAllItemMods();
     _RemoveAllAuraMods();
     _RemoveStatsMods();
 
-    // base stats
-    float newMP  = (getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE) ? 0 : GetMaxPower(POWER_MANA);
+    PlayerLevelInfo info;
 
-    float newHP  = GetMaxHealth();
+    objmgr.GetPlayerLevelInfo(getRace(),getClass(),level,&info);
 
-    float newStats[MAX_STATS];
+    // send levelup info to client
+    WorldPacket data;
+    data.Initialize(SMSG_LEVELUP_INFO);
+    data << uint32(level);
+    data << uint32(int32(info.health) - GetMaxHealth());
+    data << uint32(int32(info.mana)   - GetMaxPower(POWER_MANA));
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
 
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        newStats[i] = GetStat(Stats(i));
+        data << uint32(int32(info.stats[i]) - GetStat(Stats(i)));
 
-    uint32 gainStats[MAX_STATS];
+    GetSession()->SendPacket(&data);
 
-    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        gainStats[i] = 0;
-
-    // Gain stats
-    BuildLvlUpStats(&gainStats);
-
-    // Apply gain stats
-    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        newStats[i] += gainStats[i];
-
-    MPGain = (getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE) ? 0 : uint32(newStats[STAT_SPIRIT] / 2);
-    HPGain = uint32(newStats[STAT_STAMINA] / 2);
-
-    newMP  += MPGain;
-    newHP  += HPGain;
-
-    // update level, talants, max level of skills
-    SetLevel( level);
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
 
-    if( level > 9)
-        SetUInt32Value(PLAYER_CHARACTER_POINTS1,GetUInt32Value(PLAYER_CHARACTER_POINTS1)+1);
+    // talentes base at level diff ( talentes = level - 9 but some can be used already)
+    if(level < 10)
+    {
+        // Remove all talent points
+        if(getLevel() >= 10)                                // Free any used talentes
+        {
+            resetTalents(true);
+            SetUInt32Value(PLAYER_CHARACTER_POINTS1,0);
+        }
+    }
+    else
+    {
+        // Update talent points amount
+        if(level > getLevel())                                  // Add new talent points
+            SetUInt32Value(PLAYER_CHARACTER_POINTS1,GetUInt32Value(PLAYER_CHARACTER_POINTS1)+min(level-getLevel(),level-9));
+        else
+        if(level < getLevel())                                  // Free if need talentes, remove some amount talent points
+        {
+            if(GetUInt32Value(PLAYER_CHARACTER_POINTS1) < (getLevel() - level))
+               resetTalents(true);
+            SetUInt32Value(PLAYER_CHARACTER_POINTS1,GetUInt32Value(PLAYER_CHARACTER_POINTS1)-(getLevel() - level));
+        }
+    }
 
+    // update level, max level of skills
+    SetLevel( level);
     UpdateMaxSkills ();
 
     // save new stats
-    if(getClass() != CLASS_WARRIOR && getClass() != CLASS_ROGUE)
-        SetMaxPower(POWER_MANA, uint32(newMP));             // only integer part
+    SetMaxPower(POWER_MANA, info.mana);
+    if(getPowerType() == POWER_RAGE)
+       SetMaxPower(POWER_RAGE, 1000 );
+    else if(getPowerType()== POWER_ENERGY)
+        SetMaxPower(POWER_ENERGY, 100 );
 
-    SetMaxHealth(uint32(newHP));                            // only integer part
+    SetMaxPower(POWER_FOCUS, 0 );
+    SetMaxPower(POWER_HAPPINESS, 0 );
+
+    SetMaxHealth(info.health);
 
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetStat(Stats(i), uint32(newStats[i]));             // only integer part
+        SetStat(Stats(i), info.stats[i]);
 
-    // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
-    UpdateBlockPercentage();
+    // reset misc. values
+    SetAttackTime(BASE_ATTACK,   2000 );
+    SetAttackTime(RANGED_ATTACK, 2000 );
+
+    SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
+
+    SetArmor(m_createStats[STAT_AGILITY]*2);
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,        0 );
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 0 );
+
+    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
+    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
+    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
+
+    SetPosStat(STAT_STRENGTH, 0);
+    SetPosStat(STAT_AGILITY, 0);
+    SetPosStat(STAT_STAMINA, 0);
+    SetPosStat(STAT_INTELLECT, 0);
+    SetPosStat(STAT_SPIRIT, 0);
+
+    SetFloatValue(PLAYER_CRIT_PERCENTAGE, 5);
+    SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
+
+    // set armor (resistence 0) to original value (create_agility*2)
+    SetArmor(m_createStats[STAT_AGILITY]*2);
+    SetResistanceBuffMods(SpellSchools(0), true, 0);
+    SetResistanceBuffMods(SpellSchools(0), false, 0);
+    // set other resistence to original value (0)
+    for (int i = 1; i < 7; i++)
+    {
+        SetResistance(SpellSchools(i), 0);
+        SetResistanceBuffMods(SpellSchools(i), true, 0);
+        SetResistanceBuffMods(SpellSchools(i), false, 0);
+    }
 
     // apply stats, aura, items mods
     _ApplyStatsMods();
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
 
+    // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
+    // must called with applied AuraMods (removed in call code)
+    UpdateBlockPercentage();
+
     // set current level health and mana/energy to maximum after appling all mods.
     SetHealth(GetMaxHealth());
     SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-
-    // send levelup info to client
-    WorldPacket data;
-    data.Initialize(SMSG_LEVELUP_INFO);
-    data << uint32(level);
-    data << uint32(HPGain);
-    data << uint32(MPGain);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-
-    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        data << uint32(gainStats[i]);
-
-    WPAssert(data.size() == 48);
-    GetSession()->SendPacket(&data);
+    if(GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
+        SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
+    SetPower(POWER_FOCUS, 0);
+    SetPower(POWER_HAPPINESS, 0);
 
     // Level Played Time reset
     m_Played_time[1] = 0;
 }
 
-void Player::BuildLvlUpStats(uint32 (*gainStats)[MAX_STATS])
-{
-    uint8 _class = getClass();
-    uint8 lvl    = getLevel();
-    uint8 race  = getRace();
-
-    if (lvl < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
-    {
-        for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-            (*gainStats)[i] += objmgr.GetLevelUpStatGain(_class,race,lvl,Stats(i));
-    }
-    else
-    {
-        switch(_class)
-        {
-            case CLASS_WARRIOR:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
-                (*gainStats)[STAT_STAMINA]   += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
-                (*gainStats)[STAT_AGILITY]   += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
-                (*gainStats)[STAT_INTELLECT] += (lvl > 9 && !(lvl%2) ? 1: 0);
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 9 && !(lvl%2) ? 1: 0);
-                break;
-            case CLASS_PALADIN:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 3  ? 1: 0);
-                (*gainStats)[STAT_STAMINA]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
-                (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
-                (*gainStats)[STAT_INTELLECT] += (lvl > 6 && (lvl%2) ? 1: 0);
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 7 ? 1: 0);
-                break;
-            case CLASS_HUNTER:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 4  ? 1: 0);
-                (*gainStats)[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
-                (*gainStats)[STAT_AGILITY]   += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
-                (*gainStats)[STAT_INTELLECT] += (lvl > 8 && (lvl%2) ? 1: 0);
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
-                break;
-            case CLASS_ROGUE:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 5  ? 1: 0);
-                (*gainStats)[STAT_STAMINA]   += (lvl > 4  ? 1: 0);
-                (*gainStats)[STAT_AGILITY]   += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
-                (*gainStats)[STAT_INTELLECT] += (lvl > 8 && !(lvl%2) ? 1: 0);
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
-                break;
-            case CLASS_PRIEST:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
-                (*gainStats)[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
-                (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
-                (*gainStats)[STAT_INTELLECT] += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 3  ? 1: 0);
-                break;
-            case CLASS_SHAMAN:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
-                (*gainStats)[STAT_STAMINA]   += (lvl > 4 ? 1: 0);
-                (*gainStats)[STAT_AGILITY]   += (lvl > 7 && !(lvl%2) ? 1: 0);
-                (*gainStats)[STAT_INTELLECT] += (lvl > 5 ? 1: 0);
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 4 ? 1: 0);
-                break;
-            case CLASS_MAGE:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
-                (*gainStats)[STAT_STAMINA]   += (lvl > 5  ? 1: 0);
-                (*gainStats)[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
-                (*gainStats)[STAT_INTELLECT] += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
-                break;
-            case CLASS_WARLOCK:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 9 && !(lvl%2) ? 1: 0);
-                (*gainStats)[STAT_STAMINA]   += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
-                (*gainStats)[STAT_AGILITY]   += (lvl > 9 && !(lvl%2) ? 1: 0);
-                (*gainStats)[STAT_INTELLECT] += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
-                break;
-            case CLASS_DRUID:
-                (*gainStats)[STAT_STRENGTH]  += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
-                (*gainStats)[STAT_STAMINA]   += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
-                (*gainStats)[STAT_AGILITY]   += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
-                (*gainStats)[STAT_INTELLECT] += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
-                (*gainStats)[STAT_SPIRIT]    += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
-        }
-    }
-}
 
 void Player::SendInitialSpells()
 {
@@ -2203,18 +2130,23 @@ uint32 Player::resetTalentsCost() const
     }
 }
 
-bool Player::resetTalents()
+bool Player::resetTalents(bool no_cost)
 {
     uint32 level = getLevel();
     if (level < 10 || (GetUInt32Value(PLAYER_CHARACTER_POINTS1) >= level - 9))
         return false;
 
-    uint32 cost = resetTalentsCost();
+    uint32 cost = 0;
 
-    if (GetMoney() < cost)
+    if(!no_cost)
     {
-        SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
-        return false;
+        cost = resetTalentsCost();
+
+        if (GetMoney() < cost)
+        {
+            SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
+            return false;
+        }
     }
 
     for (int i = 0; i < sTalentStore.GetNumRows(); i++)
@@ -2240,10 +2172,14 @@ bool Player::resetTalents()
     }
 
     SetUInt32Value(PLAYER_CHARACTER_POINTS1, level - 9);
-    ModifyMoney(-(int32)cost);
 
-    m_resetTalentsCost = cost;
-    m_resetTalentsTime = time(NULL);
+    if(!no_cost)
+    {
+        ModifyMoney(-(int32)cost);
+
+        m_resetTalentsCost = cost;
+        m_resetTalentsTime = time(NULL);
+    }
     return true;
 }
 
@@ -10006,7 +9942,7 @@ bool Player::LoadFromDB( uint32 guid )
 
     m_class = fields[6].GetUInt8();
 
-    info = objmgr.GetPlayerCreateInfo(m_race, m_class);
+    PlayerInfo const *info = objmgr.GetPlayerInfo(m_race, m_class);
     if(!info)
     {
         sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
@@ -10014,11 +9950,11 @@ bool Player::LoadFromDB( uint32 guid )
         return false;
     }
 
-    m_createStats[STAT_AGILITY] = (float)info->agility;
-    m_createStats[STAT_INTELLECT] = (float)info->intellect;
-    m_createStats[STAT_SPIRIT] = (float)info->spirit;
-    m_createStats[STAT_STAMINA] = (float)info->stamina;
-    m_createStats[STAT_STRENGTH] = (float)info->strength;
+    SetCreateStat(STAT_AGILITY,  (float)info->levelInfo[0].stats[STAT_AGILITY]);
+    SetCreateStat(STAT_INTELLECT,(float)info->levelInfo[0].stats[STAT_INTELLECT]);
+    SetCreateStat(STAT_SPIRIT,   (float)info->levelInfo[0].stats[STAT_SPIRIT]);
+    SetCreateStat(STAT_STAMINA,  (float)info->levelInfo[0].stats[STAT_STAMINA]);
+    SetCreateStat(STAT_STRENGTH, (float)info->levelInfo[0].stats[STAT_STRENGTH]);
 
     uint32 transGUID = fields[29].GetUInt32();
     m_positionX = fields[7].GetFloat();
@@ -10090,6 +10026,9 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadTaxiMask( fields[12].GetString() );
 
     delete result;
+
+    // reset stats before loading any modifiers
+    InitStatsForLevel(getLevel(),false);
 
     // make sure the unit is considered out of combat for proper loading
     ClearInCombat();

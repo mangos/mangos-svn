@@ -227,7 +227,9 @@
 
 #define LANG_HOVER_ENABLED               "Hover Enabled"
 #define LANG_HOVER_DISABLED              "Hover Disabled"
-#define LANG_YOURS_LEVEL_UP              "You have been leveled Up"
+#define LANG_YOURS_LEVEL_UP              "You have been leveled Up (%i)"
+#define LANG_YOURS_LEVEL_DOWN            "You have been leveled Down (%i)"
+#define LANG_YOURS_LEVEL_PROGRESS_RESET  "Your level progress have been reset."
 #define LANG_EXPLORE_AREA                "The area has been set as explored."
 #define LANG_UNEXPLORE_AREA              "The area has been set as not explored."
 

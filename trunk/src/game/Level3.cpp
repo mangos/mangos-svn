@@ -2083,16 +2083,27 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         return true;
     }
 
-    for(int i=0;i<nrlvl || i==0;i++)
-    {
-        chr->GiveLevel();
+    int32 oldlevel = chr->getLevel();
+    int32 newlevel = oldlevel + nrlvl;
+    if(newlevel < 1)
+        newlevel = 1;
+    if(newlevel > 255)                                      // hardcoded maximum level
+        newlevel = 255;
 
-        WorldPacket data;
-        FillSystemMessageData(&data, chr->GetSession(), LANG_YOURS_LEVEL_UP );
-        chr->GetSession()->SendPacket( &data );
-    }
+    chr->InitStatsForLevel(newlevel);
     chr->SetUInt32Value(PLAYER_XP,0);
 
+    WorldPacket data;
+    
+    if(oldlevel == newlevel)
+        FillSystemMessageData(&data, chr->GetSession(), LANG_YOURS_LEVEL_PROGRESS_RESET);
+    else
+    if(oldlevel < newlevel)
+        FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_UP,newlevel-oldlevel));
+    else
+    if(oldlevel > newlevel)
+        FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_DOWN,newlevel-oldlevel));
+    chr->GetSession()->SendPacket( &data );
     return true;
 }
 
@@ -2522,27 +2533,8 @@ bool ChatHandler::HandleResetCommand (const char * args)
     std::string argstr = (char*)args;
     if (argstr == "stats" || argstr == "level")
     {
-        PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo((uint32)player->getRace(), (uint32)player->getClass());
+        PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(), player->getClass());
         if(!info) return false;
-
-        for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
-        {
-            if(player->GetItemByPos(INVENTORY_SLOT_BAG_0,i) != NULL)
-            {
-                SendSysMessage("The player must unequip all items before resetting stats!");
-                return true;
-            }
-        }
-
-        Player::AuraMap& p_Auras = player->GetAuras();
-        for(Player::AuraMap::iterator itr = p_Auras.begin(); itr != p_Auras.end(); ++itr)
-        {
-            if (itr->second && !itr->second->IsPassive())
-            {
-                SendSysMessage("The player must debuff all non passive auras before resetting stats!");
-                return true;
-            }
-        }
 
         ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(player->getClass());
         if(!cEntry)
@@ -2566,53 +2558,22 @@ bool ChatHandler::HandleResetCommand (const char * args)
             return true;
         }
 
-        player->SetCreateStat(STAT_AGILITY, (float)info->agility);
-        player->SetCreateStat(STAT_INTELLECT, (float)info->intellect);
-        player->SetCreateStat(STAT_SPIRIT, (float)info->spirit);
-        player->SetCreateStat(STAT_STAMINA, (float)info->stamina);
-        player->SetCreateStat(STAT_STRENGTH, (float)info->strength);
+        player->SetCreateStat(STAT_AGILITY,  (float)info->levelInfo[0].stats[STAT_AGILITY]);
+        player->SetCreateStat(STAT_INTELLECT,(float)info->levelInfo[0].stats[STAT_INTELLECT]);
+        player->SetCreateStat(STAT_SPIRIT,   (float)info->levelInfo[0].stats[STAT_SPIRIT]);
+        player->SetCreateStat(STAT_STAMINA,  (float)info->levelInfo[0].stats[STAT_STAMINA]);
+        player->SetCreateStat(STAT_STRENGTH, (float)info->levelInfo[0].stats[STAT_STRENGTH]);
 
         if ( player->getRace() == RACE_TAUREN )
             player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
         else
             player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
-        player->SetStat(STAT_STRENGTH,info->strength );
-        player->SetStat(STAT_AGILITY,info->agility );
-        player->SetStat(STAT_STAMINA,info->stamina );
-        player->SetStat(STAT_INTELLECT,info->intellect );
-        player->SetStat(STAT_SPIRIT,info->spirit );
-        player->SetArmor(info->basearmor );
-        player->SetUInt32Value(UNIT_FIELD_ATTACK_POWER, 0 );
-        player->SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 0 );
-
-        player->SetHealth(info->health);
-        player->SetMaxHealth(info->health);
-
-        player->SetPower(   POWER_MANA, info->mana );
-        player->SetMaxPower(POWER_MANA, info->mana );
-        player->SetPower(   POWER_RAGE, 0 );
-        player->SetMaxPower(POWER_RAGE, info->rage );
-        player->SetPower(   POWER_FOCUS, info->focus );
-        player->SetMaxPower(POWER_FOCUS, info->focus );
-        player->SetPower(   POWER_ENERGY, info->energy );
-        player->SetMaxPower(POWER_ENERGY, info->energy );
-
-        player->SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
-        player->SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
-        player->SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
-        player->SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
-
-        player->SetAttackTime(BASE_ATTACK,   2000 );        // melee attack time
-        player->SetAttackTime(RANGED_ATTACK, 2000 );        // ranged attack time
-
         player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
         player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
 
         player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId + player->getGender());
         player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId + player->getGender() );
-
-        player->SetLevel( 1 );
 
         player->setFactionForRace(player->getRace());
 
@@ -2625,57 +2586,21 @@ bool ChatHandler::HandleResetCommand (const char * args)
                                                             //-1 is default value
         player->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
 
-        player->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
         player->SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
 
-        player->SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
-        player->SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
-        player->SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
-        player->SetLevel(1);
-        player->SetPosStat(STAT_STRENGTH, 0);
-        player->SetPosStat(STAT_AGILITY, 0);
-        player->SetPosStat(STAT_STAMINA, 0);
-        player->SetPosStat(STAT_INTELLECT, 0);
-        player->SetPosStat(STAT_SPIRIT, 0);
+        if(argstr == "level")
+        {
+            player->InitStatsForLevel(1,false);
+            player->SetUInt32Value(PLAYER_XP,0);            
+        }
+        else
+            player->InitStatsForLevel(player->getLevel(),false);
 
-        // reinitilize potential block chance (used if item with Block value equiped)
-        player->SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 + (float(player->GetDefenceSkillValue()) - player->getLevel()*5)*0.04);
-        player->SetFloatValue(PLAYER_CRIT_PERCENTAGE, 5);
-        for (int i = 0; i < 7; i++)
-        {
-            player->SetResistance(SpellSchools(i), 0);
-            player->SetResistanceBuffMods(SpellSchools(i), true, 0);
-            player->SetResistanceBuffMods(SpellSchools(i), false, 0);
-        }
+
         return true;
     }
-    if (argstr == "talents" || argstr == "level")
-    {
-        for (int i = 0; i < sTalentStore.GetNumRows(); i++)
-        {
-            TalentEntry *talentInfo = sTalentStore.LookupEntry(i);
-            if (!talentInfo) continue;
-            for (int j = 0; j < 5; j++)
-            {
-                SpellEntry *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[j]);
-                if (!spellInfo) continue;
-                const PlayerSpellMap& s_list = player->GetSpellMap();
-                for(PlayerSpellMap::const_iterator itr = s_list.begin(); itr != s_list.end(); ++itr)
-                {
-                    if(itr->second->state == PLAYERSPELL_REMOVED) continue;
-                    if (itr->first == spellInfo->Id)
-                    {
-                        player->RemoveAurasDueToSpell(itr->first);
-                        player->removeSpell(itr->first);
-                        break;
-                    }
-                }
-            }
-        }
-        uint32 tp = player->getLevel() < 10 ? 0 : player->getLevel() - 9;
-        player->SetUInt32Value(PLAYER_CHARACTER_POINTS1, tp);
-        return true;
-    }
+    if (argstr == "talents"||argstr == "level")
+        player->resetTalents(true);
 
     if (argstr == "spells")
     {
@@ -2686,7 +2611,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
             player->removeSpell(itr->first);
         }
 
-        PlayerCreateInfo const *info = player->GetPlayerInfo();
+        PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(),player->getClass());
         std::list<CreateSpellPair>::const_iterator spell_itr;
         for (spell_itr = info->spell.begin(); spell_itr!=info->spell.end(); spell_itr++)
         {
