@@ -424,7 +424,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel();
-        void InitStatsForLevel(uint32 level, bool sendgain = true);
+        void InitStatsForLevel(uint32 level, bool sendgain = true, bool remove_mods = true);
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
