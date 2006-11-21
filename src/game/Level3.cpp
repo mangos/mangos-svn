@@ -2558,12 +2558,6 @@ bool ChatHandler::HandleResetCommand (const char * args)
             return true;
         }
 
-        player->SetCreateStat(STAT_AGILITY,  (float)info->levelInfo[0].stats[STAT_AGILITY]);
-        player->SetCreateStat(STAT_INTELLECT,(float)info->levelInfo[0].stats[STAT_INTELLECT]);
-        player->SetCreateStat(STAT_SPIRIT,   (float)info->levelInfo[0].stats[STAT_SPIRIT]);
-        player->SetCreateStat(STAT_STAMINA,  (float)info->levelInfo[0].stats[STAT_STAMINA]);
-        player->SetCreateStat(STAT_STRENGTH, (float)info->levelInfo[0].stats[STAT_STRENGTH]);
-
         if ( player->getRace() == RACE_TAUREN )
             player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
         else
