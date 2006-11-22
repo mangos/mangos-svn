@@ -178,7 +178,7 @@ void Creature::AIM_Update(const uint32 &diff)
         {
             if( m_deathTimer <= diff )
             {
-
+                m_deathTimer = 0;
                 DEBUG_LOG("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
                 ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
                 lootForPickPocketed = false;
@@ -1499,9 +1499,11 @@ void Creature::SaveAsPet()
 
 bool Creature::IsVisibleInGridForPlayer(Player* pl) const
 {
-    // Live player see live creatures
+    // Live player see live creatures or death creatures with corpse dissappiring time > 0
     if(pl->isAlive())
-        return isAlive();
+    {
+        return isAlive() || m_deathTimer > 0;
+    }
 
     // Dead player see live creatures near own corpse
     if(pl->getDeathState() == CORPSE)
