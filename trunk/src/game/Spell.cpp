@@ -712,17 +712,9 @@ void Spell::SendSpellCooldown()
     int32 rec = m_spellInfo->RecoveryTime;
     int32 catrec = m_spellInfo->CategoryRecoveryTime;
 
-    // throw spell used equiped item cooldown values
-    if (m_spellInfo->Id == 2764)
+    // shoot spells used equiped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
+    if (!rec && !catrec && (m_spellInfo->Category == 76 || m_spellInfo->Category == 351))
         rec = _player->GetAttackTime(RANGED_ATTACK);
-
-    // shoot spell used equiped wand cooldown values
-    if (m_spellInfo->Id == 5019)
-    {
-        if(Item* item = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-            if(ItemPrototype const* proto = item->GetProto())
-                rec = proto->Delay;
-    }
 
     // some special item spells without correct cooldown in SpellInfo
     // cooldown information stored in item prototype
