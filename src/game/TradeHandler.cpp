@@ -60,19 +60,28 @@ void WorldSession::SendUpdateTrade()
         data << (uint8) i;
         if(item)
         {
-
             data << (uint32) item->GetProto()->ItemId;
             data << (uint32) 0;
-            data << (uint32) item->GetProto()->MaxCount;
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
+
+            data << (uint32) 0;// gift here ???
+            data << (uint32) 0;// gift here ???
+            data << (uint32) 0;// gift here ??? or enchants count ?
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT);
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_CREATOR);
+            data << (uint32) HIGHGUID_PLAYER;
+            data << (uint32) 0;
+            data << (uint32) 0;
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID);
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_FLAGS);
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_DURABILITY);
         }
         else
         {
-            data << (uint32) 0;
-            data << (uint32) 0;
-            data << (uint32) 0;
+            for(int j=0; j<15; j++)
+                data << (uint32) 0;
         }
-        for(int j=0; j<12; j++)
-            data << (uint32) 0;
     }
 
     SendPacket(&data);
