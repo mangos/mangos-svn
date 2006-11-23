@@ -77,7 +77,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     pl->StorePvpState();
     plTarget->StorePvpState();
 
-    pl->SetPvP(false);
+    pl->SetPvP(true);
     plTarget->SetPvP(true);
     //******************************* TEMPORARY *********************************
     #endif

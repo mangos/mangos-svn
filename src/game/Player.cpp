@@ -8584,7 +8584,7 @@ void Player::PrepareQuestMenu( uint64 guid )
             else
                 qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD_REP, status );
         } else if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
-        qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, status );
     }
 }
 
