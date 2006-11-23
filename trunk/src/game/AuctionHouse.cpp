@@ -446,7 +446,8 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     uint16 pos = pl->GetPosByGuid(item);
     Item *it = pl->GetItemByPos( pos );
 
-    if(!it)
+    // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
+    if(!it || !it->IsCanTraded())
         return;
 
     uint8 location = AuctionerFactionToLocation(pCreature->getFaction());

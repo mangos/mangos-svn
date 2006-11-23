@@ -112,7 +112,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         if(it)
         {
             // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to mail)
-            if(it->IsBag() && !((Bag*)it)->IsEmpty())
+            if(!it->IsCanTraded())
             {
                 data.Initialize(SMSG_SEND_MAIL_RESULT);
                 data << uint32(0);

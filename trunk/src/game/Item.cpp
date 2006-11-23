@@ -761,3 +761,11 @@ void Item::SetItemRandomProperties()
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT+15,item_rand->enchant_id_3);
     }
 }
+
+bool Item::IsCanTraded() const { 
+    if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED) || GetProto()->Class == ITEM_CLASS_QUEST)
+        return false;
+    if(IsBag() && ((Bag*)this)->GetCount()!=0)
+        return false;
+    return true;
+}
