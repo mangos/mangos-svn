@@ -370,6 +370,8 @@ class WorldSession;
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
+    friend void Item::AddToUpdateQueueOf(Player *player);
+    friend void Item::RemoveFromUpdateQueueOf(Player *player);
     public:
         explicit Player (WorldSession *session);
         ~Player ( );
@@ -509,6 +511,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 GetPosByGuid( uint64 guid ) const;
         Item* GetItemByPos( uint16 pos ) const;
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
+        std::vector<Item *> &GetItemUpdateQueue() { return m_itemUpdateQueue; }
         bool HasBankBagSlot( uint8 slot ) const;
         bool IsInventoryPos( uint16 pos ) const;
         bool IsEquipmentPos( uint16 pos ) const;
@@ -1163,6 +1166,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         Item* m_items[BUYBACK_SLOT_END];
         Item* m_buybackitems[BUYBACK_SLOT_END - BUYBACK_SLOT_START];
+        std::vector<Item*> m_itemUpdateQueue;
+        bool m_itemUpdateQueueBlocked;
 
         uint32 m_movement_flags;
 

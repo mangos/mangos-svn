@@ -79,19 +79,6 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 void Bag::SaveToDB()
 {
     Item::SaveToDB();
-
-    if(GetSlot()!=NULL_SLOT)                                // equiped bag
-    {
-        sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
-        for (uint8 i = 0; i < GetProto()->ContainerSlots; i++)
-        {
-            if (m_bagslot[i])
-            {
-                sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GUID_LOPART(GetOwnerGUID()), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
-                m_bagslot[i]->SaveToDB();
-            }
-        }
-    }
 }
 
 bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)
@@ -110,9 +97,9 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)
         }
     }
 
-    if(GetSlot()!=NULL_SLOT)                                // equiped bag
+    if(!IsInBag())                                          // equiped bag
     {
-        QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
+        QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetGUIDLow());
 
         if (result)
         {
@@ -139,6 +126,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)
                     continue;
                 }
                 StoreItem( slot, item, true );
+                item->SetState(ITEM_UNCHANGED);
             } while (result->NextRow());
 
             delete result;
@@ -174,6 +162,9 @@ void Bag::RemoveItem( uint8 slot, bool update )
 {
     assert(slot < MAX_BAG_SIZE);
 
+    if (m_bagslot[slot])
+        m_bagslot[slot]->SetContainer(NULL);
+
     m_bagslot[slot] = NULL;
     SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
 }
@@ -188,7 +179,8 @@ void Bag::StoreItem( uint8 slot, Item *pItem, bool update )
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), pItem->GetGUID());
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
         pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetOwnerGUID() );
-        pItem->SetSlot( NULL_SLOT );
+        pItem->SetContainer(this);
+        pItem->SetSlot(slot);
     }
 }
 

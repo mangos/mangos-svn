@@ -158,6 +158,7 @@ Player::Player (WorldSession *session): Unit()
 
     m_resetTalentsCost = 0;
     m_resetTalentsTime = 0;
+    m_itemUpdateQueueBlocked = false;
 }
 
 Player::~Player ()
@@ -175,11 +176,8 @@ Player::~Player ()
     {
         eslot = j - BUYBACK_SLOT_START;
         if(m_buybackitems[eslot])
-        {
-            m_buybackitems[eslot]->DeleteFromDB();
-            m_buybackitems[eslot]->RemoveFromWorld();
             delete m_buybackitems[eslot];
-        }
+        // already deleted from DB when player was saved
     }
     for(int i = 0; i < BANK_SLOT_BAG_END; i++)
     {
@@ -927,7 +925,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
         items[i] = NULL;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = 0",GetGUIDLow());
     if (result)
     {
         do
@@ -2849,6 +2847,7 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
         _ApplyItemMods(m_items[equip_pos],equip_pos, false);
 
     m_items[equip_pos]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
+    m_items[equip_pos]->SetState(ITEM_CHANGED, this);
 }
 
 void Player::DurabilityRepairAll(bool cost)
@@ -2885,6 +2884,7 @@ void Player::DurabilityRepair(uint16 pos, bool cost)
     }
 
     item->SetUInt32Value(ITEM_FIELD_DURABILITY, maxDurability);
+    item->SetState(ITEM_CHANGED, this);
 
     // reapply mods for total broken and repaired item if equiped
     if(IsEquipmentPos(pos) && !curDurability)
@@ -7448,12 +7448,15 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
                 pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetGUID() );
 
                 pItem->SetSlot( slot );
+                pItem->SetContainer( NULL );
 
                 if( IsInWorld() && update )
                 {
                     pItem->AddToWorld();
                     pItem->SendUpdateToPlayer( this );
                 }
+
+                pItem->SetState(ITEM_CHANGED, this);
             }
             else
             {
@@ -7466,6 +7469,8 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
                         pItem->AddToWorld();
                         pItem->SendUpdateToPlayer( this );
                     }
+                    pItem->SetState(ITEM_CHANGED, this);
+                    pBag->SetState(ITEM_CHANGED, this);
                 }
             }
         }
@@ -7476,13 +7481,14 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
                 pItem2->SendUpdateToPlayer( this );
 
             // delete item (it not in any slot currently)
-            pItem->DeleteFromDB();
+            //pItem->DeleteFromDB();
             if( IsInWorld() && update )
             {
                 pItem->RemoveFromWorld();
                 pItem->DestroyForPlayer( this );
             }
-            delete pItem;
+            pItem->SetState(ITEM_REMOVED, this);
+            pItem2->SetState(ITEM_CHANGED, this);
 
             return pItem2;
         }
@@ -7541,6 +7547,7 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
     pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
     pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetGUID() );
     pItem->SetSlot( slot );
+    pItem->SetContainer( NULL );
 
     if( slot < EQUIPMENT_SLOT_END )
     {
@@ -7556,6 +7563,7 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
         SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
     }
 
+    pItem->SetState(ITEM_CHANGED, this);
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
@@ -7566,6 +7574,11 @@ Item* Player::BankItem( uint16 pos, Item *pItem, bool update )
 
 void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
 {
+    // note: removeitem does not actualy change the item
+    // it only takes the item out of storage temporarily
+    // note2: if removeitem is to be used for delinking
+    // the item must be removed from the player's updatequeue
+
     Item *pItem = GetItemByPos( bag, slot );
     if( pItem )
     {
@@ -7623,6 +7636,7 @@ void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
                 pItem->SetCount( pItem->GetCount() - count + remcount );
                 if( IsInWorld() && update )
                     pItem->SendUpdateToPlayer( this );
+                pItem->SetState(ITEM_CHANGED, this);
                 return;
             }
         }
@@ -7655,6 +7669,7 @@ void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
                             pItem->SetCount( pItem->GetCount() - count + remcount );
                             if( IsInWorld() && update )
                                 pItem->SendUpdateToPlayer( this );
+                            pItem->SetState(ITEM_CHANGED, this);
                             return;
                         }
                     }
@@ -7670,10 +7685,9 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
     if( pItem )
     {
         sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
-        pItem->SetOwnerGUID(0);
+        //pItem->SetOwnerGUID(0);
         pItem->SetSlot( NULL_SLOT );
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
-        pItem->DeleteFromDB();
         ItemPrototype const *pProto = pItem->GetProto();
 
         for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();)
@@ -7751,8 +7765,8 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                 }
             }
         }
+        pItem->DeleteFromDB();
     }
-    delete pItem;
 }
 
 void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
@@ -7783,6 +7797,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                 ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                 if( IsInWorld() & update )
                     pItem->SendUpdateToPlayer( this );
+                pItem->SetState(ITEM_CHANGED, this);
                 return;
             }
         }
@@ -7819,6 +7834,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                             ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                             if( IsInWorld() && update )
                                 pItem->SendUpdateToPlayer( this );
+                            pItem->SetState(ITEM_CHANGED, this);
                             return;
                         }
                     }
@@ -7848,6 +7864,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                 ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                 if( IsInWorld() & update )
                     pItem->SendUpdateToPlayer( this );
+                pItem->SetState(ITEM_CHANGED, this);
                 return;
             }
         }
@@ -7876,6 +7893,7 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
         count = 0;
         if( IsInWorld() & update )
             pItem->SendUpdateToPlayer( this );
+        pItem->SetState(ITEM_CHANGED, this);
     }
 }
 
@@ -7918,6 +7936,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     pSrcItem->SetCount( pSrcItem->GetCount() - count );
                     if( IsInWorld() )
                         pSrcItem->SendUpdateToPlayer( this );
+                    pSrcItem->SetState(ITEM_CHANGED, this);
                     StoreItem( dest, pNewItem, true);
                 }
                 else
@@ -7934,6 +7953,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     pSrcItem->SetCount( pSrcItem->GetCount() - count );
                     if( IsInWorld() )
                         pSrcItem->SendUpdateToPlayer( this );
+                    pSrcItem->SetState(ITEM_CHANGED, this);
                     BankItem( dest, pNewItem, true);
                 }
                 else
@@ -7950,6 +7970,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     pSrcItem->SetCount( pSrcItem->GetCount() - count );
                     if( IsInWorld() )
                         pSrcItem->SendUpdateToPlayer( this );
+                    pSrcItem->SetState(ITEM_CHANGED, this);
                     EquipItem( dest, pNewItem, true);
                 }
                 else
@@ -8057,6 +8078,8 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     {
                         pSrcItem->SetCount( pSrcItem->GetCount() + pDstItem->GetCount() - pSrcItem->GetProto()->Stackable );
                         pDstItem->SetCount( pSrcItem->GetProto()->Stackable );
+                        pSrcItem->SetState(ITEM_CHANGED, this);
+                        pDstItem->SetState(ITEM_CHANGED, this);
                         if( IsInWorld() )
                         {
                             pSrcItem->SendUpdateToPlayer( this );
@@ -8079,6 +8102,8 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     {
                         pSrcItem->SetCount( pSrcItem->GetCount() + pDstItem->GetCount() - pSrcItem->GetProto()->Stackable );
                         pDstItem->SetCount( pSrcItem->GetProto()->Stackable );
+                        pSrcItem->SetState(ITEM_CHANGED, this);
+                        pDstItem->SetState(ITEM_CHANGED, this);
                         if( IsInWorld() )
                         {
                             pSrcItem->SendUpdateToPlayer( this );
@@ -8101,6 +8126,8 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     {
                         pSrcItem->SetCount( pSrcItem->GetCount() + pDstItem->GetCount() - pSrcItem->GetProto()->Stackable );
                         pDstItem->SetCount( pSrcItem->GetProto()->Stackable );
+                        pSrcItem->SetState(ITEM_CHANGED, this);
+                        pDstItem->SetState(ITEM_CHANGED, this);
                         if( IsInWorld() )
                         {
                             pSrcItem->SendUpdateToPlayer( this );
@@ -8407,6 +8434,7 @@ void Player::SaveEnchant()
                 if((*itr)->leftduration > 0)
                 {
                     (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+1,(*itr)->leftduration);
+                    (*itr)->item->SetState(ITEM_CHANGED, this);
                 }
             }
         }
@@ -8948,7 +8976,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
         for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
         {
             if ( qInfo->ReqItemId[i] )
-                RemoveItemCount( qInfo->ReqItemId[i], qInfo->ReqItemCount[i], true);
+                DestroyItemCount( qInfo->ReqItemId[i], qInfo->ReqItemCount[i], true);
         }
 
         //if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
@@ -10170,11 +10198,13 @@ void Player::LoadCorpse()
 
 void Player::_LoadInventory(uint32 timediff)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u' ORDER BY `slot`",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0' ORDER BY `slot`",GetGUIDLow());
 
     uint16 dest;
     if (result)
     {
+        // prevent items from being added to the queue when stored
+        m_itemUpdateQueueBlocked = true;
         do
         {
             Field *fields = result->Fetch();
@@ -10191,7 +10221,8 @@ void Player::_LoadInventory(uint32 timediff)
             }
 
             Item *item = NewItemOrBag(proto);
-            item->SetSlot(slot);
+            item->SetSlot( slot );
+            item->SetContainer( NULL );
 
             if(!item->LoadFromDB(item_guid, GetGUID()))
             {
@@ -10199,12 +10230,13 @@ void Player::_LoadInventory(uint32 timediff)
                 continue;
             }
 
+            bool success = true;
             dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
             if( IsInventoryPos( dest ) )
             {
                 if( !CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
                 {
-                    delete item;
+                    success = false;
                     continue;
                 }
 
@@ -10214,7 +10246,7 @@ void Player::_LoadInventory(uint32 timediff)
             {
                 if( !CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
                 {
-                    delete item;
+                    success = false;
                     continue;
                 }
 
@@ -10224,16 +10256,20 @@ void Player::_LoadInventory(uint32 timediff)
             {
                 if( !CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false, false ) == EQUIP_ERR_OK )
                 {
-                    delete item;
+                    success = false;
                     continue;
                 }
 
                 BankItem(dest, item, true);
             }
 
+            // item's state may have changed after stored
+            if (success) item->SetState(ITEM_UNCHANGED, this);
+            else delete item;
         } while (result->NextRow());
 
         delete result;
+        m_itemUpdateQueueBlocked = false;
     }
     if(isAlive())
         _ApplyAllItemMods();
@@ -10668,16 +10704,69 @@ void Player::_SaveAuras()
 
 void Player::_SaveInventory()
 {
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(), INVENTORY_SLOT_BAG_0);
-
-    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
+    // force items in buyback slots to new state
+    // and remove those that aren't already
+    for (uint8 i = 0; i < 12; i++)
     {
-        if ( m_items[i] != 0 )
+        Item *item = m_buybackitems[i];
+        if (!item || item->GetState() == ITEM_NEW) continue;
+        sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
+        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", item->GetGUIDLow());
+        m_buybackitems[i]->FSetState(ITEM_NEW);
+    }
+
+    if (m_itemUpdateQueue.empty()) return;
+
+    // do not save if the update queue is corrupt
+    bool error = false;
+    for(int i = 0; i < m_itemUpdateQueue.size(); i++)
+    {
+        Item *item = m_itemUpdateQueue[i];
+        if(!item || item->GetState() == ITEM_REMOVED) continue;
+        Item *test = GetItemByPos( item->GetBagSlot(), item->GetSlot());
+
+        if (test == NULL)
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), INVENTORY_SLOT_BAG_0, i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
-            m_items[i]->SaveToDB();
+            sLog.outError("Player::_SaveInventory - the bag(%d) and slot(%d) values for the item with guid %d are incorrect, the player doesn't have an item at that position!", item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow());
+            error = true;
+        }
+        else if (test != item)
+        {
+            sLog.outError("Player::_SaveInventory - the bag(%d) and slot(%d) values for the item with guid %d are incorrect, the item with guid %d is there instead!", item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow(), test->GetGUIDLow());
+            error = true;
         }
     }
+
+    if (error)
+    {
+        sLog.outError("Player::_SaveInventory - one or more errors occured save aborted!");
+        sChatHandler.SendSysMessage(GetSession(), "Item save failed!");
+        return;
+    }
+
+    for(int i = 0; i < m_itemUpdateQueue.size(); i++)
+    {
+        Item *item = m_itemUpdateQueue[i];
+        if(!item) continue;
+
+        Bag *container = item->GetContainer();
+        uint32 bag_guid = container ? container->GetGUIDLow() : 0;
+
+        switch(item->GetState())
+        {
+            case ITEM_NEW:
+                sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
+                break;
+            case ITEM_CHANGED:
+                sDatabase.PExecute("UPDATE `character_inventory` SET `guid`='%u', `bag`='%u', `slot`='%u', `item_template`='%u' WHERE `item`='%u'", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetEntry(), item->GetGUIDLow());
+                break;
+            case ITEM_REMOVED:
+                sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
+        }
+
+        item->SaveToDB();
+    }
+    m_itemUpdateQueue.clear();
 }
 
 void Player::_SaveMail()

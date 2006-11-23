@@ -303,9 +303,17 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                 {
                     _player->ModifyMoney( pProto->SellPrice * pItem->GetCount() );
                     uint32 buyBackslot = _player->GetCurrentBuybackSlot();
-                    _player->RemoveItem( (pos >> 8), (pos & 255), true);
-                    _player->AddItemToBuyBackSlot( buyBackslot, pItem );
-                    _player->SetCurrentBuybackSlot( buyBackslot + 1 );
+
+                    if (buyBackslot < BUYBACK_SLOT_END - 1)
+                    {
+                        _player->RemoveItem( (pos >> 8), (pos & 255), true);
+                        pItem->RemoveFromUpdateQueueOf(_player);
+                        _player->AddItemToBuyBackSlot( buyBackslot, pItem );
+                        _player->SetCurrentBuybackSlot( buyBackslot + 1 );
+                    }
+                    else
+                        _player->DestroyItem( (pos >> 8), (pos & 255), true);
+
                     return;
                 }
                 else

@@ -25,6 +25,7 @@
 #include "ItemPrototype.h"
 
 struct SpellEntry;
+class Bag;
 
 typedef struct
 {
@@ -122,6 +123,14 @@ enum SellFailure
     SELL_ERR_CANT_FIND_VENDOR               = 3
 };
 
+enum ItemUpdateState
+{
+    ITEM_UNCHANGED = 0,
+    ITEM_CHANGED = 1,
+    ITEM_NEW = 2,
+    ITEM_REMOVED = 3,
+};
+
 class MANGOS_DLL_SPEC Item : public Object
 {
     public:
@@ -137,7 +146,8 @@ class MANGOS_DLL_SPEC Item : public Object
         Player* GetOwner()const;
 
         void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS,ITEM_FLAGS_BINDED,val); }
-        bool IsBindedNotWith(uint64 guid) const { return  HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED) && GetOwnerGUID()!= guid; }
+        bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED); }
+        bool IsBindedNotWith(uint64 guid) const { return IsSoulBound() && GetOwnerGUID()!= guid; }
 
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid);
@@ -145,7 +155,6 @@ class MANGOS_DLL_SPEC Item : public Object
 
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
-        bool IsEquipped() const;
         bool IsCanTraded() const;
 
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
@@ -153,8 +162,14 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
         uint32 GetMaxStackCount() const { return GetProto()->Stackable ? GetProto()->Stackable : 1; }
 
-        uint32 GetSlot() const {return m_slot;}
-        void SetSlot(uint32 slot) {m_slot = slot;};
+        uint8 GetSlot() const {return m_slot;}
+        Bag *GetContainer() { return m_container; }
+        uint8 GetBagSlot() const;
+        void SetSlot(uint8 slot) {m_slot = slot;}
+        void SetContainer(Bag *container) { m_container = container; }
+
+        bool IsInBag() const { return m_container != NULL; }
+        bool IsEquipped() const { return !IsInBag() && m_slot < 255; }
 
         uint32 GetSkill();
         uint32 GetSpell();
@@ -162,9 +177,21 @@ class MANGOS_DLL_SPEC Item : public Object
         Loot loot;
         bool m_lootGenerated;
 
+        // Update States
+        ItemUpdateState GetState() const { return uState; }
+        void SetState(ItemUpdateState state, Player *forplayer = NULL);
+        void AddToUpdateQueueOf(Player *player);
+        void RemoveFromUpdateQueueOf(Player *player);
+        bool IsInUpdateQueue() const { return uQueuePos != -1; }
+        uint16 GetQueuePos() const { return uQueuePos; }
+        void FSetState(ItemUpdateState state) { uState = state; }     // forced
+
     protected:
         void _LoadQuests();
     private:
-        uint32 m_slot;
+        uint8 m_slot;
+        Bag *m_container;
+        ItemUpdateState uState;
+        int16 uQueuePos;
 };
 #endif

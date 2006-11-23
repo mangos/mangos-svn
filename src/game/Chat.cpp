@@ -128,6 +128,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "qpartymsg",   3, &ChatHandler::HandleSendQuestPartyMsgCommand,  "",   NULL },
         { "qinvalidmsg", 3, &ChatHandler::HandleSendQuestInvalidMsgCommand,"",   NULL },
         { "itemmsg",     3, &ChatHandler::HandleSendItemErrorMsg,          "",   NULL },
+        { "getitemstate",3, &ChatHandler::HandleGetItemState,              "",   NULL },
         { NULL,          0, NULL,                                          "",   NULL }
     };
 
