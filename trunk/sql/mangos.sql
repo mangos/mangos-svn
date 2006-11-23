@@ -268,7 +268,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `character_inventory`;
 CREATE TABLE `character_inventory` (
   `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `bag` tinyint(3) unsigned NOT NULL default '0',
+  `bag` bigint(20) unsigned NOT NULL default '0',
   `slot` tinyint(3) unsigned NOT NULL default '0',
   `item` bigint(20) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
