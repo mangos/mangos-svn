@@ -391,7 +391,7 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 
     // check cheating, can't fail with correct client operations
     Item* item = _player->GetItemByPos(bag,slot);
-    if(!item || item->IsBag() && !((Bag*)item)->IsEmpty())
+    if(!item || !item->IsCanTraded())
     {
         // send to self (cancel trade at cheating attempt)
         WorldPacket data;
