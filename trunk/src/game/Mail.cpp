@@ -135,6 +135,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     {
         //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
+        it->RemoveFromUpdateQueueOf(pl);
+        sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", it->GetGUIDLow());
     }
 
     pl->ModifyMoney( -30 - money );
@@ -168,8 +170,13 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
         receive->AddMail(m);
         if (it)
+        {
+            it->FSetState(ITEM_NEW);
             receive->AddMItem(it);
+        }
     }
+    else if (it)
+        delete it;
 
     // backslash all '
     sDatabase.escape_string(body);

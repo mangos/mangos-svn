@@ -186,6 +186,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                         sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
                         _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
                         _player->ItemRemovedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
+                        myItems[i]->RemoveFromUpdateQueueOf(_player);
                         _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
                         _player->pTrader->StoreItem( dst, myItems[i], true);
                     }
@@ -198,11 +199,15 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                         sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
                         _player->pTrader->RemoveItem(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);
                         _player->pTrader->ItemRemovedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
+                        hisItems[i]->RemoveFromUpdateQueueOf(_player->pTrader);
                         _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
                         _player->StoreItem( dst, hisItems[i], true);
                     }
                 }
             }
+            // desynced with the other saves here
+            _player->_SaveInventory();
+            _player->pTrader->_SaveInventory();
             _player->ModifyMoney( -((int32)_player->tradeGold) );
             _player->ModifyMoney(_player->pTrader->tradeGold );
             _player->pTrader->ModifyMoney( -((int32)_player->pTrader->tradeGold) );

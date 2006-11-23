@@ -529,7 +529,7 @@ void Spell::EffectHeal( uint32 i )
 {
     if( unitTarget && unitTarget->isAlive() )
     {
-        int32 addhealth = unitTarget->SpellHealingBonus(m_spellInfo, damage);
+        int32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, damage);
         bool crit = m_caster->SpellCriticalBonus(m_spellInfo, &addhealth);
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth, crit);
@@ -1158,6 +1158,8 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             p_caster->AddItemEnchant(itemTarget,enchant_id,true);
         }
 
+        itemTarget->SetState(ITEM_CHANGED);
+
         //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
         //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),pEnchant->display_type,duration);
     }
@@ -1208,6 +1210,8 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         {
             p_caster->AddItemEnchant(itemTarget,enchant_id,true);
         }
+
+        itemTarget->SetState(ITEM_CHANGED);
 
         // set duration
         p_caster->AddEnchantDuration(itemTarget,1,duration*1000);
@@ -1768,6 +1772,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
 
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3, enchant_id);
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+1, duration*1000);
+        itemTarget->SetState(ITEM_CHANGED);
 
         // add new enchanting
         p_caster->AddItemEnchant(itemTarget,enchant_id,true);

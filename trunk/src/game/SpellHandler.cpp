@@ -73,8 +73,14 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     // check also  BIND_WHEN_PICKED_UP for .additem or .additemset case by GM (not binded at adding to inventory)
-    if( pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
-        pItem->SetBinding( true );
+    if( pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP)
+    {
+        if (!pItem->IsSoulBound())
+        {
+            pItem->SetState(ITEM_CHANGED, pUser);
+            pItem->SetBinding( true );
+        }
+    }
 
     SpellCastTargets targets;
     targets.read(&recvPacket, pUser);

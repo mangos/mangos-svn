@@ -112,6 +112,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     _player->StoreNewItem( dest, GUILD_CHARTER_ITEM_ID, 1, true );
     Item *charter = _player->GetItemByPos(dest);
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
+    charter->SetState(ITEM_CHANGED, _player);
 
     sDatabase.escape_string(guildname);
     sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u' OR `charterguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());

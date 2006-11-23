@@ -165,6 +165,9 @@ Item::Item( )
 
     m_valuesCount = ITEM_END;
     m_slot = 0;
+    uState = ITEM_NEW;
+    uQueuePos = -1;
+    m_container = NULL;
     m_lootGenerated = false;
 }
 
@@ -449,17 +452,36 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
 void Item::SaveToDB()
 {
     uint32 guid = GetGUIDLow();
-    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
+    switch (uState)
+    {
+        case ITEM_NEW:
+        {
+            std::ostringstream ss;
+            ss << "REPLACE INTO `item_instance` (`guid`,`data`) VALUES (" << guid << ",'";
+            for(uint16 i = 0; i < m_valuesCount; i++ )
+                ss << GetUInt32Value(i) << " ";
+            ss << "' )";
 
-    std::ostringstream ss;
-    ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES (" << guid << ",'";
+            sDatabase.Execute( ss.str().c_str() );
+        } break;
+        case ITEM_CHANGED:
+        {
+            std::ostringstream ss;
+            ss << "UPDATE `item_instance` SET `data` = '";
+            for(uint16 i = 0; i < m_valuesCount; i++ )
+                ss << GetUInt32Value(i) << " ";
+            ss << "' WHERE `guid` = '" << guid << "'";
 
-    for(uint16 i = 0; i < m_valuesCount; i++ )
-        ss << GetUInt32Value(i) << " ";
-
-    ss << "' )";
-
-    sDatabase.Execute( ss.str().c_str() );
+            sDatabase.Execute( ss.str().c_str() );
+        } break;
+        case ITEM_REMOVED:
+        {
+            sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
+            delete this;
+            return;
+        }
+    }
+    SetState(ITEM_UNCHANGED);
 }
 
 bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
@@ -490,13 +512,13 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
     delete result;
 
     _LoadQuests();
-
     return true;
 }
 
 void Item::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
+    //sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
+    SetState(ITEM_REMOVED, GetOwner());
 }
 
 void Item::_LoadQuests()
@@ -595,11 +617,6 @@ uint32 Item::GetSpell()
             }
     }
     return 0;
-}
-
-bool Item::IsEquipped() const
-{
-    return GetSlot() < EQUIPMENT_SLOT_END;
 }
 
 void Item::SetItemRandomProperties()
@@ -760,6 +777,68 @@ void Item::SetItemRandomProperties()
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT+12,item_rand->enchant_id_2);
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT+15,item_rand->enchant_id_3);
     }
+}
+
+void Item::SetState(ItemUpdateState state, Player *forplayer)
+{
+    if (uState == ITEM_NEW && state == ITEM_REMOVED)
+    {
+        // pretend the item never existed
+        RemoveFromUpdateQueueOf(forplayer);
+        delete this;
+        return;
+    }
+
+    if (state != ITEM_UNCHANGED)
+    {
+        // new items must stay in new state until saved
+        if (uState != ITEM_NEW) uState = state;
+        AddToUpdateQueueOf(forplayer);
+    }
+    else
+    {
+        // unset in queue
+        // the item must be removed from the queue manually
+        uQueuePos = -1;
+        uState = ITEM_UNCHANGED;
+    }
+}
+
+void Item::AddToUpdateQueueOf(Player *player)
+{
+    if (IsInUpdateQueue()) return;
+    if (!player) { player = GetOwner(); if (!player) return; }
+    if (player->m_itemUpdateQueueBlocked) return;
+
+    if (player->GetGUID() != GetOwnerGUID())
+    {
+        sLog.outError("Item::AddToUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
+        return;
+    }
+
+    player->m_itemUpdateQueue.push_back(this);
+    uQueuePos = player->m_itemUpdateQueue.size()-1;
+}
+
+void Item::RemoveFromUpdateQueueOf(Player *player)
+{
+    if (!IsInUpdateQueue()) return;
+    if (!player) { player = GetOwner(); if (!player) return; }
+    if (player->m_itemUpdateQueueBlocked) return;
+
+    if (player->GetGUID() != GetOwnerGUID())
+    {
+        sLog.outError("Item::RemoveFromUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
+        return;
+    }
+
+    player->m_itemUpdateQueue[uQueuePos] = NULL;
+    uQueuePos = -1;
+}
+
+uint8 Item::GetBagSlot() const
+{
+    return m_container ? m_container->GetSlot() : INVENTORY_SLOT_BAG_0;
 }
 
 bool Item::IsCanTraded() const { 
