@@ -202,6 +202,9 @@ void Spell::EffectSchoolDMG(uint32 i)
 {
     if( unitTarget && unitTarget->isAlive() )
         m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
+
+    if (m_caster->GetTypeId()==TYPEID_PLAYER && m_spellInfo->Attributes == 0x150010)
+        m_caster->AttackStop();
 }
 
 void Spell::EffectDummy(uint32 i)

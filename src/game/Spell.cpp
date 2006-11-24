@@ -1447,9 +1447,24 @@ uint8 Spell::CanCast()
             else if(!(pitem->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
                 castResult = CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND;
         }*/
-        if((m_spellInfo->AttributesExEx & 0x4000000) && !target->HasInArc(M_PI, m_caster) )
-            castResult = CAST_FAIL_NOT_BEHIND_TARGET;
+        //Old not working code
+        //if((m_spellInfo->AttributesExEx & 0x4000000) && !target->HasInArc(M_PI, m_caster) )
+        //    castResult = CAST_FAIL_NOT_BEHIND_TARGET;
 
+        //Must be behind the target.
+        if (m_spellInfo->AttributesEx2 == 0x100000 && target->HasInArc(M_PI, m_caster) && (m_spellInfo->SpellIconID != 204 || m_spellInfo->SpellIconID != 205))
+        {
+            SendInterrupted(2);
+            castResult = CAST_FAIL_NOT_BEHIND_TARGET;
+        } 
+        else
+        //Target must be facing you.
+        if((m_spellInfo->Attributes == 0x150010) && !target->HasInArc(M_PI, m_caster) )
+        {    
+            SendInterrupted(2);
+            castResult = CAST_FAIL_NOT_IN_FRONT_OF_TARGET;
+        }
+        else
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
     }

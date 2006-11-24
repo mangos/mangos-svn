@@ -154,6 +154,7 @@ struct SpellEntry
     uint32    Mechanic;
     uint32    Attributes;
     uint32    AttributesEx;
+    uint32    AttributesEx2;
     uint32    AttributesExEx;
     uint32    Stances;
     uint32    Targets;
