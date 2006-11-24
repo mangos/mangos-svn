@@ -46,7 +46,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     LanguageDesc const* langDesc = GetLanguageDescByID(lang);
     if(!langDesc || langDesc->skill_id != 0 && !_player->HasSkill(langDesc->skill_id))
     {
-        SendNotification("Unknown langauge");
+        SendNotification("Unknown language");
         return;
     }
 

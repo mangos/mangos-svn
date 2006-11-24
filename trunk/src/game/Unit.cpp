@@ -278,9 +278,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         // clean hostilList
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
         {
-            DEBUG_LOG("We are dead, loosing 10 percents durability");
-            if (durabilityLoss)
+            if (GetTypeId() != TYPEID_PLAYER && durabilityLoss)
             {
+                DEBUG_LOG("We are dead, loosing 10 percents durability");
                 ((Player*)pVictim)->DurabilityLossAll(0.10);
                 WorldPacket data;
                                                             // durability lost message
