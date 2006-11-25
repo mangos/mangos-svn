@@ -161,6 +161,13 @@ Rate.Creature.Elite.RAREELITE.HP = 1
 Rate.Creature.Elite.WORLDBOSS.HP = 1
 Rate.Creature.Elite.RARE.HP = 1
 
+
+# Resting points grow rates (1 - normal, 2 - double rate, 0.5 - half rate, etc) from standart values
+Rate.Rest.InGame = 1
+Rate.Rest.Offline.InTavernOrCity = 1
+Rate.Rest.Offline.InWilderness = 1
+
+
 #Aggro radius percent or off.
 #          0   - off (0%)
 # Default: 1   - 100% 

@@ -765,7 +765,8 @@ void Player::Update( uint32 p_time )
             int time_inn = time(NULL)-GetTimeInnEter();
             if (time_inn >= 10)                             //freeze update
             {
-                float bubble=1;                             //speed collect rest bonus (section/in hour)
+                float bubble = sWorld.getRate(RATE_REST_INGAME);
+                                                            //speed collect rest bonus (section/in hour)
                 SetRestBonus( GetRestBonus()+ time_inn*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/144000)*bubble );
                 UpdateInnerTime(time(NULL));
             }
@@ -10036,14 +10037,16 @@ bool Player::LoadFromDB( uint32 guid )
     uint32 time_diff = (time(NULL) - fields[21].GetUInt32());
 
     rest_bonus = fields[20].GetFloat();
-    //speed collect rest bonus in offline, in logaut, far from tavern, city (section/in hour)
+    //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
     float bubble0 = 0.0416;
-    //speed collect rest bonus in offline, in logaut, far from tavern, city (section/in hour)
+    //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
     float bubble1 = 0.083;
 
     if((int32)fields[21].GetUInt32() > 0)
     {
-        float bubble = fields[22].GetUInt32() > 0 ? bubble1 : bubble0;
+        float bubble = fields[22].GetUInt32() > 0
+            ? bubble1*sWorld.getRate(RATE_REST_OFFLINE_IN_TAVERN_OR_CITY)
+            : bubble0*sWorld.getRate(RATE_REST_OFFLINE_IN_WILDERNESS);
 
         SetRestBonus(GetRestBonus()+ (time(NULL)-(int32)fields[21].GetUInt32())*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/144000)*bubble);
     }
