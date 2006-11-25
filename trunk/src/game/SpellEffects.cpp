@@ -213,6 +213,36 @@ void Spell::EffectDummy(uint32 i)
         return;
 
     // More spell specific code in begining
+    if( m_spellInfo->Id == SPELL_ID_AGGRO )
+    {
+        if( !unitTarget || !m_caster || !m_caster->getVictim() )
+            return;
+
+        // only creature to creature
+        if( unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT )
+            return;
+
+        // skip friendly to caster enemy creatures
+        if( ((Creature*)unitTarget)->IsFriendlyTo(m_caster->getVictim()) )
+            return;
+
+        // only from same creature family
+        if( ((Creature*)unitTarget)->GetCreatureInfo()->family != ((Creature*)m_caster)->GetCreatureInfo()->family )
+            return;
+
+        // only if enimy is player or pet.
+        if( m_caster->getVictim()->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_caster->getVictim())->isPet() )
+        {
+            // and finally if creature not figthing currently
+            if( !unitTarget->isInCombat() )
+            {
+                ((Creature*)m_caster)->SetNoCallAssistence(true);
+                ((Creature*)unitTarget)->SetNoCallAssistence(true);
+                ((Creature*)unitTarget)->AI().AttackStart(m_caster->getVictim());
+            }
+        }
+        return;
+    }
 
     // Preparation Rogue - immediately finishes the cooldown on other Rogue abilities
     if(m_spellInfo->Id == 14185)

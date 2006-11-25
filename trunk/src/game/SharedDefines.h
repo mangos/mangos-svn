@@ -981,4 +981,6 @@ enum Language
 
 #define UNIT_FLAG_ANIMATION_FROZEN      0x0400
 #define UNIT_FLAG_WAR_PLAYER            0x1000
+
+#define SPELL_ID_AGGRO                    22764
 #endif

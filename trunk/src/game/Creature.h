@@ -366,6 +366,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 getUsedTrainPoint(){ return (GetUInt32Value(UNIT_TRAINING_POINTS) & 0xFFFF);};
         void GivePetLevel(uint32 level);
 
+        void CallAssistence();
+        void SetNoCallAssistence(bool val) { m_AlreadyCallAssistence = val; }
+
         MovementGeneratorType GetDefaultMovementType() const { return m_defaultMovementType; }
         void SetDefaultMovementType(MovementGeneratorType mgt) { m_defaultMovementType = mgt; }
 
@@ -412,5 +415,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_regenTimer;
         MovementGeneratorType m_defaultMovementType;
         Cell m_currentCell;                                 // store current cell where creature listed
+        bool m_AlreadyCallAssistence;
 };
 #endif

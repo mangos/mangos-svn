@@ -2830,6 +2830,10 @@ bool Unit::Attack(Unit *victim)
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
+    if( GetTypeId()==TYPEID_UNIT && !((Creature*)this)->isPet() )
+    {
+        ((Creature*)this)->CallAssistence();
+    }
     //if(!isAttackReady(BASE_ATTACK))
     //resetAttackTimer(BASE_ATTACK);
 
@@ -2855,6 +2859,11 @@ bool Unit::AttackStop()
 
     if(m_currentMeleeSpell)
         m_currentMeleeSpell->cancel();
+
+    if( GetTypeId()==TYPEID_UNIT )
+    {
+        ((Creature*)this)->SetNoCallAssistence(false);
+    }
 
     SendAttackStop(victim);
 
