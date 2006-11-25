@@ -890,23 +890,28 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
 
 bool ChatHandler::HandleKickPlayerCommand(const char *args)
 {
-    char *kickName;
-
-    char* px = strtok((char*)args, " ");
-    if (!px)
-        return false;
-
-    int x=0;
-    while(px[x]==' ')
-        x++;
-    kickName=&px[x];
-
-    if (strlen(kickName) == 0)
+    char* kickName = strtok((char*)args, " ");
+    if (!kickName)
     {
-        return false;
+        Player* player = getSelectedPlayer();
+        if(player==m_session->GetPlayer())
+        {
+            SendSysMessage("You can't kick self by selecting, use .kick name ;)");
+            return true;
+        }
+
+        player->GetSession()->KickPlayer();
+    }
+    else
+    {
+        std::string name = kickName;
+        normalizePlayerName(name);
+        if(sWorld.KickPlayer(name))
+            PSendSysMessage("Player %s kicked.",name.c_str());
+        else
+            PSendSysMessage("Player %s not found.",name.c_str());
     }
 
-    sWorld.KickPlayer(kickName);
     return true;
 }
 

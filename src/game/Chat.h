@@ -185,6 +185,11 @@ class ChatHandler
         bool HandleMoveObjectCommand(const char* args);
         bool HandlePInfoCommand(const char* args);
 
+        bool HandleBanIPCommand(const char* args);
+        bool HandleBanAccountCommand(const char* args);
+        bool HandleUnBanIPCommand(const char* args);
+        bool HandleUnBanAccountCommand(const char* args);
+        bool HandleIdleShutDownCommand(const char* args);
         bool HandleShutDownCommand(const char* args);
         bool HandleSecurityCommand(const char* args);
         bool HandleGoXYCommand(const char* args);

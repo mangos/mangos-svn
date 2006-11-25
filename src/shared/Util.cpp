@@ -39,3 +39,25 @@ vector<string> StrSplit(const string &src, const string &sep)
     if (s.length()) r.push_back(s);
     return r;
 }
+
+bool IsItIP(char const* ip)
+{
+    if(!ip)
+        return false;
+    //ip looks like a.b.c.d  -- let's calc number of '.' it must be equal to 3
+    //and must contain only numbers + .
+    unsigned int iDotCount=0;
+    unsigned int l=strlen(ip);
+    for(unsigned int y=0;y<l;y++)
+    {
+        if(ip[y]=='.')iDotCount++;
+        else
+        if( (ip[y] < '0' || ip[y] > '9'))
+            return false;
+    }
+
+    if(iDotCount!=3)
+        return false;
+
+    return true;
+}

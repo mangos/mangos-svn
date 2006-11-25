@@ -2655,10 +2655,7 @@ bool ChatHandler::HandleMaxSkillCommand(const char* args)
 bool ChatHandler::HandleShutDownCommand(const char* args)
 {
     if(!*args)
-    {
-        SendSysMessage(LANG_SHUTTDOWN);
         return false;
-    }
 
     if(std::string(args)=="stop")
     {
@@ -2668,6 +2665,23 @@ bool ChatHandler::HandleShutDownCommand(const char* args)
     {
         uint32 time = atoi(args);
         sWorld.ShutdownServ(time);
+    }
+    return true;
+}
+
+bool ChatHandler::HandleIdleShutDownCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    if(std::string(args)=="stop")
+    {
+        sWorld.ShutdownCancel();
+    }
+    else
+    {
+        uint32 time = atoi(args);
+        sWorld.ShutdownServ(time,true);
     }
     return true;
 }
@@ -2693,6 +2707,67 @@ bool ChatHandler::HandleOutOfRange(const char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleBanIPCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    char* banIP = strtok((char*)args, " ");
+
+    if(!IsItIP(banIP))
+    {
+        PSendSysMessage("Incorrect IP: %s",banIP);
+        return true;
+    }
+
+    PSendSysMessage("IP %s banned.",banIP);                 // output before to prevent crash at ban own IP ;)
+    sWorld.BanAccount(banIP);
+    return true;
+}
+
+bool ChatHandler::HandleBanAccountCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    if(sWorld.BanAccount(args))
+        PSendSysMessage("Account %s banned.",args);
+    else
+        PSendSysMessage("Account %s not found.",args);
+
+    return true;
+}
+
+bool ChatHandler::HandleUnBanIPCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    char* banIP = strtok((char*)args, " ");
+
+    if(!IsItIP(banIP))
+    {
+        PSendSysMessage("Incorrect IP: %s",banIP);
+        return true;
+    }
+
+    sWorld.RemoveBanAccount(banIP);
+    PSendSysMessage("IP %s unbanned.",banIP);
+    return true;
+}
+
+bool ChatHandler::HandleUnBanAccountCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    if(sWorld.RemoveBanAccount(args))
+
+    PSendSysMessage("Account %s unbanned.",args);
+    return true;
+}
+
 
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false

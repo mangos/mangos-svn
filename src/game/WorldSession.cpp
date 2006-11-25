@@ -204,6 +204,18 @@ void WorldSession::LogoutPlayer(bool Save)
     LogoutRequest(0);
 }
 
+void WorldSession::KickPlayer()
+{
+    if(!_socket)
+        return;
+
+    LogoutPlayer(true);
+
+    // session will removed in next update tick
+    _socket->SetCloseAndDelete(true);
+}
+
+
 OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 {
     static OpcodeHandler table[] =

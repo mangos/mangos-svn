@@ -167,7 +167,7 @@ class World
         void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
 
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
-        void ShutdownServ(uint32 time);
+        void ShutdownServ(uint32 time, bool idle = false);
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);
 
@@ -192,7 +192,9 @@ class World
         }
         uint32 getLogFilter() const { return m_logFilter; }
 
-        void KickPlayer(char * playerName);
+        bool KickPlayer(std::string playerName);
+        bool BanAccount(std::string nameOrIP);
+        bool RemoveBanAccount(std::string nameOrIP);
 
         multimap<uint64, ScriptAction> scriptSchedule;
         void ScriptsProcess();
@@ -221,6 +223,7 @@ class World
         uint32 m_configs[CONFIG_VALUE_COUNT];
         uint32 m_logFilter;
         time_t m_Last_tick;
+        uint32 m_ShutdownIdleMode;
         uint32 m_ShutdownTimer;
 };
 
