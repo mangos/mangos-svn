@@ -1863,7 +1863,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
 
     bool positive = m_modifier.m_miscvalue2 == 0;
 
-    for(int8 x=0;x < 7;x++)
+    for(int8 x=0;x < MAX_SPELL_SCHOOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -1886,7 +1886,7 @@ void Aura::HandleAuraModResistance(bool apply)
 
     bool positive = m_modifier.m_miscvalue2 == 0;
 
-    for(int8 x=0;x < 7;x++)
+    for(int8 x=0;x < MAX_SPELL_SCHOOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -1912,7 +1912,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
         return;
     Player *p_target = (Player*)m_target;
 
-    for(int8 x=0;x < 7;x++)
+    for(int8 x=0;x < MAX_SPELL_SCHOOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -1927,7 +1927,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
 
 void Aura::HandleModResistancePercent(bool apply)
 {
-    for(int8 i = 0; i < 7; i++)
+    for(int8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
     {
         if(m_modifier.m_miscvalue & int32(1<<i))
         {
@@ -1948,7 +1948,7 @@ void Aura::HandleModBaseResistance(bool apply)
         return;
     Player *p_target = (Player*)m_target;
 
-    for(int i = 0; i < 7; i++)
+    for(int i = 0; i < MAX_SPELL_SCHOOOL; i++)
         if(m_modifier.m_miscvalue & (1<<i))
             p_target->ApplyResistanceMod(SpellSchools(SPELL_SCHOOL_NORMAL + i),m_modifier.m_amount, apply);
 }
@@ -2380,7 +2380,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
     // magic damage
     if((m_modifier.m_miscvalue & 126) != 0)
     {
-        for(int8 x=1;x < 7;x++)
+        for(int8 x=1;x < MAX_SPELL_SCHOOOL;x++)
         {
             if(m_modifier.m_miscvalue & int32(1<<x))
             {
