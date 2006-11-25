@@ -66,6 +66,8 @@ m_regenTimer(2000), lootForPickPocketed(false), lootForBody(false), m_defaultMov
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
+
+    m_AlreadyCallAssistence = false;
 }
 
 Creature::~Creature()
@@ -1525,4 +1527,12 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
 
     // and not see any other
     return false;
+}
+
+void Creature::CallAssistence()
+{
+    if (!m_AlreadyCallAssistence)
+    {
+        CastSpell(this,SPELL_ID_AGGRO, true);
+    }
 }
