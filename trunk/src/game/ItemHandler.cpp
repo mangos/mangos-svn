@@ -296,6 +296,13 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         Item *pItem = _player->GetItemByPos( pos );
         if( pItem )
         {
+            // prevent sell non empty bag by drag-and-drop at vendor's item list
+            if(pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
+            {
+                _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+                return;
+            }
+
             ItemPrototype const *pProto = pItem->GetProto();
             if( pProto )
             {

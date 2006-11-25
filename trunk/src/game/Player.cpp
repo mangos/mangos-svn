@@ -10198,7 +10198,7 @@ void Player::LoadCorpse()
     {
         if( isAlive() )
         {
-            if( corpse->GetType() == CORPSE_RESURRECTABLE ) )
+            if( corpse->GetType() == CORPSE_RESURRECTABLE )
                 corpse->ConvertCorpseToBones();
         }
         else
