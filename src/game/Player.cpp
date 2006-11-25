@@ -2808,8 +2808,11 @@ void Player::SpawnCorpseBones()
     Corpse* corpse =  GetCorpse();
     if(!corpse) return;
 
-    corpse->ConvertCorpseToBones();
-    SaveToDB();                                             // prevent loading as ghost without corpse
+    if( corpse->GetType() == CORPSE_RESURRECTABLE )
+    {
+        corpse->ConvertCorpseToBones();
+        SaveToDB();                                             // prevent loading as ghost without corpse
+    }
 }
 
 Corpse* Player::GetCorpse() const
@@ -10193,8 +10196,11 @@ void Player::LoadCorpse()
 {
     if(Corpse* corpse = GetCorpse())
     {
-        if(isAlive())
-            corpse->ConvertCorpseToBones();
+        if( isAlive() )
+        {
+            if( corpse->GetType() == CORPSE_RESURRECTABLE ) )
+                corpse->ConvertCorpseToBones();
+        }
         else
             corpse->UpdateForPlayer(this,true);
     }
