@@ -6583,7 +6583,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                 if( !swap && pProto->MaxCount > 0 )
                 {
                     uint32 curcount = 0;
-                    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+                    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
                     {
                         pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
                         pItem2 = GetItemByPos( pos );
@@ -6995,7 +6995,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                 if( !swap && pProto->MaxCount > 0 )
                 {
                     uint32 curcount = 0;
-                    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+                    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
                     {
                         pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
                         pItem2 = GetItemByPos( pos );

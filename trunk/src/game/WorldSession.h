@@ -75,6 +75,7 @@ class MANGOS_DLL_SPEC WorldSession
         }
 
         void LogoutPlayer(bool Save);
+        void KickPlayer();
 
         void QueuePacket(WorldPacket& packet);
         bool Update(uint32 diff);

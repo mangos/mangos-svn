@@ -55,6 +55,7 @@ World::World()
     m_playerLimit = 0;
     m_allowMovement = true;
     m_Last_tick = time(NULL);
+    m_ShutdownIdleMode = false;
     m_ShutdownTimer = 0;
     internalGameTime = 0;
     m_logFilter = 0;
@@ -662,18 +663,11 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
     SendZoneMessage(zone, &data, self);
 }
 
-void World::KickPlayer(char* playerName)
+bool World::KickPlayer(std::string playerName)
 {
     SessionMap::iterator itr, next;
     WorldSession *playerToKick = 0;
 
-    int y = 0;
-    while (!playerName[y] == 0)
-    {
-        if ((playerName[y] >= 'a') && (playerName[y] <= 'z'))
-            playerName[y] -= 'a' - 'A';
-        y++;
-    }
 
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
     {
@@ -686,25 +680,73 @@ void World::KickPlayer(char* playerName)
             continue;
         if( player->IsInWorld() )
         {
-            char *tmpPlayerName = new char[strlen(player->GetName()) + 1];
-            strcpy(tmpPlayerName, player->GetName());
-            y = 0;
-            while (!tmpPlayerName[y] == 0)
+            if (playerName == player->GetName())
             {
-                if ((tmpPlayerName[y] >= 'a') && (tmpPlayerName[y] <= 'z'))
-                    tmpPlayerName[y] -= 'a' - 'A';
-                y++;
+                itr->second->KickPlayer();
+                return true;
             }
-            if (strcmp(playerName, tmpPlayerName) == 0)
-                playerToKick = itr->second;
-            delete[] tmpPlayerName;
         }
     }
-    if (playerToKick)
-    {
-        playerToKick->LogoutPlayer(true);
-    }
+    return false;
 }
+
+bool World::BanAccount(std::string nameOrIP)
+{
+    bool is_ip = IsItIP(nameOrIP.c_str());
+
+    loginDatabase.escape_string(nameOrIP);
+
+    QueryResult *resultAccounts;
+
+    if(is_ip)
+    {
+        resultAccounts = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `last_ip` = '%s'",nameOrIP.c_str());
+
+        loginDatabase.PExecute("INSERT INTO `ip_banned` VALUES ('%s')",nameOrIP.c_str());
+    }
+    else
+    {
+        resultAccounts = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",nameOrIP.c_str());
+
+        loginDatabase.PExecute("UPDATE `account` SET `banned` = '1' WHERE `username` = '%s'",nameOrIP.c_str());
+    }
+
+    // disconnect all affected players (for IP it's can be many)
+    if(resultAccounts)
+    {
+        do
+        {
+            Field* fieldsAccount = resultAccounts->Fetch();
+            uint32 account = fieldsAccount->GetUInt32();
+
+            WorldSession* s = FindSession(account);
+            if(s)
+                s->KickPlayer();
+        }
+        while( resultAccounts->NextRow() );
+
+        delete resultAccounts;
+        return true;
+    }
+
+    return is_ip;                                           // if not ip and no accounts found then mark as fail
+}
+
+bool World::RemoveBanAccount(std::string nameOrIP)
+{
+    if(IsItIP(nameOrIP.c_str()))
+    {
+        loginDatabase.escape_string(nameOrIP);
+        loginDatabase.PExecute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",nameOrIP.c_str());
+    }
+    else
+    {
+        loginDatabase.escape_string(nameOrIP);
+        loginDatabase.PExecute("UPDATE `account` SET `banned` = '0' WHERE `username` = '%s'",nameOrIP.c_str());
+    }
+    return true;
+}
+
 
 time_t World::_UpdateGameTime()
 {
@@ -716,7 +758,10 @@ time_t World::_UpdateGameTime()
     {
         if( m_ShutdownTimer <= elapsed )
         {
-            m_stopEvent = true;
+            if(!m_ShutdownIdleMode || GetSessionCount()==0)
+                m_stopEvent = true;
+            else
+                m_ShutdownTimer = 1;                        // minimum timer value to wait idle state 
         }
         else
         {
@@ -733,10 +778,15 @@ time_t World::_UpdateGameTime()
     return m_gameTime;
 }
 
-void World::ShutdownServ(uint32 time)
+void World::ShutdownServ(uint32 time, bool idle)
 {
+    m_ShutdownIdleMode = idle;
+
     if(time==0)
-        m_stopEvent = true;
+    {
+        if(!idle || GetSessionCount()==0)
+            m_stopEvent = true;
+    }
     else
     {
         m_ShutdownTimer = time;
@@ -746,6 +796,10 @@ void World::ShutdownServ(uint32 time)
 
 void World::ShutdownMsg(bool show, Player* player)
 {
+    // not show messages for idle shutdown mode
+    if(m_ShutdownIdleMode)
+        return;
+
     if ( show ||
         (m_ShutdownTimer < 10) ||
                                                             // < 30 sec; every 5 sec
@@ -784,6 +838,7 @@ void World::ShutdownCancel()
     if(!m_ShutdownTimer)
         return;
 
+    m_ShutdownIdleMode = false;
     m_ShutdownTimer = 0;
     SendServerMessage(SERVER_MSG_SHUTDOWN_CANCELLED);
 

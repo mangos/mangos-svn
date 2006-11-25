@@ -25,6 +25,7 @@
 #include "GlobalEvents.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
+#include "Util.h"
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
@@ -87,28 +88,6 @@ const CliCommand Commands[]=
 };
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
-bool IsItIP(char* banip)
-{
-    if(!banip)
-        return false;
-    //ip looks like a.b.c.d  -- let's calc number of '.' it must be equal to 3
-    //and must contain only numbers + .
-    unsigned int iDotCount=0;
-    unsigned int l=strlen(banip);
-    for(unsigned int y=0;y<l;y++)
-    {
-        if(banip[y]=='.')iDotCount++;
-        else
-        if( (banip[y] < '0' || banip[y] > '9'))
-            return false;
-    }
-
-    if(iDotCount!=3)
-        return false;
-
-    return true;
-}
-
 void CliLoadScripts(char*command,pPrintf zprintf)
 {
 
@@ -160,7 +139,7 @@ void CliDelete(char*command,pPrintf zprintf)
 
             // kick if player currently
             if(Player* p = objmgr.GetPlayer(MAKE_GUID(guidlo,HIGHGUID_PLAYER)))
-                p->GetSession()->LogoutPlayer(false);
+                p->GetSession()->KickPlayer();
 
             WorldSession acc_s(account_id,NULL);            // some invalide session
             Player acc_player(&acc_s);
@@ -297,20 +276,20 @@ void CliBan(char*command,pPrintf zprintf)
         return;
     }
 
-    //if(isdigit(command[4])) <- very bad check, there might be an account like '123test'
+    bool is_ip = IsItIP(banip);
 
-    if(IsItIP(banip))
+    if(sWorld.BanAccount(banip))
     {
+        if(is_ip)
+            zprintf("We banned IP: %s\x0d\x0a",banip);
+        else
+            zprintf("We banned account: %s\x0d\x0a",banip);
 
-        loginDatabase.PExecute("INSERT INTO `ip_banned` VALUES ('%s')",banip);
-        zprintf("We banned IP: %s\x0d\x0a",banip);
     }
     else
     {
-        loginDatabase.PExecute("UPDATE `account` SET `banned` = '1' WHERE `username` = '%s'",banip);
-        zprintf("We banned account (if it exists): %s\x0d\x0a",banip);
+        zprintf("Account %s not found and not banned in result.\x0d\x0a",banip);
     }
-
 }
 
 void CliVersion(char*,pPrintf zprintf)
@@ -328,20 +307,12 @@ void CliRemoveBan(char *command,pPrintf zprintf)
     if(!strlen(banip))
         zprintf("Syntax is: removeban character or ip");
 
-    //if(isdigit(command[10])) //again stupid check
+    sWorld.RemoveBanAccount(banip);
 
     if(IsItIP(banip))
-    {
-        loginDatabase.PExecute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",banip);
         zprintf("We removed banned IP: %s\x0d\x0a",banip);
-    }
-
     else
-    {
-        loginDatabase.PExecute("UPDATE `account` SET `banned` = '0' WHERE `username` = '%s'",banip);
         zprintf("We removed ban from account: %s\x0d\x0a",banip);
-    }
-
 }
 
 void CliListGM(char *command,pPrintf zprintf)
@@ -560,7 +531,10 @@ void CliKick(char*command,pPrintf zprintf)
         return;
     }
 
-    sWorld.KickPlayer(kickName);
+    std::string name = kickName;
+    normalizePlayerName(name);
+
+    sWorld.KickPlayer(name);
 }
 
 void CliMotd(char*command,pPrintf zprintf)

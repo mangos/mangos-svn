@@ -60,4 +60,7 @@ inline void normalizePlayerName(std::string& name)
     for(size_t i = 1; i < name.size(); ++i)
         name[i] = tolower(name[i]);
 }
+
+bool IsItIP(char const* ip);
+
 #endif
