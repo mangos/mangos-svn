@@ -98,6 +98,9 @@ enum Rates
     RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE,
     RATE_CREATURE_ELITE_RARE_DAMAGE,
     RATE_CREATURE_AGGRO,
+    RATE_REST_INGAME,
+    RATE_REST_OFFLINE_IN_TAVERN_OR_CITY,
+    RATE_REST_OFFLINE_IN_WILDERNESS,
     MAX_RATES
 };
 
@@ -174,8 +177,8 @@ class World
         void Update(time_t diff);
         time_t GetLastTickTime() const { return m_Last_tick; }
 
-        void setRate(Rates rate,float value) { regen_values[rate]=value; }
-        float getRate(Rates rate) const { return regen_values[rate]; }
+        void setRate(Rates rate,float value) { rate_values[rate]=value; }
+        float getRate(Rates rate) const { return rate_values[rate]; }
 
         void setConfig(uint32 index,uint32 value)
         {
@@ -212,7 +215,7 @@ class World
         WeatherMap m_weathers;
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
-        float regen_values[MAX_RATES];
+        float rate_values[MAX_RATES];
         uint32 m_playerLimit;
         bool m_allowMovement;
         std::string m_motd;
