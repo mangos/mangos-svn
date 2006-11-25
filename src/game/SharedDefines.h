@@ -79,9 +79,11 @@ enum Stats
     STAT_AGILITY                       = 1,
     STAT_STAMINA                       = 2,
     STAT_INTELLECT                     = 3,
-    STAT_SPIRIT                        = 4,
-    MAX_STATS                          = 5
+    STAT_SPIRIT                        = 4
 };
+
+#define MAX_STATS                        5
+
 
 enum Powers
 {
@@ -91,6 +93,8 @@ enum Powers
     POWER_ENERGY                       = 3,
     POWER_HAPPINESS                    = 4
 };
+
+#define MAX_POWERS                       5
 
 enum SpellSchools
 {
@@ -102,6 +106,8 @@ enum SpellSchools
     SPELL_SCHOOL_SHADOW                = 5,
     SPELL_SCHOOL_ARCANE                = 6
 };
+
+#define MAX_SPELL_SCHOOOL                7
 
 #define ITEM_QUALITY_POOR                   0               //GREY
 #define ITEM_QUALITY_NORMAL                 1               //WHITE

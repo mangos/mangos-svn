@@ -1657,7 +1657,7 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetResistanceBuffMods(SpellSchools(0), true, 0);
     SetResistanceBuffMods(SpellSchools(0), false, 0);
     // set other resistence to original value (0)
-    for (int i = 1; i < 7; i++)
+    for (int i = 1; i < MAX_SPELL_SCHOOOL; i++)
     {
         SetResistance(SpellSchools(i), 0);
         SetResistanceBuffMods(SpellSchools(i), true, 0);
@@ -4201,36 +4201,36 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 
         switch (proto->ItemStat[i].ItemStatType)
         {
-            case POWER:                                     // modify MP
+            case ITEM_STAT_POWER:                           // modify MP
                 ApplyMaxPowerMod(POWER_MANA, val, apply);
                 typestr = "Mana";
                 break;
-            case HEALTH:                                    // modify HP
+            case ITEM_STAT_HEALTH:                          // modify HP
                 ApplyMaxHealthMod(val, apply);
                 typestr = "Health";
                 break;
-            case AGILITY:                                   // modify agility
+            case ITEM_STAT_AGILITY:                         // modify agility
                 ApplyStatMod(STAT_AGILITY,                val, apply);
                 ApplyPosStatMod(STAT_AGILITY,             val, apply);
                 typestr = "AGILITY";
                 break;
-            case STRENGHT:                                  //modify strength
+            case ITEM_STAT_STRENGTH:                        //modify strength
                 ApplyStatMod(STAT_STRENGTH,               val, apply);
                 ApplyPosStatMod(STAT_STRENGTH,            val, apply);
                 typestr = "STRENGHT";
                 break;
-            case INTELLECT:                                 //modify intellect
+            case ITEM_STAT_INTELLECT:                       //modify intellect
                 ApplyStatMod(STAT_INTELLECT,               val,    apply);
                 ApplyPosStatMod(STAT_INTELLECT,            val,    apply);
                 //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
                 typestr = "INTELLECT";
                 break;
-            case SPIRIT:                                    //modify spirit
+            case ITEM_STAT_SPIRIT:                          //modify spirit
                 ApplyStatMod(STAT_SPIRIT,                 val, apply);
                 ApplyPosStatMod(STAT_SPIRIT,              val, apply);
                 typestr = "SPIRIT";
                 break;
-            case STAMINA:                                   //modify stamina
+            case ITEM_STAT_STAMINA:                         //modify stamina
                 ApplyStatMod(STAT_STAMINA                ,val,   apply);
                 ApplyPosStatMod(STAT_STAMINA             ,val,   apply);
                 //ApplyMaxHealthMod(                        val*10,apply);
@@ -10075,6 +10075,11 @@ bool Player::LoadFromDB( uint32 guid )
 
     delete result;
 
+    // remember loaded power values to restore after stats initialization and modifier appling
+    float savedPower[MAX_POWERS];
+    for(uint32 i = 0; i < MAX_POWERS; ++i)
+        savedPower[i] = GetPower(Powers(i));
+
     // reset stats before loading any modifiers
     InitStatsForLevel(getLevel(),false,false);
 
@@ -10100,6 +10105,11 @@ bool Player::LoadFromDB( uint32 guid )
 
     // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
     // Skip _ApplyAllItemMods(); -- already applied in _LoadInventory()
+
+    // restore remembered power values
+    for(uint32 i = 0; i < MAX_POWERS; ++i)
+        SetPower(Powers(i),savedPower[i]);
+    
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugValues();

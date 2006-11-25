@@ -23,14 +23,14 @@
 
 enum ITEM_STAT_TYPE
 {
-    POWER      = 0,
-    HEALTH     = 1,
-    UNKNOWN    = 2,
-    AGILITY    = 3,
-    STRENGHT   = 4,
-    INTELLECT  = 5,
-    SPIRIT     = 6,
-    STAMINA    = 7,
+    ITEM_STAT_POWER      = 0,
+    ITEM_STAT_HEALTH     = 1,
+    ITEM_STAT_UNKNOWN    = 2,
+    ITEM_STAT_AGILITY    = 3,
+    ITEM_STAT_STRENGTH   = 4,
+    ITEM_STAT_INTELLECT  = 5,
+    ITEM_STAT_SPIRIT     = 6,
+    ITEM_STAT_STAMINA    = 7
 };
 
 enum ITEM_DAMAGE_TYPE
@@ -41,7 +41,7 @@ enum ITEM_DAMAGE_TYPE
     NATURE_DAMAGE  = 3,
     FROST_DAMAGE   = 4,
     SHADOW_DAMAGE  = 5,
-    ARCANE_DAMAGE  = 6,
+    ARCANE_DAMAGE  = 6
 };
 
 enum ITEM_SPELLTRIGGER_TYPE
@@ -49,7 +49,7 @@ enum ITEM_SPELLTRIGGER_TYPE
     USE           = 0,
     ON_EQUIP      = 1,
     CHANCE_ON_HIT = 2,
-    SOULSTONE     = 4,
+    SOULSTONE     = 4
 };
 
 enum ITEM_BONDING_TYPE
@@ -60,13 +60,13 @@ enum ITEM_BONDING_TYPE
     BIND_WHEN_USE        = 3,
     //TODO: Better name these
     QUEST_ITEM           = 4,
-    QUEST_ITEM1          = 5,
+    QUEST_ITEM1          = 5
 };
 
 // masks for ITEM_FIELD_FLAGS field
 enum ITEM_FLAGS
 {
-    ITEM_FLAGS_BINDED = 1,
+    ITEM_FLAGS_BINDED = 1
 };
 
 enum INVENTORY_TYPES
@@ -100,7 +100,7 @@ enum INVENTORY_TYPES
     INVTYPE_RANGEDRIGHT    = 26,
     INVTYPE_SLOT_ITEM      = 27,
     INVTYPE_RELIC          = 28,
-    NUM_INVENTORY_TYPES    = 29,
+    NUM_INVENTORY_TYPES    = 29
 };
 
 enum INVENTORY_CLASS
@@ -120,7 +120,7 @@ enum INVENTORY_CLASS
     ITEM_CLASS_QUEST         = 12,
     ITEM_CLASS_KEY           = 13,
     ITEM_CLASS_PERMANENT     = 14,
-    ITEM_CLASS_JUNK          = 15,
+    ITEM_CLASS_JUNK          = 15
 };
 
 // Client understand only 0 subclass for ITEM_CLASS_CONSUMABLE
@@ -132,7 +132,7 @@ enum ITEM_SUBCLASS_CONSUMABLE
     ITEM_SUBCLASS_POTION                  = 3,
     ITEM_SUBCLASS_SCROLL                  = 4,
     ITEM_SUBCLASS_BANDAGE                 = 5,
-    ITEM_SUBCLASS_HEALSTONE               = 6,
+    ITEM_SUBCLASS_HEALSTONE               = 6
 };
 
 enum ITEM_SUBCLASS_CONTAINER
@@ -141,7 +141,7 @@ enum ITEM_SUBCLASS_CONTAINER
     ITEM_SUBCLASS_SOUL_CONTAINER          = 1,
     ITEM_SUBCLASS_HERB_CONTAINER          = 2,
     ITEM_SUBCLASS_ENCHANTING_CONTAINER    = 3,
-    ITEM_SUBCLASS_ENGINEERING_CONTAINER   = 4,
+    ITEM_SUBCLASS_ENGINEERING_CONTAINER   = 4
 };
 
 enum INVENTORY_SUBCLASS_WEAPON
@@ -166,7 +166,7 @@ enum INVENTORY_SUBCLASS_WEAPON
     ITEM_SUBCLASS_WEAPON_SPEAR         = 17,
     ITEM_SUBCLASS_WEAPON_CROSSBOW      = 18,
     ITEM_SUBCLASS_WEAPON_WAND          = 19,
-    ITEM_SUBCLASS_WEAPON_FISHING_POLE  = 20,
+    ITEM_SUBCLASS_WEAPON_FISHING_POLE  = 20
 };
 
 enum ITEM_SUBCLASS_ARMOR
@@ -177,18 +177,18 @@ enum ITEM_SUBCLASS_ARMOR
     ITEM_SUBCLASS_ARMOR_MAIL        = 3,
     ITEM_SUBCLASS_ARMOR_PLATE       = 4,
     ITEM_SUBCLASS_ARMOR_BUCKLER     = 5,
-    ITEM_SUBCLASS_ARMOR_SHIELD      = 6,
+    ITEM_SUBCLASS_ARMOR_SHIELD      = 6
 };
 
 enum ITEM_SUBCLASS_PROJECTILE
 {
     ITEM_SUBCLASS_ARROW             = 2,
-    ITEM_SUBCLASS_BULLET            = 3,
+    ITEM_SUBCLASS_BULLET            = 3
 };
 
 enum ITEM_SUBCLASS_TRADE_GOODS
 {
-    ITEM_SUBCLASS_BOMB              = 2,
+    ITEM_SUBCLASS_BOMB              = 2
 };
 
 enum ITEM_SUBCLASS_BOOK
@@ -201,13 +201,13 @@ enum ITEM_SUBCLASS_BOOK
     ITEM_SUBCLASS_ALCHEMY_RECIPE        = 6,
     ITEM_SUBCLASS_FIRST_AID_MANUAL      = 7,
     ITEM_SUBCLASS_ENCHANTING_FORMULA    = 8,
-    ITEM_SUBCLASS_FISHING_MANUAL        = 9,
+    ITEM_SUBCLASS_FISHING_MANUAL        = 9
 };
 
 enum ITEM_SUBCLASS_QUIVER
 {
     ITEM_SUBCLASS_QUIVER            = 2,
-    ITEM_SUBCLASS_AMMO_POUCH        = 3,
+    ITEM_SUBCLASS_AMMO_POUCH        = 3
 };
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax

@@ -2059,24 +2059,24 @@ void Unit::ApplyStats(bool apply)
         if((*i)->GetModifier()->m_miscvalue != -1)
             totalstatmods[(*i)->GetModifier()->m_miscvalue] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
         else
-            for (uint8 j = 0; j < 5; j++)
+            for (uint8 j = 0; j < MAX_STATS; j++)
                 totalstatmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
     }
     AuraList& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
     for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
-        for(uint8 j = 0; j <= 6; j++)
+        for(uint8 j = 0; j < MAX_SPELL_SCHOOOL; j++)
             if((*i)->GetModifier()->m_miscvalue & (1<<j))
                 totalresmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
-    for (uint8 i = 0; i < 5; i++)
+    for (uint8 i = 0; i < MAX_STATS; i++)
         totalstatmods[i] = totalstatmods[i] * 100.0f - 100.0f;
-    for (uint8 i = 0; i < 7; i++)
+    for (uint8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
         totalresmods[i] = totalresmods[i] * 100.0f - 100.0f;
 
     // restore percent mods
     if (apply)
     {
-        for (uint8 i = 0; i < 5; i++)
+        for (uint8 i = 0; i < MAX_STATS; i++)
         {
             if (totalstatmods[i] != 0)
             {
@@ -2085,7 +2085,7 @@ void Unit::ApplyStats(bool apply)
                 ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );
             }
         }
-        for (uint8 i = 0; i < 7; i++)
+        for (uint8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
         {
             if (totalresmods[i] != 0)
             {
@@ -2201,7 +2201,7 @@ void Unit::ApplyStats(bool apply)
     // remove percent mods to see original stats when adding buffs/items
     if (!apply)
     {
-        for (uint8 i = 0; i < 5; i++)
+        for (uint8 i = 0; i < MAX_STATS; i++)
         {
             if (totalstatmods[i])
             {
@@ -2210,7 +2210,7 @@ void Unit::ApplyStats(bool apply)
                 ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );
             }
         }
-        for (uint8 i = 0; i < 7; i++)
+        for (uint8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
         {
             if (totalresmods[i])
             {
