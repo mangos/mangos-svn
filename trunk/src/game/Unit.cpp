@@ -1135,15 +1135,21 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         }
     }
 
-    // flat 40% chance to score a glancing blow if you're 3 or more levels
-    // below mob level or your weapon skill is too low
+    // Max 40% chance to score a glancing blow against mobs that are higher level
     if (   (GetTypeId() == TYPEID_PLAYER)
-        && (pVictim->GetTypeId() != TYPEID_PLAYER)
-        && ((getLevel() + 3 <= pVictim->getLevel()) || (skillDiff <= -15))
-        && (roll < (sum += 4000)))
+        && (pVictim->GetTypeId() != TYPEID_PLAYER) 
+        && ((getLevel() < pVictim->getLevel())))
     {
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum);
-        return MELEE_HIT_GLANCING;
+        tmp = GetWeaponSkillValue(attType);
+        int32	maxskill = getLevel() * 5;
+        tmp = (tmp > maxskill) ? maxskill : tmp;
+        tmp = ((pVictim->getLevel()* 5 - tmp - 5) * 300 + 1000 );
+        tmp = tmp > 4000 ? 4000 : tmp;
+        if (roll < (sum += tmp))
+        {
+            DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum);
+            return MELEE_HIT_GLANCING;
+        }
     }
 
     // FIXME: +skill and +defense has no effect on crit chance in PvP combat
