@@ -1077,7 +1077,6 @@ void Player::SendIgnorelist()
     WorldPacket dataI;
 
     unsigned char nrignore=0;
-    uint8 i=0;
     Field *fields;
 
     QueryResult *result = sDatabase.PQuery("SELECT COUNT(`friend`) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
@@ -4743,6 +4742,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                         case NEED_BEFORE_GREED:
                             group->NeedBeforeGreed(recipient->GetGUID(), loot, creature);
                             break;
+                        default:
+                            break;
                     }
                 }
             }
@@ -6969,7 +6970,6 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     if(swap)
         return EQUIP_ERR_OK;
 
-    uint32 type = pProto->InventoryType;
     uint8 slot = pos & 255;
 
     // can't unequip mainhand item if offhand item equiped

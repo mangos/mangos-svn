@@ -225,7 +225,6 @@ AggressorAI::IsVisible(Unit *pl) const
     bool seestealth = true;
     uint32 sight = sWorld.getConfig(CONFIG_SIGHT_MONSTER);
     float dist = i_creature.GetDistanceSq(pl);
-    float attackRadius = i_creature.GetAttackDistance(pl);
     if(pl->isStealth())
     {
         int32 seevaluse;

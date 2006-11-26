@@ -1010,7 +1010,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     {
         QueryResult *result = sDatabase.Query("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket`");
 
-        if(!result || num > result->GetRowCount())
+        if(!result || uint64(num) > result->GetRowCount())
         {
             PSendSysMessage("Ticket %i doesn't exist", num);
             delete result;
@@ -1068,7 +1068,7 @@ uint32 ChatHandler::GetTicketIDByNum(uint32 num)
         return 0;
     }
 
-    for(int i = 1; i < num; ++i)
+    for(uint32 i = 1; i < num; ++i)
         result->NextRow();
 
     Field* fields = result->Fetch();
@@ -1118,7 +1118,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
     {
         QueryResult *result = sDatabase.PQuery("SELECT `ticket_id`,`guid` FROM `character_ticket` LIMIT '%i'",num);
 
-        if(!result || num > result->GetRowCount())
+        if(!result || uint64(num) > result->GetRowCount())
         {
             PSendSysMessage("Ticket %i doesn't exist", num);
             delete result;

@@ -208,10 +208,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 static void HandleShapeshiftBoosts(bool apply, Aura* aura);
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
-m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0),m_castItem(castItem),
-m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
+m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target), 
+m_timeCla(1000), m_castItem(castItem), m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_removeOnDeath(false), m_procCharges(0), m_absorbDmg(0), m_isPersistent(false)
+m_procCharges(0), m_absorbDmg(0), m_isPersistent(false), m_removeOnDeath(false)
 {
     assert(target);
     m_duration = GetDuration(spellproto);
@@ -350,7 +350,6 @@ void Aura::Update(uint32 diff)
         if(caster && m_timeCla <= 0)
         {
             Powers powertype = caster->getPowerType();
-            uint32 curpower = caster->GetPower(powertype);
             int32 manaPerSecond = GetSpellProto()->manaPerSecond;
             int32 manaPerSecondPerLevel = uint32(GetSpellProto()->manaPerSecondPerLevel*caster->getLevel());
             m_timeCla = 1000;
@@ -835,7 +834,6 @@ void Aura::HandleAuraDummy(bool apply)
 
     if(GetSpellProto()->SpellVisual == 5622 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        Player *player = (Player*)caster;
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
         {
             Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
@@ -854,7 +852,6 @@ void Aura::HandleAuraDummy(bool apply)
     }
     if(GetSpellProto()->SpellVisual == 7395 && GetSpellProto()->SpellIconID == 278 && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        Player *player = (Player*)caster;
         Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
         if(apply)
             tAuraProcTriggerDamage.push_back(this);
@@ -1228,7 +1225,7 @@ void Aura::HandleModPossess(bool apply)
 
     Creature* creatureTarget = (Creature*)m_target;
 
-    if(m_target->getLevel() <= m_modifier.m_amount)
+    if(int32(m_target->getLevel()) <= m_modifier.m_amount)
     {
         WorldPacket data;
 
@@ -1279,7 +1276,7 @@ void Aura::HandleModCharm(bool apply)
 
     Creature* creatureTarget = (Creature*)m_target;
 
-    if(m_target->getLevel() <= m_modifier.m_amount)
+    if(int32(m_target->getLevel()) <= m_modifier.m_amount)
     {
         WorldPacket data;
 
@@ -2344,7 +2341,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
             Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             if (pItem)
             {
-                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) &&
+                if ((int32(pItem->GetProto()->Class) == GetSpellProto()->EquippedItemClass) &&
                     ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
@@ -2354,7 +2351,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
             pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
             if (pItem)
             {
-                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) &&
+                if ((int32(pItem->GetProto()->Class) == GetSpellProto()->EquippedItemClass) &&
                     ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
@@ -2364,7 +2361,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
             pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
             if (pItem)
             {
-                if ((pItem->GetProto()->Class == GetSpellProto()->EquippedItemClass) &&
+                if ((int32(pItem->GetProto()->Class) == GetSpellProto()->EquippedItemClass) &&
                     ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );

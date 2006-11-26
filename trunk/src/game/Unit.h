@@ -451,7 +451,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2);
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK);
-        int32 SpellMissChanceCalc(Unit *pVictim) const;
+        uint32 SpellMissChanceCalc(Unit *pVictim) const;
         int32 MeleeMissChanceCalc(const Unit *pVictim) const;
 
         float GetUnitDodgeChance()    const;

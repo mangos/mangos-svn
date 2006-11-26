@@ -1221,7 +1221,6 @@ void Spell::TakeCastItem()
         return;
 
     ItemPrototype const *proto = m_CastItem->GetProto();
-    uint32 ItemCount = m_CastItem->GetCount();
     uint32 ItemClass = proto->Class;
 
     if (ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_BOOK || ItemClass == ITEM_CLASS_QUEST)
@@ -1305,7 +1304,6 @@ void Spell::TakeReagents()
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
 {
     uint8 castResult = 0;
-    SpellSchools school = SpellSchools(m_spellInfo->School);
     unitTarget = pUnitTarget;
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
@@ -1809,7 +1807,7 @@ uint8 Spell::CheckMana(uint32 *mana)
 
     Powers powerType = Powers(m_spellInfo->powerType);
 
-    uint32 currentPower = m_caster->GetPower(powerType);
+    int32 currentPower = m_caster->GetPower(powerType);
     int32 manaCost = m_spellInfo->manaCost;
     if(m_spellInfo->manaCostPerlevel)
         manaCost += int32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
@@ -1875,7 +1873,7 @@ uint8 Spell::CheckItems()
         if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
         {
             // filter by equiped class (weapon or armor) - raw class value
-            if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
+            if(int32(itemTarget->GetProto()->Class) != m_spellInfo->EquippedItemClass)
                 return CAST_FAIL_ITEM_NOT_READY;
             // filter by equiped subclass - bitmask of subclasses
             if((( 1 << itemTarget->GetProto()->SubClass ) & m_spellInfo->EquippedItemSubClass) == 0 )
@@ -1955,7 +1953,7 @@ uint8 Spell::CheckItems()
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
             {
-                if(m_spellInfo->EquippedItemClass >= 0 && itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
+                if(int32(m_spellInfo->EquippedItemClass) >= 0 && itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
                 if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENCHANT_HELD_ITEM && !itemTarget->IsEquipped())
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
@@ -2084,7 +2082,7 @@ void Spell::Delayed(int32 delaytime)
     m_timer += delaytime;
 
     if(m_timer > casttime)
-        m_timer = casttime;
+        m_timer = (casttime > 0 ? casttime : 0);
 
     WorldPacket data;
 
@@ -2120,7 +2118,7 @@ void Spell::DelayedChannel(int32 delaytime)
     m_delayedTime += appliedDelayTime;
 
     // Cancel spell if aggregate channeling delay is greater than base channeling duration
-    if(m_delayedTime >= duration)
+    if(m_delayedTime >= int32(duration))
     {
         sLog.outDebug("Spell %u canceled because of accumulated delay: %i ms", m_spellInfo->Id, m_delayedTime);
         cancel();

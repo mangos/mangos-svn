@@ -1188,7 +1188,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     sLog.outDebug("Received worldport command from player %s", GetPlayer()->GetName());
 }
 
-void WorldSession::SendNotification(char* msg)
+void WorldSession::SendNotification(char const* msg)
 {
     if(msg)
     {

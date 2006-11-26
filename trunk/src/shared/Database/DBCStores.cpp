@@ -514,8 +514,8 @@ bool IsSingleTarget(uint32 spellId)
 
     // cannot be cast on another target while not cooled down anyway
     int32 duration = GetDuration(spellInfo);
-    if ( duration < spellInfo->RecoveryTime) return false;
-    if ( spellInfo->RecoveryTime == 0 && duration < spellInfo->CategoryRecoveryTime) return false;
+    if ( duration < int32(spellInfo->RecoveryTime)) return false;
+    if ( spellInfo->RecoveryTime == 0 && duration < int32(spellInfo->CategoryRecoveryTime)) return false;
 
     // all other single target spells have if it has AttributesEx
     if ( spellInfo->AttributesEx & (1<<18) ) return true;

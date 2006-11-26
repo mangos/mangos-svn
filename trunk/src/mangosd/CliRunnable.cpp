@@ -94,7 +94,7 @@ const CliCommand Commands[]=
 /// Reload the scripts and notify the players
 void CliLoadScripts(char*command,pPrintf zprintf)
 {
-    char *del=strtok(command," ");
+    char const *del=strtok(command," ");
     if (!del)
         del="";
     if(!LoadScriptingModule(del))                                   // Error report is already done by LoadScriptingModule
@@ -482,7 +482,7 @@ void ParseCommand( pPrintf zprintf, char* input)
         return;
 
     unsigned int l=strlen(input);
-    char * supposedCommand=NULL,* arguments="";
+    char *supposedCommand=NULL,* arguments=(char*)("");
     if(!l)
         return;
 

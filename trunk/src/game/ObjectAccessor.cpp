@@ -310,7 +310,6 @@ Corpse*
 ObjectAccessor::GetCorpseForPlayer(Player const &player)
 {
     Guard guard(i_corpseGuard);
-    uint64 guid = player.GetGUID();
 
     Player2CorpsesMapType::iterator iter = i_corpse.find(player.GetGUID());
     if( iter == i_corpse.end() ) return NULL;

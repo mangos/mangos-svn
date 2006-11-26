@@ -644,7 +644,6 @@ void Guild::Roster(WorldSession *session)
         data << ritr->rights;
 
     MemberList::iterator itr;
-    int a=0;
     for (itr = members.begin(); itr != members.end(); itr++)
     {
         pl = ObjectAccessor::Instance().FindPlayer(itr->guid);

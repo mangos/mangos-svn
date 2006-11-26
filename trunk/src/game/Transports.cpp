@@ -70,7 +70,7 @@ void MapManager::LoadTransports()
         m_Transports.push_back(t);
         
         
-        for (int i = 0; i < mapsUsed.size(); i++) {
+        for (size_t i = 0; i < mapsUsed.size(); i++) {
             if (m_TransportsByMap.find(mapsUsed[i]) == m_TransportsByMap.end()) {
                 vector<Transport *> tmp;
                 m_TransportsByMap[t->m_WayPoints[i].mapid] = tmp;
@@ -163,7 +163,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
     vector<keyFrame> keyFrames;
     int mapChange = 0;
     mapids.clear();
-    for (int i = 1; i < path.Size() - 1; i++) {
+    for (size_t i = 1; i < path.Size() - 1; i++) {
         if (mapChange == 0) {
             if ((path[i].mapid == path[i+1].mapid)) {
                 keyFrame k(path[i].x, path[i].y, path[i].z, path[i].mapid, path[i].actionFlag, path[i].delay);
@@ -187,7 +187,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
     }
 
     // find the rest of the distances between key points
-    for (int i = 1; i < keyFrames.size(); i++) {
+    for (size_t i = 1; i < keyFrames.size(); i++) {
         if ((keyFrames[i].actionflag == 1) || (keyFrames[i].mapid != keyFrames[i-1].mapid)) {
             keyFrames[i].distFromPrev = 0;
         } else {
@@ -201,7 +201,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
     }
 
     float tmpDist = 0;
-    for (int i = 0; i < keyFrames.size(); i++) {
+    for (size_t i = 0; i < keyFrames.size(); i++) {
         int j = (i + lastStop) % keyFrames.size();
         if (keyFrames[j].actionflag == 2)
             tmpDist = 0;
@@ -210,7 +210,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
         keyFrames[j].distSinceStop = tmpDist;
     }
 
-    for (int i = keyFrames.size() - 1; i >= 0; i--) {
+    for (size_t i = keyFrames.size() - 1; i >= 0; i--) {
         int j = (i + (keyFrames.size() - lastStop)) % keyFrames.size();
         tmpDist += keyFrames[(j + 1) % keyFrames.size()].distFromPrev;
         keyFrames[j].distUntilStop = tmpDist;
@@ -218,7 +218,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
             tmpDist = 0;
     }
 
-    for (int i = 0; i < keyFrames.size(); i++) {
+    for (size_t i = 0; i < keyFrames.size(); i++) {
         if (keyFrames[i].distSinceStop < (30 * 30 * 0.5))
             keyFrames[i].tFrom = sqrt(2 * keyFrames[i].distSinceStop);
         else
@@ -249,7 +249,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
     t += keyFrames[0].delay * 1000;
 
     int cM = keyFrames[0].mapid;
-    for (int i = 0; i < keyFrames.size() - 1; i++) { //
+    for (size_t i = 0; i < keyFrames.size() - 1; i++) { //
         float d = 0;
         float tFrom = keyFrames[i].tFrom;
         float tTo = keyFrames[i].tTo;

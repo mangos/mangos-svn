@@ -118,7 +118,7 @@ class Group
             uint8 itemSlot;
 
             Roll()
-                : totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemGUID(0), itemid(0), itemSlot(0), loot(NULL) {}
+                : itemGUID(0), itemid(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), loot(NULL), itemSlot(0) {}
         };
 
         void BroadcastToGroup(WorldSession *session, std::string msg);

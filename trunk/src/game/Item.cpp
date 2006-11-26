@@ -480,6 +480,8 @@ void Item::SaveToDB()
             delete this;
             return;
         }
+        case ITEM_UNCHANGED:
+            break;
     }
     SetState(ITEM_UNCHANGED);
 }
