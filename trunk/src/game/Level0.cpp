@@ -126,6 +126,8 @@ bool ChatHandler::HandleStartCommand(const char* args)
 
     chr->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,chr->GetOrientation());
 
+    chr->SetUInt32Value(PLAYER_FARSIGHT, 0x00);
+
     return true;
 }
 
