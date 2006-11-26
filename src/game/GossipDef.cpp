@@ -129,10 +129,11 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
 
     for ( uint16 iI = 0; iI < pQuestMenu->MenuItemCount(); iI++ )
     {
-        data << uint32( pQuestMenu->GetItem(iI).m_qId );
+        uint32 questID = pQuestMenu->GetItem(iI).m_qId;
+        data << questID;
         data << uint32( pQuestMenu->GetItem(iI).m_qIcon );
-        data << uint32( pQuestMenu->GetItem(iI).m_qAvailable );
-        data << pQuestMenu->GetItem(iI).m_qTitle;
+        data << uint32( objmgr.QuestTemplates[questID]->GetQuestLevel() );
+        data << objmgr.QuestTemplates[questID]->GetTitle();
     }
 
     pSession->SendPacket( &data );
@@ -238,21 +239,16 @@ QuestMenu::~QuestMenu()
     ClearMenu();
 }
 
-void QuestMenu::AddMenuItem( uint32 QuestId, uint8 Icon, uint8 Available)
+void QuestMenu::AddMenuItem( uint32 QuestId, uint8 Icon)
 {
     Quest * qinfo = objmgr.QuestTemplates[QuestId];
     if (!qinfo) return;
 
-    char* Text = new char[strlen( qinfo->GetTitle() ) + 1];
-    strcpy( Text, qinfo->GetTitle() );
-
     m_qItemsCount++;
     ASSERT( m_qItemsCount < GOSSIP_MAX_MENU_ITEMS  );
 
-    m_qItems[m_qItemsCount - 1].m_qIcon      = Icon;
-    m_qItems[m_qItemsCount - 1].m_qTitle     = Text;
     m_qItems[m_qItemsCount - 1].m_qId        = QuestId;
-    m_qItems[m_qItemsCount - 1].m_qAvailable = Available;
+    m_qItems[m_qItemsCount - 1].m_qIcon      = Icon;
 }
 
 bool QuestMenu::HasItem( uint32 questid )
@@ -269,9 +265,6 @@ bool QuestMenu::HasItem( uint32 questid )
 
 void QuestMenu::ClearMenu()
 {
-    for (int i=0; i<m_qItemsCount; i++)
-        delete[] m_qItems[i].m_qTitle;
-
     m_qItemsCount = 0;
 }
 
@@ -289,12 +282,11 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
     for ( uint16 iI = 0; iI < pQuestMenu->MenuItemCount(); iI++ )
     {
         QuestMenuItem qmi=pQuestMenu->GetItem(iI);
-        data << uint32( qmi.m_qId );
-        //data << uint32((qmi.m_qAvailable)?5:3);
-        data << uint32(qmi.m_qAvailable);
-        //data << uint32( qmi.m_qIcon );
-        data << uint32(0x00);
-        data << qmi.m_qTitle;
+        uint32 questID = qmi.m_qId;
+        data << questID;
+        data << uint32( qmi.m_qIcon );
+        data << uint32( objmgr.QuestTemplates[questID]->GetQuestLevel() );
+        data << objmgr.QuestTemplates[questID]->GetTitle();
     }
     pSession->SendPacket( &data );
     uint32 fqid=pQuestMenu->GetItem(0).m_qId;

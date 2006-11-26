@@ -819,8 +819,9 @@ void ObjectMgr::LoadQuests()
     // create multimap previous quest for each existed quest
     // some quests can have many previous maps setted by NextQuestId in previouse quest
     // for example set of race quests can lead to single not race specific quest
-    
+    barGoLink bar( result->GetRowCount() );
     do {
+        bar.step();
         Field *fields = result->Fetch();
         
         Quest * newQuest = new Quest(fields);
