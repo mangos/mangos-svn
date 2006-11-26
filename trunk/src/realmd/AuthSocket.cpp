@@ -301,9 +301,8 @@ void AuthSocket::_HandleLogonChallenge()
 
     //Escape the user login to avoid further SQL injection
     //Memory will be freed on AuthSocket object destruction
-    _safelogin.resize(2*_login.size()+1);
-    if (!dbRealmServer.escape_string((char*)_safelogin.c_str(), _login.c_str(), _login.size()))
-        _safelogin.empty();
+    _safelogin=_login;
+    dbRealmServer.escape_string(_safelogin);
 
     std::string password;
 
@@ -393,7 +392,8 @@ void AuthSocket::_HandleLogonChallenge()
                             BigNumber x;
                             x.SetBinary(sha.GetDigest(), sha.GetLength());
                             v = g.ModExp(x, N);
-                            dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _login.c_str() );
+                            // No SQL injection (username escaped)
+                            dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
                             b.SetRand(19 * 8);
                             BigNumber gmod=g.ModExp(b, N);
                             B = ((v * 3) + gmod) % N;
