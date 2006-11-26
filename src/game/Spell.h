@@ -117,7 +117,7 @@ class SpellCastTargets
         ~SpellCastTargets();
 
         void read ( WorldPacket * data,Unit *caster );
-        void write ( WorldPacket * data);
+        void write ( WorldPacket * data, bool forceAppend=false);
 
         SpellCastTargets& operator=(const SpellCastTargets &target)
         {
@@ -529,6 +529,7 @@ class Spell
         uint32 m_timer;
         int32 m_delayedTime;
         SpellEntry * m_TriggerSpell;
+        uint16 m_castFlags;
 
         float m_castPositionX;
         float m_castPositionY;

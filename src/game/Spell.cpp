@@ -95,22 +95,31 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     }
 }
 
-void SpellCastTargets::write ( WorldPacket * data)
+void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
 {
-
-    *data << m_targetMask;
-
-    if(m_targetMask == TARGET_FLAG_SELF)
-        *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);
+    uint32 len = data->size();
+    
+    // dont append targets when spell's for your own..
+    /*if(m_targetMask == TARGET_FLAG_SELF) 
+        *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);*/
 
     if(m_targetMask & TARGET_FLAG_UNIT)
-        *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);
+        if(m_unitTarget)
+            data->append(m_unitTarget->GetPackGUID());
+        else
+            *data << (uint8)0;
 
     if(m_targetMask & TARGET_FLAG_OBJECT)
-        *data << (m_GOTarget ? m_GOTarget->GetGUID(): (uint64)0);
+        if(m_GOTarget)
+            data->append(m_GOTarget->GetPackGUID());
+        else
+            *data << (uint8)0;
 
     if(m_targetMask & TARGET_FLAG_ITEM)
-        *data << (m_itemTarget ? m_itemTarget->GetGUID(): (uint64)0);
+        if(m_itemTarget)
+            data->append(m_itemTarget->GetPackGUID());
+        else
+            *data << (uint8)0;
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         *data << m_srcX << m_srcY << m_srcZ;
@@ -124,6 +133,9 @@ void SpellCastTargets::write ( WorldPacket * data)
     {
         //0x8000 TARGET_CORPSE NEED TO ADD
     }
+
+    if(forceAppend && data->size() == len)
+        *data << (uint8)0;
 }
 
 Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
@@ -972,9 +984,8 @@ void Spell::SendSpellStart()
 {
 
     WorldPacket data;
-    uint16 cast_flags;
 
-    cast_flags = 2;
+    m_castFlags = CAST_FLAG_UNKNOWN1;
     Unit * target;
     if(!unitTarget)
         target = m_caster;
@@ -982,12 +993,17 @@ void Spell::SendSpellStart()
         target = unitTarget;
 
     data.Initialize(SMSG_SPELL_START);
-    data.append(target->GetPackGUID());
+    //data.append(target->GetPackGUID());
+    /* in fact this should be the causer's guid. so if you clicked on a item and
+       this caused spell it has to be the item's guid
+    */
+    data.append(m_caster->GetPackGUID()); 
     data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
-    data << cast_flags;
+    data << m_castFlags;
     data << uint32(m_timer);
 
+    data << m_targets.m_targetMask;
     m_targets.write( &data );
 
     m_caster->SendMessageToSet(&data, true);
@@ -1005,7 +1021,11 @@ void Spell::SendSpellGo()
         target = unitTarget;
 
     data.Initialize(SMSG_SPELL_GO);
-    data.append(target->GetPackGUID());
+    //data.append(target->GetPackGUID());
+    /* in fact this should be the causer's guid. so if you clicked on a item and
+       this caused spell it has to be the item's guid
+    */
+    data.append(m_caster->GetPackGUID());
     data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
 
@@ -1014,9 +1034,10 @@ void Spell::SendSpellGo()
 
     data << (uint8)0;
 
-    m_targets.write( &data );
-    m_caster->SendMessageToSet(&data, true);
+    data << m_castFlags;
+    m_targets.write( &data, true );
 
+    m_caster->SendMessageToSet(&data, true);
 }
 
 void Spell::writeSpellGoTargets( WorldPacket * data )
