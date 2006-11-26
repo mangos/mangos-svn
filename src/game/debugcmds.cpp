@@ -50,9 +50,11 @@ bool ChatHandler::HandleDebugSpellFailCommand(const char* args)
 {
     WorldPacket data;
 
-    if(!args || args ==" ")
+    if(!args)
         return false;
     char* px = strtok((char*)args, " ");
+    if(!px)
+        return false;
 
     uint8 failnum = (uint8)atoi(px);
 
@@ -143,8 +145,8 @@ bool ChatHandler::HandleGetItemState(const char* args)
     if (!args)
         return false;
 
-    char *st = strtok((char*)args, " ");
-    std::string state_str(args);
+    std::string state_str = args;
+
     ItemUpdateState state;
     bool list_queue = false, check_all = false;
     if (state_str == "unchanged") state = ITEM_UNCHANGED;
@@ -189,7 +191,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
     if (list_queue)
     {
         std::vector<Item *> &updateQueue = player->GetItemUpdateQueue();
-        for(int i = 0; i < updateQueue.size(); i++)
+        for(size_t i = 0; i < updateQueue.size(); i++)
         {
             Item *item = updateQueue[i];
             if(!item) continue;
@@ -331,7 +333,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
             }
         }
 
-        for(int i = 0; i < updateQueue.size(); i++)
+        for(size_t i = 0; i < updateQueue.size(); i++)
         {
             Item *item = updateQueue[i];
             if(!item) continue;

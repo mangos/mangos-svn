@@ -544,7 +544,6 @@ void WorldSession::SendStablePet(uint64 guid )
         if(!unit->GetUInt32Value(UNIT_FIELD_PETNUMBER))
             return;
         Creature *pet = _player->GetPet();
-        CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(pet->GetEntry());
                                                             // petnumber
         data << uint32(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER));
         data << uint32(pet->GetEntry());

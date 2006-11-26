@@ -674,7 +674,6 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
 bool World::KickPlayer(std::string playerName)
 {
     SessionMap::iterator itr, next;
-    WorldSession *playerToKick = 0;
 
 
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)

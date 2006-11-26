@@ -31,13 +31,13 @@ class MANGOS_DLL_SPEC HomeMovementGenerator : public MovementGenerator
         void Initialize(Creature &);
         void Reset(Creature &);
         bool Update(Creature &, const uint32 &);
-        void modifyTravelTime(const uint32 &travel_time) { i_travel_timer = travel_time; }
+        void modifyTravelTime(uint32 travel_time) { i_travel_timer = travel_time; }
         MovementGeneratorType GetMovementGeneratorType() { return HOME_MOTION_TYPE; }
 
     private:
         void _setTargetLocation(Creature &);
 
-        time_t i_travel_timer;
+        uint32 i_travel_timer;
         void _reLocate(Creature &); 
 };
 #endif

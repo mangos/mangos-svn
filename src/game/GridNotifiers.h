@@ -220,8 +220,8 @@ namespace MaNGOS
                 return go->IsWithinDist(i_unit, dist);
             }
         private:
-            uint32 i_focusId;
             Unit* i_unit;
+            uint32 i_focusId;
 
     };
 
@@ -254,10 +254,10 @@ namespace MaNGOS
             }
             Unit *GetResult() const { return i_result; }
         private:
+            Object* const i_obj;
+            Unit* const i_funit;
             float i_range;
             Unit* i_result;
-            Unit* const i_funit;
-            Object* const i_obj;
     };
 
     struct MANGOS_DLL_DECL GridUnitListNotifier

@@ -67,6 +67,7 @@ class RASocket: public TcpSocket
         }stage;
 
         void Log(const char *,...);
+	static int zprintf( const char * szText, ... );
 };
 #endif
 #endif

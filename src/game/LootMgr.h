@@ -124,7 +124,7 @@ struct Loot
     uint8 unlootedCount;
     bool released;
 
-    Loot(uint32 _gold = 0) : gold(_gold), released(false), unlootedCount(0) {}
+    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), released(false) {}
     ~Loot() { clear(); }
 
     void clear()

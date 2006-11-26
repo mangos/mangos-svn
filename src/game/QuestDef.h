@@ -122,7 +122,7 @@ enum __QuestSpecialFlags                                    //according to mango
 // xp to give
 class Quest
 {
-    friend ObjectMgr;
+    friend class ObjectMgr;
     public:
         Quest(Field * questRecord);
         uint32 XPValue( Player *pPlayer );

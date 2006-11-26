@@ -663,7 +663,7 @@ void ObjectMgr::LoadPlayerInfo()
             }
 
             // fill level gaps
-            for (int level = 1; level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+            for (uint32 level = 1; level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
             {
                 if(pInfo->levelInfo[level].health == 0)
                 {
@@ -1158,8 +1158,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 
     pathnodes.Resize(nodeList.size());
 
-    unsigned int i = 0;
-    for(int i = 0; i < nodeList.size(); ++i)
+    for(size_t i = 0; i < nodeList.size(); ++i)
     {
         pathnodes[ i ].x = nodeList[i].x;
         pathnodes[ i ].y = nodeList[i].y;
@@ -1176,8 +1175,7 @@ void ObjectMgr::GetTransportPathNodes( uint32 path, TransportPath &pathnodes )
 
     pathnodes.Resize(nodeList.size());
 
-    unsigned int i = 0;
-    for(int i = 0; i < nodeList.size(); ++i)
+    for(size_t i = 0; i < nodeList.size(); ++i)
     {
         pathnodes[ i ].mapid = nodeList[i].mapid;
         pathnodes[ i ].x = nodeList[i].x;

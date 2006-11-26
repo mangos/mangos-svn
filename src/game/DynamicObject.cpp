@@ -71,11 +71,11 @@ void DynamicObject::Update(uint32 p_time)
 
     if(m_aliveDuration > 0)
     {
-        if(m_aliveDuration > p_time)
+        if(uint32(m_aliveDuration) > p_time)
             m_aliveDuration -= p_time;
         else
         {
-            if(this->IsInWorld())
+            if(IsInWorld())
             {
                 deleteThis = true;
             }

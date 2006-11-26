@@ -48,7 +48,7 @@ void usage(const char *prog)
 int main(int argc, char **argv)
 {
     ///- Command line parsing to get the configuration file name
-    char* cfg_file = _REALMD_CONFIG;
+    char const* cfg_file = _REALMD_CONFIG;
     int c=1;
     while( c < argc )
     {

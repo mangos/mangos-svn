@@ -117,7 +117,7 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
     data << uint32( TitleTextId );
     data << uint32( pGossipMenu->MenuItemCount() );
 
-    for ( int iI = 0; iI < pGossipMenu->MenuItemCount(); iI++ )
+    for ( unsigned int iI = 0; iI < pGossipMenu->MenuItemCount(); iI++ )
     {
         data << uint32( iI );
         data << uint8( pGossipMenu->GetItem(iI).m_gIcon );

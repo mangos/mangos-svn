@@ -1623,7 +1623,6 @@ bool ChatHandler::HandleDieCommand(const char* args)
 
     if( target->isAlive() )
     {
-        uint32 health = target->GetHealth();
         m_session->GetPlayer()->DealDamage(target, target->GetHealth(), DIRECT_DAMAGE, 0, false);
     }
 

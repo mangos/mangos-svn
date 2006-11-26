@@ -541,7 +541,6 @@ void Spell::EffectPowerDrain(uint32 i)
         return;
 
     uint32 curPower = unitTarget->GetPower(POWER_MANA);
-    uint32 curHealth = unitTarget->GetHealth();
 
     int32 new_damage;
     if(curPower < damage)
@@ -589,7 +588,6 @@ void Spell::EffectHealthLeach(uint32 i)
 
     sLog.outDebug("HealthLeach :%u", damage);
 
-    uint32 curPower = unitTarget->GetPower(POWER_MANA);
     uint32 curHealth = unitTarget->GetHealth();
 
     int32 new_damage;
@@ -1273,7 +1271,6 @@ void Spell::EffectTameCreature(uint32 i)
         if(m_caster->getVictim()==creatureTarget)
             m_caster->AttackStop();
 
-        uint32 petlevel = creatureTarget->getLevel();
         creatureTarget->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         creatureTarget->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
         creatureTarget->SetMaxPower(POWER_HAPPINESS,1000000);
@@ -1340,8 +1337,6 @@ void Spell::EffectSummonPet(uint32 i)
     }
 
     Pet* NewSummon = new Pet();
-
-    uint32 ownerid = m_caster->GetGUIDLow();
 
     if(NewSummon->LoadPetFromDB(m_caster,petentry))
     {
@@ -1485,7 +1480,6 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
-    uint32 procflag = 0;
     bool criticalhit = false;
 
     m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
@@ -1798,7 +1792,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
 
         // remove old enchanting before appling new
         if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3))
-            p_caster->AddItemEnchant(itemTarget,enchant_id,false);
+            p_caster->AddItemEnchant(itemTarget,old_enchant_id,false);
 
         for(int x=0;x<3;x++)
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);

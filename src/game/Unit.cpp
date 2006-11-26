@@ -373,7 +373,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                         pGroupGuy->GiveXP(xp, pVictim);
                         if(player->GetPet())
                         {
-                            uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
                             player->GetPet()->GivePetXP(xp/2);
                         }
                         pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
@@ -385,7 +384,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                     player->GiveXP(xp, pVictim);
                     if(player->GetPet())
                     {
-                        uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
                         player->GetPet()->GivePetXP(xp);
                     }
                     player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
@@ -667,7 +665,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
                 continue;
 
             int32 amount;
-            if(pVictim->GetPower(POWER_MANA) > mod->m_amount)
+            if(int32(pVictim->GetPower(POWER_MANA)) > mod->m_amount)
                 amount = mod->m_amount;
             else
                 amount = pVictim->GetPower(POWER_MANA);
@@ -1245,7 +1243,7 @@ void Unit::SendAttackStop(Unit* victim)
         ((Creature*)victim)->AI().AttackStop(this);
 }
 
-int32 Unit::SpellMissChanceCalc(Unit *pVictim) const
+uint32 Unit::SpellMissChanceCalc(Unit *pVictim) const
 {
     if(!pVictim)
         return 0;
@@ -1951,7 +1949,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             }
 
             Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
-            float radius =  GetRadius(sSpellRadiusStore.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
+            //float radius =  GetRadius(sSpellRadiusStore.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
@@ -3075,7 +3073,7 @@ bool Unit::SpellCriticalBonus(SpellEntry *spellProto, int32 *peffect)
             critchance += (*i)->GetModifier()->m_amount;
 
     critchance = critchance > 0 ? critchance :0;
-    if(critchance >= urand(0,100))
+    if(uint32(critchance) >= urand(0,100))
     {
         int32 critbonus = *peffect / 2;
         if (GetTypeId() == TYPEID_PLAYER)

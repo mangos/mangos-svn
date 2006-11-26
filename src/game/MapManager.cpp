@@ -57,7 +57,7 @@ MapManager::~MapManager()
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
         delete iter->second;
 
-    for(int i = 0; i < m_Transports.size(); i++)
+    for(size_t i = 0; i < m_Transports.size(); i++)
         delete m_Transports[i];
 
     sDatabase.PExecute("TRUNCATE table `creature_grid`");

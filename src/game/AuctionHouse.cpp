@@ -175,8 +175,6 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
             pl->ModifyMoney(-int32(price));
 
-            uint64 guid = auctioneer;
-
             data.Initialize( SMSG_AUCTION_BIDDER_LIST_RESULT );
             uint32 cnt = 0;
             Player *pl = GetPlayer();

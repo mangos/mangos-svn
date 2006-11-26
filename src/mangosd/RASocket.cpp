@@ -164,7 +164,7 @@ void RASocket::OnRead()
                     if(!result)
                     {
                         Sendf("-No such user.\r\n");
-                        if(bLog)Log("User %s does not exist.\n",szLogin);
+                        if(bLog)Log("User %s does not exist.\n",szLogin.c_str());
                         if(bSecure)SetCloseAndDelete();
                     }
                     else
@@ -177,7 +177,7 @@ void RASocket::OnRead()
                         if(fields[1].GetUInt32()<iMinLevel)
                         {
                             Sendf("-Not enough privileges.\r\n");
-                            if(bLog)Log("User %s has no privilege.\n",szLogin);
+                            if(bLog)Log("User %s has no privilege.\n",szLogin.c_str());
                             if(bSecure)SetCloseAndDelete();
                         }   else
                         {
@@ -199,13 +199,13 @@ void RASocket::OnRead()
                         iUsers++;
 
                         Sendf("+Logged in.\r\n");
-                        if(bLog)Log("User %s has logged in.\n",szLogin);
+                        if(bLog)Log("User %s has logged in.\n",szLogin.c_str());
                     }
                     else
                     {
                         ///- Else deny access
                         Sendf("-Wrong pass.\r\n");
-                        if(bLog)Log("User %s has failed to log in.\n",szLogin);
+                        if(bLog)Log("User %s has failed to log in.\n",szLogin.c_str());
                         if(bSecure)SetCloseAndDelete();
                     }
                 }

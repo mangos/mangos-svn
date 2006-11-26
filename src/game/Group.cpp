@@ -31,14 +31,14 @@ void Group::ChangeLeader(const uint64 &guid)
 {
     WorldPacket data;
     Player *player;
-    int32 i = GetPlayerGroupSlot(guid);
-    ASSERT( i >= 0 );
+    int32 slot = GetPlayerGroupSlot(guid);
+    ASSERT( slot >= 0 );
 
     m_leaderGuid=guid;
     data.Initialize( SMSG_GROUP_SET_LEADER );
-    data << m_members[i].name;
+    data << m_members[slot].name;
 
-    for( i = 0; i < m_count; i++ )
+    for( uint32 i = 0; i < m_count; i++ )
     {
         player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
         ASSERT( player );
@@ -150,7 +150,6 @@ void Group::RemoveRollsFromMember(const uint64 &guid)
     //If a player was rolling for an item, all his votes has to be reseted to "pass"
     vector<Roll>::iterator it;
     int8 pos;
-    Player *p=objmgr.GetPlayer(guid);
     for (it = RollId.begin(); it < RollId.end(); it++)
     {
         pos = GetPlayerGroupSlot(guid);
@@ -161,7 +160,7 @@ void Group::RemoveRollsFromMember(const uint64 &guid)
         if (it->playerVote[pos] == PASS) it->totalPass--;
         if (it->playerVote[pos] != NOT_VALID) it->totalPlayersRolling--;
 
-        for( int j = pos + 1; j < m_count; j++ )
+        for( uint32 j = pos + 1; j < m_count; j++ )
             it->playerVote[j-1] = it->playerVote[j];
 
         CountTheRoll(guid, it->itemGUID, m_count-1, 3);
@@ -194,7 +193,7 @@ void Group::SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntr
     data << ItemInfo;                                       // ItemInfo this is related to special additionals to a item
     data << CountDown;                                      // the countdown time to choose "need" or "greed"
 
-    for (int i = 0; i < m_count; i++)
+    for (uint32 i = 0; i < m_count; i++)
     {
         Player *p = objmgr.GetPlayer(m_members[i].guid);
         if (r.playerVote[i] != NOT_VALID)
@@ -215,7 +214,7 @@ void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry,
     data << RollNumber;                                     // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
     data << RollType;                                       // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
 
-    for (int i = 0; i < m_count; i++)
+    for (uint32 i = 0; i < m_count; i++)
     {
         Player *p = objmgr.GetPlayer(m_members[i].guid);
         if (r.playerVote[i] != NOT_VALID)
@@ -236,7 +235,7 @@ void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEnt
     data << RollNumber;                                     // rollnumber realted to SMSG_LOOT_ROLL
     data << RollType;                                       // Rolltype related to SMSG_LOOT_ROLL
 
-    for (int i = 0; i < m_count; i++)
+    for (uint32 i = 0; i < m_count; i++)
     {
         Player *p = objmgr.GetPlayer(m_members[i].guid);
         if (r.playerVote[i] != NOT_VALID)
@@ -254,7 +253,7 @@ void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, uint32 ItemEn
     data << ItemInfo;                                       // ItemInfo
     data << uint32(0x3F3);                                  // unknown, I think it can be number of roll
 
-    for (int i = 0; i < m_count; i++)
+    for (uint32 i = 0; i < m_count; i++)
     {
         Player *p = objmgr.GetPlayer(m_members[i].guid);
         if (r.playerVote[i] != NOT_VALID)
@@ -283,7 +282,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             r.itemid = i->itemid;
 
             //a vector is filled with only near party members
-            for (int j = 0; j < m_count; j++)
+            for (uint32 j = 0; j < m_count; j++)
             {
                 if (objmgr.GetPlayer(m_members[j].guid)->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                 {
@@ -327,7 +326,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
             r.itemid = i->itemid;
 
             //a vector is filled with only near party members
-            for (int j = 0; j < m_count; j++)
+            for (uint32 j = 0; j < m_count; j++)
             {
                 Player *playerToRoll = objmgr.GetPlayer(m_members[j].guid);
                 if (playerToRoll->CanUseItem(item))
@@ -499,7 +498,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
 
 int8 Group::GetPlayerGroupSlot(uint64 Guid)
 {
-    for (int8 i = 0; i < m_count; i++)
+    for (uint32 i = 0; i < m_count; i++)
     {
         if (m_members[i].guid == Guid)
             return i;
