@@ -63,6 +63,10 @@ void AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, ui
 
     *Source >> TempValue;                                   //get real size of the packed structure
 
+    // empty addon packet, nothing proccess, can't be recieve from real client
+    if(!TempValue)
+        return;
+
     AddonRealSize = TempValue;                              //temp value becouse ZLIB only excepts uLongf
 
     CurrentPosition = Source->rpos();                       //get the position of the pointer in the structure
