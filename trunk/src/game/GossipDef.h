@@ -87,8 +87,6 @@ struct QuestMenuItem
 {
     uint32      m_qId;
     uint8       m_qIcon;
-    uint8       m_qAvailable;
-    char*       m_qTitle;
 };
 
 class MANGOS_DLL_SPEC GossipMenu
@@ -126,7 +124,7 @@ class QuestMenu
         QuestMenu();
         ~QuestMenu();
 
-        void AddMenuItem( uint32 QuestId, uint8 Icon , uint8 Available);
+        void AddMenuItem( uint32 QuestId, uint8 Icon);
         void ClearMenu();
 
         uint8 MenuItemCount()

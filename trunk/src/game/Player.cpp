@@ -8559,11 +8559,11 @@ void Player::PrepareQuestMenu( uint64 guid )
         uint32 quest_id = *i;
         uint32 status = GetQuestStatus( quest_id );
         if ( status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus( quest_id ) )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, status );
+            qm->AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
         else if ( status == QUEST_STATUS_INCOMPLETE )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, status );
+            qm->AddMenuItem(quest_id, DIALOG_STATUS_INCOMPLETE);
         else if (status == QUEST_STATUS_AVAILABLE )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_CHAT, status);
+            qm->AddMenuItem(quest_id, DIALOG_STATUS_CHAT);
     }
 
     for( std::list<uint32>::iterator i = pObject->mQuests.begin( ); i != pObject->mQuests.end( ); i++ )
@@ -8576,12 +8576,9 @@ void Player::PrepareQuestMenu( uint64 guid )
         if ((strlen(pQuest->GetObjectives()) == 0) && (CanTakeQuest(pQuest, false)))
         {
             // perhaps find a better check for quests that autocomplete
-            if (pQuest->IsRepeatable() == 0)
-                qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, status );
-            else
-                qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD_REP, status );
+            qm->AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
         } else if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, status );
+            qm->AddMenuItem(quest_id, DIALOG_STATUS_AVAILABLE);
     }
 }
 
@@ -8633,9 +8630,9 @@ void Player::SendPreparedQuest( uint64 guid )
             GossipText * gossiptext = objmgr.GetGossipText(textid);
             if( !gossiptext )
             {
-                qe._Delay = TEXTEMOTE_MESSAGE;              //zyg: player emote
-                qe._Emote = TEXTEMOTE_HELLO;                //zyg: NPC emote
-                title = "Do Quest ?";
+                qe._Delay = 0; //TEXTEMOTE_MESSAGE;              //zyg: player emote
+                qe._Emote = 0; //TEXTEMOTE_HELLO;                //zyg: NPC emote
+                title = "";
             }
             else
             {
