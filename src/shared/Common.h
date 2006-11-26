@@ -122,6 +122,15 @@
 
 #define for if(true) for
 
+enum TimeConstants
+{
+    MINUTE = 60,
+    HOUR   = MINUTE*60,
+    DAY    = HOUR*24,
+    MONTH  = DAY*30
+};
+
+
 #ifdef WIN32
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
 #else

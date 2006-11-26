@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup mangosd
+/// @{
+/// \file
+
 #ifndef _RASOCKET_H
 #define _RASOCKET_H
 
@@ -32,8 +36,8 @@
 
 class SocketHandler;
 
+/// Remote Administration socket
 class RASocket: public TcpSocket
-
 {
     public:
 
@@ -42,13 +46,12 @@ class RASocket: public TcpSocket
 
         void OnAccept();
         void OnRead();
-        static  int zprintf( const char * szText, ... );
 
     private:
 
         char * buff;
-        char szLogin[17];
-        char szPass[17];
+        std::string szLogin;
+        std::string szPass;
         uint32 iSess;
         unsigned int iInputLength;
         bool bLog;
@@ -64,7 +67,7 @@ class RASocket: public TcpSocket
         }stage;
 
         void Log(const char *,...);
-
 };
 #endif
 #endif
+/// @}

@@ -16,12 +16,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup mangosd
+/// @{
+/// \file
+
 #ifndef __WORLDRUNNABLE_H
 #define __WORLDRUNNABLE_H
 
+/// Heartbeat thread for the World 
 class WorldRunnable : public ZThread::Runnable
 {
     public:
         void run();
 };
 #endif
+/// @}

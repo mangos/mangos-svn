@@ -16,25 +16,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup mangosd
+/// @{
+/// \file
+
 #ifndef _MASTER_H
 #define _MASTER_H
 
 #include "Common.h"
 #include "Policies/Singleton.h"
-#include "Config/ConfigEnv.h"
-#include "Database/DatabaseEnv.h"
-#include "SystemConfig.h"
 
+/// Start the server
 class Master
 {
     public:
         Master();
         ~Master();
-        bool Run();
+        void Run();
 
     private:
         bool _StartDB();
-        void _StopDB();
 
         void _HookSignals();
         void _UnhookSignals();
@@ -46,3 +47,4 @@ class Master
 
 #define sMaster MaNGOS::Singleton<Master>::Instance()
 #endif
+/// @}

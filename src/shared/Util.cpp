@@ -40,24 +40,13 @@ vector<string> StrSplit(const string &src, const string &sep)
     return r;
 }
 
-bool IsItIP(char const* ip)
-{
-    if(!ip)
+/// Check if the string is a valid ip address representation
+bool IsIPAddress(char const* ipaddress)
+ {
+    if(!ipaddress)
         return false;
-    //ip looks like a.b.c.d  -- let's calc number of '.' it must be equal to 3
-    //and must contain only numbers + .
-    unsigned int iDotCount=0;
-    unsigned int l=strlen(ip);
-    for(unsigned int y=0;y<l;y++)
-    {
-        if(ip[y]=='.')iDotCount++;
-        else
-        if( (ip[y] < '0' || ip[y] > '9'))
-            return false;
-    }
-
-    if(iDotCount!=3)
-        return false;
-
-    return true;
+ 
+    // Let the big boys do it.
+    // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
+    return inet_addr(ipaddress) != INADDR_NONE;
 }
