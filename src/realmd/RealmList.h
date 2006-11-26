@@ -86,5 +86,5 @@ class RealmList
     private:
         RealmMap _realms;                                   ///< Internal map of realms
 };
-/// @}
 #endif
+/// @}

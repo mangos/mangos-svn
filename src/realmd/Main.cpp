@@ -52,7 +52,6 @@ int main(int argc, char **argv)
     int c=1;
     while( c < argc )
     {
-        const char *tmp = argv[c];
         if( strcmp(argv[c],"-c") == 0)
         {
             if( ++c >= argc )
@@ -169,9 +168,10 @@ int main(int argc, char **argv)
     #endif
 
     // maximum counter for next ping
-    uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (60 * 1000000 / 100000));
+    uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (MINUTE * 1000000 / 100000));
     uint32 loopCounter = 0;
 
+    ///- Wait for termination signal
     while (!stopEvent)
     {
         h.Select(0, 100000);
