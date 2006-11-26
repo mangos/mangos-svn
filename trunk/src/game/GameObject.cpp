@@ -318,11 +318,7 @@ GameObjectInfo const *GameObject::GetGOInfo() const
 
 void GameObject::_LoadQuests()
 {
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-        delete *i;
     mQuests.clear();
-    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
-        delete *i;
     mInvolvedQuests.clear();
 
     Field *fields;
@@ -335,10 +331,10 @@ void GameObject::_LoadQuests()
         do
         {
             fields = result->Fetch();
-            pQuest = objmgr.NewQuest( fields[0].GetUInt32() );
+            pQuest = objmgr.QuestTemplates[ fields[0].GetUInt32() ];
             if (!pQuest) continue;
 
-            addQuest(pQuest);
+            addQuest(pQuest->GetQuestId());
         }
         while( result->NextRow() );
 
@@ -352,10 +348,10 @@ void GameObject::_LoadQuests()
     do
     {
         fields = result1->Fetch();
-        pQuest = objmgr.NewQuest( fields[0].GetUInt32() );
+        pQuest = objmgr.QuestTemplates[ fields[0].GetUInt32() ];
         if (!pQuest) continue;
 
-        addInvolvedQuest(pQuest);
+        addInvolvedQuest(pQuest->GetQuestId());
     }
     while( result1->NextRow() );
 

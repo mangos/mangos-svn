@@ -37,10 +37,6 @@ INSTANTIATE_SINGLETON_1(ObjectMgr);
 extern SQLStorage sItemStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sCreatureStorage;
-extern SQLStorage sQuestsStorage;
-
-QuestRelations sPrevQuests;
-QuestRelations sExclusiveQuestGroups;
 ScriptMapMap sScripts;
 
 ObjectMgr::ObjectMgr()
@@ -56,11 +52,11 @@ ObjectMgr::ObjectMgr()
 ObjectMgr::~ObjectMgr()
 {
 
-    for( QuestMap::iterator i = mQuests.begin( ); i != mQuests.end( ); ++ i )
+    for( QuestMap::iterator i = QuestTemplates.begin( ); i != QuestTemplates.end( ); ++ i )
     {
         delete i->second;
     }
-    mQuests.clear( );
+    QuestTemplates.clear( );
 
     for( GossipTextMap::iterator i = mGossipText.begin( ); i != mGossipText.end( ); ++ i )
     {
@@ -813,29 +809,45 @@ void ObjectMgr::LoadGuilds()
 
 void ObjectMgr::LoadQuests()
 {
-    sQuestsStorage.Load ();
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `quest_template`");
+    if(result == NULL)
+    {
+        sLog.outError("Error opening quest_template table.\n");
+        exit(1);
+    }
 
     // create multimap previous quest for each existed quest
     // some quests can have many previous maps setted by NextQuestId in previouse quest
     // for example set of race quests can lead to single not race specific quest
-    for(uint32 i = 1; i < sQuestsStorage.MaxEntry; ++i )
-    {
-        QuestInfo const* qinfo = GetQuestInfo(i);
+    
+    do {
+        Field *fields = result->Fetch();
+        
+        Quest * newQuest = new Quest(fields);
+        QuestTemplates[newQuest->GetQuestId()] = newQuest;
+    } while( result->NextRow() );
 
-        if(!qinfo)
-            continue;
+    delete result;
 
-        if(qinfo->PrevQuestId )
-            sPrevQuests.insert(QuestRelations::value_type(qinfo->QuestId,qinfo->PrevQuestId));
+    // Post processing
+    for (QuestMap::iterator iter = QuestTemplates.begin(); iter != QuestTemplates.end(); iter++) {
+        Quest * qinfo = iter->second;
+        if(qinfo->PrevQuestId)
+            qinfo->prevQuests.push_back(qinfo->PrevQuestId);
 
-        if(qinfo->NextQuestId )
-            sPrevQuests.insert(QuestRelations::value_type(qinfo->NextQuestId,qinfo->QuestId));
+        if(qinfo->NextQuestId) {
+            if (QuestTemplates.find(qinfo->NextQuestId) == QuestTemplates.end()) {
+                sLog.outString("Quest %d has NextQuestId %d, but no such quest", qinfo->GetQuestId(), qinfo->NextQuestId);
+                exit(1);
+            }
+            QuestTemplates[qinfo->NextQuestId]->prevQuests.push_back(qinfo->GetQuestId());
+        }
 
         if(qinfo->ExclusiveGroup)
-            sExclusiveQuestGroups.insert(QuestRelations::value_type(qinfo->ExclusiveGroup,qinfo->QuestId));
-    };
+            ExclusiveQuestGroups.insert(pair<uint32, uint32>(qinfo->ExclusiveGroup, qinfo->GetQuestId()));
+    }
 
-    sLog.outString( ">> Loaded %u quests definitions", sQuestsStorage.RecordCount );
+    sLog.outString( ">> Loaded %u quests definitions", QuestTemplates.size() );
     sLog.outString( "" );
 }
 

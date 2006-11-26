@@ -262,14 +262,16 @@ class MANGOS_DLL_SPEC Object
         }
         void SetSpeed(float newspd) { m_speed = newspd; }
 
-        std::list<Quest*> mQuests;
-        std::list<Quest*> mInvolvedQuests;
-        void addQuest(Quest *quest) { mQuests.push_back(quest); }
-        void addInvolvedQuest(Quest *quest) { mInvolvedQuests.push_back(quest); }
+        void addQuest(uint32 questid) { mQuests.push_back(questid); }
+        void addInvolvedQuest(uint32 questid) { mInvolvedQuests.push_back(questid); }
         bool hasQuest(uint32 quest_id);
         bool hasInvolvedQuest(uint32 quest_id);
 
+        std::list<uint32> mQuests;
+        std::list<uint32> mInvolvedQuests;
+        
     protected:
+        
         Object ( );
 
         void _InitValues()

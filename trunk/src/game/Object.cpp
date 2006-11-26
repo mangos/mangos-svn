@@ -700,24 +700,12 @@ bool Object::IsPositionValid() const
 
 bool Object::hasQuest(uint32 quest_id)
 {
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-    {
-        if ((*i)->GetQuestInfo()->QuestId == quest_id)
-            return true;
-    }
-
-    return false;
+    return (find(mQuests.begin(), mQuests.end(), quest_id) != mQuests.end());
 }
 
 bool Object::hasInvolvedQuest(uint32 quest_id)
 {
-    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
-    {
-        if ((*i)->GetQuestInfo()->QuestId == quest_id)
-            return true;
-    }
-
-    return false;
+    return (find(mInvolvedQuests.begin(), mInvolvedQuests.end(), quest_id) != mInvolvedQuests.end());
 }
 
 bool Object::PrintIndexError(uint32 index, bool set) const
