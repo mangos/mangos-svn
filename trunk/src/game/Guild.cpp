@@ -123,7 +123,12 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
     {
         plLevel = (uint8)pl->getLevel();
         plClass = (uint8)pl->getClass();
-        plZone = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()))->zone;
+
+        AreaTableEntry* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()));
+        if (area)                                           // For example: .worldport -2313 478 48 1    Zone will be 0(unkonown), even though it's a usual cave
+            plZone = area->zone;                            // would cause null pointer exception
+        else
+            plZone = 0;
     }
     else
     {
