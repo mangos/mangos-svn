@@ -18,6 +18,8 @@
 
 #include "Util.h"
 
+#include "Network/socket_include.h"
+
 using namespace std;
 
 vector<string> StrSplit(const string &src, const string &sep)
