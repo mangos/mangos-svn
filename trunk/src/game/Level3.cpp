@@ -2715,7 +2715,7 @@ bool ChatHandler::HandleBanIPCommand(const char* args)
 
     char* banIP = strtok((char*)args, " ");
 
-    if(!IsItIP(banIP))
+    if(!IsIPAddress(banIP))
     {
         PSendSysMessage("Incorrect IP: %s",banIP);
         return true;
@@ -2746,7 +2746,7 @@ bool ChatHandler::HandleUnBanIPCommand(const char* args)
 
     char* banIP = strtok((char*)args, " ");
 
-    if(!IsItIP(banIP))
+    if(!IsIPAddress(banIP))
     {
         PSendSysMessage("Incorrect IP: %s",banIP);
         return true;

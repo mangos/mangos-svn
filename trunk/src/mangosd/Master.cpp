@@ -16,52 +16,38 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/** \file
+    \ingroup mangosd
+*/
+
 #include "Master.h"
 #include "Network/SocketHandler.h"
 #include "Network/ListenSocket.h"
-#include "Network/TcpSocket.h"
-//#include "AuthSocket.h"
 #include "WorldSocket.h"
-#include "RASocket.h"
 #include "WorldSocketMgr.h"
 #include "WorldRunnable.h"
 #include "World.h"
-//#include "RealmList.h"
 #include "Log.h"
 #include "Timer.h"
 #include <signal.h>
-#include "MapManager.h"
 #include "Policies/SingletonImp.h"
+#include "SystemConfig.h"
+#include "Config/ConfigEnv.h"
+#include "Database/DatabaseEnv.h"
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
 
 INSTANTIATE_SINGLETON_1( CliRunnable );
 #endif
+#ifdef ENABLE_RA
+#include "RASocket.h"
+#endif
 
+/// \todo Not useful under VC++2005. Can somebody say on which compiler it is useful?
 #pragma warning(disable:4305)
 
 INSTANTIATE_SINGLETON_1( Master );
-
-void Master::_OnSignal(int s)
-{
-    switch (s)
-    {
-        case SIGINT:
-        case SIGQUIT:
-        case SIGTERM:
-        case SIGABRT:
-            World::m_stopEvent = true;
-            break;
-        #ifdef _WIN32
-        case SIGBREAK:
-            World::m_stopEvent = true;
-            break;
-        #endif
-    }
-
-    signal(s, _OnSignal);
-}
 
 Master::Master()
 {
@@ -71,7 +57,8 @@ Master::~Master()
 {
 }
 
-bool Master::Run()
+/// Main function
+void Master::Run()
 {
     sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n\n" );
@@ -88,74 +75,54 @@ bool Master::Run()
     sLog.outTitle( "        MM  MMM http://www.mangosproject.org");
     sLog.outTitle( "        MMMMMM\n\n");
 
-    _StartDB();
+    ///- Start the databases
+    if (!_StartDB())
+        return;
 
-    //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
-
-    sWorld.SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
-    sWorld.SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
+    ///- Initialize the World
     sWorld.SetInitialWorldSettings();
 
-    port_t wsport, rmport;
-    rmport = sWorld.getConfig(CONFIG_PORT_REALM);           //sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-    wsport = sWorld.getConfig(CONFIG_PORT_WORLD);           //sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
+    ///- Launch the world listener socket
+    port_t wsport = sWorld.getConfig(CONFIG_PORT_WORLD);
 
-    uint32 socketSelecttime;
-                                                            //sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME );
-    socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);
-
-    //uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);
-    //sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
-    //grid_clean_up_delay *= 1000;
-    //MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
-
-    //uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
-    //sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
-    //MapManager::Instance().SetMapUpdateInterval(map_update_interval);
-
-    //    sRealmList.setServerPort(wsport);
-    //    sRealmList.GetAndAddRealms ();
     SocketHandler h;
     ListenSocket<WorldSocket> worldListenSocket(h);
-    //    ListenSocket<AuthSocket> authListenSocket(h);
-
     if (worldListenSocket.Bind(wsport))
     {
-        _StopDB();
-        sLog.outError( "MaNGOS can not bind to that port" );
-        exit(1);
+        clearOnlineAccounts();
+        sLog.outError("MaNGOS cannot bind to port %d", wsport);
+        return;
     }
 
     h.Add(&worldListenSocket);
-    //    h.Add(&authListenSocket);
 
+     ///- Catch termination signals
     _HookSignals();
 
+    ///- Launch WorldRunnable thread
     ZThread::Thread t(new WorldRunnable);
-
-    //#ifndef WIN32
     t.setPriority ((ZThread::Priority )2);
-    //#endif
 
     #ifdef ENABLE_CLI
+    ///- Launch CliRunnable thread
     ZThread::Thread td1(new CliRunnable);
     #endif
 
     #ifdef ENABLE_RA
-
+    ///- Launch the RA listener socket
+    port_t raport = sConfig.GetIntDefault( "RA.Port", 3443 );
     ListenSocket<RASocket> RAListenSocket(h);
 
-    if (RAListenSocket.Bind(sConfig.GetIntDefault( "RA.Port", 3443 )))
+    if (RAListenSocket.Bind(raport))
     {
-
-        sLog.outError( "MaNGOS can not bind to that port" );
-        // exit(1); go on with no RA
-
+        sLog.outError( "MaNGOS RA can not bind to port %d", raport );
+        // return; //go on with no RA
     }
 
     h.Add(&RAListenSocket);
     #endif
 
+    ///- Handle affinity for multiple processors and process priority on Windows
     #ifdef WIN32
     {
         HANDLE hProcess = GetCurrentProcess();
@@ -168,11 +135,11 @@ bool Master::Run()
 
             if(GetProcessAffinityMask(hProcess,&appAff,&sysAff))
             {
-                uint32 curAff = Aff & appAff;               // remove non accassable processors
+                uint32 curAff = Aff & appAff;               // remove non accessible processors
 
                 if(!curAff )
                 {
-                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessable for mangosd. Accessable processors bitmask (hex): %x",Aff,appAff);
+                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessible for mangosd. Accessible processors bitmask (hex): %x",Aff,appAff);
                 }
                 else
                 {
@@ -201,10 +168,13 @@ bool Master::Run()
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
 
+    uint32 socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);
+
     // maximum counter for next ping
     uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (MINUTE * 1000000 / socketSelecttime));
     uint32 loopCounter = 0;
 
+    ///- Wait for termination signal
     while (!World::m_stopEvent)
     {
 
@@ -215,7 +185,6 @@ bool Master::Run()
         sWorldSocketMgr.Update( realCurrTime - realPrevTime );
         realPrevTime = realCurrTime;
 
-        //h.Select(0, 100000);
         h.Select(0, socketSelecttime);
 
         // ping if need
@@ -228,78 +197,102 @@ bool Master::Run()
         }
     }
 
+    ///- Remove signal handling before leaving
     _UnhookSignals();
 
     t.wait();
 
-    _StopDB();
+    ///- Clean database before leaving
+    clearOnlineAccounts();
 
     sLog.outString( "Halting process..." );
 
-    return 0;
+    return;
 }
 
+/// Initialize connection to the databases
 bool Master::_StartDB()
 {
+    ///- Get world database info from configuration file
     std::string dbstring;
     if(!sConfig.GetString("WorldDatabaseInfo", &dbstring))
     {
-        sLog.outError("Database not specified");
-        exit(1);
-
+        sLog.outError("Database not specified in configuration file");
+        return false;
     }
+    sLog.outString("World Database: %s", dbstring.c_str());
 
-    sLog.outString("World Database: %s", dbstring.c_str() );
+    ///- Initialise the world database
     if(!sDatabase.Initialize(dbstring.c_str()))
     {
-        sLog.outError("Cannot connect to world database");
-        exit(1);
+        sLog.outError("Cannot connect to world database %s",dbstring.c_str());
+        return false;
     }
 
+    ///- Get login database info from configuration file
     if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
     {
-        sLog.outError("Login database not specified");
-        exit(1);
-
+        sLog.outError("Login database not specified in configuration file");
+        return false;
     }
+
+    ///- Initialise the login database
     sLog.outString("Login Database: %s", dbstring.c_str() );
     if(!loginDatabase.Initialize(dbstring.c_str()))
     {
-        sLog.outError("Cannot connect to login database");
-        exit(1);
+        sLog.outError("Cannot connect to login database %s",dbstring.c_str());
+        return false;
     }
 
+    ///- Get the realm Id from the configuration file
     realmID = sConfig.GetIntDefault("RealmID", 0);
     if(!realmID)
     {
-        sLog.outError("Realm ID not defined");
-        exit(1);
+        sLog.outError("Realm ID not defined in configuration file");
+        return false;
     }
-    else
-    {
-        sLog.outString("Realm running as realm ID %d", realmID);
-    }
+    sLog.outString("Realm running as realm ID %d", realmID);
 
+    ///- Clean the database before starting
     clearOnlineAccounts();
+
     return true;
 }
 
-void Master::_StopDB()
-{
-    clearOnlineAccounts();
-}
-
+/// Clear 'online' status for all accounts with characters in this realm
 void Master::clearOnlineAccounts()
 {
     // Cleanup online status for characters hosted at current realm
-    sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `realm` = '%d'",realmID);
-
+    /// \todo Only accounts with characters logged on *this* realm should have online status reset. Move the online column from 'account' to 'realmcharacters'?
     loginDatabase.PExecute(
         "UPDATE `account`,`realmcharacters` SET `account`.`online` = 0 "
         "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
         "  AND `realmcharacters`.`realmid` = '%d'",realmID);
+
+    sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `realm` = '%d'",realmID);
 }
 
+/// Handle termination signals
+/** Put the World::m_stopEvent to 'true' if a termination signal is caught **/
+void Master::_OnSignal(int s)
+{
+    switch (s)
+    {
+        case SIGINT:
+        case SIGQUIT:
+        case SIGTERM:
+        case SIGABRT:
+        #ifdef _WIN32
+        case SIGBREAK:
+        #endif
+            World::m_stopEvent = true;
+        break;
+    }
+
+    signal(s, _OnSignal);
+}
+
+/// Define hook '_OnSignal' for all termination signals
 void Master::_HookSignals()
 {
     signal(SIGINT, _OnSignal);
@@ -311,6 +304,7 @@ void Master::_HookSignals()
     #endif
 }
 
+/// Unhook the signals before leaving
 void Master::_UnhookSignals()
 {
     signal(SIGINT, 0);
@@ -320,5 +314,4 @@ void Master::_UnhookSignals()
     #ifdef _WIN32
     signal(SIGBREAK, 0);
     #endif
-
 }

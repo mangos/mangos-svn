@@ -16,15 +16,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/** \file
+    \ingroup mangosd
+*/
+
 #include "Common.h"
 #include "Log.h"
 #include "World.h"
-#include "Master.h"
-#include "Timer.h"
 #include "ScriptCalls.h"
 #include "GlobalEvents.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
+#include "SystemConfig.h"
+#include "Config/ConfigEnv.h"
 #include "Util.h"
 
 #ifdef ENABLE_CLI
@@ -33,12 +37,12 @@
 typedef int(* pPrintf)(const char*,...);
 typedef void(* pCliFunc)(char *,pPrintf);
 
+/// Storage structure for commands
 typedef struct
 {
     char const * cmd;
-    uint8 cmdlength;                                        //including ' ' if you want
     pCliFunc Func;
-    char const * discription;
+    char const * description;
 }CliCommand;
 
 char prompt[64];
@@ -58,68 +62,72 @@ void CliBroadcast(char*,pPrintf);
 void CliCreate(char*,pPrintf);
 void CliDelete(char*,pPrintf);
 void CliLoadScripts(char*,pPrintf);
-void CliLoadAddons(char*,pPrintf);
 void CliKick(char*,pPrintf);
 void CliMotd(char*,pPrintf);
 void CliCorpses(char*,pPrintf);
 void CliSetLogLevel(char*,pPrintf);
 
-#define CMD(a) a,(sizeof(a)-1)
+/// Table of known commands
 const CliCommand Commands[]=
 {
-    {CMD("help"), & CliHelp,"Display this help"},
-    {CMD("broadcast"), & CliBroadcast,"Announce in-game message"},
-    {CMD("info"), & CliInfo,"Display Server infomation"},
-    {CMD("ban"), & CliBan,"Ban account|ip"},
-    {CMD("listbans"), & CliBanList,"List bans"},
-    {CMD("unban"), & CliRemoveBan,"Remove ban from ip|account"},
-    {CMD("setgm"), & CliSetGM,"Edit user privileges"},
-    {CMD("listgm"), & CliListGM,"Display user privileges"},
-    //    {CMD("quit"), & CliExit,"Shutdown server"},  //allowing aliases
-    {CMD("create"), & CliCreate,"Create account"},
-    {CMD("delete"), & CliDelete,"Delete account and characters"},
-    {CMD("exit"), & CliExit,"Shutdown server"},
-    {CMD("version"), & CliVersion,"Display server version"},
-    {CMD("loadscripts"), & CliLoadScripts,"Load script library"},
-    {CMD("kick"), & CliKick,"Kick user"},
-    {CMD("motd"), & CliMotd,"Change or display motd"},
-    {CMD("setloglevel"), & CliSetLogLevel,"Set Log Level"},
-    {CMD("corpses"), & CliCorpses,"Manually call corpses erase global even code"}
+    {"help", & CliHelp,"Display this help message"},
+    {"broadcast", & CliBroadcast,"Announce in-game message"},
+    {"motd", & CliMotd,"Change or display motd"},
+    {"version", & CliVersion,"Display server version"},
+    {"info", & CliInfo,"Display Server infomation"},
+    {"create", & CliCreate,"Create account"},
+    {"delete", & CliDelete,"Delete account and characters"},
+    {"kick", & CliKick,"Kick user"},
+    {"ban", & CliBan,"Ban account|ip"},
+    {"listbans", & CliBanList,"List bans"},
+    {"unban", & CliRemoveBan,"Remove ban from account|ip"},
+    {"setgm", & CliSetGM,"Edit user privileges"},
+    {"listgm", & CliListGM,"Display user privileges"},
+    {"loadscripts", & CliLoadScripts,"Load script library"},
+    {"setloglevel", & CliSetLogLevel,"Set Log Level"},
+    {"corpses", & CliCorpses,"Manually call corpses erase global even code"},
+    {"exit", & CliExit,"Shutdown server"}
 };
+/// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
+/// Reload the scripts and notify the players
 void CliLoadScripts(char*command,pPrintf zprintf)
 {
-
-    char *del;
-    int x=0;
-    while(command[x]==' ')
-        x++;
-    del=&command[x];
-    if(!LoadScriptingModule(del)) return;
+    char *del=strtok(command," ");
+    if (!del)
+        del="";
+    if(!LoadScriptingModule(del))                                   // Error report is already done by LoadScriptingModule
+        return;
 
     sWorld.SendWorldText("|cffff0000[System Message]:|rScripts reloaded", NULL);
 }
 
+/// Delete a user account and all associated characters in this realm
+/// \todo This function has to be enhanced to respect the login/realm split (delete char, delete account chars in realm, delete account chars in realm then delete account
 void CliDelete(char*command,pPrintf zprintf)
 {
-
-    char *account_name;
-    int x=0;
-    while(command[x]==' ')
-        x++;
-    account_name=&command[x];
-    if(!strlen(account_name))
+    ///- Get the account name from the command line
+    char *account_name=strtok(command," ");
+    if(!account_name)
     {
-        zprintf("Syntax is: delete account\x0d\x0a");
+        // \r\n is used because this function can also be called from RA
+        zprintf("Syntax is: delete <account>\r\n");
         return;
     }
+
+    ///- Escape account name to allow quotes in names
+    std::string safe_account_name=account_name;
+    loginDatabase.escape_string(safe_account_name);
+
+    ///- Get the account ID from the database
     Field *fields;
-    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",account_name);
+    // No SQL injection (account_name escaped)
+    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
 
     if (!result)
     {
-        zprintf("User %s does not exist\x0d\x0a",account_name);
+        zprintf("User %s does not exist\r\n",account_name);
         return;
     }
 
@@ -127,6 +135,8 @@ void CliDelete(char*command,pPrintf zprintf)
     uint32 account_id = fields[0].GetUInt32();
     delete result;
 
+    ///- Circle through characters belonging to this account ID and remove all characters related data (items, quests, ...) from the Database
+    // No SQL injection (account_id is db internal)
     result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%d'",account_id);
 
     if (result)
@@ -141,54 +151,62 @@ void CliDelete(char*command,pPrintf zprintf)
             if(Player* p = objmgr.GetPlayer(MAKE_GUID(guidlo,HIGHGUID_PLAYER)))
                 p->GetSession()->KickPlayer();
 
-            WorldSession acc_s(account_id,NULL);            // some invalide session
+            WorldSession acc_s(account_id,NULL);            // some invalid session
             Player acc_player(&acc_s);
 
             acc_player.LoadFromDB(guidlo);
 
             acc_player.DeleteFromDB();
 
-            zprintf("We deleted character: %s from account %s\x0d\x0a",acc_player.GetName(),account_name);
+            zprintf("We deleted character: %s from account %s\r\n",acc_player.GetName(),account_name);
 
         } while (result->NextRow());
 
         delete result;
     }
 
-    sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",account_id);
-    loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",account_name);
+    ///- Remove characters and account from the databases
+    bool done = sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",account_id) &&
+        loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",safe_account_name.c_str()) &&
     loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
 
-    zprintf("We deleted account: %s\x0d\x0a",account_name);
+    if (done)
+        zprintf("We deleted account: %s\r\n",account_name);
 }
 
+/// Broadcast a message to the World
 void CliBroadcast(char *text,pPrintf zprintf)
 {
     std::string str ="|cffff0000[System Message]:|r";
     str += text;
     sWorld.SendWorldText(str.c_str(), NULL);
-    zprintf("Broadcasting to the world:%s\x0d\x0a",str.c_str());
+    zprintf("Broadcasting to the world:%s\r\n",str.c_str());
 }
 
+/// Print the list of commands and associated description
 void CliHelp(char*,pPrintf zprintf)
 {
     for (unsigned int x=0;x<CliTotalCmds;x++)
-        zprintf("%s - %s.\x0d\x0a",Commands[x].cmd ,Commands[x].discription);
+        zprintf("%-13s - %s.\r\n",Commands[x].cmd ,Commands[x].description);
 }
 
+/// Exit the realm
 void CliExit(char*,pPrintf zprintf)
 {
-    zprintf( "Exiting daemon...\n" );
+    zprintf( "Exiting daemon...\r\n" );
     World::m_stopEvent = true;
 }
 
+/// Display info on users currently in the realm
 void CliInfo(char*,pPrintf zprintf)
 {
+    ///- Get the list of accounts ID logged to the realm
+    // No SQL injection. RealmID is uint32
     QueryResult *resultDB = sDatabase.PQuery("SELECT `name`,`account` FROM `character` WHERE `online` > 0 AND `realm` = '%u'",realmID);
 
     if (!resultDB)
     {
-        zprintf("NO online users\x0d\x0a");
+        zprintf("NO online users\r\n");
         return;
     }
 
@@ -196,338 +214,350 @@ void CliInfo(char*,pPrintf zprintf)
     char* buf = new char[resultDB->GetRowCount()*linesize+1];
     char* bufPos = buf;
 
+    ///- Circle through accounts
     do
     {
-
-        Field * fieldsDB = resultDB->Fetch();
+        Field *fieldsDB = resultDB->Fetch();
         std::string name = fieldsDB[0].GetCppString();
         uint32 account = fieldsDB[1].GetUInt32();
 
+        ///- Get the username, last IP and GM level of each account
+        // No SQL injection. account is uint32.
         QueryResult *resultLogin = loginDatabase.PQuery(
-            "SELECT `username`,`last_ip`,`gmlevel` FROM `account` WHERE `id` = '%u'",account );
+            "SELECT `username`,`last_ip`,`gmlevel` FROM `account` WHERE `id` = '%u'",account);
 
         if(resultLogin)
         {
             Field *fieldsLogin = resultLogin->Fetch();
-            bufPos+=sprintf(bufPos,"|%15s| %20s | %15s |%6d|\x0d\x0a",
+            bufPos+=sprintf(bufPos,"|%15s| %20s | %15s |%6d|\r\n",
                 fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsLogin[2].GetUInt32());
 
             delete resultLogin;
         }
         else
-            bufPos += sprintf(bufPos,"|<Error>        | %20s |<Error>          |<Err> |\x0d\x0a",name.c_str());
+            bufPos += sprintf(bufPos,"|<Error>        | %20s |<Error>          |<Err> |\r\n",name.c_str());
 
     }while(resultDB->NextRow());
 
     *bufPos = '\0';
 
+    ///- Display the list of account/characters online
     zprintf("Online users: %d\x0d\x0a",resultDB->GetRowCount());
-    zprintf("=================================================================\x0d\x0a");
-    zprintf("|    Account    |       Character      |       IP        |  GM  |\x0d\x0a");
-    zprintf("=================================================================\x0d\x0a");
+    zprintf("=================================================================\r\n");
+    zprintf("|    Account    |       Character      |       IP        |  GM  |\r\n");
+    zprintf("=================================================================\r\n");
     zprintf("%s",buf);
-    zprintf("=================================================================\x0d\x0a");
+    zprintf("=================================================================\r\n");
 
     delete resultDB;
     delete[] buf;
 }
 
+/// Display a list of banned accounts and ip addresses
 void CliBanList(char*,pPrintf zprintf)
 {
+    ///- Get the list of banned accounts and display them
     Field *fields;
     QueryResult *result2 = loginDatabase.Query( "SELECT `username` FROM `account` WHERE `banned` > 0" );
     if(result2)
     {
-        zprintf("Banned Accounts:\x0d\x0a");
+        zprintf("Banned Accounts:\r\n");
         do
         {
             fields = result2->Fetch();
-            zprintf("|%5s|\x0d\x0a", fields[0].GetString());
+            zprintf("|%15s|\r\n", fields[0].GetString());
         }while( result2->NextRow() );
         delete result2;
     }
 
+    ///- Get the list of banned IP addresses and display them
     QueryResult *result3 = loginDatabase.Query( "SELECT `ip` FROM `ip_banned`" );
     if(result3)
     {
-        zprintf("Banned IPs:\x0d\x0a");
-
+        zprintf("Banned IPs:\r\n");
         do
         {
             fields = result3->Fetch();
-            zprintf("|%5s|\x0d\x0a", fields[0].GetString());
+            zprintf("|%15s|\r\n", fields[0].GetString());
         }while( result3->NextRow() );
         delete result3;
     }
-    if(!result2 && !result3) zprintf("We don't have banned users\x0d\x0a");
+
+    if(!result2 && !result3) zprintf("We do not have banned users\r\n");
 }
 
+/// Ban an IP address or a user account
 void CliBan(char*command,pPrintf zprintf)
 {
-
-    char *banip;
-    int x=0;
-    while(command[x]==' ')
-        x++;
-    banip=&command[x];
-    if(!strlen(banip))
+    ///- Get the command parameter
+    char *banip = strtok(command," ");
+    if(!banip)
     {
-        zprintf("Syntax is: ban account or ip\x0d\x0a");
+        zprintf("Syntax is: ban <account|ip>\r\n");
         return;
     }
 
-    bool is_ip = IsItIP(banip);
+    // Is this IP address or account name?
+    bool is_ip = IsIPAddress(banip);
 
     if(sWorld.BanAccount(banip))
     {
         if(is_ip)
-            zprintf("We banned IP: %s\x0d\x0a",banip);
+            zprintf("We banned IP: %s\r\n",banip);
         else
-            zprintf("We banned account: %s\x0d\x0a",banip);
-
+            zprintf("We banned account: %s\r\n",banip);
     }
     else
     {
-        zprintf("Account %s not found and not banned in result.\x0d\x0a",banip);
+        zprintf("Account %s not found and not banned.\r\n",banip);
     }
 }
 
+/// Display MaNGOS version
 void CliVersion(char*,pPrintf zprintf)
 {
                                                             //<--maybe better append to info cmd
-    zprintf( "MaNGOS daemon version is %s\x0d\x0a", _FULLVERSION );
+    zprintf( "MaNGOS daemon version is %s\r\n", _FULLVERSION );
 }
 
+/// Unban an IP adress or a user account
 void CliRemoveBan(char *command,pPrintf zprintf)
 {
-    char *banip;
-    unsigned int x=0;
-    while(command[x]==' ')x++;
-    banip=&command[x];
-    if(!strlen(banip))
-        zprintf("Syntax is: removeban character or ip");
+    ///- Get the command parameter
+    char *banip = strtok(command," ");
+    if(!banip)
+        zprintf("Syntax is: removeban <account|ip>\r\n");
 
     sWorld.RemoveBanAccount(banip);
 
-    if(IsItIP(banip))
-        zprintf("We removed banned IP: %s\x0d\x0a",banip);
+    ///- If this is an IP address
+    if(IsIPAddress(banip))
+        zprintf("We removed banned IP: %s\r\n",banip);
     else
-        zprintf("We removed ban from account: %s\x0d\x0a",banip);
+        zprintf("We removed ban from account: %s\r\n",banip);
 }
 
-void CliListGM(char *command,pPrintf zprintf)
+/// Display the list of GMs
+void CliListGM(char*,pPrintf zprintf)
 {
 
+    ///- Get the accounts with GM Level >0
     Field *fields;
 
     QueryResult *result = loginDatabase.Query( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0" );
     if(result)
     {
 
-        zprintf("Current gamemasters:\x0d\x0a");
+        zprintf("Current gamemasters:\r\n");
+        zprintf("========================\r\n");
+        zprintf("|    Account    |  GM  |\r\n");
+        zprintf("========================\r\n");
 
-        zprintf("========================\x0d\x0a");
-        zprintf("|    Account    |  GM  |\x0d\x0a");
-        zprintf("========================\x0d\x0a");
-
+        ///- Circle through them. Display username and GM level
         do
         {
             fields = result->Fetch();
             zprintf("|%15s|", fields[0].GetString());
-            zprintf("%6s|\x0d\x0a",fields[1].GetString());
+            zprintf("%6s|\r\n",fields[1].GetString());
         }while( result->NextRow() );
 
-        zprintf("========================\x0d\x0a");
+        zprintf("========================\r\n");
         delete result;
     }
-
     else
     {
-        zprintf("NO gamemasters\x0d\x0a");
+        zprintf("NO gamemasters\r\n");
     }
 }
 
+/// Set the GM level of an account
 void CliSetGM(char *command,pPrintf zprintf)
 {
+    ///- Get the command line arguments
+    char *szAcc = strtok(command," ");
 
-    unsigned int x =0;
-    char *charcr;
-
-    while (command[x]==' ') x++;
-    charcr=&command[x];
-
-    char szAcc[19];
-    x=0;
-    while(charcr[x]!=' ' &&charcr[x] )
+    if(!szAcc)                                          //wrong syntax 'setgm' without name
     {
-        szAcc[x]=charcr[x];
-        x++;
-    }
-    szAcc[x]=0;
-    if(!charcr[x])                                          //wrong syntax 'setgm name' without plevel
-    {
-        zprintf("Syntax is: setgm character number (0 - normal, 3 - gamemaster)\x0d\x0a");
+        zprintf("Syntax is: setgm <character> <number (0 - normal, 3 - gamemaster)>\r\n");
         return;
     }
-    while(charcr[x]==' ')
-        x++;
-    if(!charcr[x])                                          //wrong syntax 'setgm name   ' without plevel
-    {
-        zprintf("Syntax is: setgm character number (0 - normal, 3 - gamemaster)\x0d\x0a");
+
+    char *szLevel =  strtok(NULL," ");
+
+    if(!szLevel)                                          //wrong syntax 'setgm' without plevel
+    { 
+        zprintf("Syntax is: setgm <character> <number (0 - normal, 3 - gamemaster)>\r\n");
         return;
     }
 
     //wow it's ok,let's hope it was integer given
-    int lev=atoi(&charcr[x]);                               //get int anyway
+    int lev=atoi(szLevel);                               //get int anyway (0 if error)
 
-    QueryResult *result = loginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `username` = '%s'",szAcc );
+    ///- Escape the account name to allow quotes in names
+    std::string safe_account_name=szAcc;
+    loginDatabase.escape_string(safe_account_name);
+
+    ///- Try to find the account, then update the GM level
+    // No SQL injection (account name is escaped)
+    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
 
     if (result)
     {
-        loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,szAcc);
-        zprintf("We added %s gmlevel %d\x0d\x0a",szAcc,lev);
+        // No SQL injection (account name is escaped)
+        loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
+        zprintf("We added %s gmlevel %d\r\n",szAcc,lev);
 
         delete result;
     }
     else
     {
-        zprintf("No such account %s\x0d\x0a",szAcc);
+        zprintf("No account %s found\r\n",szAcc);
     }
-
 }
 
+/// Create an account
 void CliCreate(char *command,pPrintf zprintf)
 {
     //I see no need in this function (why would an admin personally create accounts
     //instead of using account registration page or accessing db directly?)
     //but still let it be
-    char szAcc[17];
-    int x=0;
-    while(command[x]==' ')x++;
-    if(!strlen(&command[x]))
+
+    ///- Parse the command line arguments
+    char *szAcc = strtok(command, " ");
+    if(!szAcc)
     {
-        zprintf("Syntax is: create username password\x0d\x0a");
+        zprintf("Syntax is: create <username> <password>\r\n");
         return;
     }
-    char * ptr=&command[x];
-    for(x=0;ptr[x]!=' ' && ptr[x] && x<17;x++)
-        szAcc[x]=ptr[x];
-    if(x==17)
+    
+    if(strlen(szAcc)>16)
     {
-        zprintf("Account can't be longer then 16 characters.\x0d\x0a");
+        zprintf("Account cannot be longer than 16 characters.\r\n");
+        return;
+    }
+    
+    char *szPassword = strtok(NULL, " ");
+
+    if(!szPassword)
+    {
+        zprintf("Syntax is: create <username> <password>\r\n");
         return;
     }
 
-    if(!ptr[x])
-    {
-        zprintf("Syntax is: create username password\x0d\x0a");
-        return;
-    }
-    szAcc[x]=0;
+    ///- Escape the account name to allow quotes in names
+    std::string safe_account_name=szAcc;
+    loginDatabase.escape_string(safe_account_name);
 
-    while(ptr[x]==' ')x++;
-    if(!ptr[x])
-    {
-        zprintf("Syntax is: create username password\x0d\x0a");
-        return;
-    }
-
-    QueryResult *result1 = loginDatabase.PQuery("SELECT `username` FROM `account` WHERE `username` = '%s'",szAcc );
+    ///- Check that the account does not exist yet
+    QueryResult *result1 = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
 
     if (result1)
     {
-        zprintf("User %s already exists\x0d\x0a",szAcc);
+        zprintf("User %s already exists\r\n",szAcc);
         delete result1;
         return;
     }
 
-    if(loginDatabase.PExecute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]))
+    ///- Also escape the password
+    std::string safe_password=szPassword;
+    loginDatabase.escape_string(safe_password);
+
+    ///- Insert the account in the database (account table)
+    // No SQL injection (escaped account name and password)
+    if(loginDatabase.PExecute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",safe_account_name.c_str(),safe_password.c_str()))
     {
-        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `account`, `realmlist` WHERE `account`.`id` NOT IN (SELECT `acctid` FROM `realmcharacters`)");
-        zprintf("User %s with password %s created successfully\x0d\x0a",szAcc,&ptr[x]);
+        ///- Make sure that the realmcharacters table is up-to-date
+        loginDatabase.Execute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `account`, `realmlist` WHERE `account`.`id` NOT IN (SELECT `acctid` FROM `realmcharacters`)");
+        zprintf("User %s with password %s created successfully\r\n",szAcc,szPassword);
     }
     else
-        zprintf("User %s with password %s NOT created (probably sql file format was updated)\x0d\x0a",szAcc,&ptr[x]);
+        zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",szAcc,szPassword);
 }
 
-void ParseCommand( pPrintf zprintf, char*command)
+/// Command parser and dispatcher
+void ParseCommand( pPrintf zprintf, char* input)
 {
     unsigned int x;
-    unsigned int l=strlen(command);
-    if(l<2)                                                 //return;//some dirty check
-    {
-        //zprintf(prompt);
+    if (!input)
         return;
-    }
-    /*
-    for(unsigned int y=0;y<l;y++)
-    if(command[y]==0xd||command[y]==0xa)
-    {command[y]=0;break;}
-    // replace '\x0d\x0a' with 0
-    */
+
+    unsigned int l=strlen(input);
+    char * supposedCommand=NULL,* arguments="";
+    if(!l)
+        return;
+
+    ///- Get the command and the arguments
+    supposedCommand = strtok(input," ");
+    if (l>strlen(supposedCommand))
+        arguments=&input[strlen(supposedCommand)+1];
+
+    ///- Circle through the command table and invoke the appropriate handler
     for ( x=0;x<CliTotalCmds;x++)
-        if(!memcmp(Commands[x].cmd,command,Commands[x].cmdlength ))
+        if(!strcmp(Commands[x].cmd,supposedCommand))
     {
-        Commands[x].Func (&command[Commands[x].cmdlength],zprintf);
+            Commands[x].Func(arguments,zprintf);
         break;
     }
+
+    ///- Display an error message if the command is unknown
     if(x==CliTotalCmds)
-        zprintf( "Unknown command.\x0d\x0a" );
+        zprintf("Unknown command: %s\r\n", input);
 }
 
+/// %Thread start
 void CliRunnable::run()
 {
+    ///- Init new SQL thread for the world database
     sDatabase.ThreadStart();                                // let thread do safe mySQL requests
+    /// \todo We also use the LoginDatabase in this thread. Should we also make it thread-safe? Else explain why.
 
     char commandbuf[256];
 
-    //uint32 realCurrTime = 0, realPrevTime = 0;
-
+    ///- Display the list of available CLI functions then beep
     sLog.outString("");
-    void CliHelp();
+    /// \todo Shoudn't we use here also the sLog singleton?
+    CliHelp(NULL,&printf);
 
     if(sConfig.GetIntDefault("BeepAtStart", 1) > 0)
     {
-        putchar(7);
+        printf("\a");                                           // \a = Alert
     }
 
+    ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
     while (!World::m_stopEvent)
     {
-
         printf("mangos>");
         fflush(stdout);
         char *command = fgets(commandbuf,sizeof(commandbuf),stdin);
         if (command != NULL)
         {
             for(int x=0;command[x];x++)
-                if(command[x]==0xd||command[x]==0xa)
+                if(command[x]=='\r'||command[x]=='\n')
             {
                 command[x]=0;
                 break;
             }
+            //// \todo Shoudn't we use here also the sLog singleton?
             ParseCommand(&printf,command);
         }
         else if (feof(stdin))
         {
             World::m_stopEvent = true;
         }
-
     }
 
+    ///- End the database thread
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }
 
+/// Kick a character out of the realm
 void CliKick(char*command,pPrintf zprintf)
 {
-    char *kickName;
-    int x=0;
-    while(command[x]==' ')
-        x++;
-    kickName=&command[x];
+    char *kickName = strtok(command, " ");
 
-    if (strlen(kickName) == 0)
+    if (!kickName)
     {
-        zprintf("Syntax is: kick playername\x0d\x0a");
+        zprintf("Syntax is: kick <charactername>\r\n");
         return;
     }
 
@@ -537,43 +567,36 @@ void CliKick(char*command,pPrintf zprintf)
     sWorld.KickPlayer(name);
 }
 
+/// Display/Define the 'Message of the day' for the realm
 void CliMotd(char*command,pPrintf zprintf)
 {
-    char const *motdText;
-    int x=0;
-    while(command[x]==' ')
-        x++;
-    motdText=&command[x];
 
-    if (strlen(motdText) == 0)
+    if (strlen(command) == 0)
     {
-        zprintf("Current Message of the day: \x0d\x0a%s\x0d\x0a", sWorld.GetMotd());
+        zprintf("Current Message of the day: \r\n%s\r\n", sWorld.GetMotd());
         return;
     }
     else
     {
-        sWorld.SetMotd(motdText);
-        zprintf("Text changed to:\x0d\x0a%s\x0d\x0a", motdText);
+        sWorld.SetMotd(command);
+        zprintf("Message of the day changed to:\r\n%s\r\n", command);
     }
-
 }
 
+/// Comment me
+/// \todo What is CorpsesErase for?
 void CliCorpses(char*,pPrintf)
 {
     CorpsesErase();
 }
 
-void CliSetLogLevel(char*Level,pPrintf zprintf)
+/// Set the level of logging
+void CliSetLogLevel(char*command,pPrintf zprintf)
 {
-    char *NewLevel;
-    int x=0;
-    while(Level[x]==' ')
-        x++;
-    NewLevel=&Level[x];
-
-    if (strlen(NewLevel) == 0)
+    char *NewLevel = strtok(command, " ");
+    if (!NewLevel)
     {
-        zprintf("Syntax is: Bad LogLevel\x0d\x0a");
+        zprintf("Syntax is: setloglevel <loglevel>\r\n");
         return;
     }
     sLog.SetLogLevel(NewLevel);

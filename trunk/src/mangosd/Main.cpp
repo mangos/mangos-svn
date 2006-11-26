@@ -16,57 +16,65 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup mangosd Mangos Daemon
+/// @{
+/// \file
+
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/ConfigEnv.h"
 #include "Log.h"
 #include "Master.h"
+#include "SystemConfig.h"
 
-#include <iostream>
+DatabaseMysql sDatabase; ///< Accessor to the mangos server database
+DatabaseMysql loginDatabase; ///< Accessor to the realm/login database
+uint32 realmID; ///< Id of the realm
 
-//uint8 loglevel = DEFAULT_LOG_LEVEL;
-DatabaseMysql sDatabase;
-DatabaseMysql loginDatabase;
-uint32 realmID;
-
+/// Print out the usage string for this program on the console.
 void usage(const char *prog)
 {
-    std::cerr << "Usage: " << prog << std::endl;
-    std::cerr << "\t" << "-c: config_file [" << _MANGOSD_CONFIG << "]" << std::endl;
-    exit(1);
+    sLog.outString("Usage: \n %s [-c config_file]",prog);
 }
 
+/// Launch the mangos server
 int main(int argc, char **argv)
 {
-
-    std::string cfg_file = _MANGOSD_CONFIG;
-    int c = 1;
+    ///- Command line parsing to get the configuration file name
+    char* cfg_file = _MANGOSD_CONFIG;
+    int c=1;
     while( c < argc )
     {
-        const char *tmp = argv[c];
-        if( *tmp == '-' && std::string(tmp +1) == "c" )
+        if( strcmp(argv[c],"-c") == 0)
         {
             if( ++c >= argc )
             {
-                std::cerr << "Runtime-Error: -c option requires an input argument" << std::endl;
+                sLog.outError("Runtime-Error: -c option requires an input argument");
                 usage(argv[0]);
+                return 1;
             }
             else
                 cfg_file = argv[c];
         }
         else
         {
-            std::cerr << "Runtime-Error: unsupported option " << tmp << std::endl;
+            sLog.outError("Runtime-Error: unsupported option %s",argv[c]);
             usage(argv[0]);
+            return 1;
         }
         ++c;
     }
 
-    if (!sConfig.SetSource(cfg_file.c_str()) )
+    if (!sConfig.SetSource(cfg_file))
     {
-        sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
+        sLog.outError("Could not find configuration file %s.", cfg_file);
+        return 1;
     }
+    sLog.outString("Using configuration file %s.", cfg_file);
 
+    ///- and run the 'Master'
+    /// \todo Why do we need this 'Master'? Can't all of this be in the Main as for Realmd?
     sMaster.Run();
     return 0;
 }
+/// @}

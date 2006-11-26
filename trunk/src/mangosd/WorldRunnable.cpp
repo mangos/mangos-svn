@@ -16,19 +16,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/** \file
+    \ingroup mangosd
+*/
+
 #include "Common.h"
-#include "Log.h"
 #include "World.h"
 #include "WorldRunnable.h"
-#include "Master.h"
 #include "Timer.h"
 
+#include "Database/DatabaseEnv.h"
+
+/// Heartbeat for the World
 void WorldRunnable::run()
 {
+    ///- Init new SQL thread for the world database
     sDatabase.ThreadStart();                                // let thread do safe mySQL requests
 
     uint32 realCurrTime = 0, realPrevTime = 0;
 
+    ///- While we have not World::m_stopEvent, update the world 
     while (!World::m_stopEvent)
     {
 
@@ -46,5 +53,6 @@ void WorldRunnable::run()
         #endif
     }
 
+    ///- End the database thread
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }

@@ -16,12 +16,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup mangosd
+/// @{
+/// \file
+
 #ifndef __CLIRUNNABLE_H
 #define __CLIRUNNABLE_H
 
+/// Command Line Interface handling thread
 class CliRunnable : public ZThread::Runnable
 {
     public:
         void run();
 };
 #endif
+/// @}

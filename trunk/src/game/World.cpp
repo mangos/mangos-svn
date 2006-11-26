@@ -183,6 +183,9 @@ void World::SetInitialWorldSettings()
         }
     }
 
+    SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
+    SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
+
     rate_values[RATE_HEALTH]      = sConfig.GetFloatDefault("Rate.Health", 1);
     rate_values[RATE_POWER_MANA]  = sConfig.GetFloatDefault("Rate.Power1", 1);
     rate_values[RATE_POWER_RAGE]  = sConfig.GetFloatDefault("Rate.Power2", 1);
@@ -226,9 +229,9 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300000);
     m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
     m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600000);
-    m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", 8085);
-    m_configs[CONFIG_PORT_REALM] = sConfig.GetIntDefault("RealmServerPort", 3724);
-    m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", 10000);
+    m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", DEFAULT_WORLDSERVER_PORT);
+    m_configs[CONFIG_PORT_REALM] = sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT);
+    m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME);
     m_configs[CONFIG_GROUP_XP_DISTANCE] = sConfig.GetIntDefault("MaxGroupXPDistance", 74);
     m_configs[CONFIG_GROUP_XP_DISTANCE] = m_configs[CONFIG_GROUP_XP_DISTANCE]*m_configs[CONFIG_GROUP_XP_DISTANCE];
     m_configs[CONFIG_GROUP_XP_LEVELDIFF] = sConfig.GetIntDefault("MaxGroupXPLevelDiff", 10);
@@ -696,7 +699,7 @@ bool World::KickPlayer(std::string playerName)
 
 bool World::BanAccount(std::string nameOrIP)
 {
-    bool is_ip = IsItIP(nameOrIP.c_str());
+    bool is_ip = IsIPAddress(nameOrIP.c_str());
 
     loginDatabase.escape_string(nameOrIP);
 
@@ -738,7 +741,7 @@ bool World::BanAccount(std::string nameOrIP)
 
 bool World::RemoveBanAccount(std::string nameOrIP)
 {
-    if(IsItIP(nameOrIP.c_str()))
+    if(IsIPAddress(nameOrIP.c_str()))
     {
         loginDatabase.escape_string(nameOrIP);
         loginDatabase.PExecute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",nameOrIP.c_str());
