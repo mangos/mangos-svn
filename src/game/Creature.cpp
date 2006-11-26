@@ -74,9 +74,6 @@ Creature::~Creature()
 {
     CombatStop();
     RemoveAllAuras();
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-        delete *i;
-    mQuests.clear( );
 
     for( SpellsList::iterator i = m_tspells.begin( ); i != m_tspells.end( ); i++ )
         delete (*i);
@@ -333,20 +330,17 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     uint32 quest_id;
     Quest *pQuest;
 
-    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
+    for( std::list<uint32>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
     {
-        pQuest = *i;
-        if ( !pQuest )
-            continue;
-
-        quest_id = pQuest->GetQuestInfo()->QuestId;
+        quest_id = *i;
+        pQuest = objmgr.QuestTemplates[quest_id];
         status = pPlayer->GetQuestStatus( quest_id );
         if ((status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
-            ((strlen(pQuest->GetQuestInfo()->Objectives) == 0) && pPlayer->CanTakeQuest(pQuest, false)))
+            ((strlen(pQuest->GetObjectives()) == 0) && pPlayer->CanTakeQuest(pQuest, false)))
         {
             SetFlag(UNIT_DYNAMIC_FLAGS, 2);
 
-            if ( pQuest->GetQuestInfo()->Repeatable )
+            if ( pQuest->IsRepeatable() )
                 return DIALOG_STATUS_REWARD_REP;
             else
                 return DIALOG_STATUS_REWARD;
@@ -360,13 +354,13 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     if ( result == DIALOG_STATUS_INCOMPLETE )
         return result;
 
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
+    for( std::list<uint32>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
     {
-        pQuest = *i;
+        pQuest = objmgr.QuestTemplates[*i];
         if ( !pQuest )
             continue;
 
-        quest_id = pQuest->GetQuestInfo()->QuestId;
+        quest_id = pQuest->GetQuestId();
         status = pPlayer->GetQuestStatus( quest_id );
         if ( status == QUEST_STATUS_NONE )
         {
@@ -374,7 +368,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             {
                 if ( pPlayer->SatisfyQuestLevel(quest_id, false) )
                 {
-                    if ( pQuest->GetQuestInfo()->Repeatable )
+                    if ( pQuest->IsRepeatable() )
                         return DIALOG_STATUS_REWARD_REP;
                     else
                         return DIALOG_STATUS_AVAILABLE;
@@ -1158,17 +1152,11 @@ void Creature::_LoadGoods()
 
 void Creature::_LoadQuests()
 {
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-        delete *i;
     mQuests.clear();
-
-    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
-        delete *i;
     mInvolvedQuests.clear();
 
     Field *fields;
-    Quest *pQuest;
-
+    
     QueryResult *result = sDatabase.PQuery("SELECT `quest` FROM `creature_questrelation` WHERE `id` = '%u'", GetEntry());
 
     if(result)
@@ -1176,27 +1164,27 @@ void Creature::_LoadQuests()
         do
         {
             fields = result->Fetch();
-            pQuest = objmgr.NewQuest( fields[0].GetUInt32() );
-            if (!pQuest) continue;
+            Quest* qInfo = objmgr.QuestTemplates[fields[0].GetUInt32()];
+            if (!qInfo) continue;
 
-            addQuest(pQuest);
+            addQuest(qInfo->GetQuestId());
         }
         while( result->NextRow() );
 
         delete result;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT `quest` FROM `creature_involvedrelation` WHERE `id` = '%u'", GetEntry ());
+    QueryResult *result1 = sDatabase.PQuery("SELECT `quest` FROM `creature_involvedrelation` WHERE `id` = '%u'", GetEntry());
 
     if(!result1) return;
 
     do
     {
         fields = result1->Fetch();
-        pQuest = objmgr.NewQuest( fields[0].GetUInt32() );
-        if (!pQuest) continue;
+        Quest* qInfo = objmgr.QuestTemplates[fields[0].GetUInt32()];
+        if (!qInfo) continue;
 
-        addInvolvedQuest(pQuest);
+        addInvolvedQuest(qInfo->GetQuestId());
     }
     while( result1->NextRow() );
 

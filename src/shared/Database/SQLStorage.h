@@ -35,6 +35,9 @@ class SQLStorage
             iNumFields =strlen(fmt);
             MaxEntry = 0;
         }
+        ~SQLStorage(){
+            Free();
+        }
 
         template<class T>
             T const* LookupEntry(uint32 id) const

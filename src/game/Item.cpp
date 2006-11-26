@@ -523,16 +523,14 @@ void Item::DeleteFromDB()
 
 void Item::_LoadQuests()
 {
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-        delete *i;
     mQuests.clear();
 
     ItemPrototype const *itemProto = GetProto();
     if(itemProto && itemProto->StartQuest)
     {
-        Quest* quest = objmgr.NewQuest(itemProto->StartQuest);
+        Quest * quest = objmgr.QuestTemplates[itemProto->StartQuest];
         if(quest)
-            addQuest(quest);
+            addQuest(itemProto->StartQuest);
         else
             sLog.outError("Item (Entry: %u) can start quest %u but quest not exist, ignoring.",GetEntry(),itemProto->StartQuest);
     }

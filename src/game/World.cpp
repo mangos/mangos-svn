@@ -65,6 +65,7 @@ World::~World()
 {
     for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end(); ++itr)
         delete itr->second;
+
     m_weathers.clear();
 }
 

@@ -47,6 +47,7 @@ class Field
         }
         float GetFloat() const { return mValue ? static_cast<float>(atof(mValue)) : 0; }
         bool GetBool() const { return mValue ? atoi(mValue) > 0 : false; }
+        int32 GetInt32() const { return mValue ? static_cast<int32>(atol(mValue)) : 0; }
         uint8 GetUInt8() const { return mValue ? static_cast<uint8>(atol(mValue)) : 0; }
         uint16 GetUInt16() const { return mValue ? static_cast<uint16>(atol(mValue)) : 0; }
         uint32 GetUInt32() const { return mValue ? static_cast<uint32>(atol(mValue)) : 0; }

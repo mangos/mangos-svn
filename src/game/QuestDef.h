@@ -20,9 +20,14 @@
 #define MANGOSSERVER_QUEST_H
 
 #include "Platform/Define.h"
+#include "Database/DatabaseEnv.h"
 #include <string>
+#include <vector>
+using namespace std;
 
 class Player;
+
+class ObjectMgr;
 
 // (PLAYER_VISIBLE_ITEM_1_CREATOR - PLAYER_QUEST_LOG_1_1)/3
 #define MAX_QUEST_LOG_SIZE 20
@@ -112,105 +117,148 @@ enum __QuestSpecialFlags                                    //according to mango
     QUEST_SPECIAL_FLAGS_REPUTATION    = 64,
 };
 
-// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
-#pragma pack(1)
-#else
-#pragma pack(push,1)
-#endif
-
-struct QuestInfo
-{
-    uint32 QuestId;
-    uint32 ZoneId;
-    uint32 QuestSort;
-    uint32 MinLevel;
-    uint32 QuestLevel;
-    uint32 Type;
-    uint32 RequiredRaces;
-    uint32 RequiredClass;
-    uint32 RequiredSkill;
-    uint32 RequiredSkillValue;
-    uint32 RequiredRepFaction;
-    uint32 RequiredRepValue;
-    uint32 LimitTime;
-    uint32 SpecialFlags;
-    uint32 PrevQuestId;
-    uint32 NextQuestId;
-    uint32 ExclusiveGroup;
-    uint32 SrcItemId;
-    uint32 SrcItemCount;
-    uint32 SrcSpell;
-    char* Title;
-    char* Details;
-    char* Objectives;
-    char* OfferRewardText;
-    char* RequestItemsText;
-    char* EndText;
-    char* ObjectiveText[4];
-    uint32 ReqItemId[ QUEST_OBJECTIVES_COUNT ];
-    uint32 ReqItemCount[ QUEST_OBJECTIVES_COUNT ];
-    uint32 ReqSourceId[ QUEST_SOURCE_ITEM_IDS_COUNT ];
-    uint32 ReqSourceRef[ QUEST_SOURCE_ITEM_IDS_COUNT ];
-    int32  ReqCreatureOrGOId[ QUEST_OBJECTIVES_COUNT ];     // >0 Creature <0 Gameobject
-    uint32 ReqCreatureOrGOCount[ QUEST_OBJECTIVES_COUNT ];
-    uint32 ReqSpell[ QUEST_OBJECTIVES_COUNT ];
-    //uint32 ReqQuests[ QUEST_DEPLINK_COUNT ];
-    uint32 RewChoiceItemId[ QUEST_REWARD_CHOICES_COUNT ];
-    uint32 RewChoiceItemCount[ QUEST_REWARD_CHOICES_COUNT ];
-    uint32 RewItemId[ QUEST_REWARDS_COUNT ];
-    uint32 RewItemCount[ QUEST_REWARDS_COUNT ];
-    uint32 RewRepFaction1;
-    uint32 RewRepFaction2;
-    int32  RewRepValue1;
-    int32  RewRepValue2;
-    int32  RewOrReqMoney;
-    uint32 RewXP;
-    uint32 RewSpell;
-    uint32 PointMapId;
-    float PointX;
-    float PointY;
-    uint32 PointOpt;
-    uint32 DetailsEmote;
-    uint32 IncompleteEmote;
-    uint32 CompleteEmote;
-    uint32 OfferRewardEmote;
-    uint32 RequestItemsEmote;
-    uint32 QuestCompleteScript;
-    uint32 HaveQuestId;
-    uint32 Repeatable;
-
-    // simple data access functions
-    bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }
-};
-
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
-#pragma pack()
-#else
-#pragma pack(pop)
-#endif
-
+// This Quest class provides a convenient way to access a few pretotaled (cached) quest details,
+// all base quest information, and any utility functions such as generating the amount of
+// xp to give
 class Quest
 {
+    friend ObjectMgr;
     public:
-        Quest();
+        Quest(Field * questRecord);
+        uint32 XPValue( Player *pPlayer );
+        
+        bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }
 
-        QuestInfo const* GetQuestInfo() const;
-        uint32 GetQuestId() const { return m_quest_id; }
+        // table data accessors:
+        uint32 GetQuestId() { return QuestId; }
+        uint32 GetZoneId() { return ZoneId; }
+        uint32 GetQuestSort() { return QuestSort; }
+        uint32 GetMinLevel() { return MinLevel; }
+        uint32 GetQuestLevel() { return QuestLevel; }
+        uint32 GetType() { return Type; }
+        uint32 GetRequiredRaces() { return RequiredRaces; }
+        uint32 GetRequiredClass() { return RequiredClass; }
+        uint32 GetRequiredSkill() { return RequiredSkill; }
+        uint32 GetRequiredSkillValue() { return RequiredSkillValue; }
+        uint32 GetRequiredRepFaction() { return RequiredRepFaction; }
+        uint32 GetRequiredRepValue() { return RequiredRepValue; }
+        uint32 GetLimitTime() { return LimitTime; }
+        uint32 GetNextQuestId() { return NextQuestId; }
+        uint32 GetExclusiveGroup() { return ExclusiveGroup; }
+        uint32 GetSrcItemId() { return SrcItemId; }
+        uint32 GetSrcItemCount() { return SrcItemCount; }
+        uint32 GetSrcSpell() { return SrcSpell; }
+        const char* GetTitle() { return Title.c_str(); }
+        const char* GetDetails() { return Details.c_str(); }
+        const char* GetObjectives() { return Objectives.c_str(); }
+        const char* GetOfferRewardText() { return OfferRewardText.c_str(); }
+        const char* GetRequestItemsText() { return RequestItemsText.c_str(); }
+        const char* GetEndText() { return EndText.c_str(); }
+        uint32 GetRewRepFaction1() { return RewRepFaction1; }
+        uint32 GetRewRepFaction2() { return RewRepFaction2; }
+        int32  GetRewRepValue1() { return RewRepValue1; }
+        int32  GetRewRepValue2() { return RewRepValue2; }
+        int32  GetRewOrReqMoney() { return RewOrReqMoney; }
+        uint32 GetRewXP() { return RewXP; }
+        uint32 GetRewSpell() { return RewSpell; }
+        uint32 GetPointMapId() { return PointMapId; }
+        float GetPointX() { return PointX; }
+        float GetPointY (){ return PointY; }
+        uint32 GetPointOpt() { return PointOpt; }
+        uint32 GetOfferRewardEmote() { return OfferRewardEmote; }
+        uint32 GetRequestItemsEmote() { return RequestItemsEmote; }
+        uint32 GetQuestCompleteScript() { return QuestCompleteScript; }
+        uint32 GetHaveQuestId() { return HaveQuestId; }
+        uint32 IsRepeatable() { return Repeatable; }
+        uint32 GetSpecialFlags() { return SpecialFlags; }
 
+        // multiple values
+        vector<string> ObjectiveText;
+        vector<uint32> ReqItemId;
+        vector<uint32> ReqItemCount;
+        vector<uint32> ReqSourceId;
+        vector<uint32> ReqSourceRef;
+        vector<int32> ReqCreatureOrGOId;     // >0 Creature <0 Gameobject
+        vector<uint32> ReqCreatureOrGOCount;
+        vector<uint32> ReqSpell;
+        vector<uint32> RewChoiceItemId;
+        vector<uint32> RewChoiceItemCount;
+        vector<uint32> RewItemId;
+        vector<uint32> RewItemCount;
+         
+        // multiple values
+        /*vector<char*> GetObjectiveText() { return ObjectiveText; }
+        vector<uint32> GetReqItemId() { return ReqItemId; }
+        vector<uint32> GetReqItemCount() { return ReqItemCount; }
+        vector<uint32> GetReqSourceId() { return ReqSourceId; }
+        vector<uint32> GetReqSourceRef() { return ReqSourceRef; }
+        vector<int32>  GetReqCreatureOrGOId() { return ReqCreatureOrGOId; }    // >0 Creature <0 Gameobject
+        vector<uint32> GetReqCreatureOrGOCount() { return ReqCreatureOrGOCount; }
+        vector<uint32> GetReqSpell() { return ReqSpell; }
+        vector<uint32> GetRewChoiceItemId() { return RewChoiceItemId; }
+        vector<uint32> GetRewChoiceItemCount() { return RewChoiceItemCount; }
+        vector<uint32> GetRewItemId() { return RewItemId; }
+        vector<uint32> GetRewItemCount() { return RewItemCount; }*/
+        
+        uint32 GetReqItemsCount() { return m_reqitemscount; }
+        uint32 GetReqCreatureOrGOcount() { return m_reqCreatureOrGOcount; }
+        uint32 GetRewChoiceItemsCount() { return m_rewchoiceitemscount; }
+        uint32 GetRewItemsCount() { return m_rewitemscount; }
+
+        vector<uint32> prevQuests;
+    
+    // cached data
+    private:
         uint32 m_reqitemscount;
         uint32 m_reqCreatureOrGOcount;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
 
-        uint32 m_offerRewardEmote;
-        uint32 m_requestItemsEmote;
-
-        bool LoadQuest( uint32 quest );
-        uint32 XPValue( Player *pPlayer );
-
-    private:
-        uint32 m_quest_id;
+        
+    // table data
+    protected:
+        uint32 QuestId;
+        uint32 ZoneId;
+        uint32 QuestSort;
+        uint32 MinLevel;
+        uint32 QuestLevel;
+        uint32 Type;
+        uint32 RequiredRaces;
+        uint32 RequiredClass;
+        uint32 RequiredSkill;
+        uint32 RequiredSkillValue;
+        uint32 RequiredRepFaction;
+        uint32 RequiredRepValue;
+        uint32 LimitTime;
+        uint32 SpecialFlags;
+        uint32 PrevQuestId;
+        uint32 NextQuestId;
+        uint32 ExclusiveGroup;
+        uint32 SrcItemId;
+        uint32 SrcItemCount;
+        uint32 SrcSpell;
+        string Title;
+        string Details;
+        string Objectives;
+        string OfferRewardText;
+        string RequestItemsText;
+        string EndText;
+        uint32 RewRepFaction1;
+        uint32 RewRepFaction2;
+        int32  RewRepValue1;
+        int32  RewRepValue2;
+        int32  RewOrReqMoney;
+        uint32 RewXP;
+        uint32 RewSpell;
+        uint32 PointMapId;
+        float PointX;
+        float PointY;
+        uint32 PointOpt;
+        uint32 OfferRewardEmote;
+        uint32 RequestItemsEmote;
+        uint32 QuestCompleteScript;
+        uint32 HaveQuestId;
+        uint32 Repeatable;
 };
 
 struct quest_status

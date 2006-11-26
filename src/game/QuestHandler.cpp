@@ -90,7 +90,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         return;
     }
 
-    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
+    Quest * qInfo = objmgr.QuestTemplates[quest];
     if ( qInfo )
     {
         if( _player->GetDivider() != 0 )
@@ -103,10 +103,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
             }
         }
 
-        Quest *pQuest = objmgr.NewQuest(quest);
-        if( _player->CanAddQuest( pQuest, true ) )
+        if( _player->CanAddQuest( qInfo, true ) )
         {
-            _player->AddQuest( pQuest );
+            _player->AddQuest( qInfo );
 
             if ( _player->CanCompleteQuest( quest ) )
                 _player->CompleteQuest( quest );
@@ -114,24 +113,22 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
             switch(pObject->GetTypeId())
             {
                 case TYPEID_UNIT:
-                    Script->QuestAccept(_player, ((Creature*)pObject), pQuest );
+                    Script->QuestAccept(_player, ((Creature*)pObject), qInfo );
                     break;
                 case TYPEID_ITEM:
-                    Script->ItemQuestAccept(_player, ((Item*)pObject), pQuest );
+                    Script->ItemQuestAccept(_player, ((Item*)pObject), qInfo );
                     break;
                 case TYPEID_GAMEOBJECT:
-                    Script->GOQuestAccept(_player, ((GameObject*)pObject), pQuest );
+                    Script->GOQuestAccept(_player, ((GameObject*)pObject), qInfo );
                     break;
             }
             _player->PlayerTalkClass->CloseGossip();
 
-            if( qInfo->SrcSpell > 0 )
-                _player->CastSpell( _player, qInfo->SrcSpell, true);
+            if( qInfo->GetSrcSpell() > 0 )
+                _player->CastSpell( _player, qInfo->GetSrcSpell(), true);
 
             return;
         }
-        else
-            delete pQuest;
     }
 
     _player->PlayerTalkClass->CloseGossip();
@@ -152,15 +149,13 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Quest *pQuest = objmgr.NewQuest(quest);
+    Quest *pQuest = objmgr.QuestTemplates[quest];
     if ( pQuest )
     {
         _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
-        delete pQuest;
     }
 
     /*
-        Quest *pQuest = objmgr.NewQuest(quest);
         if ( pQuest )
         {
             uint32 status = _player->GetQuestStatus( quest );
@@ -202,7 +197,6 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
                     break;
             }
         }
-        delete pQuest;
         _player->PlayerTalkClass->CloseGossip();*/
 }
 
@@ -212,12 +206,10 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     recv_data >> quest;
     sLog.outDebug( "WORLD: Received CMSG_QUEST_QUERY quest = %u",quest );
 
-    Quest *pQuest = objmgr.NewQuest(quest);
-
+    Quest *pQuest = objmgr.QuestTemplates[quest];
     if ( pQuest )
     {
         _player->PlayerTalkClass->SendQuestQueryResponse( pQuest );
-        delete pQuest;
     }
 }
 
@@ -233,7 +225,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     if(!pObject||!pObject->hasInvolvedQuest(quest))
         return;
 
-    Quest *pQuest = objmgr.NewQuest(quest);
+    Quest *pQuest = objmgr.QuestTemplates[quest];
     if( pQuest )
     {
         if( _player->CanRewardQuest( pQuest, reward, true ) )
@@ -261,7 +253,6 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                     break;
             }
         }
-        delete pQuest;
     }
 }
 
@@ -277,12 +268,11 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     if(!pObject||!pObject->hasInvolvedQuest(quest))
         return;
 
-    Quest *pQuest       = objmgr.NewQuest( quest );
+    Quest *pQuest = objmgr.QuestTemplates[quest];
     if( pQuest )
     {
         if ( _player->CanCompleteQuest( quest ) )
             _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, guid, true, NULL, 0);
-        delete pQuest;
     }
 }
 
@@ -355,14 +345,13 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Quest *pQuest = objmgr.NewQuest( quest );
+    Quest *pQuest = objmgr.QuestTemplates[quest];
     if( pQuest )
     {
         if( _player->GetQuestStatus( quest ) != QUEST_STATUS_COMPLETE )
             _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, false, false);
         else
             _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, true, false);
-        delete pQuest;
     }
 }
 
@@ -381,7 +370,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
 
     sLog.outDetail( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
 
-    Quest *pQuest = objmgr.NewQuest( quest );
+    Quest *pQuest = objmgr.QuestTemplates[quest];
     if( pQuest )
     {
         if( _player->IsInGroup() )
@@ -449,8 +438,6 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                 }
             }
         }
-
-        delete pQuest;
     }
 }
 

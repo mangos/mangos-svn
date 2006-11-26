@@ -41,18 +41,13 @@
 #include "Policies/Singleton.h"
 #include "Database/SQLStorage.h"
 
-extern SQLStorage sQuestsStorage;
 extern SQLStorage sCreatureStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sItemStorage;
 
-typedef std::multimap<uint32,uint32> QuestRelations;
 struct ScriptInfo;
 typedef multimap<uint32, ScriptInfo> ScriptMap;
 typedef map<uint32, ScriptMap > ScriptMapMap;
-
-extern QuestRelations sPrevQuests;
-extern QuestRelations sExclusiveQuestGroups;
 extern ScriptMapMap sScripts;
 
 class Group;
@@ -157,21 +152,6 @@ class ObjectMgr
         std::string GetGuildNameById(const uint32 GuildId) const;
         void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
-
-        static QuestInfo const* GetQuestInfo(uint32 id) { return sQuestsStorage.LookupEntry<QuestInfo>(id); }
-
-        Quest* NewQuest(uint32 id) const
-        {
-            Quest *rquest=new Quest;
-
-            if(!rquest->LoadQuest(id))
-            {
-                delete rquest;
-                return NULL;
-            }
-
-            return rquest;
-        }
 
         void AddAuction(AuctionEntry *ah)
         {
@@ -293,6 +273,10 @@ class ObjectMgr
         uint32 GenerateAuctionID();
         uint32 GenerateMailID();
 
+        typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
+        QuestMap QuestTemplates;
+        multimap<uint32, uint32> ExclusiveQuestGroups;
+
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -307,7 +291,6 @@ class ObjectMgr
         template<class T> HM_NAMESPACE::hash_map<uint32,T*>& _GetContainer();
         template<class T> TYPEID _GetTypeId() const;
 
-        typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
 
@@ -319,7 +302,6 @@ class ObjectMgr
 
         AuctionEntryMap     mAuctions;
 
-        QuestMap            mQuests;
         AreaTriggerMap      mAreaTriggerMap;
         GossipTextMap       mGossipText;
         TeleportMap         mTeleports;
