@@ -323,7 +323,7 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
     ItemPrototype const* IProto;
 
     data << pQuest->GetRewChoiceItemsCount();
-    for (uint32 i=0; i < pQuest->GetRewChoiceItemsCount(); i++)
+    for (uint32 i=0; i < QUEST_REWARD_CHOICES_COUNT; i++)
     {
         data << uint32(pQuest->RewChoiceItemId[i]);
         data << uint32(pQuest->RewChoiceItemCount[i]);
@@ -335,7 +335,7 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
     }
 
     data << pQuest->GetRewItemsCount();
-    for (uint32 i=0; i < pQuest->GetRewItemsCount(); i++)
+    for (uint32 i=0; i < QUEST_REWARDS_COUNT; i++)
     {
         data << pQuest->RewItemId[i];
         data << pQuest->RewItemCount[i];
