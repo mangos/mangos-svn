@@ -226,8 +226,8 @@ void Spell::EffectDummy(uint32 i)
         if( ((Creature*)unitTarget)->IsFriendlyTo(m_caster->getVictim()) )
             return;
 
-        // only from same creature family
-        if( ((Creature*)unitTarget)->GetCreatureInfo()->family != ((Creature*)m_caster)->GetCreatureInfo()->family )
+        // only from same creature faction
+        if(unitTarget->getFaction() != m_caster->getFaction() )
             return;
 
         // only if enimy is player or pet.

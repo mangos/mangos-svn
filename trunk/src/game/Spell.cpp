@@ -1471,7 +1471,7 @@ uint8 Spell::CanCast()
         //    castResult = CAST_FAIL_NOT_BEHIND_TARGET;
 
         //Must be behind the target.
-        if (m_spellInfo->AttributesEx2 == 0x100000 && target->HasInArc(M_PI, m_caster) && m_spellInfo->SpellIconID != 204 && m_spellInfo->SpellIconID != 205)
+        if( m_spellInfo->AttributesEx2 == 0x100000 && target->HasInArc(M_PI, m_caster) && m_spellInfo->SpellIconID != 204 && m_spellInfo->SpellIconID != 205 )
         {
             SendInterrupted(2);
             castResult = CAST_FAIL_NOT_BEHIND_TARGET;
@@ -1778,15 +1778,15 @@ uint8 Spell::CheckRange()
 
     Unit *target = m_targets.getUnitTarget();
 
-    if(target && target->GetGUID() != m_caster->GetGUID())
+    if(target && target != m_caster)
     {
         float dist = m_caster->GetDistanceSq(target);
         if(dist > max_range * max_range)
             return CAST_FAIL_OUT_OF_RANGE;                  //0x56;
         if(dist < min_range * min_range)
             return CAST_FAIL_TOO_CLOSE;
-        if( m_caster != target && !m_IsTriggeredSpell && !m_caster->isInFront( target, max_range) )
-            if (!IsPositiveSpell(m_spellInfo->Id) && casttime != 0 && !IsSingleTarget(m_spellInfo->Id))
+        if( !m_IsTriggeredSpell && !m_caster->isInFront( target, max_range) )
+            if (m_rangedShoot || !IsPositiveSpell(m_spellInfo->Id) && casttime != 0 && !IsSingleTarget(m_spellInfo->Id))
                 return CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
     }
 
