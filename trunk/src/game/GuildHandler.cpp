@@ -687,6 +687,9 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
+    if(plName.size() == 0)
+        return;
+
     normalizePlayerName(plName);
     sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
@@ -816,6 +819,9 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
+    if(plName.size() == 0)
+        return;
+
     normalizePlayerName(plName);
     sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
@@ -885,6 +891,10 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_DEMOTE"  );
 
     recvPacket >> plName;
+
+    if(plName.size() == 0)
+        return;
+
     normalizePlayerName(plName);
     sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
@@ -1021,6 +1031,10 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_LEADER"  );
 
     recvPacket >> name;
+
+    if(name.size() == 0)
+        return;
+
     normalizePlayerName(name);
     sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
@@ -1119,6 +1133,10 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_SET_PUBLIC_NOTE"  );
 
     recvPacket >> name;
+
+    if(name.size() == 0)
+        return;
+
     normalizePlayerName(name);
     sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
@@ -1173,6 +1191,9 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     sLog.outDebug( "WORLD: Received CMSG_GUILD_SET_OFFICER_NOTE"  );
 
     recvPacket >> plName;
+
+    if(plName.size() == 0)
+        return;
 
     normalizePlayerName(plName);
     sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
