@@ -474,6 +474,9 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     recv_data >> friendName;
 
+    if(friendName.size() == 0)
+        return;
+
     normalizePlayerName(friendName);
     sDatabase.escape_string(friendName);                    // prevent SQL injection - normal name don't must changed by this call
 
@@ -579,6 +582,9 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     recv_data >> IgnoreName;
+
+    if(IgnoreName.size() == 0)
+        return;
 
     normalizePlayerName(IgnoreName);
     sDatabase.escape_string(IgnoreName);                    // prevent SQL injection - normal name don't must changed by this call

@@ -40,6 +40,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     recv_data >> item;
     recv_data >> money >> COD;
 
+    if(receiver.size() == 0)
+        return;
+
     normalizePlayerName(receiver);
     sDatabase.escape_string(receiver);                      // prevent SQL injection - normal name don't must changed by this call
 

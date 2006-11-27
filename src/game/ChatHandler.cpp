@@ -150,6 +150,16 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string to, msg;
             recv_data >> to >> msg;
+
+            if(to.size() == 0)
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_CHAT_PLAYER_NOT_FOUND);
+                data<<to;
+                SendPacket(&data);
+                break;
+            }
+
             normalizePlayerName(to);
             Player *player = objmgr.GetPlayer(to.c_str());
             // send whispers from player to GM only if GM accept its (not show online state GM in other case)

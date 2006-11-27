@@ -210,6 +210,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     data >> m_name;
 
+    if(m_name.size() == 0)
+        return false;
+
     normalizePlayerName(m_name);
 
     data >> race >> class_ >> gender >> skin >> face;

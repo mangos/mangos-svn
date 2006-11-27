@@ -78,6 +78,9 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> race_;
     recv_data.rpos(0);
 
+    if(name.size() == 0)
+        return;
+
     normalizePlayerName(name);
 
     // prevent sending (not from client) wrong names creating
