@@ -7415,12 +7415,10 @@ Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,
     if( pItem )
     {
         ItemPrototype const *pProto = pItem->GetProto();
+        ItemAddedQuestCheck( item, count );
         if(fromLoot)
             pItem->SetItemRandomProperties();
-
         Item * retItem = StoreItem( pos, pItem, update );
-
-        ItemAddedQuestCheck( item, count );
         
         return retItem;
     }
@@ -7689,6 +7687,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
     if( pItem )
     {
         sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+
         //pItem->SetOwnerGUID(0);
         pItem->SetSlot( NULL_SLOT );
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
@@ -7704,6 +7703,8 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
+            ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
+
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
             if ( slot < EQUIPMENT_SLOT_END )
@@ -7744,8 +7745,6 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
             m_items[slot] = NULL;
             
-            ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
-
             if( IsInWorld() && update )
             {
                 pItem->RemoveFromWorld();
@@ -7757,11 +7756,11 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
             if( pBag )
             {
-                pBag->RemoveItem(slot, update);
-
                 if( pProto && pProto->Class == ITEM_CLASS_QUEST )
                     ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
                 
+                pBag->RemoveItem(slot, update);
+
                 if( IsInWorld() && update )
                 {
                     pItem->RemoveFromWorld();
@@ -7797,8 +7796,8 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             else
             {
                 pProto = pItem->GetProto();
-                pItem->SetCount( pItem->GetCount() - count + remcount );
                 ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
+                pItem->SetCount( pItem->GetCount() - count + remcount );
                 if( IsInWorld() & update )
                     pItem->SendUpdateToPlayer( this );
                 pItem->SetState(ITEM_CHANGED, this);
@@ -7834,8 +7833,8 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                         else
                         {
                             pProto = pItem->GetProto();
-                            pItem->SetCount( pItem->GetCount() - count + remcount );
                             ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
+                            pItem->SetCount( pItem->GetCount() - count + remcount );
                             if( IsInWorld() && update )
                                 pItem->SendUpdateToPlayer( this );
                             pItem->SetState(ITEM_CHANGED, this);
@@ -7864,8 +7863,8 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             else
             {
                 pProto = pItem->GetProto();
-                pItem->SetCount( pItem->GetCount() - count + remcount );
                 ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
+                pItem->SetCount( pItem->GetCount() - count + remcount );
                 if( IsInWorld() & update )
                     pItem->SendUpdateToPlayer( this );
                 pItem->SetState(ITEM_CHANGED, this);
@@ -7892,8 +7891,8 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
     else
     {
         ItemPrototype const* pProto  = pItem->GetProto();
-        pItem->SetCount( pItem->GetCount() - count );
         ItemRemovedQuestCheck( pItem->GetEntry(), count);
+        pItem->SetCount( pItem->GetCount() - count );
         count = 0;
         if( IsInWorld() & update )
             pItem->SendUpdateToPlayer( this );
@@ -8596,7 +8595,7 @@ void Player::SendPreparedQuest( uint64 guid )
         Quest *pQuest = objmgr.QuestTemplates[quest_id];
         if ( pQuest )
         {
-            if( status == DIALOG_STATUS_REWARD && !GetQuestRewardStatus( quest_id ) )
+            if( status == DIALOG_STATUS_REWARD_REP && !GetQuestRewardStatus( quest_id ) )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanRewardQuest(pQuest,false), true );
             else if( status == DIALOG_STATUS_INCOMPLETE )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, false, true );
@@ -8753,9 +8752,9 @@ bool Player::CanCompleteQuest( uint32 quest_id )
             //{
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
             {
-                //if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
-                // Must do it this way because repeatable quests won't be counted:
-                if (GetItemCount(qInfo->ReqItemId[i]) < qInfo->ReqItemCount[i])
+                if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
+                // Need to do something so repeatable quests can be counted:
+                //if (GetItemCount(qInfo->ReqItemId[i]) < qInfo->ReqItemCount[i])
                     return false;
             }
             //}
@@ -9012,15 +9011,16 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
 
         ModifyMoney( pQuest->GetRewOrReqMoney() );
 
-        if ( !pQuest->IsRepeatable() )
+        if ( !pQuest->IsRepeatable() ) {
+            SetQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
             mQuestStatus[quest_id].m_rewarded = true;
+        }
         else
         {
             SetQuestStatus(quest_id, QUEST_STATUS_NONE);
         }
 
         SendQuestReward( pQuest, XP, questGiver );
-
         mQuestStatus[quest_id].m_completed_once = true;     // in repeated quest case prevent recive XP at second complete
     }
 }
