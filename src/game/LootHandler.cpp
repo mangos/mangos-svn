@@ -60,9 +60,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         Creature* pCreature =
             ObjectAccessor::Instance().GetCreature(*player, lguid);
 
-        bool ok_loot = pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
+        bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
 
-        if (!pCreature || !ok_loot || !pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
+        if( !ok_loot || !pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
             return;
 
         loot = &pCreature->loot;
@@ -161,8 +161,10 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
     else
     {
         Creature* pCreature = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
-        bool ok_loot = pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
-        if ( pCreature && ok_loot && pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
+
+        bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
+
+        if ( ok_loot && pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
             pLoot = &pCreature->loot ;
     }
 
@@ -256,8 +258,8 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         Creature* pCreature =
             ObjectAccessor::Instance().GetCreature(*player, lguid);
 
-        bool ok_loot = pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
-        if ( !pCreature || !ok_loot || !pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
+        bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
+        if ( !ok_loot || !pCreature->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
             return;
 
         loot = &pCreature->loot;
