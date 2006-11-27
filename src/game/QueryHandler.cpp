@@ -161,19 +161,33 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
-    data << ((unit->isPet()) ? ((Pet*)unit)->GetName().c_str() : ci->Name);
+    if (unit)
+        data << ((unit->isPet()) ? ((Pet*)unit)->GetName().c_str() : ci->Name);
+    else
+        data << ci->Name;
+
     data << uint8(0) << uint8(0) << uint8(0);
-    data << ((unit->isPet()) ? "Pet" : ci->SubName);
+    if (unit)
+        data << ((unit->isPet()) ? "Pet" : ci->SubName);
+    else
+        data << ci->SubName;
 
     uint32 wdbFeild11=0,wdbFeild12=0;
 
     data << ci->flag1;                                      //flag1          wdbFeild7=wad flags1
-    data << (uint32)((unit->isPet()) ? 0 : ci->type);       //creatureType   wdbFeild8
+    if (unit)
+        data << (uint32)((unit->isPet()) ? 0 : ci->type);       //creatureType   wdbFeild8
+    else
+        data << (uint32)ci->type;
+
     data << (uint32)ci->family;                             //family         wdbFeild9
     data << (uint32)ci->rank;                               //rank           wdbFeild10
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+    if (unit)
+        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+    else
+        data << (uint32)ci->randomDisplayID();
 
     data << (uint16)ci->civilian;                           //wdbFeild14
 
@@ -207,19 +221,35 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
-    data << ((unit->isPet()) ? ((Pet*)unit)->GetName().c_str() : ci->Name);;
+    if (unit)
+        data << ((unit->isPet()) ? ((Pet*)unit)->GetName().c_str() : ci->Name);
+    else
+        data << ci->Name;
+
     data << uint8(0) << uint8(0) << uint8(0);
-    data << ((unit->isPet()) ? "Pet" : ci->SubName);
+    
+    if (unit)
+        data << ((unit->isPet()) ? "Pet" : ci->SubName);
+    else
+        data << ci->Name;
 
     uint32 wdbFeild11=0,wdbFeild12=0;
 
     data << ci->flag1;                                      //flags          wdbFeild7=wad flags1
-    data << (uint32)((unit->isPet()) ? 0 : ci->type);       //creatureType   wdbFeild8
+    
+    if (unit)
+        data << (uint32)((unit->isPet()) ? 0 : ci->type);       //creatureType   wdbFeild8
+    else
+        data << (uint32) ci->type;
+
     data << (uint32)ci->family;                             //family         wdbFeild9
     data << (uint32)ci->rank;                               //rank           wdbFeild10
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+    if (unit)
+        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+    else
+        data << (uint32)ci->randomDisplayID();
 
     data << (uint16)ci->civilian;                           //wdbFeild14
 
@@ -309,7 +339,10 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
     data << (uint32)ci->rank;                               //unknow         wdbFeild10
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+    if (unit)
+        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+    else
+        data << (uint32)ci->randomDisplayID();
 
     data << (uint16)ci->civilian;                           //wdbFeild14
 
