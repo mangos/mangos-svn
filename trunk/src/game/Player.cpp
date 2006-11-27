@@ -8961,7 +8961,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
         for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
         {
             if ( pQuest->ReqItemId[i] )
-                RemoveItemCount( pQuest->ReqItemId[i], pQuest->ReqItemCount[i], true);
+                DestroyItemCount( pQuest->ReqItemId[i], pQuest->ReqItemCount[i], true);
         }
 
         //if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
