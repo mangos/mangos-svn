@@ -222,8 +222,8 @@ void Spell::EffectDummy(uint32 i)
         if( unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT )
             return;
 
-        // skip friendly to caster enemy creatures
-        if( ((Creature*)unitTarget)->IsFriendlyTo(m_caster->getVictim()) )
+        // skip non hostile to caster enemy creatures
+        if( !((Creature*)unitTarget)->IsHostileTo(m_caster->getVictim()) )
             return;
 
         // only from same creature faction

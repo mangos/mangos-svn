@@ -2860,49 +2860,50 @@ static bool InDuelWith(Unit const* one, Unit const* two)
 
 bool Unit::IsHostileTo(Unit const* unit) const
 {
-    // common case 
-    FactionTemplateResolver my_faction = getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
-
-    if(my_faction.IsHostileTo(your_faction) || my_faction.IsHostileToAll())
-        return true;
-
-    // special cases
-    if(GetTypeId()==TYPEID_PLAYER && unit->GetTypeId()==TYPEID_PLAYER && getFaction()!=unit->getFaction() )
-    {
-        // if other faction player in pvp
-        if(((Player*)unit)->GetPvP())
-            return true;
-    }
-
+    // special cases (Duel)
     if(InDuelWith(this,unit))
         return true;
 
-    // last case
-    return false;
+    // special cases (PvP states)
+    if(GetTypeId()==TYPEID_PLAYER && unit->GetTypeId()==TYPEID_PLAYER)
+    {        
+        // Green/Blue (can't attack)
+        if(getFaction()==unit->getFaction())
+            return false;
+
+        // Red (can attack) if true, Blue/Yellow (can't attack) in another case
+        return ((Player*)unit)->GetPvP() && ((Player*)this)->GetPvP();
+    }
+
+    // common case (CvC,PvC, CvP)
+    FactionTemplateResolver my_faction = getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
+
+    return my_faction.IsHostileTo(your_faction) || my_faction.IsHostileToAll();
 }
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
 {
-    FactionTemplateResolver my_faction = getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
-
-    if(!my_faction.IsFriendlyTo(your_faction))
-        return false;
-
-    // special cases
-    if(GetTypeId()==TYPEID_PLAYER && unit->GetTypeId()==TYPEID_PLAYER && getFaction()!=unit->getFaction() )
-    {
-        // if other faction player in pvp
-        if(((Player*)unit)->GetPvP())
-            return false;
-    }
-
+    // special cases (Duel)
     if(InDuelWith(this,unit))
         return false;
 
-    // last case
-    return true;
+    // special cases (PvP states)
+    if(GetTypeId()==TYPEID_PLAYER && unit->GetTypeId()==TYPEID_PLAYER)
+    {
+        // Green/Blue (non-attackable)
+        if(getFaction()==unit->getFaction())
+            return true;
+
+        // Blue (friendly/non-attackable) if not PVP, or Yellow/Red in another case (attackable)
+        return !((Player*)unit)->GetPvP();
+    }
+
+    // common case (CvC, PvC, CvP)
+    FactionTemplateResolver my_faction = getFactionTemplateEntry();
+    FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
+
+    return my_faction.IsFriendlyTo(your_faction);
 }
 
 bool Unit::IsNeutralToAll() const
