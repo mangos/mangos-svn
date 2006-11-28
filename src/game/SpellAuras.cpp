@@ -231,6 +231,7 @@ m_procCharges(0), m_absorbDmg(0), m_isPersistent(false), m_removeOnDeath(false)
     }
     m_isPassive = IsPassiveSpell(m_spellId);
     m_positive = IsPositiveEffect(m_spellId, m_effIndex);
+    m_applyTime = time(NULL);
 
     sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d.", spellproto->Id, spellproto->EffectApplyAuraName[eff], m_duration, spellproto->EffectImplicitTargetA[eff]);
 

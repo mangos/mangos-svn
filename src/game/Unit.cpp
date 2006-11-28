@@ -37,6 +37,7 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Totem.h"
+#include "FactionTemplateResolver.h"
 
 #include <math.h>
 
@@ -249,10 +250,23 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         ((Creature*)pVictim)->AI().AttackStart(this);
     }
 
+    // enter in PVP if damage player
+    if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER )
+        ((Player*)this)->SetPvP(true);
+
     DEBUG_LOG("DealDamageStart");
 
     uint32 health = pVictim->GetHealth();
     sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
+
+    // duel ends when player has 1 or less hp
+    bool duel_hasEnded = false;
+    if(pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damage >= (health-1))
+    {
+        damage = health-1;
+        duel_hasEnded = true;
+    }
+
     if (health <= damage)
     {
         if(pVictim->GetTypeId() == TYPEID_UNIT)             //leave combat mode when killing mobs
@@ -475,6 +489,19 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 sLog.outDetail("Spell %u canceled at damage!",pVictim->m_currentSpell->m_spellInfo->Id);
                 pVictim->m_currentSpell->cancel();
             }
+        }
+
+        if(duel_hasEnded)
+        {
+            Player *me = (Player*)this;
+            Player *he = (Player*)pVictim;
+            
+            he->ModifyHealth(1);
+            me->CombatStop();
+            he->CombatStop();
+        
+            he->HandleEmoteCommand(ANIM_EMOTE_BEG);
+            me->DuelComplete(1);
         }
     }
 
@@ -2790,12 +2817,69 @@ bool Unit::IsHostileToAll() const
     return my_faction.IsHostileToAll();
 }
 
+static bool InDuelWith(Unit const* one, Unit const* two)
+{
+    // player
+    if(one->GetTypeId()==TYPEID_PLAYER)
+    {
+        // one is player in duel
+        if(((Player const*)one)->duel)
+        {
+            // two is opponent
+            if(((Player const*)one)->duel->opponent == two)
+                return true;
+            // two is opponent's pet
+            else if(((Player const*)one)->duel->opponent->GetPetGUID()==two->GetGUID())
+                return true;
+        }
+    }
+    // any controlled Creature (pets/tamed beasts)
+    else if(one->GetOwnerGUID())
+    {
+        // player
+        if(two->GetTypeId()==TYPEID_PLAYER)
+        {
+            // two is duel opponent for pet owner
+            if(((Player const*)two)->duel && one->GetOwnerGUID()==((Player const*)two)->duel->opponent->GetGUID())
+                return true;
+        }
+        else
+        // any controlled Creature (pets/tamed beasts)
+        if(two->GetOwnerGUID())
+        {
+            // two is opponent's pet (slowest pet-ws-pet check, search by grid)
+            Unit const* t_owner = two->GetOwner();
+            if( t_owner && t_owner->GetTypeId()==TYPEID_PLAYER && 
+                ((Player const*)t_owner)->duel && ((Player const*)t_owner)->duel->opponent->GetGUID() == one->GetOwnerGUID())
+                return true;
+        }
+    }
+
+    return false;
+}
+
 bool Unit::IsHostileTo(Unit const* unit) const
 {
+    // common case 
     FactionTemplateResolver my_faction = getFactionTemplateEntry();
     FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
 
-    return my_faction.IsHostileTo(your_faction) || my_faction.IsHostileToAll();
+    if(my_faction.IsHostileTo(your_faction) || my_faction.IsHostileToAll())
+        return true;
+
+    // special cases
+    if(GetTypeId()==TYPEID_PLAYER && unit->GetTypeId()==TYPEID_PLAYER && getFaction()!=unit->getFaction() )
+    {
+        // if other faction player in pvp
+        if(((Player*)unit)->GetPvP())
+            return true;
+    }
+
+    if(InDuelWith(this,unit))
+        return true;
+
+    // last case
+    return false;
 }
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
@@ -2803,7 +2887,22 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     FactionTemplateResolver my_faction = getFactionTemplateEntry();
     FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
 
-    return my_faction.IsFriendlyTo(your_faction);
+    if(!my_faction.IsFriendlyTo(your_faction))
+        return false;
+
+    // special cases
+    if(GetTypeId()==TYPEID_PLAYER && unit->GetTypeId()==TYPEID_PLAYER && getFaction()!=unit->getFaction() )
+    {
+        // if other faction player in pvp
+        if(((Player*)unit)->GetPvP())
+            return false;
+    }
+
+    if(InDuelWith(this,unit))
+        return false;
+
+    // last case
+    return true;
 }
 
 bool Unit::IsNeutralToAll() const
@@ -2907,6 +3006,14 @@ void Unit::SetStateFlag(uint32 index, uint32 newFlag )
 void Unit::RemoveStateFlag(uint32 index, uint32 oldFlag )
 {
     index &= ~ oldFlag;
+}
+
+Unit *Unit::GetOwner() const
+{
+    uint64 ownerid = GetOwnerGUID();
+    if(!ownerid)
+        return NULL;
+    return ObjectAccessor::Instance().GetUnit(*this, ownerid);
 }
 
 Creature* Unit::GetPet() const

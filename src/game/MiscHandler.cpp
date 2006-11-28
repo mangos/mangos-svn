@@ -115,7 +115,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
     //Can not logout if...
     if( Target->isInCombat() ||                             //...is in combat
-        Target->isInDuel()   ||                             //...is in Duel
+        Target->duel         ||                             //...is in Duel
                                                             //...is jumping ...is falling
         Target->HasMovementFlags( MOVEMENT_JUMPING | MOVEMENT_FALLING ))
     {
@@ -337,7 +337,7 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
 {
 
-    if ( (!GetPlayer()->isAlive()) || GetPlayer()->isInCombat() || GetPlayer()->isInDuel() )
+    if ( (!GetPlayer()->isAlive()) || GetPlayer()->isInCombat() || GetPlayer()->duel )
     {
         WorldPacket data;
         data.Initialize(SMSG_CAST_RESULT);

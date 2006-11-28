@@ -21,7 +21,6 @@
 #include "Creature.h"
 #include "Player.h"
 #include "Utilities.h"
-#include "FactionTemplateResolver.h"
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 #include <list>

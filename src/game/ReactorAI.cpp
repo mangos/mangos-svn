@@ -21,7 +21,6 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "TargetedMovementGenerator.h"
-#include "FactionTemplateResolver.h"
 #include "Log.h"
 
 #define REACTOR_VISIBLE_RANGE (26.46f)

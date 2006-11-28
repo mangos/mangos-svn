@@ -156,6 +156,7 @@ class Aura
         void SetEffIndex(uint32 eff) { m_effIndex = eff; }
         int32 GetAuraDuration() const { return m_duration; }
         void SetAuraDuration(int32 duration) { m_duration = duration; }
+        time_t GetAuraApplyTime() { return m_applyTime; }
         void UpdateAuraDuration();
 
         uint64 const& GetCasterGUID() const { return m_caster_guid; }
@@ -206,6 +207,7 @@ class Aura
         int32 m_duration;
         int32 m_timeCla;
         Item* m_castItem;
+        time_t m_applyTime;
 
         uint8 m_auraSlot;
 
