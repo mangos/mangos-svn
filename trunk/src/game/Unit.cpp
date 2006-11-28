@@ -251,7 +251,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
     }
 
     // enter in PVP if damage player
-    if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER )
+    if(this != pVictim && GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER )
         ((Player*)this)->SetPvP(true);
 
     DEBUG_LOG("DealDamageStart");
