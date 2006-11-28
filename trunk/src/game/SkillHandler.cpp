@@ -48,6 +48,10 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 
     Player * player = GetPlayer();
 
+    // prevent skip talent ranks (cheating)
+    if(requested_rank > 0 && !player->HasSpell(talentInfo->RankID[requested_rank-1]))
+        return;
+
     // Check if it requires another talent
     if (talentInfo->DependsOn > 0)
     {
