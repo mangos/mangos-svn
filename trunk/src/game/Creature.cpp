@@ -31,7 +31,6 @@
 #include "LootMgr.h"
 #include "Chat.h"
 #include "MapManager.h"
-#include "FactionTemplateResolver.h"
 #include "CreatureAI.h"
 #include "CreatureAISelector.h"
 #include "Pet.h"
@@ -1362,14 +1361,6 @@ SpellEntry *Creature::reachWithSpellCure(Unit *pVictim)
     return NULL;
 }
 
-Unit *Creature::GetOwner()
-{
-    uint64 ownerid = GetUInt64Value(UNIT_FIELD_SUMMONEDBY);
-    if(!ownerid)
-        return NULL;
-    return ObjectAccessor::Instance().GetUnit(*this, ownerid);
-}
-
 void Creature::Untamed()
 {
     if(!isTamed())
@@ -1479,7 +1470,7 @@ void Creature::SaveAsPet()
         loyalty = 1;
     else loyalty = getloyalty();
 
-    uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
+    uint32 owner = GUID_LOPART(GetOwnerGUID());
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,1)",

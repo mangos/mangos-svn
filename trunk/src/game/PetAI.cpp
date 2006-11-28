@@ -34,7 +34,7 @@ int PetAI::Permissible(const Creature *creature)
 
 PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_LOOK)
 {
-    i_owner = ObjectAccessor::Instance().GetUnit(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
+    i_owner = ObjectAccessor::Instance().GetUnit(c, c.GetOwnerGUID());
 }
 
 void PetAI::MoveInLineOfSight(Unit *u)

@@ -269,8 +269,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
         }
 
-        Unit* GetOwner();
-
         void AIM_Update(const uint32 &);
         void AIM_Initialize(void);
         MotionMaster* operator->(void) { return &i_motionMaster; }

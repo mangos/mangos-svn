@@ -101,7 +101,7 @@ void Totem::SetOwner(uint64 guid)
 
 Unit *Totem::GetOwner()
 {
-    uint64 ownerid = GetUInt64Value(UNIT_FIELD_SUMMONEDBY);
+    uint64 ownerid = GetOwnerGUID();
     if(!ownerid)
         return NULL;
     return ObjectAccessor::Instance().GetUnit(*this, ownerid);

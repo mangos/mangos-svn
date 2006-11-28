@@ -20,7 +20,6 @@
 #define MANGOS_AGGRESSORAI_H
 
 #include "CreatureAI.h"
-#include "FactionTemplateResolver.h"
 #include "Timer.h"
 
 class Creature;

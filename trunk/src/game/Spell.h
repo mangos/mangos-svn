@@ -21,7 +21,6 @@
 
 #include "GridDefines.h"
 #include "Database/DBCStores.h"
-#include "FactionTemplateResolver.h"
 
 class WorldSession;
 class Unit;

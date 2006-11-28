@@ -555,8 +555,11 @@ class MANGOS_DLL_SPEC Unit : public Object
             m_deathState = s;
         }
 
+        uint64 const& GetOwnerGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMONEDBY); }
         uint64 GetPetGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMON); }
         uint64 GetCharmGUID() const { return  GetUInt64Value(UNIT_FIELD_CHARM); }
+
+        Unit* GetOwner() const;
         Creature* GetPet() const;
         Creature* GetCharm() const;
         void SetPet(Creature* pet);

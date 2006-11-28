@@ -20,7 +20,6 @@
 #include "Totem.h"
 #include "Creature.h"
 #include "Player.h"
-#include "FactionTemplateResolver.h"
 #include "Database/DBCStores.h"
 #include "MapManager.h"
 
@@ -100,15 +99,13 @@ TotemAI::UpdateAI(const uint32 diff)
         i_victimGuid = 0;
 
     // look for a new victim in range
-    FactionTemplateResolver myFaction = i_totem.getFactionTemplateEntry();
     std::list<Unit*> UnitList;
     MapManager::Instance().GetMap(i_totem.GetMapId())->GetUnitList(i_totem.GetPositionX(), i_totem.GetPositionY(),UnitList);
     for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
     {
         if((*iter) && (*iter)->isTargetableForAttack()&& IsVisible(*iter))
         {
-            FactionTemplateResolver its_faction = (*iter)->getFactionTemplateEntry();
-            if(myFaction.IsFriendlyTo(its_faction) || myFaction.IsNeutralToAll() || its_faction.IsNeutralToAll())
+            if(i_totem.IsFriendlyTo(*iter) || i_totem.IsNeutralToAll() || (*iter)->IsNeutralToAll())
                 continue;
             if(i_totem.IsWithinDist(*iter, max_range) )
             {

@@ -308,13 +308,11 @@ void Spell::EffectDummy(uint32 i)
         SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
         float max_range = GetMaxRange(srange);
         bool found=false;
-        FactionTemplateResolver myFaction = m_caster->getFactionTemplateEntry();
         std::list<Unit*> UnitList;
         MapManager::Instance().GetMap(m_caster->GetMapId())->GetUnitList(m_caster->GetPositionX(), m_caster->GetPositionY(),UnitList);
         for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
         {
-            FactionTemplateResolver its_faction = (*iter)->getFactionTemplateEntry();
-            if(myFaction.IsFriendlyTo(its_faction) || (*iter)->isAlive() || (*iter)->isInFlight() ||
+            if( m_caster->IsFriendlyTo(*iter) || (*iter)->isAlive() || (*iter)->isInFlight() ||
                 (((Creature*)(*iter))->GetCreatureInfo()->type != CREATURE_TYPE_HUMANOID && ((Creature*)(*iter))->GetCreatureInfo()->type != CREATURE_TYPE_UNDEAD))
                 continue;
 
@@ -1664,17 +1662,14 @@ void Spell::EffectDuel(uint32 i)
 {
     WorldPacket data;
 
-    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if(!m_caster || !unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
     Player *caster = (Player*)m_caster;
     Player *target = (Player*)unitTarget;
 
     // caster or target already have requested duel
-    if( caster->isRequestedOrStartDuel() || target->isRequestedOrStartDuel() ) return;
+    if( caster->duel || target->duel ) return;
 
     //CREATE DUEL FLAG OBJECT
     GameObject* pGameObj = new GameObject();
@@ -1703,12 +1698,29 @@ void Spell::EffectDuel(uint32 i)
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
     //END
 
-    //Send request to opositor
+
+    //Send request
     data.Initialize(SMSG_DUEL_REQUESTED);
     data << pGameObj->GetGUID();
     data << caster->GetGUID();
+    caster->GetSession()->SendPacket(&data);
     target->GetSession()->SendPacket(&data);
-    //Set who are the oponents
+
+    // create duel-info
+    DuelInfo *duel   = new DuelInfo;
+    duel->initiator  = caster;
+    duel->opponent   = target;
+    duel->startTime  = 0;
+    duel->startTimer = 0;
+    caster->duel     = duel;
+
+    DuelInfo *duel2   = new DuelInfo;
+    duel2->initiator  = caster;
+    duel2->opponent   = caster;
+    duel2->startTime  = 0;
+    duel2->startTimer = 0;
+    target->duel      = duel2;
+    /*//Set who are the oponents
     caster->SetDuelVs(target);
     target->SetDuelVs(caster);
     //Players are not in duel yet...
@@ -1716,7 +1728,7 @@ void Spell::EffectDuel(uint32 i)
     target->SetInDuel(false);
     //Set who is the duel caster
     caster->SetDuelSender(caster);
-    target->SetDuelSender(caster);
+    target->SetDuelSender(caster);*/
 
     caster->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
     target->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());

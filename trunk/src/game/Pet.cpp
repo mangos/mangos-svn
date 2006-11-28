@@ -166,7 +166,7 @@ void Pet::SaveToDB()
     if(GetEntry())
         return;
 
-    uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
+    uint32 owner = GUID_LOPART(GetOwnerGUID());
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,1)",
@@ -176,7 +176,7 @@ void Pet::SaveToDB()
 
 void Pet::DeleteFromDB()
 {
-    uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
+    uint32 owner = GUID_LOPART(GetOwnerGUID());
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", owner );
 }
 
