@@ -24,6 +24,7 @@
 #include "World.h"
 #include "WorldRunnable.h"
 #include "Timer.h"
+#include "ObjectAccessor.h"
 
 #include "Database/DatabaseEnv.h"
 
@@ -31,7 +32,7 @@
 void WorldRunnable::run()
 {
     ///- Init new SQL thread for the world database
-    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
+    sDatabase.ThreadStart();                                // let thread do safe mySQL requests (one connection call enough)
 
     uint32 realCurrTime = 0, realPrevTime = 0;
 
@@ -52,6 +53,8 @@ void WorldRunnable::run()
         ZThread::Thread::sleep(100);
         #endif
     }
+
+    ObjectAccessor::Instance().SaveAllPlayers();
 
     ///- End the database thread
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
