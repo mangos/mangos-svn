@@ -58,6 +58,8 @@ void CliSetGM(char*,pPrintf);
 void CliListGM(char*,pPrintf);
 void CliVersion(char*,pPrintf);
 void CliExit(char*,pPrintf);
+void CliIdleShutdown(char*,pPrintf zprintf);
+void CliShutdown(char*,pPrintf zprintf);
 void CliBroadcast(char*,pPrintf);
 void CliCreate(char*,pPrintf);
 void CliDelete(char*,pPrintf);
@@ -72,11 +74,10 @@ const CliCommand Commands[]=
 {
     {"help", & CliHelp,"Display this help message"},
     {"broadcast", & CliBroadcast,"Announce in-game message"},
-    {"motd", & CliMotd,"Change or display motd"},
-    {"version", & CliVersion,"Display server version"},
-    {"info", & CliInfo,"Display Server infomation"},
     {"create", & CliCreate,"Create account"},
     {"delete", & CliDelete,"Delete account and characters"},
+    {"info", & CliInfo,"Display Server infomation"},
+    {"motd", & CliMotd,"Change or display motd"},
     {"kick", & CliKick,"Kick user"},
     {"ban", & CliBan,"Ban account|ip"},
     {"listbans", & CliBanList,"List bans"},
@@ -86,7 +87,10 @@ const CliCommand Commands[]=
     {"loadscripts", & CliLoadScripts,"Load script library"},
     {"setloglevel", & CliSetLogLevel,"Set Log Level"},
     {"corpses", & CliCorpses,"Manually call corpses erase global even code"},
-    {"exit", & CliExit,"Shutdown server"}
+    {"version", & CliVersion,"Display server version"},
+    {"idleshutdown", & CliIdleShutdown,"Shutdown server with some delay when not active connections at server"},
+    {"shutdown", & CliShutdown,"Shutdown server with some delay"},
+    {"exit", & CliExit,"Shutdown server NOW"}
 };
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -195,6 +199,38 @@ void CliExit(char*,pPrintf zprintf)
 {
     zprintf( "Exiting daemon...\r\n" );
     World::m_stopEvent = true;
+}
+
+/// Shutdown server with some delay when not active connections at server
+void CliIdleShutdown(char* command,pPrintf zprintf)
+{
+    char *args = strtok(command," ");
+
+    if(std::string(args)=="stop")
+    {
+        sWorld.ShutdownCancel();
+    }
+    else
+    {
+        uint32 time = atoi(args);
+        sWorld.ShutdownServ(time,true);
+    }
+}
+
+/// Shutdown server with some delay when not active connections at server
+void CliShutdown(char* command,pPrintf zprintf)
+{
+    char *args = strtok(command," ");
+
+    if(std::string(args)=="stop")
+    {
+        sWorld.ShutdownCancel();
+    }
+    else
+    {
+        uint32 time = atoi(args);
+        sWorld.ShutdownServ(time);
+    }
 }
 
 /// Display info on users currently in the realm
@@ -507,9 +543,8 @@ void ParseCommand( pPrintf zprintf, char* input)
 /// %Thread start
 void CliRunnable::run()
 {
-    ///- Init new SQL thread for the world database
+    ///- Init new SQL thread for the world database (one connection call enough)
     sDatabase.ThreadStart();                                // let thread do safe mySQL requests
-    /// \todo We also use the LoginDatabase in this thread. Should we also make it thread-safe? Else explain why.
 
     char commandbuf[256];
 
