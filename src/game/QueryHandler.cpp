@@ -203,7 +203,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
     if (unit == NULL)
     {
-        sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
+        sLog.outDebug( "WORLD: SendCreatureQuery - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
     //    return;
     }
     
@@ -213,7 +213,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
     if (!ci)
     {
-        sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO CREATUREINFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
+        sLog.outDebug( "WORLD: SendCreatureQuery - (%u) NO CREATUREINFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
         return;
     }
 
@@ -309,7 +309,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
     if (unit == NULL)
     {
-        sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
+        sLog.outDebug( "WORLD: SendTestCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
         //return;
     }
 
@@ -317,7 +317,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
     CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
     if (!ci)
     {
-        sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO CREATUREINFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
+        sLog.outDebug( "WORLD: SendTestCreatureQueryOpcode - (%u) NO CREATUREINFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
         return;
     }
 
