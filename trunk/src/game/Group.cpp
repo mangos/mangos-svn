@@ -93,15 +93,14 @@ void Group::SendUpdate()
             if (m_members[j].guid != m_members[i].guid)
             {
                 data << m_members[j].name;
-                data << (uint32)m_members[j].guid;
-                data << uint32(0) << uint16(1);
+                data << (uint64)m_members[j].guid;
+                data << uint16(1);
             }
         }
         data << (uint64)m_leaderGuid;
         data << (uint8)m_lootMethod;
-        data << (uint32)m_looterGuid;
-        data << uint32(0);
-        data << uint8(2);
+        data << (uint64)m_looterGuid;
+        data << (uint16)2;
 
         player->GetSession()->SendPacket( &data );
     }
