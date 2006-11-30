@@ -275,7 +275,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         if (loot->isLooted())
         {
             //this is probably wrong
-            pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
+            pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             loot->clear();
         }
     }
