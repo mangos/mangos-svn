@@ -168,6 +168,7 @@ void WorldSession::LogoutPlayer(bool Save)
         _player->UnsummonPet();
         _player->Uncharm();
         _player->UnsummonTotem();
+        _player->InvisiblePjsNear.clear();
 
         ObjectAccessor::Instance().RemovePlayer(_player);
         MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);

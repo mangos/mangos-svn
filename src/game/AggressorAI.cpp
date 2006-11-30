@@ -50,7 +50,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
             if( i_creature.IsHostileTo( u ) )
             {
                 AttackStart(u);
-                if(u->isStealth())
+                if(u->HasStealthAura())
                     u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
             }
         }
@@ -112,7 +112,7 @@ void AggressorAI::_stopAttack()
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_creature.GetGUIDLow());
     }
-    else if( victim->isStealth() )
+    else if( victim->HasStealthAura() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
     }
@@ -224,7 +224,7 @@ AggressorAI::IsVisible(Unit *pl) const
     bool seestealth = true;
     uint32 sight = sWorld.getConfig(CONFIG_SIGHT_MONSTER);
     float dist = i_creature.GetDistanceSq(pl);
-    if(pl->isStealth())
+    if(pl->HasStealthAura())
     {
         int32 seevaluse;
         int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;

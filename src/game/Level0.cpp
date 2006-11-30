@@ -175,7 +175,7 @@ bool ChatHandler::HandleGMListCommand(const char* args)
     ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
-        if(itr->second->GetSession()->GetSecurity() && itr->second->isGMVisibleFor(m_session->GetPlayer()))
+        if(itr->second->GetSession()->GetSecurity() && itr->second->isVisibleFor(m_session->GetPlayer()))
         {
             if(first)
                 SendSysMessage(LANG_GMS_ON_SRV);

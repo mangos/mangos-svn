@@ -1040,7 +1040,7 @@ void Spell::EffectPickPocket(uint32 i)
         else
         {
             //Reveal action + get attack
-            m_caster->RemoveAurasDueToSpell(1784);
+            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
             ((Creature*)unitTarget)->AI().AttackStart(m_caster);
         }
     }

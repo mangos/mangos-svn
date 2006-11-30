@@ -545,7 +545,7 @@ Map::Remove(T *obj, bool remove)
 }
 
 void
-Map::PlayerRelocation(Player *player, float x, float y, float z, float orientation)
+Map::PlayerRelocation(Player *player, float x, float y, float z, float orientation, bool visibilityChanges )
 {
     assert(player);
 
@@ -594,6 +594,13 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
     cell_lock->Visit(cell_lock, p2c_relocation, *this);
     TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > p2p_relocation(relocationNotifier);
     cell_lock->Visit(cell_lock, p2p_relocation, *this);
+    
+    if (visibilityChanges)
+    {
+        MaNGOS::VisibleChangesNotifier visualChangesNotifier(*player);
+        TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, ContainerMapList<Player> > player_Vnotifier(visualChangesNotifier);
+        cell_lock->Visit(cell_lock, player_Vnotifier, *this);
+    }
 
     if( same_cell )
         return;

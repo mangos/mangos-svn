@@ -89,13 +89,57 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         if( (i_player.isAlive() && iter->second->isAlive()) ||
             (i_player.isDead() && iter->second->isDead()) )
         {
-            iter->second->SendUpdateToPlayer(&i_player);
-            i_player.SendUpdateToPlayer(iter->second);
-
+            if (iter->second->isVisibleFor(&i_player))
+                iter->second->SendUpdateToPlayer(&i_player);
+            if (i_player.isVisibleFor(iter->second))
+                i_player.SendUpdateToPlayer(iter->second);
         }
         else
         {
             ObjectAccessor::Instance().RemovePlayerFromPlayerView(&i_player, iter->second);
+        }
+    }
+}
+
+template<>
+inline void
+MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        // Invisibility for gms
+        if(iter->second != &i_player)
+        {
+            switch(i_player.GetUpdateVisibility())
+            {
+            case VISIBLE_SET_INVISIBLE:
+                {
+                    ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
+                    iter->second->m_DetectInvTimer = 1;
+                }
+                break;
+            case VISIBLE_SET_INVISIBLE_FOR_FACTION:
+                    if (iter->second->IsHostileTo(&i_player))
+                    {
+                        ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
+                        iter->second->m_DetectInvTimer = 1;
+                    }
+                break;
+            case VISIBLE_SET_VISIBLE:
+                    i_player.SendUpdateToPlayer(iter->second);
+                break;
+            }
+
+            // Detect invisible pjs
+            if (i_player.m_enableDetect && iter->second->GetVisibility() == VISIBILITY_FACTION && iter->second->IsHostileTo(&i_player))
+            {
+                if(i_player.IsWithinDist(iter->second, 20))
+                    i_player.InvisiblePjsNear.push_back(iter->second);
+            }
+
+            // Reveal Invisible Pjs
+            if (iter->second == i_player.m_DiscoveredPj)
+                iter->second->SendUpdateToPlayer(&i_player);
         }
     }
 }
@@ -121,18 +165,20 @@ MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         // Remove selection
         if(i_player.GetSelection()==iter->second->GetGUID())
                                                             // visibility distance
-            if(!i_player.IsWithinDist(iter->second, 100))
-                i_player.SendOutOfRange(iter->second);
+            if(!i_player.IsWithinDist(iter->second, 160))   // valor under 160 can generate a bug of visibility, as a player
+                i_player.SendOutOfRange(iter->second);      // can reach 158 yards until it disapears, without been selected
 
         if(iter->second->GetSelection()==i_player.GetGUID())
                                                             // visibility distance
-            if(!i_player.IsWithinDist(iter->second, 100))
+            if(!i_player.IsWithinDist(iter->second, 160))
                 iter->second->SendOutOfRange(&i_player);
 
         // Cancel Trade
         if(i_player.GetTrader()==iter->second)
             if(!i_player.IsWithinDist(iter->second, 5))     // iteraction distance
                 i_player.GetSession()->SendCancelTrade();   // will clode both side trade windows
+
+        
     }
 }
 

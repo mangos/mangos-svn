@@ -126,6 +126,10 @@ Player::Player (WorldSession *session): Unit()
     m_lastManaUse = 0;
     m_deathTimer = 0;
 
+    m_DetectInvTimer = 1000;
+    m_DiscoveredPj = 0;
+    m_enableDetect = true;
+
     m_pvp_count = 0;
     m_pvp_counting = false;
 
@@ -849,6 +853,18 @@ void Player::Update( uint32 p_time )
     //Handle lava
     HandleLava();
 
+    //Handle detect invisible players
+    if (m_DetectInvTimer > 0)
+    {
+        if (p_time >= m_DetectInvTimer)
+        {
+            m_DetectInvTimer = 3000;
+            HandleInvisiblePjs();
+        }
+        else
+            m_DetectInvTimer -= p_time;
+    }
+
     // Played time
     if (now > m_Last_tick)
     {
@@ -969,13 +985,7 @@ bool Player::ToggleAFK()
     if(HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK))
         RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
     else
-    {
-        // to prevent show <AFK> in invisiable mode
-        if(isGMVisible())
-            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
-        else
-            GetSession()->SendNotification("You invisible currently!");
-    }
+        SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
 
     return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
 }
@@ -985,13 +995,7 @@ bool Player::ToggleDND()
     if(HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND))
         RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
     else
-    {
-        // to prevent show <DND> in invisiable mode
-        if(isGMVisible())
-            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
-        else
-            GetSession()->SendNotification("You invisible currently!");
-    }
+        SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
 
     return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
 }
@@ -1025,7 +1029,7 @@ void Player::SendFriendlist()
         {
             friendstr[i].PlayerGUID = fields[0].GetUInt64();
             pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
-            if( pObj && pObj->isGMVisibleFor(this))
+            if( pObj && pObj->isVisibleFor(this))
             {
                 if(pObj->isAFK())
                     friendstr[i].Status = 2;
@@ -1410,10 +1414,7 @@ void Player::SetGameMaster(bool on)
         m_GMFlags |= GM_ON;
         setFaction(35);
         SetFlag(PLAYER_BYTES_2, 0x8);
-
-        // to prevent show <GM> in invisible mode
-        if(isGMVisible())
-            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
     }
     else
     {
@@ -1430,39 +1431,17 @@ void Player::SetGMVisible(bool on)
     {
         m_GMFlags &= ~GM_INVISIBLE;                         //remove flag
 
-        // if in GM mode show <GM> befire removing invisibility
-        if(isGameMaster())
-            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
-
-        DeMorph();
-        RemoveAura(10032,1);                                //crash?
-
+        SetVisibility(VISIBILITY_ON);
     }
     else
     {
         m_GMFlags |= GM_INVISIBLE;                          //add flag
 
-        // remove <AFK> before go to invisible mode
-        if(isAFK())
-            ToggleAFK();
-
-        // remove <DND> before go to invisible mode
-        if(isDND())
-            ToggleDND();
-
         SetAcceptWhispers(false);
-        SetGameMaster(true);                                // <GM> wiil be not added
+        SetGameMaster(true);
 
-        SetUInt32Value(UNIT_FIELD_DISPLAYID, 6908);         //Set invisible model
-
-                                                            //Stealth spell
-        SpellEntry *spellInfo = sSpellStore.LookupEntry( 10032 );
-        Aura *Aur = new Aura(spellInfo, 1, this);
-        AddAura(Aur);
+        SetVisibility(VISIBILITY_OFF);
     }
-
-    // hide or show name
-    GetSession()->SendNameQueryOpcode(this,true);
 }
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
@@ -11279,4 +11258,27 @@ void Player::SetRestBonus (float rest_bonus_new)
 
     //RestTickUpdate
     SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, rest_bonus);
+}
+
+void Player::HandleInvisiblePjs()
+{
+    Map *m = MapManager::Instance().GetMap(m_mapId);
+    
+    //this is to be sure that InvisiblePjsNear vector has active pjs only.
+    m->PlayerRelocation(this, m_positionX, m_positionY, m_positionZ, m_orientation, true);
+
+    for (std::vector<Player *>::iterator i = InvisiblePjsNear.begin(); i != InvisiblePjsNear.end(); i++)
+    {
+        if ((*i)->isVisibleFor(this))
+        {
+            m_DiscoveredPj = *i;
+            m_enableDetect = false;
+            m->PlayerRelocation(this, m_positionX, m_positionY, m_positionZ, m_orientation, true);
+            m_enableDetect = true;
+            m_DiscoveredPj = 0;
+        }
+    }
+    if (!InvisiblePjsNear.size())
+        m_DetectInvTimer = 0;
+    InvisiblePjsNear.clear();
 }

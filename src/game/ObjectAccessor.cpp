@@ -487,6 +487,19 @@ ObjectAccessor::RemovePlayerFromPlayerView(Player *pl, Player *pl2)
 }
 
 void
+ObjectAccessor::RemoveInvisiblePlayerFromPlayerView(Player *pl, Player *pl2)
+{
+    MaNGOS::PlayerInvisibilityRemover remover(*pl,*pl2);
+    TypeContainerVisitor<MaNGOS::PlayerInvisibilityRemover, ContainerMapList<Player> > player_notifier(remover);
+    CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
+    Cell cell = RedZone::GetZone(p);
+    cell.SetNoCreate();
+    cell.data.Part.reserved = ALL_DISTRICT;
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(pl->GetMapId()));
+}
+
+void
 ObjectAccessor::RemoveCreatureFromPlayerView(Player *pl, Creature *c)
 {
     MaNGOS::CreatureViewRemover remover(*pl,*c);
@@ -531,6 +544,11 @@ namespace MaNGOS
     {
         for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
             i_objects.DestroyForPlayer(iter->second);
+    }
+
+    void PlayerInvisibilityRemover::Visit(PlayerMapType &m)
+    {
+        i_player.DestroyForPlayer(&i_player2);
     }
 
     void PlayerDeadViewRemover::Visit(PlayerMapType &m)
