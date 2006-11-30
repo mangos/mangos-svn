@@ -886,6 +886,8 @@ void ObjectMgr::LoadScripts()
         count++;
     } while( result->NextRow() );
 
+    delete result;
+
     sLog.outString( ">> Loaded %u script definitions", count );
     sLog.outString( "" );
 }

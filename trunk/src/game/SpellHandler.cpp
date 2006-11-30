@@ -109,6 +109,10 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         spell->m_CastItem = pItem;
         spell->prepare(&targets);
 
+        // delete triggered spell
+        if(count > 0)
+            delete spell;
+
         ++count;
     }
 }
@@ -283,7 +287,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     }
 
     Spell *spell = new Spell(_player, spellInfo, false, 0);
-    WPAssert(spell);
 
     SpellCastTargets targets;
     targets.setUnitTarget( _player );
@@ -317,8 +320,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     Spell *spell ;
     spell = new Spell(_player, spellInfo, false, 0);
-
-    WPAssert(spell);
 
     SpellCastTargets targets;
     targets.read(&recvPacket,_player);

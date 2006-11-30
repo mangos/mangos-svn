@@ -1599,12 +1599,13 @@ void Spell::EffectScriptEffect(uint32 i)
             if(!spellInfo)
                 return;
             Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
-            if(!p_spell)
-                return;
+
             SpellCastTargets targets;
             Unit *ptarget = unitTarget;
             targets.setUnitTarget(ptarget);
             p_spell->prepare(&targets);
+
+            delete p_spell;                                 // triggered spell not self deleted
         }
     }
     else
