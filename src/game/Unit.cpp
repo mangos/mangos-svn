@@ -250,9 +250,16 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         ((Creature*)pVictim)->AI().AttackStart(this);
     }
 
-    // enter in PVP if damage player
-    if(this != pVictim && GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER )
-        ((Player*)this)->SetPvP(true);
+    // enter in PVP if damage player or pet or if your pet damage pet or player
+    if(this != pVictim)
+    {
+        Unit* attackerOwner = GetOwner();
+        Unit* targetOwner = pVictim->GetOwner();
+        Unit* attacker = attackerOwner ? attackerOwner : this;
+        Unit* target   = targetOwner ? targetOwner : pVictim;
+        if(attacker->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER && !((Player*)attacker)->duel)
+            ((Player*)attacker)->SetPvP(true);
+    }
 
     DEBUG_LOG("DealDamageStart");
 
@@ -554,7 +561,7 @@ void Unit::CastSpell(Unit* Victim,SpellEntry *spellInfo, bool triggered, Item *c
     spell->m_CastItem = castItem;
     spell->prepare(&targets);
     m_canMove = false;
-    if (triggered) delete spell;
+    if (triggered) delete spell;                            // triggered spell not self deleted
 }
 
 void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
@@ -2817,93 +2824,68 @@ bool Unit::IsHostileToAll() const
     return my_faction.IsHostileToAll();
 }
 
-static bool InDuelWith(Unit const* one, Unit const* two)
-{
-    // player
-    if(one->GetTypeId()==TYPEID_PLAYER)
-    {
-        // one is player in duel
-        if(((Player const*)one)->duel)
-        {
-            // two is opponent
-            if(((Player const*)one)->duel->opponent == two)
-                return true;
-            // two is opponent's pet
-            else if(((Player const*)one)->duel->opponent->GetPetGUID()==two->GetGUID())
-                return true;
-        }
-    }
-    // any controlled Creature (pets/tamed beasts)
-    else if(one->GetOwnerGUID())
-    {
-        // player
-        if(two->GetTypeId()==TYPEID_PLAYER)
-        {
-            // two is duel opponent for pet owner
-            if(((Player const*)two)->duel && one->GetOwnerGUID()==((Player const*)two)->duel->opponent->GetGUID())
-                return true;
-        }
-        else
-        // any controlled Creature (pets/tamed beasts)
-        if(two->GetOwnerGUID())
-        {
-            // two is opponent's pet (slowest pet-ws-pet check, search by grid)
-            Unit const* t_owner = two->GetOwner();
-            if( t_owner && t_owner->GetTypeId()==TYPEID_PLAYER && 
-                ((Player const*)t_owner)->duel && ((Player const*)t_owner)->duel->opponent->GetGUID() == one->GetOwnerGUID())
-                return true;
-        }
-    }
-
-    return false;
-}
-
 bool Unit::IsHostileTo(Unit const* unit) const
 {
-    // special cases (Duel)
-    if(InDuelWith(this,unit))
-        return true;
+    // test pet/charm masters instead pers/charmeds
+    Unit const* testerOwner = GetOwner();
+    Unit const* targetOwner = unit->GetOwner();
 
-    // special cases (PvP states)
-    if(GetTypeId()==TYPEID_PLAYER && unit->GetTypeId()==TYPEID_PLAYER)
-    {        
+    Unit const* tester = testerOwner ? testerOwner : this;
+    Unit const* target = targetOwner ? targetOwner : unit;
+
+    // special cases (Duel)
+    if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
+    {
+        // Duel
+        if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target)
+            return true;
+
+        //= PvP states
         // Green/Blue (can't attack)
-        if(getFaction()==unit->getFaction())
+        if(((Player*)tester)->GetTeam()==((Player*)target)->GetTeam())
             return false;
 
         // Red (can attack) if true, Blue/Yellow (can't attack) in another case
-        return ((Player*)unit)->GetPvP() && ((Player*)this)->GetPvP();
+        return ((Player*)tester)->GetPvP() && ((Player*)target)->GetPvP();
     }
 
     // common case (CvC,PvC, CvP)
-    FactionTemplateResolver my_faction = getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver tester_faction = tester->getFactionTemplateEntry();
+    FactionTemplateResolver target_faction = target->getFactionTemplateEntry();
 
-    return my_faction.IsHostileTo(your_faction) || my_faction.IsHostileToAll();
+    return tester_faction.IsHostileTo(target_faction);
 }
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
 {
-    // special cases (Duel)
-    if(InDuelWith(this,unit))
-        return false;
+    // test pet/charm masters instead pers/charmeds
+    Unit const* testerOwner = GetOwner();
+    Unit const* targetOwner = unit->GetOwner();
 
-    // special cases (PvP states)
-    if(GetTypeId()==TYPEID_PLAYER && unit->GetTypeId()==TYPEID_PLAYER)
+    Unit const* tester = testerOwner ? testerOwner : this;
+    Unit const* target = targetOwner ? targetOwner : unit;
+
+    // special cases (Duel)
+    if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
     {
+        // Duel
+        if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target)
+            return false;
+
+        //= PvP states
         // Green/Blue (non-attackable)
-        if(getFaction()==unit->getFaction())
+        if(((Player*)tester)->GetTeam()==((Player*)target)->GetTeam())
             return true;
 
         // Blue (friendly/non-attackable) if not PVP, or Yellow/Red in another case (attackable)
-        return !((Player*)unit)->GetPvP();
+        return !((Player*)target)->GetPvP();
     }
 
     // common case (CvC, PvC, CvP)
-    FactionTemplateResolver my_faction = getFactionTemplateEntry();
-    FactionTemplateResolver your_faction = unit->getFactionTemplateEntry();
+    FactionTemplateResolver tester_faction = tester->getFactionTemplateEntry();
+    FactionTemplateResolver target_faction = target->getFactionTemplateEntry();
 
-    return my_faction.IsFriendlyTo(your_faction);
+    return tester_faction.IsFriendlyTo(target_faction);
 }
 
 bool Unit::IsNeutralToAll() const
