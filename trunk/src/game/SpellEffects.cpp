@@ -1020,7 +1020,8 @@ void Spell::EffectPickPocket(uint32 i)
     if( m_caster->GetTypeId() != TYPEID_PLAYER )
         return;
 
-    if( !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+    //victim must be creature and attackable
+    if( !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->IsFriendlyTo(unitTarget) ) 
         return;
 
     //victim have to be alive and humanoid or undead
