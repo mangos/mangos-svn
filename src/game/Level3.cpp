@@ -76,32 +76,42 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
         return false;
 
     int8 gm = (uint8) atoi(pgm);
-    if ( gm < 0 || gm > 5)
+    if ( gm < 0 || gm > 3)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
-    Player* chr = ObjectAccessor::Instance().FindPlayerByName(args);
+    std::string name = pName;
+
+    normalizePlayerName(name);
+    sDatabase.escape_string(name);
+    QueryResult *result = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'", name.c_str());
+
+    if(!result)
+    {
+        PSendSysMessage(LANG_NO_PLAYER, pName);
+        return true;
+    }
+
+    uint32 acc_id = (*result)[0].GetUInt32();
+
+    delete result;
+
+    Player* chr = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
 
     if (chr)
     {
-
-        PSendSysMessage(LANG_YOU_CHANGE_SECURITY, chr->GetName(), gm);
-
         WorldPacket data;
         char buf[256];
         sprintf((char*)buf,LANG_YOURS_SECURITY_CHANGED, m_session->GetPlayer()->GetName(), gm);
         FillSystemMessageData(&data, m_session, buf);
-
         chr->GetSession()->SendPacket(&data);
         chr->GetSession()->SetSecurity(gm);
-
-        loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%i' WHERE `id` = '%u'", gm, chr->GetSession()->GetAccountId());
-
     }
-    else
-        PSendSysMessage(LANG_NO_PLAYER, pName);
+
+    PSendSysMessage(LANG_YOU_CHANGE_SECURITY, name.c_str(), gm);
+    loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%i' WHERE `id` = '%u'", gm, acc_id);
 
     return true;
 }
