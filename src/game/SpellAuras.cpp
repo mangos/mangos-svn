@@ -1506,7 +1506,7 @@ void Aura::HandleModThreat(bool apply)
 
 void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    sLog.outDebug("HandleAuraModIncreaseSpeedAlways: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
@@ -1523,7 +1523,7 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
 
 void Aura::HandleAuraModIncreaseSpeed(bool apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    sLog.outDebug("HandleAuraModIncreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
@@ -1542,7 +1542,7 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
 
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    sLog.outDebug("HandleAuraModIncreaseMountedSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
@@ -1560,7 +1560,7 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    sLog.outDebug("HandleAuraModDecreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount <= 0)
     {                                                       //for new spell dbc
         if(apply)
@@ -1586,7 +1586,7 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
 
 void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
+    sLog.outDebug("HandleAuraModIncreaseSwimSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;

@@ -128,7 +128,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
     if(GameType == 1 || GameType == 8)
     {
-        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
+        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' AND `realm` = '%u' LIMIT 1", GetAccountId(),realmID);
         if(result2)
         {
             Field * field = result2->Fetch();
