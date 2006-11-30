@@ -1012,7 +1012,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
             modelid = 902;
             break;
         case FORM_GHOSTWOLF:
-            modelid = 1236;
+            modelid = 4613;
             break;
         case FORM_MOONKIN:
             if(unit_target->getRace() == RACE_NIGHTELF)

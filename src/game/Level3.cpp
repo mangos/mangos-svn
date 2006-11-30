@@ -97,7 +97,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
         chr->GetSession()->SendPacket(&data);
         chr->GetSession()->SetSecurity(gm);
 
-        sDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%i' WHERE `id` = '%u'", gm, chr->GetSession()->GetAccountId());
+        loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%i' WHERE `id` = '%u'", gm, chr->GetSession()->GetAccountId());
 
     }
     else
