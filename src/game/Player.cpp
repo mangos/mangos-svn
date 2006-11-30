@@ -4671,6 +4671,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOKETING) || !creature->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
             return;
 
+        if(loot_type == LOOT_PICKPOKETING && IsFriendlyTo(creature))
+            return;
+
         loot   = &creature->loot;
 
         uint32 lootid = creature->GetCreatureInfo()->lootid;
