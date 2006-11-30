@@ -339,7 +339,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         {
             pVictim->m_hostilList.clear();
             DEBUG_LOG("DealDamageNotPlayer");
-            pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 1);
+            pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         }
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP

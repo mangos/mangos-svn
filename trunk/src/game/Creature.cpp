@@ -160,8 +160,13 @@ void Creature::AIM_Update(const uint32 &diff)
             {
                 DEBUG_LOG("Respawning...");
 
+                CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
+
+                SelectLevel(cinfo);
+                SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
                 RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-                SetUInt32Value(UNIT_NPC_FLAGS, objmgr.GetCreatureTemplate(this->GetEntry())->npcflag);
+
+                SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
                 SetHealth(GetMaxHealth());
                 setDeathState( ALIVE );
                 clearUnitState(UNIT_STAT_ALL_STATE);
@@ -337,7 +342,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         if ((status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
             ((strlen(pQuest->GetObjectives()) == 0) && pPlayer->CanTakeQuest(pQuest, false)))
         {
-            SetFlag(UNIT_DYNAMIC_FLAGS, 2);
+            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
 
             if ( pQuest->IsRepeatable() )
                 return DIALOG_STATUS_REWARD_REP;
@@ -348,7 +353,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             result = DIALOG_STATUS_INCOMPLETE;
     }
 
-    RemoveFlag(UNIT_DYNAMIC_FLAGS, 2);
+    RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
 
     if ( result == DIALOG_STATUS_INCOMPLETE )
         return result;
@@ -932,9 +937,72 @@ void Creature::SaveToDB()
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
 
+void Creature::SelectLevel(const CreatureInfo *cinfo)
+{
+    uint32 minlevel = min(cinfo->maxlevel, cinfo->minlevel);
+    uint32 maxlevel = max(cinfo->maxlevel, cinfo->minlevel);
+    uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
+    SetLevel(level);
+
+    float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel))/(maxlevel - minlevel);
+
+    uint32 minhealth = min(cinfo->maxhealth, cinfo->minhealth);
+    uint32 maxhealth = max(cinfo->maxhealth, cinfo->minhealth);
+    uint32 health = _GetHealthMod(cinfo->rank) * (minhealth + uint32(rellevel*(maxhealth - minhealth)));
+
+    SetMaxHealth(health);
+    SetUInt32Value(UNIT_FIELD_BASE_HEALTH,health);
+    SetHealth(health);
+
+    uint32 minmana = min(cinfo->maxmana, cinfo->minmana);
+    uint32 maxmana = max(cinfo->maxmana, cinfo->minmana);
+    uint32 mana = minmana + uint32(rellevel*(maxmana - minmana));
+
+    SetMaxPower(POWER_MANA, mana);                           //MAX Mana
+    SetUInt32Value(UNIT_FIELD_BASE_MANA, mana);
+    SetPower(POWER_MANA, mana);
+}
+
+float Creature::_GetHealthMod(int32 Rank)
+{
+    switch (Rank)                                           // define rates for each elite rank
+    {
+        case CREATURE_ELITE_NORMAL:
+            return sWorld.getRate(RATE_CREATURE_NORMAL_HP);
+        case CREATURE_ELITE_ELITE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_ELITE_HP);
+        case CREATURE_ELITE_RAREELITE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_RAREELITE_HP);
+        case CREATURE_ELITE_WORLDBOSS:
+            return sWorld.getRate(RATE_CREATURE_ELITE_WORLDBOSS_HP);
+        case CREATURE_ELITE_RARE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_RARE_HP);
+        default:
+            return sWorld.getRate(RATE_CREATURE_ELITE_ELITE_HP);
+    }
+}
+
+float Creature::_GetDamageMod(int32 Rank)
+{
+    switch (Rank)                                           // define rates for each elite rank
+    {
+        case CREATURE_ELITE_NORMAL:
+            return sWorld.getRate(RATE_CREATURE_NORMAL_DAMAGE);
+        case CREATURE_ELITE_ELITE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_ELITE_DAMAGE);
+        case CREATURE_ELITE_RAREELITE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_RAREELITE_DAMAGE);
+        case CREATURE_ELITE_WORLDBOSS:
+            return sWorld.getRate(RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE);
+        case CREATURE_ELITE_RARE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_RARE_DAMAGE);
+        default:
+            return sWorld.getRate(RATE_CREATURE_ELITE_ELITE_DAMAGE);
+    }
+}
+
 bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 {
-    float healthmod = 0, damagemod = 0;
     Object::_Create(guidlow, HIGHGUID_UNIT);
     SetUInt32Value(OBJECT_FIELD_ENTRY,Entry);
     CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
@@ -944,59 +1012,14 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
         return false;
     }
     uint32 rank = cinfo->rank;
+    float damagemod = _GetDamageMod(rank);;
 
     uint32 display_id = cinfo->randomDisplayID();
 
     SetUInt32Value(UNIT_FIELD_DISPLAYID,display_id );
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,display_id );
-    switch (rank)                                           // define rates for each elite rank
-    {
-        case CREATURE_ELITE_NORMAL:
-            healthmod = sWorld.getRate(RATE_CREATURE_NORMAL_HP);
-            damagemod = sWorld.getRate(RATE_CREATURE_NORMAL_DAMAGE);
-            break;
-        case CREATURE_ELITE_ELITE:
-            healthmod = sWorld.getRate(RATE_CREATURE_ELITE_ELITE_HP);
-            damagemod = sWorld.getRate(RATE_CREATURE_ELITE_ELITE_DAMAGE);
-            break;
-        case CREATURE_ELITE_RAREELITE:
-            healthmod = sWorld.getRate(RATE_CREATURE_ELITE_RAREELITE_HP);
-            damagemod = sWorld.getRate(RATE_CREATURE_ELITE_RAREELITE_DAMAGE);
-            break;
-        case CREATURE_ELITE_WORLDBOSS:
-            healthmod = sWorld.getRate(RATE_CREATURE_ELITE_WORLDBOSS_HP);
-            damagemod = sWorld.getRate(RATE_CREATURE_ELITE_WORLDBOSS_DAMAGE);
-            break;
-        case CREATURE_ELITE_RARE:
-            healthmod = sWorld.getRate(RATE_CREATURE_ELITE_RARE_HP);
-            damagemod = sWorld.getRate(RATE_CREATURE_ELITE_RARE_DAMAGE);
-            break;
-        default:
-            break;
-    }
 
-    uint32 minlevel = cinfo->minlevel;
-    uint32 maxlevel = max(cinfo->maxlevel, cinfo->minlevel);
-    uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel,maxlevel);
-    SetLevel(level);
-
-    float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel))/(maxlevel - minlevel);
-
-    uint32 minhealth = cinfo->minhealth;
-    uint32 maxhealth = max(cinfo->maxhealth, cinfo->minhealth);
-    uint32 health = minhealth + uint32(rellevel*(maxhealth - minhealth)*healthmod);
-
-    SetMaxHealth(health);
-    SetUInt32Value(UNIT_FIELD_BASE_HEALTH,health);
-    SetHealth(health);
-
-    uint32 minmana = cinfo->minmana;
-    uint32 maxmana = max(cinfo->maxmana, cinfo->minmana);
-    uint32 mana = minmana + uint32(rellevel*(maxmana - minmana));
-
-    SetMaxPower(POWER_MANA,mana);                           //MAX Mana
-    SetUInt32Value(UNIT_FIELD_BASE_MANA, mana);
-    SetPower(POWER_MANA,mana );
+    SelectLevel(cinfo);
 
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
 

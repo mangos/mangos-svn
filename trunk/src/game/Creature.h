@@ -244,6 +244,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
         bool CreateFromProto(uint32 guidlow,uint32 Entry);
+        void SelectLevel(const CreatureInfo *cinfo);
 
         virtual void Update( uint32 time );
         inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
@@ -380,6 +381,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void _LoadQuests();
         void _LoadMovement();
         void _RealtimeSetCreatureInfo();
+
+        float _GetHealthMod(int32 Rank);
+        float _GetDamageMod(int32 Rank);
 
         uint32 m_lootMoney;
         uint64 m_lootRecipient;
