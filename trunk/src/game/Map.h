@@ -106,7 +106,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void MessageBoardcast(Object *, WorldPacket *);
 
-        void PlayerRelocation(Player *, float x, float y, float z, float angl);
+        void PlayerRelocation(Player *, float x, float y, float z, float angl, bool visibilityChanges = false);
 
         void CreatureRelocation(Creature *creature, float x, float y, float, float);
 

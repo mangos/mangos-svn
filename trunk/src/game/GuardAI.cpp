@@ -47,7 +47,7 @@ void GuardAI::MoveInLineOfSight(Unit *u)
             if( i_creature.IsHostileTo(u) || u->IsHostileToAll() )
             {
                 AttackStart(u);
-                if(u->isStealth())
+                if(u->HasStealthAura())
                     u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
             }
         }
@@ -111,7 +111,7 @@ void GuardAI::_stopAttack()
     {
         DEBUG_LOG("Creature stopped attacking because victim is dead [guid=%u]", i_creature.GetGUIDLow());
     }
-    else if( victim ->isStealth() )
+    else if( victim ->HasStealthAura() )
     {
         DEBUG_LOG("Creature stopped attacking because victim is using stealth [guid=%u]", i_creature.GetGUIDLow());
     }
@@ -229,7 +229,7 @@ bool GuardAI::IsVisible(Unit *pl) const
     bool seestealth = true;
     uint32 sight = sWorld.getConfig(CONFIG_SIGHT_GUARDER);
     float dist = i_creature.GetDistanceSq(pl);
-    if(pl->isStealth())
+    if(pl->HasStealthAura())
     {
         int32 seevaluse;
         int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;

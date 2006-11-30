@@ -120,7 +120,7 @@ TotemAI::UpdateAI(const uint32 diff)
 bool
 TotemAI::IsVisible(Unit *pl) const
 {
-    return !pl->isInvisible() && !pl->isStealth();
+    return !pl->HasInvisibilityAura() && !pl->HasStealthAura();
 }
 
 void

@@ -98,7 +98,7 @@ void PetAI::_stopAttack()
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_pet.GetGUIDLow());
     }
-    else if( victim->isStealth() )
+    else if( victim->HasStealthAura() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_pet.GetGUIDLow());
     }

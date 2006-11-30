@@ -65,6 +65,9 @@ Unit::Unit() : Object()
     m_silenced = false;
     waterbreath = false;
 
+    m_Visibility = VISIBILITY_ON;
+    m_UpdateVisibility = VISIBLE_NOCHANGES;
+
     m_detectStealth = 0;
     m_stealthvalue = 0;
     m_transform = 0;
@@ -231,9 +234,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
 
     if(!damage) return;
 
-    if(isStealth())
+    if(HasStealthAura())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-    if(isInvisible())
+    if(HasInvisibilityAura())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -3406,4 +3409,77 @@ void Unit::ModifyPower(Powers power, int32 dVal)
     else
     if(curPower != maxPower)
         SetPower(power,maxPower);
+}
+
+bool Unit::isVisibleFor(Unit* u)
+{
+    // Visible units, always are visible for all pjs
+    if (m_Visibility == VISIBILITY_ON)
+        return true;
+
+    // GMs are visible for higher gms (or players are visible for gms)
+    if (u->GetTypeId() == TYPEID_PLAYER && ((Player *)u)->isGameMaster())
+        return (GetTypeId() == TYPEID_PLAYER && ((Player *)this)->GetSession()->GetSecurity() < ((Player *)u)->GetSession()->GetSecurity());
+
+    // Units far than MAX_DIST_INVISIBLE, that are not gms and are stealth, are not visibles too
+    if (!this->IsWithinDist(u,MAX_DIST_INVISIBLE_UNIT))
+        return false;
+
+    // Stealth not hostile units, not visibles
+    if (!u->IsHostileTo(this))
+        return true;
+
+    bool IsVisible = true;
+    bool notInFront = u->isInFront(this, MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ? 0 : 1;
+    float Distance = sqrt(GetDistanceSq(u));
+    float prob = 0;
+    
+    // Function for detection (can be improved)
+    // Take into account that this function is executed every x secs, so prob must be low for right working
+
+    int8 x = u->getLevel() + (m_detectStealth / 5) - (m_stealthvalue / 5) + 59;
+    if (x<0) x = 0;
+    float AverageDist = 1 - 0.11016949*x + 0.00301637*x*x;  //at this distance, the detector has to be a 15% prob of detect
+    if (AverageDist < 1) AverageDist = 1;
+    if (Distance > AverageDist)
+        prob = (AverageDist-200+9*Distance)/(AverageDist-20); //prob between 10% and 0%
+    else
+        prob = 75 - (60/AverageDist)*Distance;  //prob between 15% and 75% (75% max prob)
+    if (notInFront)
+        prob = prob/100;
+    if (prob < 0.1)
+        prob = 0.1;  //min prob of detect is 0.1
+
+    if (rand_chance() > prob)
+        IsVisible = false;
+    else
+        IsVisible = true;
+
+    return IsVisible && ( Distance <= MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ;
+}
+
+void Unit::SetVisibility(UnitVisibility x)
+{
+    m_Visibility = x;
+    
+    switch (x)
+    {
+    case VISIBILITY_ON:
+        m_UpdateVisibility = VISIBLE_SET_VISIBLE;
+        break;
+    case VISIBILITY_OFF:
+        m_UpdateVisibility = VISIBLE_SET_INVISIBLE;
+        break;
+    case VISIBILITY_FACTION:
+        m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_FACTION;
+        break;
+    }
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        Map *m = MapManager::Instance().GetMap(GetMapId());
+        m->PlayerRelocation((Player *)this,GetPositionX(),GetPositionY(),
+            GetPositionZ(),GetOrientation(), true);
+    }
+
+    m_UpdateVisibility = VISIBLE_NOCHANGES;
 }

@@ -89,7 +89,7 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
     // Is unit visibale for MoveInLineOfSight
     bool IsVisible(Unit *who) const
     {
-        return !who->isStealth() && m_creature->GetDistanceSq(who) <= VISIBLE_RANGE;
+        return !who->HasStealthAura() && m_creature->GetDistanceSq(who) <= VISIBLE_RANGE;
     }
 
     // Called at World update tick

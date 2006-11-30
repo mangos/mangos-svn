@@ -425,7 +425,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetTaxiCheater(bool on) { if(on) m_GMFlags |= GM_TAXICHEAT; else m_GMFlags &= ~GM_TAXICHEAT; }
         bool isGMVisible() const { return !(m_GMFlags & GM_INVISIBLE); }
         void SetGMVisible(bool on);
-        bool isGMVisibleFor(Player* p) const { return GetSession()->GetSecurity() <= p->GetSession()->GetSecurity() || isGMVisible(); }
 
         const char* GetName() const { return m_name.c_str(); };
 
@@ -1071,6 +1070,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetTransOffsetY() const { return m_transY; }
         float GetTransOffsetZ() const { return m_transZ; }
         float GetTransOffsetO() const { return m_transO; }
+
+        // Invisibility and detection system
+        std::vector<Player *> InvisiblePjsNear;
+        Player* m_DiscoveredPj;
+        uint32 m_DetectInvTimer;
+        void HandleInvisiblePjs();
+        bool m_enableDetect;
 
     protected:
 

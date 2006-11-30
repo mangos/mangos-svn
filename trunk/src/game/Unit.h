@@ -86,6 +86,8 @@
 #define NULL_BAG                    0
 #define NULL_SLOT                   255
 
+#define MAX_DIST_INVISIBLE_UNIT     20                    // Max distance to be able to detect an invisible unit
+
 struct FactionTemplateEntry;
 struct Modifier;
 struct SpellEntry;
@@ -155,6 +157,21 @@ enum DamageEffectType
     HEAL = 3,
     NODAMAGE = 4,
     SELF_DAMAGE = 5
+};
+
+enum UnitVisibilityUpdate
+{
+    VISIBLE_NOCHANGES                 = 0,
+    VISIBLE_SET_VISIBLE               = 1,
+    VISIBLE_SET_INVISIBLE             = 2,
+    VISIBLE_SET_INVISIBLE_FOR_FACTION = 3
+};
+
+enum UnitVisibility
+{
+    VISIBILITY_OFF         = 0,
+    VISIBILITY_ON          = 1,
+    VISIBILITY_FACTION     = 2
 };
 
 // Value masks for UNIT_FIELD_FLAGS
@@ -506,11 +523,11 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool HasAura(uint32 spellId, uint32 effIndex) const
             { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
 
-        bool isStealth() const                              // cache this in a bool someday
+        bool HasStealthAura() const                              // cache this in a bool someday
         {
             return HasAuraType(SPELL_AURA_MOD_STEALTH);
         }
-        bool isInvisible() const                            // cache this in a bool someday
+        bool HasInvisibilityAura() const                            // cache this in a bool someday
         {
             return HasAuraType(SPELL_AURA_MOD_INVISIBILITY);
         }
@@ -606,6 +623,13 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isInFront(Unit const* target,float distance);
         void SetInFront(Unit const* target);
 
+        // Invisibility and detection system
+        UnitVisibility GetVisibility() {return m_Visibility;}
+        UnitVisibilityUpdate GetUpdateVisibility() { return m_UpdateVisibility; }
+        void SetVisibility(UnitVisibility x);
+        void SetUpdateVisibility(UnitVisibilityUpdate x) { m_UpdateVisibility = x; }
+        bool isVisibleFor(Unit* u);
+
         bool m_silenced;
         bool waterbreath;
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
@@ -684,5 +708,9 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
+        
+        UnitVisibilityUpdate m_UpdateVisibility;
+        UnitVisibility m_Visibility;
+        
 };
 #endif

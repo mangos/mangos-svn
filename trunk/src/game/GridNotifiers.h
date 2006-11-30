@@ -61,6 +61,17 @@ namespace MaNGOS
         #endif
     };
 
+    struct MANGOS_DLL_DECL VisibleChangesNotifier
+    {
+        Player &i_player;
+        VisibleChangesNotifier(Player &player) : i_player(player) {}
+        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
+        
+        #ifdef WIN32
+        template<> void VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
+        #endif
+    };
+
     struct MANGOS_DLL_DECL NotVisibleNotifier
     {
         Player &i_player;
@@ -318,6 +329,7 @@ namespace MaNGOS
 
     template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void VisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
+    template<> void VisibleChangesNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void NotVisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);

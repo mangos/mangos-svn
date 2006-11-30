@@ -156,7 +156,7 @@ ReactorAI::stopAttack()
     {
         DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
     }
-    else if( victim->isStealth() )
+    else if( victim->HasStealthAura() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
     }
