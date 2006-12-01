@@ -648,7 +648,7 @@ void Spell::EffectCreateItem(uint32 i)
         pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
 
     //should send message "create item" to client.-FIX ME
-    player->UpdateSkillPro(m_spellInfo->Id);
+    player->UpdateCraftSkill(m_spellInfo->Id);
 }
 
 void Spell::EffectPersistentAA(uint32 i)
@@ -702,51 +702,35 @@ void Spell::EffectOpenLock(uint32 i)
         sLog.outDebug( "WORLD: Open Lock - No Player Caster!");
         return;
     }
+    Player* player = (Player*)m_caster;
 
     LootType loottype = LOOT_CORPSE;
     uint32 lockId = gameObjTarget->GetGOInfo()->sound0;
     LockEntry *lockInfo = sLockStore.LookupEntry(lockId);
+
     if (!lockInfo)
     {
         sLog.outError( "Spell::EffectOpenLock: gameobject [guid = %u] has an unknown lockId: %u!", gameObjTarget->GetGUIDLow() , lockId);
         return;
     }
-    uint16 skill = 999;
 
-    if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_HERBALISM)
+    uint32 SkillId = m_spellInfo->EffectMiscValue[1];
+    if ( SkillId )
     {
-        skill = ((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM);
         loottype = LOOT_SKINNING;
-    } else
-    if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_MINING)
-    {
-        skill = ((Player*)m_caster)->GetSkillValue(SKILL_MINING);
-        loottype = LOOT_SKINNING;
+        uint32 SkillValue = player->GetSkillValue(SkillId);
+        if ( SkillValue < lockInfo->requiredskill )
+        {
+            SendCastResult(CAST_FAIL_FAILED);
+            return;
+        }
+        // Allow one skill-up until respawned
+        if ( !gameObjTarget->IsInSkillupList( player->GetGUIDLow() ) &&
+            player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill) )
+            gameObjTarget->AddToSkillupList( player->GetGUIDLow() );
     }
 
-    if((skill != 999) && (skill < lockInfo->requiredskill))
-    {
-        SendCastResult(CAST_FAIL_FAILED);
-        return;
-    }
-
-    if( skill >= (lockInfo->requiredskill +75) )
-        up_skillvalue = 4;
-    else if( skill >= (lockInfo->requiredskill +50) )
-        up_skillvalue = 3;
-    else if( skill >= (lockInfo->requiredskill +25) )
-        up_skillvalue = 2;
-    else if( skill >= lockInfo->requiredskill)
-        up_skillvalue = 1;
-    else up_skillvalue = 0;
-
-    if(loottype == LOOT_CORPSE && gameObjTarget->HaveLootSkill())
-    {
-        gameObjTarget->SetLootSkill(false);
-        ((Player*)m_caster)->UpdateSkillPro(m_spellInfo->Id);
-    }
-
-    ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
+    player->SendLoot(gameObjTarget->GetGUID(),loottype);
 }
 
 void Spell::EffectSummonChangeItem(uint32 i)
@@ -1160,7 +1144,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
     Player* p_caster = (Player*)m_caster;
 
-    p_caster->UpdateSkillPro(m_spellInfo->Id);
+    p_caster->UpdateCraftSkill(m_spellInfo->Id);
 
     if (m_spellInfo->EffectMiscValue[i])
     {
@@ -2029,7 +2013,7 @@ void Spell::EffectDisEnchant(uint32 i)
 
     uint32 item_count = 1;
     p_caster->DestroyItemCount(itemTarget,item_count, true);
-    p_caster->UpdateSkillPro(m_spellInfo->Id);
+    p_caster->UpdateCraftSkill(m_spellInfo->Id);
 
     uint16 dest;
     uint8 msg = p_caster->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item, count, false );
@@ -2269,24 +2253,10 @@ void Spell::EffectSkinning(uint32 i)
     ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_SKINNING);
     unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-    int32 reqValue = targetLevel<20 ? (targetLevel-10)*10 : targetLevel*5;
+    int32 reqValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel-10)*10 : targetLevel*5;
 
-    if(skinningValue >= reqValue + 100)
-        up_skillvalue = 4;
-    else if(skinningValue >= reqValue + 50)
-        up_skillvalue = 3;
-    else if(skinningValue >= reqValue + 25)
-        up_skillvalue = 2;
-    else if(skinningValue >= reqValue)
-        up_skillvalue = 1;
-    else up_skillvalue = 0;
-
-    uint8 minColorLevel = skinningValue<25 ? 1 : skinningValue<50 ? 2 : skinningValue<100 ? 3 : 4;
-    if(up_skillvalue > minColorLevel)
-        up_skillvalue = minColorLevel;
-
-    if( ((Creature*)unitTarget)->isElite() && up_skillvalue > 1 && up_skillvalue < 4)
-        up_skillvalue--;
+    // Double chances for elites
+    ((Player*)m_caster)->UpdateGatherSkill(SKILL_SKINNING, skinningValue, reqValue, ((Creature*)unitTarget)->isElite() ? 2 : 1 );
 }
 
 void Spell::EffectCharge(uint32 i)
@@ -2382,13 +2352,17 @@ void Spell::EffectTransmitted(uint32 i)
     if(m_spellInfo->EffectMiscValue[i] == 35591)
     {
         Map* map = MapManager::Instance().GetMap(m_caster->GetMapId());
-        if ( map->IsUnderWater(fx,fy,fz) )
+        if ( !map->IsUnderWater(fx,fy,fz) )
         {
             SendCastResult(CAST_FAIL_CANT_BE_CAST_HERE);
             up_skillvalue = 4;
             SendChannelUpdate(0);
             return;
         }
+
+        // replace by water level in this case
+        fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetWaterLevel(fx,fy);
+
     }
 
     GameObject* pGameObj = new GameObject();
@@ -2441,56 +2415,4 @@ void Spell::EffectTransmitted(uint32 i)
 
 void Spell::EffectSkill(uint32 i)
 {
-    if(m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    // This hack like code, but another way get GO for prevent effect skill applying for partly looted go not found
-    if(m_spellInfo->Effect[0]==33 && !m_targetGOs[0].empty())
-    {
-        GameObject* go = m_targetGOs[0].front();
-
-        if(!go->HaveLootSkill())
-            return;
-
-        go->SetLootSkill(false);
-    }
-
-    Player *player = (Player*)m_caster;
-
-    uint32 skill_id = m_spellInfo->EffectMiscValue[i];
-
-    if(skill_id == SKILL_FISHING && up_skillvalue != 4)
-        up_skillvalue = player->CheckFishingAble();
-    if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING
-        || skill_id == SKILL_HERBALISM || skill_id == SKILL_MINING)
-    {
-        switch(up_skillvalue)
-        {
-            case 0:
-                return;
-            case 1:
-            {
-                if(urand(1,100) <= 10)
-                    return;
-                else break;
-            }
-            case 2:
-            {
-                if(urand(1,100) <= 40)
-                    return;
-                else break;
-            }
-            case 3:
-            {
-                if(urand(1,100) <= 70)
-                    return;
-                else break;
-            }
-            case 4:
-            default:return;
-        }
-
-        player->UpdateSkill(skill_id);
-    }else
-    player->UpdateSkillPro(m_spellInfo->Id);
 }

@@ -1616,8 +1616,8 @@ uint8 Spell::CanCast()
                     break;
                 }
 
-                // Fizzle at Preparing stage only
-                if (m_caster->m_currentSpell != this && ReqValue > irand(SkinningValue-25, SkinningValue+5) )
+                // Fizzle at the skinning attempt finish
+                if (m_caster->m_currentSpell == this && ReqValue > irand(SkinningValue-25, SkinningValue+5) )
                 {
                     castResult = CAST_FAIL_FIZZLED;
                     // 10% chance to damage the skin when fizzled

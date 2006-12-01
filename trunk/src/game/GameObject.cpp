@@ -42,7 +42,6 @@ GameObject::GameObject() : Object()
     m_respawnTimer = 0;
     m_respawnDelayTime = 25000;
     m_lootState = GO_CLOSED;
-    m_lootskill = true;
 
     lootid=0;
 }
@@ -140,6 +139,7 @@ void GameObject::Update(uint32 p_time)
                 else
                 {
                     m_respawnTimer = 0;
+                    m_SkillupList.clear();
                     if (GetGoType() != GAMEOBJECT_TYPE_TRAP)
                         MapManager::Instance().GetMap(GetMapId())->Add(this);
                 }
@@ -150,7 +150,6 @@ void GameObject::Update(uint32 p_time)
         case GO_LOOTED:
             loot.clear();
             SetLootState(GO_CLOSED);
-            SetLootSkill(true);
 
             data.Initialize(SMSG_DESTROY_OBJECT);
             data << GetGUID();
