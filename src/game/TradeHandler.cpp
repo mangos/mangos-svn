@@ -64,9 +64,9 @@ void WorldSession::SendUpdateTrade()
             data << (uint32) 0;
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
 
-            data << (uint32) 0;// gift here ???
-            data << (uint32) 0;// gift here ???
-            data << (uint32) 0;// gift here ??? or enchants count ?
+            data << (uint32) 0;                             // gift here ???
+            data << (uint32) 0;                             // gift here ???
+            data << (uint32) 0;                             // gift here ??? or enchants count ?
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT);
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_CREATOR);
             data << (uint32) HIGHGUID_PLAYER;

@@ -36,7 +36,7 @@ void WorldRunnable::run()
 
     uint32 realCurrTime = 0, realPrevTime = 0;
 
-    ///- While we have not World::m_stopEvent, update the world 
+    ///- While we have not World::m_stopEvent, update the world
     while (!World::m_stopEvent)
     {
 

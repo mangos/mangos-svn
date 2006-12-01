@@ -32,5 +32,4 @@ class MANGOS_DLL_SPEC IdleMovementGenerator : public MovementGenerator
 };
 
 extern IdleMovementGenerator si_idleMovement;
-
 #endif

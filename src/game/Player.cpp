@@ -804,7 +804,7 @@ void Player::Update( uint32 p_time )
     }
 
     if (m_deathState == JUST_DIED)
-    {        
+    {
         KillPlayer();
         if( GetSoulStoneSpell() && GetSoulStone())
         {
@@ -1551,13 +1551,13 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     else
     {
         // Update talent points amount
-        if(level > getLevel())                                  // Add new talent points
+        if(level > getLevel())                              // Add new talent points
             SetUInt32Value(PLAYER_CHARACTER_POINTS1,GetUInt32Value(PLAYER_CHARACTER_POINTS1)+min(level-getLevel(),level-9));
         else
-        if(level < getLevel())                                  // Free if need talentes, remove some amount talent points
+        if(level < getLevel())                          // Free if need talentes, remove some amount talent points
         {
             if(GetUInt32Value(PLAYER_CHARACTER_POINTS1) < (getLevel() - level))
-               resetTalents(true);
+                resetTalents(true);
             SetUInt32Value(PLAYER_CHARACTER_POINTS1,GetUInt32Value(PLAYER_CHARACTER_POINTS1)-(getLevel() - level));
         }
     }
@@ -1569,7 +1569,7 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     // save new stats
     SetMaxPower(POWER_MANA, info.mana);
     if(getPowerType() == POWER_RAGE)
-       SetMaxPower(POWER_RAGE, 1000 );
+        SetMaxPower(POWER_RAGE, 1000 );
     else if(getPowerType()== POWER_ENERGY)
         SetMaxPower(POWER_ENERGY, 100 );
 
@@ -1666,7 +1666,6 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     // Level Played Time reset
     m_Played_time[1] = 0;
 }
-
 
 void Player::SendInitialSpells()
 {
@@ -2792,7 +2791,7 @@ void Player::SpawnCorpseBones()
     if( corpse->GetType() == CORPSE_RESURRECTABLE )
     {
         corpse->ConvertCorpseToBones();
-        SaveToDB();                                             // prevent loading as ghost without corpse
+        SaveToDB();                                         // prevent loading as ghost without corpse
     }
 }
 
@@ -2989,13 +2988,13 @@ bool Player::UpdateSkill(uint32 skill_id)
 
 #define HalfChanceSkillSteps 75
 
-inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLevel, uint32 YellowLevel) 
+inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLevel, uint32 YellowLevel)
 {
-    if ( SkillValue >= GrayLevel )  
+    if ( SkillValue >= GrayLevel )
         return sWorld.getConfig(CONFIG_SKILL_CHANCE_GREY)*10;
-    if ( SkillValue >= GreenLevel )  
+    if ( SkillValue >= GreenLevel )
         return sWorld.getConfig(CONFIG_SKILL_CHANCE_GREEN)*10;
-    if ( SkillValue >= YellowLevel )  
+    if ( SkillValue >= YellowLevel )
         return sWorld.getConfig(CONFIG_SKILL_CHANCE_YELLOW)*10;
     return sWorld.getConfig(CONFIG_SKILL_CHANCE_ORANGE)*10;
 }
@@ -3012,19 +3011,19 @@ bool Player::UpdateCraftSkill(uint32 spellid)
 
     uint32 SkillValue = GetSkillValue(SkillId);
 
-    return UpdateSkillPro(pAbility->skillId, SkillGainChance(SkillValue, 
-        pAbility->max_value, 
+    return UpdateSkillPro(pAbility->skillId, SkillGainChance(SkillValue,
+        pAbility->max_value,
         (pAbility->max_value + pAbility->min_value)/2,
         pAbility->min_value));
 }
-
 
 bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator )
 {
     sLog.outDebug("UpdateGatherSkill(SkillId %d SkillLevel %d RedLevel %d)", SkillId, SkillValue, RedLevel);
 
     // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
-    switch (SkillId) {
+    switch (SkillId)
+    {
         case SKILL_HERBALISM:
             return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator);
         case SKILL_SKINNING:
@@ -3043,14 +3042,14 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
         if ( SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i))) == SkillId ) break;
-    if ( i >= PLAYER_MAX_SKILLS ) 
+    if ( i >= PLAYER_MAX_SKILLS )
         return false;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
     uint32 SkillValue = SKILL_VALUE(data);
     uint32 MaxValue   = SKILL_MAX(data);
 
-    if ( !MaxValue || !SkillValue || SkillValue >= MaxValue ) 
+    if ( !MaxValue || !SkillValue || SkillValue >= MaxValue )
         return false;
 
     int32 Roll = irand(1,1000);
@@ -3062,7 +3061,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
         SendDirectMessage(&data);
     }
 
-    if ( Roll <= Chance ) 
+    if ( Roll <= Chance )
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
         sLog.outDebug("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance/10.0);
@@ -4062,12 +4061,12 @@ void Player::DuelComplete(uint8 type)
     if(type != 0)
     {
         data.Initialize(SMSG_DUEL_WINNER);
-        data << (uint8)((type==1) ? 0 : 1);    // 0 = just won; 1 = fled
+        data << (uint8)((type==1) ? 0 : 1);                 // 0 = just won; 1 = fled
         data << duel->opponent->GetName();
         data << GetName();
         SendMessageToSet(&data,true);
     }
-    
+
     // cool-down duel spell
     data.Initialize(SMSG_SPELL_COOLDOWN);
     data<<(uint32)7266;
@@ -7431,7 +7430,7 @@ Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,
         if(fromLoot)
             pItem->SetItemRandomProperties();
         Item * retItem = StoreItem( pos, pItem, update );
-        
+
         return retItem;
     }
     return NULL;
@@ -7756,7 +7755,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             }
 
             m_items[slot] = NULL;
-            
+
             if( IsInWorld() && update )
             {
                 pItem->RemoveFromWorld();
@@ -7770,7 +7769,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             {
                 if( pProto && pProto->Class == ITEM_CLASS_QUEST )
                     ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
-                
+
                 pBag->RemoveItem(slot, update);
 
                 if( IsInWorld() && update )
@@ -8581,7 +8580,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     {
         uint32 quest_id = *i;
         Quest* pQuest = objmgr.QuestTemplates[quest_id];
-        
+
         uint32 status = GetQuestStatus( quest_id );
 
         if ((strlen(pQuest->GetObjectives()) == 0) && (CanTakeQuest(pQuest, false)))
@@ -8589,7 +8588,7 @@ void Player::PrepareQuestMenu( uint64 guid )
             // perhaps find a better check for quests that autocomplete
             qm->AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
         } else if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
-            qm->AddMenuItem(quest_id, DIALOG_STATUS_AVAILABLE);
+        qm->AddMenuItem(quest_id, DIALOG_STATUS_AVAILABLE);
     }
 }
 
@@ -8641,8 +8640,8 @@ void Player::SendPreparedQuest( uint64 guid )
             GossipText * gossiptext = objmgr.GetGossipText(textid);
             if( !gossiptext )
             {
-                qe._Delay = 0; //TEXTEMOTE_MESSAGE;              //zyg: player emote
-                qe._Emote = 0; //TEXTEMOTE_HELLO;                //zyg: NPC emote
+                qe._Delay = 0;                              //TEXTEMOTE_MESSAGE;              //zyg: player emote
+                qe._Emote = 0;                              //TEXTEMOTE_HELLO;                //zyg: NPC emote
                 title = "";
             }
             else
@@ -8670,7 +8669,8 @@ Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
     {
         Object *pObject;
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
-        if( pCreature ) {
+        if( pCreature )
+        {
             pObject = (Object*)pCreature;
         }
         else
@@ -8684,7 +8684,8 @@ Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
 
         uint32 nextQuestID = pQuest->GetNextQuestId();
         list<uint32>::iterator iter = find(pObject->mQuests.begin(), pObject->mQuests.end(), nextQuestID);
-        if (iter != pObject->mQuests.end()) {
+        if (iter != pObject->mQuests.end())
+        {
             return objmgr.QuestTemplates[nextQuestID];
         }
     }
@@ -8765,8 +8766,8 @@ bool Player::CanCompleteQuest( uint32 quest_id )
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
             {
                 if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
-                // Need to do something so repeatable quests can be counted:
-                //if (GetItemCount(qInfo->ReqItemId[i]) < qInfo->ReqItemCount[i])
+                    // Need to do something so repeatable quests can be counted:
+                    //if (GetItemCount(qInfo->ReqItemId[i]) < qInfo->ReqItemCount[i])
                     return false;
             }
             //}
@@ -8889,7 +8890,7 @@ void Player::AddQuest( Quest *pQuest )
         assert(log_slot);
 
         uint32 quest_id = pQuest->GetQuestId();
-        
+
         mQuestStatus[quest_id].m_quest = pQuest;
         mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
         mQuestStatus[quest_id].m_rewarded = false;
@@ -8967,7 +8968,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
     if( pQuest )
     {
         uint32 quest_id = pQuest->GetQuestId();
-        
+
         uint16 dest;
         for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
         {
@@ -9023,7 +9024,8 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
 
         ModifyMoney( pQuest->GetRewOrReqMoney() );
 
-        if ( !pQuest->IsRepeatable() ) {
+        if ( !pQuest->IsRepeatable() )
+        {
             SetQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
             mQuestStatus[quest_id].m_rewarded = true;
         }
@@ -10107,7 +10109,6 @@ bool Player::LoadFromDB( uint32 guid )
     // restore remembered power values
     for(uint32 i = 0; i < MAX_POWERS; ++i)
         SetPower(Powers(i),savedPower[i]);
-    
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugValues();
@@ -10392,7 +10393,7 @@ void Player::_LoadQuestStatus()
             Field *fields = result->Fetch();
 
             uint32 quest_id = fields[0].GetUInt32();
-            Quest* pQuest = objmgr.QuestTemplates[quest_id];   // used to be new, no delete?
+            Quest* pQuest = objmgr.QuestTemplates[quest_id];// used to be new, no delete?
             if( pQuest )
             {
                 mQuestStatus[quest_id].m_quest = pQuest;
@@ -11302,7 +11303,7 @@ void Player::SetRestBonus (float rest_bonus_new)
 void Player::HandleInvisiblePjs()
 {
     Map *m = MapManager::Instance().GetMap(m_mapId);
-    
+
     //this is to be sure that InvisiblePjsNear vector has active pjs only.
     m->PlayerRelocation(this, m_positionX, m_positionY, m_positionZ, m_orientation, true);
 

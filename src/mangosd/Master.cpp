@@ -96,7 +96,7 @@ void Master::Run()
 
     h.Add(&worldListenSocket);
 
-     ///- Catch termination signals
+    ///- Catch termination signals
     _HookSignals();
 
     ///- Launch WorldRunnable thread
@@ -286,7 +286,7 @@ void Master::_OnSignal(int s)
         case SIGBREAK:
         #endif
             World::m_stopEvent = true;
-        break;
+            break;
     }
 
     signal(s, _OnSignal);

@@ -66,7 +66,7 @@ namespace MaNGOS
         Player &i_player;
         VisibleChangesNotifier(Player &player) : i_player(player) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
-        
+
         #ifdef WIN32
         template<> void VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
         #endif

@@ -62,5 +62,4 @@ inline void normalizePlayerName(std::string& name)
 }
 
 bool IsIPAddress(char const* ipaddress);
-
 #endif

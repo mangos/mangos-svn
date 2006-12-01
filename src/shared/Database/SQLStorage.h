@@ -35,7 +35,8 @@ class SQLStorage
             iNumFields =strlen(fmt);
             MaxEntry = 0;
         }
-        ~SQLStorage(){
+        ~SQLStorage()
+        {
             Free();
         }
 

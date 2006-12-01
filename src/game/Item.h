@@ -184,7 +184,10 @@ class MANGOS_DLL_SPEC Item : public Object
         void RemoveFromUpdateQueueOf(Player *player);
         bool IsInUpdateQueue() const { return uQueuePos != -1; }
         uint16 GetQueuePos() const { return uQueuePos; }
-        void FSetState(ItemUpdateState state) { uState = state; }     // forced
+        void FSetState(ItemUpdateState state)               // forced
+        {
+            uState = state;
+        }
 
     protected:
         void _LoadQuests();

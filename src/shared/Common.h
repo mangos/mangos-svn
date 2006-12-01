@@ -130,7 +130,6 @@ enum TimeConstants
     MONTH  = DAY*30
 };
 
-
 #ifdef WIN32
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
 #else

@@ -126,7 +126,7 @@ class Quest
     public:
         Quest(Field * questRecord);
         uint32 XPValue( Player *pPlayer );
-        
+
         bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }
 
         // table data accessors:
@@ -178,14 +178,14 @@ class Quest
         vector<uint32> ReqItemCount;
         vector<uint32> ReqSourceId;
         vector<uint32> ReqSourceRef;
-        vector<int32> ReqCreatureOrGOId;     // >0 Creature <0 Gameobject
+        vector<int32> ReqCreatureOrGOId;                    // >0 Creature <0 Gameobject
         vector<uint32> ReqCreatureOrGOCount;
         vector<uint32> ReqSpell;
         vector<uint32> RewChoiceItemId;
         vector<uint32> RewChoiceItemCount;
         vector<uint32> RewItemId;
         vector<uint32> RewItemCount;
-         
+
         // multiple values
         /*vector<char*> GetObjectiveText() { return ObjectiveText; }
         vector<uint32> GetReqItemId() { return ReqItemId; }
@@ -199,23 +199,22 @@ class Quest
         vector<uint32> GetRewChoiceItemCount() { return RewChoiceItemCount; }
         vector<uint32> GetRewItemId() { return RewItemId; }
         vector<uint32> GetRewItemCount() { return RewItemCount; }*/
-        
+
         uint32 GetReqItemsCount() { return m_reqitemscount; }
         uint32 GetReqCreatureOrGOcount() { return m_reqCreatureOrGOcount; }
         uint32 GetRewChoiceItemsCount() { return m_rewchoiceitemscount; }
         uint32 GetRewItemsCount() { return m_rewitemscount; }
 
         vector<uint32> prevQuests;
-    
-    // cached data
+
+        // cached data
     private:
         uint32 m_reqitemscount;
         uint32 m_reqCreatureOrGOcount;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
 
-        
-    // table data
+        // table data
     protected:
         uint32 QuestId;
         uint32 ZoneId;

@@ -209,12 +209,13 @@ class ObjectMgr
         AuctionEntryMap::iterator GetAuctionsBegin() {return mAuctions.begin();}
         AuctionEntryMap::iterator GetAuctionsEnd() {return mAuctions.end();}
 
-        PlayerInfo const* GetPlayerInfo(uint32 race, uint32 class_) const { 
+        PlayerInfo const* GetPlayerInfo(uint32 race, uint32 class_) const
+        {
             if(race   >= MAX_RACES)   return NULL;
             if(class_ >= MAX_CLASSES) return NULL;
             PlayerInfo const* info = &playerInfo[race][class_];
             if(info->displayId==0) return NULL;
-            return info; 
+            return info;
         }
         void GetPlayerLevelInfo(uint32 race, uint32 class_,uint32 level, PlayerLevelInfo* info) const;
 
@@ -308,7 +309,7 @@ class ObjectMgr
 
     private:
         void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
-        PlayerInfo **playerInfo; // [race][class]
+        PlayerInfo **playerInfo;                            // [race][class]
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()

@@ -297,7 +297,7 @@ void ObjectMgr::LoadPlayerInfo()
 
     // Load playercreate
     {
-        //                                            0      1       2     3      4            5            6            7      
+        //                                            0      1       2     3      4            5            6            7
         QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID` FROM `playercreateinfo`");
 
         uint32 count = 0;
@@ -459,7 +459,7 @@ void ObjectMgr::LoadPlayerInfo()
 
     // Load playercreate skills
     {
-        //                                            0      1       2       3           4   
+        //                                            0      1       2       3           4
         QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`Skill`,`SkillMin`, `SkillMax` FROM `playercreateinfo_skill`");
 
         uint32 count = 0;
@@ -684,7 +684,7 @@ void ObjectMgr::GetPlayerLevelInfo(uint32 race, uint32 class_, uint32 level, Pla
     if(pInfo->displayId==0) return;
 
     if(level <= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
-        *info = pInfo->levelInfo[level-1]; 
+        *info = pInfo->levelInfo[level-1];
     else
         BuildPlayerLevelInfo(race,class_,level,info);
 }
@@ -820,10 +820,11 @@ void ObjectMgr::LoadQuests()
     // some quests can have many previous maps setted by NextQuestId in previouse quest
     // for example set of race quests can lead to single not race specific quest
     barGoLink bar( result->GetRowCount() );
-    do {
+    do
+    {
         bar.step();
         Field *fields = result->Fetch();
-        
+
         Quest * newQuest = new Quest(fields);
         QuestTemplates[newQuest->GetQuestId()] = newQuest;
     } while( result->NextRow() );
@@ -831,13 +832,16 @@ void ObjectMgr::LoadQuests()
     delete result;
 
     // Post processing
-    for (QuestMap::iterator iter = QuestTemplates.begin(); iter != QuestTemplates.end(); iter++) {
+    for (QuestMap::iterator iter = QuestTemplates.begin(); iter != QuestTemplates.end(); iter++)
+    {
         Quest * qinfo = iter->second;
         if(qinfo->PrevQuestId)
             qinfo->prevQuests.push_back(qinfo->PrevQuestId);
 
-        if(qinfo->NextQuestId) {
-            if (QuestTemplates.find(qinfo->NextQuestId) == QuestTemplates.end()) {
+        if(qinfo->NextQuestId)
+        {
+            if (QuestTemplates.find(qinfo->NextQuestId) == QuestTemplates.end())
+            {
                 sLog.outString("Quest %d has NextQuestId %d, but no such quest", qinfo->GetQuestId(), qinfo->NextQuestId);
                 exit(1);
             }

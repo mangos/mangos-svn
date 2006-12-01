@@ -98,28 +98,28 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
 {
     uint32 len = data->size();
-    
+
     // dont append targets when spell's for your own..
-    /*if(m_targetMask == TARGET_FLAG_SELF) 
-        *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);*/
+    /*if(m_targetMask == TARGET_FLAG_SELF)
+     *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);*/
 
     if(m_targetMask & TARGET_FLAG_UNIT)
         if(m_unitTarget)
             data->append(m_unitTarget->GetPackGUID());
-        else
-            *data << (uint8)0;
+    else
+        *data << (uint8)0;
 
     if(m_targetMask & TARGET_FLAG_OBJECT)
         if(m_GOTarget)
             data->append(m_GOTarget->GetPackGUID());
-        else
-            *data << (uint8)0;
+    else
+        *data << (uint8)0;
 
     if(m_targetMask & TARGET_FLAG_ITEM)
         if(m_itemTarget)
             data->append(m_itemTarget->GetPackGUID());
-        else
-            *data << (uint8)0;
+    else
+        *data << (uint8)0;
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         *data << m_srcX << m_srcY << m_srcZ;
@@ -303,7 +303,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, ContainerMapList<Player> > player_notifier(notifier);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-            
+
                 CellLock<GridReadGuard> cell_lock(cell, p);
                 cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
                 cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
@@ -342,7 +342,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, ContainerMapList<Player> > player_notifier(notifier);
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-            
+
             CellLock<GridReadGuard> cell_lock(cell, p);
             cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
             cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
@@ -359,10 +359,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             cell.SetNoCreate();
 
             MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_IN_FRONT);
-            
+
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, ContainerMapList<Player> > player_notifier(notifier);
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-            
+
             CellLock<GridReadGuard> cell_lock(cell, p);
             cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
             cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
@@ -389,10 +389,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 cell.SetNoCreate();
 
                 MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_DEST_CENTER);
-                
+
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, ContainerMapList<Player> > player_notifier(notifier);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-            
+
                 CellLock<GridReadGuard> cell_lock(cell, p);
                 cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
                 cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
@@ -1011,7 +1011,7 @@ void Spell::SendSpellStart()
     /* in fact this should be the causer's guid. so if you clicked on a item and
        this caused spell it has to be the item's guid
     */
-    data.append(m_caster->GetPackGUID()); 
+    data.append(m_caster->GetPackGUID());
     data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
     data << m_castFlags;
@@ -1489,11 +1489,11 @@ uint8 Spell::CanCast()
         {
             SendInterrupted(2);
             castResult = CAST_FAIL_NOT_BEHIND_TARGET;
-        } 
+        }
         else
-        //Target must be facing you.
+            //Target must be facing you.
         if((m_spellInfo->Attributes == 0x150010) && !target->HasInArc(M_PI, m_caster) )
-        {    
+        {
             SendInterrupted(2);
             castResult = CAST_FAIL_NOT_IN_FRONT_OF_TARGET;
         }

@@ -101,7 +101,7 @@ void CliLoadScripts(char*command,pPrintf zprintf)
     char const *del=strtok(command," ");
     if (!del)
         del="";
-    if(!LoadScriptingModule(del))                                   // Error report is already done by LoadScriptingModule
+    if(!LoadScriptingModule(del))                           // Error report is already done by LoadScriptingModule
         return;
 
     sWorld.SendWorldText("|cffff0000[System Message]:|rScripts reloaded", NULL);
@@ -172,7 +172,7 @@ void CliDelete(char*command,pPrintf zprintf)
     ///- Remove characters and account from the databases
     bool done = sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",account_id) &&
         loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",safe_account_name.c_str()) &&
-    loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
+        loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
 
     if (done)
         zprintf("We deleted account: %s\r\n",account_name);
@@ -412,7 +412,7 @@ void CliSetGM(char *command,pPrintf zprintf)
     ///- Get the command line arguments
     char *szAcc = strtok(command," ");
 
-    if(!szAcc)                                          //wrong syntax 'setgm' without name
+    if(!szAcc)                                              //wrong syntax 'setgm' without name
     {
         zprintf("Syntax is: setgm <character> <number (0 - normal, 3 - gamemaster)>\r\n");
         return;
@@ -420,14 +420,14 @@ void CliSetGM(char *command,pPrintf zprintf)
 
     char *szLevel =  strtok(NULL," ");
 
-    if(!szLevel)                                          //wrong syntax 'setgm' without plevel
-    { 
+    if(!szLevel)                                            //wrong syntax 'setgm' without plevel
+    {
         zprintf("Syntax is: setgm <character> <number (0 - normal, 3 - gamemaster)>\r\n");
         return;
     }
 
     //wow it's ok,let's hope it was integer given
-    int lev=atoi(szLevel);                               //get int anyway (0 if error)
+    int lev=atoi(szLevel);                                  //get int anyway (0 if error)
 
     ///- Escape the account name to allow quotes in names
     std::string safe_account_name=szAcc;
@@ -465,13 +465,13 @@ void CliCreate(char *command,pPrintf zprintf)
         zprintf("Syntax is: create <username> <password>\r\n");
         return;
     }
-    
+
     if(strlen(szAcc)>16)
     {
         zprintf("Account cannot be longer than 16 characters.\r\n");
         return;
     }
-    
+
     char *szPassword = strtok(NULL, " ");
 
     if(!szPassword)
@@ -531,7 +531,7 @@ void ParseCommand( pPrintf zprintf, char* input)
     for ( x=0;x<CliTotalCmds;x++)
         if(!strcmp(Commands[x].cmd,supposedCommand))
     {
-            Commands[x].Func(arguments,zprintf);
+        Commands[x].Func(arguments,zprintf);
         break;
     }
 
@@ -555,7 +555,7 @@ void CliRunnable::run()
 
     if(sConfig.GetIntDefault("BeepAtStart", 1) > 0)
     {
-        printf("\a");                                           // \a = Alert
+        printf("\a");                                       // \a = Alert
     }
 
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it

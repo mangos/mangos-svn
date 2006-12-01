@@ -44,10 +44,10 @@ vector<string> StrSplit(const string &src, const string &sep)
 
 /// Check if the string is a valid ip address representation
 bool IsIPAddress(char const* ipaddress)
- {
+{
     if(!ipaddress)
         return false;
- 
+
     // Let the big boys do it.
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
     return inet_addr(ipaddress) != INADDR_NONE;
