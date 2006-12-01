@@ -35,6 +35,9 @@
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
+    // keys can be non cleared if player open realm list and close it by 'cancel'
+    loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
+
     WorldPacket data;
 
     data.Initialize(SMSG_CHAR_ENUM);
