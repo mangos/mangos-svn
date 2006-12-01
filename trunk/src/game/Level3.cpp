@@ -2103,7 +2103,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
     chr->SetUInt32Value(PLAYER_XP,0);
 
     WorldPacket data;
-    
+
     if(oldlevel == newlevel)
         FillSystemMessageData(&data, chr->GetSession(), LANG_YOURS_LEVEL_PROGRESS_RESET);
     else
@@ -2594,11 +2594,10 @@ bool ChatHandler::HandleResetCommand (const char * args)
         if(argstr == "level")
         {
             player->InitStatsForLevel(1,false);
-            player->SetUInt32Value(PLAYER_XP,0);            
+            player->SetUInt32Value(PLAYER_XP,0);
         }
         else
             player->InitStatsForLevel(player->getLevel(),false);
-
 
         return true;
     }
@@ -2773,10 +2772,9 @@ bool ChatHandler::HandleUnBanAccountCommand(const char* args)
 
     if(sWorld.RemoveBanAccount(args))
 
-    PSendSysMessage("Account %s unbanned.",args);
+        PSendSysMessage("Account %s unbanned.",args);
     return true;
 }
-
 
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false

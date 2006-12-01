@@ -86,7 +86,7 @@
 #define NULL_BAG                    0
 #define NULL_SLOT                   255
 
-#define MAX_DIST_INVISIBLE_UNIT     20                    // Max distance to be able to detect an invisible unit
+#define MAX_DIST_INVISIBLE_UNIT     20                      // Max distance to be able to detect an invisible unit
 
 struct FactionTemplateEntry;
 struct Modifier;
@@ -523,11 +523,11 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool HasAura(uint32 spellId, uint32 effIndex) const
             { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
 
-        bool HasStealthAura() const                              // cache this in a bool someday
+        bool HasStealthAura() const                         // cache this in a bool someday
         {
             return HasAuraType(SPELL_AURA_MOD_STEALTH);
         }
-        bool HasInvisibilityAura() const                            // cache this in a bool someday
+        bool HasInvisibilityAura() const                    // cache this in a bool someday
         {
             return HasAuraType(SPELL_AURA_MOD_INVISIBILITY);
         }
@@ -708,9 +708,9 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
-        
+
         UnitVisibilityUpdate m_UpdateVisibility;
         UnitVisibility m_Visibility;
-        
+
 };
 #endif

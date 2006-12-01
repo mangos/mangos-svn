@@ -23,7 +23,7 @@
 #ifndef __WORLDRUNNABLE_H
 #define __WORLDRUNNABLE_H
 
-/// Heartbeat thread for the World 
+/// Heartbeat thread for the World
 class WorldRunnable : public ZThread::Runnable
 {
     public:

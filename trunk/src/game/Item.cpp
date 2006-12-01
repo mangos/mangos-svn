@@ -841,7 +841,8 @@ uint8 Item::GetBagSlot() const
     return m_container ? m_container->GetSlot() : INVENTORY_SLOT_BAG_0;
 }
 
-bool Item::IsCanTraded() const { 
+bool Item::IsCanTraded() const
+{
     if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED) || GetProto()->Class == ITEM_CLASS_QUEST)
         return false;
     if(IsBag() && !((Bag*)this)->IsEmpty())

@@ -620,7 +620,8 @@ void World::ScriptsProcess()
             ((Creature *)iter->second.source)->HandleEmoteCommand(iter->second.script->datalong);
         else if (iter->second.script->command == 2)
             ((Creature *)iter->second.source)->SetUInt32Value(iter->second.script->datalong, iter->second.script->datalong2);
-        else if (iter->second.script->command == 3) {
+        else if (iter->second.script->command == 3)
+        {
             ((Unit *)iter->second.source)->SendMoveToPacket(iter->second.script->x, iter->second.script->y, iter->second.script->z, false, iter->second.script->datalong2 );
             MapManager::Instance().GetMap(((Object *)iter->second.source)->GetMapId())->CreatureRelocation(((Creature *)iter->second.source), iter->second.script->x, iter->second.script->y, iter->second.script->z, 0);
             //char buffff[255];
@@ -679,7 +680,6 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
 bool World::KickPlayer(std::string playerName)
 {
     SessionMap::iterator itr, next;
-
 
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
     {
@@ -759,7 +759,6 @@ bool World::RemoveBanAccount(std::string nameOrIP)
     return true;
 }
 
-
 time_t World::_UpdateGameTime()
 {
     time_t thisTime = time(NULL);
@@ -773,7 +772,7 @@ time_t World::_UpdateGameTime()
             if(!m_ShutdownIdleMode || GetSessionCount()==0)
                 m_stopEvent = true;
             else
-                m_ShutdownTimer = 1;                        // minimum timer value to wait idle state 
+                m_ShutdownTimer = 1;                        // minimum timer value to wait idle state
         }
         else
         {

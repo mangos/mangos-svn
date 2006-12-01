@@ -147,7 +147,8 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
     float dx = x - GetPositionX();
     float dy = y - GetPositionY();
     float dz = z - GetPositionZ();
-    if (!transitTime) {
+    if (!transitTime)
+    {
         float dist = ((dx*dx) + (dy*dy) + (dz*dz));
         if(dist<0)
             dist = 0;
@@ -505,11 +506,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         {
             Player *me = (Player*)this;
             Player *he = (Player*)pVictim;
-            
+
             he->ModifyHealth(1);
             me->CombatStop();
             he->CombatStop();
-        
+
             he->HandleEmoteCommand(ANIM_EMOTE_BEG);
             me->DuelComplete(1);
         }
@@ -1172,11 +1173,11 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     // Max 40% chance to score a glancing blow against mobs that are higher level
     if (   (GetTypeId() == TYPEID_PLAYER)
-        && (pVictim->GetTypeId() != TYPEID_PLAYER) 
+        && (pVictim->GetTypeId() != TYPEID_PLAYER)
         && ((getLevel() < pVictim->getLevel())))
     {
         tmp = GetWeaponSkillValue(attType);
-        int32	maxskill = getLevel() * 5;
+        int32   maxskill = getLevel() * 5;
         tmp = (tmp > maxskill) ? maxskill : tmp;
         tmp = ((pVictim->getLevel()* 5 - tmp - 5) * 300 + 1000 );
         tmp = tmp > 4000 ? 4000 : tmp;
@@ -3433,7 +3434,7 @@ bool Unit::isVisibleFor(Unit* u)
     bool notInFront = u->isInFront(this, MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ? 0 : 1;
     float Distance = sqrt(GetDistanceSq(u));
     float prob = 0;
-    
+
     // Function for detection (can be improved)
     // Take into account that this function is executed every x secs, so prob must be low for right working
 
@@ -3442,13 +3443,14 @@ bool Unit::isVisibleFor(Unit* u)
     float AverageDist = 1 - 0.11016949*x + 0.00301637*x*x;  //at this distance, the detector has to be a 15% prob of detect
     if (AverageDist < 1) AverageDist = 1;
     if (Distance > AverageDist)
-        prob = (AverageDist-200+9*Distance)/(AverageDist-20); //prob between 10% and 0%
+                                                            //prob between 10% and 0%
+            prob = (AverageDist-200+9*Distance)/(AverageDist-20);
     else
-        prob = 75 - (60/AverageDist)*Distance;  //prob between 15% and 75% (75% max prob)
+        prob = 75 - (60/AverageDist)*Distance;              //prob between 15% and 75% (75% max prob)
     if (notInFront)
         prob = prob/100;
     if (prob < 0.1)
-        prob = 0.1;  //min prob of detect is 0.1
+        prob = 0.1;                                         //min prob of detect is 0.1
 
     if (rand_chance() > prob)
         IsVisible = false;
@@ -3461,18 +3463,18 @@ bool Unit::isVisibleFor(Unit* u)
 void Unit::SetVisibility(UnitVisibility x)
 {
     m_Visibility = x;
-    
+
     switch (x)
     {
-    case VISIBILITY_ON:
-        m_UpdateVisibility = VISIBLE_SET_VISIBLE;
-        break;
-    case VISIBILITY_OFF:
-        m_UpdateVisibility = VISIBLE_SET_INVISIBLE;
-        break;
-    case VISIBILITY_FACTION:
-        m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_FACTION;
-        break;
+        case VISIBILITY_ON:
+            m_UpdateVisibility = VISIBLE_SET_VISIBLE;
+            break;
+        case VISIBILITY_OFF:
+            m_UpdateVisibility = VISIBLE_SET_INVISIBLE;
+            break;
+        case VISIBILITY_FACTION:
+            m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_FACTION;
+            break;
     }
     if(GetTypeId() == TYPEID_PLAYER)
     {

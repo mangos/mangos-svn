@@ -216,7 +216,6 @@ void WorldSession::KickPlayer()
     _socket->SetCloseAndDelete(true);
 }
 
-
 OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 {
     static OpcodeHandler table[] =

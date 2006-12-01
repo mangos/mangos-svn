@@ -56,53 +56,65 @@ Quest::Quest(Field * questRecord)
     OfferRewardText = questRecord[23].GetCppString();
     RequestItemsText = questRecord[24].GetCppString();
     EndText = questRecord[25].GetCppString();
-    for (int i = 26; i < 26 + QUEST_OBJECTIVES_COUNT; i++) {
+    for (int i = 26; i < 26 + QUEST_OBJECTIVES_COUNT; i++)
+    {
         //if (questRecord[i].GetCppString().size() > 0)
-            ObjectiveText.push_back(questRecord[i].GetCppString());
+        ObjectiveText.push_back(questRecord[i].GetCppString());
     }
-    for (int i = 30; i < 30 + QUEST_OBJECTIVES_COUNT; i++) {
+    for (int i = 30; i < 30 + QUEST_OBJECTIVES_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            ReqItemId.push_back(questRecord[i].GetUInt32());
+        ReqItemId.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 34; i < 34 + QUEST_OBJECTIVES_COUNT; i++) {
+    for (int i = 34; i < 34 + QUEST_OBJECTIVES_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            ReqItemCount.push_back(questRecord[i].GetUInt32());
+        ReqItemCount.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 38; i < 38 + QUEST_SOURCE_ITEM_IDS_COUNT; i++) {
+    for (int i = 38; i < 38 + QUEST_SOURCE_ITEM_IDS_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            ReqSourceId.push_back(questRecord[i].GetUInt32());
+        ReqSourceId.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 42; i < 42 + QUEST_SOURCE_ITEM_IDS_COUNT; i++) {
+    for (int i = 42; i < 42 + QUEST_SOURCE_ITEM_IDS_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            ReqSourceRef.push_back(questRecord[i].GetUInt32());
+        ReqSourceRef.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 46; i < 46 + QUEST_OBJECTIVES_COUNT; i++) {
+    for (int i = 46; i < 46 + QUEST_OBJECTIVES_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            ReqCreatureOrGOId.push_back(questRecord[i].GetInt32());
+        ReqCreatureOrGOId.push_back(questRecord[i].GetInt32());
     }
-    for (int i = 50; i < 50 + QUEST_OBJECTIVES_COUNT; i++) {
+    for (int i = 50; i < 50 + QUEST_OBJECTIVES_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            ReqCreatureOrGOCount.push_back(questRecord[i].GetUInt32());
+        ReqCreatureOrGOCount.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 54; i < 54 + QUEST_OBJECTIVES_COUNT; i++) {
+    for (int i = 54; i < 54 + QUEST_OBJECTIVES_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            ReqSpell.push_back(questRecord[i].GetUInt32());
+        ReqSpell.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 58; i < 58 + QUEST_REWARD_CHOICES_COUNT; i++) {
+    for (int i = 58; i < 58 + QUEST_REWARD_CHOICES_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            RewChoiceItemId.push_back(questRecord[i].GetUInt32());
+        RewChoiceItemId.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 64; i < 64 + QUEST_REWARD_CHOICES_COUNT; i++) {
+    for (int i = 64; i < 64 + QUEST_REWARD_CHOICES_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            RewChoiceItemCount.push_back(questRecord[i].GetUInt32());
+        RewChoiceItemCount.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 70; i < 70 + QUEST_REWARDS_COUNT; i++) {
+    for (int i = 70; i < 70 + QUEST_REWARDS_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            RewItemId.push_back(questRecord[i].GetUInt32());
+        RewItemId.push_back(questRecord[i].GetUInt32());
     }
-    for (int i = 74; i < 74 + QUEST_REWARDS_COUNT; i++) {
+    for (int i = 74; i < 74 + QUEST_REWARDS_COUNT; i++)
+    {
         //if (questRecord[i].GetUInt32() != 0)
-            RewItemCount.push_back(questRecord[i].GetUInt32());
+        RewItemCount.push_back(questRecord[i].GetUInt32());
     }
     RewRepFaction1 = questRecord[78].GetUInt32();
     RewRepFaction2 = questRecord[79].GetUInt32();

@@ -1005,7 +1005,7 @@ void Spell::EffectPickPocket(uint32 i)
         return;
 
     //victim must be creature and attackable
-    if( !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->IsFriendlyTo(unitTarget) ) 
+    if( !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->IsFriendlyTo(unitTarget) )
         return;
 
     //victim have to be alive and humanoid or undead
@@ -1683,7 +1683,6 @@ void Spell::EffectDuel(uint32 i)
     m_caster->AddGameObject(pGameObj);
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
     //END
-
 
     //Send request
     data.Initialize(SMSG_DUEL_REQUESTED);

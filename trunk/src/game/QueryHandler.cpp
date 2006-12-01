@@ -65,7 +65,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
         data << uint32(pChar->getGender());
         data << uint32(pChar->getClass());
     }
-    
+
     SendPacket( &data );
 }
 
@@ -93,21 +93,21 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     if (unit == NULL)
     {
         sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-    /*    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint16)0;
-        SendPacket( &data );
-        return;*/
+        /*    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint32)0;
+            data << (uint16)0;
+            SendPacket( &data );
+            return;*/
     }
 
     //CreatureInfo const *ci = unit->GetCreatureInfo();
@@ -150,7 +150,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 
     data << ci->flag1;                                      //flag1          wdbFeild7=wad flags1
     if (unit)
-        data << (uint32)((unit->isPet()) ? 0 : ci->type);       //creatureType   wdbFeild8
+        data << (uint32)((unit->isPet()) ? 0 : ci->type);   //creatureType   wdbFeild8
     else
         data << (uint32)ci->type;
 
@@ -159,7 +159,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
     if (unit)
-        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
     else
         data << (uint32)ci->randomDisplayID();
 
@@ -178,11 +178,11 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     if (unit == NULL)
     {
         sLog.outDebug( "WORLD: SendCreatureQuery - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-    //    return;
+        //    return;
     }
-    
+
     //CreatureInfo const *ci = unit->GetCreatureInfo();
-    
+
     CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
 
     if (!ci)
@@ -201,7 +201,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
         data << ci->Name;
 
     data << uint8(0) << uint8(0) << uint8(0);
-    
+
     if (unit)
         data << ((unit->isPet()) ? "Pet" : ci->SubName);
     else
@@ -210,9 +210,9 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     uint32 wdbFeild11=0,wdbFeild12=0;
 
     data << ci->flag1;                                      //flags          wdbFeild7=wad flags1
-    
+
     if (unit)
-        data << (uint32)((unit->isPet()) ? 0 : ci->type);       //creatureType   wdbFeild8
+        data << (uint32)((unit->isPet()) ? 0 : ci->type);   //creatureType   wdbFeild8
     else
         data << (uint32) ci->type;
 
@@ -221,7 +221,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
     if (unit)
-        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
     else
         data << (uint32)ci->randomDisplayID();
 
@@ -314,7 +314,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
     if (unit)
-        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID);     //DisplayID      wdbFeild13
+        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
     else
         data << (uint32)ci->randomDisplayID();
 

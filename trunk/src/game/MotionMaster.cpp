@@ -25,10 +25,9 @@
 #include <cassert>
 
 inline bool isStatic(MovementGenerator *mv)
-{ 
-    return (mv == &si_idleMovement); 
+{
+    return (mv == &si_idleMovement);
 }
-
 
 void
 MotionMaster::Initialize(Creature *creature)

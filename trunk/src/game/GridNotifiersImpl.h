@@ -112,22 +112,22 @@ MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         {
             switch(i_player.GetUpdateVisibility())
             {
-            case VISIBLE_SET_INVISIBLE:
+                case VISIBLE_SET_INVISIBLE:
                 {
                     ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
                     iter->second->m_DetectInvTimer = 1;
                 }
                 break;
-            case VISIBLE_SET_INVISIBLE_FOR_FACTION:
+                case VISIBLE_SET_INVISIBLE_FOR_FACTION:
                     if (iter->second->IsHostileTo(&i_player))
                     {
                         ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
                         iter->second->m_DetectInvTimer = 1;
                     }
-                break;
-            case VISIBLE_SET_VISIBLE:
+                    break;
+                case VISIBLE_SET_VISIBLE:
                     i_player.SendUpdateToPlayer(iter->second);
-                break;
+                    break;
             }
 
             // Detect invisible pjs
@@ -178,7 +178,6 @@ MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
             if(!i_player.IsWithinDist(iter->second, 5))     // iteraction distance
                 i_player.GetSession()->SendCancelTrade();   // will clode both side trade windows
 
-        
     }
 }
 

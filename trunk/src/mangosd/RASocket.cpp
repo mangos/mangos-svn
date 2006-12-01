@@ -41,8 +41,8 @@ SOCKET r;
         return; \
     }
 
-uint32 iSession=0;                  ///< Session number (incremented each time a new connection is made)
-unsigned int iUsers=0;              ///< Number of active administrators
+uint32 iSession=0;                                          ///< Session number (incremented each time a new connection is made)
+unsigned int iUsers=0;                                      ///< Number of active administrators
 
 typedef int(* pPrintf)(const char*,...);
 
@@ -92,8 +92,8 @@ void RASocket::OnAccept()
     if(iUsers)
         dropclient
 
-    ///- Else print Motd
-    Sendf("%s\r\n",(char*)sWorld.GetMotd());
+        ///- Else print Motd
+            Sendf("%s\r\n",(char*)sWorld.GetMotd());
 }
 
 /// Read data from the network
@@ -105,7 +105,7 @@ void RASocket::OnRead()
     unsigned int sz=ibuf.GetLength();
     if(iInputLength+sz>=RA_BUFF_SIZE)
     {
-        if (bLog) 
+        if (bLog)
             Log("Input buffer overflow, possible DOS attack.\n");
         SetCloseAndDelete();
         return;
@@ -115,7 +115,7 @@ void RASocket::OnRead()
     if(stage!=OK && iUsers)
         dropclient
 
-    char *inp = new char [sz+1];
+            char *inp = new char [sz+1];
     ibuf.Read(inp,sz);
 
     /// \todo Can somebody explain this 'Linux bugfix'?
@@ -132,10 +132,10 @@ void RASocket::OnRead()
     unsigned int y=0;
     for(;y<sz;y++)
         if(inp[y]=='\r'||inp[y]=='\n')
-        {
-            gotenter=true;
-            break;
-        }
+    {
+        gotenter=true;
+        break;
+    }
 
     //No buffer overflow (checked above)
     memcpy(&buff[iInputLength],inp,y);
@@ -153,13 +153,13 @@ void RASocket::OnRead()
                 if(!memcmp(buff,"USER ",5))                 //got "USER" cmd
                 {
                     szLogin=&buff[5];
-                    
+
                     ///- Get the gmlevel and password from the account table
                     std::string login = szLogin;
                     loginDatabase.escape_string(login);
                     // No SQL injection (escaped login)
                     QueryResult* result = loginDatabase.PQuery("SELECT `password`,`gmlevel` FROM `account` WHERE `username` = '%s'",login.c_str());
-                    
+
                     ///- If the user is not found, deny access
                     if(!result)
                     {
@@ -187,7 +187,7 @@ void RASocket::OnRead()
                     }
                 }
                 break;
-            ///<li> If the input is 'PASS <password>' (and the user already gave his username)
+                ///<li> If the input is 'PASS <password>' (and the user already gave his username)
             case LG:
                 if(!memcmp(buff,"PASS ",5))                 //got "PASS" cmd
                 {                                           //login+pass ok
@@ -210,7 +210,7 @@ void RASocket::OnRead()
                     }
                 }
                 break;
-            ///<li> If user is logged, parse and execute the command
+                ///<li> If user is logged, parse and execute the command
             case OK:
                 if(strlen(buff))
                 {
@@ -218,7 +218,7 @@ void RASocket::OnRead()
                     ParseCommand(&RASocket::zprintf , buff);
                 }
                 break;
-            ///</ul>
+                ///</ul>
         };
 
     }
@@ -230,7 +230,7 @@ int RASocket::zprintf( const char * szText, ... )
     if( !szText ) return 0;
     va_list ap;
     va_start(ap, szText);
-    /// \todo Remove buffer length here. Can be >1024 (e.g. list of users) 
+    /// \todo Remove buffer length here. Can be >1024 (e.g. list of users)
     char *megabuffer=new char[1024];
     unsigned int sz=vsnprintf(megabuffer,1024,szText,ap);
     #ifdef RA_CRYPT

@@ -50,7 +50,7 @@ uint32 CreatureInfo::randomDisplayID() const
 }
 
 Creature::Creature() :
-Unit(), i_AI(NULL), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0), 
+Unit(), i_AI(NULL), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
 m_deathTimer(0), m_respawnTimer(0), m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
 itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false), m_isTamed(false),
@@ -958,7 +958,7 @@ void Creature::SelectLevel(const CreatureInfo *cinfo)
     uint32 maxmana = max(cinfo->maxmana, cinfo->minmana);
     uint32 mana = minmana + uint32(rellevel*(maxmana - minmana));
 
-    SetMaxPower(POWER_MANA, mana);                           //MAX Mana
+    SetMaxPower(POWER_MANA, mana);                          //MAX Mana
     SetUInt32Value(UNIT_FIELD_BASE_MANA, mana);
     SetPower(POWER_MANA, mana);
 }
@@ -1178,7 +1178,7 @@ void Creature::_LoadQuests()
     mInvolvedQuests.clear();
 
     Field *fields;
-    
+
     QueryResult *result = sDatabase.PQuery("SELECT `quest` FROM `creature_questrelation` WHERE `id` = '%u'", GetEntry());
 
     if(result)

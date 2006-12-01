@@ -76,7 +76,6 @@ enum Stats
 
 #define MAX_STATS                        5
 
-
 enum Powers
 {
     POWER_MANA                         = 0,

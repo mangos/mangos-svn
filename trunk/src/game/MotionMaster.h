@@ -46,7 +46,8 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 
         void Mutate(MovementGenerator *m)
         {
-            if (top()->GetMovementGeneratorType() == HOME_MOTION_TYPE)  // HomeMovement is not that important, delete it if meanwhile a new comes
+                                                            // HomeMovement is not that important, delete it if meanwhile a new comes
+            if (top()->GetMovementGeneratorType() == HOME_MOTION_TYPE)
                 MovementExpired();
             m->Initialize(*i_owner);
             push(m);

@@ -156,7 +156,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
     else if (state_str == "queue") list_queue = true;
     else if (state_str == "check_all") check_all = true;
     else return false;
-    
+
     Player* player = getSelectedPlayer();
     if (!player) player = m_session->GetPlayer();
 
@@ -166,7 +166,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
         SendSysMessage(state_str.c_str());
         for (uint8 i = 0; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i); 
+            Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
             if (!item) continue;
             if (!item->IsBag())
             {
@@ -220,7 +220,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
         std::vector<Item *> &updateQueue = player->GetItemUpdateQueue();
         for (uint8 i = 0; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i); 
+            Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
             if (!item) continue;
 
             if (item->GetSlot() != i)
@@ -368,7 +368,6 @@ bool ChatHandler::HandleGetItemState(const char* args)
         if (!error)
             SendSysMessage("All OK!");
     }
-
 
     return true;
 }

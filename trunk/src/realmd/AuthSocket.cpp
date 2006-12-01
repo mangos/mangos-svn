@@ -287,7 +287,6 @@ void AuthSocket::_SetVSFields(std::string password)
     dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
 }
 
-
 /// Logon Challenge command handler
 void AuthSocket::_HandleLogonChallenge()
 {

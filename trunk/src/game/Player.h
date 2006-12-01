@@ -121,7 +121,9 @@ struct PlayerLevelInfo
 
 struct PlayerInfo
 {
-    PlayerInfo() : displayId(0),levelInfo(NULL) {}                     // existance checked by displayId != 0
+    PlayerInfo() : displayId(0),levelInfo(NULL)             // existance checked by displayId != 0
+    {
+    }
 
     uint32 mapId;
     uint32 zoneId;
@@ -134,7 +136,7 @@ struct PlayerInfo
     std::list<uint16> skill[3];
     std::list<uint16> action[4];
 
-    PlayerLevelInfo* levelInfo; //[level-1] 0..MaxPlayerLevel-1
+    PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1
 };
 
 struct DuelInfo
@@ -849,7 +851,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CheckDuelDistance();
         void DuelComplete(uint8 type);
         DuelInfo *duel;
-
 
         uint32 GetCurrentBuybackSlot() { return m_currentBuybackSlot; }
         void SetCurrentBuybackSlot( uint32 slot )

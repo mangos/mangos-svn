@@ -269,9 +269,9 @@ class MANGOS_DLL_SPEC Object
 
         std::list<uint32> mQuests;
         std::list<uint32> mInvolvedQuests;
-        
+
     protected:
-        
+
         Object ( );
 
         void _InitValues()
