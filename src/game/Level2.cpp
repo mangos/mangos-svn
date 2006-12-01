@@ -326,10 +326,6 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     if (!pFlags)
         return false;
 
-    char* pFaction = strtok(NULL, " ");
-    if (!pFaction)
-        return false;
-
     char* pLevel = strtok(NULL, " ");
     if (!pLevel)
         return false;
@@ -338,13 +334,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     if (!pName)
         return false;
 
-    uint32 npcFlags  = atoi(pFlags);
-    uint32 faction_id  = atoi(pFaction);
     uint32 level  = atoi(pLevel);
-    uint32 display_id = atoi(pEntry);
-
-    if (display_id==0)
-        return false;
 
     for (uint8 i = 0; i < strlen(pName); i++)
     {
@@ -354,7 +344,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
             return false;
         }
     }
-    SpawnCreature(m_session, pName, display_id, npcFlags, faction_id, level);
+    SpawnCreature(m_session, pName, level);
 
     return true;
 }
@@ -834,7 +824,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     pCreature->SetUInt32Value(UNIT_NPC_FLAGS, npcFlags);
 
-    pCreature->SaveToDB();
+    sDatabase.PExecute("UPDATE `creature_template` SET `npcflag` = '%u' WHERE `entry` = '%u'", npcFlags, pCreature->GetEntry());
 
     SendSysMessage(LANG_VALUE_SAVED_REJOIN);
 
