@@ -48,6 +48,8 @@ class AuthSocket: public TcpSocket
         void _HandleXferCancel();
         void _HandleXferAccept();
 
+        void _SetVSFields(std::string password);
+
         FILE *pPatch;
         bool IsLag();
 
