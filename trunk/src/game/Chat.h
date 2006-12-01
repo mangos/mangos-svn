@@ -100,7 +100,7 @@ class ChatHandler
         int ParseCommands(const char* text, WorldSession *session);
 
     protected:
-        void SpawnCreature(WorldSession *session, const char* pName, uint32 displayId, uint32 npcFlags, uint32 factionId, uint32 level);
+        void SpawnCreature(WorldSession *session, const char* pName, uint32 level);
 
         bool hasStringAbbr(const char* s1, const char* s2);
         void SendSysMessage(const char *str) { SendSysMessage(m_session,str); }

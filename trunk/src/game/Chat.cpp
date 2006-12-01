@@ -517,7 +517,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         *data << uint8(0);
 }
 
-void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 displayId, uint32 npcFlags, uint32 factionId, uint32 level)
+void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 level)
 {
     /*
     //SpawnCreature is invallid, remains for educatial reasons
@@ -541,8 +541,6 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
         pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, objmgr.AddCreatureTemplate(pCreature->GetName(), displayId));
         pCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
         pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
-        pCreature->SetUInt32Value(UNIT_NPC_FLAGS , npcFlags);
-        pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE , factionId);
         pCreature->SetHealth(28 + 30*level);
         pCreature->SetMaxHealth(28 + 30*level);
         pCreature->SetLevel(level);

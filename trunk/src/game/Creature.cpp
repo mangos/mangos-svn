@@ -929,8 +929,6 @@ void Creature::SaveToDB()
     //or
     //<< (uint32)(m_state) << ","                     // is it really death state or just state?
 
-        << GetUInt32Value(UNIT_NPC_FLAGS) << ","            //npcflags
-        << getFaction() << ","
         << GetDefaultMovementType() << ","                  // default movement generator type
         << "'')";                                           // should save auras
 
@@ -1088,7 +1086,8 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
-        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`npcflags`,`faction`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
+        //                                0    1     2            3            4            5             6              7              8           9                  10                 11                 12          13        14             15      16             17
+        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimemin`,`spawntimemax`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
 
     if(!result)
     {
@@ -1097,6 +1096,8 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
     }
 
     Field *fields = result->Fetch();
+
+
 
     if(!Create(guid,fields[1].GetUInt32(),fields[2].GetFloat(),fields[3].GetFloat(),
         fields[4].GetFloat(),fields[5].GetFloat(),fields[0].GetUInt32()))
@@ -1108,9 +1109,6 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
     SetHealth(fields[12].GetUInt32());
     SetPower(POWER_MANA,fields[13].GetUInt32());
 
-    SetUInt32Value(UNIT_NPC_FLAGS,fields[16].GetUInt32());
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[17].GetUInt32());
-
     m_respawnradius = fields[8].GetFloat();
     respawn_cord[0] = fields[9].GetFloat();
     respawn_cord[1] = fields[10].GetFloat();
@@ -1121,7 +1119,7 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
     m_deathState = (DeathState)fields[15].GetUInt32();
 
     {
-        uint32 mtg = fields[18].GetUInt32();
+        uint32 mtg = fields[16].GetUInt32();
         if(mtg < MAX_DB_MOTION_TYPE)
             m_defaultMovementType = MovementGeneratorType(mtg);
         else
