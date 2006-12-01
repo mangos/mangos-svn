@@ -76,7 +76,8 @@ enum SpellCastFlags
 {
     CAST_FLAG_UNKNOWN1           = 0x2,
     CAST_FLAG_UNKNOWN2           = 0x10,
-    CAST_FLAG_AMMO               = 0x20
+    CAST_FLAG_AMMO               = 0x20,
+    CAST_FLAG_UNKNOWN3           = 0x100
 };
 
 enum SpellChannelInterruptFlags
@@ -466,6 +467,7 @@ class Spell
         void setState(uint32 state) { m_spellState = state; }
 
         void writeSpellGoTargets( WorldPacket * data );
+        void writeAmmoToPacket( WorldPacket * data );
         void FillTargetMap();
         void SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::list<Item*> &TagItemMap,std::list<GameObject*> &TagGOMap);
 
