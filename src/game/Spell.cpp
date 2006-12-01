@@ -996,10 +996,13 @@ void Spell::SendCastResult(uint8 result)
 
 void Spell::SendSpellStart()
 {
-
+    sLog.outDebug("Sending SMSG_SPELL_START");
     WorldPacket data;
 
     m_castFlags = CAST_FLAG_UNKNOWN1;
+    if(m_rangedShoot)
+        m_castFlags = m_castFlags | CAST_FLAG_AMMO;
+
     Unit * target;
     if(!unitTarget)
         target = m_caster;
@@ -1019,13 +1022,17 @@ void Spell::SendSpellStart()
 
     data << m_targets.m_targetMask;
     m_targets.write( &data );
-
+    if( m_castFlags & CAST_FLAG_AMMO )
+    {
+        writeAmmoToPacket(&data);
+    }
+    data.hexlike();
     m_caster->SendMessageToSet(&data, true);
 }
 
 void Spell::SendSpellGo()
 {
-
+    sLog.outDebug("Sending SMSG_SPELL_GO");
     WorldPacket data;
 
     Unit * target;
@@ -1033,6 +1040,10 @@ void Spell::SendSpellGo()
         target = m_caster;
     else
         target = unitTarget;
+
+    m_castFlags = CAST_FLAG_UNKNOWN3;
+    if(m_rangedShoot)
+        m_castFlags = m_castFlags | CAST_FLAG_AMMO;
 
     data.Initialize(SMSG_SPELL_GO);
     //data.append(target->GetPackGUID());
@@ -1043,15 +1054,47 @@ void Spell::SendSpellGo()
     data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
 
-    data << uint16(0x0100);
+    data << m_castFlags;
     writeSpellGoTargets(&data);
 
-    data << (uint8)0;
+    data << (uint8)0; // miss count
 
-    data << m_castFlags;
+    data << m_targets.m_targetMask;
     m_targets.write( &data, true );
-
+    if( m_castFlags & CAST_FLAG_AMMO )
+    {
+        writeAmmoToPacket(&data);
+    }
+    data.hexlike();
     m_caster->SendMessageToSet(&data, true);
+}
+
+void Spell::writeAmmoToPacket( WorldPacket * data )
+{
+    uint32 ammoInventoryType = 0;
+    uint32 ammoDisplayID = 0;
+    Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+    if(pItem)
+    {
+        ammoInventoryType = pItem->GetProto()->InventoryType;
+        if( ammoInventoryType == INVTYPE_THROWN )
+            ammoDisplayID = pItem->GetProto()->DisplayInfoID;
+        else
+        {
+            uint32 ammoID = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
+            if(ammoID)
+            {
+                ItemPrototype const *pProto = objmgr.GetItemPrototype( ammoID ); 
+                if(pProto)
+                {
+                    ammoDisplayID = pProto->DisplayInfoID;
+                    ammoInventoryType = pProto->InventoryType;
+                }
+            }
+        }
+    }
+    *data << ammoDisplayID;
+    *data << ammoInventoryType;
 }
 
 void Spell::writeSpellGoTargets( WorldPacket * data )
