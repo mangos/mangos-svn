@@ -46,7 +46,16 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     if(!talentInfo)
         return;
 
+    TalentTabEntry *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TalentTab );
+
+    if(!talentTabInfo)
+        return;
+
     Player * player = GetPlayer();
+
+    // prevent learn talent for different class (cheating)
+    if( (player->getClassMask() & talentTabInfo->ClassMask) == 0 )
+        return;
 
     // prevent skip talent ranks (cheating)
     if(requested_rank > 0 && !player->HasSpell(talentInfo->RankID[requested_rank-1]))
@@ -70,7 +79,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     // Find out how many points we have in this field
     uint32 spentPoints = 0;
 
-    uint32 tTree = talentInfo->TalentTree;
+    uint32 tTab = talentInfo->TalentTab;
     if (talentInfo->Row > 0)
     {
         unsigned int numRows = sTalentStore.GetNumRows();
@@ -80,7 +89,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
             TalentEntry *tmpTalent = sTalentStore.data[i];
             if (tmpTalent)                                  // the way talents are tracked
             {
-                if (tmpTalent->TalentTree == tTree)
+                if (tmpTalent->TalentTab == tTab)
                 {
                     for (int j = 0; j <= 4; j++)
                     {

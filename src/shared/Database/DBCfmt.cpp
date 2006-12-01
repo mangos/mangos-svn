@@ -37,6 +37,7 @@ const char SpellItemEnchantmentfmt[]="niixixxixxiixxxxxixxxxii";
 const char SpellRadiusfmt[]="nfxf";
 const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxx";
 const char TalentEntryfmt[]="niiiiiiiixxxxixxixxxx";
+const char TalentTabEntryfmt[]="nxxxxxxxxxxxixx";
 const char TaxiNodesEntryfmt[]="nifffsxxxxxxxxii";
 const char TaxiPathEntryfmt[]="niii";
 const char TaxiPathNodeEntryfmt[]="diiifffii";

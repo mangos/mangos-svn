@@ -143,6 +143,7 @@ extern DBCStorage <SpellRadiusEntry>          sSpellRadiusStore;
 extern DBCStorage <SpellRangeEntry>           sSpellRangeStore;
 extern DBCStorage <SpellEntry>                sSpellStore;
 extern DBCStorage <TalentEntry>               sTalentStore;
+extern DBCStorage <TalentTabEntry>            sTalentTabStore;
 extern DBCStorage <TaxiNodesEntry>            sTaxiNodesStore;
 extern TaxiPathSetBySource                    sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;

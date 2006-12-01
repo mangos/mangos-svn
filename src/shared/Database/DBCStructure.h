@@ -271,12 +271,18 @@ struct SpellItemEnchantmentEntry
 struct TalentEntry
 {
     uint32    TalentID;
-    uint32    TalentTree;
+    uint32    TalentTab;
     uint32    Row;
     uint32    Col;
     uint32    RankID[5];
     uint32    DependsOn;
     uint32    DependsOnRank;
+};
+
+struct TalentTabEntry
+{
+    uint32    TalentTabID;
+    uint32    ClassMask;
 };
 
 struct TaxiNodesEntry
