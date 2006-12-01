@@ -99,8 +99,14 @@ class MANGOS_DLL_SPEC GameObject : public Object
         uint32 GetGoType() { return GetUInt32Value(GAMEOBJECT_TYPE_ID); }
 
         LootState getLootState() { return m_lootState; }
-        bool HaveLootSkill() const { return m_lootskill; }
-        void SetLootSkill(bool skill) { m_lootskill = skill; }
+
+        void AddToSkillupList(uint32 PlayerGuidLow) { m_SkillupList.push_back(PlayerGuidLow); }
+        bool IsInSkillupList(uint32 PlayerGuidLow)
+        {     
+            for (std::list<uint32>::iterator i = m_SkillupList.begin(); i != m_SkillupList.end(); ++i)
+                if (*i == PlayerGuidLow) return true;
+            return false;
+        }
 
         Loot        loot;
         uint32      lootid;
@@ -114,6 +120,6 @@ class MANGOS_DLL_SPEC GameObject : public Object
         uint32      m_respawnDelayTime;
         uint32      m_flags;
         LootState   m_lootState;
-        bool        m_lootskill;
+        std::list<uint32> m_SkillupList;
 };
 #endif

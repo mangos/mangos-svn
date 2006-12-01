@@ -2430,7 +2430,7 @@ bool Player::CanLearnProSpell(uint32 spell)
         SpellEntry *pSpellInfo = sSpellStore.LookupEntry(itr->first);
         if(!pSpellInfo) continue;
 
-        if(pSpellInfo->Effect[1] == 118)
+        if(pSpellInfo->Effect[1] == SPELL_EFFECT_SKILL)
         {
             uint32 pskill = pSpellInfo->EffectMiscValue[1];
             if( pskill != SKILL_HERBALISM && pskill != SKILL_MINING && pskill != SKILL_LEATHERWORKING
@@ -2987,56 +2987,90 @@ bool Player::UpdateSkill(uint32 skill_id)
     return false;
 }
 
-void Player::UpdateSkillPro(uint32 spellid)
-{
-    SkillLineAbilityEntry *pAbility = sSkillLineAbilityStore.LookupEntry(spellid);
-    if(!pAbility)
-        return;
-    uint32 minValue = pAbility->min_value;
-    uint32 maxValue = pAbility->max_value;
-    uint32 skill_id = pAbility->skillId;
+#define HalfChanceSkillSteps 75
 
-    if(!skill_id)return;
+inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLevel, uint32 YellowLevel) 
+{
+    if ( SkillValue >= GrayLevel )  
+        return sWorld.getConfig(CONFIG_SKILL_CHANCE_GREY)*10;
+    if ( SkillValue >= GreenLevel )  
+        return sWorld.getConfig(CONFIG_SKILL_CHANCE_GREEN)*10;
+    if ( SkillValue >= YellowLevel )  
+        return sWorld.getConfig(CONFIG_SKILL_CHANCE_YELLOW)*10;
+    return sWorld.getConfig(CONFIG_SKILL_CHANCE_ORANGE)*10;
+}
+
+bool Player::UpdateCraftSkill(uint32 spellid)
+{
+    sLog.outDebug("UpdateCraftSkill spellid %d", spellid);
+
+    SkillLineAbilityEntry *pAbility = sSkillLineAbilityStore.LookupEntry(spellid);
+    if ( !pAbility ) return false;
+
+    uint32 SkillId = pAbility->skillId;
+    if ( !SkillId ) return false;
+
+    uint32 SkillValue = GetSkillValue(SkillId);
+
+    return UpdateSkillPro(pAbility->skillId, SkillGainChance(SkillValue, 
+        pAbility->max_value, 
+        (pAbility->max_value + pAbility->min_value)/2,
+        pAbility->min_value));
+}
+
+
+bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator )
+{
+    sLog.outDebug("UpdateGatherSkill(SkillId %d SkillLevel %d RedLevel %d)", SkillId, SkillValue, RedLevel);
+
+    // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
+    switch (SkillId) {
+        case SKILL_HERBALISM:
+            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator);
+        case SKILL_SKINNING:
+        case SKILL_MINING:
+            return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/HalfChanceSkillSteps) );
+    }
+    return false;
+}
+
+bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
+{
+    sLog.outDebug("UpdateSkillPro(SkillId %d, Chance %3.1f%%)", SkillId, Chance/10.0);
+    if ( !SkillId )
+        return false;
+
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill_id) break;
-    if(i>=PLAYER_MAX_SKILLS) return;
+        if ( SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i))) == SkillId ) break;
+    if ( i >= PLAYER_MAX_SKILLS ) 
+        return false;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
-    uint32 value = SKILL_VALUE(data);
-    uint32 max = SKILL_MAX(data);
+    uint32 SkillValue = SKILL_VALUE(data);
+    uint32 MaxValue   = SKILL_MAX(data);
 
-    if ((!max) || (!value) || (value >= max)) return;
-    //generates chance for unsuccess gain
-    if (value*512 > max*urand(0,512)) return;
-    if(skill_id == SKILL_POISONS && value < 125)
+    if ( !MaxValue || !SkillValue || SkillValue >= MaxValue ) 
+        return false;
+
+    int32 Roll = irand(1,1000);
+    {
+        WorldPacket data;
+        char buf[256];
+        sprintf(buf, "UpdateSkillPro: rolled %d (gain range is 1..%d)", Roll, Chance);
+        sChatHandler.FillMessageData(&data, GetSession(), CHAT_MSG_SKILL, LANG_UNIVERSAL, NULL, GetGUID(), buf);
+        SendDirectMessage(&data);
+    }
+
+    if ( Roll <= Chance ) 
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
-        return;
+        sLog.outDebug("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance/10.0);
+        return true;
     }
-    if(skill_id == SKILL_MINING && value>75)
-        return;
-    if(value >= maxValue+25 )
-        return;
-    else if(value >= maxValue)
-    {
-        if(urand(0,100) <30)
-            SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
-        return;
-    }
-    else if(value >= minValue)
-    {
-        if(urand(0,100) <70)
-            SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
-        return;
-    }
-    else if(value >= 1)
-    {
-        SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
-        return;
-    }
-    else return;
 
+    sLog.outDebug("Player::UpdateSkillPro Chance=%3.1f%% missed", Chance/10.0);
+    return false;
 }
 
 void Player::UpdateWeaponSkill (WeaponAttackType attType)
@@ -4603,8 +4637,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     Loot    *loot = NULL;
     PermissionTypes permission = ALL_PERMISSION;
 
+    sLog.outDebug("Player::SendLoot");
     if (IS_GAMEOBJECT_GUID(guid))
     {
+        sLog.outDebug("       IS_GAMEOBJECT_GUID(guid)");
         GameObject *go =
             ObjectAccessor::Instance().GetGameObject(*this, guid);
 
@@ -4618,7 +4654,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             uint32 lootid =  go->lootid;
 
             if(lootid)
+            {
+                sLog.outDebug("       if(lootid)");
                 FillLoot(this,loot,lootid,LootTemplates_Gameobject);
+            }
 
             if(loot_type == LOOT_FISHING)
                 go->getFishLoot(loot);
