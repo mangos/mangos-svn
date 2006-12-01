@@ -3422,6 +3422,10 @@ bool Unit::isVisibleFor(Unit* u)
     if (u->GetTypeId() == TYPEID_PLAYER && ((Player *)u)->isGameMaster())
         return (GetTypeId() == TYPEID_PLAYER && ((Player *)this)->GetSession()->GetSecurity() < ((Player *)u)->GetSession()->GetSecurity());
 
+    // non faction visibility non-breakable for non-GMs
+    if (m_Visibility == VISIBILITY_OFF)
+        return false;
+
     // Units far than MAX_DIST_INVISIBLE, that are not gms and are stealth, are not visibles too
     if (!this->IsWithinDist(u,MAX_DIST_INVISIBLE_UNIT))
         return false;
