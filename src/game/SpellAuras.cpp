@@ -2125,7 +2125,7 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
     if(int32(powerType) != m_modifier.m_miscvalue)
         return;
 
-    m_target->ModifyPower(powerType, apply ? m_modifier.m_amount : - m_modifier.m_amount);
+    m_target->ApplyMaxPowerMod(powerType, m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
