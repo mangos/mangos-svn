@@ -41,7 +41,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         GameObject *go =
             ObjectAccessor::Instance().GetGameObject(*player, lguid);
 
-        if (!go || !go->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
+        // not check distance for GO in case owned GO (fishing bobber case, for example)
+        if (!go || go->GetOwnerGUID() != _player->GetGUID() && !go->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
             return;
 
         loot = &go->loot;
@@ -155,7 +156,9 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
     if( IS_GAMEOBJECT_GUID( guid ) )
     {
         GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*GetPlayer(), guid);
-        if( pGameObject && pGameObject->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
+
+        // not check distance for GO in case owned GO (fishing bobber case, for example)
+        if( pGameObject && (pGameObject->GetOwnerGUID()==_player->GetGUID() || pGameObject->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE)) )
             pLoot = &pGameObject->loot;
     }
     else
@@ -235,7 +238,8 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         GameObject *go =
             ObjectAccessor::Instance().GetGameObject(*player, lguid);
 
-        if ( !go || !go->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE) )
+        // not check distance for GO in case owned GO (fishing bobber case, for example)
+        if (!go || go->GetOwnerGUID() != _player->GetGUID() && !go->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
             return;
 
         loot = &go->loot;

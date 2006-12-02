@@ -4643,7 +4643,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         GameObject *go =
             ObjectAccessor::Instance().GetGameObject(*this, guid);
 
-        if (!go || !go->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
+        // not check distance for GO in case owned GO (fishing bobber case, for example)
+        if (!go || (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
             return;
 
         loot = &go->loot;
