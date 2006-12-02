@@ -129,6 +129,19 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
     recv_data >> bag >> slot >> count >> data1 >> data2 >> data3;
     sLog.outDebug("STORAGE: receive bag = %u, slot = %u, count = %u", bag, slot, count);
 
+    uint16 pos = (bag << 8) | slot;
+
+    // prevent drop unequipable items (in combat or just non empty bags)
+    if(_player->IsEquipmentPos(pos))
+    {
+        uint8 msg = _player->CanUnequipItem( pos, false );
+        if( msg != EQUIP_ERR_OK )
+        {
+            _player->SendEquipError( msg, _player->GetItemByPos(pos), NULL );
+            return;
+        }
+    }
+
     _player->DestroyItem( bag, slot, true );
 }
 

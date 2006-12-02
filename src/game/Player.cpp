@@ -6978,6 +6978,9 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
         pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC )
         return EQUIP_ERR_CANT_DO_IN_COMBAT;
 
+    if(!swap && pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
+        return EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS;
+
     // All equiped items can swaped (not in combat case)
     if(swap)
         return EQUIP_ERR_OK;
