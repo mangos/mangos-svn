@@ -82,11 +82,11 @@ MotionMaster::MovementExpired()
 void
 MotionMaster::TargetedHome()
 {
-    if(top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        MovementExpired();
-
     if(i_owner->hasUnitState(UNIT_STAT_FLEEING))
         return;
+
+    if(top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
+        pop();
 
     DEBUG_LOG("Target home location %u", i_owner->GetGUIDLow());
 
