@@ -578,8 +578,8 @@ void ObjectMgr::LoadPlayerInfo()
             barGoLink bar( 1 );
 
             sLog.outString( "" );
-            sLog.outString( ">> Loaded %u levelup definitions", count );
-            sLog.outError( "Error loading player_levelupgains table or table empty.");
+            sLog.outString( ">> Loaded %u level stats definitions", count );
+            sLog.outError( "Error loading player_levelstats table or table empty.");
             exit(1);
         }
 
@@ -606,7 +606,10 @@ void ObjectMgr::LoadPlayerInfo()
             uint32 current_level = fields[2].GetUInt32();
             if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
             {
-                sLog.outError("Wrong level %u in `player_levelupgains` table, ignoring.",current_level);
+                if(current_level > 255)                     // harcoded level maximum
+                    sLog.outError("Wrong (> 255) level %u in `player_levelstats` table, ignoring.",current_level);
+                else
+                    sLog.outDetail("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_levelstats` table, ignoring.",current_level);
                 continue;
             }
 
