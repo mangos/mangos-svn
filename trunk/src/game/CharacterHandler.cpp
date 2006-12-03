@@ -264,6 +264,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     Player *pCurrChar = GetPlayer();
 
+    pCurrChar->LoadIgnoreList();
     pCurrChar->SendFriendlist();
     pCurrChar->SendIgnorelist();
 

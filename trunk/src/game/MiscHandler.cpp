@@ -600,12 +600,8 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
             ignoreResult = FRIEND_IGNORE_SELF;
         else
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `guid`,`name`,`friend`,`flags` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 'IGNORE' AND `friend` = '%u'", GetPlayer()->GetGUIDLow(), GUID_LOPART(IgnoreGuid));
-
-            if( result )
+            if( GetPlayer()->HasInIgnoreList(IgnoreGuid) )
                 ignoreResult = FRIEND_IGNORE_ALREADY;
-
-            delete result;
         }
     }
 
@@ -615,8 +611,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     {
         ignoreResult = FRIEND_IGNORE_ADDED;
 
-        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')",
-            GetPlayer()->GetGUIDLow(), IgnoreName.c_str(), GUID_LOPART(IgnoreGuid));
+        GetPlayer()->AddToIgnoreList(IgnoreGuid,IgnoreName);
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
     {
@@ -651,9 +646,7 @@ void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 
     data << (uint8)IgnoreResult << (uint64)IgnoreGUID;
 
-    uint32 guidlow = GetPlayer()->GetGUIDLow();
-
-    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u' AND `friend` = '%u'",guidlow, GUID_LOPART(IgnoreGUID));
+    GetPlayer()->RemoveFromIgnoreList(IgnoreGUID);
 
     SendPacket( &data );
 

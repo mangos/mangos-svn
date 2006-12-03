@@ -79,6 +79,18 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // OK result but not send invite
+    if( player->HasInIgnoreList(GetPlayer()->GetGUID()) )
+    {
+        data.Initialize(SMSG_PARTY_COMMAND_RESULT);
+        data << uint32( 0x0 );
+        data << membername;
+        data << uint32( 0x00000000 );
+
+        SendPacket( &data );
+        return;
+    }
+
     if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
     {
         uint32 sidea = GetPlayer()->GetTeam();

@@ -89,11 +89,12 @@ class Channel
 
         void MakeYouInvited(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x1D) << who->GetName(); }
 
-        void SendToAll(WorldPacket *data)
+        void SendToAll(WorldPacket *data, Player *p = NULL)
         {
             PlayerList::iterator i;
             for(i = players.begin(); i!=players.end(); i++)
-                i->first->GetSession()->SendPacket(data);
+                if(!p || !i->first->HasInIgnoreList(p->GetGUID()))
+                    i->first->GetSession()->SendPacket(data);
         }
 
         void SendToAllButOne(WorldPacket *data, Player *who)

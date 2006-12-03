@@ -1075,38 +1075,59 @@ void Player::SendFriendlist()
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
 }
 
-void Player::SendIgnorelist()
+void Player::AddToIgnoreList(uint64 guid, std::string name)
 {
-    WorldPacket dataI;
+    // prevent list (client-side) overflow
+    if(m_ignorelist.size() >= (255-1))
+        return;
 
-    unsigned char nrignore=0;
-    Field *fields;
+    sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')",
+            GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
+    m_ignorelist.insert(GUID_LOPART(guid));
+}
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`friend`) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
+void Player::RemoveFromIgnoreList(uint64 guid)
+{
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u' AND `friend` = '%u'",GetGUIDLow(), GUID_LOPART(guid));
+    m_ignorelist.erase(GUID_LOPART(guid));
+}
 
-    if(!result) return;
-
-    fields = result->Fetch();
-    nrignore=fields[0].GetUInt32();
-    delete result;
-
-    dataI.Initialize( SMSG_IGNORE_LIST );
-    dataI << nrignore;
-
-    result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
+void Player::LoadIgnoreList()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
 
     if(!result) return;
 
     do
     {
+        Field *fields  = result->Fetch();
+        m_ignorelist.insert(fields[0].GetUInt32());
 
-        fields = result->Fetch();
-        dataI << fields[0].GetUInt64();
+        // prevent list (client-side) overflow
+        if(m_ignorelist.size() >= 255)
+            break;
+    }
+    while( result->NextRow() );
 
-    }while( result->NextRow() );
     delete result;
+}
 
-    this->GetSession()->SendPacket( &dataI );
+void Player::SendIgnorelist()
+{
+
+    if(m_ignorelist.empty())
+        return;
+
+    WorldPacket dataI;
+    dataI.Initialize( SMSG_IGNORE_LIST );
+    dataI << uint8(m_ignorelist.size());
+
+    for(IgnoreList::iterator iter = m_ignorelist.begin(); iter != m_ignorelist.end(); ++iter)
+    {
+        dataI << uint64(MAKE_GUID(*iter,HIGHGUID_PLAYER));
+    }
+
+    GetSession()->SendPacket( &dataI );
     sLog.outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
 }
 
@@ -2471,7 +2492,10 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
+    
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
+    m_ignorelist.clear();
+
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u'",guid);
 
