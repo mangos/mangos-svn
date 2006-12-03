@@ -4079,8 +4079,8 @@ void Player::DuelComplete(uint8 type)
     {
         data.Initialize(SMSG_DUEL_WINNER);
         data << (uint8)((type==1) ? 0 : 1);                 // 0 = just won; 1 = fled
-        data << duel->opponent->GetName();
         data << GetName();
+        data << duel->opponent->GetName();
         SendMessageToSet(&data,true);
     }
 
