@@ -2039,7 +2039,7 @@ void Player::_LoadSpellCooldowns()
                 continue;
 
             data << uint32(spell_id);
-            data << uint32((db_time-curTime)*1000);         // in m.secs
+            data << uint32(uint32(db_time-curTime)*1000);           // in m.secs
 
             AddSpellCooldown(spell_id,db_time);
 
@@ -2054,50 +2054,55 @@ void Player::_LoadSpellCooldowns()
     }
 
     // setup item coldowns
-    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    if(m_spellCooldowns.size() > 0)
     {
-        if(Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+        for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            uint32 spell_id = pItem->GetProto()->Spells[i].SpellId;
-            if(spell_id != 0 && HaveSpellCooldown(spell_id))
+            if(Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
             {
-                sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
-                WorldPacket data;
-                data.Initialize(SMSG_ITEM_COOLDOWN);
-                data << pItem->GetGUID();
-                data << uint32(spell_id);
-                GetSession()->SendPacket(&data);
-                break;
+                for(int ii = 0; ii < 5; ++ii)
+                {
+                    uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
+                    if(spell_id != 0 && HaveSpellCooldown(spell_id))
+                    {
+                        sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
+                        WorldPacket data;
+                        data.Initialize(SMSG_ITEM_COOLDOWN);
+                        data << pItem->GetGUID();
+                        data << uint32(spell_id);
+                        GetSession()->SendPacket(&data);
+                        break;
+                    }
+                }
             }
         }
-    }
-    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-    {
-        if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+        for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
         {
-            for(uint32 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
+            if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
             {
-                if(Item* pItem = GetItemByPos( i, j ))
+                for(uint32 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
                 {
-                    for(int i = 0; i < 5; ++i)
+                    if(Item* pItem = GetItemByPos( i, j ))
                     {
-                        uint32 spell_id = pItem->GetProto()->Spells[i].SpellId;
-                        if(spell_id != 0 && HaveSpellCooldown(spell_id))
+                        for(int ii = 0; ii < 5; ++ii)
                         {
-                            sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
-                            WorldPacket data;
-                            data.Initialize(SMSG_ITEM_COOLDOWN);
-                            data << pItem->GetGUID();
-                            data << uint32(spell_id);
-                            GetSession()->SendPacket(&data);
-                            break;
+                            uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
+                            if(spell_id != 0 && HaveSpellCooldown(spell_id))
+                            {
+                                sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
+                                WorldPacket data;
+                                data.Initialize(SMSG_ITEM_COOLDOWN);
+                                data << pItem->GetGUID();
+                                data << uint32(spell_id);
+                                GetSession()->SendPacket(&data);
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
     }
-
 }
 
 void Player::_SaveSpellCooldowns()
@@ -2113,7 +2118,7 @@ void Player::_SaveSpellCooldowns()
             m_spellCooldowns.erase(itr++);
         else
         {
-            sDatabase.PExecute("INSERT INTO `character_spell_cooldown` (`guid`,`spell`,`time`) VALUES ('%u', '%u', '" I64FMTD "')", GetGUIDLow(), itr->first, itr->second);
+            sDatabase.PExecute("INSERT INTO `character_spell_cooldown` (`guid`,`spell`,`time`) VALUES ('%u', '%u', '" I64FMTD "')", GetGUIDLow(), itr->first, uint64(itr->second));
             ++itr;
         }
     }
