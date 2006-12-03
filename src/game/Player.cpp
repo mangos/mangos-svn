@@ -3053,13 +3053,6 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
         return false;
 
     int32 Roll = irand(1,1000);
-    {
-        WorldPacket data;
-        char buf[256];
-        sprintf(buf, "UpdateSkillPro: rolled %d (gain range is 1..%d)", Roll, Chance);
-        sChatHandler.FillMessageData(&data, GetSession(), CHAT_MSG_SKILL, LANG_UNIVERSAL, NULL, GetGUID(), buf);
-        SendDirectMessage(&data);
-    }
 
     if ( Roll <= Chance )
     {
@@ -6523,6 +6516,17 @@ bool Player::IsBankPos( uint16 pos ) const
     return false;
 }
 
+bool Player::IsBagPos( uint16 pos ) const
+{
+    uint8 bag = pos >> 8;
+    uint8 slot = pos & 255;
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END ) )
+        return true;
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END ) )
+        return true;
+    return false;
+}
+
 bool Player::HasItemCount( uint32 item, uint32 count ) const
 {
     Item *pItem;
@@ -6959,7 +6963,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
 uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
 {
     // Applied only to equiped items
-    if(!IsEquipmentPos(pos) )
+    if(!IsEquipmentPos(pos))
         return EQUIP_ERR_OK;
 
     Item* pItem = GetItemByPos(pos);
@@ -8026,7 +8030,8 @@ void Player::SwapItem( uint16 src, uint16 dst )
 
         if(IsEquipmentPos ( src ))
         {
-            uint8 msg = CanUnequipItem( src, pDstItem != NULL );
+            // bags can be swapped with empty bag slots
+            uint8 msg = CanUnequipItem( src, pDstItem != NULL || IsBagPos ( src ) && IsBagPos ( dst ));
             if(msg != EQUIP_ERR_OK)
             {
                 SendEquipError( msg, pSrcItem, pDstItem );

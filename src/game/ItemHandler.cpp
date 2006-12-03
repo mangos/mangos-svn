@@ -131,8 +131,8 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
     uint16 pos = (bag << 8) | slot;
 
-    // prevent drop unequipable items (in combat or just non empty bags)
-    if(_player->IsEquipmentPos(pos))
+    // prevent drop unequipable items (in combat, for example) and non-empty bags
+    if(_player->IsEquipmentPos(pos) || _player->IsBagPos(pos))
     {
         uint8 msg = _player->CanUnequipItem( pos, false );
         if( msg != EQUIP_ERR_OK )
