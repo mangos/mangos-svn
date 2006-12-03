@@ -391,8 +391,7 @@ void Channel::Say(Player *p, const char *what, uint32 lang)
         data << what;
         data << p->chatTag();
 
-        SendToAll(&data);
-
+        SendToAll(&data,!players[p].moderator ? p : NULL);
     }
 }
 
@@ -419,9 +418,12 @@ void Channel::Invite(Player *p, const char *newname)
         }
         else
         {
-            MakeInvited(&data,p);
-            SendToOne(&data,newp);
-            data.clear();
+            if(!newp->HasInIgnoreList(p->GetGUID()))
+            {
+                MakeInvited(&data,p);
+                SendToOne(&data,newp);
+                data.clear();
+            }
             MakeYouInvited(&data,newp);
             SendToOne(&data,p);
         }

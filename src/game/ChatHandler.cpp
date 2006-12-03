@@ -184,6 +184,14 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                     break;
                 }
             }
+
+            if(player->HasInIgnoreList(GetPlayer()->GetGUID()))
+            {
+                sChatHandler.FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, player->GetGUID(), player->afkMsg.c_str());
+                SendPacket(&data);
+                break;
+            }
+
             sChatHandler.FillMessageData(&data, this, type, lang, NULL, 0, msg.c_str() );
             player->GetSession()->SendPacket(&data);
             sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,lang,NULL,player->GetGUID(),msg.c_str() );

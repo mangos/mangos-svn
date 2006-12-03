@@ -461,7 +461,7 @@ void Guild::BroadcastToGuild(WorldSession *session, std::string msg)
 
             pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
 
-            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN))
+            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()) )
                 pl->GetSession()->SendPacket(&data);
         }
     }
@@ -481,7 +481,7 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg)
 
             pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
 
-            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN))
+            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()))
                 pl->GetSession()->SendPacket(&data);
         }
     }

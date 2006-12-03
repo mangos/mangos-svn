@@ -385,7 +385,7 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
     sLog.outDebug("OFFER PETITION: GUID1 %u, to player id: %u", GUID_LOPART(petitionguid), GUID_LOPART(plguid));
 
     player = ObjectAccessor::Instance().FindPlayer(plguid);
-    if(!player)
+    if(!player || player->HasInIgnoreList(GetPlayer()->GetGUID()))
         return;
 
     // not let offer to enemies
@@ -635,6 +635,10 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
         SendCommandResult(GUILD_INVITE_S,Invitedname,GUILD_PLAYER_NOT_FOUND);
         return;
     }
+
+    // OK result but not send invite
+    if(player->HasInIgnoreList(GetPlayer()->GetGUID()))
+        return;
 
     // not let enemies sign guild charter
     if ( !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && player->GetTeam() != GetPlayer()->GetTeam() )

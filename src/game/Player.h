@@ -263,6 +263,8 @@ enum GMFlags
     GM_INVISIBLE       = 16
 };
 
+typedef std::set<uint32> IgnoreList;
+
 #define IS_BACK_SLOT(s) (s == 0xFF)
 
 class Quest;
@@ -404,6 +406,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendFriendlist();
         void SendIgnorelist();
+        void AddToIgnoreList(uint64 guid, std::string name);
+        void RemoveFromIgnoreList(uint64 guid);
+        bool HasInIgnoreList(uint64 guid) const { return m_ignorelist.find(GUID_LOPART(guid)) != m_ignorelist.end(); }
 
         uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
@@ -1122,6 +1127,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadSpells(uint32 timediff);
         void _LoadTaxiMask(const char* data);
         void _LoadTutorials();
+        void LoadIgnoreList();
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -1271,6 +1277,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_resetTalentsCost;
         time_t m_resetTalentsTime;
+
+        IgnoreList m_ignorelist;
 };
 
 int32 irand(int32 min, int32 max);

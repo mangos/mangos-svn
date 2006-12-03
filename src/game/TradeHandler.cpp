@@ -341,6 +341,14 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    if( pOther->HasInIgnoreList(GetPlayer()->GetGUID()) )
+    {
+        data.Initialize(SMSG_TRADE_STATUS);
+        data << (uint32)14;
+        SendPacket(&data);
+        return;
+    }
+
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && pOther->GetTeam() !=_player->GetTeam() )
     {
         data.Initialize(SMSG_TRADE_STATUS);
