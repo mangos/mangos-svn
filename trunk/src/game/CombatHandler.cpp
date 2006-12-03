@@ -41,7 +41,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         return;
     }
 
-    sLog.outError( "WORLD: Enemy %u %.8X is not a player or a creature",GUID_LOPART(guid), GUID_HIPART(guid));
+    sLog.outError( "WORLD: Enemy %u %.8X not found, or not a player or a creature",GUID_LOPART(guid), GUID_HIPART(guid));
 }
 
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )

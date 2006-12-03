@@ -64,7 +64,7 @@ HomeMovementGenerator::_reLocate(Creature &owner) // resend clients the creature
     if (owner.GetTypeId() == TYPEID_UNIT)
     {
 
-        sLog.outDebug("IdleMovementGenerator::_reLocate() called, where Unit.GetGUIDLow()=%d", owner.GetGUIDLow());
+        sLog.outDebug("HomeMovementGenerator::_reLocate() called, where Unit.GetGUIDLow()=%d", owner.GetGUIDLow());
         CellPair p = MaNGOS::ComputeCellPair(owner.GetPositionX(), owner.GetPositionY());
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;
@@ -72,9 +72,7 @@ HomeMovementGenerator::_reLocate(Creature &owner) // resend clients the creature
         TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, ContainerMapList<Player> > player_notifier(notifier);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(owner.GetMapId()));
-
     }
-
 }
 
 bool
