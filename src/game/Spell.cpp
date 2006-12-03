@@ -79,7 +79,16 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_GOTarget = ObjectAccessor::Instance().GetGameObject(*caster, readGUID(data));
 
     if((m_targetMask & TARGET_FLAG_ITEM) && caster->GetTypeId() == TYPEID_PLAYER)
-        m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(readGUID(data)));
+    { 
+	uint64 _guid = readGUID(data); 
+	m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(_guid)); 
+	    if (!m_itemTarget) 
+	    { 
+		Player* pTrader; 
+		if (NULL != (pTrader = ((Player*)caster)->GetTrader())) 
+		    m_itemTarget = pTrader->GetItemByPos(pTrader->GetPosByGuid(_guid)); 
+	    } 
+    } 
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         *data >> m_srcX >> m_srcY >> m_srcZ;
@@ -1788,39 +1797,40 @@ uint8 Spell::CanCast()
             case SPELL_AURA_MOD_STEALTH:
             case SPELL_AURA_MOD_INVISIBILITY:
             {
-                //detect if any mod is in x range.if true,can't steath.FIX ME!
-                if(m_spellInfo->Attributes == 169148432 || m_caster->GetTypeId() != TYPEID_PLAYER)
-                    break;
 
-                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                Cell cell = RedZone::GetZone(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
-
-                std::list<Unit*> i_data;
-                std::list<Unit*>::iterator itr;
-                MaNGOS::GridUnitListNotifier checker(i_data);
-
-                TypeContainerVisitor<MaNGOS::GridUnitListNotifier, TypeMapContainer<AllObjectTypes> > object_checker(checker);
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-                for(itr = i_data.begin();itr != i_data.end();++itr)
-                {
-                    if( !(*itr)->isAlive() )
-                        continue;
-
-                    if( !(*itr)->IsHostileTo(m_caster) )
-                        continue;
-
-                    if((*itr)->GetTypeId() != TYPEID_PLAYER)
-                    {
-                        float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster);
-                        if((*itr)->IsWithinDist(m_caster, attackdis))
-                        {
-                            castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
-                            break;
-                        }
-                    }
-                }
+	    //detect if any mod is in x range.if true,can't steath.FIX ME! 
+            if(m_spellInfo->Attributes == 169148432 || m_caster->GetTypeId() != TYPEID_PLAYER) 
+		break; 
+ 
+	    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY())); 
+	    Cell cell = RedZone::GetZone(p); 
+	    cell.data.Part.reserved = ALL_DISTRICT; 
+	 
+	    std::list<Unit*> i_data; 
+	    std::list<Unit*>::iterator itr; 
+	    MaNGOS::GridUnitListNotifier checker(i_data); 
+ 
+	    TypeContainerVisitor<MaNGOS::GridUnitListNotifier, TypeMapContainer<AllObjectTypes> > object_checker(checker); 
+	    CellLock<GridReadGuard> cell_lock(cell, p); 
+	    cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId())); 
+	    for(itr = i_data.begin();itr != i_data.end();++itr) 
+	    { 
+		if( !(*itr)->isAlive() ) 
+		    continue; 
+ 
+		if( !(*itr)->IsHostileTo(m_caster) ) 
+		    continue; 
+	 
+		if((*itr)->GetTypeId() != TYPEID_PLAYER) 
+		{ 
+		    float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster); 
+		    if((*itr)->GetDistanceSq(m_caster) < attackdis*attackdis ) 
+		    { 
+			castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY; 
+			break; 
+		    } 
+		} 
+	    } 
 
             };break;
             default:break;
