@@ -1300,18 +1300,31 @@ void Spell::TakeCastItem()
 
     ItemPrototype const *proto = m_CastItem->GetProto();
     uint32 ItemClass = proto->Class;
+    uint32 ItemSubClass = proto->SubClass;
 
-    if (ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_BOOK || ItemClass == ITEM_CLASS_QUEST)
+    bool spendable = false; 
+    bool withoutCharges = false; 
+    uint32 charges; 
+
+    for (int i = 0; i<5; i++) 
+	if (abs(proto->Spells[i].SpellCharges) > 0) 
+	{ 
+	    spendable = true; 
+	    charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i); 
+	    m_CastItem->SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i,  charges-1); 
+	    if (charges-1 == 0) 
+	    withoutCharges = true; 
+	} 
+	 
+    if (ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_BOOK || ItemClass == ITEM_CLASS_QUEST || (ItemClass == ITEM_CLASS_TRADE_GOODS && ItemSubClass == ITEM_SUBCLASS_BOMB))
     {
         //Soulstones (minor, greater, major, etc) not destroyed
         if(proto->DisplayInfoID == 6009 && m_spellInfo->School == 5)
             return;
 
-        //quest items with charges, not destroyed
-        if(ItemClass == ITEM_CLASS_QUEST)
-            for (int i=0; i <5; i++)
-                if (proto->Spells[i].SpellCharges > 1 || proto->Spells[i].SpellCharges == -1)
-                    return;
+        //quest or consumable items with charges, not destroyed 
+	if ((ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_QUEST) && spendable && !withoutCharges) 
+	return; 
 
         uint32 count = 1;
         ((Player*)m_caster)->DestroyItemCount(m_CastItem, count, true);
@@ -1930,6 +1943,15 @@ uint8 Spell::CheckItems()
             ItemPrototype const *proto = m_CastItem->GetProto();
             if(!proto)
                 return CAST_FAIL_ITEM_NOT_READY;
+
+	    uint32 charges; 
+		for (int i = 0; i<5; i++) 
+		    if (abs(proto->Spells[i].SpellCharges) > 0) 
+		    { 
+			charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i); 
+			if (charges == 0) 
+			    return CAST_FAIL_NO_CHARGES_REMAIN; 
+		    } 
 
             uint32 ItemClass = proto->Class;
             if (ItemClass == ITEM_CLASS_CONSUMABLE && unitTarget)

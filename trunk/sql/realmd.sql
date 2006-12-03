@@ -28,7 +28,7 @@ CREATE TABLE `account` (
   `sessionkey` longtext,
   `v` longtext,
   `s` longtext,
-  `email` varchar(50) NOT NULL default '',
+  `email` varchar(320) NOT NULL default '',
   `joindate` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `banned` tinyint(3) unsigned NOT NULL default '0',
   `last_ip` varchar(30) NOT NULL default '127.0.0.1',
