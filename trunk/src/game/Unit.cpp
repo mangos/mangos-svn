@@ -275,7 +275,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
     if(pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damage >= (health-1))
     {
         // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-        if(((Player*)pVictim)->duel->opponent==this || ((Player*)pVictim)->duel->opponent->GetOwnerGUID() == GetGUID())
+        if(((Player*)pVictim)->duel->opponent==this || ((Player*)pVictim)->duel->opponent->GetGUID() == GetOwnerGUID())
             damage = health-1;
 
         duel_hasEnded = true;
@@ -432,8 +432,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             assert(he->duel);
 
             CombatStop();                                   // for case killed by pet
+            if(he->duel->opponent!=this)
+                he->duel->opponent->CombatStop();
             he->CombatStop();
-            he->duel->opponent->CombatStop();
 
             he->DuelComplete(0);
         }
@@ -530,7 +531,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
 
             he->ModifyHealth(1);
             CombatStop();                                   // for case killed by pet
-            he->duel->opponent->CombatStop();
+            if(he->duel->opponent!=this)
+                he->duel->opponent->CombatStop();
             he->CombatStop();
 
             he->HandleEmoteCommand(ANIM_EMOTE_BEG);
