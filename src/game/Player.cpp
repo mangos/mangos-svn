@@ -661,7 +661,7 @@ void Player::Update( uint32 p_time )
 
     UpdateDuelFlag(time(NULL));
 
-    CheckDuelDistance();
+    CheckDuelDistance(time(NULL));
 
     CheckExploreSystem();
 
@@ -4054,20 +4054,41 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
 }
 
 //If players are too far way of duel flag... then player loose the duel
-void Player::CheckDuelDistance()
+void Player::CheckDuelDistance(time_t currTime)
 {
     if(!duel) return;
 
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
-
     GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
+    if(!obj)
+        return;
 
-    //If the distance of duel flag is > 50
-    if( !obj || !IsWithinDist(obj, 50))
+    if(duel->outOfBound == 0)
     {
-        DuelComplete(2);
-    }
+        if(!IsWithinDist(obj, 50))
+        {
+            duel->outOfBound = currTime;
 
+            WorldPacket data;
+            data.Initialize(SMSG_DUEL_OUTOFBOUNDS);
+            GetSession()->SendPacket(&data);
+        }
+    }
+    else
+    {
+        if(IsWithinDist(obj, 40))
+        {
+            duel->outOfBound = 0;
+
+            WorldPacket data;
+            data.Initialize(SMSG_DUEL_INBOUNDS);
+            GetSession()->SendPacket(&data);
+        }
+        else if(currTime >= (duel->outOfBound+10))
+        {
+            DuelComplete(2);
+        }
+    }
 }
 
 //type: 0=cleanup ; 1=i won ; 2=i fled
@@ -4088,8 +4109,8 @@ void Player::DuelComplete(uint8 type)
     {
         data.Initialize(SMSG_DUEL_WINNER);
         data << (uint8)((type==1) ? 0 : 1);                 // 0 = just won; 1 = fled
-        data << GetName();
         data << duel->opponent->GetName();
+        data << GetName();
         SendMessageToSet(&data,true);
     }
 

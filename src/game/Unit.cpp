@@ -261,7 +261,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         Unit* targetOwner = pVictim->GetOwner();
         Unit* attacker = attackerOwner ? attackerOwner : this;
         Unit* target   = targetOwner ? targetOwner : pVictim;
-        if(attacker->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER && !((Player*)attacker)->duel)
+        if(attacker->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER && (!((Player*)attacker)->duel || ((Player*)attacker)->duel->opponent->GetGUID() != target->GetGUID()))
             ((Player*)attacker)->SetPvP(true);
     }
 
@@ -535,8 +535,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 he->duel->opponent->CombatStop();
             he->CombatStop();
 
-            he->HandleEmoteCommand(ANIM_EMOTE_BEG);
-            he->duel->opponent->DuelComplete(1);
+            he->CastSpell(he, 7267, false);                 // beg
+            he->DuelComplete(1);
         }
     }
 

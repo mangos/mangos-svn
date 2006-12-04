@@ -141,10 +141,13 @@ struct PlayerInfo
 
 struct DuelInfo
 {
+    DuelInfo() : initiator(NULL), opponent(NULL), startTimer(0), startTime(0), outOfBound(0) {}
+
     Player *initiator;
     Player *opponent;
     time_t startTimer;
     time_t startTime;
+    time_t outOfBound;
 };
 
 struct Areas
@@ -853,8 +856,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid);
 
+        /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
         void UpdateDuelFlag(time_t currTime);
-        void CheckDuelDistance();
+        void CheckDuelDistance(time_t currTime);
         void DuelComplete(uint8 type);
         DuelInfo *duel;
 
