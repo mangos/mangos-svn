@@ -2716,6 +2716,49 @@ bool ChatHandler::HandleOutOfRange(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleAddQuest(const char* args)
+{
+    // .addquest #entry'
+    char* pentry = strtok((char*)args, " ");
+
+    if(!pentry)
+        return false;
+
+    uint32 entry = (uint32)atoi(pentry);
+
+    ObjectMgr::QuestMap::iterator qIter = objmgr.QuestTemplates.find(entry);
+
+    if(qIter == objmgr.QuestTemplates.end())
+    {
+        PSendSysMessage("Quest %u not found.",entry);
+        return true;
+    }
+
+    // check item starting quest (it can work incorrectly if added without item in inventory)
+    QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `item_template` WHERE `startquest` = '%u' LIMIT 1",entry);
+    if(result)
+    {
+        Field* fields = result->Fetch();
+        uint32 item_id = fields[0].GetUInt32();
+        delete result;
+
+        PSendSysMessage("Quest %u started from item. For correct work, please, add item to inventory and start quest in normal way: .additem %u",entry,item_id);
+        return true;
+    }
+
+    // ok, normal (creature/GO starting) quest
+    Quest* pQuest = qIter->second;
+    if( m_session->GetPlayer()->CanAddQuest( pQuest, true ) )
+    {
+        m_session->GetPlayer()->AddQuest( pQuest );
+
+        if ( m_session->GetPlayer()->CanCompleteQuest( entry ) )
+            m_session->GetPlayer()->CompleteQuest( entry );
+    }
+
+    return true;
+}
+
 bool ChatHandler::HandleBanIPCommand(const char* args)
 {
     if(!args)

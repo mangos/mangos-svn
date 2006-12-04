@@ -93,6 +93,13 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     Quest * qInfo = objmgr.QuestTemplates[quest];
     if ( qInfo )
     {
+        // prevent cheating 
+        if(!GetPlayer()->CanTakeQuest(qInfo,true) )
+        {
+            _player->PlayerTalkClass->CloseGossip();
+            return;
+        }
+
         if( _player->GetDivider() != 0 )
         {
             Player *pPlayer = ObjectAccessor::Instance().FindPlayer( _player->GetDivider() );
