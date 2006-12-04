@@ -36,7 +36,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     Player *pl;
     Player *plTarget;
 
-    if(!GetPlayer()->duel)
+    if(!GetPlayer()->duel)    // ignore accept from duel-sender
         return;
 
     recvPacket >> guid;
@@ -44,10 +44,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     pl       = GetPlayer();
     plTarget = pl->duel->opponent;
 
-    if(pl == pl->duel->initiator)                           // ignore accept from duel-sender
-        return;
-
-    if(!plTarget || pl == plTarget || pl->duel->startTime != 0 || plTarget->duel->startTime != 0)
+    if(pl == pl->duel->initiator || !plTarget || pl == plTarget || pl->duel->startTime != 0 || plTarget->duel->startTime != 0)
         return;
 
     sLog.outDebug( "WORLD: received CMSG_DUEL_ACCEPTED" );
