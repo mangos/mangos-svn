@@ -90,6 +90,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendAuctionHello( uint64 guid );
         void SendTabardVendorActivate( uint64 guid );
         void SendTaxiStatus( uint64 guid );
+        void SendTaxiMenu( uint64 guid );
         void SendDoFlight( uint16 MountId, uint32 path );
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);

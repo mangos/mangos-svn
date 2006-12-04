@@ -593,24 +593,16 @@ void Creature::sendPreparedGossip(Player* player)
 
     GossipMenu* gossipmenu = player->PlayerTalkClass->GetGossipMenu();
 
-    //if(!isServiceProvider()) {
+    // in case empty gossip menu open quest menu if any
     if (gossipmenu->MenuItemCount() == 0)
     {
         player->SendPreparedQuest(GetGUID());
         return;
     }
 
-    QuestMenu * questmenu = player->PlayerTalkClass->GetQuestMenu();
-
-    //if ( gossipmenu->MenuItemCount() == 1 && gossipmenu->MenuItemAction(0) != GOSSIP_OPTION_INNKEEPER )
-    //if ((gossipmenu->MenuItemCount() + questmenu->MenuItemCount() <= 1) && (GetNpcTextId() == DEFAULT_GOSSIP_MESSAGE))
-    //    if (gossipmenu->MenuItemCount() == 1) {
-    //        OnGossipSelect(player, 0);
-    //    } else {
-    if (questmenu->MenuItemCount() == 1)
-        player->SendPreparedQuest(GetGUID());
-    else
-        player->PlayerTalkClass->SendGossipMenu(GetNpcTextId(), GetGUID());
+    // in case non empty gossip menu (that not included quests list size) show it 
+    // (quest entries from quest menu wiill be included in list)
+    player->PlayerTalkClass->SendGossipMenu(GetNpcTextId(), GetGUID());
 }
 
 void Creature::OnGossipSelect(Player* player, uint32 option)
@@ -660,7 +652,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             player->SendTalentWipeConfirm(guid);
             break;
         case GOSSIP_OPTION_TAXIVENDOR:
-            player->GetSession()->SendTaxiStatus(guid);
+            player->GetSession()->SendTaxiMenu(guid);
             break;
         case GOSSIP_OPTION_INNKEEPER:
             player->PlayerTalkClass->CloseGossip();

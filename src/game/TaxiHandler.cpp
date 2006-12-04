@@ -80,13 +80,18 @@ void WorldSession::SendTaxiStatus( uint64 guid )
 void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: Received CMSG_TAXIQUERYAVAILABLENODES" );
+
     uint64 guid;
+    recv_data >> guid;
+    SendTaxiMenu( guid );
+}
+
+void WorldSession::SendTaxiMenu( uint64 guid )
+{
     uint32 curloc;
     uint8 field;
     uint32 TaxiMask[8];
     uint32 submask;
-
-    recv_data >> guid;
 
     if(_player->IsMounted())
     {
