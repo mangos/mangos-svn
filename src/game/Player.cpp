@@ -2487,7 +2487,11 @@ void Player::DeleteFromDB()
 
     // remove from guild
     if(GetGuildId() != 0)
-        objmgr.GetGuildById(GetGuildId())->DelMember(guid);
+    {
+        Guild* guild = objmgr.GetGuildById(GetGuildId());
+        if(guild)
+            guild->DelMember(guid);
+    }
 
     // remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(GetGUID());
