@@ -246,6 +246,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "lookupcreature",3, &ChatHandler::HandleLookupCreatureCommand, "",   NULL },
         { "money",       1, &ChatHandler::HandleModifyMoneyCommand,      "",   NULL },
         { "speed",       1, &ChatHandler::HandleModifySpeedCommand,      "",   NULL },
+        { "addquest",    3, &ChatHandler::HandleAddQuest,                "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
@@ -254,6 +255,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "NewMail",     3, &ChatHandler::HandleSendMailNotice,          "",   NULL },
         { "QNM",         3, &ChatHandler::HandleQueryNextMailTime,       "",   NULL },
         { "oor",         3, &ChatHandler::HandleOutOfRange,              "",   NULL },
+
         { NULL,          0, NULL,                                        "",   NULL }
     };
 

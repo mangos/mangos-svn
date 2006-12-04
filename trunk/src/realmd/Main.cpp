@@ -180,7 +180,7 @@ int main(int argc, char **argv)
         {
             loopCounter = 0;
             sLog.outString("Ping MySQL to keep connection alive");
-            dbRealmServer.Query("SELECT 1 FROM `realmlist` LIMIT 1");
+            delete dbRealmServer.Query("SELECT 1 FROM `realmlist` LIMIT 1");
         }
     }
 
