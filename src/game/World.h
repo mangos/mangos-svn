@@ -214,6 +214,8 @@ class World
     private:
 
         IntervalTimer m_timers[WUPDATE_COUNT];
+        uint32 mail_timer;
+        uint32 mail_timer_expires;
 
         typedef HM_NAMESPACE::hash_map<uint32, Weather*> WeatherMap;
         WeatherMap m_weathers;

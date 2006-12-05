@@ -22,6 +22,7 @@
 #include "Common.h"
 
 struct ItemPrototype;
+struct AuctionEntry;
 
 class Creature;
 class Player;
@@ -87,7 +88,6 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTrainerList( uint64 guid,std::string strTitle );
         void SendListInventory( uint64 guid );
         void SendShowBank( uint64 guid );
-        void SendAuctionHello( uint64 guid );
         void SendTabardVendorActivate( uint64 guid );
         void SendTaxiStatus( uint64 guid );
         void SendTaxiMenu( uint64 guid );
@@ -100,6 +100,16 @@ class MANGOS_DLL_SPEC WorldSession
         void SendPetitionQueryOpcode( uint64 petitionguid);
         void SendUpdateTrade();
 
+        //mail
+        bool SendItemInfo( uint32 itemid, WorldPacket data ); //used with item_page table
+        //auction 
+        void SendAuctionHello( uint64 guid, Creature * unit );
+        void SendAuctionCommandResult( uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError = 0);
+        void SendAuctionBidderNotification( uint32 location, uint32 auctionId, uint64 bidder, uint32 bidSum, uint32 diff, uint32 item_template);
+        void SendAuctionOwnerNotification( AuctionEntry * auction );
+        bool SendAuctionInfo(WorldPacket & data, AuctionEntry* auction);
+        void SendAuctionOutbiddedMail( AuctionEntry * auction, uint32 newPrice );
+        
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
         void SendItemEnchantTimeUpdate(uint64 Itemguid,uint32 slot,uint32 Duration);
@@ -301,7 +311,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleReturnToSender( WorldPacket & recv_data );
         void HandleMailDelete( WorldPacket & recv_data );
         void HandleItemTextQuery( WorldPacket & recv_data);
-        bool SendItemInfo( uint32 itemid, WorldPacket data );
         void HandleMailCreateTextItem(WorldPacket & recv_data );
         void HandleMsgQueryNextMailtime(WorldPacket & recv_data );
         void HandleCancelChanneling(WorldPacket & recv_data );

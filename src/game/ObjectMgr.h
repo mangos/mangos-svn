@@ -34,6 +34,7 @@
 #include "NPCHandler.h"
 #include "MiscHandler.h"
 #include "Database/DatabaseEnv.h"
+#include "AuctionHouseObject.h"
 #include "Mail.h"
 #include "Spell.h"
 #include "ObjectAccessor.h"
@@ -54,20 +55,6 @@ class Group;
 class Guild;
 class Path;
 class TransportPath;
-
-struct AuctionEntry
-{
-    uint32 Id;
-    uint32 auctioneer;
-    uint32 item_guidlow;
-    uint32 item_id;
-    uint32 owner;
-    uint32 bid;
-    uint32 buyout;
-    time_t time;
-    uint32 bidder;
-    uint32 location;
-};
 
 struct ScriptInfo
 {
@@ -95,8 +82,6 @@ class ObjectMgr
 
         typedef std::set< Group * > GroupSet;
         typedef std::set< Guild * > GuildSet;
-
-        typedef HM_NAMESPACE::hash_map<uint32, AuctionEntry*> AuctionEntryMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, TeleportCoords*> TeleportMap;
 
@@ -153,30 +138,6 @@ class ObjectMgr
         void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
-        void AddAuction(AuctionEntry *ah)
-        {
-            ASSERT( ah );
-            ASSERT( mAuctions.find(ah->Id) == mAuctions.end() );
-            mAuctions[ah->Id] = ah;
-        }
-        AuctionEntry* GetAuction(uint32 id) const
-        {
-            AuctionEntryMap::const_iterator itr = mAuctions.find( id );
-            if( itr != mAuctions.end( ) )
-                return itr->second;
-            return NULL;
-        }
-        bool RemoveAuction(uint32 id)
-        {
-            AuctionEntryMap::iterator i = mAuctions.find(id);
-            if (i == mAuctions.end())
-            {
-                return false;
-            }
-            mAuctions.erase(i);
-            return true;
-        }
-
         CreatureInfo const *GetCreatureTemplate( uint32 id );
 
         static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
@@ -206,9 +167,15 @@ class ObjectMgr
             mAitems.erase(i);
             return true;
         }
-        AuctionEntryMap::iterator GetAuctionsBegin() {return mAuctions.begin();}
-        AuctionEntryMap::iterator GetAuctionsEnd() {return mAuctions.end();}
+        AuctionHouseObject * GetAuctionsMap( uint32 location );
 
+        //auction messages
+        void SendAuctionWonMail( AuctionEntry * auction );
+        void SendAuctionSuccessfulMail( AuctionEntry * auction );
+        void SendAuctionExpiredMail( AuctionEntry * auction );
+        uint32 GetAuctionCut( uint32 location, uint32 highBid );
+        uint32 GetAuctionDeposit(uint32 location, uint32 time, Item *pItem);
+        
         PlayerInfo const* GetPlayerInfo(uint32 race, uint32 class_) const
         {
             if(race   >= MAX_RACES)   return NULL;
@@ -265,14 +232,20 @@ class ObjectMgr
 
         void LoadTeleportCoords();
 
-        void LoadAuctions();
+        //load first auction items, because of check if item exists, when loading
         void LoadAuctionItems();
+        void LoadAuctions();
         void LoadPlayerInfo();
+
+        void ReturnOrDeleteOldMails(bool serverUp);
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(uint32 guidhigh);
         uint32 GenerateAuctionID();
         uint32 GenerateMailID();
+        uint32 GenerateItemPageID();
+
+        uint32 CreateItemPage(std::string text);
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
         QuestMap QuestTemplates;
@@ -281,6 +254,7 @@ class ObjectMgr
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
+        uint32 m_ItemPageId;
 
         uint32 m_hiCharGuid;
         uint32 m_hiCreatureGuid;
@@ -301,7 +275,9 @@ class ObjectMgr
         ItemMap             mItems;
         ItemMap             mAitems;
 
-        AuctionEntryMap     mAuctions;
+        AuctionHouseObject  mHordeAuctions;
+        AuctionHouseObject  mAllianceAuctions;
+        AuctionHouseObject  mNeutralAuctions;
 
         AreaTriggerMap      mAreaTriggerMap;
         GossipTextMap       mGossipText;

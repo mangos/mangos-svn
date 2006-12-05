@@ -313,6 +313,9 @@ void World::SetInitialWorldSettings()
     objmgr.LoadItemPrototypes();
     objmgr.LoadAuctions();
     objmgr.LoadAuctionItems();
+    
+    sLog.outString( "Returning old mails..." );
+    objmgr.ReturnOrDeleteOldMails(false);
 
     sLog.outString( "Loading Creature templates..." );
     objmgr.LoadCreatureTemplates();
@@ -335,7 +338,14 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
     m_timers[WUPDATE_WEATHERS].SetInterval(1000);
-    m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
+    m_timers[WUPDATE_AUCTIONS].SetInterval(60000); //set auction update interval to 1 minute 
+
+    //to set mailtimer to return mails every day between 4 and 5 am 
+    //mailtimer is increased when updating auctions
+    //one second is 1000 -(tested on win system)
+    mail_timer = ((((localtime( &m_gameTime )->tm_hour + 20) % 24)* HOUR * 1000) / m_timers[WUPDATE_AUCTIONS].GetInterval() );
+    mail_timer_expires = ( (DAY * 1000) / (m_timers[WUPDATE_AUCTIONS].GetInterval())); //1440
+    sLog.outDebug("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 
     sLog.outString( "WORLD: Starting BattleGround System" );
     sBattleGroundMgr.CreateInitialBattleGrounds();
@@ -370,189 +380,47 @@ void World::Update(time_t diff)
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {
         m_timers[WUPDATE_AUCTIONS].Reset();
-        ObjectMgr::AuctionEntryMap::iterator itr,next;
-        for (itr = objmgr.GetAuctionsBegin(); itr != objmgr.GetAuctionsEnd();itr = next)
+        //update mails (return old mails with item, or delete it) (tested... works on win)
+        if (++mail_timer > mail_timer_expires)
         {
-            next = itr;
-            next++;
-            if (time(NULL) > (itr->second->time))
+            mail_timer = 0;
+            objmgr.ReturnOrDeleteOldMails(true);
+        }
+        //update auctions
+        for (int i = 0; i < 3; i++)
+        {
+            AuctionHouseObject* AuctionMap;
+            switch (i)
             {
-                // Auction Expired!
-                if (itr->second->bidder == 0)               // if noone bidded auction...
+                case 0:
+                    AuctionMap = objmgr.GetAuctionsMap( 6 ); //horde
+                    break;
+                case 1:
+                    AuctionMap = objmgr.GetAuctionsMap( 2 ); //ali
+                    break;
+                case 2:
+                    AuctionMap = objmgr.GetAuctionsMap( 7 ); //neutral
+                    break;
+            }
+
+            AuctionHouseObject::AuctionEntryMap::iterator itr,next;
+            for (itr = AuctionMap->GetAuctionsBegin(); itr != AuctionMap->GetAuctionsEnd();itr = next)
+            {
+                next = itr;
+                ++next;
+                if (time(NULL) > (itr->second->time))
                 {
-                    Item *it = objmgr.GetAItem(itr->second->item_guidlow);
-                    if(it)
-                    {
-                        uint64 plGuid = itr->second->owner;
-                        Player *receive = objmgr.GetPlayer(plGuid);
-
-                        Mail *m = new Mail;
-                        m->messageID = objmgr.GenerateMailID();
-                        m->sender = 0;                      //there should be horde/ali AuctionHouse
-                        m->receiver = itr->second->owner;
-
-                        std::ostringstream msgAuctionExpiredSubject;
-                        msgAuctionExpiredSubject << "Auction Expired: ";
-                        Item *theitem = objmgr.GetAItem(itr->second->item_guidlow);
-                        if (theitem)
-                        {
-                            ItemPrototype const *theitemproto = theitem->GetProto();
-                            msgAuctionExpiredSubject << theitemproto->Name1;
-                        }
-                        else
-                            msgAuctionExpiredSubject << "Unknown";
-
-                        m->subject = msgAuctionExpiredSubject.str().c_str();
-                        m->body = "";
-                        m->item_guidlow = itr->second->item_guidlow;
-                        m->item_id = itr->second->item_id;
-                        m->time = time(NULL) + (29 * DAY);
-                        m->money = 0;
-                        m->COD = 0;                         // there might be deposit
-                        m->checked = 0;
-                        if (receive)
-                        {
-                            receive->AddMail(m);
-                            receive->AddMItem(it);
-                        }
-
-                        //escape apostrophes
-                        std::string subject = m->subject;
-                        std::string body = m->body;
-                        sDatabase.escape_string(body);
-                        sDatabase.escape_string(subject);
-
-                        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, 0, 0, 0);
-
-                        delete m;
+                    // Auction time Expired!
+                    if (itr->second->bidder == 0) {              // if no one bidded auction...
+                        objmgr.SendAuctionExpiredMail( itr->second );
+                    } else {
+                        //we should send "item sold"- message if seller is online
+                        //we should send item to winner
+                        //we should send money to seller
+                        objmgr.SendAuctionSuccessfulMail( itr->second );
+                        objmgr.SendAuctionWonMail( itr->second ); //- this functions cleans ram!
+                        //delete itr->second - do not call this!
                     }
-                    else
-                        sLog.outError("Auction item (GUID: %u) not found, and lost.",itr->second->item_guidlow);
-
-                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
-
-                    objmgr.RemoveAItem(itr->second->item_guidlow);
-                    objmgr.RemoveAuction(itr->second->Id);
-                }
-                else
-                {
-                    Mail *m = new Mail;
-                    m->messageID = objmgr.GenerateMailID();
-                    m->sender = itr->second->bidder;
-                    m->receiver = itr->second->owner;
-
-                    std::ostringstream msgAuctionSuccessfullSubject;
-                    std::ostringstream msgAuctionSuccessfullBody;
-                    msgAuctionSuccessfullSubject << "Auction successfull: ";
-                    msgAuctionSuccessfullBody << "Item Sold: ";
-
-                    Item *theitem = objmgr.GetAItem(itr->second->item_guidlow);
-                    if (theitem)
-                    {
-                        ItemPrototype const *theitemproto = theitem->GetProto();
-                        msgAuctionSuccessfullSubject << theitemproto->Name1;
-                        msgAuctionSuccessfullBody << theitemproto->Name1;
-                    }
-                    else
-                    {
-                        msgAuctionSuccessfullSubject << "Unknown";
-                        msgAuctionSuccessfullBody << "Unknown";
-                    }
-
-                    // If it was a buyout, show it so
-                    if (itr->second->bid == itr->second->buyout)
-                        msgAuctionSuccessfullSubject << " (buyout)";
-
-                    msgAuctionSuccessfullBody << "$B" << "Sold By: ";
-                    Player *auctionWinner = objmgr.GetPlayer(itr->second->bidder);
-                    if (auctionWinner)
-                    {
-                        // the auctionOwner is currently online, so lets get the name
-                        msgAuctionSuccessfullBody << auctionWinner->GetName() << "$B";
-                    }
-                    else
-                    {
-                        // the auctionOwner is currently offline, so lets get the name from the database
-                        std::string ownerName;
-                        if(objmgr.GetPlayerNameByGUID(itr->second->bidder,ownerName))
-                            msgAuctionSuccessfullBody << ownerName << "$B";
-                        else
-                            msgAuctionSuccessfullBody << "Unknown$B";
-                    }
-                    m->subject = msgAuctionSuccessfullSubject.str().c_str();
-                    m->body = msgAuctionSuccessfullBody.str().c_str();
-                    m->item_guidlow = 0;
-                    m->item_id = 0;
-                    m->time = time(NULL) + (29 * DAY);
-                    m->money = itr->second->bid;
-                    m->COD = 0;
-                    m->checked = 0;
-
-                    {
-                        //escape apostrophes
-                        std::string subject = m->subject;
-                        std::string body = m->body;
-                        sDatabase.escape_string(body);
-                        sDatabase.escape_string(subject);
-
-                        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, m->money, 0, 0);
-                    }
-
-                    Player *rpl = objmgr.GetPlayer(MAKE_GUID(m->receiver,HIGHGUID_PLAYER));
-                    if (rpl)
-                    {
-                        rpl->AddMail(m);
-                    }
-                    else
-                        delete m;
-
-                    Mail *mn = new Mail;
-                    mn->messageID = objmgr.GenerateMailID();
-                    mn->sender = itr->second->owner;
-                    mn->receiver = itr->second->bidder;
-                    mn->subject = "Your won an item!";
-                    mn->body = "";
-                    mn->item_guidlow = itr->second->item_guidlow;
-                    mn->item_id = itr->second->item_id;
-                    mn->time = time(NULL) + (29 * 3600);
-                    mn->money = 0;
-                    mn->COD = 0;
-                    mn->checked = 0;
-
-                    Item *it = objmgr.GetAItem(itr->second->item_guidlow);
-
-                    {
-                        //escape apostrophes
-                        std::string subject = mn->subject;
-                        std::string body = mn->body;
-                        sDatabase.escape_string(body);
-                        sDatabase.escape_string(subject);
-
-                        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn->messageID);
-                        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`, `item_template`, `time`,`money`,`cod`,`checked`) "
-                            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                            mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item_guidlow, mn->item_id, (uint64)mn->time, 0, 0, 0);
-                    }
-
-                    Player *rpl1 = objmgr.GetPlayer(MAKE_GUID(mn->receiver,HIGHGUID_PLAYER));
-                    if (rpl1)
-                    {
-                        rpl1->AddMItem(it);
-                        rpl1->AddMail(mn);
-                    }
-                    else
-                        delete mn;
-
-                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
-
-                    objmgr.RemoveAItem(itr->second->item_guidlow);
-                    objmgr.RemoveAuction(itr->second->Id);
                 }
             }
         }

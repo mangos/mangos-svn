@@ -152,10 +152,11 @@ class MANGOS_DLL_SPEC Item : public Object
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid);
         virtual void DeleteFromDB();
+        void DeleteFromInventoryDB();
 
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
-        bool IsCanTraded() const;
+        bool CanBeTraded() const;
 
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
         uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
