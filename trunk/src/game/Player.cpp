@@ -192,7 +192,7 @@ Player::~Player ()
     CleanupChannels();
 
     //all mailed items should be deleted, also all mail should be dealocated
-    for (std::list<Mail*>::iterator itr =  m_mail.begin(); itr != m_mail.end();++itr)
+    for (std::deque<Mail*>::iterator itr =  m_mail.begin(); itr != m_mail.end();++itr)
         delete *itr;
 
     for (ItemMap::iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
@@ -1730,64 +1730,72 @@ void Player::SendInitialSpells()
 
 void Player::RemoveMail(uint32 id)
 {
-    std::list<Mail*>::iterator itr;
-    for (itr = m_mail.begin(); itr != m_mail.end();)
+    std::deque<Mail*>::iterator itr;
+    for (itr = m_mail.begin(); itr != m_mail.end();++itr)
     {
         if ((*itr)->messageID == id)
         {
             //do not delete item. beacuse Player::removeMail() is called when returning mail to sender.
-            m_mail.erase(itr++);
-        }
-        else
-        {
-            ++itr;
+            m_mail.erase(itr);
+            return;
         }
     }
 }
-
-//called when mail's state changed, removes mail and adds it to the end - mails are sorted
-void Player::SetMail(Mail *m)
+//call this function when mail receiver is online
+void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemPageId, uint32 itemGuid, uint32 item_template, time_t etime, uint32 money, uint32 COD, uint32 checked, Item* pItem)
 {
-    if (!m_mailsLoaded)
+    if ( !m_mailsLoaded ) {
+        if ( pItem )
+            delete pItem;
         return;
-
-    std::list<Mail*>::iterator itr;
-    for (itr = m_mail.begin(); itr != m_mail.end();)
-    {
-        if ((*itr)->messageID == m->messageID)
-            m_mail.erase(itr++);
-        else
-            ++itr;
     }
-    m_mail.push_back(m);                                    //insert to the end
+    Mail * m = new Mail;
+    m->messageID = mailId;
+    m->messageType = messageType;
+    m->sender = sender;
+    m->receiver = this->GetGUIDLow();
+    m->subject = subject;
+    m->itemPageId = itemPageId;
+    m->item_guid = itemGuid;
+    m->item_template = item_template;
+    m->time = etime;
+    m->money = money;
+    m->COD = COD;
+    m->checked = checked;
+    m->state = UNCHANGED;
+
+    AddMail(m);
+    if ( pItem )
+        AddMItem(pItem);
 }
 
+void Player::SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_SEND_MAIL_RESULT);
+    data << (uint32) mailId;
+    data << (uint32) mailAction;
+    data << (uint32) mailError;
+    if (equipError)
+        data << (uint32) equipError;
+    GetSession()->SendPacket(&data);
+}
 //call this function only when sending new mail
 void Player::AddMail(Mail *m)
 {
     WorldPacket data;
 
     data.Initialize(SMSG_RECEIVED_MAIL);
-    data << uint32(0);
+    data << (uint32) 0;
     GetSession()->SendPacket(&data);
     unReadMails++;
 
     if(!m_mailsLoaded)
-        return;
-
-    std::list<Mail*>::iterator itr;
-    for (itr = m_mail.begin(); itr != m_mail.end();)
     {
-        if ((*itr)->messageID == m->messageID)
-        {
-            m_mail.erase(itr++);
-        }
-        else
-        {
-            ++itr;
-        }
+        delete m;
+        return;
     }
-    m_mail.push_front(m);                                   //to insert new mail to beginning of maillist
+    m_mail.push_front(m);               //to insert new mail to beginning of maillist
 }
 
 bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uint16 slot_id)
@@ -2224,7 +2232,7 @@ bool Player::_removeSpell(uint16 spell_id)
 
 Mail* Player::GetMail(uint32 id)
 {
-    std::list<Mail*>::iterator itr;
+    std::deque<Mail*>::iterator itr;
     for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
     {
         if ((*itr)->messageID == id)
@@ -2500,9 +2508,11 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN ( SELECT `item` FROM `character_inventory` WHERE `guid` = '%u' )",guid);
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
     
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN ( SELECT `item_guid` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0 ",guid);
     m_ignorelist.clear();
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
@@ -10362,7 +10372,7 @@ void Player::_LoadInventory(uint32 timediff)
 // load mailed items which should receive current player
 void Player::_LoadMailedItems()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT `item`,`item_template` FROM `mail` WHERE `receiver` = '%u' AND `item` > 0", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery( "SELECT `item_guid`,`item_template` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0", GetGUIDLow());
 
     if( !result )
         return;
@@ -10372,19 +10382,17 @@ void Player::_LoadMailedItems()
     {
         fields = result->Fetch();
         uint32 item_guid = fields[0].GetUInt32();
-        uint32 item_id   = fields[1].GetUInt32();
+        uint32 item_template = fields[1].GetUInt32();
 
-        ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
+        ItemPrototype const *proto = objmgr.GetItemPrototype(item_template);
 
-        if(!proto)
-        {
-            sLog.outError( "Bag::LoadFromDB: Player %d have unknown item (GUID: %u id: #%u) in mail, skipped.", GetGUIDLow(), item_guid, item_id);
+        if(!proto) {
+            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail, skipped.", GetGUIDLow(), item_guid, item_template);
             continue;
         }
-
         Item *item = NewItemOrBag(proto);
-        if(!item->LoadFromDB(item_guid, 0))
-        {
+        if(!item->LoadFromDB(item_guid, 0)) {
+            sLog.outError( "Player::_LoadMailedItems - Mailed Item doesn't exist!!!! - item guid: %u", item_guid);
             delete item;
             continue;
         }
@@ -10397,45 +10405,35 @@ void Player::_LoadMailedItems()
 
 void Player::_LoadMail()
 {
-    //delete old mails, and if old mail has item so delete it too
     time_t base = time(NULL);
-
-    //FIXME: mails with COD will not be returned, but deleted.
-
-    //delete old mails:
-    sDatabase.PExecute("DELETE a FROM item_instance AS a INNER JOIN mail AS ab ON a.guid=ab.item WHERE ab.time < '" I64FMTD "' AND `receiver` = '%u'", (uint64)base, GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `time` < '" I64FMTD "' AND `receiver` = '%u'", (uint64)base, GetGUIDLow());
 
     _LoadMailedItems();
 
     m_mail.clear();
-
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
-
-    if(result)
-    {
+    //mails are in right order
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
+    if(result) {
         do
         {
             Field *fields = result->Fetch();
-            Mail *be = new Mail;
-            be->messageID = fields[0].GetUInt32();
-            be->sender = fields[1].GetUInt32();
-            be->receiver = fields[2].GetUInt32();
-            be->subject = fields[3].GetCppString();
-            be->body = fields[4].GetCppString();
-            be->item_guidlow = fields[5].GetUInt32();
-            be->item_id = fields[6].GetUInt32();
-            be->time = fields[7].GetUInt32();
-            be->money = fields[8].GetUInt32();
-            be->COD = fields[9].GetUInt32();
-            be->checked = fields[10].GetUInt32();
-            m_mail.push_back(be);
-        }
-        while( result->NextRow() );
-
+            Mail *m = new Mail;
+            m->messageID = fields[0].GetUInt32();
+            m->messageType = fields[1].GetUInt8();
+            m->sender = fields[2].GetUInt32();
+            m->receiver = fields[3].GetUInt32();
+            m->subject = fields[4].GetCppString();
+            m->itemPageId = fields[5].GetUInt32();
+            m->item_guid = fields[6].GetUInt32();
+            m->item_template = fields[7].GetUInt32();
+            m->time = fields[8].GetUInt32();
+            m->money = fields[9].GetUInt32();
+            m->COD = fields[10].GetUInt32();
+            m->checked = fields[11].GetUInt32();
+            m->state = UNCHANGED;
+            m_mail.push_back(m);
+        } while( result->NextRow() );
         delete result;
     }
-
     m_mailsLoaded = true;
 }
 
@@ -10858,22 +10856,37 @@ void Player::_SaveMail()
     if (!m_mailsLoaded)
         return;
 
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
-
-    std::list<Mail*>::iterator itr;
+    std::deque<Mail*>::iterator itr;
     for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
     {
         Mail *m = (*itr);
-
-        //escape apostrophes
-        std::string subject = m->subject;
-        std::string body = m->body;
-        sDatabase.escape_string(body);
-        sDatabase.escape_string(subject);
-
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-            m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, m->money, m->COD, m->checked);
+        if (m->state == CHANGED) {
+            sDatabase.PExecute("UPDATE `mail` SET `itemPageId` = '%u',`item_guid` = '%u',`item_template` = '%u',`time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
+                m->itemPageId, m->item_guid, m->item_template, (uint64)m->time, m->money, m->COD, m->checked, m->messageID);
+            m->state = UNCHANGED;
+        } else if (m->state == DELETED) {
+            if (m->item_guid)
+                sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
+            if (m->itemPageId) {
+                sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", m->itemPageId);
+            }
+            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
+        }
+    }
+    //dealocate deleted mails...
+    bool continueDeleting = true;
+    while ( continueDeleting ) {
+        continueDeleting = false;
+        for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
+        {
+            if ((*itr)->state == DELETED) {
+                Mail* m = *itr;
+                m_mail.erase(itr);
+                continueDeleting = true;
+                delete m;
+                break;//break only from for cycle
+            }
+        }
     }
     m_mailsUpdated = false;
 }

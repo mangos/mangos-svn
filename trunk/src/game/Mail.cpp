@@ -30,434 +30,325 @@
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
     time_t base = time(NULL);
-    WorldPacket data;
-    uint64 sender,item;
+    uint64 mailbox,itemId;
     std::string receiver,subject,body;
-    uint32 unk1,unk2,money,COD,mID;
-    recv_data >> sender;
+    uint32 unk1,unk2,money,COD,mailId;
+    recv_data >> mailbox;
     recv_data >> receiver >> subject >> body;
-    recv_data >> unk1 >> unk2;
-    recv_data >> item;
-    recv_data >> money >> COD;
+    recv_data >> unk1 >> unk2; // 0x29 and 0x00
+    recv_data >> itemId;
+    recv_data >> money >> COD; //then there are two (uint32) 0;
 
-    if(receiver.size() == 0)
+    if (receiver.size() == 0) 
         return;
-
     normalizePlayerName(receiver);
     sDatabase.escape_string(receiver);                      // prevent SQL injection - normal name don't must changed by this call
 
-    sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes item %u and %u copper and %u COD copper",GUID_LOPART(sender),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(item),money,COD);
-    mID = objmgr.GenerateMailID();
-
     Player* pl = _player;
 
-    WorldPacket tmpData;
+    sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes item %u, %u copper and %u COD copper with unk1 = %u, unk2 = %u",pl->GetGUIDLow(),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(itemId),money,COD,unk1,unk2);
 
     uint64 rc = objmgr.GetPlayerGUIDByName(receiver.c_str());
-    if(pl->GetGUID() == rc)
-    {
-        tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
-        tmpData << uint32(0);
-        tmpData << uint32(0);
-        tmpData << uint32(MAIL_ERR_CANNOT_SEND_TO_SELF);
-        SendPacket(&tmpData);
+    if(pl->GetGUID() == rc) {
+        pl->SendMailResult(0, 0, MAIL_ERR_CANNOT_SEND_TO_SELF);
         return;
     }
-
-    if (pl->GetMoney() < money + 30)
-    {
-        tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
-        tmpData << uint32(0);
-        tmpData << uint32(0);
-        tmpData << uint32(MAIL_ERR_NOT_ENOUGH_MONEY);
-        SendPacket(&tmpData);
+    if (pl->GetMoney() < money + 30) {
+        pl->SendMailResult(0, 0, MAIL_ERR_NOT_ENOUGH_MONEY);
         return;
     }
-
-    if (!rc)
-    {
-        data.Initialize(SMSG_SEND_MAIL_RESULT);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(MAIL_ERR_RECIPIENT_NOT_FOUND);
-        SendPacket(&data);
+    if (!rc) {
+        pl->SendMailResult(0, 0, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
     Player *receive = objmgr.GetPlayer(rc);
 
     uint32 rc_team = 0;
+    uint8 mails_count = 0; //do not allow to send to one player more than 100 mails
 
-    if(receive)
+    if(receive) {
         rc_team = receive->GetTeam();
-    else
+        mails_count = receive->GetMailSize();
+    } else {
         rc_team = objmgr.GetPlayerTeamByGUID(rc);
-
+        QueryResult* result = sDatabase.PQuery("SELECT COUNT(*) FROM `mail` WHERE `receiver` = '%u'", GUID_LOPART(rc));
+        Field *fields = result->Fetch();
+        mails_count = fields[0].GetUInt32();
+        delete result;
+    }
+    //do not allow to have more than 100 mails in mailbox.. mails count is in opcode uint8!!! - so max can be 255..
+    if (mails_count > 100) {
+        pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
+        return;
+    }
     // test the receiver's Faction...
-    if (pl->GetTeam() != rc_team)
-    {
-        data.Initialize(SMSG_SEND_MAIL_RESULT);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(MAIL_ERR_NOT_YOUR_TEAM);
-        SendPacket(&data);
+    if (pl->GetTeam() != rc_team) {
+        pl->SendMailResult(0, 0, MAIL_ERR_NOT_YOUR_TEAM);
         return;
     }
 
     uint16 item_pos;
-    Item *it = 0;
-
-    if (item)
-    {
-        item_pos = pl->GetPosByGuid(item);
-        it = pl->GetItemByPos( item_pos );
-
-        if(it)
+    Item *pItem = 0;
+    if (itemId) {
+        item_pos = pl->GetPosByGuid(itemId);
+        pItem = pl->GetItemByPos( item_pos );
+        // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to mail)
+        if(!pItem || !pItem->CanBeTraded())
         {
-            // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to mail)
-            if(!it->IsCanTraded())
-            {
-                data.Initialize(SMSG_SEND_MAIL_RESULT);
-                data << uint32(0);
-                data << uint32(0);
-                data << uint32(MAIL_ERR_INTERNAL_ERROR);
-                SendPacket(&data);
-                return;
-            }
-            it->SaveToDB();
+            pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
+            return;
         }
+        /*if (pItem->GetUInt32Value(???) { //todo find conjured_item index to item->data array
+            pl->SendMailResult(0, 0, MAIL_ERR_CANNOT_MAIL_CONJURED_ITEM);
+            return;
+        }*/
     }
+    pl->SendMailResult(0, 0, MAIL_OK);
 
-    data.Initialize(SMSG_SEND_MAIL_RESULT);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(MAIL_OK);
-    SendPacket(&data);
-
-    if (it)
-    {
+    uint32 itemPageId = 0;
+    if (body.size() > 0) {
+        itemPageId = objmgr.CreateItemPage( body );
+    }
+    if (pItem) {
         //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
-        it->RemoveFromUpdateQueueOf(pl);
-        sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", it->GetGUIDLow());
+        pItem->DeleteFromInventoryDB();//deletes item from character's inventory
+        pItem->RemoveFromUpdateQueueOf( pl );
+        pItem->SaveToDB();
     }
-
+    uint32 messagetype = 0;
     pl->ModifyMoney( -30 - money );
-
-    uint32 item_id = it ? it->GetEntry() : 0;               //item prototype
-
-    time_t etime = base + DAY * ((COD > 0)? 3 : 30);        //time if COD 3 days, if no COD 30 days
-
-    if (receive)
-    {
-        Mail* m = new Mail;
-        m->messageID = mID;
-        m->sender = pl->GetGUIDLow();
-        m->receiver = GUID_LOPART(rc);
-        m->subject = subject;
-        m->body = body;
-        if (it)                                             // if item attachment exists
-        {
-            m->item_id = item_id;
-            m->item_guidlow = GUID_LOPART(item);
-        }
-        else
-        {
-            m->item_id = 0;
-            m->item_guidlow = 0;
-        }
-        m->time = etime;
-        m->money = money;
-        m->COD = COD;
-        m->checked = 0;
-
-        receive->AddMail(m);
-        if (it)
-        {
-            it->FSetState(ITEM_NEW);
-            receive->AddMItem(it);
-        }
+    uint32 item_template = pItem ? pItem->GetEntry() : 0;               //item prototype
+    mailId = objmgr.GenerateMailID();
+    time_t etime = time(NULL) + DAY * ((COD > 0)? 3 : 30);      //time if COD 3 days, if no COD 30 days
+    if (receive) {
+        receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemPageId, GUID_LOPART(itemId), item_template, etime, money, COD, NOT_READ, pItem);
     }
-    else if (it)
-        delete it;
-
+    else if (pItem)
+        delete pItem; //item is sent, but receiver isn't online .. so remove it from RAM
     // backslash all '
-    sDatabase.escape_string(body);
     sDatabase.escape_string(subject);
-
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-        mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), item_id, (uint64)etime, money, COD, 0);
+    //not needed : sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '0')",
+        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemPageId, GUID_LOPART(itemId), item_template, (uint64)etime, money, COD);
+    //there is small problem:
+    //one player sends big sum of money to another player, then server crashes, but mail with money is
+    //is DB .. so receiver will receive money, BUT sender has also that money..., we will have to save also players money...
 }
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
 {
     uint64 mailbox;
-    uint32 message;
+    uint32 mailId;
     recv_data >> mailbox;
-    recv_data >> message;
+    recv_data >> mailId;
     Player *pl = _player;
-    Mail *m = pl->GetMail(message);
-    if (m)
-    {
+    Mail *m = pl->GetMail(mailId);
+    if (m) {
         if (pl->unReadMails)
             pl->unReadMails--;
-        m->checked = 1;
+        m->checked = m->checked | READ;
         m->time = time(NULL) + (3 * DAY);
         pl->m_mailsUpdated = true;
-        pl->SetMail(m);
+        m->state = CHANGED;
     }
 }
 
 void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 {
     uint64 mailbox;
-    uint32 message;
-    WorldPacket data;
+    uint32 mailId;
     recv_data >> mailbox;
-    recv_data >> message;
-    Player *pl = _player;
-    // pl->m_mailsUpdated = true; there 's no need to change it .. because query deletes mail from DB...
-    Mail *m = pl->GetMail(message);
+    recv_data >> mailId;
+    Player* pl = _player;
+    pl->m_mailsUpdated = true;
+    Mail *m = pl->GetMail(mailId);
     if(m)
-    {
-        if (m->item_guidlow > 0)
-            return;
-        //there's no need to delete item from DB, client won't allow to delete mail, when it has an item
-        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
-    }
-    pl->RemoveMail(message);
-
-    data.Initialize(SMSG_SEND_MAIL_RESULT);
-    data << uint32(message);
-    data << uint32(MAIL_DELETED);
-    data << uint32(0);
-    SendPacket(&data);
+        m->state = DELETED;
+    pl->SendMailResult(mailId, MAIL_DELETED, 0);
 }
 
 void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 {
     uint64 mailbox;
-    uint32 message;
-    WorldPacket data;
+    uint32 mailId;
     recv_data >> mailbox;
-    recv_data >> message;
+    recv_data >> mailId;
     Player *pl = _player;
-    Mail *m = pl->GetMail(message);
-
-    if(!m)
+    Mail *m = pl->GetMail(mailId);
+    if(!m || m->state == DELETED) {
+        pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, MAIL_ERR_INTERNAL_ERROR);
         return;
-
-    m->receiver = m->sender;
-    m->sender = pl->GetGUIDLow();
-    m->time = time(NULL) + (30 * DAY);
-    m->COD = 0;
-    m->checked = 0;
-    uint64 rc = m->receiver;
-    Player *receive = objmgr.GetPlayer(rc);
-    if(receive)
-    {
-        if (m->item_guidlow)
-        {
-            Item *pItem = pl->GetMItem(m->item_guidlow);
-            receive->AddMItem(pItem);
-            pl->RemoveMItem(m->item_guidlow);
-        }
-        receive->AddMail(m);
     }
-    //pl->m_mailsUpdated = true; - not needed, query does all we need
+    //we can return mail now
+    //so firstly delete the old one
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mailId);
+    pl->RemoveMail(mailId);
 
-    data.Initialize(SMSG_SEND_MAIL_RESULT);
-    data << uint32(message);
-    data << uint32(MAIL_RETURNED_TO_SENDER);
-    data << uint32(0);
-    SendPacket(&data);
+    uint32 messageID = objmgr.GenerateMailID();
+    
+    Item *pItem = NULL;
+    if (m->item_guid)  {
+        pItem = pl->GetMItem(m->item_guid);
+        pl->RemoveMItem(m->item_guid);
+    }
+    time_t etime = time(NULL) + 30*DAY;
+    Player *receiver = objmgr.GetPlayer((uint64)m->sender);
+    if(receiver) 
+        receiver->CreateMail(messageID,0,m->receiver,m->subject,m->itemPageId,m->item_guid,m->item_template,etime,m->money,0,RETURNED_CHECKED,pItem);
+    else if ( pItem )
+        delete pItem;
 
-    std::string body, subject;
-
-    //backslash all apostrophes
-    body = m->body;
+    std::string subject;
     subject = m->subject;
-    sDatabase.escape_string(body);
     sDatabase.escape_string(subject);
-
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", message);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`, `time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u','%u', '%s', '%s', '%u', '%u', '" I64FMTD "','%u','%u','%u')",
-        m->messageID, pl->GetGUIDLow(), m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, m->money, 0, 0);
-
-    pl->RemoveMail(message);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '%u', '0', '16')",
+        messageID, m->receiver, m->sender, subject.c_str(), m->itemPageId, m->item_guid, m->item_template, (uint64)etime, m->money);
+    delete m;            //we can deallocate old mail
+    pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
 }
 
 void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 {
     uint64 mailbox;
-    uint32 message;
+    uint32 mailId;
     uint16 dest;
-    WorldPacket data;
     recv_data >> mailbox;
-    recv_data >> message;
+    recv_data >> mailId;
     Player* pl = _player;
 
-    Mail* m = pl->GetMail(message);
-    if (!m)
+    Mail* m = pl->GetMail(mailId);
+    if(!m || m->state == DELETED) {
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);//not sure
         return;
+    }
 
-    Item *it = pl->GetMItem(m->item_guidlow);
+    Item *it = pl->GetMItem(m->item_guid);
 
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
-    if( msg == EQUIP_ERR_OK )
-    {
-        m->item_guidlow = 0;
-        m->item_id = 0;
+    if( msg == EQUIP_ERR_OK ) {
+        m->item_guid = 0;
+        m->item_template = 0;
 
-        if (m->COD > 0)
-        {
-            Mail* mn = new Mail;
-            mn->messageID = objmgr.GenerateMailID();
-            mn->sender = m->receiver;
-            mn->receiver = m->sender;
-            mn->subject = m->subject;
-            mn->body = "Your item sold, player paid a COD";
-            mn->item_guidlow = 0;
-            mn->item_id = 0;
-            mn->time = time(NULL) + (30 * DAY);
-            mn->money = m->COD;
-            mn->COD = 0;
-            mn->checked = 0;
-
+        if (m->COD > 0) {
             Player *receive = objmgr.GetPlayer(MAKE_GUID(m->sender,HIGHGUID_PLAYER));
-
+            time_t etime = time(NULL) + (30 * DAY);
+            uint32 newMailId = objmgr.GenerateMailID();
             if (receive)
-                receive->AddMail(mn);
+                receive->CreateMail(newMailId, 0, m->receiver, m->subject, 0, 0, 0, etime, m->COD, 0, COD_PAYMENT_CHECKED, NULL);
 
             //escape apostrophes
-            std::string subject = mn->subject;
-            std::string body = mn->body;
-            sDatabase.escape_string(body);
+            std::string subject = m->subject;
             sDatabase.escape_string(subject);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+                "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '8')",
+                newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, m->COD);
 
-            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mn->messageID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item_guidlow, mn->item_id, (uint64)mn->time, mn->money, 0, 0);
-
-            // client tests, if player has enought money !!!
+            // client tests, if player has enought money
             pl->ModifyMoney( -int32(m->COD) );
         }
         m->COD = 0;
-        pl->SetMail(m);
+        m->state = CHANGED;
+        pl->m_mailsUpdated = true;
+        pl->RemoveMItem(it->GetGUIDLow());
+        pl->StoreItem( dest, it, true);
+        it->SetState(ITEM_NEW, pl);
 
-        uint32 it_guidlow = it->GetGUIDLow();
-        _player->StoreItem( dest, it, true);                // item can be remove at adding to existed item stack
-        pl->RemoveMItem(it_guidlow);
-
-        data.Initialize(SMSG_SEND_MAIL_RESULT);
-        data << uint32(message);
-        data << uint32(MAIL_ITEM_TAKEN);
-        data << uint32(0);
-        SendPacket(&data);
-    }
-    else
-    {
-        data.Initialize(SMSG_SEND_MAIL_RESULT);
-        data << uint32(message);
-        data << uint32(0);
-        data << uint32(MAIL_ERR_BAG_FULL);
-        SendPacket(&data);
-    }
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, 0);
+    } else 
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_BAG_FULL, msg); //works great 
 }
 
 void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint64 mailbox;
-    uint32 id;
+    uint32 mailId;
     recv_data >> mailbox;
-    recv_data >> id;
+    recv_data >> mailId;
     Player *pl = _player;
 
-    Mail* m = pl->GetMail(id);
-    if(!m)
+    Mail* m = pl->GetMail(mailId);
+    if(!m || m->state == DELETED)
         return;
 
-    data.Initialize(SMSG_SEND_MAIL_RESULT);
-    data << uint32(id);
-    data << uint32(MAIL_MONEY_TAKEN);
-    data << uint32(0);
-    SendPacket(&data);
+    pl->SendMailResult(mailId, MAIL_MONEY_TAKEN, 0);
 
     pl->ModifyMoney(m->money);
     m->money = 0;
-
+    m->state = CHANGED;
     pl->m_mailsUpdated = true;
-    pl->SetMail(m);
 }
 
 void WorldSession::HandleGetMail(WorldPacket & recv_data )
 {
     uint64 mailbox;
-    recv_data >> mailbox;                                   // from mailbox in Storm near bank it was 0x000068A2 (dec 26786) and 0xF0004000 (dec 4026548224)
+    recv_data >> mailbox;
 
-    WorldPacket data;
     Player* pl = _player;
 
     //load players mails, and mailed items
     if(!pl->m_mailsLoaded)
         pl ->_LoadMail();
 
+    WorldPacket data;
     data.Initialize(SMSG_MAIL_LIST_RESULT);
-    data << uint8(pl->GetMailSize());
-    std::list<Mail*>::iterator itr;
+    data << uint8(0);
+    uint8 mails_count = 0;
+    std::deque<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
     {
-        data << uint32((*itr)->messageID);                  // Correct..., also message id , if you change it, server crashes
-        data << uint8(0);                                   // Message Type 0 = Default, maybe there will be also Reply
-        data << uint32((*itr)->sender);                     // SenderID
-        data << uint32(0);                                  // Constant
-
-        data << (*itr)->subject.c_str();                    // Subject string
-        if((*itr)->body.c_str()!=NULL)
-            data << uint32((*itr)->messageID);              // MessageID!!
+        if ((*itr)->state == DELETED)
+            continue;
+        mails_count++;
+        data << (uint32) (*itr)->messageID;
+        data << (uint8)  (*itr)->messageType;               // Message Type, once = 3
+        data << (uint32) (*itr)->sender;                    // SenderID 
+        if ((*itr)->messageType == 0)
+            data << (uint32) 0;                             // HIGHGUID_PLAYER
+        data << (*itr)->subject.c_str();                    // Subject string - once 00, when mail type = 3
+        data << (uint32) (*itr)->itemPageId;                // sure about this
+        data << (uint32) 0;                                 // Constant
+        if ((*itr)->messageType == 0)
+            data << (uint32) 0x29;                          // Constant 
         else
-            data << uint32(0);                              // No messageID
-        data << uint32(0);                                  // Unknown - 0x00000029
-        data << uint32(0);                                  // Unknown
+            data << (uint32) 0x3E;
         uint8 icount = 1;
-        if ((*itr)->item_guidlow != 0)
-        {
-            if(Item* i = pl->GetMItem((*itr)->item_guidlow))
-            {
-                data << uint32(i->GetUInt32Value(OBJECT_FIELD_ENTRY));
-                icount = i->GetCount();
-            }
-            else
-            {
-                sLog.outError("Mail to %s marked as having item (mail item idx: %u), but item not found.",pl->GetName(),(*itr)->item_guidlow);
-                data << uint32(0);
+        Item* it = NULL;
+        if ((*itr)->item_guid != 0) {
+            if(it = pl->GetMItem((*itr)->item_guid)) {
+                data << (uint32) it->GetUInt32Value(OBJECT_FIELD_ENTRY);    //item prototype
+                icount = it->GetCount();
+            } else {
+                sLog.outError("Mail to %s marked as having item (mail item idx: %u), but item not found.",pl->GetName(),(*itr)->item_guid);
+                data << (uint32) 0;
             }
         }
         else
-            data << uint32(0);
+            data << (uint32) 0;                             // Any item attached
 
-        data << uint32(0);                                  // Unknown
-        data << uint32(0);                                  // Unknown
-        data << uint32(0);                                  // Unknown
-        data << uint8(icount);                              // Attached item stack count
-        data << uint32(0xFFFFFFFF);                         // Unknown - Charges
-        data << uint32(0);                                  // Unknown - MaxDurability
-        data << uint32(0);                                  // Unknown - Durability
-        data << uint32((*itr)->money);                      // Gold
-        data << uint32((*itr)->COD);                        // COD
-        data << uint32((*itr)->checked);                    // flags 0: not checked 1: checked 8: COD Payment: "Subject"
-        data << float(((*itr)->time - time(NULL)) / DAY);   // Time
-        data << uint32(0);                                  // Unknown
-
+        data << (uint32) 0;                                 // Unknown Constant 0
+        data << (uint32) 0;                                 // Unknown 
+        data << (uint32) 0;                                 // not item->creator, it is another item's property
+        data << (uint8)  icount;                            // Attached item stack count
+        uint32 charges = (it) ? it->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES) : 0; //sometimes more than zero, not sure when
+        data << (uint32) charges;                           // item -> charges sure
+        uint32 maxDurability = (it)? it->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0;
+        uint32 curDurability = (it)? it->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0;
+        data << (uint32) maxDurability;                     // MaxDurability
+        data << (uint32) curDurability;                     // Durability
+        data << (uint32) (*itr)->money;                     // Gold 
+        data << (uint32) (*itr)->COD;                       // COD 
+        data << (uint32) (*itr)->checked;                   // checked 
+        data << (float)  ((*itr)->time - time(NULL)) / DAY; // Time
+        data << (uint32) 0;                                 // Constant, something like end..
     }
+    data.put<uint8>(0, mails_count);
     SendPacket(&data);
 }
-
+/* 
 extern char *fmtstring( char *format, ... );
 
 uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
@@ -498,7 +389,6 @@ uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
 
 bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
 {
-    //    int i;
     uint32 realID = GetItemGuidFromDisplayID(itemid, _player);
     char const *itemInfo;
 
@@ -530,129 +420,142 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
     SendPacket(&data);
 
     return true;
-}
-
+}*/
+//TO DO FIXME, for mails and auction mails this function works great
 void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 {
-    WorldPacket data;
-    uint32 mailguid;
-    uint64 unk1;
+    uint32 itemPageId;
+    uint32 mailId; //this value can be item id in bag, but it is also mail id
+    uint32 unk; //maybe something like state - 0x70000000
 
-    recv_data >> mailguid >> unk1;
+    recv_data >> itemPageId >> mailId >> unk; 
 
     Player* pl = _player;
 
-    Mail *itr;
+    /* //old code, doesn't needed now..
+    Mail *m;
 
-    itr = pl->GetMail(mailguid);
-    if(itr)
-    {
-        sLog.outDebug("We got mailguid: %u with unk: %u", mailguid, unk1);
+    m = pl->GetMail(mailId);
+    if(m) {
+        sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", bodyItemGuid, mailId, unk);
+        QueryResult *result = sDatabase.PQuery( "SELECT `text` FROM `item_page` WHERE `id` = '%u'", m->itemPageId );
 
         data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-        data << mailguid;
-        data << itr->body.c_str();
-        data << uint32(0);
+        data << bodyItemGuid;
+        // it is player's id in ASCII:numberInASCII:sameNumberInASCII -- but only for auctionhouse's mails...
+        if (result) {
+            Field *fields = result->Fetch();
+            data << fields[0].GetCppString();
+        } else {
+            data << (uint32) 0;
+        }
+        data.hexlike();
         SendPacket(&data);
+        delete result;
     }
-
     else
-    {
-        QueryResult *result = sDatabase.PQuery( "SELECT `text`,`next_page` FROM `item_page` WHERE `id` = '%u'", mailguid );
+    { 
+        uint16 item_pos = pl->GetPosByGuid(bodyItemGuid);
+        Item* pItem = pl->GetItemByPos( item_pos );
+        if (pItem) {
+            QueryResult *result = sDatabase.PQuery( "SELECT `text`,`next_page` FROM `item_page` WHERE `id` = '%u'", pItem->GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) );
 
-        if( result )
-        {
-            data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-            data << mailguid;
+            if( result ) {
+                data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+                data << mailId;
 
-            uint32 nextpage = mailguid;
+                uint32 nextpage = mailId;
 
-            while (nextpage)
-            {
-                data << (*result)[0].GetString();
-                nextpage = (*result)[1].GetUInt32();
-                data << nextpage;
+                while (nextpage) {
+                    data << (*result)[0].GetCppString();
+                    nextpage = (*result)[1].GetUInt32();
+                    data << nextpage;
+                }
+                data << (uint32) 0;
+                SendPacket(&data);
+                delete result;
+                return;
             }
-
-            data << uint32(0);
-            SendPacket(&data);
-            delete result;
-            return;
         }
+        //print an error:
+        sLog.outError("There is no info for item, bodyItemGuid: %u, mailId: %u", bodyItemGuid, mailId);
+        data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+        data << bodyItemGuid;
 
-        if (!SendItemInfo( mailguid, data ))
-        {
-            data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-            data << mailguid;
+        data << "There is no info for this item.";
 
-            data << "There is no info for this item.";
-
-            data << uint32(0);
-            SendPacket(&data);
-        }
+        data << (uint32) 0;
+        SendPacket(&data);
+    }*/
+    //there maybe check, if player has item with guid mailId, or has mail with id mailId
+    WorldPacket data;
+    data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+    data << itemPageId;
+    sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", itemPageId, mailId, unk);
+    QueryResult *result = sDatabase.PQuery( "SELECT `text` FROM `item_page` WHERE `id` = '%u'", itemPageId );
+    if (result) {
+        Field *fields = result->Fetch();
+        data << fields[0].GetCppString();
+    } else {
+        data << "There is no info for this item.";
     }
+    SendPacket(&data);
 }
 
 void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 {
-    uint32 unk1,unk2,mailid;
+    uint64 mailbox;
+    uint32 mailId;
 
-    recv_data >> unk1 >> unk2 >> mailid;
+    recv_data >> mailbox >> mailId;
 
-    sLog.outDetail("HandleMailCreateTextItem unk1=%u,unk2=%u,mailid=%u",unk1,unk2,mailid);
+    Player *pl = _player;
 
-    Item *item = new Item();
-
-    if(!item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, _player))
-    {
-        delete item;
+    Mail* m = pl->GetMail(mailId);
+    if(!m || !m->itemPageId || m->state == DELETED) {
+        pl->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_INTERNAL_ERROR); 
         return;
     }
-    item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
-
-    WorldPacket data;
-    data.Initialize(SMSG_SEND_MAIL_RESULT);
+    
+    Item *bodyItem = new Item;
+    if(!bodyItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), MAIL_BODY_ITEM_TEMPLATE, pl)) {
+        delete bodyItem;
+        return;
+    }
+    
+    bodyItem->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , m->itemPageId );
+    bodyItem->SetUInt32Value( ITEM_FIELD_CREATOR, m->sender);
+    
+    sLog.outDetail("HandleMailCreateTextItem mailid=%u",mailId);
 
     uint16 dest;
-    uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, item, false );
-    if( msg == EQUIP_ERR_OK )
-    {
-        _player->StoreItem(dest, item, true);
-        data << uint32(mailid);
-        data << uint32(MAIL_MADE_PERMANENT);
-        data << uint32(0);
-    }
-    else
-    {
-        _player->SendEquipError( msg, item, NULL );
-        data << uint32(mailid);
-        data << uint32(0);
-        data << uint32(MAIL_ERR_INTERNAL_ERROR);
-        delete item;
-    }
+    uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, bodyItem, false );
+    if( msg == EQUIP_ERR_OK ) {
+        m->itemPageId = 0;
+        m->state = CHANGED;
+        pl->m_mailsUpdated = true;
 
-    SendPacket(&data);
+        pl->StoreItem(dest, bodyItem, true);
+        //bodyItem->SetState(ITEM_NEW, pl); is set automatically
+        pl->SendMailResult(mailId, MAIL_MADE_PERMANENT, 0);
+    } else {
+        pl->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_BAG_FULL, msg);
+        delete bodyItem;
+    }
 }
 
 void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
 {
+    WorldPacket data;
 
-    WorldPacket Data;
-
-    if( _player->unReadMails > 0 )
-    {
-        Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
-        Data << uint32(0);
-        SendPacket(&Data);
+    data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
+    if( _player->unReadMails > 0 ) {
+        data << (uint32) 0;
+    } else {
+        data << (uint8) 0x00;
+        data << (uint8) 0xC0;
+        data << (uint8) 0xA8;
+        data << (uint8) 0xC7;
     }
-    else
-    {
-        Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
-        Data << uint8(0x00);
-        Data << uint8(0xC0);
-        Data << uint8(0xA8);
-        Data << uint8(0xC7);
-        SendPacket(&Data);
-    }
-
+    SendPacket(&data);
 }

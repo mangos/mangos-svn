@@ -25,6 +25,7 @@
 #include "WorldSession.h"
 #include "Player.h"
 #include "ObjectMgr.h"
+#include "AuctionHouseObject.h"
 #include "Group.h"
 #include "Guild.h"
 #include "World.h"

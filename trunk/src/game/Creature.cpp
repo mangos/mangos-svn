@@ -666,7 +666,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             player->GetSession()->SendTabardVendorActivate( guid );
             break;
         case GOSSIP_OPTION_AUCTIONEER:
-            player->GetSession()->SendAuctionHello( guid );
+            player->GetSession()->SendAuctionHello( guid, this );
             break;
         case GOSSIP_OPTION_GUARD:
         case GOSSIP_GUARD_SPELLTRAINER:

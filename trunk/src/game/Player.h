@@ -710,15 +710,17 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetSelection(const uint64 &guid) { m_curSelection = guid; }
         void SetTarget(const uint64 &guid) { m_curTarget = guid; }
 
+        void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemPageId, uint32 itemGuid, uint32 item_template, time_t etime, uint32 money, uint32 COD, uint32 checked, Item* pItem);
+        void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0);
         void AddMail(Mail *m);
-        void SetMail(Mail *m);
+        //void SetMail(Mail *m);
         void RemoveMail(uint32 id);
 
         uint32 GetMailSize() { return m_mail.size();};
         Mail* GetMail(uint32 id);
 
-        std::list<Mail*>::iterator GetmailBegin() { return m_mail.begin();};
-        std::list<Mail*>::iterator GetmailEnd() { return m_mail.end();};
+        std::deque<Mail*>::iterator GetmailBegin() { return m_mail.begin();};
+        std::deque<Mail*>::iterator GetmailEnd() { return m_mail.end();};
 
         /*********************************************************/
         /*** MAILED ITEMS SYSTEM ***/
@@ -1208,7 +1210,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_currentBuybackSlot;
 
         std::list<struct Factions> factions;
-        std::list<Mail*> m_mail;
+        std::deque<Mail*> m_mail;
         PlayerSpellMap m_spells;
         SpellCooldowns m_spellCooldowns;
 

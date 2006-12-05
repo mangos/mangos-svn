@@ -476,6 +476,8 @@ void Item::SaveToDB()
         } break;
         case ITEM_REMOVED:
         {
+            if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 2282 )
+                sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
             sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
             delete this;
             return;
@@ -521,6 +523,11 @@ void Item::DeleteFromDB()
 {
     //sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
     SetState(ITEM_REMOVED, GetOwner());
+}
+
+void Item::DeleteFromInventoryDB()
+{
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'",GetGUIDLow());
 }
 
 void Item::_LoadQuests()
@@ -841,8 +848,8 @@ uint8 Item::GetBagSlot() const
     return m_container ? m_container->GetSlot() : INVENTORY_SLOT_BAG_0;
 }
 
-bool Item::IsCanTraded() const
-{
+bool Item::CanBeTraded() const
+{ 
     if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED) || GetProto()->Class == ITEM_CLASS_QUEST)
         return false;
     if(IsBag() && !((Bag*)this)->IsEmpty())

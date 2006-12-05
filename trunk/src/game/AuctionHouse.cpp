@@ -24,400 +24,37 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "UpdateMask.h"
+#include "AuctionHouseObject.h"
+
+//pls DO NOT use iterator++, because it is slowlier than ++iterator!!!
+//post-incrementation is always slowlier than pre-incrementation !
 
 void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 {
-    uint64 guid;
-
+    uint64 guid; //NPC guid
     recv_data >> guid;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
-    if (!unit)
-    {
+    if (!unit) {
         sLog.outDebug( "WORLD: HandleAuctionHelloOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
         return;
     }
-
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
-
     if( !unit->isAuctioner())                               // it's not auctioner
         return;
 
-    SendAuctionHello(guid);
+    SendAuctionHello(guid, unit);
 }
 
-void WorldSession::SendAuctionHello( uint64 guid )
-{
-    WorldPacket data;
-    data.Initialize( MSG_AUCTION_HELLO );
-    data << guid;
-    data << uint32(0);
-
-    SendPacket( &data );
-}
-
-// TODO : All bids show up as overbid : BUG!
-void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
-{
-    uint64 guid;
-    float unknownAuction;
-
-    recv_data >> guid;
-    recv_data >> unknownAuction;
-
-    WorldPacket data;
-
-    data.Initialize( SMSG_AUCTION_BIDDER_LIST_RESULT );
-    uint32 cnt = 0;
-    Player *pl = GetPlayer();
-    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        if (pl && itr->second->bidder == pl->GetGUIDLow())
-            cnt++;
-    }
-    if (cnt < 51)
-    {
-        data << cnt;
-    }
-    else
-    {
-        data << uint32(50);
-    }
-    uint32 cnter = 1;
-                                                            // added
-    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        //cycle, which finds all players auctions
-        AuctionEntry *Aentry = itr->second;
-        Player *pl = GetPlayer();
-        if( Aentry && pl && Aentry->bidder == pl->GetGUIDLow() && (cnter < 51))
-        {
-            data << Aentry->Id;
-            Item *it = objmgr.GetAItem(Aentry->item_guidlow);
-            data << it->GetUInt32Value(OBJECT_FIELD_ENTRY);
-            data << uint32(1);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(it->GetCount());
-            data << uint32(0);
-            data << it->GetOwnerGUID();
-            data << Aentry->bid;
-            data << uint32(0);
-            data << Aentry->buyout;
-            data << uint32((Aentry->time - time(NULL)) * 1000);
-            data << uint64(0);
-            data << Aentry->bid;
-            cnter++;
-        }
-    }
-    data << cnt;
-    SendPacket(&data);
-}
-
-void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
-{
-    uint64 auctioneer;
-    uint32 auction;
-    uint32 price;
-    WorldPacket data;
-    recv_data >> auctioneer;
-    recv_data >> auction >> price;
-    AuctionEntry *ah = objmgr.GetAuction(auction);
-    Player *pl = GetPlayer();
-    if ((ah) && (ah->owner != pl->GetGUIDLow()))
-    {
-        if ((price < ah->buyout) || (ah->buyout == 0))
-        {
-            if (ah->bidder > 0)
-            {
-                Mail* n = new Mail;
-                n->messageID = objmgr.GenerateMailID();
-                n->sender = ah->owner;
-                n->receiver = ah->bidder;
-                n->subject = "You have lost a bid";
-                n->body = "";
-                n->item_guidlow = 0;
-                n->item_id = 0;
-                n->time = time(NULL) + (30 * DAY);
-                n->money = ah->bid;
-                n->COD = 0;
-                n->checked = 0;
-
-                uint64 rc = MAKE_GUID(ah->bidder,HIGHGUID_PLAYER);
-                Player *rpl = objmgr.GetPlayer(rc);
-
-                //escape apostrophes
-                std::string subject = n->subject;
-                std::string body = n->body;
-                sDatabase.escape_string(body);
-                sDatabase.escape_string(subject);
-
-                sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", n->messageID);
-                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                    n->messageID , n->sender , n->receiver , subject.c_str() , body.c_str(), n->item_guidlow , n->item_id,(uint64)n->time ,n->money ,n->COD ,n->checked);
-
-                if (rpl)
-                {
-                    rpl->AddMail(n);
-                }
-            }
-
-            ah->bidder = pl->GetGUIDLow();
-            ah->bid = price;
-            objmgr.RemoveAuction(ah->Id);
-            objmgr.AddAuction(ah);
-
-            // after this update we should save player!
-            sDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u';", ah->bidder, ah->bid, ah->Id);
-
-            pl->ModifyMoney(-int32(price));
-
-            data.Initialize( SMSG_AUCTION_BIDDER_LIST_RESULT );
-            uint32 cnt = 0;
-            Player *pl = GetPlayer();
-                                                            // added
-            for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-            {
-                //we need count of auctions of this player
-                AuctionEntry *Aentry = itr->second;
-                if( Aentry && pl && Aentry->bidder == pl->GetGUIDLow())
-                    cnt++;
-            }
-            if (cnt < 51)
-            {
-                data << cnt;
-            }
-            else
-            {
-                data << uint32(50);
-            }
-            uint32 cnter = 1;
-
-            for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-            {
-                //prepare data to send
-                AuctionEntry *Aentry = itr->second;
-                if( Aentry && pl && Aentry->bidder == pl->GetGUIDLow() && (cnter < 51))
-                {
-                    data << Aentry->Id;
-                    Item *it = objmgr.GetAItem(Aentry->item_guidlow);
-                    data << it->GetUInt32Value(OBJECT_FIELD_ENTRY);
-                    data << uint32(1);
-                    data << uint32(0);
-                    data << uint32(0);
-                    data << uint32(it->GetCount());
-                    data << uint32(0);
-                    data << it->GetOwnerGUID();
-                    data << Aentry->bid;
-                    data << uint32(0);
-                    data << Aentry->buyout;
-                    data << uint32((Aentry->time - time(NULL)) * 1000);
-                    data << uint64(0);
-                    // Is this needed?
-                    if (uint32(Aentry->bidder) > 0)
-                    {
-                        data << Aentry->bid;
-                    }
-                    else
-                    {
-                        data << uint32(0);
-                    }
-                    cnter++;
-                }
-            }
-
-            data << cnt;
-            SendPacket(&data);
-            data.clear();
-            data.Initialize( SMSG_AUCTION_LIST_RESULT );
-            data << uint32(0);
-            data << uint32(0);
-            SendPacket(&data);
-        }
-        else
-        {
-            pl->ModifyMoney(-int32(ah->buyout));
-            Mail *m = new Mail;
-            m->messageID = objmgr.GenerateMailID();
-            m->sender = ah->owner;
-            m->receiver = pl->GetGUIDLow();
-
-            std::ostringstream msgAuctionWonSubject;
-            std::ostringstream msgAuctionWonBody;
-            msgAuctionWonSubject << "Auction won: ";
-            msgAuctionWonBody << "Item Purchased: ";
-
-            // Get the item info
-            Item *wonitem = objmgr.GetAItem(ah->item_guidlow);
-            if (wonitem)
-            {
-                ItemPrototype const *wonitemproto = wonitem->GetProto();
-                msgAuctionWonSubject << wonitemproto->Name1;
-                msgAuctionWonBody << wonitemproto->Name1 << "$B";
-            }
-            else
-            {
-                msgAuctionWonSubject << "Unknown";
-                msgAuctionWonBody << "Unknown$B";
-            }
-
-            msgAuctionWonBody << "Sold By: ";
-            Player *auctionOwner = objmgr.GetPlayer((uint64)m->sender);
-            if (auctionOwner)
-            {
-                // the auctionOwner is currently online, so lets get the name
-                msgAuctionWonBody << auctionOwner->GetName() << "$B";
-            }
-            else
-            {
-                // the auctionOwner is currently offline, so lets get the name from the database
-                std::string ownerName;
-                if(objmgr.GetPlayerNameByGUID(m->sender,ownerName))
-                    msgAuctionWonBody << ownerName << "$B";
-                else
-                    msgAuctionWonBody << "Unknown$B";
-            }
-
-            // TODO Add message stating how much it costed
-            m->subject = msgAuctionWonSubject.str().c_str();
-            m->body = msgAuctionWonBody.str().c_str();
-            m->item_guidlow = ah->item_guidlow;
-            m->item_id = ah->item_id;
-            m->time = time(NULL) + (29 * DAY);
-
-            // If we do a buyout and the prev bid was made by the same player ..
-            if (ah->bidder == pl->GetGUIDLow())
-            {
-                m->money = ah->bid;                         // .. we return their cash
-            }
-            else
-            {
-                m->money = 0;                               // Otherwise, just the item
-            }
-            m->COD = 0;
-            m->checked = 0;
-
-            uint64 mrcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
-            Player *mrpln = objmgr.GetPlayer(mrcpl);
-            if (mrpln)
-            {
-                mrpln->AddMail(m);
-            }
-
-            //escape apostrophes
-            std::string subject = m->subject;
-            std::string body = m->body;
-            sDatabase.escape_string(body);
-            sDatabase.escape_string(subject);
-
-            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, m->money, 0, 0);
-
-            // mail to last bidder if there's one... + return money
-            // EXCEPT if lastbidder == newbidder
-            if ((ah->bidder > 0) && (ah->bidder != pl->GetGUIDLow()))
-            {
-                Mail *mn2 = new Mail;
-                mn2->messageID = objmgr.GenerateMailID();
-                mn2->sender = ah->owner;
-                mn2->receiver = ah->bidder;
-                mn2->subject = "You lost a bid!";
-                mn2->body = "Item has been bought";
-                mn2->item_guidlow = 0;
-                mn2->item_id = 0;
-                mn2->time = time(NULL) + (30 * DAY);
-                mn2->money = ah->bid;
-                mn2->COD = 0;
-                mn2->checked = 0;
-
-                Player *rpl2 = objmgr.GetPlayer(MAKE_GUID(ah->bidder,HIGHGUID_PLAYER));
-
-                //escape apostrophes
-                std::string subject = mn2->subject;
-                std::string body = mn2->body;
-                sDatabase.escape_string(body);
-                sDatabase.escape_string(subject);
-
-                sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
-                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                    mn2->messageID , mn2->sender , mn2->receiver , subject.c_str() , body.c_str(), mn2->item_guidlow, mn2->item_id, (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
-
-                if (rpl2)
-                {
-                    rpl2->AddMail(mn2);
-                }
-            }
-
-            uint64 rcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
-            Player *rpl = objmgr.GetPlayer(rcpl);
-            if (rpl)
-            {
-                Item *it = objmgr.GetAItem(ah->item_guidlow);
-                rpl->AddMItem(it);
-            }
-
-            sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",ah->Id);
-
-            data.Initialize( SMSG_AUCTION_LIST_RESULT );
-            data << uint32(0);
-            data << uint32(0);
-            SendPacket(&data);
-
-            Mail *mn = new Mail;
-            mn->messageID = objmgr.GenerateMailID();
-            mn->sender = 0;                                 //changed to 0, but there should be "Horde or Ali Auction House"
-            mn->receiver = ah->owner;
-            mn->subject = "Your item sold!";
-            mn->body = "";
-            mn->item_guidlow = 0;
-            mn->item_id = 0;
-            mn->time = time(NULL) + (29 * DAY);
-            mn->money = ah->buyout;
-            mn->COD = 0;
-            mn->checked = 0;
-
-            {
-                //escape apostrophes
-                std::string subject = mn->subject;
-                std::string body = mn->body;
-                sDatabase.escape_string(body);
-                sDatabase.escape_string(subject);
-
-                sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u';", mn->messageID);
-                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                    "VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u');",
-                    mn->messageID, mn->sender, mn->receiver, subject.c_str(), body.c_str(), mn->item_guidlow, mn->item_id, (uint64)mn->time, mn->money, 0, 0);
-            }
-
-            rcpl = MAKE_GUID(mn->receiver,HIGHGUID_PLAYER);
-            Player *rpln = objmgr.GetPlayer(rcpl);
-            if (rpln)
-            {
-                rpln->AddMail(mn);
-            }
-
-            objmgr.RemoveAItem(ah->item_guidlow);
-            objmgr.RemoveAuction(ah->Id);
-            //now we can remove auction from ram...
-            //delete ah; // should be used in objmgr::removeauction function
-        }
-    }
-}
-
-static uint8 AuctionerFactionToLocation(uint32 faction)
+static uint8 AuctioneerFactionToLocation(uint32 faction)
 {
     switch (faction)
     {
-        case 29:                                            // orc
+        case 29:                                            //orc
         case 68:                                            //undead
         case 104:                                           //tauren
-            return 1;
+            return 6;
             break;
         case 12:                                            //human
         case 55:                                            //dwarf
@@ -425,8 +62,102 @@ static uint8 AuctionerFactionToLocation(uint32 faction)
             return 2;
             break;
         default:                                            /* 85 and so on ... neutral*/
-            return 3;
+            return 7;
     }
+}
+
+void WorldSession::SendAuctionHello( uint64 guid, Creature* unit )
+{
+    WorldPacket data;
+    data.Initialize( MSG_AUCTION_HELLO );
+    data << (uint64) guid;
+    data << (uint32) AuctioneerFactionToLocation(unit->getFaction());
+    SendPacket( &data );
+}
+//this function inserts to WorldPacket auction's data 
+bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
+{
+    Item *pItem = objmgr.GetAItem(auction->item_guid);
+    if (!pItem) {
+        sLog.outError("auction to item, that doesn't exist !!!!");		
+        return false;
+    }
+    data << auction->Id;
+    data << pItem->GetUInt32Value(OBJECT_FIELD_ENTRY);
+    data << (uint32) 0;                                                 //0 - HighBidder, 1 - outbid, BID TYPE - not sure
+    data << (uint32) 0;                                                 //unknown constant 0 ?
+    data << (uint32) 0;                                                 //not pItem->GetCreator();// 4a d0 64 02, 0, unknown
+    data << (uint32) pItem->GetCount();                                 //item->count
+    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES);   //item->charge FFFFFFF
+    data << (uint32) auction->owner;                                    //Auction->owner
+    data << (uint32) 0;                                                 //player_high_guid
+    data << (uint32) auction->startbid;                                 //Auction->startbid
+    data << (uint32) 0;                                                 //minimal outbid... not fixed now... wait a moment ;-)
+    data << (uint32) auction->buyout;                                   //auction->buyout
+    data << (uint32) (auction->time - time(NULL)) * 1000;               //time
+    data << (uint32) auction->bidder;                                   //auction->bidder current
+    data << (uint32) 0;                                                 //0 ? .. player highguid
+    data << (uint32) auction->bid;                                      //current bid
+    return true;
+}
+//call this method when player bids, creates, or deletes auction
+void WorldSession::SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError )
+{
+    WorldPacket data;
+    data.Initialize( SMSG_AUCTION_COMMAND_RESULT );
+    data << auctionId;
+    data << Action;
+    data << ErrorCode;
+    if ( Action )
+        data << bidError; //when bid, then send 0, once...
+    SendPacket(&data);
+}
+//this function sends notification, if bidder is online
+void WorldSession::SendAuctionBidderNotification( uint32 location, uint32 auctionId, uint64 bidder, uint32 bidSum, uint32 diff, uint32 item_template)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_AUCTION_BIDDER_NOTIFICATION);
+    data << location;
+    data << auctionId;
+    data << (uint64) bidder;
+    data << bidSum;
+    data << (uint32) diff;
+    data << item_template;
+    data << (uint32) 0;
+    SendPacket(&data);
+}
+
+void WorldSession::SendAuctionOwnerNotification( AuctionEntry* auction)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_AUCTION_OWNER_NOTIFICATION);
+    data << auction->Id;
+    data << auction->bid;
+    data << (uint32) 0; //unk
+    data << (uint32) 0; //unk
+    data << (uint32) 0; //unk
+    data << auction->item_template;
+    data << (uint32) 0; //unk
+    SendPacket(&data);
+}
+//this function sends mail to old bidder 
+void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPrice)
+{
+    uint32 mailId = objmgr.GenerateMailID();
+    time_t etime = time(NULL) + (30 * DAY);
+
+    std::ostringstream msgAuctionExpiredSubject;
+    msgAuctionExpiredSubject << auction->item_template << ":0:" << AUCTION_OUTBIDDED;
+
+    Player *oldBidder = objmgr.GetPlayer((uint64) auction->bidder);
+    if (oldBidder) {
+        oldBidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, newPrice - auction->bid, auction->item_template);
+        oldBidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionExpiredSubject.str(), 0, 0, 0, etime, auction->bid, 0, NOT_READ, NULL); 
+    }
+
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '%d')",
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionExpiredSubject.str().c_str(), (uint64)etime, auction->bid, NOT_READ);
 }
 
 void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
@@ -438,94 +169,153 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     Player *pl = GetPlayer();
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
-    if(!pCreature||!pCreature->isAuctioner())
+    if(!pCreature||!pCreature->isAuctioner()) {
         return;
+    }
 
     uint16 pos = pl->GetPosByGuid(item);
     Item *it = pl->GetItemByPos( pos );
 
     // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
-    if(!it || !it->IsCanTraded())
+    if(!it || !it->CanBeTraded())
+    {
+        //5b 02 00 00 00 00 00 00 00 00 02 00 00 00 -- -- : [.............
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR); //sure
         return;
+    }
+    
+    uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
+    AuctionHouseObject * mAuctions;
+    mAuctions = objmgr.GetAuctionsMap( location );
 
-    uint8 location = AuctionerFactionToLocation(pCreature->getFaction());
+    //we have to take deposit :
+    uint32 deposit = objmgr.GetAuctionDeposit( location, etime, it );
+    if ( pl->GetMoney() < deposit ) {
+        //SendAuctionCommandResult(0, AUCTION_SELL_ITEM, some error code , maybe 1?);
+        return;
+    }
+    pl->ModifyMoney( ((int32) deposit) * -1 );
 
     AuctionEntry *AH = new AuctionEntry;
     AH->Id = objmgr.GenerateAuctionID();
     AH->auctioneer = GUID_LOPART(auctioneer);
-    AH->item_guidlow = GUID_LOPART(item);
-    AH->item_id = it->GetEntry();
+    AH->item_guid = GUID_LOPART(item);
+    AH->item_template = it->GetEntry();
     AH->owner = pl->GetGUIDLow();
-    AH->bid = bid;
+    AH->startbid = bid;
     AH->bidder = 0;
+    AH->bid = 0;
     AH->buyout = buyout;
     time_t base = time(NULL);
     AH->time = ((time_t)(etime * 60)) + base;
+    AH->deposit = deposit;
     AH->location = location;
 
     sLog.outDetail("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes) in location: %u", GUID_LOPART(item), GUID_LOPART(auctioneer), bid, buyout, GUID_LOPART(time), location);
-    objmgr.AddAuction(AH);
+    mAuctions->AddAuction(AH);
 
     // DB can have outdate auction item with same guid
     objmgr.RemoveAItem(GUID_LOPART(item));
 
     objmgr.AddAItem(it);
-
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
     it->RemoveFromUpdateQueueOf(pl);
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", it->GetGUIDLow());
+    it->DeleteFromInventoryDB();
+    it->SaveToDB();
+    sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location`) "
+        "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u')",
+        AH->Id, AH->auctioneer, AH->item_guid, AH->item_template, AH->owner, AH->buyout, AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);
 
-    sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`location`) "
-        "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-        AH->Id, AH->auctioneer, AH->item_guidlow, AH->item_id, AH->owner, AH->buyout, AH->time, AH->bidder, AH->bid, AH->location);
-    pl->SaveToDB();
-
-    WorldPacket data;
-    data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
-    data << uint32(0);                                      // initialize, but there should be count..
-    uint32 count = 0;
-    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        if (itr->second->owner == pl->GetGUIDLow() && (count < 51))
-        {
-            AuctionEntry *Aentry = itr->second;
-            data << Aentry->Id;
-            Item *it = objmgr.GetAItem(Aentry->item_guidlow);
-            data << it->GetUInt32Value(OBJECT_FIELD_ENTRY);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(it->GetCount());
-            data << uint32(0);
-            data << it->GetOwnerGUID();
-            data << Aentry->bid;
-            data << uint32(0);
-            data << Aentry->buyout;
-            time_t base = time(NULL);
-            data << uint32((Aentry->time - base) * 1000);
-            data << uint64(0);
-            data << Aentry->bid;
-            count++;
-        }
-    }
-    data.put( 0, count );                                   // add count to placeholder
-    data << count;
-    SendPacket(&data);
-
+    SendAuctionCommandResult(AH->Id, AUCTION_SELL_ITEM, AUCTION_OK);
+    //pl->SaveToDB() - isn't needed, because item will be removed from inventory now, only money are problem
 }
 
+void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
+{
+    uint64 auctioneer;
+    uint32 auctionId;
+    uint32 price;
+    WorldPacket data;
+    recv_data >> auctioneer;
+    recv_data >> auctionId >> price;
+
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
+    if(!pCreature||!pCreature->isAuctioner())
+        return;
+    uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
+
+    AuctionHouseObject * mAuctions;
+    mAuctions = objmgr.GetAuctionsMap( location );
+
+    AuctionEntry *auction = mAuctions->GetAuction(auctionId);
+    Player *pl = GetPlayer();
+    if ((auction) && (auction->owner != pl->GetGUIDLow()))
+    {
+        if (price < auction->bid) {
+            //auction has already higher bid, client tests it!
+            //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
+            return;
+        }
+        if (price > pl->GetMoney()) {
+            //you don't have enought money!, client tests!
+            //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
+            return;
+        }
+        if ((price < auction->buyout) || (auction->buyout == 0))
+        {
+            if (auction->bidder > 0) {
+                if ( auction->bidder == pl->GetGUIDLow() ) {
+                    pl->ModifyMoney(((uint32)(price - auction->bid)) * -1);
+                } else {
+                    // mail to last bidder if there's one... + return money
+                    SendAuctionOutbiddedMail( auction , price );
+                    pl->ModifyMoney(((int32) price) * -1);
+                }
+            } else {
+                pl->ModifyMoney(((int32) price) * -1);
+            }
+            auction->bidder = pl->GetGUIDLow();
+            auction->bid = price;
+
+            // after this update we should save player's money ...
+            sDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u';", auction->bidder, auction->bid, auction->Id);
+
+            SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK, 0 );
+        } else {
+            //buyout:
+            if (pl->GetGUIDLow() == auction->bidder ) {
+                pl->ModifyMoney(-int32(auction->buyout - auction->bid));
+            } else {
+                pl->ModifyMoney(-int32(auction->buyout));
+                if ( auction->bidder ) {                                         //buyout for bidded auction ..
+                    SendAuctionOutbiddedMail( auction, auction->buyout );
+                }
+            }
+            auction->bidder = pl->GetGUIDLow();
+            auction->bid = auction->buyout;
+            
+            objmgr.SendAuctionSuccessfulMail( auction );
+            objmgr.SendAuctionWonMail( auction );
+
+            SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK);
+        }
+    } else {
+        //send auction database error..., or somethig like that
+        SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_INTERNAL_ERROR, 0); //maybe would work
+    }
+}
+//will be fixed soon , but now it's not used....
 void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 {
-    uint32 auctioneer;
-    uint32 unk1;                                            // 0xF0001000
+    uint64 auctioneer;
     uint32 auctionID;
-    recv_data >> auctioneer >> unk1;
+    recv_data >> auctioneer;
     recv_data >> auctionID;
-    // sLog.outError("DELETE AUCTION !!! auctioneer : %u, unknown: %u, AuctionID: %u", auctioneer, unk1, auctionID);
+    sLog.outDebug( "DELETE AUCTION AuctionID: %u", auctionID);
     // Fetches the AH auction
-    AuctionEntry *ah = objmgr.GetAuction(auctionID);
-    Player *pl = GetPlayer();
-
+    //AuctionEntry *ah = objmgr.GetAuction(auctionID);
+    /*Player *pl = GetPlayer();
+    //will be fixed soon
     if ((ah))                                               // && (ah->owner != pl->GetGUIDLow()))
     {
         Item *it = objmgr.GetAItem(ah->item_guidlow);
@@ -668,7 +458,42 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     SendPacket(&data);
     //    WorldPacket data;
     //    data << unk1 << auctionID;                              //need fix here, this code does nothing
-    //    SendPacket(&data);
+    //    SendPacket(&data);*/
+}
+
+void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
+{
+    uint64 guid;            //NPC guid
+    float unknownAuction;   //0 Constant ?
+
+    recv_data >> guid;
+    recv_data >> unknownAuction;
+
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    if(!pCreature||!pCreature->isAuctioner())
+        return;
+    uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
+
+    AuctionHouseObject * mAuctions;
+    mAuctions = objmgr.GetAuctionsMap( location );
+
+    WorldPacket data;
+    data.Initialize( SMSG_AUCTION_BIDDER_LIST_RESULT );
+    Player *pl = GetPlayer();
+    data << (uint32) 0; //add 0 as count
+	uint32 cnt = 0;
+    for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
+    {
+        AuctionEntry *Aentry = itr->second;
+        if( Aentry && Aentry->bidder == pl->GetGUIDLow() && (cnt < 51))
+        {
+            if (SendAuctionInfo(data, itr->second))
+                cnt++;            
+        }
+    }
+    data.put( 0, cnt );                                   // add count to placeholder
+    data << cnt;                                          //not sure
+    SendPacket(&data);
 }
 
 void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
@@ -678,41 +503,33 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 
     recv_data >> guid;
 
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    if(!pCreature||!pCreature->isAuctioner())
+        return;
+    uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
+
+    AuctionHouseObject * mAuctions;
+    mAuctions = objmgr.GetAuctionsMap( location );
+
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
-
     count = 0;
-    data << uint32(0);
-    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
+    data << (uint32) 0;
+    for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
     {
         AuctionEntry *Aentry = itr->second;
         if( Aentry )
         {
             if( Aentry->owner == _player->GetGUIDLow() )
             {
-                Item *item = objmgr.GetAItem(Aentry->item_guidlow);
+                Item *item = objmgr.GetAItem(Aentry->item_guid);
                 if( item )
                 {
                     ItemPrototype const *proto = item->GetProto();
                     if( proto )
                     {
-                        count++;
-                        data << Aentry->Id;
-                        data << proto->ItemId;
-                        data << uint32(0);
-                        data << uint32(0);
-                        data << uint32(0);
-                        data << uint32(item->GetCount());
-                        data << uint32(0);
-                        data << item->GetOwnerGUID();
-                        data << Aentry->bid;
-                        data << uint32(0);
-                        data << Aentry->buyout;
-                                                            // May be need fixing
-                        data << uint32((Aentry->time - time(NULL)) * 1000);
-                        data << uint32(Aentry->bidder);
-                        data << uint32(0);
-                        data << Aentry->bid;
+                        if (SendAuctionInfo(data, itr->second))
+                            count++;
                         if( count == 50 )
                             break;
                     }
@@ -721,7 +538,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
         }
     }
     data.put<uint32>(0, count);
-    data << uint32(count);
+    data << (uint32) count;
     SendPacket(&data);
 }
 
@@ -743,71 +560,49 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     if(!pCreature||!pCreature->isAuctioner())
         return;
 
-    location = AuctionerFactionToLocation(pCreature->getFaction());
+    location = AuctioneerFactionToLocation(pCreature->getFaction());
+    AuctionHouseObject * mAuctions;
+    mAuctions = objmgr.GetAuctionsMap( location );
 
     sLog.outDebug("Auctionhouse search guid: " I64FMTD ", list from: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, listfrom, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
 
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_LIST_RESULT );
-    count = 0;                                              // Start value?
+    count = 0;
     totalcount = 0;
-    data << uint32(0);
-    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
+    data << (uint32) 0;
+    for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
     {
         AuctionEntry *Aentry = itr->second;
-        if( Aentry && Aentry->location == location)
+        Item *item = objmgr.GetAItem(Aentry->item_guid);
+        if( item )
         {
-            Item *item = objmgr.GetAItem(Aentry->item_guidlow);
-            if( item )
+            ItemPrototype const *proto = item->GetProto();
+            if( proto )
             {
-                ItemPrototype const *proto = item->GetProto();
-                if( proto )
+                if( auctionMainCategory == (0xffffffff) || proto->Class == auctionMainCategory )
                 {
-                    if( auctionMainCategory == (0xffffffff) || proto->Class == auctionMainCategory )
+                    if( auctionSubCategory == (0xffffffff) || proto->SubClass == auctionSubCategory )
                     {
-                        if( auctionSubCategory == (0xffffffff) || proto->SubClass == auctionSubCategory )
+                        if( auctionSlotID == (0xffffffff) || proto->InventoryType == auctionSlotID )
                         {
-                            if( auctionSlotID == (0xffffffff) || proto->InventoryType == auctionSlotID )
+                            if( quality == (0xffffffff) || proto->Quality == quality )
                             {
-                                if( quality == (0xffffffff) || proto->Quality == quality )
+                                if( usable == (0x00) || _player->CanUseItem( item ) == EQUIP_ERR_OK )
                                 {
-                                    if( usable == (0x00) || _player->CanUseItem( item ) == EQUIP_ERR_OK )
+                                    if( ( levelmin == (0x00) || proto->RequiredLevel >= levelmin ) && ( levelmax == (0x00) || proto->RequiredLevel <= levelmax ) )
                                     {
-                                        if( ( levelmin == (0x00) || proto->RequiredLevel >= levelmin ) && ( levelmax == (0x00) || proto->RequiredLevel <= levelmax ) )
+                                        name = proto->Name1;
+                                        std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+                                        std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), ::tolower );
+                                        if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
                                         {
-                                            name = proto->Name1;
-                                            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-                                            std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), ::tolower );
-                                            if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
+                                            if ((count < 50) && (totalcount >= listfrom))
                                             {
-                                                if ((count < 50) && (totalcount >= listfrom))
-                                                {
-                                                    count++;
-                                                    data << Aentry->Id;
-                                                    data << proto->ItemId;
-                                                    data << uint32(0);
-                                                    data << uint32(0);
-                                                    data << uint32(0);
-                                                    data << uint32(item->GetCount());
-                                                    data << uint32(0);
-                                                    data << item->GetOwnerGUID();
-                                                    data << Aentry->bid;
-                                                    data << uint32(0);
-                                                    data << Aentry->buyout;
-                                                    data << uint32((Aentry->time - time(NULL)) * 1000);
-                                                    data << uint32(Aentry->bidder);
-                                                    data << uint32(0);
-                                                    if (uint32(Aentry->bidder) > 0)
-                                                    {
-                                                        data << Aentry->bid;
-                                                    }
-                                                    else
-                                                    {
-                                                        data << uint32(0);
-                                                    }
-                                                }
-                                                totalcount++;
+                                                count++;
+                                                SendAuctionInfo( data, Aentry);                                                
                                             }
+                                            totalcount++;
                                         }
                                     }
                                 }
@@ -819,6 +614,6 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
         }
     }
     data.put<uint32>(0, count);
-    data << uint32(totalcount);
+    data << (uint32) totalcount;
     SendPacket(&data);
 }
