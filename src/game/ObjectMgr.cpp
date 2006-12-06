@@ -401,7 +401,7 @@ void ObjectMgr::LoadAuctions()
     delete result;
 
     sLog.outString("");
-    sLog.outString( ">> Loaded %u auction items", AuctionCount);
+    sLog.outString( ">> Loaded %u auctions", AuctionCount);
     sLog.outString("");
 }
 
@@ -423,14 +423,14 @@ void ObjectMgr::LoadAuctionItems()
     do
     {
         fields = result->Fetch();
-        uint32 item_guid = fields[0].GetUInt32();
-        uint32 item_id   = fields[1].GetUInt32();
+        uint32 item_guid        = fields[0].GetUInt32();
+        uint32 item_template    = fields[1].GetUInt32();
 
-        ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
+        ItemPrototype const *proto = objmgr.GetItemPrototype(item_template);
 
         if(!proto)
         {
-            sLog.outError( "ObjectMgr::LoadAuctionItems: Unknown item (GUID: %u id: #%u) in auction, skipped.", item_guid,item_id);
+            sLog.outError( "ObjectMgr::LoadAuctionItems: Unknown item (GUID: %u id: #%u) in auction, skipped.", item_guid,item_template);
             continue;
         }
 
@@ -1061,6 +1061,25 @@ void ObjectMgr::LoadScripts()
     sLog.outString( "" );
 }
 
+void ObjectMgr::LoadItemPages()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `item_page`");
+    if( !result )
+    {
+        sLog.outError("Error opening item_page table.\n");
+        exit(1);
+    }
+
+    Field* fields;
+    do
+    {
+        fields = result->Fetch();
+
+        mItemPages[ fields[0].GetUInt32() ] = fields[1].GetCppString();
+
+    } while ( result->NextRow() );
+}
+
 void ObjectMgr::AddGossipText(GossipText *pGText)
 {
     ASSERT( pGText->Text_ID );
@@ -1652,8 +1671,10 @@ uint32 ObjectMgr::GenerateItemPageID()
 
 uint32 ObjectMgr::CreateItemPage(std::string text)
 {
-    //todo load all item_pages to RAM! // i will fix soon
     uint32 newItemPageId = GenerateItemPageID();
+    //insert new itempage to container
+    mItemPages[ newItemPageId ] = text;
+    //save new itempage
     sDatabase.escape_string(text);
     //any Delete query needed, itempageId is maximum of all ids
     std::ostringstream query;

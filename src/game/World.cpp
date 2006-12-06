@@ -311,11 +311,14 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Items..." );
     objmgr.LoadItemPrototypes();
-    objmgr.LoadAuctions();
     objmgr.LoadAuctionItems();
+    objmgr.LoadAuctions();
     
     sLog.outString( "Returning old mails..." );
     objmgr.ReturnOrDeleteOldMails(false);
+
+    sLog.outString( "Loading item_pages..." );
+    objmgr.LoadItemPages();
 
     sLog.outString( "Loading Creature templates..." );
     objmgr.LoadCreatureTemplates();

@@ -20,15 +20,14 @@
 #define AuctionHouse
 
 enum AuctionError {
-	AUCTION_OK = 0,
+    AUCTION_OK = 0,
     AUCTION_INTERNAL_ERROR = 2
 };
 
 enum AuctionAction {
-	AUCTION_SELL_ITEM = 0,
-	AUCTION_CANCEL = 1,
-	AUCTION_PLACE_BID = 2,
-
+    AUCTION_SELL_ITEM = 0,
+    AUCTION_CANCEL = 1,
+    AUCTION_PLACE_BID = 2
 };
 
 struct AuctionEntry

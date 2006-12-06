@@ -488,17 +488,20 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
         SendPacket(&data);
     }*/
     //there maybe check, if player has item with guid mailId, or has mail with id mailId
+
+    sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", itemPageId, mailId, unk);
+
     WorldPacket data;
     data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
     data << itemPageId;
-    sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", itemPageId, mailId, unk);
-    QueryResult *result = sDatabase.PQuery( "SELECT `text` FROM `item_page` WHERE `id` = '%u'", itemPageId );
+    /*QueryResult *result = sDatabase.PQuery( "SELECT `text` FROM `item_page` WHERE `id` = '%u'", itemPageId );
     if (result) {
         Field *fields = result->Fetch();
         data << fields[0].GetCppString();
     } else {
         data << "There is no info for this item.";
-    }
+    }*/
+    data << objmgr.GetItemPage( itemPageId );
     SendPacket(&data);
 }
 
