@@ -85,7 +85,7 @@ Player::Player (WorldSession *session): Unit()
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;
 
-    memset(m_items, 0, sizeof(Item*)*BUYBACK_SLOT_END);
+    memset(m_items, 0, sizeof(Item*)*BANK_SLOT_BAG_END);
     memset(m_buybackitems, 0, sizeof(Item*)*(BUYBACK_SLOT_END - BUYBACK_SLOT_START));
 
     //m_pDuel       = NULL;
@@ -8315,28 +8315,58 @@ void Player::SwapItem( uint16 src, uint16 dst )
     }
 }
 
-void Player::AddItemToBuyBackSlot( uint32 slot, Item *pItem )
+void Player::AddItemToBuyBackSlot( Item *pItem )
 {
     if( pItem )
     {
-        if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
+        uint32 slot = m_currentBuybackSlot;
+        // if current back slot non-empty search oldest or free
+        if(m_buybackitems[slot-BUYBACK_SLOT_START])
         {
-            RemoveItemFromBuyBackSlot( slot );
-            sLog.outDebug( "STORAGE: AddItemToBuyBackSlot item = %u, slot = %u", pItem->GetEntry(), slot);
-            uint32 eslot = slot - BUYBACK_SLOT_START;
+            uint32 oldest_time = GetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 );
+            uint32 oldest_slot = BUYBACK_SLOT_START;
 
-            m_buybackitems[eslot] = pItem;
-            time_t base = time(NULL);
-            time_t etime = base + (30 * 3600);
+            for(uint32 i = 1; i < BUYBACK_SLOT_END-BUYBACK_SLOT_START; ++i )
+            {
+                // found empty
+                if(!m_buybackitems[i])
+                {
+                    slot = BUYBACK_SLOT_START+i;
+                    break;
+                }
 
-            SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + eslot * 2, pItem->GetGUID() );
-            ItemPrototype const *pProto = pItem->GetProto();
-            if( pProto )
-                SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, pProto->SellPrice * pItem->GetCount() );
-            else
-                SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, 0 );
-            SetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + eslot, (uint32)etime );
+                uint32 i_time = GetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + i);
+
+                if(oldest_time > i_time)
+                {
+                    oldest_time = i_time;
+                    oldest_slot = BUYBACK_SLOT_START+i;
+                }
+            }
+
+            // find oldest
+            slot = oldest_slot;
         }
+        
+        RemoveItemFromBuyBackSlot( slot, true );
+        sLog.outDebug( "STORAGE: AddItemToBuyBackSlot item = %u, slot = %u", pItem->GetEntry(), slot);
+        uint32 eslot = slot - BUYBACK_SLOT_START;
+
+        m_buybackitems[eslot] = pItem;
+        time_t base = time(NULL);
+        uint32 etime = uint32(base - m_logintime + (30 * 3600));
+
+        SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + eslot * 2, pItem->GetGUID() );
+        ItemPrototype const *pProto = pItem->GetProto();
+        if( pProto )
+            SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, pProto->SellPrice * pItem->GetCount() );
+        else
+            SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, 0 );
+        SetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + eslot, (uint32)etime );
+
+        // move to next (for non filled list is move most optimized choice)
+        if(m_currentBuybackSlot < BUYBACK_SLOT_END-1)
+            ++m_currentBuybackSlot;
     }
 }
 
@@ -8348,7 +8378,7 @@ Item* Player::GetItemFromBuyBackSlot( uint32 slot )
     return NULL;
 }
 
-void Player::RemoveItemFromBuyBackSlot( uint32 slot )
+void Player::RemoveItemFromBuyBackSlot( uint32 slot, bool del )
 {
     sLog.outDebug( "STORAGE: RemoveItemFromBuyBackSlot slot = %u", slot);
     if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
@@ -8356,12 +8386,20 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot )
         uint32 eslot = slot - BUYBACK_SLOT_START;
         Item *pItem = m_buybackitems[eslot];
         if( pItem )
+        {
             pItem->RemoveFromWorld();
+            if(del)
+                delete pItem;
+        }
 
         m_buybackitems[eslot] = NULL;
         SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + eslot * 2, 0 );
         SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, 0 );
         SetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + eslot, 0 );
+
+        // if cuurent backslot is filled set to now free slot
+        if(m_buybackitems[m_currentBuybackSlot])
+            m_currentBuybackSlot = slot;
     }
 }
 
