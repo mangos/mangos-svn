@@ -206,14 +206,21 @@ void CliIdleShutdown(char* command,pPrintf zprintf)
 {
     char *args = strtok(command," ");
 
-    if(std::string(args)=="stop")
+    if( args )
     {
-        sWorld.ShutdownCancel();
+        if(std::string(args)=="stop")
+        {
+            sWorld.ShutdownCancel();
+        }
+        else
+        {
+            uint32 time = atoi(args);
+            sWorld.ShutdownServ(time,true);
+        }
     }
-    else
+    else 
     {
-        uint32 time = atoi(args);
-        sWorld.ShutdownServ(time,true);
+        zprintf("Invalid argument\r\n");
     }
 }
 
@@ -222,14 +229,21 @@ void CliShutdown(char* command,pPrintf zprintf)
 {
     char *args = strtok(command," ");
 
-    if(std::string(args)=="stop")
+    if( args )
     {
-        sWorld.ShutdownCancel();
+        if(std::string(args)=="stop")
+        {
+            sWorld.ShutdownCancel();
+        }
+        else
+        {
+            uint32 time = atoi(args);
+            sWorld.ShutdownServ(time);
+        }
     }
-    else
+    else 
     {
-        uint32 time = atoi(args);
-        sWorld.ShutdownServ(time);
+        zprintf("Invalid argument\r\n");
     }
 }
 

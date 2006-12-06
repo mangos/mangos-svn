@@ -994,8 +994,11 @@ void Spell::SendCastResult(uint8 result)
     {
         data << uint8(2);                                   // status = fail
         data << uint8(result);                              // problem
-
-        // first and second opt. argument (uint32 both), not work for me.
+        switch (result) {
+            case CAST_FAIL_REQUIRES_XXX:
+                data << uint32(m_spellInfo->RequiresSpellFocus);
+                break;
+        }
     }
     else
         data << uint8(0);                                   // status = ok
@@ -2005,7 +2008,7 @@ uint8 Spell::CheckItems()
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 
-        if(!ok) return (uint8)CAST_FAIL_REQUIRES_SOMETHING;
+        if(!ok) return (uint8)CAST_FAIL_REQUIRES_XXX;
 
         // game object found in range
     }
