@@ -138,7 +138,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
             {
                 buf.clear();
                 buf << uint8( UPDATETYPE_CREATE_OBJECT2 );
-                buf << uint8( 0xFF );
+                buf << uint8( 0xFF );                       // must be packet GUID ?
                 buf << GetGUID() ;
                 buf << m_objectTypeId;
                 _BuildMovementUpdate( &buf, 0x71, 0x2000 );
@@ -192,7 +192,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     ByteBuffer buf(500);
 
     buf << (uint8) UPDATETYPE_VALUES;
-    buf << (uint8) 0xFF;
+    buf << (uint8) 0xFF; // must be packed GUID  ?
     buf << GetGUID();
 
     UpdateMask updateMask;

@@ -1074,7 +1074,7 @@ void Spell::SendSpellGo()
     {
         writeAmmoToPacket(&data);
     }
-    data.hexlike();
+
     m_caster->SendMessageToSet(&data, true);
 }
 

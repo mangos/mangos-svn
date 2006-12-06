@@ -115,6 +115,7 @@ libgame_a_SOURCES = \
 	WorldSocketMgr.cpp \
 	AggressorAI.h \
 	AnimalRandomMovementGenerator.h \
+	AuctionHouseObject.h \
 	Bag.h \
 	BattleGround.h \
 	BattleGroundMgr.h \

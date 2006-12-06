@@ -1663,6 +1663,10 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
         SetResistanceBuffMods(SpellSchools(i), false, 0);
     }
 
+    // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
+    SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
+
     // apply stats, aura, items mods
     if(remove_mods)
     {
@@ -3074,6 +3078,17 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
             return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/HalfChanceSkillSteps) );
     }
     return false;
+}
+
+bool Player::UpdateFishingSkill()
+{
+    sLog.outDebug("UpdateFishingSkill");
+
+    uint32 SkillValue = GetSkillValue(SKILL_FISHING);
+
+    int32 chance = SkillValue < 75 ? 100 : 2500/(SkillValue-50);
+
+    return UpdateSkillPro(SKILL_FISHING,chance*10);
 }
 
 bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
