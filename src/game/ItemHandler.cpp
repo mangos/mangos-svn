@@ -322,17 +322,10 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                 if( pProto->SellPrice > 0 )
                 {
                     _player->ModifyMoney( pProto->SellPrice * pItem->GetCount() );
-                    uint32 buyBackslot = _player->GetCurrentBuybackSlot();
 
-                    if (buyBackslot < BUYBACK_SLOT_END - 1)
-                    {
-                        _player->RemoveItem( (pos >> 8), (pos & 255), true);
-                        pItem->RemoveFromUpdateQueueOf(_player);
-                        _player->AddItemToBuyBackSlot( buyBackslot, pItem );
-                        _player->SetCurrentBuybackSlot( buyBackslot + 1 );
-                    }
-                    else
-                        _player->DestroyItem( (pos >> 8), (pos & 255), true);
+                    _player->RemoveItem( (pos >> 8), (pos & 255), true);
+                    pItem->RemoveFromUpdateQueueOf(_player);
+                    _player->AddItemToBuyBackSlot( pItem );
 
                     return;
                 }
@@ -372,7 +365,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
             if( msg == EQUIP_ERR_OK )
             {
                 _player->ModifyMoney( -(int32)price );
-                _player->RemoveItemFromBuyBackSlot( slot );
+                _player->RemoveItemFromBuyBackSlot( slot, false );
                 _player->StoreItem( dest, pItem, true );
             }
             else

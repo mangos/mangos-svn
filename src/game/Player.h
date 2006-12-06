@@ -360,6 +360,7 @@ class WorldSession;
 #define BANK_SLOT_BAG_6              68
 #define BANK_SLOT_BAG_END            69
 
+// strored in m_buybackitems
 #define BUYBACK_SLOT_START           69
 #define BUYBACK_SLOT_1               69
 #define BUYBACK_SLOT_2               70
@@ -553,9 +554,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DestroyItemCount( Item* item, uint32& count, bool update );
         void SplitItem( uint16 src, uint16 dst, uint32 count );
         void SwapItem( uint16 src, uint16 dst );
-        void AddItemToBuyBackSlot( uint32 slot, Item *pItem );
+        void AddItemToBuyBackSlot( Item *pItem );
         Item* GetItemFromBuyBackSlot( uint32 slot );
-        void RemoveItemFromBuyBackSlot( uint32 slot );
+        void RemoveItemFromBuyBackSlot( uint32 slot, bool del );
         void SendEquipError( uint8 msg, Item* pItem, Item *pItem2 );
         void SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param );
         void SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param );
@@ -865,15 +866,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CheckDuelDistance(time_t currTime);
         void DuelComplete(uint8 type);
         DuelInfo *duel;
-
-        uint32 GetCurrentBuybackSlot() { return m_currentBuybackSlot; }
-        void SetCurrentBuybackSlot( uint32 slot )
-        {
-            if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
-                m_currentBuybackSlot = slot;
-            else
-                m_currentBuybackSlot = BUYBACK_SLOT_START;
-        }
 
         bool IsGroupMember(Player *plyr);
 
@@ -1190,8 +1182,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_dismountCost;
         uint32 m_nextSave;
 
-        Item* m_items[BUYBACK_SLOT_END];
+        Item* m_items[BANK_SLOT_BAG_END];
         Item* m_buybackitems[BUYBACK_SLOT_END - BUYBACK_SLOT_START];
+        uint32 m_currentBuybackSlot;
+
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;
 
@@ -1209,8 +1203,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_isInvited;
 
         uint32 m_GuildIdInvited;
-
-        uint32 m_currentBuybackSlot;
 
         std::list<struct Factions> factions;
         std::deque<Mail*> m_mail;
