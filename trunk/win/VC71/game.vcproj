@@ -431,6 +431,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\AuctionHouseObject.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Bag.cpp"
 				>
 			</File>

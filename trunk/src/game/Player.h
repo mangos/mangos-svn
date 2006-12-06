@@ -880,6 +880,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool UpdateSkillPro(uint16 SkillId, int32 Chance);
         bool UpdateCraftSkill(uint32 spellid);
         bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
+        bool UpdateFishingSkill();
 
         uint32 GetSpellByProto(ItemPrototype *proto);
 
