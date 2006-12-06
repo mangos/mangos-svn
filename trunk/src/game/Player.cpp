@@ -2519,7 +2519,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
 
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
-    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN ( SELECT `item_guid` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0 ",guid);
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN ( SELECT `item_guid` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0 )",guid);
     m_ignorelist.clear();
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
