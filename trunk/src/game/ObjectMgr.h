@@ -230,6 +230,8 @@ class ObjectMgr
         void LoadGossipText();
         void LoadAreaTriggerPoints();
 
+        void LoadItemPages();
+
         void LoadTeleportCoords();
 
         //load first auction items, because of check if item exists, when loading
@@ -246,6 +248,14 @@ class ObjectMgr
         uint32 GenerateItemPageID();
 
         uint32 CreateItemPage(std::string text);
+        std::string GetItemPage( uint32 id )            
+        {
+            ItemPageMap::const_iterator itr = mItemPages.find( id );
+            if ( itr != mItemPages.end() )
+                return itr->second;
+            else 
+                return "There is no info for this item";
+        }
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
         QuestMap QuestTemplates;
@@ -268,12 +278,15 @@ class ObjectMgr
 
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
+        typedef HM_NAMESPACE::hash_map<uint32, std::string> ItemPageMap;
 
         GroupSet            mGroupSet;
         GuildSet            mGuildSet;
 
         ItemMap             mItems;
         ItemMap             mAitems;
+
+        ItemPageMap         mItemPages;
 
         AuctionHouseObject  mHordeAuctions;
         AuctionHouseObject  mAllianceAuctions;
