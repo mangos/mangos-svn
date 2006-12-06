@@ -175,7 +175,7 @@ class ObjectMgr
         void SendAuctionExpiredMail( AuctionEntry * auction );
         uint32 GetAuctionCut( uint32 location, uint32 highBid );
         uint32 GetAuctionDeposit(uint32 location, uint32 time, Item *pItem);
-        
+
         PlayerInfo const* GetPlayerInfo(uint32 race, uint32 class_) const
         {
             if(race   >= MAX_RACES)   return NULL;
@@ -248,12 +248,12 @@ class ObjectMgr
         uint32 GenerateItemPageID();
 
         uint32 CreateItemPage(std::string text);
-        std::string GetItemPage( uint32 id )            
+        std::string GetItemPage( uint32 id )
         {
             ItemPageMap::const_iterator itr = mItemPages.find( id );
             if ( itr != mItemPages.end() )
                 return itr->second;
-            else 
+            else
                 return "There is no info for this item";
         }
 

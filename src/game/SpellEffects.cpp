@@ -1736,11 +1736,11 @@ void Spell::EffectSummonTotem(uint32 i)
     float x = m_caster->GetPositionX() + 2 * cos(angle);
     float y = m_caster->GetPositionY() + 2 * sin(angle);
     float z = m_caster->GetPositionZ();
-	
+
     Map* map = MapManager::Instance().GetMap(m_caster->GetMapId());
     float z2 = map->GetHeight(x,y);
     if( abs( z2 - z ) < 5 )
-    z = z2;
+        z = z2;
 
     uint64 guid = m_caster->m_TotemSlot[slot];
     if(guid != 0)
@@ -1753,7 +1753,7 @@ void Spell::EffectSummonTotem(uint32 i)
     Totem* pTotem = new Totem();
 
     if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),
-	m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(),
+        m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i] ))
     {
         delete pTotem;

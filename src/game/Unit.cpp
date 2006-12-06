@@ -3483,7 +3483,7 @@ bool Unit::isVisibleFor(Unit* u)
     if (AverageDist < 1) AverageDist = 1;
     if (Distance > AverageDist)
                                                             //prob between 10% and 0%
-            prob = (AverageDist-200+9*Distance)/(AverageDist-20);
+        prob = (AverageDist-200+9*Distance)/(AverageDist-20);
     else
         prob = 75 - (60/AverageDist)*Distance;              //prob between 15% and 75% (75% max prob)
     if (notInFront)
