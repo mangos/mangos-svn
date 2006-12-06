@@ -164,14 +164,14 @@ enum UnitVisibilityUpdate
     VISIBLE_NOCHANGES                 = 0,
     VISIBLE_SET_VISIBLE               = 1,
     VISIBLE_SET_INVISIBLE             = 2,
-    VISIBLE_SET_INVISIBLE_FOR_FACTION = 3
+    VISIBLE_SET_INVISIBLE_FOR_GROUP   = 3
 };
 
 enum UnitVisibility
 {
     VISIBILITY_OFF         = 0,
     VISIBILITY_ON          = 1,
-    VISIBILITY_FACTION     = 2
+    VISIBILITY_GROUP       = 2
 };
 
 // Value masks for UNIT_FIELD_FLAGS
