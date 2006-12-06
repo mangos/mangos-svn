@@ -1395,7 +1395,7 @@ void Aura::HandleModStealth(bool apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
         m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
-        m_target->SetVisibility(VISIBILITY_FACTION);
+        m_target->SetVisibility(VISIBILITY_GROUP);
     }
     else
     {
@@ -1426,7 +1426,7 @@ void Aura::HandleInvisibility(bool Apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
         m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-        m_target->SetVisibility(VISIBILITY_FACTION);
+        m_target->SetVisibility(VISIBILITY_GROUP);
     }
     else
     {

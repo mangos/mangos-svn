@@ -3454,9 +3454,20 @@ bool Unit::isVisibleFor(Unit* u)
     if (!this->IsWithinDist(u,MAX_DIST_INVISIBLE_UNIT))
         return false;
 
-    // Stealth not hostile units, not visibles
+    // Stealth not hostile units, not visibles (except Player-with-Player case)
     if (!u->IsHostileTo(this))
-        return true;
+    {
+        // player autodetect other player with stealth only if he in same group or raid
+        if(GetTypeId()==TYPEID_PLAYER && u->GetTypeId()==TYPEID_PLAYER)
+        {
+            if(((Player*)this)->IsInGroupOrRaidWith(((Player*)u)))
+                return true;
+
+            // else apply same rules as for hostile case (detecting check)
+        }
+        else
+            return true;
+    }
 
     bool IsVisible = true;
     bool notInFront = u->isInFront(this, MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ? 0 : 1;
@@ -3500,8 +3511,8 @@ void Unit::SetVisibility(UnitVisibility x)
         case VISIBILITY_OFF:
             m_UpdateVisibility = VISIBLE_SET_INVISIBLE;
             break;
-        case VISIBILITY_FACTION:
-            m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_FACTION;
+        case VISIBILITY_GROUP:
+            m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_GROUP;
             break;
     }
     if(GetTypeId() == TYPEID_PLAYER)

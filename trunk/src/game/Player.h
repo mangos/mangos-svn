@@ -842,6 +842,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetLeader(const uint64 &guid) { m_groupLeader = guid; }
 
         int  IsInGroup() { return m_isInGroup; }
+        // FIX ME: add check for raid case (when implemented)
+        int  IsInGroupOrRaidWith(Player* p) { return IsInGroup() && GetGroupLeader()== p->GetGroupLeader(); }
         int  IsInvited() { return m_isInvited; }
         const uint64& GetGroupLeader() const { return m_groupLeader; }
 

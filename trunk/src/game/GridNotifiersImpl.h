@@ -118,8 +118,8 @@ MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
                     iter->second->m_DetectInvTimer = 1;
                 }
                 break;
-                case VISIBLE_SET_INVISIBLE_FOR_FACTION:
-                    if (iter->second->IsHostileTo(&i_player))
+                case VISIBLE_SET_INVISIBLE_FOR_GROUP:
+                    if (!iter->second->IsInGroupOrRaidWith(&i_player))
                     {
                         ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
                         iter->second->m_DetectInvTimer = 1;
@@ -131,7 +131,7 @@ MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
             }
 
             // Detect invisible pjs
-            if (i_player.m_enableDetect && iter->second->GetVisibility() == VISIBILITY_FACTION && iter->second->IsHostileTo(&i_player))
+            if (i_player.m_enableDetect && iter->second->GetVisibility() == VISIBILITY_GROUP && !iter->second->IsInGroupOrRaidWith(&i_player))
             {
                 if(i_player.IsWithinDist(iter->second, 20))
                     i_player.InvisiblePjsNear.push_back(iter->second);
