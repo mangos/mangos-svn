@@ -36,7 +36,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     Player *pl;
     Player *plTarget;
 
-    if(!GetPlayer()->duel)    // ignore accept from duel-sender
+    if(!GetPlayer()->duel)                                  // ignore accept from duel-sender
         return;
 
     recvPacket >> guid;

@@ -79,16 +79,16 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_GOTarget = ObjectAccessor::Instance().GetGameObject(*caster, readGUID(data));
 
     if((m_targetMask & TARGET_FLAG_ITEM) && caster->GetTypeId() == TYPEID_PLAYER)
-    { 
-	uint64 _guid = readGUID(data); 
-	m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(_guid)); 
-	    if (!m_itemTarget) 
-	    { 
-		Player* pTrader; 
-		if (NULL != (pTrader = ((Player*)caster)->GetTrader())) 
-		    m_itemTarget = pTrader->GetItemByPos(pTrader->GetPosByGuid(_guid)); 
-	    } 
-    } 
+    {
+        uint64 _guid = readGUID(data);
+        m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(_guid));
+        if (!m_itemTarget)
+        {
+            Player* pTrader;
+            if (NULL != (pTrader = ((Player*)caster)->GetTrader()))
+                m_itemTarget = pTrader->GetItemByPos(pTrader->GetPosByGuid(_guid));
+        }
+    }
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         *data >> m_srcX >> m_srcY >> m_srcZ;
@@ -994,7 +994,8 @@ void Spell::SendCastResult(uint8 result)
     {
         data << uint8(2);                                   // status = fail
         data << uint8(result);                              // problem
-        switch (result) {
+        switch (result)
+        {
             case CAST_FAIL_REQUIRES_XXX:
                 data << uint32(m_spellInfo->RequiresSpellFocus);
                 break;
@@ -1069,7 +1070,7 @@ void Spell::SendSpellGo()
     data << m_castFlags;
     writeSpellGoTargets(&data);
 
-    data << (uint8)0; // miss count
+    data << (uint8)0;                                       // miss count
 
     data << m_targets.m_targetMask;
     m_targets.write( &data, true );
@@ -1096,7 +1097,7 @@ void Spell::writeAmmoToPacket( WorldPacket * data )
             uint32 ammoID = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
             if(ammoID)
             {
-                ItemPrototype const *pProto = objmgr.GetItemPrototype( ammoID ); 
+                ItemPrototype const *pProto = objmgr.GetItemPrototype( ammoID );
                 if(pProto)
                 {
                     ammoDisplayID = pProto->DisplayInfoID;
@@ -1314,29 +1315,29 @@ void Spell::TakeCastItem()
     uint32 ItemClass = proto->Class;
     uint32 ItemSubClass = proto->SubClass;
 
-    bool spendable = false; 
-    bool withoutCharges = false; 
-    uint32 charges; 
+    bool spendable = false;
+    bool withoutCharges = false;
+    uint32 charges;
 
-    for (int i = 0; i<5; i++) 
-	if (abs(proto->Spells[i].SpellCharges) > 0) 
-	{ 
-	    spendable = true; 
-	    charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i); 
-	    m_CastItem->SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i,  charges-1); 
-	    if (charges-1 == 0) 
-	    withoutCharges = true; 
-	} 
-	 
+    for (int i = 0; i<5; i++)
+        if (abs(proto->Spells[i].SpellCharges) > 0)
+    {
+        spendable = true;
+        charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i);
+        m_CastItem->SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i,  charges-1);
+        if (charges-1 == 0)
+            withoutCharges = true;
+    }
+
     if (ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_BOOK || ItemClass == ITEM_CLASS_QUEST || (ItemClass == ITEM_CLASS_TRADE_GOODS && ItemSubClass == ITEM_SUBCLASS_BOMB))
     {
         //Soulstones (minor, greater, major, etc) not destroyed
         if(proto->DisplayInfoID == 6009 && m_spellInfo->School == 5)
             return;
 
-        //quest or consumable items with charges, not destroyed 
-	if ((ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_QUEST) && spendable && !withoutCharges) 
-	return; 
+        //quest or consumable items with charges, not destroyed
+        if ((ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_QUEST) && spendable && !withoutCharges)
+            return;
 
         uint32 count = 1;
         ((Player*)m_caster)->DestroyItemCount(m_CastItem, count, true);
@@ -1801,39 +1802,39 @@ uint8 Spell::CanCast()
             case SPELL_AURA_MOD_INVISIBILITY:
             {
 
-	    //detect if any mod is in x range.if true,can't steath.FIX ME! 
-            if(m_spellInfo->Attributes == 169148432 || m_caster->GetTypeId() != TYPEID_PLAYER) 
-		break; 
- 
-	    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY())); 
-	    Cell cell = RedZone::GetZone(p); 
-	    cell.data.Part.reserved = ALL_DISTRICT; 
-	 
-	    std::list<Unit*> i_data; 
-	    std::list<Unit*>::iterator itr; 
-	    MaNGOS::GridUnitListNotifier checker(i_data); 
- 
-	    TypeContainerVisitor<MaNGOS::GridUnitListNotifier, TypeMapContainer<AllObjectTypes> > object_checker(checker); 
-	    CellLock<GridReadGuard> cell_lock(cell, p); 
-	    cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId())); 
-	    for(itr = i_data.begin();itr != i_data.end();++itr) 
-	    { 
-		if( !(*itr)->isAlive() ) 
-		    continue; 
- 
-		if( !(*itr)->IsHostileTo(m_caster) ) 
-		    continue; 
-	 
-		if((*itr)->GetTypeId() != TYPEID_PLAYER) 
-		{ 
-		    float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster); 
-		    if((*itr)->GetDistanceSq(m_caster) < attackdis*attackdis ) 
-		    { 
-			castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY; 
-			break; 
-		    } 
-		} 
-	    } 
+                //detect if any mod is in x range.if true,can't steath.FIX ME!
+                if(m_spellInfo->Attributes == 169148432 || m_caster->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+
+                std::list<Unit*> i_data;
+                std::list<Unit*>::iterator itr;
+                MaNGOS::GridUnitListNotifier checker(i_data);
+
+                TypeContainerVisitor<MaNGOS::GridUnitListNotifier, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                for(itr = i_data.begin();itr != i_data.end();++itr)
+                {
+                    if( !(*itr)->isAlive() )
+                        continue;
+
+                    if( !(*itr)->IsHostileTo(m_caster) )
+                        continue;
+
+                    if((*itr)->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster);
+                        if((*itr)->GetDistanceSq(m_caster) < attackdis*attackdis )
+                        {
+                            castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
+                            break;
+                        }
+                    }
+                }
 
             };break;
             default:break;
@@ -1957,14 +1958,14 @@ uint8 Spell::CheckItems()
             if(!proto)
                 return CAST_FAIL_ITEM_NOT_READY;
 
-	    uint32 charges; 
-		for (int i = 0; i<5; i++) 
-		    if (abs(proto->Spells[i].SpellCharges) > 0) 
-		    { 
-			charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i); 
-			if (charges == 0) 
-			    return CAST_FAIL_NO_CHARGES_REMAIN; 
-		    } 
+            uint32 charges;
+            for (int i = 0; i<5; i++)
+                if (abs(proto->Spells[i].SpellCharges) > 0)
+            {
+                charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i);
+                if (charges == 0)
+                    return CAST_FAIL_NO_CHARGES_REMAIN;
+            }
 
             uint32 ItemClass = proto->Class;
             if (ItemClass == ITEM_CLASS_CONSUMABLE && unitTarget)

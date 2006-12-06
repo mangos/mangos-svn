@@ -192,7 +192,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     ByteBuffer buf(500);
 
     buf << (uint8) UPDATETYPE_VALUES;
-    buf << (uint8) 0xFF; // must be packed GUID  ?
+    buf << (uint8) 0xFF;                                    // must be packed GUID  ?
     buf << GetGUID();
 
     UpdateMask updateMask;

@@ -218,7 +218,7 @@ void CliIdleShutdown(char* command,pPrintf zprintf)
             sWorld.ShutdownServ(time,true);
         }
     }
-    else 
+    else
     {
         zprintf("Invalid argument\r\n");
     }
@@ -241,7 +241,7 @@ void CliShutdown(char* command,pPrintf zprintf)
             sWorld.ShutdownServ(time);
         }
     }
-    else 
+    else
     {
         zprintf("Invalid argument\r\n");
     }

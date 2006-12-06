@@ -93,7 +93,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     Quest * qInfo = objmgr.QuestTemplates[quest];
     if ( qInfo )
     {
-        // prevent cheating 
+        // prevent cheating
         if(!GetPlayer()->CanTakeQuest(qInfo,true) )
         {
             _player->PlayerTalkClass->CloseGossip();

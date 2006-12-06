@@ -313,7 +313,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadItemPrototypes();
     objmgr.LoadAuctionItems();
     objmgr.LoadAuctions();
-    
+
     sLog.outString( "Returning old mails..." );
     objmgr.ReturnOrDeleteOldMails(false);
 
@@ -341,13 +341,14 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
     m_timers[WUPDATE_WEATHERS].SetInterval(1000);
-    m_timers[WUPDATE_AUCTIONS].SetInterval(60000); //set auction update interval to 1 minute 
+    m_timers[WUPDATE_AUCTIONS].SetInterval(60000);          //set auction update interval to 1 minute
 
-    //to set mailtimer to return mails every day between 4 and 5 am 
+    //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
     //one second is 1000 -(tested on win system)
     mail_timer = ((((localtime( &m_gameTime )->tm_hour + 20) % 24)* HOUR * 1000) / m_timers[WUPDATE_AUCTIONS].GetInterval() );
-    mail_timer_expires = ( (DAY * 1000) / (m_timers[WUPDATE_AUCTIONS].GetInterval())); //1440
+                                                            //1440
+    mail_timer_expires = ( (DAY * 1000) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
     sLog.outDebug("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 
     sLog.outString( "WORLD: Starting BattleGround System" );
@@ -396,13 +397,13 @@ void World::Update(time_t diff)
             switch (i)
             {
                 case 0:
-                    AuctionMap = objmgr.GetAuctionsMap( 6 ); //horde
+                    AuctionMap = objmgr.GetAuctionsMap( 6 );//horde
                     break;
                 case 1:
-                    AuctionMap = objmgr.GetAuctionsMap( 2 ); //ali
+                    AuctionMap = objmgr.GetAuctionsMap( 2 );//ali
                     break;
                 case 2:
-                    AuctionMap = objmgr.GetAuctionsMap( 7 ); //neutral
+                    AuctionMap = objmgr.GetAuctionsMap( 7 );//neutral
                     break;
             }
 
@@ -414,14 +415,18 @@ void World::Update(time_t diff)
                 if (time(NULL) > (itr->second->time))
                 {
                     // Auction time Expired!
-                    if (itr->second->bidder == 0) {              // if no one bidded auction...
+                    if (itr->second->bidder == 0)           // if no one bidded auction...
+                    {
                         objmgr.SendAuctionExpiredMail( itr->second );
-                    } else {
+                    }
+                    else
+                    {
                         //we should send "item sold"- message if seller is online
                         //we should send item to winner
                         //we should send money to seller
                         objmgr.SendAuctionSuccessfulMail( itr->second );
-                        objmgr.SendAuctionWonMail( itr->second ); //- this functions cleans ram!
+                                                            //- this functions cleans ram!
+                        objmgr.SendAuctionWonMail( itr->second );
                         //delete itr->second - do not call this!
                     }
                 }

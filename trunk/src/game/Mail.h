@@ -16,10 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#define MAIL_BODY_ITEM_TEMPLATE 8383 // - plain letter, A Dusty Unsent Letter: 889
+#define MAIL_BODY_ITEM_TEMPLATE 8383                        // - plain letter, A Dusty Unsent Letter: 889
 
-enum MAIL_RESPONSE {
-    MAIL_OK = 0, 
+enum MAIL_RESPONSE
+{
+    MAIL_OK = 0,
     MAIL_MONEY_TAKEN = 1,
     MAIL_ITEM_TAKEN = 2,
     MAIL_RETURNED_TO_SENDER = 3,
@@ -33,12 +34,13 @@ enum MAIL_ERRORS
     MAIL_ERR_CANNOT_SEND_TO_SELF = 2,
     MAIL_ERR_NOT_ENOUGH_MONEY = 3,
     MAIL_ERR_RECIPIENT_NOT_FOUND = 4,
-    MAIL_ERR_NOT_YOUR_TEAM = 5, 
+    MAIL_ERR_NOT_YOUR_TEAM = 5,
     MAIL_ERR_INTERNAL_ERROR = 6,
     MAIL_ERR_CANNOT_MAIL_CONJURED_ITEM = 14
 };
 
-enum MAIL_CHECKED {
+enum MAIL_CHECKED
+{
     NOT_READ = 0,
     READ = 1,
     AUCTION_CHECKED = 4,
@@ -46,18 +48,21 @@ enum MAIL_CHECKED {
     RETURNED_CHECKED = 16
 };
 
-enum MailMessageType {
+enum MailMessageType
+{
     MAIL_NORMAL = 0,
     AUCTIONHOUSE_MAIL = 2
 };
 
-enum Mail_state { //mail state created isn't used, because it caused items duplication
+enum Mail_state                                             //mail state created isn't used, because it caused items duplication
+{
     UNCHANGED = 1,
     CHANGED = 2,
     DELETED = 3
 };
 
-enum MailAuctionAnswers {
+enum MailAuctionAnswers
+{
     AUCTION_OUTBIDDED = 0,
     AUCTION_WON = 1,
     AUCTION_SUCCESSFUL = 2,

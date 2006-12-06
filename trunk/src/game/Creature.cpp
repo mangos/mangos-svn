@@ -600,7 +600,7 @@ void Creature::sendPreparedGossip(Player* player)
         return;
     }
 
-    // in case non empty gossip menu (that not included quests list size) show it 
+    // in case non empty gossip menu (that not included quests list size) show it
     // (quest entries from quest menu wiill be included in list)
     player->PlayerTalkClass->SendGossipMenu(GetNpcTextId(), GetGUID());
 }
@@ -1088,8 +1088,6 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
     }
 
     Field *fields = result->Fetch();
-
-
 
     if(!Create(guid,fields[1].GetUInt32(),fields[2].GetFloat(),fields[3].GetFloat(),
         fields[4].GetFloat(),fields[5].GetFloat(),fields[0].GetUInt32()))

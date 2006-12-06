@@ -101,15 +101,16 @@ class MANGOS_DLL_SPEC WorldSession
         void SendUpdateTrade();
 
         //mail
-        bool SendItemInfo( uint32 itemid, WorldPacket data ); //used with item_page table
-        //auction 
+                                                            //used with item_page table
+        bool SendItemInfo( uint32 itemid, WorldPacket data );
+        //auction
         void SendAuctionHello( uint64 guid, Creature * unit );
         void SendAuctionCommandResult( uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError = 0);
         void SendAuctionBidderNotification( uint32 location, uint32 auctionId, uint64 bidder, uint32 bidSum, uint32 diff, uint32 item_template);
         void SendAuctionOwnerNotification( AuctionEntry * auction );
         bool SendAuctionInfo(WorldPacket & data, AuctionEntry* auction);
         void SendAuctionOutbiddedMail( AuctionEntry * auction, uint32 newPrice );
-        
+
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
         void SendItemEnchantTimeUpdate(uint64 Itemguid,uint32 slot,uint32 Duration);
