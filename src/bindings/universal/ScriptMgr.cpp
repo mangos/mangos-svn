@@ -274,8 +274,10 @@ void ScriptedAI::AttackStop(Unit *)
 
 void ScriptedAI::DoStartAttack(Unit* victim)
 {
-    m_creature->Attack(victim);
-    (*m_creature)->Mutate(new TargetedMovementGenerator(*victim));
+    if( m_creature->Attack(victim) )
+    {
+       (*m_creature)->Mutate(new TargetedMovementGenerator(*victim));
+    }
 }
 
 void ScriptedAI::DoStopAttack()
