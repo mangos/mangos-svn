@@ -936,6 +936,7 @@ void Spell::EffectLearnSpell(uint32 i)
             player->learnSpell(818);
             player->learnSpell(2540);
             player->learnSpell(2538);
+            player->learnSpell(8604);
             break;
         }
         case 3273:                                          //SKILL_FIRST_AID
