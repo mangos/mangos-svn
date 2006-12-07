@@ -21,7 +21,8 @@
 
 enum AuctionError {
     AUCTION_OK = 0,
-    AUCTION_INTERNAL_ERROR = 2
+    AUCTION_INTERNAL_ERROR = 2,
+    CANNOT_BID_YOUR_AUCTION_ERROR = 10
 };
 
 enum AuctionAction {

@@ -110,6 +110,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendAuctionOwnerNotification( AuctionEntry * auction );
         bool SendAuctionInfo(WorldPacket & data, AuctionEntry* auction);
         void SendAuctionOutbiddedMail( AuctionEntry * auction, uint32 newPrice );
+        void SendAuctionCancelledToBidderMail( AuctionEntry* auction );
 
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);

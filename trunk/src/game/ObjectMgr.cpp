@@ -151,9 +151,9 @@ AuctionHouseObject * ObjectMgr::GetAuctionsMap( uint32 location )
 uint32 ObjectMgr::GetAuctionCut(uint32 location, uint32 highBid)
 {
     if (location == 7)
-        return (uint32) (0.05 * highBid);
-    else
         return (uint32) (0.15 * highBid);
+    else
+        return (uint32) (0.05 * highBid);
 }
 
 uint32 ObjectMgr::GetAuctionDeposit(uint32 location, uint32 time, Item *pItem)
@@ -163,8 +163,7 @@ uint32 ObjectMgr::GetAuctionDeposit(uint32 location, uint32 time, Item *pItem)
         percentance = 25;
     else
         percentance = 5;
-    percentance *= (time / 120 );
-    return (uint32) ( ((percentance * pItem->GetProto()->SellPrice ) / 100 ) * pItem->GetCount() );
+    return (uint32) ( ((percentance * pItem->GetProto()->SellPrice * pItem->GetCount() ) / 100 ) * (time / 120 ) );
 }
 
 void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction ) //clears ram :D
