@@ -67,7 +67,7 @@ enum MailAuctionAnswers
     AUCTION_WON = 1,
     AUCTION_SUCCESSFUL = 2,
     AUCTION_EXPIRED = 3,
-    //AUCTION_???? = 4, //unknown ...
+    AUCTION_CANCELLED_TO_BIDDER = 4,
     AUCTION_CANCELED = 5
 };
 

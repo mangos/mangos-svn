@@ -113,7 +113,7 @@ void WorldSession::SendAuctionCommandResult(uint32 auctionId, uint32 Action, uin
     data << auctionId;
     data << Action;
     data << ErrorCode;
-    if ( Action )
+    if ( !ErrorCode && Action )
         data << bidError;                                   //when bid, then send 0, once...
     SendPacket(&data);
 }
@@ -153,19 +153,40 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
     uint32 mailId = objmgr.GenerateMailID();
     time_t etime = time(NULL) + (30 * DAY);
 
-    std::ostringstream msgAuctionExpiredSubject;
-    msgAuctionExpiredSubject << auction->item_template << ":0:" << AUCTION_OUTBIDDED;
+    std::ostringstream msgAuctionOutbiddedSubject;
+    msgAuctionOutbiddedSubject << auction->item_template << ":0:" << AUCTION_OUTBIDDED;
 
     Player *oldBidder = objmgr.GetPlayer((uint64) auction->bidder);
     if (oldBidder)
     {
         oldBidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, newPrice - auction->bid, auction->item_template);
-        oldBidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionExpiredSubject.str(), 0, 0, 0, etime, auction->bid, 0, NOT_READ, NULL);
+        oldBidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionOutbiddedSubject.str(), 0, 0, 0, etime, auction->bid, 0, NOT_READ, NULL);
     }
 
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionExpiredSubject.str().c_str(), (uint64)etime, auction->bid, NOT_READ);
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str().c_str(), (uint64)etime, auction->bid, NOT_READ);
+}
+
+//this function sends mail, when auction is cancelled to old bidder 
+void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
+{
+    uint32 mailId = objmgr.GenerateMailID();
+    time_t etime = time(NULL) + (30 * DAY);
+
+    std::ostringstream msgAuctionCancelledSubject;
+    msgAuctionCancelledSubject << auction->item_template << ":0:" << AUCTION_CANCELLED_TO_BIDDER;
+
+    Player *bidder = objmgr.GetPlayer((uint64) auction->bidder);
+    if (bidder)
+    {
+        // unknown : bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, newPrice - auction->bid, auction->item_template);
+        bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionCancelledSubject.str(), 0, 0, 0, etime, auction->bid, 0, NOT_READ, NULL);
+    }
+
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '%d')",
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionCancelledSubject.str().c_str(), (uint64)etime, auction->bid, NOT_READ);
 }
 
 void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
@@ -327,9 +348,8 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
     }
     else
     {
-        //send auction database error..., or somethig like that
-                                                            //maybe would work
-        SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_INTERNAL_ERROR, 0);
+        //you cannot bid your own auction:
+        SendAuctionCommandResult( 0, AUCTION_PLACE_BID, CANNOT_BID_YOUR_AUCTION_ERROR );
     }
 }
 
@@ -337,157 +357,70 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 {
     uint64 auctioneer;
-    uint32 auctionID;
+    uint32 auctionId;
     recv_data >> auctioneer;
-    recv_data >> auctionID;
-    sLog.outDebug( "DELETE AUCTION AuctionID: %u", auctionID);
-    // Fetches the AH auction
-    //AuctionEntry *ah = objmgr.GetAuction(auctionID);
-    /*Player *pl = GetPlayer();
-    //will be fixed soon
-    if ((ah))                                               // && (ah->owner != pl->GetGUIDLow()))
+    recv_data >> auctionId;
+    sLog.outDebug( "Cancel AUCTION AuctionID: %u", auctionId);
+
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
+    if(!pCreature||!pCreature->isAuctioner())
+        return;
+    uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
+
+    AuctionHouseObject * mAuctions;
+    mAuctions = objmgr.GetAuctionsMap( location );
+
+    AuctionEntry *auction = mAuctions->GetAuction(auctionId);
+    Player *pl = GetPlayer();
+
+    if (auction && auction->owner == pl->GetGUIDLow())
     {
-        Item *it = objmgr.GetAItem(ah->item_guidlow);
-        ItemPrototype const *proto = it->GetProto();
-        if (it)
+        Item *pItem = objmgr.GetAItem(auction->item_guid);
+        if (pItem)
         {
-
-            if (ah->bidder > 0)                             // If we have a bidder, we have to send him the money he paid
+            if (auction->bidder > 0)                            // If we have a bidder, we have to send him the money he paid
             {
-                Mail *m = new Mail;
-                m->messageID = objmgr.GenerateMailID();
-                m->sender = ah->owner;
-                m->receiver = ah->bidder;
-                std::ostringstream msgAuctionCanceled;
-                msgAuctionCanceled << "Auction Was Canceled: "  << proto->Name1;
-                m->subject = msgAuctionCanceled.str();
-                m->body = "";
-                m->item_guidlow = 0;
-                m->item_id = 0;
-                m->time = time(NULL) + (29 * DAY);
-                m->money = ah->bid;
-                m->COD = 0;
-                m->checked = 0;
-
-                //escape apostrophes
-                std::string subject = m->subject;
-                std::string body = m->body;
-                sDatabase.escape_string(body);
-                sDatabase.escape_string(subject);
-
-                sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
-                sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                    "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                    m->messageID, m->sender, m->receiver, subject.c_str(), body.c_str(), m->item_guidlow, m->item_id, (uint64)m->time, m->money, m->COD, m->checked);
-
-                uint64 mrcpl = MAKE_GUID(m->receiver,HIGHGUID_PLAYER);
-                Player *mrpln = objmgr.GetPlayer(mrcpl);
-                if (mrpln)
-                {
-                    mrpln->AddMail(m);
-                }
+                uint32 auctionCut = objmgr.GetAuctionCut( auction->location, auction->bid);
+                if ( pl->GetMoney() < auctionCut )              //player doesn't have enought money, maybe message needed
+                    return;
+                //some auctionBidderNotification would be needed, but don't know that parts..
+                SendAuctionCancelledToBidderMail( auction );
+                pl->ModifyMoney( ((int32) auctionCut) * -1 );
             }
             // Return the item
-            Mail *mn2 = new Mail;
-            mn2->messageID = objmgr.GenerateMailID();
-            mn2->sender = ah->owner;
-            mn2->receiver = pl->GetGUIDLow();
             std::ostringstream msgAuctionCanceledOwner;
-            msgAuctionCanceledOwner << "Auction Canceled: " << proto->Name1;
-            mn2->body = "";
-            mn2->subject = msgAuctionCanceledOwner.str();
-            mn2->item_guidlow = ah->item_guidlow;
-            mn2->item_id = ah->item_id;
-            mn2->time = time(NULL) + (29 * DAY);
-            mn2->money = 0;
-            mn2->COD = 0;
-            mn2->checked = 0;
+            msgAuctionCanceledOwner << auction->item_template << ":0:" << AUCTION_CANCELED;
 
-            //escape apostrophes
-            std::string subject = mn2->subject;
-            std::string body = mn2->body;
-            sDatabase.escape_string(body);
-            sDatabase.escape_string(subject);
+            uint32 messageID = objmgr.GenerateMailID();
+            time_t etime = time(NULL) + (30 * DAY);
 
-            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn2->messageID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                "VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u')",
-                mn2->messageID , mn2->sender , mn2->receiver , subject.c_str() , body.c_str(), mn2->item_guidlow , mn2->item_id , (uint64)mn2->time ,mn2->money ,mn2->COD ,mn2->checked);
-
-            uint64 mrcpl2 = MAKE_GUID(mn2->receiver,HIGHGUID_PLAYER);
-            Player *mrpln2 = objmgr.GetPlayer(mrcpl2);
-            if (mrpln2)
-            {
-                // ItemPrototype
-                mrpln2->AddMItem(it);
-                mrpln2->AddMail(mn2);
-            }
+            pl->CreateMail( messageID, AUCTIONHOUSE_MAIL, auction->location, msgAuctionCanceledOwner.str(), 0, auction->item_guid, auction->item_template, etime, 0, 0, 0, pItem);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+                "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "', '0', '0', '0')",
+                messageID, AUCTIONHOUSE_MAIL, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime);
         }
         else
         {
-            // TODO Item not found - Error handling
+            sLog.outError("Auction id: %u has non-existed item (item guid : %u)!!!", auction->Id, auction->item_guid);
+            SendAuctionCommandResult( 0, AUCTION_CANCEL, AUCTION_INTERNAL_ERROR );
             return;
         }
     }
     else
     {
+        SendAuctionCommandResult( 0, AUCTION_CANCEL, AUCTION_INTERNAL_ERROR );
+        //this code isn't possible ... maybe there should be assert
+        sLog.outError("CHEATER : %u, he tried to cancel auction (id: %u) of another player, or auction is NULL", pl->GetGUIDLow(), auctionId );
         return;
     }
 
+    //inform player, that auction is removed
+    SendAuctionCommandResult( auction->Id, AUCTION_CANCEL, AUCTION_OK );
     // Now remove the auction
-    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",ah->Id);
-    objmgr.RemoveAItem(ah->item_guidlow);
-    objmgr.RemoveAuction(ah->Id);
-
-    // And return an updated list of items
-    WorldPacket data;
-    data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
-
-    uint32 count = 0;
-    data << uint32(0);
-    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-    AuctionEntry *Aentry = itr->second;
-    if( Aentry )
-    {
-    if( Aentry->owner == _player->GetGUIDLow() )
-    {
-    Item *item = objmgr.GetAItem(Aentry->item_guidlow);
-    if( item )
-    {
-    ItemPrototype const *proto = item->GetProto();
-    if( proto )
-    {
-    count++;
-    data << Aentry->Id;
-    data << proto->ItemId;
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(item->GetCount());
-    data << uint32(0);
-    data << item->GetOwnerGUID();
-    data << Aentry->bid;
-    data << uint32(0);
-    data << Aentry->buyout;
-    // May be need fixing
-    data << uint32((Aentry->time - time(NULL)) * 1000);
-    data << uint32(Aentry->bidder);
-    data << uint32(0);
-    data << Aentry->bid;
-    if( count == 50 )
-    break;
-    }
-    }
-    }
-    }
-    }
-    data.put<uint32>(0, count);
-    data << uint32(count);
-    SendPacket(&data);
-    //    WorldPacket data;
-    //    data << unk1 << auctionID;                              //need fix here, this code does nothing
-    //    SendPacket(&data);*/
+    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+    objmgr.RemoveAItem( auction->item_guid );
+    mAuctions->RemoveAuction( auction->Id );
+    delete auction;
 }
 
 void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
