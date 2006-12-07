@@ -45,8 +45,6 @@ typedef struct
     char const * description;
 }CliCommand;
 
-char prompt[64];
-
 //func prototypes must be defined
 
 void CliHelp(char*,pPrintf);
@@ -201,49 +199,66 @@ void CliExit(char*,pPrintf zprintf)
     World::m_stopEvent = true;
 }
 
-/// Shutdown server with some delay when not active connections at server
+/// Shutdown the server (with some delay) as soon as no active connections remain on the server
 void CliIdleShutdown(char* command,pPrintf zprintf)
 {
     char *args = strtok(command," ");
 
-    if( args )
+    if(!args)
     {
-        if(std::string(args)=="stop")
-        {
-            sWorld.ShutdownCancel();
-        }
-        else
-        {
-            uint32 time = atoi(args);
-            sWorld.ShutdownServ(time,true);
-        }
+        zprintf("Syntax is: idleshutdown <seconds|cancel>\r\n");
+        return;
+    }
+
+    if(std::string(args)=="cancel")
+    {
+        sWorld.ShutdownCancel();
     }
     else
     {
-        zprintf("Invalid argument\r\n");
+
+        char *time_str= strtok(args," ");
+        uint32 time = atoi(time_str);
+
+        ///- Prevent interpret wrong arg value as 0 secs shutdown time
+        if(!time_str || time_str[0]!='0' || time_str[1]!='\0' || time < 0)
+        {
+            zprintf("Syntax is: idleshutdown <seconds|cancel>\r\n");
+            return;
+        }
+
+        sWorld.ShutdownServ(time,true);
     }
 }
 
-/// Shutdown server with some delay when not active connections at server
+/// Shutdown the server with some delay
 void CliShutdown(char* command,pPrintf zprintf)
 {
     char *args = strtok(command," ");
 
-    if( args )
+    if(!args)
     {
-        if(std::string(args)=="stop")
-        {
-            sWorld.ShutdownCancel();
-        }
-        else
-        {
-            uint32 time = atoi(args);
-            sWorld.ShutdownServ(time);
-        }
+        zprintf("Syntax is: shutdown <seconds|cancel>\r\n");
+        return;
+    }
+
+    if(std::string(args)=="cancel")
+    {
+        sWorld.ShutdownCancel();
     }
     else
     {
-        zprintf("Invalid argument\r\n");
+        char *time_str= strtok(args," ");
+        int32 time = atoi(time_str);
+
+        ///- Prevent interpret wrong arg value as 0 secs shutdown time
+        if(!time_str || time_str[0]!='0' || time_str[1]!='\0' || time < 0)
+        {
+            zprintf("Syntax is: shutdown <seconds|cancel>\r\n");
+            return;
+        }
+
+        sWorld.ShutdownServ(time);
     }
 }
 

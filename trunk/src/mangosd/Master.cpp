@@ -37,14 +37,13 @@
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
-
-INSTANTIATE_SINGLETON_1( CliRunnable );
 #endif
+
 #ifdef ENABLE_RA
 #include "RASocket.h"
 #endif
 
-/// \todo Not useful under VC++2005. Can somebody say on which compiler it is useful?
+/// \todo Warning disabling not useful under VC++2005. Can somebody say on which compiler it is useful?
 #pragma warning(disable:4305)
 
 INSTANTIATE_SINGLETON_1( Master );

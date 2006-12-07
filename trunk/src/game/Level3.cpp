@@ -2665,13 +2665,19 @@ bool ChatHandler::HandleShutDownCommand(const char* args)
     if(!*args)
         return false;
 
-    if(std::string(args)=="stop")
+    if(std::string(args)=="cancel")
     {
         sWorld.ShutdownCancel();
     }
     else
     {
-        uint32 time = atoi(args);
+        char *time_str= strtok((char*)args," ");
+        int32 time = atoi(time_str);
+
+        ///- Prevent interpret wrong arg value as 0 secs shutdown time
+        if(!time_str || time_str[0]!='0' || time_str[1]!='\0' || time < 0)
+            return false;
+
         sWorld.ShutdownServ(time);
     }
     return true;
@@ -2682,13 +2688,19 @@ bool ChatHandler::HandleIdleShutDownCommand(const char* args)
     if(!*args)
         return false;
 
-    if(std::string(args)=="stop")
+    if(std::string(args)=="cancel")
     {
         sWorld.ShutdownCancel();
     }
     else
     {
-        uint32 time = atoi(args);
+        char *time_str= strtok((char*)args," ");
+        int32 time = atoi(time_str);
+
+        ///- Prevent interpret wrong arg value as 0 secs shutdown time
+        if(!time_str || time_str[0]!='0' || time_str[1]!='\0' || time < 0)
+            return false;
+
         sWorld.ShutdownServ(time,true);
     }
     return true;
