@@ -10336,7 +10336,17 @@ void Player::LoadCorpse()
                 corpse->ConvertCorpseToBones();
         }
         else
+	{
             corpse->UpdateForPlayer(this,true);
+
+	    if( corpse->GetType() == CORPSE_RESURRECTABLE &&
+		abs(corpse->GetPositionX() - m_positionX) < 0.1 &&
+		abs(corpse->GetPositionY() - m_positionY) < 0.1 &&
+		abs(corpse->GetPositionZ() - m_positionZ) < 0.1 &&
+		abs(corpse->GetOrientation() - m_orientation) < 0.1 &&
+		corpse->GetMapId() == m_mapId )
+		RepopAtGraveyard();
+	}
     }
     else
     {
