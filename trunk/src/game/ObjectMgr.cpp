@@ -396,6 +396,7 @@ void ObjectMgr::LoadAuctions()
         aItem->time = fields[6].GetUInt32();
         aItem->bidder = fields[7].GetUInt32();
         aItem->bid = fields[8].GetUInt32();
+        aItem->outBid = ( aItem->bid > 0 );                    //when bid = 0 then 0 else 1
         aItem->startbid = fields[9].GetUInt32();
         aItem->deposit = fields[10].GetUInt32();
         aItem->location = fields[11].GetUInt8();

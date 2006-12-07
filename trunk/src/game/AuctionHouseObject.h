@@ -22,6 +22,7 @@
 enum AuctionError {
     AUCTION_OK = 0,
     AUCTION_INTERNAL_ERROR = 2,
+    AUCTION_NOT_ENOUGHT_MONEY = 3,
     CANNOT_BID_YOUR_AUCTION_ERROR = 10
 };
 
@@ -40,10 +41,11 @@ struct AuctionEntry
     uint32 owner;
     uint32 startbid;
     uint32 bid;
+    uint32 outBid;                          //used only when auction is in ram, it isn't saved to DB
     uint32 buyout;
     time_t time;
     uint32 bidder;
-    uint32 deposit; //deposit can be calculated only when creating auction
+    uint32 deposit;                         //deposit can be calculated only when creating auction
     uint32 location;
 };
 
