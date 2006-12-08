@@ -190,17 +190,14 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             obj->SetUInt32Value(GAMEOBJECT_STATE,0);        //open
             //obj->SetUInt32Value(GAMEOBJECT_TIMESTAMP,0x465EE6D2); //load timestamp
 
-            obj->SetLootState((LootState)0);
+            obj->SetLootState(GO_CLOSED);
             obj->SetRespawnTimer(5000);                     //close door in 5 seconds
 
             return;
-            break;
         case GAMEOBJECT_TYPE_QUESTGIVER:                    // 2
             _player->PrepareQuestMenu( guid );
             _player->SendPreparedQuest( guid );
             return;
-            break;
-
             //Sitting: Wooden bench, chairs enzz
         case GAMEOBJECT_TYPE_CHAIR:                         //7
 
@@ -220,7 +217,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
-
             //chest locked
         case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
 
@@ -237,6 +233,81 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             }
 
+            obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
+
+            info = obj->GetGOInfo();
+            if(info)
+            {
+                spellId = info->sound0;
+                if (spellId == 0)
+                    spellId = info->sound3;
+
+                guid=_player->GetGUID();
+
+            }
+            break;
+            //fishing bobber
+        case GAMEOBJECT_TYPE_FISHINGNODE:                   //17
+        {
+            if(_player->GetGUID() != obj->GetOwnerGUID())
+                return;
+
+            switch(obj->getLootState())
+            {
+                case GO_CLOSED:                             // ready for loot
+                {
+                    // 1) skill must beb >= base_zone_skill
+                    // 2) if skill == base_zone_skill => 5% chance
+                    // 3) chance is liniar dependence from (base_zone_skill-skill)
+
+                    int32 skill = _player->GetSkillValue(SKILL_FISHING);
+                    int32 zone_skill = _player->FishingMinSkillForCurrentZone();
+                    int32 chance = skill - zone_skill + 5;
+                    int32 roll = irand(1,100);
+
+                    DEBUG_LOG("Fishing check (skill: %i zone min skill: %i chance %i roll: %i",skill,zone_skill,chance,roll);
+
+                    if(skill >= zone_skill && chance >= roll)
+                    {
+                        // prevent removing GO at spell cancel
+                        _player->RemoveGameObject(obj,false);
+                        obj->SetOwnerGUID(_player->GetGUID());
+
+                        //fish catched 
+                        _player->UpdateFishingSkill();
+                        _player->SendLoot(obj->GetGUID(),LOOT_FISHING);
+                    }
+                    else
+                    {
+                        // fish escaped
+                        obj->SetLootState(GO_LOOTED);       // can be deleted now
+
+                        WorldPacket data;
+                        data.Initialize(SMSG_FISH_ESCAPED);
+                        SendPacket(&data);
+                    }
+                    break;
+                }
+                case GO_LOOTED:                             // nothing to do, wiil be deleted at next update
+                    break;
+                default:
+                {
+                    obj->SetLootState(GO_LOOTED);
+
+                    WorldPacket data;
+                    data.Initialize(SMSG_FISH_NOT_HOOKED);
+                    SendPacket(&data);
+                    break;
+                }
+            }
+
+            if(_player->m_currentSpell)
+            {
+                _player->m_currentSpell->SendChannelUpdate(0);
+                _player->m_currentSpell->finish();
+            }
+            return;
+        }
         case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
             //GB flag
             info = obj->GetGOInfo();

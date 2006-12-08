@@ -596,11 +596,9 @@ void Spell::cancel()
     else if(m_spellState == SPELL_STATE_CASTING)
     {
         for (int j = 0; j < 3; j++)
-	    for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
-
-		if (*iunit && (*iunit)->isAlive())
-
-		    (*iunit)->RemoveAurasDueToSpell(m_spellInfo->Id);
+        for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
+            if (*iunit && (*iunit)->isAlive())
+                (*iunit)->RemoveAurasDueToSpell(m_spellInfo->Id);
 
         m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
         SendChannelUpdate(0);
@@ -1589,8 +1587,8 @@ uint8 Spell::CanCast()
 
     if(castResult == 0)
     {
-	uint32 mana = 0;
-	castResult = CheckMana(&mana);
+        uint32 mana = 0;
+        castResult = CheckMana(&mana);
     }
 
     if( castResult != 0 )

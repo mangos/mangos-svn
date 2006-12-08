@@ -1656,7 +1656,8 @@ void Spell::EffectDuel(uint32 i)
     Player *target = (Player*)unitTarget;
 
     // caster or target already have requested duel
-    if( caster->duel || target->duel ) return;
+    if( caster->duel || target->duel || target->HasInIgnoreList(caster->GetGUID()) ) 
+        return;
 
     //CREATE DUEL FLAG OBJECT
     GameObject* pGameObj = new GameObject();
@@ -2378,17 +2379,37 @@ void Spell::EffectTransmitted(uint32 i)
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetMapId(),
-        fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 0, 0))
+        fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 100, 0))
     {
         delete pGameObj;
         return;
     }
 
-    pGameObj->SetUInt64Value(OBJECT_FIELD_CREATED_BY, m_caster->GetGUID() );
+    if(m_spellInfo->EffectMiscValue[i] == 35591)
+    {
+        m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT,pGameObj->GetGUIDLow());
+        m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1,pGameObj->GetGUIDHigh());
+                                                            //Orientation3
+        pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 2, 0.88431775569915771 );
+                                                            //Orientation4
+        pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 3, -0.4668855369091033 );
+        pGameObj->SetLootState(GO_NOT_READY);               // bobber not move
+        m_caster->AddGameObject(pGameObj);                  // will removed at spell cancel
+
+        // end time of range when posable catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
+        // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
+        uint32 fish = urand(FISHING_BOBBER_READY_TIME,GetDuration(m_spellInfo));
+        pGameObj->SetRespawnTimer(fish);
+    }
+    else
+    {
+        pGameObj->SetOwnerGUID(m_caster->GetGUID() );
+        pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
+    }
+
     pGameObj->SetUInt32Value(12, 0x3F63BB3C );
     pGameObj->SetUInt32Value(13, 0xBEE9E017 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
-    pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     DEBUG_LOG("AddObject at SpellEfects.cpp EffectTransmitted\n");
@@ -2401,25 +2422,6 @@ void Spell::EffectTransmitted(uint32 i)
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
     data << uint64(pGameObj->GetGUID());
     m_caster->SendMessageToSet(&data,true);
-
-    if(m_spellInfo->EffectMiscValue[i] == 35591)
-    {
-        if( m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->CheckFishingAble() > 0)
-        {
-            //pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
-                                                            //Orientation3
-            pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 2, 0.88431775569915771 );
-                                                            //Orientation4
-            pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 3, -0.4668855369091033 );
-            data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM);
-            data<<uint64(pGameObj->GetGUID());
-            data<<uint8(0);
-            ((Player*)m_caster)->GetSession()->SendPacket(&data);
-            //need fixed produre of fishing.
-            ((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),LOOT_FISHING);
-            SendChannelUpdate(0);
-        }
-    }
 }
 
 void Spell::EffectSkill(uint32 i)

@@ -129,6 +129,43 @@ void GameObject::Update(uint32 p_time)
 
     switch (m_lootState)
     {
+        case GO_NOT_READY:
+            if (GetGoType()==17)
+            {
+                // fishing code (bobber not ready)
+                if( m_respawnTimer > p_time + FISHING_BOBBER_READY_TIME )
+                {
+                    m_respawnTimer -= p_time;               // not ready and will fail at open attempt
+                }
+                else
+                {
+                    // splash bobber (bobber ready now)
+                    Unit* caster = GetOwner();
+                    if(caster && caster->GetTypeId()==TYPEID_PLAYER)
+                    {
+                        SetUInt32Value(GAMEOBJECT_STATE, 0);
+                        SetUInt32Value(GAMEOBJECT_FLAGS, 32);
+
+                        UpdateData udata;
+                        WorldPacket packet;
+                        BuildValuesUpdateBlockForPlayer(&udata,((Player*)caster));
+                        udata.BuildPacket(&packet);
+                        ((Player*)caster)->GetSession()->SendPacket(&packet);
+
+                        WorldPacket data;
+                        data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM);
+                        data << GetGUID();
+                        data << (uint32)(0);
+                        ((Player*)caster)->SendMessageToSet(&data,true);
+                    }
+
+                    m_lootState = GO_CLOSED;                // can be succesfully open with some chance
+                }
+                return;
+            }
+
+            m_lootState = GO_CLOSED;                        // for not bobber is same as GO_CLOSED
+            // NO BREAK
         case GO_CLOSED:
             if (m_respawnTimer > 0)
             {
@@ -136,25 +173,59 @@ void GameObject::Update(uint32 p_time)
                 {
                     m_respawnTimer -= p_time;
                 }
-                else
+                else                                        // timer expired
                 {
                     m_respawnTimer = 0;
                     m_SkillupList.clear();
-                    if (GetGoType() != GAMEOBJECT_TYPE_TRAP)
-                        MapManager::Instance().GetMap(GetMapId())->Add(this);
+
+                    switch (GetGoType())
+                    {
+                        case GAMEOBJECT_TYPE_FISHINGNODE:   //  can't fish now
+                        {
+                            Unit* caster = GetOwner();
+                            if(caster && caster->GetTypeId()==TYPEID_PLAYER)
+                            {
+                                if(caster->m_currentSpell)
+                                {
+                                    caster->m_currentSpell->SendChannelUpdate(0);
+                                    caster->m_currentSpell->finish();
+                                }
+
+                                WorldPacket data;
+                                data.Initialize(SMSG_FISH_NOT_HOOKED);
+                                ((Player*)caster)->GetSession()->SendPacket(&data);
+                            }
+                            m_lootState = GO_LOOTED;    // can be delete
+                            return;
+                        }
+                        case GAMEOBJECT_TYPE_TRAP:
+                            break;
+                        default:
+                            MapManager::Instance().GetMap(GetMapId())->Add(this);
+                            break;
+                    }
                 }
             }
             break;
         case GO_OPEN:
             break;
         case GO_LOOTED:
-            loot.clear();
-            SetLootState(GO_CLOSED);
+            switch(GetGoType())
+            {
+                case GAMEOBJECT_TYPE_FISHINGNODE:
+                    Delete();
+                    return;
+                default:
+                {
+                    loot.clear();
+                    SetLootState(GO_CLOSED);
 
-            data.Initialize(SMSG_DESTROY_OBJECT);
-            data << GetGUID();
-            SendMessageToSet(&data, true);
-            m_respawnTimer = m_respawnDelayTime;
+                    data.Initialize(SMSG_DESTROY_OBJECT);
+                    data << GetGUID();
+                    SendMessageToSet(&data, true);
+                    m_respawnTimer = m_respawnDelayTime;
+                }break;
+            }
             break;
     }
 
