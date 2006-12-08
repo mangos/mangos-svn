@@ -1019,7 +1019,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendLoot(uint64 guid, LootType loot_type);
         void SendNotifyLootItemRemoved(uint8 lootSlot);
         void SendNotifyLootMoneyRemoved();
-        uint8 CheckFishingAble() const;
+        int32 FishingMinSkillForCurrentZone() const;
         void SetSoulStoneSpell(uint32 spellid) { m_soulStoneSpell = spellid; }
         void SetSoulStone(Item *item) {  m_soulStone = item;}
         uint32 GetSoulStoneSpell()const { return m_soulStoneSpell;}

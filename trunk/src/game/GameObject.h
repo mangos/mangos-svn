@@ -60,14 +60,20 @@ struct GameObjectInfo
 #pragma pack(pop)
 #endif
 
+// For containers: [GO_NOT_READY] -> GO_CLOSED -> GO_OPEN -> GO_LOOTED -> GO_CLOSED -> ...
+// For bobber:     GO_NOT_READY   -> GO_CLOSED -> GO_OPEN -> GO_LOOTED -> <deleted>
 enum LootState
 {
-    GO_CLOSED = 0,
+    GO_NOT_READY = 0,
+    GO_CLOSED,
     GO_OPEN,
     GO_LOOTED
 };
 
 class Unit;
+
+// 5 sec for bobber catch
+#define FISHING_BOBBER_READY_TIME 2000
 
 class MANGOS_DLL_SPEC GameObject : public Object
 {
