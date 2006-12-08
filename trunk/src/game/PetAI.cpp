@@ -115,7 +115,7 @@ void PetAI::_stopAttack()
     {
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
         i_pet->Clear();
-        i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
+        i_pet->Mutate(new TargetedMovementGenerator(*i_owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
     }
     else
     {
@@ -188,7 +188,7 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 i_pet.addUnitState(UNIT_STAT_FOLLOW);
                 i_pet->Clear();
-                i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
+                i_pet->Mutate(new TargetedMovementGenerator(*i_owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
             }
         }
     }

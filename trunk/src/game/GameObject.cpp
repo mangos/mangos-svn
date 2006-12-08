@@ -42,7 +42,7 @@ GameObject::GameObject() : Object()
     m_respawnTimer = 0;
     m_respawnDelayTime = 25000;
     m_lootState = GO_CLOSED;
-
+    m_usetimes = 0;
     lootid=0;
 }
 
@@ -264,6 +264,12 @@ void GameObject::Update(uint32 p_time)
             m_respawnTimer = 0;
         }
     }
+
+    if (m_usetimes >= 5)
+    {
+	Delete();
+    }
+
 }
 
 void GameObject::Refresh()
@@ -275,6 +281,11 @@ void GameObject::Refresh()
     SendMessageToSet(&data, true);
 
     MapManager::Instance().GetMap(GetMapId())->Add(this);
+}
+
+void GameObject::CountUseTimes()
+{
+    m_usetimes += 1;
 }
 
 void GameObject::Delete()
