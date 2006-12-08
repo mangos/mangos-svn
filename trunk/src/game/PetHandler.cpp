@@ -65,6 +65,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             {
                 case 0x0000:                                //flat=1792  //STAY
                     pet->StopMoving();
+                    (*pet)->Clear();
                     (*pet)->Idle();
                     if(pet->isPet())
                     {
@@ -75,6 +76,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 case 0x0001:                                //spellid=1792  //FOLLOW
                     pet->AttackStop();
                     pet->addUnitState(UNIT_STAT_FOLLOW);
+                    (*pet)->Clear();
                     (*pet)->Mutate(new TargetedMovementGenerator(*_player));
                     if(pet->isPet())
                     {
@@ -95,6 +97,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
                     if(TargetUnit!=pet->getVictim())
                         pet->AttackStop();
+                    (*pet)->Clear();
                     pet->AI().AttackStart(TargetUnit);
                     data.Initialize(SMSG_AI_REACTION);
                     data << guid1 << uint32(00000002);
