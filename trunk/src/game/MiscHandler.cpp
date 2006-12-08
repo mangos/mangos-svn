@@ -371,7 +371,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
 
     AreaTableEntry* area = GetAreaEntryByAreaID(newZone);
-    if(!area && area->zone_type == 312)                      // city
+    if(area && area->zone_type == 312)                      // city
     {
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         GetPlayer()->SetRestType(2);
