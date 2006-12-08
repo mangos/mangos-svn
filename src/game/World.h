@@ -199,6 +199,8 @@ class World
         }
         uint32 getLogFilter() const { return m_logFilter; }
 
+        bool IsPvPRealm() { return (MaNGOS::Singleton<World>::Instance().getConfig(CONFIG_GAME_TYPE) == 1 || MaNGOS::Singleton<World>::Instance().getConfig(CONFIG_GAME_TYPE) == 8); }
+
         bool KickPlayer(std::string playerName);
         bool BanAccount(std::string nameOrIP);
         bool RemoveBanAccount(std::string nameOrIP);

@@ -261,6 +261,18 @@ void Spell::FillTargetMap()
         if(IsChanneledSpell() && !tmpUnitMap.empty())
             m_needAliveTarget[i] = true;
 
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && (!m_caster->IsPvP() || ((Player*)m_caster)->pvpInfo.endTimer != 0))
+        {
+            Player *me = (Player*)m_caster;
+            for (std::list<Unit*>::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); itr++)
+            {        
+                Unit *owner = (*itr)->GetOwner();
+                Unit *u = owner ? owner : (*itr);
+                if(u->IsPvP() && (!me->duel || me->duel->opponent != u))
+                    me->UpdatePvP(true);
+            }
+        }
+
         m_targetUnits[i] = tmpUnitMap;
         m_targetItems[i] = tmpItemMap;
         m_targetGOs[i]   = tmpGOMap;

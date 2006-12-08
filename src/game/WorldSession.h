@@ -165,7 +165,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGMTicketDeleteOpcode(WorldPacket& recvPacket);
         void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
 
-        void HandleEnablePvP(WorldPacket& recvPacket);
+        void HandleTogglePvP(WorldPacket& recvPacket);
 
         void HandleZoneUpdateOpcode(WorldPacket& recvPacket);
         void HandleSetTargetOpcode(WorldPacket& recvPacket);

@@ -130,9 +130,6 @@ Player::Player (WorldSession *session): Unit()
     m_DiscoveredPj = 0;
     m_enableDetect = true;
 
-    m_pvp_count = 0;
-    m_pvp_counting = false;
-
     m_bgInBattleGround = false;
     m_bgBattleGroundID = 0;
 
@@ -302,7 +299,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
-    SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_ALLOW_SWIM );
+    SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 );
 
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
                                                             //-1 is default value
@@ -657,7 +654,7 @@ void Player::Update( uint32 p_time )
 
     time_t now = time (NULL);
 
-    UpdatePVPFlag(time(NULL));
+    UpdatePvPFlag(time(NULL));
 
     UpdateDuelFlag(time(NULL));
 
@@ -754,6 +751,11 @@ void Player::Update( uint32 p_time )
                     resetAttackTimer(OFF_ATTACK);
                 }
             }
+
+            Unit *owner = pVictim->GetOwner();
+            Unit *u = owner ? owner : pVictim;
+            if(u->IsPvP() && (!duel || duel->opponent != u))
+                UpdatePvP(true);
         }
     }
 
@@ -1216,6 +1218,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
             UnsummonPet(pet);
     }
+
+    UpdatePvPZone();
+    if(pvpInfo.inHostileArea)
+        CastSpell(this, 2479, false);
 }
 
 void Player::AddToWorld()
@@ -2699,7 +2705,7 @@ void Player::BuildPlayerRepop()
     StopMirrorTimer(BREATH_TIMER);
     StopMirrorTimer(FIRE_TIMER);
 
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_ALLOW_SWIM );
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 );
     SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
     SetUInt32Value(UNIT_FIELD_AURA + 33, 0x5068 );          //!dono
 
@@ -2729,9 +2735,6 @@ void Player::ResurrectPlayer()
 {
     // remove death flag + set aura
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
-
-    // return the PvP enable flag to normal
-    SetPvP( GetPvP() );
 
     setDeathState(ALIVE);
 
@@ -4007,6 +4010,7 @@ void Player::CalculateHonor(Unit *uVictim)
     sLog.outDetail("PLAYER: CalculateHonor");
 
     if( !uVictim ) return;
+    if( uVictim->GetAura(2479,0) ) return; // is honorless target
 
     if( uVictim->GetTypeId() == TYPEID_UNIT )
     {
@@ -4079,6 +4083,27 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
         return 0;
 
     return MapManager::Instance().GetMap((*result)[0].GetUInt32())->GetZoneId((*result)[0].GetFloat(),(*result)[0].GetFloat());
+}
+
+void Player::UpdatePvPZone()
+{
+    AreaTableEntry* area = GetAreaEntryByAreaID(GetZoneId());
+
+    pvpInfo.inHostileArea = 
+        (GetTeam() == ALLIANCE && area->team == AREATEAM_HORDE || 
+         GetTeam() == HORDE    && area->team == AREATEAM_ALLY  ||
+         (sWorld.IsPvPRealm()  && area->team == AREATEAM_NONE));
+
+    if(pvpInfo.inHostileArea)
+    {
+        if(!IsPvP() || pvpInfo.endTimer != 0)
+            UpdatePvP(true, true);
+    }
+    else
+    {
+        if(IsPvP() && !HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP) && pvpInfo.endTimer == 0)
+            pvpInfo.endTimer = time(NULL); // start toggle-off
+    }
 }
 
 //If players are too far way of duel flag... then player loose the duel
@@ -4214,6 +4239,9 @@ void Player::FlightComplete()
     clearUnitState(UNIT_STAT_IN_FLIGHT);
     SetMoney( m_dismountCost);
     Unmount();
+
+    if(pvpInfo.inHostileArea)
+        CastSpell(this, 2479, false);
 }
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
@@ -10236,27 +10264,12 @@ void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
 /***              Update timers                        ***/
 /*********************************************************/
 
-void Player::UpdatePVPFlag(time_t currTime)
+void Player::UpdatePvPFlag(time_t currTime)
 {
-    if( !GetPvP() ) return;
+    if(!IsPvP() || pvpInfo.endTimer == 0) return;
+    if(currTime < (pvpInfo.endTimer + 300)) return;
 
-    //Player is counting to set/unset pvp flag
-    if( !m_pvp_counting ) return;
-
-    //Is player is in a PvP action stop counting
-    if( isInCombatWithPlayer() )
-    {
-        m_pvp_counting = false;
-        m_pvp_count = time(NULL);
-        return;
-    }
-
-    //Wait 5 min until remove pvp mode
-    if( currTime < m_pvp_count + 300 ) return;
-
-    SetPvP(false);
-    //sChatHandler.SendSysMessage(GetSession(), "PvP toggled off.");
-
+    UpdatePvP(false);
 }
 
 void Player::UpdateDuelFlag(time_t currTime)

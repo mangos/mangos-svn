@@ -139,6 +139,14 @@ struct PlayerInfo
     PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1
 };
 
+struct PvPInfo
+{
+    PvPInfo() : inHostileArea(false), endTimer(0) {}
+
+    bool inHostileArea;
+    time_t endTimer;
+};
+
 struct DuelInfo
 {
     DuelInfo() : initiator(NULL), opponent(NULL), startTimer(0), startTime(0), outOfBound(0) {}
@@ -812,26 +820,24 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_cinematic = cine;
         }
 
-        void UpdatePVPFlag(time_t currTime);
-
-        void SetPVPCount(time_t count)
+        PvPInfo pvpInfo;
+        void UpdatePvP(bool state, bool ovrride=false) 
         {
-            //if(!m_pvp_counting)
-            //{
-            m_pvp_count = count;
-            m_pvp_counting = true;
-            //}
-        }
-
-        void SetPvP(bool b)
-        {
-            if (!b)
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+            if(!state || ovrride)
+            {
+                SetPvP(state);                
+                pvpInfo.endTimer = 0;
+            }
             else
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
-
-            m_pvp_counting = false;
-        };
+            {
+                if(pvpInfo.endTimer != 0)
+                    pvpInfo.endTimer = time(NULL);
+                else
+                    SetPvP(state);
+            }
+        }
+        void UpdatePvPZone();
+        void UpdatePvPFlag(time_t currTime);
 
         inline std::list<struct actions> getActionList() { return m_actions; };
         void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
@@ -1249,8 +1255,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_deathTimer;
 
         uint32 m_restTime;
-        time_t m_pvp_count;
-        bool m_pvp_counting;
 
         uint32 m_BlockValue;
         uint32 m_soulStoneSpell;

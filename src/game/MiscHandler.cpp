@@ -334,34 +334,23 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 }
 
-void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
+void WorldSession::HandleTogglePvP(WorldPacket& recvPacket)
 {
+    sLog.outString("HERE ENABLE PVP");
+    recvPacket.hexlike();
 
-    if ( (!GetPlayer()->isAlive()) || GetPlayer()->isInCombat() || GetPlayer()->duel )
+    GetPlayer()->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+
+    if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
     {
-        WorldPacket data;
-        data.Initialize(SMSG_CAST_RESULT);
-        data << uint32(0);
-        data << uint8(2);
-        data << uint8(97);
-        SendPacket(&data);
-        return;
+        if(!GetPlayer()->IsPvP() || GetPlayer()->pvpInfo.endTimer != 0)
+            GetPlayer()->UpdatePvP(true, true);
     }
-
-    if( !GetPlayer()->GetPvP() || GetPlayer()->m_pvp_counting )
+    else
     {
-        //sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You are now flagged PvP combat and will remain so until toggled off.");
-        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
-        GetPlayer()->SetPvP (true);
-        return;
+        if(!GetPlayer()->pvpInfo.inHostileArea && GetPlayer()->IsPvP())
+            GetPlayer()->pvpInfo.endTimer = time(NULL); // start toggle-off
     }
-
-    //sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You will be unflagged for PvP combat after five minutes of non-PvP action in friendly territory.");
-
-    GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
-    if(sWorld.getConfig(CONFIG_GAME_TYPE) != 1 && sWorld.getConfig(CONFIG_GAME_TYPE) != 8)
-        GetPlayer()->SetPVPCount(time(NULL));
-
 }
 
 void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
@@ -382,13 +371,14 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
 
     AreaTableEntry* area = GetAreaEntryByAreaID(newZone);
-
-    if(area && area->zone_type == 312)                      // city
+    if(!area && area->zone_type == 312)                      // city
     {
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         GetPlayer()->SetRestType(2);
         GetPlayer()->InnEnter(time(NULL),0,0,0);
     }
+
+    GetPlayer()->UpdatePvPZone();
 }
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )

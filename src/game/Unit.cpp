@@ -254,17 +254,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         ((Creature*)pVictim)->AI().AttackStart(this);
     }
 
-    // enter in PVP if damage player or pet or if your pet damage pet or player
-    if(this != pVictim)
-    {
-        Unit* attackerOwner = GetOwner();
-        Unit* targetOwner = pVictim->GetOwner();
-        Unit* attacker = attackerOwner ? attackerOwner : this;
-        Unit* target   = targetOwner ? targetOwner : pVictim;
-        if(attacker->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER && (!((Player*)attacker)->duel || ((Player*)attacker)->duel->opponent->GetGUID() != target->GetGUID()))
-            ((Player*)attacker)->SetPvP(true);
-    }
-
     DEBUG_LOG("DealDamageStart");
 
     uint32 health = pVictim->GetHealth();
@@ -2874,7 +2863,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             return false;
 
         // Red (can attack) if true, Blue/Yellow (can't attack) in another case
-        return ((Player*)tester)->GetPvP() && ((Player*)target)->GetPvP();
+        return ((Player*)tester)->IsPvP() && ((Player*)target)->IsPvP();
     }
 
     // common case (CvC,PvC, CvP)
@@ -2906,7 +2895,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             return true;
 
         // Blue (friendly/non-attackable) if not PVP, or Yellow/Red in another case (attackable)
-        return !((Player*)target)->GetPvP();
+        return !((Player*)target)->IsPvP();
     }
 
     // common case (CvC, PvC, CvP)
