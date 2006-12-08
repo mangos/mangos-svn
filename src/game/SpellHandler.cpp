@@ -233,6 +233,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             }
 
+
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
 
             info = obj->GetGOInfo();
@@ -308,6 +309,9 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             return;
         }
+
+	    obj->CountUseTimes();
+
         case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
             //GB flag
             info = obj->GetGOInfo();

@@ -50,6 +50,10 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
 
     float x, y, z;
     i_target.GetContactPoint( &owner, x, y, z );
+    float angle = i_target.GetOrientation() + i_angle;
+    x += i_offset * cos(angle);
+    y += i_offset * sin(angle);
+
     Traveller<Creature> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z, offset);
     owner.addUnitState(UNIT_STAT_CHASE);
