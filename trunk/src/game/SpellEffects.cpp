@@ -565,15 +565,6 @@ void Spell::EffectHeal( uint32 i )
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth, crit);
 
         unitTarget->ModifyHealth( addhealth );
-
-        //If the target is in combat, then player is in combat too
-        if( m_caster != unitTarget &&
-            m_caster->GetTypeId() == TYPEID_PLAYER &&
-            unitTarget->GetTypeId() == TYPEID_PLAYER &&
-            unitTarget->isInCombatWithPlayer() )
-        {
-            ((Player*)m_caster)->SetPvP(true);
-        }
     }
 }
 
@@ -1341,7 +1332,7 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,0);
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1);
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);

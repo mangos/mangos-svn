@@ -2583,7 +2583,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( player->getRace() ) | ( player->getClass() << 8 ) | ( player->getGender() << 16 ) | ( powertype << 24 ) ) );
         player->SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
         player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
-        player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_ALLOW_SWIM );
+        player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 );
 
         player->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
                                                             //-1 is default value

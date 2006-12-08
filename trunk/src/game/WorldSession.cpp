@@ -243,7 +243,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GMTICKET_SYSTEMSTATUS,       STATUS_LOGGEDIN, &WorldSession::HandleGMTicketSystemStatusOpcode    },
         { CMSG_GMTICKET_DELETETICKET,       STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode          },
         { CMSG_GMTICKET_UPDATETEXT,         STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode      },
-        { CMSG_TOGGLE_PVP,                  STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP                     },
+        { CMSG_TOGGLE_PVP,                  STATUS_LOGGEDIN, &WorldSession::HandleTogglePvP                     },
 
         // played time
         { CMSG_PLAYED_TIME,                 STATUS_LOGGEDIN, &WorldSession::HandlePlayedTime                    },

@@ -25,6 +25,12 @@
 #pragma pack(push,1)
 #endif
 
+enum AreaTeams
+{
+	AREATEAM_NONE  = 0,
+	AREATEAM_ALLY  = 2,
+	AREATEAM_HORDE = 4
+};
 struct AreaTableEntry
 {
     uint32    ID;
@@ -32,6 +38,7 @@ struct AreaTableEntry
     uint32    exploreFlag;
     uint32    zone_type;                                    // unknown value but 312 for all cities
     int32     area_level;
+    uint32    team;
 };
 
 struct ChrClassesEntry

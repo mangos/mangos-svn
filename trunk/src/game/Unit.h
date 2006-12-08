@@ -179,14 +179,14 @@ enum UnitFlags
 {
     UNIT_FLAG_NONE           = 0x00000000,
     UNIT_FLAG_DISABLE_MOVE   = 0x00000004,
-    UNIT_FLAG_ALLOW_SWIM     = 0x00000008,
+    UNIT_FLAG_UNKNOWN1       = 0x00000008,    // essential for all units..
     UNIT_FLAG_RESTING        = 0x00000020,
     UNIT_FLAG_PVP            = 0x00001000,
     UNIT_FLAG_MOUNT          = 0x00002000,
     UNIT_FLAG_DISABLE_ROTATE = 0x00040000,
     UNIT_FLAG_IN_COMBAT      = 0x00080000,
     UNIT_FLAG_SKINNABLE      = 0x04000000,
-    UNIT_FLAG_SHEATHE        = 0x40000000
+    UNIT_FLAG_SHEATHE        = 0x40000000    
 };
 enum ProcFlags
 {
@@ -453,7 +453,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool IsHostileToAll() const;
         bool IsFriendlyTo(Unit const* unit) const;
         bool IsNeutralToAll() const;
-        bool GetPvP() { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
+        bool IsPvP() { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
+        void SetPvP(bool state) { if(state) SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); else RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
 
         uint8 getStandState() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_1) & 0xFF); };
 
