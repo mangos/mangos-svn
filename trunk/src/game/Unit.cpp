@@ -1465,8 +1465,8 @@ void Unit::_UpdateSpells( uint32 time )
         {
             if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
             {
-                                                            //Auto shot
-                if( m_currentSpell->m_spellInfo->Id == 75 && GetTypeId() == TYPEID_PLAYER )
+                //Auto Shot & Shoot 
+                if( m_currentSpell->m_spellInfo->AttributesEx2 == 0x000020 && GetTypeId() == TYPEID_PLAYER ) 
                     resetAttackTimer( RANGED_ATTACK );
                 else
                     setAttackTimer( RANGED_ATTACK, m_currentSpell->m_spellInfo->RecoveryTime);

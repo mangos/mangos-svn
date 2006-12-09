@@ -172,7 +172,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 
     m_triggeredByAura = Aur;
     m_autoRepeat = false;
-    if(info->Id == 75)                                      //auto shot
+    if( m_spellInfo->AttributesEx2 == 0x000020 )            //Auto Shot & Shoot 
         m_autoRepeat = true;
 
     casttime = GetCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
