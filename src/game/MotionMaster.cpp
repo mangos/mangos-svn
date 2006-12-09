@@ -32,6 +32,7 @@ inline bool isStatic(MovementGenerator *mv)
 void
 MotionMaster::Initialize(Creature *creature)
 {
+    if (!empty()) Clear();
     i_owner = creature;
     MovementGenerator* movement = FactorySelector::selectMovementGenerator(i_owner);
     push(  movement == NULL ? &si_idleMovement : movement );
@@ -49,7 +50,7 @@ MotionMaster::UpdateMotion(const uint32 &diff)
 }
 
 void
-MotionMaster::Clear()
+MotionMaster::Clear(bool reset)
 {
     while( !empty() && size() > 1 )
     {
@@ -60,7 +61,7 @@ MotionMaster::Clear()
     }
 
     assert( !empty() );
-    top()->Reset(*i_owner);
+    if (reset) top()->Reset(*i_owner);
 }
 
 void
@@ -85,11 +86,9 @@ MotionMaster::TargetedHome()
     if(i_owner->hasUnitState(UNIT_STAT_FLEEING))
         return;
 
-    if(!empty() && top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        pop();
-
     DEBUG_LOG("Target home location %u", i_owner->GetGUIDLow());
 
+    Clear(false);
     Mutate(new HomeMovementGenerator());
 }
 
