@@ -50,6 +50,9 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 
 static uint8 AuctioneerFactionToLocation(uint32 faction)
 {
+    if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
+        return 7;                                           // neutral
+
     switch (faction)
     {
         case 29:                                            //orc
