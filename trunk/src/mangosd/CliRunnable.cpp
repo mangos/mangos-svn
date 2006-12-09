@@ -217,11 +217,10 @@ void CliIdleShutdown(char* command,pPrintf zprintf)
     else
     {
 
-        char *time_str= strtok(args," ");
-        uint32 time = atoi(time_str);
+        uint32 time = atoi(args);
 
         ///- Prevent interpret wrong arg value as 0 secs shutdown time
-        if(!time_str || time_str[0]!='0' || time_str[1]!='\0' || time < 0)
+        if(time==0 && (args[0]!='0' || args[1]!='\0') || time < 0)
         {
             zprintf("Syntax is: idleshutdown <seconds|cancel>\r\n");
             return;
@@ -248,11 +247,10 @@ void CliShutdown(char* command,pPrintf zprintf)
     }
     else
     {
-        char *time_str= strtok(args," ");
-        int32 time = atoi(time_str);
+        int32 time = atoi(args);
 
         ///- Prevent interpret wrong arg value as 0 secs shutdown time
-        if(!time_str || time_str[0]!='0' || time_str[1]!='\0' || time < 0)
+        if(time==0 && (args[0]!='0' || args[1]!='\0') || time < 0)
         {
             zprintf("Syntax is: shutdown <seconds|cancel>\r\n");
             return;
