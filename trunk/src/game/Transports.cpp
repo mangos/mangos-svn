@@ -22,21 +22,34 @@
 #include "Path.h"
 
 #include "Common.h"
-
 #include "WorldPacket.h"
-
 #include "Database/DBCStores.h"
+#include "ProgressBar.h"
 
 void MapManager::LoadTransports()
 {
     QueryResult *result = sDatabase.Query("SELECT `entry`, `name`, `period` FROM transports");
-    if(!result) 
+
+    uint32 count = 0;
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u transports", count );
         return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
 
     uint32 entry;
     string name;
     
     do {
+        bar.step();
+
         Transport *t = new Transport;
 
         Field *fields = result->Fetch();
@@ -47,7 +60,7 @@ void MapManager::LoadTransports()
 
         const GameObjectInfo *goinfo = objmgr.GetGameObjectInfo(entry);
         
-        sLog.outString("Loading transport between %s, %s", name.c_str(), goinfo->name);
+        //sLog.outString("Loading transport between %s, %s", name.c_str(), goinfo->name);
 
         vector<uint32> mapsUsed;
 
@@ -78,17 +91,19 @@ void MapManager::LoadTransports()
             vector<Transport *> *v = &(m_TransportsByMap[mapsUsed[i]]);
             if (find(v->begin(), v->end(), t) == v->end()) {
                 v->push_back(t);
-                sLog.outString("%d ", mapsUsed[i]);
+                //sLog.outString("%d ", mapsUsed[i]);
             }
         }
         
         //If we someday decide to use the grid to track transports, here:
         //MapManager::Instance().LoadGrid(mapid,x,y,true);
         //MapManager::Instance().GetMap(t->GetMapId())->Add<GameObject>((GameObject *)t);        
+        ++count;
     } while(result->NextRow());
     delete result;
 
-    return;
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u transports", count );
 }
 
 bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
@@ -323,7 +338,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, vector <uint32> &mapids)
 
     uint32 timer = t;
 
-    sLog.outDetail("    Generated %d waypoints, total time %u.", m_WayPoints.size(), timer);
+//    sLog.outDetail("    Generated %d waypoints, total time %u.", m_WayPoints.size(), timer);
     
     m_curr = m_WayPoints.begin();
     m_curr = GetNextWayPoint();

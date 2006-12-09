@@ -307,8 +307,8 @@ void ObjectMgr::LoadCreatureTemplates()
 
     sCreatureStorage.Load();
 
-    sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
     sLog.outString( "" );
+    sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
 }
 
 // name must be checked to correctness (if recived) before call this function
@@ -414,16 +414,17 @@ void ObjectMgr::LoadAuctions()
     } while (result->NextRow());
     delete result;
 
-    sLog.outString("");
-    sLog.outString( ">> Loaded %u auctions", AuctionCount);
-    sLog.outString("");
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u auctions", AuctionCount );
+    sLog.outString( "" );
 }
 
 void ObjectMgr::LoadItemPrototypes()
 {
     sItemStorage.Load ();
-    sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount);
-    sLog.outString("");
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount );
+    sLog.outString( "" );
 }
 
 void ObjectMgr::LoadAuctionItems()
@@ -433,9 +434,15 @@ void ObjectMgr::LoadAuctionItems()
     if( !result )
         return;
 
+    barGoLink bar( result->GetRowCount() );
+
+    uint32 count = 0;
+
     Field *fields;
     do
     {
+        bar.step();
+
         fields = result->Fetch();
         uint32 item_guid        = fields[0].GetUInt32();
         uint32 item_template    = fields[1].GetUInt32();
@@ -456,10 +463,15 @@ void ObjectMgr::LoadAuctionItems()
             continue;
         }
         AddAItem(item);
+
+        ++count;
     }
     while( result->NextRow() );
 
     delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u auction items", count );
 }
 
 void ObjectMgr::LoadPlayerInfo()
@@ -1031,8 +1043,8 @@ void ObjectMgr::LoadQuests()
             ExclusiveQuestGroups.insert(pair<uint32, uint32>(qinfo->ExclusiveGroup, qinfo->GetQuestId()));
     }
 
-    sLog.outString( ">> Loaded %u quests definitions", QuestTemplates.size() );
     sLog.outString( "" );
+    sLog.outString( ">> Loaded %u quests definitions", QuestTemplates.size() );
 }
 
 void ObjectMgr::LoadScripts()
@@ -1040,12 +1052,24 @@ void ObjectMgr::LoadScripts()
 
     QueryResult *result = sDatabase.Query( "SELECT `id`,`delay`,`command`,`datalong`,`datalong2`,`datatext`, `x`, `y`, `z`, `o` FROM `scripts`" );
 
-    if( !result )
-        return;
-
     uint32 count = 0;
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u script definitions", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
     do
     {
+        bar.step();
+
         Field *fields = result->Fetch();
         ScriptInfo tmp;
         tmp.id = fields[0].GetUInt32();
@@ -1071,8 +1095,8 @@ void ObjectMgr::LoadScripts()
 
     delete result;
 
-    sLog.outString( ">> Loaded %u script definitions", count );
     sLog.outString( "" );
+    sLog.outString( ">> Loaded %u script definitions", count );
 }
 
 void ObjectMgr::LoadItemPages()
@@ -1084,14 +1108,27 @@ void ObjectMgr::LoadItemPages()
         exit(1);
     }
 
+    barGoLink bar( result->GetRowCount() );
+
+    uint32 count = 0;
+
     Field* fields;
     do
     {
+        bar.step();
+
         fields = result->Fetch();
 
         mItemPages[ fields[0].GetUInt32() ] = fields[1].GetCppString();
 
+        ++count;
+
     } while ( result->NextRow() );
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u item pages", count );
 }
 
 void ObjectMgr::AddGossipText(GossipText *pGText)
@@ -1118,7 +1155,16 @@ void ObjectMgr::LoadGossipText()
     QueryResult *result = sDatabase.Query( "SELECT * FROM `npc_text`" );
 
     int count = 0;
-    if( !result ) return;
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u npc texts", count );
+        return;
+    }
+
     int cic;
 
     barGoLink bar( result->GetRowCount() );
@@ -1279,18 +1325,26 @@ AreaTriggerPoint *ObjectMgr::GetAreaTriggerQuestPoint(uint32 Trigger_ID)
 
 void ObjectMgr::LoadAreaTriggerPoints()
 {
-    int count = 0;
     QueryResult *result = sDatabase.Query( "SELECT `id`,`quest` FROM `areatrigger_involvedrelation`" );
     AreaTriggerPoint *pArea;
 
-    if( !result ) return;
+    uint32 count = 0;
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u quest trigger points", count );
+        return;
+    }
 
     barGoLink bar( result->GetRowCount() );
 
     do
     {
-        count++;
-
+        ++count;
         bar.step();
 
         pArea = new AreaTriggerPoint;
@@ -1304,9 +1358,10 @@ void ObjectMgr::LoadAreaTriggerPoints()
 
     } while( result->NextRow() );
 
+    delete result;
+
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u quest trigger points", count );
-    delete result;
 }
 
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
@@ -1723,6 +1778,7 @@ void ObjectMgr::LoadGameobjectInfo()
 {
     sGOStorage.Load();
 
+    sLog.outString( "" );
     sLog.outString( ">> Loaded %u game object templates", sGOStorage.RecordCount );
 
 }
