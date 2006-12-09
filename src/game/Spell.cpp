@@ -233,7 +233,8 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_PROFICIENCY:
                 case SPELL_EFFECT_PARRY:
                 case SPELL_EFFECT_DUMMY:
-                    tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    if(m_targets.getUnitTarget())
+                        tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
                 case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_FEED_PET:
@@ -305,7 +306,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_SINGLE_ENEMY:
         {
-            TagUnitMap.push_back(m_targets.getUnitTarget());
+            if(m_targets.getUnitTarget())
+                TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_ALL_ENEMY_IN_AREA:
         {
@@ -350,7 +352,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
         {
-            TagUnitMap.push_back(m_targets.getUnitTarget());
+            if(m_targets.getUnitTarget())
+                TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_ALL_ENEMIES_AROUND_CASTER:
         {
@@ -370,7 +373,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_GAMEOBJECT:
         {
-            TagGOMap.push_back(m_targets.m_GOTarget);
+            if(m_targets.m_GOTarget)
+                TagGOMap.push_back(m_targets.m_GOTarget);
         }break;
         case TARGET_IN_FRONT_OF_CASTER:
         {
@@ -390,7 +394,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_DUELVSPLAYER:
         {
-            TagUnitMap.push_back(m_targets.getUnitTarget());
+            if(m_targets.getUnitTarget())
+                TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_GAMEOBJECT_ITEM:
         {
@@ -425,11 +430,13 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_SINGLE_PARTY:
         {
-            TagUnitMap.push_back(m_targets.getUnitTarget());
+            if(m_targets.getUnitTarget())
+                TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_AREAEFFECT_PARTY:
         {
-            Player* targetPlayer = m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER ? (Player*)m_targets.getUnitTarget() : NULL;
+            Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER 
+                ? (Player*)m_targets.getUnitTarget() : NULL;
 
             Group* pGroup = targetPlayer ? objmgr.GetGroupByLeader(targetPlayer->GetGroupLeader()) : NULL;
             if(pGroup)
@@ -495,7 +502,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
         {
-            Player* targetPlayer = m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER ? (Player*)m_targets.getUnitTarget() : NULL;
+            Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER 
+                ? (Player*)m_targets.getUnitTarget() : NULL;
 
             Group* pGroup = targetPlayer ? objmgr.GetGroupByLeader(targetPlayer->GetGroupLeader()) : NULL;
             if(pGroup)
@@ -508,7 +516,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                         TagUnitMap.push_back(Target);
                 }
             }
-            else
+            else if(m_targets.getUnitTarget())
                 TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
     }
@@ -542,7 +550,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             }
         }
         // the player's target will always be added to the map
-        if (removed_utarget)
+        if (removed_utarget && m_targets.getUnitTarget())
             TagUnitMap.push_back(m_targets.getUnitTarget());
     }
 }
