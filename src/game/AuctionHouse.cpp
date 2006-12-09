@@ -260,7 +260,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     it->SaveToDB();
     sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location`) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u')",
-        AH->Id, AH->auctioneer, AH->item_guid, AH->item_template, AH->owner, AH->buyout, AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);
+        AH->Id, AH->auctioneer, AH->item_guid, AH->item_template, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);
 
     SendAuctionCommandResult(AH->Id, AUCTION_SELL_ITEM, AUCTION_OK);
     //pl->SaveToDB() - isn't needed, because item will be removed from inventory now, only money are problem

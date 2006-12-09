@@ -444,11 +444,11 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                    if(m_targets.getUnitTarget()->IsWithinDist(Target, radius) )
+                    if(m_targets.getUnitTarget() && Target && m_targets.getUnitTarget()->IsWithinDist(Target, radius) )
                         TagUnitMap.push_back(Target);
                 }
             }
-            else
+            else if(m_targets.getUnitTarget())
                 TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_SELF_FISHING:
@@ -467,7 +467,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    if(m_targets.getUnitTarget()->GetGUID() == pGroup->GetMemberGUID(p))
+                    if(m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetGUID() == pGroup->GetMemberGUID(p))
                     {
                         onlyParty = true;
                         break;
@@ -483,7 +483,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                         TagUnitMap.push_back(Target);
                 }
             }
-            else
+            else if(m_targets.getUnitTarget())
                 TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_CURRENT_SELECTED_ENEMY:
@@ -511,7 +511,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                    if(targetPlayer->IsWithinDist(Target, radius) &&
+                    if(Target && targetPlayer->IsWithinDist(Target, radius) &&
                         targetPlayer->getClass() == Target->getClass())
                         TagUnitMap.push_back(Target);
                 }
