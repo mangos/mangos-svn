@@ -34,6 +34,7 @@
 #define LANG_CHAR_IN_FLIGHT              "%s are flying and your command fail."
 #define LANG_CHAR_NON_MOUNTED            "You are not mounted and can't do dismount."
 #define LANG_YOU_IN_COMBAT               "You are fighting and can't do it."
+#define LANG_YOU_USED_IT_RECENTLY        "You used it recently."
 
 // alliance ranks
 #define LANG_ALI_PRIVATE                 "Private "
