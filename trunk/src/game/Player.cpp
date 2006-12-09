@@ -4089,6 +4089,9 @@ void Player::UpdatePvPZone()
 {
     AreaTableEntry* area = GetAreaEntryByAreaID(GetZoneId());
 
+    if(!area)
+        return;
+
     pvpInfo.inHostileArea = 
         (GetTeam() == ALLIANCE && area->team == AREATEAM_HORDE || 
          GetTeam() == HORDE    && area->team == AREATEAM_ALLY  ||
