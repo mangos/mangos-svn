@@ -6161,8 +6161,8 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
 
 uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
 {
-    // Applied only to equiped items
-    if(!IsEquipmentPos(pos))
+    // Applied only to equiped items and bank bags
+    if(!IsEquipmentPos(pos) && !IsBagPos(pos))
         return EQUIP_ERR_OK;
 
     Item* pItem = GetItemByPos(pos);
@@ -7227,7 +7227,8 @@ void Player::SwapItem( uint16 src, uint16 dst )
             return;
         }
 
-        if(IsEquipmentPos ( src ))
+        // check unequip posability for equipped items and bank bags
+        if(IsEquipmentPos ( src ) || IsBagPos ( src ))
         {
             // bags can be swapped with empty bag slots
             uint8 msg = CanUnequipItem( src, pDstItem != NULL || IsBagPos ( src ) && IsBagPos ( dst ));
@@ -7236,9 +7237,11 @@ void Player::SwapItem( uint16 src, uint16 dst )
                 SendEquipError( msg, pSrcItem, pDstItem );
                 return;
             }
+
         }
 
-        if( srcslot == dstbag )
+        // prevent put equiped/bank bag in self
+        if( IsBagPos ( src ) && srcslot == dstbag)
         {
             SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pSrcItem, pDstItem );
             return;

@@ -55,7 +55,8 @@ enum EContainerFields
     CONTAINER_FIELD_NUM_SLOTS               = 48,
     CONTAINER_ALIGN_PAD                     = 49,
     CONTAINER_FIELD_SLOT_1                  = 50,
-    CONTAINER_END                           = 90,
+    CONTAINER_END                           = 106,
+    //CONTAINER_END                           = 90,
 };
 
 enum EUnitFields
