@@ -1647,7 +1647,7 @@ void Spell::EffectDuel(uint32 i)
     Player *target = (Player*)unitTarget;
 
     // caster or target already have requested duel
-    if( caster->duel || target->duel || target->HasInIgnoreList(caster->GetGUID()) ) 
+    if( caster->duel || target->duel || target->HasInIgnoreList(caster->GetGUID()) )
         return;
 
     //CREATE DUEL FLAG OBJECT

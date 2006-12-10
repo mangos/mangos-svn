@@ -27,9 +27,9 @@
 
 enum AreaTeams
 {
-	AREATEAM_NONE  = 0,
-	AREATEAM_ALLY  = 2,
-	AREATEAM_HORDE = 4
+    AREATEAM_NONE  = 0,
+    AREATEAM_ALLY  = 2,
+    AREATEAM_HORDE = 4
 };
 struct AreaTableEntry
 {

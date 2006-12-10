@@ -74,21 +74,21 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     }
                     break;
                 case 0x0001:                                //spellid=1792  //FOLLOW
-		    DEBUG_LOG("Start shits 1");
+                    DEBUG_LOG("Start shits 1");
                     pet->AttackStop();
-		    DEBUG_LOG("Start shits 2");
+                    DEBUG_LOG("Start shits 2");
                     pet->addUnitState(UNIT_STAT_FOLLOW);
-		    DEBUG_LOG("Start shits 3");
+                    DEBUG_LOG("Start shits 3");
                     (*pet)->Clear();
-		    DEBUG_LOG("Start shits 4");
-		    (*pet)->Mutate(new TargetedMovementGenerator(*_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
-		    DEBUG_LOG("Start shits 5");
+                    DEBUG_LOG("Start shits 4");
+                    (*pet)->Mutate(new TargetedMovementGenerator(*_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
+                    DEBUG_LOG("Start shits 5");
 
                     if(pet->isPet())
                     {
-		    DEBUG_LOG("Start shits 6");
+                        DEBUG_LOG("Start shits 6");
                         ((Pet*)pet)->AddActState( STATE_RA_FOLLOW );
-		    DEBUG_LOG("Start shits 7");
+                        DEBUG_LOG("Start shits 7");
                         ((Pet*)pet)->ClearActState( STATE_RA_STAY );
                     }
                     break;
