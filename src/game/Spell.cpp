@@ -766,6 +766,7 @@ void Spell::SendSpellCooldown()
 
     Player* _player = (Player*)m_caster;
 
+    uint32 cat = m_spellInfo->Category;
     int32 rec = m_spellInfo->RecoveryTime;
     int32 catrec = m_spellInfo->CategoryRecoveryTime;
 
@@ -785,6 +786,7 @@ void Spell::SendSpellCooldown()
             {
                 if(proto->Spells[idx].SpellId == m_spellInfo->Id)
                 {
+                    cat    = proto->Spells[idx].SpellCategory;
                     rec    = proto->Spells[idx].SpellCooldown;
                     catrec = proto->Spells[idx].SpellCategoryCooldown;
                     break;
@@ -842,7 +844,7 @@ void Spell::SendSpellCooldown()
                 continue;
 
             SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
-            if( spellInfo->Category == m_spellInfo->Category)
+            if( spellInfo->Category == cat)
             {
                 data << uint32(itr->first);
                 data << uint32(catrec);

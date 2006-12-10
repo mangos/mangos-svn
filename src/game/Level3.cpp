@@ -2227,14 +2227,7 @@ bool ChatHandler::HandleUpdate(const char* args)
 
 bool ChatHandler::HandleBankCommand(const char* args)
 {
-    WorldPacket data;
-    uint64 guid;
-
-    guid = m_session->GetPlayer()->GetGUID();
-
-    data.Initialize( SMSG_SHOW_BANK );
-    data << guid;
-    m_session->SendPacket( &data );
+    m_session->SendShowBank( m_session->GetPlayer()->GetGUID() );
 
     return true;
 }
