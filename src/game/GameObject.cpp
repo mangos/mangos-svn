@@ -195,7 +195,7 @@ void GameObject::Update(uint32 p_time)
                                 data.Initialize(SMSG_FISH_NOT_HOOKED);
                                 ((Player*)caster)->GetSession()->SendPacket(&data);
                             }
-                            m_lootState = GO_LOOTED;    // can be delete
+                            m_lootState = GO_LOOTED;        // can be delete
                             return;
                         }
                         case GAMEOBJECT_TYPE_TRAP:
@@ -267,7 +267,7 @@ void GameObject::Update(uint32 p_time)
 
     if (m_usetimes >= 5)
     {
-	Delete();
+        Delete();
     }
 
 }

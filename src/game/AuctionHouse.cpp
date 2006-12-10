@@ -171,7 +171,7 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
         mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str().c_str(), (uint64)etime, auction->bid, NOT_READ);
 }
 
-//this function sends mail, when auction is cancelled to old bidder 
+//this function sends mail, when auction is cancelled to old bidder
 void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
 {
     uint32 mailId = objmgr.GenerateMailID();
@@ -301,7 +301,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         }
         if ((price < auction->buyout) || (auction->buyout == 0))
         {
-            auction->outBid += 5;                               //this line must be here
+            auction->outBid += 5;                           //this line must be here
 
             if (auction->bidder > 0)
             {
@@ -322,7 +322,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             }
             auction->bidder = pl->GetGUIDLow();
             auction->bid = price;
-            if ( auction->outBid > 10000 )                      //one gold
+            if ( auction->outBid > 10000 )                  //one gold
                 auction->outBid = 5;
 
             // after this update we should save player's money ...
@@ -386,10 +386,10 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
         Item *pItem = objmgr.GetAItem(auction->item_guid);
         if (pItem)
         {
-            if (auction->bidder > 0)                            // If we have a bidder, we have to send him the money he paid
+            if (auction->bidder > 0)                        // If we have a bidder, we have to send him the money he paid
             {
                 uint32 auctionCut = objmgr.GetAuctionCut( auction->location, auction->bid);
-                if ( pl->GetMoney() < auctionCut )              //player doesn't have enought money, maybe message needed
+                if ( pl->GetMoney() < auctionCut )          //player doesn't have enought money, maybe message needed
                     return;
                 //some auctionBidderNotification would be needed, but don't know that parts..
                 SendAuctionCancelledToBidderMail( auction );
@@ -444,7 +444,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
     {
         sLog.outError("Client sent bad opcode!!! with count: %u and size : %d", outbiddedCount, recv_data.size());
         outbiddedCount = 0;
-    }       
+    }
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(!pCreature||!pCreature->isAuctioner())
@@ -482,7 +482,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
             totalcount++;
         }
     }
-    data.put( 0, count );                                     // add count to placeholder
+    data.put( 0, count );                                   // add count to placeholder
     data << totalcount;
     SendPacket(&data);
 }
@@ -493,7 +493,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
     uint64 guid;
 
     recv_data >> guid;
-    recv_data >> listfrom;                                    // page of auctions
+    recv_data >> listfrom;                                  // page of auctions
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(!pCreature||!pCreature->isAuctioner())

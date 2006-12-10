@@ -233,7 +233,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             }
 
-
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
 
             info = obj->GetGOInfo();
@@ -274,7 +273,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                         _player->RemoveGameObject(obj,false);
                         obj->SetOwnerGUID(_player->GetGUID());
 
-                        //fish catched 
+                        //fish catched
                         _player->UpdateFishingSkill();
                         _player->SendLoot(obj->GetGUID(),LOOT_FISHING);
                     }
@@ -310,7 +309,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             return;
         }
 
-	    obj->CountUseTimes();
+        obj->CountUseTimes();
 
         case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
             //GB flag

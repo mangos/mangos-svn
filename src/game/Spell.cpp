@@ -172,7 +172,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 
     m_triggeredByAura = Aur;
     m_autoRepeat = false;
-    if( m_spellInfo->AttributesEx2 == 0x000020 )            //Auto Shot & Shoot 
+    if( m_spellInfo->AttributesEx2 == 0x000020 )            //Auto Shot & Shoot
         m_autoRepeat = true;
 
     casttime = GetCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
@@ -266,7 +266,7 @@ void Spell::FillTargetMap()
         {
             Player *me = (Player*)m_caster;
             for (std::list<Unit*>::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); itr++)
-            {        
+            {
                 Unit *owner = (*itr)->GetOwner();
                 Unit *u = owner ? owner : (*itr);
                 if(u->IsPvP() && (!me->duel || me->duel->opponent != u))
@@ -435,7 +435,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_AREAEFFECT_PARTY:
         {
-            Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER 
+            Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER
                 ? (Player*)m_targets.getUnitTarget() : NULL;
 
             Group* pGroup = targetPlayer ? objmgr.GetGroupByLeader(targetPlayer->GetGroupLeader()) : NULL;
@@ -502,7 +502,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
         {
-            Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER 
+            Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER
                 ? (Player*)m_targets.getUnitTarget() : NULL;
 
             Group* pGroup = targetPlayer ? objmgr.GetGroupByLeader(targetPlayer->GetGroupLeader()) : NULL;
@@ -616,9 +616,9 @@ void Spell::cancel()
     else if(m_spellState == SPELL_STATE_CASTING)
     {
         for (int j = 0; j < 3; j++)
-        for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
-            if (*iunit && (*iunit)->isAlive())
-                (*iunit)->RemoveAurasDueToSpell(m_spellInfo->Id);
+            for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
+                if (*iunit && (*iunit)->isAlive())
+                    (*iunit)->RemoveAurasDueToSpell(m_spellInfo->Id);
 
         m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
         SendChannelUpdate(0);

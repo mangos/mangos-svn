@@ -346,7 +346,7 @@ void WorldSession::HandleTogglePvP(WorldPacket& recvPacket)
     else
     {
         if(!GetPlayer()->pvpInfo.inHostileArea && GetPlayer()->IsPvP())
-            GetPlayer()->pvpInfo.endTimer = time(NULL); // start toggle-off
+            GetPlayer()->pvpInfo.endTimer = time(NULL);     // start toggle-off
     }
 }
 
@@ -354,7 +354,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 {
     uint32 newZone;
     recv_data >> newZone;
-    
+
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
 
     GetPlayer()->UpdateZone();

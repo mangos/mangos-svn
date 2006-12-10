@@ -2720,7 +2720,7 @@ void Player::BuildPlayerRepop()
         SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);        //10045 correct wisp model
 
     // set initial flags + set ghost + restore pvp
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 | (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP)?UNIT_FLAG_PVP:0) );    
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 | (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP)?UNIT_FLAG_PVP:0) );
     SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST | (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP)?PLAYER_FLAGS_IN_PVP:0) );
 }
 
@@ -4011,7 +4011,7 @@ void Player::CalculateHonor(Unit *uVictim)
     sLog.outDetail("PLAYER: CalculateHonor");
 
     if( !uVictim ) return;
-    if( uVictim->GetAura(2479,0) ) return; // is honorless target
+    if( uVictim->GetAura(2479,0) ) return;                  // is honorless target
 
     if( uVictim->GetTypeId() == TYPEID_UNIT )
     {
@@ -4092,31 +4092,29 @@ void Player::UpdateZone()
     if(!zone)
         return;
 
+    pvpInfo.inHostileArea =
+        (GetTeam() == ALLIANCE && zone->team == AREATEAM_HORDE ||
+        GetTeam() == HORDE    && zone->team == AREATEAM_ALLY  ||
+        (sWorld.IsPvPRealm()  && zone->team == AREATEAM_NONE));
 
-    pvpInfo.inHostileArea = 
-        (GetTeam() == ALLIANCE && zone->team == AREATEAM_HORDE || 
-         GetTeam() == HORDE    && zone->team == AREATEAM_ALLY  ||
-         (sWorld.IsPvPRealm()  && zone->team == AREATEAM_NONE));
-
-    if(pvpInfo.inHostileArea)   // in hostile area
+    if(pvpInfo.inHostileArea)                               // in hostile area
     {
         if(!IsPvP() || pvpInfo.endTimer != 0)
             UpdatePvP(true, true);
     }
-    else                        // in friendly area
+    else                                                    // in friendly area
     {
         if(IsPvP() && !HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP) && pvpInfo.endTimer == 0)
-            pvpInfo.endTimer = time(NULL); // start toggle-off
+            pvpInfo.endTimer = time(NULL);                  // start toggle-off
     }
 
-
-    if(zone->zone_type == 312)  // in city
+    if(zone->zone_type == 312)                              // in city
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         SetRestType(2);
         InnEnter(time(NULL),0,0,0);
     }
-    else                        // anywhere else
+    else                                                    // anywhere else
     {
         if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType()==2)
         {

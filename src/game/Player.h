@@ -821,11 +821,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
 
         PvPInfo pvpInfo;
-        void UpdatePvP(bool state, bool ovrride=false) 
+        void UpdatePvP(bool state, bool ovrride=false)
         {
             if(!state || ovrride)
             {
-                SetPvP(state);                
+                SetPvP(state);
                 pvpInfo.endTimer = 0;
             }
             else

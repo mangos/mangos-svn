@@ -276,7 +276,7 @@ void ScriptedAI::DoStartAttack(Unit* victim)
 {
     if( m_creature->Attack(victim) )
     {
-       (*m_creature)->Mutate(new TargetedMovementGenerator(*victim));
+        (*m_creature)->Mutate(new TargetedMovementGenerator(*victim));
     }
 }
 

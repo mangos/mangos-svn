@@ -179,14 +179,14 @@ enum UnitFlags
 {
     UNIT_FLAG_NONE           = 0x00000000,
     UNIT_FLAG_DISABLE_MOVE   = 0x00000004,
-    UNIT_FLAG_UNKNOWN1       = 0x00000008,    // essential for all units..
+    UNIT_FLAG_UNKNOWN1       = 0x00000008,                  // essential for all units..
     UNIT_FLAG_RESTING        = 0x00000020,
     UNIT_FLAG_PVP            = 0x00001000,
     UNIT_FLAG_MOUNT          = 0x00002000,
     UNIT_FLAG_DISABLE_ROTATE = 0x00040000,
     UNIT_FLAG_IN_COMBAT      = 0x00080000,
     UNIT_FLAG_SKINNABLE      = 0x04000000,
-    UNIT_FLAG_SHEATHE        = 0x40000000    
+    UNIT_FLAG_SHEATHE        = 0x40000000
 };
 enum ProcFlags
 {

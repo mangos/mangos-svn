@@ -114,12 +114,12 @@ class MANGOS_DLL_SPEC GameObject : public Object
             return false;
         }
 
-	void CountUseTimes();
+        void CountUseTimes();
 
         Loot        loot;
         uint32      lootid;
 
-	uint32	    m_usetimes;
+        uint32      m_usetimes;
 
     protected:
 
