@@ -336,9 +336,6 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleTogglePvP(WorldPacket& recvPacket)
 {
-    sLog.outString("HERE ENABLE PVP");
-    recvPacket.hexlike();
-
     GetPlayer()->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
 
     if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
@@ -356,29 +353,11 @@ void WorldSession::HandleTogglePvP(WorldPacket& recvPacket)
 void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 {
     uint32 newZone;
-    WPAssert(GetPlayer());
-
-    // if player is resting stop resting
-    if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
-    {
-        if(GetPlayer()->GetRestType()==2)                   //rest in city
-        {
-            GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-        }
-    }
-
     recv_data >> newZone;
+    
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
 
-    AreaTableEntry* area = GetAreaEntryByAreaID(newZone);
-    if(area && area->zone_type == 312)                      // city
-    {
-        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-        GetPlayer()->SetRestType(2);
-        GetPlayer()->InnEnter(time(NULL),0,0,0);
-    }
-
-    GetPlayer()->UpdatePvPZone();
+    GetPlayer()->UpdateZone();
 }
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )

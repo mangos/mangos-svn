@@ -836,7 +836,7 @@ class MANGOS_DLL_SPEC Player : public Unit
                     SetPvP(state);
             }
         }
-        void UpdatePvPZone();
+        void UpdateZone();
         void UpdatePvPFlag(time_t currTime);
 
         inline std::list<struct actions> getActionList() { return m_actions; };
