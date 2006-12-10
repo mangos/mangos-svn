@@ -1219,7 +1219,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             UnsummonPet(pet);
     }
 
-    UpdatePvPZone();
+    UpdateZone();
     if(pvpInfo.inHostileArea)
         CastSpell(this, 2479, false);
 }
@@ -2705,7 +2705,6 @@ void Player::BuildPlayerRepop()
     StopMirrorTimer(BREATH_TIMER);
     StopMirrorTimer(FIRE_TIMER);
 
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 );
     SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
     SetUInt32Value(UNIT_FIELD_AURA + 33, 0x5068 );          //!dono
 
@@ -2720,7 +2719,9 @@ void Player::BuildPlayerRepop()
     if (getRace() == RACE_NIGHTELF)
         SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);        //10045 correct wisp model
 
-    SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
+    // set initial flags + set ghost + restore pvp
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 | (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP)?UNIT_FLAG_PVP:0) );    
+    SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST | (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP)?PLAYER_FLAGS_IN_PVP:0) );
 }
 
 void Player::SendDelayResponse(const uint32 ml_seconds)
@@ -4085,27 +4086,42 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
     return MapManager::Instance().GetMap((*result)[0].GetUInt32())->GetZoneId((*result)[0].GetFloat(),(*result)[0].GetFloat());
 }
 
-void Player::UpdatePvPZone()
+void Player::UpdateZone()
 {
-    AreaTableEntry* area = GetAreaEntryByAreaID(GetZoneId());
-
-    if(!area)
+    AreaTableEntry* zone = GetAreaEntryByAreaID(GetZoneId());
+    if(!zone)
         return;
 
-    pvpInfo.inHostileArea = 
-        (GetTeam() == ALLIANCE && area->team == AREATEAM_HORDE || 
-         GetTeam() == HORDE    && area->team == AREATEAM_ALLY  ||
-         (sWorld.IsPvPRealm()  && area->team == AREATEAM_NONE));
 
-    if(pvpInfo.inHostileArea)
+    pvpInfo.inHostileArea = 
+        (GetTeam() == ALLIANCE && zone->team == AREATEAM_HORDE || 
+         GetTeam() == HORDE    && zone->team == AREATEAM_ALLY  ||
+         (sWorld.IsPvPRealm()  && zone->team == AREATEAM_NONE));
+
+    if(pvpInfo.inHostileArea)   // in hostile area
     {
         if(!IsPvP() || pvpInfo.endTimer != 0)
             UpdatePvP(true, true);
     }
-    else
+    else                        // in friendly area
     {
         if(IsPvP() && !HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP) && pvpInfo.endTimer == 0)
             pvpInfo.endTimer = time(NULL); // start toggle-off
+    }
+
+
+    if(zone->zone_type == 312)  // in city
+    {
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        SetRestType(2);
+        InnEnter(time(NULL),0,0,0);
+    }
+    else                        // anywhere else
+    {
+        if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType()==2)
+        {
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        }
     }
 }
 
