@@ -2083,36 +2083,95 @@ bool ChatHandler::HandleHoverCommand(const char* args)
 
 bool ChatHandler::HandleLevelUpCommand(const char* args)
 {
-    int nrlvl = (!*args) ? 1 : atoi((char*)args);
+    char* px = strtok((char*)args, " ");
+    char* py = strtok((char*)NULL, " ");
 
-    Player *chr = getSelectedPlayer();
-    if (chr == NULL)
+    // command format parsing
+    char* pname = (char*)NULL;
+    int addlevel = 1;
+
+    if(px && py)                                            // .levelup name level
     {
-        SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        addlevel = atoi(py);
+        pname = px;
+    }
+    else if(px && !py)                                      // .levelup name OR .levelup level
+    {
+        if(isalpha(px[0]))                                  // .levelup name
+            pname = px;
+        else                                                // .levelup level
+            addlevel = atoi(px);
+    }
+    // else .levelup - nothing do for prepering
+
+    // player 
+    Player *chr = NULL;
+    uint64 chr_guid = 0;
+
+    if(pname)                                               // player by name
+    {
+        std::string name = pname;
+        normalizePlayerName(name);
+
+        chr = objmgr.GetPlayer(name.c_str());
+        if(!chr)                                            // not in game
+        {
+            chr_guid = objmgr.GetPlayerGUIDByName(name.c_str());
+            if (chr_guid == NULL)
+            {
+                SendSysMessage(LANG_PLAYER_NOT_FOUND);
+                return true;
+            }
+        }
+    }
+    else                                                    // player by selection
+    {
+        chr = getSelectedPlayer();
+
+        if (chr == NULL)
+        {
+            SendSysMessage(LANG_NO_CHAR_SELECTED);
+            return true;
+        }
     }
 
-    int32 oldlevel = chr->getLevel();
-    int32 newlevel = oldlevel + nrlvl;
+    assert(chr || chr_guid);
+
+    int32 oldlevel = chr ? chr->getLevel() : Player::GetUInt32ValueFromDB(UNIT_FIELD_LEVEL,chr_guid);
+    int32 newlevel = oldlevel + addlevel;
     if(newlevel < 1)
         newlevel = 1;
     if(newlevel > 255)                                      // hardcoded maximum level
         newlevel = 255;
 
-    chr->InitStatsForLevel(newlevel);
-    chr->SetUInt32Value(PLAYER_XP,0);
+    if(chr)
+    {
+        chr->InitStatsForLevel(newlevel);
+        chr->SetUInt32Value(PLAYER_XP,0);
 
-    WorldPacket data;
+        WorldPacket data;
 
-    if(oldlevel == newlevel)
-        FillSystemMessageData(&data, chr->GetSession(), LANG_YOURS_LEVEL_PROGRESS_RESET);
+        if(oldlevel == newlevel)
+            FillSystemMessageData(&data, chr->GetSession(), LANG_YOURS_LEVEL_PROGRESS_RESET);
+        else
+        if(oldlevel < newlevel)
+            FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_UP,newlevel-oldlevel));
+        else
+        if(oldlevel > newlevel)
+            FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_DOWN,newlevel-oldlevel));
+
+        chr->GetSession()->SendPacket( &data );
+    }
     else
-    if(oldlevel < newlevel)
-        FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_UP,newlevel-oldlevel));
-    else
-    if(oldlevel > newlevel)
-        FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_DOWN,newlevel-oldlevel));
-    chr->GetSession()->SendPacket( &data );
+    {
+        // update levle and XP at level, all other will be updated at loading
+        std::vector<std::string> values;
+        Player::LoadValuesArrayFromDB(values,chr_guid);
+        Player::SetUInt32ValueInArray(values,UNIT_FIELD_LEVEL,newlevel);
+        Player::SetUInt32ValueInArray(values,PLAYER_XP,0);
+        Player::SaveValuesArrayInDB(values,chr_guid);
+    }
+
     return true;
 }
 

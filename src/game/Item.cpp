@@ -436,11 +436,11 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);
     SetUInt32Value(ITEM_FIELD_DURABILITY, itemProto->MaxDurability);
 
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES,  uint32(abs(itemProto->Spells[0].SpellCharges)));
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+1,uint32(abs(itemProto->Spells[1].SpellCharges)));
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+2,uint32(abs(itemProto->Spells[2].SpellCharges)));
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+3,uint32(abs(itemProto->Spells[3].SpellCharges)));
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4,uint32(abs(itemProto->Spells[4].SpellCharges)));
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES,  uint32(itemProto->Spells[0].SpellCharges));
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+1,uint32(itemProto->Spells[1].SpellCharges));
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+2,uint32(itemProto->Spells[2].SpellCharges));
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+3,uint32(itemProto->Spells[3].SpellCharges));
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4,uint32(itemProto->Spells[4].SpellCharges));
     SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
     //SetUInt32Value(ITEM_FIELD_DURATION, itemProto->Delay); ITEM_FIELD_DURATION is time until item expires, not speed
 

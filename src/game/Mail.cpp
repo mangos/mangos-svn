@@ -359,7 +359,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (uint32) 0;                                 // not item->creator, it is another item's property
         data << (uint8)  icount;                            // Attached item stack count
                                                             //sometimes more than zero, not sure when
-        uint32 charges = (it) ? it->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES) : 0;
+        int32 charges = (it) ? int32(it->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES)) : 0;
         data << (uint32) charges;                           // item -> charges sure
         uint32 maxDurability = (it)? it->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0;
         uint32 curDurability = (it)? it->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0;
