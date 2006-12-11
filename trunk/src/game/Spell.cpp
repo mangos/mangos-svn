@@ -771,7 +771,7 @@ void Spell::SendSpellCooldown()
     int32 catrec = m_spellInfo->CategoryRecoveryTime;
 
     // shoot spells used equiped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
-    if (!rec && !catrec && (m_spellInfo->Category == 76 || m_spellInfo->Category == 351))
+    if (!rec && !catrec && (cat == 76 || cat == 351))
         rec = _player->GetAttackTime(RANGED_ATTACK);
 
     // some special item spells without correct cooldown in SpellInfo
