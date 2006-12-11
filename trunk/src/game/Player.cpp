@@ -7003,7 +7003,16 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                 }
             }
         }
-        pItem->DeleteFromDB();
+
+        if (pItem->IsBag())
+        {
+            for (int i = 0; i < MAX_BAG_SIZE; i++)
+            {
+                Item *bagItem = ((Bag*)pItem)->GetItemByPos(i);
+                if (bagItem) bagItem->SetState(ITEM_REMOVED, this);
+            }
+        }
+        pItem->SetState(ITEM_REMOVED, this);
     }
 }
 

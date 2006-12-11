@@ -326,8 +326,6 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                     _player->RemoveItem( (pos >> 8), (pos & 255), true);
                     pItem->RemoveFromUpdateQueueOf(_player);
                     _player->AddItemToBuyBackSlot( pItem );
-
-                    return;
                 }
                 else
                     _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);

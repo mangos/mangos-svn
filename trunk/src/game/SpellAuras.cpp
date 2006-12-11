@@ -211,7 +211,8 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster, Item*
 m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItem(castItem), m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_procCharges(0), m_absorbDmg(0), m_isPersistent(false), m_removeOnDeath(false)
+m_procCharges(0), m_absorbDmg(0), m_isPersistent(false), m_removeOnDeath(false),
+m_isAreaAura(false)
 {
     assert(target);
     m_duration = GetDuration(spellproto);
