@@ -7528,8 +7528,7 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot, bool del )
         if( pItem )
         {
             pItem->RemoveFromWorld();
-            if(del)
-                delete pItem;
+            if(del) pItem->SetState(ITEM_REMOVED, this);
         }
 
         m_buybackitems[eslot] = NULL;
