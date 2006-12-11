@@ -521,8 +521,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
 
 void Item::DeleteFromDB()
 {
-    //sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
-    SetState(ITEM_REMOVED, GetOwner());
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
 void Item::DeleteFromInventoryDB()
