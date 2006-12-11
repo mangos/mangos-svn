@@ -1612,6 +1612,9 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetStat(Stats(i), info.stats[i]);
 
+    // restore if need some important flags
+    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
+
     // reset misc. values
     SetAttackTime(BASE_ATTACK,   2000 );
     SetAttackTime(OFF_ATTACK,    2000 );
