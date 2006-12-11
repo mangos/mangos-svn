@@ -1341,16 +1341,32 @@ void Spell::TakeCastItem()
 
     bool spendable = false;
     bool withoutCharges = false;
-    uint32 charges;
+    int32 charges;
 
     for (int i = 0; i<5; i++)
-        if (abs(proto->Spells[i].SpellCharges) > 0)
     {
-        spendable = true;
-        charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i);
-        m_CastItem->SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i,  charges-1);
-        if (charges-1 == 0)
-            withoutCharges = true;
+        if (proto->Spells[i].SpellId)
+        {
+            // have limited or unlimited charges
+            if(proto->Spells[i].SpellCharges)
+            {
+                spendable = true;
+                charges = int32(m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i));
+
+                // limited charges and have charges
+                if(charges>0)
+                {
+                    --charges;
+                    m_CastItem->SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i,  charges);
+                }
+
+                // all charges used
+                if (charges == 0)
+                    withoutCharges = true;
+
+                // last case: (-1, or any <0 value) infinity charges (non destroyble if other spell not have limited charges)
+            }
+        }
     }
 
     if (ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_BOOK || ItemClass == ITEM_CLASS_QUEST || (ItemClass == ITEM_CLASS_TRADE_GOODS && ItemSubClass == ITEM_SUBCLASS_BOMB))
