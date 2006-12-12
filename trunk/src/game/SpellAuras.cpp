@@ -1136,8 +1136,8 @@ void Aura::HandleAuraModSkill(bool apply)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    uint32 prot=GetSpellProto()->EffectMiscValue[0];
-    int32 points = GetSpellProto()->EffectBasePoints[0]+1;
+    uint32 prot=GetSpellProto()->EffectMiscValue[m_effIndex];
+    int32 points = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
 
     ((Player*)m_target)->ModifySkillBonus(prot,(apply ? points: -points));
     if(prot == SKILL_DEFENSE)
