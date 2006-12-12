@@ -795,7 +795,7 @@ const char *gmSpellList[] =
     "2426",
     "5916",
     "6634",
-    "6718",
+    //"6718", phasing stealth, annoing for learn all case.
     "6719",
     "8822",
     "9591",
