@@ -3371,6 +3371,19 @@ uint16 Player::GetSkillValue(uint32 skill) const
     return 0;
 }
 
+uint16 Player::GetMaxSkillValue(uint32 skill) const
+{
+    if(!skill)return 0;
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
+        {
+            return SKILL_MAX(GetUInt32Value(PLAYER_SKILL(i)+1));
+        }
+    }
+    return 0;
+}
+
 uint16 Player::GetPureSkillValue(uint32 skill) const
 {
     if(!skill)return 0;

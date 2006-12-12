@@ -175,10 +175,13 @@
 #define LANG_SPAWNING_SPIRIT_HEAL        "Spawning Spirit Healers\n"
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in db, exiting."
 
+// SetSkill-Kommando von WarHead
+#define LANG_SET_SKILL                   "Skill %u (%s) for player %s set to %u and current maximum set to %u."
+#define LANG_SET_SKILL_ERROR             "Player %s must have skill %u (%s) before use this command."
+
 #define LANG_LEARNSK_SYNTAX              "Syntax: .learnsk skillId level max"
-#define LANG_LEARNED_SKILL               "Player %s learned skill %u"
+#define LANG_LEARNED_SKILL               "Player %s learned skill %u (%s)"
 #define LANG_INVALID_SKILL_ID            "Invalid skill id (%u)"
-#define LANG_UNLEARNSK_SYNTAX            "Syntax: .unlearnsk skillId"
 #define LANG_UNLEARNED_SKILL             "Player %s unlearned skill %u"
 #define LANG_UNKNOWN_SKILL               "You don't know that skill."
 #define LANG_LEARNING_GM_SKILLS          "%s - Learning default GM spells/skills."

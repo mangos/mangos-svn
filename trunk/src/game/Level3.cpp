@@ -300,52 +300,29 @@ bool ChatHandler::HandleGoCommand(const char* args)
 
 bool ChatHandler::HandleLearnSkillCommand (const char* args)
 {
-    bool syntax_error = false;
+    if (!*args) 
+        return false;
 
-    if (!*args) syntax_error = true;
+    char *skill_p = strtok ((char*)args, " ");
+    char *level_p = strtok (NULL, " ");
+    char *max_p   = strtok (NULL, " ");
 
-    uint32 skill = 0;
-    uint16 level = 1;
-    uint16 max = 1;
-    char args1[512];
-    strcpy (args1, args);
+    if( !skill_p )
+        return false;
 
-    if (!syntax_error)
+    int32 skill = atoi(skill_p);
+
+    if (skill <= 0)
     {
-        char *p = strtok (args1, " ");
-        if (p)
-        {
-            skill = atol (p);
-            p = strtok (NULL, " ");
-            if (p)
-            {
-                level = atoi (p);
-                p = strtok (NULL, " ");
-                if (p)
-                {
-                    max = atoi (p);
-                }
-                else
-                {
-                    syntax_error = true;
-                }
-            }
-            else
-            {
-                syntax_error = true;
-            }
-        }
-        else
-        {
-            syntax_error = true;
-        }
-    }
-
-    if (syntax_error)
-    {
-        SendSysMessage(LANG_LEARNSK_SYNTAX);
+        PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
         return true;
     }
+
+    int32 level = level_p ? atoi (level_p) : 1;
+    int32 max   = max_p   ? atoi (max_p)   : level;
+
+    if( level <= 0 || level > max || max <= 0 )
+        return false;
 
     Player * target = getSelectedPlayer();
     if(!target)
@@ -354,13 +331,16 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
         return true;
     }
 
-    if(sSkillLineStore.LookupEntry(skill))
+    SkillLineEntry const* sl = sSkillLineStore.LookupEntry(skill);
+
+    if(!sl)
     {
-        target->SetSkill(skill, level, max);
-        PSendSysMessage(LANG_LEARNED_SKILL, target->GetName(), skill);
-    }
-    else
         PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
+        return true;
+    }
+
+    target->SetSkill(skill, level, max);
+    PSendSysMessage(LANG_LEARNED_SKILL, target->GetName(), skill, sl->name[0]);
 
     return true;
 }
@@ -368,16 +348,14 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
 bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
 {
     if (!*args)
-    {
-        SendSysMessage(LANG_UNLEARNSK_SYNTAX);
-        return true;
-    }
+        return false;
 
-    uint32 skill = 0;
-    char args1[512];
-    strcpy (args1, args);
+    char *skill_p = strtok ((char*)args, " ");
 
-    skill = atol (strtok(args1, " "));
+    if( !skill_p )
+        return false;
+
+    int32 skill = atol (skill_p);
 
     if (skill <= 0)
     {
@@ -396,10 +374,95 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
     {
         target->SetSkill(skill, 0, 0);
         PSendSysMessage(LANG_UNLEARNED_SKILL, target->GetName(), skill);
-    } else
-    {
-        SendSysMessage(LANG_UNKNOWN_SKILL);
     }
+    else
+        SendSysMessage(LANG_UNKNOWN_SKILL);
+
+    return true;
+}
+
+bool ChatHandler::HandleFixUnlearnCommand(const char * args)
+{
+    Player *player = getSelectedPlayer();
+    if (!player)
+        player = m_session->GetPlayer();
+
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        uint32 id = player->GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
+        SkillLineEntry *pSkill = sSkillLineStore.LookupEntry(id);
+        // enable unlearn button for professions only
+        if (pSkill && pSkill->categoryId == 11)
+            player->SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
+    }
+    return true;
+}
+
+bool ChatHandler::HandleMaxSkillCommand(const char* args)
+{
+    Player* SelectedPlayer = getSelectedPlayer();
+    if(!SelectedPlayer)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    // each skills that have max skill value dependent from level seted to current level max skill value
+    SelectedPlayer->UpdateSkillsToMaxSkillsForLevel();
+    return true;
+}
+
+bool ChatHandler::HandleSetSkillCommand(const char* args)
+{
+    if (!*args) 
+        return false;
+
+
+    char *skill_p = strtok ((char*)args, " ");
+    char *level_p = strtok (NULL, " ");
+    char *max_p   = strtok (NULL, " ");
+
+    if( !skill_p || !level_p)
+        return false;
+
+    int32 skill = atoi(skill_p);
+
+    if (skill <= 0)
+    {
+        PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
+        return true;
+    }
+
+    int32 level = atol (level_p);
+
+    Player * target = getSelectedPlayer();
+    if(!target)
+    {
+        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    SkillLineEntry const* sl = sSkillLineStore.LookupEntry(skill);
+    if(!sl)
+    {
+        PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
+        return true;
+    }
+
+    if(!target->GetSkillValue(skill))
+    {
+        PSendSysMessage(LANG_SET_SKILL_ERROR, target->GetName(), skill, sl->name[0]);
+        return true;
+    }
+
+    int32 max   = max_p ? atol (max_p) : target->GetMaxSkillValue(skill);
+
+    if( level <= 0 || level > max || max <= 0 )
+        return false;
+
+    target->SetSkill(skill, level, max);
+    PSendSysMessage(LANG_SET_SKILL, skill, sl->name[0], target->GetName(), level, max);
+
     return true;
 }
 
@@ -2679,37 +2742,6 @@ bool ChatHandler::HandleResetCommand (const char * args)
     }
 
     return false;
-}
-
-bool ChatHandler::HandleFixUnlearnCommand(const char * args)
-{
-    Player *player = getSelectedPlayer();
-    if (!player)
-        player = m_session->GetPlayer();
-
-    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
-    {
-        uint32 id = player->GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
-        SkillLineEntry *pSkill = sSkillLineStore.LookupEntry(id);
-        // enable unlearn button for professions only
-        if (pSkill && pSkill->categoryId == 11)
-            player->SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
-    }
-    return true;
-}
-
-bool ChatHandler::HandleMaxSkillCommand(const char* args)
-{
-    Player* SelectedPlayer = getSelectedPlayer();
-    if(!SelectedPlayer)
-    {
-        SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
-    }
-
-    // each skills that have max skill value dependent from level seted to current level max skill value
-    SelectedPlayer->UpdateSkillsToMaxSkillsForLevel();
-    return true;
 }
 
 bool ChatHandler::HandleShutDownCommand(const char* args)
