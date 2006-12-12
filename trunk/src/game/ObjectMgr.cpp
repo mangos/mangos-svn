@@ -1033,10 +1033,10 @@ void ObjectMgr::LoadQuests()
         {
             if (QuestTemplates.find(qinfo->NextQuestId) == QuestTemplates.end())
             {
-                sLog.outString("Quest %d has NextQuestId %d, but no such quest", qinfo->GetQuestId(), qinfo->NextQuestId);
-                exit(1);
+                sLog.outError("Quest %d has NextQuestId %d, but no such quest", qinfo->GetQuestId(), qinfo->NextQuestId);
             }
-            QuestTemplates[qinfo->NextQuestId]->prevQuests.push_back(qinfo->GetQuestId());
+            else
+                QuestTemplates[qinfo->NextQuestId]->prevQuests.push_back(qinfo->GetQuestId());
         }
 
         if(qinfo->ExclusiveGroup)
