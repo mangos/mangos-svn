@@ -3066,7 +3066,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
     uint32 SkillId = pAbility->skillId;
     if ( !SkillId ) return false;
 
-    uint32 SkillValue = GetSkillValue(SkillId);
+    uint32 SkillValue = GetPureSkillValue(SkillId);
 
     return UpdateSkillPro(pAbility->skillId, SkillGainChance(SkillValue,
         pAbility->max_value,
@@ -3094,7 +3094,7 @@ bool Player::UpdateFishingSkill()
 {
     sLog.outDebug("UpdateFishingSkill");
 
-    uint32 SkillValue = GetSkillValue(SKILL_FISHING);
+    uint32 SkillValue = GetPureSkillValue(SKILL_FISHING);
 
     int32 chance = SkillValue < 75 ? 100 : 2500/(SkillValue-50);
 

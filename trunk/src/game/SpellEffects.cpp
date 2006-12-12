@@ -709,13 +709,13 @@ void Spell::EffectOpenLock(uint32 i)
     if ( SkillId )
     {
         loottype = LOOT_SKINNING;
-        uint32 SkillValue = player->GetSkillValue(SkillId);
-        if ( SkillValue < lockInfo->requiredskill )
+        if ( player->GetSkillValue(SkillId) < lockInfo->requiredskill )
         {
             SendCastResult(CAST_FAIL_FAILED);
             return;
         }
         // Allow one skill-up until respawned
+        uint32 SkillValue = player->GetPureSkillValue(SkillId);
         if ( !gameObjTarget->IsInSkillupList( player->GetGUIDLow() ) &&
             player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill) )
             gameObjTarget->AddToSkillupList( player->GetGUIDLow() );
@@ -2248,13 +2248,14 @@ void Spell::EffectSkinning(uint32 i)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    int32 skinningValue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
     int32 targetLevel = unitTarget->getLevel();
 
     ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_SKINNING);
     unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
     int32 reqValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel-10)*10 : targetLevel*5;
+
+    int32 skinningValue = ((Player*)m_caster)->GetPureSkillValue(SKILL_SKINNING);
 
     // Double chances for elites
     ((Player*)m_caster)->UpdateGatherSkill(SKILL_SKINNING, skinningValue, reqValue, ((Creature*)unitTarget)->isElite() ? 2 : 1 );
