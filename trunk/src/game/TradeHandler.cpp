@@ -53,7 +53,7 @@ void WorldSession::SendUpdateTrade()
     data << (uint32) 0;
     data << (uint32)pThis->pTrader->tradeGold;
     data << (uint32) 0;
-    for(int i=0; i<7; i++)
+    for(int i=0; i<TRADE_SLOT_COUNT; i++)
     {
         item = (pThis->pTrader->tradeItems[i] != NULL_SLOT ? pThis->pTrader->GetItemByPos( pThis->pTrader->tradeItems[i] ) : NULL);
 
@@ -91,10 +91,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
     {
         WorldPacket data;
-        Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
-        Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
+        Item *myItems[TRADE_SLOT_TRADED_COUNT]  = { NULL, NULL, NULL, NULL, NULL, NULL };
+        Item *hisItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
         bool myCanStoreItem=false,hisCanStoreItem=false,myCanCompleteTrade=true,hisCanCompleteTrade=true;
-        int i;
         uint16 dst;
 
         if ( !GetPlayer()->pTrader )
@@ -106,7 +105,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             data.Initialize(SMSG_TRADE_STATUS);
             data << (uint32)4;
             _player->pTrader->GetSession()->SendPacket(&data);
-            for(i=0; i<6; i++)
+            for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
             {
                 if(_player->tradeItems[i] != NULL_SLOT )
                 {
@@ -119,7 +118,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     hisItems[i]=_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]);
                 }
             }
-            for(i=0; i<6; i++)
+            for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
             {
                 if(myItems[i])
                 {
@@ -176,7 +175,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 _player->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
                 return;
             }
-            for(i=0; i<6; i++)
+            for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
             {
                 if(myItems[i])
                 {
@@ -404,7 +403,7 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 
     // check cheating, can't fail with correct client operations
     Item* item = _player->GetItemByPos(bag,slot);
-    if(!item || !item->CanBeTraded())
+    if(!item || tradeSlot!=TRADE_SLOT_NONTRADED && !item->CanBeTraded())
     {
         // send to self (cancel trade at cheating attempt)
         WorldPacket data;

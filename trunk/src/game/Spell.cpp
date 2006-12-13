@@ -84,8 +84,8 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(_guid));
         if (!m_itemTarget)
         {
-            Player* pTrader;
-            if (NULL != (pTrader = ((Player*)caster)->GetTrader()))
+            Player* pTrader = ((Player*)caster)->GetTrader();
+            if(pTrader)
                 m_itemTarget = pTrader->GetItemByPos(pTrader->GetPosByGuid(_guid));
         }
     }
