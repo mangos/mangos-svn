@@ -384,6 +384,10 @@ class WorldSession;
 #define BUYBACK_SLOT_12              80
 #define BUYBACK_SLOT_END             81
 
+#define TRADE_SLOT_COUNT             7
+#define TRADE_SLOT_TRADED_COUNT      6
+#define TRADE_SLOT_NONTRADED         6
+
 #define MOVEMENT_WALKING 0x100
 #define MOVEMENT_JUMPING 0x2000
 #define MOVEMENT_FALLING 0x6000
@@ -1242,7 +1246,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         Player *pTrader;
         bool acceptTrade;
-        uint16 tradeItems[7];
+        uint16 tradeItems[TRADE_SLOT_COUNT];
         uint32 tradeGold;
 
         time_t m_nextThinkTime;
