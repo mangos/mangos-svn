@@ -25,6 +25,7 @@
 #include "Opcodes.h"
 #include "Chat.h"
 #include "BattleGroundMgr.h"
+#include "SharedDefines.h"
 
 struct BattleGroundScore
 {
@@ -98,10 +99,13 @@ class BattleGround
         inline uint32 GetMapId() { return m_MapId; };
 
         void SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O);
-        inline float GetTeamStartLocX(uint32 TeamID) { return m_TeamStartLocX[TeamID]; };
-        inline float GetTeamStartLocY(uint32 TeamID) { return m_TeamStartLocY[TeamID]; };
-        inline float GetTeamStartLocZ(uint32 TeamID) { return m_TeamStartLocZ[TeamID]; };
-        inline float GetTeamStartLocO(uint32 TeamID) { return m_TeamStartLocO[TeamID]; };
+        void GetTeamStartLoc(uint32 TeamID, float &X, float &Y, float &Z, float &O) { 
+            uint8 idx = GetTeamIndexByTeamId(TeamID);
+            X = m_TeamStartLocX[idx]; 
+            Y = m_TeamStartLocY[idx]; 
+            Z = m_TeamStartLocZ[idx]; 
+            O = m_TeamStartLocO[idx]; 
+        }
 
         /* Packet Transfer */
         void SendPacketToTeam(uint32 TeamID, WorldPacket *packet);
@@ -110,27 +114,26 @@ class BattleGround
         /* Scorekeeping */
         inline uint32 GetTeamScore(uint32 TeamID)
         {
-            ASSERT(TeamID > 1);
-            return m_TeamScores[TeamID];
+            return m_TeamScores[GetTeamIndexByTeamId(TeamID)];
         }
 
         inline void AddPoint(uint32 TeamID, uint32 Points = 1)
         {
-            ASSERT(TeamID > 1);
-            m_TeamScores[TeamID] += Points;
+            m_TeamScores[GetTeamIndexByTeamId(TeamID)] += Points;
 
             // TODO: Update all players
         }
 
         inline void RemovePoint(uint32 TeamID, uint32 Points = 1)
         {
-            ASSERT(TeamID > 1);
-            m_TeamScores[TeamID] -= Points;
+            m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points;
 
             // TODO: Update all players
         }
 
     private:
+        inline uint8 GetTeamIndexByTeamId(uint32 Team) { return Team==HORDE ? 0 : 1; }
+
         /* Battleground */
         uint32 m_ID;
         std::string m_Name;

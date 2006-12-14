@@ -38,15 +38,6 @@ class Creature;
 class PlayerMenu;
 class Transport;
 
-enum Team
-{
-    ALLIANCE = 469,
-    HORDE = 67,
-    ALLIANCE_FORCES = 891,
-    HORDE_FORCES = 892,
-    STEAMWHEEDLE_CARTEL = 169,
-};
-
 enum SpellModType
 {
     SPELLMOD_FLAT = 107,
@@ -1049,8 +1040,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         inline void SetInBattleGround(bool val) { m_bgInBattleGround = val; }
         inline uint32 GetBattleGroundId() const { return m_bgBattleGroundID; }
         inline void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; }
-        inline uint32 GetBattleGroundTeam() const { return m_bgTeam; }
-        inline void SetBattleGroundTeam(uint32 Team) { m_bgTeam = Team;}
         inline uint32 GetBattleGroundEntryPointMap() const { return m_bgEntryPointMap; }
         inline void SetBattleGroundEntryPointMap(uint32 Map) { m_bgEntryPointMap = Map;}
 
@@ -1119,7 +1108,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_bgEntryPointY;
         float m_bgEntryPointZ;
         float m_bgEntryPointO;
-        uint32 m_bgTeam;
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/

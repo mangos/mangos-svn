@@ -86,32 +86,6 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 MaxPlayersPerTeam, uint32 Leve
     return BattleGroundID;
 }
 
-uint32 BattleGroundMgr::GenerateTeamByRace(uint8 Race)
-{
-    switch(Race)
-    {
-        case RACE_ORC:
-        case RACE_UNDEAD_PLAYER:
-        case RACE_TAUREN:
-        case RACE_TROLL:
-        {
-            return 1;
-        }break;
-        case RACE_HUMAN:
-        case RACE_DWARF:
-        case RACE_NIGHTELF:
-        case RACE_GNOME:
-        {
-            return 0;
-        }break;
-        default:
-        {
-            sLog.outError("BattleGroundMgr: Warning! Unable to determine race for %u", Race);
-            return 0;
-        }break;
-    }
-}
-
 void BattleGroundMgr::CreateInitialBattleGrounds()
 {
     std::string bg_Name;
@@ -185,13 +159,11 @@ void BattleGroundMgr::AddPlayerToBattleGround(Player *pl, uint32 bgId)
 
 }
 
-void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 teamId, uint32 bgId)
+void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 bgId)
 {
     uint32 mapid = GetBattleGround(bgId)->GetMapId();
-    float x = GetBattleGround(bgId)->GetTeamStartLocX(teamId);
-    float y = GetBattleGround(bgId)->GetTeamStartLocY(teamId);
-    float z = GetBattleGround(bgId)->GetTeamStartLocZ(teamId);
-    float O = GetBattleGround(bgId)->GetTeamStartLocO(teamId);
+    float x,y,z,O;
+    GetBattleGround(bgId)->GetTeamStartLoc(pl->GetTeam(),x,y,z,O);
 
     sLog.outDetail("BATTLEGROUND: Sending %s to %f,%f,%f,%f", pl->GetName(), x,y,z,O);
     pl->TeleportTo(mapid, x, y, z, O);

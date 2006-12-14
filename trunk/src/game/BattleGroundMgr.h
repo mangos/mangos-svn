@@ -56,10 +56,8 @@ class BattleGroundMgr
 
         void CreateInitialBattleGrounds();
 
-        uint32 GenerateTeamByRace(uint8 Race);
-
         void AddPlayerToBattleGround(Player *pl, uint32 bgId);
-        void SendToBattleGround(Player *pl, uint32 teamId, uint32 bgId);
+        void SendToBattleGround(Player *pl, uint32 bgId);
 
         void SendBattleGroundStatusPacket(Player *pl, uint32 MapID, uint8 InstanceID, uint8 StatusID, uint32 Time = 0x00FFFF00);
 

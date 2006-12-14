@@ -78,10 +78,11 @@ BattleGround::~BattleGround()
 
 void BattleGround::SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O)
 {
-    m_TeamStartLocX[TeamID] = X;
-    m_TeamStartLocY[TeamID] = Y;
-    m_TeamStartLocZ[TeamID] = Z;
-    m_TeamStartLocO[TeamID] = O;
+    uint8 idx = GetTeamIndexByTeamId(TeamID);
+    m_TeamStartLocX[idx] = X;
+    m_TeamStartLocY[idx] = Y;
+    m_TeamStartLocZ[idx] = Z;
+    m_TeamStartLocO[idx] = O;
 }
 
 void BattleGround::SendPacketToAll(WorldPacket *packet)
@@ -97,7 +98,7 @@ void BattleGround::SendPacketToTeam(uint32 TeamID, WorldPacket *packet)
 {
     for(std::list<Player*>::iterator itr=m_Players.begin();itr!=m_Players.end();++itr)
     {
-        if((*itr)->GetSession() /* && (*itr)->m_BattleGroundTeam == TeamID */)
+        if((*itr)->GetSession() && (*itr)->GetTeam() == TeamID )
             (*itr)->GetSession()->SendPacket(packet);
     }
 }
@@ -148,7 +149,6 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     plr->SetBattleGroundId(0);
 
     plr->SetInBattleGround(false);
-    plr->SetBattleGroundTeam(0);
 
     // Packets/Movement
     //WorldPacket data;
@@ -197,7 +197,7 @@ void BattleGround::AddPlayer(Player *plr)
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data,plr);
 
     // Let others from your team know //dono if correct if team1 only get team packages?
-    SendPacketToTeam(plr->GetBattleGroundTeam(), &data);
+    SendPacketToTeam(plr->GetTeam(), &data);
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
 }
@@ -232,22 +232,18 @@ void BattleGround::EventPlayerPassFlag(Player *Source, Player *Target)
     char message[100];
     sprintf(message, "%s passed the flag to %s!", Source->GetName(), Target->GetName());
     sChatHandler.FillSystemMessageData(&data, NULL, message);
-    SendPacketToTeam(Source->GetBattleGroundTeam(), &data);
+    SendPacketToTeam(Source->GetTeam(), &data);
 }
 
 bool BattleGround::HasFreeSlots(uint32 Team)
 {
     //check if the current BG had free slots
-    uint32 TeamCounts[2];
-    TeamCounts[0] = 0;
-    TeamCounts[1] = 0;
+    uint32 TeamCounts = 0;
     for(std::list<Player*>::iterator i=m_Players.begin();i!=m_Players.end();++i)
-        TeamCounts[(*i)->GetBattleGroundTeam()]++;
+        if((*i)->GetTeam() == Team)
+            ++TeamCounts;
 
-    if(TeamCounts[Team] < m_MaxPlayersPerTeam)
-        return true;
-    else
-        return false;
+    return (TeamCounts < m_MaxPlayersPerTeam);
 }
 
 //

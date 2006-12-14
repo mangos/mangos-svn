@@ -87,12 +87,12 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     recv_data >> guid;                                      // >> MapID >> Instance;
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: " I64FMT, guid);
 
-    // We're in BG.
-    GetPlayer()->m_bgBattleGroundID = 1;
-    GetPlayer()->SetInBattleGround(true);
+    // TODO: select bg ID base at bg map_id or use map id as bg ID
+    uint8 bgID = 1;
 
-    // Calculate team
-    GetPlayer()->SetBattleGroundTeam(sBattleGroundMgr.GenerateTeamByRace(GetPlayer()->getRace()));
+    // We're in BG.
+    GetPlayer()->m_bgBattleGroundID = bgID;
+    GetPlayer()->SetInBattleGround(true);
 
     //sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(),3);
 
@@ -102,17 +102,14 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     GetPlayer()->SetBattleGroundEntryPointY(GetPlayer()->GetPositionY());
     GetPlayer()->SetBattleGroundEntryPointZ(GetPlayer()->GetPositionZ());
 
-    // TODO: Find team based on faction
-    uint32 TeamID = 0;
-
-    sBattleGroundMgr.SendToBattleGround(GetPlayer(),TeamID,1);
+    sBattleGroundMgr.SendToBattleGround(GetPlayer(),bgID);
 
     //sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(), 0x03, 0x001D2A00);
 
-    sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(), 0x03, 0x00);
+    sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(bgID)->GetID(), 0x03, 0x00);
 
     // Adding Player to BattleGround id = 0
-    sBattleGroundMgr.AddPlayerToBattleGround(GetPlayer(),1);
+    sBattleGroundMgr.AddPlayerToBattleGround(GetPlayer(),bgID);
 
     // Bur: Not sure if we would have to send a position/score update.. maybe the client requests this automatically we'll have to see
 }
