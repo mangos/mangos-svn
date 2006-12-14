@@ -134,6 +134,7 @@ extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore;
 extern DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore;
 extern DBCStorage <ItemSetEntry>              sItemSetStore;
 extern DBCStorage <LockEntry>                 sLockStore;
+extern DBCStorage <MapEntry>                  sMapStore;
 extern DBCStorage <SkillLineEntry>            sSkillLineStore;
 extern DBCStorage <SkillLineAbilityEntry>     sSkillLineAbilityStore;
 extern DBCStorage <SpellDurationEntry>        sSpellDurationStore;

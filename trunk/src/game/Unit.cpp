@@ -95,7 +95,7 @@ Unit::~Unit()
     {
         (*i)->SetOwnerGUID(0);
         (*i)->Delete();
-        m_gameObj.erase(i++);
+        i = m_gameObj.erase(i);
     }
 }
 
@@ -1563,17 +1563,14 @@ void Unit::_UpdateSpells( uint32 time )
         for (ite = m_dynObj.begin(); ite != m_dynObj.end(); ite = dnext)
         {
             dnext = ite;
-            dnext++;
             //(*i)->Update( difftime );
             if( (*ite)->isFinished() )
             {
                 (*ite)->Delete();
-                m_dynObj.erase(ite);
-                if(m_dynObj.empty())
-                    break;
-                else
-                    dnext = m_dynObj.begin();
+                dnext = m_dynObj.erase(ite);
             }
+            else
+                ++dnext;
         }
     }
     if(!m_gameObj.empty())
@@ -1582,19 +1579,15 @@ void Unit::_UpdateSpells( uint32 time )
         for (ite1 = m_gameObj.begin(); ite1 != m_gameObj.end(); ite1 = dnext1)
         {
             dnext1 = ite1;
-            dnext1++;
             //(*i)->Update( difftime );
             if( (*ite1)->isFinished() )
             {
                 (*ite1)->SetOwnerGUID(0);
                 (*ite1)->Delete();
-                m_gameObj.erase(ite1);
-
-                if(m_gameObj.empty())
-                    break;
-                else
-                    dnext1 = m_gameObj.begin();
+                dnext1 = m_gameObj.erase(ite1);
             }
+            else
+                ++dnext1;
         }
     }
 }
@@ -1603,18 +1596,17 @@ void Unit::_UpdateHostil( uint32 time )
 {
     if(!isInCombat() && m_hostilList.size() )
     {
-        HostilList::iterator iter;
-        for(iter=m_hostilList.begin(); iter!=m_hostilList.end(); ++iter)
+        HostilList::iterator iter, next;
+        for(iter=m_hostilList.begin(); iter!=m_hostilList.end(); iter = next)
         {
+            next = iter;
             iter->Hostility-=time/1000.0f;
             if(iter->Hostility<=0.0f)
             {
-                m_hostilList.erase(iter);
-                if(!m_hostilList.size())
-                    break;
-                else
-                    iter = m_hostilList.begin();
+                next = m_hostilList.erase(iter);
             }
+            else
+                ++next;
         }
     }
 }
@@ -2475,16 +2467,13 @@ void Unit::RemoveDynObject(uint32 spellid)
     for (i = m_dynObj.begin(); i != m_dynObj.end(); i = next)
     {
         next = i;
-        next++;
         if(spellid == 0 || (*i)->GetSpellId() == spellid)
         {
             (*i)->Delete();
-            m_dynObj.erase(i);
-            if(m_dynObj.empty())
-                break;
-            else
-                next = m_dynObj.begin();
+            next = m_dynObj.erase(i);
         }
+        else
+            ++next;
     }
 }
 
@@ -2521,19 +2510,16 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
     for (i = m_gameObj.begin(); i != m_gameObj.end(); i = next)
     {
         next = i;
-        next++;
         if(spellid == 0 || (*i)->GetSpellId() == spellid)
         {
             (*i)->SetOwnerGUID(0);
             if(del)
                 (*i)->Delete();
 
-            m_gameObj.erase(i);
-            if(m_gameObj.empty())
-                break;
-            else
-                next = m_gameObj.begin();
+            next = m_gameObj.erase(i);
         }
+        else
+            ++next;
     }
 }
 

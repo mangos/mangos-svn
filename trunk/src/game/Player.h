@@ -178,10 +178,15 @@ struct Factions
 
 struct EnchantDuration
 {
-    Item *item;
+    EnchantDuration() : item(NULL), slot(0), leftduration(0) {};
+    EnchantDuration(Item * _item, uint32 _slot, uint32 _leftduration) : item(_item), slot(_slot), leftduration(_leftduration) { assert(item); };
+
+    Item * item;
     uint32 slot;
     uint32 leftduration;
 };
+
+typedef std::list<EnchantDuration> EnchantDurationList;
 
 enum PlayerMovementType
 {
@@ -1222,7 +1227,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         std::list<struct actions> m_actions;
         SpellModList m_spellMods[32];
-        std::list<struct EnchantDuration*> m_enchantDuration;
+        EnchantDurationList m_enchantDuration;
 
         uint64 m_resurrectGUID;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
