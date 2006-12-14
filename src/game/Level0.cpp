@@ -283,3 +283,23 @@ bool ChatHandler::HandleShowHonor(const char* args)
 
     return true;
 }
+
+bool ChatHandler::HandlePasswordCommand(const char* args)
+{
+    if(!*args)
+    {
+        SendSysMessage(LANG_BAD_VALUE); 
+        return true;
+    }
+         
+    std::string password = args;
+    loginDatabase.escape_string(password);
+                                                                                   
+    if(loginDatabase.PExecute( "UPDATE `account` SET `password` = '%s' WHERE `id` = '%d';",password.c_str(), m_session->GetAccountId()))
+    {
+        PSendSysMessage("New password %s",password.c_str());
+        return true;
+    }  
+    
+    return true;
+}  
