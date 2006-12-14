@@ -1183,15 +1183,30 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         GetSession()->SendPacket( &data );
 
         SetMapId(mapid);
+
+        // orientation+0.1 used to pressure SetPosition send notifiers at teleportaion like in normal move case
         if(m_transport)
         {
-            Relocate(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
+            Relocate(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO+0.1);
             SetPosition(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
         }
         else
         {
-            Relocate(x, y, z, orientation);
+            Relocate(x, y, z, orientation+0.1);
             SetPosition(x, y, z, orientation);
+        }
+
+        // resurrect character at enter into instance where his corpse exist
+        Corpse* corpse = GetCorpse();
+        if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == mapid)
+        {
+            MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
+            if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
+            {
+                ResurrectPlayer();
+                SetHealth( GetMaxHealth()/2 );
+                SpawnCorpseBones();
+            }
         }
         SetDontMove(true);
         //SaveToDB();
@@ -6941,12 +6956,15 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
         ItemPrototype const *pProto = pItem->GetProto();
 
-        for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();)
+        for(EnchantDurationList::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr = next)
         {
-            if((*itr)->item == pItem)
-                m_enchantDuration.erase(itr++);
+            next = itr;
+            if(itr->item == pItem)
+            {
+                next = m_enchantDuration.erase(itr);
+            }
             else
-                ++itr;
+                ++next;
         }
 
         if( bag == INVENTORY_SLOT_BAG_0 )
@@ -7620,34 +7638,25 @@ void Player::TradeCancel(bool sendback)
 
 void Player::UpdateEnchantTime(uint32 time)
 {
-    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
+    for(EnchantDurationList::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
     {
+        assert(itr->item);
         next=itr;
-        next++;
-        if(*itr)
+        if(!itr->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3))
         {
-            if((*itr)->item)
-            {
-                if(!(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3))
-                {
-                    delete *itr;
-                    m_enchantDuration.erase(itr);
-                    continue;
-                }
-                if((*itr)->leftduration <= time)
-                {
-                    AddItemEnchant((*itr)->item,(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3),false);
-                    for(int y=0;y<3;y++)
-                        (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+y,0);
-                    delete *itr;
-                    m_enchantDuration.erase(itr);
-                    continue;
-                }
-                else if((*itr)->leftduration > time)
-                {
-                    (*itr)->leftduration -= time;
-                }
-            }
+            next = m_enchantDuration.erase(itr);
+        }
+        else if(itr->leftduration <= time)
+        {
+            AddItemEnchant(itr->item,itr->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3),false);
+            for(int y=0;y<3;y++)
+                itr->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3+y,0);
+            next = m_enchantDuration.erase(itr);
+        }
+        else if(itr->leftduration > time)
+        {
+            itr->leftduration -= time;
+            ++next;
         }
     }
 }
@@ -7657,31 +7666,18 @@ void Player::AddEnchantDuration(Item *item,uint32 slot,uint32 duration)
 {
     if(!item)
         return;
-    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
+    for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();++itr)
     {
-        next=itr;
-        next++;
-        if(*itr)
+        if(itr->item == item && itr->slot == slot)
         {
-            if((*itr)->item)
-            {
-                if((*itr)->item == item && (*itr)->slot == slot)
-                {
-                    delete *itr;
-                    m_enchantDuration.erase(itr);
-                    break;
-                }
-            }
+            m_enchantDuration.erase(itr);
+            break;
         }
     }
     if(item && duration > 0 )
     {
         GetSession()->SendItemEnchantTimeUpdate(item->GetGUID(),slot,uint32(duration/1000));
-        EnchantDuration *ed = new EnchantDuration();
-        ed->item = item;
-        ed->leftduration = duration;
-        ed->slot = slot;
-        m_enchantDuration.push_back(ed);
+        m_enchantDuration.push_back(EnchantDuration(item,slot,duration));
     }
 }
 
@@ -7726,18 +7722,13 @@ void Player::SaveEnchant()
 {
     uint32 duration = 0;
 
-    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();itr++)
+    for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();++itr)
     {
-        if(*itr)
+        assert(itr->item);
+        if(itr->leftduration > 0)
         {
-            if((*itr)->item)
-            {
-                if((*itr)->leftduration > 0)
-                {
-                    (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+1,(*itr)->leftduration);
-                    (*itr)->item->SetState(ITEM_CHANGED, this);
-                }
-            }
+            itr->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3+1,itr->leftduration);
+            itr->item->SetState(ITEM_CHANGED, this);
         }
     }
 }

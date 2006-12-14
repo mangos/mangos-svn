@@ -127,6 +127,13 @@ struct LockEntry
     uint32      requiredskill;
 };
 
+struct MapEntry
+{
+    uint32      MapID;
+    char*       name;
+    uint32      map_type;
+};
+
 struct SkillLineEntry
 {
     uint32    id;

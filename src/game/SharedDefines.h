@@ -58,6 +58,14 @@ enum Classes
     MAX_CLASSES     = 12
 };
 
+enum MapTypes
+{
+    MAP_COMMON          = 0,
+    MAP_INSTANCE        = 1,
+    MAP_RAID            = 2,
+    MAP_BATTLEGROUND    = 3,
+};
+
 enum MoneyConstants
 {
     COPPER = 1,

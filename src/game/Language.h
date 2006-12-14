@@ -179,7 +179,7 @@
 #define LANG_SET_SKILL                   "Skill %u (%s) for player %s set to %u and current maximum set to %u."
 #define LANG_SET_SKILL_ERROR             "Player %s must have skill %u (%s) before use this command."
 
-#define LANG_LEARNSK_SYNTAX              "Syntax: .learnsk skillId level max"
+#define LANG_LEARNSK_SYNTAX              "Syntax: .learnskill skillId level max"
 #define LANG_LEARNED_SKILL               "Player %s learned skill %u (%s)"
 #define LANG_INVALID_SKILL_ID            "Invalid skill id (%u)"
 #define LANG_UNLEARNED_SKILL             "Player %s unlearned skill %u"
