@@ -166,6 +166,15 @@ enum Language
 
 #define LANGUAGES_COUNT 15
 
+enum Team
+{
+    ALLIANCE = 469,
+    HORDE = 67,
+    ALLIANCE_FORCES = 891,
+    HORDE_FORCES = 892,
+    STEAMWHEEDLE_CARTEL = 169,
+};
+
 // Spell Effects
 
 #define SPELL_EFFECT_INSTAKILL                  1
