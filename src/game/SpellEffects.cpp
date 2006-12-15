@@ -1255,6 +1255,10 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+        creatureTarget->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME); 
+                                                            // this enables popup window (pet detals, abandon, rename)
+        creatureTarget->SetUInt32Value(UNIT_FIELD_PETNUMBER,1); 
+                                                            // this enables pet detals window (Shift+P)
         creatureTarget->SetTamed(true);
         creatureTarget->AIM_Initialize();
 
@@ -1332,12 +1336,14 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1);
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING); 
+                                                            // this enables popup window (pet detals, abandon)
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+        NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER,1);  // this enables pet detals window (Shift+P)
         NewSummon->SetStat(STAT_STRENGTH,22);
         NewSummon->SetStat(STAT_AGILITY,22);
         NewSummon->SetStat(STAT_STAMINA,25);
@@ -1359,6 +1365,11 @@ void Spell::EffectSummonPet(uint32 i)
             std::string new_name=objmgr.GeneratePetName(petentry);
             if(new_name!="")
                 NewSummon->SetName(new_name);
+        }
+        else if(m_caster->getClass() == CLASS_HUNTER && NewSummon->GetCreatureInfo()->type == CREATURE_TYPE_BEAST)
+        {
+            // this enables popup window (pet detals, abandon, rename)
+            NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);
         }
 
         NewSummon->SaveToDB();
