@@ -238,6 +238,9 @@ class ObjectMgr
         void LoadAuctionItems();
         void LoadAuctions();
         void LoadPlayerInfo();
+        void LoadPetNames();
+
+        std::string GeneratePetName(uint32 entry);
 
         void ReturnOrDeleteOldMails(bool serverUp);
 
@@ -299,6 +302,10 @@ class ObjectMgr
     private:
         void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
         PlayerInfo **playerInfo;                            // [race][class]
+
+        typedef std::map<uint32,std::vector<std::string> > HalfNameMap;
+        HalfNameMap PetHalfName0;
+        HalfNameMap PetHalfName1;
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()

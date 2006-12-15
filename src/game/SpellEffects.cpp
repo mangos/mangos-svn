@@ -1353,6 +1353,14 @@ void Spell::EffectSummonPet(uint32 i)
             NewSummon->AddActState(STATE_RA_SPELL1);
         }
 
+        // generate new name for warlock pet
+        if(m_caster->getClass() == CLASS_WARLOCK)
+        {
+            std::string new_name=objmgr.GeneratePetName(petentry);
+            if(new_name!="")
+                NewSummon->SetName(new_name);
+        }
+
         NewSummon->SaveToDB();
         NewSummon->AIM_Initialize();
         MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);

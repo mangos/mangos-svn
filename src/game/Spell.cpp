@@ -1594,7 +1594,7 @@ uint8 Spell::CanCast()
         //    castResult = CAST_FAIL_NOT_BEHIND_TARGET;
 
         //Must be behind the target.
-        if( m_spellInfo->AttributesEx2 == 0x100000 && target->HasInArc(M_PI, m_caster) && m_spellInfo->SpellIconID != 204 && m_spellInfo->SpellIconID != 205 )
+        if( m_spellInfo->AttributesEx2 == 0x100000 && target->HasInArc(M_PI, m_caster) && m_spellInfo->SpellIconID != 244 && m_spellInfo->SpellIconID != 205 )
         {
             SendInterrupted(2);
             castResult = CAST_FAIL_NOT_BEHIND_TARGET;
