@@ -299,8 +299,9 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDetail( "WORLD: Received CMSG_SELL_ITEM" );
     uint64 vendorguid, itemguid;
+    uint8 count;
 
-    recv_data >> vendorguid >> itemguid;
+    recv_data >> vendorguid >> itemguid >> count;
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
     if( pCreature )
@@ -316,16 +317,44 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                 return;
             }
 
+            // special case at auto sell (sell all)
+            if(count==0)
+            {
+                count = pItem->GetCount();
+            }
+            else
+            // prevent sell more items that exist in stack (possable only not from client)
+            if(count > pItem->GetCount())
+            {
+                _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+                return;
+            }
+
             ItemPrototype const *pProto = pItem->GetProto();
             if( pProto )
             {
                 if( pProto->SellPrice > 0 )
                 {
-                    _player->ModifyMoney( pProto->SellPrice * pItem->GetCount() );
+                    _player->ModifyMoney( pProto->SellPrice * count );
 
-                    _player->RemoveItem( (pos >> 8), (pos & 255), true);
-                    pItem->RemoveFromUpdateQueueOf(_player);
-                    _player->AddItemToBuyBackSlot( pItem );
+                    if(count < pItem->GetCount())           // need split items
+                    {
+                        pItem->SetCount( pItem->GetCount() - count );
+                        if( _player->IsInWorld() )
+                            pItem->SendUpdateToPlayer( _player );
+                        pItem->SetState(ITEM_CHANGED, _player);
+
+                        Item *pNewItem = _player->CreateItem( pItem->GetEntry(), count );
+                        _player->AddItemToBuyBackSlot( pNewItem );
+                        if( _player->IsInWorld() )
+                            pNewItem->SendUpdateToPlayer( _player );
+                    }
+                    else
+                    {
+                        _player->RemoveItem( (pos >> 8), (pos & 255), true);
+                        pItem->RemoveFromUpdateQueueOf(_player);
+                        _player->AddItemToBuyBackSlot( pItem );
+                    }
                 }
                 else
                     _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
