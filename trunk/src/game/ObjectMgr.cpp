@@ -1613,17 +1613,25 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 
 void ObjectMgr::LoadTeleportCoords()
 {
+    uint32 count = 0;
 
     QueryResult *result = sDatabase.Query( "SELECT `id`,`target_position_x`,`target_position_y`,`target_position_z`,`target_map` FROM `areatrigger_template`" );
 
     if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u teleport definitions", count );
         return;
-
-    uint32 count = 0;
-
-    TeleportCoords *pTC;
+    }
 
     barGoLink bar( result->GetRowCount() );
+
+    TeleportCoords *pTC;
 
     do
     {
@@ -1781,4 +1789,60 @@ void ObjectMgr::LoadGameobjectInfo()
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u game object templates", sGOStorage.RecordCount );
 
+}
+
+void ObjectMgr::LoadPetNames()
+{
+    uint32 count = 0;
+    QueryResult *result = sDatabase.Query("SELECT `word`,`entry`,`half` FROM `pet_name_generation`");
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u pet name parts", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        bar.step();
+
+        Field *fields = result->Fetch();
+        std::string word = fields[0].GetString();
+        uint32 entry     = fields[1].GetUInt32();
+        bool   half      = fields[2].GetBool();
+        if(half)
+            PetHalfName1[entry].push_back(word);
+        else
+            PetHalfName0[entry].push_back(word);
+        count++;
+    }
+    while (result->NextRow());
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u pet name parts", count );
+}
+
+std::string ObjectMgr::GeneratePetName(uint32 entry)
+{
+    std::vector<std::string> & list0 = PetHalfName0[entry];
+    std::vector<std::string> & list1 = PetHalfName1[entry];
+
+    if(list0.empty() || list1.empty())
+    {
+        CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(entry);
+        char* petname = GetPetName(cinfo->family);
+        if(!petname)
+            petname = cinfo->Name;
+        return std::string(petname);
+    }
+
+    return *(list0.begin()+urand(0, list0.size()-1)) + *(list1.begin()+urand(0, list1.size()-1));
 }

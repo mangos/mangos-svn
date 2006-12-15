@@ -44,10 +44,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
 
     if(petentry)
         // known entry
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry );
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`,`name` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry );
     else
         // current pet
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'",ownerid );
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`,`name` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'",ownerid );
 
     if(!result)
         return false;
@@ -85,11 +85,13 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
     uint32 petlevel=fields[3].GetUInt32();
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
+    SetName(fields[15].GetString());
     if(owner->getClass() == CLASS_WARLOCK)
     {
         petlevel=owner->getLevel();
 
         SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+        SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
         SetStat(STAT_STRENGTH,22);
         SetStat(STAT_AGILITY,22);
         SetStat(STAT_STAMINA,25);
@@ -150,10 +152,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     //summon imp Template ID is 416
     if(owner->GetTypeId() == TYPEID_PLAYER)
     {
-        std::string name;
+/*        std::string name;
         name = ((Player*)owner)->GetName();
         name.append("'s Pet");
-        SetName( name );
+        SetName( name );*/
         ((Player*)owner)->PetSpellInitialize();
     }
     return true;
@@ -169,9 +171,9 @@ void Pet::SaveToDB()
     uint32 owner = GUID_LOPART(GetOwnerGUID());
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
-    sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,1)",
+    sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s',1)",
         GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint());
+        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), GetName());
 }
 
 void Pet::DeleteFromDB()

@@ -183,25 +183,19 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     uint32 petnumber;
     uint64 guid;
 
-    std::string name = "ERROR_NO_NAME_FOR_PET_GUID";
-
     recv_data >> petnumber;
     recv_data >> guid;
 
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid);
     if(!pet || !pet->GetEntry())
         return;
-    CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(pet->GetEntry());
-    char* petname = GetPetName(cinfo->family);
-    if(!petname)
-        petname = cinfo->Name;
+
+    std::string name = pet->GetName();
 
     WorldPacket data;
     data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
     data << uint32(petnumber);
-    if(petname)
-        data << petname;
-    else data << name.c_str();
+    data << name.c_str();
     //data << uint8(0x00);
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
     _player->GetSession()->SendPacket(&data);

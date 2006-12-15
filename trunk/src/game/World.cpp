@@ -329,6 +329,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
 
+    sLog.outString( "Loading Pet Name Parts..." );
+    objmgr.LoadPetNames();
+
     objmgr.SetHighestGuids();
 
     sLog.outString( "Loading Loot Tables..." );

@@ -53,7 +53,8 @@ class Pet : public Creature
         bool HasActState(uint32 st) { return m_actState & st;};
         uint32 GetFealty() { return m_fealty; }
         void SetFealty(uint32 fealty) { m_fealty=fealty; }
-        std::string GetName() { return m_name; }
+        char const* GetName() const { return m_name.c_str(); }
+                                                            // overwrite Cerature::GetName
         void SetName(std::string newname) { m_name=newname; }
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0 );
         void SaveToDB();                                    // overwrited of Creature::SaveToDB
