@@ -243,7 +243,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             return;
 
         loot = &go->loot;
-        if (loot->isLooted())
+        if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
         {
             go->SetLootState(GO_LOOTED);
             loot->clear();
