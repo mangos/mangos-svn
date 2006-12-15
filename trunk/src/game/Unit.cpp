@@ -348,7 +348,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 PvP = true;
         }
-        else if(((Creature*)this)->isPet())
+        else if(GetOwnerGUID())                             // Pet or timed creature, etc
         {
             Creature* pet = (Creature*)this;
             Unit* owner = ((Creature*)this)->GetOwner();
@@ -358,8 +358,12 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 player = (Player*)owner;
                 player->ClearInCombat();
             }
-            uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
-            pet->GivePetXP(petxp);
+
+            if(pet->isPet())
+            {
+                uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
+                pet->GivePetXP(petxp);
+            }
         }
 
         // self or owner of pet
@@ -388,9 +392,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                         if(uint32(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel())) > sWorld.getConfig(CONFIG_GROUP_XP_LEVELDIFF))
                             continue;
                         pGroupGuy->GiveXP(xp, pVictim);
-                        if(player->GetPet())
+                        if(Creature* pet = player->GetPet())
                         {
-                            player->GetPet()->GivePetXP(xp/2);
+                            pet->GivePetXP(xp/2);
                         }
                         pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
                     }
@@ -399,9 +403,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 {
                     DEBUG_LOG("Player kill enemy alone");
                     player->GiveXP(xp, pVictim);
-                    if(player->GetPet())
+                    if(Creature* pet = player->GetPet())
                     {
-                        player->GetPet()->GivePetXP(xp);
+                        pet->GivePetXP(xp);
                     }
                     player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
                 }
