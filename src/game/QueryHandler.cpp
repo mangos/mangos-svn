@@ -141,7 +141,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     //if (unit)
     //    data << ((unit->isPet()) ? "Pet" : ci->SubName);
     //else
-        data << ci->SubName;
+    data << ci->SubName;
 
     uint32 wdbFeild11=0,wdbFeild12=0;
 

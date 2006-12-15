@@ -248,7 +248,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "money",       1, &ChatHandler::HandleModifyMoneyCommand,      "",   NULL },
         { "speed",       1, &ChatHandler::HandleModifySpeedCommand,      "",   NULL },
         { "addquest",    3, &ChatHandler::HandleAddQuest,                "",   NULL },
-        { "password",    0, &ChatHandler::HandlePasswordCommand,         "",   NULL },            
+        { "password",    0, &ChatHandler::HandlePasswordCommand,         "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
