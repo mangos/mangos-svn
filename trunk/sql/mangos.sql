@@ -332,7 +332,7 @@ CREATE TABLE `character_pet` (
   `fealty` int(11) unsigned NOT NULL default '0',
   `loyalty` int(11) unsigned NOT NULL default '1',
   `trainpoint` int(11) unsigned NOT NULL default '0',
-  `name` varchar(12) default 'Pet',
+  `name` varchar(100) default 'Pet',
   `current` tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)

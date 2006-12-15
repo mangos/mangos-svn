@@ -91,6 +91,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
         petlevel=owner->getLevel();
 
         SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+        SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
         SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
         SetStat(STAT_STRENGTH,22);
         SetStat(STAT_AGILITY,22);
@@ -102,6 +103,8 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     else if(owner->getClass() == CLASS_HUNTER && cinfo->type == CREATURE_TYPE_BEAST)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[12].GetUInt32()<<8));
+        SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING +  UNIT_FLAG_RENAME); 
+                                                            // TODO: check, if pet was already renamed
         SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->minlevel)*1.5f);
         SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->minlevel)*1.5f);
         SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[13].GetUInt32() );
@@ -169,11 +172,13 @@ void Pet::SaveToDB()
         return;
 
     uint32 owner = GUID_LOPART(GetOwnerGUID());
+    std::string name = m_name;
+    sDatabase.escape_string(name);
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s',1)",
         GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), GetName());
+        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str());
 }
 
 void Pet::DeleteFromDB()
