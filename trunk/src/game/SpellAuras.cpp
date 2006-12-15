@@ -2051,7 +2051,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply)
     {
         m_periodicTimer += m_modifier.periodictime;
         float modifier = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
-        m_modifier.m_amount = m_target->GetMaxHealth() * modifier/100;
+        m_modifier.m_amount = uint32(m_target->GetMaxHealth() * modifier/100);
 
         if(m_target->GetHealth() < m_target->GetMaxHealth())
             m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
@@ -2072,7 +2072,7 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply)
         {
             float modifier = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
                                                             // take percent (m_modifier.m_amount) max mana
-            m_modifier.m_amount = (m_target->GetMaxPower(POWER_MANA) * modifier)/100;
+            m_modifier.m_amount = uint32((m_target->GetMaxPower(POWER_MANA) * modifier)/100);
         }
 
         if(m_target->GetPower(POWER_MANA) < m_target->GetMaxPower(POWER_MANA))

@@ -9388,7 +9388,7 @@ bool Player::LoadFromDB( uint32 guid )
 
     // restore remembered power values
     for(uint32 i = 0; i < MAX_POWERS; ++i)
-        SetPower(Powers(i),savedPower[i]);
+        SetPower(Powers(i),uint32(savedPower[i]));
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugValues();
@@ -10579,7 +10579,7 @@ void Player::SetRestBonus (float rest_bonus_new)
     }
 
     //RestTickUpdate
-    SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, rest_bonus);
+    SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, uint32(rest_bonus));
 }
 
 void Player::HandleInvisiblePjs()
