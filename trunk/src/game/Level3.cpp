@@ -300,7 +300,7 @@ bool ChatHandler::HandleGoCommand(const char* args)
 
 bool ChatHandler::HandleLearnSkillCommand (const char* args)
 {
-    if (!*args) 
+    if (!*args)
         return false;
 
     char *skill_p = strtok ((char*)args, " ");
@@ -414,9 +414,8 @@ bool ChatHandler::HandleMaxSkillCommand(const char* args)
 
 bool ChatHandler::HandleSetSkillCommand(const char* args)
 {
-    if (!*args) 
+    if (!*args)
         return false;
-
 
     char *skill_p = strtok ((char*)args, " ");
     char *level_p = strtok (NULL, " ");
@@ -2167,7 +2166,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
     }
     // else .levelup - nothing do for prepering
 
-    // player 
+    // player
     Player *chr = NULL;
     uint64 chr_guid = 0;
 

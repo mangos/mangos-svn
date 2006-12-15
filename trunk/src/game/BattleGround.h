@@ -99,12 +99,13 @@ class BattleGround
         inline uint32 GetMapId() { return m_MapId; };
 
         void SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O);
-        void GetTeamStartLoc(uint32 TeamID, float &X, float &Y, float &Z, float &O) { 
+        void GetTeamStartLoc(uint32 TeamID, float &X, float &Y, float &Z, float &O)
+        {
             uint8 idx = GetTeamIndexByTeamId(TeamID);
-            X = m_TeamStartLocX[idx]; 
-            Y = m_TeamStartLocY[idx]; 
-            Z = m_TeamStartLocZ[idx]; 
-            O = m_TeamStartLocO[idx]; 
+            X = m_TeamStartLocX[idx];
+            Y = m_TeamStartLocY[idx];
+            Z = m_TeamStartLocZ[idx];
+            O = m_TeamStartLocO[idx];
         }
 
         /* Packet Transfer */

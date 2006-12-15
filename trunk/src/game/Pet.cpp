@@ -152,10 +152,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     //summon imp Template ID is 416
     if(owner->GetTypeId() == TYPEID_PLAYER)
     {
-/*        std::string name;
-        name = ((Player*)owner)->GetName();
-        name.append("'s Pet");
-        SetName( name );*/
+        /*        std::string name;
+                name = ((Player*)owner)->GetName();
+                name.append("'s Pet");
+                SetName( name );*/
         ((Player*)owner)->PetSpellInitialize();
     }
     return true;

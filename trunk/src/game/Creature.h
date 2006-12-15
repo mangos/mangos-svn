@@ -247,7 +247,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SelectLevel(const CreatureInfo *cinfo);
 
         virtual char const* GetName()    const { return GetCreatureInfo()->Name; }
-                char const* GetSubName() const { return GetCreatureInfo()->SubName; }
+        char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
         virtual void Update( uint32 time );
         inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
