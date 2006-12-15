@@ -2179,7 +2179,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         if(!chr)                                            // not in game
         {
             chr_guid = objmgr.GetPlayerGUIDByName(name.c_str());
-            if (chr_guid == NULL)
+            if (chr_guid == 0)
             {
                 SendSysMessage(LANG_PLAYER_NOT_FOUND);
                 return true;

@@ -3202,10 +3202,10 @@ uint32 Unit::SpellHealingBonus(SpellEntry *spellProto, uint32 healamount)
     // TODO: check for ALL/SPELLS type
     AuraList& mHealingPct = GetAurasByType(SPELL_AURA_MOD_HEALING_PCT);
     for(AuraList::iterator i = mHealingPct.begin();i != mHealingPct.end(); ++i)
-        healamount *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+        healamount *= uint32((100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
     AuraList& mHealingDonePct = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for(AuraList::iterator i = mHealingDonePct.begin();i != mHealingDonePct.end(); ++i)
-        healamount *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+        healamount *= uint32((100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
 
     healamount += m_AuraModifiers[SPELL_AURA_MOD_HEALING];
     if (int32(healamount) < 0) healamount = 0;
