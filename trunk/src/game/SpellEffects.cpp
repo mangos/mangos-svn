@@ -377,6 +377,36 @@ void Spell::EffectDummy(uint32 i)
         }
     }
 
+    //Holy Shock For Paladins
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellIconID == 156)
+    {
+        int hurt = 0;
+        int heal = 0;
+
+        switch(m_spellInfo->Id)
+        {
+            case 20473:
+                hurt = 25912;         
+                heal = 25914;
+                break;
+            case 20929:
+                hurt = 25911;        
+                heal = 25913;
+                break;
+            case 20930:
+                hurt = 25902;        
+                heal = 25903;
+                break;
+            default:
+                break;
+        }
+
+        if(m_caster->IsFriendlyTo(unitTarget))
+            m_caster->CastSpell(unitTarget, heal, true, 0);
+        else
+            m_caster->CastSpell(unitTarget, hurt, true, 0);
+    }
+ 
     if(m_spellInfo->SpellIconID == 1648)
     {
         uint32 dmg = damage;
