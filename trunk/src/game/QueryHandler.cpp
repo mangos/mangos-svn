@@ -30,43 +30,57 @@
 #include "ObjectAccessor.h"
 #include "Pet.h"
 
+void WorldSession::SendNameQueryOpcode(Player *p)
+{
+    if(!p)
+        return;
+
+    WorldPacket data;
+    data.Initialize( SMSG_NAME_QUERY_RESPONSE );
+    data << p->GetGUID();
+    data << p->GetName();
+    data << uint8(0);
+    data << uint32(p->getRace());
+    data << uint32(p->getGender());
+    data << uint32(p->getClass());
+
+    SendPacket(&data);
+}
+
+void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
+{
+    std::string name;
+    if(!objmgr.GetPlayerNameByGUID(guid, name))
+        name = "<non-existing character>";
+    uint32 field = Player::GetUInt32ValueFromDB(UNIT_FIELD_BYTES_0, guid);    
+
+    WorldPacket data;
+    data.Initialize( SMSG_NAME_QUERY_RESPONSE );
+    data << guid;
+    data << name;
+    data << (uint8)0;
+    data << (uint32)(field & 0xFF);
+    data << (uint32)((field >> 16) & 0xFF);
+    data << (uint32)((field >> 8) & 0xFF);
+
+    SendPacket( &data );
+}
+
 void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
 
     recv_data >> guid;
 
-    sLog.outDebug( "Received CMSG_NAME_QUERY for: " I64FMTD, guid);
-
-    Player *pChar = ObjectAccessor::Instance().FindPlayer(guid);
+    Player *pChar = objmgr.GetPlayer(guid);
 
     WorldPacket data;
     data.Initialize( SMSG_NAME_QUERY_RESPONSE );
 
-    if (pChar == NULL)
-    {
-        std::string name = "<Non-existed now character>";
-
-        if (!objmgr.GetPlayerNameByGUID(guid, name))
-            sLog.outError( "No player name found for this guid: %u", guid );
-
-        data << guid;
-        data << name;
-        data << uint8(0);
-        data << uint32(0) << uint32(0) << uint32(0);
-
-    }
+    if (pChar)
+        SendNameQueryOpcode(pChar);
     else
-    {
-        data << guid;
-        data << pChar->GetName();
-        data << uint8(0);
-        data << uint32(pChar->getRace());
-        data << uint32(pChar->getGender());
-        data << uint32(pChar->getClass());
-    }
-
-    SendPacket( &data );
+        SendNameQueryOpcodeFromDB(guid);
 }
 
 void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )

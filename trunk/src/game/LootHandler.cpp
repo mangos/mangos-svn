@@ -133,13 +133,10 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         data << uint64(0);
         data << uint32(1);
 
-        if (player->IsInGroup())
-        {
-            Group *group = objmgr.GetGroupByLeader(player->GetGroupLeader());
-            assert(group);
-            group->BroadcastPacket(&data);
-        }
-        else SendPacket( &data );
+        if (player->groupInfo.group)
+            player->groupInfo.group->BroadcastPacket(&data);
+        else 
+            SendPacket( &data );
     }
     else
         player->SendEquipError( msg, NULL, NULL );
@@ -173,19 +170,19 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 
     if( pLoot )
     {
-        if (player->IsInGroup())
+        if (player->groupInfo.group)
         {
-            WorldPacket data;
-            Group *group = objmgr.GetGroupByLeader(player->GetGroupLeader());
+            Group *group = player->groupInfo.group;
             uint32 iMembers = group->GetMembersCount();
 
             // it is probably more costly to call getplayer for each member
             // than temporarily storing them in a vector
             std::vector<Player*> playersNear;
-            playersNear.reserve(iMembers);
             for (int i=0; i<iMembers; i++)
             {
                 Player* playerGroup = objmgr.GetPlayer(group->GetMemberGUID(i));
+                if(!playerGroup)
+                    continue;
                 if (player->GetDistance2dSq(playerGroup) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     playersNear.push_back(playerGroup);
             }
@@ -194,15 +191,14 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
             {
                 (*i)->ModifyMoney( uint32((pLoot->gold)/(playersNear.size())) );
                 //Offset surely incorrect, but works
+                WorldPacket data;
                 data.Initialize( SMSG_LOOT_MONEY_NOTIFY );
                 data << uint32((pLoot->gold)/(playersNear.size()));
                 (*i)->GetSession()->SendPacket( &data );
             }
         }
         else
-        {
             player->ModifyMoney( pLoot->gold );
-        }
         pLoot->gold = 0;
         pLoot->NotifyMoneyRemoved();
     }
@@ -211,6 +207,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_LOOT");
+
     uint64 guid;
     recv_data >> guid;
 
@@ -269,10 +266,9 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         loot = &pCreature->loot;
 
         Player *recipient = pCreature->GetLootRecipient();
-        if (recipient && recipient->IsInGroup())
+        if (recipient && recipient->groupInfo.group)
         {
-            Group *group = objmgr.GetGroupByLeader(recipient->GetGroupLeader());
-            if (group->GetLooterGuid() == player->GetGUID())
+            if (recipient->groupInfo.group->GetLooterGuid() == player->GetGUID())
                 loot->released = true;
         }
 

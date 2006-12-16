@@ -20,6 +20,8 @@
 #define MANGOSSERVER_GROUP_H
 
 #define MAXGROUPSIZE 5
+#define MAXRAIDSIZE 40
+#define TARGETICONCOUNT 8
 
 enum RollVote
 {
@@ -29,100 +31,131 @@ enum RollVote
     NOT_EMITED_YET    = 3,
     NOT_VALID         = 4
 };
+enum GroupType
+{
+    GROUPTYPE_NORMAL = 0,
+    GROUPTYPE_RAID   = 1
+};
 
+
+/** request member stats checken **/
+/** todo: uninvite people that not accepted invite **/
 class Group
 {
-    public:
-        Group()
+    protected:
+        struct MemberSlot
         {
-            m_count = 0;
-            m_leaderGuid = 0;
-            m_lootMethod = FREE_FOR_ALL;
-            m_looterGuid = 0;
-            m_grouptype = 0;
-        }
-
-        ~Group()
-        {
-        }
-
-        bool Create(const uint64 &guid, const char * name)
-        {
-            AddMember(guid, name);
-
-            m_leaderGuid = guid;
-            m_leaderName = name;
-            return true;
-        }
-
-        void AddMember(uint64 guid, const char* name)
-        {
-
-            if (m_count < MAXGROUPSIZE)
-            {
-                m_members[m_count].guid = guid;
-                m_members[m_count].name = name;
-                m_count++;
-            }
-            else
-            {
-                ;
-
-            }
-        }
-
-        uint32 RemoveMember(const uint64 &guid);
-        void RemoveRollsFromMember(const uint64 &guid);
-        void ChangeLeader(const uint64 &guid);
-
-        bool IsFull() const { return m_count == MAXGROUPSIZE; }
-
-        void SendUpdate();
-        void Disband();
-
-        const uint64& GetLeaderGUID() const { return m_leaderGuid; }
-
-        void SetLootMethod(LootMethod method) { m_lootMethod = method; }
-        void SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
-
-        LootMethod GetLootMethod() const { return m_lootMethod; }
-        const uint64 & GetLooterGuid() const { return m_looterGuid; }
-
-        uint32 GetMembersCount() const { return m_count; }
-        const uint64& GetMemberGUID(uint32 i) const { ASSERT(i < m_count); return m_members[i].guid; }
-
-        bool GroupCheck(uint64 guid)
-        {
-            for(uint32 i = 0; i < m_count; i++ )
-            {
-                if (m_members[i].guid == guid)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        int8 GetPlayerGroupSlot(uint64 Guid);
-
+            uint64      guid;
+            std::string name;
+            uint8       group;
+            bool        assistant;
+        };
         struct Roll
         {
+            Roll(): itemGUID(0), itemid(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), loot(NULL), itemSlot(0) {}
+
             uint64 itemGUID;
             uint32 itemid;
-            RollVote playerVote[MAXGROUPSIZE];              //vote position correspond with player position (in group)
+            map<uint64, RollVote> playerVote;              //vote position correspond with player position (in group)
             uint8 totalPlayersRolling;
             uint8 totalNeed;
             uint8 totalGreed;
             uint8 totalPass;
             Loot *loot;
-            uint8 itemSlot;
-
-            Roll()
-                : itemGUID(0), itemid(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), loot(NULL), itemSlot(0) {}
+            uint8 itemSlot;            
         };
 
-        void BroadcastToGroup(WorldSession *session, std::string msg);
-        void BroadcastPacket(WorldPacket *packet);
+
+
+    public:        
+        Group()
+        {
+            m_leaderGuid = 0;
+            m_groupType  = (GroupType)0;
+            m_lootMethod = (LootMethod)0;
+            m_looterGuid = 0;
+            for(int i=0; i<TARGETICONCOUNT; i++)
+                m_targetIcons[i] = 0;
+        }
+        ~Group() {}
+
+        // group manipulation methods
+        void   Create(const uint64 &guid, const char * name);
+        void   LoadRaidGroupFromDB(const uint64 &leaderGuid);
+        bool   AddInvite(Player *player);
+        void   RemoveInvite(const uint64 &guid);
+        bool   AddMember(const uint64 &guid, const char* name);
+        uint32 RemoveMember(const uint64 &guid, const uint8 &method);   // method: 0=just remove, 1=kick
+        void   ChangeLeader(const uint64 &guid);
+        void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
+        void   SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
+        void   Disband(bool hideDestroy=false);
+
+        // properties accessories
+        bool IsFull() const { return (m_groupType==GROUPTYPE_NORMAL) ? (m_members.size()>=MAXGROUPSIZE) : (m_members.size()>=MAXRAIDSIZE); }
+        bool isRaidGroup() { return (m_groupType==GROUPTYPE_RAID); }
+        const uint64& GetLeaderGUID() const { return m_leaderGuid; }
+        LootMethod    GetLootMethod() const { return m_lootMethod; }
+        const uint64& GetLooterGuid() const { return m_looterGuid; }
+
+        // member manipulation methods
+        bool IsMember(uint64 guid);
+        bool IsLeader(uint64 guid) { return (GetLeaderGUID() == guid); }
+        bool IsAssistant(uint64 guid)
+        {
+            uint8 id = _getMemberIndex(guid);
+            if(id<0)
+                return false;
+
+            return m_members[id].assistant;
+        }
+        bool SameSubGroup(uint64 guid1, uint64 guid2)
+        {
+            uint8 id1 = _getMemberIndex(guid1);
+            uint8 id2 = _getMemberIndex(guid2);
+            if(id1<0 || id2<0)
+                return false;
+
+            return (m_members[id1].group==m_members[id2].group);
+        }
+
+        uint32 GetMembersCount() const { return m_members.size(); }
+        uint64 GetMemberGUID(uint8 id) { if(id>=m_members.size()) return 0; else return m_members[id].guid; }
+        uint8  GetMemberGroup(uint64 guid) 
+        { 
+            uint8 id = _getMemberIndex(guid);
+            if(id<0) 
+                return (MAXRAIDSIZE/MAXGROUPSIZE+1); 
+
+            return m_members[id].group; 
+        }        
+
+        // some additional raid methods
+        void ConvertToRaid();
+        void ChangeMembersGroup(const uint64 &guid, const uint8 &group)
+        { 
+            if(!isRaidGroup())
+                return;
+            if(_setMembersGroup(guid, group))
+                SendUpdate();
+        }
+        void ChangeAssistantFlag(const uint64 &guid, const bool &state)
+        { 
+            if(!isRaidGroup())
+                return;
+            if(_setAssistantFlag(guid, state))
+                SendUpdate();
+        }
+
+        void SetTargetIcon(uint8 id, uint64 guid);     
+
+        // -no description-
+        void SendInit(WorldSession *session);
+        void SendTargetIconList(WorldSession *session);
+        void SendUpdate(); 
+        void BroadcastPacket(WorldPacket *packet, int group=-1, uint64 ignore=0); // ignore: GUID of player that will be ignored
+
+        // roll system
         void SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntry, uint32 ItemInfo, uint32 CountDown, const Roll &r);
         void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r);
         void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r);
@@ -131,25 +164,30 @@ class Group
         void NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature);
         void CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise);
 
-        vector<Roll> RollId;
-
+        
     protected:
+        bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);
+        bool _addMember(const uint64 &guid, const char* name, bool isAssistant, uint8 group);
+        bool _removeMember(const uint64 &guid); // returns true if leader has changed
+        void _setLeader(const uint64 &guid);
 
-        typedef struct
-        {
-            std::string name;
-            uint64 guid;
-        } MemberSlot;
+        void _removeRolls(const uint64 &guid);
 
-        MemberSlot m_members[MAXGROUPSIZE];
+        void _convertToRaid();
+        bool _setMembersGroup(const uint64 &guid, const uint8 &group);
+        bool _setAssistantFlag(const uint64 &guid, const bool &state);
 
-        uint64 m_leaderGuid;
-        std::string m_leaderName;
+        int8 _getMemberIndex(uint64 Guid);
 
-        uint32 m_count;
-        uint16 m_grouptype;
 
-        LootMethod m_lootMethod;
-        uint64 m_looterGuid;
+        vector<MemberSlot> m_members;
+        vector<uint64> m_invitees;
+        uint64       m_leaderGuid;
+        std::string  m_leaderName;
+        GroupType    m_groupType;          
+        uint64       m_targetIcons[TARGETICONCOUNT];        
+        LootMethod   m_lootMethod;
+        uint64       m_looterGuid;
+        vector<Roll> RollId;
 };
 #endif

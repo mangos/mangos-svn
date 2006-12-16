@@ -27,158 +27,183 @@
 #include "Chat.h"
 #include "ObjectAccessor.h"
 
-void Group::ChangeLeader(const uint64 &guid)
+void Group::Create(const uint64 &guid, const char * name)
 {
-    WorldPacket data;
-    Player *player;
-    int32 slot = GetPlayerGroupSlot(guid);
-    ASSERT( slot >= 0 );
+    m_leaderGuid = guid;
+    m_leaderName = name;
 
-    m_leaderGuid=guid;
-    data.Initialize( SMSG_GROUP_SET_LEADER );
-    data << m_members[slot].name;
+    m_groupType  = GROUPTYPE_NORMAL;
+    m_lootMethod = GROUP_LOOT;
 
-    for( uint32 i = 0; i < m_count; i++ )
-    {
-        player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
-        ASSERT( player );
-
-        player->SetLeader(guid );
-        player->GetSession()->SendPacket( &data );
-    }
-
-    SendUpdate();
+    AddMember(guid, name);
 }
 
-void Group::Disband()
+void Group::LoadRaidGroupFromDB(const uint64 &leaderGuid)
 {
-    uint32 i;
-    WorldPacket data;
-    Player *player;
+    QueryResult *result = sDatabase.PQuery("SELECT `lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8` FROM `raidgroup` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    if(!result)
+        return;
 
-    data.Initialize( SMSG_GROUP_DESTROYED );
+    m_leaderGuid = leaderGuid;
+    objmgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName);
+    m_groupType  = GROUPTYPE_RAID;
+    m_lootMethod = (LootMethod)(*result)[0].GetUInt8();
+    m_looterGuid = (*result)[1].GetUInt64();
 
-    for( i = 0; i < m_count; i++ )
+    for(int i=0; i<TARGETICONCOUNT; i++)
+        m_targetIcons[i] = (*result)[2+i].GetUInt8();
+    delete result;
+
+
+    result = sDatabase.PQuery("SELECT `memberGuid`,`assistant`,`subgroup` FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    if(!result)
+        return;    
+
+    do
     {
-        player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
-        ASSERT( player );
-        player->RemoveAreaAurasByOthers();
-
-        player->UnSetInGroup();
-        player->GetSession()->SendPacket( &data );
-    }
-
-    //delete all outstanding items rolled
-    RollId.clear();
-
+        MemberSlot member;
+        member.guid      = (*result)[0].GetUInt64();
+        objmgr.GetPlayerNameByGUID(member.guid, member.name);
+        member.group     = (*result)[2].GetUInt8();
+        member.assistant = (*result)[1].GetBool();
+        m_members.push_back(member);
+    } while( result->NextRow() );
+    delete result;
 }
 
-void Group::SendUpdate()
+bool Group::AddInvite(Player *player)
 {
-    uint32 i ,j;
-    Player *player;
-    WorldPacket data;
+    if(!player || player->groupInfo.invite || player->groupInfo.group)
+        return false;
 
-    for( i = 0; i < m_count; i ++ )
+    RemoveInvite(player->GetGUID());
+
+    m_invitees.push_back(player->GetGUID());
+
+    player->groupInfo.invite = this;
+
+    return true;
+}
+
+void Group::RemoveInvite(const uint64 &guid)
+{
+    for(vector<uint64>::iterator itr=m_invitees.begin(); itr!=m_invitees.end(); itr++)
     {
-        player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
-        ASSERT( player );
-
-        data.Initialize(SMSG_GROUP_LIST);
-        data << (uint16)m_grouptype;
-        data << uint32(m_count - 1);
-
-        for( j = 0; j < m_count; j++ )
+        if((*itr) == guid)
         {
-            if (m_members[j].guid != m_members[i].guid)
-            {
-                data << m_members[j].name;
-                data << (uint64)m_members[j].guid;
-                data << uint16(1);
-            }
-        }
-        data << (uint64)m_leaderGuid;
-        data << (uint8)m_lootMethod;
-        data << (uint64)m_looterGuid;
-        data << (uint16)2;
-
-        player->GetSession()->SendPacket( &data );
-    }
-}
-
-uint32 Group::RemoveMember(const uint64 &guid)
-{
-    uint32 i, j;
-    bool leaderFlag = false;
-
-    Player *player = ObjectAccessor::Instance().FindPlayer( guid );
-    if (player)
-    {
-        player->RemoveAreaAurasByOthers();
-        player->RemoveAreaAurasFromGroup();
-    }
-
-    RemoveRollsFromMember( guid);
-
-    for( i = 0; i < m_count; i++ )
-    {
-        if (m_members[i].guid == guid)
-        {
-            leaderFlag = m_members[i].guid == m_leaderGuid;
-
-            for( j = i + 1; j < m_count; j++ )
-            {
-                m_members[j-1].guid = m_members[j].guid;
-                m_members[j-1].name = m_members[j].name;
-            }
-
+            m_invitees.erase(itr);
             break;
         }
     }
 
-    m_count--;
-
-    if (m_count > 1 && leaderFlag)
-        ChangeLeader(m_members[0].guid);
-
-    return m_count;
+    Player *player = objmgr.GetPlayer(guid);
+    if(player)
+        player->groupInfo.invite = NULL;
 }
 
-void Group::RemoveRollsFromMember(const uint64 &guid)
+bool Group::AddMember(const uint64 &guid, const char* name)
 {
-    //If a player was rolling for an item, all his votes has to be reseted to "pass"
-    vector<Roll>::iterator it;
-    int8 pos;
-    for (it = RollId.begin(); it < RollId.end(); it++)
-    {
-        pos = GetPlayerGroupSlot(guid);
-        assert(pos >= 0);
+    if(!_addMember(guid, name))
+        return false;
+    SendUpdate();
 
-        if (it->playerVote[pos] == GREED) it->totalGreed--;
-        if (it->playerVote[pos] == NEED) it->totalNeed--;
-        if (it->playerVote[pos] == PASS) it->totalPass--;
-        if (it->playerVote[pos] != NOT_VALID) it->totalPlayersRolling--;
-
-        for( uint32 j = pos + 1; j < m_count; j++ )
-            it->playerVote[j-1] = it->playerVote[j];
-
-        CountTheRoll(guid, it->itemGUID, m_count-1, 3);
-    }
+    return true;
 }
 
-void Group::BroadcastToGroup(WorldSession *session, std::string msg)
+uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 {
-    if (session && session->GetPlayer())
+    if(m_members.size() > 1)
     {
-        for (uint32 i = 0; i < m_count; i++)
+        bool leaderChanged = _removeMember(guid);
+
+        Player *player = objmgr.GetPlayer( guid );
+        if (player)
         {
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, session, CHAT_MSG_PARTY, LANG_UNIVERSAL, NULL, 0, msg.c_str());
-            Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
-            if (pl && pl->GetSession())
-                pl->GetSession()->SendPacket(&data);
+
+            if(method == 1)
+            {   
+                data.Initialize( SMSG_GROUP_UNINVITE );
+                player->GetSession()->SendPacket( &data );
+            }
+
+            data.Initialize(SMSG_GROUP_LIST);
+            data<<(uint16)0<<(uint32)0<<(uint64)0;
+            player->GetSession()->SendPacket(&data);
         }
+
+        if(leaderChanged)
+        {
+            WorldPacket data;
+            data.Initialize(SMSG_GROUP_SET_LEADER);
+            data << m_members[0].name;
+            BroadcastPacket(&data);  
+        }
+
+        SendUpdate();
     }
+    else
+        Disband(true);
+
+    return m_members.size();
+}
+
+void Group::ChangeLeader(const uint64 &guid)
+{    
+    _setLeader(guid);
+
+    WorldPacket data;
+    data.Initialize(SMSG_GROUP_SET_LEADER);
+    data << m_members[_getMemberIndex(guid)].name;
+    BroadcastPacket(&data);  
+    SendUpdate();
+}
+
+void Group::Disband(bool hideDestroy)
+{
+    Player *player;
+    WorldPacket data;
+    
+    for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
+    {
+        player = objmgr.GetPlayer(citr->guid);
+        if(!player || !player->GetSession())
+            continue;
+        
+        player->RemoveAreaAurasByOthers();
+        player->RemoveAreaAurasFromGroup();
+        player->groupInfo.group = NULL;
+
+        if(!hideDestroy)
+        {
+            data.Initialize(SMSG_GROUP_DESTROYED);
+            player->GetSession()->SendPacket(&data);
+        }
+
+        data.Initialize(SMSG_GROUP_LIST);
+        data<<(uint16)0<<(uint32)0<<(uint64)0;
+        player->GetSession()->SendPacket(&data);
+    }
+    RollId.clear();
+    m_members.clear();
+
+    for(vector<uint64>::iterator itr=m_invitees.begin(); itr!=m_invitees.end(); itr++)
+    {
+        Player *invitee = objmgr.GetPlayer((*itr));
+        if(invitee)
+            invitee->groupInfo.invite = NULL;
+    }
+    m_invitees.clear();
+
+
+    if(isRaidGroup())
+    {
+        sDatabase.PExecute("DELETE FROM `raidgroup` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+        sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    }
+
+    m_leaderGuid = 0;
+    m_leaderName = "";
 }
 
 void Group::SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntry, uint32 ItemInfo, uint32 CountDown, const Roll &r)
@@ -192,10 +217,14 @@ void Group::SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntr
     data << ItemInfo;                                       // ItemInfo this is related to special additionals to a item
     data << CountDown;                                      // the countdown time to choose "need" or "greed"
 
-    for (uint32 i = 0; i < m_count; i++)
+    map<uint64, RollVote>::const_iterator itr;
+    for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
     {
-        Player *p = objmgr.GetPlayer(m_members[i].guid);
-        if (r.playerVote[i] != NOT_VALID)
+        Player *p = objmgr.GetPlayer(itr->first);
+        if(!p || !p->GetSession())
+            continue;
+
+        if(itr->second != NOT_VALID)
             p->GetSession()->SendPacket( &data );
     }
 }
@@ -213,10 +242,14 @@ void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry,
     data << RollNumber;                                     // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
     data << RollType;                                       // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
 
-    for (uint32 i = 0; i < m_count; i++)
+    map<uint64, RollVote>::const_iterator itr;
+    for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
     {
-        Player *p = objmgr.GetPlayer(m_members[i].guid);
-        if (r.playerVote[i] != NOT_VALID)
+        Player *p = objmgr.GetPlayer(itr->first);
+        if(!p || !p->GetSession())
+            continue;
+
+        if(itr->second != NOT_VALID)
             p->GetSession()->SendPacket( &data );
     }
 }
@@ -234,10 +267,14 @@ void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEnt
     data << RollNumber;                                     // rollnumber realted to SMSG_LOOT_ROLL
     data << RollType;                                       // Rolltype related to SMSG_LOOT_ROLL
 
-    for (uint32 i = 0; i < m_count; i++)
+    map<uint64, RollVote>::const_iterator itr;
+    for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
     {
-        Player *p = objmgr.GetPlayer(m_members[i].guid);
-        if (r.playerVote[i] != NOT_VALID)
+        Player *p = objmgr.GetPlayer(itr->first);
+        if(!p || !p->GetSession())
+            continue;
+
+        if(itr->second != NOT_VALID)
             p->GetSession()->SendPacket( &data );
     }
 }
@@ -252,10 +289,14 @@ void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, uint32 ItemEn
     data << ItemInfo;                                       // ItemInfo
     data << uint32(0x3F3);                                  // unknown, I think it can be number of roll
 
-    for (uint32 i = 0; i < m_count; i++)
+    map<uint64, RollVote>::const_iterator itr;
+    for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
     {
-        Player *p = objmgr.GetPlayer(m_members[i].guid);
-        if (r.playerVote[i] != NOT_VALID)
+        Player *p = objmgr.GetPlayer(itr->first);
+        if(!p || !p->GetSession())
+            continue;
+
+        if(itr->second != NOT_VALID)
             p->GetSession()->SendPacket( &data );
     }
 }
@@ -268,7 +309,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
     uint8 itemSlot = 0;
     uint8 THRESHOLD = 1;
     Player *player = objmgr.GetPlayer(playerGUID);
-    Group *group = objmgr.GetGroupByLeader(player->GetGroupLeader());
+    Group *group = player->groupInfo.group;
 
     for (i=loot->items.begin(); i != loot->items.end(); i++)
     {
@@ -281,15 +322,17 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             r.itemid = i->itemid;
 
             //a vector is filled with only near party members
-            for (uint32 j = 0; j < m_count; j++)
+            for (int j = 0; j < m_members.size(); j++)
             {
-                if (objmgr.GetPlayer(m_members[j].guid)->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+                Player *member = objmgr.GetPlayer(m_members[j].guid);
+                if(!member || !member->GetSession())
+                    continue;
+
+                if (member->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                 {
-                    r.playerVote[j] = NOT_EMITED_YET;
+                    r.playerVote[m_members[j].guid] = NOT_EMITED_YET;
                     r.totalPlayersRolling++;
                 }
-                else
-                    r.playerVote[j] = NOT_VALID;
             }
 
             group->SendLootStartRoll(newitemGUID, r.totalPlayersRolling, i->itemid, 0, 60000, r);
@@ -312,7 +355,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
     uint8 itemSlot = 0;
     uint8 THRESHOLD = 1;
     Player *player = objmgr.GetPlayer(playerGUID);
-    Group *group = objmgr.GetGroupByLeader(player->GetGroupLeader());
+    Group *group = player->groupInfo.group;
 
     for (i=loot->items.begin(); i != loot->items.end(); i++)
     {
@@ -325,21 +368,20 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
             r.itemid = i->itemid;
 
             //a vector is filled with only near party members
-            for (uint32 j = 0; j < m_count; j++)
+            for (int j = 0; j < m_members.size(); j++)
             {
                 Player *playerToRoll = objmgr.GetPlayer(m_members[j].guid);
+                if(!playerToRoll || !playerToRoll->GetSession())
+                    continue;
+
                 if (playerToRoll->CanUseItem(item))
                 {
                     if (playerToRoll->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     {
-                        r.playerVote[j] = NOT_EMITED_YET;
+                        r.playerVote[m_members[j].guid] = NOT_EMITED_YET;
                         r.totalPlayersRolling++;
                     }
-                    else
-                        r.playerVote[j] = NOT_VALID;
                 }
-                else
-                    r.playerVote[j] = NOT_VALID;
             }
 
             if (r.totalPlayersRolling > 0)
@@ -366,38 +408,35 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
     {
         if (i->itemGUID == Guid)
         {
+            map<uint64, RollVote>::iterator itr2 = i->playerVote.find(playerGUID);
             // this condition means that player joins to the party after roll begins
-            if (GetPlayerGroupSlot(playerGUID) >= i->totalPlayersRolling)
+            if (itr2 == i->playerVote.end())
                 return;
 
             if (i->loot)
                 if (i->loot->items.size() == 0)
                     return;
 
-            int8 pos = GetPlayerGroupSlot(playerGUID);
-            if (pos == -1 || pos >= MAXGROUPSIZE)           //error pos
-                return;
-
             switch (Choise)
             {
                 case 0:                                     //Player choose pass
                 {
                     SendLootRoll(0, playerGUID, i->itemid, 0, 128, 0, *i);
-                    i->playerVote[pos] = PASS;
                     i->totalPass++;
+                    itr2->second = PASS;
                 }
                 break;
                 case 1:                                     //player choose Need
                 {
                     SendLootRoll(0, playerGUID, i->itemid, 0, 1, 0, *i);
                     i->totalNeed++;
-                    i->playerVote[pos] = NEED;
+                    itr2->second = NEED;
                 }
                 break;
                 case 2:                                     //player choose Greed
                 {
                     i->totalGreed++;
-                    i->playerVote[pos] = GREED;
+                    itr2->second = GREED;
                 }
                 break;
             }
@@ -410,61 +449,27 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                 if (i->totalNeed > 0)
                 {
                     uint8 maxresul = 0;
-                    uint8 maxindex = 0;
+                    uint8 maxguid  = 0;
                     Player *player;
 
-                    for (uint8 j = 0; j < m_count; j++)
+                    map<uint64, RollVote>::iterator itr2;
+                    for (itr2=i->playerVote.begin(); itr2!=i->playerVote.end(); itr2++)
                     {
-                        if (i->playerVote[j] != NEED)
+                        if (itr2->second != NEED)
                             continue;
+
                         uint8 randomN = rand() % 100;
-                        SendLootRoll(0, m_members[j].guid, i->itemid, 0, randomN, 1, *i);
+                        SendLootRoll(0, itr2->first, i->itemid, 0, randomN, 1, *i);
                         if (maxresul < randomN)
                         {
-                            maxindex = j;
+                            maxguid  = itr2->first;
                             maxresul = randomN;
                         }
                     }
-                    SendLootRollWon(0, m_members[maxindex].guid, i->itemid, 0, maxresul, 1, *i);
-                    player = objmgr.GetPlayer(m_members[maxindex].guid);
-                    uint16 dest;
-                    LootItem *item = &(i->loot->items[i->itemSlot]);
-                    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, i->itemid, item->count, false );
-                    if ( msg == EQUIP_ERR_OK )
+                    SendLootRollWon(0, maxguid, i->itemid, 0, maxresul, 1, *i);
+                    player = objmgr.GetPlayer(maxguid);
+                    if(player && player->GetSession())
                     {
-                        item->is_looted = true;
-                        i->loot->NotifyItemRemoved(i->itemSlot);
-                        player->StoreNewItem( dest, i->itemid, item->count, true, true);
-                    }
-                    else
-                    {
-                        item->is_blocked = false;
-                        player->SendEquipError( msg, NULL, NULL );
-                    }
-                }
-                else
-                {
-                    if (i->totalGreed > 0)
-                    {
-                        uint8 maxresul = 0;
-                        uint8 maxindex = 0;
-                        Player *player;
-
-                        for (uint8 j = 0; j < m_count; j++)
-                        {
-                            if (i->playerVote[j] != GREED)
-                                continue;
-                            uint8 randomN = rand() % 100;
-                            SendLootRoll(0, m_members[j].guid, i->itemid, 0, randomN, 2, *i);
-                            if (maxresul < randomN)
-                            {
-                                maxindex = j;
-                                maxresul = randomN;
-                            }
-                        }
-                        SendLootRollWon(0, m_members[maxindex].guid, i->itemid, 0, maxresul, 2, *i);
-                        player = objmgr.GetPlayer(m_members[maxindex].guid);
-
                         uint16 dest;
                         LootItem *item = &(i->loot->items[i->itemSlot]);
                         uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, i->itemid, item->count, false );
@@ -478,6 +483,50 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                         {
                             item->is_blocked = false;
                             player->SendEquipError( msg, NULL, NULL );
+                        }
+                    }
+                }
+                else
+                {
+                    if (i->totalGreed > 0)
+                    {
+                        uint8 maxresul = 0;
+                        uint8 maxguid = 0;
+                        Player *player;
+
+                        map<uint64, RollVote>::iterator itr2;
+                        for (itr2=i->playerVote.begin(); itr2!=i->playerVote.end(); itr2++)
+                        {
+                            if (itr2->second != GREED)
+                                continue;
+
+                            uint8 randomN = rand() % 100;
+                            SendLootRoll(0, itr2->first, i->itemid, 0, randomN, 1, *i);
+                            if (maxresul < randomN)
+                            {
+                                maxguid  = itr2->first;
+                                maxresul = randomN;
+                            }
+                        }
+                        SendLootRollWon(0, maxguid, i->itemid, 0, maxresul, 2, *i);
+                        player = objmgr.GetPlayer(maxguid);
+
+                        if(player && player->GetSession())
+                        {
+                            uint16 dest;
+                            LootItem *item = &(i->loot->items[i->itemSlot]);
+                            uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, i->itemid, item->count, false );
+                            if ( msg == EQUIP_ERR_OK )
+                            {
+                                item->is_looted = true;
+                                i->loot->NotifyItemRemoved(i->itemSlot);
+                                player->StoreNewItem( dest, i->itemid, item->count, true, true);
+                            }
+                            else
+                            {
+                                item->is_blocked = false;
+                                player->SendEquipError( msg, NULL, NULL );
+                            }
                         }
                     }
                     else
@@ -495,22 +544,310 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
     }
 }
 
-int8 Group::GetPlayerGroupSlot(uint64 Guid)
+void Group::ConvertToRaid()
 {
-    for (uint32 i = 0; i < m_count; i++)
+    _convertToRaid();
+    SendUpdate();
+}
+
+void Group::SetTargetIcon(uint8 id, uint64 guid)
+{
+    if(id >= TARGETICONCOUNT)
+        return;
+
+    m_targetIcons[id] = guid;
+
+    WorldPacket data;
+    data.Initialize(MSG_RAID_ICON_TARGET);
+    data << (uint8)0;                                  
+    data << id;                                         
+    data << guid;                                      
+    BroadcastPacket(&data);
+}
+
+bool Group::IsMember(uint64 guid)
+{
+    Player *player = objmgr.GetPlayer(guid);
+
+    if(player)
+        return (player->groupInfo.group == this);
+    else
+    {
+        if(!isRaidGroup())
+            return false;
+
+        QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `raidgroup_member` WHERE `memberGuid`='%u' AND `leaderGuid`='%u'", GUID_LOPART(guid), GUID_LOPART(GetLeaderGUID()));
+        if(result)
+        {
+            delete result;
+            return true;
+        }
+        else
+            return false;
+    }
+}
+
+void Group::SendInit(WorldSession *session)
+{
+    if(!session)
+        return;
+
+    WorldPacket data;
+    int         myIndex;
+    uint8       myFlag;
+    uint64      guid;
+
+    guid = session->GetPlayer()->GetGUID();
+    myIndex = _getMemberIndex(guid);
+    myFlag  = m_members[myIndex].group | (m_members[myIndex].assistant?0x80:0);
+    for(int i=1; i<=m_members.size(); i++)
+    {
+        data.Initialize(SMSG_GROUP_LIST);
+        data << (uint8)m_groupType;
+        data << (uint8)myFlag;
+
+        int count = 0;
+        data << uint32(m_members.size()-1);
+        for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
+        {
+            if(citr->guid == guid)
+                continue;
+
+            data << ((count<i) ? citr->name : "");
+            data << citr->guid;
+            data << (uint8)(objmgr.GetPlayer(citr->guid)?1:0);            
+            data << (uint8)(citr->group | (citr->assistant?0x80:0));    
+            count++;
+
+            if(count >= i)
+                break;
+        }
+
+        data << m_leaderGuid;
+        data << (uint8)m_lootMethod;
+        data << m_looterGuid;
+        data << (uint16)2;
+
+        session->SendPacket( &data );
+    }
+}
+
+void Group::SendTargetIconList(WorldSession *session)
+{
+    if(!session)
+        return;
+
+    WorldPacket data;
+    data.Initialize(MSG_RAID_ICON_TARGET);
+    data << (uint8)1;     
+
+    for(int i=0; i<TARGETICONCOUNT; i++)
+    {
+        if(m_targetIcons[i] == 0)
+            continue;
+
+        data << (uint8)i;
+        data << m_targetIcons[i];
+    }       
+
+    session->SendPacket(&data);
+}
+
+void Group::SendUpdate()
+{
+    Player *player;
+    WorldPacket data;
+
+    for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
+    {
+        player = objmgr.GetPlayer(citr->guid);
+        if(!player || !player->GetSession())
+            continue;
+
+        data.Initialize(SMSG_GROUP_LIST);
+        data << (uint8)m_groupType;
+        data << (uint8)(citr->group | (citr->assistant?0x80:0));        // own flags (groupid | (assistant?0x80:0))
+
+        data << uint32(m_members.size()-1);
+        for(vector<MemberSlot>::const_iterator citr2=m_members.begin(); citr2!=m_members.end(); citr2++)
+        {
+            if(citr == citr2)
+                continue;
+
+            data << citr2->name;
+            data << citr2->guid;
+            data << (uint8)(objmgr.GetPlayer(citr2->guid) ? 1 : 0);         // online-state
+            data << (uint8)(citr2->group | (citr2->assistant?0x80:0));      // member flags
+        }
+
+        data << m_leaderGuid;
+        data << (uint8)m_lootMethod;
+        data << m_looterGuid;
+        data << (uint16)2;
+
+        player->GetSession()->SendPacket( &data );
+    }
+}
+
+void Group::BroadcastPacket(WorldPacket *packet, int group, uint64 ignore)
+{
+    for (uint32 i = 0; i < m_members.size(); i++)
+    {
+        if(ignore != 0 && m_members[i].guid == ignore)
+            continue;
+
+        Player *pl = objmgr.GetPlayer(m_members[i].guid);
+        if (pl && pl->GetSession() && (group==-1 || m_members[i].group==group))
+            pl->GetSession()->SendPacket(packet);
+    }
+}
+
+
+bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant)
+{
+    // get first not-full group
+    uint8 groupid = 0;
+    vector<uint8> temp(MAXRAIDSIZE/MAXGROUPSIZE);
+    for(int i=0; i<m_members.size(); i++)
+    {
+        temp[m_members[i].group]++;
+        if(temp[groupid] >= MAXGROUPSIZE)
+            groupid++;
+    }
+
+    return _addMember(guid, name, isAssistant, groupid);
+}
+
+bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant, uint8 group)
+{
+    if(IsFull())
+        return false;
+
+    MemberSlot member;
+    member.guid      = guid;
+    member.name      = name;
+    member.group     = group;
+    member.assistant = isAssistant;
+    m_members.push_back(member);
+
+    Player *player = objmgr.GetPlayer(guid);
+    if(player)
+    {
+        player->groupInfo.invite = NULL;     
+        player->groupInfo.group = this;
+    }
+
+    if(!isRaidGroup())  // reset targetIcons for non-raid-groups
+    {
+        for(int i=0; i<TARGETICONCOUNT; i++)
+            m_targetIcons[i] = 0;
+    }
+    else                // insert into raid table..
+        sDatabase.PExecute("INSERT INTO `raidgroup_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(member.guid), ((member.assistant==1)?1:0), member.group);
+
+    return true;
+}
+
+bool Group::_removeMember(const uint64 &guid)
+{
+    Player *player = objmgr.GetPlayer(guid);
+    if (player)
+    {
+        player->RemoveAreaAurasByOthers();
+        player->RemoveAreaAurasFromGroup();
+        player->groupInfo.group = NULL;
+    }
+
+    _removeRolls(guid);
+    m_members.erase(m_members.begin()+_getMemberIndex(guid));
+    if(isRaidGroup())
+        sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `memberGuid`='%u'", GUID_LOPART(guid));
+
+    if(m_leaderGuid == guid) // leader was removed
+    {
+        if(m_members.size() > 0)
+            _setLeader(m_members[0].guid);
+        return true;
+    }
+
+    return false;
+}
+
+void Group::_setLeader(const uint64 &guid)
+{
+    int8 id = _getMemberIndex(guid);
+    if(id < 0)
+        return;
+
+    if(isRaidGroup())
+    {            
+        sDatabase.PExecute("UPDATE `raidgroup` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
+        sDatabase.PExecute("UPDATE `raidgroup_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
+    }
+    m_leaderGuid = m_members[id].guid;
+    m_leaderName = m_members[id].name;
+}
+
+void Group::_removeRolls(const uint64 &guid)
+{
+    vector<Roll>::iterator it;
+    for (it = RollId.begin(); it < RollId.end(); it++)
+    {
+        map<uint64, RollVote>::iterator itr2 = it->playerVote.find(guid);
+        if(itr2 == it->playerVote.end())
+            continue;
+
+        if (itr2->second == GREED) it->totalGreed--;
+        if (itr2->second == NEED) it->totalNeed--;
+        if (itr2->second == PASS) it->totalPass--;
+        if (itr2->second != NOT_VALID) it->totalPlayersRolling--;
+
+        it->playerVote.erase(itr2);
+
+        CountTheRoll(guid, it->itemGUID, m_members.size()-1, 3);
+    }
+}
+
+void Group::_convertToRaid()
+{
+    m_groupType = GROUPTYPE_RAID;
+
+    sDatabase.PExecute("DELETE FROM `raidgroup` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("INSERT INTO `raidgroup`(`leaderGuid`,`lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), m_lootMethod, GUID_LOPART(m_looterGuid), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
+
+    for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
+        sDatabase.PExecute("INSERT INTO `raidgroup_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(citr->guid), (citr->assistant==1)?1:0, citr->group);
+}
+
+bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
+{
+    uint8 i = _getMemberIndex(guid);
+    if(i < 0)
+        return false;
+
+    m_members[i].group = group; 
+    sDatabase.PExecute("UPDATE `raidgroup_member` SET `subgroup`='%u' WHERE `memberGuid`='%u'", group, GUID_LOPART(guid));
+    return true;
+}
+
+bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
+{
+    uint8 i = _getMemberIndex(guid);
+    if(i < 0)
+        return false;
+
+    m_members[i].assistant = state; 
+    sDatabase.PExecute("UPDATE `raidgroup_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));
+    return true;
+}
+
+int8 Group::_getMemberIndex(uint64 Guid)
+{
+    for (int i=0; i<m_members.size(); i++)
     {
         if (m_members[i].guid == Guid)
             return i;
     }
     return -1;
-}
-
-void Group::BroadcastPacket(WorldPacket *packet)
-{
-    for (uint32 i = 0; i < m_count; i++)
-    {
-        Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
-        if (pl && pl->GetSession())
-            pl->GetSession()->SendPacket(packet);
-    }
 }

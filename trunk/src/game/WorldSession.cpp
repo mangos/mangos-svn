@@ -134,24 +134,6 @@ void WorldSession::LogoutPlayer(bool Save)
         sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `guid` = '%u'", _player->GetGUIDLow());
         loginDatabase.PExecute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u'", GetAccountId());
 
-        if (_player->IsInGroup())
-        {
-            Group *group;
-            group = objmgr.GetGroupByLeader(_player->GetGroupLeader());
-            if(group!=NULL)
-            {
-                if (group->RemoveMember(_player->GetGUID()) > 1)
-                    group->SendUpdate();
-                else
-                {
-                    group->Disband();
-                    objmgr.RemoveGroup(group);
-
-                    delete group;
-                }
-            }
-            _player->UnSetInGroup();
-        }
         Guild *guild;
         guild = objmgr.GetGuildById(_player->GetGuildId());
         if(guild)
@@ -194,8 +176,40 @@ void WorldSession::LogoutPlayer(bool Save)
         data<<_player->GetGUID();
         _player->BroadcastPacketToFriendListers(&data);
 
+        Group *group = NULL;
+        if(_player->groupInfo.invite)
+        {
+            group = _player->groupInfo.invite;
+
+            group->RemoveInvite(_player->GetGUID());
+            if(group->GetMembersCount() <= 1) // group has just 1 member => disband
+            {        
+                group->Disband(true);
+                objmgr.RemoveGroup(group);
+                delete group;
+            }
+            group = NULL;
+        }
+        else
+        {
+            group = _player->groupInfo.group;
+            if(group && !group->isRaidGroup())
+            {
+                if (group->RemoveMember(_player->GetGUID(), 0) <= 1)
+                {          
+                    group->Disband();
+                    objmgr.RemoveGroup(group);
+                    delete group;
+                }
+                group = NULL;
+            }
+        }
         delete _player;
         _player = 0;
+
+        // send group update after player has been deleted..
+        if(group)    
+            group->SendUpdate();
 
         data.Initialize( SMSG_LOGOUT_COMPLETE );
         SendPacket( &data );
@@ -316,11 +330,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_MOUNTSPECIAL_ANIM,           STATUS_LOGGEDIN, &WorldSession::HandleMountSpecialAnimOpcode        },
 
         { CMSG_GROUP_INVITE,                STATUS_LOGGEDIN, &WorldSession::HandleGroupInviteOpcode             },
-        { CMSG_GROUP_CANCEL,                STATUS_LOGGEDIN, &WorldSession::HandleGroupCancelOpcode             },
+        //{ CMSG_GROUP_CANCEL,                STATUS_LOGGEDIN, &WorldSession::HandleGroupCancelOpcode             },
         { CMSG_GROUP_ACCEPT,                STATUS_LOGGEDIN, &WorldSession::HandleGroupAcceptOpcode             },
         { CMSG_GROUP_DECLINE,               STATUS_LOGGEDIN, &WorldSession::HandleGroupDeclineOpcode            },
-        { CMSG_GROUP_UNINVITE,              STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteOpcode           },
-        { CMSG_GROUP_UNINVITE_GUID,         STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteGuildOpcode      },
+        { CMSG_GROUP_UNINVITE,              STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteNameOpcode       },
+        { CMSG_GROUP_UNINVITE_GUID,         STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteGuidOpcode       },
         { CMSG_GROUP_SET_LEADER,            STATUS_LOGGEDIN, &WorldSession::HandleGroupSetLeaderOpcode          },
         { CMSG_GROUP_DISBAND,               STATUS_LOGGEDIN, &WorldSession::HandleGroupDisbandOpcode            },
         { CMSG_LOOT_METHOD,                 STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              },
@@ -328,6 +342,10 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_REQUEST_PARTY_MEMBER_STATS,  STATUS_LOGGEDIN, &WorldSession::HandleRequestPartyMemberStatsOpcode },
         { CMSG_REQUEST_RAID_INFO,           STATUS_LOGGEDIN, &WorldSession::HandleRequestRaidInfoOpcode         },
         { MSG_RAID_ICON_TARGET,             STATUS_LOGGEDIN, &WorldSession::HandleRaidIconTargetOpcode          },
+        { CMSG_GROUP_RAID_CONVERT,          STATUS_LOGGEDIN, &WorldSession::HandleRaidConvertOpcode             },
+        { MSG_RAID_READY_CHECK,             STATUS_LOGGEDIN, &WorldSession::HandleRaidReadyCheckOpcode          },
+        { CMSG_GROUP_CHANGE_SUB_GROUP,      STATUS_LOGGEDIN, &WorldSession::HandleGroupChangeSubGroupOpcode     },
+        { CMSG_GROUP_ASSISTANT,      STATUS_LOGGEDIN, &WorldSession::HandleAssistantOpcode    },
 
         { CMSG_PETITION_SHOWLIST,           STATUS_LOGGEDIN, &WorldSession::HandlePetitionShowListOpcode        },
         { CMSG_PETITION_BUY,                STATUS_LOGGEDIN, &WorldSession::HandlePetitionBuyOpcode             },

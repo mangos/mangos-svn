@@ -86,12 +86,13 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            if (GetPlayer()->IsInGroup())
-            {
-                Group *group = objmgr.GetGroupByLeader(GetPlayer()->GetGroupLeader());
-                if (group)
-                    group->BroadcastToGroup(this, msg);
-            }
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group)
+                return;
+
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str());   
+            group->BroadcastPacket(&data, group->GetMemberGroup(GetPlayer()->GetGUID()));
         }
         break;
 
@@ -253,6 +254,54 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 if(GetPlayer()->isDND() && GetPlayer()->isAFK())
                     GetPlayer()->ToggleAFK();
             }
+        } break;
+
+        case CHAT_MSG_RAID:
+        {
+            std::string msg="";
+            recv_data >> msg;
+
+            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+                break;
+
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group || !group->isRaidGroup())
+                return;
+
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID, lang, "", 0, msg.c_str());
+            group->BroadcastPacket(&data);
+        } break;
+
+        case CHAT_MSG_RAID_LEADER:
+        {
+            std::string msg="";
+            recv_data >> msg;
+
+            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+                break;
+
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
+                return;
+
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str());
+            group->BroadcastPacket(&data);
+        } break;
+
+        case CHAT_MSG_RAID_WARN:
+        {
+            std::string msg="";
+            recv_data >> msg;
+
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
+                return;
+
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_WARN, lang, "", 0, msg.c_str());
+            group->BroadcastPacket(&data);
         } break;
 
         default:

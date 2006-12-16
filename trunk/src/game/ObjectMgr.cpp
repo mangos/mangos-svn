@@ -998,6 +998,44 @@ void ObjectMgr::LoadGuilds()
     sLog.outString( ">> Loaded %u guild definitions", count );
 }
 
+void ObjectMgr::LoadRaidGroups()
+{
+    Group *group;
+    uint32 count = 0;
+
+    QueryResult *result = sDatabase.Query( "SELECT `leaderGuid` FROM `raidgroup`" );
+
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u raidgroup definitions", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        bar.step();
+        count++;
+
+        group = new Group;
+        group->LoadRaidGroupFromDB((*result)[0].GetUInt64());
+        AddGroup(group);
+
+    }while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u raidgroup definitions", count );
+}
+
 void ObjectMgr::LoadQuests()
 {
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `quest_template`");

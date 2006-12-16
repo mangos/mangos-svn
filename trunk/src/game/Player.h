@@ -27,6 +27,7 @@
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
 #include "QuestDef.h"
+#include "Group.h"
 #include "Bag.h"
 #include "Weather.h"
 #include "WorldSession.h"
@@ -136,6 +137,12 @@ struct PvPInfo
 
     bool inHostileArea;
     time_t endTimer;
+};
+
+struct GroupInfo
+{
+    Group *group;
+    Group *invite;
 };
 
 struct DuelInfo
@@ -844,18 +851,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         void removeAction(uint8 button);
         void SendInitialActions();
 
-        void SetInvited() { m_isInvited = true; }
-        void SetInGroup() { m_isInGroup = true; }
-        void SetLeader(const uint64 &guid) { m_groupLeader = guid; }
 
-        int  IsInGroup() { return m_isInGroup; }
+        GroupInfo groupInfo;
+
         // FIX ME: add check for raid case (when implemented)
-        int  IsInGroupOrRaidWith(Player* p) { return IsInGroup() && GetGroupLeader()== p->GetGroupLeader(); }
-        int  IsInvited() { return m_isInvited; }
-        const uint64& GetGroupLeader() const { return m_groupLeader; }
-
-        void UnSetInvited() { m_isInvited = false; }
-        void UnSetInGroup() { m_isInGroup = false; m_groupLeader = 0; }
+        int  IsInGroupOrRaidWith(Player* p) { return (groupInfo.group != NULL && groupInfo.group == p->groupInfo.group); }
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); Player::SetUInt32ValueInDB(PLAYER_GUILDID, GuildId, this->GetGUID()); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, rankId, this->GetGUID()); }
@@ -1201,10 +1201,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         typedef std::map<uint32, struct quest_status> StatusMap;
         StatusMap mQuestStatus;
-
-        uint64 m_groupLeader;
-        bool m_isInGroup;
-        bool m_isInvited;
 
         uint32 m_GuildIdInvited;
 

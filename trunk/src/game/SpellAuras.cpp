@@ -432,24 +432,23 @@ void AreaAura::Update(uint32 diff)
     {
         Unit* caster = m_target;
 
-        uint64 leaderGuid = 0;
+        Group *pGroup = NULL;
         if (caster->GetTypeId() == TYPEID_PLAYER)
-            leaderGuid = ((Player*)caster)->GetGroupLeader();
+            pGroup = ((Player*)caster)->groupInfo.group;
         else if(((Creature*)caster)->isTotem())
         {
             Unit *owner = ((Totem*)caster)->GetOwner();
             if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                leaderGuid = ((Player*)owner)->GetGroupLeader();
+                pGroup = ((Player*)owner)->groupInfo.group;
         }
 
-        Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
         float radius =  GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
         if(pGroup)
         {
             for(uint32 p=0;p<pGroup->GetMembersCount();p++)
             {
-                Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive())
+                Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || pGroup->SameSubGroup(m_caster_guid, Target->GetGUID()))
                     continue;
                 Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
 

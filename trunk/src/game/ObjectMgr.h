@@ -222,6 +222,7 @@ class ObjectMgr
         AreaTrigger * GetAreaTrigger(uint32 trigger);
 
         void LoadGuilds();
+        void LoadRaidGroups();
         void LoadQuests();
         void LoadScripts();
         void LoadCreatureTemplates();
