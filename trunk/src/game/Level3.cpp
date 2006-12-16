@@ -36,10 +36,6 @@
 
 bool ChatHandler::HandleReloadCommand(const char* args)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_GROUP_DESTROYED);
-    m_session->SendPacket(&data);
-    return true;
     char* updatefield = strtok((char*)args, " ");
 
     char* value = strtok(NULL, " ");
