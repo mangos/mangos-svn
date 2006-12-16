@@ -3239,7 +3239,7 @@ void Player::ModifySkillBonus(uint32 skillid,int32 val)
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
         if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skillid)
     {
-        SetUInt32Value(PLAYER_SKILL(i)+2,uint32(int32(GetUInt32Value(PLAYER_SKILL(i)+2))+val);
+        SetUInt32Value(PLAYER_SKILL(i)+2,uint32(int32(GetUInt32Value(PLAYER_SKILL(i)+2))+val));
         return;
     }
 }
