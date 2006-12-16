@@ -40,7 +40,7 @@ enum GroupType
 
 /** request member stats checken **/
 /** todo: uninvite people that not accepted invite **/
-class Group
+class MANGOS_DLL_SPEC Group
 {
     protected:
         struct MemberSlot
@@ -103,17 +103,17 @@ class Group
         bool IsLeader(uint64 guid) { return (GetLeaderGUID() == guid); }
         bool IsAssistant(uint64 guid)
         {
-            uint8 id = _getMemberIndex(guid);
-            if(id<=0)
+            int8 id = _getMemberIndex(guid);
+            if(id<0)
                 return false;
 
             return m_members[id].assistant;
         }
         bool SameSubGroup(uint64 guid1, uint64 guid2)
         {
-            uint8 id1 = _getMemberIndex(guid1);
-            uint8 id2 = _getMemberIndex(guid2);
-            if(id1<=0 || id2<=0)
+            int8 id1 = _getMemberIndex(guid1);
+            int8 id2 = _getMemberIndex(guid2);
+            if(id1<0 || id2<0)
                 return false;
 
             return (m_members[id1].group==m_members[id2].group);
@@ -123,15 +123,19 @@ class Group
         uint64 GetMemberGUID(uint8 id) { if(id>=m_members.size()) return 0; else return m_members[id].guid; }
         uint8  GetMemberGroup(uint64 guid) 
         { 
-            uint8 id = _getMemberIndex(guid);
-            if(id<=0) 
+            int8 id = _getMemberIndex(guid);
+            if(id<0) 
                 return (MAXRAIDSIZE/MAXGROUPSIZE+1); 
 
             return m_members[id].group; 
         }        
 
         // some additional raid methods
-        void ConvertToRaid();
+        void ConvertToRaid()
+        {
+            _convertToRaid();
+            SendUpdate();
+        }
         void ChangeMembersGroup(const uint64 &guid, const uint8 &group)
         { 
             if(!isRaidGroup())

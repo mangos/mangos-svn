@@ -3505,18 +3505,6 @@ void Player::SetDontMove(bool dontMove)
     m_dontMove = dontMove;
 }
 
-bool Player::IsGroupMember(Player *plyr)
-{
-    if(!plyr->groupInfo.group)
-        return false;
-    Group *grp = plyr->groupInfo.group;
-    for(uint32 i = 0; i < grp->GetMembersCount(); i++ )
-        if (grp->GetMemberGUID(i) == plyr->GetGUID())
-            return true;
- 
-    return false;
-}
-
 bool Player::SetPosition(float x, float y, float z, float orientation)
 {
     Map *m = MapManager::Instance().GetMap(m_mapId);

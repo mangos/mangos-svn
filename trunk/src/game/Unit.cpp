@@ -3441,7 +3441,7 @@ bool Unit::isVisibleFor(Unit* u)
         // player autodetect other player with stealth only if he in same group or raid
         if(GetTypeId()==TYPEID_PLAYER && u->GetTypeId()==TYPEID_PLAYER)
         {
-            if(((Player*)this)->IsInGroupOrRaidWith(((Player*)u)))
+            if(((Player*)this)->IsInGroupWith(((Player*)u)))
                 return true;
 
             // else apply same rules as for hostile case (detecting check)

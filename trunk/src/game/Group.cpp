@@ -544,12 +544,6 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
     }
 }
 
-void Group::ConvertToRaid()
-{
-    _convertToRaid();
-    SendUpdate();
-}
-
 void Group::SetTargetIcon(uint8 id, uint64 guid)
 {
     if(id >= TARGETICONCOUNT)
@@ -593,7 +587,7 @@ void Group::SendInit(WorldSession *session)
         return;
 
     WorldPacket data;
-    int         myIndex;
+    int8        myIndex;
     uint8       myFlag;
     uint64      guid;
 
@@ -822,7 +816,7 @@ void Group::_convertToRaid()
 
 bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
 {
-    uint8 i = _getMemberIndex(guid);
+    int8 i = _getMemberIndex(guid);
     if(i < 0)
         return false;
 
@@ -833,7 +827,7 @@ bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
 
 bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
 {
-    uint8 i = _getMemberIndex(guid);
+    int8 i = _getMemberIndex(guid);
     if(i < 0)
         return false;
 
