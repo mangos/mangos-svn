@@ -827,6 +827,12 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_cinematic = cine;
         }
 
+        inline std::list<struct actions> getActionList() { return m_actions; };
+        void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
+        void removeAction(uint8 button);
+        void SendInitialActions();
+
+
         PvPInfo pvpInfo;
         void UpdatePvP(bool state, bool ovrride=false)
         {
@@ -846,16 +852,15 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateZone();
         void UpdatePvPFlag(time_t currTime);
 
-        inline std::list<struct actions> getActionList() { return m_actions; };
-        void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
-        void removeAction(uint8 button);
-        void SendInitialActions();
+        /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
+        DuelInfo *duel;
+        void UpdateDuelFlag(time_t currTime);
+        void CheckDuelDistance(time_t currTime);
+        void DuelComplete(uint8 type);
 
 
         GroupInfo groupInfo;
-
-        // FIX ME: add check for raid case (when implemented)
-        int  IsInGroupOrRaidWith(Player* p) { return (groupInfo.group != NULL && groupInfo.group == p->groupInfo.group); }
+        int IsInGroupWith(Player* p) { return (groupInfo.group != NULL && groupInfo.group == p->groupInfo.group && groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID())); }
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); Player::SetUInt32ValueInDB(PLAYER_GUILDID, GuildId, this->GetGUID()); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, rankId, this->GetGUID()); }
@@ -867,13 +872,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid);
 
-        /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
-        void UpdateDuelFlag(time_t currTime);
-        void CheckDuelDistance(time_t currTime);
-        void DuelComplete(uint8 type);
-        DuelInfo *duel;
-
-        bool IsGroupMember(Player *plyr);
 
         bool UpdateSkill(uint32 skill_id);
 
