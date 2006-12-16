@@ -476,9 +476,11 @@ void Item::SaveToDB()
         } break;
         case ITEM_REMOVED:
         {
+            sDatabase.BeginTransaction();
             if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 2282 )
                 sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
             sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
+            sDatabase.CommitTransaction();
             delete this;
             return;
         }

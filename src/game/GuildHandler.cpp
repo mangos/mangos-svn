@@ -115,9 +115,11 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     charter->SetState(ITEM_CHANGED, _player);
 
     sDatabase.escape_string(guildname);
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u' OR `charterguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
     sDatabase.PExecute("INSERT INTO `guild_charter` (`ownerguid`, `charterguid`, `guildname`) VALUES ('%u', '%u', '%s')",
         _player->GetGUIDLow(), charter->GetGUIDLow(), guildname.c_str());
+    sDatabase.CommitTransaction();
 }
 
 void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
@@ -533,8 +535,10 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
     delete result;
 
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
     sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    sDatabase.CommitTransaction();
 
     // Guild created
     sLog.outDebug("TURN IN PETITION GUID %u", GUID_LOPART(petitionguid));

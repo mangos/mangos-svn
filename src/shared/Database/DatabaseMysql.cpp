@@ -19,6 +19,7 @@
 #include "DatabaseEnv.h"
 #include "Util.h"
 #include "Policies/SingletonImp.h"
+#include "../src/zthread/ThreadImpl.h"
 
 using namespace std;
 
@@ -62,6 +63,7 @@ DatabaseMysql::~DatabaseMysql()
 
 bool DatabaseMysql::Initialize(const char *infoString)
 {
+    tranThread = NULL;
     MYSQL *mysqlInit;
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
@@ -137,7 +139,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
     {
         // guarded block for thread-safe mySQL request
-        ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
+        ZThread::Guard<ZThread::FastMutex> query_connection_guard((ZThread::ThreadImpl::current()==tranThread?tranMutex:mMutex));
 
         if(mysql_query(mMysql, sql))
         {
@@ -180,7 +182,7 @@ bool DatabaseMysql::Execute(const char *sql)
 
     {
         // guarded block for thread-safe mySQL request
-        ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
+        ZThread::Guard<ZThread::FastMutex> query_connection_guard((ZThread::ThreadImpl::current()==tranThread?tranMutex:mMutex));
 
         if(mysql_query(mMysql, sql))
         {
@@ -216,6 +218,62 @@ bool DatabaseMysql::PExecute(const char * format,...)
     }
 
     return Execute(szQuery);
+}
+
+bool DatabaseMysql::_TransactionCmd(const char *sql)
+{
+    if (mysql_query(mMysql, sql))
+    {
+        sLog.outError("SQL: %s", sql);
+        sLog.outError("SQL ERROR: %s", mysql_error(mMysql));
+        return false;
+    } 
+    else 
+    {
+        DEBUG_LOG("SQL: %s", sql);
+    }
+    return true;
+}
+
+bool DatabaseMysql::BeginTransaction()
+{
+    if (!mMysql)
+        return false;
+    if (tranThread==ZThread::ThreadImpl::current())
+        return false;               // huh? this thread already started transaction
+    mMutex.acquire();
+    if (!_TransactionCmd("BEGIN"))
+    {
+        mMutex.release();           // can't start transaction
+        return false;
+    }
+    // transaction started
+    tranThread = ZThread::ThreadImpl::current();    // owner of this transaction
+    return true;
+}
+
+bool DatabaseMysql::CommitTransaction()
+{
+    if (!mMysql)
+        return false;
+    if (tranThread!=ZThread::ThreadImpl::current())
+        return false;
+    bool _res = _TransactionCmd("COMMIT");
+    tranThread = NULL;
+    mMutex.release();
+    return _res;
+}
+
+bool DatabaseMysql::RollbackTransaction()
+{
+    if (!mMysql)
+        return false;
+    if (tranThread!=ZThread::ThreadImpl::current())
+        return false;
+    bool _res = _TransactionCmd("ROLLBACK");
+    tranThread = NULL;
+    mMutex.release();
+    return _res;
 }
 
 unsigned long DatabaseMysql::escape_string(char *to, const char *from, unsigned long length)

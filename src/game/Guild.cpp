@@ -82,12 +82,14 @@ void Guild::create(uint64 lGuid, std::string gname)
     sDatabase.escape_string(dbGINFO);
     sDatabase.escape_string(dbMOTD);
 
+    sDatabase.BeginTransaction();
     // sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid`='%u'", Id); - MAX(`guildid`)+1 not exist
     sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid`='%u'", Id);
     sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guildid`='%u'", Id);
     sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`info`,`MOTD`,`createdate`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) "
         "VALUES('%u','%s','%u', '%s', '%s', NOW(),'%u','%u','%u','%u','%u')",
         Id, gname.c_str(), GUID_LOPART(leaderGuid), dbGINFO.c_str(), dbMOTD.c_str(), EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
+    sDatabase.CommitTransaction();
 
     rname = "Guild Master";
     CreateRank(rname,GR_RIGHT_ALL);
@@ -628,8 +630,10 @@ void Guild::Disband()
         this->DelMember(memberGuids[i], true);
     delete[] memberGuids;
 
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
     sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid` = '%u'",Id);
+    sDatabase.CommitTransaction();
     objmgr.RemoveGuild(this);
 }
 

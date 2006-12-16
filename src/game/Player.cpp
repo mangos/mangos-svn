@@ -2546,12 +2546,26 @@ void Player::DeleteFromDB()
     // remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(GetGUID());
 
+    for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
+    {
+        if(m_items[i] == NULL)
+            continue;
+        m_items[i]->DeleteFromDB();                         // Bag items delete also by virtual call Bag::DeleteFromDB
+    }
+
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN ( SELECT `item` FROM `character_inventory` WHERE `guid` = '%u' )",guid);
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u'",guid);
 
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN ( SELECT `item_guid` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0 )",guid);
@@ -2559,6 +2573,7 @@ void Player::DeleteFromDB()
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u'",guid);
+    sDatabase.CommitTransaction();
 
     //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
     QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
@@ -2570,20 +2585,6 @@ void Player::DeleteFromDB()
         delete resultCount;
         loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetSession()->GetAccountId(), realmID, charCount);
     }
-
-    for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
-    {
-        if(m_items[i] == NULL)
-            continue;
-        m_items[i]->DeleteFromDB();                         // Bag items delete also by virtual call Bag::DeleteFromDB
-    }
-
-    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u'",guid);
 }
 
 void Player::SetMovement(uint8 pType)
@@ -9849,6 +9850,8 @@ void Player::SaveToDB()
     if (inworld)
         RemoveFromWorld();
 
+    sDatabase.BeginTransaction();
+
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
@@ -9943,6 +9946,8 @@ void Player::SaveToDB()
     _SaveAuras();
     _SaveReputation();
     SavePet();
+
+    sDatabase.CommitTransaction();
 
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
@@ -10075,6 +10080,7 @@ void Player::_SaveMail()
         }
         else if (m->state == DELETED)
         {
+            sDatabase.BeginTransaction();
             if (m->item_guid)
                 sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
             if (m->itemPageId)
@@ -10082,6 +10088,7 @@ void Player::_SaveMail()
                 sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", m->itemPageId);
             }
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
+            sDatabase.CommitTransaction();
         }
     }
     //dealocate deleted mails...
@@ -10106,6 +10113,7 @@ void Player::_SaveMail()
 
 void Player::_SaveQuestStatus()
 {
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",GetGUIDLow());
 
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
@@ -10113,18 +10121,21 @@ void Player::_SaveQuestStatus()
         sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
             GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
     }
+    sDatabase.CommitTransaction();
 }
 
 void Player::_SaveReputation()
 {
     std::list<Factions>::iterator itr;
 
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
 
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
         sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
     }
+    sDatabase.CommitTransaction();
 }
 
 void Player::_SaveSpells()
@@ -10145,8 +10156,10 @@ void Player::_SaveSpells()
 
 void Player::_SaveTutorials()
 {
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
     sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+    sDatabase.CommitTransaction();
 }
 
 void Player::SavePet()
@@ -10555,8 +10568,10 @@ void Player::RemovePetitionsAndSigns(uint64 guid)
         sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `playerguid` = '%u'",guid);
     }
 
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `ownerguid` = '%u'",guid);
+    sDatabase.CommitTransaction();
 }
 
 void Player::SetRestBonus (float rest_bonus_new)

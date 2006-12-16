@@ -168,9 +168,13 @@ void CliDelete(char*command,pPrintf zprintf)
     }
 
     ///- Remove characters and account from the databases
+    sDatabase.BeginTransaction();
+
     bool done = sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",account_id) &&
         loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",safe_account_name.c_str()) &&
         loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
+
+    sDatabase.CommitTransaction();
 
     if (done)
         zprintf("We deleted account: %s\r\n",account_name);
@@ -527,6 +531,7 @@ void CliCreate(char *command,pPrintf zprintf)
 
     ///- Insert the account in the database (account table)
     // No SQL injection (escaped account name and password)
+    sDatabase.BeginTransaction();
     if(loginDatabase.PExecute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",safe_account_name.c_str(),safe_password.c_str()))
     {
         ///- Make sure that the realmcharacters table is up-to-date
@@ -535,6 +540,7 @@ void CliCreate(char *command,pPrintf zprintf)
     }
     else
         zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",szAcc,szPassword);
+    sDatabase.CommitTransaction();
 }
 
 /// Command parser and dispatcher

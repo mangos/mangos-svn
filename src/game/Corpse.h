@@ -45,7 +45,7 @@ class Corpse : public Object
         bool LoadFromDB(uint32 guid, QueryResult *result = NULL);
 
         void DeleteFromWorld(bool remove);
-        void DeleteFromDB();
+        void DeleteFromDB(bool inner_transaction = true);
 
         void AddToWorld();
         void RemoveFromWorld();

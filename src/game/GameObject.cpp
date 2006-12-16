@@ -313,6 +313,8 @@ void GameObject::getFishLoot(Loot *fishloot)
 void GameObject::SaveToDB()
 {
     std::ostringstream ss;
+
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
 
     const GameObjectInfo *goI = GetGOInfo();
@@ -338,6 +340,7 @@ void GameObject::SaveToDB()
         << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
 
     sDatabase.Execute( ss.str( ).c_str( ) );
+    sDatabase.CommitTransaction();
 }
 
 bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
