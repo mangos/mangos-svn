@@ -104,7 +104,7 @@ class Group
         bool IsAssistant(uint64 guid)
         {
             uint8 id = _getMemberIndex(guid);
-            if(id<0)
+            if(id<=0)
                 return false;
 
             return m_members[id].assistant;
@@ -113,7 +113,7 @@ class Group
         {
             uint8 id1 = _getMemberIndex(guid1);
             uint8 id2 = _getMemberIndex(guid2);
-            if(id1<0 || id2<0)
+            if(id1<=0 || id2<=0)
                 return false;
 
             return (m_members[id1].group==m_members[id2].group);
@@ -124,7 +124,7 @@ class Group
         uint8  GetMemberGroup(uint64 guid) 
         { 
             uint8 id = _getMemberIndex(guid);
-            if(id<0) 
+            if(id<=0) 
                 return (MAXRAIDSIZE/MAXGROUPSIZE+1); 
 
             return m_members[id].group; 
