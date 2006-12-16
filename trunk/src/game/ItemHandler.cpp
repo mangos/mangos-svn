@@ -645,52 +645,26 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     sLog.outDebug("WORLD: CMSG_BUY_BANK_SLOT");
 
     uint32 bank = _player->GetUInt32Value(PLAYER_BYTES_2);
-    uint32 result = (bank & 0x70000) >> 16;
+    uint32 slot = (bank & 0x70000) >> 16;
 
-    sLog.outDetail("PLAYER: Buy bank bag slot, slot number = %u", result);
+    // next slot
+    ++slot;
 
-    uint32 price;
+    sLog.outDetail("PLAYER: Buy bank bag slot, slot number = %u", slot);
 
-    // Prices Hardcoded
-    switch (result)
-    {
-        case 0:
-            price = 1000;
-            break;
-        case 1:
-            price = 10000;
-            break;
-        case 2:
-            price = 100000;
-            break;
-        case 3:
-            price = 250000;
-            break;
-        case 4:
-            price = 500000;
-            break;
-        case 5:
-            price = 1000000;
-            break;
-        default:
-            return;
-    }
+    BankBagSlotPricesEntry const* slotEntry = sBankBagSlotPricesStore.LookupEntry(slot);
 
-    if (result < 6)
-    {
-        result++;
-    }
-    else
-    {
+    if(!slotEntry)
         return;
-    }
-    bank = (bank & ~0x70000) + (result << 16);
+
+    uint32 price = slotEntry->price;
 
     if (_player->GetMoney() >= price)
     {
+        bank = (bank & ~0x70000) + (slot << 16);
+
         _player->SetUInt32Value(PLAYER_BYTES_2, bank);
         _player->ModifyMoney(-int32(price));
-
     }
 }
 
