@@ -1482,6 +1482,21 @@ void Player::SetGMVisible(bool on)
     }
 }
 
+bool Player::IsGroupVisibleFor(Player* p)
+{ 
+    switch(sWorld.getConfig(CONFIG_GROUP_VISIBILITY))
+    {
+        default: 
+            return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group 
+                && groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID()); 
+        case 1:
+            return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group; 
+        case 2: 
+            return GetTeam()==p->GetTeam();
+    }
+}
+
+
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
 {
     WorldPacket data;
