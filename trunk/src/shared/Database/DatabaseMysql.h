@@ -45,6 +45,9 @@ class DatabaseMysql : public Database
         QueryResult* Query(const char *sql);
         bool Execute(const char *sql);
         bool PExecute(const char *format,...);
+        bool BeginTransaction();
+        bool CommitTransaction();
+        bool RollbackTransaction();
 
         operator bool () const { return mMysql != NULL; }
 
@@ -57,8 +60,14 @@ class DatabaseMysql : public Database
         void ThreadEnd();
     private:
         ZThread::FastMutex mMutex;
+        ZThread::FastMutex tranMutex;
+
+        ZThread::ThreadImpl* tranThread;
+
         MYSQL *mMysql;
 
         static size_t db_count;
+
+        bool _TransactionCmd(const char *sql);
 };
 #endif

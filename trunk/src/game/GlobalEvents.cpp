@@ -58,8 +58,10 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                     else
                     {
                         sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
+                        sDatabase.BeginTransaction();
                         sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                         sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
+                        sDatabase.CommitTransaction();
                     }
                 }
                 // delete  bones
@@ -72,15 +74,19 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                     else
                         sLog.outDebug("Bones %u not found in world. Delete from DB also.",guidlow);
 
+                    sDatabase.BeginTransaction();
                     sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                     sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
+                    sDatabase.CommitTransaction();
                 }
             }
             else
             {
                 // remove corpse/bones from DB in any case
+                sDatabase.BeginTransaction();
                 sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                 sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
+                sDatabase.CommitTransaction();
             }
         } while (result->NextRow());
 

@@ -894,6 +894,8 @@ void Creature::SetLootRecipient(Player *player)
 
 void Creature::SaveToDB()
 {
+    sDatabase.BeginTransaction();
+
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
 
     std::ostringstream ss;
@@ -925,6 +927,8 @@ void Creature::SaveToDB()
         << "'')";                                           // should save auras
 
     sDatabase.Execute( ss.str( ).c_str( ) );
+
+    sDatabase.CommitTransaction();
 }
 
 void Creature::SelectLevel(const CreatureInfo *cinfo)
@@ -1203,8 +1207,10 @@ void Creature::_LoadQuests()
 
 void Creature::DeleteFromDB()
 {
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM `creature_involvedrelation` WHERE `id` = '%u'", GetGUIDLow());
+    sDatabase.CommitTransaction();
 }
 
 float Creature::GetAttackDistance(Unit *pl) const
@@ -1484,11 +1490,14 @@ void Creature::SaveAsPet()
     uint32 owner = GUID_LOPART(GetOwnerGUID());
     std::string name = GetName();
     sDatabase.escape_string(name);
+
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s',1)",
         GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
         m_spells[0], m_spells[1], m_spells[2], m_spells[3], STATE_RA_FOLLOW, GetPower(POWER_HAPPINESS),loyalty,getUsedTrainPoint(),name.c_str());
+    sDatabase.CommitTransaction();
 }
 
 bool Creature::IsVisibleInGridForPlayer(Player* pl) const

@@ -201,11 +201,13 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction ) //clears ram :D
     else
         delete pItem;
 
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '0', '0', '%d')",
         mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemPage, auction->item_guid, auction->item_template, (uint64)etime, AUCTION_CHECKED);
 
     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+    sDatabase.CommitTransaction();
 
     this->RemoveAItem(auction->item_guid);
     this->GetAuctionsMap(auction->location)->RemoveAuction(auction->Id);

@@ -198,8 +198,10 @@ void Group::Disband(bool hideDestroy)
 
     if(isRaidGroup())
     {
+        sDatabase.BeginTransaction();
         sDatabase.PExecute("DELETE FROM `raidgroup` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
         sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+        sDatabase.CommitTransaction();
     }
 
     m_leaderGuid = 0;
@@ -775,8 +777,10 @@ void Group::_setLeader(const uint64 &guid)
 
     if(isRaidGroup())
     {            
+        sDatabase.BeginTransaction();
         sDatabase.PExecute("UPDATE `raidgroup` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
         sDatabase.PExecute("UPDATE `raidgroup_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
+        sDatabase.CommitTransaction();
     }
     m_leaderGuid = m_members[id].guid;
     m_leaderName = m_members[id].name;
@@ -806,12 +810,14 @@ void Group::_convertToRaid()
 {
     m_groupType = GROUPTYPE_RAID;
 
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `raidgroup` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
     sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
     sDatabase.PExecute("INSERT INTO `raidgroup`(`leaderGuid`,`lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), m_lootMethod, GUID_LOPART(m_looterGuid), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
 
     for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
         sDatabase.PExecute("INSERT INTO `raidgroup_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(citr->guid), (citr->assistant==1)?1:0, citr->group);
+    sDatabase.CommitTransaction();
 }
 
 bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)

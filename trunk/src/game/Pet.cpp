@@ -141,8 +141,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     // set current pet as current
     if(fields[14].GetUInt32() != 1)
     {
+        sDatabase.BeginTransaction();
         sDatabase.PExecute("UPDATE `character_pet` SET `current` = '0' WHERE `owner` = '%u' AND `current` <> '0' AND `entry` <> '%u'",ownerid, petentry);
         sDatabase.PExecute("UPDATE `character_pet` SET `current` = '1' WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry);
+        sDatabase.CommitTransaction();
     }
 
     delete result;
@@ -174,11 +176,13 @@ void Pet::SaveToDB()
     uint32 owner = GUID_LOPART(GetOwnerGUID());
     std::string name = m_name;
     sDatabase.escape_string(name);
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s',1)",
         GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
         m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str());
+    sDatabase.CommitTransaction();
 }
 
 void Pet::DeleteFromDB()

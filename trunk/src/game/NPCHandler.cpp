@@ -625,9 +625,11 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
                 break;
             else if( slot == 1 || slot == 2)
             {
+                sDatabase.BeginTransaction();
                 sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u' AND `slot` = '%u'", _player->GetGUIDLow(),slot);
                 sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,%u,%u,%u,%u,%u,%u)",
                     _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->getUsedTrainPoint());
+                sDatabase.CommitTransaction();
                 data << uint8(0x08);
                 flag = true;
                 _player->UnsummonPet();
@@ -826,9 +828,11 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
         uint32 slot = fields[1].GetUInt32();
         uint32 petentry = fields[3].GetUInt32();
 
+        sDatabase.BeginTransaction();
         sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u' AND `slot` = '%u'", _player->GetGUIDLow(),slot);
         sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,%u,%u,%u,%u,%u,%u)",
             _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->getUsedTrainPoint());
+        sDatabase.CommitTransaction();
         if(pet->isPet())
             _player->UnsummonPet();
         else if(pet->isTamed())

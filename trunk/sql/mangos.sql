@@ -106,7 +106,7 @@ CREATE TABLE `auctionhouse` (
   `deposit` int(11) NOT NULL default '0',
   `location` tinyint(3) unsigned NOT NULL default '3',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `auctionhouse`
@@ -178,9 +178,8 @@ CREATE TABLE `character` (
   `transguid` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
-  KEY `idx_online` (`online`),
-  FULLTEXT KEY `idx_name` (`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+  KEY `idx_online` (`online`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character`
@@ -204,7 +203,7 @@ CREATE TABLE `character_action` (
   `type` smallint(3) unsigned NOT NULL default '0',
   `misc` smallint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`button`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_action`
@@ -227,7 +226,7 @@ CREATE TABLE `character_aura` (
   `effect_index` int(11) unsigned NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_aura`
@@ -252,7 +251,7 @@ CREATE TABLE `character_homebind` (
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   PRIMARY KEY  (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_homebind`
@@ -276,7 +275,7 @@ CREATE TABLE `character_inventory` (
   `item` bigint(20) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
   PRIMARY KEY  (`guid`,`bag`,`slot`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_inventory`
@@ -300,7 +299,7 @@ CREATE TABLE `character_kill` (
   `date` int(11) unsigned NOT NULL default '0',
   `type` smallint(9) unsigned NOT NULL default '0',
   KEY `idx_guid` (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_kill`
@@ -336,7 +335,7 @@ CREATE TABLE `character_pet` (
   `current` tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_pet`
@@ -370,7 +369,7 @@ CREATE TABLE `character_queststatus` (
   `itemcount3` int(11) unsigned NOT NULL default '0',
   `itemcount4` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`quest`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_queststatus`
@@ -394,7 +393,7 @@ CREATE TABLE `character_reputation` (
   `standing` int(11) NOT NULL default '0',
   `flags` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`faction`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_reputation`
@@ -417,7 +416,7 @@ CREATE TABLE `character_social` (
   `friend` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `flags` varchar(21) NOT NULL default '',
   PRIMARY KEY  (`guid`,`friend`,`flags`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_social`
@@ -440,7 +439,7 @@ CREATE TABLE `character_spell` (
   `slot` int(11) unsigned NOT NULL default '0',
   `active` int(11) unsigned NOT NULL default '1',
   PRIMARY KEY  (`guid`,`spell`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_spell`
@@ -462,7 +461,7 @@ CREATE TABLE `character_spell_cooldown` (
   `spell` int(11) unsigned NOT NULL default '0' COMMENT 'Spell Identifier',
   `time`  bigint(20) unsigned NOT NULL default '0',
    PRIMARY KEY  (`guid`,`spell`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `character_spell_cooldown`
@@ -488,7 +487,7 @@ CREATE TABLE `character_stable` (
   `loyalty` int(11) unsigned NOT NULL default '1',
   `trainpoint` int(11) unsigned NOT NULL default '0',
   KEY `petnumber` (`petnumber`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_stable`
@@ -511,7 +510,7 @@ CREATE TABLE `character_ticket` (
   `ticket_text` varchar(255) NOT NULL default '',
   `ticket_category` int(1) NOT NULL default '0',
   PRIMARY KEY  (`ticket_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_ticket`
@@ -539,7 +538,7 @@ CREATE TABLE `character_tutorial` (
   `tut6` bigint(20) unsigned NOT NULL default '0',
   `tut7` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_tutorial`
@@ -592,7 +591,7 @@ CREATE TABLE `corpse` (
   `bones_flag` tinyint(3) NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_bones_flag` (`bones_flag`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
 
 --
 -- Dumping data for table `corpse`
@@ -779,7 +778,7 @@ CREATE TABLE `creature_questrelation` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
   PRIMARY KEY  (`id`,`quest`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
 --
 -- Dumping data for table `creature_questrelation`
@@ -1162,7 +1161,7 @@ CREATE TABLE `guild` (
   `MOTD` varchar(255) NOT NULL default '',
   `createdate` datetime default NULL,
   PRIMARY KEY  (`guildid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `guild`
@@ -1185,7 +1184,7 @@ CREATE TABLE `guild_charter` (
   `guildname` varchar(255) NOT NULL default '',
   PRIMARY KEY (`ownerguid`),
   UNIQUE KEY `index_ownerguid_charterguid` (`ownerguid`,`charterguid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `guild_charter`
@@ -1208,7 +1207,7 @@ CREATE TABLE `guild_charter_sign` (
   `charterguid` int(11) unsigned default '0', 
   `playerguid` int(11) unsigned default '0',
   PRIMARY KEY (`charterguid`,`playerguid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `guild_charter_sign`
@@ -1232,7 +1231,7 @@ CREATE TABLE `guild_member` (
   `rank` tinyint(2) unsigned NOT NULL default '0',
   `Pnote` varchar(255) NOT NULL default '',
   `OFFnote` varchar(255) NOT NULL default ''
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `guild_member`
@@ -1255,7 +1254,7 @@ CREATE TABLE `guild_rank` (
   `rname` varchar(255) NOT NULL default '',
   `rights` int(3) unsigned NOT NULL default '0',
   PRIMARY KEY (`guildid`,`rid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `guild_rank`
@@ -1276,7 +1275,7 @@ CREATE TABLE `item_instance` (
   `guid` bigint(20) NOT NULL default '0',
   `data` longtext,
   PRIMARY KEY  (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
 
 --
 -- Dumping data for table `item_instance`
@@ -1324,7 +1323,7 @@ CREATE TABLE `item_page` (
   `next_page` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `item_pages_index` (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
 
 --
 -- Dumping data for table `item_page`
@@ -1496,7 +1495,7 @@ CREATE TABLE `mail` (
   `checked` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `idx_receiver` (`receiver`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Mail System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Mail System';
 
 --
 -- Dumping data for table `mail`
@@ -2213,5 +2212,3 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
-

@@ -75,7 +75,8 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
 void Corpse::SaveToDB()
 {
     // prevent DB data inconsistance problems and duplicates
-    DeleteFromDB();
+    sDatabase.BeginTransaction();
+    DeleteFromDB(false);
 
     std::ostringstream ss;
     ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`) VALUES ("
@@ -94,6 +95,7 @@ void Corpse::SaveToDB()
         CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, GetGUIDLow()
         );
     sDatabase.PExecute("UPDATE `corpse_grid` SET `grid`=(`position_x`*%u) + `position_y`,`cell`=((`cell_position_y` * %u) + `cell_position_x`) WHERE `guid` = '%u'", MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP,GetGUIDLow());
+    sDatabase.CommitTransaction();
 }
 
 void Corpse::DeleteFromWorld(bool remove)
@@ -103,9 +105,13 @@ void Corpse::DeleteFromWorld(bool remove)
     RemoveFromWorld();
 }
 
-void Corpse::DeleteFromDB()
+void Corpse::DeleteFromDB(bool inner_transaction)
 {
     std::ostringstream ss;
+
+    if(inner_transaction)
+        sDatabase.BeginTransaction();
+
     if(GetType() == CORPSE_BONES)
         // only specific bones
         ss  << "DELETE FROM `corpse` WHERE `guid` = '" << GetGUIDLow() << "'";
@@ -115,6 +121,9 @@ void Corpse::DeleteFromDB()
     sDatabase.Execute( ss.str().c_str() );
 
     sDatabase.PExecute( "DELETE FROM `corpse_grid` WHERE `guid` = '%u'",GetGUIDLow());
+
+    if(inner_transaction)
+        sDatabase.CommitTransaction();
 }
 
 bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
