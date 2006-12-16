@@ -123,6 +123,7 @@ class DBCStorage
 };
 
 //extern DBCStorage <AreaTableEntry>            sAreaStore; -- accessed using 2 functions
+extern DBCStorage <BankBagSlotPricesEntry>    sBankBagSlotPricesStore;
 extern DBCStorage <ChrClassesEntry>           sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>             sChrRacesStore;
 extern DBCStorage <CreatureFamilyEntry>       sCreatureFamilyStore;

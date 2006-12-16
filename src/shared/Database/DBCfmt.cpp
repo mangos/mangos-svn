@@ -17,6 +17,7 @@
  */
 
 const char AreaTableEntryfmt[]="ixinixxxxxixxxxxxxxxixxxx";
+const char BankBagSlotPricesEntryfmt[]="ni";
 const char ChrClassesEntryfmt[]="nxxixsxxxxxxxxxxx";
 const char ChrRacesEntryfmt[]="nxixxxxxixxxxxixisxxxxxxxxxxx";
 const char CreatureFamilyfmt[]="nxxxxiiixxxxsxxxxx";

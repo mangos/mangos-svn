@@ -41,6 +41,12 @@ struct AreaTableEntry
     uint32    team;
 };
 
+struct BankBagSlotPricesEntry
+{
+    uint32      ID;
+    uint32      price;
+};
+
 struct ChrClassesEntry
 {
     uint32      ClassID;
