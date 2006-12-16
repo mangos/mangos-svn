@@ -309,7 +309,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
         sLog.outDetail( "SOCKET: Sent Auth Response (already connected)." );
 
-        session->LogoutPlayer(false);
+        session->LogoutPlayer(true);
 
         return;
     }
