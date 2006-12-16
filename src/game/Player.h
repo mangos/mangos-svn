@@ -860,7 +860,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
 
         GroupInfo groupInfo;
-        int IsInGroupWith(Player* p) { return (groupInfo.group != NULL && groupInfo.group == p->groupInfo.group && groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID())); }
+        bool IsGroupVisibleFor(Player* p);
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); Player::SetUInt32ValueInDB(PLAYER_GUILDID, GuildId, this->GetGUID()); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, rankId, this->GetGUID()); }

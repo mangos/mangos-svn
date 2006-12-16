@@ -125,6 +125,12 @@ GM.WhisperingTo = 0
 #          1 (true) 
 GM.InWhoList = 0
 
+# Group visibility modes
+# Default: 0 (standard setting: only members from same group can 100% auto detect invisible player)
+#          1 (raid members 100% auto detect invisible player from same raid)
+#          2 (players from same team can 100% auto detect invisible player)
+GroupVisibility = 0
+
 # Message of the Day. Displayed at worldlogin for every user.
 Motd = "Welcome to the Massive Network Game Object Server."
 
