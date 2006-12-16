@@ -334,12 +334,15 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
         {
-            Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader()) : NULL;
+            Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? ((Player*)m_caster)->groupInfo.group : NULL;
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
+                        continue;
+
+                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
                     if(!Target)
                         continue;
                     if(m_caster->IsWithinDist(Target, radius))
@@ -438,12 +441,15 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER
                 ? (Player*)m_targets.getUnitTarget() : NULL;
 
-            Group* pGroup = targetPlayer ? objmgr.GetGroupByLeader(targetPlayer->GetGroupLeader()) : NULL;
+            Group* pGroup = targetPlayer ? targetPlayer->groupInfo.group : NULL;
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
+                        continue;
+
+                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
                     if(m_targets.getUnitTarget() && Target && m_targets.getUnitTarget()->IsWithinDist(Target, radius) )
                         TagUnitMap.push_back(Target);
                 }
@@ -462,11 +468,14 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             if(!m_targets.getUnitTarget())
                 break;
 
-            Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader()) : NULL;
+            Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? ((Player*)m_caster)->groupInfo.group : NULL;
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
+                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
+                        continue;
+
                     if(m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetGUID() == pGroup->GetMemberGUID(p))
                     {
                         onlyParty = true;
@@ -475,7 +484,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 }
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
+                        continue;
+
+                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
 
                     if(!Target || Target->GetGUID() == m_caster->GetGUID())
                         continue;
@@ -505,12 +517,15 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER
                 ? (Player*)m_targets.getUnitTarget() : NULL;
 
-            Group* pGroup = targetPlayer ? objmgr.GetGroupByLeader(targetPlayer->GetGroupLeader()) : NULL;
+            Group* pGroup = targetPlayer ? targetPlayer->groupInfo.group : NULL;
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
+                        continue;
+
+                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
                     if(Target && targetPlayer->IsWithinDist(Target, radius) &&
                         targetPlayer->getClass() == Target->getClass())
                         TagUnitMap.push_back(Target);

@@ -50,8 +50,8 @@ class MANGOS_DLL_SPEC WorldSession
         ~WorldSession();
 
         void SendPacket(WorldPacket* packet);
-        void SendToGroup(WorldPacket* data, bool to_self);
         void SendNotification(char const* msg);
+        void SendPartyResult(uint32 unk, std::string member, uint32 state);
 
         uint32 GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
@@ -82,6 +82,8 @@ class MANGOS_DLL_SPEC WorldSession
         bool Update(uint32 diff);
 
         void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
+        void SendNameQueryOpcode(Player* p);
+        void SendNameQueryOpcodeFromDB(uint64 guid);
 
         void SendCreatureQuery( uint32 entry, uint64 guid );
         void SendTrainerList( uint64 guid );
@@ -215,17 +217,22 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleBattleMasterHelloOpcode(WorldPacket &recv_data);
 
         void HandleGroupInviteOpcode(WorldPacket& recvPacket);
-        void HandleGroupCancelOpcode(WorldPacket& recvPacket);
+        //void HandleGroupCancelOpcode(WorldPacket& recvPacket);
         void HandleGroupAcceptOpcode(WorldPacket& recvPacket);
         void HandleGroupDeclineOpcode(WorldPacket& recvPacket);
-        void HandleGroupUninviteOpcode(WorldPacket& recvPacket);
-        void HandleGroupUninviteGuildOpcode(WorldPacket& recvPacket);
+        void HandleGroupUninviteNameOpcode(WorldPacket& recvPacket);
+        void HandleGroupUninviteGuidOpcode(WorldPacket& recvPacket);
+        void HandleGroupUninvite(uint64 guid, std::string name);
         void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
         void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
         void HandleLootRoll( WorldPacket &recv_data );
         void HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data );
         void HandleRaidIconTargetOpcode( WorldPacket & recv_data );
+        void HandleRaidReadyCheckOpcode( WorldPacket & recv_data );
+        void HandleRaidConvertOpcode( WorldPacket & recv_data );
+        void HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data );
+        void HandleAssistantOpcode( WorldPacket & recv_data );
 
         void HandlePetitionBuyOpcode(WorldPacket& recv_data);
         void HandlePetitionShowSignOpcode(WorldPacket& recv_data);

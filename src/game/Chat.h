@@ -46,6 +46,8 @@ enum ChatMsg
     CHAT_MSG_SAY                                  = 0x00,
     CHAT_MSG_PARTY                                = 0x01,
     CHAT_MSG_RAID                                 = 0x02,
+    CHAT_MSG_RAID_LEADER                          = 0x57,
+    CHAT_MSG_RAID_WARN                            = 0x58,
     CHAT_MSG_GUILD                                = 0x03,
     CHAT_MSG_OFFICER                              = 0x04,
     CHAT_MSG_YELL                                 = 0x05,

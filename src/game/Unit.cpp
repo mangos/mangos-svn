@@ -377,14 +377,14 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 DEBUG_LOG("DealDamageIsPvE");
                 uint32 xp = MaNGOS::XP::Gain(player, pVictim);
 
-                Group *pGroup = objmgr.GetGroupByLeader(player->GetGroupLeader());
+                Group *pGroup = player->groupInfo.group;
                 if(pGroup)
                 {
                     DEBUG_LOG("Kill Enemy In Group");
                     xp /= pGroup->GetMembersCount();
                     for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
                     {
-                        Player *pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
+                        Player *pGroupGuy = objmgr.GetPlayer(pGroup->GetMemberGUID(i));
                         if(!pGroupGuy)
                             continue;
                         if(pVictim->GetDistanceSq(pGroupGuy) > sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
@@ -1985,23 +1985,25 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
         {
             Unit* i_caster = i_target;
 
-            uint64 leaderGuid = 0;
+            Group *pGroup = NULL;
             if (i_caster->GetTypeId() == TYPEID_PLAYER)
-                leaderGuid = ((Player*)i_caster)->GetGroupLeader();
+                pGroup = ((Player*)i_caster)->groupInfo.group;
             else if(((Creature*)i_caster)->isTotem())
             {
                 Unit *owner = ((Totem*)i_caster)->GetOwner();
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                    leaderGuid = ((Player*)owner)->GetGroupLeader();
+                    pGroup = ((Player*)owner)->groupInfo.group;
             }
 
-            Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
             //float radius =  GetRadius(sSpellRadiusStore.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(!pGroup->SameSubGroup(i_caster->GetGUID(), pGroup->GetMemberGUID(p)))
+                        continue;
+
+                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
                     if(!Target || Target->GetGUID() == i_caster->GetGUID())
                         continue;
                     Aura *t_aura = Target->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());

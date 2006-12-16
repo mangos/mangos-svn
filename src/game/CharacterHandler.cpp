@@ -32,6 +32,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Transports.h"
+#include "Group.h"
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
@@ -485,6 +486,21 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // show time before shutdown if shudown planned.
     if(sWorld.IsShutdowning())
         sWorld.ShutdownMsg(true,pCurrChar);
+
+
+    result = sDatabase.PQuery("SELECT `leaderGuid` FROM `raidgroup_member` WHERE `memberGuid`='%u'", GUID_LOPART(pCurrChar->GetGUID()));
+    if(result)
+    {
+        uint64 leaderGuid = (*result)[0].GetUInt64();
+        delete result;
+
+        pCurrChar->groupInfo.group = objmgr.GetGroupByLeader(leaderGuid);
+        if(pCurrChar->groupInfo.group)
+        {
+            pCurrChar->groupInfo.group->SendInit(this);
+            pCurrChar->groupInfo.group->SendUpdate();
+        }
+    }
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

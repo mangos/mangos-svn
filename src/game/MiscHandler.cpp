@@ -865,15 +865,6 @@ void WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )
     DEBUG_LOG( "WORLD: Which movie to play" );
 }
 
-void WorldSession::HandleRequestRaidInfoOpcode( WorldPacket & recv_data )
-{
-    sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
-    WorldPacket data;
-    data.Initialize(SMSG_RAID_INSTANCE_INFO);
-    data << (uint32)0;
-    _player->GetSession()->SendPacket(&data);
-}
-
 void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
 {
 
@@ -882,7 +873,6 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
-
     WorldSession::Update( getMSTime() );
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 

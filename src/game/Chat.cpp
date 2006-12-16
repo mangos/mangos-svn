@@ -492,8 +492,8 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 
     // in CHAT_MSG_WHISPER_INFORM mode used original target_guid
     if (type == CHAT_MSG_SAY  || type == CHAT_MSG_CHANNEL || type == CHAT_MSG_WHISPER ||
-        type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY   || type == CHAT_MSG_GUILD   ||
-        type == CHAT_MSG_OFFICER)
+        type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY  || type == CHAT_MSG_RAID  || type == CHAT_MSG_RAID_LEADER || type == CHAT_MSG_RAID_WARN ||
+        type == CHAT_MSG_GUILD || type == CHAT_MSG_OFFICER)
     {
         target_guid = session ? session->GetPlayer()->GetGUID() : 0;
     }

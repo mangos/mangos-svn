@@ -1747,15 +1747,6 @@ void Spell::EffectDuel(uint32 i)
     duel2->startTime  = 0;
     duel2->startTimer = 0;
     target->duel      = duel2;
-    /*//Set who are the oponents
-    caster->SetDuelVs(target);
-    target->SetDuelVs(caster);
-    //Players are not in duel yet...
-    caster->SetInDuel(false);
-    target->SetInDuel(false);
-    //Set who is the duel caster
-    caster->SetDuelSender(caster);
-    target->SetDuelSender(caster);*/
 
     caster->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
     target->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());

@@ -336,9 +336,9 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
     Quest *pQuest = objmgr.QuestTemplates[quest];
     if( pQuest )
     {
-        if( _player->IsInGroup() )
+        if( _player->groupInfo.group )
         {
-            Group *pGroup = objmgr.GetGroupByLeader(_player->GetGroupLeader());
+            Group *pGroup = _player->groupInfo.group;
             if( pGroup )
             {
                 uint32 pguid = _player->GetGUID();

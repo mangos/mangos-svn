@@ -690,7 +690,7 @@ enum OpCodes
     SMSG_PVP_CREDIT                                 = 652,
     SMSG_AUCTION_REMOVED_NOTIFICATION               = 653,
     CMSG_GROUP_RAID_CONVERT                         = 654,
-    CMSG_GROUP_ASSISTANT_LEADER                     = 655,
+    CMSG_GROUP_ASSISTANT                            = 655,
     CMSG_BUYBACK_ITEM                               = 656,
     SMSG_SERVER_MESSAGE                             = 657,
     CMSG_MEETINGSTONE_JOIN                          = 658,
@@ -815,10 +815,12 @@ enum OpCodes
 
     CMSG_FIELD_WATCHED_FACTION_INACTIVE             = 791,
     CMSG_FIELD_WATCHED_FACTION_SHOW_BAR             = 792,
+    
+    MSG_RAID_ICON_TARGET                            = 801,
+    MSG_RAID_READY_CHECK                            = 802,
 
     // unofficial opcodes:
     SMSG_COMPRESSED_MOVE                            = 0x2FB,// 763
-    MSG_RAID_ICON_TARGET                            = 801,
     SMSG_OUTDOORPVP_NOTIFY                          = 0x33B,// 827
 };
 

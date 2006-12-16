@@ -88,16 +88,12 @@ Player::Player (WorldSession *session): Unit()
     memset(m_items, 0, sizeof(Item*)*BANK_SLOT_BAG_END);
     memset(m_buybackitems, 0, sizeof(Item*)*(BUYBACK_SLOT_END - BUYBACK_SLOT_START));
 
-    //m_pDuel       = NULL;
-    //m_pDuelSender = NULL;
-    //m_isInDuel = false;
+    groupInfo.group  = NULL;
+    groupInfo.invite = NULL;
+
     duel = NULL;
 
     m_GuildIdInvited = 0;
-
-    m_groupLeader = 0;
-    m_isInGroup = false;
-    m_isInvited = false;
 
     m_dontMove = false;
 
@@ -3514,13 +3510,13 @@ void Player::SetDontMove(bool dontMove)
 
 bool Player::IsGroupMember(Player *plyr)
 {
-    if(!plyr->IsInGroup())
+    if(!plyr->groupInfo.group)
         return false;
-    Group *grp = objmgr.GetGroupByLeader(plyr->GetGroupLeader());
-    if(grp->GroupCheck(plyr->GetGUID()))
-    {
-        return true;
-    }
+    Group *grp = plyr->groupInfo.group;
+    for(uint32 i = 0; i < grp->GetMembersCount(); i++ )
+        if (grp->GetMemberGUID(i) == plyr->GetGUID())
+            return true;
+ 
     return false;
 }
 
@@ -4886,11 +4882,11 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
                 creature->generateMoneyLoot();
 
-                if (recipient->IsInGroup())
+                if (recipient->groupInfo.group)
                 {
                     // round robin style looting applies for all low
                     // quality items in each loot metho except free for all
-                    Group *group = objmgr.GetGroupByLeader(recipient->GetGroupLeader());
+                    Group *group = groupInfo.group;
                     uint32 siz = group->GetMembersCount();
                     uint32 pos = 0;
                     for (pos = 0; pos<siz; pos++)
@@ -4916,17 +4912,17 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if (loot_type == LOOT_SKINNING)
                 FillLoot(this,loot,creature->GetCreatureInfo()->SkinLootId,LootTemplates_Skinning);
 
-            if (!IsInGroup() && recipient == this)
+            if (!groupInfo.group && recipient == this)
                 permission = ALL_PERMISSION;
             else
             {
-                if (IsInGroup())
+                if (groupInfo.group)
                 {
-                    Group *group = objmgr.GetGroupByLeader(recipient->GetGroupLeader());
-                    if ((GetGroupLeader() == recipient->GetGroupLeader()) && (group->GetLooterGuid() == GetGUID() || loot->released || group->GetLootMethod() == FREE_FOR_ALL))
+                    Group *group = groupInfo.group;
+                    if ((group == recipient->groupInfo.group) && (group->GetLooterGuid() == GetGUID() || loot->released || group->GetLootMethod() == FREE_FOR_ALL))
                         permission = ALL_PERMISSION;
                     else
-                    if (GetGroupLeader() == recipient->GetGroupLeader())
+                    if (group == recipient->groupInfo.group)
                         permission = GROUP_PERMISSION;
                     else
                         permission = NONE_PERMISSION;
@@ -8795,7 +8791,8 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
             continue;
 
         Quest * qInfo = objmgr.QuestTemplates[questid];
-        if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
+        // just if !ingroup || !noraidgroup || raidgroup        
+        if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!groupInfo.group || !groupInfo.group->isRaidGroup() || qInfo->GetType() == 62))
         {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
             {
@@ -8929,6 +8926,10 @@ bool Player::HaveQuestForItem( uint32 itemid )
         {
             if (!qs.m_quest) continue;
             Quest * qinfo = qs.m_quest;
+
+            // hide quest if player is in raid-group and quest is no raid quest
+            if(groupInfo.group && groupInfo.group->isRaidGroup() && qinfo->GetType() != 62)
+                continue;
 
             // There should be no mixed ReqItem/ReqSource drop
             // This part for ReqItem drop
@@ -10502,15 +10503,19 @@ void Player::ApplyBlockValueMod(int32 val,bool apply)
 
 void Player::RemoveAreaAurasFromGroup()
 {
-    Group* pGroup = objmgr.GetGroupByLeader(this->GetGroupLeader());
+    Group* pGroup = groupInfo.group;
     if(!pGroup)
         return;
 
     for(uint32 p=0;p<pGroup->GetMembersCount();p++)
     {
-        Unit* Member = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+        if(!pGroup->SameSubGroup(GetGUID(), pGroup->GetMemberGUID(p)))
+            continue;
+              
+        Unit* Member = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
         if(!Member)
             continue;
+
         Member->RemoveAreaAurasByOthers(GetGUID());
         for (uint8 i = 0; i < 4; i++)
             if (m_TotemSlot[i])
