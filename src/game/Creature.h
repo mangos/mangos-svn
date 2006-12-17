@@ -246,15 +246,14 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool CreateFromProto(uint32 guidlow,uint32 Entry);
         void SelectLevel(const CreatureInfo *cinfo);
 
-        virtual char const* GetName()    const { return GetCreatureInfo()->Name; }
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
         virtual void Update( uint32 time );
         inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
         inline void GetRespawnDist(float &d) const { d = m_respawnradius; }
 
-        bool isTamed() const { return m_isTamed; }
         void SaveAsPet();
+        bool isTamed() const { return m_isTamed; }
         void SetTamed(bool isTamed) { m_isTamed = isTamed; }
         void Untamed();
         void GivePetXP(uint32 xp);
