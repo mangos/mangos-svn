@@ -1027,7 +1027,7 @@ void Player::SendFriendlist()
         {
             friendstr[i].PlayerGUID = fields[0].GetUInt64();
             pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
-            if( pObj && pObj->isVisibleFor(this))
+            if( pObj && pObj->isVisibleFor(this,false))
             {
                 if(pObj->isAFK())
                     friendstr[i].Status = 2;
@@ -10611,7 +10611,7 @@ void Player::HandleInvisiblePjs()
 
     for (std::vector<Player *>::iterator i = InvisiblePjsNear.begin(); i != InvisiblePjsNear.end(); i++)
     {
-        if ((*i)->isVisibleFor(this))
+        if ((*i)->isVisibleFor(this,true))
         {
             m_DiscoveredPj = *i;
             m_enableDetect = false;

@@ -73,7 +73,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         if( itr->second->GetName() &&
             ( security > 0 ||
             ( itr->second->GetTeam() == team || allowTwoSideWhoList ) &&
-            (itr->second->GetSession()->GetSecurity() == 0 || gmInWhoList && itr->second->isVisibleFor(_player) )))
+            (itr->second->GetSession()->GetSecurity() == 0 || gmInWhoList && itr->second->isVisibleFor(_player,false) )))
         {
             clientcount++;
 
@@ -477,7 +477,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     if (friendGuid && friendResult==FRIEND_NOT_FOUND)
     {
-        if( pfriend && pfriend->IsInWorld() && pfriend->isVisibleFor(GetPlayer()))
+        if( pfriend && pfriend->IsInWorld() && pfriend->isVisibleFor(GetPlayer(),false))
         {
             friendResult = FRIEND_ADDED_ONLINE;
             friendArea = pfriend->GetZoneId();

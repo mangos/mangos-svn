@@ -3417,7 +3417,7 @@ void Unit::ModifyPower(Powers power, int32 dVal)
         SetPower(power,maxPower);
 }
 
-bool Unit::isVisibleFor(Unit* u)
+bool Unit::isVisibleFor(Unit* u, bool detect)
 {
     // Visible units, always are visible for all pjs
     if (m_Visibility == VISIBILITY_ON)
@@ -3449,6 +3449,10 @@ bool Unit::isVisibleFor(Unit* u)
         else
             return true;
     }
+
+    // if in non-detect mode then invisible for unit
+    if(!detect)
+        return false;
 
     bool IsVisible = true;
     bool notInFront = u->isInFront(this, MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ? 0 : 1;
