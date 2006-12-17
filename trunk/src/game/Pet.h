@@ -53,9 +53,6 @@ class Pet : public Creature
         bool HasActState(uint32 st) { return m_actState & st;};
         uint32 GetFealty() { return m_fealty; }
         void SetFealty(uint32 fealty) { m_fealty=fealty; }
-        char const* GetName() const { return m_name.c_str(); }
-                                                            // overwrite Cerature::GetName
-        void SetName(std::string newname) { m_name=newname; }
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0 );
         void SaveToDB();                                    // overwrited of Creature::SaveToDB
         void DeleteFromDB();                                // overwrited of Creature::DeleteFromDB
@@ -64,7 +61,6 @@ class Pet : public Creature
         void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
 
     protected:
-        std::string m_name;
         uint32 m_actState;
         uint32 m_fealty;
 };

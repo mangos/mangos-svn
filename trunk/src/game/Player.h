@@ -452,8 +452,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool isGMVisible() const { return !(m_GMFlags & GM_INVISIBLE); }
         void SetGMVisible(bool on);
 
-        const char* GetName() const { return m_name.c_str(); };
-
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel();
         void InitStatsForLevel(uint32 level, bool sendgain = true, bool remove_mods = true);
@@ -1169,7 +1167,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint64 m_lootGuid;
 
-        std::string m_name;
         std::string m_rank_name;
 
         float m_createStats[5];

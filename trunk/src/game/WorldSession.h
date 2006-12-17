@@ -101,6 +101,9 @@ class MANGOS_DLL_SPEC WorldSession
         void SendStablePet(uint64 guid );
         void SendPetitionQueryOpcode( uint64 petitionguid);
         void SendUpdateTrade();
+        
+        //pet
+        void SendPetNameQuery(uint64 guid, uint32 petnumber);
 
         //mail
                                                             //used with item_page table

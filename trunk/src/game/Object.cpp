@@ -83,6 +83,7 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh )
     SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
+    m_PackGUID.clear();
     _SetPackGUID(&m_PackGUID,GetGUID());
 }
 
