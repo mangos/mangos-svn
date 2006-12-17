@@ -210,29 +210,29 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 {
     sLog.outDetail( "HandlePetRename. CMSG_PET_RENAME\n" );
 
-    uint32 petnumber;
     uint64 guid;
 
-    std::string name = "ERROR_NO_NAME_FOR_PET_GUID";
+    std::string name;
 
-    recv_data >> petnumber;
     recv_data >> guid;
     recv_data >> name;
     WorldPacket data;
 
     Creature* pet = ObjectAccessor::Instance().GetCreature(*_player,guid);
-    if(!pet || !pet->GetEntry())
-        return;
-    if(!pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+    if(!pet || !pet->isTamed() || pet->GetOwnerGUID() != _player->GetGUID())
         return;
 
+    // FIXME: correct response required
+    /*
     data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
-    data << uint32(petnumber);
+    data << guid;
     data << name.c_str();
     //data << uint8(0x00);
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
     _player->GetSession()->SendPacket(&data);
-
+    */
+    sDatabase.escape_string(name);
+    sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s' WHERE `owner` = '%u' AND `entry` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetEntry() );
 }
 
 void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
