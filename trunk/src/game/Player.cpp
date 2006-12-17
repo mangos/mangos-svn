@@ -1654,8 +1654,10 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
 
     SetArmor(m_createStats[STAT_AGILITY]*2);
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,        0 );
-    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 0 );
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,            0 );
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0 );
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0 );
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
 
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);

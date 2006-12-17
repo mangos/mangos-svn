@@ -209,15 +209,18 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    Player* plr = new Player(this);
-    ASSERT(plr);
-
-    if(!plr->LoadFromDB( GUID_LOPART(guid) ))
+    // can't delete loaded character
+    if(objmgr.GetPlayer(guid))
         return;
-    sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),plr->GetName(),guid);
-    plr->DeleteFromDB();
 
-    delete plr;
+    {
+        Player plr(this);
+
+        if(!plr.LoadFromDB( GUID_LOPART(guid) ))
+            return;
+        sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),plr.GetName(),guid);
+        plr.DeleteFromDB();
+    }
 
     //data.Initialize(SMSG_CHAR_CREATE);
     //data << (uint8)0x34;
