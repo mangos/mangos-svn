@@ -630,7 +630,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         UnitVisibilityUpdate GetUpdateVisibility() { return m_UpdateVisibility; }
         void SetVisibility(UnitVisibility x);
         void SetUpdateVisibility(UnitVisibilityUpdate x) { m_UpdateVisibility = x; }
-        bool isVisibleFor(Unit* u);
+        bool isVisibleFor(Unit* u, bool detect);
 
         bool m_silenced;
         bool waterbreath;

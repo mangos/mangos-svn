@@ -226,22 +226,8 @@ void GuardAI::UpdateAI(const uint32 diff)
 
 bool GuardAI::IsVisible(Unit *pl) const
 {
-    bool seestealth = true;
-    uint32 sight = sWorld.getConfig(CONFIG_SIGHT_GUARDER);
-    float dist = i_creature.GetDistanceSq(pl);
-    if(pl->HasStealthAura())
-    {
-        int32 seevaluse;
-        int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;
-        seevaluse = 5  + i_creature.getLevel() * 5 + i_creature.m_detectStealth - pl->m_stealthvalue - (uint32)sqrt(dist/100) - 50 * notfront;
-        if(seevaluse<0)
-            seestealth = false;
-        else if(seevaluse>=int32(urand(0,30)))
-            seestealth = true;
-        else seestealth = false;
-    }
-                                                            // offset=1.0
-    return seestealth && (dist * 1.0 <= sight) ;
+    return i_creature.GetDistanceSq(pl) < sWorld.getConfig(CONFIG_SIGHT_GUARDER)
+        && pl->isVisibleFor(&i_creature,true);
 }
 
 void GuardAI::AttackStart(Unit *u)

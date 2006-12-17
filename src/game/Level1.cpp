@@ -199,7 +199,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     {
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());
 
-        if (m_session->GetPlayer()->isVisibleFor(chr))
+        if (m_session->GetPlayer()->isVisibleFor(chr,false))
         {
             char buf0[256];
             sprintf((char*)buf0,LANG_APPEARING_TO, m_session->GetPlayer()->GetName());

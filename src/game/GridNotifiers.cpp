@@ -40,9 +40,9 @@ void PlayerNotifier::Visit(PlayerMapType &m)
         if( i_player.isAlive() && iter->second->isAlive() ||
             i_player.isDead() && iter->second->isDead() )
         {
-            if (iter->second->isVisibleFor(&i_player))
+            if (iter->second->isVisibleFor(&i_player,false))
                 iter->second->SendUpdateToPlayer(&i_player);
-            if (i_player.isVisibleFor(iter->second))
+            if (i_player.isVisibleFor(iter->second,false))
                 i_player.SendUpdateToPlayer(iter->second);
         }
         else
