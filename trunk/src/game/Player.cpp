@@ -4887,7 +4887,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 {
                     // round robin style looting applies for all low
                     // quality items in each loot metho except free for all
-                    Group *group = groupInfo.group;
+                    Group *group = recipient->groupInfo.group;
                     uint32 siz = group->GetMembersCount();
                     uint32 pos = 0;
                     for (pos = 0; pos<siz; pos++)
