@@ -9359,7 +9359,13 @@ bool Player::LoadFromDB( uint32 guid )
 
     delete result;
 
-    // remember loaded power values to restore after stats initialization and modifier appling
+    // clear channel spell data (if saved at channel spell casting) 
+    SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT,0);
+    SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1,0);
+    SetUInt32Value(UNIT_CHANNEL_SPELL,0);
+
+
+    // remember loaded power values to restore after stats initialization and modifier applying
     float savedPower[MAX_POWERS];
     for(uint32 i = 0; i < MAX_POWERS; ++i)
         savedPower[i] = GetPower(Powers(i));
