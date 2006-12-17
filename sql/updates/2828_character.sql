@@ -1,5 +1,5 @@
 ALTER TABLE `auctionhouse`             ENGINE = InnoDB;
-ALTER TABLE `character`                /*DROP KEY `idx_name`, */ENGINE = InnoDB;
+ALTER TABLE `character`                DROP KEY `idx_name`, ENGINE = InnoDB;
 ALTER TABLE `character_action`         ENGINE = InnoDB;
 ALTER TABLE `character_aura`           ENGINE = InnoDB;
 ALTER TABLE `character_homebind`       ENGINE = InnoDB;
@@ -23,8 +23,5 @@ ALTER TABLE `guild_rank`               ENGINE = InnoDB;
 ALTER TABLE `item_instance`            ENGINE = InnoDB;
 ALTER TABLE `item_page`                ENGINE = InnoDB;
 ALTER TABLE `mail`                     ENGINE = InnoDB;
-
-ALTER TABLE `character`                ENGINE = InnoDB;
-ALTER TABLE `character`                ENGINE = InnoDB;
-ALTER TABLE `character`                ENGINE = InnoDB;
-ALTER TABLE `character`                ENGINE = InnoDB;
+ALTER TABLE `raidgroup`                ENGINE = InnoDB;
+ALTER TABLE `raidgroup_member`         ENGINE = InnoDB;
