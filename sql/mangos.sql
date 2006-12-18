@@ -618,7 +618,7 @@ CREATE TABLE `corpse_grid` (
   `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
+) ENGINE=MEMORY DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
 
 --
 -- Dumping data for table `corpse_grid`
@@ -686,7 +686,7 @@ CREATE TABLE `creature_grid` (
   `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Exploration System';
+) ENGINE=MEMORY DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Exploration System';
 
 --
 -- Dumping data for table `creature_grid`
@@ -1026,7 +1026,7 @@ CREATE TABLE `gameobject_grid` (
   `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
+) ENGINE=MEMORY DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
 
 --
 -- Dumping data for table `gameobject_grid`
