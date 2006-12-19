@@ -147,7 +147,7 @@ bool Creature::isCanWalkOrFly() const
     return true;
 }
 
-void Creature::AIM_Update(const uint32 &diff)
+void Creature::Update(uint32 diff)
 {
     switch( m_deathState )
     {
@@ -298,11 +298,6 @@ void Creature::AIM_Initialize()
 {
     i_motionMaster.Initialize(this);
     i_AI = FactorySelector::selectAI(this);
-}
-
-void Creature::Update( uint32 p_time )
-{
-    AIM_Update( p_time );
 }
 
 bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry)

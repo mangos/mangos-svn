@@ -1043,8 +1043,13 @@ void ObjectMgr::LoadQuests()
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `quest_template`");
     if(result == NULL)
     {
-        sLog.outError("Error opening quest_template table.\n");
-        exit(1);
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded 0 quests definitions" );
+        sLog.outError("`quest_template` table is empty!");
+        return;
     }
 
     // create multimap previous quest for each existed quest

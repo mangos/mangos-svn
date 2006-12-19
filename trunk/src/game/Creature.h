@@ -248,9 +248,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
-        virtual void Update( uint32 time );
-        inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
-        inline void GetRespawnDist(float &d) const { d = m_respawnradius; }
+        void Update( uint32 time );                         // overwrited Unit::Update
+        void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
+        void GetRespawnDist(float &d) const { d = m_respawnradius; }
 
         void SaveAsPet();
         bool isTamed() const { return m_isTamed; }
@@ -272,7 +272,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
         }
 
-        void AIM_Update(const uint32 &);
         void AIM_Initialize(void);
         MotionMaster* operator->(void) { return &i_motionMaster; }
 
