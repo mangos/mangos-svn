@@ -1957,7 +1957,18 @@ uint8 Spell::CheckMana(uint32 *mana)
     if(m_spellInfo->powerType == -2)
     {
         uint32 currentHealth = m_caster->GetHealth();
-        uint32 healthCost = m_spellInfo->manaCost + m_spellInfo->ManaCostPercentage*m_caster->GetMaxHealth()/100;
+
+        uint32 healthCost;
+
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            PlayerLevelInfo info;
+            objmgr.GetPlayerLevelInfo(m_caster->getRace(),m_caster->getClass(),m_caster->getLevel(),&info);
+            healthCost = m_spellInfo->manaCost + int32(float(m_spellInfo->ManaCostPercentage)/100.0 * info.health);
+        }
+        else
+            healthCost = m_spellInfo->manaCost + int32(float(m_spellInfo->ManaCostPercentage)/100.0 * m_caster->GetMaxHealth());
+
         *mana = healthCost;
         if(currentHealth <= healthCost)
             return CAST_FAIL_CANT_DO_THAT_YET;
@@ -1978,7 +1989,16 @@ uint8 Spell::CheckMana(uint32 *mana)
     if(m_spellInfo->manaCostPerlevel)
         manaCost += int32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
     if(m_spellInfo->ManaCostPercentage)
-        manaCost += int32(float(m_spellInfo->ManaCostPercentage)/100.0*m_caster->GetMaxPower(powerType));
+    {
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && powerType==POWER_MANA)
+        {
+            PlayerLevelInfo info;
+            objmgr.GetPlayerLevelInfo(m_caster->getRace(),m_caster->getClass(),m_caster->getLevel(),&info);
+            manaCost += int32(float(m_spellInfo->ManaCostPercentage)/100.0 * info.mana);
+        }
+        else
+            manaCost += int32(float(m_spellInfo->ManaCostPercentage)/100.0*m_caster->GetMaxPower(powerType));
+    }
 
     Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
