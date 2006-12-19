@@ -1213,7 +1213,7 @@ void Aura::HandleAuraTracResources(bool apply)
 
 void Aura::HandleAuraModScale(bool apply)
 {
-    m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,10,apply);
+    m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleModPossess(bool apply)

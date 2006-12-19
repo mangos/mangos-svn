@@ -868,6 +868,7 @@ void Spell::EffectSummon(uint32 i)
     name.append("'s Pet");
     spawnCreature->SetName( name );
 
+    spawnCreature->AddToWorld();
     MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1107,6 +1108,7 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetArmor(level*50);
     spawnCreature->AIM_Initialize();
 
+    spawnCreature->AddToWorld();
     MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1404,6 +1406,8 @@ void Spell::EffectSummonPet(uint32 i)
 
         NewSummon->SaveToDB();
         NewSummon->AIM_Initialize();
+
+        NewSummon->AddToWorld();
         MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);
 
         m_caster->SetPet(NewSummon);
@@ -2347,6 +2351,8 @@ void Spell::EffectSummonCritter(uint32 i)
     name.append("'s Pet");
     critter->SetName( name );
     m_caster->SetPet(critter);
+
+    critter->AddToWorld();
     MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)critter);
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {

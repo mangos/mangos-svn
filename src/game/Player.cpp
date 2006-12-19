@@ -3143,8 +3143,8 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
         return false;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
-    uint32 SkillValue = SKILL_VALUE(data);
-    uint32 MaxValue   = SKILL_MAX(data);
+    uint16 SkillValue = SKILL_VALUE(data);
+    uint16 MaxValue   = SKILL_MAX(data);
 
     if ( !MaxValue || !SkillValue || SkillValue >= MaxValue )
         return false;
@@ -3153,7 +3153,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
 
     if ( Roll <= Chance )
     {
-        SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+        SetUInt32Value(PLAYER_SKILL(i)+1,MAKE_SKILL_VALUE(SkillValue+1,MaxValue));
         sLog.outDebug("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance/10.0);
         return true;
     }

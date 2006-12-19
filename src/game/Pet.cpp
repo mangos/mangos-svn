@@ -150,6 +150,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     delete result;
 
     AIM_Initialize();
+    AddToWorld();
     MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
     owner->SetPet(this);
     sLog.outDebug("New Pet has guid %u", GetGUIDLow());
