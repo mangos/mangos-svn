@@ -2042,6 +2042,12 @@ void Player::learnSpell(uint16 spell_id)
         case 2842:                                          //poisons
             SetSkill(40,1,maxskill);
             break;
+        case 33388:                                         //Min riding
+            SetSkill(762,75,75);
+            break;
+        case 33391:                                         //Mid riding
+            SetSkill(762,150,150);
+            break;
             // Languages
         case 668: case 669: case 670: case 671:  case 672:  case 813: case 814:
         case 815: case 816: case 817: case 7340: case 7341: case 17737:
