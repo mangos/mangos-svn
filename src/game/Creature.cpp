@@ -53,7 +53,7 @@ Creature::Creature() :
 Unit(), i_AI(NULL), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
 m_deathTimer(0), m_respawnTimer(0), m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
 itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
-m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false), m_isTamed(false),
+m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
 {
     m_valuesCount = UNIT_END;
@@ -71,8 +71,11 @@ m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
 
 Creature::~Creature()
 {
-    CombatStop();
-    RemoveAllAuras();
+    if(m_uint32Values)                                      // only for fully created object
+    {
+        CombatStop();
+        RemoveAllAuras();
+    }
 
     for( SpellsList::iterator i = m_tspells.begin( ); i != m_tspells.end( ); i++ )
         delete (*i);
@@ -190,9 +193,6 @@ void Creature::Update(uint32 diff)
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;
 
-                if ( isTamed() )
-                    Untamed();
-
                 float x,y,z;
                 GetRespawnCoord(x, y, z);
                 MapManager::Instance().GetMap(GetMapId())->CreatureRelocation(this,x,y,z,GetOrientation());
@@ -204,17 +204,13 @@ void Creature::Update(uint32 diff)
         }
         case ALIVE:
         {
-            if(isPet() || isTamed())
+            if(isPet())
             {
                 // unsummon pet that lost owner
                 Unit* owner = GetOwner();
                 if(!owner||!IsWithinDistInMap(owner, OWNER_MAX_DISTANCE))
                 {
-                    if(isPet())
-                        ((Pet*)this)->Unsummon();
-                    else
-                    if(isTamed())
-                        Untamed();
+                    ((Pet*)this)->Abandon();
                     return;
                 }
             }
@@ -937,7 +933,7 @@ void Creature::SelectLevel(const CreatureInfo *cinfo)
 
     uint32 minhealth = min(cinfo->maxhealth, cinfo->minhealth);
     uint32 maxhealth = max(cinfo->maxhealth, cinfo->minhealth);
-    uint32 health = uint32(_GetHealthMod(cinfo->rank) * (minhealth + uint32(rellevel*(maxhealth - minhealth))));
+    uint32 health = uint32(_GetHealthMod(isPet() ? 0 : cinfo->rank) * (minhealth + uint32(rellevel*(maxhealth - minhealth))));
 
     SetMaxHealth(health);
     SetUInt32Value(UNIT_FIELD_BASE_HEALTH,health);
@@ -1000,7 +996,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
         sLog.outString("Error: creature entry %u does not exist.",Entry);
         return false;
     }
-    uint32 rank = cinfo->rank;
+    uint32 rank = isPet()? 0 : cinfo->rank;
     float damagemod = _GetDamageMod(rank);;
 
     uint32 display_id = cinfo->randomDisplayID();
@@ -1373,128 +1369,6 @@ SpellEntry *Creature::reachWithSpellCure(Unit *pVictim)
         return spellInfo;
     }
     return NULL;
-}
-
-void Creature::Untamed()
-{
-    if(!isTamed())
-        return;
-
-    Unit* owner = GetOwner();
-
-    if(owner && owner->GetTypeId()==TYPEID_PLAYER)
-        ((Player*)owner)->UnTamePet(this);
-    else
-    {
-        SetMaxPower(POWER_HAPPINESS,0);
-        SetPower(POWER_HAPPINESS,0);
-        SetMaxPower(POWER_FOCUS,0);
-        SetPower(POWER_FOCUS,0);
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,GetCreatureInfo()->faction);
-        SetUInt64Value(UNIT_FIELD_CREATEDBY, 0);
-        SetUInt32Value(UNIT_FIELD_PETNUMBER,0);
-        if(owner)
-            owner->SetPet(0);
-        SetTamed(false);
-        AIM_Initialize();
-    }
-}
-
-void Creature::GivePetXP(uint32 xp)
-{
-    if(!isPet() || !GetUInt32Value(UNIT_FIELD_PETNUMBER))
-        return;
-    if ( xp < 1 )
-        return;
-
-    uint32 level = getLevel();
-
-    // XP to money conversion processed in Player::RewardQuest
-    if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
-        return;
-
-    uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
-    uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
-    uint32 newXP = curXP + xp;
-
-    if(newXP >= nextLvlXP && level+1 > GetOwner()->getLevel())
-    {
-        SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, nextLvlXP-1);
-        return;
-    }
-
-    while( newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
-    {
-        newXP -= nextLvlXP;
-
-        SetLevel( level + 1 );
-        SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(level+1))/4));
-
-        level = getLevel();
-        nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
-        GivePetLevel(level);
-    }
-
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, newXP);
-}
-
-void Creature::GivePetLevel(uint32 level)
-{
-    if(!level)
-        return;
-    uint32 loyalty = 1;
-    CreatureInfo const *cinfo = GetCreatureInfo();
-    // pet damage will grow up with the pet level,*1.5f for temp
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(level-cinfo->minlevel)*1.5f);
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(level-cinfo->minlevel)*1.5f);
-    SetUInt32Value(UNIT_TRAINING_POINTS, (level<<16) + getUsedTrainPoint());
-    SetUInt32Value(UNIT_FIELD_BYTES_1,(getloyalty()<<8));
-    SetHealth( 28 + 10 * level);
-    SetMaxHealth( 28 + 10 * level);
-    SetStat(STAT_STRENGTH,uint32(20+level*1.55));
-    SetStat(STAT_AGILITY,uint32(20+level*0.64));
-    SetStat(STAT_STAMINA,uint32(20+level*1.27));
-    SetStat(STAT_INTELLECT,uint32(20+level*0.18));
-    SetStat(STAT_SPIRIT,uint32(20+level*0.36));
-    SetArmor(level*50);
-
-    if(level - cinfo->minlevel >= 21)
-        loyalty = 7;
-    else if(level - cinfo->minlevel >= 15)
-        loyalty = 6;
-    else if(level - cinfo->minlevel >= 10)
-        loyalty = 5;
-    else if(level - cinfo->minlevel >= 6)
-        loyalty = 4;
-    else if(level - cinfo->minlevel >= 3)
-        loyalty = 3;
-    else if(level - cinfo->minlevel >= 1)
-        loyalty = 2;
-    SetUInt32Value(UNIT_FIELD_BYTES_1,(loyalty << 8));
-}
-
-void Creature::SaveAsPet()
-{
-    if(!isTamed() && !isPet())
-        return;
-    if(!GetEntry())
-        return;
-    uint32 loyalty =1;
-    if(isTamed())
-        loyalty = 1;
-    else loyalty = getloyalty();
-
-    uint32 owner = GUID_LOPART(GetOwnerGUID());
-    std::string name = GetName();
-    sDatabase.escape_string(name);
-
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
-    sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
-    sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s',1)",
-        GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], STATE_RA_FOLLOW, GetPower(POWER_HAPPINESS),loyalty,getUsedTrainPoint(),name.c_str());
-    sDatabase.CommitTransaction();
 }
 
 bool Creature::IsVisibleInGridForPlayer(Player* pl) const

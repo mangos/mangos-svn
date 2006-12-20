@@ -72,9 +72,6 @@ Player::Player (WorldSession *session): Unit()
     m_curTarget = 0;
     m_curSelection = 0;
     m_lootGuid = 0;
-    m_petInfoId = 0;
-    m_petLevel = 0;
-    m_petFamilyId = 0;
 
     m_regenTimer = 0;
     m_dismountCost = 0;
@@ -161,9 +158,10 @@ Player::Player (WorldSession *session): Unit()
 
 Player::~Player ()
 {
-    DuelComplete(0);
+    if(m_uint32Values)                                      // only for fully created Object
+        CombatStop();
 
-    CombatStop();
+    DuelComplete(0);
 
     TradeCancel(false);
 
@@ -371,10 +369,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         for( i=0; i<4 ;i++)
             action_itr[i]++;
     }
-
-    m_petInfoId = 0;
-    m_petLevel = 0;
-    m_petFamilyId = 0;
 
     m_rating = 0;
     m_highest_rank = 0;
@@ -931,9 +925,35 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << uint8(0x0);                                  //is this player_GUILDRANK????
 
     *p_data << (uint8)0;
-    *p_data << (uint32)m_petInfoId;
-    *p_data << (uint32)m_petLevel;
-    *p_data << (uint32)m_petFamilyId;
+
+    // Pets info
+    {
+        uint32 petDisplayId = 0;
+        uint32 petLevel   = 0;
+        uint32 petFamily  = 0;
+
+        QueryResult *result = sDatabase.PQuery("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'", GetGUIDLow() );
+        if(result)
+        {
+            Field* fields = result->Fetch();
+
+            uint32 entry = fields[0].GetUInt32();
+            CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
+            if(cInfo)
+            {
+                petDisplayId = fields[1].GetUInt32();
+                petLevel     = fields[2].GetUInt32();
+                petFamily    = cInfo->family;
+            }
+
+            delete result;
+        }
+
+        *p_data << (uint32)petDisplayId;
+        *p_data << (uint32)petLevel;
+        *p_data << (uint32)petFamily;
+    }
+
 
     ItemPrototype const *items[EQUIPMENT_SLOT_END];
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
@@ -1132,7 +1152,7 @@ void Player::SendIgnorelist()
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange, bool ignore_transport)
 {
     // prepering unsommon pet if lost (we must get pet before teleportation or will not find it later)
-    Creature* pet = GetPet();
+    Pet* pet = GetPet();
 
     // if we were on a transport, leave
     if (ignore_transport && m_transport)
@@ -1227,7 +1247,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         // unsommon pet if lost
         if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
-            UnsummonPet(pet);
+            AbandonPet(pet);
     }
 
     UpdateZone();
@@ -9155,6 +9175,7 @@ bool Player::MinimalLoadFromDB( uint32 guid )
         m_items[i] = NULL;
 
     delete result;
+
     return true;
 }
 
@@ -9655,15 +9676,9 @@ void Player::_LoadMail()
 
 void Player::LoadPet()
 {
-    uint64 pet_guid = GetPetGUID();
-    if(pet_guid)
-    {
-        Creature* in_pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
-        if(in_pet)
-            return;
-        Pet *pet = new Pet();
-        pet->LoadPetFromDB(this);
-    }
+    Pet *pet = new Pet(getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
+    if(!pet->LoadPetFromDB(this))
+        delete pet;
 }
 
 void Player::_LoadQuestStatus()
@@ -10172,9 +10187,9 @@ void Player::_SaveTutorials()
 
 void Player::SavePet()
 {
-    Creature* pet = GetPet();
-    if(pet && (pet->isPet() || pet->isTamed()))
-        pet->SaveAsPet();
+    Pet* pet = GetPet();
+    if(pet)
+        pet->SavePetToDB(true);
 }
 
 void Player::outDebugValues() const
@@ -10345,56 +10360,34 @@ void Player::UpdateDuelFlag(time_t currTime)
     duel->opponent->duel->startTime  = currTime;
 }
 
-void Player::UnsummonPet(Creature* pet)
+void Player::AbandonPet(Pet* pet, bool real)
 {
     if(!pet)
         pet = GetPet();
 
-    if(!pet||pet->GetGUID()!=GetPetGUID()) return;
+    if(!pet||pet->GetOwnerGUID()!=GetGUID()) return;
 
     SetPet(0);
 
-    pet->CombatStop();
+    if(real)
+        pet->SavePetToDB(false);
 
-    if(pet->isPet())
-        pet->SaveAsPet();
+    pet->CombatStop();
 
     WorldPacket data;
     data.Initialize(SMSG_DESTROY_OBJECT);
     data << pet->GetGUID();
     SendMessageToSet (&data, true);
 
-    data.Initialize(SMSG_PET_SPELLS);
-    data << uint64(0);
-    GetSession()->SendPacket(&data);
-
     ObjectAccessor::Instance().AddObjectToRemoveList(pet);
-}
 
-void Player::UnTamePet(Creature* pet)
-{
-    if(!pet)
-        pet = GetPet();
-
-    if(!pet||!pet->isTamed()||pet->GetGUID()!=GetPetGUID()) return;
-
-    pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,pet->GetCreatureInfo()->faction);
-    pet->SetMaxPower(POWER_HAPPINESS,0);
-    pet->SetPower(POWER_HAPPINESS,0);
-    pet->SetMaxPower(POWER_FOCUS,0);
-    pet->SetPower(POWER_FOCUS,0);
-    pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, 0);
-    pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,0);
-    pet->SetTamed(false);
-    SetPet(0);
-
-    pet->AIM_Initialize();
-
-    WorldPacket data;
-
-    data.Initialize(SMSG_PET_SPELLS);
-    data << uint64(0);
-    GetSession()->SendPacket(&data);
+    if(pet->getPetType()==SUMMON_PET || pet->getPetType()==HUNTER_PET)
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_PET_SPELLS);
+        data << uint64(0);
+        GetSession()->SendPacket(&data);
+    }
 }
 
 void Player::Uncharm()

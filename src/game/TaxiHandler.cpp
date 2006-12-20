@@ -297,7 +297,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
     }
 
     // unsommon pet, it will be lost anyway
-    GetPlayer( )->UnsummonPet();
+    GetPlayer( )->AbandonPet();
 
     //CHECK DONE, DO FLIGHT
 
@@ -429,7 +429,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     GetPlayer()->AddTaxiDestination(destinationnode);
 
     // unsommon pet, it will be lost anyway
-    GetPlayer( )->UnsummonPet();
+    GetPlayer( )->AbandonPet();
 
     //CHECK DONE, DO FLIGHT
 

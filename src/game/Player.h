@@ -36,6 +36,7 @@ struct Mail;
 class Channel;
 class DynamicObject;
 class Creature;
+class Pet;
 class PlayerMenu;
 class Transport;
 
@@ -471,7 +472,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             if(s == JUST_DIED && cur)
             {
                 _RemoveAllItemMods();
-                UnsummonPet();
+                AbandonPet();
             }
             Unit::setDeathState(s);
             if(isAlive() && !cur)
@@ -505,8 +506,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetTimeInnEter() const { return time_inn_enter; };
         void UpdateInnerTime (int time) { time_inn_enter = time; };
 
-        void UnsummonPet(Creature* pet = NULL);
-        void UnTamePet(Creature* pet = NULL);
+        void AbandonPet(Pet* pet = NULL, bool real = true);
         void Uncharm();
 
         float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
@@ -1175,9 +1175,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_class;
         uint32 m_team;
         uint8  m_outfitId;
-        uint16 m_petInfoId;
-        uint16 m_petLevel;
-        uint16 m_petFamilyId;
         uint32 m_dismountCost;
         uint32 m_nextSave;
 

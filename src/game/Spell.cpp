@@ -27,6 +27,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Pet.h"
 #include "Unit.h"
 #include "Spell.h"
 #include "DynamicObject.h"
@@ -242,7 +243,7 @@ void Spell::FillTargetMap()
                     tmpUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_LEARN_PET_SPELL:
-                    if(Creature* pet = m_caster->GetPet())
+                    if(Pet* pet = m_caster->GetPet())
                         tmpUnitMap.push_back(pet);
                     break;
                 case SPELL_EFFECT_DISENCHANT:
@@ -300,7 +301,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_PET:
         {
-            Unit* tmpUnit = m_caster->GetPet();
+            Pet* tmpUnit = m_caster->GetPet();
             if (!tmpUnit) break;
             TagUnitMap.push_back(tmpUnit);
         }break;
@@ -1315,7 +1316,7 @@ void Spell::SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage,
 
 void Spell::SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal)
 {
-    Creature* pet = target->GetPet();
+    Pet* pet = target->GetPet();
     if(!pet)
         return;
 
@@ -1766,12 +1767,12 @@ uint8 Spell::CanCast()
                 break;
             }
             case SPELL_EFFECT_SUMMON:
-            case SPELL_EFFECT_SUMMON_WILD:
-            case SPELL_EFFECT_SUMMON_GUARDIAN:
+            //case SPELL_EFFECT_SUMMON_WILD:                //not store in pet field
+            //case SPELL_EFFECT_SUMMON_GUARDIAN:            //not store in pet field
             case SPELL_EFFECT_SUMMON_PET:
             case SPELL_EFFECT_SUMMON_POSSESSED:
             case SPELL_EFFECT_SUMMON_PHANTASM:
-            case SPELL_EFFECT_SUMMON_CRITTER:
+            case SPELL_EFFECT_SUMMON_CRITTER:             //not store in pet field
             case SPELL_EFFECT_SUMMON_DEMON:
             {
                 if(m_caster->GetPetGUID())

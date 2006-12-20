@@ -252,12 +252,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
         void GetRespawnDist(float &d) const { d = m_respawnradius; }
 
-        void SaveAsPet();
-        bool isTamed() const { return m_isTamed; }
-        void SetTamed(bool isTamed) { m_isTamed = isTamed; }
-        void Untamed();
-        void GivePetXP(uint32 xp);
-
         bool isPet() const { return m_isPet; }
         bool isTotem() const { return m_isTotem; }
         bool isCivilian() const { return GetCreatureInfo()->civilian != 0; }
@@ -268,6 +262,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool isElite() const
         {
+            if(isPet())
+                return false;
+
             uint32 rank = GetCreatureInfo()->rank;
             return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
         }
@@ -364,7 +361,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         float GetAttackDistance(Unit *pl) const;
         uint32 getloyalty(){ return ((GetUInt32Value(UNIT_FIELD_BYTES_1) >> 8) & 0xFF);};
         uint32 getUsedTrainPoint(){ return (GetUInt32Value(UNIT_TRAINING_POINTS) & 0xFFFF);};
-        void GivePetLevel(uint32 level);
 
         void CallAssistence();
         void SetNoCallAssistence(bool val) { m_AlreadyCallAssistence = val; }
@@ -412,7 +408,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint8 m_emoteState;
         bool m_isPet;                                       // set only in Pet::Pet
         bool m_isTotem;                                     // set only in Totem::Totem
-        bool m_isTamed;
         void RegenerateMana();
         void RegenerateHealth();
         uint32 m_regenTimer;

@@ -19,7 +19,20 @@
 #ifndef MANGOSSERVER_PET_H
 #define MANGOSSERVER_PET_H
 
+#include "ObjectDefines.h"
 #include "Creature.h"
+
+enum PetType
+{
+    SUMMON_PET = 0,
+    HUNTER_PET,
+    GUARDIAN_PET,
+    MINI_PET
+};
+
+#define MAX_PET_TYPE 4
+
+extern char const* petTypeSuffix[MAX_PET_TYPE];
 
 enum PetState
 {
@@ -43,7 +56,7 @@ enum PetState
 class Pet : public Creature
 {
     public:
-        Pet();
+        explicit Pet(PetType type);
         virtual ~Pet(){};
 
         uint32 GetActState() { return m_actState; }
@@ -53,15 +66,53 @@ class Pet : public Creature
         bool HasActState(uint32 st) { return m_actState & st;};
         uint32 GetFealty() { return m_fealty; }
         void SetFealty(uint32 fealty) { m_fealty=fealty; }
+        PetType getPetType() const { return m_petType; }
+
+        void CreateBaseAtCreature( Creature* creature );
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0 );
-        void SaveToDB();                                    // overwrited of Creature::SaveToDB
-        void DeleteFromDB();                                // overwrited of Creature::DeleteFromDB
-        void Unsummon();
+        void SavePetToDB(bool current);
+        void DeletePetFromDB();
+        void Abandon();
 
         void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
 
+        void GivePetXP(uint32 xp);
+        void GivePetLevel(uint32 level);
     protected:
         uint32 m_actState;
         uint32 m_fealty;
+        PetType m_petType;
+    private:
+        void SaveToDB() { assert(false); }                  // overwrited of Creature::SaveToDB     - don't must be called
+        void DeleteFromDB() { assert(false); }              // overwrited of Creature::DeleteFromDB - don't must be called
 };
+
+class PetWithIdCheck
+{
+    public:
+        PetWithIdCheck(Unit* owner, uint32 entry) : i_owner(owner), i_entry(entry), i_result(NULL) {}
+        bool operator()(Unit* u)
+        {
+            if(u->GetTypeId()!=TYPEID_UNIT)
+                return false;
+            
+            if(!((Creature*)u)->isPet())
+                return false;
+            
+            if(u->GetEntry()!=i_entry)
+                return false;
+            
+            if(u->GetOwnerGUID()!=i_owner->GetGUID())
+                return false;
+
+            i_result = (Pet*)u;
+            return true;
+        }
+        Pet *GetResult() const { return i_result; }
+    private:
+        Unit* const i_owner;
+        uint32 i_entry;
+        Pet* i_result;
+};
+
 #endif
