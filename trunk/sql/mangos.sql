@@ -333,6 +333,7 @@ CREATE TABLE `character_pet` (
   `loyalty` int(11) unsigned NOT NULL default '1',
   `trainpoint` int(11) unsigned NOT NULL default '0',
   `name` varchar(100) default 'Pet',
+  `renamed` tinyint(1) unsigned NOT NULL default '0',
   `current` tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)

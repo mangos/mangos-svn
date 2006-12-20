@@ -10367,7 +10367,9 @@ void Player::AbandonPet(Pet* pet, bool real)
 
     if(!pet||pet->GetOwnerGUID()!=GetGUID()) return;
 
-    SetPet(0);
+    // only if current pet in slot
+    if(GetPetGUID()==pet->GetGUID())
+        SetPet(0);
 
     if(real)
         pet->SavePetToDB(false);

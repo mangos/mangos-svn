@@ -1351,6 +1351,14 @@ void Spell::EffectSummonPet(uint32 i)
 
     uint32 petentry = m_spellInfo->EffectMiscValue[i];
 
+    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(petentry);
+
+    if(!cInfo)
+    {
+        sLog.outError("EffectSummonPet: creature entry %u not found.",petentry);
+        return;
+    }
+
     Pet *OldSummon = m_caster->GetPet();
 
     // if pet requested type already exist
@@ -1388,7 +1396,7 @@ void Spell::EffectSummonPet(uint32 i)
             return;
     }
 
-    Pet* NewSummon = new Pet(SUMMON_PET);
+    Pet* NewSummon = new Pet(m_caster->getClass() == CLASS_HUNTER && cInfo->type == CREATURE_TYPE_BEAST ? HUNTER_PET : SUMMON_PET);
 
     if(NewSummon->LoadPetFromDB(m_caster,petentry))
     {
@@ -1439,7 +1447,7 @@ void Spell::EffectSummonPet(uint32 i)
             if(new_name!="")
                 NewSummon->SetName(new_name);
         }
-        else if(m_caster->getClass() == CLASS_HUNTER && NewSummon->GetCreatureInfo()->type == CREATURE_TYPE_BEAST)
+        else if(m_caster->getClass() == CLASS_HUNTER && cInfo->type == CREATURE_TYPE_BEAST)
         {
             // this enables popup window (pet detals, abandon, rename)
             NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);

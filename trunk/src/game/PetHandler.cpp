@@ -225,13 +225,14 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     recv_data >> name;
 
     Creature* pet = ObjectAccessor::Instance().GetCreature(*_player,petguid);
-    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || pet->GetOwnerGUID() != _player->GetGUID())
+    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || !pet->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME) || pet->GetOwnerGUID() != _player->GetGUID() )
         return;
 
     pet->SetName(name);
+    pet->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME);
         
     sDatabase.escape_string(name);
-    sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s' WHERE `owner` = '%u' AND `entry` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetEntry() );
+    sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s', `renamed` = '1' WHERE `owner` = '%u' AND `entry` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetEntry() );
     
     SendPetNameQuery(petguid,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER));
 }
