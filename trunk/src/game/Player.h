@@ -432,7 +432,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
-
         void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
         void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
         uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
@@ -441,6 +440,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_TaxiDestinations.pop_front();
             return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front();
         }
+        bool ActivateTaxiPathTo(std::vector<uint32> const& nodes );
 
         bool isAcceptTickets() const;
         void SetAcceptTicket(bool on) { if(on) m_GMFlags |= GM_ACCEPT_TICKETS; else m_GMFlags &= ~GM_ACCEPT_TICKETS; }

@@ -439,14 +439,13 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
                 return;
             }
-            // not check level requiremnt for normal items (PvP related bonus items is another case and nt implemented)
-            /*
-            if( _player->getLevel() < pProto->RequiredLevel )
+            // not check level requiremnt for normal items (PvP related bonus items is another case)
+            if(pProto->RequiredHonorRank && (_player->GetHonorRank() < pProto->RequiredHonorRank || _player->getLevel() < pProto->RequiredLevel) )
             {
                 _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
                 return;
             }
-            */
+
             uint32 price  = pProto->BuyPrice * count;
             if( _player->GetMoney() < price )
             {
@@ -528,14 +527,13 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
                 _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
                 return;
             }
-            // not check level requiremnt for normal items (PvP related bonus items is another case and nt implemented)
-            /*
-            if( _player->getLevel() < pProto->RequiredLevel )
+            // not check level requiremnt for normal items (PvP related bonus items is another case)
+            if(pProto->RequiredHonorRank && (_player->GetHonorRank() < pProto->RequiredHonorRank || _player->getLevel() < pProto->RequiredLevel) )
             {
                 _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
                 return;
             }
-            */
+
             uint32 price = pProto->BuyPrice * count;
 
             if( _player->GetMoney() < price )

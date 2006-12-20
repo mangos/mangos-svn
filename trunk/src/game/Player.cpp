@@ -10627,3 +10627,117 @@ void Player::HandleInvisiblePjs()
         m_DetectInvTimer = 0;
     InvisiblePjsNear.clear();
 }
+
+bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
+{
+    if(nodes.size() < 2)
+        return false;
+
+    // not let cheating with start flight mounted
+    if(IsMounted())
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_CAST_RESULT);
+        data << uint32(0);
+        data << uint8(2);
+        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
+        GetSession()->SendPacket(&data);
+        return false;
+    }
+
+    if( HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
+        return false;
+
+    // not let flight if casting not finished
+    if(m_currentSpell)
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
+        data << uint32( 7 );
+        GetSession()->SendPacket( &data );
+        return false;
+    }
+
+    uint32 curloc = objmgr.GetNearestTaxiNode( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId() );
+
+    uint32 sourcenode = nodes[0];
+
+    // starting node != nearest node (cheat?)
+    if(curloc != sourcenode)
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
+        data << uint32( 4 );
+        GetSession()->SendPacket( &data );
+        return false;
+    }
+
+    uint32 sourcepath = 0;
+    uint32 totalcost = 0;
+
+    uint32 prevnode = sourcenode;
+    uint32 lastnode = 0;
+
+    ClearTaxiDestinations();
+
+    for(uint32 i = 1; i < nodes.size(); ++i)
+    {
+        uint32 path, cost;
+
+        lastnode =  nodes[i];
+        objmgr.GetTaxiPath( prevnode, lastnode, path, cost);
+
+        if(!path)
+            break;
+
+        totalcost += cost;
+
+        if(prevnode == sourcenode)
+            sourcepath = path;
+
+        AddTaxiDestination(lastnode);
+
+        prevnode = lastnode;
+    }
+
+    uint16 MountId = objmgr.GetTaxiMount(sourcenode, GetTeam());
+
+    if ( MountId == 0 || sourcepath == 0)
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
+        data << uint32( 1 );
+        GetSession()->SendPacket( &data );
+        return false;
+    }
+
+    uint32 money = GetMoney();
+    if(money < totalcost )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_ACTIVATETAXIREPLY );
+        data << uint32( 3 );
+        GetSession()->SendPacket( &data );
+        return false;
+    }
+
+    // unsommon pet, it will be lost anyway
+    AbandonPet();
+
+    //CHECK DONE, DO FLIGHT
+
+    SaveToDB();                               //For temporary avoid save player on air
+
+    setDismountCost( money - totalcost);
+
+    WorldPacket data;
+    data.Initialize( SMSG_ACTIVATETAXIREPLY );
+    data << uint32( 0 );
+    GetSession()->SendPacket( &data );
+
+    sLog.outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
+
+    GetSession()->SendDoFlight( MountId, sourcepath );
+
+    return true;
+}
