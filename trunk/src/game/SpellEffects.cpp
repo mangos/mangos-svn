@@ -44,6 +44,8 @@
 #include "Creature.h"
 #include "Totem.h"
 #include "CreatureAI.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -822,7 +824,7 @@ void Spell::EffectSummon(uint32 i)
     if(!pet_entry)
         return;
     uint32 level = m_caster->getLevel();
-    Pet* spawnCreature = new Pet();
+    Pet* spawnCreature = new Pet(SUMMON_PET);
 
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
         m_caster->GetMapId(),
@@ -865,7 +867,7 @@ void Spell::EffectSummon(uint32 i)
         name = ((Player*)m_caster)->GetName();
     else
         name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-    name.append("'s Pet");
+    name.append(petTypeSuffix[spawnCreature->getPetType()]);
     spawnCreature->SetName( name );
 
     spawnCreature->AddToWorld();
@@ -1060,62 +1062,89 @@ void Spell::EffectSummonWild(uint32 i)
     uint32 pet_entry = m_spellInfo->EffectMiscValue[i];
     if(!pet_entry)
         return;
-    uint32 level = m_caster->getLevel();
 
-    // level of pet summoned using engineering item based at engineering skill level
-    if(m_caster->GetTypeId()==TYPEID_PLAYER && m_CastItem)
+    Pet* old_wild = NULL;
+
     {
-        ItemPrototype const *proto = m_CastItem->GetProto();
-        if(proto && proto->RequiredSkill == SKILL_ENGINERING)
-        {
-            uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINERING);
-            if(skill202)
-            {
-                level = skill202/5;
-            }
-        }
+        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+        Cell cell = RedZone::GetZone(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+        cell.SetNoCreate();
+
+        PetWithIdCheck u_check(m_caster, pet_entry);
+        MaNGOS::UnitSearcher<PetWithIdCheck> checker((Unit*&)old_wild, u_check);
+        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        CellLock<GridReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
     }
 
-    Pet* spawnCreature = new Pet();
-
-    if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-        m_caster->GetMapId(),
-        m_caster->GetPositionX(),m_caster->GetPositionY(),
-        m_caster->GetPositionZ(),m_caster->GetOrientation(),
-        m_spellInfo->EffectMiscValue[i]))
+    if (old_wild)                                           // find old critter, unsummon
     {
-        sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
-        delete spawnCreature;
+        old_wild->Abandon();
         return;
     }
-
-    spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-    spawnCreature->setPowerType(POWER_MANA);
-    spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
-    spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
-    spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-    spawnCreature->SetHealth(    28 + 30*level);
-    spawnCreature->SetMaxHealth( 28 + 30*level);
-    spawnCreature->SetLevel(level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-    spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-    spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
-
-    spawnCreature->SetArmor(level*50);
-    spawnCreature->AIM_Initialize();
-
-    spawnCreature->AddToWorld();
-    MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
-
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    else                                                    // in another case summon new
     {
-        m_caster->SetPet(spawnCreature);
-        ((Player*)m_caster)->PetSpellInitialize();
-        ((Player*)m_caster)->SavePet();
+
+        uint32 level = m_caster->getLevel();
+
+        // level of pet summoned using engineering item based at engineering skill level
+        if(m_caster->GetTypeId()==TYPEID_PLAYER && m_CastItem)
+        {
+            ItemPrototype const *proto = m_CastItem->GetProto();
+            if(proto && proto->RequiredSkill == SKILL_ENGINERING)
+            {
+                uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINERING);
+                if(skill202)
+                {
+                    level = skill202/5;
+                }
+            }
+        }
+
+        Pet* spawnCreature = new Pet(GUARDIAN_PET);
+
+        if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
+            m_caster->GetMapId(),
+            m_caster->GetPositionX(),m_caster->GetPositionY(),
+            m_caster->GetPositionZ(),m_caster->GetOrientation(),
+            m_spellInfo->EffectMiscValue[i]))
+        {
+            sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+            delete spawnCreature;
+            return;
+        }
+
+        spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
+        spawnCreature->setPowerType(POWER_MANA);
+        spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
+        spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
+        spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
+        spawnCreature->SetHealth(    28 + 30*level);
+        spawnCreature->SetMaxHealth( 28 + 30*level);
+        spawnCreature->SetLevel(level);
+        spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+        spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
+        spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
+        spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
+        spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
+        spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+        spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
+
+        spawnCreature->SetArmor(level*50);
+        spawnCreature->AIM_Initialize();
+
+        spawnCreature->AddToWorld();
+        MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
+/*
+        guardians and wilds can't be controled
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            m_caster->SetPet(spawnCreature);
+            ((Player*)m_caster)->PetSpellInitialize();
+            ((Player*)m_caster)->SavePet();
+        }
+*/
     }
 }
 
@@ -1272,31 +1301,43 @@ void Spell::EffectTameCreature(uint32 i)
 
     Creature* creatureTarget = (Creature*)unitTarget;
 
+    if(creatureTarget->isPet())
+        return;
+
     if(m_caster->getClass() == CLASS_HUNTER)
     {
         creatureTarget->AttackStop();
         if(m_caster->getVictim()==creatureTarget)
             m_caster->AttackStop();
 
-        creatureTarget->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
-        creatureTarget->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
-        creatureTarget->SetMaxPower(POWER_HAPPINESS,1000000);
-        creatureTarget->SetPower(   POWER_HAPPINESS,600000);
-        creatureTarget->setPowerType(POWER_FOCUS);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-        creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME); 
+        Pet* pet = new Pet(HUNTER_PET);
+
+        pet->CreateBaseAtCreature(creatureTarget);
+
+        ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(creatureTarget);
+        creatureTarget->setDeathState(JUST_DIED);
+
+        pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
+        pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
+        pet->SetMaxPower(POWER_HAPPINESS,1000000);
+        pet->SetPower(   POWER_HAPPINESS,600000);
+        pet->setPowerType(POWER_FOCUS);
+        pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+        pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
+        pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
+        pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME); 
                                                             // this enables popup window (pet detals, abandon, rename)
-        creatureTarget->SetUInt32Value(UNIT_FIELD_PETNUMBER,1); 
+        pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,1); 
                                                             // this enables pet detals window (Shift+P)
-        creatureTarget->SetTamed(true);
-        creatureTarget->AIM_Initialize();
+        pet->AIM_Initialize();
+
+        pet->AddToWorld();
+        MapManager::Instance().GetMap(pet->GetMapId())->Add((Creature*)pet);
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            m_caster->SetPet(creatureTarget);
+            m_caster->SetPet(pet);
             ((Player*)m_caster)->PetSpellInitialize();
             ((Player*)m_caster)->SavePet();
         }
@@ -1310,7 +1351,7 @@ void Spell::EffectSummonPet(uint32 i)
 
     uint32 petentry = m_spellInfo->EffectMiscValue[i];
 
-    Creature *OldSummon = m_caster->GetPet();
+    Pet *OldSummon = m_caster->GetPet();
 
     // if pet requested type already exist
     if(OldSummon && OldSummon->isPet() && OldSummon->GetCreatureInfo()->Entry == petentry)
@@ -1327,10 +1368,10 @@ void Spell::EffectSummonPet(uint32 i)
             OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
             (*OldSummon)->Clear();
         }
-        MapManager::Instance().GetMap(OldSummon->GetMapId())->Remove(OldSummon,false);
+        MapManager::Instance().GetMap(OldSummon->GetMapId())->Remove((Creature*)OldSummon,false);
         OldSummon->SetMapId(m_caster->GetMapId());
         OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-        MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
+        MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)OldSummon);
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             ((Player*)m_caster)->PetSpellInitialize();
@@ -1342,12 +1383,12 @@ void Spell::EffectSummonPet(uint32 i)
     if(OldSummon)
     {
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_caster)->UnsummonPet(OldSummon);
+            ((Player*)m_caster)->AbandonPet(OldSummon);
         else
             return;
     }
 
-    Pet* NewSummon = new Pet();
+    Pet* NewSummon = new Pet(SUMMON_PET);
 
     if(NewSummon->LoadPetFromDB(m_caster,petentry))
     {
@@ -1404,7 +1445,7 @@ void Spell::EffectSummonPet(uint32 i)
             NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);
         }
 
-        NewSummon->SaveToDB();
+        NewSummon->SavePetToDB(true);
         NewSummon->AIM_Initialize();
 
         NewSummon->AddToWorld();
@@ -2112,9 +2153,7 @@ void Spell::EffectDismissPet(uint32 i)
         return;
 
     if(m_caster->GetPet()->isPet())
-        ((Player*)m_caster)->UnsummonPet();
-    else if(m_caster->GetPet()->isTamed())
-        ((Player*)m_caster)->UnTamePet();
+        ((Player*)m_caster)->AbandonPet();
 }
 
 void Spell::EffectSummonObject(uint32 i)
@@ -2324,40 +2363,59 @@ void Spell::EffectSummonCritter(uint32 i)
     uint32 pet_entry = m_spellInfo->EffectMiscValue[i];
     if(!pet_entry)
         return;
-    Pet* critter = new Pet();
 
-    if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-        m_caster->GetMapId(),
-        m_caster->GetPositionX(),m_caster->GetPositionY(),
-        m_caster->GetPositionZ(),m_caster->GetOrientation(),
-        m_spellInfo->EffectMiscValue[i]))
+    Pet* old_critter = NULL;
+
     {
-        sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
-        delete critter;
-        return;
+        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+        Cell cell = RedZone::GetZone(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+        cell.SetNoCreate();
+
+        PetWithIdCheck u_check(m_caster, pet_entry);
+        MaNGOS::UnitSearcher<PetWithIdCheck> checker((Unit*&)old_critter, u_check);
+        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        CellLock<GridReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
     }
 
-    critter->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-    critter->SetUInt64Value(UNIT_FIELD_CREATEDBY,m_caster->GetGUID());
-    critter->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-
-    critter->AIM_Initialize();
-
-    std::string name;
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        name = ((Player*)m_caster)->GetName();
-    else
-        name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-    name.append("'s Pet");
-    critter->SetName( name );
-    m_caster->SetPet(critter);
-
-    critter->AddToWorld();
-    MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)critter);
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (old_critter)                                        // find old critter, unsummon
     {
-        ((Player*)m_caster)->PetSpellInitialize();
-        ((Player*)m_caster)->SavePet();
+        old_critter->Abandon();
+        return;
+    }
+    else                                                    // in another case summon new
+    {
+        Pet* critter = new Pet(MINI_PET);
+
+        if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
+            m_caster->GetMapId(),
+            m_caster->GetPositionX(),m_caster->GetPositionY(),
+            m_caster->GetPositionZ(),m_caster->GetOrientation(),
+            m_spellInfo->EffectMiscValue[i]))
+        {
+            sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+            delete critter;
+            return;
+        }
+
+        critter->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
+        critter->SetUInt64Value(UNIT_FIELD_CREATEDBY,m_caster->GetGUID());
+        critter->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+
+        critter->AIM_Initialize();
+
+        std::string name;
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            name = ((Player*)m_caster)->GetName();
+        else
+            name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
+        name.append(petTypeSuffix[critter->getPetType()]);
+        critter->SetName( name );
+        //m_caster->SetPet(critter);
+
+        critter->AddToWorld();
+        MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)critter);
     }
 }
 

@@ -113,7 +113,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
                 }
                 case 3:
-                    _player->UnsummonPet(pet);
+                    if(pet->isPet())
+                        _player->AbandonPet((Pet*)pet);
                     break;
                 default:
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.\n", flag, spellid);
@@ -224,7 +225,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     recv_data >> name;
 
     Creature* pet = ObjectAccessor::Instance().GetCreature(*_player,petguid);
-    if(!pet || !pet->isTamed() || pet->GetOwnerGUID() != _player->GetGUID())
+    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || pet->GetOwnerGUID() != _player->GetGUID())
         return;
 
     pet->SetName(name);
@@ -243,11 +244,15 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(pet)
     {
-        if(pet->GetGUID() == _player->GetPetGUID())
+        if(pet->isPet())
         {
-            uint32 feelty = pet->GetPower(POWER_HAPPINESS);
-            pet->SetPower(POWER_HAPPINESS ,(feelty-50000) > 0 ?(feelty-50000) : 0);
-            _player->UnsummonPet();
+            if(pet->GetGUID() == _player->GetPetGUID())
+            {
+                uint32 feelty = pet->GetPower(POWER_HAPPINESS);
+                pet->SetPower(POWER_HAPPINESS ,(feelty-50000) > 0 ?(feelty-50000) : 0);
+            }
+
+            _player->AbandonPet();
         }
         else if(pet->GetGUID() == _player->GetCharmGUID())
         {

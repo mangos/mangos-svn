@@ -97,6 +97,7 @@ class Creature;
 class Spell;
 class DynamicObject;
 class Item;
+class Pet;
 
 struct DamageShield
 {
@@ -582,9 +583,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint64 GetCharmGUID() const { return  GetUInt64Value(UNIT_FIELD_CHARM); }
 
         Unit* GetOwner() const;
-        Creature* GetPet() const;
+        Pet* GetPet() const;
         Creature* GetCharm() const;
-        void SetPet(Creature* pet);
+        void SetPet(Pet* pet);
         void SetCharm(Creature* pet);
 
         bool AddAura(Aura *aur, bool uniq = false);

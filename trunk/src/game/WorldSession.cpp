@@ -148,14 +148,11 @@ void WorldSession::LogoutPlayer(bool Save)
             data<<(uint8)0<<(uint8)0<<(uint8)0;
             guild->BroadcastPacket(&data);
         }
-        _player->UnsummonPet();
         _player->Uncharm();
         _player->UnsummonTotem();
         _player->InvisiblePjsNear.clear();
 
-        ObjectAccessor::Instance().RemovePlayer(_player);
-        MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
-
+        // some save parts correct work only in case player present in map/player_lists (pets, etc)
         if(Save)
         {
             uint32 eslot;
@@ -169,6 +166,12 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->SaveToDB();
 
         }
+
+        _player->AbandonPet(NULL,false);
+
+        ObjectAccessor::Instance().RemovePlayer(_player);
+        MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
+
 
         WorldPacket data;
         data.Initialize(SMSG_FRIEND_STATUS);

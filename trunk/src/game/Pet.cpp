@@ -24,13 +24,22 @@
 #include "ObjectMgr.h"
 #include "Pet.h"
 #include "MapManager.h"
+#include "Formulas.h"
 
-Pet::Pet()
+char const* petTypeSuffix[MAX_PET_TYPE] = { 
+    "'s Minion",   // SUMMON_PET
+    "'s Pet",      // HUNTER_PET
+    "'s Guardian", // GUARDIAN_PET
+    "'s Pet"       // MINI_PET
+};
+
+Pet::Pet(PetType type)
 {
     m_isPet = true;
     m_name = "Pet";
     m_actState = STATE_RA_FOLLOW;
     m_fealty = 0;
+    m_petType = type;
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
         m_spells[i]=0;
 }
@@ -43,11 +52,11 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     QueryResult *result;
 
     if(petentry)
-        // known entry
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`,`name` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry );
+        // known entry                    0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`,`name` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry );
     else
-        // current pet
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`,`name` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'",ownerid );
+        // current pet                    0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`,`name` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'",ownerid );
 
     if(!result)
         return false;
@@ -75,17 +84,14 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     {
         AIM_Initialize();
         MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
-        owner->SetPet(this);
-        if(owner->GetTypeId() == TYPEID_PLAYER)
-        {
-            ((Player*)owner)->PetSpellInitialize();
-        }
         return true;
     }
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
-    uint32 petlevel=fields[3].GetUInt32();
+    SetUInt64Value(UNIT_FIELD_DISPLAYID,       fields[3].GetUInt32());
+    SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, fields[3].GetUInt32());
+    uint32 petlevel=fields[4].GetUInt32();
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
-    SetName(fields[15].GetString());
+    SetName(fields[16].GetString());
     if(owner->getClass() == CLASS_WARLOCK)
     {
         petlevel=owner->getLevel();
@@ -102,16 +108,16 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     }
     else if(owner->getClass() == CLASS_HUNTER && cinfo->type == CREATURE_TYPE_BEAST)
     {
-        SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[12].GetUInt32()<<8));
+        SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[13].GetUInt32()<<8));
         SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING +  UNIT_FLAG_RENAME); 
                                                             // TODO: check, if pet was already renamed
         SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->minlevel)*1.5f);
         SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->minlevel)*1.5f);
-        SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[13].GetUInt32() );
+        SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[14].GetUInt32() );
         SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
         SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
         SetMaxPower(POWER_HAPPINESS,1000000);
-        SetPower(   POWER_HAPPINESS,fields[11].GetUInt32());
+        SetPower(   POWER_HAPPINESS,fields[12].GetUInt32());
         setPowerType(POWER_FOCUS);
         SetStat(STAT_STRENGTH,uint32(20+petlevel*1.55));
         SetStat(STAT_AGILITY,uint32(20+petlevel*0.64));
@@ -126,20 +132,20 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
     SetPower(   POWER_MANA, 28 + 10 * petlevel);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[4].GetUInt32());
-    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[5].GetUInt32());
+    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
+    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[6].GetUInt32());
     SetUInt64Value(UNIT_FIELD_CREATEDBY, owner->GetGUID());
 
-    m_fealty = fields[11].GetUInt32();
+    m_fealty = fields[12].GetUInt32();
 
-    m_spells[0] = fields[6].GetUInt32();
-    m_spells[1] = fields[7].GetUInt32();
-    m_spells[2] = fields[8].GetUInt32();
-    m_spells[3] = fields[9].GetUInt32();
-    m_actState = fields[10].GetUInt32();
+    m_spells[0] = fields[7].GetUInt32();
+    m_spells[1] = fields[8].GetUInt32();
+    m_spells[2] = fields[9].GetUInt32();
+    m_spells[3] = fields[10].GetUInt32();
+    m_actState = fields[11].GetUInt32();
 
     // set current pet as current
-    if(fields[14].GetUInt32() != 1)
+    if(fields[15].GetUInt32() != 1)
     {
         sDatabase.BeginTransaction();
         sDatabase.PExecute("UPDATE `character_pet` SET `current` = '0' WHERE `owner` = '%u' AND `current` <> '0' AND `entry` <> '%u'",ownerid, petentry);
@@ -167,12 +173,15 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     return true;
 }
 
-void Pet::SaveToDB()
+void Pet::SavePetToDB(bool current)
 {
-    if(!isPet())
+    if(!GetEntry())
         return;
-    if(GetEntry())
-        return;
+
+    uint32 loyalty =1;
+    if(getPetType()==HUNTER_PET)
+        loyalty = 1;
+    else loyalty = getloyalty();
 
     uint32 owner = GUID_LOPART(GetOwnerGUID());
     std::string name = m_name;
@@ -180,13 +189,13 @@ void Pet::SaveToDB()
     sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
     sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
-    sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s',1)",
-        GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str());
+    sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u')",
+        GetEntry(), owner, GetUInt32Value(UNIT_FIELD_DISPLAYID), getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),uint32(current?1:0));
     sDatabase.CommitTransaction();
 }
 
-void Pet::DeleteFromDB()
+void Pet::DeletePetFromDB()
 {
     uint32 owner = GUID_LOPART(GetOwnerGUID());
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", owner );
@@ -230,7 +239,10 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
     {
         Unit* owner = GetOwner();
         if(owner && owner->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)owner)->UnsummonPet();
+        {
+            SavePetToDB(false);
+            ((Player*)owner)->AbandonPet(this,false);
+        }
         else
         {
             if(owner)
@@ -241,20 +253,153 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
     }
 }
 
-void Pet::Unsummon()
+void Pet::Abandon()
 {
     Unit* owner = GetOwner();
 
     if(owner)
     {
         if(owner->GetTypeId()==TYPEID_PLAYER)
-            ((Player*)owner)->UnsummonPet(this);
-        else
         {
-            owner->SetPet(0);
-            ObjectAccessor::Instance().AddObjectToRemoveList(this);
+            ((Player*)owner)->AbandonPet(this);
+            return;
         }
+
+        owner->SetPet(0);
+    }
+
+    if(getPetType()==HUNTER_PET)
+    {
+        SetMaxPower(POWER_HAPPINESS,0);
+        SetPower(POWER_HAPPINESS,0);
+        SetMaxPower(POWER_FOCUS,0);
+        SetPower(POWER_FOCUS,0);
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,GetCreatureInfo()->faction);
+        SetUInt64Value(UNIT_FIELD_CREATEDBY, 0);
+        SetUInt32Value(UNIT_FIELD_PETNUMBER,0);
+        AIM_Initialize();
     }
     else
         ObjectAccessor::Instance().AddObjectToRemoveList(this);
+}
+
+void Pet::GivePetXP(uint32 xp)
+{
+    if(getPetType()!=SUMMON_PET || !GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        return;
+    if ( xp < 1 )
+        return;
+
+    uint32 level = getLevel();
+
+    // XP to money conversion processed in Player::RewardQuest
+    if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        return;
+
+    uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
+    uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
+    uint32 newXP = curXP + xp;
+
+    if(newXP >= nextLvlXP && level+1 > GetOwner()->getLevel())
+    {
+        SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, nextLvlXP-1);
+        return;
+    }
+
+    while( newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
+    {
+        newXP -= nextLvlXP;
+
+        SetLevel( level + 1 );
+        SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(level+1))/4));
+
+        level = getLevel();
+        nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
+        GivePetLevel(level);
+    }
+
+    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, newXP);
+}
+
+void Pet::GivePetLevel(uint32 level)
+{
+    if(!level)
+        return;
+    uint32 loyalty = 1;
+    CreatureInfo const *cinfo = GetCreatureInfo();
+    // pet damage will grow up with the pet level,*1.5f for temp
+    SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(level-cinfo->minlevel)*1.5f);
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(level-cinfo->minlevel)*1.5f);
+    SetUInt32Value(UNIT_TRAINING_POINTS, (level<<16) + getUsedTrainPoint());
+    SetUInt32Value(UNIT_FIELD_BYTES_1,(getloyalty()<<8));
+    SetHealth( 28 + 10 * level);
+    SetMaxHealth( 28 + 10 * level);
+    SetStat(STAT_STRENGTH,uint32(20+level*1.55));
+    SetStat(STAT_AGILITY,uint32(20+level*0.64));
+    SetStat(STAT_STAMINA,uint32(20+level*1.27));
+    SetStat(STAT_INTELLECT,uint32(20+level*0.18));
+    SetStat(STAT_SPIRIT,uint32(20+level*0.36));
+    SetArmor(level*50);
+
+    if(level - cinfo->minlevel >= 21)
+        loyalty = 7;
+    else if(level - cinfo->minlevel >= 15)
+        loyalty = 6;
+    else if(level - cinfo->minlevel >= 10)
+        loyalty = 5;
+    else if(level - cinfo->minlevel >= 6)
+        loyalty = 4;
+    else if(level - cinfo->minlevel >= 3)
+        loyalty = 3;
+    else if(level - cinfo->minlevel >= 1)
+        loyalty = 2;
+    SetUInt32Value(UNIT_FIELD_BYTES_1,(loyalty << 8));
+}
+
+void Pet::CreateBaseAtCreature(Creature* creature)
+{
+    uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
+
+    Create(guid, creature->GetMapId(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), creature->GetEntry());
+
+    CreatureInfo const *cinfo = GetCreatureInfo();
+    if(cinfo->type == CREATURE_TYPE_CRITTER)
+    {
+        m_petType = MINI_PET;
+        AIM_Initialize();
+        MapManager::Instance().GetMap(creature->GetMapId())->Add((Creature*)this);
+        return;
+    }
+    SetUInt64Value(UNIT_FIELD_DISPLAYID,       creature->GetUInt64Value(UNIT_FIELD_DISPLAYID));
+    SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, creature->GetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID));
+    uint32 petlevel=creature->getLevel();
+    SetUInt32Value(UNIT_NPC_FLAGS , 0);
+    SetName(creature->GetName());
+    if(cinfo->type == CREATURE_TYPE_BEAST)
+    {
+        SetUInt32Value(UNIT_FIELD_BYTES_1,creature->GetUInt32Value(UNIT_FIELD_BYTES_1));
+                                                            // TODO: check, if pet was already renamed
+        SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->minlevel)*1.5f);
+        SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->minlevel)*1.5f);
+        SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED) );
+        SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
+        SetStat(STAT_STRENGTH,uint32(20+petlevel*1.55));
+        SetStat(STAT_AGILITY,uint32(20+petlevel*0.64));
+        SetStat(STAT_STAMINA,uint32(20+petlevel*1.27));
+        SetStat(STAT_INTELLECT,uint32(20+petlevel*0.18));
+        SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
+        SetArmor(petlevel*50);
+    }
+    SetLevel( petlevel);
+    SetHealth( 28 + 10 * petlevel);
+    SetMaxHealth( 28 + 10 * petlevel);
+    SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
+    SetPower(   POWER_MANA, 28 + 10 * petlevel);
+
+    m_fealty = 0;
+
+    m_spells[0] = creature->m_spells[0];
+    m_spells[1] = creature->m_spells[1];
+    m_spells[2] = creature->m_spells[2];
+    m_spells[3] = creature->m_spells[3];
 }

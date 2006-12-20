@@ -602,14 +602,14 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
         return;
     if(_player->GetPet())
     {
-        Creature *unit = _player->GetPet();
+        Pet *unit = _player->GetPet();
         if(!unit->GetUInt32Value(UNIT_FIELD_PETNUMBER))
             return;
     }
 
     QueryResult *result;
     bool flag = false;
-    Creature *pet = _player->GetPet();
+    Pet *pet = _player->GetPet();
 
     result = sDatabase.PQuery("SELECT `owner`,`slot`,`petnumber` FROM `character_stable` WHERE `owner` = '%u' ORDER BY `slot` ",_player->GetGUIDLow());
     if(result)
@@ -632,7 +632,7 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
                 sDatabase.CommitTransaction();
                 data << uint8(0x08);
                 flag = true;
-                _player->UnsummonPet();
+                _player->AbandonPet(pet);
                 break;
             }
         }while( result->NextRow() );
@@ -688,7 +688,7 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
                 continue;
             else
             {
-                Pet *newpet = new Pet();
+                Pet *newpet = new Pet(_player->getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
                 newpet->LoadPetFromDB(_player,fields[3].GetUInt32());
                 sDatabase.PExecute("UPDATE `character_stable` SET `petnumber` = '0',`entry` = '0',`level` = '0',`loyalty` = '0',`trainpoint` = '0' WHERE `owner` = '%u' AND `slot` = '%u'",_player->GetGUIDLow(), slot);
             }
@@ -821,7 +821,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
     }
     else
     {
-        Creature *pet = _player->GetPet();
+        Pet *pet = _player->GetPet();
 
         Field *fields = result->Fetch();
 
@@ -833,11 +833,8 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
         sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,%u,%u,%u,%u,%u,%u)",
             _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->getUsedTrainPoint());
         sDatabase.CommitTransaction();
-        if(pet->isPet())
-            _player->UnsummonPet();
-        else if(pet->isTamed())
-            _player->UnTamePet();
-        Pet *newpet = new Pet();
+        _player->AbandonPet(pet);
+        Pet *newpet = new Pet(_player->getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
         newpet->LoadPetFromDB(_player,petentry);
     }
     delete result;

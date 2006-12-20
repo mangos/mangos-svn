@@ -225,7 +225,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
         data << (uint32) ci->type;
 
     data << (uint32)ci->family;                             //family         wdbFeild9
-    data << (uint32)ci->rank;                               //rank           wdbFeild10
+    data << (uint32)(unit && unit->isPet() ? 0 : ci->rank); //rank           wdbFeild10
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
     data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
     if (unit)

@@ -362,7 +362,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             if(pet->isPet())
             {
                 uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
-                pet->GivePetXP(petxp);
+                ((Pet*)pet)->GivePetXP(petxp);
             }
         }
 
@@ -392,7 +392,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                         if(uint32(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel())) > sWorld.getConfig(CONFIG_GROUP_XP_LEVELDIFF))
                             continue;
                         pGroupGuy->GiveXP(xp, pVictim);
-                        if(Creature* pet = player->GetPet())
+                        if(Pet* pet = player->GetPet())
                         {
                             pet->GivePetXP(xp/2);
                         }
@@ -403,7 +403,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 {
                     DEBUG_LOG("Player kill enemy alone");
                     player->GiveXP(xp, pVictim);
-                    if(Creature* pet = player->GetPet())
+                    if(Pet* pet = player->GetPet())
                     {
                         pet->GivePetXP(xp);
                     }
@@ -3008,19 +3008,19 @@ Unit *Unit::GetOwner() const
     return ObjectAccessor::Instance().GetUnit(*this, ownerid);
 }
 
-Creature* Unit::GetPet() const
+Pet* Unit::GetPet() const
 {
     uint64 pet_guid = GetPetGUID();
     if(pet_guid)
     {
         Creature* pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
-        if(!pet)
+        if(!pet||!pet->isPet())
         {
             sLog.outError("Unit::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
             const_cast<Unit*>(this)->SetPet(0);
             return NULL;
         }
-        return pet;
+        return (Pet*)pet;
     }
 
     return NULL;
@@ -3043,7 +3043,7 @@ Creature* Unit::GetCharm() const
         return NULL;
 }
 
-void Unit::SetPet(Creature* pet)
+void Unit::SetPet(Pet* pet)
 {
     SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0);
 }

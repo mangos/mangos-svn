@@ -320,6 +320,7 @@ CREATE TABLE `character_pet` (
   `id` int(11) unsigned NOT NULL auto_increment,
   `entry` int(11) unsigned NOT NULL default '0',
   `owner` int(11) unsigned NOT NULL default '0',
+  `modelid` int(11) unsigned default '0',
   `level` int(11) unsigned NOT NULL default '1',
   `exp` int(11) unsigned NOT NULL default '0',
   `nextlvlexp` int(11) unsigned NOT NULL default '100',

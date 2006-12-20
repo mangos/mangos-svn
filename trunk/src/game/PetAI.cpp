@@ -43,8 +43,6 @@ void PetAI::MoveInLineOfSight(Unit *u)
 
 void PetAI::AttackStart(Unit *u)
 {
-    if(!u)
-        return;
     _taggedToKill(u);
 }
 
@@ -201,7 +199,7 @@ bool PetAI::_isVisible(Unit *u) const
 
 void PetAI::_taggedToKill(Unit *u)
 {
-    if( i_pet.getVictim() || !u)
+    if( i_pet.getVictim() || !u || i_pet.isPet() && ((Pet&)i_pet).getPetType()==MINI_PET )
         return;
 
     if(i_pet.Attack(u))
