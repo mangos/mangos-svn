@@ -91,9 +91,6 @@ class MANGOS_DLL_SPEC WorldSession
         void SendListInventory( uint64 guid );
         void SendShowBank( uint64 guid );
         void SendTabardVendorActivate( uint64 guid );
-        void SendTaxiStatus( uint64 guid );
-        void SendTaxiMenu( uint64 guid );
-        void SendDoFlight( uint16 MountId, uint32 path );
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
         void SendGMTicketGetTicket(uint32 status, char const* text);
@@ -121,6 +118,10 @@ class MANGOS_DLL_SPEC WorldSession
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
         void SendItemEnchantTimeUpdate(uint64 Itemguid,uint32 slot,uint32 Duration);
 
+        //Taxi
+        void SendTaxiStatus( uint64 guid );
+        void SendTaxiMenu( uint64 guid );
+        void SendDoFlight( uint16 MountId, uint32 path );
     protected:
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);

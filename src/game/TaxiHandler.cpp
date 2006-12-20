@@ -207,110 +207,24 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
 
     uint64 guid;
     uint32 node_count, _totalcost;
-    uint16 MountId;
-    WorldPacket data;
 
     recv_data >> guid >> _totalcost >> node_count;
 
-    // node_count = 1 (source node) + destination nodes
-
-    uint32 sourcenode;
-    recv_data >> sourcenode;
-
-    // not let cheating with start flight mounted
-    if(_player->IsMounted())
+    std::vector<uint32> nodes;
+    
+    for(uint32 i = 0; i < node_count; ++i)
     {
-        WorldPacket data;
-        data.Initialize(SMSG_CAST_RESULT);
-        data << uint32(0);
-        data << uint8(2);
-        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
-        SendPacket(&data);
-        return;
+        uint32 node;
+        recv_data >> node;
+        nodes.push_back(node);
     }
 
-    uint32 curloc = objmgr.GetNearestTaxiNode(
-        GetPlayer( )->GetPositionX( ),
-        GetPlayer( )->GetPositionY( ),
-        GetPlayer( )->GetPositionZ( ),
-        GetPlayer( )->GetMapId( ) );
-
-    // starting node != nearest node (cheat?)
-    if(curloc != sourcenode)
-    {
-        data.Initialize( SMSG_ACTIVATETAXIREPLY );
-        data << uint32( 4 );
-        SendPacket( &data );
-        return;
-    }
-
-    uint32 sourcepath = 0;
-    uint32 totalcost = 0;
-
-    uint32 prevnode = sourcenode;
-    uint32 lastnode = 0;
-
-    GetPlayer()->ClearTaxiDestinations();
-
-    for(uint32 i = 1; i < node_count; ++i)
-    {
-        uint32 path, cost;
-
-        recv_data >> lastnode;
-        objmgr.GetTaxiPath( prevnode, lastnode, path, cost);
-
-        if(!path)
-            break;
-
-        totalcost += cost;
-
-        if(prevnode == sourcenode)
-            sourcepath = path;
-
-        GetPlayer()->AddTaxiDestination(lastnode);
-
-        prevnode = lastnode;
-    }
-
-    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI_FAR from %d to %d" ,sourcenode,lastnode);
-
-    if( GetPlayer( )->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
+    if(nodes.size() < 1)
         return;
 
-    MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());
+    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI_FAR from %d to %d" ,nodes.front(),nodes.back());
 
-    data.Initialize( SMSG_ACTIVATETAXIREPLY );
-
-    if ( MountId == 0 || sourcepath == 0)
-    {
-        data << uint32( 1 );
-        SendPacket( &data );
-        return;
-    }
-
-    uint32 money = GetPlayer()->GetMoney();
-    if(money < totalcost )
-    {
-        data << uint32( 3 );
-        SendPacket( &data );
-        return;
-    }
-
-    // unsommon pet, it will be lost anyway
-    GetPlayer( )->AbandonPet();
-
-    //CHECK DONE, DO FLIGHT
-
-    GetPlayer( )->SaveToDB();                               //For temporary avoid save player on air
-
-    GetPlayer( )->setDismountCost( money - totalcost);
-
-    data << uint32( 0 );
-
-    SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
-
-    SendDoFlight( MountId, sourcepath );
+    GetPlayer()->ActivateTaxiPathTo(nodes);
 }
 
 void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
@@ -357,91 +271,11 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI" );
 
     uint64 guid;
-    uint32 sourcenode, destinationnode;
-    uint32 path;
-    uint32 cost;
-    uint16 MountId;
-    WorldPacket data;
+    std::vector<uint32> nodes;
+    nodes.resize(2);
 
-    recv_data >> guid >> sourcenode >> destinationnode;
-    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,sourcenode ,destinationnode);
+    recv_data >> guid >> nodes[0] >> nodes[1];
+    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,nodes[0],nodes[1]);
 
-    // not let cheating with start flight mounted
-    if(_player->IsMounted())
-    {
-        WorldPacket data;
-        data.Initialize(SMSG_CAST_RESULT);
-        data << uint32(0);
-        data << uint8(2);
-        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
-        SendPacket(&data);
-        return;
-    }
-
-    uint32 curloc = objmgr.GetNearestTaxiNode(
-        GetPlayer( )->GetPositionX( ),
-        GetPlayer( )->GetPositionY( ),
-        GetPlayer( )->GetPositionZ( ),
-        GetPlayer( )->GetMapId( ) );
-
-    // starting node != nearest node (cheat?)
-    if(curloc != sourcenode)
-    {
-        data.Initialize( SMSG_ACTIVATETAXIREPLY );
-        data << uint32( 4 );
-        SendPacket( &data );
-        return;
-    }
-
-    if( GetPlayer( )->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
-        return;
-
-    // not let flight if casting not finished
-    if(GetPlayer( )->m_currentSpell)
-    {
-        data.Initialize( SMSG_ACTIVATETAXIREPLY );
-        data << uint32( 7 );
-        SendPacket( &data );
-        return;
-    }
-
-    objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
-    MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());
-
-    if ( MountId == 0 || path == 0 )
-    {
-        data.Initialize( SMSG_ACTIVATETAXIREPLY );
-        data << uint32( 1 );
-        SendPacket( &data );
-        return;
-    }
-
-    uint32 money = GetPlayer()->GetMoney();
-    if(money < cost )
-    {
-        data.Initialize( SMSG_ACTIVATETAXIREPLY );
-        data << uint32( 3 );
-        SendPacket( &data );
-        return;
-    }
-
-    GetPlayer()->ClearTaxiDestinations();
-    GetPlayer()->AddTaxiDestination(destinationnode);
-
-    // unsommon pet, it will be lost anyway
-    GetPlayer( )->AbandonPet();
-
-    //CHECK DONE, DO FLIGHT
-
-    GetPlayer( )->SaveToDB();                               //For temporary avoid save player on air
-
-    GetPlayer( )->setDismountCost( money - cost);
-
-    data.Initialize( SMSG_ACTIVATETAXIREPLY );
-    data << uint32( 0 );
-
-    SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
-
-    SendDoFlight( MountId, path );
+    GetPlayer()->ActivateTaxiPathTo(nodes);
 }
