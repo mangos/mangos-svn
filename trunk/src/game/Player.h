@@ -541,10 +541,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
         std::vector<Item *> &GetItemUpdateQueue() { return m_itemUpdateQueue; }
         bool HasBankBagSlot( uint8 slot ) const;
-        bool IsInventoryPos( uint16 pos ) const;
-        bool IsEquipmentPos( uint16 pos ) const;
+        bool IsInventoryPos( uint16 pos ) const { return IsInventoryPos(pos >> 8,pos & 255); }
+        bool IsInventoryPos( uint8 bag, uint8 slot ) const;
+        bool IsEquipmentPos( uint16 pos ) const { return IsEquipmentPos(pos >> 8,pos & 255); }
+        bool IsEquipmentPos( uint8 bag, uint8 slot ) const;
         bool IsBagPos( uint16 pos ) const;
-        bool IsBankPos( uint16 pos ) const;
+        bool IsBankPos( uint16 pos ) const { return IsBankPos(pos >> 8,pos & 255); }
+        bool IsBankPos( uint8 bag, uint8 slot ) const;
         bool HasItemCount( uint32 item, uint32 count ) const;
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
