@@ -78,6 +78,7 @@ class Pet : public Creature
 
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
+        void InitStatsForLevel(uint32 level);
     protected:
         uint32 m_actState;
         uint32 m_fealty;

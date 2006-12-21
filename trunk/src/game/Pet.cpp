@@ -92,50 +92,36 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     uint32 petlevel=fields[4].GetUInt32();
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
     SetName(fields[16].GetString());
-    if(owner->getClass() == CLASS_WARLOCK)
+
+    switch(getPetType())
     {
-        petlevel=owner->getLevel();
+    
+        case SUMMON_PET:
+            petlevel=owner->getLevel();
 
-        SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-        SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
-        SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
-        SetStat(STAT_STRENGTH,22);
-        SetStat(STAT_AGILITY,22);
-        SetStat(STAT_STAMINA,25);
-        SetStat(STAT_INTELLECT,28);
-        SetStat(STAT_SPIRIT,27);
-        SetArmor(petlevel*50);
+            SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
+            SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
+            break;
+        case HUNTER_PET:
+            SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[13].GetUInt32()<<8));
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING); 
+
+            // pet not renamed yet, let rename if wont
+            if(!fields[17].GetBool())
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME); 
+
+            SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[14].GetUInt32() );
+            SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
+            SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
+            SetMaxPower(POWER_HAPPINESS,1000000);
+            SetPower(   POWER_HAPPINESS,fields[12].GetUInt32());
+            setPowerType(POWER_FOCUS);
+            break;
+        default:
+            sLog.outError("Pet have incorrect type (%u) for pet loading.",getPetType());
     }
-    else if(owner->getClass() == CLASS_HUNTER && cinfo->type == CREATURE_TYPE_BEAST)
-    {
-        SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[13].GetUInt32()<<8));
-        SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING); 
-
-        // pet not renamed yet, let rename if wont
-        if(!fields[17].GetBool())
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME); 
-
-                                                            // TODO: check, if pet was already renamed
-        SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->minlevel)*1.5f);
-        SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->minlevel)*1.5f);
-        SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[14].GetUInt32() );
-        SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
-        SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
-        SetMaxPower(POWER_HAPPINESS,1000000);
-        SetPower(   POWER_HAPPINESS,fields[12].GetUInt32());
-        setPowerType(POWER_FOCUS);
-        SetStat(STAT_STRENGTH,uint32(20+petlevel*1.55));
-        SetStat(STAT_AGILITY,uint32(20+petlevel*0.64));
-        SetStat(STAT_STAMINA,uint32(20+petlevel*1.27));
-        SetStat(STAT_INTELLECT,uint32(20+petlevel*0.18));
-        SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
-        SetArmor(petlevel*50);
-    }
-    SetLevel( petlevel);
-    SetHealth( 28 + 10 * petlevel);
-    SetMaxHealth( 28 + 10 * petlevel);
-    SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
-    SetPower(   POWER_MANA, 28 + 10 * petlevel);
+    InitStatsForLevel( petlevel);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[6].GetUInt32());
@@ -341,18 +327,9 @@ void Pet::GivePetLevel(uint32 level)
     uint32 loyalty = 1;
     CreatureInfo const *cinfo = GetCreatureInfo();
     // pet damage will grow up with the pet level,*1.5f for temp
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(level-cinfo->minlevel)*1.5f);
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(level-cinfo->minlevel)*1.5f);
+    InitStatsForLevel( level);
     SetUInt32Value(UNIT_TRAINING_POINTS, (level<<16) + getUsedTrainPoint());
     SetUInt32Value(UNIT_FIELD_BYTES_1,(getloyalty()<<8));
-    SetHealth( 28 + 10 * level);
-    SetMaxHealth( 28 + 10 * level);
-    SetStat(STAT_STRENGTH,uint32(20+level*1.55));
-    SetStat(STAT_AGILITY,uint32(20+level*0.64));
-    SetStat(STAT_STAMINA,uint32(20+level*1.27));
-    SetStat(STAT_INTELLECT,uint32(20+level*0.18));
-    SetStat(STAT_SPIRIT,uint32(20+level*0.36));
-    SetArmor(level*50);
 
     if(level - cinfo->minlevel >= 21)
         loyalty = 7;
@@ -391,23 +368,11 @@ void Pet::CreateBaseAtCreature(Creature* creature)
     if(cinfo->type == CREATURE_TYPE_BEAST)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_1,creature->GetUInt32Value(UNIT_FIELD_BYTES_1));
-                                                            // TODO: check, if pet was already renamed
-        SetFloatValue(UNIT_FIELD_MINDAMAGE, cinfo->mindmg + float(petlevel-cinfo->minlevel)*1.5f);
-        SetFloatValue(UNIT_FIELD_MAXDAMAGE, cinfo->maxdmg + float(petlevel-cinfo->minlevel)*1.5f);
+
         SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED) );
         SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
-        SetStat(STAT_STRENGTH,uint32(20+petlevel*1.55));
-        SetStat(STAT_AGILITY,uint32(20+petlevel*0.64));
-        SetStat(STAT_STAMINA,uint32(20+petlevel*1.27));
-        SetStat(STAT_INTELLECT,uint32(20+petlevel*0.18));
-        SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
-        SetArmor(petlevel*50);
     }
-    SetLevel( petlevel);
-    SetHealth( 28 + 10 * petlevel);
-    SetMaxHealth( 28 + 10 * petlevel);
-    SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
-    SetPower(   POWER_MANA, 28 + 10 * petlevel);
+    InitStatsForLevel( petlevel);
 
     m_fealty = 0;
 
@@ -415,4 +380,45 @@ void Pet::CreateBaseAtCreature(Creature* creature)
     m_spells[1] = creature->m_spells[1];
     m_spells[2] = creature->m_spells[2];
     m_spells[3] = creature->m_spells[3];
+}
+
+void Pet::InitStatsForLevel(uint32 petlevel)
+{
+    CreatureInfo const *cinfo = GetCreatureInfo();
+    assert(cinfo);
+
+    SetLevel( petlevel);
+
+    // remove elite bonuses included in DB values
+    SetHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+    SetMaxHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+    SetMaxPower(POWER_MANA, ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+    SetPower(   POWER_MANA, ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank))* petlevel);
+
+    SetArmor(petlevel*50);
+
+    switch(getPetType())
+    {
+        case HUNTER_PET:
+            // remove elite bonuses included in DB values
+            SetFloatValue(UNIT_FIELD_MINDAMAGE, (cinfo->mindmg / (1 + 2 * cinfo->rank)) + float(petlevel-cinfo->minlevel)*1.5f);
+            SetFloatValue(UNIT_FIELD_MAXDAMAGE, (cinfo->maxdmg / (1 + 2 * cinfo->rank)) + float(petlevel-cinfo->minlevel)*1.5f);
+
+            SetStat(STAT_STRENGTH,uint32(20+petlevel*1.55));
+            SetStat(STAT_AGILITY,uint32(20+petlevel*0.64));
+            SetStat(STAT_STAMINA,uint32(20+petlevel*1.27));
+            SetStat(STAT_INTELLECT,uint32(20+petlevel*0.18));
+            SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
+            break;
+        case SUMMON_PET:
+            SetStat(STAT_STRENGTH,22);
+            SetStat(STAT_AGILITY,22);
+            SetStat(STAT_STAMINA,25);
+            SetStat(STAT_INTELLECT,28);
+            SetStat(STAT_SPIRIT,27);
+            break;
+        default:
+            sLog.outError("Pet have incorrect type (%u) for levelup.",getPetType());
+            break;
+    }
 }
