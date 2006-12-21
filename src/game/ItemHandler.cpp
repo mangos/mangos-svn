@@ -102,11 +102,11 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
                 uint8 slot = dest & 255;
                 _player->RemoveItem( bag, slot, false );
                 _player->RemoveItem( srcbag, srcslot, false );
-                if( _player->IsInventoryPos( src ) )
+                if( _player->IsInventoryPos( srcbag, srcslot ) )
                     _player->StoreItem( src, pItem2, true);
-                else if( _player->IsBankPos ( src ) )
+                else if( _player->IsBankPos ( srcbag, srcslot ) )
                     _player->BankItem( src, pItem2, true);
-                else if( _player->IsEquipmentPos ( src ) )
+                else if( _player->IsEquipmentPos ( srcbag, srcslot ) )
                     _player->EquipItem( src, pItem2, true);
                 _player->EquipItem( dest, pItem, true );
             }
@@ -705,15 +705,30 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
     Item *pItem = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )
     {
-        uint16 dest;
-        uint8 msg = _player->CanBankItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
-        if( msg == EQUIP_ERR_OK )
+        if(_player->IsBankPos(srcbag, srcslot))              // moving from bank to inventory
         {
-            _player->RemoveItem(srcbag, srcslot, true);
-            _player->BankItem( dest, pItem, true );
+            uint16 dest;
+            uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
+            if( msg == EQUIP_ERR_OK )
+            {
+                _player->RemoveItem(srcbag, srcslot, true);
+                _player->StoreItem( dest, pItem, true );
+            }
+            else
+                _player->SendEquipError( msg, pItem, NULL );
         }
-        else
-            _player->SendEquipError( msg, pItem, NULL );
+        else                                                // moving from inventory to bank
+        {
+            uint16 dest;
+            uint8 msg = _player->CanBankItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
+            if( msg == EQUIP_ERR_OK )
+            {
+                _player->RemoveItem(srcbag, srcslot, true);
+                _player->BankItem( dest, pItem, true );
+            }
+            else
+                _player->SendEquipError( msg, pItem, NULL );
+        }
     }
 }
 
