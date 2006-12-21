@@ -988,11 +988,12 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
         recv_data >> X >> Y >> Z >> O;
         recv_data >> unk1 >> NewSpeed;
     }
-    if (GetPlayer()->GetSpeed(MOVE_RUN) != NewSpeed)
+
+    if (fabs(GetPlayer()->GetSpeed(MOVE_RUN) - NewSpeed) > 0.01f)
     {
         sLog.outError("SpeedChange player %s is NOT correct (must be %f instead %f, force set to correct value", GetPlayer()->GetName(), GetPlayer()->GetSpeed(MOVE_RUN), NewSpeed);
-        // forse set correct speed;
-        GetPlayer()->SetSpeed(MOVE_RUN,GetPlayer()->GetSpeed(MOVE_RUN)/baseMoveSpeed[MOVE_RUN],true);
+        // force set correct speed (and send to client);
+        GetPlayer()->SetSpeed(MOVE_RUN,GetPlayer()->GetSpeedRate(MOVE_RUN),true);
     }
 }
 
