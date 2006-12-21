@@ -1058,10 +1058,10 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     m_spells[2] = cinfo->spell3;
     m_spells[3] = cinfo->spell4;
 
-    float speed_run_rate = cinfo->speed / baseMoveSpeed[MOVE_RUN];
-    SetSpeed(MOVE_WALK,     speed_run_rate );
-    SetSpeed(MOVE_RUN,      speed_run_rate );
-    SetSpeed(MOVE_WALKBACK, speed_run_rate );
+    float speed_walk_rate = cinfo->speed / baseMoveSpeed[MOVE_WALK];
+    SetSpeed(MOVE_WALK,     speed_walk_rate );
+    SetSpeed(MOVE_RUN,      speed_walk_rate );
+    SetSpeed(MOVE_WALKBACK, speed_walk_rate );
     float speed_swim_rate = cinfo->speed / baseMoveSpeed[MOVE_SWIM];
     SetSpeed(MOVE_SWIM,     speed_swim_rate);
     SetSpeed(MOVE_SWIMBACK, speed_swim_rate);
