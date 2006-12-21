@@ -413,7 +413,10 @@ void Spell::EffectDummy(uint32 i)
     {
         uint32 dmg = damage;
         dmg += uint32(m_caster->GetPower(POWER_RAGE)/10 * FindSpellRank(m_spellInfo->Id)*3);
-        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dmg);
+        SpellEntry *tspellInfo = sSpellStore.LookupEntry(20647);
+        SpellEntry sInfo = *tspellInfo;
+        sInfo.EffectBasePoints[0] = dmg;
+        m_caster->CastSpell(unitTarget, &sInfo, true, 0);
         m_caster->SetPower(POWER_RAGE,0);
     }
 }
