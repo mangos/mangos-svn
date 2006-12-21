@@ -41,6 +41,15 @@
 
 #include <math.h>
 
+float baseMoveSpeed[MAX_MOVE_TYPE] = { 
+    2.5f,                                                   // MOVE_WALK
+    7.0f,                                                   // MOVE_RUN
+    1.25f,                                                  // MOVE_WALKBACK
+    4.722222f,                                              // MOVE_SWIM
+    4.5f,                                                   // MOVE_SWIMBACK
+    3.141594f                                               // MOVE_TURN
+};
+
 Unit::Unit() : Object()
 {
     m_objectType |= TYPE_UNIT;
@@ -85,6 +94,9 @@ Unit::Unit() : Object()
     m_baseSpellCritChance = 5;
     m_modCastSpeedPct = 0;
     m_CombatTimer = 0;
+
+    for (int i = 0; i < MAX_MOVE_TYPE; ++i)
+        m_speed_rate[i] = 1.0f;
 }
 
 Unit::~Unit()
@@ -3508,4 +3520,62 @@ void Unit::SetVisibility(UnitVisibility x)
     }
 
     m_UpdateVisibility = VISIBLE_NOCHANGES;
+}
+
+float Unit::GetSpeed( UnitMoveType mtype ) const
+{
+    return m_speed_rate[mtype]*baseMoveSpeed[mtype];
+}
+
+
+void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
+{
+    m_speed_rate[mtype] = 1.0f;
+    ApplySpeedMod(mtype, rate, forced, true);
+}
+
+void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
+{
+    WorldPacket data;
+
+    if(apply)
+        m_speed_rate[mtype] *= rate;
+    else
+        m_speed_rate[mtype] /= rate;
+
+    switch(mtype)
+    {
+        case MOVE_WALK:
+            if(forced) { data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE); }
+            else { data.Initialize(MSG_MOVE_SET_WALK_SPEED); }
+            break;
+        case MOVE_RUN:
+            if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE); }
+            else { data.Initialize(MSG_MOVE_SET_RUN_SPEED); }
+            break;
+        case MOVE_WALKBACK:
+            if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE); }
+            else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED); }
+            break;
+        case MOVE_SWIM:
+            if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE); }
+            else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED); }
+            break;
+        case MOVE_SWIMBACK:
+            data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED);
+            break;
+        case MOVE_TURN:
+            return;                                         // ignore
+        default:
+            sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
+            return;
+    }
+
+    data.append(GetPackGUID());
+    data << (uint32)0;
+    data << float(GetSpeed(mtype));
+    SendMessageToSet( &data, true );
+
+    if(Pet* pet = GetPet())
+        pet->SetSpeed(mtype,m_speed_rate[mtype],forced);
 }

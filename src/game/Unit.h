@@ -143,6 +143,20 @@ enum UnitState
     UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
+enum UnitMoveType
+{
+    MOVE_WALK       =0,
+    MOVE_RUN        =1,
+    MOVE_WALKBACK   =2,
+    MOVE_SWIM       =3,
+    MOVE_SWIMBACK   =4,
+    MOVE_TURN       =5
+};
+
+#define MAX_MOVE_TYPE 6
+
+extern float baseMoveSpeed[MAX_MOVE_TYPE];
+
 enum WeaponAttackType
 {
     BASE_ATTACK   = 0,
@@ -672,6 +686,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
 
+        float GetSpeed( UnitMoveType mtype ) const;
+        virtual void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
+        void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool aplly);
     protected:
         Unit ( );
 
@@ -709,6 +726,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
         std::string m_name;
+        float m_speed_rate[MAX_MOVE_TYPE];
     private:
         void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)
         void SendAttackStart(Unit* pVictim);                // only from Unit::AttackStart(Unit*)

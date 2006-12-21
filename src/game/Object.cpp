@@ -54,9 +54,6 @@ Object::Object( )
 
     m_valuesCount       = 0;
 
-    m_speed             = 1.0f;
-    m_moveType          = MOVE_STOP;
-
     mSemaphoreTeleport  = false;
     m_inWorld           = false;
     m_objectUpdated     = false;
@@ -267,12 +264,12 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << (float)0;
             *data << (float)0;
         }
-        *data << GetSpeed( MOVE_WALK );
-        *data << GetSpeed( MOVE_RUN );
-        *data << GetSpeed( MOVE_SWIMBACK );
-        *data << GetSpeed( MOVE_SWIM );
-        *data << GetSpeed( MOVE_WALKBACK );
-        *data << GetSpeed( MOVE_TURN );
+        *data << ((Player*)this)->GetSpeed( MOVE_WALK );
+        *data << ((Player*)this)->GetSpeed( MOVE_RUN );
+        *data << ((Player*)this)->GetSpeed( MOVE_SWIMBACK );
+        *data << ((Player*)this)->GetSpeed( MOVE_SWIM );
+        *data << ((Player*)this)->GetSpeed( MOVE_WALKBACK );
+        *data << ((Player*)this)->GetSpeed( MOVE_TURN );
     }
     if( m_objectTypeId==TYPEID_UNIT )
     {
@@ -283,12 +280,12 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         *data << (float)m_positionZ;
         *data << (float)m_orientation;
         *data << (float)0;
-        *data << GetSpeed( MOVE_WALK );
-        *data << GetSpeed( MOVE_RUN );
-        *data << GetSpeed( MOVE_SWIMBACK );
-        *data << GetSpeed( MOVE_SWIM );
-        *data << GetSpeed( MOVE_WALKBACK );
-        *data << GetSpeed( MOVE_TURN );
+        *data << ((Creature*)this)->GetSpeed( MOVE_WALK );
+        *data << ((Creature*)this)->GetSpeed( MOVE_RUN );
+        *data << ((Creature*)this)->GetSpeed( MOVE_SWIMBACK );
+        *data << ((Creature*)this)->GetSpeed( MOVE_SWIM );
+        *data << ((Creature*)this)->GetSpeed( MOVE_WALKBACK );
+        *data << ((Creature*)this)->GetSpeed( MOVE_TURN );
         uint8 PosCount=0;
         if(flags2 & 0x400000)
         {

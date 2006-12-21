@@ -1058,7 +1058,13 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     m_spells[2] = cinfo->spell3;
     m_spells[3] = cinfo->spell4;
 
-    SetSpeed( cinfo->speed ) ;
+    float speed_run_rate = cinfo->speed / baseMoveSpeed[MOVE_RUN];
+    SetSpeed(MOVE_WALK,     speed_run_rate );
+    SetSpeed(MOVE_RUN,      speed_run_rate );
+    SetSpeed(MOVE_WALKBACK, speed_run_rate );
+    float speed_swim_rate = cinfo->speed / baseMoveSpeed[MOVE_SWIM];
+    SetSpeed(MOVE_SWIM,     speed_swim_rate);
+    SetSpeed(MOVE_SWIMBACK, speed_swim_rate);
 
     if(cinfo->MovementType < MAX_DB_MOTION_TYPE)
         m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);

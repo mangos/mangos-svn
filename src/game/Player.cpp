@@ -2649,55 +2649,6 @@ void Player::SetMovement(uint8 pType)
     }
 }
 
-void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
-{
-    WorldPacket data;
-
-    switch(SpeedType)
-    {
-        case MOVE_RUN:
-        {
-            SetSpeed( value / SPEED_RUN );
-            if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE); }
-            else { data.Initialize(MSG_MOVE_SET_RUN_SPEED); }
-            data.append(GetPackGUID());
-            data << (uint32)0;
-            data << float(value);
-            GetSession()->SendPacket( &data );
-        }break;
-        case MOVE_WALKBACK:
-        {
-            SetSpeed( value / SPEED_WALKBACK );
-            if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE); }
-            else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED); }
-            data.append(GetPackGUID());
-            data << (uint32)0;
-            data << float(value);
-            GetSession()->SendPacket( &data );
-        }break;
-        case MOVE_SWIM:
-        {
-            SetSpeed( value / SPEED_SWIM );
-            if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE); }
-            else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED); }
-            data.append(GetPackGUID());
-            data << (uint32)0;
-            data << float(value);
-            GetSession()->SendPacket( &data );
-        }break;
-        case MOVE_SWIMBACK:
-        {
-            SetSpeed( value / SPEED_SWIMBACK );
-            data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED);
-            data.append(GetPackGUID());
-            data << (uint32)0;
-            data << float(value);
-            GetSession()->SendPacket( &data );
-        }break;
-        default:break;
-    }
-}
-
 void Player::BuildPlayerRepop()
 {
     // place corpse instead player body
@@ -2719,13 +2670,13 @@ void Player::BuildPlayerRepop()
     // setting new speed
     if (getRace() == RACE_NIGHTELF)
     {
-        SetPlayerSpeed(MOVE_RUN, (float)12.75, true);
-        SetPlayerSpeed(MOVE_SWIM, (float)8.85, true);
+        SetSpeed(MOVE_RUN,  1.5f*1.2f, true);
+        SetSpeed(MOVE_SWIM, 1.5f*1.2f, true);
     }
     else
     {
-        SetPlayerSpeed(MOVE_RUN, (float)10.625, true);
-        SetPlayerSpeed(MOVE_SWIM, (float)7.375, true);
+        SetSpeed(MOVE_RUN,  1.5f, true);
+        SetSpeed(MOVE_SWIM, 1.5f, true);
     }
 
     //! corpse reclaim delay 30 * 1000ms
@@ -2800,8 +2751,8 @@ void Player::ResurrectPlayer()
     SetMovement(MOVE_LAND_WALK);
     SetMovement(MOVE_UNROOT);
 
-    SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
-    SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
+    SetSpeed(MOVE_RUN,  1.0f, true);
+    SetSpeed(MOVE_SWIM, 1.0f, true);
 
     SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
 
@@ -9683,7 +9634,12 @@ void Player::_LoadMail()
 void Player::LoadPet()
 {
     Pet *pet = new Pet(getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
-    if(!pet->LoadPetFromDB(this))
+    if(pet->LoadPetFromDB(this))
+    {
+        for(int i = 0; i < MAX_MOVE_TYPE; ++i)
+            pet->SetSpeed(UnitMoveType(i),m_speed_rate[i],true);
+    }
+    else
         delete pet;
 }
 

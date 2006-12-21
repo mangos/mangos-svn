@@ -466,17 +466,17 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // setting new speed if dead
     if ( pCurrChar->m_deathState == DEAD )
     {
-        GetPlayer()->SetMovement(MOVE_WATER_WALK);
+        pCurrChar->SetMovement(MOVE_WATER_WALK);
 
-        if (GetPlayer()->getRace() == RACE_NIGHTELF)
+        if (pCurrChar->getRace() == RACE_NIGHTELF)
         {
-            pCurrChar->SetPlayerSpeed(MOVE_RUN, (float)12.75, true);
-            pCurrChar->SetPlayerSpeed(MOVE_SWIM, (float)8.85, true);
+            pCurrChar->SetSpeed(MOVE_RUN,  1.5f*1.2f, true);
+            pCurrChar->SetSpeed(MOVE_SWIM, 1.5f*1.2f, true);
         }
         else
         {
-            pCurrChar->SetPlayerSpeed(MOVE_RUN, (float)10.625, true);
-            pCurrChar->SetPlayerSpeed(MOVE_SWIM, (float)7.375, true);
+            pCurrChar->SetSpeed(MOVE_RUN,  1.5f, true);
+            pCurrChar->SetSpeed(MOVE_SWIM, 1.5f, true);
         }
     }
 

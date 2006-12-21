@@ -656,7 +656,7 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
 
     float ASpeed = (float)atof((char*)args);
 
-    if (ASpeed > 50 || ASpeed <= 0)
+    if (ASpeed > 10 || ASpeed < 0.1)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -669,7 +669,7 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_YOU_CHANGE_ASPEED, ASpeed, chr->GetName());
+    PSendSysMessage(LANG_YOU_CHANGE_ASPEED, ASpeed*100, chr->GetName());
 
     char buf[256];
     sprintf((char*)buf,LANG_YOURS_ASPEED_CHANGED, m_session->GetPlayer()->GetName(), ASpeed);
@@ -677,22 +677,11 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE );
-    data.append(chr->GetPackGUID());
-    data << (uint32)0;
-    data << (float)ASpeed;
-    chr->SendMessageToSet( &data, true );
-
-    data.Initialize( SMSG_FORCE_SWIM_SPEED_CHANGE );
-    data.append(chr->GetPackGUID());
-    data << (uint32)0;
-    data << (float)ASpeed;
-    chr->SendMessageToSet( &data, true );
-    data.Initialize( SMSG_FORCE_RUN_BACK_SPEED_CHANGE );
-    data.append(chr->GetPackGUID());
-    data << (uint32)0;
-    data << (float)ASpeed;
-    chr->SendMessageToSet( &data, true );
+    chr->SetSpeed(MOVE_WALK,    ASpeed,true);
+    chr->SetSpeed(MOVE_RUN,     ASpeed,true);
+    chr->SetSpeed(MOVE_WALKBACK,ASpeed,true);
+    chr->SetSpeed(MOVE_SWIM,    ASpeed,true);
+    chr->SetSpeed(MOVE_SWIMBACK,ASpeed,true);
     return true;
 }
 
@@ -705,7 +694,7 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
 
     float Speed = (float)atof((char*)args);
 
-    if (Speed > 50 || Speed <= 0)
+    if (Speed > 10 || Speed < 0.1)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -726,12 +715,7 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE );
-    data.append(chr->GetPackGUID());
-    data << uint32(0);
-    data << (float)Speed;                                   //4
-
-    chr->SendMessageToSet( &data, true );
+    chr->SetSpeed(MOVE_RUN,Speed,true);
 
     return true;
 }
@@ -745,7 +729,7 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
 
     float Swim = (float)atof((char*)args);
 
-    if (Swim > 50 || Swim <= 0)
+    if (Swim > 10 || Swim < 0.01)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -766,11 +750,7 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    data.Initialize( SMSG_FORCE_SWIM_SPEED_CHANGE );
-    data.append(chr->GetPackGUID());
-    data << (uint32)0;
-    data << (float)Swim;
-    chr->SendMessageToSet( &data, true );
+    chr->SetSpeed(MOVE_SWIM,Swim,true);
 
     return true;
 }
@@ -784,7 +764,7 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
 
     float BSpeed = (float)atof((char*)args);
 
-    if (BSpeed > 50 || BSpeed <= 0)
+    if (BSpeed > 10 || BSpeed < 0.1)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -805,11 +785,7 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    data.Initialize( SMSG_FORCE_RUN_BACK_SPEED_CHANGE );
-    data.append(chr->GetPackGUID());
-    data << (uint32)0;
-    data << (float)BSpeed;
-    chr->SendMessageToSet( &data, true );
+    chr->SetSpeed(MOVE_WALKBACK,BSpeed,true);
 
     return true;
 }
