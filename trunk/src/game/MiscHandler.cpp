@@ -989,8 +989,11 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
         recv_data >> unk1 >> NewSpeed;
     }
     if (GetPlayer()->GetSpeed(MOVE_RUN) != NewSpeed)
-                                                            //now kick player???
-        sLog.outError("SpeedChange player is NOT correct, its set to: %f", NewSpeed);
+    {
+        sLog.outError("SpeedChange player %s is NOT correct (must be %f instead %f, force set to correct value", GetPlayer()->GetName(), GetPlayer()->GetSpeed(MOVE_RUN), NewSpeed);
+        // forse set correct speed;
+        GetPlayer()->SetSpeed(MOVE_RUN,GetPlayer()->GetSpeed(MOVE_RUN)/baseMoveSpeed[MOVE_RUN],true);
+    }
 }
 
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)

@@ -363,9 +363,7 @@ void Aura::Update(uint32 diff)
             float x,y,z,angle,speed,pos_x,pos_y,pos_z;
             angle = m_target->GetAngle( caster->GetPositionX(), caster->GetPositionY() );
             // If the m_target is player,and if the speed is too slow,change it :P
-            if(m_target->GetTypeId() != TYPEID_PLAYER)
-                speed = m_target->GetSpeed(MOVE_RUN);
-            else speed = m_target->GetSpeed();
+            speed = m_target->GetSpeed(MOVE_RUN);
             pos_x = m_target->GetPositionX();
             pos_y = m_target->GetPositionY();
             uint32 mapid = m_target->GetMapId();
@@ -1514,14 +1512,10 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
     if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
-    if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount)/100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
-    data.Initialize(MSG_MOVE_SET_RUN_SPEED);
-    data << m_target->GetGUID();
-    data << m_target->GetSpeed( MOVE_RUN );
-    m_target->SendMessageToSet(&data,true);
+
+    float rate = (100.0f + m_modifier.m_amount)/100.0f;
+
+    m_target->ApplySpeedMod(MOVE_RUN, rate, false, apply );
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
@@ -1531,16 +1525,11 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
     if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
-    if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount)/100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data.append(m_target->GetPackGUID());
-    data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
 
-    m_target->SendMessageToSet(&data,true);
+    float rate = (100.0f + m_modifier.m_amount)/100.0f;
+
+    m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
+
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
@@ -1549,16 +1538,11 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
     sLog.outDebug("HandleAuraModIncreaseMountedSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
-    WorldPacket data;
-    if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data.append(m_target->GetPackGUID());
-    data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
-    m_target->SendMessageToSet(&data,true);
+
+    float rate = (100.0f + m_modifier.m_amount)/100.0f;
+
+    m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
+
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
@@ -1567,42 +1551,29 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
     sLog.outDebug("HandleAuraModDecreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount <= 0)
     {                                                       //for new spell dbc
-        if(apply)
-            m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount) / 100.0f );
-        else
-            m_target->SetSpeed( m_target->GetSpeed() * 100.0f / (100.0f + m_modifier.m_amount) );
+        float rate = (100.0f + m_modifier.m_amount)/100.0f;
+
+        m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
     }
     else
     {                                                       //for old spell dbc
-        if(apply)
-            m_target->SetSpeed( m_target->GetSpeed() * (m_modifier.m_amount / 100.0f) );
-        else
-            m_target->SetSpeed( m_target->GetSpeed() * (100.0f / m_modifier.m_amount) );
+        float rate = m_modifier.m_amount / 100.0f;
+
+        m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
     }
-    WorldPacket data;
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data.append(m_target->GetPackGUID());
-    data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
-    m_target->SendMessageToSet(&data,true);
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
-void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
+void Aura::HandleAuraModIncreaseSwimSpeed(bool apply)
 {
     sLog.outDebug("HandleAuraModIncreaseSwimSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
-    WorldPacket data;
-    if(Apply)
-        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
-    data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE);
-    data.append(m_target->GetPackGUID());
-    data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_SWIM );
-    m_target->SendMessageToSet(&data,true);
+
+    float rate = (100.0f + m_modifier.m_amount)/100.0f;
+
+    m_target->ApplySpeedMod(MOVE_SWIM, rate, true, apply );
+
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_SWIM));
 }
 

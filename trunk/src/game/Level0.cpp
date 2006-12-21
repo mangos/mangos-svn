@@ -28,6 +28,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Language.h"
+#include "SpellAuras.h"
 
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 {
@@ -167,7 +168,9 @@ bool ChatHandler::HandleDismountCommand(const char* args)
     }
 
     m_session->GetPlayer( )->Unmount();
-    m_session->GetPlayer( )->SetPlayerSpeed(MOVE_RUN, 7.5, true);
+    Unit::AuraList& mModMounted = m_session->GetPlayer( )->GetAurasByType(SPELL_AURA_MOUNTED);
+    while(!mModMounted.empty())
+        m_session->GetPlayer()->RemoveAura(mModMounted.front()->GetId(),mModMounted.front()->GetEffIndex());
     return true;
 }
 

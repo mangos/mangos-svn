@@ -926,7 +926,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RepopAtGraveyard();
 
         void SetMovement(uint8 pType);
-        void SetPlayerSpeed(uint8 SpeedType, float value, bool forced=false);
 
         void JoinedChannel(Channel *c);
         void LeftChannel(Channel *c);
