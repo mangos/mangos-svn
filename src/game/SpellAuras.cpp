@@ -165,7 +165,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_PCT = 118,
     &Aura::HandleNULL,                                      //SPELL_AURA_SHARE_PET_TRACKING = 119,
     &Aura::HandleNULL,                                      //SPELL_AURA_UNTRACKABLE = 120,
-    &Aura::HandleNULL,                                      //SPELL_AURA_EMPATHY = 121,
+    &Aura::HandleAuraEmpathy,                               //SPELL_AURA_EMPATHY = 121,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT = 122,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_COST_PCT = 123,
     &Aura::HandleAuraModRangedAttackPower,                  //SPELL_AURA_MOD_RANGED_ATTACK_POWER = 124,
@@ -184,7 +184,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModTotalPercentStat,                       //SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE = 137,
     &Aura::HandleHaste,                                     //SPELL_AURA_MOD_HASTE = 138,
     &Aura::HandleForceReaction,                             //SPELL_AURA_FORCE_REACTION = 139,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_HASTE = 140,
+    &Aura::HandleAuraModRangedHaste,                        //SPELL_AURA_MOD_RANGED_HASTE = 140,
     &Aura::HandleRangedAmmoHaste,                           //SPELL_AURA_MOD_RANGED_AMMO_HASTE = 141,
     &Aura::HandleAuraModBaseResistancePCT,                  //SPELL_AURA_MOD_BASE_RESISTANCE_PCT = 142,
     &Aura::HandleAuraModResistanceExclusive,                //SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE = 143,
@@ -2243,6 +2243,14 @@ void Aura::HandleHaste(bool apply)
     }
 }
 
+void Aura::HandleAuraModRangedHaste(bool apply)
+{
+    if(m_modifier.m_amount >= 0)
+        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
+    else
+        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, -m_modifier.m_amount, !apply);
+}
+
 void Aura::HandleRangedAmmoHaste(bool apply)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -2572,4 +2580,16 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
 
     double healthPercentage = (double)unit_target->GetHealth() / (double)unit_target->GetMaxHealth();
     unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));
+}
+
+void Aura::HandleAuraEmpathy(bool apply)
+{
+    if(m_target->GetTypeId()!=TYPEID_UNIT)
+        return;
+
+    CreatureInfo const * ci = objmgr.GetCreatureTemplate(m_target->GetEntry());
+    if(ci && ci->type == CREATURE_TYPE_BEAST)
+    {
+        m_target->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
+    }
 }

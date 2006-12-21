@@ -64,6 +64,7 @@ class Aura
         void HandleAuraModStun(bool Apply);
         void HandleModDamageDone(bool Apply);
         void HandleModDamageTaken(bool Apply);
+        void HandleAuraEmpathy(bool Apply);
         void HandleAuraModRangedAttackPower(bool Apply);
         void HandleAuraModIncreaseSpeedAlways(bool Apply);
         void HandleAuraModIncreaseEnergyPercent(bool Apply);
@@ -141,6 +142,7 @@ class Aura
         void HandleModShieldBlock(bool Apply);
         void HandleModReputationGain(bool Apply);
         void HandleForceReaction(bool Apply);
+        void HandleAuraModRangedHaste(bool apply);
         void HandleRangedAmmoHaste(bool Apply);
         void HandleModTotalPercentStat(bool Apply);
 
