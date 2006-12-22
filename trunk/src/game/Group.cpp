@@ -451,7 +451,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                 if (i->totalNeed > 0)
                 {
                     uint8 maxresul = 0;
-                    uint8 maxguid  = 0;
+                    uint64 maxguid  = (*i->playerVote.begin()).first;
                     Player *player;
 
                     map<uint64, RollVote>::iterator itr2;
@@ -470,6 +470,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                     }
                     SendLootRollWon(0, maxguid, i->itemid, 0, maxresul, 1, *i);
                     player = objmgr.GetPlayer(maxguid);
+
                     if(player && player->GetSession())
                     {
                         uint16 dest;
@@ -493,7 +494,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                     if (i->totalGreed > 0)
                     {
                         uint8 maxresul = 0;
-                        uint8 maxguid = 0;
+                        uint64 maxguid = (*i->playerVote.begin()).first;
                         Player *player;
 
                         map<uint64, RollVote>::iterator itr2;
