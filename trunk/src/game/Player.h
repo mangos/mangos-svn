@@ -1160,7 +1160,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***              ENVIROMENTAL SYSTEM                  ***/
         /*********************************************************/
         void AddWeather();
-        void HandleDrowing (uint32 UnderWaterTime);
+        void HandleDrowning (uint32 UnderWaterTime);
         void HandleLava();
         void HandleSobering();
         void StartMirrorTimer(MirrorTimerType Type, uint32 MaxValue);

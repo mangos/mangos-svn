@@ -515,7 +515,7 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
     DealDamage((Unit*)this, Amount, SELF_DAMAGE, 0, true);
 }
 
-void Player::HandleDrowing(uint32 UnderWaterTime)
+void Player::HandleDrowning(uint32 UnderWaterTime)
 {
     if(!m_isunderwater)
         return;
@@ -852,7 +852,7 @@ void Player::Update( uint32 p_time )
     }
 
     //Handle Water/drowning
-    HandleDrowing(60000);
+    HandleDrowning(60000);
 
     //Handle lava
     HandleLava();
@@ -6141,19 +6141,8 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
                 return EQUIP_ERR_CANT_DO_IN_COMBAT;
 
-	    if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0) 
-	    { 
-		return EQUIP_ERR_CANT_DO_RIGHT_NOW; // maybe exist better err 
-	    } 
-
-	    else if (isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0) 
-	    { 
-		m_weaponChangeTimer == DEFAULT_SWITCH_WEAPON; 
-		if (getClass() == CLASS_ROGUE) 
-		{ 
-		    m_weaponChangeTimer == ROGUE_SWITCH_WEAPON; 
-		} 
-	    } 
+			if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0) 
+				return EQUIP_ERR_CANT_DO_RIGHT_NOW; // maybe exist better err 
 
             uint32 type = pProto->InventoryType;
             uint8 eslot = FindEquipSlot( type, slot, swap );
@@ -6768,7 +6757,17 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         uint8 slot = pos & 255;
 
         if(isAlive())
+		{
             _ApplyItemMods(pItem, slot, true);
+		
+			ItemPrototype const *pProto = pItem->GetProto();
+			if(pProto && isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0) 
+			{ 
+				m_weaponChangeTimer = DEFAULT_SWITCH_WEAPON; 
+				if (getClass() == CLASS_ROGUE) 
+					m_weaponChangeTimer = ROGUE_SWITCH_WEAPON; 
+			}
+		}
 
         if( IsInWorld() && update )
         {
