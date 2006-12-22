@@ -148,6 +148,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     //there is small problem:
     //one player sends big sum of money to another player, then server crashes, but mail with money is
     //is DB .. so receiver will receive money, BUT sender has also that money..., we will have to save also players money...
+
+    // save to db
+    pl->SaveToDB();
 }
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )

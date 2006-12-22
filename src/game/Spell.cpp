@@ -2057,9 +2057,29 @@ uint8 Spell::CheckItems()
                     if (m_spellInfo->Effect[i] == SPELL_EFFECT_HEAL)
                         if (unitTarget->GetHealth() == unitTarget->GetMaxHealth())
                             return (uint8)CAST_FAIL_ALREADY_FULL_HEALTH;
-                    if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE)
-                        if (unitTarget->GetPower(POWER_MANA) == unitTarget->GetMaxPower(POWER_MANA))
-                            return (uint8)CAST_FAIL_ALREADY_FULL_MANA;
+
+		    // Mana Potion, Rage Potion, Thistle Tea(Rogue), ... 
+		    if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE) 
+		    { 
+			//Check if the Caster Has Rage For Power 
+			if (m_caster->GetMaxPower(POWER_RAGE)) 
+                        { 
+                            if (unitTarget->GetPower(POWER_RAGE) == unitTarget->GetMaxPower(POWER_RAGE)) 
+                                    return (uint8)CAST_FAIL_ALREADY_FULL_MANA; 
+                        } 
+                        //Check if the Caster Has Energy For Power 
+                        else if (m_caster->GetMaxPower(POWER_ENERGY)) 
+                        { 
+                            if (unitTarget->GetPower(POWER_ENERGY) == unitTarget->GetMaxPower(POWER_ENERGY)) 
+                                return (uint8)CAST_FAIL_ALREADY_FULL_MANA; 
+                        } 
+                        //So The Player Has Mana 
+                        else if (unitTarget->GetPower(POWER_MANA) == unitTarget->GetMaxPower(POWER_MANA)) 
+                        { 
+                            return (uint8)CAST_FAIL_ALREADY_FULL_MANA; 
+                        } 
+                    } 
+
                 }
             }
         }

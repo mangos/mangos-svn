@@ -46,6 +46,8 @@
 
 #include <cmath>
 
+#define DEFAULT_SWITCH_WEAPON        1500
+
 Player::Player (WorldSession *session): Unit()
 {
     m_transport = NULL;
@@ -74,6 +76,7 @@ Player::Player (WorldSession *session): Unit()
     m_lootGuid = 0;
 
     m_regenTimer = 0;
+    m_weaponChangeTimer = 0;
     m_dismountCost = 0;
 
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
@@ -111,6 +114,7 @@ Player::Player (WorldSession *session): Unit()
     ItemsSetEff[1]=NULL;
     ItemsSetEff[2]=NULL;
     m_regenTimer = 0;
+    m_weaponChangeTimer = 0;
     m_breathTimer = 0;
     m_isunderwater = 0;
     m_drunkTimer = 0;
@@ -789,6 +793,14 @@ void Player::Update( uint32 p_time )
         else
             m_regenTimer -= p_time;
     }
+
+    if (m_weaponChangeTimer > 0) 
+    { 
+	if(p_time >= m_weaponChangeTimer) 
+	    m_weaponChangeTimer = 0; 
+	else 
+            m_weaponChangeTimer -= p_time; 
+    } 
 
     if (isAlive())
     {
@@ -6129,6 +6141,20 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
                 return EQUIP_ERR_CANT_DO_IN_COMBAT;
 
+	    if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0) 
+	    { 
+		return EQUIP_ERR_CANT_DO_RIGHT_NOW; // maybe exist better err 
+	    } 
+
+	    else if (isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0) 
+	    { 
+		m_weaponChangeTimer == DEFAULT_SWITCH_WEAPON; 
+		if (getClass() == CLASS_ROGUE) 
+		{ 
+		    m_weaponChangeTimer == ROGUE_SWITCH_WEAPON; 
+		} 
+	    } 
+
             uint32 type = pProto->InventoryType;
             uint8 eslot = FindEquipSlot( type, slot, swap );
             if( eslot == NULL_SLOT )
@@ -6197,6 +6223,7 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
         pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC )
         return EQUIP_ERR_CANT_DO_IN_COMBAT;
+
 
     if(!swap && pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
         return EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS;

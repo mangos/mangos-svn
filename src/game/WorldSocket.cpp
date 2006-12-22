@@ -360,8 +360,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     _session->SetSecurity(security);
     sWorld.AddSession(_session);
 
-    sLog.outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
-    sLog.outString( "Account: '%s' Login.", account.c_str() );
+    sLog.outDebug( "SOCKET: Client '%s' authed successfully.", account.c_str() );
+    sLog.outDebug( "Account: '%s' Login.", account.c_str() );
     loginDatabase.PQuery("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), account.c_str());
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client

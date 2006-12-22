@@ -388,6 +388,9 @@ class WorldSession;
 #define BUYBACK_SLOT_12              80
 #define BUYBACK_SLOT_END             81
 
+#define DEFAULT_SWITCH_WEAPON        1500   //cooldown in ms 
+#define ROGUE_SWITCH_WEAPON          1000
+
 #define TRADE_SLOT_COUNT             7
 #define TRADE_SLOT_TRADED_COUNT      6
 #define TRADE_SLOT_NONTRADED         6
@@ -695,6 +698,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void Regenerate(Powers power);
         void RegenerateHealth();
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
+	void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
+
 
         uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
         void ModifyMoney( int32 d ) { SetMoney (GetMoney() + d > 0 ? GetMoney() + d : 0); }
@@ -1239,6 +1244,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_drunkTimer;
         uint16 m_drunk;
         time_t m_lastManaUse;
+	uint32 m_weaponChangeTimer;
 
         uint32 m_deathTimer;
 
