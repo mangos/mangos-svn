@@ -687,7 +687,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
 
         float GetSpeed( UnitMoveType mtype ) const;
-        float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[MAX_MOVE_TYPE]; }
+        float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
         void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
         void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool aplly);
     protected:
