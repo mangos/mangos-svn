@@ -9628,12 +9628,7 @@ void Player::_LoadMail()
 void Player::LoadPet()
 {
     Pet *pet = new Pet(getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
-    if(pet->LoadPetFromDB(this))
-    {
-        for(int i = 0; i < MAX_MOVE_TYPE; ++i)
-            pet->SetSpeed(UnitMoveType(i),m_speed_rate[i],true);
-    }
-    else
+    if(!pet->LoadPetFromDB(this))
         delete pet;
 }
 
