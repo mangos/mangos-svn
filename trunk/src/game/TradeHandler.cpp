@@ -30,13 +30,13 @@
 void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug( "WORLD: Ignore Trade %u",_player->GetGUIDLow());
-    recvPacket.print_storage();
+    // recvPacket.print_storage();
 }
 
 void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug( "WORLD: Busy Trade %u",_player->GetGUIDLow());
-    recvPacket.print_storage();
+    // recvPacket.print_storage();
 }
 
 void WorldSession::SendUpdateTrade()
