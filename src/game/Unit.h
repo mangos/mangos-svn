@@ -688,7 +688,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[MAX_MOVE_TYPE]; }
-        virtual void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
+        void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
         void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool aplly);
     protected:
         Unit ( );

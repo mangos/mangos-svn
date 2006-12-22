@@ -3058,6 +3058,14 @@ Creature* Unit::GetCharm() const
 void Unit::SetPet(Pet* pet)
 {
     SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0);
+
+    if(pet)
+    {
+        for(int i = 0; i < MAX_MOVE_TYPE; ++i)
+        {
+            pet->SetSpeed(UnitMoveType(i),m_speed_rate[i],true);
+        }
+    }
 }
 
 void Unit::SetCharm(Creature* charmed)
