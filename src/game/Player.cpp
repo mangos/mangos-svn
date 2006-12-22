@@ -9797,10 +9797,9 @@ void Player::SaveToDB()
     uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
     uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
 
-    int is_logout_resting=0;                                //logout, far from tavern/city
-                                                            //logout, but in tavern/city
-    if(!IsInWorld()&&HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))is_logout_resting=1;
-
+    int is_save_resting = HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0;
+                                                            //save, far from tavern/city
+                                                            //save, but in tavern/city
     // Set player sit state to standing on save
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
@@ -9882,7 +9881,7 @@ void Player::SaveToDB()
     ss << ", ";
     ss << time(NULL);
     ss << ", ";
-    ss << is_logout_resting;
+    ss << is_save_resting;
     ss << ", ";
     ss << m_resetTalentsCost;
     ss << ", ";
@@ -9906,6 +9905,8 @@ void Player::SaveToDB()
 
     sDatabase.Execute( ss.str().c_str() );
 
+    sDatabase.CommitTransaction();
+
     SaveEnchant();
 
     if(m_mailsUpdated)                                      //save mails only when needed
@@ -9921,8 +9922,6 @@ void Player::SaveToDB()
     _SaveReputation();
     SavePet();
 
-    sDatabase.CommitTransaction();
-
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
 
@@ -9936,6 +9935,9 @@ void Player::SaveToDB()
     SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
     SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
     SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
+
+    if(is_save_resting)
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     if (inworld)
         AddToWorld();
