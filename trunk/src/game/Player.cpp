@@ -1298,12 +1298,14 @@ void Player::CalcRage( uint32 damage,bool attacker )
 {
     uint32 addRage = 0;
 
-    if(attacker)
-        addRage = (uint32)(10*damage/(getLevel()*0.5f));
-    else
-        addRage = (uint32)(10*damage/(getLevel()*1.5f));
+	float rageconversion = ((0.0091107836 * getLevel()*getLevel())+3.225598133*getLevel())+4.2652911;
 
-    ModifyPower(POWER_RAGE, addRage);
+    if(attacker)
+		addRage = (uint32)(damage/rageconversion*7.5);
+    else
+		addRage = (uint32)(damage/rageconversion*2.5);
+ 
+	ModifyPower(POWER_RAGE, addRage*10);
 }
 
 void Player::RegenerateAll()
