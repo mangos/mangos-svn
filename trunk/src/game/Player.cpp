@@ -796,9 +796,9 @@ void Player::Update( uint32 p_time )
 
     if (m_weaponChangeTimer > 0) 
     { 
-	if(p_time >= m_weaponChangeTimer) 
-	    m_weaponChangeTimer = 0; 
-	else 
+    if(p_time >= m_weaponChangeTimer) 
+        m_weaponChangeTimer = 0; 
+    else 
             m_weaponChangeTimer -= p_time; 
     } 
 
@@ -1298,14 +1298,14 @@ void Player::CalcRage( uint32 damage,bool attacker )
 {
     uint32 addRage = 0;
 
-	float rageconversion = ((0.0091107836 * getLevel()*getLevel())+3.225598133*getLevel())+4.2652911;
+    float rageconversion = ((0.0091107836 * getLevel()*getLevel())+3.225598133*getLevel())+4.2652911;
 
     if(attacker)
-		addRage = (uint32)(damage/rageconversion*7.5);
+        addRage = (uint32)(damage/rageconversion*7.5);
     else
-		addRage = (uint32)(damage/rageconversion*2.5);
+        addRage = (uint32)(damage/rageconversion*2.5);
  
-	ModifyPower(POWER_RAGE, addRage*10);
+    ModifyPower(POWER_RAGE, addRage*10);
 }
 
 void Player::RegenerateAll()
@@ -6143,8 +6143,8 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
                 return EQUIP_ERR_CANT_DO_IN_COMBAT;
 
-			if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0) 
-				return EQUIP_ERR_CANT_DO_RIGHT_NOW; // maybe exist better err 
+            if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0) 
+                return EQUIP_ERR_CANT_DO_RIGHT_NOW; // maybe exist better err 
 
             uint32 type = pProto->InventoryType;
             uint8 eslot = FindEquipSlot( type, slot, swap );
@@ -6759,17 +6759,17 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         uint8 slot = pos & 255;
 
         if(isAlive())
-		{
+        {
             _ApplyItemMods(pItem, slot, true);
-		
-			ItemPrototype const *pProto = pItem->GetProto();
-			if(pProto && isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0) 
-			{ 
-				m_weaponChangeTimer = DEFAULT_SWITCH_WEAPON; 
-				if (getClass() == CLASS_ROGUE) 
-					m_weaponChangeTimer = ROGUE_SWITCH_WEAPON; 
-			}
-		}
+        
+            ItemPrototype const *pProto = pItem->GetProto();
+            if(pProto && isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0) 
+            { 
+                m_weaponChangeTimer = DEFAULT_SWITCH_WEAPON; 
+                if (getClass() == CLASS_ROGUE) 
+                    m_weaponChangeTimer = ROGUE_SWITCH_WEAPON; 
+            }
+        }
 
         if( IsInWorld() && update )
         {

@@ -698,7 +698,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void Regenerate(Powers power);
         void RegenerateHealth();
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
-	void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
+    void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
 
         uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
@@ -1244,7 +1244,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_drunkTimer;
         uint16 m_drunk;
         time_t m_lastManaUse;
-	uint32 m_weaponChangeTimer;
+    uint32 m_weaponChangeTimer;
 
         uint32 m_deathTimer;
 
