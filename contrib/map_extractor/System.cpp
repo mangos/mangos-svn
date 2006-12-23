@@ -5,7 +5,7 @@
 #include "dbcfile.h"
 #include "adt.h"
 #include "mpq_libmpq.h"
-#include <io.h>
+//#include <io.h>
 #include <fcntl.h>
 
 extern unsigned int iRes;

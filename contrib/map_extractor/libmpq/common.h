@@ -31,6 +31,28 @@
 #define LIBMPQ_CONF_EOPEN_DIR		-1			/* error on open directory */
 #define LIBMPQ_CONF_EVALUE_NOT_FOUND	-2			/* value for the option was not found */
 
+#if defined( __GNUC__ )
+	#include <sys/types.h>
+	#include <unistd.h>
+
+	#define _lseek  lseek
+	#define _read   read
+	#define _open	open
+	#define _write	write
+	#define _close	close
+	#define _strdup	strdup
+
+	#ifndef O_BINARY
+		#define O_BINARY 0
+	#endif
+#else
+	#include <io.h>
+#endif
+
+#ifndef min
+	#define min(a, b) ((a < b) ? a : b)
+#endif
+
 int libmpq_init_buffer(mpq_archive *mpq_a);
 int libmpq_read_hashtable(mpq_archive *mpq_a);
 int libmpq_read_blocktable(mpq_archive *mpq_a);

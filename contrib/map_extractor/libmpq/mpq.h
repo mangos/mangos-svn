@@ -31,7 +31,10 @@
 #define _MPQ_H
 
 #include <limits.h>
-#define PATH_MAX 260
+
+#ifndef PATH_MAX
+	#define PATH_MAX 260
+#endif
 
 
 #define LIBMPQ_MAJOR_VERSION		0		/* Major version number... maybe sometimes we reach version 1 :) */
@@ -93,9 +96,11 @@
 #define TRUE 1
 #endif
 
+/*
 #ifndef min
 #define min(a, b) ((a < b) ? a : b)
 #endif
+*/
 
 typedef unsigned int	mpq_buffer[LIBMPQ_TOOLS_BUFSIZE];
 typedef int		(*DECOMPRESS)(char *, int *, char *, int);
