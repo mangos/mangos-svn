@@ -10,22 +10,27 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-if test -z "`automake --version 2>&1|head -n 1|egrep '1.[5-9]'`"; then
+TESTAUTOMAKE=`automake --version 2>&1|head -n 1|awk '{ split($4, t, "."); if(t[2]>4 && t[1]==1) { print t[2] }}'`
+TESTACLOCAL=`aclocal --version 2>&1|head -n 1|awk '{ split($4, t, "."); if(t[2]>4 && t[1]==1) { print t[2] }}'`
+TESTAUTOCONF=`autoconf --version 2>&1|head -n 1|awk '{ split($4, t, "."); if(t[2]>4 && t[1]==2) { print t[2] }}'`
+TESTAUTOHEADER=`autoheader --version 2>&1|head -n 1|awk '{ split($4, t, "."); if(t[2]>4 && t[1]==2) { print t[2] }}'`
+
+if test -z "$TESTAUTOMAKE"; then
         echo "Sorry, automake 1.5 or above is required.";
         exit 1;
 fi
 
-if test -z "`aclocal --version 2>&1|head -n 1|egrep '1.[5-9]'`"; then
+if test -z "$TESTACLOCAL"; then
         echo "Sorry, aclocal 1.5 or above is required.";
         exit 1;
 fi
 
-if test -z "`autoconf --version 2>&1|head -n 1|egrep '2.[5-9]'`"; then
+if test -z "$TESTAUTOCONF"; then
         echo "Sorry, autoconf 2.5 or above is required.";
         exit 1;
 fi
 
-if test -z "`autoheader --version 2>&1|head -n 1|egrep '2.[5-9]'`"; then
+if test -z "$TESTAUTOHEADER"; then
         echo "Sorry, autoheader 2.5 or above is required.";
         exit 1;
 fi

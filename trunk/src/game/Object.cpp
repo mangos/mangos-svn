@@ -727,3 +727,19 @@ void Object::_SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const
         }
     }
 }
+
+void Object::SendDestroyObject(uint64 guid)
+{
+    WorldPacket data; 
+    data.Initialize(SMSG_DESTROY_OBJECT);
+    data << guid;
+    SendMessageToSet(&data, true);
+}
+
+void Object::SendObjectDeSpawnAnim(uint64 guid)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
+    data << guid;
+    SendMessageToSet(&data, true);  
+}

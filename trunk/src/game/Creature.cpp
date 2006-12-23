@@ -1050,6 +1050,17 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
     SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
 
+
+    FactionEntry* factionEntry = sFactionStore.LookupEntry(cinfo->faction);
+
+    if (factionEntry->team == ALLIANCE || HORDE)
+    {
+	if (cinfo->civilian != 1)
+	{
+		SetPvP(true);
+	}
+    }
+
     if (cinfo->mount != 0)
         Mount(cinfo->mount);
 

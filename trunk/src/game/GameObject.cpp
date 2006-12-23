@@ -220,9 +220,7 @@ void GameObject::Update(uint32 p_time)
                     loot.clear();
                     SetLootState(GO_CLOSED);
 
-                    data.Initialize(SMSG_DESTROY_OBJECT);
-                    data << GetGUID();
-                    SendMessageToSet(&data, true);
+                    SendDestroyObject(GetGUID());
                     m_respawnTimer = m_respawnDelayTime;
                 }break;
             }
@@ -274,11 +272,7 @@ void GameObject::Update(uint32 p_time)
 
 void GameObject::Refresh()
 {
-    WorldPacket data;
-
-    data.Initialize(SMSG_DESTROY_OBJECT);
-    data << GetGUID();
-    SendMessageToSet(&data, true);
+    SendDestroyObject(GetGUID());
 
     MapManager::Instance().GetMap(GetMapId())->Add(this);
 }
@@ -290,15 +284,13 @@ void GameObject::CountUseTimes()
 
 void GameObject::Delete()
 {
-    WorldPacket data;
-    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-    data << GetGUID();
-    SendMessageToSet(&data, true);
+ 
+    SendObjectDeSpawnAnim(GetGUID());
+    
     SetUInt32Value(GAMEOBJECT_STATE, 1);
     SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
-    data.Initialize(SMSG_DESTROY_OBJECT);
-    data << GetGUID();
-    SendMessageToSet(&data,true);
+    
+    SendDestroyObject(GetGUID());
     //TODO: set timestamp
     RemoveFromWorld();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
