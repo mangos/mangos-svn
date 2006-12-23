@@ -2058,11 +2058,11 @@ uint8 Spell::CheckItems()
                         if (unitTarget->GetHealth() == unitTarget->GetMaxHealth())
                             return (uint8)CAST_FAIL_ALREADY_FULL_HEALTH;
 
-		    // Mana Potion, Rage Potion, Thistle Tea(Rogue), ... 
-		    if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE) 
-		    { 
-			//Check if the Caster Has Rage For Power 
-			if (m_caster->GetMaxPower(POWER_RAGE)) 
+            // Mana Potion, Rage Potion, Thistle Tea(Rogue), ... 
+            if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE) 
+            { 
+            //Check if the Caster Has Rage For Power 
+            if (m_caster->GetMaxPower(POWER_RAGE)) 
                         { 
                             if (unitTarget->GetPower(POWER_RAGE) == unitTarget->GetMaxPower(POWER_RAGE)) 
                                     return (uint8)CAST_FAIL_ALREADY_FULL_MANA; 

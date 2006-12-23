@@ -116,7 +116,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         else
             loot->NotifyItemRemoved(lootSlot);
 
-        if (item->is_ffa) item->is_looted = true;
+        //if (item->is_ffa) item->is_looted = true;
+        item->is_looted = true;
         loot->unlootedCount--;
 
         WorldPacket data;
