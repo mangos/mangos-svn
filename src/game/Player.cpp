@@ -10355,10 +10355,7 @@ void Player::AbandonPet(Pet* pet, bool real)
 
     pet->CombatStop();
 
-    WorldPacket data;
-    data.Initialize(SMSG_DESTROY_OBJECT);
-    data << pet->GetGUID();
-    SendMessageToSet (&data, true);
+    SendDestroyObject(pet->GetGUID());
 
     ObjectAccessor::Instance().AddObjectToRemoveList(pet);
 

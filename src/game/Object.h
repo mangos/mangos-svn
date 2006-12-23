@@ -109,6 +109,9 @@ class MANGOS_DLL_SPEC Object
         void BuildTeleportAckMsg( WorldPacket *data, float x, float y, float z, float ang) const;
         bool IsBeingTeleported() { return mSemaphoreTeleport; }
         void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
+        
+        void SendDestroyObject(uint64 guid);
+        void SendObjectDeSpawnAnim(uint64 guid);
 
         void Relocate(float x, float y, float z, float orientation)
         {

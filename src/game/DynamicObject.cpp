@@ -101,16 +101,9 @@ void DynamicObject::Update(uint32 p_time)
 
 void DynamicObject::Delete()
 {
-    WorldPacket data;
-
-    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-    data << GetGUID();
-    SendMessageToSet(&data,true);
-
-    data.Initialize(SMSG_DESTROY_OBJECT);
-    data << GetGUID();
-    SendMessageToSet(&data,true);
-
+    SendObjectDeSpawnAnim(GetGUID()); 
+    SendDestroyObject(GetGUID());
+    
     RemoveFromWorld();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }

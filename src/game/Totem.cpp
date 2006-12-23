@@ -52,13 +52,10 @@ void Totem::Update( uint32 time )
 
 void Totem::Summon()
 {
-    WorldPacket data;
     sLog.outDebug("AddObject at Totem.cpp line 49");
     MapManager::Instance().GetMap(GetMapId())->Add((Creature*)this);
 
-    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-    data << GetGUID();
-    SendMessageToSet(&data,true);
+    SendDestroyObject(GetGUID());
 
     AIM_Initialize();
 
@@ -71,13 +68,8 @@ void Totem::UnSummon()
     if (m_type == TOTEM_LAST_BURST)
         this->CastSpell(this, m_spell, true);
 
-    WorldPacket data;
-    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-    data << GetGUID();
-    SendMessageToSet(&data, true);
-    data.Initialize(SMSG_DESTROY_OBJECT);
-    data << GetGUID();
-    SendMessageToSet(&data, true);
+    SendObjectDeSpawnAnim(GetGUID());    
+    SendDestroyObject(GetGUID());
 
     CombatStop();
     RemoveAurasDueToSpell(m_spell);
