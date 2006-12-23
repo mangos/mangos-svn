@@ -313,9 +313,14 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
     Player *player = objmgr.GetPlayer(playerGUID);
     Group *group = player->groupInfo.group;
 
-    for (i=loot->items.begin(); i != loot->items.end(); i++)
+    for (i=loot->items.begin(); i != loot->items.end(); i++, itemSlot++)
     {
         item = objmgr.GetItemPrototype(i->itemid);
+        if (!item)
+        {
+            sLog.outDebug("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
+            continue;
+        }
         if (item->Quality > THRESHOLD)
         {
             Roll r;
@@ -345,8 +350,6 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
 
             RollId.push_back(r);
         }
-
-        itemSlot++;
     }
 }
 
