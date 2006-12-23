@@ -29,7 +29,6 @@
 #include "mpq.h"
 #include "common.h"
 #include <ctype.h>
-#include <io.h>
 
 /*
  *  This function decrypts a MPQ block.
