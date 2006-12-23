@@ -1052,7 +1052,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
 
     FactionEntry* factionEntry = sFactionStore.LookupEntry(cinfo->faction);
-    if (cinfo->civilian != 1 && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
+    if (factionEntry && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE) && cinfo->civilian != 1)
         SetPvP(true);
 
     if (cinfo->mount != 0)
