@@ -961,6 +961,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
 void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 {
+	/*
     //check for speed stuff
     recv_data.hexlike();
     uint64 GUID;
@@ -995,6 +996,7 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
         // force set correct speed (and send to client);
         GetPlayer()->SetSpeed(MOVE_RUN,GetPlayer()->GetSpeedRate(MOVE_RUN),true);
     }
+    */
 }
 
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)

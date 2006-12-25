@@ -484,7 +484,6 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType);
-        void CalDamageReduction(Unit *pVictim, uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist);
         void ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2);
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK);
@@ -686,6 +685,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
 
+		uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
+		void CalcAbsorbResist(Unit *pVictim, uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist);
+		
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
         void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
