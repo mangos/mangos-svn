@@ -1735,8 +1735,8 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     }
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
-    SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
-    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
+    //SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+    //RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
     // apply stats, aura, items mods
     if(remove_mods)
@@ -5828,71 +5828,72 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
             uint16 pos;
             if(pItem->IsBindedNotWith(GetGUID()))
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
-            if( bag == 0 )
+
+			// check count of items
+            if( !swap && pProto->MaxCount > 0 )
             {
-                // check count of items
-                if( !swap && pProto->MaxCount > 0 )
+                uint32 curcount = 0;
+                for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
                 {
-                    uint32 curcount = 0;
-                    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
+                    pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                    pItem2 = GetItemByPos( pos );
+                    if( pItem2 && pItem2!= pItem && pItem2->GetEntry() == pItem->GetEntry() )
                     {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
-                        pItem2 = GetItemByPos( pos );
-                        if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() )
-                        {
-                            curcount += pItem2->GetCount();
-                            if( curcount + pItem->GetCount() > pProto->MaxCount )
-                                return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
-                        }
+                        curcount += pItem2->GetCount();
+                        if( curcount + pItem->GetCount() > pProto->MaxCount )
+                            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                     }
-                    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+                }
+                for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+                {
+                    pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                    pBag = (Bag*)GetItemByPos( pos );
+                    if( pBag )
                     {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
-                        pBag = (Bag*)GetItemByPos( pos );
-                        if( pBag )
+                        pBagProto = pBag->GetProto();
+                        if( pBagProto )
                         {
-                            pBagProto = pBag->GetProto();
-                            if( pBagProto )
+                            for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                             {
-                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                                pos = ((i << 8) | j );
+                                pItem2 = GetItemByPos( pos );
+                                if( pItem2 && pItem2!= pItem && pItem2->GetEntry() == pItem->GetEntry() )
                                 {
-                                    pos = ((i << 8) | j );
-                                    pItem2 = GetItemByPos( pos );
-                                    if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() )
-                                    {
-                                        curcount += pItem2->GetCount();
-                                        if( curcount + pItem->GetCount() > pProto->MaxCount )
-                                            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
-                    {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
-                        pBag = (Bag*)GetItemByPos( pos );
-                        if( pBag )
-                        {
-                            pBagProto = pBag->GetProto();
-                            if( pBagProto )
-                            {
-                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
-                                {
-                                    pos = ((i << 8) | j );
-                                    pItem2 = GetItemByPos( pos );
-                                    if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() )
-                                    {
-                                        curcount += pItem2->GetCount();
-                                        if( curcount + pItem->GetCount() > pProto->MaxCount )
-                                            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
-                                    }
+                                    curcount += pItem2->GetCount();
+                                    if( curcount + pItem->GetCount() > pProto->MaxCount )
+                                        return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                                 }
                             }
                         }
                     }
                 }
+                for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+                {
+                    pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                    pBag = (Bag*)GetItemByPos( pos );
+                    if( pBag )
+                    {
+                        pBagProto = pBag->GetProto();
+                        if( pBagProto )
+                        {
+                            for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                            {
+                                pos = ((i << 8) | j );
+                                pItem2 = GetItemByPos( pos );
+                                if( pItem2 && pItem2!= pItem && pItem2->GetEntry() == pItem->GetEntry() )
+                                {
+                                    curcount += pItem2->GetCount();
+                                    if( curcount + pItem->GetCount() > pProto->MaxCount )
+                                        return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
+            if( bag == 0 )
+            {
                 // search stack for merge to
                 if( pProto->Stackable > 1 )
                 {
