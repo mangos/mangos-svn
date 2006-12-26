@@ -961,7 +961,6 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
 void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 {
-	/*
     //check for speed stuff
     recv_data.hexlike();
     uint64 GUID;
@@ -971,6 +970,11 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
     float NewSpeed;
 
     recv_data >> GUID;
+
+    // skip another player speed update info 
+    if(GUID != _player->GetGUID())
+        return;
+
     recv_data >> unk0 >> Flags;
     if ( (Flags & 0x2000) || (Flags & 0x6000) )             //0x2000 == jumping  0x6000 == Falling
     {
@@ -996,7 +1000,6 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
         // force set correct speed (and send to client);
         GetPlayer()->SetSpeed(MOVE_RUN,GetPlayer()->GetSpeedRate(MOVE_RUN),true);
     }
-    */
 }
 
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)

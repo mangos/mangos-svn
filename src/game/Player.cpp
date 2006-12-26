@@ -1735,8 +1735,8 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     }
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
-    //SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
-    //RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
+    SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
     // apply stats, aura, items mods
     if(remove_mods)
