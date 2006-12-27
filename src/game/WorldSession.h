@@ -55,12 +55,13 @@ class MANGOS_DLL_SPEC WorldSession
 
         uint32 GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
-        Player* GetPlayer() { return _player; }
+        Player* GetPlayer() const { return _player; }
+        char const* GetPlayerName() const;
         void SetSecurity(uint32 security) { _security = security; }
         void SetSocket(WorldSocket *sock);
         void SetPlayer(Player *plr) { _player = plr; }
 
-        bool isLogingOut()
+        bool isLogingOut() const
         {
             if (_logoutTime) return true;
             else return false;

@@ -50,6 +50,12 @@ WorldSession::~WorldSession()
     }
 }
 
+char const* WorldSession::GetPlayerName() const
+{
+    return GetPlayer() ? GetPlayer()->GetName() : "<none>";
+}
+
+
 void WorldSession::SetSocket(WorldSocket *sock)
 {
     _socket = sock;
