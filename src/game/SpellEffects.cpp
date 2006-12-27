@@ -449,10 +449,8 @@ void Spell::EffectApplyAura(uint32 i)
         return;
     uint8 castResult = 0;
     //If m_immuneToState type contain this aura type, IMMUNE aura.
-    for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_EFFECT].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_EFFECT].end(); itr = next)
+    for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_EFFECT].begin(); itr != unitTarget->m_spellImmune[IMMUNITY_EFFECT].end(); ++itr)
     {
-        next = itr;
-        next++;
         if((*itr)->type == m_spellInfo->EffectApplyAuraName[i])
         {
             castResult = CAST_FAIL_IMMUNE;

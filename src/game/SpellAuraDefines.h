@@ -194,8 +194,12 @@ enum MOD_TYPES
     SPELL_AURA_MOD_WATER_BREATHING  =   155 ,               //    Mod Water Breathing
     SPELL_AURA_MOD_REPUTATION_GAIN    =   156 ,             //    Mod Reputation Gain
     SPELL_AURA_PET_DAMAGE_MULTI =   157 ,                   //    Mod Pet Damage
+    SPELL_AURA_158,
+    SPELL_AURA_159,
+    SPELL_AURA_160,
+    SPELL_AURA_161,
+    SPELL_AURA_162,
 
-    TOTAL_AURAS=158
-
+    TOTAL_AURAS=163
 };
 #endif
