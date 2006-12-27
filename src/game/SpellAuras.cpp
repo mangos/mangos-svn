@@ -41,6 +41,7 @@
 #include "Totem.h"
 #include "Creature.h"
 #include "ConfusedMovementGenerator.h"
+#include "Formulas.h"
 
 pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
@@ -1146,11 +1147,18 @@ void Aura::HandleChannelDeathItem(bool apply)
     if(!apply)
     {
         Unit* caster = GetCaster();
-        if(!caster || caster->GetTypeId() != TYPEID_PLAYER || !m_removeOnDeath)
+        Unit* victim = GetTarget();
+        if(!caster || caster->GetTypeId() != TYPEID_PLAYER || !victim || !m_removeOnDeath)
             return;
+
         SpellEntry *spellInfo = GetSpellProto();
         if(spellInfo->EffectItemType[m_effIndex] == 0)
             return;
+
+        // Soul Shard only from non-grey
+        if( MaNGOS::XP::GetGrayLevel(caster->getLevel()) < victim->getLevel() &&  spellInfo->EffectItemType[m_effIndex] == 6265)
+            return;
+
         uint16 dest;
         uint8 msg = ((Player*)caster)->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, spellInfo->EffectItemType[m_effIndex], 1, false);
         if( msg == EQUIP_ERR_OK )

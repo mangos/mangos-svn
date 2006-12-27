@@ -172,7 +172,7 @@ struct Factions
     uint32 ID;
     uint32 ReputationListID;
     uint32 Flags;
-    uint32 Standing;
+    int32  Standing;
 };
 
 struct EnchantDuration
@@ -961,8 +961,18 @@ class MANGOS_DLL_SPEC Player : public Unit
         void setFactionForRace(uint8 race);
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
-        uint32 GetStanding(uint32 faction) const;
-        bool SetStanding(uint32 faction, int standing);
+
+        std::list<struct Factions> factions;
+        int32 GetBaseReputation(const FactionEntry *factionEntry) const;
+        int32 GetReputation(uint32 FactionTemplateId) const;
+        int32 GetReputation(const FactionEntry *factionEntry) const;
+        ReputationRank GetReputationRank(uint32 faction) const;
+        ReputationRank GetReputationRank(const FactionEntry *factionEntry) const;
+        const static int32 ReputationRank_Length[MAX_REPUTATION_RANK]; 
+        const static int32 Reputation_Cap    =  42999; 
+        const static int32 Reputation_Bottom = -42000;
+
+        bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);
         bool ModifyFactionReputation(FactionEntry* factionEntry, int32 standing);
         void CalculateReputation(Unit *pVictim);
         void CalculateReputation(Quest *pQuest, uint64 guid);
@@ -1203,7 +1213,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_GuildIdInvited;
 
-        std::list<struct Factions> factions;
         std::deque<Mail*> m_mail;
         PlayerSpellMap m_spells;
         SpellCooldowns m_spellCooldowns;

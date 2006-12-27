@@ -58,6 +58,21 @@ enum Classes
     MAX_CLASSES     = 12
 };
 
+enum ReputationRank
+{
+    REP_HATED       = 0,
+    REP_HOSTILE     = 1,
+    REP_UNFRIENDLY  = 2,
+    REP_NEUTRAL     = 3,
+    REP_FRIENDLY    = 4,
+    REP_HONORED     = 5,
+    REP_REVERTED    = 6,
+    REP_EXALTED     = 7
+};
+
+#define MIN_REPUTATION_RANK (REP_HATED)
+#define MAX_REPUTATION_RANK 8
+
 enum MapTypes
 {
     MAP_COMMON          = 0,

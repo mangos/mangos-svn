@@ -48,6 +48,8 @@
 
 #define DEFAULT_SWITCH_WEAPON        1500
 
+const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
+
 Player::Player (WorldSession *session): Unit()
 {
     m_transport = NULL;
@@ -3741,18 +3743,33 @@ void Player::SetInitialFactions()
     }
 }
 
-uint32 Player::GetStanding(uint32 faction) const
+int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
 {
-    FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(faction);
+    uint8 Race = getRace();
+    for (int i=0; i < 4; i++)
+        if ( factionEntry->BaseRepMask[i] & (1 << (Race-1)))
+            return factionEntry->BaseRepValue[i];
+    sLog.outError("Player::GetBaseReputation: can't get base reputation of %s for faction id %d", GetName(), factionEntry->ID);
+    return 0;
+}
+
+int32 Player::GetReputation(uint32 FactionTemplateId) const
+{
+    FactionEntry *factionEntry;
+    FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
 
     if(!factionTemplateEntry)
     {
-        sLog.outError("Player::GetStanding: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(),faction);
+        sLog.outError("Player::GetReputation: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(), FactionTemplateId);
         return 0;
     }
+    factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
 
-    FactionEntry *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
+    return GetReputation(factionEntry);
+}
 
+int32 Player::GetReputation(const FactionEntry *factionEntry) const
+{
     // Faction without recorded reputation. Just ignore.
     if(!factionEntry)
         return 0;
@@ -3761,20 +3778,41 @@ uint32 Player::GetStanding(uint32 faction) const
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
         if(int32(itr->ReputationListID) == factionEntry->reputationListID)
-        {
-            return itr->Standing;
-        }
+            return GetBaseReputation(factionEntry) + itr->Standing;
     }
     return 0;
+
 }
 
-bool Player::SetStanding(uint32 faction, int standing)
+ReputationRank Player::GetReputationRank(uint32 faction) const
 {
-    FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(faction);
+    FactionEntry *factionEntry = sFactionStore.LookupEntry(faction);
+    if(!factionEntry)
+        return MIN_REPUTATION_RANK;
+
+    return GetReputationRank(factionEntry);
+}
+
+ReputationRank Player::GetReputationRank(const FactionEntry *factionEntry) const
+{
+    int32 Reputation = GetReputation(factionEntry);
+    int32 Limit = Reputation_Cap + 1;
+    for (int i = MAX_REPUTATION_RANK-1; i >= MIN_REPUTATION_RANK; i--)
+    {
+        Limit -= ReputationRank_Length[i];
+        if (Reputation >= Limit )
+            return ReputationRank(i);
+    }
+    return MIN_REPUTATION_RANK;
+}
+
+bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation)
+{
+    FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
 
     if(!factionTemplateEntry)
     {
-        sLog.outError("Player::SetStanding: Can't update reputation of %s for unknown faction (faction template id) #%u.",GetName(),faction);
+        sLog.outError("Player::ModifyFactionReputation: Can't update reputation of %s for unknown faction (faction template id) #%u.", GetName(), FactionTemplateId);
         return false;
     }
 
@@ -3784,17 +3822,29 @@ bool Player::SetStanding(uint32 faction, int standing)
     if(!factionEntry)
         return false;
 
-    return ModifyFactionReputation(factionEntry,standing);
+    return ModifyFactionReputation(factionEntry, DeltaReputation);
 }
 
 bool Player::ModifyFactionReputation(FactionEntry* factionEntry, int32 standing)
 {
     std::list<struct Factions>::iterator itr;
+    int32 BaseRep;
+
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
         if(int32(itr->ReputationListID) == factionEntry->reputationListID)
         {
-            itr->Standing = (((int32)itr->Standing + standing) > 0 ? itr->Standing + standing: 0);
+            BaseRep = GetBaseReputation(factionEntry);
+            itr->Standing = BaseRep + itr->Standing + standing;
+
+            if (itr->Standing > Reputation_Cap)
+                itr->Standing = Reputation_Cap;
+            else if (itr->Standing < Reputation_Bottom)
+                itr->Standing = Reputation_Bottom;
+
+            itr->Standing -= BaseRep;
+
+
             itr->Flags = (itr->Flags | 0x00000001);
             SendSetFactionStanding(&*itr);
             return true;
@@ -3810,7 +3860,7 @@ void Player::CalculateReputation(Unit *pVictim)
 
     if( pVictim->GetTypeId() != TYPEID_PLAYER )
     {
-        SetStanding( pVictim->getFaction(), (-100) );
+        ModifyFactionReputation( pVictim->getFaction(), (-100) );
     }
 }
 
@@ -3820,22 +3870,37 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
     if( pCreature )
     {
-        int dif = getLevel() - pQuest->GetMinLevel();
-        if(dif < 0) dif = 0;
-        else if(dif > 5) dif = 5;
+        int Factor;
+        int dif = getLevel() - pQuest->GetQuestLevel();
 
-        int RepPoints = (uint32)(((5-dif)*0.20)*(100.0f + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]));
+        // This part is before_2.01_like
+        if (dif <= 5) 
+            Factor = 5;
+        else if (dif >= 10) 
+            Factor = 1;
+        else
+            Factor = (10-dif);
+
+        // TODO: check if "100" in next line is a wrong replacement for pQuest->GetRewRepValue1 (huh, it's even an addition...)
+        int RepPoints = Factor*(100 + max(m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN], 0)) / 5;
         // correct would be multiplicative but currently only one such aura in game
+        // max(m_AuraModifiers[], 0) may be need to be commented ATM - m_AuraModifiers[] is -1...
 
-        SetStanding(pCreature->getFaction(), (RepPoints > 0 ? RepPoints : 1) );
+        // Uncomment the next line to be 2.01_like (see comment for "100" above also)
+        // int RepPoints = 100 + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN];
+
+        // TODO: check if next line requires removing GetRewRepFaction1
+        ModifyFactionReputation(pCreature->getFaction(), RepPoints);
+
+        // TODO: implement reputation spillover 
     }
 
     // special quest reputation reward/losts
     if(pQuest->GetRewRepFaction1() && pQuest->GetRewRepValue1() )
-        SetStanding(pQuest->GetRewRepFaction1(), pQuest->GetRewRepValue1() );
+        ModifyFactionReputation(pQuest->GetRewRepFaction1(), pQuest->GetRewRepValue1() );
 
     if(pQuest->GetRewRepFaction2() && pQuest->GetRewRepValue2() )
-        SetStanding(pQuest->GetRewRepFaction2(), pQuest->GetRewRepValue2() );
+        ModifyFactionReputation(pQuest->GetRewRepFaction2(), pQuest->GetRewRepValue2() );
 }
 
 //Update honor fields
@@ -6590,9 +6655,8 @@ uint8 Player::CanUseItem( Item *pItem, bool check_alive ) const
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
             if( GetHonorRank() < pProto->RequiredHonorRank )
                 return EQUIP_ITEM_RANK_NOT_ENOUGH;
-            /*if( GetREputation() < pProto->RequiredReputation )
+            if( pProto->RequiredReputationFaction && GetReputationRank(pProto->RequiredReputationFaction) < pProto->RequiredReputationRank )
                 return EQUIP_ITEM_REPUTATION_NOT_ENOUGH;
-            */
             if( getLevel() < pProto->RequiredLevel )
                 return EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;
             return EQUIP_ERR_OK;
@@ -8487,7 +8551,7 @@ bool Player::SatisfyQuestReputation( uint32 quest_id, bool msg )
         if(!faction_id)
             return true;
 
-        return GetStanding(faction_id) >= qInfo->GetRequiredRepValue();
+        return GetReputation(faction_id) >= qInfo->GetRequiredRepValue();
     }
     return false;
 }

@@ -83,16 +83,10 @@ struct FactionEntry
 {
     uint32      ID;
     int32       reputationListID;
-    uint32      something1;
-    uint32      something2;
-    uint32      something3;
-    uint32      something4;
-    uint32      something5;
-    uint32      something6;
-    uint32      something7;
-    uint32      something8;
-    uint32      something9;
+    uint32      BaseRepMask[4];   // Base reputation masks (see enum Races)
+    int32       BaseRepValue[4];  // Base reputation values 
     uint32      team;
+    char*       name;
 };
 
 struct FactionTemplateEntry
