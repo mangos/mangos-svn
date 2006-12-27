@@ -186,15 +186,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 }
             }
 
-            if(player->HasInIgnoreList(GetPlayer()->GetGUID()))
-            {
-                sChatHandler.FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, player->GetGUID(), player->afkMsg.c_str());
-                SendPacket(&data);
-                break;
-            }
-
             sChatHandler.FillMessageData(&data, this, type, lang, NULL, 0, msg.c_str() );
             player->GetSession()->SendPacket(&data);
+
             sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,lang,NULL,player->GetGUID(),msg.c_str() );
             SendPacket(&data);
 
@@ -372,14 +366,14 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 {
     WorldPacket data;
     uint64 iguid;
-    std::string msg = "";
     sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
 
     recv_data >> iguid;
 
     Player *player = objmgr.GetPlayer(iguid);
-    objmgr.GetPlayerNameByGUID(GetPlayer()->GetGUID(),msg);
-    msg += " is ignoring you!";
-    sChatHandler.FillSystemMessageData( &data, player->GetSession() ,msg.c_str() );
+    if(!player || !player->GetSession())
+        return;
+
+    sChatHandler.FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, GetPlayer()->GetGUID(), GetPlayer()->GetName());
     player->GetSession()->SendPacket(&data);
 }

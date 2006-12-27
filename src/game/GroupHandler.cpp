@@ -67,15 +67,6 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
 
-    /* dont let invite himself */
-
-    // OK result but not send invite
-    if(player->HasInIgnoreList(GetPlayer()->GetGUID()))
-    {
-        SendPartyResult(0, membername, 0);
-        return;
-    }
-
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && GetPlayer()->GetTeam() != player->GetTeam())
     {
         SendPartyResult(0, membername, 7);
@@ -104,7 +95,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         }
     }
 
-    if(player->groupInfo.group || player->groupInfo.invite)
+    if(player->groupInfo.group || player->groupInfo.invite || player->HasInIgnoreList(GetPlayer()->GetGUID()))
     {
         if(newGroup)
         {
@@ -113,7 +104,18 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
             delete group;
             group = NULL;
         }
-        SendPartyResult(0, membername, 4);
+
+        if(player->groupInfo.group || player->groupInfo.invite)
+        {
+            SendPartyResult(0, membername, 4);
+        }
+        else
+        {
+            SendPartyResult(0, membername, 0);
+            SendPartyResult(0, membername, 8);
+        }
+
+        return;
     }
     /********************/
 
@@ -575,13 +577,22 @@ return;
     SendPacket(&data);
 }
 
-/*?*/void WorldSession::HandleRequestRaidInfoOpcode( WorldPacket & recv_data )
+/*!*/void WorldSession::HandleRequestRaidInfoOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
 
     WorldPacket data;
     data.Initialize(SMSG_RAID_INSTANCE_INFO);
     data << (uint32)0;
+
+    /*data << (uint32)count;
+    for(int i=0; i<count; i++)
+    {
+        data << (uint32)mapid;
+        data << (uint32)time_left_in_seconds;
+        data << (uint32)instanceid;
+    }*/
+
     GetPlayer()->GetSession()->SendPacket(&data);
 }
 
