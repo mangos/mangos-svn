@@ -3882,7 +3882,7 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
             Factor = (10-dif);
 
         // TODO: check if "100" in next line is a wrong replacement for pQuest->GetRewRepValue1 (huh, it's even an addition...)
-        int RepPoints = Factor*(100 + max(m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN], 0)) / 5;
+        int RepPoints = Factor*(100 + max(m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN], long(0))) / 5;
         // correct would be multiplicative but currently only one such aura in game
         // max(m_AuraModifiers[], 0) may be need to be commented ATM - m_AuraModifiers[] is -1...
 

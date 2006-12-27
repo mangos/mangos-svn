@@ -267,6 +267,13 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_SKILL_CHANCE_GREEN]  = sConfig.GetIntDefault("SkillChance.Green",25);
     m_configs[CONFIG_SKILL_CHANCE_GREY]   = sConfig.GetIntDefault("SkillChance.Grey",0);
 
+    m_configs[CONFIG_MAX_OVERSPEED_PINGS] = sConfig.GetIntDefault("MaxOverspeedPings",10);
+    if(m_configs[CONFIG_MAX_OVERSPEED_PINGS] != 0 && m_configs[CONFIG_MAX_OVERSPEED_PINGS] < 2)
+    {
+        sLog.outError("MaxOverspeedPings (%i) must be in range 2..infinity (or 0 for disbale check. Set to 2.",m_configs[CONFIG_MAX_OVERSPEED_PINGS]);
+        m_configs[CONFIG_MAX_OVERSPEED_PINGS] = 2;
+    }
+
     m_gameTime = time(NULL);
 
     // check existance map files (startup race areas).

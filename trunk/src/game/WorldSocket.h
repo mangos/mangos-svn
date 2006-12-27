@@ -56,5 +56,8 @@ class WorldSocket : public TcpSocket
         WorldSession* _session;
 
         ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> _sendQueue;
+
+        uint32 m_LastPingMSTime;
+        uint32 m_OverSpeedPings;
 };
 #endif

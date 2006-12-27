@@ -64,6 +64,8 @@ struct ServerPktHeader
 WorldSocket::WorldSocket(SocketHandler &sh): TcpSocket(sh), _cmd(0), _remaining(0), _session(NULL)
 {
     _seed = _GetSeed();
+    m_LastPingMSTime = 0;                                   // first time it will counted as overspeed maybe, but this is not important
+    m_OverSpeedPings = 0;
 }
 
 WorldSocket::~WorldSocket()
@@ -391,6 +393,30 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
     {
         sLog.outDetail("Incomplete packet");
         return;
+    }
+
+    // check ping speed for players
+    if(_session && _session->GetSecurity() == 0)
+    {
+        uint32 cur_mstime = getMSTime();
+        uint32 diff_mstime = cur_mstime - m_LastPingMSTime;
+        sLog.outError("Diff %u (count %u)",diff_mstime,m_OverSpeedPings);
+        m_LastPingMSTime = cur_mstime;
+        if(diff_mstime < 27000) // should be 30000 (=30 secs), add little tolerance
+        {
+            ++m_OverSpeedPings;
+
+            uint32 max_count = sWorld.getConfig(CONFIG_MAX_OVERSPEED_PINGS);
+            if(max_count && m_OverSpeedPings > max_count)
+            {
+                sLog.outBasic("Player %s from account id %u kicked for overspeed ping packets from client (non-playeble connection lags or cheating) ",_session->GetPlayerName(),_session->GetAccountId());
+                _session->KickPlayer();
+                return;
+            }
+        }
+        else
+            m_OverSpeedPings = 0;
+
     }
 
     packet.Initialize( SMSG_PONG );

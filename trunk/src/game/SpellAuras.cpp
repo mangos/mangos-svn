@@ -1155,7 +1155,7 @@ void Aura::HandleChannelDeathItem(bool apply)
         if(spellInfo->EffectItemType[m_effIndex] == 0)
             return;
 
-        // Soul Shard only from non-grey
+        // Soul Shard only from non-grey units
         if( MaNGOS::XP::GetGrayLevel(caster->getLevel()) < victim->getLevel() &&  spellInfo->EffectItemType[m_effIndex] == 6265)
             return;
 
