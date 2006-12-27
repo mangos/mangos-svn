@@ -911,14 +911,22 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     Player* target = NULL;
 
     char* px = strtok((char*)args, " ");
+    char* py = NULL;
+
     if (px)
     {
         std::string name = px;
         normalizePlayerName(name);
         target = objmgr.GetPlayer(name.c_str());
+        if (target)
+            py = strtok(NULL, " ");
+        else
+            py = px;
     }
-    else
+    if(!target)
+    {
         target = getSelectedPlayer();
+    }
 
     if(!target)
     {
@@ -951,6 +959,23 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     uint32 copp = (target->GetMoney() % (100*100)) % 100;
     PSendSysMessage(LANG_PINFO_LEVEL,  days, hours, target->getLevel(), gold,silv,copp );
 
+    if ( py && strncmp(py, "rep", 3) == 0 )
+    {
+        static const char* ReputationRankStr[MAX_REPUTATION_RANK] = {"Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Reverted", "Exalted"};
+        std::list<struct Factions>::const_iterator itr;
+        char* FactionName;
+        for(itr = target->factions.begin(); itr != target->factions.end(); ++itr)
+        {
+            FactionEntry *factionEntry = sFactionStore.LookupEntry(itr->ID);
+            if (factionEntry)
+                FactionName = factionEntry->name;
+            else
+                FactionName = "#Not found#";
+            ReputationRank Rank = target->GetReputationRank(factionEntry);
+
+            PSendSysMessage("Id:%4d %s %s %5d %1x", itr->ID, FactionName, ReputationRankStr[Rank], target->GetReputation(factionEntry), itr->Flags);
+        }
+    }
     return true;
 }
 

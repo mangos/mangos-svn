@@ -523,10 +523,10 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
         if(itr->ReputationListID == FactionID)
         {
             if( Flag )
-                itr->Flags = (itr->Flags | 2);
+                itr->Flags |= 2;
             else
-            if( itr->Flags >= 2) itr->Flags -= 2;
-                break;
+                itr->Flags &= ~(uint32)2;
+            break;
         }
     }
 }
