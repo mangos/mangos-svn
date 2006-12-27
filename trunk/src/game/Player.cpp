@@ -9521,6 +9521,12 @@ void Player::_LoadAuras(uint32 timediff)
                 continue;
             }
 
+            if(effindex >= 3)
+            {
+                sLog.outError("Invalid effect index (spellid %u, effindex %u), ignore.",spellid,effindex);
+                continue;
+            }
+
             // negative effects should continue counting down after logout
             if (remaintime != -1 && !IsPositiveEffect(spellid, effindex))
             {

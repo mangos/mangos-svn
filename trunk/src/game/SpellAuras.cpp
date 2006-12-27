@@ -202,7 +202,12 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STEALTH_LEVEL    =    154    ,//    Stealth Level Modifier
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_WATER_BREATHING    =    155    ,//    Mod Water Breathing
     &Aura::HandleModReputationGain,                         //SPELL_AURA_MOD_REPUTATION_GAIN    =    156    ,//    Mod Reputation Gain
-    &Aura::HandleNULL                                       //SPELL_AURA_PET_DAMAGE_MULTI    =    157    ,//    Mod Pet Damage
+    &Aura::HandleNULL,                                      //SPELL_AURA_PET_DAMAGE_MULTI       = 157   ,//    Mod Pet Damage
+    &Aura::HandleNULL,                                      //                                  = 158    ,//
+    &Aura::HandleNULL,                                      //                                  = 159    ,//
+    &Aura::HandleNULL,                                      //                                  = 160    ,//
+    &Aura::HandleNULL,                                      //                                  = 161    ,//
+    &Aura::HandleNULL                                       //                                  = 162    ,//
 };
 
 // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
