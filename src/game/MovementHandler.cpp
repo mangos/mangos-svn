@@ -101,7 +101,6 @@ void WorldSession::HandleMoveFallResetOpcode( WorldPacket & recv_data )
     uint64 unk5;
     uint32 unk1, unk2;
     float x, y, z, o, o1, o2, o3;
-    recv_data.hexlike();
     recv_data >> unk1;                                      // constant ??? (24577 for me)
     recv_data >> unk2;                                      // time?
     recv_data >> x;                                         // x coordinate
