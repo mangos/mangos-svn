@@ -962,7 +962,6 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 {
     //check for speed stuff
-    recv_data.hexlike();
     uint64 GUID;
     uint32 Flags,unk1, unk0;
     uint32 d_time;

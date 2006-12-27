@@ -108,15 +108,11 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 
     if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
     {
-	    float dist;
-
         // put targeted movement generators on a higher priority
-	if (owner.GetObjectSize())
-	    {
-
+	    if (owner.GetObjectSize())
             i_destinationHolder.ResetUpdate(50);
-	    float dist = i_target.GetObjectSize() + owner.GetObjectSize() + OBJECT_CONTACT_DISTANCE;
-	    }
+
+	    float  dist = i_target.GetObjectSize() + owner.GetObjectSize() + OBJECT_CONTACT_DISTANCE;
 
         // try to counter precision differences
         if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.1)

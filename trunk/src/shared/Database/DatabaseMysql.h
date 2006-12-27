@@ -19,7 +19,6 @@
 #ifndef _DATABASEMYSQL_H
 #define _DATABASEMYSQL_H
 
-
 #include "Policies/Singleton.h"
 #include "zthread/FastMutex.h"
 

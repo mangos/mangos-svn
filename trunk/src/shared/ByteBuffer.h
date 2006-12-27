@@ -244,31 +244,23 @@ class ByteBuffer
         }
         void print_storage()
         {
-	// temporary commented out
-	/*
             printf("STORAGE_SIZE: %u\n", size() );
             for(uint32 i = 0; i < size(); i++)
                 printf("%u - ", read<uint8>(i) );
             printf("\n");
-	*/
         }
 
         void textlike()
         {
-	// temporary commented out
-	/*
             printf("STORAGE_SIZE: %u\n", size() );
             for(uint32 i = 0; i < size(); i++)
                 printf("%c", read<uint8>(i) );
             printf("\n");
-	*/
         }
 
         void hexlike()
         {
 
-	// temporary commented out
-	/*
             uint32 j = 1, k = 1;
             printf("STORAGE_SIZE: %u\n", size() );
             for(uint32 i = 0; i < size(); i++)
@@ -313,8 +305,6 @@ class ByteBuffer
                 }
             }
             printf("\n");
-	*/
-
         }
 
     protected:

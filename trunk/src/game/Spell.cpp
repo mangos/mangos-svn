@@ -1079,7 +1079,6 @@ void Spell::SendSpellStart()
     {
         writeAmmoToPacket(&data);
     }
-    data.hexlike();
     m_caster->SendMessageToSet(&data, true);
 }
 
@@ -1578,7 +1577,7 @@ uint8 Spell::CanCast()
         }
 
         //If m_immuneToDispel type contain this spell type, IMMUNE spell.
-        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_DISPEL].begin(), next; itr != target->m_spellImmune[IMMUNITY_DISPEL].end(); ++itr)
+        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_DISPEL].begin(); itr != target->m_spellImmune[IMMUNITY_DISPEL].end(); ++itr)
         {
             if((*itr)->type == m_spellInfo->Dispel)
             {
@@ -1586,7 +1585,7 @@ uint8 Spell::CanCast()
                 break;
             }
         }
-        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_MECHANIC].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); ++itr)
+        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_MECHANIC].begin(); itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); ++itr)
         {
             if((*itr)->type == m_spellInfo->Mechanic)
             {
