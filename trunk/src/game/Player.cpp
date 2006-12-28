@@ -2077,29 +2077,31 @@ void Player::learnSpell(uint16 spell_id)
 PlayerSpellMap::iterator Player::removeSpell(uint16 spell_id)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
-    if (itr != m_spells.end())
+    if (itr == m_spells.end())
+        return itr;
+
+    PlayerSpellMap::iterator next = itr;
+    ++next;
+    
+    if(itr->second->state == PLAYERSPELL_REMOVED)
+        return next;
+
+    // removing
+    WorldPacket data;
+    data.Initialize(SMSG_REMOVED_SPELL);
+    data << itr->first;
+    GetSession()->SendPacket(&data);
+
+    if(itr->second->state == PLAYERSPELL_NEW)
     {
-        if(itr->second->state == PLAYERSPELL_REMOVED) return false;
-
-        WorldPacket data;
-        data.Initialize(SMSG_REMOVED_SPELL);
-        data << itr->first;
-        GetSession()->SendPacket(&data);
-
-        if(itr->second->state == PLAYERSPELL_NEW)
-        {
-            delete itr->second;
-            itr = m_spells.erase(itr);
-        }
-        else
-        {
-            itr->second->state = PLAYERSPELL_REMOVED;
-            ++itr;
-        }
-
-        RemoveAurasDueToSpell(spell_id);
+        delete itr->second;
+        m_spells.erase(itr);
     }
-    return itr;
+    else
+        itr->second->state = PLAYERSPELL_REMOVED;
+
+    RemoveAurasDueToSpell(spell_id);
+    return next;
 }
 
 void Player::_LoadSpellCooldowns()
