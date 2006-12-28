@@ -1907,7 +1907,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     newspell->state = state;
 
     WorldPacket data;
-    if(newspell->active && !canStackSpellRank(spellInfo))
+    if(newspell->active && !objmgr.canStackSpellRank(spellInfo))
     {
         PlayerSpellMap::iterator itr;
         for (itr = m_spells.begin(); itr != m_spells.end(); itr++)
@@ -1922,7 +1922,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
                 {
                     data.Initialize(SMSG_SUPERCEDED_SPELL);
 
-                    if(FindSpellRank(spell_id) >= FindSpellRank(itr->first))
+                    if(objmgr.GetSpellRank(spell_id) >= objmgr.GetSpellRank(itr->first))
                     {
                         data << uint32(itr->first);
                         data << uint32(spell_id);
@@ -2074,7 +2074,7 @@ void Player::learnSpell(uint16 spell_id)
     }
 }
 
-bool Player::removeSpell(uint16 spell_id)
+PlayerSpellMap::iterator Player::removeSpell(uint16 spell_id)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr != m_spells.end())
@@ -2089,15 +2089,17 @@ bool Player::removeSpell(uint16 spell_id)
         if(itr->second->state == PLAYERSPELL_NEW)
         {
             delete itr->second;
-            m_spells.erase(itr);
+            itr = m_spells.erase(itr);
         }
         else
+        {
             itr->second->state = PLAYERSPELL_REMOVED;
+            ++itr;
+        }
 
         RemoveAurasDueToSpell(spell_id);
-        return true;
     }
-    return false;
+    return itr;
 }
 
 void Player::_LoadSpellCooldowns()
@@ -2276,18 +2278,26 @@ bool Player::resetTalents(bool no_cost)
         if (!talentInfo) continue;
         for (int j = 0; j < 5; j++)
         {
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[j]);
-            if (!spellInfo) continue;
             const PlayerSpellMap& s_list = GetSpellMap();
-            for(PlayerSpellMap::const_iterator itr = s_list.begin(); itr != s_list.end(); ++itr)
+
+            for(PlayerSpellMap::const_iterator itr = s_list.begin(); itr != s_list.end();)
             {
-                if(itr->second->state == PLAYERSPELL_REMOVED) continue;
-                if (itr->first == spellInfo->Id)
+                if(itr->second->state == PLAYERSPELL_REMOVED) 
+                {
+                    ++itr;
+                    continue;
+                }
+
+                // remove learned spells (all ranks)
+                uint32 itrFirstId = objmgr.GetFirstSpellInChain(itr->first);
+                if (itrFirstId == talentInfo->RankID[j])
                 {
                     RemoveAurasDueToSpell(itr->first);
-                    removeSpell(itr->first);
-                    break;
+                    itr = removeSpell(itr->first);
+                    continue;
                 }
+                else
+                    ++itr;
             }
         }
     }
@@ -2562,7 +2572,7 @@ bool Player::CanLearnProSpell(uint32 spell)
                 return true;
 
             // count only first rank prof. spells
-            if(FindSpellRank(pSpellInfo->Id)==1)
+            if(objmgr.GetSpellRank(pSpellInfo->Id)==1)
                 value += 1;
         }
     }

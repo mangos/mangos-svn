@@ -57,8 +57,6 @@ float GetMaxRange(SpellRangeEntry const *range);
 int32 GetDuration(SpellEntry const *spellInfo);
 int32 GetMaxDuration(SpellEntry const *spellInfo);
 char* GetPetName(uint32 petfamily);
-uint32 FindSpellRank(uint32 spellId);
-bool canStackSpellRank(SpellEntry const *spellInfo);
 bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2);
 bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);

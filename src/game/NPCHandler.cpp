@@ -177,7 +177,9 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         uint32 spellLevel = ( (*itr)->reqlevel ? (*itr)->reqlevel : spellInfo->spellLevel);
         if(_player->getLevel() >= spellLevel)
             LevelFlag = true;
-        if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
+
+        uint32 prev_id =  objmgr.GetPrevSpellInChain(spellInfo->Id);
+        if(!prev_id || _player->HasSpell(prev_id))
             ReqspellFlag = true;
 
         if(ReqskillValueFlag && LevelFlag && ReqspellFlag)
@@ -199,7 +201,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint8(spellLevel);
         data << uint32((*itr)->reqskill);
         data << uint32((*itr)->reqskillvalue);
-        data << uint32((*itr)->reqspell);
+        data << uint32(prev_id);
         data << uint32(0);
         data << uint32(0);
     }
@@ -253,9 +255,12 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         return;
     if(proto->reqskill && _player->GetSkillValue(proto->reqskill) < proto->reqskillvalue)
         return;
-    if(proto->reqspell && !_player->HasSpell(proto->reqspell))
+
+    uint32 prev_id =  objmgr.GetPrevSpellInChain(spellInfo->Id);
+    if(prev_id && !_player->HasSpell(prev_id))
         return;
-    if(proto->spell->Effect[1] == 44)
+
+    if(proto->spell->Effect[1] == SPELL_EFFECT_SKILL_STEP)
         if(!_player->CanLearnProSpell(spellId))
             return;
 

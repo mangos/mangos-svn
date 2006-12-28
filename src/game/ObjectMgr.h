@@ -224,6 +224,7 @@ class ObjectMgr
         void LoadGuilds();
         void LoadRaidGroups();
         void LoadQuests();
+        void LoadSpellChains();
         void LoadScripts();
         void LoadCreatureTemplates();
         void LoadItemPrototypes();
@@ -265,6 +266,43 @@ class ObjectMgr
         QuestMap QuestTemplates;
         multimap<uint32, uint32> ExclusiveQuestGroups;
 
+        struct SpellChainNode
+        {
+            uint32 prev;
+            uint32 first;
+            uint8  rank;
+        };
+
+        typedef HM_NAMESPACE::hash_map<uint32, SpellChainNode> SpellChainMap;
+        SpellChainMap SpellChains;
+
+        uint32 GetFirstSpellInChain(uint32 spell_id)
+        {
+            SpellChainMap::iterator itr = SpellChains.find(spell_id);
+            if(itr == SpellChains.end())
+                return spell_id;
+
+            return itr->second.first;
+        }
+
+        uint32 GetPrevSpellInChain(uint32 spell_id)
+        {
+            SpellChainMap::iterator itr = SpellChains.find(spell_id);
+            if(itr == SpellChains.end())
+                return 0;
+
+            return itr->second.prev;
+        }
+
+        uint8 GetSpellRank(uint32 spell_id)
+        {
+            SpellChainMap::iterator itr = SpellChains.find(spell_id);
+            if(itr == SpellChains.end())
+                return 0;
+
+            return itr->second.rank;
+        }
+        bool canStackSpellRank(SpellEntry const *spellInfo);
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;

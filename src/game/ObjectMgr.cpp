@@ -1092,6 +1092,74 @@ void ObjectMgr::LoadQuests()
     sLog.outString( ">> Loaded %u quests definitions", QuestTemplates.size() );
 }
 
+void ObjectMgr::LoadSpellChains()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `spell_id`, `prev_spell`, `first_spell`, `rank` FROM `spell_chain`");
+    if(result == NULL)
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded 0 spell chain records" );
+        sLog.outError("`spell_chains` table is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    barGoLink bar( result->GetRowCount() );
+    do
+    {
+        bar.step();
+        Field *fields = result->Fetch();
+
+        uint32 spell_id = fields[0].GetUInt32();
+
+        SpellChainNode node;
+        node.prev  = fields[1].GetUInt32();
+        node.first = fields[2].GetUInt32();
+        node.rank  = fields[3].GetUInt8();
+
+        if(!sSpellStore.LookupEntry(spell_id))
+        {
+            sLog.outError("Spell %u not exist",spell_id);
+            continue;
+        }
+
+        if(node.prev!=0 && !sSpellStore.LookupEntry(node.prev))
+        {
+            sLog.outError("Spell %u have non existed previous rank spell: %u",spell_id,node.prev);
+            continue;
+        }
+
+        if(!sSpellStore.LookupEntry(node.first))
+        {
+            sLog.outError("Spell %u have non existed first rank spell: %u",spell_id,node.first);
+            continue;
+        }
+
+        // check basic spell chain data integrity (note: rank can be equal 0 or 1 for first/single spell)
+        if( spell_id == node.first && ( node.rank > 1 || node.prev != 0 ) || 
+            node.rank == 1 && ( spell_id != node.first || node.prev != 0 ) ||
+            node.prev == 0 && ( spell_id != node.first || node.rank > 1 ))
+        {
+            sLog.outError("Spell %u have not compatiable chain data (prev: %u, first: %u, rank: %d)",spell_id,node.prev,node.first,node.rank);
+            continue;
+        }
+                                                            
+
+        SpellChains[spell_id] = node;
+
+        ++count;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u spell chain records", count );
+}
+
 void ObjectMgr::LoadScripts()
 {
 
@@ -1890,4 +1958,25 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
     }
 
     return *(list0.begin()+urand(0, list0.size()-1)) + *(list1.begin()+urand(0, list1.size()-1));
+}
+
+bool ObjectMgr::canStackSpellRank(SpellEntry const *spellInfo)
+{
+    if(GetSpellRank(spellInfo->Id) == 0)
+        return true;
+
+    if(spellInfo->powerType == 0)
+    {
+        if(spellInfo->manaCost > 0)
+            return true;
+        if(spellInfo->ManaCostPercentage > 0)
+            return true;
+        if(spellInfo->manaCostPerlevel > 0)
+            return true;
+        if(spellInfo->manaPerSecond > 0)
+            return true;
+        if(spellInfo->manaPerSecondPerLevel > 0)
+            return true;
+    }
+    return false;
 }
