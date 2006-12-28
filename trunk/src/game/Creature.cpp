@@ -93,7 +93,7 @@ void Creature::CreateTrainerSpells()
 
     TrainerSpell *tspell;
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqspell`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
 
     if(!result) return;
 
@@ -115,16 +115,9 @@ void Creature::CreateTrainerSpells()
         tspell = new TrainerSpell;
         tspell->spell = spellinfo;
         tspell->spellcost = fields[1].GetUInt32();
-        tspell->reqspell = fields[2].GetUInt32();
-        tspell->reqskill = fields[3].GetUInt32();
-        tspell->reqskillvalue = fields[4].GetUInt32();
-        tspell->reqlevel = fields[5].GetUInt32();
-
-        if(tspell->reqspell && !sSpellStore.LookupEntry(tspell->reqspell))
-        {
-            sLog.outError("Trainer (GUID: %u ID: %u ) have for spell %u non-existed required spell %u (requirement ignored)",GetGUIDLow(),GetEntry(),spellid,tspell->reqspell);
-            tspell->reqspell = 0;
-        }
+        tspell->reqskill = fields[2].GetUInt32();
+        tspell->reqskillvalue = fields[3].GetUInt32();
+        tspell->reqlevel = fields[4].GetUInt32();
 
         m_tspells.push_back(tspell);
 

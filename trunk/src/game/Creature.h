@@ -130,7 +130,6 @@ struct TrainerSpell
 {
     SpellEntry* spell;
     uint32 spellcost;
-    uint32 reqspell;
     uint32 reqskill;
     uint32 reqskillvalue;
     uint32 reqlevel;

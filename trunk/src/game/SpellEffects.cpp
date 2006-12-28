@@ -412,7 +412,7 @@ void Spell::EffectDummy(uint32 i)
     if(m_spellInfo->SpellIconID == 1648)
     {
         uint32 dmg = damage;
-        dmg += uint32(m_caster->GetPower(POWER_RAGE)/10 * FindSpellRank(m_spellInfo->Id)*3);
+        dmg += uint32(m_caster->GetPower(POWER_RAGE)/10 * objmgr.GetSpellRank(m_spellInfo->Id)*3);
         SpellEntry *tspellInfo = sSpellStore.LookupEntry(20647);
         SpellEntry sInfo = *tspellInfo;
         sInfo.EffectBasePoints[0] = dmg;
@@ -1271,7 +1271,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3, enchant_id);
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+1, duration*1000);
         if(m_spellInfo->SpellFamilyName == 8)
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2, 45+FindSpellRank(m_spellInfo->Id)*15);
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2, 45+objmgr.GetSpellRank(m_spellInfo->Id)*15);
 
         // add new enchanting if equipped
         if(itemTarget->IsEquipped())

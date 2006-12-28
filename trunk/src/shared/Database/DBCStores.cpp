@@ -278,56 +278,6 @@ char* GetPetName(uint32 petfamily)
     return pet_family->Name?pet_family->Name:NULL;
 }
 
-uint32 FindSpellRank(uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if(!spellInfo) return 0;
-    for(int i=0;i<8;i++)
-    {
-        if(spellInfo->Rank[i] && *spellInfo->Rank[i])
-        {
-            // prof. rank case
-            if(!strncmp(spellInfo->Rank[i],"Apprentice",10))
-                return 1;
-            if(!strncmp(spellInfo->Rank[i],"Journeyman",10))
-                return 2;
-            if(!strncmp(spellInfo->Rank[i],"Expert",6))
-                return 3;
-            if(!strncmp(spellInfo->Rank[i],"Artisan",7))
-                return 4;
-
-            // Rank N case
-            char *tmp = strstr(spellInfo->Rank[i], " ");
-            if (!tmp) continue;
-
-            return atoi(tmp+1);
-        }
-    }
-
-    return 0;
-}
-
-bool canStackSpellRank(SpellEntry const *spellInfo)
-{
-    if(FindSpellRank(spellInfo->Id) == 0)
-        return true;
-
-    if(spellInfo->powerType == 0)
-    {
-        if(spellInfo->manaCost > 0)
-            return true;
-        if(spellInfo->ManaCostPercentage > 0)
-            return true;
-        if(spellInfo->manaCostPerlevel > 0)
-            return true;
-        if(spellInfo->manaPerSecond > 0)
-            return true;
-        if(spellInfo->manaPerSecondPerLevel > 0)
-            return true;
-    }
-    return false;
-}
-
 bool IsPassiveSpell(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);

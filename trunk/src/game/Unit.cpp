@@ -2771,7 +2771,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                     if(getPowerType() == POWER_MANA)
                     {
                         uint32 mana = 0;
-                        switch(FindSpellRank(spellProto->Id))
+                        switch(objmgr.GetSpellRank(spellProto->Id))
                         {
                             case 1:mana = 33;break;
                             case 2:mana = 46;break;
@@ -2785,7 +2785,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                 if(spellProto->SpellIconID == 299)
                 {
                     uint32 health = 0;
-                    switch(FindSpellRank(spellProto->Id))
+                    switch(objmgr.GetSpellRank(spellProto->Id))
                     {
                         case 1:health = 25;break;
                         case 2:health = 34;break;

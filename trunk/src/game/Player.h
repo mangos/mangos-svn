@@ -787,7 +787,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendInitialSpells();
         bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
-        bool removeSpell(uint16 spell_id);
+        PlayerSpellMap::iterator removeSpell(uint16 spell_id);
         bool resetTalents(bool no_cost = false);
         uint32 resetTalentsCost() const;
 

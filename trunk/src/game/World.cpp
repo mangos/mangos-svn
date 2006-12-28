@@ -309,6 +309,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();
 
+    sLog.outString( "Loading Spell Chain Data..." );
+    objmgr.LoadSpellChains();
+
     sLog.outString( "Loading Scripts..." );
     objmgr.LoadScripts();
 
