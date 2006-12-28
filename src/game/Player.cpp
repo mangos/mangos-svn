@@ -2074,22 +2074,29 @@ void Player::learnSpell(uint16 spell_id)
     }
 }
 
-PlayerSpellMap::iterator Player::removeSpell(uint16 spell_id)
+void Player::removeSpell(uint16 spell_id)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
-        return itr;
+        return;
 
+    removeSpell(itr);
+}
+
+PlayerSpellMap::iterator Player::removeSpell(PlayerSpellMap::iterator itr)
+{
     PlayerSpellMap::iterator next = itr;
     ++next;
-    
+
     if(itr->second->state == PLAYERSPELL_REMOVED)
         return next;
+
+    uint32 spell_id = itr->first;
 
     // removing
     WorldPacket data;
     data.Initialize(SMSG_REMOVED_SPELL);
-    data << itr->first;
+    data << spell_id;
     GetSession()->SendPacket(&data);
 
     if(itr->second->state == PLAYERSPELL_NEW)
@@ -2280,9 +2287,7 @@ bool Player::resetTalents(bool no_cost)
         if (!talentInfo) continue;
         for (int j = 0; j < 5; j++)
         {
-            const PlayerSpellMap& s_list = GetSpellMap();
-
-            for(PlayerSpellMap::const_iterator itr = s_list.begin(); itr != s_list.end();)
+            for(PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();)
             {
                 if(itr->second->state == PLAYERSPELL_REMOVED) 
                 {
@@ -2295,7 +2300,7 @@ bool Player::resetTalents(bool no_cost)
                 if (itrFirstId == talentInfo->RankID[j])
                 {
                     RemoveAurasDueToSpell(itr->first);
-                    itr = removeSpell(itr->first);
+                    itr = removeSpell(itr);
                     continue;
                 }
                 else

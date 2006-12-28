@@ -2720,11 +2720,10 @@ bool ChatHandler::HandleResetCommand (const char * args)
 
     if (argstr == "spells")
     {
-        const PlayerSpellMap& pSpells = player->GetSpellMap();
-        for (PlayerSpellMap::const_iterator itr = pSpells.begin(), next = pSpells.begin(); itr != pSpells.end(); itr = next)
+        PlayerSpellMap& pSpells = player->GetSpellMap();
+        for (PlayerSpellMap::iterator itr = pSpells.begin(); itr != pSpells.end();)
         {
-            next++;
-            player->removeSpell(itr->first);
+            itr = player->removeSpell(itr);
         }
 
         PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(),player->getClass());
