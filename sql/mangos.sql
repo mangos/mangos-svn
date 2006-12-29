@@ -147,7 +147,6 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `character`;
 CREATE TABLE `character` (
   `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `realm` int(11) unsigned NOT NULL default '0' COMMENT 'Realm Identifier',
   `account` bigint(20) unsigned NOT NULL default '0' COMMENT 'Account Identifier',
   `data` longtext,
   `name` varchar(12) NOT NULL default '',

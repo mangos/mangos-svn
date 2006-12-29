@@ -9417,8 +9417,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-    //                                             0      1       2         3      4      5      6       7            8            9            10    11            12         13       14             15         16       17          18          19          20           21            22                  23                  24                  25         26         27         28         29
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid` FROM `character` WHERE `guid` = '%u'",guid);
+    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12             13         14       15          16          17          18           19            20                  21                  22                  23        24        25        26         27
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
     {
@@ -9430,7 +9430,7 @@ bool Player::LoadFromDB( uint32 guid )
 
     Object::_Create( guid, HIGHGUID_PLAYER );
 
-    if(!LoadValues( fields[3].GetString()))
+    if(!LoadValues( fields[2].GetString()))
     {
         sLog.outError("ERROR: Player #%d have broken data in `data` field. Can't be loaded.",GUID_LOPART(guid));
         delete result;
@@ -9455,18 +9455,18 @@ bool Player::LoadFromDB( uint32 guid )
 
     m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE;
 
-    m_name = fields[4].GetCppString();
+    m_name = fields[3].GetCppString();
 
     sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
 
-    m_race = fields[5].GetUInt8();
+    m_race = fields[4].GetUInt8();
     //Need to call it to initialize m_team (m_team can be calculated from m_race)
     //Other way is to saves m_team into characters table.
     setFactionForRace(m_race);
     SetCharm(0);
 
-    m_class = fields[6].GetUInt8();
+    m_class = fields[5].GetUInt8();
 
     PlayerInfo const *info = objmgr.GetPlayerInfo(m_race, m_class);
     if(!info)
@@ -9476,19 +9476,19 @@ bool Player::LoadFromDB( uint32 guid )
         return false;
     }
 
-    uint32 transGUID = fields[29].GetUInt32();
-    m_positionX = fields[7].GetFloat();
-    m_positionY = fields[8].GetFloat();
-    m_positionZ = fields[9].GetFloat();
-    m_mapId = fields[10].GetUInt32();
-    m_orientation = fields[11].GetFloat();
+    uint32 transGUID = fields[27].GetUInt32();
+    m_positionX = fields[6].GetFloat();
+    m_positionY = fields[7].GetFloat();
+    m_positionZ = fields[8].GetFloat();
+    m_mapId = fields[9].GetUInt32();
+    m_orientation = fields[10].GetFloat();
 
     if (transGUID != 0)
     {
-        m_transX = fields[25].GetFloat();
-        m_transY = fields[26].GetFloat();
-        m_transZ = fields[27].GetFloat();
-        m_transO = fields[28].GetFloat();
+        m_transX = fields[23].GetFloat();
+        m_transY = fields[24].GetFloat();
+        m_transZ = fields[25].GetFloat();
+        m_transO = fields[26].GetFloat();
 
         for (int i = 0; i < MapManager::Instance().m_Transports.size(); i++)
         {
@@ -9502,21 +9502,21 @@ bool Player::LoadFromDB( uint32 guid )
     }
 
     // since last logout (in seconds)
-    uint32 time_diff = (time(NULL) - fields[21].GetUInt32());
+    uint32 time_diff = (time(NULL) - fields[19].GetUInt32());
 
-    rest_bonus = fields[20].GetFloat();
+    rest_bonus = fields[18].GetFloat();
     //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
     float bubble0 = 0.0416;
     //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
     float bubble1 = 0.083;
 
-    if((int32)fields[21].GetUInt32() > 0)
+    if((int32)fields[19].GetUInt32() > 0)
     {
-        float bubble = fields[22].GetUInt32() > 0
+        float bubble = fields[20].GetUInt32() > 0
             ? bubble1*sWorld.getRate(RATE_REST_OFFLINE_IN_TAVERN_OR_CITY)
             : bubble0*sWorld.getRate(RATE_REST_OFFLINE_IN_WILDERNESS);
 
-        SetRestBonus(GetRestBonus()+ (time(NULL)-(int32)fields[21].GetUInt32())*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/144000)*bubble);
+        SetRestBonus(GetRestBonus()+ time_diff*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/144000)*bubble);
     }
 
     if(!IsPositionValid())
@@ -9529,15 +9529,15 @@ bool Player::LoadFromDB( uint32 guid )
         m_positionZ = info->positionZ;
     }
 
-    m_highest_rank = fields[14].GetUInt32();
-    m_standing = fields[15].GetUInt32();
-    m_rating = fields[16].GetFloat();
-    m_cinematic = fields[17].GetUInt32();
-    m_Played_time[0]= fields[18].GetUInt32();
-    m_Played_time[1]= fields[19].GetUInt32();
+    m_highest_rank = fields[12].GetUInt32();
+    m_standing = fields[13].GetUInt32();
+    m_rating = fields[14].GetFloat();
+    m_cinematic = fields[15].GetUInt32();
+    m_Played_time[0]= fields[16].GetUInt32();
+    m_Played_time[1]= fields[17].GetUInt32();
 
-    m_resetTalentsCost = fields[23].GetUInt32();
-    m_resetTalentsTime = fields[24].GetUInt64();
+    m_resetTalentsCost = fields[21].GetUInt32();
+    m_resetTalentsTime = fields[22].GetUInt64();
 
     if( HasFlag(PLAYER_FLAGS, 8) )
         SetUInt32Value(PLAYER_FLAGS, 0);
@@ -9545,7 +9545,7 @@ bool Player::LoadFromDB( uint32 guid )
     if( HasFlag(PLAYER_FLAGS, 0x11) )
         m_deathState = DEAD;
 
-    _LoadTaxiMask( fields[12].GetString() );
+    _LoadTaxiMask( fields[11].GetString() );
 
     delete result;
 
@@ -10052,13 +10052,12 @@ void Player::SaveToDB()
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
-    ss << "INSERT INTO `character` (`guid`,`realm`,`account`,`name`,`race`,`class`,"
+    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,"
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
         "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`) VALUES ("
         << GetGUIDLow() << ", "
-        << realmID << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
         << m_race << ", "

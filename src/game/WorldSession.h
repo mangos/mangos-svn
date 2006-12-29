@@ -145,6 +145,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleInspectHonorStatsOpcode(WorldPacket& recvPacket);
 
         void HandleMoveWaterWalkAck(WorldPacket& recvPacket);
+        void HandleMoveHoverAck( WorldPacket & recv_data );
+
         void HandleMountSpecialAnimOpcode(WorldPacket &recvdata);
 
         // repair
@@ -156,6 +158,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMoveTeleportAck(WorldPacket& recvPacket);
         void HandleForceRunSpeedChangeAck(WorldPacket& recvPacket);
         void HandleForceSwimSpeedChangeAck(WorldPacket& recvPacket);
+        void HandleForceWalkSpeedChangeAck( WorldPacket & recv_data );
+        void HandleForceRunBackSpeedChangeAck( WorldPacket & recv_data );
 
         void HandlePingOpcode(WorldPacket& recvPacket);
         void HandleAuthSessionOpcode(WorldPacket& recvPacket);

@@ -693,7 +693,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
         void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool aplly);
 
-        void SendHover(bool on);
+        void SetHover(bool on);
+        bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
     protected:
         Unit ( );
 

@@ -43,7 +43,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 
     data.Initialize(SMSG_CHAR_ENUM);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u' AND `realm` = '%u' ORDER BY `guid`", GetAccountId(),realmID);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
 
     uint8 num = 0;
 
@@ -137,7 +137,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
     if(GameType == 1 || GameType == 8)
     {
-        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' AND `realm` = '%u' LIMIT 1", GetAccountId(),realmID);
+        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
         if(result2)
         {
             Field * field = result2->Fetch();

@@ -288,14 +288,17 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         // repair item
         { CMSG_REPAIR_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleRepairItemOpcode              },
 
-        // knockback
+        // movements
         { CMSG_MOVE_KNOCK_BACK_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveKnockBackAck              },
-
+        { CMSG_MOVE_HOVER_ACK,              STATUS_LOGGEDIN, &WorldSession::HandleMoveHoverAck                  },
         { CMSG_SET_ACTIVE_MOVER,            STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode          },
-        { MSG_LOOKING_FOR_GROUP,            STATUS_LOGGEDIN, &WorldSession::HandleLookingForGroup               },
         { MSG_MOVE_TELEPORT_ACK,            STATUS_LOGGEDIN, &WorldSession::HandleMoveTeleportAck               },
         { CMSG_FORCE_RUN_SPEED_CHANGE_ACK,  STATUS_LOGGEDIN, &WorldSession::HandleForceRunSpeedChangeAck        },
         { CMSG_FORCE_SWIM_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSwimSpeedChangeAck       },
+        { CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceRunBackSpeedChangeAck},
+        { CMSG_FORCE_WALK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceWalkSpeedChangeAck       },
+
+        { MSG_LOOKING_FOR_GROUP,            STATUS_LOGGEDIN, &WorldSession::HandleLookingForGroup               },
         { CMSG_SET_FACTION_ATWAR,           STATUS_LOGGEDIN, &WorldSession::HandleSetFactionAtWar               },
         { CMSG_SET_FACTION_CHEAT,           STATUS_LOGGEDIN, &WorldSession::HandleSetFactionCheat               },
         { CMSG_ZONEUPDATE,                  STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode              },

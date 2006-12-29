@@ -151,7 +151,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TOTAL_THREAT = 103,
     &Aura::HandleAuraWaterWalk,                             //SPELL_AURA_WATER_WALK = 104,
     &Aura::HandleAuraFeatherFall,                           //SPELL_AURA_FEATHER_FALL = 105,
-    &Aura::HandleNULL,                                      //SPELL_AURA_HOVER = 106,
+    &Aura::HandleAuraHover,                                 //SPELL_AURA_HOVER = 106,
     &Aura::HandleAddModifier,                               //SPELL_AURA_ADD_FLAT_MODIFIER = 107,
     &Aura::HandleAddModifier,                               //SPELL_AURA_ADD_PCT_MODIFIER = 108,
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_TARGET_TRIGGER = 109,
@@ -959,6 +959,17 @@ void Aura::HandleAuraFeatherFall(bool apply)
         data.Initialize(SMSG_MOVE_FEATHER_FALL);
     else
         data.Initialize(SMSG_MOVE_NORMAL_FALL);
+    data.append(m_target->GetPackGUID());
+    m_target->SendMessageToSet(&data,true);
+}
+
+void Aura::HandleAuraHover(bool apply)
+{
+    WorldPacket data;
+    if(apply)
+        data.Initialize(SMSG_MOVE_SET_HOVER);
+    else
+        data.Initialize(SMSG_MOVE_UNSET_HOVER);
     data.append(m_target->GetPackGUID());
     m_target->SendMessageToSet(&data,true);
 }
