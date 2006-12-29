@@ -1009,6 +1009,11 @@ void Spell::EffectLearnSpell(uint32 i)
             player->learnSpell(2764);
             break;
         }
+        case 2842:                                          //SKILL_POISONS
+        {
+            player->learnSpell(8681);
+            break;
+        }
         default:break;
     }
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
