@@ -150,6 +150,9 @@ class MANGOS_DLL_SPEC WorldSession
         // repair
         void HandleRepairItemOpcode(WorldPacket& recvPacket);
 
+        //Knockback
+        void HandleMoveKnockBackAck(WorldPacket& recvPacket);
+
         void HandleMoveTeleportAck(WorldPacket& recvPacket);
         void HandleForceRunSpeedChangeAck(WorldPacket& recvPacket);
         void HandleForceSwimSpeedChangeAck(WorldPacket& recvPacket);
