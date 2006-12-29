@@ -82,17 +82,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> race_;
     recv_data.rpos(0);
 
+    // prevent character creating with invalid name
     if(name.size() == 0)
-        return;
-
-    normalizePlayerName(name);
-
-    // prevent sending (not from client) wrong names creating
-    std::string name2 = name;
-    sDatabase.escape_string(name);
-
-    // normal name will not affected by escape_string
-    if(name != name2)
     {
         data.Initialize( SMSG_CHAR_CREATE );
         data << (uint8)0x33;
@@ -100,6 +91,20 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
+    for(size_t i = 0; i < name.size(); ++i)
+    {
+        if(!isalpha(name[i]))
+        {
+            data.Initialize( SMSG_CHAR_CREATE );
+            data << (uint8)0x33;
+            SendPacket( &data );
+            return;
+        }
+    }
+
+    normalizePlayerName(name);
+
+    sDatabase.escape_string(name);
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
 
     if ( result )
