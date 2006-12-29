@@ -3603,14 +3603,22 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
         pet->SetSpeed(mtype,m_speed_rate[mtype],forced);
 }
 
-void Unit::SendHover(bool on)
+void Unit::SetHover(bool on)
 {
-    WorldPacket data;
-    if (on)
-        data.Initialize(SMSG_MOVE_SET_HOVER);
-    else
-        data.Initialize(SMSG_MOVE_UNSET_HOVER);
+    if(on)
+    {
+        SpellEntry *sInfo = sSpellStore.LookupEntry(11010);
+        if(!sInfo)
+            return;
 
-    data.append(GetPackGUID());
-    SendMessageToSet( &data, true );
+        Spell spell(this, sInfo, true,0);
+        SpellCastTargets targets;
+        targets.setUnitTarget(this);
+        targets.m_targetMask = TARGET_FLAG_SELF;
+        spell.prepare(&targets);
+    }
+    else
+    {
+        RemoveAurasDueToSpell(11010);
+    }
 }

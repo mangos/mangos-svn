@@ -2122,7 +2122,7 @@ bool ChatHandler::HandleHoverCommand(const char* args)
     else
         flag = atoi(px);
 
-    m_session->GetPlayer()->SendHover(flag);
+    m_session->GetPlayer()->SetHover(flag);
 
     if (flag)
         SendSysMessage(LANG_HOVER_ENABLED);

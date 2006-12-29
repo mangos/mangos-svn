@@ -269,7 +269,7 @@ void CliInfo(char*,pPrintf zprintf)
 {
     ///- Get the list of accounts ID logged to the realm
     // No SQL injection. RealmID is uint32
-    QueryResult *resultDB = sDatabase.PQuery("SELECT `name`,`account` FROM `character` WHERE `online` > 0 AND `realm` = '%u'",realmID);
+    QueryResult *resultDB = sDatabase.Query("SELECT `name`,`account` FROM `character` WHERE `online` > 0");
 
     if (!resultDB)
     {

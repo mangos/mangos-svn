@@ -1001,6 +1001,14 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
     }
 }
 
+void WorldSession::HandleForceWalkSpeedChangeAck( WorldPacket & recv_data )
+{
+}
+
+void WorldSession::HandleForceRunBackSpeedChangeAck( WorldPacket & recv_data )
+{
+}
+
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)
 {
     // set swim speed ? received data is more
@@ -1017,12 +1025,6 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 
     temp = ((GetPlayer()->GetUInt32Value( PLAYER_FIELD_BYTES )) & 0xFFF0FFFF) + (ActionBar << 16);
     GetPlayer()->SetUInt32Value( PLAYER_FIELD_BYTES, temp);
-}
-
-void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
-{
-    // TODO
-    // we receive guid,x,y,z
 }
 
 void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)

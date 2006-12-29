@@ -268,7 +268,7 @@ void Master::clearOnlineAccounts()
         "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
         "  AND `realmcharacters`.`realmid` = '%d'",realmID);
 
-    sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `realm` = '%d'",realmID);
+    sDatabase.Execute("UPDATE `character` SET `online` = 0");
 }
 
 /// Handle termination signals

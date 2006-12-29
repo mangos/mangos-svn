@@ -233,3 +233,14 @@ void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
     // check code
     */
 }
+
+void WorldSession::HandleMoveHoverAck( WorldPacket & recv_data )
+{
+}
+
+void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
+{
+    // TODO
+    // we receive guid,x,y,z
+}
+

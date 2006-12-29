@@ -60,6 +60,7 @@ class Aura
         void HandleModThreat(bool apply);
         void HandleAuraWaterWalk(bool Apply);
         void HandleAuraFeatherFall(bool Apply);
+        void HandleAuraHover(bool apply);
         void HandleAddModifier(bool Apply);
         void HandleAuraModStun(bool Apply);
         void HandleModDamageDone(bool Apply);
