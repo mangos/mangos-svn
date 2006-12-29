@@ -563,6 +563,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update,bool fromLoot = false );
         Item* StoreItem( uint16 pos, Item *pItem, bool update );
         void EquipItem( uint16 pos, Item *pItem, bool update );
+        void SetAmmo( uint32 item );
         void QuickEquipItem( uint16 pos, Item *pItem);
         void VisualizeItem( uint16 pos, Item *pItem);
         Item* BankItem( uint16 pos, Item *pItem, bool update );
@@ -1025,6 +1026,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
         void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
+        void _ApplyAmmoBonuses(bool apply);
 
         void CastItemEquipSpell(Item *item);
         void CastItemCombatSpell(Item *item,Unit* Target);
