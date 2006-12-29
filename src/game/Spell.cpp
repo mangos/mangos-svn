@@ -2143,9 +2143,6 @@ uint8 Spell::CheckItems()
     if (!itemTarget)
         return uint8(0);
 
-    if( !p_caster->HasItemCount(itemTarget->GetEntry(), 1) )
-        return (uint8)CAST_FAIL_ITEM_NOT_READY;
-
     for(int i = 0; i < 3; i++)
     {
         switch (m_spellInfo->Effect[i])
