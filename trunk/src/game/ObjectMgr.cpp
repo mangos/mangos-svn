@@ -1140,9 +1140,9 @@ void ObjectMgr::LoadSpellChains()
         }
 
         // check basic spell chain data integrity (note: rank can be equal 0 or 1 for first/single spell)
-        if( spell_id == node.first && ( node.rank > 1 || node.prev != 0 ) || 
-            node.rank == 1 && ( spell_id != node.first || node.prev != 0 ) ||
-            node.prev == 0 && ( spell_id != node.first || node.rank > 1 ))
+        if( (spell_id == node.first) != (node.rank <= 1) || 
+            (spell_id == node.first) != (node.prev == 0) || 
+            (node.rank <= 1) != (node.prev == 0) )
         {
             sLog.outError("Spell %u have not compatiable chain data (prev: %u, first: %u, rank: %d)",spell_id,node.prev,node.first,node.rank);
             continue;
@@ -1153,6 +1153,30 @@ void ObjectMgr::LoadSpellChains()
 
         ++count;
     } while( result->NextRow() );
+
+    // additinal integrity checks
+    for(SpellChainMap::iterator i = SpellChains.begin(); i != SpellChains.end(); ++i)
+    {
+        if(i->second.prev)
+        {
+            SpellChainMap::iterator i_prev = SpellChains.find(i->second.prev);
+            if(i_prev == SpellChains.end())
+            {
+                sLog.outError("Spell %u (prev: %u, first: %u, rank: %d) have not found in table previous rank spell.",
+                    i->first,i->second.prev,i->second.first,i->second.rank);
+            }
+            else if( i_prev->second.first != i->second.first )
+            {
+                sLog.outError("Spell %u (prev: %u, first: %u, rank: %d) have different firsdy spell in chain in comparison with previous rank spell (prev: %u, first: %u, rank: %d).",
+                    i->first,i->second.prev,i->second.first,i->second.rank,i_prev->second.prev,i_prev->second.first,i_prev->second.rank);
+            }
+            else if( i_prev->second.rank+1 != i->second.rank )
+            {
+                sLog.outError("Spell %u (prev: %u, first: %u, rank: %d) have different rank in comparison with previous rank spell (prev: %u, first: %u, rank: %d).",
+                    i->first,i->second.prev,i->second.first,i->second.rank,i_prev->second.prev,i_prev->second.first,i_prev->second.rank);
+            }
+        }
+    }
 
     delete result;
 
