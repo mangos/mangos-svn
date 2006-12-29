@@ -288,6 +288,9 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         // repair item
         { CMSG_REPAIR_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleRepairItemOpcode              },
 
+        // knockback
+        { CMSG_MOVE_KNOCK_BACK_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveKnockBackAck              },
+
         { CMSG_SET_ACTIVE_MOVER,            STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode          },
         { MSG_LOOKING_FOR_GROUP,            STATUS_LOGGEDIN, &WorldSession::HandleLookingForGroup               },
         { MSG_MOVE_TELEPORT_ACK,            STATUS_LOGGEDIN, &WorldSession::HandleMoveTeleportAck               },

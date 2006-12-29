@@ -205,3 +205,31 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
 
     GetPlayer()->SendMessageToSet(&data, false);
 }
+
+void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
+{
+    // Currently not used but maybe use later for recheck final player position 
+    // (must be at call same as into "recv_data >> x >> y >> z >> orientation;"
+
+    /* 
+    uint32 flags, time;
+    float x, y, z, orientation;
+    uint64 guid;
+    uint32 sequence;
+    uint32 ukn1;
+    float xdirection,ydirection,hspeed,vspeed;
+
+    recv_data >> guid;
+    recv_data >> sequence;
+    recv_data >> flags >> time;
+    recv_data >> x >> y >> z >> orientation;
+    recv_data >> ukn1; //unknown
+    recv_data >> vspeed >> xdirection >> ydirection >> hspeed;
+
+    // skip not personal message;
+    if(GetPlayer()->GetGUID()!=guid)
+        return;
+
+    // check code
+    */
+}

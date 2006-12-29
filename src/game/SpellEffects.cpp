@@ -147,7 +147,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSkinning,                                 //SPELL_EFFECT_SKINNING = 95
     &Spell::EffectCharge,                                   //SPELL_EFFECT_CHARGE = 96
     &Spell::EffectSummonCritter,                            //SPELL_EFFECT_SUMMON_CRITTER = 97
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_KNOCK_BACK = 98
+    &Spell::EffectKnockBack,                                //SPELL_EFFECT_KNOCK_BACK = 98
     &Spell::EffectDisEnchant,                               //SPELL_EFFECT_DISENCHANT = 99
     &Spell::EffectInebriate,                                //SPELL_EFFECT_INEBRIATE = 100
     &Spell::EffectFeedPet,                                  //SPELL_EFFECT_FEED_PET = 101
@@ -2426,6 +2426,36 @@ void Spell::EffectSummonCritter(uint32 i)
         critter->AddToWorld();
         MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)critter);
     }
+}
+
+void Spell::EffectKnockBack(uint32 i)
+{
+    if(!unitTarget || !m_caster)
+        return;
+
+    //Effect only works on players
+    if(unitTarget->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
+    float value = 0;
+    int32 basePoints = m_spellInfo->EffectBasePoints[i];
+    int32 randomPoints = m_spellInfo->EffectDieSides[i];
+    if (randomPoints) value = basePoints + rand()%randomPoints;
+    else value = basePoints;
+
+    //Only allowed to knock ourselves straight up to prevent exploiting
+    if (unitTarget == m_caster)value = 0;
+
+    WorldPacket data;
+    data.SetOpcode(SMSG_MOVE_KNOCK_BACK);
+    data.append(unitTarget->GetPackGUID());
+    data << uint32(0);//Sequence
+    data << cos(m_caster->GetAngle(unitTarget)); //xdirection
+    data << sin(m_caster->GetAngle(unitTarget)); //ydirection
+    data << value/10;//Horizontal speed
+    data << float(m_spellInfo->EffectMiscValue[i])/-10;//Z Movement speed
+
+    ((Player*)unitTarget)->SendMessageToSet(&data,true);
 }
 
 void Spell::EffectSummonDeadPet(uint32 i)
