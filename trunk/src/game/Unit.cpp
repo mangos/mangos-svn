@@ -3602,3 +3602,15 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
     if(Pet* pet = GetPet())
         pet->SetSpeed(mtype,m_speed_rate[mtype],forced);
 }
+
+void Unit::SendHover(bool on)
+{
+    WorldPacket data;
+    if (on)
+        data.Initialize(SMSG_MOVE_SET_HOVER);
+    else
+        data.Initialize(SMSG_MOVE_UNSET_HOVER);
+
+    data.append(GetPackGUID());
+    SendMessageToSet( &data, true );
+}

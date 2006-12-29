@@ -2122,18 +2122,7 @@ bool ChatHandler::HandleHoverCommand(const char* args)
     else
         flag = atoi(px);
 
-    //SMSG_MOVE_UNSET_HOVER
-
-    if (flag)
-    {
-        data.Initialize(SMSG_MOVE_SET_HOVER);
-    }
-    else
-    {
-        data.Initialize(SMSG_MOVE_UNSET_HOVER);
-    }
-    data.append(m_session->GetPlayer()->GetPackGUID());
-    m_session->SendPacket( &data );
+    m_session->GetPlayer()->SendHover(flag);
 
     if (flag)
         SendSysMessage(LANG_HOVER_ENABLED);
