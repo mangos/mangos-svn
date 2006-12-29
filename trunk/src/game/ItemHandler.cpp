@@ -739,16 +739,7 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
 
     recv_data >> item;
 
-    if( item == 0 )
-        GetPlayer()->SetUInt32Value(PLAYER_AMMO_ID, 0);
-    else
-    {
-        uint8 msg = GetPlayer()->CanUseAmmo( item );
-        if( msg == EQUIP_ERR_OK )
-            GetPlayer()->SetUInt32Value(PLAYER_AMMO_ID, item);
-        else
-            GetPlayer()->SendEquipError( msg, NULL, NULL );
-    }
+    GetPlayer()->SetAmmo(item);
 }
 
 void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID)
