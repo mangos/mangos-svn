@@ -60,24 +60,11 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
 }
 
 void
-TargetedMovementGenerator::_setAttackRadius(Creature &owner)
-{
-    if(!&owner)
-        return;
-    float combat_reach = owner.GetFloatValue(UNIT_FIELD_COMBATREACH);
-    if( combat_reach <= 0.0f )
-        combat_reach = 1.0f;
-    //float bounding_radius = owner.GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
-    i_attackRadius = combat_reach;                          // - SMALL_ALPHA);
-}
-
-void
 TargetedMovementGenerator::Initialize(Creature &owner)
 {
     if(!&owner)
         return;
     owner.setMoveRunFlag(true);
-    _setAttackRadius(owner);
     _setTargetLocation(owner, 0);
 }
 
@@ -90,7 +77,7 @@ TargetedMovementGenerator::Reset(Creature &owner)
 bool
 TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 {
-    if( !&owner || !owner.isAlive() || !&i_target || i_targetedHome )
+    if( !&owner || !owner.isAlive() || !&i_target )
         return true;
     if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) || owner.hasUnitState(UNIT_STAT_FLEEING))
         return true;
