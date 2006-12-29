@@ -29,8 +29,8 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
 {
     public:
 
-        TargetedMovementGenerator(Unit &target) : i_target(target), i_attackRadius(0), i_targetedHome(false), i_offset(0), i_angle(0) {}
-        TargetedMovementGenerator(Unit &target, float offset, float angle) : i_target(target), i_attackRadius(0), i_targetedHome(false), i_offset(offset), i_angle(angle) {}
+        TargetedMovementGenerator(Unit &target) : i_target(target), i_offset(0), i_angle(0) {}
+        TargetedMovementGenerator(Unit &target, float offset, float angle) : i_target(target), i_offset(offset), i_angle(angle) {}
         ~TargetedMovementGenerator() {}
 
         void Initialize(Creature &);
@@ -43,11 +43,8 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
     private:
 
         void _spellAtack(Creature &owner, SpellEntry* spellInfo);
-        void _setAttackRadius(Creature &);
         void _setTargetLocation(Creature &, float offset);
         Unit &i_target;
-        float i_attackRadius;
-        bool i_targetedHome;
         float i_offset;
         float i_angle;
         DestinationHolder<Traveller<Creature> > i_destinationHolder;
