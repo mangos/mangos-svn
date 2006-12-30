@@ -5996,7 +5996,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
             if(pItem->IsBindedNotWith(GetGUID()))
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
 
-			// check count of items
+            // check count of items
             if( !swap && pProto->MaxCount > 0 )
             {
                 uint32 curcount = 0;

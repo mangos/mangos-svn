@@ -610,7 +610,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     uint32 absorb=0;
     uint32 resist=0;
 
-	//Spell miss (sends resist message)
+    //Spell miss (sends resist message)
     if(SpellMissChanceCalc(pVictim) > urand(0,10000))
     {
         SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
@@ -619,10 +619,10 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
     bool crit = SpellCriticalBonus(spellInfo, (int32*)&pdamage);
-	
-	//Calculate armor mitigation if it is a physical spell
-	if (spellInfo->School == 0)
-		pdamage = CalcArmorReducedDamage(pVictim, damage);
+    
+    //Calculate armor mitigation if it is a physical spell
+    if (spellInfo->School == 0)
+        pdamage = CalcArmorReducedDamage(pVictim, damage);
     CalcAbsorbResist(pVictim,spellInfo->School,pdamage, &absorb, &resist);
 
     // Only send absorbed message if we actually absorbed some damage
@@ -630,12 +630,12 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     {
         SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
         return;
-    }else 	// If we didn't fully absorb check if we fully resisted
-		if( pdamage <= resist)
-		{
-		    SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
-		   return;
-		}
+    }else     // If we didn't fully absorb check if we fully resisted
+        if( pdamage <= resist)
+        {
+            SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
+           return;
+        }
 
     sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
@@ -656,9 +656,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
     uint32 pdamage = mod->m_amount;
 
-	//Calculate armor mitigation if it is a physical spell
-	if (spellProto->School == 0)
-		pdamage = CalcArmorReducedDamage(pVictim, pdamage);
+    //Calculate armor mitigation if it is a physical spell
+    if (spellProto->School == 0)
+        pdamage = CalcArmorReducedDamage(pVictim, pdamage);
 
     CalcAbsorbResist(pVictim, spellProto->School, pdamage, &absorb, &resist);
 
@@ -799,17 +799,17 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
 
 uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
 {
-	uint32 newdamage = 0;
-	float armor = pVictim->GetArmor();
-	float tmpvalue = armor / (getLevel() * 85.0 + 400.0 +armor);
+    uint32 newdamage = 0;
+    float armor = pVictim->GetArmor();
+    float tmpvalue = armor / (getLevel() * 85.0 + 400.0 +armor);
 
-	if(tmpvalue < 0)
-		tmpvalue = 0.0;
-	if(tmpvalue > 0.75)
-		tmpvalue = 0.75;
-	newdamage = uint32(damage - (damage * tmpvalue));
+    if(tmpvalue < 0)
+        tmpvalue = 0.0;
+    if(tmpvalue > 0.75)
+        tmpvalue = 0.75;
+    newdamage = uint32(damage - (damage * tmpvalue));
 
-	return (newdamage > 1) ? newdamage : 1; 
+    return (newdamage > 1) ? newdamage : 1; 
 }
 
 
@@ -819,7 +819,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
         return;
 
     // Magic damage, check for resists
-	if (School != SPELL_SCHOOL_NORMAL)
+    if (School != SPELL_SCHOOL_NORMAL)
     {
         float tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
         if (tmpvalue2 < 0) tmpvalue2 = 0;
@@ -901,9 +901,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
     *damage += CalculateDamage (attType);
 
-	//Calculate the damage after armor mitigation if SPELL_SCHOOL_NORMAL
-	if (*damageType == SPELL_SCHOOL_NORMAL)
-		*damage = CalcArmorReducedDamage(pVictim, *damage);
+    //Calculate the damage after armor mitigation if SPELL_SCHOOL_NORMAL
+    if (*damageType == SPELL_SCHOOL_NORMAL)
+        *damage = CalcArmorReducedDamage(pVictim, *damage);
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
         ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
@@ -971,12 +971,12 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             else
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
-			//Only set VICTIMSTATE_BLOCK on a full block
-			if (*blocked_amount >= *damage)
-			{
-				*victimState = VICTIMSTATE_BLOCKS;
-				*blocked_amount = *damage;
-			}
+            //Only set VICTIMSTATE_BLOCK on a full block
+            if (*blocked_amount >= *damage)
+            {
+                *victimState = VICTIMSTATE_BLOCKS;
+                *blocked_amount = *damage;
+            }
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
@@ -1007,7 +1007,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     MeleeDamageBonus(pVictim, damage);
     CalcAbsorbResist(pVictim, *damageType, *damage-*blocked_amount, absorbDamage, resistDamage);
 
-	if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
+    if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
     if (*resistDamage) *hitInfo |= HITINFO_RESIST;
 
     if (*damage <= *absorbDamage + *resistDamage + *blocked_amount)

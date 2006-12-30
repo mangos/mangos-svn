@@ -136,7 +136,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->KillPlayer();
             _player->BuildPlayerRepop();
         }
-		// no point calling this here as Player::SaveToDB() will reset it to 1 since player has not been removed from world at this stage
+        // no point calling this here as Player::SaveToDB() will reset it to 1 since player has not been removed from world at this stage
         //sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `guid` = '%u'", _player->GetGUIDLow());
         loginDatabase.PExecute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u'", GetAccountId());
 
@@ -224,8 +224,8 @@ void WorldSession::LogoutPlayer(bool Save)
         SendPacket( &data );
 
 
-		// Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
-		sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `account` = '%u'", GetAccountId());
+        // Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+        sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `account` = '%u'", GetAccountId());
         sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
 

@@ -77,7 +77,7 @@ void PetAI::_stopAttack()
     Unit* victim = ObjectAccessor::Instance().GetUnit(i_pet, i_victimGuid );
 
     if ( !victim )
-	return;
+    return;
 
     assert(!i_pet.getVictim() || i_pet.getVictim() == victim);
 
