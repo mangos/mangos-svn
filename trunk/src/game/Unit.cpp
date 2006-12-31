@@ -1788,18 +1788,6 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
     }
 
-    // Apply aura modifiers applied only at aura add/remove
-    // It don't must include modifiers important for correct saving/aura mods/item mods/stats mods applying
-    switch(Aur->GetModifier()->m_auraname)
-    {
-        case SPELL_AURA_MOD_STEALTH:               Aur->ApplyModStealth(true);                 break;
-        case SPELL_AURA_MOD_INCREASE_SPEED:        Aur->ApplyAuraModIncreaseSpeed(true);       break;
-        case SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED:Aur->ApplyAuraModIncreaseMountedSpeed(true);break;
-        case SPELL_AURA_MOD_DECREASE_SPEED:        Aur->ApplyAuraModDecreaseSpeed(true);       break;
-        case SPELL_AURA_MOD_INCREASE_SWIM_SPEED:   Aur->ApplyAuraModIncreaseSwimSpeed(true);   break;
-        case SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS: Aur->ApplyAuraModIncreaseSpeedAlways(true); break;
-    }
-
     if (IsSingleTarget(Aur->GetId()) && Aur->GetTarget() && Aur->GetSpellProto())
     {
         if(Unit* caster = Aur->GetCaster())
@@ -2061,23 +2049,9 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     (*i).second->SetRemoveOnDeath(onDeath);
     (*i).second->_RemoveAura();
 
-    Aura* Aur = (*i).second;
+    delete (*i).second;
     m_Auras.erase(i++);
     m_removedAuras++;                                       // internal count used by unit update
-
-    // Apply aura modifiers applied only at aura add/remove
-    // It don't must include modifiers important for correct saving/aura mods/item mods/stats mods applying
-    switch(Aur->GetModifier()->m_auraname)
-    {
-        case SPELL_AURA_MOD_STEALTH:               Aur->ApplyModStealth(false);                 break;
-        case SPELL_AURA_MOD_INCREASE_SPEED:        Aur->ApplyAuraModIncreaseSpeed(false);       break;
-        case SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED:Aur->ApplyAuraModIncreaseMountedSpeed(false);break;
-        case SPELL_AURA_MOD_DECREASE_SPEED:        Aur->ApplyAuraModDecreaseSpeed(false);       break;
-        case SPELL_AURA_MOD_INCREASE_SWIM_SPEED:   Aur->ApplyAuraModIncreaseSwimSpeed(false);   break;
-        case SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS: Aur->ApplyAuraModIncreaseSpeedAlways(false); break;
-    }
-
-    delete Aur;
 }
 
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
