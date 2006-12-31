@@ -301,19 +301,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    WorldSession *session = sWorld.FindSession( id );
-    if( session )
+    // kick already loaded player (if any) and remove session
+    if(sWorld.RemoveSession(id))
     {
-        packet.Initialize( SMSG_AUTH_RESPONSE );
-        //packet << uint8( 13 );
-        packet << uint8( AUTH_ALREADY_ONLINE );
-        SendPacket( &packet );
-
         sLog.outDetail( "SOCKET: Sent Auth Response (already connected)." );
-
-        session->LogoutPlayer(true);
-
-        return;
     }
 
     Sha1Hash sha;
@@ -356,10 +347,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     SendPacket(&packet);
 
-    _session = new WorldSession(id, this);
-
-    ASSERT(_session);
-    _session->SetSecurity(security);
+    _session = new WorldSession(id, this,security);
     sWorld.AddSession(_session);
 
     sLog.outDebug( "SOCKET: Client '%s' authed successfully.", account.c_str() );

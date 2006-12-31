@@ -71,12 +71,9 @@ World::~World()
 
 Player* World::FindPlayerInZone(uint32 zone)
 {
-    SessionMap::iterator itr, next;
-    for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
+    SessionMap::iterator itr;
+    for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        next = itr;
-        next++;
-
         if(!itr->second)
             continue;
         Player *player = itr->second->GetPlayer();
@@ -95,20 +92,26 @@ WorldSession* World::FindSession(uint32 id) const
     SessionMap::const_iterator itr = m_sessions.find(id);
 
     if(itr != m_sessions.end())
-        return itr->second;
+        return itr->second;                                 // also can return NULL for kicked session
     else
-        return 0;
+        return NULL;
 }
 
-void World::RemoveSession(uint32 id)
+bool World::RemoveSession(uint32 id)
 {
     SessionMap::iterator itr = m_sessions.find(id);
 
-    if(itr != m_sessions.end())
+    if(itr != m_sessions.end() && itr->second)
     {
-        delete itr->second;
-        m_sessions.erase(itr);
+        itr->second->KickPlayer();
+
+        // session can't be erased or delected currently (to prevent iterator invalidation and socket problems)
+        m_kicked_sessions.insert(itr->second);
+        itr->second = NULL;
+        return true;
     }
+
+    return false;
 }
 
 void World::AddSession(WorldSession* s)
@@ -455,11 +458,17 @@ void World::Update(time_t diff)
     {
         m_timers[WUPDATE_SESSIONS].Reset();
 
-        SessionMap::iterator itr, next;
-        for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
+        for (std::set<WorldSession*>::iterator itr = m_kicked_sessions.begin(); itr != m_kicked_sessions.end(); ++itr)
+            delete *itr;
+        m_kicked_sessions.clear();
+
+        for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
         {
             next = itr;
             next++;
+
+            if(!itr->second)
+                continue;
 
             if(!itr->second->Update(diff))
             {
@@ -535,7 +544,7 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
     {
-        if (itr->second->GetPlayer() &&
+        if (itr->second && itr->second->GetPlayer() &&
             itr->second->GetPlayer()->IsInWorld()
             && itr->second != self)
         {
@@ -556,6 +565,9 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
     {
+        if(!itr->second)
+            continue;
+
         Player *player = itr->second->GetPlayer();
         if ( player && player->IsInWorld() && player->GetZoneId() == zone && itr->second != self)
         {
@@ -595,6 +607,7 @@ bool World::KickPlayer(std::string playerName)
     }
     return false;
 }
+
 
 bool World::BanAccount(std::string nameOrIP)
 {

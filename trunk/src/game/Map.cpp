@@ -1022,7 +1022,7 @@ uint32 Map::GetZoneId(uint16 areaflag)
         return 0;
 }
 
-float Map::IsInWater(float x, float y)
+bool Map::IsInWater(float x, float y)
 {
     float z = GetHeight(x,y);
     float water_z = GetWaterLevel(x,y);
@@ -1030,7 +1030,7 @@ float Map::IsInWater(float x, float y)
     return (z < (water_z-2)) && (flag & 0x01);
 }
 
-float Map::IsUnderWater(float x, float y, float z)
+bool Map::IsUnderWater(float x, float y, float z)
 {
     float water_z = GetWaterLevel(x,y);
     uint8 flag = GetTerrainType(x,y);
