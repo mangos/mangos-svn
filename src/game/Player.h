@@ -1053,8 +1053,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
 
-        inline bool InBattleGround() const { return m_bgInBattleGround; }
-        inline void SetInBattleGround(bool val) { m_bgInBattleGround = val; }
+        inline bool InBattleGround() const { return m_bgBattleGroundID != 0; }
         inline uint32 GetBattleGroundId() const { return m_bgBattleGroundID; }
         inline void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; }
         inline uint32 GetBattleGroundEntryPointMap() const { return m_bgEntryPointMap; }
@@ -1118,7 +1117,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
 
-        bool m_bgInBattleGround;
         uint8 m_bgBattleGroundID;
         uint32 m_bgEntryPointMap;
         float m_bgEntryPointX;
