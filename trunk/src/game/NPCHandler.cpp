@@ -575,7 +575,7 @@ void WorldSession::SendStablePet(uint64 guid )
                 data << uint32(fields[4].GetUInt32());
                 data << cinfo->Name;
                 data << uint32(fields[5].GetUInt32());      // loyalty
-                data << uint8(fields[1].GetUInt32()+2);     // slot
+                data << uint8(fields[1].GetUInt32()+1);     // slot
             }
         }while( result->NextRow() );
     }
@@ -746,37 +746,26 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
     delete result;
 
     switch(slot)
-    {
-        case 2:data << uint8(0x06);break;
-        case 1:
-            /*
-            if(_player->GetMoney() < 50000)
-            {
-                data << uint8(0x06);break;
-            }
-            else
-            {
-                sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,2,0,0,0,0,0)",_player->GetGUIDLow());
-                _player->SetMoney(_player->GetMoney() - 50000);
-                data << uint8(0x0A);                             // success buy
-                break;
-            }
-            */
-            break;                                          // temparay only one slot can be used.
+    {        
         case 0:
-            if(_player->GetMoney() < 500)
+        case 1: 
             {
-                data << uint8(0x06);
-                break;
-            }
-            else
-            {
-                sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,1,0,0,0,0,0)",_player->GetGUIDLow());
-                _player->SetMoney(_player->GetMoney() - 500);
-                data << uint8(0x0A);                        // success buy
-                break;
-            }break;
-        default :data << uint8(0x06);break;
+                StableSlotPricesEntry *SlotPrice = sStableSlotPricesStore.LookupEntry(slot+1);
+                if(_player->GetMoney() < SlotPrice->Price)
+                {
+                    data << uint8(0x06);
+                    break;
+                }
+                else
+                {
+                    sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u, %u,0,0,0,0,0)",_player->GetGUIDLow(), slot+1);
+                    _player->SetMoney(_player->GetMoney() - SlotPrice->Price);
+                    data << uint8(0x0A);                        // success buy
+                    break;
+                } break; 
+            } 
+        case 2: data << uint8(0x06); break;
+        default: data << uint8(0x06); break;
     }
     SendPacket(&data);
     SendStablePet(npcGUID);

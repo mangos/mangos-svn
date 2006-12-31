@@ -142,6 +142,7 @@ extern DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore;
 extern DBCStorage <SpellRadiusEntry>          sSpellRadiusStore;
 extern DBCStorage <SpellRangeEntry>           sSpellRangeStore;
 extern DBCStorage <SpellEntry>                sSpellStore;
+extern DBCStorage <StableSlotPricesEntry>     sStableSlotPricesStore;
 extern DBCStorage <TalentEntry>               sTalentStore;
 extern DBCStorage <TalentTabEntry>            sTalentTabStore;
 extern DBCStorage <TaxiNodesEntry>            sTaxiNodesStore;

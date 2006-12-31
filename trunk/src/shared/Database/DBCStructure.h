@@ -282,6 +282,12 @@ struct SpellItemEnchantmentEntry
     uint32      slot;
 };
 
+struct StableSlotPricesEntry
+{
+    uint32 Slot;
+    uint32 Price;
+};
+
 struct TalentEntry
 {
     uint32    TalentID;
