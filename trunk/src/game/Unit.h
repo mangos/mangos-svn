@@ -574,22 +574,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAlive() const { return (m_deathState == ALIVE); };
         bool isDead() const { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         DeathState getDeathState() { return m_deathState; };
-        virtual void setDeathState(DeathState s)
-        {
-            if (s != ALIVE)
-                CombatStop();
-
-            if (s == JUST_DIED)
-            {
-                RemoveAllAurasOnDeath();
-                UnsummonTotem();
-            }
-            if (m_deathState != ALIVE && s == ALIVE)
-            {
-                _ApplyAllAuraMods();
-            }
-            m_deathState = s;
-        }
+        virtual void setDeathState(DeathState s);           // overwrited in Creature/Player/Pet
 
         uint64 const& GetOwnerGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMONEDBY); }
         uint64 GetPetGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMON); }
