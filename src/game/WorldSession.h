@@ -46,7 +46,7 @@ enum SessionStatus
 class MANGOS_DLL_SPEC WorldSession
 {
     public:
-        WorldSession(uint32 id, WorldSocket *sock);
+        WorldSession(uint32 id, WorldSocket *sock, uint32 sec);
         ~WorldSession();
 
         void SendPacket(WorldPacket* packet);

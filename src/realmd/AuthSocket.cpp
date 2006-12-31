@@ -389,11 +389,11 @@ void AuthSocket::_HandleLogonChallenge()
                     else
                     {
                         ///- If the user is already logged in, reject the logon attempt
-                        if((*result)[4].GetUInt8() == 1)
-                        {
-                            pkt << (uint8)REALM_AUTH_ACCOUNT_IN_USE;
-                        }
-                        else
+                        //if((*result)[4].GetUInt8() == 1)
+                        //{
+                        //    pkt << (uint8)REALM_AUTH_ACCOUNT_IN_USE;
+                        //}
+                        //else
                         {
                             ///- Get the password from the account table, upper it, and make the SRP6 calculation
                             std::string password = (*result)[0].GetCppString();

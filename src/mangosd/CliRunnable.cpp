@@ -153,7 +153,7 @@ void CliDelete(char*command,pPrintf zprintf)
             if(Player* p = objmgr.GetPlayer(MAKE_GUID(guidlo,HIGHGUID_PLAYER)))
                 p->GetSession()->KickPlayer();
 
-            WorldSession acc_s(account_id,NULL);            // some invalid session
+            WorldSession acc_s(account_id,NULL,0);          // some invalid session
             Player acc_player(&acc_s);
 
             acc_player.LoadFromDB(guidlo);

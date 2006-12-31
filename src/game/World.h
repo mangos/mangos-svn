@@ -148,7 +148,7 @@ class World
 
         WorldSession* FindSession(uint32 id) const;
         void AddSession(WorldSession *s);
-        void RemoveSession(uint32 id);
+        bool RemoveSession(uint32 id);
         uint32 GetSessionCount() const { return m_sessions.size(); }
         Player* FindPlayerInZone(uint32 zone);
 
@@ -225,6 +225,7 @@ class World
         WeatherMap m_weathers;
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
+        std::set<WorldSession*> m_kicked_sessions;
         float rate_values[MAX_RATES];
         uint32 m_playerLimit;
         bool m_allowMovement;

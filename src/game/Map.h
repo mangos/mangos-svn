@@ -159,8 +159,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         uint16 GetAreaFlag(float x, float y );
         uint8 GetTerrainType(float x, float y );
         float GetWaterLevel(float x, float y );
-        float IsInWater(float x, float y);
-        float IsUnderWater(float x, float y, float z);
+        bool IsInWater(float x, float y);
+        bool IsUnderWater(float x, float y, float z);
 
         uint32 GetAreaId(uint16 areaflag);
         uint32 GetZoneId(uint16 areaflag);
