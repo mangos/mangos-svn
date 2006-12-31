@@ -1239,15 +1239,20 @@ void ObjectMgr::LoadScripts()
 void ObjectMgr::LoadItemPages()
 {
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `item_page`");
+
+    uint32 count = 0;
+
     if( !result )
     {
-        sLog.outError("Error opening item_page table.\n");
-        exit(1);
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u item pages", count );
+        return;
     }
 
     barGoLink bar( result->GetRowCount() );
-
-    uint32 count = 0;
 
     Field* fields;
     do

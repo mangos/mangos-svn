@@ -529,13 +529,13 @@ void PersistentAreaAura::Update(uint32 diff)
         m_target->RemoveAura(GetId(), GetEffIndex());
 }
 
-void Aura::ApplyModifier(bool apply)
+void Aura::ApplyModifier(bool apply, bool Real)
 {
     uint8 aura = 0;
     aura = m_modifier.m_auraname;
 
     if(aura<TOTAL_AURAS)
-        (*this.*AuraHandler [aura])(apply);
+        (*this.*AuraHandler [aura])(apply,Real);
 }
 
 void Aura::UpdateAuraDuration()
@@ -593,7 +593,7 @@ void Aura::_AddAura()
         m_periodicTimer = 5000;
 
     m_target->ApplyStats(false);
-    ApplyModifier(true);
+    ApplyModifier(true,true);
     m_target->ApplyStats(true);
 
     sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
@@ -660,7 +660,7 @@ void Aura::_RemoveAura()
 
     m_target->ApplyStats(false);
     sLog.outDebug("Aura %u now is remove", m_modifier.m_auraname);
-    ApplyModifier(false);
+    ApplyModifier(false,true);
     m_target->ApplyStats(true);
 
     Unit* caster = GetCaster();
@@ -725,11 +725,11 @@ void Aura::_RemoveAura()
 /***               BASIC AURA FUNCTION                 ***/
 /*********************************************************/
 
-void Aura::HandleNULL(bool apply)
+void Aura::HandleNULL(bool apply, bool Real)
 {
 }
 
-void Aura::HandleAddModifier(bool apply)
+void Aura::HandleAddModifier(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -833,7 +833,7 @@ void Aura::TriggerSpell()
 /***                  AURA EFFECTS                     ***/
 /*********************************************************/
 
-void Aura::HandleAuraDummy(bool apply)
+void Aura::HandleAuraDummy(bool apply, bool Real)
 {
     Unit* caster = GetCaster();
 
@@ -926,7 +926,7 @@ void Aura::HandleAuraDummy(bool apply)
     }
 }
 
-void Aura::HandleAuraMounted(bool apply)
+void Aura::HandleAuraMounted(bool apply, bool Real)
 {
     if(apply)
     {
@@ -941,7 +941,7 @@ void Aura::HandleAuraMounted(bool apply)
     }
 }
 
-void Aura::HandleAuraWaterWalk(bool apply)
+void Aura::HandleAuraWaterWalk(bool apply, bool Real)
 {
     WorldPacket data;
     if(apply)
@@ -952,7 +952,7 @@ void Aura::HandleAuraWaterWalk(bool apply)
     m_target->SendMessageToSet(&data,true);
 }
 
-void Aura::HandleAuraFeatherFall(bool apply)
+void Aura::HandleAuraFeatherFall(bool apply, bool Real)
 {
     WorldPacket data;
     if(apply)
@@ -963,7 +963,7 @@ void Aura::HandleAuraFeatherFall(bool apply)
     m_target->SendMessageToSet(&data,true);
 }
 
-void Aura::HandleAuraHover(bool apply)
+void Aura::HandleAuraHover(bool apply, bool Real)
 {
     WorldPacket data;
     if(apply)
@@ -974,12 +974,12 @@ void Aura::HandleAuraHover(bool apply)
     m_target->SendMessageToSet(&data,true);
 }
 
-void Aura::HandleWaterBreathing(bool apply)
+void Aura::HandleWaterBreathing(bool apply, bool Real)
 {
     m_target->waterbreath = apply;
 }
 
-void Aura::HandleAuraModShapeshift(bool apply)
+void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 {
     if(!m_target)
         return;
@@ -1083,7 +1083,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
     }
 }
 
-void Aura::HandleAuraTransform(bool apply)
+void Aura::HandleAuraTransform(bool apply, bool Real)
 {
     if(!m_target)
         return;
@@ -1115,7 +1115,7 @@ void Aura::HandleAuraTransform(bool apply)
         m_target->SendUpdateToPlayer((Player*)caster);
 }
 
-void Aura::HandleForceReaction(bool Apply)
+void Aura::HandleForceReaction(bool Apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -1145,7 +1145,7 @@ void Aura::HandleForceReaction(bool Apply)
         ((Player*)m_target)->setFactionForRace(((Player*)m_target)->getRace());
 }
 
-void Aura::HandleAuraModSkill(bool apply)
+void Aura::HandleAuraModSkill(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -1158,7 +1158,7 @@ void Aura::HandleAuraModSkill(bool apply)
         ((Player*)m_target)->ApplyDefenseBonusesMod(points, apply);
 }
 
-void Aura::HandleChannelDeathItem(bool apply)
+void Aura::HandleChannelDeathItem(bool apply, bool Real)
 {
     if(!apply)
     {
@@ -1184,7 +1184,7 @@ void Aura::HandleChannelDeathItem(bool apply)
     }
 }
 
-void Aura::HandleAuraSafeFall(bool apply)
+void Aura::HandleAuraSafeFall(bool apply, bool Real)
 {
     WorldPacket data;
     if(apply)
@@ -1195,7 +1195,7 @@ void Aura::HandleAuraSafeFall(bool apply)
     m_target->SendMessageToSet(&data,true);
 }
 
-void Aura::HandleBindSight(bool apply)
+void Aura::HandleBindSight(bool apply, bool Real)
 {
     if(!m_target)
         return;
@@ -1206,7 +1206,7 @@ void Aura::HandleBindSight(bool apply)
     m_target->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
 }
 
-void Aura::HandleFarSight(bool apply)
+void Aura::HandleFarSight(bool apply, bool Real)
 {
     if(!m_target)
         return;
@@ -1217,7 +1217,7 @@ void Aura::HandleFarSight(bool apply)
     m_target->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
 }
 
-void Aura::HandleAuraTracCreatures(bool apply)
+void Aura::HandleAuraTracCreatures(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
@@ -1225,7 +1225,7 @@ void Aura::HandleAuraTracCreatures(bool apply)
     m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1) : 0 );
 }
 
-void Aura::HandleAuraTracResources(bool apply)
+void Aura::HandleAuraTracResources(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
@@ -1233,12 +1233,12 @@ void Aura::HandleAuraTracResources(bool apply)
     m_target->SetUInt32Value(PLAYER_TRACK_RESOURCES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1): 0 );
 }
 
-void Aura::HandleAuraModScale(bool apply)
+void Aura::HandleAuraModScale(bool apply, bool Real)
 {
     m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,m_modifier.m_amount,apply);
 }
 
-void Aura::HandleModPossess(bool apply)
+void Aura::HandleModPossess(bool apply, bool Real)
 {
     if(!m_target)
         return;
@@ -1289,7 +1289,7 @@ void Aura::HandleModPossess(bool apply)
     }
 }
 
-void Aura::HandleModCharm(bool apply)
+void Aura::HandleModCharm(bool apply, bool Real)
 {
     if(!m_target)
         return;
@@ -1339,7 +1339,7 @@ void Aura::HandleModCharm(bool apply)
     }
 }
 
-void Aura::HandleModConfuse(bool apply)
+void Aura::HandleModConfuse(bool apply, bool Real)
 {
     uint32 apply_stat = UNIT_STAT_CONFUSED;
     if( apply )
@@ -1358,7 +1358,7 @@ void Aura::HandleModConfuse(bool apply)
     }
 }
 
-void Aura::HandleModFear(bool Apply)
+void Aura::HandleModFear(bool Apply, bool Real)
 {
     uint32 apply_stat = UNIT_STAT_FLEEING;
     WorldPacket data;
@@ -1385,7 +1385,7 @@ void Aura::HandleModFear(bool Apply)
     m_target->SendMessageToSet(&data,true);
 }
 
-void Aura::HandleAuraModStun(bool apply)
+void Aura::HandleAuraModStun(bool apply, bool Real)
 {
     WorldPacket data;
     if (apply)
@@ -1411,37 +1411,38 @@ void Aura::HandleAuraModStun(bool apply)
     }
 }
 
-void Aura::HandleModStealth(bool apply)
+void Aura::HandleModStealth(bool apply, bool Real)
 {
     if(apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
         m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
+
+        // only at real aura add
+        if(Real)
+        {
+            m_target->SetVisibility(VISIBILITY_GROUP);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                m_target->SendUpdateToPlayer((Player*)m_target);
+        }
     }
     else
     {
         m_target->m_stealthvalue = 0;
         m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
+
+        // only at real aura remove
+        if(Real)
+        {
+            SendCoolDownEvent();
+            m_target->SetVisibility(VISIBILITY_ON);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                m_target->SendUpdateToPlayer((Player*)m_target);
+        }
     }
 }
 
-// this part send data to client and not modify fields important for another aura/item/stats changes
-void Aura::ApplyModStealth(bool apply)
-{
-    if(apply)
-    {
-        m_target->SetVisibility(VISIBILITY_GROUP);
-    }
-    else
-    {
-        SendCoolDownEvent();
-        m_target->SetVisibility(VISIBILITY_ON);
-    }
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->SendUpdateToPlayer((Player*)m_target);
-}
-
-void Aura::HandleModDetect(bool apply)
+void Aura::HandleModDetect(bool apply, bool Real)
 {
     if(apply)
     {
@@ -1453,26 +1454,38 @@ void Aura::HandleModDetect(bool apply)
     }
 }
 
-void Aura::HandleInvisibility(bool Apply)
+void Aura::HandleInvisibility(bool Apply, bool Real)
 {
     if(Apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
         m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-        m_target->SetVisibility(VISIBILITY_GROUP);
+
+        // only at real aura add
+        if(Real)
+        {
+            m_target->SetVisibility(VISIBILITY_GROUP);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                m_target->SendUpdateToPlayer((Player*)m_target);
+        }
     }
     else
     {
-        SendCoolDownEvent();
         m_target->m_stealthvalue = 0;
         m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-        m_target->SetVisibility(VISIBILITY_ON);
+
+        // only at real aura remove
+        if(Real)
+        {
+            SendCoolDownEvent();
+            m_target->SetVisibility(VISIBILITY_ON);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                m_target->SendUpdateToPlayer((Player*)m_target);
+        }
     }
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->SendUpdateToPlayer((Player*)m_target);
 }
 
-void Aura::HandleInvisibilityDetect(bool Apply)
+void Aura::HandleInvisibilityDetect(bool Apply, bool Real)
 {
     if(Apply)
     {
@@ -1484,7 +1497,7 @@ void Aura::HandleInvisibilityDetect(bool Apply)
     }
 }
 
-void Aura::HandleAuraModRoot(bool apply)
+void Aura::HandleAuraModRoot(bool apply, bool Real)
 {
     uint32 apply_stat = UNIT_STAT_ROOT;
     if (apply)
@@ -1519,12 +1532,12 @@ void Aura::HandleAuraModRoot(bool apply)
     }
 }
 
-void Aura::HandleAuraModSilence(bool apply)
+void Aura::HandleAuraModSilence(bool apply, bool Real)
 {
     apply ? m_target->m_silenced = true : m_target->m_silenced = false;
 }
 
-void Aura::HandleModThreat(bool apply)
+void Aura::HandleModThreat(bool apply, bool Real)
 {
     if(!m_target || !m_target->isAlive())
         return;
@@ -1541,13 +1554,12 @@ void Aura::HandleModThreat(bool apply)
 /***                  MODIDY SPEED                     ***/
 /*********************************************************/
 
-void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
+void Aura::HandleAuraModIncreaseSpeedAlways(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
-}
+    if(!Real)
+        return;
 
-void Aura::ApplyAuraModIncreaseSpeedAlways(bool apply)
-{
     sLog.outDebug("HandleAuraModIncreaseSpeedAlways: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
@@ -1559,13 +1571,12 @@ void Aura::ApplyAuraModIncreaseSpeedAlways(bool apply)
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
-void Aura::HandleAuraModIncreaseSpeed(bool apply)
+void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
-}
+    if(!Real)
+        return;
 
-void Aura::ApplyAuraModIncreaseSpeed(bool apply)
-{
     sLog.outDebug("HandleAuraModIncreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
@@ -1578,13 +1589,12 @@ void Aura::ApplyAuraModIncreaseSpeed(bool apply)
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
-void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
+void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
-}
+    if(!Real)
+        return;
 
-void Aura::ApplyAuraModIncreaseMountedSpeed(bool apply)
-{
     sLog.outDebug("HandleAuraModIncreaseMountedSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
@@ -1596,13 +1606,12 @@ void Aura::ApplyAuraModIncreaseMountedSpeed(bool apply)
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
-void Aura::HandleAuraModDecreaseSpeed(bool apply)
+void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
-}
+    if(!Real)
+        return;
 
-void Aura::ApplyAuraModDecreaseSpeed(bool apply)
-{
     sLog.outDebug("HandleAuraModDecreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount <= 0)
     {                                                       //for new spell dbc
@@ -1619,13 +1628,12 @@ void Aura::ApplyAuraModDecreaseSpeed(bool apply)
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
-void Aura::HandleAuraModIncreaseSwimSpeed(bool apply)
+void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
-}
+    if(!Real)
+        return;
 
-void Aura::ApplyAuraModIncreaseSwimSpeed(bool apply)
-{
     sLog.outDebug("HandleAuraModIncreaseSwimSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
@@ -1641,32 +1649,32 @@ void Aura::ApplyAuraModIncreaseSwimSpeed(bool apply)
 /***                     IMMUNITY                      ***/
 /*********************************************************/
 
-void Aura::HandleModMechanicImmunity(bool apply)
+void Aura::HandleModMechanicImmunity(bool apply, bool Real)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,m_modifier.m_miscvalue,apply);
 }
 
-void Aura::HandleAuraModEffectImmunity(bool apply)
+void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_EFFECT,m_modifier.m_miscvalue,apply);
 }
 
-void Aura::HandleAuraModStateImmunity(bool apply)
+void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_STATE,m_modifier.m_miscvalue,apply);
 }
 
-void Aura::HandleAuraModSchoolImmunity(bool apply)
+void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_SCHOOL,m_modifier.m_miscvalue,apply);
 }
 
-void Aura::HandleAuraModDmgImmunity(bool apply)
+void Aura::HandleAuraModDmgImmunity(bool apply, bool Real)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_DAMAGE,m_modifier.m_miscvalue,apply);
 }
 
-void Aura::HandleAuraModDispelImmunity(bool apply)
+void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
 }
@@ -1675,7 +1683,7 @@ void Aura::HandleAuraModDispelImmunity(bool apply)
 /***                  MANA SHIELD                      ***/
 /*********************************************************/
 
-void Aura::HandleAuraDamageShield(bool apply)
+void Aura::HandleAuraDamageShield(bool apply, bool Real)
 {
     /*if(apply)
     {
@@ -1702,7 +1710,7 @@ void Aura::HandleAuraDamageShield(bool apply)
     }*/
 }
 
-void Aura::HandleAuraManaShield(bool apply)
+void Aura::HandleAuraManaShield(bool apply, bool Real)
 {
     if (apply && !m_absorbDmg)
         m_absorbDmg = m_modifier.m_amount;
@@ -1742,7 +1750,7 @@ void Aura::HandleAuraManaShield(bool apply)
     }*/
 }
 
-void Aura::HandleAuraSchoolAbsorb(bool apply)
+void Aura::HandleAuraSchoolAbsorb(bool apply, bool Real)
 {
     if (apply && !m_absorbDmg)
         m_absorbDmg = m_modifier.m_amount;
@@ -1783,12 +1791,12 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
 /***               REFLECT SPELLS                      ***/
 /*********************************************************/
 
-void Aura::HandleReflectSpells(bool apply)
+void Aura::HandleReflectSpells(bool apply, bool Real)
 {
     // has no immediate effect when adding / removing
 }
 
-void Aura::HandleReflectSpellsSchool(bool apply)
+void Aura::HandleReflectSpellsSchool(bool apply, bool Real)
 {
     // has no immediate effect when adding / removing
 }
@@ -1797,7 +1805,7 @@ void Aura::HandleReflectSpellsSchool(bool apply)
 /***                 PROC TRIGGER                      ***/
 /*********************************************************/
 
-void Aura::HandleAuraProcTriggerSpell(bool apply)
+void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
 {
     if(apply && !m_procCharges)
     {
@@ -1807,7 +1815,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply)
     }
 }
 
-void Aura::HandleAuraProcTriggerDamage(bool apply)
+void Aura::HandleAuraProcTriggerDamage(bool apply, bool Real)
 {
     if(apply && !m_procCharges)
     {
@@ -1821,7 +1829,7 @@ void Aura::HandleAuraProcTriggerDamage(bool apply)
 /***                   PERIODIC                        ***/
 /*********************************************************/
 
-void Aura::HandlePeriodicTriggerSpell(bool apply)
+void Aura::HandlePeriodicTriggerSpell(bool apply, bool Real)
 {
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_modifier.periodictime;
@@ -1830,7 +1838,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
     m_isTrigger = apply;
 }
 
-void Aura::HandlePeriodicEnergize(bool apply)
+void Aura::HandlePeriodicEnergize(bool apply, bool Real)
 {
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_modifier.periodictime;
@@ -1838,7 +1846,7 @@ void Aura::HandlePeriodicEnergize(bool apply)
     m_isPeriodic = apply;
 }
 
-void Aura::HandlePeriodicHeal(bool apply)
+void Aura::HandlePeriodicHeal(bool apply, bool Real)
 {
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_modifier.periodictime;
@@ -1846,7 +1854,7 @@ void Aura::HandlePeriodicHeal(bool apply)
     m_isPeriodic = apply;
 }
 
-void Aura::HandlePeriodicDamage(bool apply)
+void Aura::HandlePeriodicDamage(bool apply, bool Real)
 {
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_modifier.periodictime;
@@ -1854,7 +1862,7 @@ void Aura::HandlePeriodicDamage(bool apply)
     m_isPeriodic = apply;
 }
 
-void Aura::HandlePeriodicDamagePCT(bool apply)
+void Aura::HandlePeriodicDamagePCT(bool apply, bool Real)
 {
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_modifier.periodictime;
@@ -1862,7 +1870,7 @@ void Aura::HandlePeriodicDamagePCT(bool apply)
     m_isPeriodic = apply;
 }
 
-void Aura::HandlePeriodicLeech(bool apply)
+void Aura::HandlePeriodicLeech(bool apply, bool Real)
 {
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_modifier.periodictime;
@@ -1870,7 +1878,7 @@ void Aura::HandlePeriodicLeech(bool apply)
     m_isPeriodic = apply;
 }
 
-void Aura::HandlePeriodicManaLeech(bool apply)
+void Aura::HandlePeriodicManaLeech(bool apply, bool Real)
 {
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_modifier.periodictime;
@@ -1886,7 +1894,7 @@ void Aura::HandlePeriodicManaLeech(bool apply)
 /***        RESISTANCE        ***/
 /********************************/
 
-void Aura::HandleAuraModResistanceExclusive(bool apply)
+void Aura::HandleAuraModResistanceExclusive(bool apply, bool Real)
 {
     if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
     {
@@ -1909,7 +1917,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
     }
 }
 
-void Aura::HandleAuraModResistance(bool apply)
+void Aura::HandleAuraModResistance(bool apply, bool Real)
 {
     if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
     {
@@ -1932,7 +1940,7 @@ void Aura::HandleAuraModResistance(bool apply)
     }
 }
 
-void Aura::HandleAuraModBaseResistancePCT(bool apply)
+void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
 {
     if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
     {
@@ -1958,7 +1966,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
     }
 }
 
-void Aura::HandleModResistancePercent(bool apply)
+void Aura::HandleModResistancePercent(bool apply, bool Real)
 {
     for(int8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
     {
@@ -1974,7 +1982,7 @@ void Aura::HandleModResistancePercent(bool apply)
     }
 }
 
-void Aura::HandleModBaseResistance(bool apply)
+void Aura::HandleModBaseResistance(bool apply, bool Real)
 {
     // only players have base stats
     if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -1990,7 +1998,7 @@ void Aura::HandleModBaseResistance(bool apply)
 /***           STAT           ***/
 /********************************/
 
-void Aura::HandleAuraModStat(bool apply)
+void Aura::HandleAuraModStat(bool apply, bool Real)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
     {
@@ -2014,7 +2022,7 @@ void Aura::HandleAuraModStat(bool apply)
     }
 }
 
-void Aura::HandleModPercentStat(bool apply)
+void Aura::HandleModPercentStat(bool apply, bool Real)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
     {
@@ -2040,7 +2048,7 @@ void Aura::HandleModPercentStat(bool apply)
     }
 }
 
-void Aura::HandleModTotalPercentStat(bool apply)
+void Aura::HandleModTotalPercentStat(bool apply, bool Real)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
     {
@@ -2066,7 +2074,7 @@ void Aura::HandleModTotalPercentStat(bool apply)
 /********************************/
 /***      HEAL & ENERGIZE     ***/
 /********************************/
-void Aura::HandleAuraModTotalHealthPercentRegen(bool apply)
+void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
 {
     /*
     Need additional checking for auras who reduce or increase healing, magic effect like Dumpen Magic,
@@ -2090,7 +2098,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply)
     m_isPeriodic = apply;
 }
 
-void Aura::HandleAuraModTotalManaPercentRegen(bool apply)
+void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 {
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
@@ -2112,7 +2120,7 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply)
     m_isPeriodic = apply;
 }
 
-void Aura::HandleModRegen(bool apply)                       // eating
+void Aura::HandleModRegen(bool apply, bool Real)                       // eating
 {
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
@@ -2126,7 +2134,7 @@ void Aura::HandleModRegen(bool apply)                       // eating
     m_isPeriodic = apply;
 }
 
-void Aura::HandleModPowerRegen(bool apply)                  // drinking
+void Aura::HandleModPowerRegen(bool apply, bool Real)                  // drinking
 {
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
@@ -2145,12 +2153,12 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
     m_isPeriodic = apply;
 }
 
-void Aura::HandleAuraModIncreaseHealth(bool apply)
+void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     m_target->ApplyMaxHealthMod(m_modifier.m_amount,apply);
 }
 
-void Aura::HandleAuraModIncreaseEnergy(bool apply)
+void Aura::HandleAuraModIncreaseEnergy(bool apply, bool Real)
 {
     Powers powerType = m_target->getPowerType();
     if(int32(powerType) != m_modifier.m_miscvalue)
@@ -2159,7 +2167,7 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
     m_target->ApplyMaxPowerMod(powerType, m_modifier.m_amount,apply);
 }
 
-void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
+void Aura::HandleAuraModIncreaseEnergyPercent(bool apply, bool Real)
 {
     Powers powerType = m_target->getPowerType();
     if(int32(powerType) != m_modifier.m_miscvalue)
@@ -2169,7 +2177,7 @@ void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
     sLog.outDetail("MaxPowerPercentMod %s %d",(apply ? "+" : "-"), m_modifier.m_amount);
 }
 
-void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
+void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool Real)
 {
     m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount,apply);
 }
@@ -2178,7 +2186,7 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
 /***          FIGHT           ***/
 /********************************/
 
-void Aura::HandleAuraModParryPercent(bool apply)
+void Aura::HandleAuraModParryPercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
@@ -2186,7 +2194,7 @@ void Aura::HandleAuraModParryPercent(bool apply)
     m_target->ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
-void Aura::HandleAuraModDodgePercent(bool apply)
+void Aura::HandleAuraModDodgePercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
@@ -2194,7 +2202,7 @@ void Aura::HandleAuraModDodgePercent(bool apply)
     m_target->ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
-void Aura::HandleAuraModBlockPercent(bool apply)
+void Aura::HandleAuraModBlockPercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
@@ -2202,7 +2210,7 @@ void Aura::HandleAuraModBlockPercent(bool apply)
     m_target->ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
-void Aura::HandleAuraModCritPercent(bool apply)
+void Aura::HandleAuraModCritPercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
@@ -2210,7 +2218,7 @@ void Aura::HandleAuraModCritPercent(bool apply)
     m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
-void Aura::HandleModShieldBlock(bool apply)
+void Aura::HandleModShieldBlock(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -2218,22 +2226,22 @@ void Aura::HandleModShieldBlock(bool apply)
     ((Player*)m_target)->ApplyBlockValueMod(m_modifier.m_amount,apply);
 }
 
-void Aura::HandleModHitChance(bool Apply)
+void Aura::HandleModHitChance(bool Apply, bool Real)
 {
     m_target->m_modHitChance = Apply?m_modifier.m_amount:0;
 }
 
-void Aura::HandleModSpellHitChance(bool Apply)
+void Aura::HandleModSpellHitChance(bool Apply, bool Real)
 {
     m_target->m_modSpellHitChance = Apply?m_modifier.m_amount:0;
 }
 
-void Aura::HandleModSpellCritChance(bool Apply)
+void Aura::HandleModSpellCritChance(bool Apply, bool Real)
 {
     m_target->m_baseSpellCritChance += Apply?m_modifier.m_amount:(-m_modifier.m_amount);
 }
 
-void Aura::HandleModSpellCritChanceShool(bool Apply)
+void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 {
     // has no immediate effect when adding / removing
 }
@@ -2242,12 +2250,12 @@ void Aura::HandleModSpellCritChanceShool(bool Apply)
 /***         ATTACK SPEED     ***/
 /********************************/
 
-void Aura::HandleModCastingSpeed(bool apply)
+void Aura::HandleModCastingSpeed(bool apply, bool Real)
 {
     m_target->m_modCastSpeedPct += apply ? m_modifier.m_amount : (-m_modifier.m_amount);
 }
 
-void Aura::HandleModAttackSpeed(bool apply)
+void Aura::HandleModAttackSpeed(bool apply, bool Real)
 {
     if(!m_target || !m_target->isAlive() )
         return;
@@ -2255,7 +2263,7 @@ void Aura::HandleModAttackSpeed(bool apply)
     m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
 }
 
-void Aura::HandleHaste(bool apply)
+void Aura::HandleHaste(bool apply, bool Real)
 {
 
     if(m_modifier.m_amount >= 0)
@@ -2288,7 +2296,7 @@ void Aura::HandleHaste(bool apply)
     }
 }
 
-void Aura::HandleAuraModRangedHaste(bool apply)
+void Aura::HandleAuraModRangedHaste(bool apply, bool Real)
 {
     if(m_target->GetTypeId()==TYPEID_PLAYER)
         ((Player*)m_target)->_ApplyAmmoBonuses(false);
@@ -2302,7 +2310,7 @@ void Aura::HandleAuraModRangedHaste(bool apply)
         ((Player*)m_target)->_ApplyAmmoBonuses(true);
 }
 
-void Aura::HandleRangedAmmoHaste(bool apply)
+void Aura::HandleRangedAmmoHaste(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -2315,12 +2323,12 @@ void Aura::HandleRangedAmmoHaste(bool apply)
 /***        ATTACK POWER      ***/
 /********************************/
 
-void Aura::HandleAuraModAttackPower(bool apply)
+void Aura::HandleAuraModAttackPower(bool apply, bool Real)
 {
     m_target->ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_modifier.m_amount, apply);
 }
 
-void Aura::HandleAuraModRangedAttackPower(bool apply)
+void Aura::HandleAuraModRangedAttackPower(bool apply, bool Real)
 {
     m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_modifier.m_amount,apply);
 }
@@ -2329,27 +2337,27 @@ void Aura::HandleAuraModRangedAttackPower(bool apply)
 /***        DAMAGE BONUS      ***/
 /********************************/
 
-void Aura::HandleModDamagePCTTaken(bool apply)
+void Aura::HandleModDamagePCTTaken(bool apply, bool Real)
 {
     m_target->m_modDamagePCT = apply ? m_modifier.m_amount : 0;
 }
 
-void Aura::HandleModPCTRegen(bool apply)
+void Aura::HandleModPCTRegen(bool apply, bool Real)
 {
     // has no immediate effect when adding / removing
 }
 
-void Aura::HandleModCreatureAttackPower(bool apply)
+void Aura::HandleModCreatureAttackPower(bool apply, bool Real)
 {
     // has no immediate effect when adding / removing
 }
 
-void Aura::HandleModDamageDoneCreature(bool Apply)
+void Aura::HandleModDamageDoneCreature(bool apply, bool Real)
 {
     // has no immediate effect when adding / removing
 }
 
-void Aura::HandleModDamageDone(bool apply)
+void Aura::HandleModDamageDone(bool apply, bool Real)
 {
     // physical damage modifier is applied to damage fields
     if(m_modifier.m_miscvalue & (int32)(1<<SPELL_SCHOOL_NORMAL))
@@ -2368,12 +2376,12 @@ void Aura::HandleModDamageDone(bool apply)
     }
 }
 
-void Aura::HandleModDamageTaken(bool apply)
+void Aura::HandleModDamageTaken(bool apply, bool Real)
 {
 
 }
 
-void Aura::HandleModDamagePercentDone(bool apply)
+void Aura::HandleModDamagePercentDone(bool apply, bool Real)
 {
     sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
 
@@ -2460,12 +2468,12 @@ void Aura::HandleModDamagePercentDone(bool apply)
 /***        POWER COST        ***/
 /********************************/
 
-void Aura::HandleModPowerCost(bool apply)
+void Aura::HandleModPowerCost(bool apply, bool Real)
 {
     m_target->ApplyModUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER, m_modifier.m_amount, apply);
 }
 
-void Aura::HandleModPowerCostSchool(bool apply)
+void Aura::HandleModPowerCostSchool(bool apply, bool Real)
 {
     // has no immediate effect when adding / removing
 }
@@ -2474,7 +2482,7 @@ void Aura::HandleModPowerCostSchool(bool apply)
 /***                    OTHERS                         ***/
 /*********************************************************/
 
-void Aura::HandleModReputationGain(bool apply)
+void Aura::HandleModReputationGain(bool apply, bool Real)
 {
     // has no immediate effect when adding / removing
 }
@@ -2635,7 +2643,7 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
     unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));
 }
 
-void Aura::HandleAuraEmpathy(bool apply)
+void Aura::HandleAuraEmpathy(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_UNIT)
         return;
