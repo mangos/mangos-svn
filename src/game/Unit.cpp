@@ -3623,3 +3623,25 @@ void Unit::SetHover(bool on)
         RemoveAurasDueToSpell(11010);
     }
 }
+
+void Unit::setDeathState(DeathState s)
+{
+    if (s != ALIVE)
+    {
+        CombatStop();
+
+        if(m_currentSpell)
+            m_currentSpell->cancel();
+    }
+
+    if (s == JUST_DIED)
+    {
+        RemoveAllAurasOnDeath();
+        UnsummonTotem();
+    }
+    if (m_deathState != ALIVE && s == ALIVE)
+    {
+        _ApplyAllAuraMods();
+    }
+    m_deathState = s;
+}

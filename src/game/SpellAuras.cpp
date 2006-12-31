@@ -943,6 +943,10 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
 
 void Aura::HandleAuraWaterWalk(bool apply, bool Real)
 {
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
     WorldPacket data;
     if(apply)
         data.Initialize(SMSG_MOVE_WATER_WALK);
@@ -954,6 +958,10 @@ void Aura::HandleAuraWaterWalk(bool apply, bool Real)
 
 void Aura::HandleAuraFeatherFall(bool apply, bool Real)
 {
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
     WorldPacket data;
     if(apply)
         data.Initialize(SMSG_MOVE_FEATHER_FALL);
@@ -965,6 +973,10 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
 
 void Aura::HandleAuraHover(bool apply, bool Real)
 {
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
     WorldPacket data;
     if(apply)
         data.Initialize(SMSG_MOVE_SET_HOVER);
@@ -1186,6 +1198,10 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
 
 void Aura::HandleAuraSafeFall(bool apply, bool Real)
 {
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
     WorldPacket data;
     if(apply)
         data.Initialize(SMSG_MOVE_FEATHER_FALL);
@@ -1346,23 +1362,31 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     {
         m_target->addUnitState(UNIT_STAT_CONFUSED);
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if (m_target->GetTypeId() == TYPEID_UNIT)
-            (*((Creature*)m_target))->Mutate(new ConfusedMovementGenerator(*((Creature*)m_target)));
+
+        // only at real add aura
+        if(Real)
+        {
+            if (m_target->GetTypeId() == TYPEID_UNIT)
+                (*((Creature*)m_target))->Mutate(new ConfusedMovementGenerator(*((Creature*)m_target)));
+        }
     }
     else
     {
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if (m_target->GetTypeId() == TYPEID_UNIT)
-            (*((Creature*)m_target))->MovementExpired();
+
+        // only at real remove aura
+        if(Real)
+        {
+            if (m_target->GetTypeId() == TYPEID_UNIT)
+                (*((Creature*)m_target))->MovementExpired();
+        }
     }
 }
 
 void Aura::HandleModFear(bool Apply, bool Real)
 {
     uint32 apply_stat = UNIT_STAT_FLEEING;
-    WorldPacket data;
-    data.Initialize(SMSG_DEATH_NOTIFY_OBSOLETE);
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
@@ -1370,44 +1394,68 @@ void Aura::HandleModFear(bool Apply, bool Real)
 
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
-        data<<m_target->GetGUID();
-        data<<uint8(0);
+        // only at real add aura
+        if(Real)
+        {
+            WorldPacket data;
+            data.Initialize(SMSG_DEATH_NOTIFY_OBSOLETE);
+            data<<m_target->GetGUID();
+            data<<uint8(0);
+            m_target->SendMessageToSet(&data,true);
+        }
     }
     else
     {
-        data<<m_target->GetGUID();
-        data<<uint8(1);
         m_target->clearUnitState(UNIT_STAT_FLEEING);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if(m_target->GetTypeId() != TYPEID_PLAYER)
-            m_target->Attack(GetCaster());
+
+        // only at real remove aura
+        if(Real)
+        {
+            if(m_target->GetTypeId() != TYPEID_PLAYER)
+                m_target->Attack(GetCaster());
+            WorldPacket data;
+            data.Initialize(SMSG_DEATH_NOTIFY_OBSOLETE);
+            data<<m_target->GetGUID();
+            data<<uint8(1);
+            m_target->SendMessageToSet(&data,true);
+        }
     }
-    m_target->SendMessageToSet(&data,true);
 }
 
 void Aura::HandleAuraModStun(bool apply, bool Real)
 {
-    WorldPacket data;
     if (apply)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
-        if(m_target->GetTypeId() != TYPEID_PLAYER)
-            ((Creature *)m_target)->StopMoving();
-
-        data.Initialize(SMSG_FORCE_MOVE_ROOT);
-        data.append(m_target->GetPackGUID());
-        m_target->SendMessageToSet(&data,true);
         m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
+
+        // only at real add aura
+        if(Real)
+        {
+            if(m_target->GetTypeId() != TYPEID_PLAYER)
+                ((Creature *)m_target)->StopMoving();
+
+            WorldPacket data;
+            data.Initialize(SMSG_FORCE_MOVE_ROOT);
+            data.append(m_target->GetPackGUID());
+            m_target->SendMessageToSet(&data,true);
+        }
     }
     else
     {
         m_target->clearUnitState(UNIT_STAT_STUNDED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
 
-        data.Initialize(SMSG_FORCE_MOVE_UNROOT);
-        data.append(m_target->GetPackGUID());
-        m_target->SendMessageToSet(&data,true);
+        // only at real remove aura
+        if(Real)
+        {
+            WorldPacket data;
+            data.Initialize(SMSG_FORCE_MOVE_UNROOT);
+            data.append(m_target->GetPackGUID());
+            m_target->SendMessageToSet(&data,true);
+        }
     }
 }
 
@@ -1505,29 +1553,38 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         m_target->addUnitState(UNIT_STAT_ROOT);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
+
+        // only at real add aura
+        if(Real)
         {
-            WorldPacket data;
-            data.Initialize(SMSG_FORCE_MOVE_ROOT);
-            data.append(m_target->GetPackGUID());
-            data << (uint32)2;
-            m_target->SendMessageToSet(&data,true);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_FORCE_MOVE_ROOT);
+                data.append(m_target->GetPackGUID());
+                data << (uint32)2;
+                m_target->SendMessageToSet(&data,true);
+            }
+            else
+                ((Creature *)m_target)->StopMoving();
         }
-        else
-            ((Creature *)m_target)->StopMoving();
     }
     else
     {
         m_target->clearUnitState(UNIT_STAT_ROOT);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        WorldPacket data;
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
+
+        // only at real remove aura
+        if(Real)
         {
-            WorldPacket data;
-            data.Initialize(SMSG_FORCE_MOVE_UNROOT);
-            data.append(m_target->GetPackGUID());
-            data << (uint32)2;
-            m_target->SendMessageToSet(&data,true);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_FORCE_MOVE_UNROOT);
+                data.append(m_target->GetPackGUID());
+                data << (uint32)2;
+                m_target->SendMessageToSet(&data,true);
+            }
         }
     }
 }
@@ -1539,6 +1596,10 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
 
 void Aura::HandleModThreat(bool apply, bool Real)
 {
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
     if(!m_target || !m_target->isAlive())
         return;
 
