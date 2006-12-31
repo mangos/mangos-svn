@@ -630,7 +630,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_canMove;
         uint32 m_detectStealth;
         uint32 m_stealthvalue;
-        float m_speed;
         uint32 m_ShapeShiftForm;
         uint32 m_form;
         int32 m_modDamagePCT;

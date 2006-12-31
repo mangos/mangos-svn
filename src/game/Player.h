@@ -1257,7 +1257,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_drunkTimer;
         uint16 m_drunk;
         time_t m_lastManaUse;
-    uint32 m_weaponChangeTimer;
+        uint32 m_weaponChangeTimer;
 
         uint32 m_deathTimer;
 

@@ -68,6 +68,7 @@ class Aura
         void HandleAuraEmpathy(bool Apply);
         void HandleAuraModRangedAttackPower(bool Apply);
         void HandleAuraModIncreaseSpeedAlways(bool Apply);
+        void ApplyAuraModIncreaseSpeedAlways(bool apply);
         void HandleAuraModIncreaseEnergyPercent(bool Apply);
         void HandleAuraModIncreaseHealthPercent(bool Apply);
         void HandleHaste(bool Apply);
@@ -77,6 +78,7 @@ class Aura
         void HandleAuraSafeFall(bool Apply);
         void HandleAuraDamageShield(bool Apply);
         void HandleModStealth(bool Apply);
+        void ApplyModStealth(bool Apply);                   // only real aura add/remove part
         void HandleModDetect(bool Apply);
         void HandleInvisibility(bool Apply);
         void HandleInvisibilityDetect(bool Apply);
@@ -88,8 +90,11 @@ class Aura
         void HandleReflectSpells(bool Apply);
         void HandleAuraModStat(bool Apply);
         void HandleAuraModIncreaseSpeed(bool Apply);
+        void ApplyAuraModIncreaseSpeed(bool apply);
         void HandleAuraModIncreaseMountedSpeed(bool Apply);
+        void ApplyAuraModIncreaseMountedSpeed(bool Apply);
         void HandleAuraModDecreaseSpeed(bool Apply);
+        void ApplyAuraModDecreaseSpeed(bool Apply);
         void HandleAuraModIncreaseHealth(bool Apply);
         void HandleAuraModIncreaseEnergy(bool Apply);
         void HandleAuraModShapeshift(bool Apply);
@@ -125,6 +130,7 @@ class Aura
         void HandleAuraTransform(bool Apply);
         void HandleModSpellCritChance(bool Apply);
         void HandleAuraModIncreaseSwimSpeed(bool Apply);
+        void ApplyAuraModIncreaseSwimSpeed(bool Apply);
         void HandleModDamageDoneCreature(bool Apply);
         void HandleAuraManaShield(bool Apply);
         void HandleAuraSchoolAbsorb(bool Apply);
