@@ -129,7 +129,6 @@ Player::Player (WorldSession *session): Unit()
     m_DiscoveredPj = 0;
     m_enableDetect = true;
 
-    m_bgInBattleGround = false;
     m_bgBattleGroundID = 0;
 
     m_movement_flags = 0;

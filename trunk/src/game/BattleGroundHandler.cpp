@@ -91,8 +91,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     uint8 bgID = 1;
 
     // We're in BG.
-    GetPlayer()->m_bgBattleGroundID = bgID;
-    GetPlayer()->SetInBattleGround(true);
+    GetPlayer()->SetBattleGroundId(bgID);
 
     //sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(),3);
 
@@ -116,9 +115,17 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_data )
 {
+
+    if(!GetPlayer()->InBattleGround())
+        return;
+
+    BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
+    if(!bg)
+        return;
+
     std::list<Player*> ListToSend;
 
-    for(std::list<Player*>::iterator i = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId())->GetPlayersBegin(); i != sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId())->GetPlayersEnd(); ++i)
+    for(std::list<Player*>::iterator i = bg->GetPlayersBegin(); i != bg->GetPlayersEnd(); ++i)
     {
         if((*i) != GetPlayer())
             ListToSend.push_back(*i);
@@ -142,7 +149,10 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
     sLog.outDebug( "WORLD: Recvd MSG_PVP_LOG_DATA Message");
     WorldPacket data;
 
-    BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID);
+    if(!GetPlayer()->InBattleGround())
+        return;
+
+    BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
     if(!bg)
         return;
 

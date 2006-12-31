@@ -24,6 +24,8 @@
 
 class BattleGround;
 
+typedef std::map<uint32, BattleGround*> BattleGroundSet;
+
 class BattleGroundMgr
 {
     public:
@@ -38,13 +40,12 @@ class BattleGroundMgr
         void BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr);
 
         /* Battlegrounds */
-        inline std::map<uint32, BattleGround*>::iterator GetBattleGroundsBegin() { return m_BattleGrounds.begin(); };
+        BattleGroundSet::iterator GetBattleGroundsBegin() { return m_BattleGrounds.begin(); };
+        BattleGroundSet::iterator GetBattleGroundsEnd() { return m_BattleGrounds.end(); };
 
-        inline std::map<uint32, BattleGround*>::iterator GetBattleGroundsEnd() { return m_BattleGrounds.end(); };
-
-        inline BattleGround* GetBattleGround(uint8 ID)
+        BattleGround* GetBattleGround(uint8 ID)
         {
-            std::map<uint32, BattleGround*>::iterator i = m_BattleGrounds.find(ID);
+            BattleGroundSet::iterator i = m_BattleGrounds.find(ID);
             if(i != m_BattleGrounds.end())
                 return i->second;
             else
@@ -64,7 +65,6 @@ class BattleGroundMgr
     private:
 
         /* Battlegrounds */
-        typedef std::map<uint32, BattleGround*> BattleGroundSet;
         BattleGroundSet m_BattleGrounds;
 };
 

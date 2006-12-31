@@ -782,7 +782,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
     else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
     {
-        if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->m_bgInBattleGround )
+        if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->InBattleGround() )
         {
             WorldPacket movedata;
             _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
@@ -791,7 +791,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             //_player->BuildHeartBeatMsg(&data);
             //_player->SendMessageToSet(&data, true);
         }
-        else if (GetPlayer()->m_bgInBattleGround)           //if player is playing in a BattleGround
+        else if (GetPlayer()->InBattleGround())             //if player is playing in a BattleGround
         {
             //! AreaTrigger BattleGround
 

@@ -148,8 +148,6 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     // We're not in BG.
     plr->SetBattleGroundId(0);
 
-    plr->SetInBattleGround(false);
-
     // Packets/Movement
     //WorldPacket data;
 
