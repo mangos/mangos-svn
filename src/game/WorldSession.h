@@ -123,6 +123,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTaxiStatus( uint64 guid );
         void SendTaxiMenu( uint64 guid );
         void SendDoFlight( uint16 MountId, uint32 path );
+	bool LearnNewTaxiNode( uint64 guid );
     protected:
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
@@ -279,7 +280,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendCommandResult(uint32 typecmd,std::string str,uint32 cmdresult);
 
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);
-        void HandleTaxiQueryAviableNodesOpcode(WorldPacket& recvPacket);
+        void HandleTaxiQueryAvailableNodesOpcode(WorldPacket& recvPacket);
         void HandleActivateTaxiOpcode(WorldPacket& recvPacket);
         void HandleActivateTaxiFarOpcode(WorldPacket& recvPacket);
         void HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket);

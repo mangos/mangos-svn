@@ -526,6 +526,8 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                             cantalking=false;
                         break;
                     case GOSSIP_OPTION_TAXIVENDOR:
+			if ( pPlayer->GetSession()->LearnNewTaxiNode(GetGUID()) )
+			    return;
                     case GOSSIP_OPTION_GUARD:
                     case GOSSIP_OPTION_INNKEEPER:
                     case GOSSIP_OPTION_BANKER:
@@ -1043,10 +1045,15 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
     SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
 
-
-    FactionEntry* factionEntry = sFactionStore.LookupEntry(cinfo->faction);
-    if (factionEntry && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE) && cinfo->civilian != 1)
-        SetPvP(true);
+    FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction);
+    if (factionTemplate)
+    {
+        FactionEntry* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
+        if (factionEntry)
+            if (cinfo->civilian != 1 && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
+                SetPvP(true);
+    } else
+        sLog.outError("Error: invalid faction for creature %u", GetGUID());
 
     if (cinfo->mount != 0)
         Mount(cinfo->mount);

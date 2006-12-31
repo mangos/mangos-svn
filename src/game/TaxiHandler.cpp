@@ -77,7 +77,7 @@ void WorldSession::SendTaxiStatus( uint64 guid )
     sLog.outDebug( "WORLD: Sent SMSG_TAXINODE_STATUS" );
 }
 
-void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
+void WorldSession::HandleTaxiQueryAvailableNodesOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: Received CMSG_TAXIQUERYAVAILABLENODES" );
 
@@ -91,7 +91,6 @@ void WorldSession::SendTaxiMenu( uint64 guid )
     uint32 curloc;
     uint8 field;
     uint32 TaxiMask[8];
-    uint32 submask;
 
     if(_player->IsMounted())
     {
@@ -133,23 +132,6 @@ void WorldSession::SendTaxiMenu( uint64 guid )
         return;
 
     field = (uint8)((curloc - 1) / 32);
-    submask = 1<<((curloc-1)%32);
-
-    if ( (GetPlayer( )->GetTaximask(field) & submask)
-        != submask )
-    {
-        GetPlayer()->SetTaximask(field, (submask | GetPlayer( )->GetTaximask(field)) );
-
-        WorldPacket msg;
-        msg.Initialize(SMSG_NEW_TAXI_PATH);
-        _player->GetSession()->SendPacket( &msg );
-
-        WorldPacket update;
-        update.Initialize( SMSG_TAXINODE_STATUS );
-        update << guid;
-        update << uint8( 1 );
-        SendPacket( &update );
-    }
 
     memset(TaxiMask, 0, sizeof(TaxiMask));
     if ( !objmgr.GetGlobalTaxiNodeMask( curloc, TaxiMask ) )
@@ -200,6 +182,44 @@ void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
     //WPAssert( data.size() == 37 + pathnodes.Size( ) * 4 * 3 );
     GetPlayer()->SendMessageToSet(&data, true);
 }
+
+bool WorldSession::LearnNewTaxiNode( uint64 guid )
+{
+    uint32 curloc;
+    uint8 field;
+    uint32 submask;
+
+    curloc = objmgr.GetNearestTaxiNode(
+        GetPlayer( )->GetPositionX( ),
+        GetPlayer( )->GetPositionY( ),
+        GetPlayer( )->GetPositionZ( ),
+        GetPlayer( )->GetMapId( ) );
+
+    if ( curloc == 0 )
+        return false;
+
+    field = (uint8)((curloc - 1) / 32);
+    submask = 1<<((curloc-1)%32);
+
+    if ( (GetPlayer( )->GetTaximask(field) & submask) != submask )
+    {
+        GetPlayer()->SetTaximask(field, (submask | GetPlayer( )->GetTaximask(field)) );
+
+        WorldPacket msg;
+        msg.Initialize(SMSG_NEW_TAXI_PATH);
+        _player->GetSession()->SendPacket( &msg );
+
+        WorldPacket update;
+        update.Initialize( SMSG_TAXINODE_STATUS );
+        update << guid;
+        update << uint8( 1 );
+        SendPacket( &update );
+
+        return true;
+    } else
+        return false;
+}
+
 
 void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
 {

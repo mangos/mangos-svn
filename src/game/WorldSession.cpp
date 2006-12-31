@@ -399,7 +399,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { MSG_SAVE_GUILD_EMBLEM,            STATUS_LOGGEDIN, &WorldSession::HandleGuildSaveEmblemOpcode         },
 
         { CMSG_TAXINODE_STATUS_QUERY,       STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode     },
-        { CMSG_TAXIQUERYAVAILABLENODES,     STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAviableNodesOpcode   },
+        { CMSG_TAXIQUERYAVAILABLENODES,     STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAvailableNodesOpcode },
         { CMSG_ACTIVATETAXI,                STATUS_LOGGEDIN, &WorldSession::HandleActivateTaxiOpcode            },
         { CMSG_ACTIVATETAXI_FAR,            STATUS_LOGGEDIN, &WorldSession::HandleActivateTaxiFarOpcode         },
         { CMSG_MOVE_SPLINE_DONE,            STATUS_LOGGEDIN, &WorldSession::HandleTaxiNextDestinationOpcode     },
