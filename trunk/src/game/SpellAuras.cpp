@@ -1417,13 +1417,24 @@ void Aura::HandleModStealth(bool apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
         m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
+    }
+    else
+    {
+        m_target->m_stealthvalue = 0;
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
+    }
+}
+
+// this part send data to client and not modify fields important for another aura/item/stats changes
+void Aura::ApplyModStealth(bool apply)
+{
+    if(apply)
+    {
         m_target->SetVisibility(VISIBILITY_GROUP);
     }
     else
     {
         SendCoolDownEvent();
-        m_target->m_stealthvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
         m_target->SetVisibility(VISIBILITY_ON);
     }
     if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -1532,6 +1543,11 @@ void Aura::HandleModThreat(bool apply)
 
 void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
 {
+    // all applied/removed only at real aura add/remove
+}
+
+void Aura::ApplyAuraModIncreaseSpeedAlways(bool apply)
+{
     sLog.outDebug("HandleAuraModIncreaseSpeedAlways: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
@@ -1544,6 +1560,11 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
 }
 
 void Aura::HandleAuraModIncreaseSpeed(bool apply)
+{
+    // all applied/removed only at real aura add/remove
+}
+
+void Aura::ApplyAuraModIncreaseSpeed(bool apply)
 {
     sLog.outDebug("HandleAuraModIncreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
@@ -1559,6 +1580,11 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
 
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 {
+    // all applied/removed only at real aura add/remove
+}
+
+void Aura::ApplyAuraModIncreaseMountedSpeed(bool apply)
+{
     sLog.outDebug("HandleAuraModIncreaseMountedSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
@@ -1571,6 +1597,11 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 }
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply)
+{
+    // all applied/removed only at real aura add/remove
+}
+
+void Aura::ApplyAuraModDecreaseSpeed(bool apply)
 {
     sLog.outDebug("HandleAuraModDecreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount <= 0)
@@ -1589,6 +1620,11 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
 }
 
 void Aura::HandleAuraModIncreaseSwimSpeed(bool apply)
+{
+    // all applied/removed only at real aura add/remove
+}
+
+void Aura::ApplyAuraModIncreaseSwimSpeed(bool apply)
 {
     sLog.outDebug("HandleAuraModIncreaseSwimSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
