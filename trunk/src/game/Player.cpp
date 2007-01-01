@@ -10031,7 +10031,8 @@ void Player::SaveToDB()
     //this is becouse of the rename char stuff
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
-    ClearInCombat();                                        // Remove combat flag
+    // combat flags cleared at loading anyway.
+    //ClearInCombat();                                        // Remove combat flag
 
     sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
     outDebugValues();
