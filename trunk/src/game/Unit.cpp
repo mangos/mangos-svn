@@ -1506,6 +1506,20 @@ void Unit::_UpdateSpells( uint32 time )
             }
             else if(m_currentSpell->getState() == SPELL_STATE_IDLE && isAttackReady(RANGED_ATTACK) )
             {
+                // check movement in player case
+                if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetMovementFlags())
+                {
+                    // cancel wand shooting
+                    if(m_currentSpell->m_spellInfo->Category == 351)
+                    {
+                        WorldPacket data;
+                        data.Initialize(SMSG_CANCEL_AUTO_REPEAT);
+                        ((Player*)this)->GetSession()->SendPacket(&data);
+                        castSpell(NULL);
+                    }
+                    // ELSE delay auto-repeat ranged weapon until player movement stop
+                }
+                else
                 // recheck range and req. items (ammo and gun, etc)
                 if(m_currentSpell->CheckRange() == 0 && m_currentSpell->CheckItems() == 0 )
                 {
@@ -1520,8 +1534,7 @@ void Unit::_UpdateSpells( uint32 time )
                         data.Initialize(SMSG_CANCEL_AUTO_REPEAT);
                         ((Player*)this)->GetSession()->SendPacket(&data);
                     }
-                    else
-                        castSpell(NULL);
+                    castSpell(NULL);
                 }
             }
         }
