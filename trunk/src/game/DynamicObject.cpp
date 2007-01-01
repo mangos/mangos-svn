@@ -66,9 +66,6 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
 
 void DynamicObject::Update(uint32 p_time)
 {
-
-    WorldPacket data;
-
     if(m_aliveDuration > 0)
     {
         if(uint32(m_aliveDuration) > p_time)

@@ -34,8 +34,6 @@
 
 bool ChatHandler::HandleAnnounceCommand(const char* args)
 {
-    WorldPacket data;
-
     if(!*args)
         return false;
 
@@ -120,13 +118,13 @@ bool ChatHandler::HandleGPSCommand(const char* args)
 
 bool ChatHandler::HandleNamegoCommand(const char* args)
 {
+    WorldPacket data;
+
     if(m_session->GetPlayer()->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
     }
-
-    WorldPacket data;
 
     if(!*args)
         return false;
@@ -572,7 +570,7 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    data.Initialize(SMSG_SET_FLAT_SPELL_MODIFIER);
+    data.Initialize(SMSG_SET_FLAT_SPELL_MODIFIER, (1+1+2+2));
     data << uint8(spellflatid);
     data << uint8(op);
     data << uint16(val);
@@ -601,8 +599,6 @@ bool ChatHandler::HandleModifyTalentCommand (const char* args)
 
 bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 {
-    WorldPacket data;
-
     if (!*args)
         return false;
 
@@ -1068,13 +1064,13 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
     chr->SetUInt32Value( UNIT_FIELD_FLAGS , 0x001000 );
     chr->Mount(mId);
 
-    data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE );
+    data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE, (8+4+4) );
     data.append(chr->GetPackGUID());
     data << (uint32)0;
     data << float(speed);
     chr->SendMessageToSet( &data, true );
 
-    data.Initialize( SMSG_FORCE_SWIM_SPEED_CHANGE );
+    data.Initialize( SMSG_FORCE_SWIM_SPEED_CHANGE, (8+4+4) );
     data.append(chr->GetPackGUID());
     data << (uint32)0;
     data << float(speed);

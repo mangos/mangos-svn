@@ -46,7 +46,6 @@ Pet::Pet(PetType type)
 
 bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
 {
-    WorldPacket data;
     uint32 ownerid = owner->GetGUIDLow();
 
     QueryResult *result;

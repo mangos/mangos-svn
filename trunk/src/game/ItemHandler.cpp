@@ -149,8 +149,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
 
-    WorldPacket data;
-    data.Initialize( SMSG_ITEM_QUERY_SINGLE_RESPONSE );
+    WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600 ); // guess size
 
     uint32 item, guidLow, guidHigh;
     recv_data >> item >> guidLow >> guidHigh;
@@ -269,12 +268,12 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
         uint8 msg = _player->CanUseItem( pItem );
         if( msg == EQUIP_ERR_OK )
         {
-            data.Initialize (SMSG_READ_ITEM_OK);
+            data.Initialize (SMSG_READ_ITEM_OK, 8);
             sLog.outDetail("STORAGE: Item page sent");
         }
         else
         {
-            data.Initialize( SMSG_READ_ITEM_FAILED );
+            data.Initialize( SMSG_READ_ITEM_FAILED, 8 );
             sLog.outDetail("STORAGE: Unable to read item");
             _player->SendEquipError( msg, pItem, NULL );
         }
@@ -287,7 +286,6 @@ void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
 {
     sLog.outDetail( "WORLD: Received CMSG_PAGE_TEXT_QUERY" );
 
-    WorldPacket data;
     uint32 itemid, guidlow, guidhigh;
 
     recv_data >> itemid >> guidlow >> guidhigh;
@@ -579,8 +577,7 @@ void WorldSession::SendListInventory( uint64 guid )
         uint32 ptime = time(NULL);
         uint32 diff;
 
-        WorldPacket data;
-        data.Initialize( SMSG_LIST_INVENTORY );
+        WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*7*4) );
         data << guid;
         data << numitems;
 
@@ -744,8 +741,7 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
 
 void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_ENCHANTMENTLOG);
+    WorldPacket data(SMSG_ENCHANTMENTLOG, (8+8+4+4+1));
     data << Target;
     data << Caster;
     data << ItemID;
@@ -756,8 +752,7 @@ void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID
 
 void WorldSession::SendItemEnchantTimeUpdate(uint64 Itemguid,uint32 slot,uint32 Duration)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_ITEM_ENCHANT_TIME_UPDATE);
+    WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, (8+4+4));
     data << Itemguid;
     data << slot;
     data << Duration;
@@ -772,8 +767,7 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
     ItemPrototype const *pProto = objmgr.GetItemPrototype( itemid );
     if( pProto )
     {
-        WorldPacket data;
-        data.Initialize(SMSG_ITEM_NAME_QUERY_RESPONSE);
+        WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+10)); // guess size
         data << pProto->ItemId;
         data << pProto->Name1;
         SendPacket(&data);

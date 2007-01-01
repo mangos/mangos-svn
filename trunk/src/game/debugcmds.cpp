@@ -48,8 +48,6 @@ bool ChatHandler::HandleDebugInArcCommand(const char* args)
 
 bool ChatHandler::HandleDebugSpellFailCommand(const char* args)
 {
-    WorldPacket data;
-
     if(!args)
         return false;
     char* px = strtok((char*)args, " ");
@@ -58,7 +56,7 @@ bool ChatHandler::HandleDebugSpellFailCommand(const char* args)
 
     uint8 failnum = (uint8)atoi(px);
 
-    data.Initialize(SMSG_CAST_RESULT);
+    WorldPacket data(SMSG_CAST_RESULT, 6);
     data << (uint32)133;
     data << uint8(2);
     data << failnum;
@@ -104,8 +102,7 @@ bool ChatHandler::HandleSendItemErrorMsg(const char* args)
     uint8 error_msg = atol((char*)args);
     if ( error_msg > 0 )
     {
-        WorldPacket data;
-        data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+        WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, (30)); // guess size
         data << error_msg;
         data << uint64(0);
         data << uint64(0);
@@ -121,8 +118,7 @@ bool ChatHandler::HandleSendQuestPartyMsgCommand(const char* args)
     uint32 msg = atol((char*)args);
     if ( msg >= 0 )
     {
-        WorldPacket data;
-        data.Initialize( MSG_QUEST_PUSH_RESULT );
+        WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );
         data << m_session->GetPlayer()->GetGUID();
         data << uint32(msg);
         data << uint8(0);

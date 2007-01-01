@@ -120,8 +120,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         item->is_looted = true;
         loot->unlootedCount--;
 
-        WorldPacket data;
-        data.Initialize( SMSG_ITEM_PUSH_RESULT );
+        WorldPacket data( SMSG_ITEM_PUSH_RESULT, (8+8+4+4+1+4+8+4) );
         data << player->GetGUID();
         data << uint64(0x00000000);
         data << uint8(0x01);
@@ -192,8 +191,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
             {
                 (*i)->ModifyMoney( uint32((pLoot->gold)/(playersNear.size())) );
                 //Offset surely incorrect, but works
-                WorldPacket data;
-                data.Initialize( SMSG_LOOT_MONEY_NOTIFY );
+                WorldPacket data( SMSG_LOOT_MONEY_NOTIFY, 4 );
                 data << uint32((pLoot->gold)/(playersNear.size()));
                 (*i)->GetSession()->SendPacket( &data );
             }
@@ -226,8 +224,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 
     player->SetLootGUID(0);
 
-    WorldPacket data;
-    data.Initialize( SMSG_LOOT_RELEASE_RESPONSE );
+    WorldPacket data( SMSG_LOOT_RELEASE_RESPONSE, (8+1) );
     data << lguid << uint8(1);
     SendPacket( &data );
 

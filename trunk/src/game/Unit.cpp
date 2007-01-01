@@ -178,8 +178,7 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
 
 void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Walkback, bool Run, uint32 Time)
 {
-    WorldPacket data;
-    data.Initialize( SMSG_MONSTER_MOVE );
+    WorldPacket data( SMSG_MONSTER_MOVE, (41+GetPackGUID().size()) );
     data.append(GetPackGUID());
                                                             // Point A, starting location
     data << GetPositionX() << GetPositionY() << GetPositionZ();
@@ -311,9 +310,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             {
                 DEBUG_LOG("We are dead, loosing 10 percents durability");
                 ((Player*)pVictim)->DurabilityLossAll(0.10);
-                WorldPacket data;
-                                                            // durability lost message
-                data.Initialize(SMSG_DURABILITY_DAMAGE_DEATH);
+                WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);// durability lost message
                 ((Player*)pVictim)->GetSession()->SendPacket(&data);
             }
             HostilList::iterator i;
@@ -665,8 +662,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb);
 
-    WorldPacket data;
-    data.Initialize(SMSG_PERIODICAURALOG);
+    WorldPacket data(SMSG_PERIODICAURALOG, (21+16));    // we guess size
     data.append(pVictim->GetPackGUID());
     data.append(this->GetPackGUID());
     data << spellProto->Id;
@@ -788,9 +784,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
 {
-    WorldPacket data;
-
-    data.Initialize( SMSG_EMOTE );
+    WorldPacket data( SMSG_EMOTE, 12 );
     data << anim_id << GetGUID();
     WPAssert(data.size() == 12);
 
@@ -1300,8 +1294,7 @@ void Unit::SendAttackStart(Unit* pVictim)
     if(GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    WorldPacket data;
-    data.Initialize( SMSG_ATTACKSTART );
+    WorldPacket data( SMSG_ATTACKSTART, 16 );
     data << GetGUID();
     data << pVictim->GetGUID();
 
@@ -1311,8 +1304,7 @@ void Unit::SendAttackStart(Unit* pVictim)
 
 void Unit::SendAttackStop(Unit* victim)
 {
-    WorldPacket data;
-    data.Initialize( SMSG_ATTACKSTOP );
+    WorldPacket data( SMSG_ATTACKSTOP, (4+16) ); // we guess size
     data.append(GetPackGUID());
     data.append(victim->GetPackGUID());
     data << uint32( 0 );
@@ -1512,8 +1504,7 @@ void Unit::_UpdateSpells( uint32 time )
                     // cancel wand shooting
                     if(m_currentSpell->m_spellInfo->Category == 351)
                     {
-                        WorldPacket data;
-                        data.Initialize(SMSG_CANCEL_AUTO_REPEAT);
+                        WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 0);
                         ((Player*)this)->GetSession()->SendPacket(&data);
                         castSpell(NULL);
                     }
@@ -1530,8 +1521,7 @@ void Unit::_UpdateSpells( uint32 time )
                 {
                     if(GetTypeId()==TYPEID_PLAYER)
                     {
-                        WorldPacket data;
-                        data.Initialize(SMSG_CANCEL_AUTO_REPEAT);
+                        WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 0);
                         ((Player*)this)->GetSession()->SendPacket(&data);
                     }
                     castSpell(NULL);
@@ -2572,8 +2562,7 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
 
 void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_SPELLNONMELEEDAMAGELOG);
+    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+31)); // we guess size
     data.append(target->GetPackGUID());
     data.append(GetPackGUID());
     data << SpellID;
@@ -2593,8 +2582,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
 {
     sLog.outDebug("WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
-    WorldPacket data;
-    data.Initialize(SMSG_ATTACKERSTATEUPDATE);
+    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (16+45)); // we guess size
     data << (uint32)HitInfo;
     data.append(GetPackGUID());
     data.append(target->GetPackGUID());
@@ -3104,8 +3092,6 @@ void Unit::SetCharm(Creature* charmed)
 
 void Unit::UnsummonTotem(int8 slot)
 {
-    WorldPacket data;
-
     for (int8 i = 0; i < 4; i++)
     {
         if (i != slot && slot != -1) continue;
@@ -3117,8 +3103,7 @@ void Unit::UnsummonTotem(int8 slot)
 
 void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE);
+    WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (9+16)); // we guess size
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
     data << SpellID;
@@ -3129,8 +3114,7 @@ void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, b
 
 void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype, bool critical)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE);
+    WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (13+8));
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
     data << SpellID;
@@ -3583,23 +3567,23 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
     switch(mtype)
     {
         case MOVE_WALK:
-            if(forced) { data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE); }
-            else { data.Initialize(MSG_MOVE_SET_WALK_SPEED); }
+            if(forced) { data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_WALK_SPEED, 16); }
             break;
         case MOVE_RUN:
-            if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE); }
-            else { data.Initialize(MSG_MOVE_SET_RUN_SPEED); }
+            if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_RUN_SPEED, 16); }
             break;
         case MOVE_WALKBACK:
-            if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE); }
-            else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED); }
+            if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED, 16); }
             break;
         case MOVE_SWIM:
-            if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE); }
-            else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED); }
+            if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED, 16); }
             break;
         case MOVE_SWIMBACK:
-            data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED);
+            data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED, 16);
             break;
         case MOVE_TURN:
             return;                                         // ignore

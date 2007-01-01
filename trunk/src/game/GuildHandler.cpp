@@ -155,8 +155,7 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 
     sLog.outDebug("CMSG_PETITION_SHOW_SIGNATURES petition entry: '%u'", GUID_LOPART(petitionguid));
 
-    WorldPacket data;
-    data.Initialize(SMSG_PETITION_SHOW_SIGNATURES);
+    WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+1+signs*12));
     data << petitionguid;                                   // petition guid
     data << _player->GetGUID();                             // owner guid
     data << GUID_LOPART(petitionguid);                      // guild guid (in mangos always same as GUID_LOPART(petitionguid)
@@ -228,8 +227,7 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
         return;
     }
 
-    WorldPacket data;
-    data.Initialize(SMSG_PETITION_QUERY_RESPONSE);
+    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+guildname.size()+1+sizeof(tdata)));
     data << GUID_LOPART(petitionguid);                      // guild guid (in mangos always same as GUID_LOPART(petition guid)
     data << (uint64)ownerguid;                              // charter owner guid
     data << guildname;                                      // guildname
@@ -267,8 +265,7 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
         db_newguildname.c_str(), GUID_LOPART(petitionguid));
 
     sLog.outDebug("Petition (GUID: %u) renamed to '%s'", GUID_LOPART(petitionguid), newguildname.c_str());
-    WorldPacket data;
-    data.Initialize(MSG_PETITION_RENAME);
+    WorldPacket data(MSG_PETITION_RENAME, (8+newguildname.size()+1));
     data << petitionguid;
     data << newguildname;
     SendPacket( &data );
@@ -326,8 +323,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 
     sLog.outDebug("PETITION SIGN: GUID %u by player: %s (GUID: %u)", GUID_LOPART(petitionguid), _player->GetName(),plguidlo);
 
-    WorldPacket data;
-    data.Initialize(SMSG_PETITION_SIGN_RESULTS);
+    WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
     data << petitionguid;
     data << _player->GetGUID();
     data << (uint32)0;                                      // can be other values for error reporting(need check 2, 4)
@@ -360,8 +356,7 @@ void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
     Player* owner = objmgr.GetPlayer(ownerguid);
     if(owner)                                               // petition owner online
     {
-        WorldPacket data;
-        data.Initialize(MSG_PETITION_DECLINE);
+        WorldPacket data(MSG_PETITION_DECLINE, 8);
         data << _player->GetGUID();
         owner->GetSession()->SendPacket( &data );
     }
@@ -408,8 +403,7 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
     if(result)
         signs = result->GetRowCount();
 
-    WorldPacket data;
-    data.Initialize(SMSG_PETITION_SHOW_SIGNATURES);
+    WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+signs+signs*12));
     data << petitionguid;                                   // petition guid
     data << _player->GetGUID();                             // owner guid
     data << GUID_LOPART(petitionguid);                      // guild guid (in mangos always same as GUID_LOPART(petition guid)
@@ -455,7 +449,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
     if(_player->GetGuildId())
     {
-        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS);
+        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
         data << (uint32)2;                                  // already in guild
         _player->GetSession()->SendPacket(&data);
     }
@@ -490,7 +484,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
     if(signs < sWorld.getConfig(CONFIG_MIN_PETITION_SIGNS))
     {
-        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS);
+        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
         data << (uint32)4;                                  // need more signatures...
         SendPacket(&data);
         delete result;
@@ -543,7 +537,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
     // Guild created
     sLog.outDebug("TURN IN PETITION GUID %u", GUID_LOPART(petitionguid));
 
-    data.Initialize(SMSG_TURN_IN_PETITION_RESULTS);
+    data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
     data << (uint32)0;
     SendPacket( &data );
 }
@@ -572,7 +566,7 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
     if( !unit->isGuildMaster())                             // it's not guild master
         return;
 
-    data.Initialize( SMSG_PETITION_SHOWLIST );
+    data.Initialize( SMSG_PETITION_SHOWLIST, (8+sizeof(tdata)) );
     data << guid;
     data.append( tdata, sizeof(tdata) );
     SendPacket( &data );
@@ -675,7 +669,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     player->SetGuildIdInvited(GetPlayer()->GetGuildId());
 
-    data.Initialize(SMSG_GUILD_INVITE);
+    data.Initialize(SMSG_GUILD_INVITE, (8+10)); // guess size
     data << GetPlayer()->GetName();
     data << guild->GetName();
     player->GetSession()->SendPacket(&data);
@@ -731,7 +725,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     guild->DelMember(plGuid);
 
-    data.Initialize(SMSG_GUILD_EVENT);
+    data.Initialize(SMSG_GUILD_EVENT, (2+20)); // guess size
     data << (uint8)GE_REMOVED;
     data << (uint8)2;
     data << plName;
@@ -741,7 +735,6 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
     Guild *guild;
     Player *player = GetPlayer();
 
@@ -757,7 +750,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
 
     guild->AddMember(GetPlayer()->GetGUID());
 
-    data.Initialize(SMSG_GUILD_EVENT);
+    WorldPacket data(SMSG_GUILD_EVENT, (2+10)); // guess size
     data << (uint8)GE_JOINED;
     data << (uint8)1;
     data << player->GetName();
@@ -779,7 +772,6 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleGuildInfoOpcode(WorldPacket& recvPacket)
 {
     Guild *guild;
-    WorldPacket data;
     sLog.outDebug( "WORLD: Received CMSG_GUILD_INFO"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -789,7 +781,7 @@ void WorldSession::HandleGuildInfoOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    data.Initialize( SMSG_GUILD_INFO );
+    WorldPacket data( SMSG_GUILD_INFO, (5*4 + guild->GetName().size() + 1) );
     data << guild->GetName();
     data << guild->GetCreatedDay();
     data << guild->GetCreatedMonth();
@@ -815,7 +807,6 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
     std::string plName;
     uint64 plGuid;
     uint32 plGuildId;
@@ -877,7 +868,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
     guild->ChangeRank(plGuid, (plRankId-1));
 
-    data.Initialize(SMSG_GUILD_EVENT);
+    WorldPacket data(SMSG_GUILD_EVENT, (2+30)); // guess size
     data << (uint8)GE_PROMOTION;
     data << (uint8)3;
     data << GetPlayer()->GetName();
@@ -888,7 +879,6 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
     std::string plName;
     uint64 plGuid;
     uint32 plGuildId;
@@ -950,7 +940,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 
     guild->ChangeRank(plGuid, (plRankId+1));
 
-    data.Initialize(SMSG_GUILD_EVENT);
+    WorldPacket data(SMSG_GUILD_EVENT, (2+30)); // guess size
     data << (uint8)GE_DEMOTION;
     data << (uint8)3;
     data << GetPlayer()->GetName();
@@ -961,7 +951,6 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data,data2;
     std::string plName;
     Guild *guild;
     Player *player = GetPlayer();
@@ -990,7 +979,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
 
     guild->DelMember(player->GetGUID());
 
-    data.Initialize(SMSG_GUILD_EVENT);
+    WorldPacket data(SMSG_GUILD_EVENT, (2+10)); // guess size
     data << (uint8)GE_LEFT;
     data << (uint8)1;
     data << plName;
@@ -1028,7 +1017,6 @@ void WorldSession::HandleGuildDisbandOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
     std::string name;
     Player * newLeader;
     uint64 newLeaderGUID;
@@ -1083,7 +1071,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     guild->SetLeader(newLeaderGUID);
     guild->ChangeRank(oldLeader->GetGUID(), GR_OFFICER);
 
-    data.Initialize(SMSG_GUILD_EVENT);
+    WorldPacket data(SMSG_GUILD_EVENT, (2+20)); // guess size
     data << (uint8)GE_LEADER_CHANGED;
     data << (uint8)2;
     data << oldLeader->GetName();
@@ -1095,7 +1083,6 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
     Guild *guild;
     std::string MOTD;
 
@@ -1120,7 +1107,7 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
 
     guild->SetMOTD(MOTD);
 
-    data.Initialize(SMSG_GUILD_EVENT);
+    WorldPacket data(SMSG_GUILD_EVENT, (2+MOTD.size()+1));
     data << (uint8)GE_MOTD;
     data << (uint8)1;
     data << MOTD;
@@ -1337,8 +1324,7 @@ void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
 
 void WorldSession::SendCommandResult(uint32 typecmd,std::string str,uint32 cmdresult)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_GUILD_COMMAND_RESULT);
+    WorldPacket data(SMSG_GUILD_COMMAND_RESULT, (8+str.size()+1));
     data << typecmd;
     data << str;
     data << cmdresult;
@@ -1406,8 +1392,7 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 
     guild->Query(this);
 
-    WorldPacket data;
-    data.Initialize(MSG_SAVE_GUILD_EMBLEM);
+    WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);
     data << (uint32)0;
     SendPacket( &data );
 }

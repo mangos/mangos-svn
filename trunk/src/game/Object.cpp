@@ -210,8 +210,7 @@ void Object::DestroyForPlayer(Player *target) const
 {
     ASSERT(target);
 
-    WorldPacket data;
-    data.Initialize( SMSG_DESTROY_OBJECT );
+    WorldPacket data(SMSG_DESTROY_OBJECT, 8);
     data << GetGUID();
 
     target->GetSession()->SendPacket( &data );
@@ -364,7 +363,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
 
 void Object::BuildHeartBeatMsg(WorldPacket *data) const
 {
-    data->Initialize(MSG_MOVE_HEARTBEAT);                   //2
+    data->Initialize(MSG_MOVE_HEARTBEAT, 32);               //2
 
     *data << GetGUID();                                     //8
     *data << uint32(0);                                     //4
@@ -379,7 +378,7 @@ void Object::BuildHeartBeatMsg(WorldPacket *data) const
 
 void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
 {
-    data->Initialize(MSG_MOVE_TELEPORT_ACK);
+    data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
     *data << uint8(0xFF);
     *data << GetGUID();
     *data << uint32(0x800000);
@@ -730,16 +729,14 @@ void Object::_SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const
 
 void Object::SendDestroyObject(uint64 guid)
 {
-    WorldPacket data; 
-    data.Initialize(SMSG_DESTROY_OBJECT);
+    WorldPacket data(SMSG_DESTROY_OBJECT, 8); 
     data << guid;
     SendMessageToSet(&data, true);
 }
 
 void Object::SendObjectDeSpawnAnim(uint64 guid)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
+    WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
     data << guid;
     SendMessageToSet(&data, true);  
 }

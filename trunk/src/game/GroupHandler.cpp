@@ -40,8 +40,7 @@
 */
 void WorldSession::SendPartyResult(uint32 unk, std::string member, uint32 state)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_PARTY_COMMAND_RESULT);
+    WorldPacket data(SMSG_PARTY_COMMAND_RESULT, (8+member.size()+1));
     data << unk;
     data << member;
     data << state;
@@ -123,8 +122,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     // everything's fine, do it
     group->AddInvite(player);      
 
-    WorldPacket data;
-    data.Initialize(SMSG_GROUP_INVITE);
+    WorldPacket data(SMSG_GROUP_INVITE, 10); // guess size
     data << GetPlayer()->GetName();
     player->GetSession()->SendPacket(&data);
 
@@ -175,8 +173,7 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
     
     GetPlayer()->groupInfo.invite = NULL;
 
-    WorldPacket data;
-    data.Initialize( SMSG_GROUP_DECLINE );
+    WorldPacket data( SMSG_GROUP_DECLINE, 10 ); // guess size
     data << GetPlayer()->GetName();
     leader->GetSession()->SendPacket( &data );
 }
@@ -367,8 +364,7 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
 
 
     // everything's fine, do it
-    WorldPacket data;
-    data.Initialize(MSG_MINIMAP_PING);
+    WorldPacket data(MSG_MINIMAP_PING, (8+4+4));
     data << GetPlayer()->GetGUID();
     data << x;
     data << y;
@@ -393,8 +389,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
     
     sLog.outDebug("ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
 
-    WorldPacket data;
-    data.Initialize(MSG_RANDOM_ROLL);
+    WorldPacket data(MSG_RANDOM_ROLL, 24);
     data << minimum;
     data << maximum;
     data << roll;
@@ -515,8 +510,7 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
 
 
         // everything's fine, do it 
-        WorldPacket data;
-        data.Initialize(MSG_RAID_READY_CHECK);
+        WorldPacket data(MSG_RAID_READY_CHECK, 0);
         GetPlayer()->groupInfo.group->BroadcastPacket(&data, -1, GetPlayer()->GetGUID());
     }    
     else                            // answer
@@ -533,8 +527,7 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
         Player *leader = objmgr.GetPlayer(GetPlayer()->groupInfo.group->GetLeaderGUID());
         if(leader && leader->GetSession())
         {
-            WorldPacket data;
-            data.Initialize(MSG_RAID_READY_CHECK);
+            WorldPacket data(MSG_RAID_READY_CHECK, 9);
             data << GetPlayer()->GetGUID();
             data << state;
             leader->GetSession()->SendPacket(&data);
@@ -552,8 +545,7 @@ return;
     if(!player)
         return;
 
-    WorldPacket data;
-    data.Initialize(SMSG_PARTY_MEMBER_STATS);
+    WorldPacket data(SMSG_PARTY_MEMBER_STATS, 30);
     /*data << (uint16)0xFF << Guid;
     data << (uint8)0;
     data << (uint32)(player ? 1 : 0);*/
@@ -581,8 +573,7 @@ return;
 {
     sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
 
-    WorldPacket data;
-    data.Initialize(SMSG_RAID_INSTANCE_INFO);
+    WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
     data << (uint32)0;
 
     /*data << (uint32)count;

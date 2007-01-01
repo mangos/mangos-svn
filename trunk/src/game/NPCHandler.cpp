@@ -57,8 +57,7 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendTabardVendorActivate( uint64 guid )
 {
-    WorldPacket data;
-    data.Initialize( MSG_TABARDVENDOR_ACTIVATE );
+    WorldPacket data( MSG_TABARDVENDOR_ACTIVATE, 8 );
     data << guid;
     SendPacket( &data );
 }
@@ -90,8 +89,7 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendShowBank( uint64 guid )
 {
-    WorldPacket data;
-    data.Initialize( SMSG_SHOW_BANK );
+    WorldPacket data( SMSG_SHOW_BANK, 8 );
     data << guid;
     SendPacket( &data );
 }
@@ -113,8 +111,6 @@ void WorldSession::SendTrainerList( uint64 guid )
 
 void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 {
-    WorldPacket data;
-
     sLog.outDebug( "WORLD: SendTrainerList" );
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
@@ -152,7 +148,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
             Tspells.push_back(*itr);
     }
 
-    data.Initialize( SMSG_TRAINER_LIST );
+    WorldPacket data( SMSG_TRAINER_LIST, 200 ); // guess size
     data << guid;
     data << uint32(0) << uint32(Tspells.size());
 
@@ -215,7 +211,6 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
 void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint64 guid;
     uint32 spellId = 0;
     TrainerSpell *proto=NULL;
@@ -271,7 +266,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     }
     if( _player->GetMoney() >= proto->spellcost )
     {
-        data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED );
+        WorldPacket data( SMSG_TRAINER_BUY_SUCCEEDED, 12 );
         data << guid << spellId;
         SendPacket( &data );
 
@@ -307,9 +302,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 {
     sLog.outDetail( "WORLD: Received CMSG_GOSSIP_HELLO" );
 
-    WorldPacket data;
     uint64 guid;
-
     recv_data >> guid;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
@@ -333,7 +326,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 {
     sLog.outDetail("WORLD: CMSG_GOSSIP_SELECT_OPTION");
-    WorldPacket data;
+
     uint32 option;
     uint64 guid;
 
@@ -450,7 +443,7 @@ void WorldSession::SendBindPoint(Creature *npc)
     WorldPacket data;
 
     // binding
-    data.Initialize( SMSG_BINDPOINTUPDATE );
+    data.Initialize( SMSG_BINDPOINTUPDATE, (4+4+4+4+4) );
     data << float(_player->GetPositionX());
     data << float(_player->GetPositionY());
     data << float(_player->GetPositionZ());
@@ -465,7 +458,7 @@ void WorldSession::SendBindPoint(Creature *npc)
     DEBUG_LOG("New Home ZoneId is %u",_player->GetZoneId());
 
     // zone update
-    data.Initialize( SMSG_PLAYERBOUND );
+    data.Initialize( SMSG_PLAYERBOUND, 12 );
     data << uint64(_player->GetGUID());
     data << uint32(_player->GetZoneId());
     SendPacket( &data );
@@ -474,13 +467,13 @@ void WorldSession::SendBindPoint(Creature *npc)
     sDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%u', `zone` = '%u', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%u'", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetGUIDLow());
 
     // send spell for bind 3286 bind magic
-    data.Initialize(SMSG_SPELL_START );
+    data.Initialize(SMSG_SPELL_START, (8+8+2+2+2+4+2) );
     data.append(_player->GetPackGUID());
     data.append(npc->GetPackGUID());
     data << uint16(3286) << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
     SendPacket( &data );
 
-    data.Initialize(SMSG_SPELL_GO);
+    data.Initialize(SMSG_SPELL_GO, (8+8+2+2+1+1+1+8+4+2+2));
     data.append(_player->GetPackGUID());
     data.append(npc->GetPackGUID());
     data << uint16(3286) << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
@@ -514,9 +507,8 @@ void WorldSession::HandleListStabledPetsOpcode( WorldPacket & recv_data )
 void WorldSession::SendStablePet(uint64 guid )
 {
     sLog.outDetail("WORLD: Recv MSG_LIST_STABLED_PETS Send.");
-    WorldPacket data;
-    data.clear();
-    data.Initialize(MSG_LIST_STABLED_PETS);
+
+    WorldPacket data(MSG_LIST_STABLED_PETS, 200); // guess size
     data << uint64 ( guid );
 
     QueryResult *result,*result_1;
@@ -585,7 +577,6 @@ void WorldSession::SendStablePet(uint64 guid )
 
 void WorldSession::HandleStablePet( WorldPacket & recv_data )
 {
-    WorldPacket data;
     sLog.outDetail("WORLD: Recv CMSG_STABLE_PET not dispose.");
     uint64 npcGUID;
 
@@ -600,9 +591,8 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
-
-    data.clear();
-    data.Initialize(SMSG_STABLE_RESULT);
+    
+    WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
     if(!_player->GetPet())
         return;
     if(_player->GetPet())
@@ -652,7 +642,6 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
 
 void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
 {
-    WorldPacket data;
     sLog.outDetail("WORLD: Recv CMSG_UNSTABLE_PET.");
     uint64 npcGUID;
     uint32 petnumber;
@@ -668,9 +657,8 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
-
-    data.clear();
-    data.Initialize(SMSG_STABLE_RESULT);
+    
+    WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
     if(_player->GetPet())
     {
         data << uint8(0x06);
@@ -710,7 +698,6 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
 
 void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
 {
-    WorldPacket data;
     sLog.outDetail("WORLD: Recv CMSG_BUY_STABLE_SLOT.");
     uint64 npcGUID;
 
@@ -726,8 +713,7 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
-    data.clear();
-    data.Initialize(SMSG_STABLE_RESULT);
+    WorldPacket data(SMSG_STABLE_RESULT, 200);
 
     QueryResult *result;
     uint8 slot = 0;
@@ -777,7 +763,6 @@ void WorldSession::HandleStableRevivePet( WorldPacket & recv_data )
 
 void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
 {
-    WorldPacket data;
     sLog.outDetail("WORLD: Recv CMSG_STABLE_SWAP_PET.");
     uint64 npcGUID;
     uint32 pet_number;
@@ -794,8 +779,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
-    data.clear();
-    data.Initialize(SMSG_STABLE_RESULT);
+    WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
 
     if(_player->GetPet())
     {
@@ -843,7 +827,6 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
 void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_REPAIR_ITEM");
-    WorldPacket data;
 
     uint64 npcGUID, itemGUID;
 

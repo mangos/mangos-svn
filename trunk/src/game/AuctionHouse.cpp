@@ -72,8 +72,7 @@ static uint8 AuctioneerFactionToLocation(uint32 faction)
 
 void WorldSession::SendAuctionHello( uint64 guid, Creature* unit )
 {
-    WorldPacket data;
-    data.Initialize( MSG_AUCTION_HELLO );
+    WorldPacket data( MSG_AUCTION_HELLO, 12 );
     data << (uint64) guid;
     data << (uint32) AuctioneerFactionToLocation(unit->getFaction());
     SendPacket( &data );
@@ -111,8 +110,7 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
 //call this method when player bids, creates, or deletes auction
 void WorldSession::SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError )
 {
-    WorldPacket data;
-    data.Initialize( SMSG_AUCTION_COMMAND_RESULT );
+    WorldPacket data( SMSG_AUCTION_COMMAND_RESULT, 16 );
     data << auctionId;
     data << Action;
     data << ErrorCode;
@@ -124,8 +122,7 @@ void WorldSession::SendAuctionCommandResult(uint32 auctionId, uint32 Action, uin
 //this function sends notification, if bidder is online
 void WorldSession::SendAuctionBidderNotification( uint32 location, uint32 auctionId, uint64 bidder, uint32 bidSum, uint32 diff, uint32 item_template)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_AUCTION_BIDDER_NOTIFICATION);
+    WorldPacket data(SMSG_AUCTION_BIDDER_NOTIFICATION, (8*4));
     data << location;
     data << auctionId;
     data << (uint64) bidder;
@@ -138,8 +135,7 @@ void WorldSession::SendAuctionBidderNotification( uint32 location, uint32 auctio
 
 void WorldSession::SendAuctionOwnerNotification( AuctionEntry* auction)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_AUCTION_OWNER_NOTIFICATION);
+    WorldPacket data(SMSG_AUCTION_OWNER_NOTIFICATION, (7*4));
     data << auction->Id;
     data << auction->bid;
     data << (uint32) 0;                                     //unk
@@ -271,7 +267,6 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
     uint64 auctioneer;
     uint32 auctionId;
     uint32 price;
-    WorldPacket data;
     recv_data >> auctioneer;
     recv_data >> auctionId >> price;
 
@@ -454,8 +449,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
     AuctionHouseObject * mAuctions;
     mAuctions = objmgr.GetAuctionsMap( location );
 
-    WorldPacket data;
-    data.Initialize( SMSG_AUCTION_BIDDER_LIST_RESULT );
+    WorldPacket data( SMSG_AUCTION_BIDDER_LIST_RESULT, (4+4+4) );
     Player *pl = GetPlayer();
     data << (uint32) 0;                                     //add 0 as count
     uint32 count = 0;
@@ -503,8 +497,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
     AuctionHouseObject * mAuctions;
     mAuctions = objmgr.GetAuctionsMap( location );
 
-    WorldPacket data;
-    data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
+    WorldPacket data( SMSG_AUCTION_OWNER_LIST_RESULT, (4+4+4) );
     data << (uint32) 0;
     uint32 count = 0;
     uint32 totalcount = 0;
@@ -547,8 +540,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 
     sLog.outDebug("Auctionhouse search guid: " I64FMTD ", list from: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, listfrom, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
 
-    WorldPacket data;
-    data.Initialize( SMSG_AUCTION_LIST_RESULT );
+    WorldPacket data( SMSG_AUCTION_LIST_RESULT, (4+4+4) );
     count = 0;
     totalcount = 0;
     data << (uint32) 0;

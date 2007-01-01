@@ -1331,8 +1331,6 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
 
     do
     {
-        WorldPacket data;
-
         Field *fields = result->Fetch();
         uint32 itemId = fields[0].GetUInt32();
 
@@ -1658,14 +1656,12 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 
 bool ChatHandler::HandleAnimCommand(const char* args)
 {
-    WorldPacket data;
-
     if (!*args)
         return false;
 
     uint32 anim_id = atoi((char*)args);
 
-    data.Initialize( SMSG_EMOTE );
+    WorldPacket data( SMSG_EMOTE, (8+4) );
     data << anim_id << m_session->GetPlayer( )->GetGUID();
     WPAssert(data.size() == 12);
     MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId())->MessageBoardcast(m_session->GetPlayer(), &data, true);
@@ -1899,8 +1895,6 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
 
 bool ChatHandler::HandleAddSHCommand(const char *args)
 {
-    WorldPacket data;
-
     /* this code is wrong, SH is just an NPC
     and should be spawned normally as any NPC
     (c) Phantomas
@@ -2113,8 +2107,6 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
 
 bool ChatHandler::HandleHoverCommand(const char* args)
 {
-    WorldPacket data;
-
     char* px = strtok((char*)args, " ");
     uint32 flag;
     if (!px)
@@ -2514,8 +2506,6 @@ bool ChatHandler::HandleMod32Value(const char* args)
 
 bool ChatHandler::HandleSendMailNotice(const char* args)
 {
-    WorldPacket data;
-
     char* px = strtok((char*)args, " ");
     uint32 flag;
     if (!px)
@@ -2523,7 +2513,7 @@ bool ChatHandler::HandleSendMailNotice(const char* args)
     else
         flag = atoi(px);
 
-    data.Initialize(SMSG_RECEIVED_MAIL);
+    WorldPacket data(SMSG_RECEIVED_MAIL, 4);
 
     data << uint32(flag);
     m_session->SendPacket(&data);
@@ -2532,8 +2522,6 @@ bool ChatHandler::HandleSendMailNotice(const char* args)
 
 bool ChatHandler::HandleQueryNextMailTime(const char* args)
 {
-    WorldPacket Data;
-
     char* px = strtok((char*)args, " ");
     uint32 flag;
     if (!px)
@@ -2541,9 +2529,9 @@ bool ChatHandler::HandleQueryNextMailTime(const char* args)
     else
         flag = atoi(px);
 
-    Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
-    Data << uint32(flag);
-    m_session->SendPacket(&Data);
+    WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 4);
+    data << uint32(flag);
+    m_session->SendPacket(&data);
     return true;
 }
 

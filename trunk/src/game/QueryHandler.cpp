@@ -35,8 +35,7 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     if(!p)
         return;
 
-    WorldPacket data;
-    data.Initialize( SMSG_NAME_QUERY_RESPONSE );
+    WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) ); // guess size
     data << p->GetGUID();
     data << p->GetName();
     data << uint8(0);
@@ -54,8 +53,7 @@ void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
         name = "<non-existing character>";
     uint32 field = Player::GetUInt32ValueFromDB(UNIT_FIELD_BYTES_0, guid);    
 
-    WorldPacket data;
-    data.Initialize( SMSG_NAME_QUERY_RESPONSE );
+    WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) ); // guess size
     data << guid;
     data << name;
     data << (uint8)0;
@@ -74,9 +72,6 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 
     Player *pChar = objmgr.GetPlayer(guid);
 
-    WorldPacket data;
-    data.Initialize( SMSG_NAME_QUERY_RESPONSE );
-
     if (pChar)
         SendNameQueryOpcode(pChar);
     else
@@ -85,8 +80,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
-    data.Initialize( SMSG_QUERY_TIME_RESPONSE );
+    WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4 );
 
     data << (uint32)time(NULL);
     //data << (uint32)getMSTime();
@@ -129,7 +123,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     if (!ci)
     {
         sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO CREATUREINFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-        data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
+        data.Initialize( SMSG_CREATURE_QUERY_RESPONSE, (11*4+2) );
         data << (uint32)0;
         data << (uint32)0;
         data << (uint32)0;
@@ -147,7 +141,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     }
 
     sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
-    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
+    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE, (100) ); // guess size
     data << (uint32)entry;
     data << (unit ? unit->GetName() : ci->Name);
 
@@ -182,8 +176,6 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 {
-    WorldPacket data;
-
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     if (unit == NULL)
@@ -204,7 +196,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
     sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
 
-    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
+    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 ); // guess size
     data << (uint32)entry;
     data << (unit ? unit->GetName() : ci->Name);
 
@@ -285,8 +277,6 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
 void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue )
 {
-    WorldPacket data;
-
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     if (unit == NULL)
@@ -307,7 +297,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
     uint8 u8unk1=0,u8unk2=0,u8unk3=0;
     //------------------------------------------------------------------------
-    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
+    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 ); // guess size
     data << (uint32)entry;
     data << ci->Name;
     data << uint8(u8unk1) << uint8(u8unk2) << uint8(u8unk3);
@@ -377,8 +367,6 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
 void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 {
-
-    WorldPacket data;
     uint32 entryID;
     uint64 guid;
 
@@ -388,7 +376,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%u'", guid);
 
     const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
-    data.Initialize( SMSG_GAMEOBJECT_QUERY_RESPONSE );
+    WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 150 ); // guess size
     data << entryID;
 
     if( !info  )
@@ -447,15 +435,13 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 {
-    WorldPacket data;
-
     sLog.outDetail("WORLD: Received MSG_CORPSE_QUERY");
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
     if(!corpse) return;
 
-    data.Initialize(MSG_CORPSE_QUERY);
+    WorldPacket data(MSG_CORPSE_QUERY, (5*4+1));
     data << uint8(0x01);
     data << uint32(0x01);
     data << corpse->GetPositionX();
@@ -468,7 +454,6 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 
 void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint32 textID;
     uint32 uField0, uField1;
     GossipText *pGossip;
@@ -483,7 +468,7 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 
     pGossip = objmgr.GetGossipText(textID);
 
-    data.Initialize( SMSG_NPC_TEXT_UPDATE );
+    WorldPacket data( SMSG_NPC_TEXT_UPDATE, 100 ); // guess size
     data << textID;
 
     if (!pGossip)
@@ -521,7 +506,6 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint32 pageID;
 
     recv_data >> pageID;
@@ -530,7 +514,7 @@ void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
     while (pageID)
     {
         ItemPage *pPage = objmgr.RetreiveItemPageText( pageID );
-        data.Initialize( SMSG_PAGE_TEXT_QUERY_RESPONSE );
+        WorldPacket data( SMSG_PAGE_TEXT_QUERY_RESPONSE, 50 ); // guess size
         data << pageID;
 
         if (!pPage)

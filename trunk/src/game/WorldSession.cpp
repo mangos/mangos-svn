@@ -88,6 +88,7 @@ bool WorldSession::Update(uint32 diff)
         if(packet==NULL)
             continue;
 
+        sLog.outString("MOEP: %u", packet->GetOpcode());
         for (i = 0; table[i].handler != NULL; i++)
         {
             if (table[i].opcode == packet->GetOpcode())
@@ -146,8 +147,7 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             guild->LoadPlayerStatsByGuid(_player->GetGUID());
 
-            WorldPacket data;
-            data.Initialize(SMSG_GUILD_EVENT);
+            WorldPacket data(SMSG_GUILD_EVENT, (5+10)); // we guess size
             data<<(uint8)GE_SIGNED_OFF;
             data<<(uint8)1;
             data<<_player->GetName();
@@ -179,8 +179,7 @@ void WorldSession::LogoutPlayer(bool Save)
         MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
 
 
-        WorldPacket data;
-        data.Initialize(SMSG_FRIEND_STATUS);
+        WorldPacket data(SMSG_FRIEND_STATUS, (9));
         data<<uint8(FRIEND_OFFLINE);
         data<<_player->GetGUID();
         _player->BroadcastPacketToFriendListers(&data);
@@ -220,7 +219,7 @@ void WorldSession::LogoutPlayer(bool Save)
         if(group)    
             group->SendUpdate();
 
-        data.Initialize( SMSG_LOGOUT_COMPLETE );
+        data.Initialize( SMSG_LOGOUT_COMPLETE, 0 );
         SendPacket( &data );
 
 
