@@ -1543,6 +1543,14 @@ uint8 Spell::CanCast()
         return CAST_FAIL_SPELL_NOT_READY_YET;
     }
 
+    // cancel autorepeat spells if cast start when moving 
+    // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
+    if( ((Player*)m_caster)->GetMovementFlags() &&  IsAutoRepeat() )
+	{
+		SendCastResult(CAST_FAIL_CANT_DO_WHILE_MOVING);
+		return CAST_FAIL_CANT_DO_WHILE_MOVING;
+	}
+
     uint8 castResult = 0;
 
     Unit *target = m_targets.getUnitTarget();

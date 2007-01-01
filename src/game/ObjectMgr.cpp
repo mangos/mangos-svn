@@ -309,8 +309,8 @@ void ObjectMgr::LoadCreatureTemplates()
 
     sCreatureStorage.Load();
 
-    sLog.outString( "" );
     sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
+    sLog.outString( "" );
 }
 
 // name must be checked to correctness (if recived) before call this function
@@ -424,7 +424,6 @@ void ObjectMgr::LoadAuctions()
 void ObjectMgr::LoadItemPrototypes()
 {
     sItemStorage.Load ();
-    sLog.outString( "" );
     sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount );
     sLog.outString( "" );
 }
@@ -1928,9 +1927,8 @@ void ObjectMgr::LoadGameobjectInfo()
 {
     sGOStorage.Load();
 
-    sLog.outString( "" );
     sLog.outString( ">> Loaded %u game object templates", sGOStorage.RecordCount );
-
+    sLog.outString( "" );
 }
 
 void ObjectMgr::LoadPetNames()
