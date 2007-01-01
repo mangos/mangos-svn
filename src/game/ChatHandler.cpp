@@ -154,8 +154,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             if(to.size() == 0)
             {
-                WorldPacket data;
-                data.Initialize(SMSG_CHAT_PLAYER_NOT_FOUND);
+                WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
                 data<<to;
                 SendPacket(&data);
                 break;
@@ -166,8 +165,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             // send whispers from player to GM only if GM accept its (not show online state GM in other case)
             if(!player || GetSecurity() == 0 && player->GetSession()->GetSecurity() > 0 && !player->isAcceptWhispers())
             {
-                WorldPacket data;
-                data.Initialize(SMSG_CHAT_PLAYER_NOT_FOUND);
+                WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
                 data<<to;
                 SendPacket(&data);
                 break;
@@ -178,8 +176,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 uint32 sideb = player->GetTeam();
                 if( sidea != sideb )
                 {
-                    WorldPacket data;
-                    data.Initialize(SMSG_CHAT_PLAYER_NOT_FOUND);
+                    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
                     data<<to;
                     SendPacket(&data);
                     break;
@@ -305,7 +302,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint32 text_emote, emoteNum;
     uint64 guid;
 
@@ -336,14 +332,15 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     if (em)
     {
         uint32 emote_anim = em->textid;
-
-        data.Initialize(SMSG_EMOTE);
+        
+        WorldPacket data;
+        data.Initialize(SMSG_EMOTE, 12);
         data << (uint32)emote_anim;
         data << GetPlayer()->GetGUID();
         WPAssert(data.size() == 12);
         GetPlayer()->SendMessageToSet( &data, true );
 
-        data.Initialize(SMSG_TEXT_EMOTE);
+        data.Initialize(SMSG_TEXT_EMOTE, (20+namlen)); 
         data << GetPlayer()->GetGUID();
         data << (uint32)text_emote;
         data << emoteNum;

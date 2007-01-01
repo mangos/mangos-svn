@@ -38,7 +38,6 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     uint16 spellid;
     uint16 flag;
     uint64 guid2;
-    WorldPacket data;
     recv_data >> guid1;                                     //pet guid
     recv_data >> spellid;
     recv_data >> flag;                                      //delete = 0x0700 CastSpell = C100
@@ -107,7 +106,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                         pet->AttackStop();
                     (*pet)->Clear();
                     pet->AI().AttackStart(TargetUnit);
-                    data.Initialize(SMSG_AI_REACTION);
+                    WorldPacket data(SMSG_AI_REACTION, 12);
                     data << guid1 << uint32(00000002);
                     SendPacket(&data);
                     break;
@@ -200,8 +199,7 @@ void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
 
     std::string name = pet->GetName();
 
-    WorldPacket data;
-    data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
+    WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (4+4+name.size()+1));
     data << uint32(petnumber);
     data << name.c_str();
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));

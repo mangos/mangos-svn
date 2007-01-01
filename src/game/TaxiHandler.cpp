@@ -64,8 +64,7 @@ void WorldSession::SendTaxiStatus( uint64 guid )
     field = (uint8)((curloc - 1) / 32);
     submask = 1<<((curloc-1)%32);
 
-    WorldPacket data;
-    data.Initialize( SMSG_TAXINODE_STATUS );
+    WorldPacket data( SMSG_TAXINODE_STATUS, 9 );
     data << guid;
 
     if ( (GetPlayer( )->GetTaximask(field) & submask) != submask )
@@ -94,8 +93,7 @@ void WorldSession::SendTaxiMenu( uint64 guid )
 
     if(_player->IsMounted())
     {
-        WorldPacket data;
-        data.Initialize(SMSG_CAST_RESULT);
+        WorldPacket data(SMSG_CAST_RESULT, (4+1+1));
         data << uint32(0);
         data << uint8(2);
         data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
@@ -138,8 +136,7 @@ void WorldSession::SendTaxiMenu( uint64 guid )
         return;
     TaxiMask[field] |= 1 << ((curloc-1)%32);
 
-    WorldPacket data;
-    data.Initialize( SMSG_SHOWTAXINODES );
+    WorldPacket data( SMSG_SHOWTAXINODES, (4+8+4) );
     data << uint32( 1 ) << guid;
     data << uint32( curloc );
     for (uint8 i=0; i<8; i++)
@@ -159,15 +156,13 @@ void WorldSession::SendTaxiMenu( uint64 guid )
 
 void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
 {
-    WorldPacket data;
-
     GetPlayer( )->Mount( MountId, true );
     FlightPathMovementGenerator *flight(new FlightPathMovementGenerator(*_player, path));
     Path &pathnodes(flight->GetPath());
     assert( pathnodes.Size() > 0 );
 
     uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
-    data.Initialize( SMSG_MONSTER_MOVE );
+    WorldPacket data( SMSG_MONSTER_MOVE, (8+4+4+4+4+1+4+4+4+pathnodes.Size()*4*3) );
     data.append(GetPlayer()->GetPackGUID());
     data << GetPlayer( )->GetPositionX( )
         << GetPlayer( )->GetPositionY( )
@@ -205,12 +200,10 @@ bool WorldSession::LearnNewTaxiNode( uint64 guid )
     {
         GetPlayer()->SetTaximask(field, (submask | GetPlayer( )->GetTaximask(field)) );
 
-        WorldPacket msg;
-        msg.Initialize(SMSG_NEW_TAXI_PATH);
+        WorldPacket msg(SMSG_NEW_TAXI_PATH, 0);
         _player->GetSession()->SendPacket( &msg );
 
-        WorldPacket update;
-        update.Initialize( SMSG_TAXINODE_STATUS );
+        WorldPacket update( SMSG_TAXINODE_STATUS, 9 );
         update << guid;
         update << uint8( 1 );
         SendPacket( &update );
@@ -252,7 +245,6 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
     uint32 sourcenode,destinationnode;
     uint16 MountId;
     uint32 path, cost;
-    WorldPacket data;
 
     sLog.outDebug( "WORLD: Received CMSG_MOVE_SPLINE_DONE" );
 
@@ -268,7 +260,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
             {
                 GetPlayer()->SetTaximask(field, (submask | GetPlayer( )->GetTaximask(field)) );
 
-                data.Initialize(SMSG_NEW_TAXI_PATH);
+                WorldPacket data(SMSG_NEW_TAXI_PATH, 0);
                 _player->GetSession()->SendPacket( &data );
             }
         }

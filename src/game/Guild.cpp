@@ -349,16 +349,14 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
             }
             objmgr.GetPlayerNameByGUID(guid, oldLeaderName);
 
-            WorldPacket data;
-
-            data.Initialize(SMSG_GUILD_EVENT);
+            WorldPacket data(SMSG_GUILD_EVENT, (1+1+oldLeaderName.size()+1+newLeaderName.size()+1));
             data << (uint8)GE_LEADER_CHANGED;
             data << (uint8)2;
             data << oldLeaderName;
             data << newLeaderName;
             this->BroadcastPacket(&data);
 
-            data.Initialize(SMSG_GUILD_EVENT);
+            data.Initialize(SMSG_GUILD_EVENT, (1+1+oldLeaderName.size()+1));
             data << (uint8)GE_LEFT;
             data << (uint8)1;
             data << oldLeaderName;
@@ -610,8 +608,7 @@ void Guild::SetRankRights(uint32 rankId, uint32 rights)
 
 void Guild::Disband()
 {
-    WorldPacket data;
-    data.Initialize(SMSG_GUILD_EVENT);
+    WorldPacket data(SMSG_GUILD_EVENT, 1);
     data << (uint8)GE_DISBANDED;
     this->BroadcastPacket(&data);
 
@@ -639,10 +636,9 @@ void Guild::Disband()
 
 void Guild::Roster(WorldSession *session)
 {
-    WorldPacket data;
     Player *pl;
 
-    data.Initialize(SMSG_GUILD_ROSTER);
+    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+ranks.size()*4+members.size()*50));   // we can only guess size
     data << (uint32)members.size();
     data << MOTD;
     data << GINFO;
@@ -700,9 +696,8 @@ void Guild::Roster(WorldSession *session)
 
 void Guild::Query(WorldSession *session)
 {
-    WorldPacket data;
-
-    data.Initialize( SMSG_GUILD_QUERY_RESPONSE );
+    WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, (8*32+200)); // we can only guess size
+    
     data << Id;
     data << name;
     RankList::iterator itr;

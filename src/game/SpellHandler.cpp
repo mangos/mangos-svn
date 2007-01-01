@@ -167,7 +167,6 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint64 guid;
     uint32 spellId = OPEN_CHEST;
     const GameObjectInfo *info;
@@ -282,8 +281,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                         // fish escaped
                         obj->SetLootState(GO_LOOTED);       // can be deleted now
 
-                        WorldPacket data;
-                        data.Initialize(SMSG_FISH_ESCAPED);
+                        WorldPacket data(SMSG_FISH_ESCAPED, 0);
                         SendPacket(&data);
                     }
                     break;
@@ -294,8 +292,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 {
                     obj->SetLootState(GO_LOOTED);
 
-                    WorldPacket data;
-                    data.Initialize(SMSG_FISH_NOT_HOOKED);
+                    WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
                     SendPacket(&data);
                     break;
                 }

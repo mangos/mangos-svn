@@ -94,11 +94,9 @@ void WorldSocket::SendPacket(WorldPacket* packet)
 
 void WorldSocket::OnAccept()
 {
-    WorldPacket packet;
-
     sWorldSocketMgr.AddSocket(this);
 
-    packet.Initialize( SMSG_AUTH_CHALLENGE );
+    WorldPacket packet( SMSG_AUTH_CHALLENGE, 4 );
     packet << _seed;
 
     SendPacket(&packet);
@@ -127,10 +125,9 @@ void WorldSocket::OnRead()
         if (ibuf.GetLength() < _remaining)
             break;
 
-        WorldPacket packet;
+        WorldPacket packet((uint16)_cmd, _remaining);
 
         packet.resize(_remaining);
-        packet.SetOpcode((uint16)_cmd);
         if(_remaining) ibuf.Read((char*)packet.contents(), _remaining);
 
         if( sWorldLog.LogWorld() )
@@ -226,7 +223,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     if ( !result )
     {
 
-        packet.Initialize( SMSG_AUTH_RESPONSE );
+        packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
         SendPacket( &packet );
 
@@ -253,7 +250,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", account.c_str());
     if ( strcmp(v.AsHexStr(),(*result)[6].GetString() ) )
     {
-        packet.Initialize( SMSG_AUTH_RESPONSE );
+        packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
         SendPacket( &packet );
         sLog.outDetail( "SOCKET: User not logged.");
@@ -265,7 +262,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     {
         if ( strcmp((*result)[3].GetString(),GetRemoteAddress().c_str()) )
         {
-            packet.Initialize( SMSG_AUTH_RESPONSE );
+            packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
             packet << uint8( REALM_AUTH_ACCOUNT_FREEZED );
             SendPacket( &packet );
 
@@ -275,7 +272,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
     if((*result)[8].GetUInt8() == 1)                        // if account banned
     {
-        packet.Initialize( SMSG_AUTH_RESPONSE );
+        packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_BANNED );
         SendPacket( &packet );
 
@@ -293,7 +290,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     if (sWorld.GetPlayerLimit() > 0 && num > sWorld.GetPlayerLimit() && security == 0)
     {
 
-        packet.Initialize( SMSG_AUTH_RESPONSE );
+        packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         //packet << uint8( 21 );
         packet << uint8( CSTATUS_FULL);
         SendPacket( &packet );
@@ -322,7 +319,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     if (memcmp(sha.GetDigest(), digest, 20))
     {
 
-        packet.Initialize( SMSG_AUTH_RESPONSE );
+        packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         //packet << uint8( 21 );
         packet << uint8( AUTH_FAILED );
 
@@ -336,7 +333,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     _crypt.Init();
 
     //Send Auth is okey
-    packet.Initialize( SMSG_AUTH_RESPONSE );
+    packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
     packet << uint8( AUTH_OK );                             //0x0C
     //packet << uint8( 0xB0 ); - redundent
     //packet << uint8( 0x09 );
@@ -370,7 +367,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
 void WorldSocket::_HandlePing(WorldPacket& recvPacket)
 {
-    WorldPacket packet;
     uint32 ping;
 
     try
@@ -406,7 +402,7 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
 
     }
 
-    packet.Initialize( SMSG_PONG );
+    WorldPacket packet( SMSG_PONG, 4 );
     packet << ping;
     SendPacket(&packet);
 
@@ -456,8 +452,7 @@ void WorldSocket::Update(time_t diff)
 
 void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
 {
-    WorldPacket packet;
-    packet.Initialize( SMSG_AUTH_RESPONSE );
+    WorldPacket packet( SMSG_AUTH_RESPONSE, 5 );
     packet << uint8( AUTH_WAIT_QUEUE );
     //packet << uint32 (0x00);                                //unknown
     //packet << uint32 (0x00);                                //unknown

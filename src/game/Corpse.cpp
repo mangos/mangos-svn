@@ -251,8 +251,7 @@ void Corpse::ConvertCorpseToBones()
 
     if(player)
     {
-        WorldPacket data;
-        data.Initialize(SMSG_DESTROY_OBJECT);
+        WorldPacket data(SMSG_DESTROY_OBJECT, 8);
         data << (uint64)GetGUID();
         player->GetSession()->SendPacket(&data);
     }

@@ -55,8 +55,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     pl->duel->startTimer = now;
     plTarget->duel->startTimer = now;
 
-    WorldPacket data;
-    data.Initialize(SMSG_DUEL_COUNTDOWN);
+    WorldPacket data(SMSG_DUEL_COUNTDOWN, 4);
     data << (uint32)3000;                                   // 3 seconds
     pl->GetSession()->SendPacket(&data);
     plTarget->GetSession()->SendPacket(&data);
@@ -66,13 +65,11 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug( "WORLD: received CMSG_DUEL_CANCELLED" );
 
-    uint64 guid;
-    WorldPacket data;
-
     // no duel requested || duel already started
     if(!GetPlayer()->duel || GetPlayer()->duel->startTime != 0)
         return;
 
+    uint64 guid;
     recvPacket >> guid;
 
     GetPlayer()->DuelComplete(0);

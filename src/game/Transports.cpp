@@ -383,8 +383,7 @@ void Transport::TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, flo
         
         plr->TeleportTo(newMapid, x, y, z, GetOrientation(), true,false);
 
-        WorldPacket data;
-        data.SetOpcode(0x32B);
+        WorldPacket data(0x32B, 4);
         data << uint32(0);
         plr->GetSession()->SendPacket(&data);
     }

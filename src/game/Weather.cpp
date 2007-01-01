@@ -230,9 +230,8 @@ void Weather::UpdateWeather()
         return;
     //}
 
-    WorldPacket data;
     uint32 sound = GetSound();
-    data.Initialize( SMSG_WEATHER );
+    WorldPacket data( SMSG_WEATHER, (4+4+4) );
     if (m_grade >= 1)
         m_grade = 0.9999;
     else if (m_grade < 0)

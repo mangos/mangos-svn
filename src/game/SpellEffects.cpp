@@ -263,8 +263,7 @@ void Spell::EffectDummy(uint32 i)
             {
                 ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
-                WorldPacket data;
-                data.Initialize(SMSG_CLEAR_COOLDOWN);
+                WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
                 data << classspell;
                 data << m_caster->GetGUID();
                 data << uint32(0);
@@ -292,8 +291,7 @@ void Spell::EffectDummy(uint32 i)
             {
                 ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
-                WorldPacket data;
-                data.Initialize(SMSG_CLEAR_COOLDOWN);
+                WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
                 data << classspell;
                 data << m_caster->GetGUID();
                 data << uint32(0);
@@ -331,8 +329,7 @@ void Spell::EffectDummy(uint32 i)
             {
                 ((Player*)m_caster)->RemoveSpellCooldown(20577);
 
-                WorldPacket data;
-                data.Initialize(SMSG_CLEAR_COOLDOWN);
+                WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
                 data << uint32(20577);                      // spell id
                 data << m_caster->GetGUID();
                 data << uint32(0);
@@ -1746,8 +1743,6 @@ void Spell::EffectAddComboPoints(uint32 i)
 
 void Spell::EffectDuel(uint32 i)
 {
-    WorldPacket data;
-
     if(!m_caster || !unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
@@ -1786,7 +1781,7 @@ void Spell::EffectDuel(uint32 i)
     //END
 
     //Send request
-    data.Initialize(SMSG_DUEL_REQUESTED);
+    WorldPacket data(SMSG_DUEL_REQUESTED, 16);
     data << pGameObj->GetGUID();
     data << caster->GetGUID();
     caster->GetSession()->SendPacket(&data);
@@ -2172,7 +2167,6 @@ void Spell::EffectDismissPet(uint32 i)
 
 void Spell::EffectSummonObject(uint32 i)
 {
-    WorldPacket data;
     uint8 slot = 0;
     switch(m_spellInfo->Effect[i])
     {
@@ -2215,7 +2209,7 @@ void Spell::EffectSummonObject(uint32 i)
     sLog.outError("AddObject at Spell.cpp 1100");
 
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
-    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
+    WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << pGameObj->GetGUID();
     m_caster->SendMessageToSet(&data,true);
 
@@ -2451,8 +2445,7 @@ void Spell::EffectKnockBack(uint32 i)
     //Only allowed to knock ourselves straight up to prevent exploiting
     if (unitTarget == m_caster)value = 0;
 
-    WorldPacket data;
-    data.SetOpcode(SMSG_MOVE_KNOCK_BACK);
+    WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
     data.append(unitTarget->GetPackGUID());
     data << uint32(0);//Sequence
     data << cos(m_caster->GetAngle(unitTarget)); //xdirection
@@ -2487,7 +2480,6 @@ void Spell::EffectSummonDeadPet(uint32 i)
 void Spell::EffectTransmitted(uint32 i)
 {
     float fx,fy;
-    WorldPacket data;
 
     float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
@@ -2559,7 +2551,7 @@ void Spell::EffectTransmitted(uint32 i)
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
     pGameObj->AddToWorld();
 
-    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
+    WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << uint64(pGameObj->GetGUID());
     m_caster->SendMessageToSet(&data,true);
 }

@@ -123,19 +123,18 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 
             if(method == 1)
             {   
-                data.Initialize( SMSG_GROUP_UNINVITE );
+                data.Initialize( SMSG_GROUP_UNINVITE, 0 );
                 player->GetSession()->SendPacket( &data );
             }
 
-            data.Initialize(SMSG_GROUP_LIST);
+            data.Initialize(SMSG_GROUP_LIST, 14);
             data<<(uint16)0<<(uint32)0<<(uint64)0;
             player->GetSession()->SendPacket(&data);
         }
 
         if(leaderChanged)
         {
-            WorldPacket data;
-            data.Initialize(SMSG_GROUP_SET_LEADER);
+            WorldPacket data(SMSG_GROUP_SET_LEADER, (m_members[0].name.size()+1));
             data << m_members[0].name;
             BroadcastPacket(&data);  
         }
@@ -152,8 +151,7 @@ void Group::ChangeLeader(const uint64 &guid)
 {    
     _setLeader(guid);
 
-    WorldPacket data;
-    data.Initialize(SMSG_GROUP_SET_LEADER);
+    WorldPacket data(SMSG_GROUP_SET_LEADER, (m_members[_getMemberIndex(guid)].name.size()+1));
     data << m_members[_getMemberIndex(guid)].name;
     BroadcastPacket(&data);  
     SendUpdate();
@@ -162,7 +160,6 @@ void Group::ChangeLeader(const uint64 &guid)
 void Group::Disband(bool hideDestroy)
 {
     Player *player;
-    WorldPacket data;
     
     for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
     {
@@ -174,13 +171,14 @@ void Group::Disband(bool hideDestroy)
         player->RemoveAreaAurasFromGroup();
         player->groupInfo.group = NULL;
 
+        WorldPacket data;
         if(!hideDestroy)
         {
-            data.Initialize(SMSG_GROUP_DESTROYED);
+            data.Initialize(SMSG_GROUP_DESTROYED, 0);
             player->GetSession()->SendPacket(&data);
         }
 
-        data.Initialize(SMSG_GROUP_LIST);
+        data.Initialize(SMSG_GROUP_LIST, 14);
         data<<(uint16)0<<(uint32)0<<(uint64)0;
         player->GetSession()->SendPacket(&data);
     }
@@ -210,8 +208,7 @@ void Group::Disband(bool hideDestroy)
 
 void Group::SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntry, uint32 ItemInfo, uint32 CountDown, const Roll &r)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_LOOT_START_ROLL);
+    WorldPacket data(SMSG_LOOT_START_ROLL, (8+4+4+4+4+4));
     data << Guid;                                           // guid of the creature/go that has the item which is being rolled for
     data << NumberinGroup;                                  // maybe the number of players rolling for it???
     data << ItemEntry;                                      // the itemEntryId for the item that shall be rolled for
@@ -233,8 +230,7 @@ void Group::SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntr
 
 void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_LOOT_ROLL);
+    WorldPacket data(SMSG_LOOT_ROLL, (8+4+8+4+4+4+1+1));
     data << SourceGuid;                                     // guid of the item rolled
     data << (uint32)0;                                      // unknown, maybe amount of players
     data << TargetGuid;
@@ -258,8 +254,7 @@ void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry,
 
 void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_LOOT_ROLL_WON);
+    WorldPacket data(SMSG_LOOT_ROLL_WON, (8+4+4+4+4+1+1));
     data << SourceGuid;                                     // guid of the item rolled
     data << (uint32)0;                                      // unknown, maybe amount of players
     data << ItemEntry;                                      // the itemEntryId for the item that shall be rolled for
@@ -283,8 +278,7 @@ void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEnt
 
 void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, uint32 ItemEntry, uint32 ItemInfo, const Roll &r)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_LOOT_ALL_PASSED);
+    WorldPacket data(SMSG_LOOT_ALL_PASSED, (8+4+4+4+4));
     data << Guid;                                           // Guid of the item rolled
     data << NumberOfPlayers;                                // The number of players rolling for it???
     data << ItemEntry;                                      // The itemEntryId for the item that shall be rolled for
@@ -557,8 +551,7 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
 
     m_targetIcons[id] = guid;
 
-    WorldPacket data;
-    data.Initialize(MSG_RAID_ICON_TARGET);
+    WorldPacket data(MSG_RAID_ICON_TARGET, (2+8));
     data << (uint8)0;                                  
     data << id;                                         
     data << guid;                                      
@@ -592,17 +585,16 @@ void Group::SendInit(WorldSession *session)
     if(!session)
         return;
 
-    WorldPacket data;
-    int8        myIndex;
-    uint8       myFlag;
-    uint64      guid;
+    int8   myIndex;
+    uint8  myFlag;
+    uint64 guid;
 
     guid = session->GetPlayer()->GetGUID();
     myIndex = _getMemberIndex(guid);
     myFlag  = m_members[myIndex].group | (m_members[myIndex].assistant?0x80:0);
     for(int i=1; i<=m_members.size(); i++)
     {
-        data.Initialize(SMSG_GROUP_LIST);
+        WorldPacket data(SMSG_GROUP_LIST, (2+4+8+8+1+2+m_members.size()*20)); // guess size
         data << (uint8)m_groupType;
         data << (uint8)myFlag;
 
@@ -637,8 +629,7 @@ void Group::SendTargetIconList(WorldSession *session)
     if(!session)
         return;
 
-    WorldPacket data;
-    data.Initialize(MSG_RAID_ICON_TARGET);
+    WorldPacket data(MSG_RAID_ICON_TARGET, (1+TARGETICONCOUNT*9));
     data << (uint8)1;     
 
     for(int i=0; i<TARGETICONCOUNT; i++)
@@ -664,7 +655,7 @@ void Group::SendUpdate()
         if(!player || !player->GetSession())
             continue;
 
-        data.Initialize(SMSG_GROUP_LIST);
+        data.Initialize(SMSG_GROUP_LIST, (6+8+8+1+2+m_members.size()*20)); // guess size
         data << (uint8)m_groupType;
         data << (uint8)(citr->group | (citr->assistant?0x80:0));        // own flags (groupid | (assistant?0x80:0))
 

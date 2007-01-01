@@ -38,8 +38,7 @@ BattleGroundMgr::~BattleGroundMgr()
 
 void BattleGroundMgr::SendBattleGroundStatusPacket(Player *pl, uint32 MapID, uint8 InstanceID, uint8 StatusID, uint32 Time)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_BATTLEFIELD_STATUS);               //0x2D4
+    WorldPacket data(SMSG_BATTLEFIELD_STATUS, (5*4+1));               //0x2D4
     data << uint32(0x0);                                    // Unknown 1
     data << uint32(MapID);                                  // MapID
     data << uint8(0);                                       // Unknown

@@ -30,7 +30,6 @@
 
 void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint32 talent_id, requested_rank;
     recv_data >> talent_id >> requested_rank;
 
@@ -123,7 +122,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
             if(!GetPlayer( )->addSpell((uint16)spellid,1))
                 return;
 
-            data.Initialize(SMSG_LEARNED_SPELL);
+            WorldPacket data(SMSG_LEARNED_SPELL, 4);
             sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
             data << spellid;
             GetPlayer( )->GetSession()->SendPacket(&data);
@@ -186,14 +185,13 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
     }
 
     // send spell 14867
-    WorldPacket data;
-    data.Initialize(SMSG_SPELL_START );
+    WorldPacket data(SMSG_SPELL_START, (2+2+2+4+2+8+8));
     data.append(_player->GetPackGUID());
     data.append(unit->GetPackGUID());
     data << uint16(14867) << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
     SendPacket( &data );
 
-    data.Initialize(SMSG_SPELL_GO);
+    data.Initialize(SMSG_SPELL_GO, (2+2+1+1+1+8+4+2+2+8+8));
     data.append(_player->GetPackGUID());
     data.append(unit->GetPackGUID());
     data << uint16(14867) << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();

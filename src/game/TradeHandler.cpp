@@ -41,13 +41,12 @@ void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::SendUpdateTrade()
 {
-    WorldPacket data;
     Player *pThis =_player;
     Item *item = NULL;
 
     if( !pThis->pTrader ) return;
 
-    data.Initialize(SMSG_TRADE_STATUS_EXTENDED);
+    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100)); // guess size
     data << (uint8 ) 1;
     data << (uint32) 7;
     data << (uint32) 0;
@@ -233,12 +232,10 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
-
     if ( !GetPlayer()->pTrader )
         return;
 
-    data.Initialize(SMSG_TRADE_STATUS);
+    WorldPacket data(SMSG_TRADE_STATUS, 4);
     data << (uint32)7;
     _player->pTrader->GetSession()->SendPacket(&data);
 
@@ -247,17 +244,15 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
-
     if(!_player->pTrader)
         return;
 
-    data.Initialize(SMSG_TRADE_STATUS);
+    WorldPacket data(SMSG_TRADE_STATUS, 4);
     data << (uint32)2;
     _player->pTrader->GetSession()->SendPacket(&data);
     _player->pTrader->ClearTrade();
 
-    data.Initialize(SMSG_TRADE_STATUS);
+    data.Initialize(SMSG_TRADE_STATUS, 4);
     data << (uint32)2;
     SendPacket(&data);
     _player->ClearTrade();
@@ -265,9 +260,7 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::SendCancelTrade()
 {
-    WorldPacket data;
-
-    data.Initialize(SMSG_TRADE_STATUS);
+    WorldPacket data(SMSG_TRADE_STATUS, 4);
     data << (uint32)3;
     SendPacket(&data);
 }
@@ -289,7 +282,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if( !GetPlayer()->isAlive() )
     {
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)17;
         SendPacket(&data);
         return;
@@ -297,7 +290,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if( isLogingOut() )
     {
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)19;
         SendPacket(&data);
         return;
@@ -310,7 +303,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     if(!pOther)
     {
 
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)6;
         SendPacket(&data);
         return;
@@ -318,7 +311,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if( pOther->pTrader )
     {
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)0;
         SendPacket(&data);
         return;
@@ -326,7 +319,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if( !pOther->isAlive() )
     {
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)18;
         SendPacket(&data);
         return;
@@ -334,7 +327,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if( pOther->GetSession()->isLogingOut() )
     {
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)20;
         SendPacket(&data);
         return;
@@ -342,7 +335,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if( pOther->HasInIgnoreList(GetPlayer()->GetGUID()) )
     {
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)14;
         SendPacket(&data);
         return;
@@ -350,7 +343,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && pOther->GetTeam() !=_player->GetTeam() )
     {
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)11;
         SendPacket(&data);
         return;
@@ -358,7 +351,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if( pOther->GetDistance2dSq( (Object*)_player ) > 100.00 )
     {
-        data.Initialize(SMSG_TRADE_STATUS);
+        data.Initialize(SMSG_TRADE_STATUS, 4);
         data << (uint32)10;
         SendPacket(&data);
         return;
@@ -367,7 +360,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     _player->pTrader = pOther;
     pOther->pTrader =_player;
 
-    data.Initialize(SMSG_TRADE_STATUS);
+    data.Initialize(SMSG_TRADE_STATUS, 12);
     data << (uint32) 1;
     data << (uint64)_player->GetGUID();
     _player->pTrader->GetSession()->SendPacket(&data);

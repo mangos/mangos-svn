@@ -52,7 +52,6 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 {
     uint32 clientcount = 0;
-    WorldPacket data;
 
     sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
 
@@ -61,7 +60,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
     bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
 
-    data.Initialize( SMSG_WHO );
+    WorldPacket data( SMSG_WHO, 50 ); // guess size
     data << uint32( 0 );                                    // clientcount place holder
     data << uint32( 0 );                                    // clientcount place holder
 
@@ -119,7 +118,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
                                                             //...is jumping ...is falling
         Target->HasMovementFlags( MOVEMENT_JUMPING | MOVEMENT_FALLING ))
     {
-        data.Initialize( SMSG_LOGOUT_RESPONSE );
+        data.Initialize( SMSG_LOGOUT_RESPONSE, (2+4) ) ;
         data << (uint8)0xC;
         data << uint32(0);
         data << uint8(0);
@@ -141,14 +140,14 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     {
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-        data.Initialize( SMSG_FORCE_MOVE_ROOT );
+        data.Initialize( SMSG_FORCE_MOVE_ROOT, (8+4) ); // guess size
         data.append(Target->GetPackGUID());
         data << (uint32)2;
         SendPacket( &data );
         Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
     }
 
-    data.Initialize( SMSG_LOGOUT_RESPONSE );
+    data.Initialize( SMSG_LOGOUT_RESPONSE, 5 );
     data << uint32(0);
     data << uint8(0);
     SendPacket( &data );
@@ -169,14 +168,14 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 
     LogoutRequest(0);
 
-    data.Initialize( SMSG_LOGOUT_CANCEL_ACK );
+    data.Initialize( SMSG_LOGOUT_CANCEL_ACK, 0 );
     SendPacket( &data );
 
     // not remove flags if flight - its not setted in Logout request code.
     if(!GetPlayer()->isInFlight())
     {
         //!we can move again
-        data.Initialize( SMSG_FORCE_MOVE_UNROOT );
+        data.Initialize( SMSG_FORCE_MOVE_UNROOT, 8 ); // guess size
         data.append(GetPlayer()->GetPackGUID());
         SendPacket( &data );
 
@@ -195,7 +194,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 {
     int len = text ? strlen(text) : 0;
     WorldPacket data;
-    data.Initialize( SMSG_GMTICKET_GETTICKET );
+    data.Initialize( SMSG_GMTICKET_GETTICKET, (4+len+4) );
     data << uint32(6);
     if(len > 0)
         data.append((uint8 *)text,len+1);
@@ -206,8 +205,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
-    data.Initialize( SMSG_QUERY_TIME_RESPONSE );
+    WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4 );
     //    data << (uint32)20;
     data << (uint32)getMSTime();
     SendPacket( &data );
@@ -255,12 +253,11 @@ void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint32 guid = GetPlayer()->GetGUIDLow();
 
     sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u' LIMIT 1",guid);
 
-    data.Initialize( SMSG_GMTICKET_DELETETICKET );
+    WorldPacket data( SMSG_GMTICKET_DELETETICKET, 8 );
     data << uint32(1);
     data << uint32(0);
     SendPacket( &data );
@@ -295,7 +292,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 
         if ( cnt > 0 )
         {
-            data.Initialize( SMSG_GMTICKET_CREATE );
+            data.Initialize( SMSG_GMTICKET_CREATE, 4 );
             data << uint32(1);
             SendPacket( &data );
         }
@@ -304,12 +301,12 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 
             sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", guid, ticketText.c_str(), cat[buf[0]]);
 
-            data.Initialize( SMSG_QUERY_TIME_RESPONSE );
+            data.Initialize( SMSG_QUERY_TIME_RESPONSE, 4 );
             //data << (uint32)20;
             data << (uint32)getMSTime();
             SendPacket( &data );
 
-            data.Initialize( SMSG_GMTICKET_CREATE );
+            data.Initialize( SMSG_GMTICKET_CREATE, 4 );
             data << uint32(2);
             SendPacket( &data );
             DEBUG_LOG("update the ticket\n");
@@ -326,9 +323,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
-
-    data.Initialize( SMSG_GMTICKET_SYSTEMSTATUS );
+    WorldPacket data( SMSG_GMTICKET_SYSTEMSTATUS,4 );
     data << uint32(1);
 
     SendPacket( &data );
@@ -394,8 +389,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
         uint8 animstate;
         recv_data >> animstate;
 
-        WorldPacket data;
-        data.Initialize(SMSG_STANDSTATE_CHANGE_ACK);
+        WorldPacket data(SMSG_STANDSTATE_CHANGE_ACK, 1);
         data << animstate;
         SendPacket(&data);
 
@@ -439,7 +433,6 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     Player *pfriend=NULL;
     uint64 friendGuid = 0;
     uint32 friendArea = 0, friendLevel = 0, friendClass = 0;
-    WorldPacket data;
 
     recv_data >> friendName;
 
@@ -473,7 +466,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     }
 
-    data.Initialize( SMSG_FRIEND_STATUS );
+    WorldPacket data( SMSG_FRIEND_STATUS, (1+8+1+4+4+4) ); // guess size
 
     if (friendGuid && friendResult==FRIEND_NOT_FOUND)
     {
@@ -520,14 +513,13 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 {
     uint64 FriendGUID;
-    WorldPacket data;
 
     sLog.outDebug( "WORLD: Received CMSG_DEL_FRIEND"  );
     recv_data >> FriendGUID;
 
     uint8 FriendResult = FRIEND_REMOVED;
 
-    data.Initialize( SMSG_FRIEND_STATUS );
+    WorldPacket data( SMSG_FRIEND_STATUS, 9 );
 
     data << (uint8)FriendResult << (uint64)FriendGUID;
 
@@ -547,8 +539,6 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     std::string IgnoreName = "UNKNOWN";
     unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     uint64 IgnoreGuid = 0;
-
-    WorldPacket data;
 
     recv_data >> IgnoreName;
 
@@ -574,7 +564,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         }
     }
 
-    data.Initialize( SMSG_FRIEND_STATUS );
+    WorldPacket data( SMSG_FRIEND_STATUS, 9 );
 
     if (IgnoreGuid && ignoreResult == FRIEND_IGNORE_NOT_FOUND)
     {
@@ -604,14 +594,13 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 {
     uint64 IgnoreGUID;
-    WorldPacket data;
 
     sLog.outDebug( "WORLD: Received CMSG_DEL_IGNORE"  );
     recv_data >> IgnoreGUID;
 
     unsigned char IgnoreResult = FRIEND_IGNORE_REMOVED;
 
-    data.Initialize( SMSG_FRIEND_STATUS );
+    WorldPacket data( SMSG_FRIEND_STATUS, 9 );
 
     data << (uint8)IgnoreResult << (uint64)IgnoreGUID;
 
@@ -1042,11 +1031,10 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
 {
-    WorldPacket data;
     uint32 TotalTimePlayed = GetPlayer()->GetTotalPlayedTime();
     uint32 LevelPlayedTime = GetPlayer()->GetLevelPlayedTime();
 
-    data.Initialize(SMSG_PLAYED_TIME);
+    WorldPacket data(SMSG_PLAYED_TIME, 8);
     data << TotalTimePlayed;
     data << LevelPlayedTime;
     SendPacket(&data);
@@ -1055,7 +1043,6 @@ void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
 void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 {
 
-    WorldPacket data;
     uint64 guid;
     recv_data >> guid;
     DEBUG_LOG("Inspected guid is " I64FMTD,guid);
@@ -1071,7 +1058,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 
-    data.Initialize( SMSG_INSPECT );
+    WorldPacket data( SMSG_INSPECT, 8 );
     data << guid;
     SendPacket(&data);
 
@@ -1079,7 +1066,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
-    WorldPacket data;
     Player *pl;
     uint64 guid;
     recv_data >> guid;
@@ -1088,7 +1074,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     pl = objmgr.GetPlayer(guid);
     if(pl)
     {
-        data.Initialize( MSG_INSPECT_HONOR_STATS );
+        WorldPacket data( MSG_INSPECT_HONOR_STATS, (8+1+4+4+4+4+4+4+4+4+4+4+1) );
         data << guid;                                       // player guid
                                                             // Rank, filling bar, PLAYER_BYTES_3, ??
         data << (uint8)pl->GetUInt32Value(PLAYER_FIELD_HONOR_BAR);
@@ -1160,8 +1146,7 @@ void WorldSession::SendNotification(char const* msg)
 {
     if(msg)
     {
-        WorldPacket data;
-        data.Initialize(SMSG_NOTIFICATION);
+        WorldPacket data(SMSG_NOTIFICATION, (strlen(msg)+1));
         data << msg;
         SendPacket(&data);
     }

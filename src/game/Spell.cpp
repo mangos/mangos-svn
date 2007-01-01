@@ -575,8 +575,6 @@ void Spell::prepare(SpellCastTargets * targets)
 {
     uint8 result;
 
-    WorldPacket data;
-
     m_targets = *targets;
     if(!unitTarget)
         unitTarget = m_targets.getUnitTarget();
@@ -622,7 +620,6 @@ void Spell::cancel()
     if(m_spellState == SPELL_STATE_FINISHED)
         return;
 
-    WorldPacket data;
     m_autoRepeat = false;
     if(m_spellState == SPELL_STATE_PREPARING)
     {
@@ -829,9 +826,7 @@ void Spell::SendSpellCooldown()
     time_t recTime    = curTime+rec/1000;                   // in secs
     time_t catrecTime = curTime+catrec/1000;                // in secs
 
-    WorldPacket data;
-
-    data.Initialize(SMSG_SPELL_COOLDOWN);
+    WorldPacket data(SMSG_SPELL_COOLDOWN, (8+4+4+4+4));
     data << m_caster->GetGUID();
 
     // self spell cooldown
@@ -874,8 +869,7 @@ void Spell::SendSpellCooldown()
     // show cooldown for item
     if(m_CastItem)
     {
-        data.clear();
-        data.Initialize(SMSG_ITEM_COOLDOWN);
+        data.Initialize(SMSG_ITEM_COOLDOWN, (8+4));
         data << m_CastItem->GetGUID();
         data << uint32(m_spellInfo->Id);
         _player->GetSession()->SendPacket(&data);
@@ -985,8 +979,6 @@ void Spell::finish()
     m_spellState = SPELL_STATE_FINISHED;
     m_caster->m_canMove = true;
 
-    WorldPacket data;
-
     /*std::list<DynamicObject*>::iterator i;
     for(i = m_dynObjToDel.begin() ; i != m_dynObjToDel.end() ; i++)
     {
@@ -1026,9 +1018,7 @@ void Spell::SendCastResult(uint8 result)
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data;
-
-    data.Initialize(SMSG_CAST_RESULT);
+    WorldPacket data(SMSG_CAST_RESULT, (4+2));
     data << m_spellInfo->Id;
     if(result != 0)
     {
@@ -1050,7 +1040,6 @@ void Spell::SendCastResult(uint8 result)
 void Spell::SendSpellStart()
 {
     sLog.outDebug("Sending SMSG_SPELL_START");
-    WorldPacket data;
 
     m_castFlags = CAST_FLAG_UNKNOWN1;
     if(m_rangedShoot)
@@ -1062,7 +1051,7 @@ void Spell::SendSpellStart()
     else
         target = unitTarget;
 
-    data.Initialize(SMSG_SPELL_START);
+    WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2));
     //data.append(target->GetPackGUID());
     /* in fact this should be the causer's guid. so if you clicked on a item and
        this caused spell it has to be the item's guid
@@ -1085,7 +1074,6 @@ void Spell::SendSpellStart()
 void Spell::SendSpellGo()
 {
     sLog.outDebug("Sending SMSG_SPELL_GO");
-    WorldPacket data;
 
     Unit * target;
     if(!unitTarget)
@@ -1097,7 +1085,7 @@ void Spell::SendSpellGo()
     if(m_rangedShoot)
         m_castFlags = m_castFlags | CAST_FLAG_AMMO;
 
-    data.Initialize(SMSG_SPELL_GO);
+    WorldPacket data(SMSG_SPELL_GO, (50)); // guess size
     //data.append(target->GetPackGUID());
     /* in fact this should be the causer's guid. so if you clicked on a item and
        this caused spell it has to be the item's guid
@@ -1206,8 +1194,7 @@ void Spell::SendLogExecute()
         target = m_caster;
     else
         target = unitTarget;
-    WorldPacket data;
-    data.Initialize(SMSG_SPELLLOGEXECUTE);
+    WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         data.append(m_caster->GetPackGUID());
@@ -1233,13 +1220,13 @@ void Spell::SendInterrupted(uint8 result)
 {
     WorldPacket data;
 
-    data.Initialize(SMSG_SPELL_FAILURE);
+    data.Initialize(SMSG_SPELL_FAILURE, (8+4+1));
     data.append(m_caster->GetGUID());
     data << m_spellInfo->Id;
     data << result;
     m_caster->SendMessageToSet(&data, true);
 
-    data.Initialize(SMSG_SPELL_FAILED_OTHER);
+    data.Initialize(SMSG_SPELL_FAILED_OTHER, (8+4));
     data.append(m_caster->GetGUID());
     data << m_spellInfo->Id;
     m_caster->SendMessageToSet(&data, true);
@@ -1250,9 +1237,7 @@ void Spell::SendChannelUpdate(uint32 time)
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data;
-
-    data.Initialize( MSG_CHANNEL_UPDATE );
+    WorldPacket data( MSG_CHANNEL_UPDATE, 4 );
     data << time;
 
     ((Player*)m_caster)->GetSession()->SendPacket( &data );
@@ -1274,8 +1259,7 @@ void Spell::SendChannelStart(uint32 duration)
 
         target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
 
-        WorldPacket data;
-        data.Initialize( MSG_CHANNEL_START );
+        WorldPacket data( MSG_CHANNEL_START, (4+4) );
         data << m_spellInfo->Id;
         data << duration;
 
@@ -1293,8 +1277,7 @@ void Spell::SendChannelStart(uint32 duration)
 
 void Spell::SendResurrectRequest(Player* target)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_RESURRECT_REQUEST);
+    WorldPacket data(SMSG_RESURRECT_REQUEST, (8+4+1));
     data << m_caster->GetGUID();
     data << uint32(0) << uint8(0);
 
@@ -1303,8 +1286,7 @@ void Spell::SendResurrectRequest(Player* target)
 
 void Spell::SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal)
 {
-    WorldPacket data;
-    data.Initialize(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE);
+    WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (8+8+4+4+1));
     data.append(target->GetPackGUID());
     data.append(m_caster->GetPackGUID());
     data << SpellID;
@@ -1319,8 +1301,7 @@ void Spell::SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Dama
     if(!pet)
         return;
 
-    WorldPacket data;
-    data.Initialize(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE);
+    WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (8+8+4+4+1));
     data.append(pet->GetPackGUID());
     data.append(m_caster->GetPackGUID());
     data << SpellID;
@@ -1334,8 +1315,7 @@ void Spell::SendPlaySpellVisual(uint32 SpellID)
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data;
-    data.Initialize(SMSG_PLAY_SPELL_VISUAL);
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);
     data << m_caster->GetGUID();
     data << SpellID;
     ((Player*)m_caster)->GetSession()->SendPacket(&data);
@@ -2304,9 +2284,7 @@ void Spell::Delayed(int32 delaytime)
     if(m_timer > casttime)
         m_timer = (casttime > 0 ? casttime : 0);
 
-    WorldPacket data;
-
-    data.Initialize(SMSG_SPELL_DELAYED);
+    WorldPacket data(SMSG_SPELL_DELAYED, 12);
     data << m_caster->GetGUID();
     data << uint32(delaytime);
 

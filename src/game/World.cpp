@@ -765,9 +765,7 @@ void World::ShutdownCancel()
 
 void World::SendServerMessage(ServerMessageType type, const char *text, Player* player)
 {
-    WorldPacket data;
-
-    data.Initialize(SMSG_SERVER_MESSAGE);
+    WorldPacket data(SMSG_SERVER_MESSAGE, 50); // guess size
     data << uint32(type);
     if(type <= SERVER_MSG_STRING)
         data << text;

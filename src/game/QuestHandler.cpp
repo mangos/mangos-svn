@@ -329,8 +329,6 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
     uint32 quest;
     recvPacket >> quest;
 
-    WorldPacket data;
-
     sLog.outDetail( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
 
     Quest *pQuest = objmgr.QuestTemplates[quest];
@@ -351,8 +349,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                         Player *pPlayer = ObjectAccessor::Instance().FindPlayer(guid);
                         if( pPlayer )
                         {
-                            data.clear();
-                            data.Initialize( MSG_QUEST_PUSH_RESULT );
+                            WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );
                             data << guid;
                             data << uint32( QUEST_PARTY_MSG_SHARRING_QUEST );
                             data << uint8(0);
@@ -417,8 +414,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
         Player *pPlayer = ObjectAccessor::Instance().FindPlayer( _player->GetDivider() );
         if( pPlayer )
         {
-            WorldPacket data;
-            data.Initialize( MSG_QUEST_PUSH_RESULT );
+            WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );
             data << guid;
             data << uint32( msg );
             data << uint8(0);

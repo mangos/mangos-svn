@@ -131,8 +131,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_da
             ListToSend.push_back(*i);
     }
 
-    WorldPacket data;
-    data.Initialize(MSG_BATTLEGROUND_PLAYER_POSITIONS);
+    WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS, (4+16*ListToSend.size()+1));
     data << uint32(ListToSend.size());
     for(std::list<Player*>::iterator itr=ListToSend.begin();itr!=ListToSend.end();++itr)
     {
@@ -147,7 +146,6 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_da
 void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
 {
     sLog.outDebug( "WORLD: Recvd MSG_PVP_LOG_DATA Message");
-    WorldPacket data;
 
     if(!GetPlayer()->InBattleGround())
         return;
@@ -156,7 +154,7 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
     if(!bg)
         return;
 
-    data.Initialize(MSG_PVP_LOG_DATA);                      // MSG_PVP_LOG_DATA
+    WorldPacket data(MSG_PVP_LOG_DATA, (1+4+40*bg->GetPlayerScoresSize()));
     data << uint8(0x0);
     data << uint32(bg->GetPlayerScoresSize());
 
@@ -211,7 +209,6 @@ void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
 
     uint32 MapID;
     uint32 NumberOfInstances;
-    WorldPacket data;
 
     //recv_data.hexlike();
 
@@ -222,7 +219,7 @@ void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
     //MapID = 489;
 
     NumberOfInstances = 8;
-    data.Initialize(SMSG_BATTLEFIELD_LIST);
+    WorldPacket data(SMSG_BATTLEFIELD_LIST, (8+4+4+4*NumberOfInstances+1));
     data << uint64(GetPlayer()->GetGUID());
     data << uint32(MapID);
     data << uint32(NumberOfInstances << 8);

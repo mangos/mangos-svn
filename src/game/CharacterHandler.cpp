@@ -39,9 +39,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
     // keys can be non cleared if player open realm list and close it by 'cancel'
     loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
 
-    WorldPacket data;
-
-    data.Initialize(SMSG_CHAR_ENUM);
+    WorldPacket data(SMSG_CHAR_ENUM, (100)); // we guess size
 
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
 
@@ -85,7 +83,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     // prevent character creating with invalid name
     if(name.size() == 0)
     {
-        data.Initialize( SMSG_CHAR_CREATE );
+        data.Initialize( SMSG_CHAR_CREATE, 1 );
         data << (uint8)0x33;
         SendPacket( &data );
         return;
@@ -95,7 +93,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     {
         if(!isalpha(name[i]))
         {
-            data.Initialize( SMSG_CHAR_CREATE );
+            data.Initialize( SMSG_CHAR_CREATE, 1 );
             data << (uint8)0x33;
             SendPacket( &data );
             return;
@@ -111,7 +109,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     {
         delete result;
 
-        data.Initialize(SMSG_CHAR_CREATE);
+        data.Initialize(SMSG_CHAR_CREATE, 1);
         data << (uint8)0x31;
         SendPacket( &data );
 
@@ -124,7 +122,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     {
         if (result->GetRowCount() >= 10)
         {
-            data.Initialize(SMSG_CHAR_CREATE);
+            data.Initialize(SMSG_CHAR_CREATE, 1);
             data << (uint8)0x2F;
             SendPacket( &data );
             delete result;
@@ -153,7 +151,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
             if(team != team_ && GetSecurity() < 2 && !AllowTwoSideAccounts)
             {
-                data.Initialize( SMSG_CHAR_CREATE );
+                data.Initialize( SMSG_CHAR_CREATE, 1 );
                 data << (uint8)0x33;
                 SendPacket( &data );
                 return;
@@ -185,7 +183,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         // Player not create (race/class problem?)
         delete pNewChar;
 
-        data.Initialize(SMSG_CHAR_CREATE);
+        data.Initialize(SMSG_CHAR_CREATE, 1);
         data << (uint8)0x2F;
         SendPacket( &data );
 
@@ -200,7 +198,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     // 0x35 - Char delete Okay
     // 0x36 - Char delete failed
 
-    data.Initialize( SMSG_CHAR_CREATE );
+    data.Initialize( SMSG_CHAR_CREATE, 1 );
     data << (uint8)0x2E;
     SendPacket( &data );
 
@@ -209,8 +207,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
-
     uint64 guid;
     recv_data >> guid;
 
@@ -229,14 +225,13 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 
     //data.Initialize(SMSG_CHAR_CREATE);
     //data << (uint8)0x34;
-    data.Initialize(SMSG_CHAR_DELETE);                      // Changed in 1.12.x client branch
+    WorldPacket data(SMSG_CHAR_DELETE, 1);                      // Changed in 1.12.x client branch
     data << (uint8)0x39;                                    // Changed in 1.12.x client branch
     SendPacket( &data );
 }
 
 void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     uint64 playerGuid = 0;
 
     DEBUG_LOG( "WORLD: Recvd Player Logon Message" );
@@ -264,7 +259,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     SetPlayer(plr);
 
-    data.Initialize( SMSG_ACCOUNT_DATA_MD5 );
+    WorldPacket data( SMSG_ACCOUNT_DATA_MD5, (80) );
 
     for(int i = 0; i < 80; i++)
         data << uint8(0);
@@ -287,15 +282,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         Guild* guild = objmgr.GetGuildById(pCurrChar->GetGuildId());
         if(guild)
         {
-            data.Initialize(SMSG_GUILD_EVENT);
+            data.Initialize(SMSG_GUILD_EVENT, (2+guild->GetMOTD().size()+1));
             data << (uint8)GE_MOTD;
             data << (uint8)1;
             data << guild->GetMOTD();
             SendPacket(&data);
             DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
 
-            WorldPacket data;
-            data.Initialize(SMSG_GUILD_EVENT);
+            data.Initialize(SMSG_GUILD_EVENT, (5+10)); // we guess size
             data<<(uint8)GE_SIGNED_ON;
             data<<(uint8)1;
             data<<pCurrChar->GetName();
@@ -326,7 +320,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
             assert(result4);
             fields = result4->Fetch();
-            data.Initialize (SMSG_BINDPOINTUPDATE);
+            data.Initialize (SMSG_BINDPOINTUPDATE, 5*4);
             data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
             data << fields[0].GetUInt32();
             data << fields[1].GetUInt32();
@@ -343,7 +337,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             fields = result5->Fetch();
             // store and send homebind for player
             sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
-            data.Initialize (SMSG_BINDPOINTUPDATE);
+            data.Initialize (SMSG_BINDPOINTUPDATE, 5*4);
             data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
             data << fields[0].GetUInt32();
             data << fields[1].GetUInt32();
@@ -354,7 +348,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         delete result7;
     }
 
-    data.Initialize( SMSG_TUTORIAL_FLAGS );
+    data.Initialize( SMSG_TUTORIAL_FLAGS, 8*32 );
 
     for (int i = 0; i < 8; i++)
         data << uint32( GetPlayer()->GetTutorialInt(i) );
@@ -384,7 +378,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }*/
 
-    data.Initialize(SMSG_INITIALIZE_FACTIONS);
+    data.Initialize(SMSG_INITIALIZE_FACTIONS, (4+64*5));
     data << uint32 (0x00000040);
     for(uint32 a=0; a<64; a++)
     {
@@ -411,7 +405,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     GetPlayer()->UpdateHonor();
 
-    data.Initialize(SMSG_LOGIN_SETTIMESPEED);
+    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
     time_t gameTime = sWorld.GetGameTime();
     struct tm *lt = localtime(&gameTime);
     uint32 xmitTime = (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 |
@@ -429,7 +423,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(GetPlayer()->getRace());
         if(rEntry)
         {
-            data.Initialize( SMSG_TRIGGER_CINEMATIC );
+            data.Initialize( SMSG_TRIGGER_CINEMATIC,4 );
             data << uint32(rEntry->startmovie);
             SendPacket( &data );
         }
@@ -459,7 +453,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
     plr->SetInGameTime( getMSTime() );
 
-    data.Initialize(SMSG_FRIEND_STATUS);
+    data.Initialize(SMSG_FRIEND_STATUS, 19);
     data<<uint8(FRIEND_ONLINE);
     data<<pCurrChar->GetGUID();
     data<<uint8(1);

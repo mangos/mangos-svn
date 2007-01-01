@@ -34,8 +34,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 
     GetPlayer()->RemoveFromWorld();
     MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Add(GetPlayer());
-    WorldPacket data;
-    data.Initialize(SMSG_SET_REST_START);
+    WorldPacket data(SMSG_SET_REST_START, 4);
     data << uint32(8129);
     SendPacket(&data);
     GetPlayer()->SetDontMove(false);
@@ -80,15 +79,13 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     {
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
         // Can't move
-        WorldPacket data;
-        data.Initialize( SMSG_FORCE_MOVE_ROOT );
+        WorldPacket data( SMSG_FORCE_MOVE_ROOT, 12 ); // guess size
         data.append(Target->GetPackGUID());
         data << (uint32)2;
         SendPacket( &data );
     }
 
-    WorldPacket data;
-    data.Initialize( recv_data.GetOpcode() );
+    WorldPacket data( recv_data.GetOpcode(), (8+4+4+4+4+4+4) );
     data.append(GetPlayer()->GetPackGUID());
     data << flags << time;
     data << x << y << z << GetPlayer()->GetOrientation();
@@ -175,8 +172,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     if(!(opcode == MSG_MOVE_HEARTBEAT && isJumping))
     {
-        WorldPacket data;
-        data.Initialize( opcode );
+        WorldPacket data( opcode, (8+4+4+4+4+4+4) );
         data.append(GetPlayer()->GetPackGUID());
         data << flags << time;
         data << x << y << z << orientation;
@@ -199,8 +195,7 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
 {
     //sLog.outDebug("WORLD: Recvd CMSG_MOUNTSPECIAL_ANIM");
 
-    WorldPacket data;
-    data.Initialize(SMSG_MOUNTSPECIAL_ANIM);
+    WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 8);
     data << uint64(GetPlayer()->GetGUID());
 
     GetPlayer()->SendMessageToSet(&data, false);

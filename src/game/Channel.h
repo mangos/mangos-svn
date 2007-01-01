@@ -42,7 +42,7 @@ class Channel
 
         WorldPacket *MakeNotifyPacket(WorldPacket *data, uint8 code)
         {
-            data->Initialize(SMSG_CHANNEL_NOTIFY);
+            data->Initialize(SMSG_CHANNEL_NOTIFY, (1+10)); // guess size
             *data << code << name.c_str();
             return data;
         }
