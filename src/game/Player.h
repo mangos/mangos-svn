@@ -31,6 +31,7 @@
 #include "Bag.h"
 #include "Weather.h"
 #include "WorldSession.h"
+#include "Pet.h"
 
 struct Mail;
 class Channel;
@@ -475,7 +476,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             if(s == JUST_DIED && cur)
             {
                 _RemoveAllItemMods();
-                AbandonPet();
+                RemovePet(NULL,PET_SAVE_AS_CURRENT);
             }
             Unit::setDeathState(s);
             if(isAlive() && !cur)
@@ -509,7 +510,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetTimeInnEter() const { return time_inn_enter; };
         void UpdateInnerTime (int time) { time_inn_enter = time; };
 
-        void AbandonPet(Pet* pet = NULL, bool real = true);
+        void RemovePet(Pet* pet, PetSaveMode mode);
         void Uncharm();
 
         float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
@@ -681,7 +682,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         void SaveToDB();
-        void SavePet();
         static bool SaveValuesArrayInDB(vector<string> const& data,uint64 guid);
         static void SetUInt32ValueInArray(vector<string>& data,uint16 index, uint32 value);
         static void SetFloatValueInArray(vector<string>& data,uint16 index, float value);
