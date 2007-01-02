@@ -894,7 +894,7 @@ void Spell::EffectLearnSpell(uint32 i)
         {
             Creature *pet = m_caster->GetPet();
 
-            if( !pet || !pet->isPet() || pet!=unitTarget )
+            if( !pet || !pet->isPet() || pet!=unitTarget || !pet->isAlive() )
                 return;
 
             EffectLearnPetSpell(i);
@@ -1140,6 +1140,14 @@ void Spell::EffectSummonWild(uint32 i)
 
         spawnCreature->SetArmor(level*50);
         spawnCreature->AIM_Initialize();
+
+        std::string name;
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            name = ((Player*)m_caster)->GetName();
+        else
+            name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
+        name.append(petTypeSuffix[spawnCreature->getPetType()]);
+        spawnCreature->SetName( name );
 
         spawnCreature->AddToWorld();
         MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
@@ -2167,7 +2175,8 @@ void Spell::EffectDismissPet(uint32 i)
 
     Pet* pet = m_caster->GetPet();
 
-    if(!pet)
+    // not let dismiss dead pet
+    if(!pet||!pet->isAlive())
         return;
     
     ((Player*)m_caster)->RemovePet(pet,PET_SAVE_AS_CURRENT);

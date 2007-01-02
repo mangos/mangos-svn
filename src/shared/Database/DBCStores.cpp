@@ -213,6 +213,13 @@ void LoadDBCStores(std::string dataPath)
         exit(1);
     }
 
+    // check at up-to-date DBC files (33392 is last added spell in 1.12.1)
+    if(!sSpellStore.LookupEntry(33392))
+    {
+        sLog.outError("\nYou have _outdated_ DBC files. Please existact correct versions from current using client.");
+        exit(1);
+    }
+
     sLog.outString( "" );
     sLog.outString( ">> Loaded %d data stores", DBCFilesCount );
     sLog.outString( "" );

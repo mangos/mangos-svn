@@ -1296,7 +1296,7 @@ void Spell::SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage,
 void Spell::SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal)
 {
     Pet* pet = target->GetPet();
-    if(!pet)
+    if(!pet||!pet->isAlive())                               // must revive before heal
         return;
 
     WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (8+8+4+4+1));

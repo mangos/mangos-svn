@@ -87,7 +87,6 @@ uint32 WorldSocket::_GetSeed()
 void WorldSocket::SendPacket(WorldPacket* packet)
 {
     WorldPacket *pck = new WorldPacket(*packet);
-    ASSERT(pck);
 
     _sendQueue.add(pck);
 }
