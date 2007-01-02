@@ -1523,7 +1523,7 @@ uint8 Spell::CanCast()
 
     // cancel autorepeat spells if cast start when moving 
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
-    if( ((Player*)m_caster)->GetMovementFlags() &&  IsAutoRepeat() )
+    if( ((Player*)m_caster)->GetMovementFlags() &&  (IsAutoRepeat() || m_rangedShoot) )
 	{
 		SendCastResult(CAST_FAIL_CANT_DO_WHILE_MOVING);
 		return CAST_FAIL_CANT_DO_WHILE_MOVING;
