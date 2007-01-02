@@ -1332,7 +1332,7 @@ void Spell::TakeCastItem()
     uint32 ItemClass = proto->Class;
     uint32 ItemSubClass = proto->SubClass;
 
-    bool spendable = false;
+    bool expendable = false;
     bool withoutCharges = false;
     int32 charges;
 
@@ -1340,38 +1340,31 @@ void Spell::TakeCastItem()
     {
         if (proto->Spells[i].SpellId)
         {
-            // have limited or unlimited charges
-            if(proto->Spells[i].SpellCharges)
+            // item has limited charges
+            if (proto->Spells[i].SpellCharges)
             {
-                spendable = true;
+                if (proto->Spells[i].SpellCharges < 0)
+                    expendable = true;
                 charges = int32(m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i));
 
-                // limited charges and have charges
-                if(charges>0)
+                // item has charges left
+                if (charges > 0)
                 {
                     --charges;
-                    m_CastItem->SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i,  charges);
+                    if (proto->Stackable < 2)
+                        m_CastItem->SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i, charges);
+                    m_CastItem->SetState(ITEM_CHANGED, (Player*)m_caster);
                 }
 
                 // all charges used
                 if (charges == 0)
                     withoutCharges = true;
-
-                // last case: (-1, or any <0 value) infinity charges (non destroyble if other spell not have limited charges)
             }
         }
     }
 
-    if (ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_BOOK || ItemClass == ITEM_CLASS_QUEST || (ItemClass == ITEM_CLASS_TRADE_GOODS && ItemSubClass == ITEM_SUBCLASS_BOMB))
+    if (expendable && withoutCharges)
     {
-        //Soulstones (minor, greater, major, etc) not destroyed
-        if(proto->DisplayInfoID == 6009 && m_spellInfo->School == 5)
-            return;
-
-        //quest or consumable items with charges, not destroyed
-        if ((ItemClass == ITEM_CLASS_CONSUMABLE || ItemClass == ITEM_CLASS_QUEST) && spendable && !withoutCharges)
-            return;
-
         uint32 count = 1;
         ((Player*)m_caster)->DestroyItemCount(m_CastItem, count, true);
 
@@ -2032,12 +2025,12 @@ uint8 Spell::CheckItems()
 
             uint32 charges;
             for (int i = 0; i<5; i++)
-                if (abs(proto->Spells[i].SpellCharges) > 0)
-            {
-                charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i);
-                if (charges == 0)
-                    return CAST_FAIL_NO_CHARGES_REMAIN;
-            }
+                if (proto->Spells[i].SpellCharges)
+                {
+                    charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i);
+                    if (charges == 0)
+                        return CAST_FAIL_NO_CHARGES_REMAIN;
+                }
 
             uint32 ItemClass = proto->Class;
             if (ItemClass == ITEM_CLASS_CONSUMABLE && unitTarget)

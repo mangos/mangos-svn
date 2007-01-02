@@ -218,7 +218,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
             data << pProto->Spells[s].SpellId;
             data << pProto->Spells[s].SpellTrigger;
-            data << uint32(pProto->Spells[s].SpellCharges);
+            data << uint32(-abs(pProto->Spells[s].SpellCharges));
             data << uint32(dbc_data ? spell->RecoveryTime         : pProto->Spells[s].SpellCooldown);
             data << uint32(dbc_data ? spell->Category             : pProto->Spells[s].SpellCategory);
             data << uint32(dbc_data ? spell->CategoryRecoveryTime : pProto->Spells[s].SpellCategoryCooldown);
