@@ -3303,8 +3303,16 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-            damage += (*i)->GetModifier()->m_amount;
-
+	    {
+		// old one
+                //damage += (*i)->GetModifier()->m_amount;
+		int32 _damage = (*pdamage + (*i)->GetModifier()->m_amount);
+		    if (_damage < 0)
+			*pdamage = 0;
+		    else
+			*pdamage = _damage;
+	    }
+							
     AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
