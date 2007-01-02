@@ -40,101 +40,52 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     GetPlayer()->SetDontMove(false);
 }
 
-void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
-{
-    uint32 flags, time;
-    float x, y, z, orientation;
-    Player *Target = GetPlayer();
-
-    uint32 FallTime;
-
-    uint64 guid;
-    uint32 damage;
-
-    if(Target->GetDontMove())
-        return;
-
-    recv_data >> flags >> time;
-    recv_data >> x >> y >> z >> orientation;
-    recv_data >> FallTime;
-
-    if ( FallTime > 1100 && !Target->isDead() && !Target->isGameMaster() &&
-        !Target->HasAuraType(SPELL_AURA_HOVER) && !Target->HasAuraType(SPELL_AURA_FEATHER_FALL) )
-    {
-        uint32 MapID = Target->GetMapId();
-        Map* Map = MapManager::Instance().GetMap(MapID);
-        float posz = Map->GetWaterLevel(x,y);
-        guid = Target->GetGUID();
-        float fallperc = float(FallTime)*10/11000;
-        float predamage = (fallperc*fallperc - 1) /9  * Target->GetMaxHealth();
-        damage = (uint32)predamage;
-
-        if (damage > 0 && damage < 2* Target->GetMaxHealth())
-            Target->EnvironmentalDamage(guid,DAMAGE_FALL, damage);
-        DEBUG_LOG("!! z=%f, pz=%f FallTime=%d posz=%f damage=%d" , z, Target->GetPositionZ(),FallTime, posz,damage);
-    }
-
-    //handle fall and logout at the sametime
-    if (Target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
-    {
-        Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-        // Can't move
-        WorldPacket data( SMSG_FORCE_MOVE_ROOT, 12 ); // guess size
-        data.append(Target->GetPackGUID());
-        data << (uint32)2;
-        SendPacket( &data );
-    }
-
-    WorldPacket data( recv_data.GetOpcode(), (8+4+4+4+4+4+4) );
-    data.append(GetPlayer()->GetPackGUID());
-    data << flags << time;
-    data << x << y << z << GetPlayer()->GetOrientation();
-    GetPlayer()->SendMessageToSet(&data, false);
-}
-
-void WorldSession::HandleMoveFallResetOpcode( WorldPacket & recv_data )
-{
-    sLog.outDebug("Received opcode CMSG_MOVE_FALL_RESET");
-    uint64 unk5;
-    uint32 unk1, unk2;
-    float x, y, z, o, o1, o2, o3;
-    recv_data >> unk1;                                      // constant ??? (24577 for me)
-    recv_data >> unk2;                                      // time?
-    recv_data >> x;                                         // x coordinate
-    recv_data >> y;                                         // y coordinate
-    recv_data >> z;                                         // z coordinate
-    recv_data >> o;                                         // orientation
-    recv_data >> unk5;                                      // 0
-    recv_data >> o1;                                        // orientation of ??
-    recv_data >> o2;                                        // orientation of ??
-    recv_data >> o3;                                        // orientation of ??
-    sLog.outDebug("CMSG_MOVE_FALL_RESET: %u %u %f %f %f %f " I64FMTD " %f %f %f", unk1, unk2, x, y, z, o, unk5, o1, o2, o3);
-}
-
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
-    uint32 flags, time;
-    float x, y, z, orientation;
-
     if(GetPlayer()->GetDontMove())
         return;
 
+
+    /* extract packet */
+    uint32 flags, time, fallTime;
+    float x, y, z, orientation;
+
+    uint32 t_GUIDl, t_GUIDh;
+    float  t_x, t_y, t_z, t_o;
+    float  s_angle;
+    uint32 f_currFallTime;
+    float  f_unk1, f_sinAngle, f_cosAngle;
+
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
+    if (flags & MOVEMENTFLAG_FALLING)
+    {
+        recv_data >> f_currFallTime;            // current fall duration
+        recv_data >> f_unk1;                    // = 0xD893FEC0
+        recv_data >> f_sinAngle >> f_cosAngle;  // sin + cos of angle between orientation0 and players orientation
+    }
+    if (flags & MOVEMENTFLAG_SWIMMING)
+    {
+        recv_data >> s_angle;                   // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
+    }
+    if (flags & MOVEMENTFLAG_ONTRANSPORT)
+    {
+        recv_data >> t_GUIDl >> t_GUIDh;
+        recv_data >> t_x >> t_y >> t_z >> t_o;
+    }
+    recv_data >> fallTime;                      // duration of last fall
+    /*----------------*/
 
-    if (flags & 0x2000000)                                  // Transport GUID present
+
+    /* handle special cases */
+    if (flags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // if we boarded a transport, add us to it
-        uint32 tGUIDl, tGUIDh;
-        float tX, tY, tZ, tO;
-        recv_data >> tGUIDl >> tGUIDh;
-        recv_data >> tX >> tY >> tZ >> tO;
-
         if (!GetPlayer()->m_transport)
         {
             for (vector<Transport*>::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); iter++)
             {
-                if ((*iter)->GetGUIDLow() == tGUIDl)
+                if ((*iter)->GetGUIDLow() == t_GUIDl)
                 {
                     GetPlayer()->m_transport = (*iter);
                     (*iter)->AddPassenger(GetPlayer());
@@ -142,44 +93,59 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 }
             }
         }
-        GetPlayer()->m_transX = tX;
-        GetPlayer()->m_transY = tY;
-        GetPlayer()->m_transZ = tZ;
-        GetPlayer()->m_transO = tO;
-    }
-    else
+        GetPlayer()->m_transX = t_x;
+        GetPlayer()->m_transY = t_y;
+        GetPlayer()->m_transZ = t_z;
+        GetPlayer()->m_transO = t_o;
+    }    
+    else if (GetPlayer()->m_transport)// if we were on a transport, leave
     {
-        // if we were on a transport, leave
-        if (GetPlayer()->m_transport)
+        GetPlayer()->m_transport->RemovePassenger(GetPlayer());
+        GetPlayer()->m_transport = NULL;
+        GetPlayer()->m_transX = 0.0f;
+        GetPlayer()->m_transY = 0.0f;
+        GetPlayer()->m_transZ = 0.0f;
+        GetPlayer()->m_transO = 0.0f;
+    }
+
+    if (GetPlayer()->HasMovementFlags(MOVEMENTFLAG_FALLING) && !(flags&MOVEMENTFLAG_FALLING))
+    {
+        Player *target = GetPlayer();
+        if (fallTime > 1100 && !target->isDead() && !target->isGameMaster() &&
+            !target->HasAuraType(SPELL_AURA_HOVER) && !target->HasAuraType(SPELL_AURA_FEATHER_FALL))
         {
-            GetPlayer()->m_transport->RemovePassenger(GetPlayer());
-            GetPlayer()->m_transport = NULL;
-            GetPlayer()->m_transX = 0.0f;
-            GetPlayer()->m_transY = 0.0f;
-            GetPlayer()->m_transZ = 0.0f;
-            GetPlayer()->m_transO = 0.0f;
+            Map *map = MapManager::Instance().GetMap(target->GetMapId());
+            float posz = map->GetWaterLevel(x,y);
+            float fallperc = float(fallTime)*10/11000;
+            uint32 damage = (uint32)((fallperc*fallperc -1) / 9 * target->GetMaxHealth());
+            
+            if (damage > 0 && damage < 2* target->GetMaxHealth())
+                target->EnvironmentalDamage(target->GetGUID(),DAMAGE_FALL, damage);
+            DEBUG_LOG("!! z=%f, pz=%f FallTime=%d posz=%f damage=%d" , z, target->GetPositionZ(),fallTime, posz, damage);
+        }
+
+        //handle fall and logout at the sametime
+        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
+        {
+            target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+            // Can't move
+            WorldPacket data( SMSG_FORCE_MOVE_ROOT, 12 ); 
+            data.append(target->GetPackGUID());
+            data << (uint32)2;
+            SendPacket( &data );
         }
     }
+    /*----------------------*/
 
-    bool isJumping = GetPlayer()->HasMovementFlags(MOVEMENT_JUMPING);
-    uint16 opcode = recv_data.GetOpcode();
 
-    //Movement flag
-    if (opcode == MSG_MOVE_HEARTBEAT && isJumping)
-        GetPlayer( )->SetMovementFlags(GetPlayer( )->GetMovementFlags() & ~MOVEMENT_JUMPING);
-    else
-        GetPlayer( )->SetMovementFlags(flags);
+    /* process position-change */
+    WorldPacket data(recv_data.GetOpcode(), (8+recv_data.size()));
+    data.append(GetPlayer()->GetPackGUID());
+    data.append(recv_data.contents(), recv_data.size());
+    GetPlayer()->SendMessageToSet(&data, false);
 
-    if(!(opcode == MSG_MOVE_HEARTBEAT && isJumping))
-    {
-        WorldPacket data( opcode, (8+4+4+4+4+4+4) );
-        data.append(GetPlayer()->GetPackGUID());
-        data << flags << time;
-        data << x << y << z << orientation;
-        GetPlayer()->SendMessageToSet(&data, false);
-    }
-
-    GetPlayer( )->SetPosition(x, y, z, orientation);
+    GetPlayer()->SetPosition(x, y, z, orientation);
+    GetPlayer()->SetMovementFlags(flags);
 }
 
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)

@@ -920,7 +920,7 @@ void Spell::update(uint32 difftime)
                 if( m_caster->GetTypeId() == TYPEID_PLAYER )
                 {
                     // check if player has jumped before the channeling finished
-                    if( ((Player*)m_caster)->HasMovementFlags(MOVEMENT_JUMPING) )
+                    if( ((Player*)m_caster)->HasMovementFlags(MOVEMENTFLAG_JUMPING) )
                         cancel();
 
                     // check for incapacitating player states

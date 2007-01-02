@@ -342,7 +342,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { MSG_MOVE_SET_PITCH,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_SWIM,              STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_STOP_SWIM,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
-        { MSG_MOVE_FALL_LAND,               STATUS_LOGGEDIN, &WorldSession::HandleFallOpcode                    },
+        { MSG_MOVE_FALL_LAND,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { CMSG_MOUNTSPECIAL_ANIM,           STATUS_LOGGEDIN, &WorldSession::HandleMountSpecialAnimOpcode        },
 
         { CMSG_GROUP_INVITE,                STATUS_LOGGEDIN, &WorldSession::HandleGroupInviteOpcode             },
@@ -372,7 +372,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { MSG_PETITION_DECLINE,             STATUS_LOGGEDIN, &WorldSession::HandlePetitionDeclineOpcode         },
         { CMSG_OFFER_PETITION,              STATUS_LOGGEDIN, &WorldSession::HandleOfferPetitionOpcode           },
         { CMSG_TURN_IN_PETITION,            STATUS_LOGGEDIN, &WorldSession::HandleTurnInPetitionOpcode          },
-        { CMSG_MOVE_FALL_RESET,             STATUS_LOGGEDIN, &WorldSession::HandleMoveFallResetOpcode           },
+        { CMSG_MOVE_FALL_RESET,             STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
 
         { CMSG_GUILD_QUERY,                 STATUS_AUTHED,   &WorldSession::HandleGuildQueryOpcode              },
         { CMSG_GUILD_CREATE,                STATUS_LOGGEDIN, &WorldSession::HandleGuildCreateOpcode             },
