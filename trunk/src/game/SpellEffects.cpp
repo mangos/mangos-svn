@@ -874,8 +874,8 @@ void Spell::EffectSummon(uint32 i)
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         m_caster->SetPet(spawnCreature);
+        spawnCreature->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
-        ((Player*)m_caster)->SavePet();
     }
 }
 
@@ -1083,7 +1083,7 @@ void Spell::EffectSummonWild(uint32 i)
 
     if (old_wild)                                           // find old critter, unsummon
     {
-        old_wild->Abandon();
+        old_wild->Remove(PET_SAVE_AS_DELETED);
         return;
     }
     else                                                    // in another case summon new
@@ -1313,6 +1313,9 @@ void Spell::EffectTameCreature(uint32 i)
         if(m_caster->getVictim()==creatureTarget)
             m_caster->AttackStop();
 
+        creatureTarget->CombatStop();
+        creatureTarget->StopMoving();
+
         Pet* pet = new Pet(HUNTER_PET);
 
         pet->CreateBaseAtCreature(creatureTarget);
@@ -1341,8 +1344,8 @@ void Spell::EffectTameCreature(uint32 i)
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             m_caster->SetPet(pet);
+            pet->SavePetToDB(PET_SAVE_AS_CURRENT);
             ((Player*)m_caster)->PetSpellInitialize();
-            ((Player*)m_caster)->SavePet();
         }
     }
 }
@@ -1354,56 +1357,54 @@ void Spell::EffectSummonPet(uint32 i)
 
     uint32 petentry = m_spellInfo->EffectMiscValue[i];
 
+    Pet *OldSummon = m_caster->GetPet();
+
+    // if pet requested type already exist
+    if( OldSummon )
+    {
+        
+        if(petentry == 0 || OldSummon->GetCreatureInfo()->Entry == petentry)
+        {
+            // pet in corpse state can't be summoned
+            if( OldSummon->isDead() )
+                return;
+
+            MapManager::Instance().GetMap(OldSummon->GetMapId())->Remove((Creature*)OldSummon,false);
+            OldSummon->SetMapId(m_caster->GetMapId());
+            OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
+            MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)OldSummon);
+
+            if(m_caster->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled() )
+            {
+                ((Player*)m_caster)->PetSpellInitialize();
+            }
+            return;
+        }
+
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)m_caster)->RemovePet(OldSummon,PET_SAVE_AS_DELETED);
+        else
+            return;
+    }
+
+    Pet* NewSummon = new Pet(m_caster->getClass() == CLASS_HUNTER ? HUNTER_PET : SUMMON_PET);
+
+    // petentry==0 for hunter "call pet" (current pet summoned if any)
+    if(NewSummon->LoadPetFromDB(m_caster,petentry))
+    {
+        NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
+        return;
+    }
+
+    // not error in case fail hunter call pet
+    if(!petentry)
+        return;
+
     CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(petentry);
 
     if(!cInfo)
     {
         sLog.outError("EffectSummonPet: creature entry %u not found.",petentry);
-        return;
-    }
-
-    Pet *OldSummon = m_caster->GetPet();
-
-    // if pet requested type already exist
-    if(OldSummon && OldSummon->isPet() && OldSummon->GetCreatureInfo()->Entry == petentry)
-    {
-        if(OldSummon->isDead() )
-        {
-            uint32 petlvl = OldSummon->getLevel();
-            OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-            OldSummon->SetHealth( 28 + 10 * petlvl );
-            OldSummon->SetMaxHealth( 28 + 10 * petlvl );
-            OldSummon->SetPower(   POWER_MANA, 28 + 10 * petlvl);
-            OldSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlvl);
-            OldSummon->setDeathState(ALIVE);
-            OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
-            (*OldSummon)->Clear();
-        }
-        MapManager::Instance().GetMap(OldSummon->GetMapId())->Remove((Creature*)OldSummon,false);
-        OldSummon->SetMapId(m_caster->GetMapId());
-        OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-        MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)OldSummon);
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            ((Player*)m_caster)->PetSpellInitialize();
-            ((Player*)m_caster)->SavePet();
-        }
-        return;
-    }
-
-    if(OldSummon)
-    {
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_caster)->AbandonPet(OldSummon);
-        else
-            return;
-    }
-
-    Pet* NewSummon = new Pet(m_caster->getClass() == CLASS_HUNTER && cInfo->type == CREATURE_TYPE_BEAST ? HUNTER_PET : SUMMON_PET);
-
-    if(NewSummon->LoadPetFromDB(m_caster,petentry))
-    {
-        ((Player*)m_caster)->SavePet();
         return;
     }
 
@@ -1456,7 +1457,6 @@ void Spell::EffectSummonPet(uint32 i)
             NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);
         }
 
-        NewSummon->SavePetToDB(true);
         NewSummon->AIM_Initialize();
 
         NewSummon->AddToWorld();
@@ -1467,8 +1467,8 @@ void Spell::EffectSummonPet(uint32 i)
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
+            NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
             ((Player*)m_caster)->PetSpellInitialize();
-            ((Player*)m_caster)->SavePet();
         }
     }
     else
@@ -1482,7 +1482,7 @@ void Spell::EffectLearnPetSpell(uint32 i)
 
     Player *_player = (Player*)m_caster;
 
-    Creature *pet = _player->GetPet();
+    Pet *pet = _player->GetPet();
     if(!pet)
         return;
     if(!pet->isAlive())
@@ -1506,7 +1506,7 @@ void Spell::EffectLearnPetSpell(uint32 i)
             break;
         }
     }
-    _player->SavePet();
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     _player->PetSpellInitialize();
 }
 
@@ -2161,8 +2161,12 @@ void Spell::EffectDismissPet(uint32 i)
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(m_caster->GetPet()->isPet())
-        ((Player*)m_caster)->AbandonPet();
+    Pet* pet = m_caster->GetPet();
+
+    if(!pet)
+        return;
+    
+    ((Player*)m_caster)->RemovePet(pet,PET_SAVE_AS_CURRENT);
 }
 
 void Spell::EffectSummonObject(uint32 i)
@@ -2389,7 +2393,7 @@ void Spell::EffectSummonCritter(uint32 i)
 
     if (old_critter)                                        // find old critter, unsummon
     {
-        old_critter->Abandon();
+        old_critter->Remove(PET_SAVE_AS_DELETED);
         return;
     }
     else                                                    // in another case summon new
@@ -2461,12 +2465,13 @@ void Spell::EffectSummonDeadPet(uint32 i)
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
     Player *_player = (Player*)m_caster;
-    Creature *_pet = _player->GetPet();
-    if(!_pet)
+    Pet *pet = _player->GetPet();
+    if(!pet)
         return;
-    if(_pet->isAlive())
+    if(pet->isAlive())
         return;
-    Pet *pet = (Pet*)_pet;
+    pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
+    pet->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     pet->setDeathState( ALIVE );
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
     pet->SetHealth( uint32(pet->GetMaxHealth()*damage/100));
@@ -2474,7 +2479,7 @@ void Spell::EffectSummonDeadPet(uint32 i)
     pet->AIM_Initialize();
 
     _player->PetSpellInitialize();
-    _player->SavePet();
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
 void Spell::EffectTransmitted(uint32 i)

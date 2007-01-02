@@ -163,37 +163,47 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     return true;
 }
 
-void Pet::SavePetToDB(bool current)
+void Pet::SavePetToDB(PetSaveMode mode)
 {
     if(!GetEntry())
         return;
 
     // save only fully controlled creature
-    if(getPetType()!=SUMMON_PET && getPetType()!=HUNTER_PET)
+    if(!isControlled())
         return;
 
-    uint32 loyalty =1;
-    if(getPetType()==HUNTER_PET)
-        loyalty = 1;
-    else loyalty = getloyalty();
+    switch(mode)
+    {
+        case PET_SAVE_AS_CURRENT:
+        case PET_SAVE_AS_STORED:
+        {
+            uint32 loyalty =1;
+            if(getPetType()==HUNTER_PET)
+                loyalty = 1;
+            else loyalty = getloyalty();
 
-    uint32 owner = GUID_LOPART(GetOwnerGUID());
-    std::string name = m_name;
-    sDatabase.escape_string(name);
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
-    sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
-    sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`renamed`,`current`) "
-        "VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u','%u')",
-        GetEntry(), owner, GetUInt32Value(UNIT_FIELD_DISPLAYID), getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),uint32(HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME)?0:1),uint32(current?1:0));
-    sDatabase.CommitTransaction();
-}
-
-void Pet::DeletePetFromDB()
-{
-    uint32 owner = GUID_LOPART(GetOwnerGUID());
-    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", owner );
+            uint32 owner = GUID_LOPART(GetOwnerGUID());
+            std::string name = m_name;
+            sDatabase.escape_string(name);
+            sDatabase.BeginTransaction();
+            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
+            sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
+            sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`renamed`,`current`) "
+                "VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u','%u')",
+                GetEntry(), owner, GetUInt32Value(UNIT_FIELD_DISPLAYID), getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+                m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),uint32(HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME)?0:1),uint32(mode==PET_SAVE_AS_CURRENT?1:0));
+            sDatabase.CommitTransaction();
+            break;
+        }
+        case PET_SAVE_AS_DELETED:
+        {
+            uint32 owner = GUID_LOPART(GetOwnerGUID());
+            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry());
+            break;
+        }
+        default:
+            sLog.outError("Unknown pet remove mode: %d",mode);
+    }
 }
 
 /*void Pet::SendPetQuery()
@@ -230,26 +240,53 @@ void Pet::DeletePetFromDB()
 void Pet::setDeathState(DeathState s)                       // overwrite virtual Creature::setDeathState and Unit::setDeathState
 {
     Creature::setDeathState(s);
-    if(s == JUST_DIED)
+    if(getDeathState()==CORPSE)
     {
-        Unit* owner = GetOwner();
-        if(owner && owner->GetTypeId() == TYPEID_PLAYER)
-        {
-            SavePetToDB(false);
-            ((Player*)owner)->AbandonPet(this,false);
-        }
+        //remove summoned pet (no corpse)
+        if(getPetType()==SUMMON_PET)
+            Remove(PET_SAVE_AS_STORED);
+        // other will despawn at corpse desppawning (Pet::Update code)
         else
         {
-            // only if current pet in slot
-            if(owner && owner->GetPetGUID()==GetGUID())
-                owner->SetPet(0);
-
-            ObjectAccessor::Instance().AddObjectToRemoveList(this);
+            // pet corpse non lootable and non skinnable
+            SetUInt32Value( UNIT_DYNAMIC_FLAGS, 0x00 );
+            RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         }
     }
 }
 
-void Pet::Abandon()
+void Pet::Update(uint32 diff)
+{
+    switch( m_deathState )
+    {
+        case CORPSE:
+        {
+            if( m_deathTimer <= diff )
+            {
+                assert(getPetType()!=SUMMON_PET && "Must be already removed.");
+                Remove(PET_SAVE_AS_DELETED);                // delete hunter pet from DB also
+                return;
+            }
+            break;
+        }
+        case ALIVE:
+        {
+            // unsummon pet that lost owner
+            Unit* owner = GetOwner();
+            if(!owner||!IsWithinDistInMap(owner, OWNER_MAX_DISTANCE))
+            {
+                Remove(PET_SAVE_AS_CURRENT);
+                return;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    Creature::Update(diff);
+}
+
+void Pet::Remove(PetSaveMode mode)
 {
     Unit* owner = GetOwner();
 
@@ -257,7 +294,7 @@ void Pet::Abandon()
     {
         if(owner->GetTypeId()==TYPEID_PLAYER)
         {
-            ((Player*)owner)->AbandonPet(this);
+            ((Player*)owner)->RemovePet(this,mode);
             return;
         }
 
@@ -266,6 +303,7 @@ void Pet::Abandon()
             owner->SetPet(0);
     }
 
+    /* pet attack of owner (if need,  must be implemented by faction changing without pet remove call
     if(getPetType()==HUNTER_PET)
     {
         SetMaxPower(POWER_HAPPINESS,0);
@@ -278,12 +316,14 @@ void Pet::Abandon()
         AIM_Initialize();
     }
     else
-        ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    */
+
+    ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 
 void Pet::GivePetXP(uint32 xp)
 {
-    if(getPetType()!=SUMMON_PET && getPetType()!=HUNTER_PET || !GetUInt32Value(UNIT_FIELD_PETNUMBER))
+    if(getPetType()!=HUNTER_PET || !GetUInt32Value(UNIT_FIELD_PETNUMBER))
         return;
     if ( xp < 1 )
         return;

@@ -573,8 +573,6 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
 void Spell::prepare(SpellCastTargets * targets)
 {
-    uint8 result;
-
     m_targets = *targets;
     if(!unitTarget)
         unitTarget = m_targets.getUnitTarget();
@@ -590,7 +588,7 @@ void Spell::prepare(SpellCastTargets * targets)
     m_castPositionZ = m_caster->GetPositionZ();
     m_castOrientation = m_caster->GetOrientation();
 
-    result = CanCast();
+    uint8 result = CanCast();
     if(result != 0)
     {
         if(m_triggeredByAura)
@@ -1538,8 +1536,13 @@ uint8 Spell::CanCast()
     {
         //check creaturetype
         uint32 SpellCreatureType = m_spellInfo->TargetCreatureType;
+
+        // not find another way to fix spell target check :/
         if(m_spellInfo->Id == 603)
             SpellCreatureType = 0x7FF - 0x40;               //Curse of Doom
+        else
+        if(m_spellInfo->Id == 2641)                         // Dismiss Pet
+            SpellCreatureType = 0;
 
         if(SpellCreatureType)
         {

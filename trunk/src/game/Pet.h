@@ -48,6 +48,13 @@ enum PetState
     STATE_RA_AUTOSPELL      = STATE_RA_SPELL1 | STATE_RA_SPELL2 | STATE_RA_SPELL3 | STATE_RA_SPELL4
 };
 
+enum PetSaveMode
+{
+    PET_SAVE_AS_CURRENT,
+    PET_SAVE_AS_STORED,
+    PET_SAVE_AS_DELETED
+};
+
 #define OWNER_MAX_DISTANCE 100
 
 #define PET_FOLLOW_DIST  1
@@ -67,14 +74,15 @@ class Pet : public Creature
         uint32 GetFealty() { return m_fealty; }
         void SetFealty(uint32 fealty) { m_fealty=fealty; }
         PetType getPetType() const { return m_petType; }
+        bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
 
         void CreateBaseAtCreature( Creature* creature );
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0 );
-        void SavePetToDB(bool current);
-        void DeletePetFromDB();
-        void Abandon();
+        void SavePetToDB(PetSaveMode mode);
+        void Remove(PetSaveMode mode);
 
         void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
+        void Update(uint32 diff);                           // overwrite virtual Creature::Update and Unit::Update
 
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);

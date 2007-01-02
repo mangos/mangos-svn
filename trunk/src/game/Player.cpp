@@ -1252,7 +1252,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         // unsommon pet if lost
         if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
-            AbandonPet(pet);
+            RemovePet(pet,PET_SAVE_AS_CURRENT);
     }
 
     UpdateZone();
@@ -10088,7 +10088,6 @@ void Player::SaveToDB()
     _SaveActions();
     _SaveAuras();
     _SaveReputation();
-    SavePet();
 
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
@@ -10306,13 +10305,6 @@ void Player::_SaveTutorials()
     sDatabase.CommitTransaction();
 }
 
-void Player::SavePet()
-{
-    Pet* pet = GetPet();
-    if(pet)
-        pet->SavePetToDB(true);
-}
-
 void Player::outDebugValues() const
 {
     sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetMaxHealth(), GetMaxPower(POWER_MANA));
@@ -10473,7 +10465,7 @@ void Player::UpdateDuelFlag(time_t currTime)
     duel->opponent->duel->startTime  = currTime;
 }
 
-void Player::AbandonPet(Pet* pet, bool real)
+void Player::RemovePet(Pet* pet, PetSaveMode mode)
 {
     if(!pet)
         pet = GetPet();
@@ -10484,16 +10476,15 @@ void Player::AbandonPet(Pet* pet, bool real)
     if(GetPetGUID()==pet->GetGUID())
         SetPet(0);
 
-    if(real)
-        pet->SavePetToDB(false);
-
     pet->CombatStop();
+
+    pet->SavePetToDB(mode);
 
     SendDestroyObject(pet->GetGUID());
 
     ObjectAccessor::Instance().AddObjectToRemoveList(pet);
 
-    if(pet->getPetType()==SUMMON_PET || pet->getPetType()==HUNTER_PET)
+    if(pet->isControlled())
     {
         WorldPacket data(SMSG_PET_SPELLS, 8);
         data << uint64(0);
@@ -10821,13 +10812,13 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
         return false;
     }
 
+    // Save before flight (player must loaded in start taxinode is disconnected at flight,etc)
+    SaveToDB();
+
     // unsommon pet, it will be lost anyway
-    AbandonPet();
+    RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
-    //CHECK DONE, DO FLIGHT
-
-    SaveToDB();                               //For temporary avoid save player on air
-
+    //Checks and preparations done, DO FLIGHT
     setDismountCost( money - totalcost);
 
     WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );

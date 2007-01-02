@@ -33,7 +33,6 @@
 #include "MapManager.h"
 #include "CreatureAI.h"
 #include "CreatureAISelector.h"
-#include "Pet.h"
 #include "Formulas.h"
 
 // apply implementation of the singletons
@@ -197,16 +196,6 @@ void Creature::Update(uint32 diff)
         }
         case ALIVE:
         {
-            if(isPet())
-            {
-                // unsummon pet that lost owner
-                Unit* owner = GetOwner();
-                if(!owner||!IsWithinDistInMap(owner, OWNER_MAX_DISTANCE))
-                {
-                    ((Pet*)this)->Abandon();
-                    return;
-                }
-            }
             Unit::Update( diff );
             i_motionMaster.UpdateMotion(diff);
             i_AI->UpdateAI(diff);
@@ -1258,7 +1247,7 @@ void Creature::setDeathState(DeathState s)
     if(s == JUST_DIED)
     {
         SetUInt32Value(UNIT_NPC_FLAGS, 0);
-        if(GetCreatureInfo()->SkinLootId)
+        if(!isPet() && GetCreatureInfo()->SkinLootId)
         {
             LootStore skinStore = LootTemplates_Skinning;
             LootStore::iterator tab = skinStore.find(GetCreatureInfo()->SkinLootId);

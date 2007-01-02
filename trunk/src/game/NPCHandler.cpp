@@ -627,7 +627,7 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
                 sDatabase.CommitTransaction();
                 data << uint8(0x08);
                 flag = true;
-                _player->AbandonPet(pet);
+                _player->RemovePet(pet,PET_SAVE_AS_STORED);
                 break;
             }
         }while( result->NextRow() );
@@ -811,7 +811,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
         sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,%u,%u,%u,%u,%u,%u)",
             _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->getUsedTrainPoint());
         sDatabase.CommitTransaction();
-        _player->AbandonPet(pet);
+        _player->RemovePet(pet,PET_SAVE_AS_STORED);
         Pet *newpet = new Pet(_player->getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
         newpet->LoadPetFromDB(_player,petentry);
     }

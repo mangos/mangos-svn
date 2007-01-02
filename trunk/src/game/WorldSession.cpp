@@ -88,7 +88,6 @@ bool WorldSession::Update(uint32 diff)
         if(packet==NULL)
             continue;
 
-        sLog.outString("MOEP: %u", packet->GetOpcode());
         for (i = 0; table[i].handler != NULL; i++)
         {
             if (table[i].opcode == packet->GetOpcode())
@@ -173,7 +172,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         }
 
-        _player->AbandonPet(NULL,false);
+        _player->RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
         ObjectAccessor::Instance().RemovePlayer(_player);
         MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
