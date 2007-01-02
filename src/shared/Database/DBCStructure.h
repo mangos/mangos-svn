@@ -58,7 +58,7 @@ struct ChrRacesEntry
 {
     uint32      RaceID;
     uint32      FactionID;                                  //facton template id
-    uint32      TeamID;                                     // 7-Alianse 1-Horde
+    uint32      TeamID;                                     // 7-Alliance 1-Horde
     uint32      startingTaxiMask;
     uint32      startmovie;
     char*       name;
@@ -67,8 +67,6 @@ struct ChrRacesEntry
 struct CreatureFamilyEntry
 {
     uint32    ID;
-    uint32    unknown_1;
-    uint32    unknown_2;
     uint32    petfood_id;
     char*     Name;
 };
@@ -102,7 +100,6 @@ struct ItemDisplayInfoEntry
 {
     uint32      ID;
     uint32      randomPropertyChance;
-    uint32      unknown;
 };
 
 struct ItemRandomPropertiesEntry
@@ -125,6 +122,7 @@ struct LockEntry
 {
     uint32      ID;
     uint32      requiredskill;
+     uint32         requiredlockskill;
 };
 
 struct MapEntry
@@ -148,13 +146,8 @@ struct SkillLineAbilityEntry
     uint32    id;
     uint32    skillId;
     uint32    spellId;
-    uint32    unkown1;
-    uint32    unkown2;
-    uint32    unkown3;
-    uint32    unkown4;
     uint32    req_skill_value;                              //for trade skill.not for training.
     uint32    forward_spellid;
-    uint32    unkown5;
     uint32    max_value;
     uint32    min_value;
 };
@@ -164,12 +157,12 @@ struct SpellEntry
     uint32    Id;
     uint32    School;
     uint32    Category;
-    uint32    Dispel;
-    uint32    Mechanic;
-    uint32    Attributes;
-    uint32    AttributesEx;
-    uint32    AttributesEx2;
-    uint32    AttributesExEx;
+    uint32    Dispel; //4
+    uint32    Mechanic; //5
+    uint32    Attributes; //6
+    uint32    AttributesEx; //7
+    uint32    AttributesEx2; //8
+    uint32    AttributesExEx; //9
     uint32    Stances;
     uint32    Targets;
     uint32    TargetCreatureType;
@@ -195,28 +188,28 @@ struct SpellEntry
     uint32    manaPerSecondPerLevel;
     uint32    rangeIndex;
     float     speed;
-    uint32    modalNextSpell;
+    uint32    modalNextSpell; //35
     uint32    StackAmount;
-    uint32    Totem[2];
-    uint32    Reagent[8];
-    uint32    ReagentCount[8];
-    int32     EquippedItemClass;
-    int32     EquippedItemSubClass;
-    uint32    Effect[3];
-    int32     EffectDieSides[3];
-    uint32    EffectBaseDice[3];
-    float     EffectDicePerLevel[3];
-    float     EffectRealPointsPerLevel[3];
-    int32     EffectBasePoints[3];
-    uint32    EffectImplicitTargetA[3];
-    uint32    EffectImplicitTargetB[3];
-    uint32    EffectRadiusIndex[3];
-    uint32    EffectApplyAuraName[3];
-    uint32    EffectAmplitude[3];
-    float     EffectMultipleValue[3];
-    uint32    EffectChainTarget[3];
-    uint32    EffectItemType[3];
-    uint32    EffectMiscValue[3];
+    uint32    Totem[2]; //37,38
+    uint32    Reagent[8]; //39,40,41,42,43,44,45,46
+    uint32    ReagentCount[8]; //47,48,49,50,51,52,53,54
+    int32     EquippedItemClass; //55
+    int32     EquippedItemSubClass; //56
+    uint32    Effect[3]; //57,58,59
+    int32     EffectDieSides[3]; //60,61,62
+    uint32    EffectBaseDice[3]; //63,64,65
+    float     EffectDicePerLevel[3]; //66,67,68
+    float     EffectRealPointsPerLevel[3]; //69,70,71
+    int32     EffectBasePoints[3]; //72,73,74
+    uint32    EffectImplicitTargetA[3]; //75,76,77
+    uint32    EffectImplicitTargetB[3]; //78,79,80
+    uint32    EffectRadiusIndex[3]; //81,82,83
+    uint32    EffectApplyAuraName[3]; //84,85,86
+    uint32    EffectAmplitude[3]; //87,88,89
+    float     EffectMultipleValue[3]; //90,91,92
+    uint32    EffectChainTarget[3]; //93,94,95
+    uint32    EffectItemType[3]; //96,97,98
+    uint32    EffectMiscValue[3]; //99,100,101
     uint32    EffectTriggerSpell[3];
     float     EffectPointsPerComboPoint[3];
     uint32    SpellVisual;
@@ -230,7 +223,6 @@ struct SpellEntry
     uint32    ManaCostPercentage;
     uint32    StartRecoveryCategory;
     uint32    StartRecoveryTime;
-    uint32    field156;
     uint32    SpellFamilyName;
     uint32    SpellFamilyFlags ;
     uint32    MaxAffectedTargets;
@@ -272,11 +264,9 @@ struct SpellItemEnchantmentEntry
 {
     uint32      ID;
     uint32      display_type;
-    uint32      unkown1;
     uint32      value1;
     uint32      value2;
     uint32      spellid;
-    uint32      unkown2;
     uint32      description;
     uint32      aura_id;
     uint32      slot;
