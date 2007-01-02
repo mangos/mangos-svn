@@ -3095,6 +3095,7 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
     switch (SkillId)
     {
         case SKILL_HERBALISM:
+        case SKILL_LOCKPICKING:
             return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator);
         case SKILL_SKINNING:
         case SKILL_MINING:

@@ -766,7 +766,8 @@ void Spell::cast(bool skipCheck)
         if( gameObjTarget )
         {
             ((Player*)m_caster)->CastedCreatureOrGO(gameObjTarget->GetEntry(),gameObjTarget->GetGUID(),m_spellInfo->Id);
-        }
+            HandleEffects(NULL,NULL,gameObjTarget,0);
+        }    
     }
 }
 
@@ -1440,6 +1441,8 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     damage = CalculateDamage((uint8)i);
     uint8 eff = m_spellInfo->Effect[i];
+    if(m_spellInfo->Id==1804)
+        eff = 33;
 
     sLog.outDebug( "Spell: Effect : %u", eff);
     if(unitTarget)

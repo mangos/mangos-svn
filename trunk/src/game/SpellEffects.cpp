@@ -727,6 +727,7 @@ void Spell::EffectOpenLock(uint32 i)
 
     LootType loottype = LOOT_CORPSE;
     uint32 lockId = gameObjTarget->GetGOInfo()->sound0;
+
     LockEntry *lockInfo = sLockStore.LookupEntry(lockId);
 
     if (!lockInfo)
@@ -734,20 +735,23 @@ void Spell::EffectOpenLock(uint32 i)
         sLog.outError( "Spell::EffectOpenLock: gameobject [guid = %u] has an unknown lockId: %u!", gameObjTarget->GetGUIDLow() , lockId);
         return;
     }
-
+    
     uint32 SkillId = m_spellInfo->EffectMiscValue[1];
+    if(m_spellInfo->Id==1804)
+        SkillId = 633;
+
     if ( SkillId )
     {
         loottype = LOOT_SKINNING;
-        if ( player->GetSkillValue(SkillId) < lockInfo->requiredskill )
-        {
-            SendCastResult(CAST_FAIL_FAILED);
+        if ( player->GetSkillValue(SkillId) < (lockInfo->requiredskill+lockInfo->requiredlockskill) )
+        {  
+            SendCastResult(CAST_FAIL_SKILL_NOT_HIGH_ENOUGH);
             return;
         }
         // Allow one skill-up until respawned
         uint32 SkillValue = player->GetPureSkillValue(SkillId);
         if ( !gameObjTarget->IsInSkillupList( player->GetGUIDLow() ) &&
-            player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill) )
+            player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill+lockInfo->requiredlockskill) )
             gameObjTarget->AddToSkillupList( player->GetGUIDLow() );
     }
 
@@ -2563,4 +2567,5 @@ void Spell::EffectTransmitted(uint32 i)
 
 void Spell::EffectSkill(uint32 i)
 {
+    sLog.outDebug("WORLD: SkillEFFECT");
 }
