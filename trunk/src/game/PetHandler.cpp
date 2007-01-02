@@ -57,6 +57,9 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         return;
     }
 
+    if(!pet->isAlive())
+        return;
+
     switch(flag)
     {
         case 1792:                                          //0x0700

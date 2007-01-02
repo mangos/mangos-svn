@@ -323,8 +323,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 }
             }
 
-            Creature *pet = pVictim->GetPet();
-            if(pet && pet->isPet())
+            Pet *pet = pVictim->GetPet();
+            if(pet)
             {
                 pet->setDeathState(JUST_DIED);
                 pet->CombatStop();

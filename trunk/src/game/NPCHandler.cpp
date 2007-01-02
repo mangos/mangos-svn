@@ -512,7 +512,7 @@ void WorldSession::SendStablePet(uint64 guid )
     data << uint64 ( guid );
 
     QueryResult *result,*result_1;
-    uint8 slot = 0;
+    uint8 max_slot = 0;
     uint8 num = 0;
 
     result_1 = sDatabase.PQuery("SELECT `slot`,`petnumber` FROM `character_stable` WHERE `owner` = '%u'",_player->GetGUIDLow());
@@ -522,25 +522,28 @@ void WorldSession::SendStablePet(uint64 guid )
         {
             Field *fields = result_1->Fetch();
 
-            if(fields[0].GetUInt32())
-                slot++;
+            uint8 cur_slot = fields[0].GetUInt32();
+            if(max_slot < cur_slot)
+                max_slot = cur_slot;
             if(fields[1].GetUInt32())
                 num++;
         }while( result_1->NextRow() );
     }
     delete result_1;
 
-    if(_player->GetPet())
+    Pet *pet = _player->GetPet();
+
+    // count only alive pet
+    if(pet && pet->isAlive())
         num++;
 
-    data << uint8(num) << uint8(slot);
+    data << uint8(num) << uint8(max_slot);
 
-    if(_player->GetPet())
+    // not let move dead pet in slot
+    if(pet && pet->isAlive())
     {
-        Creature *unit = _player->GetPet();
-        if(!unit->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        if(!pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
             return;
-        Creature *pet = _player->GetPet();
                                                             // petnumber
         data << uint32(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER));
         data << uint32(pet->GetEntry());
@@ -592,19 +595,23 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
     
+    Pet *pet = _player->GetPet();
+
     WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
-    if(!_player->GetPet())
-        return;
-    if(_player->GetPet())
+
+    // can't place in stable dead pet
+    if(!pet||!pet->isAlive())
     {
-        Pet *unit = _player->GetPet();
-        if(!unit->GetUInt32Value(UNIT_FIELD_PETNUMBER))
-            return;
+        data << uint8(0x06);
+        SendPacket(&data);
+        return;
     }
+
+    if(!pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        return;
 
     QueryResult *result;
     bool flag = false;
-    Pet *pet = _player->GetPet();
 
     result = sDatabase.PQuery("SELECT `owner`,`slot`,`petnumber` FROM `character_stable` WHERE `owner` = '%u' ORDER BY `slot` ",_player->GetGUIDLow());
     if(result)
@@ -637,7 +644,6 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
     if(!flag)
         data << uint8(0x06);
     SendPacket(&data);
-    SendStablePet(npcGUID);
 }
 
 void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
@@ -659,16 +665,23 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
         return;
     
     WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
-    if(_player->GetPet())
+
+    Pet* pet = _player->GetPet();
+    if(pet && pet->isAlive())
     {
-        data << uint8(0x06);
+        uint8 i = 0x06;
+        data << uint8(i);
         SendPacket(&data);
         return;
     }
 
-    QueryResult *result;
+    // delete dead pet
+    if(pet)
+        _player->RemovePet(pet,PET_SAVE_AS_DELETED);
 
-    result = sDatabase.PQuery("SELECT `owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint` FROM `character_stable` WHERE `owner` = '%u'",_player->GetGUIDLow());
+    Pet *newpet = NULL;
+
+    QueryResult *result = sDatabase.PQuery("SELECT `owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint` FROM `character_stable` WHERE `owner` = '%u'",_player->GetGUIDLow());
     if(result)
     {
         do
@@ -677,23 +690,27 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
             uint32 number = fields[2].GetUInt32();
             uint32 slot = fields[1].GetUInt32();
 
-            if(petnumber != number)
-                continue;
-            else
+            if(petnumber == number)
             {
-                Pet *newpet = new Pet(_player->getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
-                newpet->LoadPetFromDB(_player,fields[3].GetUInt32());
+                newpet = new Pet(HUNTER_PET);
+                if(!newpet->LoadPetFromDB(_player,fields[3].GetUInt32()))
+                {
+                    delete newpet;
+                    newpet = NULL;
+                }
+
                 sDatabase.PExecute("UPDATE `character_stable` SET `petnumber` = '0',`entry` = '0',`level` = '0',`loyalty` = '0',`trainpoint` = '0' WHERE `owner` = '%u' AND `slot` = '%u'",_player->GetGUIDLow(), slot);
+                break;
             }
         }while( result->NextRow() );
     }
     delete result;
 
-    if(_player->GetPet())
+    if(newpet)
         data << uint8(0x09);
-    else data << uint8(0x06);
+    else
+        data << uint8(0x06);
     SendPacket(&data);
-    SendStablePet(npcGUID);
 }
 
 void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
@@ -754,7 +771,6 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
         default: data << uint8(0x06); break;
     }
     SendPacket(&data);
-    SendStablePet(npcGUID);
 }
 
 void WorldSession::HandleStableRevivePet( WorldPacket & recv_data )
@@ -781,13 +797,13 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
 
     WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
 
-    if(_player->GetPet())
-    {
-        Creature *unit = _player->GetPet();
-        if(!unit->GetUInt32Value(UNIT_FIELD_PETNUMBER))
-            return;
-    }
-    else return;
+    Pet* pet = _player->GetPet();
+
+    if(!pet)
+        return;
+
+    if(!pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        return;
 
     QueryResult *result;
 
@@ -797,31 +813,40 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
         delete result;
         return;
     }
-    else
+
+    Field *fields = result->Fetch();
+
+    uint32 slot = fields[1].GetUInt32();
+    uint32 petentry = fields[3].GetUInt32();
+    delete result;
+
+    // move alive pet to slot
+    if(pet->isAlive())
     {
-        Pet *pet = _player->GetPet();
-
-        Field *fields = result->Fetch();
-
-        uint32 slot = fields[1].GetUInt32();
-        uint32 petentry = fields[3].GetUInt32();
-
         sDatabase.BeginTransaction();
         sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u' AND `slot` = '%u'", _player->GetGUIDLow(),slot);
         sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u,%u,%u,%u,%u,%u,%u)",
             _player->GetGUIDLow(),slot,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER),pet->GetEntry(),pet->getLevel(),pet->getloyalty(),pet->getUsedTrainPoint());
         sDatabase.CommitTransaction();
         _player->RemovePet(pet,PET_SAVE_AS_STORED);
-        Pet *newpet = new Pet(_player->getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
-        newpet->LoadPetFromDB(_player,petentry);
     }
-    delete result;
+    // delele dead pet and free slot
+    else
+    {
+        sDatabase.PExecute("UPDATE `character_stable` SET `petnumber` = '0',`entry` = '0',`level` = '0',`loyalty` = '0',`trainpoint` = '0' WHERE `owner` = '%u' AND `slot` = '%u'",_player->GetGUIDLow(), slot);
+        _player->RemovePet(pet,PET_SAVE_AS_DELETED);
+    }
 
-    if(_player->GetPet())
+    // summon unstabled pet
+    Pet *newpet = new Pet(_player->getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
+    if(!newpet->LoadPetFromDB(_player,petentry))
+    {
+        delete newpet;
+        data << uint8(0x06);
+    }
+    else
         data << uint8(0x09);
-    else data << uint8(0x06);
     SendPacket(&data);
-    SendStablePet(npcGUID);
 }
 
 void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
