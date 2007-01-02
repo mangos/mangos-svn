@@ -2888,53 +2888,5 @@ bool ChatHandler::HandleUnBanAccountCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleLookupSkillCommand(const char* args)
-{
-    if(!*args)
-        return false;
-
-    QueryResult *result=sDatabase.PQuery("SELECT DISTINCT `skill`,`note` FROM `playercreateinfo_skill` WHERE `note` LIKE \"%%%s%%\" ORDER BY `skill`",args);
-    if(!result)
-    {
-        SendSysMessage("No skills found!");
-        return true;
-    }
-
-    do
-    {
-        Field *fields = result->Fetch();
-        uint16 id = fields[0].GetUInt16();
-        std::string name = fields[1].GetCppString();
-        PSendSysMessage("%d - %s",id,name.c_str());
-    } while (result->NextRow());
-
-    delete result;
-    return true;
-}
-
-bool ChatHandler::HandleLookupMobCommand(const char* args)
-{
-    if(!*args)
-        return false;
-
-    QueryResult *result=sDatabase.PQuery("SELECT `entry`,`name` FROM `creature_template` WHERE `name` LIKE \"%%%s%%\"",args);
-    if(!result)
-    {
-        SendSysMessage("No mobs found!");
-        return true;
-    }
-
-    do
-    {
-        Field *fields = result->Fetch();
-        uint16 id = fields[0].GetUInt16();
-        std::string name = fields[1].GetCppString();
-        PSendSysMessage("%d - %s",id,name.c_str());
-    } while (result->NextRow());
-
-    delete result;
-    return true;
-}
-
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false
