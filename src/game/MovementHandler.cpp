@@ -53,27 +53,29 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     uint32 t_GUIDl, t_GUIDh;
     float  t_x, t_y, t_z, t_o;
     float  s_angle;
-    uint32 f_currFallTime;
-    float  f_unk1, f_sinAngle, f_cosAngle;
+    uint32 j_currFallTime;
+    float  j_unk1, j_sinAngle, j_cosAngle;
+    
 
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
-    if (flags & MOVEMENTFLAG_FALLING)
-    {
-        recv_data >> f_currFallTime;            // current fall duration
-        recv_data >> f_unk1;                    // = 0xD893FEC0
-        recv_data >> f_sinAngle >> f_cosAngle;  // sin + cos of angle between orientation0 and players orientation
-    }
-    if (flags & MOVEMENTFLAG_SWIMMING)
-    {
-        recv_data >> s_angle;                   // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
-    }
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
     {
         recv_data >> t_GUIDl >> t_GUIDh;
         recv_data >> t_x >> t_y >> t_z >> t_o;
     }
-    recv_data >> fallTime;                      // duration of last fall
+    if (flags & MOVEMENTFLAG_JUMPING)
+    {
+        recv_data >> j_currFallTime;            // current jump duration
+        recv_data >> j_unk1;                    // = 0xD893FEC0
+        recv_data >> j_sinAngle >> j_cosAngle;  // sin + cos of angle between orientation0 and players orientation
+    }
+    // swimming never appears with JUMPING or ONTRANSPORT
+    if (flags & MOVEMENTFLAG_SWIMMING) 
+    {
+        recv_data >> s_angle;                   // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
+    }
+    recv_data >> fallTime;                      // duration of last jump
     /*----------------*/
 
 
@@ -204,4 +206,5 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
     // TODO
     // we receive guid,x,y,z
 }
+
 
