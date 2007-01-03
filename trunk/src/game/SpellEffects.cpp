@@ -1970,9 +1970,9 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             count = urand(1,(item_level/10));
             if(urand(1,100)< 85)
-                count = 11176;
+                item = 11176;
             else
-                count = 16202;
+                item = 16202;
         }
     }
     else if(item_level >= 41 && item_level <= 45)
