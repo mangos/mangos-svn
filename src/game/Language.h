@@ -79,7 +79,6 @@
 #define LANG_HONOR_LIFE                  "Life Time: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank %u: %s]"
 
 // level 1 chat
-#define LANG_BROADCAST                   "BROADCAST: %s"
 #define LANG_MAP_POSITION                "Map: %u Zone: %u\nX: %f Y: %f Z: %f Orientation: %f grid[%u,%u]cell[%u,%u]"
 #define LANG_IS_TELEPORTED               "%s is already being teleported."
 #define LANG_SUMMONING                   "You are summoning %s%s."
