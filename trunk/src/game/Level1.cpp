@@ -37,10 +37,9 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
     if(!*args)
         return false;
 
-    char pAnnounce[256];
-
-    sprintf((char*)pAnnounce, LANG_BROADCAST, args);
-    sWorld.SendWorldText(pAnnounce);
+    std::string str ="|cffff0000[System Message]:|r";
+    str += args;
+    sWorld.SendWorldText(str.c_str(), NULL);
 
     return true;
 }
