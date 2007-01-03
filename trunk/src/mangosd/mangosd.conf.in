@@ -125,6 +125,12 @@ AllowTwoSide.WhoList = 0
 #          1 (true) 
 GM.WhisperingTo = 0
 
+
+# Is GM showed in GM list (if visible) in non-GM state (.gmoff)
+# Default: 0 (false)
+#          1 (true) 
+GM.InGMList = 0
+
 # Is GM showed in who list (if visible).
 # Default: 0 (false)
 #          1 (true) 
