@@ -152,15 +152,13 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     data << guid;
     data << uint32(0) << uint32(Tspells.size());
 
-    SpellEntry *spellInfo;
-
     for (itr = Tspells.begin(); itr != Tspells.end();itr++)
     {
         uint8 canlearnflag = 1;
         bool ReqskillValueFlag = false;
         bool LevelFlag = false;
         bool ReqspellFlag = false;
-        spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
         if(!spellInfo)
             continue;
         if((*itr)->reqskill)
@@ -206,7 +204,6 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     SendPacket( &data );
 
     Tspells.clear();
-
 }
 
 void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
@@ -241,7 +238,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     if (proto == NULL) return;
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
 
     if(!spellInfo) return;
     if(_player->HasSpell(spellInfo->Id))
@@ -383,7 +380,7 @@ void WorldSession::SendSpiritResurrect()
     //Characters level 20 and up suffer from ten minutes of sickness.
     if (level > 10)
     {
-        SpellEntry *spellInfo = sSpellStore.LookupEntry( SPELL_PASSIVE_RESURRECTION_SICKNESS );
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry( SPELL_PASSIVE_RESURRECTION_SICKNESS );
         if(spellInfo)
         {
             for(uint32 i = 0;i<3;i++)
@@ -753,7 +750,7 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
         case 0:
         case 1: 
             {
-                StableSlotPricesEntry *SlotPrice = sStableSlotPricesStore.LookupEntry(slot+1);
+                StableSlotPricesEntry const *SlotPrice = sStableSlotPricesStore.LookupEntry(slot+1);
                 if(_player->GetMoney() < SlotPrice->Price)
                 {
                     data << uint8(0x06);

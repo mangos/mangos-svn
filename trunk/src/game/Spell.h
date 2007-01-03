@@ -444,7 +444,7 @@ class Spell
         void EffectAttackMe(uint32 i);
         void EffectResurrectNew(uint32 i);
 
-        Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur );
+        Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur );
 
         void prepare(SpellCastTargets * targets);
         void cancel();
@@ -467,6 +467,8 @@ class Spell
         inline uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
 
+        void DoCreateItem(uint32 i, uint32 itemtype);
+
         void writeSpellGoTargets( WorldPacket * data );
         void writeAmmoToPacket( WorldPacket * data );
         void FillTargetMap();
@@ -488,7 +490,7 @@ class Spell
         void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);
         //void HandleAddAura(Unit* Target);
 
-        SpellEntry * m_spellInfo;
+        SpellEntry const* m_spellInfo;
         Item* m_CastItem;
         SpellCastTargets m_targets;
 
@@ -530,7 +532,7 @@ class Spell
         uint32 m_spellState;
         uint32 m_timer;
         int32 m_delayedTime;
-        SpellEntry * m_TriggerSpell;
+        SpellEntry const* m_TriggerSpell;
         uint16 m_castFlags;
 
         float m_castPositionX;

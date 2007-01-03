@@ -213,7 +213,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
 static void HandleShapeshiftBoosts(bool apply, Aura* aura);
 
-Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
+Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
 m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItem(castItem), m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
@@ -265,7 +265,7 @@ Aura::~Aura()
 {
 }
 
-AreaAura::AreaAura(SpellEntry* spellproto, uint32 eff, Unit *target,
+AreaAura::AreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target,
 Unit *caster, Item* castItem) : Aura(spellproto, eff, target, caster, castItem)
 {
     m_isAreaAura = true;
@@ -275,7 +275,7 @@ AreaAura::~AreaAura()
 {
 }
 
-PersistentAreaAura::PersistentAreaAura(SpellEntry* spellproto, uint32 eff, Unit *target,
+PersistentAreaAura::PersistentAreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target,
 Unit *caster, Item* castItem) : Aura(spellproto, eff, target, caster, castItem)
 {
     m_isPersistent = true;
@@ -295,7 +295,7 @@ Unit* Aura::GetCaster() const
 
 uint32 Aura::CalculateDamage()
 {
-    SpellEntry* spellproto = GetSpellProto();
+    SpellEntry const* spellproto = GetSpellProto();
     uint32 value = 0;
     uint32 level = 0;
     if(!m_target)
@@ -735,7 +735,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
     Player *p_target = (Player *)m_target;
 
-    SpellEntry *spellInfo = GetSpellProto();
+    SpellEntry const *spellInfo = GetSpellProto();
     if(!spellInfo) return;
 
     uint8 op = spellInfo->EffectMiscValue[m_effIndex];
@@ -802,7 +802,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
 void Aura::TriggerSpell()
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( GetSpellProto()->EffectTriggerSpell[m_effIndex] );
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( GetSpellProto()->EffectTriggerSpell[m_effIndex] );
 
     if(!spellInfo)
     {
@@ -908,7 +908,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         //probably it's temporary for taming creature..
         if( GetSpellProto()->Id == 19674 && caster && caster->isAlive())
         {
-            SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
+            SpellEntry const *spell_proto = sSpellStore.LookupEntry(13481);
             Spell spell(caster, spell_proto, true, 0);
             Unit* target = NULL;
             target = m_target;
@@ -1134,7 +1134,7 @@ void Aura::HandleForceReaction(bool Apply, bool Real)
     {
         uint32 faction_id = m_modifier.m_miscvalue;
 
-        FactionTemplateEntry *factionTemplateEntry;
+        FactionTemplateEntry const *factionTemplateEntry = NULL;
 
         for(uint32 i = 0; i <  sFactionTemplateStore.GetNumRows(); ++i)
         {
@@ -1177,7 +1177,7 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
         if(!caster || caster->GetTypeId() != TYPEID_PLAYER || !victim || !m_removeOnDeath)
             return;
 
-        SpellEntry *spellInfo = GetSpellProto();
+        SpellEntry const *spellInfo = GetSpellProto();
         if(spellInfo->EffectItemType[m_effIndex] == 0)
             return;
 
@@ -2552,7 +2552,7 @@ void HandleTriggerSpellEvent(void *obj)
     Aura *Aur = ((Aura*)obj);
     if(!Aur)
         return;
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
 
     if(!spellInfo)
     {
@@ -2663,7 +2663,7 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
                 if(itr->second->state == PLAYERSPELL_REMOVED) continue;
-                SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !IsPassiveSpell(itr->first)) continue;
                 if (spellInfo->Stances & (1<<form))
                     unit_target->CastSpell(unit_target, itr->first, true);

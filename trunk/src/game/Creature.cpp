@@ -96,14 +96,12 @@ void Creature::CreateTrainerSpells()
 
     if(!result) return;
 
-    SpellEntry * spellinfo;
-
     do
     {
         fields = result->Fetch();
 
         uint32 spellid = fields[0].GetUInt32();
-        spellinfo = sSpellStore.LookupEntry(spellid);
+        SpellEntry const *spellinfo = sSpellStore.LookupEntry(spellid);
 
         if(!spellinfo)
         {
@@ -1034,10 +1032,10 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
     SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
 
-    FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction);
+    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction);
     if (factionTemplate)
     {
-        FactionEntry* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
+        FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
         if (factionEntry)
             if (cinfo->civilian != 1 && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
                 SetPvP(true);
@@ -1274,25 +1272,23 @@ void Creature::MonsterSay(char const* message, uint32 language, uint64 targetGUI
     SendMessageToSet( &data, false );
 }
 
-SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
+SpellEntry const *Creature::reachWithSpellAttack(Unit *pVictim)
 {
     if(!pVictim)
         return NULL;
-    SpellEntry *spellInfo;
-    bool bcontinue;
 
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
     {
         if(!m_spells[i])
             continue;
-        spellInfo = sSpellStore.LookupEntry(m_spells[i] );
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(m_spells[i] );
         if(!spellInfo)
         {
             sLog.outError("WORLD: unknown spell id %i\n", m_spells[i]);
             continue;
         }
 
-        bcontinue = true;
+        bool bcontinue = true;
         for(uint32 j=0;j<3;j++)
         {
             if( (spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE )       ||
@@ -1309,7 +1305,7 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
 
         if(spellInfo->manaCost > GetPower(POWER_MANA))
             continue;
-        SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetMaxRange(srange);
         float minrange = GetMinRange(srange);
         float dist = GetDistanceSq(pVictim);
@@ -1324,24 +1320,23 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
     return NULL;
 }
 
-SpellEntry *Creature::reachWithSpellCure(Unit *pVictim)
+SpellEntry const *Creature::reachWithSpellCure(Unit *pVictim)
 {
     if(!pVictim)
         return NULL;
-    SpellEntry *spellInfo;
-    bool bcontinue;
+
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
     {
         if(!m_spells[i])
             continue;
-        spellInfo = sSpellStore.LookupEntry(m_spells[i] );
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(m_spells[i] );
         if(!spellInfo)
         {
             sLog.outError("WORLD: unknown spell id %i\n", m_spells[i]);
             continue;
         }
 
-        bcontinue = true;
+        bool bcontinue = true;
         for(uint32 j=0;j<3;j++)
         {
             if( (spellInfo->Effect[j] == SPELL_EFFECT_HEAL ) )
@@ -1354,7 +1349,7 @@ SpellEntry *Creature::reachWithSpellCure(Unit *pVictim)
 
         if(spellInfo->manaCost > GetPower(POWER_MANA))
             continue;
-        SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetMaxRange(srange);
         float minrange = GetMinRange(srange);
         float dist = GetDistanceSq(pVictim);

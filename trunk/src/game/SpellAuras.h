@@ -161,13 +161,13 @@ class Aura
         void HandleRangedAmmoHaste(bool Apply, bool Real);
         void HandleModTotalPercentStat(bool Apply, bool Real);
 
-        Aura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
         Modifier* GetModifier() {return &m_modifier;}
 
-        SpellEntry* GetSpellProto() const { return sSpellStore.LookupEntry( m_spellId ); }
+        SpellEntry const* GetSpellProto() const { return sSpellStore.LookupEntry( m_spellId ); }
         uint32 GetId() const{ return m_spellId; }
         uint32 GetEffIndex() const{ return m_effIndex; }
         void SetEffIndex(uint32 eff) { m_effIndex = eff; }
@@ -245,7 +245,7 @@ class Aura
 class AreaAura : public Aura
 {
     public:
-        AreaAura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        AreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         ~AreaAura();
         void Update(uint32 diff);
 };
@@ -253,7 +253,7 @@ class AreaAura : public Aura
 class PersistentAreaAura : public Aura
 {
     public:
-        PersistentAreaAura(SpellEntry* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        PersistentAreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         ~PersistentAreaAura();
         void Update(uint32 diff);
 };

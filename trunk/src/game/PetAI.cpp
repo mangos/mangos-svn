@@ -144,17 +144,19 @@ void PetAI::UpdateAI(const uint32 diff)
             _stopAttack();                                  // i_victimGuid == 0 && i_pet.getVictim() == NULL now
             return;
         }
-        else if( i_pet.IsStopped() )
+        else if( i_pet.IsStopped() || i_pet.IsWithinDist(i_pet.getVictim(), ATTACK_DIST))
         {
-            SpellEntry *spellInfo;
-            if ( i_pet.m_currentSpell )
+            SpellEntry const* spellInfo;
+            // required to be stopped cases
+            if ( i_pet.IsStopped() && i_pet.m_currentSpell )
             {
                 if( i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
                     i_pet.m_currentSpell->cancel();
                 else
                     return;
             }
-            else if( !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack(i_pet.getVictim())))
+            else if( i_pet.IsStopped() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && 
+                ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack(i_pet.getVictim())))
             {
                 Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
                 spell->SetAutoRepeat(true);
@@ -164,6 +166,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 i_pet.m_canMove = false;
                 DEBUG_LOG("Spell Attack.");
             }
+            // not required to be stopped case
             else if( i_pet.isAttackReady() && i_pet.canReachWithAttack(i_pet.getVictim()) )
             {
                 i_pet.AttackerStateUpdate(i_pet.getVictim());

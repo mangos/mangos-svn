@@ -239,7 +239,7 @@ MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *>  &m)
 
             if (!owner.IsAffecting(itr->second))
             {
-                SpellEntry *spellInfo = sSpellStore.LookupEntry(owner.GetSpellId());
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(owner.GetSpellId());
                 PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, owner.GetEffIndex(), itr->second, owner.GetCaster());
                 itr->second->AddAura(Aur);
                 owner.AddAffected(itr->second);
@@ -261,7 +261,7 @@ MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Player *>  &m)
 
             if (!owner.IsAffecting(itr->second))
             {
-                SpellEntry *spellInfo = sSpellStore.LookupEntry(owner.GetSpellId());
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(owner.GetSpellId());
                 PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, owner.GetEffIndex(), itr->second, owner.GetCaster());
                 itr->second->AddAura(Aur);
                 owner.AddAffected(itr->second);

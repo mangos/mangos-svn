@@ -148,7 +148,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
         *data << (uint8)0;
 }
 
-Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
+Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
 {
     ASSERT( Caster != NULL && info != NULL );
 
@@ -852,7 +852,7 @@ void Spell::SendSpellCooldown()
             if(itr->second->state == PLAYERSPELL_REMOVED || !itr->second->active)
                 continue;
 
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
             if( spellInfo->Category == cat)
             {
                 data << uint32(itr->first);
@@ -1687,7 +1687,7 @@ uint8 Spell::CanCast()
             {
                 if(!unitTarget) return CAST_FAIL_FAILED;
                 if(unitTarget->GetTypeId() == TYPEID_PLAYER) return CAST_FAIL_FAILED;
-                SpellEntry *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+                SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
                 if(!learn_spellproto) return CAST_FAIL_FAILED;
                 Creature* creatureTarget = (Creature*)unitTarget;
                 uint8 learn_msg = 1;
@@ -1698,7 +1698,7 @@ uint8 Spell::CanCast()
                         castResult = CAST_FAIL_ALREADY_LEARNED_THAT_SPELL;
                         break;
                     }
-                    SpellEntry *has_spellproto = sSpellStore.LookupEntry(creatureTarget ->m_spells[x]);
+                    SpellEntry const *has_spellproto = sSpellStore.LookupEntry(creatureTarget ->m_spells[x]);
                     if (!has_spellproto) learn_msg = 0;
                     else if (has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
                         learn_msg = 0;
@@ -1809,7 +1809,7 @@ uint8 Spell::CanCast()
         {
             if (itr->second && !IsPassiveSpell(itr->second->GetId()))
             {
-                SpellEntry *spellInfo = itr->second->GetSpellProto();
+                SpellEntry const *spellInfo = itr->second->GetSpellProto();
                 if (!spellInfo) continue;
                 if (spellInfo->SpellIconID != 31 || spellInfo->SpellFamilyName != SPELLFAMILY_WARLOCK) continue;
                 hasImmolate = true;
@@ -1902,7 +1902,7 @@ uint8 Spell::CheckRange()
     // self cast doesnt need range checking -- also for Starshards fix
     if (m_spellInfo->rangeIndex == 1) return 0;
 
-    SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+    SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
     float max_range = GetMaxRange(srange);
     float min_range = GetMinRange(srange);
 

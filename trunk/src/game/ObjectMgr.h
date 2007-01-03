@@ -204,7 +204,7 @@ class ObjectMgr
         void AddGossipText(GossipText *pGText);
         GossipText *GetGossipText(uint32 Text_ID);
 
-        WorldSafeLocsEntry *GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team);
+        WorldSafeLocsEntry const *GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team);
 
         void AddTeleportCoords(TeleportCoords* TC)
         {

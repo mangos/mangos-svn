@@ -370,7 +370,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     // check if RewSpell is teaching another spell
     if(pQuest->GetRewSpell())
     {
-        SpellEntry *rewspell = sSpellStore.LookupEntry(pQuest->GetRewSpell());
+        SpellEntry const *rewspell = sSpellStore.LookupEntry(pQuest->GetRewSpell());
         if(rewspell)
         {
             if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
@@ -497,7 +497,7 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     // check if RewSpell is teaching another spell
     if(qInfo->GetRewSpell())
     {
-        SpellEntry *rewspell = sSpellStore.LookupEntry(qInfo->GetRewSpell());
+        SpellEntry const *rewspell = sSpellStore.LookupEntry(qInfo->GetRewSpell());
         if(rewspell)
         {
             if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)

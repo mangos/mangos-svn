@@ -1004,7 +1004,7 @@ float Map::GetWaterLevel(float x, float y )
 
 uint32 Map::GetAreaId(uint16 areaflag)
 {
-    AreaTableEntry *entry = GetAreaEntryByAreaFlag(areaflag);
+    AreaTableEntry const *entry = GetAreaEntryByAreaFlag(areaflag);
 
     if (entry)
         return entry->ID;
@@ -1014,7 +1014,7 @@ uint32 Map::GetAreaId(uint16 areaflag)
 
 uint32 Map::GetZoneId(uint16 areaflag)
 {
-    AreaTableEntry *entry = GetAreaEntryByAreaFlag(areaflag);
+    AreaTableEntry const *entry = GetAreaEntryByAreaFlag(areaflag);
 
     if( entry )
         return ( entry->zone != 0 ) ? entry->zone : entry->ID;

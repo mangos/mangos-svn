@@ -98,7 +98,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         if(!spellId)
             continue;
 
-        SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
         if(!spellInfo)
         {
             sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ",proto->ItemId, spellId);
@@ -152,7 +152,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     uint32 lockId = proto->LockID;
     if(lockId)
     {
-        LockEntry *lockInfo = sLockStore.LookupEntry(lockId);
+        LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
 
         if (!lockInfo)
         {
@@ -349,7 +349,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             break;
     }
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellId );
 
     if(!spellInfo)
     {
@@ -375,7 +375,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     sLog.outDetail("WORLD: got cast spell packet, spellId - %i, data length = %i",
         spellId, recvPacket.size());
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
 
     if(!spellInfo)
     {

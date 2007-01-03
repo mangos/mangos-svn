@@ -21,10 +21,10 @@
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 
-SpellEntry* Cast(Player*player,Item* item, uint32 spellId)
+SpellEntry const* Cast(Player*player,Item* item, uint32 spellId)
 {
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo)
     {
         sLog.outError("WORLD: unknown spell id %i", spellId);
@@ -45,7 +45,7 @@ void AddItemsSetItem(Player*player,Item *item)
     ItemPrototype const *proto = item->GetProto();
     uint32 setid = proto->ItemSet;
 
-    ItemSetEntry *set=sItemSetStore.LookupEntry(setid);
+    ItemSetEntry const *set = sItemSetStore.LookupEntry(setid);
 
     if(!set)
     {
@@ -107,7 +107,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
 {
     uint32 setid = proto->ItemSet;
 
-    ItemSetEntry *set=sItemSetStore.LookupEntry(setid);
+    ItemSetEntry const *set = sItemSetStore.LookupEntry(setid);
 
     if(!set)
     {
@@ -776,7 +776,7 @@ void Item::SetItemRandomProperties()
     //    random_id = irand(1267,1296);
     //}
 
-    ItemRandomPropertiesEntry *item_rand = sItemRandomPropertiesStore.LookupEntry(random_id);
+    ItemRandomPropertiesEntry const *item_rand = sItemRandomPropertiesStore.LookupEntry(random_id);
 
     if(item_rand)
     {

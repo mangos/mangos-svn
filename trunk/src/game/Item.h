@@ -31,7 +31,7 @@ typedef struct
 {
     uint32 setid;
     uint32 item_count;
-    SpellEntry *spells[8];
+    SpellEntry const *spells[8];
 }ItemsSetEffect;
 
 enum InventoryChangeFailure
