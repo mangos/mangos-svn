@@ -1933,7 +1933,14 @@ void Spell::EffectDisEnchant(uint32 i)
 
     uint32 item = 0;
     uint32 count = 0;
-    if(item_level >= 51)
+    if(item_level >= 66)
+    {
+        {
+            count = 1;
+            item = 20725;
+        }
+    }
+    else if(item_level >= 51 && item_level <= 65)
     {
         if(item_quality == 4)
         {
@@ -2228,8 +2235,6 @@ void Spell::EffectSummonObject(uint32 i)
     pGameObj->SetSpellId(m_spellInfo->Id);
     pGameObj->SetLootState(GO_CLOSED);
     m_caster->AddGameObject(pGameObj);
-
-    sLog.outError("AddObject at Spell.cpp 1100");
 
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
