@@ -669,7 +669,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     player->SetGuildIdInvited(GetPlayer()->GetGuildId());
 
-    data.Initialize(SMSG_GUILD_INVITE, (8+10)); // guess size
+    data.Initialize(SMSG_GUILD_INVITE, (8+10));             // guess size
     data << GetPlayer()->GetName();
     data << guild->GetName();
     player->GetSession()->SendPacket(&data);
@@ -725,7 +725,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     guild->DelMember(plGuid);
 
-    data.Initialize(SMSG_GUILD_EVENT, (2+20)); // guess size
+    data.Initialize(SMSG_GUILD_EVENT, (2+20));              // guess size
     data << (uint8)GE_REMOVED;
     data << (uint8)2;
     data << plName;
@@ -750,7 +750,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
 
     guild->AddMember(GetPlayer()->GetGUID());
 
-    WorldPacket data(SMSG_GUILD_EVENT, (2+10)); // guess size
+    WorldPacket data(SMSG_GUILD_EVENT, (2+10));             // guess size
     data << (uint8)GE_JOINED;
     data << (uint8)1;
     data << player->GetName();
@@ -868,7 +868,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
     guild->ChangeRank(plGuid, (plRankId-1));
 
-    WorldPacket data(SMSG_GUILD_EVENT, (2+30)); // guess size
+    WorldPacket data(SMSG_GUILD_EVENT, (2+30));             // guess size
     data << (uint8)GE_PROMOTION;
     data << (uint8)3;
     data << GetPlayer()->GetName();
@@ -940,7 +940,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 
     guild->ChangeRank(plGuid, (plRankId+1));
 
-    WorldPacket data(SMSG_GUILD_EVENT, (2+30)); // guess size
+    WorldPacket data(SMSG_GUILD_EVENT, (2+30));             // guess size
     data << (uint8)GE_DEMOTION;
     data << (uint8)3;
     data << GetPlayer()->GetName();
@@ -979,7 +979,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
 
     guild->DelMember(player->GetGUID());
 
-    WorldPacket data(SMSG_GUILD_EVENT, (2+10)); // guess size
+    WorldPacket data(SMSG_GUILD_EVENT, (2+10));             // guess size
     data << (uint8)GE_LEFT;
     data << (uint8)1;
     data << plName;
@@ -1071,7 +1071,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     guild->SetLeader(newLeaderGUID);
     guild->ChangeRank(oldLeader->GetGUID(), GR_OFFICER);
 
-    WorldPacket data(SMSG_GUILD_EVENT, (2+20)); // guess size
+    WorldPacket data(SMSG_GUILD_EVENT, (2+20));             // guess size
     data << (uint8)GE_LEADER_CHANGED;
     data << (uint8)2;
     data << oldLeader->GetName();

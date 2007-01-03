@@ -92,8 +92,14 @@ class Pet : public Creature
         uint32 m_fealty;
         PetType m_petType;
     private:
-        void SaveToDB() { assert(false); }                  // overwrited of Creature::SaveToDB     - don't must be called
-        void DeleteFromDB() { assert(false); }              // overwrited of Creature::DeleteFromDB - don't must be called
+        void SaveToDB()                                     // overwrited of Creature::SaveToDB     - don't must be called
+        {
+            assert(false);
+        }
+        void DeleteFromDB()                                 // overwrited of Creature::DeleteFromDB - don't must be called
+        {
+            assert(false);
+        }
 };
 
 class PetWithIdCheck
@@ -104,13 +110,13 @@ class PetWithIdCheck
         {
             if(u->GetTypeId()!=TYPEID_UNIT)
                 return false;
-            
+
             if(!((Creature*)u)->isPet())
                 return false;
-            
+
             if(u->GetEntry()!=i_entry)
                 return false;
-            
+
             if(u->GetOwnerGUID()!=i_owner->GetGUID())
                 return false;
 
@@ -123,5 +129,4 @@ class PetWithIdCheck
         uint32 i_entry;
         Pet* i_result;
 };
-
 #endif

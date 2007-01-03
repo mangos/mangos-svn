@@ -815,7 +815,7 @@ enum OpCodes
 
     CMSG_FIELD_WATCHED_FACTION_INACTIVE             = 791,
     CMSG_FIELD_WATCHED_FACTION_SHOW_BAR             = 792,
-    
+
     MSG_RAID_ICON_TARGET                            = 801,
     MSG_RAID_READY_CHECK                            = 802,
 

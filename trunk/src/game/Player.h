@@ -389,17 +389,16 @@ class WorldSession;
 #define BUYBACK_SLOT_12              80
 #define BUYBACK_SLOT_END             81
 
-#define DEFAULT_SWITCH_WEAPON        1500   //cooldown in ms 
+#define DEFAULT_SWITCH_WEAPON        1500                   //cooldown in ms
 #define ROGUE_SWITCH_WEAPON          1000
 
 #define TRADE_SLOT_COUNT             7
 #define TRADE_SLOT_TRADED_COUNT      6
 #define TRADE_SLOT_NONTRADED         6
 
-
 enum MovementFlags
 {
-    MOVEMENTFLAG_FORWARD        = 0x1,    
+    MOVEMENTFLAG_FORWARD        = 0x1,
     MOVEMENTFLAG_BACKWARD       = 0x2,
     MOVEMENTFLAG_STRAFE_LEFT    = 0x4,
     MOVEMENTFLAG_STRAFE_RIGHT   = 0x8,
@@ -715,8 +714,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void Regenerate(Powers power);
         void RegenerateHealth();
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
-    void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
-
+        void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
         uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
         void ModifyMoney( int32 d ) { SetMoney (GetMoney() + d > 0 ? GetMoney() + d : 0); }
@@ -857,7 +855,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void removeAction(uint8 button);
         void SendInitialActions();
 
-
         PvPInfo pvpInfo;
         void UpdatePvP(bool state, bool ovrride=false)
         {
@@ -883,7 +880,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CheckDuelDistance(time_t currTime);
         void DuelComplete(uint8 type);
 
-
         GroupInfo groupInfo;
         bool IsGroupVisibleFor(Player* p);
 
@@ -896,7 +892,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         static uint32 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid);
-
 
         bool UpdateSkill(uint32 skill_id);
 
@@ -987,8 +982,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         int32 GetReputation(const FactionEntry *factionEntry) const;
         ReputationRank GetReputationRank(uint32 faction) const;
         ReputationRank GetReputationRank(const FactionEntry *factionEntry) const;
-        const static int32 ReputationRank_Length[MAX_REPUTATION_RANK]; 
-        const static int32 Reputation_Cap    =  42999; 
+        const static int32 ReputationRank_Length[MAX_REPUTATION_RANK];
+        const static int32 Reputation_Cap    =  42999;
         const static int32 Reputation_Bottom = -42000;
 
         bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);

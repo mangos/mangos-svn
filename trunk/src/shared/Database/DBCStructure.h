@@ -81,8 +81,8 @@ struct FactionEntry
 {
     uint32      ID;
     int32       reputationListID;
-    uint32      BaseRepMask[4];   // Base reputation masks (see enum Races)
-    int32       BaseRepValue[4];  // Base reputation values 
+    uint32      BaseRepMask[4];                             // Base reputation masks (see enum Races)
+    int32       BaseRepValue[4];                            // Base reputation values
     uint32      team;
     char*       name;
 };
@@ -122,7 +122,7 @@ struct LockEntry
 {
     uint32      ID;
     uint32      requiredskill;
-     uint32         requiredlockskill;
+    uint32         requiredlockskill;
 };
 
 struct MapEntry
@@ -157,12 +157,12 @@ struct SpellEntry
     uint32    Id;
     uint32    School;
     uint32    Category;
-    uint32    Dispel; //4
-    uint32    Mechanic; //5
-    uint32    Attributes; //6
-    uint32    AttributesEx; //7
-    uint32    AttributesEx2; //8
-    uint32    AttributesExEx; //9
+    uint32    Dispel;                                       //4
+    uint32    Mechanic;                                     //5
+    uint32    Attributes;                                   //6
+    uint32    AttributesEx;                                 //7
+    uint32    AttributesEx2;                                //8
+    uint32    AttributesExEx;                               //9
     uint32    Stances;
     uint32    Targets;
     uint32    TargetCreatureType;
@@ -188,28 +188,28 @@ struct SpellEntry
     uint32    manaPerSecondPerLevel;
     uint32    rangeIndex;
     float     speed;
-    uint32    modalNextSpell; //35
+    uint32    modalNextSpell;                               //35
     uint32    StackAmount;
-    uint32    Totem[2]; //37,38
-    uint32    Reagent[8]; //39,40,41,42,43,44,45,46
-    uint32    ReagentCount[8]; //47,48,49,50,51,52,53,54
-    int32     EquippedItemClass; //55
-    int32     EquippedItemSubClass; //56
-    uint32    Effect[3]; //57,58,59
-    int32     EffectDieSides[3]; //60,61,62
-    uint32    EffectBaseDice[3]; //63,64,65
-    float     EffectDicePerLevel[3]; //66,67,68
-    float     EffectRealPointsPerLevel[3]; //69,70,71
-    int32     EffectBasePoints[3]; //72,73,74
-    uint32    EffectImplicitTargetA[3]; //75,76,77
-    uint32    EffectImplicitTargetB[3]; //78,79,80
-    uint32    EffectRadiusIndex[3]; //81,82,83
-    uint32    EffectApplyAuraName[3]; //84,85,86
-    uint32    EffectAmplitude[3]; //87,88,89
-    float     EffectMultipleValue[3]; //90,91,92
-    uint32    EffectChainTarget[3]; //93,94,95
-    uint32    EffectItemType[3]; //96,97,98
-    uint32    EffectMiscValue[3]; //99,100,101
+    uint32    Totem[2];                                     //37,38
+    uint32    Reagent[8];                                   //39,40,41,42,43,44,45,46
+    uint32    ReagentCount[8];                              //47,48,49,50,51,52,53,54
+    int32     EquippedItemClass;                            //55
+    int32     EquippedItemSubClass;                         //56
+    uint32    Effect[3];                                    //57,58,59
+    int32     EffectDieSides[3];                            //60,61,62
+    uint32    EffectBaseDice[3];                            //63,64,65
+    float     EffectDicePerLevel[3];                        //66,67,68
+    float     EffectRealPointsPerLevel[3];                  //69,70,71
+    int32     EffectBasePoints[3];                          //72,73,74
+    uint32    EffectImplicitTargetA[3];                     //75,76,77
+    uint32    EffectImplicitTargetB[3];                     //78,79,80
+    uint32    EffectRadiusIndex[3];                         //81,82,83
+    uint32    EffectApplyAuraName[3];                       //84,85,86
+    uint32    EffectAmplitude[3];                           //87,88,89
+    float     EffectMultipleValue[3];                       //90,91,92
+    uint32    EffectChainTarget[3];                         //93,94,95
+    uint32    EffectItemType[3];                            //96,97,98
+    uint32    EffectMiscValue[3];                           //99,100,101
     uint32    EffectTriggerSpell[3];
     float     EffectPointsPerComboPoint[3];
     uint32    SpellVisual;

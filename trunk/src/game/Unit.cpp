@@ -41,7 +41,8 @@
 
 #include <math.h>
 
-float baseMoveSpeed[MAX_MOVE_TYPE] = { 
+float baseMoveSpeed[MAX_MOVE_TYPE] =
+{
     2.5f,                                                   // MOVE_WALK
     7.0f,                                                   // MOVE_RUN
     1.25f,                                                  // MOVE_WALKBACK
@@ -310,7 +311,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             {
                 DEBUG_LOG("We are dead, loosing 10 percents durability");
                 ((Player*)pVictim)->DurabilityLossAll(0.10);
-                WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);// durability lost message
+                                                            // durability lost message
+                WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
                 ((Player*)pVictim)->GetSession()->SendPacket(&data);
             }
             HostilList::iterator i;
@@ -617,7 +619,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
     bool crit = SpellCriticalBonus(spellInfo, (int32*)&pdamage);
-    
+
     //Calculate armor mitigation if it is a physical spell
     if (spellInfo->School == 0)
         pdamage = CalcArmorReducedDamage(pVictim, damage);
@@ -628,12 +630,12 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     {
         SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
         return;
-    }else     // If we didn't fully absorb check if we fully resisted
-        if( pdamage <= resist)
-        {
-            SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
-           return;
-        }
+    }else                                                   // If we didn't fully absorb check if we fully resisted
+    if( pdamage <= resist)
+    {
+        SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
+        return;
+    }
 
     sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
@@ -663,7 +665,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb);
 
-    WorldPacket data(SMSG_PERIODICAURALOG, (21+16));    // we guess size
+    WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
     data.append(pVictim->GetPackGUID());
     data.append(this->GetPackGUID());
     data << spellProto->Id;
@@ -804,9 +806,8 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
         tmpvalue = 0.75;
     newdamage = uint32(damage - (damage * tmpvalue));
 
-    return (newdamage > 1) ? newdamage : 1; 
+    return (newdamage > 1) ? newdamage : 1;
 }
-
 
 void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist)
 {
@@ -1305,7 +1306,7 @@ void Unit::SendAttackStart(Unit* pVictim)
 
 void Unit::SendAttackStop(Unit* victim)
 {
-    WorldPacket data( SMSG_ATTACKSTOP, (4+16) ); // we guess size
+    WorldPacket data( SMSG_ATTACKSTOP, (4+16) );            // we guess size
     data.append(GetPackGUID());
     data.append(victim->GetPackGUID());
     data << uint32( 0 );
@@ -1512,7 +1513,7 @@ void Unit::_UpdateSpells( uint32 time )
                     // ELSE delay auto-repeat ranged weapon until player movement stop
                 }
                 else
-                // recheck range and req. items (ammo and gun, etc)
+                    // recheck range and req. items (ammo and gun, etc)
                 if(m_currentSpell->CheckRange() == 0 && m_currentSpell->CheckItems() == 0 )
                 {
                     m_currentSpell->setState(SPELL_STATE_PREPARING);
@@ -2583,7 +2584,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
 {
     sLog.outDebug("WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
-    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (16+45)); // we guess size
+    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (16+45));    // we guess size
     data << (uint32)HitInfo;
     data.append(GetPackGUID());
     data.append(target->GetPackGUID());
@@ -2592,8 +2593,10 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
     data << (uint8)SwingType;
     data << (uint32)DamageType;
 
-    data << (float)(Damage-AbsorbDamage-Resist-BlockedAmount);                                  //
-    data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);                                 // still need to double check damaga
+                                                            //
+    data << (float)(Damage-AbsorbDamage-Resist-BlockedAmount);
+                                                            // still need to double check damaga
+    data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
     data << (uint32)AbsorbDamage;
     data << (uint32)Resist;
     data << (uint32)TargetState;
@@ -3104,7 +3107,8 @@ void Unit::UnsummonTotem(int8 slot)
 
 void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
 {
-    WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (9+16)); // we guess size
+                                                            // we guess size
+    WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (9+16));
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
     data << SpellID;
@@ -3303,16 +3307,16 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-	    {
-		// old one
-                //damage += (*i)->GetModifier()->m_amount;
-		int32 _damage = (*pdamage + (*i)->GetModifier()->m_amount);
-		    if (_damage < 0)
-			*pdamage = 0;
-		    else
-			*pdamage = _damage;
-	    }
-							
+    {
+        // old one
+        //damage += (*i)->GetModifier()->m_amount;
+        int32 _damage = (*pdamage + (*i)->GetModifier()->m_amount);
+        if (_damage < 0)
+            *pdamage = 0;
+        else
+            *pdamage = _damage;
+    }
+
     AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
@@ -3556,7 +3560,6 @@ float Unit::GetSpeed( UnitMoveType mtype ) const
 {
     return m_speed_rate[mtype]*baseMoveSpeed[mtype];
 }
-
 
 void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 {

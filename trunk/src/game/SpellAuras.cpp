@@ -2172,7 +2172,7 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
     m_isPeriodic = apply;
 }
 
-void Aura::HandleModRegen(bool apply, bool Real)                       // eating
+void Aura::HandleModRegen(bool apply, bool Real)            // eating
 {
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
@@ -2186,7 +2186,7 @@ void Aura::HandleModRegen(bool apply, bool Real)                       // eating
     m_isPeriodic = apply;
 }
 
-void Aura::HandleModPowerRegen(bool apply, bool Real)                  // drinking
+void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
@@ -2323,7 +2323,7 @@ void Aura::HandleHaste(bool apply, bool Real)
         // v*(1+percent/100)
         m_target->ApplyAttackTimePercentMod(BASE_ATTACK,  m_modifier.m_amount,apply);
         m_target->ApplyAttackTimePercentMod(OFF_ATTACK,   m_modifier.m_amount,apply);
-        
+
         if(m_target->GetTypeId()==TYPEID_PLAYER)
             ((Player*)m_target)->_ApplyAmmoBonuses(false);
 

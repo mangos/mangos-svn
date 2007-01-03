@@ -102,7 +102,8 @@ bool ChatHandler::HandleSendItemErrorMsg(const char* args)
     uint8 error_msg = atol((char*)args);
     if ( error_msg > 0 )
     {
-        WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, (30)); // guess size
+                                                            // guess size
+        WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, (30));
         data << error_msg;
         data << uint64(0);
         data << uint64(0);

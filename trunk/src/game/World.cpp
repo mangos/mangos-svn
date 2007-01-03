@@ -267,7 +267,7 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_GM_LOGIN_STATE]  = sConfig.GetIntDefault("GM.LoginState",2);
 
     m_configs[CONFIG_GROUP_VISIBILITY] = sConfig.GetIntDefault("GroupVisibility",0);
-    
+
     m_configs[CONFIG_SKILL_CHANCE_ORANGE] = sConfig.GetIntDefault("SkillChance.Orange",100);
     m_configs[CONFIG_SKILL_CHANCE_YELLOW] = sConfig.GetIntDefault("SkillChance.Yellow",75);
     m_configs[CONFIG_SKILL_CHANCE_GREEN]  = sConfig.GetIntDefault("SkillChance.Green",25);
@@ -611,7 +611,6 @@ bool World::KickPlayer(std::string playerName)
     return false;
 }
 
-
 bool World::BanAccount(std::string nameOrIP)
 {
     bool is_ip = IsIPAddress(nameOrIP.c_str());
@@ -768,7 +767,7 @@ void World::ShutdownCancel()
 
 void World::SendServerMessage(ServerMessageType type, const char *text, Player* player)
 {
-    WorldPacket data(SMSG_SERVER_MESSAGE, 50); // guess size
+    WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
     data << uint32(type);
     if(type <= SERVER_MSG_STRING)
         data << text;

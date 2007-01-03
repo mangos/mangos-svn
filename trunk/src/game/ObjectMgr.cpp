@@ -1139,14 +1139,13 @@ void ObjectMgr::LoadSpellChains()
         }
 
         // check basic spell chain data integrity (note: rank can be equal 0 or 1 for first/single spell)
-        if( (spell_id == node.first) != (node.rank <= 1) || 
-            (spell_id == node.first) != (node.prev == 0) || 
+        if( (spell_id == node.first) != (node.rank <= 1) ||
+            (spell_id == node.first) != (node.prev == 0) ||
             (node.rank <= 1) != (node.prev == 0) )
         {
             sLog.outError("Spell %u have not compatiable chain data (prev: %u, first: %u, rank: %d)",spell_id,node.prev,node.first,node.rank);
             continue;
         }
-                                                            
 
         SpellChains[spell_id] = node;
 

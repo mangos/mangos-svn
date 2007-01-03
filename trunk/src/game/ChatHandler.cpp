@@ -91,7 +91,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str());   
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str());
             group->BroadcastPacket(&data, group->GetMemberGroup(GetPlayer()->GetGUID()));
         }
         break;
@@ -332,7 +332,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     if (em)
     {
         uint32 emote_anim = em->textid;
-        
+
         WorldPacket data;
         data.Initialize(SMSG_EMOTE, 12);
         data << (uint32)emote_anim;
@@ -340,7 +340,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         WPAssert(data.size() == 12);
         GetPlayer()->SendMessageToSet( &data, true );
 
-        data.Initialize(SMSG_TEXT_EMOTE, (20+namlen)); 
+        data.Initialize(SMSG_TEXT_EMOTE, (20+namlen));
         data << GetPlayer()->GetGUID();
         data << (uint32)text_emote;
         data << emoteNum;

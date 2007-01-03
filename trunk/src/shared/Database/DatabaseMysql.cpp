@@ -227,8 +227,8 @@ bool DatabaseMysql::_TransactionCmd(const char *sql)
         sLog.outError("SQL: %s", sql);
         sLog.outError("SQL ERROR: %s", mysql_error(mMysql));
         return false;
-    } 
-    else 
+    }
+    else
     {
         DEBUG_LOG("SQL: %s", sql);
     }
@@ -240,15 +240,15 @@ bool DatabaseMysql::BeginTransaction()
     if (!mMysql)
         return false;
     if (tranThread==ZThread::ThreadImpl::current())
-        return false;               // huh? this thread already started transaction
+        return false;                                       // huh? this thread already started transaction
     mMutex.acquire();
     if (!_TransactionCmd("BEGIN"))
     {
-        mMutex.release();           // can't start transaction
+        mMutex.release();                                   // can't start transaction
         return false;
     }
     // transaction started
-    tranThread = ZThread::ThreadImpl::current();    // owner of this transaction
+    tranThread = ZThread::ThreadImpl::current();            // owner of this transaction
     return true;
 }
 

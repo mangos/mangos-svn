@@ -26,11 +26,12 @@
 #include "MapManager.h"
 #include "Formulas.h"
 
-char const* petTypeSuffix[MAX_PET_TYPE] = { 
-    "'s Minion",   // SUMMON_PET
-    "'s Pet",      // HUNTER_PET
-    "'s Guardian", // GUARDIAN_PET
-    "'s Pet"       // MINI_PET
+char const* petTypeSuffix[MAX_PET_TYPE] =
+{
+    "'s Minion",                                            // SUMMON_PET
+    "'s Pet",                                               // HUNTER_PET
+    "'s Guardian",                                          // GUARDIAN_PET
+    "'s Pet"                                                // MINI_PET
 };
 
 Pet::Pet(PetType type)
@@ -94,7 +95,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
 
     switch(getPetType())
     {
-    
+
         case SUMMON_PET:
             petlevel=owner->getLevel();
 
@@ -104,11 +105,11 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
             break;
         case HUNTER_PET:
             SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[13].GetUInt32()<<8));
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING); 
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
 
             // pet not renamed yet, let rename if wont
             if(!fields[17].GetBool())
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME); 
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
 
             SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[14].GetUInt32() );
             SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );

@@ -35,7 +35,8 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     if(!p)
         return;
 
-    WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) ); // guess size
+                                                            // guess size
+    WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) );
     data << p->GetGUID();
     data << p->GetName();
     data << uint8(0);
@@ -51,9 +52,10 @@ void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
     std::string name;
     if(!objmgr.GetPlayerNameByGUID(guid, name))
         name = "<non-existing character>";
-    uint32 field = Player::GetUInt32ValueFromDB(UNIT_FIELD_BYTES_0, guid);    
+    uint32 field = Player::GetUInt32ValueFromDB(UNIT_FIELD_BYTES_0, guid);
 
-    WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) ); // guess size
+                                                            // guess size
+    WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) );
     data << guid;
     data << name;
     data << (uint8)0;
@@ -196,7 +198,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
     sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
 
-    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 ); // guess size
+    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 );  // guess size
     data << (uint32)entry;
     data << (unit ? unit->GetName() : ci->Name);
 
@@ -297,7 +299,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
     uint8 u8unk1=0,u8unk2=0,u8unk3=0;
     //------------------------------------------------------------------------
-    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 ); // guess size
+    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 );  // guess size
     data << (uint32)entry;
     data << ci->Name;
     data << uint8(u8unk1) << uint8(u8unk2) << uint8(u8unk3);
@@ -376,7 +378,8 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%u'", guid);
 
     const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
-    WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 150 ); // guess size
+                                                            // guess size
+    WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 150 );
     data << entryID;
 
     if( !info  )
@@ -468,7 +471,7 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 
     pGossip = objmgr.GetGossipText(textID);
 
-    WorldPacket data( SMSG_NPC_TEXT_UPDATE, 100 ); // guess size
+    WorldPacket data( SMSG_NPC_TEXT_UPDATE, 100 );          // guess size
     data << textID;
 
     if (!pGossip)
@@ -514,7 +517,8 @@ void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
     while (pageID)
     {
         ItemPage *pPage = objmgr.RetreiveItemPageText( pageID );
-        WorldPacket data( SMSG_PAGE_TEXT_QUERY_RESPONSE, 50 ); // guess size
+                                                            // guess size
+        WorldPacket data( SMSG_PAGE_TEXT_QUERY_RESPONSE, 50 );
         data << pageID;
 
         if (!pPage)

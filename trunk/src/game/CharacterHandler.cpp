@@ -39,7 +39,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
     // keys can be non cleared if player open realm list and close it by 'cancel'
     loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
 
-    WorldPacket data(SMSG_CHAR_ENUM, (100)); // we guess size
+    WorldPacket data(SMSG_CHAR_ENUM, (100));                // we guess size
 
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
 
@@ -225,7 +225,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 
     //data.Initialize(SMSG_CHAR_CREATE);
     //data << (uint8)0x34;
-    WorldPacket data(SMSG_CHAR_DELETE, 1);                      // Changed in 1.12.x client branch
+    WorldPacket data(SMSG_CHAR_DELETE, 1);                  // Changed in 1.12.x client branch
     data << (uint8)0x39;                                    // Changed in 1.12.x client branch
     SendPacket( &data );
 }
@@ -289,7 +289,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             SendPacket(&data);
             DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
 
-            data.Initialize(SMSG_GUILD_EVENT, (5+10)); // we guess size
+            data.Initialize(SMSG_GUILD_EVENT, (5+10));      // we guess size
             data<<(uint8)GE_SIGNED_ON;
             data<<(uint8)1;
             data<<pCurrChar->GetName();
@@ -488,7 +488,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // show time before shutdown if shudown planned.
     if(sWorld.IsShutdowning())
         sWorld.ShutdownMsg(true,pCurrChar);
-
 
     result = sDatabase.PQuery("SELECT `leaderGuid` FROM `raidgroup_member` WHERE `memberGuid`='%u'", GUID_LOPART(pCurrChar->GetGUID()));
     if(result)

@@ -729,7 +729,7 @@ void Object::_SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const
 
 void Object::SendDestroyObject(uint64 guid)
 {
-    WorldPacket data(SMSG_DESTROY_OBJECT, 8); 
+    WorldPacket data(SMSG_DESTROY_OBJECT, 8);
     data << guid;
     SendMessageToSet(&data, true);
 }
@@ -738,5 +738,5 @@ void Object::SendObjectDeSpawnAnim(uint64 guid)
 {
     WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
     data << guid;
-    SendMessageToSet(&data, true);  
+    SendMessageToSet(&data, true);
 }

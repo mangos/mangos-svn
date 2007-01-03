@@ -47,7 +47,7 @@ typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
 // Real == true at aura add/remove
 // Real == false at aura mod unapply/reapply, when this need to add/remove dependent aura/item/stat mods
 //
-// Code in aura handler can be guarded by if(Real) check in case if need it execution only at real add/remove of aura 
+// Code in aura handler can be guarded by if(Real) check in case if need it execution only at real add/remove of aura
 //
 // MAIN RULE: Code DON'T MUST be guarded by if(Real) check if this aura mod required to unapply before add/remove dependent aura/item/stat mods
 //      (percent auras, stats mods, etc)
@@ -258,5 +258,4 @@ class PersistentAreaAura : public Aura
         ~PersistentAreaAura();
         void Update(uint32 diff);
 };
-
 #endif

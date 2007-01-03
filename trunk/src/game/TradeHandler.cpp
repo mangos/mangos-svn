@@ -46,7 +46,7 @@ void WorldSession::SendUpdateTrade()
 
     if( !pThis->pTrader ) return;
 
-    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100)); // guess size
+    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100));    // guess size
     data << (uint8 ) 1;
     data << (uint32) 7;
     data << (uint32) 0;

@@ -72,7 +72,7 @@ class ChannelMgr
         ChannelMap channels;
         void MakeNotOnPacket(WorldPacket *data, std::string name)
         {
-            data->Initialize(SMSG_CHANNEL_NOTIFY, (1+10)); // we guess size
+            data->Initialize(SMSG_CHANNEL_NOTIFY, (1+10));  // we guess size
             (*data) << (uint8)0x05 << name;
         }
 };

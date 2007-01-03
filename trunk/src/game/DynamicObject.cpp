@@ -98,9 +98,9 @@ void DynamicObject::Update(uint32 p_time)
 
 void DynamicObject::Delete()
 {
-    SendObjectDeSpawnAnim(GetGUID()); 
+    SendObjectDeSpawnAnim(GetGUID());
     SendDestroyObject(GetGUID());
-    
+
     RemoveFromWorld();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }

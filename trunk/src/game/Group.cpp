@@ -54,10 +54,9 @@ void Group::LoadRaidGroupFromDB(const uint64 &leaderGuid)
         m_targetIcons[i] = (*result)[2+i].GetUInt8();
     delete result;
 
-
     result = sDatabase.PQuery("SELECT `memberGuid`,`assistant`,`subgroup` FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
     if(!result)
-        return;    
+        return;
 
     do
     {
@@ -122,7 +121,7 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
             WorldPacket data;
 
             if(method == 1)
-            {   
+            {
                 data.Initialize( SMSG_GROUP_UNINVITE, 0 );
                 player->GetSession()->SendPacket( &data );
             }
@@ -136,7 +135,7 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
         {
             WorldPacket data(SMSG_GROUP_SET_LEADER, (m_members[0].name.size()+1));
             data << m_members[0].name;
-            BroadcastPacket(&data);  
+            BroadcastPacket(&data);
         }
 
         SendUpdate();
@@ -148,25 +147,25 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 }
 
 void Group::ChangeLeader(const uint64 &guid)
-{    
+{
     _setLeader(guid);
 
     WorldPacket data(SMSG_GROUP_SET_LEADER, (m_members[_getMemberIndex(guid)].name.size()+1));
     data << m_members[_getMemberIndex(guid)].name;
-    BroadcastPacket(&data);  
+    BroadcastPacket(&data);
     SendUpdate();
 }
 
 void Group::Disband(bool hideDestroy)
 {
     Player *player;
-    
+
     for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
     {
         player = objmgr.GetPlayer(citr->guid);
         if(!player || !player->GetSession())
             continue;
-        
+
         player->RemoveAreaAurasByOthers();
         player->RemoveAreaAurasFromGroup();
         player->groupInfo.group = NULL;
@@ -192,7 +191,6 @@ void Group::Disband(bool hideDestroy)
             invitee->groupInfo.invite = NULL;
     }
     m_invitees.clear();
-
 
     if(isRaidGroup())
     {
@@ -552,9 +550,9 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
     m_targetIcons[id] = guid;
 
     WorldPacket data(MSG_RAID_ICON_TARGET, (2+8));
-    data << (uint8)0;                                  
-    data << id;                                         
-    data << guid;                                      
+    data << (uint8)0;
+    data << id;
+    data << guid;
     BroadcastPacket(&data);
 }
 
@@ -594,7 +592,8 @@ void Group::SendInit(WorldSession *session)
     myFlag  = m_members[myIndex].group | (m_members[myIndex].assistant?0x80:0);
     for(int i=1; i<=m_members.size(); i++)
     {
-        WorldPacket data(SMSG_GROUP_LIST, (2+4+8+8+1+2+m_members.size()*20)); // guess size
+                                                            // guess size
+        WorldPacket data(SMSG_GROUP_LIST, (2+4+8+8+1+2+m_members.size()*20));
         data << (uint8)m_groupType;
         data << (uint8)myFlag;
 
@@ -607,8 +606,8 @@ void Group::SendInit(WorldSession *session)
 
             data << ((count<i) ? citr->name : "");
             data << citr->guid;
-            data << (uint8)(objmgr.GetPlayer(citr->guid)?1:0);            
-            data << (uint8)(citr->group | (citr->assistant?0x80:0));    
+            data << (uint8)(objmgr.GetPlayer(citr->guid)?1:0);
+            data << (uint8)(citr->group | (citr->assistant?0x80:0));
             count++;
 
             if(count >= i)
@@ -630,7 +629,7 @@ void Group::SendTargetIconList(WorldSession *session)
         return;
 
     WorldPacket data(MSG_RAID_ICON_TARGET, (1+TARGETICONCOUNT*9));
-    data << (uint8)1;     
+    data << (uint8)1;
 
     for(int i=0; i<TARGETICONCOUNT; i++)
     {
@@ -639,7 +638,7 @@ void Group::SendTargetIconList(WorldSession *session)
 
         data << (uint8)i;
         data << m_targetIcons[i];
-    }       
+    }
 
     session->SendPacket(&data);
 }
@@ -655,9 +654,11 @@ void Group::SendUpdate()
         if(!player || !player->GetSession())
             continue;
 
-        data.Initialize(SMSG_GROUP_LIST, (6+8+8+1+2+m_members.size()*20)); // guess size
+                                                            // guess size
+        data.Initialize(SMSG_GROUP_LIST, (6+8+8+1+2+m_members.size()*20));
         data << (uint8)m_groupType;
-        data << (uint8)(citr->group | (citr->assistant?0x80:0));        // own flags (groupid | (assistant?0x80:0))
+                                                            // own flags (groupid | (assistant?0x80:0))
+        data << (uint8)(citr->group | (citr->assistant?0x80:0));
 
         data << uint32(m_members.size()-1);
         for(vector<MemberSlot>::const_iterator citr2=m_members.begin(); citr2!=m_members.end(); citr2++)
@@ -667,8 +668,10 @@ void Group::SendUpdate()
 
             data << citr2->name;
             data << citr2->guid;
-            data << (uint8)(objmgr.GetPlayer(citr2->guid) ? 1 : 0);         // online-state
-            data << (uint8)(citr2->group | (citr2->assistant?0x80:0));      // member flags
+                                                            // online-state
+            data << (uint8)(objmgr.GetPlayer(citr2->guid) ? 1 : 0);
+                                                            // member flags
+            data << (uint8)(citr2->group | (citr2->assistant?0x80:0));
         }
 
         data << m_leaderGuid;
@@ -692,7 +695,6 @@ void Group::BroadcastPacket(WorldPacket *packet, int group, uint64 ignore)
             pl->GetSession()->SendPacket(packet);
     }
 }
-
 
 bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant)
 {
@@ -724,16 +726,16 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant, u
     Player *player = objmgr.GetPlayer(guid);
     if(player)
     {
-        player->groupInfo.invite = NULL;     
+        player->groupInfo.invite = NULL;
         player->groupInfo.group = this;
     }
 
-    if(!isRaidGroup())  // reset targetIcons for non-raid-groups
+    if(!isRaidGroup())                                      // reset targetIcons for non-raid-groups
     {
         for(int i=0; i<TARGETICONCOUNT; i++)
             m_targetIcons[i] = 0;
     }
-    else                // insert into raid table..
+    else                                                    // insert into raid table..
         sDatabase.PExecute("INSERT INTO `raidgroup_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(member.guid), ((member.assistant==1)?1:0), member.group);
 
     return true;
@@ -754,7 +756,7 @@ bool Group::_removeMember(const uint64 &guid)
     if(isRaidGroup())
         sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `memberGuid`='%u'", GUID_LOPART(guid));
 
-    if(m_leaderGuid == guid) // leader was removed
+    if(m_leaderGuid == guid)                                // leader was removed
     {
         if(m_members.size() > 0)
             _setLeader(m_members[0].guid);
@@ -771,7 +773,7 @@ void Group::_setLeader(const uint64 &guid)
         return;
 
     if(isRaidGroup())
-    {            
+    {
         sDatabase.BeginTransaction();
         sDatabase.PExecute("UPDATE `raidgroup` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
         sDatabase.PExecute("UPDATE `raidgroup_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
@@ -821,7 +823,7 @@ bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
     if(i < 0)
         return false;
 
-    m_members[i].group = group; 
+    m_members[i].group = group;
     sDatabase.PExecute("UPDATE `raidgroup_member` SET `subgroup`='%u' WHERE `memberGuid`='%u'", group, GUID_LOPART(guid));
     return true;
 }
@@ -832,7 +834,7 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
     if(i < 0)
         return false;
 
-    m_members[i].assistant = state; 
+    m_members[i].assistant = state;
     sDatabase.PExecute("UPDATE `raidgroup_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));
     return true;
 }

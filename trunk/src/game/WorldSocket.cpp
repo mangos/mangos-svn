@@ -384,7 +384,7 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
         uint32 cur_mstime = getMSTime();
         uint32 diff_mstime = cur_mstime - m_LastPingMSTime;
         m_LastPingMSTime = cur_mstime;
-        if(diff_mstime < 27000) // should be 30000 (=30 secs), add little tolerance
+        if(diff_mstime < 27000)                             // should be 30000 (=30 secs), add little tolerance
         {
             ++m_OverSpeedPings;
 

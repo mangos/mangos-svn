@@ -148,7 +148,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
             Tspells.push_back(*itr);
     }
 
-    WorldPacket data( SMSG_TRAINER_LIST, 200 ); // guess size
+    WorldPacket data( SMSG_TRAINER_LIST, 200 );             // guess size
     data << guid;
     data << uint32(0) << uint32(Tspells.size());
 
@@ -505,7 +505,7 @@ void WorldSession::SendStablePet(uint64 guid )
 {
     sLog.outDetail("WORLD: Recv MSG_LIST_STABLED_PETS Send.");
 
-    WorldPacket data(MSG_LIST_STABLED_PETS, 200); // guess size
+    WorldPacket data(MSG_LIST_STABLED_PETS, 200);           // guess size
     data << uint64 ( guid );
 
     QueryResult *result,*result_1;
@@ -591,10 +591,10 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
-    
+
     Pet *pet = _player->GetPet();
 
-    WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
+    WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
     // can't place in stable dead pet
     if(!pet||!pet->isAlive())
@@ -660,8 +660,8 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
-    
-    WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
+
+    WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
     Pet* pet = _player->GetPet();
     if(pet && pet->isAlive())
@@ -746,24 +746,24 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
     delete result;
 
     switch(slot)
-    {        
+    {
         case 0:
-        case 1: 
+        case 1:
+        {
+            StableSlotPricesEntry const *SlotPrice = sStableSlotPricesStore.LookupEntry(slot+1);
+            if(_player->GetMoney() < SlotPrice->Price)
             {
-                StableSlotPricesEntry const *SlotPrice = sStableSlotPricesStore.LookupEntry(slot+1);
-                if(_player->GetMoney() < SlotPrice->Price)
-                {
-                    data << uint8(0x06);
-                    break;
-                }
-                else
-                {
-                    sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u, %u,0,0,0,0,0)",_player->GetGUIDLow(), slot+1);
-                    _player->SetMoney(_player->GetMoney() - SlotPrice->Price);
-                    data << uint8(0x0A);                        // success buy
-                    break;
-                } break; 
-            } 
+                data << uint8(0x06);
+                break;
+            }
+            else
+            {
+                sDatabase.PExecute("INSERT INTO `character_stable` (`owner`,`slot`,`petnumber`,`entry`,`level`,`loyalty`,`trainpoint`) VALUES (%u, %u,0,0,0,0,0)",_player->GetGUIDLow(), slot+1);
+                _player->SetMoney(_player->GetMoney() - SlotPrice->Price);
+                data << uint8(0x0A);                        // success buy
+                break;
+            } break;
+        }
         case 2: data << uint8(0x06); break;
         default: data << uint8(0x06); break;
     }
@@ -792,7 +792,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
-    WorldPacket data(SMSG_STABLE_RESULT, 200); // guess size
+    WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
     Pet* pet = _player->GetPet();
 

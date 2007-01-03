@@ -60,7 +60,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
     bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
 
-    WorldPacket data( SMSG_WHO, 50 ); // guess size
+    WorldPacket data( SMSG_WHO, 50 );                       // guess size
     data << uint32( 0 );                                    // clientcount place holder
     data << uint32( 0 );                                    // clientcount place holder
 
@@ -140,7 +140,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     {
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-        data.Initialize( SMSG_FORCE_MOVE_ROOT, (8+4) ); // guess size
+        data.Initialize( SMSG_FORCE_MOVE_ROOT, (8+4) );     // guess size
         data.append(Target->GetPackGUID());
         data << (uint32)2;
         SendPacket( &data );
@@ -175,7 +175,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
     if(!GetPlayer()->isInFlight())
     {
         //!we can move again
-        data.Initialize( SMSG_FORCE_MOVE_UNROOT, 8 ); // guess size
+        data.Initialize( SMSG_FORCE_MOVE_UNROOT, 8 );       // guess size
         data.append(GetPlayer()->GetPackGUID());
         SendPacket( &data );
 
@@ -466,7 +466,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     }
 
-    WorldPacket data( SMSG_FRIEND_STATUS, (1+8+1+4+4+4) ); // guess size
+    WorldPacket data( SMSG_FRIEND_STATUS, (1+8+1+4+4+4) );  // guess size
 
     if (friendGuid && friendResult==FRIEND_NOT_FOUND)
     {
@@ -782,7 +782,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
                 //_player->BuildHeartBeatMsg(&data);
                 //_player->SendMessageToSet(&data, true);
             }
-            else if (GetPlayer()->InBattleGround())             //if player is playing in a BattleGround
+            else if (GetPlayer()->InBattleGround())         //if player is playing in a BattleGround
             {
                 //! AreaTrigger BattleGround
 
@@ -973,7 +973,7 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 
     recv_data >> GUID;
 
-    // skip another player speed update info 
+    // skip another player speed update info
     if(GUID != _player->GetGUID())
         return;
 

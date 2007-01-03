@@ -210,9 +210,8 @@ bool WorldSession::LearnNewTaxiNode( uint64 guid )
 
         return true;
     } else
-        return false;
+    return false;
 }
-
 
 void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
 {
@@ -224,7 +223,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
     recv_data >> guid >> _totalcost >> node_count;
 
     std::vector<uint32> nodes;
-    
+
     for(uint32 i = 0; i < node_count; ++i)
     {
         uint32 node;
