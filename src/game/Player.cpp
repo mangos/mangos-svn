@@ -443,7 +443,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
                 if( msg == EQUIP_ERR_OK )
                 {
                     RemoveItem(INVENTORY_SLOT_BAG_0, i,true);
-                    StoreItem( dest, pItem, true);
+                    pItem = StoreItem( dest, pItem, true);
                 }
 
                 // if  this is ammo then use it
@@ -9683,7 +9683,7 @@ void Player::_LoadInventory(uint32 timediff)
                     continue;
                 }
 
-                StoreItem(dest, item, true);
+                item = StoreItem(dest, item, true);
             }
             else if( IsEquipmentPos( dest ) )
             {
@@ -9703,7 +9703,7 @@ void Player::_LoadInventory(uint32 timediff)
                     continue;
                 }
 
-                BankItem(dest, item, true);
+                item = BankItem(dest, item, true);
             }
 
             // item's state may have changed after stored
