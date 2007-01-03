@@ -135,6 +135,7 @@ class Aura
         void HandleModDamagePCTTaken(bool Apply, bool Real);
         void HandleModPCTRegen(bool Apply, bool Real);
         void HandlePeriodicDamagePCT(bool Apply, bool Real);
+        void HandleModDetectRange(bool apply, bool Real);
         void HandleAuraModAttackPower(bool Apply, bool Real);
         void HandleAuraTransform(bool Apply, bool Real);
         void HandleModSpellCritChance(bool Apply, bool Real);
@@ -201,7 +202,7 @@ class Aura
 
         void _AddAura();
         void _RemoveAura();
-        uint32 CalculateDamage();
+        int32 CalculateDamage();
 
         void TriggerSpell();
         void SendCoolDownEvent();

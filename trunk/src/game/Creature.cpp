@@ -34,6 +34,7 @@
 #include "CreatureAI.h"
 #include "CreatureAISelector.h"
 #include "Formulas.h"
+#include "SpellAuras.h"
 
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
@@ -1219,6 +1220,14 @@ float Creature::GetAttackDistance(Unit *pl) const
     // "Aggro Radius varries with level difference at a rate of roughly 1 yard/level"
     // radius grow if playlevel < creaturelevel
     RetDistance -= (float)leveldif;
+
+    if(getLevel() <= 55)
+    {
+        // decrease aggro range auras
+        AuraList const& modDectectRangeList = GetAurasByType(SPELL_AURA_MOD_DETECT_RANGE);
+        for(AuraList::const_iterator itr = modDectectRangeList.begin(); itr != modDectectRangeList.end(); ++itr)
+            RetDistance += (*itr)->GetModifier()->m_amount;
+    }
 
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
     if(RetDistance < 5 && sWorld.getRate(RATE_CREATURE_AGGRO) != 0)

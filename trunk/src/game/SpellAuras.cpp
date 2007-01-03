@@ -136,7 +136,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModPCTRegen,                               //SPELL_AURA_MOD_HEALTH_REGEN_PERCENT = 88,
     &Aura::HandlePeriodicDamagePCT,                         //SPELL_AURA_PERIODIC_DAMAGE_PERCENT = 89,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RESIST_CHANCE = 90,// Useless
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECT_RANGE = 91,
+    &Aura::HandleModDetectRange,                            //SPELL_AURA_MOD_DETECT_RANGE = 91,
     &Aura::HandleNULL,                                      //SPELL_AURA_PREVENTS_FLEEING = 92,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_UNATTACKABLE = 93,
     &Aura::HandleNULL,                                      //SPELL_AURA_INTERRUPT_REGEN = 94,
@@ -245,7 +245,7 @@ m_isAreaAura(false)
     uint32 type = 0;
     if(!m_positive)
         type = 1;
-    uint32 damage;
+    int32 damage;
     if(!caster)
     {
         m_caster_guid = target->GetGUID();
@@ -293,10 +293,10 @@ Unit* Aura::GetCaster() const
     return ObjectAccessor::Instance().GetUnit(*m_target,m_caster_guid);
 }
 
-uint32 Aura::CalculateDamage()
+int32 Aura::CalculateDamage()
 {
     SpellEntry const* spellproto = GetSpellProto();
-    uint32 value = 0;
+    int32 value = 0;
     uint32 level = 0;
     if(!m_target)
         return 0;
@@ -309,8 +309,8 @@ uint32 Aura::CalculateDamage()
 
     float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[m_effIndex];
     float randomPointsPerLevel = spellproto->EffectDicePerLevel[m_effIndex];
-    uint32 basePoints = uint32(spellproto->EffectBasePoints[m_effIndex] + level * basePointsPerLevel);
-    uint32 randomPoints = uint32(spellproto->EffectDieSides[m_effIndex] + level * randomPointsPerLevel);
+    int32 basePoints = spellproto->EffectBasePoints[m_effIndex] + level * basePointsPerLevel;
+    int32 randomPoints = spellproto->EffectDieSides[m_effIndex] + level * randomPointsPerLevel;
     float comboDamage = spellproto->EffectPointsPerComboPoint[m_effIndex];
     uint8 comboPoints=0;
     if(caster->GetTypeId() == TYPEID_PLAYER)
@@ -324,7 +324,7 @@ uint32 Aura::CalculateDamage()
 
     if(comboDamage > 0)
     {
-        value += (uint32)(comboDamage * comboPoints);
+        value += (int32)(comboDamage * comboPoints);
         if(caster->GetTypeId() == TYPEID_PLAYER)
             caster->SetUInt32Value(PLAYER_FIELD_BYTES,((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
@@ -1915,6 +1915,11 @@ void Aura::HandlePeriodicDamagePCT(bool apply, bool Real)
         m_periodicTimer += m_modifier.periodictime;
 
     m_isPeriodic = apply;
+}
+
+void Aura::HandleModDetectRange(bool apply, bool Real)
+{
+    // has no immediate effect when adding / removing
 }
 
 void Aura::HandlePeriodicLeech(bool apply, bool Real)
