@@ -311,27 +311,27 @@ void GameObject::SaveToDB()
 
     const GameObjectInfo *goI = GetGOInfo();
 
-    if (!goI)
-        return;
+    if (goI)
+    {
+        ss << "INSERT INTO `gameobject` VALUES ( "
+            << GetGUIDLow() << ", "
+            << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
+            << GetMapId() << ", "
+            << GetFloatValue(GAMEOBJECT_POS_X) << ", "
+            << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
+            << GetFloatValue(GAMEOBJECT_POS_Z) << ", "
+            << GetFloatValue(GAMEOBJECT_FACING) << ", "
+            << GetFloatValue(GAMEOBJECT_ROTATION) << ", "
+            << GetFloatValue(GAMEOBJECT_ROTATION+1) << ", "
+            << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
+            << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
+            << lootid <<", "
+            << m_respawnDelayTime << ", "
+            << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
+            << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
 
-    ss << "INSERT INTO `gameobject` VALUES ( "
-        << GetGUIDLow() << ", "
-        << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
-        << GetMapId() << ", "
-        << GetFloatValue(GAMEOBJECT_POS_X) << ", "
-        << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
-        << GetFloatValue(GAMEOBJECT_POS_Z) << ", "
-        << GetFloatValue(GAMEOBJECT_FACING) << ", "
-        << GetFloatValue(GAMEOBJECT_ROTATION) << ", "
-        << GetFloatValue(GAMEOBJECT_ROTATION+1) << ", "
-        << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
-        << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
-        << lootid <<", "
-        << m_respawnDelayTime << ", "
-        << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
-        << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
-
-    sDatabase.Execute( ss.str( ).c_str( ) );
+        sDatabase.Execute( ss.str( ).c_str( ) );
+    }
     sDatabase.CommitTransaction();
 }
 
