@@ -9885,7 +9885,7 @@ void Player::_LoadReputation()
 
             newFaction.ID               = fields[0].GetUInt32();
             newFaction.ReputationListID = fields[1].GetUInt32();
-            newFaction.Standing         = fields[2].GetUInt32();
+            newFaction.Standing         = int32(fields[2].GetUInt32());
             newFaction.Flags            = fields[3].GetUInt32();
 
             factions.push_back(newFaction);
@@ -10290,7 +10290,7 @@ void Player::_SaveReputation()
 
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%i', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
     }
     sDatabase.CommitTransaction();
 }
