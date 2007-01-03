@@ -514,8 +514,8 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                             cantalking=false;
                         break;
                     case GOSSIP_OPTION_TAXIVENDOR:
-			if ( pPlayer->GetSession()->LearnNewTaxiNode(GetGUID()) )
-			    return;
+                        if ( pPlayer->GetSession()->LearnNewTaxiNode(GetGUID()) )
+                            return;
                     case GOSSIP_OPTION_GUARD:
                     case GOSSIP_OPTION_INNKEEPER:
                     case GOSSIP_OPTION_BANKER:
@@ -1041,7 +1041,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
             if (cinfo->civilian != 1 && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
                 SetPvP(true);
     } else
-        sLog.outError("Error: invalid faction for creature %u", GetGUID());
+    sLog.outError("Error: invalid faction for creature %u", GetGUID());
 
     if (cinfo->mount != 0)
         Mount(cinfo->mount);

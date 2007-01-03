@@ -149,7 +149,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
 
-    WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600 ); // guess size
+                                                            // guess size
+    WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600 );
 
     uint32 item, guidLow, guidHigh;
     recv_data >> item >> guidLow >> guidHigh;
@@ -321,7 +322,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                 count = pItem->GetCount();
             }
             else
-            // prevent sell more items that exist in stack (possable only not from client)
+                // prevent sell more items that exist in stack (possable only not from client)
             if(count > pItem->GetCount())
             {
                 _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
@@ -702,7 +703,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
     Item *pItem = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )
     {
-        if(_player->IsBankPos(srcbag, srcslot))              // moving from bank to inventory
+        if(_player->IsBankPos(srcbag, srcslot))             // moving from bank to inventory
         {
             uint16 dest;
             uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
@@ -767,7 +768,8 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
     ItemPrototype const *pProto = objmgr.GetItemPrototype( itemid );
     if( pProto )
     {
-        WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+10)); // guess size
+                                                            // guess size
+        WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+10));
         data << pProto->ItemId;
         data << pProto->Name1;
         SendPacket(&data);

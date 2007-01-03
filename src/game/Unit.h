@@ -673,7 +673,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
         void CalcAbsorbResist(Unit *pVictim, uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist);
-        
+
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
         void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);

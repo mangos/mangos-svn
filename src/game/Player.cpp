@@ -790,13 +790,13 @@ void Player::Update( uint32 p_time )
             m_regenTimer -= p_time;
     }
 
-    if (m_weaponChangeTimer > 0) 
-    { 
-    if(p_time >= m_weaponChangeTimer) 
-        m_weaponChangeTimer = 0; 
-    else 
-            m_weaponChangeTimer -= p_time; 
-    } 
+    if (m_weaponChangeTimer > 0)
+    {
+        if(p_time >= m_weaponChangeTimer)
+            m_weaponChangeTimer = 0;
+        else
+            m_weaponChangeTimer -= p_time;
+    }
 
     if (isAlive())
     {
@@ -962,7 +962,6 @@ void Player::BuildEnumData( WorldPacket * p_data )
         *p_data << (uint32)petFamily;
     }
 
-
     ItemPrototype const *items[EQUIPMENT_SLOT_END];
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
         items[i] = NULL;
@@ -1083,7 +1082,7 @@ void Player::SendFriendlist()
         delete result;
     }
 
-    WorldPacket data(SMSG_FRIEND_LIST, (1+i*15)); // just can guess size
+    WorldPacket data(SMSG_FRIEND_LIST, (1+i*15));           // just can guess size
     data << i;
 
     for (int j=0; j < i; j++)
@@ -1297,7 +1296,7 @@ void Player::CalcRage( uint32 damage,bool attacker )
         addRage = (uint32)(damage/rageconversion*7.5);
     else
         addRage = (uint32)(damage/rageconversion*2.5);
- 
+
     ModifyPower(POWER_RAGE, addRage*10);
 }
 
@@ -1510,19 +1509,18 @@ void Player::SetGMVisible(bool on)
 }
 
 bool Player::IsGroupVisibleFor(Player* p)
-{ 
+{
     switch(sWorld.getConfig(CONFIG_GROUP_VISIBILITY))
     {
-        default: 
-            return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group 
-                && groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID()); 
+        default:
+            return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group
+                && groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID());
         case 1:
-            return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group; 
-        case 2: 
+            return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group;
+        case 2:
             return GetTeam()==p->GetTeam();
     }
 }
-
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
 {
@@ -2267,7 +2265,7 @@ bool Player::resetTalents(bool no_cost)
         {
             for(PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();)
             {
-                if(itr->second->state == PLAYERSPELL_REMOVED) 
+                if(itr->second->state == PLAYERSPELL_REMOVED)
                 {
                     ++itr;
                     continue;
@@ -3831,7 +3829,6 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
 
             itr->Standing -= BaseRep;
 
-
             itr->Flags = (itr->Flags | 0x00000001);
             SendSetFactionStanding(&*itr);
             return true;
@@ -3861,9 +3858,9 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
         int dif = getLevel() - pQuest->GetQuestLevel();
 
         // This part is before_2.01_like
-        if (dif <= 5) 
+        if (dif <= 5)
             Factor = 5;
-        else if (dif >= 10) 
+        else if (dif >= 10)
             Factor = 1;
         else
             Factor = (10-dif);
@@ -3879,7 +3876,7 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
         // TODO: check if next line requires removing GetRewRepFaction1
         ModifyFactionReputation(pCreature->getFaction(), RepPoints);
 
-        // TODO: implement reputation spillover 
+        // TODO: implement reputation spillover
     }
 
     // special quest reputation reward/losts
@@ -4246,7 +4243,7 @@ void Player::DuelComplete(uint8 type)
 
     if(type != 0)
     {
-        data.Initialize(SMSG_DUEL_WINNER, (1+20)); // we guess size
+        data.Initialize(SMSG_DUEL_WINNER, (1+20));          // we guess size
         data << (uint8)((type==1) ? 0 : 1);                 // 0 = just won; 1 = fled
         data << duel->opponent->GetName();
         data << GetName();
@@ -4515,8 +4512,8 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
     uint8 MINDAMAGEFIELD = 0;
     uint8 MAXDAMAGEFIELD = 0;
 
-    if( slot == EQUIPMENT_SLOT_RANGED && ( 
-        proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN || 
+    if( slot == EQUIPMENT_SLOT_RANGED && (
+        proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
         proto->InventoryType == INVTYPE_RANGEDRIGHT ))
     {
         MINDAMAGEFIELD = UNIT_FIELD_MINRANGEDDAMAGE;
@@ -4894,7 +4891,6 @@ void Player::_ApplyAmmoBonuses(bool apply)
     sLog.outDetail("%s Ranged mindam: %f, now is: %f", applystr.c_str(), maxDamage, GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
 }
 
-
 /*Loot type MUST be
 1-corpse, go
 2-skinning
@@ -5070,7 +5066,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     if(loot_type == LOOT_PICKPOKETING)
         loot_type = LOOT_SKINNING;
 
-    WorldPacket data(SMSG_LOOT_RESPONSE, (9+50)); // we guess size
+    WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));           // we guess size
 
     data << guid;
     data << uint8(loot_type);
@@ -5113,7 +5109,8 @@ void Player::SendInitWorldStates(uint32 MapID)
         sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%u",MapID);
 
         uint16 NumberOfFields = 108;
-        WorldPacket data(SMSG_INIT_WORLD_STATES, (4+2+NumberOfFields));  //0x2C5
+                                                            //0x2C5
+        WorldPacket data(SMSG_INIT_WORLD_STATES, (4+2+NumberOfFields));
         data <<
             (uint32)MapID <<
             (uint16)NumberOfFields <<
@@ -6263,8 +6260,8 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
                 return EQUIP_ERR_CANT_DO_IN_COMBAT;
 
-            if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0) 
-                return EQUIP_ERR_CANT_DO_RIGHT_NOW; // maybe exist better err 
+            if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0)
+                return EQUIP_ERR_CANT_DO_RIGHT_NOW;         // maybe exist better err
 
             uint32 type = pProto->InventoryType;
             uint8 eslot = FindEquipSlot( type, slot, swap );
@@ -6334,7 +6331,6 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
         pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC )
         return EQUIP_ERR_CANT_DO_IN_COMBAT;
-
 
     if(!swap && pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
         return EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS;
@@ -6802,7 +6798,6 @@ void Player::SetAmmo( uint32 item )
     _ApplyAmmoBonuses(true);
 }
 
-
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
 Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,bool fromLoot )
 {
@@ -6903,13 +6898,13 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         if(isAlive())
         {
             _ApplyItemMods(pItem, slot, true);
-        
+
             ItemPrototype const *pProto = pItem->GetProto();
-            if(pProto && isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0) 
-            { 
-                m_weaponChangeTimer = DEFAULT_SWITCH_WEAPON; 
-                if (getClass() == CLASS_ROGUE) 
-                    m_weaponChangeTimer = ROGUE_SWITCH_WEAPON; 
+            if(pProto && isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0)
+            {
+                m_weaponChangeTimer = DEFAULT_SWITCH_WEAPON;
+                if (getClass() == CLASS_ROGUE)
+                    m_weaponChangeTimer = ROGUE_SWITCH_WEAPON;
             }
         }
 
@@ -8931,7 +8926,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
             continue;
 
         Quest * qInfo = objmgr.QuestTemplates[questid];
-        // just if !ingroup || !noraidgroup || raidgroup        
+        // just if !ingroup || !noraidgroup || raidgroup
         if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!groupInfo.group || !groupInfo.group->isRaidGroup() || qInfo->GetType() == 62))
         {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
@@ -9491,11 +9486,10 @@ bool Player::LoadFromDB( uint32 guid )
 
     delete result;
 
-    // clear channel spell data (if saved at channel spell casting) 
+    // clear channel spell data (if saved at channel spell casting)
     SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT,0);
     SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1,0);
     SetUInt32Value(UNIT_CHANNEL_SPELL,0);
-
 
     // remember loaded power values to restore after stats initialization and modifier applying
     float savedPower[MAX_POWERS];
@@ -10543,7 +10537,7 @@ void Player::PetSpellInitialize()
 
         sLog.outDebug("Pet Spells Groups");
 
-        WorldPacket data(SMSG_PET_SPELLS, 100); // we guess size
+        WorldPacket data(SMSG_PET_SPELLS, 100);             // we guess size
 
         data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x1010000);
 
@@ -10644,7 +10638,7 @@ void Player::RemoveAreaAurasFromGroup()
     {
         if(!pGroup->SameSubGroup(GetGUID(), pGroup->GetMemberGUID(p)))
             continue;
-              
+
         Unit* Member = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
         if(!Member)
             continue;

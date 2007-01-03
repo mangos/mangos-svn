@@ -55,7 +55,6 @@ char const* WorldSession::GetPlayerName() const
     return GetPlayer() ? GetPlayer()->GetName() : "<none>";
 }
 
-
 void WorldSession::SetSocket(WorldSocket *sock)
 {
     _socket = sock;
@@ -146,7 +145,7 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             guild->LoadPlayerStatsByGuid(_player->GetGUID());
 
-            WorldPacket data(SMSG_GUILD_EVENT, (5+10)); // we guess size
+            WorldPacket data(SMSG_GUILD_EVENT, (5+10));     // we guess size
             data<<(uint8)GE_SIGNED_OFF;
             data<<(uint8)1;
             data<<_player->GetName();
@@ -177,7 +176,6 @@ void WorldSession::LogoutPlayer(bool Save)
         ObjectAccessor::Instance().RemovePlayer(_player);
         MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
 
-
         WorldPacket data(SMSG_FRIEND_STATUS, (9));
         data<<uint8(FRIEND_OFFLINE);
         data<<_player->GetGUID();
@@ -189,8 +187,8 @@ void WorldSession::LogoutPlayer(bool Save)
             group = _player->groupInfo.invite;
 
             group->RemoveInvite(_player->GetGUID());
-            if(group->GetMembersCount() <= 1) // group has just 1 member => disband
-            {        
+            if(group->GetMembersCount() <= 1)               // group has just 1 member => disband
+            {
                 group->Disband(true);
                 objmgr.RemoveGroup(group);
                 delete group;
@@ -203,7 +201,7 @@ void WorldSession::LogoutPlayer(bool Save)
             if(group && !group->isRaidGroup())
             {
                 if (group->RemoveMember(_player->GetGUID(), 0) <= 1)
-                {          
+                {
                     group->Disband();
                     objmgr.RemoveGroup(group);
                     delete group;
@@ -215,12 +213,11 @@ void WorldSession::LogoutPlayer(bool Save)
         _player = 0;
 
         // send group update after player has been deleted..
-        if(group)    
+        if(group)
             group->SendUpdate();
 
         data.Initialize( SMSG_LOGOUT_COMPLETE, 0 );
         SendPacket( &data );
-
 
         // Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
         sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `account` = '%u'", GetAccountId());

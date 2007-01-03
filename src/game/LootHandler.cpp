@@ -135,7 +135,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
         if (player->groupInfo.group)
             player->groupInfo.group->BroadcastPacket(&data);
-        else 
+        else
             SendPacket( &data );
     }
     else

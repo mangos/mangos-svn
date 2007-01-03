@@ -316,7 +316,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     if(!pl->m_mailsLoaded)
         pl ->_LoadMail();
 
-    WorldPacket data(SMSG_MAIL_LIST_RESULT, (200)); // guess size
+    WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
     data << uint8(0);
     uint8 mails_count = 0;
     std::deque<Mail*>::iterator itr;
@@ -520,7 +520,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 
     sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", itemPageId, mailId, unk);
 
-    WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, (4+10)); // guess size
+    WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, (4+10));// guess size
     data << itemPageId;
     /*QueryResult *result = sDatabase.PQuery( "SELECT `text` FROM `item_page` WHERE `id` = '%u'", itemPageId );
     if (result) {

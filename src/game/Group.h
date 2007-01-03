@@ -37,7 +37,6 @@ enum GroupType
     GROUPTYPE_RAID   = 1
 };
 
-
 /** request member stats checken **/
 /** todo: uninvite people that not accepted invite **/
 class MANGOS_DLL_SPEC Group
@@ -56,18 +55,16 @@ class MANGOS_DLL_SPEC Group
 
             uint64 itemGUID;
             uint32 itemid;
-            map<uint64, RollVote> playerVote;              //vote position correspond with player position (in group)
+            map<uint64, RollVote> playerVote;               //vote position correspond with player position (in group)
             uint8 totalPlayersRolling;
             uint8 totalNeed;
             uint8 totalGreed;
             uint8 totalPass;
             Loot *loot;
-            uint8 itemSlot;            
+            uint8 itemSlot;
         };
 
-
-
-    public:        
+    public:
         Group()
         {
             m_leaderGuid = 0;
@@ -85,7 +82,8 @@ class MANGOS_DLL_SPEC Group
         bool   AddInvite(Player *player);
         void   RemoveInvite(const uint64 &guid);
         bool   AddMember(const uint64 &guid, const char* name);
-        uint32 RemoveMember(const uint64 &guid, const uint8 &method);   // method: 0=just remove, 1=kick
+                                                            // method: 0=just remove, 1=kick
+        uint32 RemoveMember(const uint64 &guid, const uint8 &method);
         void   ChangeLeader(const uint64 &guid);
         void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void   SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
@@ -121,14 +119,14 @@ class MANGOS_DLL_SPEC Group
 
         uint32 GetMembersCount() const { return m_members.size(); }
         uint64 GetMemberGUID(uint8 id) { if(id>=m_members.size()) return 0; else return m_members[id].guid; }
-        uint8  GetMemberGroup(uint64 guid) 
-        { 
+        uint8  GetMemberGroup(uint64 guid)
+        {
             int8 id = _getMemberIndex(guid);
-            if(id<0) 
-                return (MAXRAIDSIZE/MAXGROUPSIZE+1); 
+            if(id<0)
+                return (MAXRAIDSIZE/MAXGROUPSIZE+1);
 
-            return m_members[id].group; 
-        }        
+            return m_members[id].group;
+        }
 
         // some additional raid methods
         void ConvertToRaid()
@@ -137,27 +135,28 @@ class MANGOS_DLL_SPEC Group
             SendUpdate();
         }
         void ChangeMembersGroup(const uint64 &guid, const uint8 &group)
-        { 
+        {
             if(!isRaidGroup())
                 return;
             if(_setMembersGroup(guid, group))
                 SendUpdate();
         }
         void ChangeAssistantFlag(const uint64 &guid, const bool &state)
-        { 
+        {
             if(!isRaidGroup())
                 return;
             if(_setAssistantFlag(guid, state))
                 SendUpdate();
         }
 
-        void SetTargetIcon(uint8 id, uint64 guid);     
+        void SetTargetIcon(uint8 id, uint64 guid);
 
         // -no description-
         void SendInit(WorldSession *session);
         void SendTargetIconList(WorldSession *session);
-        void SendUpdate(); 
-        void BroadcastPacket(WorldPacket *packet, int group=-1, uint64 ignore=0); // ignore: GUID of player that will be ignored
+        void SendUpdate();
+                                                            // ignore: GUID of player that will be ignored
+        void BroadcastPacket(WorldPacket *packet, int group=-1, uint64 ignore=0);
 
         // roll system
         void SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntry, uint32 ItemInfo, uint32 CountDown, const Roll &r);
@@ -168,11 +167,10 @@ class MANGOS_DLL_SPEC Group
         void NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature);
         void CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise);
 
-        
     protected:
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant, uint8 group);
-        bool _removeMember(const uint64 &guid); // returns true if leader has changed
+        bool _removeMember(const uint64 &guid);             // returns true if leader has changed
         void _setLeader(const uint64 &guid);
 
         void _removeRolls(const uint64 &guid);
@@ -183,13 +181,12 @@ class MANGOS_DLL_SPEC Group
 
         int8 _getMemberIndex(uint64 Guid);
 
-
         vector<MemberSlot> m_members;
         vector<uint64> m_invitees;
         uint64       m_leaderGuid;
         std::string  m_leaderName;
-        GroupType    m_groupType;          
-        uint64       m_targetIcons[TARGETICONCOUNT];        
+        GroupType    m_groupType;
+        uint64       m_targetIcons[TARGETICONCOUNT];
         LootMethod   m_lootMethod;
         uint64       m_looterGuid;
         vector<Roll> RollId;

@@ -36,9 +36,18 @@ class Database
         virtual bool Execute(const char *sql) = 0;
         virtual bool PExecute(const char *format,...) = 0;
 
-        virtual bool BeginTransaction() { return true; }    // nothing do if DB not support transactions
-        virtual bool CommitTransaction() { return true; }   // nothing do if DB not support transactions
-        virtual bool RollbackTransaction() { return false; }// can't rollback without transaction support
+        virtual bool BeginTransaction()                     // nothing do if DB not support transactions
+        {
+            return true;
+        }
+        virtual bool CommitTransaction()                    // nothing do if DB not support transactions
+        {
+            return true;
+        }
+        virtual bool RollbackTransaction()                  // can't rollback without transaction support
+        {
+            return false;
+        }
 
         virtual operator bool () const = 0;
 

@@ -77,7 +77,7 @@ void PetAI::_stopAttack()
     Unit* victim = ObjectAccessor::Instance().GetUnit(i_pet, i_victimGuid );
 
     if ( !victim )
-    return;
+        return;
 
     assert(!i_pet.getVictim() || i_pet.getVictim() == victim);
 
@@ -155,7 +155,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 else
                     return;
             }
-            else if( i_pet.IsStopped() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && 
+            else if( i_pet.IsStopped() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) &&
                 ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack(i_pet.getVictim())))
             {
                 Spell *spell = new Spell(&i_pet, spellInfo, false, 0);

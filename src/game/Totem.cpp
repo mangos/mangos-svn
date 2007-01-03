@@ -70,7 +70,7 @@ void Totem::UnSummon()
     if (m_type == TOTEM_LAST_BURST)
         this->CastSpell(this, m_spell, true);
 
-    SendObjectDeSpawnAnim(GetGUID());    
+    SendObjectDeSpawnAnim(GetGUID());
     SendDestroyObject(GetGUID());
 
     CombatStop();

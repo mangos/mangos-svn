@@ -638,7 +638,8 @@ void Guild::Roster(WorldSession *session)
 {
     Player *pl;
 
-    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+ranks.size()*4+members.size()*50));   // we can only guess size
+                                                            // we can only guess size
+    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+ranks.size()*4+members.size()*50));
     data << (uint32)members.size();
     data << MOTD;
     data << GINFO;
@@ -696,8 +697,8 @@ void Guild::Roster(WorldSession *session)
 
 void Guild::Query(WorldSession *session)
 {
-    WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, (8*32+200)); // we can only guess size
-    
+    WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, (8*32+200));// we can only guess size
+
     data << Id;
     data << name;
     RankList::iterator itr;

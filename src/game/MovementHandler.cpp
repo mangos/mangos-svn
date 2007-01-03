@@ -45,7 +45,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if(GetPlayer()->GetDontMove())
         return;
 
-
     /* extract packet */
     uint32 flags, time, fallTime;
     float x, y, z, orientation;
@@ -55,7 +54,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     float  s_angle;
     float  j_unk1, j_sinAngle, j_cosAngle;
     uint32 j_unk2;
-    
+
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
@@ -63,20 +62,19 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         recv_data >> t_GUIDl >> t_GUIDh;
         recv_data >> t_x >> t_y >> t_z >> t_o;
     }
-    if (flags & MOVEMENTFLAG_SWIMMING) 
+    if (flags & MOVEMENTFLAG_SWIMMING)
     {
-        recv_data >> s_angle;                   // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
+        recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
-    recv_data >> fallTime;                      // duration of last jump (when in jump duration from jump begin to now)
-    
+    recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
+
     if (flags & MOVEMENTFLAG_JUMPING)
     {
-        recv_data >> j_unk1;                    // ?constant, but different when jumping in water and on land?
-        recv_data >> j_sinAngle >> j_cosAngle;  // sin + cos of angle between orientation0 and players orientation
-        recv_data >> j_unk2;                    // ?changes when moving in jump?
+        recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
+        recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
+        recv_data >> j_unk2;                                // ?changes when moving in jump?
     }
     /*----------------*/
-
 
     /* handle special cases */
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
@@ -98,8 +96,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         GetPlayer()->m_transY = t_y;
         GetPlayer()->m_transZ = t_z;
         GetPlayer()->m_transO = t_o;
-    }    
-    else if (GetPlayer()->m_transport)// if we were on a transport, leave
+    }
+    else if (GetPlayer()->m_transport)                      // if we were on a transport, leave
     {
         GetPlayer()->m_transport->RemovePassenger(GetPlayer());
         GetPlayer()->m_transport = NULL;
@@ -119,7 +117,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             float posz = map->GetWaterLevel(x,y);
             float fallperc = float(fallTime)*10/11000;
             uint32 damage = (uint32)((fallperc*fallperc -1) / 9 * target->GetMaxHealth());
-            
+
             if (damage > 0 && damage < 2* target->GetMaxHealth())
                 target->EnvironmentalDamage(target->GetGUID(),DAMAGE_FALL, damage);
             DEBUG_LOG("!! z=%f, pz=%f FallTime=%d posz=%f damage=%d" , z, target->GetPositionZ(),fallTime, posz, damage);
@@ -130,14 +128,13 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         {
             target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
             // Can't move
-            WorldPacket data( SMSG_FORCE_MOVE_ROOT, 12 ); 
+            WorldPacket data( SMSG_FORCE_MOVE_ROOT, 12 );
             data.append(target->GetPackGUID());
             data << (uint32)2;
             SendPacket( &data );
         }
     }
     /*----------------------*/
-
 
     /* process position-change */
     WorldPacket data(recv_data.GetOpcode(), (8+recv_data.size()));
@@ -170,7 +167,7 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
 
 void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 {
-    // Currently not used but maybe use later for recheck final player position 
+    // Currently not used but maybe use later for recheck final player position
     // (must be at call same as into "recv_data >> x >> y >> z >> orientation;"
 
     /* 
@@ -205,5 +202,3 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
     // TODO
     // we receive guid,x,y,z
 }
-
-

@@ -231,10 +231,10 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
     pet->SetName(name);
     pet->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME);
-        
+
     sDatabase.escape_string(name);
     sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s', `renamed` = '1' WHERE `owner` = '%u' AND `entry` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetEntry() );
-    
+
     SendPetNameQuery(petguid,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER));
 }
 

@@ -766,7 +766,7 @@ void Spell::cast(bool skipCheck)
         if( gameObjTarget )
         {
             ((Player*)m_caster)->CastedCreatureOrGO(gameObjTarget->GetEntry(),gameObjTarget->GetGUID(),m_spellInfo->Id);
-        }    
+        }
     }
 }
 
@@ -1083,7 +1083,7 @@ void Spell::SendSpellGo()
     if(m_rangedShoot)
         m_castFlags = m_castFlags | CAST_FLAG_AMMO;
 
-    WorldPacket data(SMSG_SPELL_GO, (50)); // guess size
+    WorldPacket data(SMSG_SPELL_GO, (50));                  // guess size
     //data.append(target->GetPackGUID());
     /* in fact this should be the causer's guid. so if you clicked on a item and
        this caused spell it has to be the item's guid
@@ -1518,13 +1518,13 @@ uint8 Spell::CanCast()
         return CAST_FAIL_SPELL_NOT_READY_YET;
     }
 
-    // cancel autorepeat spells if cast start when moving 
+    // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
     if( ((Player*)m_caster)->GetMovementFlags() &&  (IsAutoRepeat() || m_rangedShoot) )
-	{
-		SendCastResult(CAST_FAIL_CANT_DO_WHILE_MOVING);
-		return CAST_FAIL_CANT_DO_WHILE_MOVING;
-	}
+    {
+        SendCastResult(CAST_FAIL_CANT_DO_WHILE_MOVING);
+        return CAST_FAIL_CANT_DO_WHILE_MOVING;
+    }
 
     uint8 castResult = 0;
 
@@ -1538,7 +1538,7 @@ uint8 Spell::CanCast()
         if(m_spellInfo->Id == 603)
             SpellCreatureType = 0x7FF - 0x40;               //Curse of Doom
         else
-        if(m_spellInfo->Id == 2641)                         // Dismiss Pet
+        if(m_spellInfo->Id == 2641)                     // Dismiss Pet
             SpellCreatureType = 0;
 
         if(SpellCreatureType)
@@ -1754,12 +1754,12 @@ uint8 Spell::CanCast()
                 break;
             }
             case SPELL_EFFECT_SUMMON:
-            //case SPELL_EFFECT_SUMMON_WILD:                //not store in pet field
-            //case SPELL_EFFECT_SUMMON_GUARDIAN:            //not store in pet field
+                //case SPELL_EFFECT_SUMMON_WILD:                //not store in pet field
+                //case SPELL_EFFECT_SUMMON_GUARDIAN:            //not store in pet field
             case SPELL_EFFECT_SUMMON_PET:
             case SPELL_EFFECT_SUMMON_POSSESSED:
             case SPELL_EFFECT_SUMMON_PHANTASM:
-            case SPELL_EFFECT_SUMMON_CRITTER:             //not store in pet field
+            case SPELL_EFFECT_SUMMON_CRITTER:               //not store in pet field
             case SPELL_EFFECT_SUMMON_DEMON:
             {
                 if(m_caster->GetPetGUID())
@@ -2030,11 +2030,11 @@ uint8 Spell::CheckItems()
             uint32 charges;
             for (int i = 0; i<5; i++)
                 if (proto->Spells[i].SpellCharges)
-                {
-                    charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i);
-                    if (charges == 0)
-                        return CAST_FAIL_NO_CHARGES_REMAIN;
-                }
+            {
+                charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i);
+                if (charges == 0)
+                    return CAST_FAIL_NO_CHARGES_REMAIN;
+            }
 
             uint32 ItemClass = proto->Class;
             if (ItemClass == ITEM_CLASS_CONSUMABLE && unitTarget)
@@ -2045,27 +2045,27 @@ uint8 Spell::CheckItems()
                         if (unitTarget->GetHealth() == unitTarget->GetMaxHealth())
                             return (uint8)CAST_FAIL_ALREADY_FULL_HEALTH;
 
-            // Mana Potion, Rage Potion, Thistle Tea(Rogue), ... 
-            if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE) 
-            { 
-            //Check if the Caster Has Rage For Power 
-            if (m_caster->GetMaxPower(POWER_RAGE)) 
-                        { 
-                            if (unitTarget->GetPower(POWER_RAGE) == unitTarget->GetMaxPower(POWER_RAGE)) 
-                                    return (uint8)CAST_FAIL_ALREADY_FULL_MANA; 
-                        } 
-                        //Check if the Caster Has Energy For Power 
-                        else if (m_caster->GetMaxPower(POWER_ENERGY)) 
-                        { 
-                            if (unitTarget->GetPower(POWER_ENERGY) == unitTarget->GetMaxPower(POWER_ENERGY)) 
-                                return (uint8)CAST_FAIL_ALREADY_FULL_MANA; 
-                        } 
-                        //So The Player Has Mana 
-                        else if (unitTarget->GetPower(POWER_MANA) == unitTarget->GetMaxPower(POWER_MANA)) 
-                        { 
-                            return (uint8)CAST_FAIL_ALREADY_FULL_MANA; 
-                        } 
-                    } 
+                    // Mana Potion, Rage Potion, Thistle Tea(Rogue), ...
+                    if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE)
+                    {
+                        //Check if the Caster Has Rage For Power
+                        if (m_caster->GetMaxPower(POWER_RAGE))
+                        {
+                            if (unitTarget->GetPower(POWER_RAGE) == unitTarget->GetMaxPower(POWER_RAGE))
+                                return (uint8)CAST_FAIL_ALREADY_FULL_MANA;
+                        }
+                        //Check if the Caster Has Energy For Power
+                        else if (m_caster->GetMaxPower(POWER_ENERGY))
+                        {
+                            if (unitTarget->GetPower(POWER_ENERGY) == unitTarget->GetMaxPower(POWER_ENERGY))
+                                return (uint8)CAST_FAIL_ALREADY_FULL_MANA;
+                        }
+                        //So The Player Has Mana
+                        else if (unitTarget->GetPower(POWER_MANA) == unitTarget->GetMaxPower(POWER_MANA))
+                        {
+                            return (uint8)CAST_FAIL_ALREADY_FULL_MANA;
+                        }
+                    }
 
                 }
             }

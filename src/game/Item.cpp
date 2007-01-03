@@ -841,7 +841,7 @@ void Item::AddToUpdateQueueOf(Player *player)
 void Item::RemoveFromUpdateQueueOf(Player *player)
 {
     if (!IsInUpdateQueue()) return;
-    
+
     if (!player)
     {
         player = GetOwner();
@@ -851,13 +851,13 @@ void Item::RemoveFromUpdateQueueOf(Player *player)
             return;
         }
     }
-    
+
     if (player->GetGUID() != GetOwnerGUID())
     {
         sLog.outError("Item::RemoveFromUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
         return;
     }
-    
+
     if (player->m_itemUpdateQueueBlocked) return;
 
     player->m_itemUpdateQueue[uQueuePos] = NULL;

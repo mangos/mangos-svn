@@ -284,12 +284,12 @@ void GameObject::CountUseTimes()
 
 void GameObject::Delete()
 {
- 
+
     SendObjectDeSpawnAnim(GetGUID());
-    
+
     SetUInt32Value(GAMEOBJECT_STATE, 1);
     SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
-    
+
     SendDestroyObject(GetGUID());
     //TODO: set timestamp
     RemoveFromWorld();

@@ -385,15 +385,15 @@ void Spell::EffectDummy(uint32 i)
         switch(m_spellInfo->Id)
         {
             case 20473:
-                hurt = 25912;         
+                hurt = 25912;
                 heal = 25914;
                 break;
             case 20929:
-                hurt = 25911;        
+                hurt = 25911;
                 heal = 25913;
                 break;
             case 20930:
-                hurt = 25902;        
+                hurt = 25902;
                 heal = 25903;
                 break;
             default:
@@ -405,7 +405,7 @@ void Spell::EffectDummy(uint32 i)
         else
             m_caster->CastSpell(unitTarget, hurt, true, 0);
     }
- 
+
     if(m_spellInfo->SpellIconID == 1648)
     {
         uint32 dmg = damage;
@@ -740,7 +740,7 @@ void Spell::EffectOpenLock(uint32 i)
         sLog.outError( "Spell::EffectOpenLock: gameobject [guid = %u] has an unknown lockId: %u!", gameObjTarget->GetGUIDLow() , lockId);
         return;
     }
-    
+
     uint32 SkillId = m_spellInfo->EffectMiscValue[1];
     if(m_spellInfo->Id==1804)
         SkillId = 633;
@@ -749,7 +749,7 @@ void Spell::EffectOpenLock(uint32 i)
     {
         loottype = LOOT_SKINNING;
         if ( player->GetSkillValue(SkillId) < (lockInfo->requiredskill+lockInfo->requiredlockskill) )
-        {  
+        {
             SendCastResult(CAST_FAIL_SKILL_NOT_HIGH_ENOUGH);
             return;
         }
@@ -1156,15 +1156,15 @@ void Spell::EffectSummonWild(uint32 i)
 
         spawnCreature->AddToWorld();
         MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
-/*
-        guardians and wilds can't be controled
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            m_caster->SetPet(spawnCreature);
-            ((Player*)m_caster)->PetSpellInitialize();
-            ((Player*)m_caster)->SavePet();
-        }
-*/
+        /*
+                guardians and wilds can't be controled
+                if(m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    m_caster->SetPet(spawnCreature);
+                    ((Player*)m_caster)->PetSpellInitialize();
+                    ((Player*)m_caster)->SavePet();
+                }
+        */
     }
 }
 
@@ -1349,9 +1349,9 @@ void Spell::EffectTameCreature(uint32 i)
         pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
         pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME); 
+        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);
                                                             // this enables popup window (pet detals, abandon, rename)
-        pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,1); 
+        pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,1);
                                                             // this enables pet detals window (Shift+P)
         pet->AIM_Initialize();
 
@@ -1379,7 +1379,7 @@ void Spell::EffectSummonPet(uint32 i)
     // if pet requested type already exist
     if( OldSummon )
     {
-        
+
         if(petentry == 0 || OldSummon->GetCreatureInfo()->Entry == petentry)
         {
             // pet in corpse state can't be summoned
@@ -1438,7 +1438,7 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING); 
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
                                                             // this enables popup window (pet detals, abandon)
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
@@ -2184,7 +2184,7 @@ void Spell::EffectDismissPet(uint32 i)
     // not let dismiss dead pet
     if(!pet||!pet->isAlive())
         return;
-    
+
     ((Player*)m_caster)->RemovePet(pet,PET_SAVE_AS_CURRENT);
 }
 
@@ -2470,11 +2470,11 @@ void Spell::EffectKnockBack(uint32 i)
 
     WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
     data.append(unitTarget->GetPackGUID());
-    data << uint32(0);//Sequence
-    data << cos(m_caster->GetAngle(unitTarget)); //xdirection
-    data << sin(m_caster->GetAngle(unitTarget)); //ydirection
-    data << value/10;//Horizontal speed
-    data << float(m_spellInfo->EffectMiscValue[i])/-10;//Z Movement speed
+    data << uint32(0);                                      //Sequence
+    data << cos(m_caster->GetAngle(unitTarget));            //xdirection
+    data << sin(m_caster->GetAngle(unitTarget));            //ydirection
+    data << value/10;                                       //Horizontal speed
+    data << float(m_spellInfo->EffectMiscValue[i])/-10;     //Z Movement speed
 
     ((Player*)unitTarget)->SendMessageToSet(&data,true);
 }
