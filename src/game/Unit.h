@@ -87,6 +87,7 @@
 #define NULL_SLOT                   255
 
 #define MAX_DIST_INVISIBLE_UNIT     20                      // Max distance to be able to detect an invisible unit
+#define ATTACK_DIST                 5
 
 struct FactionTemplateEntry;
 struct Modifier;
@@ -467,7 +468,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         // faction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); }
-        FactionTemplateEntry* getFactionTemplateEntry() const;
+        FactionTemplateEntry const* getFactionTemplateEntry() const;
         bool IsHostileTo(Unit const* unit) const;
         bool IsHostileToAll() const;
         bool IsFriendlyTo(Unit const* unit) const;
@@ -557,10 +558,10 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical = false);
         void SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype, bool critical = false);
-        void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
+        void PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
         void CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem = NULL);
-        void CastSpell(Unit* Victim,SpellEntry *spellInfo, bool triggered, Item *castItem= NULL);
+        void CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, Item *castItem= NULL);
 
         void DeMorph();
 
@@ -663,9 +664,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveStateFlag(uint32 index, uint32 oldFlag );
         void ApplyStats(bool apply);
         void UnsummonTotem(int8 slot = -1);
-        uint32 SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 damage);
-        uint32 SpellHealingBonus(SpellEntry *spellProto, uint32 healamount);
-        bool SpellCriticalBonus(SpellEntry *spellProto, int32 *peffect);
+        uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage);
+        uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount);
+        bool SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect);
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
 

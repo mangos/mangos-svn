@@ -992,7 +992,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         const static int32 Reputation_Bottom = -42000;
 
         bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);
-        bool ModifyFactionReputation(FactionEntry* factionEntry, int32 standing);
+        bool ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing);
         void CalculateReputation(Unit *pVictim);
         void CalculateReputation(Quest *pQuest, uint64 guid);
         void SetInitialFactions();
@@ -1046,8 +1046,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void CastItemEquipSpell(Item *item);
         void CastItemCombatSpell(Item *item,Unit* Target);
-        bool IsItemSpellToEquip(SpellEntry *spellInfo);
-        bool IsItemSpellToCombat(SpellEntry *spellInfo);
+        bool IsItemSpellToEquip(SpellEntry const *spellInfo);
+        bool IsItemSpellToCombat(SpellEntry const *spellInfo);
 
         void SendInitWorldStates(uint32 MapID);
         void SendUpdateWordState(uint16 Field, uint16 Value);
@@ -1320,7 +1320,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);
 // "the bodies of template functions must be made available in a header file"
 template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;
     int32 totalpct = 0;
     int32 totalflat = 0;

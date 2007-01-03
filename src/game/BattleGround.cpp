@@ -292,7 +292,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
 
     if(SpellId)
     {
-        SpellEntry *Entry = sSpellStore.LookupEntry(SpellId);
+        SpellEntry const *Entry = sSpellStore.LookupEntry(SpellId);
 
         if(!Entry)
             sLog.outError("WARNING: Tried to add unknown spell id %d to plr.", SpellId);

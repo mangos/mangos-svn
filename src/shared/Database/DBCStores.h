@@ -67,8 +67,8 @@ bool IsPassiveSpell(uint32 spellId);
 bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
 bool IsSingleTarget(uint32 spellId);
-AreaTableEntry* GetAreaEntryByAreaID(uint32 area_id);
-AreaTableEntry* GetAreaEntryByAreaFlag(uint32 area_flag);
+AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
+AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);
 
 template<class T>
 class DBCStorage
@@ -78,7 +78,7 @@ class DBCStorage
         ~DBCStorage(){if(data) delete [] data;};
 
         inline
-            T* LookupEntry(uint32 id)
+            T const* LookupEntry(uint32 id)
         {
             return (id>nCount)?NULL:data[id];
 

@@ -160,7 +160,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 return;
 
             pet->clearUnitState(UNIT_STAT_FOLLOW);
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(spellid );
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellid );
             if(!spellInfo)
             {
                 sLog.outError("WORLD: unknown PET spell id %i\n", spellid);

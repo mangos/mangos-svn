@@ -1531,7 +1531,7 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
     uint32 id = 0;
     for(uint32 i = 1; i <= sTaxiNodesStore.nCount; ++i)
     {
-        TaxiNodesEntry* node = sTaxiNodesStore.LookupEntry(i);
+        TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
         if(node && node->map_id == mapid)
         {
             float dist2 = (node->x - x)*(node->x - x)+(node->y - y)*(node->y - y)+(node->z - z)*(node->z - z);
@@ -1584,7 +1584,7 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team  )
 {
     uint16 mount_id = 0;
 
-    TaxiNodesEntry* node = sTaxiNodesStore.LookupEntry(id);
+    TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(id);
     if(node)
     {
         if (team == ALLIANCE)
@@ -1654,7 +1654,7 @@ void ObjectMgr::GetTransportPathNodes( uint32 path, TransportPath &pathnodes )
     }
 }
 
-WorldSafeLocsEntry *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
+WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
 {
 
     // search for zone associated closest graveyard
@@ -1677,8 +1677,8 @@ WorldSafeLocsEntry *ObjectMgr::GetClosestGraveYard(float x, float y, float z, ui
 
     bool foundNear = false;
     float distNear;
-    WorldSafeLocsEntry* entryNear = NULL;
-    WorldSafeLocsEntry* entryFar = NULL;
+    WorldSafeLocsEntry const* entryNear = NULL;
+    WorldSafeLocsEntry const* entryFar = NULL;
 
     do
     {
@@ -1686,7 +1686,7 @@ WorldSafeLocsEntry *ObjectMgr::GetClosestGraveYard(float x, float y, float z, ui
         uint32 g_id   = fields[0].GetUInt32();
         uint32 g_team = fields[1].GetUInt32();
 
-        WorldSafeLocsEntry* entry = sWorldSafeLocsStore.LookupEntry(g_id);
+        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(g_id);
         if(!entry)
         {
             sLog.outError("Table `game_graveyard_zone` have record for not existed graveyard (WorldSafeLocs.dbc id) %u, skipped.",g_id);

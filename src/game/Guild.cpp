@@ -126,7 +126,7 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
         plLevel = (uint8)pl->getLevel();
         plClass = (uint8)pl->getClass();
 
-        AreaTableEntry* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()));
+        AreaTableEntry  const* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()));
         if (area)                                           // For example: .worldport -2313 478 48 1    Zone will be 0(unkonown), even though it's a usual cave
             plZone = area->zone;                            // would cause null pointer exception
         else
@@ -282,7 +282,7 @@ void Guild::LoadPlayerStats(MemberSlot* memslot)
     vector<string> tokens = StrSplit(fields[5].GetCppString(), " ");
     memslot->level = Player::GetUInt32ValueFromArray(tokens,UNIT_FIELD_LEVEL);
 
-    AreaTableEntry* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(fields[2].GetUInt32())->GetAreaFlag(fields[3].GetFloat(),fields[4].GetFloat()));
+    AreaTableEntry const* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(fields[2].GetUInt32())->GetAreaFlag(fields[3].GetFloat(),fields[4].GetFloat()));
     if (area)                                               // For example: .worldport -2313 478 48 1    Zone will be 0(unkonown), even though it's a usual cave
         memslot->zoneId = area->zone;                       // would cause null pointer exception
     else

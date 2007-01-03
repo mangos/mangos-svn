@@ -548,7 +548,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
 
 void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
 
     if(!spellInfo)
     {
@@ -573,7 +573,7 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castIte
     */
 }
 
-void Unit::CastSpell(Unit* Victim,SpellEntry *spellInfo, bool triggered, Item *castItem)
+void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, Item *castItem)
 {
     if(!spellInfo)
     {
@@ -601,7 +601,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
         return;
     if(!this->isAlive() || !pVictim->isAlive())
         return;
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellID);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellID);
     if(!spellInfo)
         return;
 
@@ -642,7 +642,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), SPELL_DIRECT_DAMAGE, 0, true);
 }
 
-void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
+void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod)
 {
     uint32 procFlag = 0;
     if(!this || !pVictim || !isAlive() || !pVictim->isAlive())
@@ -1825,7 +1825,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 
 void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo)
         return;
     AuraMap::iterator i,next;
@@ -2453,14 +2453,14 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
     if(!item)
         return;
 
-    SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if(!pEnchant)
         return;
     uint32 enchant_display = pEnchant->display_type;
     uint32 enchant_value1 = pEnchant->value1;
     uint32 enchant_spell_id = pEnchant->spellid;
 
-    SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+    SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
 
     if(enchant_display ==4)
     {
@@ -2618,7 +2618,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
         next = i; ++next;
         uint32 procflag = procflag1;
 
-        SpellEntry *spellProto= (*i)->GetSpellProto();
+        SpellEntry const *spellProto= (*i)->GetSpellProto();
 
         if(spellProto->procFlags & PROC_FLAG_SHORT_HIT)
             procflag &= ~ PROC_FLAG_SHORT_ATTACK;
@@ -2658,7 +2658,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
         next = i; next++;
         uint32 procflag = procflag1;
 
-        SpellEntry *spellProto = (*i)->GetSpellProto();
+        SpellEntry const *spellProto = (*i)->GetSpellProto();
 
         if(spellProto->procFlags & PROC_FLAG_SHORT_HIT)
             procflag &= ~ PROC_FLAG_SHORT_ATTACK;
@@ -2696,7 +2696,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
         next = i; next++;
         uint32 procflag = procflag2;
 
-        SpellEntry *spellProto = (*i)->GetSpellProto();
+        SpellEntry const *spellProto = (*i)->GetSpellProto();
 
         if(spellProto->procFlags & PROC_FLAG_BE_SHORT_HIT)
             procflag &= ~ PROC_FLAG_BE_SHORT_ATTACK;
@@ -2737,7 +2737,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
     {
         next = i; next++;
         uint32 procflag = procflag2;
-        SpellEntry *spellProto = (*i)->GetSpellProto();
+        SpellEntry const *spellProto = (*i)->GetSpellProto();
 
         if(spellProto->procFlags & PROC_FLAG_BE_SHORT_HIT)
             procflag &= ~ PROC_FLAG_BE_SHORT_ATTACK;
@@ -2837,9 +2837,9 @@ void Unit::setPowerType(Powers new_powertype)
     }
 }
 
-FactionTemplateEntry* Unit::getFactionTemplateEntry() const
+FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
 {
-    FactionTemplateEntry* entry = sFactionTemplateStore.LookupEntry(getFaction());
+    FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(getFaction());
     if(!entry)
     {
         static uint64 guid = 0;                             // prevent repeating spam same faction problem
@@ -3125,7 +3125,7 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
     SendMessageToSet(&data, true);
 }
 
-uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdamage)
+uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 pdamage)
 {
     if(!spellProto || !pVictim) return pdamage;
     //If m_immuneToDamage type contain this damage type, IMMUNE damage.
@@ -3192,7 +3192,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     return pdamage;
 }
 
-bool Unit::SpellCriticalBonus(SpellEntry *spellProto, int32 *peffect)
+bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
 {
     int32 critchance = m_baseSpellCritChance + int32(GetStat(STAT_INTELLECT)/100-1);
     critchance = critchance > 0 ? critchance :0;
@@ -3217,7 +3217,7 @@ bool Unit::SpellCriticalBonus(SpellEntry *spellProto, int32 *peffect)
     return false;
 }
 
-uint32 Unit::SpellHealingBonus(SpellEntry *spellProto, uint32 healamount)
+uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
 {
     // Healing Done
     int32 AdvertisedBenefit = 0;
@@ -3614,7 +3614,7 @@ void Unit::SetHover(bool on)
 {
     if(on)
     {
-        SpellEntry *sInfo = sSpellStore.LookupEntry(11010);
+        SpellEntry const *sInfo = sSpellStore.LookupEntry(11010);
         if(!sInfo)
             return;
 

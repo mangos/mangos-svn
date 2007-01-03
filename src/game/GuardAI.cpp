@@ -185,15 +185,14 @@ void GuardAI::UpdateAI(const uint32 diff)
             }
             case STATE_NORMAL:
             {
-                if( i_creature.IsStopped() )
+                if( i_creature.IsWithinDist(i_creature.getVictim(), ATTACK_DIST))
                 {
                     if( i_creature.isAttackReady() )
                     {
                         Unit* newtarget = i_creature.SelectHostilTarget();
                         if(newtarget)
                             AttackStart(newtarget);
-                        if(!i_creature.getVictim() || !i_creature.canReachWithAttack(i_creature.getVictim()))
-                            return;
+
                         i_creature.AttackerStateUpdate(i_creature.getVictim());
                         i_creature.resetAttackTimer();
 

@@ -128,7 +128,7 @@ struct CreatureItem
 
 struct TrainerSpell
 {
-    SpellEntry* spell;
+    SpellEntry const* spell;
     uint32 spellcost;
     uint32 reqskill;
     uint32 reqskillvalue;
@@ -352,8 +352,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         Player *GetLootRecipient() const;
         void SetLootRecipient (Player *player);
 
-        SpellEntry *reachWithSpellAttack(Unit *pVictim);
-        SpellEntry *reachWithSpellCure(Unit *pVictim);
+        SpellEntry const *reachWithSpellAttack(Unit *pVictim);
+        SpellEntry const *reachWithSpellCure(Unit *pVictim);
 
         uint32 m_spells[CREATURE_MAX_SPELLS];
 

@@ -139,7 +139,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
 
     for(uint32 i = 1; i <= sAreaStore.nCount; ++i)
-        if(AreaTableEntry* area = sAreaStore.LookupEntry(i))
+        if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
             sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
 
     LoadDBC(bar,bad_dbc_files,sBankBagSlotPricesStore,   dataPath+"dbc/BankBagSlotPrices.dbc");
@@ -171,7 +171,7 @@ void LoadDBCStores(std::string dataPath)
     //## TaxiPath.dbc ## Loaded only for initialization different structures
     LoadDBC(bar,bad_dbc_files,sTaxiPathStore,            dataPath+"dbc/TaxiPath.dbc");
     for(uint32 i = 1; i <= sTaxiPathStore.nCount; ++i)
-        if(TaxiPathEntry* entry = sTaxiPathStore.LookupEntry(i))
+        if(TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
             sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID,entry->price);
     uint32 pathCount = sTaxiPathStore.nCount;
     sTaxiPathStore.Clear();
@@ -182,7 +182,7 @@ void LoadDBCStores(std::string dataPath)
     std::vector<uint32> pathLength;
     pathLength.resize(pathCount+1);                         // 0 and some other indexes not used
     for(uint32 i = 1; i <= sTaxiPathNodeStore.nCount; ++i)
-        if(TaxiPathNodeEntry* entry = sTaxiPathNodeStore.LookupEntry(i))
+        if(TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
             ++pathLength[entry->path];
     // Set path length
     sTaxiPathNodesByPath.resize(pathCount+1);               // 0 and some other indexes not used
@@ -190,7 +190,7 @@ void LoadDBCStores(std::string dataPath)
         sTaxiPathNodesByPath[i].resize(pathLength[i]);
     // fill data
     for(uint32 i = 1; i <= sTaxiPathNodeStore.nCount; ++i)
-        if(TaxiPathNodeEntry* entry = sTaxiPathNodeStore.LookupEntry(i))
+        if(TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
             sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->mapid,entry->x,entry->y,entry->z,entry->actionFlag,entry->delay);
     sTaxiPathNodeStore.Clear();
 
@@ -370,8 +370,8 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_
 
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2)
 {
-    SpellEntry *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
-    SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+    SpellEntry const*spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
+    SpellEntry const*spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
     if(!spellInfo_1 || !spellInfo_2) return 0;
     if (spellId_1 == spellId_2) return 0;
 
@@ -382,7 +382,7 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, ui
 
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo) return SPELL_NORMAL;
 
     if(spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
@@ -440,7 +440,7 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
 
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 {
-    SpellEntry *spellproto = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
     if (!spellproto) return false;
 
     switch(spellproto->EffectImplicitTargetA[effIndex])
@@ -461,7 +461,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 
 bool IsPositiveSpell(uint32 spellId)
 {
-    SpellEntry *spellproto = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
     if (!spellproto) return false;
 
     // spells with atleast one negative effect are considered negative
@@ -473,7 +473,7 @@ bool IsPositiveSpell(uint32 spellId)
 
 bool IsSingleTarget(uint32 spellId)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return false;
 
     // cheap shot is an exception
@@ -498,7 +498,7 @@ bool IsSingleTarget(uint32 spellId)
     return false;
 }
 
-AreaTableEntry* GetAreaEntryByAreaID(uint32 area_id)
+AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 {
     AreaFlagByAreaID::iterator i = sAreaFlagByAreaID.find(area_id);
     if(i == sAreaFlagByAreaID.end())
@@ -507,7 +507,7 @@ AreaTableEntry* GetAreaEntryByAreaID(uint32 area_id)
     return sAreaStore.LookupEntry(i->second);
 }
 
-AreaTableEntry* GetAreaEntryByAreaFlag(uint32 area_flag)
+AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag)
 {
     return sAreaStore.LookupEntry(area_flag);
 }

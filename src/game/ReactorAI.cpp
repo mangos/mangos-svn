@@ -93,7 +93,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
             stopAttack();                                   // i_victimGuid == 0 && i_creature.getVictim() == NULL now
             return;
         }
-        else if( i_creature.IsStopped() )
+        else if( i_creature.IsWithinDist(i_creature.getVictim(), ATTACK_DIST))
         {
             if( i_creature.isAttackReady() )
             {
@@ -101,8 +101,6 @@ ReactorAI::UpdateAI(const uint32 time_diff)
                 if(newtarget)
                     AttackStart(newtarget);
 
-                if(!i_creature.canReachWithAttack(i_creature.getVictim()))
-                    return;
                 i_creature.AttackerStateUpdate(i_creature.getVictim());
                 i_creature.resetAttackTimer();
 

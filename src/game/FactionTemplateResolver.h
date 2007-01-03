@@ -24,7 +24,7 @@
 
 struct MANGOS_DLL_DECL FactionTemplateResolver
 {
-    FactionTemplateResolver(FactionTemplateEntry *entry)
+    FactionTemplateResolver(FactionTemplateEntry const *entry)
     {
         data.All = 0;
         if( entry != NULL )

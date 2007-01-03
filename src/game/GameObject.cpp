@@ -227,7 +227,7 @@ void GameObject::Update(uint32 p_time)
             break;
     }
 
-    SpellEntry *createSpell = sSpellStore.LookupEntry(m_spellId);
+    SpellEntry const *createSpell = sSpellStore.LookupEntry(m_spellId);
     if (!createSpell)
         return;
     int i;

@@ -40,12 +40,12 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     if (requested_rank > 4)
         return;
 
-    TalentEntry *talentInfo = sTalentStore.LookupEntry( talent_id );
+    TalentEntry const *talentInfo = sTalentStore.LookupEntry( talent_id );
 
     if(!talentInfo)
         return;
 
-    TalentTabEntry *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TalentTab );
+    TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TalentTab );
 
     if(!talentTabInfo)
         return;
@@ -63,7 +63,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     // Check if it requires another talent
     if (talentInfo->DependsOn > 0)
     {
-        TalentEntry *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn);
+        TalentEntry const *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn);
         bool hasEnoughRank = false;
         for (int i = talentInfo->DependsOnRank; i <= 4; i++)
         {
@@ -127,7 +127,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
             data << spellid;
             GetPlayer( )->GetSession()->SendPacket(&data);
 
-            SpellEntry *spellInfo = sSpellStore.LookupEntry( spellid );
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellid );
             assert(spellInfo);                              // checked in addSpell
 
             // already apply in addSpell function

@@ -966,7 +966,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         char* FactionName;
         for(itr = target->factions.begin(); itr != target->factions.end(); ++itr)
         {
-            FactionEntry *factionEntry = sFactionStore.LookupEntry(itr->ID);
+            FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->ID);
             if (factionEntry)
                 FactionName = factionEntry->name;
             else

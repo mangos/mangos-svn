@@ -82,9 +82,9 @@ TotemAI::UpdateAI(const uint32 diff)
     if (((Totem*)&i_totem)->GetTotemType() != TOTEM_ACTIVE)
         return;
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
     if (!spellInfo) return;
-    SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+    SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
     float max_range = GetMaxRange(srange);
 
     Unit *victim = ObjectAccessor::Instance().GetUnit(*(Unit*)&i_totem, i_victimGuid);
@@ -128,7 +128,7 @@ TotemAI::AttackStart(Unit *u)
 {
     if (!i_totem.isTotem() || !i_totem.isAlive()) return;
     if (i_totem.m_currentSpell) return;
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
     if (GetDuration(spellInfo) != -1)
         i_totem.CastSpell(u, ((Totem*)&i_totem)->GetSpell(), false);
 }

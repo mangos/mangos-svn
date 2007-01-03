@@ -110,7 +110,7 @@ void Totem::SetSpell(uint32 spellId)
 
     if(spellId)
     {
-        SpellEntry *spellinfo = sSpellStore.LookupEntry(spellId);
+        SpellEntry const *spellinfo = sSpellStore.LookupEntry(spellId);
         if ( spellinfo && spellinfo->SpellFamilyFlags == 0x28000000 )
             m_type = TOTEM_LAST_BURST;                      //For Fire Nova Totem and Corrupted Fire Nova Totem
     }

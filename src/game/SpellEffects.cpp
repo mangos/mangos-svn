@@ -256,7 +256,7 @@ void Spell::EffectDummy(uint32 i)
         for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
         {
             uint32 classspell = itr->first;
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(classspell);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
             if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 &&
                 (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
@@ -284,7 +284,7 @@ void Spell::EffectDummy(uint32 i)
         {
             if (itr->second->state == PLAYERSPELL_REMOVED) continue;
             uint32 classspell = itr->first;
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(classspell);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
             if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST && spellInfo->Id != 12472 &&
                 (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
@@ -305,7 +305,7 @@ void Spell::EffectDummy(uint32 i)
     if(m_spellInfo->Id == 20577)
     {
         // non-standard cast requirement check
-        SpellRangeEntry* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
         float max_range = GetMaxRange(srange);
         bool found=false;
         std::list<Unit*> UnitList;
@@ -345,7 +345,7 @@ void Spell::EffectDummy(uint32 i)
         finish();                                           // prepere to replacing this cpell cast to main function spell
 
         // casting
-        SpellEntry *spellInfo = sSpellStore.LookupEntry( 20578 );
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry( 20578 );
         Spell *spell = new Spell(m_caster, spellInfo, false, 0);
         if(!spellInfo)
         {
@@ -364,7 +364,7 @@ void Spell::EffectDummy(uint32 i)
     // starshards/curse of agony hack .. this applies to 1.10 only
     if (m_triggeredByAura)
     {
-        SpellEntry *trig_info = m_triggeredByAura->GetSpellProto();
+        SpellEntry const *trig_info = m_triggeredByAura->GetSpellProto();
         if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
             (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
         {
@@ -410,7 +410,7 @@ void Spell::EffectDummy(uint32 i)
     {
         uint32 dmg = damage;
         dmg += uint32(m_caster->GetPower(POWER_RAGE)/10 * objmgr.GetSpellRank(m_spellInfo->Id)*3);
-        SpellEntry *tspellInfo = sSpellStore.LookupEntry(20647);
+        SpellEntry const *tspellInfo = sSpellStore.LookupEntry(20647);
         SpellEntry sInfo = *tspellInfo;
         sInfo.EffectBasePoints[0] = dmg;
         m_caster->CastSpell(unitTarget, &sInfo, true, 0);
@@ -420,7 +420,7 @@ void Spell::EffectDummy(uint32 i)
 
 void Spell::EffectTriggerSpell(uint32 i)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( m_spellInfo->EffectTriggerSpell[i] );
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( m_spellInfo->EffectTriggerSpell[i] );
 
     if(!spellInfo)
     {
@@ -495,7 +495,7 @@ void Spell::EffectApplyAura(uint32 i)
             if ((m_spellInfo->SpellVisual == 784) && (m_spellInfo->SpellIconID == 566))
             {
                                                             // Weakened Soul
-                SpellEntry *WeakenedSoulSpellInfo = sSpellStore.LookupEntry( 6788 );
+                SpellEntry const *WeakenedSoulSpellInfo = sSpellStore.LookupEntry( 6788 );
                 Aura* WeakenedSoulAura = new Aura(WeakenedSoulSpellInfo, 0, unitTarget,m_caster, 0);
                 unitTarget->AddAura(WeakenedSoulAura, 0);
                 sLog.outDebug("Spell: Additinal Aura is: %u", WeakenedSoulSpellInfo->EffectApplyAuraName[i]);
@@ -505,7 +505,7 @@ void Spell::EffectApplyAura(uint32 i)
         if(Aur->IsTrigger())
         {
             // arcane missiles
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
             if (!spellInfo) return;
             if (spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY && m_caster->GetTypeId() == TYPEID_PLAYER)
             {
@@ -625,14 +625,14 @@ void Spell::EffectHealthLeach(uint32 i)
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage);
 }
 
-void Spell::EffectCreateItem(uint32 i)
+void Spell::DoCreateItem(uint32 i, uint32 itemtype)
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
     Player* player = (Player*)m_caster;
 
-    uint32 newitemid = m_spellInfo->EffectItemType[i];
+    uint32 newitemid = itemtype;
     ItemPrototype const *pProto = objmgr.GetItemPrototype( newitemid );
     if(!pProto)
     {
@@ -670,6 +670,11 @@ void Spell::EffectCreateItem(uint32 i)
 
     //should send message "create item" to client.-FIX ME
     player->UpdateCraftSkill(m_spellInfo->Id);
+}
+
+void Spell::EffectCreateItem(uint32 i)
+{
+    DoCreateItem(i,m_spellInfo->EffectItemType[i]);
 }
 
 void Spell::EffectPersistentAA(uint32 i)
@@ -728,7 +733,7 @@ void Spell::EffectOpenLock(uint32 i)
     LootType loottype = LOOT_CORPSE;
     uint32 lockId = gameObjTarget->GetGOInfo()->sound0;
 
-    LockEntry *lockInfo = sLockStore.LookupEntry(lockId);
+    LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
 
     if (!lockInfo)
     {
@@ -1218,7 +1223,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
 
-        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant)
             return;
 
@@ -1265,7 +1270,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             duration = m_spellInfo->EffectBasePoints[i]+1;
         if(duration <= 1)
             duration = 300;
-        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant)
             return;
 
@@ -1500,13 +1505,13 @@ void Spell::EffectLearnPetSpell(uint32 i)
     if(!pet->isAlive())
         return;
 
-    SpellEntry *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+    SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     if(!learn_spellproto)
         return;
-    SpellEntry *has_spellproto;
+
     for(int8 x=0;x<4;x++)
     {
-        has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
+        SpellEntry const *has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
         if(!has_spellproto)
         {
             pet->m_spells[x] = learn_spellproto->Id;
@@ -1677,7 +1682,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 next++;
                 if (itr->second)
                 {
-                    SpellEntry *spellInfo = itr->second->GetSpellProto();
+                    SpellEntry const *spellInfo = itr->second->GetSpellProto();
                     if (!spellInfo) continue;
                     if (spellInfo->SpellVisual != 5622 || spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN) continue;
                     spellId2 = spellInfo->EffectBasePoints[2]+1;
@@ -1689,7 +1694,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 }
             }
 
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId2);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId2);
             if(!spellInfo)
                 return;
             Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
@@ -1704,27 +1709,28 @@ void Spell::EffectScriptEffect(uint32 i)
     }
     else
     {
+        uint32 itemtype;
         switch(m_spellInfo->Id)
         {
             case 6201:
-                m_spellInfo->EffectItemType[0] = 5512;      //spell 6261;    //primary healstone
+                itemtype = 5512;                            //spell 6261;    //primary healstone
                 break;
             case 6202:
-                m_spellInfo->EffectItemType[0] = 5511;      //spell 6262;    //inferior healstone
+                itemtype = 5511;                            //spell 6262;    //inferior healstone
                 break;
             case 5699:
-                m_spellInfo->EffectItemType[0] = 5509;      //spell 5720;    //healstone
+                itemtype = 5509;                            //spell 5720;    //healstone
                 break;
             case 11729:
-                m_spellInfo->EffectItemType[0] = 5510;      //spell 5723;    //strong healstone
+                itemtype = 5510;                            //spell 5723;    //strong healstone
                 break;
             case 11730:
-                m_spellInfo->EffectItemType[0] = 9421;      //spell 11732;    //super healstone
+                itemtype = 9421;                            //spell 11732;    //super healstone
                 break;
             default:
                 return;
         }
-        EffectCreateItem( i );
+        DoCreateItem( i, itemtype );
     }
 }
 
@@ -1891,7 +1897,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             duration = m_spellInfo->EffectBasePoints[i]+1;
         if(duration <= 1)
             duration = 300;
-        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant)
             return;
 
@@ -2161,7 +2167,7 @@ void Spell::EffectFeedPet(uint32 i)
 
     pet->ModifyPower(POWER_HAPPINESS,damage);
 
-    SpellEntry *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+    SpellEntry const *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     Spell _spell(m_caster, spellinfo, true, 0);
     SpellCastTargets targets;
     targets.setUnitTarget(m_caster);
@@ -2295,7 +2301,7 @@ void Spell::EffectReputation(uint32 i)
 
     uint32 faction_id = m_spellInfo->EffectMiscValue[i];
 
-    FactionEntry* factionEntry = sFactionStore.LookupEntry(faction_id);
+    FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id);
 
     if(!factionEntry)
         return;

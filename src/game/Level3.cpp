@@ -390,7 +390,7 @@ bool ChatHandler::HandleFixUnlearnCommand(const char * args)
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
     {
         uint32 id = player->GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
-        SkillLineEntry *pSkill = sSkillLineStore.LookupEntry(id);
+        SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(id);
         // enable unlearn button for professions only
         if (pSkill && pSkill->categoryId == 11)
             player->SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
@@ -1132,8 +1132,8 @@ bool ChatHandler::HandleLearnCommand(const char* args)
 
         for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
         {
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(i);
-            SkillLineAbilityEntry *skillLine = sSkillLineAbilityStore.LookupEntry(i);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(i);
+            SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(i);
             if (skillLine && spellInfo && spellInfo->SpellFamilyName == family && !m_session->GetPlayer()->HasSpell(i))
                 m_session->GetPlayer()->learnSpell((uint16)i);
         }
@@ -1741,7 +1741,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
         return false;
 
     uint32 spellID = (uint32)atoi(px);
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellID );
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellID );
     if(spellInfo)
     {
         for(uint32 i = 0;i<3;i++)
@@ -1804,7 +1804,7 @@ bool ChatHandler::HandleLinkGraveCommand(const char* args)
     else
         return false;
 
-    WorldSafeLocsEntry* graveyard =  sWorldSafeLocsStore.LookupEntry(g_id);
+    WorldSafeLocsEntry const* graveyard =  sWorldSafeLocsStore.LookupEntry(g_id);
 
     if(!graveyard )
     {
@@ -1849,7 +1849,7 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
 
     Player* player = m_session->GetPlayer();
 
-    WorldSafeLocsEntry* graveyard = objmgr.GetClosestGraveYard(
+    WorldSafeLocsEntry const* graveyard = objmgr.GetClosestGraveYard(
         player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),player->GetMapId(),player->GetTeam());
 
     if(graveyard)

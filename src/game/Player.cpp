@@ -682,7 +682,7 @@ void Player::Update( uint32 p_time )
             // default combat reach 10
             // TODO add weapon,skill check
 
-            float pldistance = 5.0f;
+            float pldistance = ATTACK_DIST;
 
             /*if(getClass() == WARRIOR)
                 pldistance += 1;
@@ -808,7 +808,7 @@ void Player::Update( uint32 p_time )
         KillPlayer();
         if( GetSoulStoneSpell() && GetSoulStone())
         {
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(GetSoulStoneSpell());
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(GetSoulStoneSpell());
             if(spellInfo)
             {
                 Spell spell(this, spellInfo, true, 0);
@@ -1865,7 +1865,7 @@ void Player::AddMail(Mail *m)
 
 bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uint16 slot_id)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
     {
         sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
@@ -1897,7 +1897,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
         for (itr = m_spells.begin(); itr != m_spells.end(); itr++)
         {
             if(itr->second->state == PLAYERSPELL_REMOVED) continue;
-            SpellEntry *i_spellInfo = sSpellStore.LookupEntry(itr->first);
+            SpellEntry const *i_spellInfo = sSpellStore.LookupEntry(itr->first);
             if(!i_spellInfo) continue;
 
             if(IsRankSpellDueToSpell(spellInfo,itr->first))
@@ -1954,7 +1954,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
 
 void Player::learnSpell(uint16 spell_id)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
     {
         sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
@@ -2261,7 +2261,7 @@ bool Player::resetTalents(bool no_cost)
 
     for (int i = 0; i < sTalentStore.GetNumRows(); i++)
     {
-        TalentEntry *talentInfo = sTalentStore.LookupEntry(i);
+        TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
         if (!talentInfo) continue;
         for (int j = 0; j < 5; j++)
         {
@@ -2523,7 +2523,7 @@ bool Player::HasSpell(uint32 spell) const
 
 bool Player::CanLearnProSpell(uint32 spell)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spell);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell);
 
     if (!spellInfo)
         return false;
@@ -2541,7 +2541,7 @@ bool Player::CanLearnProSpell(uint32 spell)
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if (itr->second->state == PLAYERSPELL_REMOVED) continue;
-        SpellEntry *pSpellInfo = sSpellStore.LookupEntry(itr->first);
+        SpellEntry const *pSpellInfo = sSpellStore.LookupEntry(itr->first);
         if(!pSpellInfo) continue;
 
         if(pSpellInfo->Effect[1] == SPELL_EFFECT_SKILL)
@@ -2947,7 +2947,7 @@ void Player::DurabilityRepair(uint16 pos, bool cost)
 
 void Player::RepopAtGraveyard()
 {
-    WorldSafeLocsEntry *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId(), GetTeam() );
+    WorldSafeLocsEntry const *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId(), GetTeam() );
 
     if(ClosestGrave)
     {
@@ -3073,7 +3073,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
 {
     sLog.outDebug("UpdateCraftSkill spellid %d", spellid);
 
-    SkillLineAbilityEntry *pAbility = sSkillLineAbilityStore.LookupEntry(spellid);
+    SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(spellid);
     if ( !pAbility ) return false;
 
     uint32 SkillId = pAbility->skillId;
@@ -3318,7 +3318,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             {
                 next++;
                 if(itr->second->state == PLAYERSPELL_REMOVED) continue;
-                SkillLineAbilityEntry *ability = sSkillLineAbilityStore.LookupEntry(itr->first);
+                SkillLineAbilityEntry const *ability = sSkillLineAbilityStore.LookupEntry(itr->first);
                 if (ability && ability->skillId == id)
                     removeSpell(itr->first);
             }
@@ -3329,7 +3329,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
         for (i=0; i < PLAYER_MAX_SKILLS; i++)
             if (!GetUInt32Value(PLAYER_SKILL(i)))
         {
-            SkillLineEntry *pSkill = sSkillLineStore.LookupEntry(id);
+            SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(id);
             if(!pSkill)
             {
                 sLog.outError("Skill not found in SkillLineStore: skill #%u", id);
@@ -3603,7 +3603,7 @@ void Player::CheckExploreSystem()
     {
         SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
 
-        AreaTableEntry *p = GetAreaEntryByAreaFlag(areaFlag);
+        AreaTableEntry const *p = GetAreaEntryByAreaFlag(areaFlag);
         if(!p)
         {
             sLog.outError("PLAYER: Player %u discovered unknown area (x: %f y: %f map: %u", GetGUIDLow(), m_positionX,m_positionY,GetMapId());
@@ -3698,7 +3698,7 @@ bool Player::FactionIsInTheList(uint32 faction)
 void Player::SetInitialFactions()
 {
     Factions newFaction;
-    FactionEntry *factionEntry = NULL;
+    FactionEntry const *factionEntry = NULL;
 
     for(unsigned int i = 1; i <= sFactionStore.GetNumRows(); i++)
     {
@@ -3743,15 +3743,14 @@ int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
 
 int32 Player::GetReputation(uint32 FactionTemplateId) const
 {
-    FactionEntry *factionEntry;
-    FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
+    FactionTemplateEntry const *factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
 
     if(!factionTemplateEntry)
     {
         sLog.outError("Player::GetReputation: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(), FactionTemplateId);
         return 0;
     }
-    factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
+    FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
 
     return GetReputation(factionEntry);
 }
@@ -3774,7 +3773,7 @@ int32 Player::GetReputation(const FactionEntry *factionEntry) const
 
 ReputationRank Player::GetReputationRank(uint32 faction) const
 {
-    FactionEntry *factionEntry = sFactionStore.LookupEntry(faction);
+    FactionEntry const*factionEntry = sFactionStore.LookupEntry(faction);
     if(!factionEntry)
         return MIN_REPUTATION_RANK;
 
@@ -3796,7 +3795,7 @@ ReputationRank Player::GetReputationRank(const FactionEntry *factionEntry) const
 
 bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation)
 {
-    FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
+    FactionTemplateEntry const*factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
 
     if(!factionTemplateEntry)
     {
@@ -3804,7 +3803,7 @@ bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputa
         return false;
     }
 
-    FactionEntry *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
+    FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
 
     // Faction without recorded reputation. Just ignore.
     if(!factionEntry)
@@ -3813,7 +3812,7 @@ bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputa
     return ModifyFactionReputation(factionEntry, DeltaReputation);
 }
 
-bool Player::ModifyFactionReputation(FactionEntry* factionEntry, int32 standing)
+bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing)
 {
     std::list<struct Factions>::iterator itr;
     int32 BaseRep;
@@ -4162,7 +4161,7 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
 
 void Player::UpdateZone()
 {
-    AreaTableEntry* zone = GetAreaEntryByAreaID(GetZoneId());
+    AreaTableEntry const* zone = GetAreaEntryByAreaID(GetZoneId());
     if(!zone)
         return;
 
@@ -4580,14 +4579,12 @@ void Player::CastItemEquipSpell(Item *item)
 
     if(!proto) return;
 
-    SpellEntry *spellInfo;
-
     for (int i = 0; i < 5; i++)
     {
         if(!proto->Spells[i].SpellId ) continue;
         if(proto->Spells[i].SpellTrigger != ON_EQUIP) continue;
 
-        spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
         {
             sLog.outError("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
@@ -4617,13 +4614,11 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     if (!Target || Target == this )
         return;
 
-    SpellEntry *spellInfo;
-
     for (int i = 0; i < 5; i++)
     {
         if(!proto->Spells[i].SpellId ) continue;
 
-        spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
         {
             sLog.outError("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
@@ -4641,14 +4636,14 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     for(int e_slot = 0; e_slot < 7; e_slot++)
     {
         uint32 enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+e_slot*3);
-        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
         uint32 enchant_display = pEnchant->display_type;
         uint32 chance = pEnchant->value1 != 0 ? pEnchant->value1 : GetWeaponProcChance();
         uint32 enchant_spell_id = pEnchant->spellid;
-        SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+        SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
         if(!enchantSpell_info) continue;
-        if(enchant_display!=4 && enchant_display!=2 && this->IsItemSpellToCombat(enchantSpell_info))
+        if(enchant_display!=4 && enchant_display!=2 && IsItemSpellToCombat(enchantSpell_info))
             if (chance > rand_chance())
                 this->CastSpell(Target, enchantSpell_info->Id, true);
     }
@@ -4656,7 +4651,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
 
 // only some item spell/auras effects can be executed when item is equiped.
 // If not you can have unexpected beaviur. like item giving damage to player when equip.
-bool Player::IsItemSpellToEquip(SpellEntry *spellInfo)
+bool Player::IsItemSpellToEquip(SpellEntry const *spellInfo)
 {
     return (GetDuration(spellInfo) == -1);                  // infinite duration -> passive aura
     /*
@@ -4684,7 +4679,7 @@ bool Player::IsItemSpellToEquip(SpellEntry *spellInfo)
 
 // only some item spell/auras effects can be executed when in combat.
 // If not you can have unexpected beaviur. like having stats always growing each attack.
-bool Player::IsItemSpellToCombat(SpellEntry *spellInfo)
+bool Player::IsItemSpellToCombat(SpellEntry const *spellInfo)
 {
     return (GetDuration(spellInfo) != -1);                  // infinite duration -> passive aura
 
@@ -7131,7 +7126,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                     uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                     if( Enchant_id)
                     {
-                        SpellItemEnchantmentEntry *pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
+                        SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
                         if(!pEnchant)
                             continue;
                         uint32 enchant_display = pEnchant->display_type;
@@ -9584,7 +9579,7 @@ void Player::_LoadAuras(uint32 timediff)
             uint32 effindex = fields[1].GetUInt32();
             int32 remaintime = (int32)fields[2].GetUInt32();
 
-            SpellEntry* spellproto = sSpellStore.LookupEntry(spellid);
+            SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
             if(!spellproto)
             {
                 sLog.outError("Unknown aura (spellid %u, effindex %u), ignore.",spellid,effindex);
@@ -10129,7 +10124,7 @@ void Player::_SaveAuras()
     AuraMap const& auras = GetAuras();
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        SpellEntry *spellInfo = itr->second->GetSpellProto();
+        SpellEntry const *spellInfo = itr->second->GetSpellProto();
         uint8 i;
         for (i = 0; i < 3; i++)
             if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT ||
@@ -10555,7 +10550,7 @@ void Player::PetSpellInitialize()
                 {
                     bool hasthisspell = false;
 
-                    SpellEntry *spellInfo = sSpellStore.LookupEntry(itr->first);
+                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                     data << uint16(spellInfo->EffectTriggerSpell[0]);
                     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
                     {
@@ -10580,7 +10575,7 @@ void Player::PetSpellInitialize()
 
 int32 Player::GetTotalFlatMods(uint32 spellId, uint8 op)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;
     int32 total = 0;
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
@@ -10596,7 +10591,7 @@ int32 Player::GetTotalFlatMods(uint32 spellId, uint8 op)
 
 int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;
     int32 total = 0;
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
