@@ -267,7 +267,7 @@ struct SpellItemEnchantmentEntry
     uint32      value1;
     uint32      value2;
     uint32      spellid;
-    uint32      description;
+    char*       description;
     uint32      aura_id;
     uint32      slot;
 };
