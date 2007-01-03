@@ -175,6 +175,7 @@ CREATE TABLE `character` (
   `trans_z` float NOT NULL default '0',
   `trans_o` float NOT NULL default '0',
   `transguid` bigint(20) unsigned NOT NULL default '0',
+  `gmstate` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`)

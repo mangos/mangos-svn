@@ -49,6 +49,7 @@ bool ChatHandler::HandleGMOnCommand(const char* args)
 {
     m_session->GetPlayer()->SetGameMaster(true);
     m_session->GetPlayer()->CombatStop();
+    m_session->SendNotification("GM mode is ON");
 
     return true;
 }
@@ -56,6 +57,7 @@ bool ChatHandler::HandleGMOnCommand(const char* args)
 bool ChatHandler::HandleGMOffCommand(const char* args)
 {
     m_session->GetPlayer()->SetGameMaster(false);
+    m_session->SendNotification("GM mode is OFF");
 
     return true;
 }
@@ -73,18 +75,18 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
 
     if ( option )
     {
-        SendSysMessage( LANG_INVISIBLE_VISIBLE );
         m_session->GetPlayer()->SetGMVisible(true);
+        m_session->SendNotification( LANG_INVISIBLE_VISIBLE );
     }
     else
     {
         if(m_session->GetPlayer()->GetGuildId())
         {
-            SendSysMessage( LANG_INVISIBLE_GUILD );
+            m_session->SendNotification( LANG_INVISIBLE_GUILD );
             return true;
         }
 
-        SendSysMessage( LANG_INVISIBLE_INVISIBLE );
+        m_session->SendNotification( LANG_INVISIBLE_INVISIBLE );
         m_session->GetPlayer()->SetGMVisible(false);
     }
 

@@ -503,6 +503,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             pCurrChar->groupInfo.group->SendUpdate();
         }
     }
+
+    if(pCurrChar->isGameMaster())
+        SendNotification("GM mode is ON");
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

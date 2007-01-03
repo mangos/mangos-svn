@@ -130,6 +130,12 @@ GM.WhisperingTo = 0
 #          1 (true) 
 GM.InWhoList = 0
 
+# GM mode at login
+#          0 (disable)
+#          1 (enable) 
+# Default: 2 (last save state)
+GM.LoginState = 2
+
 # Group visibility modes
 # Default: 0 (standard setting: only members from same group can 100% auto detect invisible player)
 #          1 (raid members 100% auto detect invisible player from same raid)

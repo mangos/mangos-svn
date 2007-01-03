@@ -9357,8 +9357,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12             13         14       15          16          17          18           19            20                  21                  22                  23        24        25        26         27
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid` FROM `character` WHERE `guid` = '%u'",guid);
+    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12             13         14       15          16          17          18           19            20                  21                  22                  23        24        25        26         27          28
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
     {
@@ -9487,6 +9487,8 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadTaxiMask( fields[11].GetString() );
 
+    uint32 gmstate = fields[28].GetUInt32();
+
     delete result;
 
     // clear channel spell data (if saved at channel spell casting) 
@@ -9532,6 +9534,25 @@ bool Player::LoadFromDB( uint32 guid )
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugValues();
+
+    // GM state
+    if(GetSession()->GetSecurity() > 0)
+    {
+        switch(sWorld.getConfig(CONFIG_GM_LOGIN_STATE))
+        {
+            case 0:                                         // disable
+                break;
+            case 1:                                         // enable
+                SetGameMaster(true);
+                break;
+            case 2:                                         // save state
+                if(gmstate)
+                    SetGameMaster(true);
+                break;
+            default:
+                break;
+        }
+    }
 
     return true;
 }
@@ -9997,7 +10018,7 @@ void Player::SaveToDB()
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
-        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`) VALUES ("
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate` ) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -10064,6 +10085,9 @@ void Player::SaveToDB()
         ss << m_transport->GetGUIDLow();
     else
         ss << "0";
+
+    ss << ", ";
+    ss << (isGameMaster()? 1 : 0);
 
     ss << " )";
 
