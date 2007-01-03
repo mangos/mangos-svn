@@ -21,7 +21,7 @@
 
 struct AreaTrigger
 {
-
+    uint8  requiredLevel;
     uint32 mapId;
     float X;
     float Y;
