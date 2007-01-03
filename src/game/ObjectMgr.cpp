@@ -1735,17 +1735,18 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 {
     if( !Trigger_ID )
         return NULL;
-    QueryResult *result = sDatabase.PQuery("SELECT `target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_template` WHERE `id` = '%u'", Trigger_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT `required_level`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_template` WHERE `id` = '%u'", Trigger_ID);
     if ( !result )
         return NULL;
     Field *fields = result->Fetch();
     AreaTrigger *at = new AreaTrigger;
 
-    at->mapId = fields[0].GetUInt32();
-    at->X = fields[1].GetFloat();
-    at->Y = fields[2].GetFloat();
-    at->Z = fields[3].GetFloat();
-    at->Orientation = fields[4].GetFloat();
+    at->requiredLevel = fields[0].GetUInt8();
+    at->mapId = fields[1].GetUInt32();
+    at->X = fields[2].GetFloat();
+    at->Y = fields[3].GetFloat();
+    at->Z = fields[4].GetFloat();
+    at->Orientation = fields[5].GetFloat();
     if(at->X==0&&at->Y==0&&at->Z==0)return NULL;
 
     delete result;

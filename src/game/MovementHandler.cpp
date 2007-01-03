@@ -53,10 +53,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     uint32 t_GUIDl, t_GUIDh;
     float  t_x, t_y, t_z, t_o;
     float  s_angle;
-    uint32 j_currFallTime;
     float  j_unk1, j_sinAngle, j_cosAngle;
+    uint32 j_unk2;
     
-
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
@@ -64,18 +63,18 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         recv_data >> t_GUIDl >> t_GUIDh;
         recv_data >> t_x >> t_y >> t_z >> t_o;
     }
-    if (flags & MOVEMENTFLAG_JUMPING)
-    {
-        recv_data >> j_currFallTime;            // current jump duration
-        recv_data >> j_unk1;                    // = 0xD893FEC0
-        recv_data >> j_sinAngle >> j_cosAngle;  // sin + cos of angle between orientation0 and players orientation
-    }
-    // swimming never appears with JUMPING or ONTRANSPORT
     if (flags & MOVEMENTFLAG_SWIMMING) 
     {
         recv_data >> s_angle;                   // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
-    recv_data >> fallTime;                      // duration of last jump
+    recv_data >> fallTime;                      // duration of last jump (when in jump duration from jump begin to now)
+    
+    if (flags & MOVEMENTFLAG_JUMPING)
+    {
+        recv_data >> j_unk1;                    // ?constant, but different when jumping in water and on land?
+        recv_data >> j_sinAngle >> j_cosAngle;  // sin + cos of angle between orientation0 and players orientation
+        recv_data >> j_unk2;                    // ?changes when moving in jump?
+    }
     /*----------------*/
 
 

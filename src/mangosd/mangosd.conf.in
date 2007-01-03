@@ -83,6 +83,11 @@ PlayerLimit = 100
 # Default: 60
 MaxPlayerLevel = 60
 
+# Ignore level requirement to enter instance
+# 	   1 (true)
+# Default: 0 (false)
+IgnoreATLevelRequirement = 0
+
 # Max count that player can learn the primary trade skill.
 # Default: 2
 # Max : 9 

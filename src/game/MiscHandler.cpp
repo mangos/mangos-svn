@@ -771,28 +771,42 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
     else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
     {
-        if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->InBattleGround() )
+        if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) == true || GetPlayer()->isGameMaster())
         {
-            WorldPacket movedata;
-            _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
-            _player->SendMessageToSet(&movedata,true);
-            //_player->SetPosition( at->X, at->Y, at->Z, _player->GetOrientation());
-            //_player->BuildHeartBeatMsg(&data);
-            //_player->SendMessageToSet(&data, true);
-        }
-        else if (GetPlayer()->InBattleGround())             //if player is playing in a BattleGround
-        {
-            //! AreaTrigger BattleGround
+            if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->InBattleGround() )
+            {
+                WorldPacket movedata;
+                _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
+                _player->SendMessageToSet(&movedata,true);
+                //_player->SetPosition( at->X, at->Y, at->Z, _player->GetOrientation());
+                //_player->BuildHeartBeatMsg(&data);
+                //_player->SendMessageToSet(&data, true);
+            }
+            else if (GetPlayer()->InBattleGround())             //if player is playing in a BattleGround
+            {
+                //! AreaTrigger BattleGround
 
-            //Get current BattleGround the player is in
-            BattleGround* TempBattlegrounds = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
-            //Run the areatrigger code
-            if(TempBattlegrounds)
-                TempBattlegrounds->HandleAreaTrigger(GetPlayer(),Trigger_ID);
+                //Get current BattleGround the player is in
+                BattleGround* TempBattlegrounds = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
+                //Run the areatrigger code
+                if(TempBattlegrounds)
+                    TempBattlegrounds->HandleAreaTrigger(GetPlayer(),Trigger_ID);
+            }
+            else
+            {
+                GetPlayer()->TeleportTo(at->mapId,at->X,at->Y,at->Z,at->Orientation,true,false);
+            }
         }
         else
         {
-            GetPlayer()->TeleportTo(at->mapId,at->X,at->Y,at->Z,at->Orientation,true,false);
+            std::stringstream msgstr;
+            msgstr << "You must be at least level " << (uint32)at->requiredLevel << " to enter.";
+            std::string msg = msgstr.str();
+
+            WorldPacket data(SMSG_AREA_TRIGGER_MESSAGE, (4+msg.length()+1));
+            data << (uint32)(msg.length()+1);
+            data << msg;
+            SendPacket(&data);
         }
         delete at;
     }
