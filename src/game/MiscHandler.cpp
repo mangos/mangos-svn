@@ -771,7 +771,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
     else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
     {
-        if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) == true || GetPlayer()->isGameMaster())
+        if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) || GetPlayer()->isGameMaster())
         {
             if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->InBattleGround() )
             {
