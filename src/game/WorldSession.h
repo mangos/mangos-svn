@@ -157,10 +157,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMoveKnockBackAck(WorldPacket& recvPacket);
 
         void HandleMoveTeleportAck(WorldPacket& recvPacket);
-        void HandleForceRunSpeedChangeAck(WorldPacket& recvPacket);
-        void HandleForceSwimSpeedChangeAck(WorldPacket& recvPacket);
-        void HandleForceWalkSpeedChangeAck( WorldPacket & recv_data );
-        void HandleForceRunBackSpeedChangeAck( WorldPacket & recv_data );
+        void HandleForceSpeedChangeAck( WorldPacket & recv_data );
 
         void HandlePingOpcode(WorldPacket& recvPacket);
         void HandleAuthSessionOpcode(WorldPacket& recvPacket);
