@@ -117,6 +117,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 case 3:
                     if(pet->isPet())
                         _player->RemovePet((Pet*)pet,PET_SAVE_AS_DELETED);
+                    else                                    // charmed
+                        _player->Uncharm();
                     break;
                 default:
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.\n", flag, spellid);

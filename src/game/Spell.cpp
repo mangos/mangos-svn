@@ -46,6 +46,15 @@
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
+bool IsQuestTameSpell(uint32 spellId)
+{ 
+    SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
+    if (!spellproto) return false;
+
+    return spellproto->Effect[0] == SPELL_EFFECT_THREAT 
+        && spellproto->Effect[1] == SPELL_EFFECT_APPLY_AURA && spellproto->EffectApplyAuraName[1] == SPELL_AURA_DUMMY;
+}
+
 SpellCastTargets::SpellCastTargets()
 {
     m_unitTarget = NULL;
@@ -596,7 +605,7 @@ void Spell::prepare(SpellCastTargets * targets)
             SendChannelUpdate(0);
             m_triggeredByAura->SetAuraDuration(0);
         }
-        finish();
+        finish(false);
         return;
     }
 
@@ -637,7 +646,7 @@ void Spell::cancel()
         SendCastResult(CAST_FAIL_INTERRUPTED);
     }
 
-    finish();
+    finish(false);
     m_caster->RemoveDynObject(m_spellInfo->Id);
     m_caster->RemoveGameObject(m_spellInfo->Id,true);
 }
@@ -653,121 +662,107 @@ void Spell::cast(bool skipCheck)
     if(castResult != 0)
     {
         SendCastResult(castResult);
-        finish();
+        finish(false);
         return;
     }
 
     // triggered cast called from Spell::preper where it already checked
     if(!skipCheck)
-        castResult = CanCast();
-
-    if(castResult == 0)
     {
-        SendSpellCooldown();
-
-        TakePower(mana);
-        TakeCastItem();
-        TakeReagents();
-        FillTargetMap();
-        SendCastResult(castResult);
-        SendSpellGo();
-
-        if(IsChanneledSpell())
+        castResult = CanCast();
+        if(castResult != 0)
         {
-            m_spellState = SPELL_STATE_CASTING;
-            SendChannelStart(GetDuration(m_spellInfo));
+            SendCastResult(castResult);
+            finish(false);
+            return;
         }
+    }
 
-        std::list<Unit*>::iterator iunit;
-        std::list<Item*>::iterator iitem;
-        std::list<GameObject*>::iterator igo;
 
-        bool needspelllog = true;
-        for(uint32 j = 0;j<3;j++)
-        {
+    // CAST SPELL
+    SendSpellCooldown();
+
+    TakePower(mana);
+    TakeCastItem();
+    TakeReagents();
+    FillTargetMap();
+    SendCastResult(castResult);
+    SendSpellGo();
+
+    if(IsChanneledSpell())
+    {
+        m_spellState = SPELL_STATE_CASTING;
+        SendChannelStart(GetDuration(m_spellInfo));
+    }
+
+    std::list<Unit*>::iterator iunit;
+    std::list<Item*>::iterator iitem;
+    std::list<GameObject*>::iterator igo;
+
+    bool needspelllog = true;
+    for(uint32 j = 0;j<3;j++)
+    {
                                                             // Dont do spell log, if is school damage spell
-            if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)
-                needspelllog = false;
-            for(iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();iunit++)
-            {
-                // let the client worry about this
-                /*if((*iunit)->GetTypeId() != TYPEID_PLAYER && m_spellInfo->TargetCreatureType)
-                {
-                    CreatureInfo const *cinfo = ((Creature*)(*iunit))->GetCreatureInfo();
-                    if((m_spellInfo->TargetCreatureType & cinfo->type) == 0)
-                        continue;
-                }*/
-                HandleEffects((*iunit),NULL,NULL,j);
-            }
-            for(iitem= m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
-                HandleEffects(NULL,(*iitem),NULL,j);
-            for(igo= m_targetGOs[j].begin();igo != m_targetGOs[j].end();igo++)
-                HandleEffects(NULL,NULL,(*igo),j);
-
-            // persistent area auras target only the ground
-            if(m_spellInfo->Effect[j] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-                HandleEffects(NULL,NULL,NULL, j);
-        }
-
-        if(needspelllog) SendLogExecute();
-
-        bool canreflect = false;
-        for(int j=0;j<3;j++)
+        if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)
+            needspelllog = false;
+        for(iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();iunit++)
         {
-            switch(m_spellInfo->EffectImplicitTargetA[j])
+            // let the client worry about this
+            /*if((*iunit)->GetTypeId() != TYPEID_PLAYER && m_spellInfo->TargetCreatureType)
             {
-                case TARGET_SINGLE_ENEMY:
-                case TARGET_ALL_ENEMY_IN_AREA:
-                case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-                case TARGET_ALL_ENEMIES_AROUND_CASTER:
-                case TARGET_IN_FRONT_OF_CASTER:
-                case TARGET_DUELVSPLAYER:
-                case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-                    //case TARGET_AE_SELECTED:
-                    canreflect = true;
-                    break;
-
-                default:
-                    canreflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
-            }
-            if(canreflect)
-                continue;
-            else break;
+                CreatureInfo const *cinfo = ((Creature*)(*iunit))->GetCreatureInfo();
+                if((m_spellInfo->TargetCreatureType & cinfo->type) == 0)
+                    continue;
+            }*/
+            HandleEffects((*iunit),NULL,NULL,j);
         }
+        for(iitem= m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
+            HandleEffects(NULL,(*iitem),NULL,j);
+        for(igo= m_targetGOs[j].begin();igo != m_targetGOs[j].end();igo++)
+            HandleEffects(NULL,NULL,(*igo),j);
+
+        // persistent area auras target only the ground
+        if(m_spellInfo->Effect[j] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+            HandleEffects(NULL,NULL,NULL, j);
+    }
+
+    if(needspelllog) 
+        SendLogExecute();
+
+    bool canreflect = false;
+    for(int j=0;j<3;j++)
+    {
+        switch(m_spellInfo->EffectImplicitTargetA[j])
+        {
+            case TARGET_SINGLE_ENEMY:
+            case TARGET_ALL_ENEMY_IN_AREA:
+            case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+            case TARGET_ALL_ENEMIES_AROUND_CASTER:
+            case TARGET_IN_FRONT_OF_CASTER:
+            case TARGET_DUELVSPLAYER:
+            case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
+            //case TARGET_AE_SELECTED:
+                canreflect = true;
+                break;
+
+            default:
+                canreflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
+        }
+
         if(canreflect)
-        {
-            for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
-            {
-                reflect(*iunit);
-            }
-        }
+            continue;
+        else 
+            break;
+    }
 
-        //if( ( IsAutoRepeat() || m_rangedShoot ) && m_caster->GetTypeId() == TYPEID_PLAYER )
-        //((Player*)m_caster)->UpdateWeaponSkill(RANGED_ATTACK);
+    if(canreflect)
+    {
+        for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
+            reflect(*iunit);
     }
 
     if(m_spellState != SPELL_STATE_CASTING)
-        finish();
-
-    //if(castResult == 0)
-    //{
-    //    TriggerSpell();
-
-    //}
-
-    // cast at creature (or GO) quest objectives update
-    if( m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        if( unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT )
-        {
-            ((Player*)m_caster)->CastedCreatureOrGO(unitTarget->GetEntry(),unitTarget->GetGUID(),m_spellInfo->Id);
-        }
-
-        if( gameObjTarget )
-        {
-            ((Player*)m_caster)->CastedCreatureOrGO(gameObjTarget->GetEntry(),gameObjTarget->GetGUID(),m_spellInfo->Id);
-        }
-    }
+        finish(true);                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
 }
 
 void Spell::SendSpellCooldown()
@@ -969,10 +964,13 @@ void Spell::update(uint32 difftime)
     }
 }
 
-void Spell::finish()
+void Spell::finish(bool ok)
 {
 
     if(!m_caster) return;
+
+    if(m_spellState == SPELL_STATE_FINISHED)
+        return;
 
     m_spellState = SPELL_STATE_FINISHED;
     m_caster->m_canMove = true;
@@ -1006,6 +1004,21 @@ void Spell::finish()
     }
 
     m_ObjToDel.clear();*/
+
+    // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
+    // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
+    if( ok && m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
+    {
+        if( unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT )
+        {
+            ((Player*)m_caster)->CastedCreatureOrGO(unitTarget->GetEntry(),unitTarget->GetGUID(),m_spellInfo->Id);
+        }
+
+        if( gameObjTarget )
+        {
+            ((Player*)m_caster)->CastedCreatureOrGO(gameObjTarget->GetEntry(),gameObjTarget->GetGUID(),m_spellInfo->Id);
+        }
+    }
 
     if(m_TriggerSpell)
         TriggerSpell();

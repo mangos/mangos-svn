@@ -188,7 +188,7 @@ void GameObject::Update(uint32 p_time)
                                 if(caster->m_currentSpell)
                                 {
                                     caster->m_currentSpell->SendChannelUpdate(0);
-                                    caster->m_currentSpell->finish();
+                                    caster->m_currentSpell->finish(false);
                                 }
 
                                 WorldPacket data;
