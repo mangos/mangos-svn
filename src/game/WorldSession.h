@@ -150,6 +150,10 @@ class MANGOS_DLL_SPEC WorldSession
 
         void HandleMountSpecialAnimOpcode(WorldPacket &recvdata);
 
+        // character view
+        void HandleToggleHelmOpcode(WorldPacket& recv_data);
+        void HandleToggleCloakOpcode(WorldPacket& recv_data);
+
         // repair
         void HandleRepairItemOpcode(WorldPacket& recvPacket);
 

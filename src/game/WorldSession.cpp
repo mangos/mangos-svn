@@ -280,6 +280,10 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_FORCE_MOVE_ROOT_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveRootAck                   },
         { CMSG_MOVE_WATER_WALK_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveWaterWalkAck              },
 
+        // charater view
+        { CMSG_TOGGLE_HELM,                 STATUS_LOGGEDIN, &WorldSession::HandleToggleHelmOpcode              },
+        { CMSG_TOGGLE_CLOAK,                STATUS_LOGGEDIN, &WorldSession::HandleToggleCloakOpcode             },
+
         // repair item
         { CMSG_REPAIR_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleRepairItemOpcode              },
 
