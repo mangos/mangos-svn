@@ -167,10 +167,8 @@ bool ChatHandler::HandleDismountCommand(const char* args)
         return true;
     }
 
-    m_session->GetPlayer( )->Unmount();
-    Unit::AuraList& mModMounted = m_session->GetPlayer( )->GetAurasByType(SPELL_AURA_MOUNTED);
-    while(!mModMounted.empty())
-        m_session->GetPlayer()->RemoveAurasDueToSpell(mModMounted.front()->GetId());
+    m_session->GetPlayer()->Unmount();
+    m_session->GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     return true;
 }
 

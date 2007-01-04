@@ -609,6 +609,10 @@ void Spell::prepare(SpellCastTargets * targets)
         return;
     }
 
+    // stealth must be removed at cast starting (at show channel bar)
+    if ( !CanUsedWhileStealthed(m_spellInfo->Id) )
+        m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
     // do first cast of autorepeat spell with recovery time delay (like after any authocast)
     if(IsAutoRepeat())
         m_spellState = SPELL_STATE_FINISHED;
@@ -677,7 +681,6 @@ void Spell::cast(bool skipCheck)
             return;
         }
     }
-
 
     // CAST SPELL
     SendSpellCooldown();
