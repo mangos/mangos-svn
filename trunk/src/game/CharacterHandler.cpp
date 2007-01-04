@@ -597,3 +597,21 @@ void WorldSession::HandleSetWatchedFactionIndexOpcode(WorldPacket & recv_data)
     recv_data >> fact;
     GetPlayer()->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fact);
 }
+
+void WorldSession::HandleToggleHelmOpcode( WorldPacket & recv_data )
+{
+    DEBUG_LOG("CMSG_TOGGLE_HELM for %s", _player->GetName());
+    if(_player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+        _player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
+    else
+        _player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
+}
+
+void WorldSession::HandleToggleCloakOpcode( WorldPacket & recv_data )
+{
+    DEBUG_LOG("CMSG_TOGGLE_CLOAK for %s", _player->GetName());
+    if(_player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+        _player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
+    else
+        _player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
+}

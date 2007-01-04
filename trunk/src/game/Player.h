@@ -243,15 +243,17 @@ enum TYPE_OF_KILL
 
 enum PlayerFlags
 {
-    PLAYER_FLAGS_GROUP_LEADER   = 0x0001,
-    PLAYER_FLAGS_AFK            = 0x0002,
-    PLAYER_FLAGS_DND            = 0x0004,
-    PLAYER_FLAGS_GM             = 0x0008,
-    PLAYER_FLAGS_GHOST          = 0x0010,
-    PLAYER_FLAGS_RESTING        = 0x0020,
-    PLAYER_FLAGS_IN_PVP         = 0x0200,
-    PLAYER_FLAGS_UNK            = 0x1000,                   //played long time
-    PLAYER_FLAGS_UNK2           = 0x2000,                   //played too long time
+    PLAYER_FLAGS_GROUP_LEADER   = 0x00000001,
+    PLAYER_FLAGS_AFK            = 0x00000002,
+    PLAYER_FLAGS_DND            = 0x00000004,
+    PLAYER_FLAGS_GM             = 0x00000008,
+    PLAYER_FLAGS_GHOST          = 0x00000010,
+    PLAYER_FLAGS_RESTING        = 0x00000020,
+    PLAYER_FLAGS_IN_PVP         = 0x00000200,
+    PLAYER_FLAGS_HIDE_HELM      = 0x00000400,
+    PLAYER_FLAGS_HIDE_CLOAK     = 0x00000800,
+    PLAYER_FLAGS_UNK            = 0x00001000,               //played long time
+    PLAYER_FLAGS_UNK2           = 0x00002000,               //played too long time
 };
 
 enum LootType
