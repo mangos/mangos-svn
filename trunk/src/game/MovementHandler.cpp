@@ -191,45 +191,45 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     switch(opcode)
     {
         case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:
-            if (fabs(_player->GetSpeed(MOVE_WALK) - newspeed) > 0.01f)
+            if (fabs(player->GetSpeed(MOVE_WALK) - newspeed) > 0.01f)
             {
-                sLog.outError("WalkSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_WALK), newspeed);
-                _player->SetSpeed(MOVE_WALK,_player->GetSpeedRate(MOVE_WALK),true);
+                sLog.outError("WalkSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_WALK), newspeed);
+                player->SetSpeed(MOVE_WALK,player->GetSpeedRate(MOVE_WALK),true);
             }
             break;
         case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:
-            if (fabs(_player->GetSpeed(MOVE_RUN) - newspeed) > 0.01f)
+            if (fabs(player->GetSpeed(MOVE_RUN) - newspeed) > 0.01f)
             {
-                sLog.outError("RunSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_RUN), newspeed);
-                _player->SetSpeed(MOVE_RUN,_player->GetSpeedRate(MOVE_RUN),true);
+                sLog.outError("RunSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_RUN), newspeed);
+                player->SetSpeed(MOVE_RUN,player->GetSpeedRate(MOVE_RUN),true);
             }
             break;
         case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:
-            if (fabs(_player->GetSpeed(MOVE_WALKBACK) - newspeed) > 0.01f)
+            if (fabs(player->GetSpeed(MOVE_WALKBACK) - newspeed) > 0.01f)
             {
-                sLog.outError("RunBackSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_WALKBACK), newspeed);
-                _player->SetSpeed(MOVE_WALKBACK,_player->GetSpeedRate(MOVE_WALKBACK),true);
+                sLog.outError("RunBackSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_WALKBACK), newspeed);
+                player->SetSpeed(MOVE_WALKBACK,player->GetSpeedRate(MOVE_WALKBACK),true);
             }
             break;
         case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:
-            if (fabs(_player->GetSpeed(MOVE_SWIM) - newspeed) > 0.01f)
+            if (fabs(player->GetSpeed(MOVE_SWIM) - newspeed) > 0.01f)
             {
-                sLog.outError("SwimSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_SWIM), newspeed);
-                _player->SetSpeed(MOVE_SWIM,_player->GetSpeedRate(MOVE_SWIM),true);
+                sLog.outError("SwimSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_SWIM), newspeed);
+                player->SetSpeed(MOVE_SWIM,player->GetSpeedRate(MOVE_SWIM),true);
             }
             break;
         case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:
-            if (fabs(_player->GetSpeed(MOVE_SWIMBACK) - newspeed) > 0.01f)
+            if (fabs(player->GetSpeed(MOVE_SWIMBACK) - newspeed) > 0.01f)
             {
-                sLog.outError("SwimBackSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_SWIMBACK), newspeed);
-                _player->SetSpeed(MOVE_SWIMBACK,_player->GetSpeedRate(MOVE_SWIMBACK),true);
+                sLog.outError("SwimBackSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_SWIMBACK), newspeed);
+                player->SetSpeed(MOVE_SWIMBACK,player->GetSpeedRate(MOVE_SWIMBACK),true);
             }
             break;
         case CMSG_FORCE_TURN_RATE_CHANGE_ACK:
-            if (fabs(_player->GetSpeed(MOVE_TURN) - newspeed) > 0.01f)
+            if (fabs(player->GetSpeed(MOVE_TURN) - newspeed) > 0.01f)
             {
-                sLog.outError("TurnSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_TURN), newspeed);
-                _player->SetSpeed(MOVE_TURN,_player->GetSpeedRate(MOVE_TURN),true);
+                sLog.outError("TurnSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_TURN), newspeed);
+                player->SetSpeed(MOVE_TURN,player->GetSpeedRate(MOVE_TURN),true);
             }
             break;
     } 
