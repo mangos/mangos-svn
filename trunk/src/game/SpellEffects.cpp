@@ -342,7 +342,7 @@ void Spell::EffectDummy(uint32 i)
 
         // ok, main function spell can be casted
 
-        finish();                                           // prepere to replacing this cpell cast to main function spell
+        finish();                                       // prepere to replacing this cpell cast to main function spell
 
         // casting
         SpellEntry const *spellInfo = sSpellStore.LookupEntry( 20578 );
@@ -470,6 +470,7 @@ void Spell::EffectApplyAura(uint32 i)
         {
             case SPELL_AURA_MOD_DETECT_RANGE:
             case SPELL_AURA_AURAS_VISIBLE:
+            case SPELL_AURA_MOD_CHARM:
                 break;
             default:
                 if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
@@ -1332,6 +1333,10 @@ void Spell::EffectTameCreature(uint32 i)
 
         creatureTarget->CombatStop();
         creatureTarget->StopMoving();
+
+        // cast finish succesfully
+        SendChannelUpdate(0);
+        finish();
 
         Pet* pet = new Pet(HUNTER_PET);
 

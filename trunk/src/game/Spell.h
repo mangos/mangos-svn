@@ -103,6 +103,8 @@ struct TeleportCoords
     float z;
 };
 
+bool IsQuestTameSpell(uint32 spellId);
+
 namespace MaNGOS
 {
     struct SpellNotifierPlayer;
@@ -450,7 +452,7 @@ class Spell
         void cancel();
         void update(uint32 difftime);
         void cast(bool skipCheck = false);
-        void finish();
+        void finish(bool ok = true);
         void TakePower(uint32 mana);
         void TakeReagents();
         void TakeCastItem();
@@ -500,7 +502,7 @@ class Spell
         void ReSetTimer() { m_timer = casttime<0?0:casttime;}
         bool IsMeleeSpell() const { return m_meleeSpell; }
         bool IsChanneledSpell() const { return m_spellInfo->ChannelInterruptFlags != 0; }
-
+        bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
     protected:
 
         Unit* m_caster;

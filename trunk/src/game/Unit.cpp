@@ -1760,6 +1760,15 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         return false;
     }
 
+    if(Aur->GetTarget() != this)
+    {
+        sLog.outError("Aura (spell %u eff %u) add to aura list of %s (lowguid: %u) but Aura target is %s (lowguid: %u)",
+            Aur->GetId(),Aur->GetEffIndex(),(GetTypeId()==TYPEID_PLAYER?"player":"creature"),GetGUIDLow(),
+            (Aur->GetTarget()->GetTypeId()==TYPEID_PLAYER?"player":"creature"),Aur->GetTarget()->GetGUIDLow());
+        delete Aur;
+        return false;
+    }
+
     AuraMap::iterator i = m_Auras.find( spellEffectPair(Aur->GetId(), Aur->GetEffIndex()) );
 
     // take out same spell
@@ -2052,11 +2061,14 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
         m_modAuras[(*i).second->GetModifier()->m_auraname].remove((*i).second);
     }
     (*i).second->SetRemoveOnDeath(onDeath);
-    (*i).second->_RemoveAura();
 
-    delete (*i).second;
+    // remove from list before mods removing (prevent cyclic calls, mods added before including to aura list - use reverse order)
+    Aura* Aur = i->second;
     m_Auras.erase(i++);
     m_removedAuras++;                                       // internal count used by unit update
+
+    Aur->_RemoveAura();
+    delete Aur;
 }
 
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)

@@ -675,9 +675,11 @@ void Aura::_RemoveAura()
         return;
 
     uint8 slot = GetAuraSlot();
-    Aura* aura = m_target->GetAura(m_spellId, m_effIndex);
-    if(!aura)
-        return;
+
+    // Aura added always to m_target
+    //Aura* aura = m_target->GetAura(m_spellId, m_effIndex);
+    //if(!aura)
+    //    return;
 
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
         return;
@@ -701,8 +703,8 @@ void Aura::_RemoveAura()
         TODO: decrease count for spell
     */
 
-    // only remove icon when the last aura of the spell is removed
-    if (totalcount > 1)
+    // only remove icon when the last aura of the spell is removed (current aura already removed from list)
+    if (totalcount > 0)
         return;
 
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
@@ -905,21 +907,43 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
     if(!apply)
     {
-        //probably it's temporary for taming creature..
-        if( GetSpellProto()->Id == 19674 && caster && caster->isAlive())
+        // only at real remove
+        if(Real)
         {
-            SpellEntry const *spell_proto = sSpellStore.LookupEntry(13481);
-            Spell spell(caster, spell_proto, true, 0);
-            Unit* target = NULL;
-            target = m_target;
-            if(!target || !target->isAlive())
-                return;
-            SpellCastTargets targets;
-            targets.setUnitTarget(target);
-            // prevent double stat apply for triggered auras
-            target->ApplyStats(true);
-            spell.prepare(&targets);
-            target->ApplyStats(false);
+            if( IsQuestTameSpell(GetId()) && caster && caster->isAlive() && m_target && m_target->isAlive())
+            {
+                uint32 finalSpelId = 0;
+                switch(GetId())
+                {
+                    case 19548: finalSpelId = 19597; break;
+                    case 19674: finalSpelId = 19677; break;
+                    case 19687: finalSpelId = 19676; break;
+                    case 19688: finalSpelId = 19678; break;
+                    case 19689: finalSpelId = 19679; break;
+                    case 19692: finalSpelId = 19680; break;
+                    case 19693: finalSpelId = 19684; break;
+                    case 19694: finalSpelId = 19681; break;
+                    case 19696: finalSpelId = 19682; break;
+                    case 19697: finalSpelId = 19683; break;
+                    case 19699: finalSpelId = 19685; break;
+                    case 19700: finalSpelId = 19686; break;
+                }
+
+                if(finalSpelId)
+                {
+                    SpellEntry const *spell_proto = sSpellStore.LookupEntry(finalSpelId);
+                    if(!spell_proto)
+                        return;
+
+                    Spell spell(caster, spell_proto, true, 0);
+                    SpellCastTargets targets;
+                    targets.setUnitTarget(m_target);
+                    // prevent double stat apply for triggered auras
+                    m_target->ApplyStats(true);
+                    spell.prepare(&targets);
+                    m_target->ApplyStats(false);
+                }
+            }
         }
     }
 }
@@ -1260,6 +1284,9 @@ void Aura::HandleModPossess(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_UNIT)
         return;
 
+    if(!Real)
+        return;
+
     Creature* creatureTarget = (Creature*)m_target;
 
     if(int32(m_target->getLevel()) <= m_modifier.m_amount)
@@ -1270,10 +1297,17 @@ void Aura::HandleModPossess(bool apply, bool Real)
             Unit* caster = GetCaster();
             if(caster)
             {
+                creatureTarget->AttackStop();
+                if(caster->getVictim()==creatureTarget)
+                    caster->AttackStop();
+
+                creatureTarget->CombatStop();
+
                 creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
                 creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
                 caster->SetCharm(creatureTarget);
                 creatureTarget->AIM_Initialize();
+
                 if(caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     ((Player*)caster)->PetSpellInitialize();
@@ -1309,6 +1343,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_UNIT)
         return;
 
+    if(!Real)
+        return;
+
     Creature* creatureTarget = (Creature*)m_target;
 
     if(int32(m_target->getLevel()) <= m_modifier.m_amount)
@@ -1319,6 +1356,12 @@ void Aura::HandleModCharm(bool apply, bool Real)
             Unit* caster = GetCaster();
             if(caster)
             {
+                creatureTarget->AttackStop();
+                if(caster->getVictim()==creatureTarget)
+                    caster->AttackStop();
+
+                creatureTarget->CombatStop();
+
                 creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
                 creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
                 caster->SetCharm(creatureTarget);
