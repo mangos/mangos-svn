@@ -52,8 +52,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     uint32 t_GUIDl, t_GUIDh;
     float  t_x, t_y, t_z, t_o;
     float  s_angle;
-    float  j_unk1, j_sinAngle, j_cosAngle;
-    uint32 j_unk2;
+    float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
 
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
@@ -72,7 +71,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     {
         recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
         recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
-        recv_data >> j_unk2;                                // ?changes when moving in jump?
+        recv_data >> j_xyspeed;                             // speed of xy movement
     }
     /*----------------*/
 
@@ -144,6 +143,96 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     GetPlayer()->SetPosition(x, y, z, orientation);
     GetPlayer()->SetMovementFlags(flags);
+}
+
+void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
+{
+    /* extract packet */
+    uint64 guid;
+    uint32 unk1, flags, time, fallTime;
+    float x, y, z, orientation;
+
+    uint32 t_GUIDl, t_GUIDh;
+    float  t_x, t_y, t_z, t_o;
+    float  s_angle;
+    float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
+    float newspeed;
+
+    recv_data >> guid >> unk1;
+    recv_data >> flags >> time;
+    recv_data >> x >> y >> z >> orientation;
+    if (flags & MOVEMENTFLAG_ONTRANSPORT)
+    {
+        recv_data >> t_GUIDl >> t_GUIDh;
+        recv_data >> t_x >> t_y >> t_z >> t_o;
+    }
+    if (flags & MOVEMENTFLAG_SWIMMING)
+    {
+        recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
+    }
+    recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
+
+    if (flags & MOVEMENTFLAG_JUMPING)
+    {
+        recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
+        recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
+        recv_data >> j_xyspeed;                             // speed of xy movement
+    }
+
+    recv_data >> newspeed;
+    /*----------------*/
+
+
+    Player *player = objmgr.GetPlayer(guid);
+    if(!player)
+        return;
+
+    uint16 opcode = recv_data.GetOpcode();
+    switch(opcode)
+    {
+        case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:
+            if (fabs(_player->GetSpeed(MOVE_WALK) - newspeed) > 0.01f)
+            {
+                sLog.outError("WalkSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_WALK), newspeed);
+                _player->SetSpeed(MOVE_WALK,_player->GetSpeedRate(MOVE_WALK),true);
+            }
+            break;
+        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:
+            if (fabs(_player->GetSpeed(MOVE_RUN) - newspeed) > 0.01f)
+            {
+                sLog.outError("RunSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_RUN), newspeed);
+                _player->SetSpeed(MOVE_RUN,_player->GetSpeedRate(MOVE_RUN),true);
+            }
+            break;
+        case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:
+            if (fabs(_player->GetSpeed(MOVE_WALKBACK) - newspeed) > 0.01f)
+            {
+                sLog.outError("RunBackSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_WALKBACK), newspeed);
+                _player->SetSpeed(MOVE_WALKBACK,_player->GetSpeedRate(MOVE_WALKBACK),true);
+            }
+            break;
+        case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:
+            if (fabs(_player->GetSpeed(MOVE_SWIM) - newspeed) > 0.01f)
+            {
+                sLog.outError("SwimSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_SWIM), newspeed);
+                _player->SetSpeed(MOVE_SWIM,_player->GetSpeedRate(MOVE_SWIM),true);
+            }
+            break;
+        case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:
+            if (fabs(_player->GetSpeed(MOVE_SWIMBACK) - newspeed) > 0.01f)
+            {
+                sLog.outError("SwimBackSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_SWIMBACK), newspeed);
+                _player->SetSpeed(MOVE_SWIMBACK,_player->GetSpeedRate(MOVE_SWIMBACK),true);
+            }
+            break;
+        case CMSG_FORCE_TURN_RATE_CHANGE_ACK:
+            if (fabs(_player->GetSpeed(MOVE_TURN) - newspeed) > 0.01f)
+            {
+                sLog.outError("TurnSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", _player->GetName(), _player->GetSpeed(MOVE_TURN), newspeed);
+                _player->SetSpeed(MOVE_TURN,_player->GetSpeedRate(MOVE_TURN),true);
+            }
+            break;
+    } 
 }
 
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)

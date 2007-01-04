@@ -962,63 +962,6 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
     DEBUG_LOG("Value 1 %u",value1);
 }
 
-void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
-{
-    //check for speed stuff
-    uint64 GUID;
-    uint32 Flags,unk1, unk0;
-    uint32 d_time;
-    float X,Y,Z,O;
-    float NewSpeed;
-
-    recv_data >> GUID;
-
-    // skip another player speed update info
-    if(GUID != _player->GetGUID())
-        return;
-
-    recv_data >> unk0 >> Flags;
-    if ( (Flags & 0x2000) || (Flags & 0x6000) )             //0x2000 == jumping  0x6000 == Falling
-    {
-        uint32 unk2, unk3, unk4, unk5;
-        float OldSpeed;
-
-        recv_data >> d_time;
-        recv_data >> X >> Y >> Z >> O;
-        recv_data >> unk2 >> unk3;                          //no idea, maybe unk2 = flags2
-        recv_data >> unk4 >> unk5;                          //no idea
-        recv_data >> OldSpeed >> NewSpeed;
-    }
-    else                                                    //single check
-    {
-        recv_data >> d_time;
-        recv_data >> X >> Y >> Z >> O;
-        recv_data >> unk1 >> NewSpeed;
-    }
-
-    if (fabs(GetPlayer()->GetSpeed(MOVE_RUN) - NewSpeed) > 0.01f)
-    {
-        sLog.outError("SpeedChange player %s is NOT correct (must be %f instead %f, force set to correct value", GetPlayer()->GetName(), GetPlayer()->GetSpeed(MOVE_RUN), NewSpeed);
-        // force set correct speed (and send to client);
-        GetPlayer()->SetSpeed(MOVE_RUN,GetPlayer()->GetSpeedRate(MOVE_RUN),true);
-    }
-}
-
-void WorldSession::HandleForceWalkSpeedChangeAck( WorldPacket & recv_data )
-{
-}
-
-void WorldSession::HandleForceRunBackSpeedChangeAck( WorldPacket & recv_data )
-{
-}
-
-void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)
-{
-    // set swim speed ? received data is more
-    sLog.outDebug("CMSG_FORCE_SWIM_SPEED_CHANGE_ACK");
-
-}
-
 void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 {
     uint8 ActionBar;
