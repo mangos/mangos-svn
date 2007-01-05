@@ -2124,6 +2124,8 @@ uint8 Spell::CheckItems()
         if((itemid = m_spellInfo->Reagent[i]) == 0)
             continue;
         itemcount = m_spellInfo->ReagentCount[i];
+        if( m_CastItem && m_CastItem->GetEntry() == itemid )
+            itemcount++;
         if( !p_caster->HasItemCount(itemid,itemcount) )
             return (uint8)CAST_FAIL_ITEM_NOT_READY;         //0x54
     }
