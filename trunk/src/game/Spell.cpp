@@ -2177,6 +2177,10 @@ uint8 Spell::CheckItems()
             }
             case SPELL_EFFECT_DISENCHANT:
             {
+                // prevent disenchanting in trade slot
+                if( itemTarget->GetOwnerGUID() != m_caster->GetGUID() )   
+                    return (uint8)CAST_FAIL_CANT_BE_DISENCHANTED; 
+
                 uint32 item_quality = itemTarget->GetProto()->Quality;
                 if(item_quality > 4 || item_quality < 2)
                     return CAST_FAIL_CANT_BE_DISENCHANTED;

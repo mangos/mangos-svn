@@ -84,7 +84,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
     if (!goinfo)
     {
-        sLog.outError("Gameobject Create not exist entry. guidlow: %u id: %u map: %u  (X: %f Y: %f Z: %f) ang: %f rotation0: %f rotation1: %f ortation2: %f rotation3: %f",guidlow, name_id, mapid, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
+        sLog.outError("Gameobject Create not exist entry. guidlow: %u id: %u map: %u  (X: %f Y: %f Z: %f) ang: %f rotation0: %f rotation1: %f rotation2: %f rotation3: %f",guidlow, name_id, mapid, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
         return false;
     }
 
