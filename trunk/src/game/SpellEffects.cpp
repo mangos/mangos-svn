@@ -342,7 +342,7 @@ void Spell::EffectDummy(uint32 i)
 
         // ok, main function spell can be casted
 
-        finish();                                       // prepere to replacing this cpell cast to main function spell
+        finish();                                           // prepere to replacing this cpell cast to main function spell
 
         // casting
         SpellEntry const *spellInfo = sSpellStore.LookupEntry( 20578 );

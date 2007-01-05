@@ -182,7 +182,6 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     recv_data >> newspeed;
     /*----------------*/
 
-
     Player *player = objmgr.GetPlayer(guid);
     if(!player)
         return;
@@ -232,7 +231,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
                 player->SetSpeed(MOVE_TURN,player->GetSpeedRate(MOVE_TURN),true);
             }
             break;
-    } 
+    }
 }
 
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
