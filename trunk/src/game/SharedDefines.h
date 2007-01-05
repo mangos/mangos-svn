@@ -723,9 +723,19 @@ enum Team
 #define ANIM_DROWNED                    0x84
 #define ANIM_FISHINGCAST                0x85
 #define ANIM_FISHINGLOOP                0x86
+#define ANIM_FLY                        0x87
+#define ANIM_EMOTE_WORK_NO_SHEATHE      0x88
+#define ANIM_EMOTE_STUN_NO_SHEATHE      0x89
+#define ANIM_EMOTE_USE_STANDING_NO_SHEATHE 0x8A
+#define ANIM_SPELL_SLEEP_DOWN           0x8B
+#define ANIM_SPELL_KNEEL_START          0x8C
+#define ANIM_SPELL_KNEEL_LOOP           0x8D
+#define ANIM_SPELL_KNEEL_END            0x8E
+#define ANIM_SPRINT                     0x8F
+#define ANIM_IN_FIGHT                   0x90
 
-#define FIRST_GAMEOBJECTANIMATION       0x87
-#define ANIM_GAMEOBJ_STAND              0
+#define FIRST_GAMEOBJECTANIMATION       0x91
+#define ANIM_GAMEOBJ_SPAWN              0
 #define ANIM_GAMEOBJ_CLOSED             1
 #define ANIM_GAMEOBJ_OPEN               2
 #define ANIM_GAMEOBJ_OPENED             3
