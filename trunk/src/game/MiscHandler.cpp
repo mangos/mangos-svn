@@ -834,24 +834,24 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     {
         sLog.outDetail( "MISC: Remove action from button %u", button );
 
-        GetPlayer()->removeAction(button);
+        GetPlayer()->removeActionButton(button);
     }
     else
     {
         if(type==ACTION_BUTTON_MACRO)
         {
             sLog.outDetail( "MISC: Added Macro %u into button %u", action, button );
-            GetPlayer()->addAction(button,action,type,misc);
+            GetPlayer()->addActionButton(button,action,type,misc);
         }
         else if(type==ACTION_BUTTON_SPELL)
         {
             sLog.outDetail( "MISC: Added Action %u into button %u", action, button );
-            GetPlayer()->addAction(button,action,type,misc);
+            GetPlayer()->addActionButton(button,action,type,misc);
         }
         else if(type==ACTION_BUTTON_ITEM)
         {
             sLog.outDetail( "MISC: Added Item %u into button %u", action, button );
-            GetPlayer()->addAction(button,action,type,misc);
+            GetPlayer()->addActionButton(button,action,type,misc);
         }
         else
             sLog.outError( "MISC: Unknown action button type %u for action %u into button %u", type, action, button );

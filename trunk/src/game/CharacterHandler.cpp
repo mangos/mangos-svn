@@ -357,8 +357,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Sent tutorial flags." );
 
     GetPlayer()->SendInitialSpells();
-
-    GetPlayer()->SendInitialActions();
+    GetPlayer()->SendInitialActionButtons();
 
     /*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
     {

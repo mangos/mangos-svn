@@ -77,12 +77,14 @@ typedef std::list<SpellModifier*> SpellModList;
 
 typedef std::map<uint32,time_t> SpellCooldowns;
 
-struct actions
+struct ActionButton
 {
-    uint8 button;
+    ActionButton() : action(0), type(0), misc(0) {}
+    ActionButton(uint16 _action, uint8 _type, uint8 _misc) : action(_action), type(_type), misc(_misc) {}
+
+    uint16 action;
     uint8 type;
     uint8 misc;
-    uint16 action;
 };
 
 enum ActionButtonType
@@ -91,6 +93,9 @@ enum ActionButtonType
     ACTION_BUTTON_MACRO = 64,
     ACTION_BUTTON_ITEM  = 128
 };
+
+typedef std::map<uint8,ActionButton> ActionButtonList;
+
 
 typedef std::pair<uint16, bool> CreateSpellPair;
 
@@ -852,10 +857,10 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_cinematic = cine;
         }
 
-        inline std::list<struct actions> getActionList() { return m_actions; };
-        void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
-        void removeAction(uint8 button);
-        void SendInitialActions();
+        ActionButtonList const& getActionButtons() const { return m_actionButtons; };
+        void addActionButton(uint8 button, uint16 action, uint8 type, uint8 misc);
+        void removeActionButton(uint8 button);
+        void SendInitialActionButtons();
 
         PvPInfo pvpInfo;
         void UpdatePvP(bool state, bool ovrride=false)
@@ -1232,7 +1237,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerSpellMap m_spells;
         SpellCooldowns m_spellCooldowns;
 
-        std::list<struct actions> m_actions;
+        ActionButtonList m_actionButtons;
         SpellModList m_spellMods[32];
         EnchantDurationList m_enchantDuration;
 

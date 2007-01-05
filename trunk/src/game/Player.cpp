@@ -369,7 +369,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         for( i=0; i<4 ;i++)
             taction[i] = (*action_itr[i]);
 
-        addAction((uint8)taction[0], taction[1], (uint8)taction[2], (uint8)taction[3]);
+        addActionButton((uint8)taction[0], taction[1], (uint8)taction[2], (uint8)taction[3]);
 
         for( i=0; i<4 ;i++)
             action_itr[i]++;
@@ -1233,8 +1233,9 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         //MapManager::Instance().GetMap(GetMapId())->Add(this);
 
-        // Resend spell list to client after far teleport.
+        // Client reset some data at NEW_WORLD teleport, resending its to client.
         SendInitialSpells();
+        SendInitialActionButtons();
     }
 
     if (outofrange)
@@ -3408,42 +3409,38 @@ uint16 Player::GetPureSkillValue(uint32 skill) const
     return 0;
 }
 
-void Player::SendInitialActions()
+void Player::SendInitialActionButtons()
 {
     sLog.outDetail( "Initializing Action Buttons for '%u'", GetGUIDLow() );
-    uint16 button=0;
 
-    std::list<struct actions>::iterator itr;
     WorldPacket data(SMSG_ACTION_BUTTONS, (120*4));
-    for (itr = m_actions.begin(); itr != m_actions.end();)
+    for(int button = 0; button < 120; ++button)
     {
-        if (itr->button == button)
+        ActionButtonList::const_iterator itr = m_actionButtons.find(button);
+        if(itr != m_actionButtons.end())
         {
-            data << uint16(itr->action);
-            data << uint8(itr->misc);
-            data << uint8(itr->type);
-            ++itr;
+            data << uint16(itr->second.action);
+            data << uint8(itr->second.misc);
+            data << uint8(itr->second.type);
         }
         else
         {
             data << uint32(0);
         }
-        button++;
     }
 
-    if (button < 120 )
-    {
-        for (int temp_counter=(120-button); temp_counter>0; temp_counter--)
-        {
-            data << uint32(0);
-        }
-    }
     GetSession()->SendPacket( &data );
     sLog.outDetail( "Action Buttons for '%u' Initialized", GetGUIDLow() );
 }
 
-void Player::addAction(const uint8 button, const uint16 action, const uint8 type, const uint8 misc)
+void Player::addActionButton(const uint8 button, const uint16 action, const uint8 type, const uint8 misc)
 {
+    if(button >= 120)
+    {
+        sLog.outError( "Action %u not added into button %u for player %s: button must be < 120", action, button, GetName() );
+        return;
+    }
+
     // check cheating with adding non-known spells to action bar
     if(type==ACTION_BUTTON_SPELL)
     {
@@ -3460,43 +3457,14 @@ void Player::addAction(const uint8 button, const uint16 action, const uint8 type
         }
     }
 
-    bool ButtonExists = false;
-    std::list<struct actions>::iterator itr;
-    for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
-    {
-        if (itr->button == button)
-        {
-            itr->button=button;
-            itr->action=action;
-            itr->type=type;
-            itr->misc=misc;
-            ButtonExists = true;
-            break;
-        }
-    }
-    if (!ButtonExists)
-    {
-        struct actions newaction;
-        newaction.button=button;
-        newaction.action=action;
-        newaction.type=type;
-        newaction.misc=misc;
-        m_actions.push_back(newaction);
-    }
+    m_actionButtons[button] = ActionButton(action,type,misc);
+
     sLog.outDetail( "Player '%u' Added Action '%u' to Button '%u'", GetGUIDLow(), action, button );
 }
 
-void Player::removeAction(uint8 button)
+void Player::removeActionButton(uint8 button)
 {
-    std::list<struct actions>::iterator itr;
-    for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
-    {
-        if (itr->button == button)
-        {
-            m_actions.erase(itr);
-            break;
-        }
-    }
+    m_actionButtons.erase(button);
     sLog.outDetail( "Action Button '%u' Removed from Player '%u'", button, GetGUIDLow() );
 }
 
@@ -9554,7 +9522,7 @@ bool Player::LoadFromDB( uint32 guid )
 void Player::_LoadActions()
 {
 
-    m_actions.clear();
+    m_actionButtons.clear();
 
     QueryResult *result = sDatabase.PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
 
@@ -9564,7 +9532,7 @@ void Player::_LoadActions()
         {
             Field *fields = result->Fetch();
 
-            addAction(fields[0].GetUInt8(), fields[1].GetUInt16(), fields[2].GetUInt8(), fields[3].GetUInt8());
+            addActionButton(fields[0].GetUInt8(), fields[1].GetUInt16(), fields[2].GetUInt8(), fields[3].GetUInt8());
         }
         while( result->NextRow() );
 
@@ -10128,10 +10096,10 @@ void Player::_SaveActions()
 {
     sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",GetGUIDLow());
 
-    std::list<struct actions>::iterator itr;
-    for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
+    for(ActionButtonList::const_iterator itr = m_actionButtons.begin(); itr != m_actionButtons.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), (uint32)itr->button, (uint32)itr->action, (uint32)itr->type, (uint32)itr->misc);
+        sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')", 
+            GetGUIDLow(), (uint32)itr->first, (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc);
     }
 }
 
