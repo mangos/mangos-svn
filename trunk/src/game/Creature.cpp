@@ -106,7 +106,7 @@ void Creature::CreateTrainerSpells()
 
         if(!spellinfo)
         {
-            sLog.outError("Trainer (GUID: %u ID: %u ) have in list non existed spell %u",GetGUIDLow(),GetEntry(),spellid);
+            sLog.outErrorDb("Trainer (GUID: %u ID: %u ) have in list non existed spell %u",GetGUIDLow(),GetEntry(),spellid);
             continue;
         }
 
@@ -374,7 +374,7 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
 
     if(m_tspells.empty())
     {
-        sLog.outError("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
+       sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
             GetGUIDLow(),GetCreatureInfo()->Entry);
         return false;
     }
@@ -444,7 +444,7 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
             }
             break;
         default:
-            sLog.outError("Creature %u (entry: %u) have trainer type %u",GetGUIDLow(),GetCreatureInfo()->Entry,GetCreatureInfo()->trainer_type);
+            sLog.outErrorDb("Creature %u (entry: %u) have trainer type %u",GetGUIDLow(),GetCreatureInfo()->Entry,GetCreatureInfo()->trainer_type);
             return false;
     }
     return true;
@@ -500,7 +500,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_VENDOR:
                         if(!GetItemCount())
                         {
-                            sLog.outError("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.",
+                           sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.",
                                 GetGUIDLow(),GetCreatureInfo()->Entry);
                             cantalking=false;
                         }
@@ -526,7 +526,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_AUCTIONEER:
                         break;                              // no checks
                     default:
-                        sLog.outError("Creature %u (entry: %u) have unknown gossip option %u",GetGUIDLow(),GetCreatureInfo()->Entry,gso->Action);
+                        sLog.outErrorDb("Creature %u (entry: %u) have unknown gossip option %u",GetGUIDLow(),GetCreatureInfo()->Entry,gso->Action);
                         break;
                 }
             }
@@ -1041,7 +1041,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
             if (cinfo->civilian != 1 && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
                 SetPvP(true);
     } else
-    sLog.outError("Error: invalid faction for creature %u", GetGUID());
+    sLog.outErrorDb("Error: invalid faction for creature %u", GetGUID());
 
     if (cinfo->mount != 0)
         Mount(cinfo->mount);
@@ -1062,7 +1062,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     else
     {
         m_defaultMovementType = IDLE_MOTION_TYPE;
-        sLog.outError("Creature template %u have wrong movement generator type value %u, ignore and set to IDLE.",Entry,cinfo->MovementType);
+        sLog.outErrorDb("Creature template %u have wrong movement generator type value %u, ignore and set to IDLE.",Entry,cinfo->MovementType);
     }
 
     return true;
@@ -1077,7 +1077,7 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
 
     if(!result)
     {
-        sLog.outError("ERROR: Creature (GUID: %u) not found in table `creature`, can't load. ",guid);
+        sLog.outErrorDb("Creature (GUID: %u) not found in table `creature`, can't load. ",guid);
         return false;
     }
 
@@ -1109,7 +1109,7 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
         else
         {
             m_defaultMovementType = IDLE_MOTION_TYPE;
-            sLog.outError("Creature (GUID: %u ID: %u) have wrong movement generator type value %u, ignore and set to IDLE.",guid,GetEntry(),mtg);
+            sLog.outErrorDb("Creature (GUID: %u ID: %u) have wrong movement generator type value %u, ignore and set to IDLE.",guid,GetEntry(),mtg);
         }
     }
 
@@ -1142,7 +1142,7 @@ void Creature::_LoadGoods()
 
         if (GetItemCount() >= MAX_CREATURE_ITEMS)
         {
-            sLog.outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetUInt32Value(OBJECT_FIELD_ENTRY), GetItemCount(), MAX_CREATURE_ITEMS );
+            sLog.outErrorDb( "Vendor %u has too many items (%u >= %i). Check the DB!", GetUInt32Value(OBJECT_FIELD_ENTRY), GetItemCount(), MAX_CREATURE_ITEMS );
             break;
         }
 

@@ -100,12 +100,12 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
         sLog.outString( "" );
         sLog.outString( ">> Loaded %u loot definitions", count );
         if(ssNonLootableItems.str().size() > 0)
-            sLog.outError("Some items can't be succesfully looted: have in chance field value < 0.000001 with and quest chance ==0 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
+            sLog.outErrorDb("Some items can't be succesfully looted: have in chance field value < 0.000001 with and quest chance ==0 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
     }
     else
     {
         sLog.outString( "" );
-        sLog.outError( ">> Loaded 0 loot definitions. DB table `%s` is empty.",tablename );
+        sLog.outErrorDb( ">> Loaded 0 loot definitions. DB table `%s` is empty.",tablename );
     }
 }
 
@@ -152,7 +152,7 @@ struct HasChance
 
         if (GroupId < 0 || GroupId >=  MaxLootGroups)
         {
-            sLog.outError("HasChance: wrong loot group in DB %i", itm.questChanceOrGroup);
+            sLog.outErrorDb("HasChance: wrong loot group in DB (%i) for item %u", itm.questChanceOrGroup,itm.itemid);
             return NULL;
         }
         if (itm.chance >= 0)
@@ -203,7 +203,7 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
 
     if (tab == store.end())
     {
-        sLog.outError("Loot id #%u used in `creature_template` or `gameobject` or fishing but it doesn't have records in appropriate *_loot_template table.",loot_id);
+        sLog.outErrorDb("Loot id #%u used in `creature_template` or `gameobject` or fishing but it doesn't have records in appropriate *_loot_template table.",loot_id);
         return;
     }
 

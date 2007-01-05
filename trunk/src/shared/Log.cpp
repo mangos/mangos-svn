@@ -184,6 +184,12 @@ void Log::Initialize()
         gmlogfile = fopen(gmlogname.c_str(), "a");
     }
 
+    std::string dberlogname = sConfig.GetStringDefault("DBErrorLogFile", "");
+    if(dberlogname!="")
+    {
+        dberlogfile = fopen(dberlogname.c_str(), "a");
+    }
+
     m_logLevel     = sConfig.GetIntDefault("LogLevel", 0);
     m_logFileLevel = sConfig.GetIntDefault("LogFileLevel", 0);
     InitColors(sConfig.GetStringDefault("LogColors", ""));
@@ -278,6 +284,46 @@ void Log::outError( const char * err, ... )
         fprintf(logfile, "\n" );
         va_end(ap);
         fflush(logfile);
+    }
+    fflush(stderr);
+}
+
+void Log::outErrorDb( const char * err, ... )
+{
+    if( !err ) return;
+
+    if(m_colored)
+        SetColor(false,m_colors[LogError]);
+
+    va_list ap;
+    va_start(ap, err);
+    vfprintf( stderr, err, ap );
+    va_end(ap);
+
+    if(m_colored)
+        ResetColor(false);
+
+    fprintf( stderr, "\n" );
+
+    if(logfile)
+    {
+        outTimestamp(logfile);
+        fprintf(logfile, "ERROR:" );
+        va_start(ap, err);
+        vfprintf(logfile, err, ap);
+        fprintf(logfile, "\n" );
+        va_end(ap);
+        fflush(logfile);
+    }
+
+    if(dberlogfile)
+    {
+        outTimestamp(dberlogfile);
+        va_start(ap, err);
+        vfprintf(dberlogfile, err, ap);
+        fprintf(dberlogfile, "\n" );
+        va_end(ap);
+        fflush(dberlogfile);
     }
     fflush(stderr);
 }

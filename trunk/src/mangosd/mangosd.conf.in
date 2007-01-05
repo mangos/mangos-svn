@@ -28,7 +28,7 @@ LogLevel = 3
 
 # Logfile name
 #    empty name disable creating log file: LogFile = 
-# Default: "Server.log"
+# Default: ""
 LogFile = "Server.log"
 
 # Server file level of logging
@@ -53,6 +53,10 @@ LogFilter_CreatureMoves = 0
 # Default: "" - none colors
 #          "13 7 11 9" - for example :)
 LogColors = ""
+
+# Log file of DB errors detected at server run.
+# Default: ""
+DBErrorLogFile = "DBErrors.log"
 
 # Log file of gm commands
 # Default: "" (Disable)

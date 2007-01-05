@@ -380,7 +380,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
         }
         else
         {
-            sLog.outError("Quest %u have non-existed RewSpell %u, ignored.",pQuest->GetQuestId(),pQuest->GetRewSpell());
+            sLog.outErrorDb("Quest %u have non-existed RewSpell %u, ignored.",pQuest->GetQuestId(),pQuest->GetRewSpell());
             data << uint32(0);
         }
     }
@@ -507,7 +507,7 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
         }
         else
         {
-            sLog.outError("Quest %u have non-existed RewSpell %u, ignored.",qInfo->GetQuestId(),qInfo->GetRewSpell());
+            sLog.outErrorDb("Quest %u have non-existed RewSpell %u, ignored.",qInfo->GetQuestId(),qInfo->GetRewSpell());
             data << uint32(0);
         }
     }

@@ -75,7 +75,7 @@ bool Group::AddInvite(Player *player)
     if(!player || player->groupInfo.invite || player->groupInfo.group)
         return false;
 
-    RemoveInvite(player->GetGUID());
+    RemoveInvite(player);
 
     m_invitees.push_back(player->GetGUID());
 
@@ -84,20 +84,18 @@ bool Group::AddInvite(Player *player)
     return true;
 }
 
-void Group::RemoveInvite(const uint64 &guid)
+void Group::RemoveInvite(Player *player)
 {
     for(vector<uint64>::iterator itr=m_invitees.begin(); itr!=m_invitees.end(); itr++)
     {
-        if((*itr) == guid)
+        if((*itr) == player->GetGUID())
         {
             m_invitees.erase(itr);
             break;
         }
     }
 
-    Player *player = objmgr.GetPlayer(guid);
-    if(player)
-        player->groupInfo.invite = NULL;
+    player->groupInfo.invite = NULL;
 }
 
 bool Group::AddMember(const uint64 &guid, const char* name)

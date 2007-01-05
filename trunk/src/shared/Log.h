@@ -59,6 +59,10 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         if( gmlogfile != NULL )
             fclose(gmlogfile);
         gmlogfile = NULL;
+
+        if( dberlogfile != NULL )
+            fclose(dberlogfile);
+        dberlogfile = NULL;
     }
     public:
         void Initialize();
@@ -71,7 +75,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void outDetail( const char * str, ... );
         void outDebug( const char * str, ... );
         void outMenu( const char * str, ... );
-
+        void outErrorDb( const char * str, ... );
         void SetLogLevel(char * Level);
         void SetLogFileLevel(char * Level);
         void SetColor(bool stdout_stream, Color color);
@@ -80,6 +84,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
     private:
         FILE* logfile;
         FILE* gmlogfile;
+        FILE* dberlogfile;
         uint32 m_logLevel;
         uint32 m_logFileLevel;
         bool m_colored;

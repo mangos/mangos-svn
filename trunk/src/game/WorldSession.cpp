@@ -186,12 +186,13 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             group = _player->groupInfo.invite;
 
-            group->RemoveInvite(_player->GetGUID());
+            group->RemoveInvite(_player);
             if(group->GetMembersCount() <= 1)               // group has just 1 member => disband
             {
                 group->Disband(true);
                 objmgr.RemoveGroup(group);
                 delete group;
+                _player->groupInfo.group = NULL;
             }
             group = NULL;
         }
