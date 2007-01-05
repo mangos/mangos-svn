@@ -497,7 +497,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             sLog.outString( "" );
             sLog.outString( ">> Loaded %u player create definitions", count );
-            sLog.outError( "Error loading `playercreateinfo` table or table empty.");
+            sLog.outErrorDb( "Error loading `playercreateinfo` table or table empty.");
             exit(1);
         }
 
@@ -510,14 +510,14 @@ void ObjectMgr::LoadPlayerInfo()
             uint32 current_race = fields[0].GetUInt32();
             if(current_race >= MAX_RACES)
             {
-                sLog.outError("Wrong race %u in `playercreateinfo` table, ignoring.",current_race);
+                sLog.outErrorDb("Wrong race %u in `playercreateinfo` table, ignoring.",current_race);
                 continue;
             }
 
             uint32 current_class = fields[1].GetUInt32();
             if(current_class >= MAX_CLASSES)
             {
-                sLog.outError("Wrong class %u in `playercreateinfo` table, ignoring.",current_class);
+                sLog.outErrorDb("Wrong class %u in `playercreateinfo` table, ignoring.",current_class);
                 continue;
             }
 
@@ -554,7 +554,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             sLog.outString( "" );
             sLog.outString( ">> Loaded %u player create items", count );
-            sLog.outError( "Error loading `playercreateinfo_item` table or table empty.");
+            sLog.outErrorDb( "Error loading `playercreateinfo_item` table or table empty.");
         }
         else
         {
@@ -567,14 +567,14 @@ void ObjectMgr::LoadPlayerInfo()
                 uint32 current_race = fields[0].GetUInt32();
                 if(current_race >= MAX_RACES)
                 {
-                    sLog.outError("Wrong race %u in `playercreateinfo_item` table, ignoring.",current_race);
+                    sLog.outErrorDb("Wrong race %u in `playercreateinfo_item` table, ignoring.",current_race);
                     continue;
                 }
 
                 uint32 current_class = fields[1].GetUInt32();
                 if(current_class >= MAX_CLASSES)
                 {
-                    sLog.outError("Wrong class %u in `playercreateinfo_item` table, ignoring.",current_class);
+                    sLog.outErrorDb("Wrong class %u in `playercreateinfo_item` table, ignoring.",current_class);
                     continue;
                 }
 
@@ -607,7 +607,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             sLog.outString( "" );
             sLog.outString( ">> Loaded %u player create spells", count );
-            sLog.outError( "Error loading `playercreateinfo_spell` table or table empty.");
+            sLog.outErrorDb( "Error loading `playercreateinfo_spell` table or table empty.");
         }
         else
         {
@@ -620,14 +620,14 @@ void ObjectMgr::LoadPlayerInfo()
                 uint32 current_race = fields[0].GetUInt32();
                 if(current_race >= MAX_RACES)
                 {
-                    sLog.outError("Wrong race %u in `playercreateinfo_spell` table, ignoring.",current_race);
+                    sLog.outErrorDb("Wrong race %u in `playercreateinfo_spell` table, ignoring.",current_race);
                     continue;
                 }
 
                 uint32 current_class = fields[1].GetUInt32();
                 if(current_class >= MAX_CLASSES)
                 {
-                    sLog.outError("Wrong class %u in `playercreateinfo_spell` table, ignoring.",current_class);
+                    sLog.outErrorDb("Wrong class %u in `playercreateinfo_spell` table, ignoring.",current_class);
                     continue;
                 }
 
@@ -659,7 +659,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             sLog.outString( "" );
             sLog.outString( ">> Loaded %u player create skills", count );
-            sLog.outError( "Error loading `playercreateinfo_skill` table or table empty.");
+            sLog.outErrorDb( "Error loading `playercreateinfo_skill` table or table empty.");
         }
         else
         {
@@ -672,14 +672,14 @@ void ObjectMgr::LoadPlayerInfo()
                 uint32 current_race = fields[0].GetUInt32();
                 if(current_race >= MAX_RACES)
                 {
-                    sLog.outError("Wrong race %u in `playercreateinfo_skill` table, ignoring.",current_race);
+                    sLog.outErrorDb("Wrong race %u in `playercreateinfo_skill` table, ignoring.",current_race);
                     continue;
                 }
 
                 uint32 current_class = fields[1].GetUInt32();
                 if(current_class >= MAX_CLASSES)
                 {
-                    sLog.outError("Wrong class %u in `playercreateinfo_skill` table, ignoring.",current_class);
+                    sLog.outErrorDb("Wrong class %u in `playercreateinfo_skill` table, ignoring.",current_class);
                     continue;
                 }
 
@@ -713,7 +713,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             sLog.outString( "" );
             sLog.outString( ">> Loaded %u player create actions", count );
-            sLog.outError( "Error loading `playercreateinfo_action` table or table empty.");
+            sLog.outErrorDb( "Error loading `playercreateinfo_action` table or table empty.");
         }
         else
         {
@@ -726,14 +726,14 @@ void ObjectMgr::LoadPlayerInfo()
                 uint32 current_race = fields[0].GetUInt32();
                 if(current_race >= MAX_RACES)
                 {
-                    sLog.outError("Wrong race %u in `playercreateinfo_action` table, ignoring.",current_race);
+                    sLog.outErrorDb("Wrong race %u in `playercreateinfo_action` table, ignoring.",current_race);
                     continue;
                 }
 
                 uint32 current_class = fields[1].GetUInt32();
                 if(current_class >= MAX_CLASSES)
                 {
-                    sLog.outError("Wrong class %u in `playercreateinfo_action` table, ignoring.",current_class);
+                    sLog.outErrorDb("Wrong class %u in `playercreateinfo_action` table, ignoring.",current_class);
                     continue;
                 }
 
@@ -768,7 +768,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             sLog.outString( "" );
             sLog.outString( ">> Loaded %u level stats definitions", count );
-            sLog.outError( "Error loading player_levelstats table or table empty.");
+            sLog.outErrorDb( "Error loading player_levelstats table or table empty.");
             exit(1);
         }
 
@@ -781,14 +781,14 @@ void ObjectMgr::LoadPlayerInfo()
             uint32 current_race = fields[0].GetUInt32();
             if(current_race >= MAX_RACES)
             {
-                sLog.outError("Wrong race %u in `player_levelstats` table, ignoring.",current_race);
+                sLog.outErrorDb("Wrong race %u in `player_levelstats` table, ignoring.",current_race);
                 continue;
             }
 
             uint32 current_class = fields[1].GetUInt32();
             if(current_class >= MAX_CLASSES)
             {
-                sLog.outError("Wrong class %u in `player_levelstats` table, ignoring.",current_class);
+                sLog.outErrorDb("Wrong class %u in `player_levelstats` table, ignoring.",current_class);
                 continue;
             }
 
@@ -796,7 +796,7 @@ void ObjectMgr::LoadPlayerInfo()
             if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
             {
                 if(current_level > 255)                     // harcoded level maximum
-                    sLog.outError("Wrong (> 255) level %u in `player_levelstats` table, ignoring.",current_level);
+                    sLog.outErrorDb("Wrong (> 255) level %u in `player_levelstats` table, ignoring.",current_level);
                 else
                     sLog.outDetail("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_levelstats` table, ignoring.",current_level);
                 continue;
@@ -850,7 +850,7 @@ void ObjectMgr::LoadPlayerInfo()
             // fatal error if no level 1 data
             if(!pInfo->levelInfo || pInfo->levelInfo[0].health == 0 )
             {
-                sLog.outError("Race %i Class %i Level 1 not have stats data!",race,class_);
+                sLog.outErrorDb("Race %i Class %i Level 1 not have stats data!",race,class_);
                 exit(1);
             }
 
@@ -859,7 +859,7 @@ void ObjectMgr::LoadPlayerInfo()
             {
                 if(pInfo->levelInfo[level].health == 0)
                 {
-                    sLog.outError("Race %i Class %i Level %i not have stats data, using data for %i.",race,class_,level+1, level);
+                    sLog.outErrorDb("Race %i Class %i Level %i not have stats data, using data for %i.",race,class_,level+1, level);
                     pInfo->levelInfo[level] = pInfo->levelInfo[level-1];
                 }
             }
@@ -1047,7 +1047,7 @@ void ObjectMgr::LoadQuests()
 
         sLog.outString( "" );
         sLog.outString( ">> Loaded 0 quests definitions" );
-        sLog.outError("`quest_template` table is empty!");
+        sLog.outErrorDb("`quest_template` table is empty!");
         return;
     }
 
@@ -1077,7 +1077,7 @@ void ObjectMgr::LoadQuests()
         {
             if (QuestTemplates.find(qinfo->NextQuestId) == QuestTemplates.end())
             {
-                sLog.outError("Quest %d has NextQuestId %d, but no such quest", qinfo->GetQuestId(), qinfo->NextQuestId);
+                sLog.outErrorDb("Quest %d has NextQuestId %d, but no such quest", qinfo->GetQuestId(), qinfo->NextQuestId);
             }
             else
                 QuestTemplates[qinfo->NextQuestId]->prevQuests.push_back(qinfo->GetQuestId());
@@ -1101,7 +1101,7 @@ void ObjectMgr::LoadSpellChains()
 
         sLog.outString( "" );
         sLog.outString( ">> Loaded 0 spell chain records" );
-        sLog.outError("`spell_chains` table is empty!");
+        sLog.outErrorDb("`spell_chains` table is empty!");
         return;
     }
 
@@ -1122,19 +1122,19 @@ void ObjectMgr::LoadSpellChains()
 
         if(!sSpellStore.LookupEntry(spell_id))
         {
-            sLog.outError("Spell %u not exist",spell_id);
+            sLog.outErrorDb("Spell %u listed in `spell_chain` not exist",spell_id);
             continue;
         }
 
         if(node.prev!=0 && !sSpellStore.LookupEntry(node.prev))
         {
-            sLog.outError("Spell %u have non existed previous rank spell: %u",spell_id,node.prev);
+            sLog.outErrorDb("Spell %u listed in `spell_chain` have non existed previous rank spell: %u",spell_id,node.prev);
             continue;
         }
 
         if(!sSpellStore.LookupEntry(node.first))
         {
-            sLog.outError("Spell %u have non existed first rank spell: %u",spell_id,node.first);
+            sLog.outErrorDb("Spell %u listed in `spell_chain` have non existed first rank spell: %u",spell_id,node.first);
             continue;
         }
 
@@ -1143,7 +1143,7 @@ void ObjectMgr::LoadSpellChains()
             (spell_id == node.first) != (node.prev == 0) ||
             (node.rank <= 1) != (node.prev == 0) )
         {
-            sLog.outError("Spell %u have not compatiable chain data (prev: %u, first: %u, rank: %d)",spell_id,node.prev,node.first,node.rank);
+            sLog.outErrorDb("Spell %u listed in `spell_chain` have not compatiable chain data (prev: %u, first: %u, rank: %d)",spell_id,node.prev,node.first,node.rank);
             continue;
         }
 
@@ -1160,17 +1160,17 @@ void ObjectMgr::LoadSpellChains()
             SpellChainMap::iterator i_prev = SpellChains.find(i->second.prev);
             if(i_prev == SpellChains.end())
             {
-                sLog.outError("Spell %u (prev: %u, first: %u, rank: %d) have not found in table previous rank spell.",
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d) listed in `spell_chain` have not found in table previous rank spell.",
                     i->first,i->second.prev,i->second.first,i->second.rank);
             }
             else if( i_prev->second.first != i->second.first )
             {
-                sLog.outError("Spell %u (prev: %u, first: %u, rank: %d) have different firsdy spell in chain in comparison with previous rank spell (prev: %u, first: %u, rank: %d).",
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d) listed in `spell_chain` have different first spell in chain in comparison with previous rank spell (prev: %u, first: %u, rank: %d).",
                     i->first,i->second.prev,i->second.first,i->second.rank,i_prev->second.prev,i_prev->second.first,i_prev->second.rank);
             }
             else if( i_prev->second.rank+1 != i->second.rank )
             {
-                sLog.outError("Spell %u (prev: %u, first: %u, rank: %d) have different rank in comparison with previous rank spell (prev: %u, first: %u, rank: %d).",
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d) listed in `spell_chain` have different rank in comparison with previous rank spell (prev: %u, first: %u, rank: %d).",
                     i->first,i->second.prev,i->second.first,i->second.rank,i_prev->second.prev,i_prev->second.first,i_prev->second.rank);
             }
         }
@@ -1670,7 +1670,7 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
 
     if(! result)
     {
-        sLog.outError("DB incomplite: Zone %u Map %u Team %u not have linked graveyard.",zoneId,MapId,team);
+        sLog.outErrorDb("Table `game_graveyard_zone` incomplite: Zone %u Map %u Team %u not have linked graveyard.",zoneId,MapId,team);
         return NULL;
     }
 
@@ -1688,7 +1688,7 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
         WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(g_id);
         if(!entry)
         {
-            sLog.outError("Table `game_graveyard_zone` have record for not existed graveyard (WorldSafeLocs.dbc id) %u, skipped.",g_id);
+            sLog.outErrorDb("Table `game_graveyard_zone` have record for not existed graveyard (WorldSafeLocs.dbc id) %u, skipped.",g_id);
             continue;
         }
 

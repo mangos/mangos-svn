@@ -68,7 +68,7 @@ void MapManager::LoadTransports()
         if(!t->GenerateWaypoints(goinfo->sound0, mapsUsed))
         // skip transports with empty waypoints list
         {
-            sLog.outError("ERROR: Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO sound0 field.",goinfo->sound0); 
+            sLog.outErrorDb("ERROR: Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO sound0 field.",goinfo->sound0); 
             delete t;
             continue;
         }
@@ -127,7 +127,7 @@ bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, 
 
     if (!goinfo)
     {
-        sLog.outError("Transport: Create not exist entry. guidlow: %u map: %u  (X: %f Y: %f Z: %f) ang: %f",guidlow, mapid, x, y, z, ang);
+        sLog.outErrorDb("Transport not created: entry in `gameobject_template` not found, guidlow: %u map: %u  (X: %f Y: %f Z: %f) ang: %f",guidlow, mapid, x, y, z, ang);
         return false;
     }
 

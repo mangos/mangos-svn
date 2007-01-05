@@ -138,7 +138,7 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
     /********************/
 
     // everything's fine, do it
-    group->RemoveInvite(GetPlayer()->GetGUID());
+    group->RemoveInvite(GetPlayer());
     group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName());
     GetPlayer()->groupInfo.group  = group;
 }
@@ -221,7 +221,7 @@ void WorldSession::HandleGroupUninvite(uint64 guid, std::string name)
     // everything's fine, do it
     if(player && player->groupInfo.invite)                  // uninvite invitee
     {
-        group->RemoveInvite(guid);
+        group->RemoveInvite(player);
 
         if(group->GetMembersCount() <= 1)                   // group has just 1 member => disband
         {

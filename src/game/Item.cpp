@@ -49,7 +49,7 @@ void AddItemsSetItem(Player*player,Item *item)
 
     if(!set)
     {
-        sLog.outError("Item set %u for item (id %u) not found, mods not applied.",setid,proto->ItemId);
+        sLog.outErrorDb("Item set %u for item (id %u) not found, mods not applied.",setid,proto->ItemId);
         return;
     }
 
@@ -111,7 +111,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
 
     if(!set)
     {
-        sLog.outError("Item set #%u for item #%u not found, mods not removed.",setid,proto->ItemId);
+        sLog.outErrorDb("Item set #%u for item #%u not found, mods not removed.",setid,proto->ItemId);
         return;
     }
 
@@ -127,7 +127,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
 
     if(!eff)
     {
-        sLog.outError("Item set effect for equiped item #%u not found, mods not removed.",proto->ItemId);
+        sLog.outErrorDb("Item set effect for equiped item #%u not found, mods not removed.",proto->ItemId);
         return;
     }
 
@@ -542,7 +542,7 @@ void Item::_LoadQuests()
         if(quest)
             addQuest(itemProto->StartQuest);
         else
-            sLog.outError("Item (Entry: %u) can start quest %u but quest not exist, ignoring.",GetEntry(),itemProto->StartQuest);
+            sLog.outErrorDb("Item (Entry: %u) can start quest %u but quest not exist, ignoring.",GetEntry(),itemProto->StartQuest);
     }
 }
 
