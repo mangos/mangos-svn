@@ -71,8 +71,8 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 MaxPlayersPerTeam, uint32 Leve
     bg->SetMaxPlayersPerTeam(MaxPlayersPerTeam);
     bg->SetMaxPlayers(MaxPlayersPerTeam*2);
     bg->SetName(BattleGroundName);
-    bg->SetTeamStartLoc(0, Team1StartLocX, Team1StartLocY, Team1StartLocZ, Team1StartLocO);
-    bg->SetTeamStartLoc(1, Team2StartLocX, Team2StartLocY, Team2StartLocZ, Team2StartLocO);
+    bg->SetTeamStartLoc(ALLIANCE, Team1StartLocX, Team1StartLocY, Team1StartLocZ, Team1StartLocO);
+    bg->SetTeamStartLoc(HORDE,    Team2StartLocX, Team2StartLocY, Team2StartLocZ, Team2StartLocO);
     bg->SetLevelRange(LevelMin, LevelMax);
 
     uint32 BattleGroundID = m_BattleGrounds.size();         // this will be replaced with instance ID later.
