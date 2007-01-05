@@ -276,8 +276,9 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         m->state = CHANGED;
         pl->m_mailsUpdated = true;
         pl->RemoveMItem(it->GetGUIDLow());
-        pl->StoreItem( dest, it, true);
-        it->SetState(ITEM_NEW, pl);
+        Item* it2 = pl->StoreItem( dest, it, true);
+        if(it2 == it)                                       // only set if not merged to existed stack (*it can be deleted already but we can compare pointers any way)
+            it->SetState(ITEM_NEW, pl);
 
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, 0);
     } else
