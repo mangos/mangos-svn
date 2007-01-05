@@ -96,7 +96,6 @@ enum ActionButtonType
 
 typedef std::map<uint8,ActionButton> ActionButtonList;
 
-
 typedef std::pair<uint16, bool> CreateSpellPair;
 
 struct PlayerCreateInfoItem

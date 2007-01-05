@@ -291,7 +291,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_MOVE_KNOCK_BACK_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveKnockBackAck              },
         { CMSG_MOVE_HOVER_ACK,              STATUS_LOGGEDIN, &WorldSession::HandleMoveHoverAck                  },
         { CMSG_SET_ACTIVE_MOVER,            STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode          },
-        { MSG_MOVE_TELEPORT_ACK,            STATUS_LOGGEDIN, &WorldSession::HandleMoveTeleportAck               },      
+        { MSG_MOVE_TELEPORT_ACK,            STATUS_LOGGEDIN, &WorldSession::HandleMoveTeleportAck               },
         { CMSG_FORCE_WALK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
         { CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck      },
         { CMSG_FORCE_TURN_RATE_CHANGE_ACK,  STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },

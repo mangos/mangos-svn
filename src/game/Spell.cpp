@@ -47,11 +47,11 @@
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
 bool IsQuestTameSpell(uint32 spellId)
-{ 
+{
     SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
     if (!spellproto) return false;
 
-    return spellproto->Effect[0] == SPELL_EFFECT_THREAT 
+    return spellproto->Effect[0] == SPELL_EFFECT_THREAT
         && spellproto->Effect[1] == SPELL_EFFECT_APPLY_AURA && spellproto->EffectApplyAuraName[1] == SPELL_AURA_DUMMY;
 }
 
@@ -729,7 +729,7 @@ void Spell::cast(bool skipCheck)
             HandleEffects(NULL,NULL,NULL, j);
     }
 
-    if(needspelllog) 
+    if(needspelllog)
         SendLogExecute();
 
     bool canreflect = false;
@@ -744,7 +744,7 @@ void Spell::cast(bool skipCheck)
             case TARGET_IN_FRONT_OF_CASTER:
             case TARGET_DUELVSPLAYER:
             case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-            //case TARGET_AE_SELECTED:
+                //case TARGET_AE_SELECTED:
                 canreflect = true;
                 break;
 
@@ -754,7 +754,7 @@ void Spell::cast(bool skipCheck)
 
         if(canreflect)
             continue;
-        else 
+        else
             break;
     }
 
@@ -2180,8 +2180,8 @@ uint8 Spell::CheckItems()
             case SPELL_EFFECT_DISENCHANT:
             {
                 // prevent disenchanting in trade slot
-                if( itemTarget->GetOwnerGUID() != m_caster->GetGUID() )   
-                    return (uint8)CAST_FAIL_CANT_BE_DISENCHANTED; 
+                if( itemTarget->GetOwnerGUID() != m_caster->GetGUID() )
+                    return (uint8)CAST_FAIL_CANT_BE_DISENCHANTED;
 
                 uint32 item_quality = itemTarget->GetProto()->Quality;
                 if(item_quality > 4 || item_quality < 2)
