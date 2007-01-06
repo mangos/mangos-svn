@@ -152,10 +152,13 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
         PSendSysMessage(LANG_SUMMONING, chr->GetName(),"");
 
-        char buf0[256];
-        snprintf((char*)buf0,256,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
-        FillSystemMessageData(&data, m_session, buf0);
-        chr->GetSession()->SendPacket( &data );
+        if (m_session->GetPlayer()->isVisibleFor(chr,false))
+        {
+            char buf0[256];
+            snprintf((char*)buf0,256,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
+            FillSystemMessageData(&data, m_session, buf0);
+            chr->GetSession()->SendPacket( &data );
+        }
 
         chr->TeleportTo(m_session->GetPlayer()->GetMapId(),
             m_session->GetPlayer()->GetPositionX(),
