@@ -38,6 +38,9 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     if (!unit)
@@ -70,6 +73,9 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     if (!unit)
@@ -98,6 +104,9 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
     uint64 guid;
+
+    if(!GetPlayer()->isAlive())
+        return;
 
     recv_data >> guid;
     SendTrainerList( guid );
@@ -215,6 +224,9 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     recv_data >> guid >> spellId;
     sLog.outDebug( "WORLD: Received CMSG_TRAINER_BUY_SPELL NpcGUID=%u, learn spell id is: %u",uint32(GUID_LOPART(guid)), spellId );
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     if(!unit) return;
@@ -313,6 +325,9 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     if(!Script->GossipHello( _player, unit ))
     {
         unit->prepareGossipMenu(_player,0);
@@ -336,6 +351,9 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     }
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if(!GetPlayer()->isAlive())
         return;
 
     if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
@@ -421,6 +439,9 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
     uint64 npcGUID;
     recv_data >> npcGUID;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
@@ -487,6 +508,9 @@ void WorldSession::HandleListStabledPetsOpcode( WorldPacket & recv_data )
     uint64 npcGUID;
 
     recv_data >> npcGUID;
+
+    if(!GetPlayer()->isAlive())
+        return;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
@@ -582,6 +606,9 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
 
     recv_data >> npcGUID;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
@@ -651,6 +678,9 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
 
     recv_data >> npcGUID >> petnumber;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
@@ -717,6 +747,9 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
 
     recv_data >> npcGUID;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
     {
@@ -781,6 +814,9 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
     uint32 pet_number;
 
     recv_data >> npcGUID >> pet_number;
+
+    if(!GetPlayer()->isAlive())
+        return;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)
@@ -853,6 +889,9 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     uint64 npcGUID, itemGUID;
 
     recv_data >> npcGUID >> itemGUID;
+
+    if(!GetPlayer()->isAlive())
+        return;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
     if (!unit)

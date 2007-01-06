@@ -552,6 +552,9 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
     };
     recv_data >> guid;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     if (!unit)

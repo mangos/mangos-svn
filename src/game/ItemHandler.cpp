@@ -374,6 +374,9 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
 
     recv_data >> vendorguid >> slot;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Item *pItem = _player->GetItemFromBuyBackSlot( slot );
     if( pItem )
     {
@@ -410,6 +413,9 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     uint8 bag, slot, count, vendorslot;
 
     recv_data >> vendorguid >> item >> bagguid >> slot >> count;
+
+    if(!GetPlayer()->isAlive())
+        return;
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
@@ -499,6 +505,9 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> item >> count >> unk1;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
@@ -562,6 +571,10 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     uint64 guid;
 
     recv_data >> guid;
+
+    if(!GetPlayer()->isAlive())
+        return;
+
     sLog.outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY" );
 
     SendListInventory( guid );
