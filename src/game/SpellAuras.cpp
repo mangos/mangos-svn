@@ -210,9 +210,6 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL                                       //                                  = 162    ,//
 };
 
-// add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
-static void HandleShapeshiftBoosts(bool apply, Aura* aura);
-
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
 m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItem(castItem), m_auraSlot(0),m_positive(false), m_permanent(false),
@@ -580,10 +577,6 @@ void Aura::_AddAura()
         }
     }
 
-    // adding linked auras
-    if(m_modifier.m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // add the shapeshift aura's boosts
-        HandleShapeshiftBoosts(true, this);
-
     // not call total regen auras at adding
     if( m_modifier.m_auraname==SPELL_AURA_OBS_MOD_HEALTH || m_modifier.m_auraname==SPELL_AURA_OBS_MOD_MANA )
         m_periodicTimer = m_modifier.periodictime;
@@ -653,10 +646,6 @@ void Aura::_AddAura()
 
 void Aura::_RemoveAura()
 {
-    // removing linked auras added ad _AddAura call before removing aura
-    if(m_modifier.m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // remove the shapeshift aura's boosts
-        HandleShapeshiftBoosts(false, this);
-
     m_target->ApplyStats(false);
     sLog.outDebug("Aura %u now is remove", m_modifier.m_auraname);
     ApplyModifier(false,true);
@@ -2638,16 +2627,15 @@ void HandleHealEvent(void *obj)
         Aur->GetTarget()->PeriodicAuraLog(caster, Aur->GetSpellProto(), Aur->GetModifier());
 }
 
-void HandleShapeshiftBoosts(bool apply, Aura* aura)
+void Aura::HandleShapeshiftBoosts(bool apply)
 {
-    if(!aura->GetTarget())
+    if(!m_target)
         return;
 
-    Unit *unit_target = aura->GetTarget();
     uint32 spellId = 0;
     uint32 spellId2 = 0;
 
-    switch(aura->GetModifier()->m_miscvalue)
+    switch(GetModifier()->m_miscvalue)
     {
         case FORM_CAT:
             spellId = 3025;
@@ -2693,48 +2681,48 @@ void HandleShapeshiftBoosts(bool apply, Aura* aura)
             break;
     }
 
-    uint32 form = aura->GetModifier()->m_miscvalue-1;
+    uint32 form = GetModifier()->m_miscvalue-1;
 
     if(apply)
     {
-        if(unit_target->m_ShapeShiftForm)
+        if(m_target->m_ShapeShiftForm)
         {
-            unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);
+            m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
         }
 
-        if (spellId) unit_target->CastSpell(unit_target, spellId, true);
-        if (spellId2) unit_target->CastSpell(unit_target, spellId2, true);
+        if (spellId) m_target->CastSpell(m_target, spellId, true);
+        if (spellId2) m_target->CastSpell(m_target, spellId2, true);
 
-        if(unit_target->GetTypeId() == TYPEID_PLAYER)
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
-            const PlayerSpellMap& sp_list = ((Player *)unit_target)->GetSpellMap();
+            const PlayerSpellMap& sp_list = ((Player *)m_target)->GetSpellMap();
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
                 if(itr->second->state == PLAYERSPELL_REMOVED) continue;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !IsPassiveSpell(itr->first)) continue;
                 if (spellInfo->Stances & (1<<form))
-                    unit_target->CastSpell(unit_target, itr->first, true);
+                    m_target->CastSpell(m_target, itr->first, true);
             }
         }
     }
     else
     {
-        unit_target->RemoveAurasDueToSpell(spellId);
-        unit_target->RemoveAurasDueToSpell(spellId2);
+        m_target->RemoveAurasDueToSpell(spellId);
+        m_target->RemoveAurasDueToSpell(spellId2);
 
-        Unit::AuraMap& tAuras = unit_target->GetAuras();
+        Unit::AuraMap& tAuras = m_target->GetAuras();
         for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
         {
             if ((*itr).second->GetSpellProto()->Stances & uint32(1<<form))
-                unit_target->RemoveAura(itr);
+                m_target->RemoveAura(itr);
             else
                 ++itr;
         }
     }
 
-    double healthPercentage = (double)unit_target->GetHealth() / (double)unit_target->GetMaxHealth();
-    unit_target->SetHealth(uint32(ceil((double)unit_target->GetMaxHealth() * healthPercentage)));
+    double healthPercentage = (double)m_target->GetHealth() / (double)m_target->GetMaxHealth();
+    m_target->SetHealth(uint32(ceil((double)m_target->GetMaxHealth() * healthPercentage)));
 }
 
 void Aura::HandleAuraEmpathy(bool apply, bool Real)
