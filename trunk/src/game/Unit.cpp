@@ -1794,6 +1794,10 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         }
     }
 
+    // adding linked auras
+    if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // add the shapeshift aura's boosts
+        Aur->HandleShapeshiftBoosts(true);
+
     Aur->_AddAura();
     m_Auras.insert(AuraMap::value_type(spellEffectPair(Aur->GetId(), Aur->GetEffIndex()), Aur));
     if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
@@ -2064,6 +2068,11 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 
     // remove from list before mods removing (prevent cyclic calls, mods added before including to aura list - use reverse order)
     Aura* Aur = i->second;
+
+    // must remove before removeing from list (its remove dependent auras and _i_ is only safe iterator value
+    if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // remove the shapeshift aura's boosts
+        Aur->HandleShapeshiftBoosts(false);
+
     m_Auras.erase(i++);
     m_removedAuras++;                                       // internal count used by unit update
 

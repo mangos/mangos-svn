@@ -214,6 +214,8 @@ class Aura
         int32 m_procCharges;
         int32 m_absorbDmg;
 
+        // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
+        void HandleShapeshiftBoosts(bool apply);
     protected:
         Modifier m_modifier;
         SpellModifier *m_spellmod;
