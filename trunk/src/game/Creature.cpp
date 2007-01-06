@@ -514,7 +514,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                             cantalking=false;
                         break;
                     case GOSSIP_OPTION_TAXIVENDOR:
-                        if ( pPlayer->GetSession()->LearnNewTaxiNode(GetGUID()) )
+                        if ( pPlayer->GetSession()->SendLearnNewTaxiNode(GetGUID()) )
                             return;
                     case GOSSIP_OPTION_GUARD:
                     case GOSSIP_OPTION_INNKEEPER:

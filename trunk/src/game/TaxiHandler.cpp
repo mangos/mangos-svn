@@ -82,25 +82,8 @@ void WorldSession::HandleTaxiQueryAvailableNodesOpcode( WorldPacket & recv_data 
 
     uint64 guid;
     recv_data >> guid;
-    SendTaxiMenu( guid );
-}
 
-void WorldSession::SendTaxiMenu( uint64 guid )
-{
-    uint32 curloc;
-    uint8 field;
-    uint32 TaxiMask[8];
-
-    if(_player->IsMounted())
-    {
-        WorldPacket data(SMSG_CAST_RESULT, (4+1+1));
-        data << uint32(0);
-        data << uint8(2);
-        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
-        SendPacket(&data);
-        return;
-    }
-
+    // cheating checks
     Creature *unit = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
 
     if (!unit)
@@ -118,36 +101,52 @@ void WorldSession::SendTaxiMenu( uint64 guid )
     if(!unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
         return;
 
-    curloc = objmgr.GetNearestTaxiNode(
+    // unknown taxi node case
+    if( SendLearnNewTaxiNode(guid) )
+        return;
+
+    // known taxo node case
+    SendTaxiMenu( guid );
+}
+
+void WorldSession::SendTaxiMenu( uint64 guid )
+{
+    // find current node
+    uint32 curloc = objmgr.GetNearestTaxiNode(
         GetPlayer( )->GetPositionX( ),
         GetPlayer( )->GetPositionY( ),
         GetPlayer( )->GetPositionZ( ),
         GetPlayer( )->GetMapId( ) );
 
-    sLog.outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
-
     if ( curloc == 0 )
         return;
 
-    field = (uint8)((curloc - 1) / 32);
+    sLog.outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
 
-    memset(TaxiMask, 0, sizeof(TaxiMask));
-    if ( !objmgr.GetGlobalTaxiNodeMask( curloc, TaxiMask ) )
+    // check additinal requirements
+    if(_player->IsMounted())
+    {
+        WorldPacket data(SMSG_CAST_RESULT, (4+1+1));
+        data << uint32(0);
+        data << uint8(2);
+        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
+        SendPacket(&data);
         return;
-    TaxiMask[field] |= 1 << ((curloc-1)%32);
+    }
 
-    WorldPacket data( SMSG_SHOWTAXINODES, (4+8+4) );
+    WorldPacket data( SMSG_SHOWTAXINODES, (4+8+4+8*4) );
     data << uint32( 1 ) << guid;
     data << uint32( curloc );
-    for (uint8 i=0; i<8; i++)
+
+    if(GetPlayer()->isTaxiCheater())
     {
-        TaxiMask[i] = 0xFFFFFFFF;
-
-        // remove unknown nodes
-        if(!GetPlayer()->isTaxiCheater())
-            TaxiMask[i] &= GetPlayer()->GetTaximask(i);
-
-        data << TaxiMask[i];
+        for (uint8 i=0; i<8; i++)
+            data << uint32(0xFFFF);                         // all nodes
+    }
+    else
+    {
+        for (uint8 i=0; i<8; i++)
+            data << uint32(GetPlayer()->GetTaximask(i));    // known nodes
     }
     SendPacket( &data );
 
@@ -178,23 +177,20 @@ void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
     GetPlayer()->SendMessageToSet(&data, true);
 }
 
-bool WorldSession::LearnNewTaxiNode( uint64 guid )
+bool WorldSession::SendLearnNewTaxiNode( uint64 guid )
 {
-    uint32 curloc;
-    uint8 field;
-    uint32 submask;
-
-    curloc = objmgr.GetNearestTaxiNode(
+    // find current node
+    uint32 curloc = objmgr.GetNearestTaxiNode(
         GetPlayer( )->GetPositionX( ),
         GetPlayer( )->GetPositionY( ),
         GetPlayer( )->GetPositionZ( ),
         GetPlayer( )->GetMapId( ) );
 
     if ( curloc == 0 )
-        return false;
+        return true;                                        // `true` send to avoid WorldSession::SendTaxiMenu call with one more curlock seartch with same false result.
 
-    field = (uint8)((curloc - 1) / 32);
-    submask = 1<<((curloc-1)%32);
+    uint8  field   = (uint8)((curloc - 1) / 32);
+    uint32 submask = 1<<((curloc-1)%32);
 
     if ( (GetPlayer( )->GetTaximask(field) & submask) != submask )
     {

@@ -1506,25 +1506,6 @@ void ObjectMgr::LoadAreaTriggerPoints()
     sLog.outString( ">> Loaded %u quest trigger points", count );
 }
 
-bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
-{
-    TaxiPathSetBySource::iterator src_i = sTaxiPathSetBySource.find(curloc);
-
-    if(src_i==sTaxiPathSetBySource.end())
-        return false;
-
-    TaxiPathSetForSource& pathSet = src_i->second;
-
-    for(TaxiPathSetForSource::iterator  path_i = pathSet.begin(); path_i != pathSet.end(); ++path_i)
-    {
-        uint8 destination = path_i->first;
-        uint8 field = (uint8)((destination - 1) / 32);
-        Mask[field] |= 1 << ( (destination - 1 ) % 32 );
-    }
-
-    return true;
-}
-
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
     bool found = false;
