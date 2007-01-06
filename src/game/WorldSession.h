@@ -126,7 +126,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTaxiStatus( uint64 guid );
         void SendTaxiMenu( uint64 guid );
         void SendDoFlight( uint16 MountId, uint32 path );
-        bool LearnNewTaxiNode( uint64 guid );
+        bool SendLearnNewTaxiNode( uint64 guid );
     protected:
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
