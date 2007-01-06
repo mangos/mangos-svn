@@ -95,7 +95,10 @@ class MANGOS_DLL_SPEC WorldSession
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
         void SendGMTicketGetTicket(uint32 status, char const* text);
+
+        void SendTradeStatus(uint32 status);
         void SendCancelTrade();
+
         void SendStablePet(uint64 guid );
         void SendPetitionQueryOpcode( uint64 petitionguid);
         void SendUpdateTrade();

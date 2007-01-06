@@ -1586,7 +1586,8 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
-    if (damage + bonus > 0)
+    // not add bonus to 0 damage
+    if( damage > 0 && damage + bonus > 0 )
         damage += bonus;
     else
         damage = 0;

@@ -2738,7 +2738,10 @@ void Player::BuildPlayerRepop()
 
     // set initial flags + set ghost + restore pvp
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 | (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP)?UNIT_FLAG_PVP:0) );
-    SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST | (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP)?PLAYER_FLAGS_IN_PVP:0) );
+
+    // reserve some flags + ad ghost flag
+    uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & ( PLAYER_FLAGS_IN_PVP | PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM );
+    SetUInt32Value(PLAYER_FLAGS, old_safe_flags | PLAYER_FLAGS_GHOST );
 }
 
 void Player::SendDelayResponse(const uint32 ml_seconds)
@@ -9442,8 +9445,11 @@ bool Player::LoadFromDB( uint32 guid )
     m_resetTalentsCost = fields[21].GetUInt32();
     m_resetTalentsTime = fields[22].GetUInt64();
 
+    // reserve some flags + ad ghost flag
+    uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & ( PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM );
+
     if( HasFlag(PLAYER_FLAGS, 8) )
-        SetUInt32Value(PLAYER_FLAGS, 0);
+        SetUInt32Value(PLAYER_FLAGS, 0 | old_safe_flags  );
 
     if( HasFlag(PLAYER_FLAGS, 0x11) )
         m_deathState = DEAD;
