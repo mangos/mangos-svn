@@ -61,6 +61,9 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_HELLO npc = %u",guid );
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(!pCreature)
         return;
@@ -80,6 +83,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     uint64 guid;
     uint32 quest;
     recv_data >> guid >> quest;
+
+    if(!GetPlayer()->isAlive())
+        return;
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
@@ -182,6 +188,9 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid >> quest >> reward;
 
+    if(!GetPlayer()->isAlive())
+        return;
+
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
 
     Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
@@ -224,6 +233,9 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     uint32 quest;
     uint64 guid;
     recv_data >> guid >> quest;
+
+    if(!GetPlayer()->isAlive())
+        return;
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
@@ -305,6 +317,9 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
     uint32 quest;
     uint64 guid;
     recv_data >> guid >> quest;
+
+    if(!GetPlayer()->isAlive())
+        return;
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 

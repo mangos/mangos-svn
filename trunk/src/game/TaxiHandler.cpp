@@ -84,6 +84,9 @@ void WorldSession::HandleTaxiQueryAvailableNodesOpcode( WorldPacket & recv_data 
     recv_data >> guid;
 
     // cheating checks
+    if(!GetPlayer()->isAlive())
+        return;
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
 
     if (!unit)
