@@ -2050,7 +2050,7 @@ void Player::learnSpell(uint16 spell_id)
             SetSkill(762,150,150);
             break;
         case 1804:                                          //Pick Lock(Rogue)
-            SetSkill(633,1,this->GetLevel()*5);
+            SetSkill(633,1,this->getLevel()*5);
             break;
             // Languages
         case 668: case 669: case 670: case 671:  case 672:  case 813: case 814:
