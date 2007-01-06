@@ -50,6 +50,7 @@ struct ScriptInfo;
 typedef multimap<uint32, ScriptInfo> ScriptMap;
 typedef map<uint32, ScriptMap > ScriptMapMap;
 extern ScriptMapMap sScripts;
+extern ScriptMapMap sSpellScripts;
 
 class Group;
 class Guild;
@@ -69,6 +70,14 @@ struct ScriptInfo
     float z;
     float o;
 };
+
+#define SCRIPT_COMMAND_SAY          0
+#define SCRIPT_COMMAND_EMOTE        1
+#define SCRIPT_COMMAND_FIELD_SET    2
+#define SCRIPT_COMMAND_MOVE_TO      3
+#define SCRIPT_COMMAND_FLAG_SET     4
+#define SCRIPT_COMMAND_FLAG_REMOVE  5
+#define SCRIPT_COMMAND_TEMP_SUMMON 10
 
 class ObjectMgr
 {
@@ -225,7 +234,7 @@ class ObjectMgr
         void LoadRaidGroups();
         void LoadQuests();
         void LoadSpellChains();
-        void LoadScripts();
+        void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();
         void LoadItemPrototypes();
 

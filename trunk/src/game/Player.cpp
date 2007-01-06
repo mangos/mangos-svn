@@ -164,7 +164,10 @@ Player::Player (WorldSession *session): Unit()
 Player::~Player ()
 {
     if(m_uint32Values)                                      // only for fully created Object
+    {
         CombatStop();
+        RemovePet(NULL, PET_SAVE_AS_CURRENT);
+    }
 
     DuelComplete(0);
 
@@ -9109,37 +9112,7 @@ void Player::SendQuestReward( Quest *pQuest, uint32 XP, Object * questGiver )
         GetSession()->SendPacket( &data );
 
         if (pQuest->GetQuestCompleteScript() != 0)
-        {
-            ScriptMapMap::iterator s = sScripts.find(pQuest->GetQuestCompleteScript());
-            if (s == sScripts.end())
-                return;
-
-            ScriptMap *s2 = &(s->second);
-            ScriptMap::iterator iter;
-            bool immedScript = false;
-            for (iter = s2->begin(); iter != s2->end(); iter++)
-            {
-                if (iter->first == 0)
-                {
-                    ScriptAction sa;
-                    sa.source = questGiver;
-                    sa.script = &iter->second;
-                    sa.target = this;
-                    sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(0, sa));
-                    immedScript = true;
-                }
-                else
-                {
-                    ScriptAction sa;
-                    sa.source = questGiver;
-                    sa.script = &iter->second;
-                    sa.target = this;
-                    sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(sWorld.internalGameTime + iter->first, sa));
-                }
-            }
-            if (immedScript)
-                sWorld.ScriptsProcess();
-        }
+            sWorld.ScriptsStart(sScripts, pQuest->GetQuestCompleteScript(), questGiver, this);
     }
 }
 

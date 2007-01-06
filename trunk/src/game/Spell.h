@@ -421,6 +421,7 @@ class Spell
         void EffectThreat(uint32 i);
         void EffectHealMaxHealth(uint32 i);
         void EffectInterruptCast(uint32 i);
+        void EffectSummonObjectWild(uint32 i);
         void EffectScriptEffect(uint32 i);
         void EffectAddComboPoints(uint32 i);
         void EffectDuel(uint32 i);
@@ -516,6 +517,7 @@ class Spell
         Item* itemTarget;
         GameObject* gameObjTarget;
         // -------------------------------------------
+        GameObject* focusObject;
 
         uint32 damage;
 

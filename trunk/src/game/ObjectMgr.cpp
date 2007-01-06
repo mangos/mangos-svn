@@ -38,6 +38,7 @@ extern SQLStorage sItemStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sCreatureStorage;
 ScriptMapMap sScripts;
+ScriptMapMap sSpellScripts;
 
 ObjectMgr::ObjectMgr()
 {
@@ -1182,10 +1183,11 @@ void ObjectMgr::LoadSpellChains()
     sLog.outString( ">> Loaded %u spell chain records", count );
 }
 
-void ObjectMgr::LoadScripts()
+void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
 {
+    sLog.outString( "%s :", tablename);
 
-    QueryResult *result = sDatabase.Query( "SELECT `id`,`delay`,`command`,`datalong`,`datalong2`,`datatext`, `x`, `y`, `z`, `o` FROM `scripts`" );
+    QueryResult *result = sDatabase.PQuery( "SELECT `id`,`delay`,`command`,`datalong`,`datalong2`,`datatext`, `x`, `y`, `z`, `o` FROM `%s`", tablename );
 
     uint32 count = 0;
 
@@ -1218,12 +1220,12 @@ void ObjectMgr::LoadScripts()
         tmp.z = fields[8].GetFloat();
         tmp.o = fields[9].GetFloat();
 
-        if (sScripts.find(tmp.id) == sScripts.end())
+        if (scripts.find(tmp.id) == scripts.end())
         {
             multimap<uint32, ScriptInfo> emptyMap;
-            sScripts[tmp.id] = emptyMap;
+            scripts[tmp.id] = emptyMap;
         }
-        sScripts[tmp.id].insert(pair<uint32, ScriptInfo>(tmp.delay, tmp));
+        scripts[tmp.id].insert(pair<uint32, ScriptInfo>(tmp.delay, tmp));
 
         count++;
     } while( result->NextRow() );

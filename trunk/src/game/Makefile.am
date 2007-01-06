@@ -99,6 +99,7 @@ libgame_a_SOURCES = \
 	TargetedMovementGenerator.cpp \
 	TaxiHandler.cpp \
 	TaxiMovementGenerator.cpp \
+	TemporarySummon.cpp \
 	tools.cpp \
 	Totem.cpp \
 	TotemAI.cpp \
@@ -183,6 +184,7 @@ libgame_a_SOURCES = \
 	Spell.h \
 	TargetedMovementGenerator.h \
 	TaxiMovementGenerator.h \
+	TemporarySummon.h \
 	Tools.h \
 	Totem.h \
 	TotemAI.h \

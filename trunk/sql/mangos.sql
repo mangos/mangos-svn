@@ -2221,6 +2221,10 @@ LOCK TABLES `skinning_loot_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
 
+--
+-- Table structure for table `scripts`
+--
+
 DROP TABLE IF EXISTS `scripts`;
 CREATE TABLE `scripts` (
   `id` int(11) unsigned NOT NULL default '0',
@@ -2234,6 +2238,42 @@ CREATE TABLE `scripts` (
   `z` float NOT NULL default '0',
   `o` float NOT NULL default '0'
 );
+
+--
+-- Dumping data for table `scripts`
+--
+
+/*!40000 ALTER TABLE `scripts` DISABLE KEYS */;
+LOCK TABLES `scripts` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `scripts` ENABLE KEYS */;
+
+--
+-- Table structure for table `scripts_spell`
+--
+
+DROP TABLE IF EXISTS `scripts_spell`;
+CREATE TABLE `scripts_spell` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `delay` int(11) unsigned NOT NULL default '0',
+  `command` int(11) unsigned NOT NULL default '0',
+  `datalong` int(11) unsigned NOT NULL default '0',
+  `datalong2` int(11) unsigned NOT NULL default '0',
+  `datatext` text NOT NULL default "",
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0'
+);
+
+--
+-- Dumping data for table `scripts_spell`
+--
+
+/*!40000 ALTER TABLE `scripts_spell` DISABLE KEYS */;
+LOCK TABLES `scripts_spell` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `scripts_spell` ENABLE KEYS */;
 
 --
 -- Table structure for table `spell_chain`

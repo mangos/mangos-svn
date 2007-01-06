@@ -42,6 +42,8 @@
 #include "GlobalEvents.h"
 #include "BattleGroundMgr.h"
 #include "SystemConfig.h"
+#include "TemporarySummon.h"
+#include "TargetedMovementGenerator.h"
 #include "zlib/zlib.h"
 
 #include <signal.h>
@@ -319,7 +321,8 @@ void World::SetInitialWorldSettings()
     objmgr.LoadSpellChains();
 
     sLog.outString( "Loading Scripts..." );
-    objmgr.LoadScripts();
+    objmgr.LoadScripts(sScripts,      "scripts");           // quest scripts
+    objmgr.LoadScripts(sSpellScripts, "spell_scripts");     // spell casting scripts
 
     sLog.outString( "Loading NPC Texts..." );
     objmgr.LoadGossipText();
@@ -512,6 +515,38 @@ void World::Update(time_t diff)
     ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
 }
 
+void World::ScriptsStart(ScriptMapMap scripts, uint32 id, Object* source, Object* target) {
+    ScriptMapMap::iterator s = scripts.find(id);
+    if (s == scripts.end())
+        return;
+
+    ScriptMap *s2 = &(s->second);
+    ScriptMap::iterator iter;
+    bool immedScript = false;
+    for (iter = s2->begin(); iter != s2->end(); iter++)
+    {
+        if (iter->first == 0)
+        {
+            ScriptAction sa;
+            sa.source = source;
+            sa.script = &iter->second;
+            sa.target = target;
+            sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(0, sa));
+            immedScript = true;
+        }
+        else
+        {
+            ScriptAction sa;
+            sa.source = source;
+            sa.script = &iter->second;
+            sa.target = target;
+            sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(sWorld.internalGameTime + iter->first, sa));
+        }
+    }
+    if (immedScript)
+        sWorld.ScriptsProcess();
+}
+
 void World::ScriptsProcess()
 {
     if (scriptSchedule.size() == 0)
@@ -520,19 +555,136 @@ void World::ScriptsProcess()
     multimap<uint64, ScriptAction>::iterator iter = scriptSchedule.begin();
     while ((scriptSchedule.size() > 0) && (iter->first < internalGameTime))
     {
-        if (iter->second.script->command == 0)
-            ((Creature *)iter->second.source)->MonsterSay(iter->second.script->datatext.c_str(), 0, iter->second.target->GetGUID());
-        else if (iter->second.script->command == 1)
-            ((Creature *)iter->second.source)->HandleEmoteCommand(iter->second.script->datalong);
-        else if (iter->second.script->command == 2)
-            ((Creature *)iter->second.source)->SetUInt32Value(iter->second.script->datalong, iter->second.script->datalong2);
-        else if (iter->second.script->command == 3)
-        {
-            ((Unit *)iter->second.source)->SendMoveToPacket(iter->second.script->x, iter->second.script->y, iter->second.script->z, false, iter->second.script->datalong2 );
-            MapManager::Instance().GetMap(((Object *)iter->second.source)->GetMapId())->CreatureRelocation(((Creature *)iter->second.source), iter->second.script->x, iter->second.script->y, iter->second.script->z, 0);
-            //char buffff[255];
-            //sprintf(buffff, "M:%d", iter->second.script->datalong2);
-            //((Creature *)iter->second.source)->MonsterSay(buffff, 0, iter->second.target->GetGUID());
+        ScriptAction const& step = iter->second;
+        switch (step.script->command) {
+            case SCRIPT_COMMAND_SAY:
+                if(!step.source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_SAY call for NULL creature.");
+                    break;
+                }
+                    
+                if(step.source->GetTypeId()!=TYPEID_UNIT)
+                {
+                    sLog.outError("SCRIPT_COMMAND_SAY call for non-creature (TypeId: %u), skipping.",step.source->GetTypeId());
+                    break;
+                }
+
+                ((Creature *)iter->second.source)->MonsterSay(iter->second.script->datatext.c_str(), 0, iter->second.target->GetGUID());
+                break;
+            case SCRIPT_COMMAND_EMOTE:
+                if(!step.source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_EMOTE call for NULL creature.");
+                    break;
+                }
+                    
+                if(step.source->GetTypeId()!=TYPEID_UNIT)
+                {
+                    sLog.outError("SCRIPT_COMMAND_EMOTE call for non-creature (TypeId: %u), skipping.",step.source->GetTypeId());
+                    break;
+                }
+
+                ((Creature *)step.source)->HandleEmoteCommand(step.script->datalong);
+                break;
+            case SCRIPT_COMMAND_FIELD_SET:
+                if(!step.source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_FIELD_SET call for NULL object.");
+                    break;
+                }
+                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= step.source->GetValuesCount())
+                {
+                    sLog.outError("SCRIPT_COMMAND_FIELD_SET call for wrong field %u (max count: %u) in object (TypeId: %u).",
+                        step.script->datalong,step.source->GetValuesCount(),step.source->GetTypeId());
+                    break;
+                }
+
+                step.source->SetUInt32Value(step.script->datalong, step.script->datalong2);
+                break;
+            case SCRIPT_COMMAND_MOVE_TO:
+                if(iter->second.source && iter->second.source->isType(TYPE_UNIT))
+                {
+                    ((Unit *)iter->second.source)->SendMoveToPacket(iter->second.script->x, iter->second.script->y, iter->second.script->z, false, iter->second.script->datalong2 );
+                    MapManager::Instance().GetMap(((Object *)iter->second.source)->GetMapId())->CreatureRelocation(((Creature *)iter->second.source), iter->second.script->x, iter->second.script->y, iter->second.script->z, 0);
+                    //char buffff[255];
+                    //sprintf(buffff, "M:%d", iter->second.script->datalong2);
+                    //((Creature *)iter->second.source)->MonsterSay(buffff, 0, iter->second.target->GetGUID());
+                }
+                break;
+            case SCRIPT_COMMAND_FLAG_SET:
+                if(!step.source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_FLAG_SET call for NULL object.");
+                    break;
+                }
+                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= step.source->GetValuesCount())
+                {
+                    sLog.outError("SCRIPT_COMMAND_FLAG_SET call for wrong field %u (max count: %u) in object (TypeId: %u).",
+                        step.script->datalong,step.source->GetValuesCount(),step.source->GetTypeId());
+                    break;
+                }
+
+                step.source->SetFlag(step.script->datalong, step.script->datalong2);
+                break;
+            case SCRIPT_COMMAND_FLAG_REMOVE:
+                if(!step.source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE call for NULL object.");
+                    break;
+                }
+                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= step.source->GetValuesCount())
+                {
+                    sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE call for wrong field %u (max count: %u) in object (TypeId: %u).",
+                        step.script->datalong,step.source->GetValuesCount(),step.source->GetTypeId());
+                    break;
+                }
+
+                step.source->RemoveFlag(step.script->datalong, step.script->datalong2);
+                break;
+            case SCRIPT_COMMAND_TEMP_SUMMON:
+            {
+                if(!step.source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL unit.");
+                    break;
+                }
+                    
+                if(!step.source->isType(TYPE_UNIT))
+                {
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-unit (TypeId: %u), skipping.",step.source->GetTypeId());
+                    break;
+                }
+
+                if(!sCreatureStorage.LookupEntry<CreatureInfo>(step.script->datalong))
+                {
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non existed summon (entry: %u).",step.script->datalong);
+                    break;
+                }
+
+                float x = step.script->x;
+                float y = step.script->y;
+                float z = step.script->z;
+                float o = step.script->o;
+
+                TemporarySummon* pCreature = new TemporarySummon;
+                if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), step.source->GetMapId(), x, y, z, o, step.script->datalong))
+                {
+                    delete pCreature;
+                    return;
+                }
+
+                pCreature->Summon(TEMPSUMMON_REMOVE_DEAD, step.script->datalong2);
+
+                if( pCreature->Attack((Unit *)step.source) )
+                {
+                    (*pCreature)->Mutate(new TargetedMovementGenerator(*((Unit *)step.source)));
+                }
+                break;
+            }
+            default:
+                sLog.outError("Unknown script command %u called.",step.script->command);
+                break;
         }
 
         scriptSchedule.erase(iter);
