@@ -125,7 +125,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_POSSESSED = 73
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74 //Useless
     &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
+    &Spell::EffectSummonObjectWild,                         //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
     &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT = 77
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK = 78 //Useless
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SANCTUARY = 79
@@ -558,6 +558,7 @@ void Spell::EffectManaDrain(uint32 i)
 
 void Spell::EffectSendEvent(uint32 i)
 {
+    sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, focusObject);
 }
 
 void Spell::EffectPowerDrain(uint32 i)
@@ -1662,6 +1663,29 @@ void Spell::EffectInterruptCast(uint32 i)
         return;
 
     unitTarget->InterruptSpell();
+}
+
+void Spell::EffectSummonObjectWild(uint32 i)
+{
+    GameObject* pGameObj = new GameObject();
+
+    uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
+
+    Object* target = focusObject;
+    if( !target )
+        target = m_caster;
+
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, target->GetMapId(),
+        target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(),
+        target->GetOrientation(), 0, 0, 0, 0, 0, 0))
+    {
+        delete pGameObj;
+        return;
+    }
+    pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
+
+    m_caster->AddGameObject(pGameObj);
+    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 }
 
 void Spell::EffectScriptEffect(uint32 i)

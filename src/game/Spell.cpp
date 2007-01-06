@@ -179,6 +179,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
     unitTarget = NULL;
     itemTarget = NULL;
     gameObjTarget = NULL;
+    focusObject = NULL;
 
     m_triggeredByAura = Aur;
     m_autoRepeat = false;
@@ -705,6 +706,10 @@ void Spell::cast(bool skipCheck)
     bool needspelllog = true;
     for(uint32 j = 0;j<3;j++)
     {
+        if(m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT) {
+            HandleEffects(NULL,NULL,NULL, j);
+            continue;
+        }
                                                             // Dont do spell log, if is school damage spell
         if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)
             needspelllog = false;
@@ -2115,6 +2120,8 @@ uint8 Spell::CheckItems()
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 
         if(!ok) return (uint8)CAST_FAIL_REQUIRES_XXX;
+
+        focusObject = ok;
 
         // game object found in range
     }

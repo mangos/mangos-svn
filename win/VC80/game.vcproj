@@ -759,6 +759,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\TemporarySummon.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\TemporarySummon.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Totem.cpp"
 				>
 			</File>
