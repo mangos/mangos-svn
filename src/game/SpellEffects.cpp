@@ -719,30 +719,46 @@ void Spell::EffectEnergize(uint32 i)
 void Spell::EffectOpenLock(uint32 i)
 {
 
-    if(!gameObjTarget)
-    {
-        sLog.outDebug( "WORLD: Open Lock - No GameObject Target!");
-        return;
-    }
-
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
     {
         sLog.outDebug( "WORLD: Open Lock - No Player Caster!");
         return;
     }
+
     Player* player = (Player*)m_caster;
 
     LootType loottype = LOOT_CORPSE;
-    uint32 lockId = gameObjTarget->GetGOInfo()->sound0;
+    uint32 lockId = 0;
+    uint64 guid = 0;
 
+    // Get lockId
+    if(gameObjTarget)
+    {
+        lockId = gameObjTarget->GetGOInfo()->sound0;
+        guid = gameObjTarget->GetGUID();
+    }
+    else if(itemTarget)
+    {
+        lockId = itemTarget->GetProto()->LockID;
+        guid = itemTarget->GetGUID();
+    }
+    else
+    {
+        sLog.outDebug( "WORLD: Open Lock - No GameObject/Item Target!");
+        return;
+    }
+
+    // Get LockInfo
     LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
 
     if (!lockInfo)
     {
-        sLog.outError( "Spell::EffectOpenLock: gameobject [guid = %u] has an unknown lockId: %u!", gameObjTarget->GetGUIDLow() , lockId);
+        sLog.outError( "Spell::EffectOpenLock: %s [guid = %u] has an unknown lockId: %u!", 
+            (gameObjTarget ? "gameobject" : "item"), GUID_LOPART(guid), lockId);
         return;
     }
 
+    // Check and skill-up skill
     uint32 SkillId = m_spellInfo->EffectMiscValue[1];
     if(m_spellInfo->Id==1804)
         SkillId = 633;
@@ -751,18 +767,29 @@ void Spell::EffectOpenLock(uint32 i)
     {
         loottype = LOOT_SKINNING;
         if ( player->GetSkillValue(SkillId) < (lockInfo->requiredskill+lockInfo->requiredlockskill) )
-        {
+        {  
             SendCastResult(CAST_FAIL_SKILL_NOT_HIGH_ENOUGH);
             return;
         }
-        // Allow one skill-up until respawned
-        uint32 SkillValue = player->GetPureSkillValue(SkillId);
-        if ( !gameObjTarget->IsInSkillupList( player->GetGUIDLow() ) &&
-            player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill+lockInfo->requiredlockskill) )
-            gameObjTarget->AddToSkillupList( player->GetGUIDLow() );
+        
+        if(gameObjTarget)
+        {
+            // Allow one skill-up until respawned
+            uint32 SkillValue = player->GetPureSkillValue(SkillId);
+            if ( !gameObjTarget->IsInSkillupList( player->GetGUIDLow() ) &&
+                player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill+lockInfo->requiredlockskill) )
+                gameObjTarget->AddToSkillupList( player->GetGUIDLow() );
+        }
+        else if(itemTarget)
+        {
+            // Do one skill-up
+            uint32 SkillValue = player->GetPureSkillValue(SkillId);
+            player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill+lockInfo->requiredlockskill);
+        }
     }
 
-    player->SendLoot(gameObjTarget->GetGUID(),loottype);
+    // Send loot
+    player->SendLoot(guid,loottype);
 }
 
 void Spell::EffectSummonChangeItem(uint32 i)
