@@ -1956,19 +1956,13 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
 
 void Player::learnSpell(uint16 spell_id)
 {
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
-    if (!spellInfo)
-    {
-        sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
+    // prevent duplicated entires in spell book
+    if (!addSpell(spell_id,1))
         return;
-    }
 
     WorldPacket data(SMSG_LEARNED_SPELL, 4);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
-
-    if (!addSpell(spell_id,1))
-        return;
 
     uint16 maxskill = getLevel()*5 > 300 ? 300 :getLevel()*5;
     switch(spell_id)
