@@ -191,6 +191,9 @@ Player::~Player ()
     }
     CleanupChannels();
 
+    for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+        delete itr->second;
+
     //all mailed items should be deleted, also all mail should be dealocated
     for (std::deque<Mail*>::iterator itr =  m_mail.begin(); itr != m_mail.end();++itr)
         delete *itr;

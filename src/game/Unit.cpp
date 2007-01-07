@@ -3231,7 +3231,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     {
         next = itr;
         next++;
-        if((*itr)->type & uint32(1<<spellProto->School))
+        if(itr->type & uint32(1<<spellProto->School))
         {
             pdamage = 0;
             break;
@@ -3242,7 +3242,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     {
         next = itr;
         next++;
-        if((*itr)->type & uint32(1<<spellProto->School))
+        if(itr->type & uint32(1<<spellProto->School))
         {
             pdamage = 0;
             break;
@@ -3354,7 +3354,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     //If m_immuneToDamage type contain magic, IMMUNE damage.
     for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_DAMAGE].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_DAMAGE].end(); itr = next)
     {
-        if((*itr)->type & IMMUNE_DAMAGE_PHYSICAL)
+        if(itr->type & IMMUNE_DAMAGE_PHYSICAL)
         {
             *pdamage = 0;
             break;
@@ -3363,7 +3363,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     //If m_immuneToSchool type contain this school type, IMMUNE damage.
     for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_SCHOOL].begin(); itr != pVictim->m_spellImmune[IMMUNITY_SCHOOL].end(); ++itr)
     {
-        if((*itr)->type & IMMUNE_SCHOOL_PHYSICAL)
+        if(itr->type & IMMUNE_SCHOOL_PHYSICAL)
         {
             *pdamage = 0;
             break;
@@ -3434,22 +3434,22 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
         for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(), next; itr != m_spellImmune[op].end(); itr = next)
         {
             next = itr; next++;
-            if((*itr)->type == type)
+            if(itr->type == type)
             {
                 m_spellImmune[op].erase(itr);
                 next = m_spellImmune[op].begin();
             }
         }
-        SpellImmune *Immune = new SpellImmune();
-        Immune->spellId = spellId;
-        Immune->type = type;
+        SpellImmune Immune;
+        Immune.spellId = spellId;
+        Immune.type = type;
         m_spellImmune[op].push_back(Immune);
     }
     else
     {
         for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(); itr != m_spellImmune[op].end(); ++itr)
         {
-            if((*itr)->spellId == spellId)
+            if(itr->spellId == spellId)
             {
                 m_spellImmune[op].erase(itr);
                 break;
