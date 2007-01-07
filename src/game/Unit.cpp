@@ -437,9 +437,17 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             assert(he->duel);
 
             CombatStop();                                   // for case killed by pet
+            if(m_currentSpell)
+                m_currentSpell->cancel();
             if(he->duel->opponent!=this)
+            {
                 he->duel->opponent->CombatStop();
+                if(he->duel->opponent->m_currentSpell)
+                    he->duel->opponent->m_currentSpell->cancel();
+            }
             he->CombatStop();
+            if(he->m_currentSpell)
+                he->m_currentSpell->cancel();
 
             he->DuelComplete(0);
         }
