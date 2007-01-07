@@ -416,6 +416,20 @@ void Spell::EffectDummy(uint32 i)
         m_caster->CastSpell(unitTarget, &sInfo, true, 0);
         m_caster->SetPower(POWER_RAGE,0);
     }
+
+    //Life Tap
+    if(m_spellInfo->SpellVisual == 1225 && m_spellInfo->SpellIconID == 208)
+    {
+        int32 mod = m_spellInfo->EffectBasePoints[0]+1;
+        if(m_caster)
+        {
+            if(m_caster->GetHealth()>mod)
+            {
+                m_caster->ModifyHealth(-mod);
+                m_caster->ModifyPower(POWER_MANA,mod);
+            }
+        }
+    }
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
