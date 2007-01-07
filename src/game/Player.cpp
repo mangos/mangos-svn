@@ -1056,10 +1056,22 @@ void Player::SendFriendlist()
     {
         fields = result->Fetch();
 
+        uint32 team = GetTeam();
+        uint32 security = GetSession()->GetSecurity();
+        bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+        bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
+
         do
         {
             friendstr[i].PlayerGUID = fields[0].GetUInt64();
             pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
+
+            // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
+            // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
+            if( pObj->GetName() &&
+            ( security > 0 ||
+            ( pObj->GetTeam() == team || allowTwoSideWhoList ) &&
+            (pObj->GetSession()->GetSecurity() == 0 || gmInWhoList && pObj->isVisibleFor(this,false) )))
             if( pObj && pObj->isVisibleFor(this,false))
             {
                 if(pObj->isAFK())
@@ -3029,14 +3041,26 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
 
     if(!result) return;
 
+    uint32 team = GetTeam();
+    uint32 security = GetSession()->GetSecurity();
+    bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
+    bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+
     do
     {
         fields = result->Fetch();
 
         pfriend = ObjectAccessor::Instance().FindPlayer(fields[0].GetUInt64());
 
-        if (pfriend && pfriend->IsInWorld())
+        // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
+        // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
+        if( pfriend && pfriend->IsInWorld() &&
+            ( pfriend->GetSession()->GetSecurity() > 0 ||
+            ( pfriend->GetTeam() == team || allowTwoSideWhoList ) &&
+            (security == 0 || gmInWhoList && isVisibleFor(pfriend,false) )))
+        {
             pfriend->GetSession()->SendPacket(packet);
+        }
 
     }while( result->NextRow() );
     delete result;
