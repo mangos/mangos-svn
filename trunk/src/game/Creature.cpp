@@ -467,9 +467,9 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
     GossipOption* gso;
     GossipOption* ingso;
 
-    for( std::list<GossipOption*>::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
+    for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
     {
-        gso=*i;
+        gso=&*i;
         if(gso->GossipId == gossipid)
         {
             bool cantalking=true;
@@ -547,9 +547,9 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
     {
         pm->ClearMenus();
 
-        for( std::list<GossipOption*>::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
+        for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
         {
-            gso=*i;
+            gso=&*i;
             if(gso->GossipId==ingso->Id)
             {
                 if(gso->Option!="")
@@ -585,7 +585,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
     uint32 action=gossipmenu->GetItem(option).m_gAction;
     uint32 zoneid=GetZoneId();
     uint64 guid=GetGUID();
-    GossipOption *gossip=GetGossipOption( action );
+    GossipOption const *gossip=GetGossipOption( action );
     uint32 textid;
     if(!gossip)
     {
@@ -655,7 +655,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
 
 }
 
-void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
+void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
 {
     if(gossip->GossipId==GOSSIP_OPTION_GUARD || gossip->GossipId==GOSSIP_GUARD_SPELLTRAINER || gossip->GossipId==GOSSIP_GUARD_SKILLTRAINER)
     {
@@ -736,11 +736,9 @@ uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 uint32 Creature::GetGossipCount( uint32 gossipid )
 {
     uint32 count=0;
-    GossipOption* gso;
-    for( std::list<GossipOption*>::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
+    for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
     {
-        gso=*i;
-        if(gso->GossipId == gossipid )
+        if(i->GossipId == gossipid )
             count++;
     }
     return count;
@@ -761,24 +759,20 @@ uint32 Creature::GetNpcTextId()
 
 std::string Creature::GetGossipTitle(uint8 type,uint32 id)
 {
-    GossipOption* gso;
-    for( std::list<GossipOption*>::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
+    for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
     {
-        gso=*i;
-        if(gso->Id==id && gso->NpcFlag==(uint32)type)
-            return gso->Option;
+        if(i->Id==id && i->NpcFlag==(uint32)type)
+            return i->Option;
     }
     return NULL;
 }
 
-GossipOption* Creature::GetGossipOption( uint32 id )
+GossipOption const* Creature::GetGossipOption( uint32 id ) const
 {
-    GossipOption* gso;
-    for( std::list<GossipOption*>::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
+    for( GossipOptionList::const_iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
     {
-        gso=*i;
-        if(gso->Action==id )
-            return gso;
+        if(i->Action==id )
+            return &*i;
     }
     return NULL;
 }
@@ -792,17 +786,16 @@ void Creature::LoadGossipOptions()
     if(!result)
         return;
 
-    GossipOption *go;
+    GossipOption go;
     do
     {
         Field *fields = result->Fetch();
-        go=new GossipOption;
-        go->Id= fields[0].GetUInt32();
-        go->GossipId = fields[1].GetUInt32();
-        go->NpcFlag=fields[2].GetUInt32();
-        go->Icon=fields[3].GetUInt32();
-        go->Action=fields[4].GetUInt32();
-        go->Option=fields[5].GetCppString();
+        go.Id= fields[0].GetUInt32();
+        go.GossipId = fields[1].GetUInt32();
+        go.NpcFlag=fields[2].GetUInt32();
+        go.Icon=fields[3].GetUInt32();
+        go.Action=fields[4].GetUInt32();
+        go.Option=fields[5].GetCppString();
         addGossipOption(go);
     }while( result->NextRow() );
     delete result;

@@ -1474,7 +1474,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
         {
             next = itr;
             next++;
-            if((*itr)->type == eff)
+            if(itr->type == eff)
             {
                 castResult = CAST_FAIL_IMMUNE;
                 break;
@@ -1588,7 +1588,7 @@ uint8 Spell::CanCast()
         //If m_immuneToDispel type contain this spell type, IMMUNE spell.
         for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_DISPEL].begin(); itr != target->m_spellImmune[IMMUNITY_DISPEL].end(); ++itr)
         {
-            if((*itr)->type == m_spellInfo->Dispel)
+            if(itr->type == m_spellInfo->Dispel)
             {
                 castResult = CAST_FAIL_IMMUNE;
                 break;
@@ -1596,7 +1596,7 @@ uint8 Spell::CanCast()
         }
         for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_MECHANIC].begin(); itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); ++itr)
         {
-            if((*itr)->type == m_spellInfo->Mechanic)
+            if(itr->type == m_spellInfo->Mechanic)
             {
                 castResult = CAST_FAIL_IMMUNE;
                 break;

@@ -1729,9 +1729,12 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
     at->Y = fields[3].GetFloat();
     at->Z = fields[4].GetFloat();
     at->Orientation = fields[5].GetFloat();
-    if(at->X==0&&at->Y==0&&at->Z==0)return NULL;
 
     delete result;
+
+    if(at->X==0&&at->Y==0&&at->Z==0)
+        return NULL;
+
     return at;
 }
 

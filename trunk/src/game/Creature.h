@@ -226,6 +226,8 @@ enum UNIT_TYPE
     MECHANICAL = 9,
 };
 
+typedef std::list<GossipOption> GossipOptionList;
+
 // max different by z coordinate for creature aggro reaction
 #define CREATURE_Z_ATTACK_RANGE 3
 
@@ -324,15 +326,15 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void prepareGossipMenu( Player *pPlayer,uint32 gossipid );
         void sendPreparedGossip( Player* player);
         void OnGossipSelect(Player* player, uint32 option);
-        void OnPoiSelect(Player* player, GossipOption *gossip);
+        void OnPoiSelect(Player* player, GossipOption const *gossip);
 
         uint32 GetGossipTextId(uint32 action, uint32 zoneid);
         uint32 GetNpcTextId();
         void LoadGossipOptions();
         std::string GetGossipTitle(uint8 type, uint32 id);
-        GossipOption* GetGossipOption( uint32 id );
+        GossipOption const* GetGossipOption( uint32 id ) const;
         uint32 GetGossipCount( uint32 gossipid );
-        void addGossipOption(GossipOption *gso) { m_goptions.push_back(gso); }
+        void addGossipOption(GossipOption const& gso) { m_goptions.push_back(gso); }
 
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
 
@@ -397,7 +399,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         uint32 mTaxiNode;
 
-        std::list<GossipOption*> m_goptions;
+        GossipOptionList m_goptions;
 
         float respawn_cord[3];
         bool m_moveBackward;

@@ -113,7 +113,7 @@ struct SpellImmune
     uint32 spellId;
 };
 
-typedef std::list<SpellImmune*> SpellImmuneList;
+typedef std::list<SpellImmune> SpellImmuneList;
 
 enum DeathState
 {
