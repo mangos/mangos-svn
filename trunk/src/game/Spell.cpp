@@ -1028,7 +1028,8 @@ void Spell::finish(bool ok)
         }
     }
 
-    if(m_TriggerSpell)
+    // call triggered spell only at successful cast
+    if(ok && m_TriggerSpell)
         TriggerSpell();
 }
 
