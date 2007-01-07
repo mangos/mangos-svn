@@ -1548,7 +1548,7 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
     data << ( victim ? victim->GetGUID() : uint64(0) );
     data << uint32(GivenXP+RestXP);                         // given experience
     data << ( victim ? (uint8)0 : (uint8)1 );               // 00-kill_xp type, 01-non_kill_xp type
-    data << uint32(RestXP);                                 // rested given experience
+    data << uint32(GivenXP);                                // experience without rested bonus
     data << float(1);                                       // 1 - none 0 - 100% group bonus output
     GetSession()->SendPacket(&data);
 }
