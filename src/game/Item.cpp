@@ -80,7 +80,7 @@ void AddItemsSetItem(Player*player,Item *item)
         }
     }
 
-    eff->item_count++;
+    ++eff->item_count;
 
     for(uint32 x=0;x<8;x++)
         if(set->spells [x])
@@ -125,13 +125,11 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
                 break;
             }
 
+    // can be in case now enough skill requirement for set appling but set has been appliend when skill requirement not enough 
     if(!eff)
-    {
-        sLog.outErrorDb("Item set effect for equiped item #%u not found, mods not removed.",proto->ItemId);
         return;
-    }
 
-    eff->item_count--;
+    --eff->item_count;
 
     for(uint32 x=0;x<8;x++)
         if(set->spells[x])

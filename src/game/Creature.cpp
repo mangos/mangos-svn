@@ -986,6 +986,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     SetUInt32Value(UNIT_FIELD_DISPLAYID,display_id );
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,display_id );
+	SetUInt32Value(UNIT_FIELD_BYTES_2,1);                       // let creature used equiped weapon in fight
 
     SetName(GetCreatureInfo()->Name);
 
