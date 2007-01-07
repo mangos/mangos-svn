@@ -84,7 +84,7 @@ bool Group::AddInvite(Player *player)
     return true;
 }
 
-void Group::RemoveInvite(Player *player)
+uint32 Group::RemoveInvite(Player *player)
 {
     for(vector<uint64>::iterator itr=m_invitees.begin(); itr!=m_invitees.end(); itr++)
     {
@@ -96,6 +96,7 @@ void Group::RemoveInvite(Player *player)
     }
 
     player->groupInfo.invite = NULL;
+    return m_members.size();
 }
 
 bool Group::AddMember(const uint64 &guid, const char* name)

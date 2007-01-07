@@ -35,7 +35,6 @@
 /* todo:
     -group_destroyed msg is sent but not shown
     -reduce xp gaining when in raid group
-    -when inviting a person that ignores you, you get "everythings ok" + "person ignores you"
     -quest sharing has to be corrected
 */
 void WorldSession::SendPartyResult(uint32 unk, std::string member, uint32 state)

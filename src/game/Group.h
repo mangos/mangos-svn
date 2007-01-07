@@ -80,7 +80,7 @@ class MANGOS_DLL_SPEC Group
         void   Create(const uint64 &guid, const char * name);
         void   LoadRaidGroupFromDB(const uint64 &leaderGuid);
         bool   AddInvite(Player *player);
-        void   RemoveInvite(Player *player);
+        uint32 RemoveInvite(Player *player);
         bool   AddMember(const uint64 &guid, const char* name);
                                                             // method: 0=just remove, 1=kick
         uint32 RemoveMember(const uint64 &guid, const uint8 &method);
