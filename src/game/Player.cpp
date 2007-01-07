@@ -124,6 +124,7 @@ Player::Player (WorldSession *session): Unit()
     m_restTime = 0;
     m_lastManaUse = 0;
     m_deathTimer = 0;
+    m_resurrectingSicknessExpire = 0;
 
     m_DetectInvTimer = 1000;
     m_DiscoveredPj = 0;
@@ -814,7 +815,7 @@ void Player::Update( uint32 p_time )
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(GetSoulStoneSpell());
             if(spellInfo)
             {
-                Spell spell(this, spellInfo, true, 0);
+                Spell spell(this, spellInfo, true, NULL);
 
                 SpellCastTargets targets;
                 targets.setUnitTarget( this );
@@ -2778,6 +2779,42 @@ void Player::ResurrectPlayer()
     }
 
     m_deathTimer = 0;
+
+    // set resurection sickness if not expired
+    if(!m_resurrectingSicknessExpire)
+        return;
+
+    // check expire
+    time_t curTime = time(NULL);
+    if(m_resurrectingSicknessExpire <= curTime)
+    {
+        m_resurrectingSicknessExpire = 0;
+        return;
+    }
+
+    // set resurection sickness!
+    uint32 delta = m_resurrectingSicknessExpire-time(NULL);
+
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( SPELL_PASSIVE_RESURRECTION_SICKNESS );
+    if(spellInfo)
+    {
+        Spell spell(this, spellInfo, true, NULL);
+
+        SpellCastTargets targets;
+        targets.setUnitTarget( this );
+
+        spell.prepare(&targets);
+
+        for(int i =0; i < 3; ++i)
+        {
+            Aura* Aur = GetAura(SPELL_PASSIVE_RESURRECTION_SICKNESS,i);
+            if(Aur)
+            {
+                Aur->SetAuraDuration(delta*1000);
+                Aur->UpdateAuraDuration();
+            }
+        }
+    }
 }
 
 void Player::KillPlayer()
@@ -4319,10 +4356,6 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             RemoveItemsSetItem(this,proto);
     }
 
-    AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-        (*i)->ApplyModifier(false);
-
     _RemoveStatsMods();
 
     AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
@@ -4356,9 +4389,6 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         (*i)->ApplyModifier(true);
 
     _ApplyStatsMods();
-
-    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-        (*i)->ApplyModifier(true);
 
     if(apply)
         CastItemEquipSpell(item);
@@ -4707,10 +4737,6 @@ void Player::_RemoveAllItemMods()
         }
     }
 
-    AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-        (*i)->ApplyModifier(false);
-
     _RemoveStatsMods();
 
     AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
@@ -4752,19 +4778,12 @@ void Player::_RemoveAllItemMods()
 
     _ApplyStatsMods();
 
-    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-        (*i)->ApplyModifier(true);
-
     sLog.outDebug("_RemoveAllItemMods complete.");
 }
 
 void Player::_ApplyAllItemMods()
 {
     sLog.outDebug("_ApplyAllItemMods start.");
-
-    AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-        (*i)->ApplyModifier(false);
 
     _RemoveStatsMods();
 
@@ -4808,9 +4827,6 @@ void Player::_ApplyAllItemMods()
         (*i)->ApplyModifier(true);
 
     _ApplyStatsMods();
-
-    for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-        (*i)->ApplyModifier(true);
 
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
