@@ -173,49 +173,41 @@ void WorldSession::LogoutPlayer(bool Save)
 
         _player->RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
+        if(_player->groupInfo.invite)
+        {
+            Group *group = _player->groupInfo.invite;
+            if(group->RemoveInvite(_player) <= 1)
+            {
+                group->Disband(true);
+                objmgr.RemoveGroup(group);
+                delete group;
+            }
+        }
+        if(_player->groupInfo.group && !_player->groupInfo.group->isRaidGroup())
+        {
+            Group *group = _player->groupInfo.group;
+            if (group->RemoveMember(_player->GetGUID(), 0) <= 1)
+            {
+                group->Disband();
+                objmgr.RemoveGroup(group);
+                delete group;
+            }
+        }
+
         ObjectAccessor::Instance().RemovePlayer(_player);
         MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
+
+        // player went offline msgs
+        if(_player->groupInfo.group && _player->groupInfo.group->isRaidGroup())
+            _player->groupInfo.group->SendUpdate();
 
         WorldPacket data(SMSG_FRIEND_STATUS, (9));
         data<<uint8(FRIEND_OFFLINE);
         data<<_player->GetGUID();
         _player->BroadcastPacketToFriendListers(&data);
 
-        Group *group = NULL;
-        if(_player->groupInfo.invite)
-        {
-            group = _player->groupInfo.invite;
-
-            group->RemoveInvite(_player);
-            if(group->GetMembersCount() <= 1)               // group has just 1 member => disband
-            {
-                group->Disband(true);
-                objmgr.RemoveGroup(group);
-                delete group;
-                _player->groupInfo.group = NULL;
-            }
-            group = NULL;
-        }
-        else
-        {
-            group = _player->groupInfo.group;
-            if(group && !group->isRaidGroup())
-            {
-                if (group->RemoveMember(_player->GetGUID(), 0) <= 1)
-                {
-                    group->Disband();
-                    objmgr.RemoveGroup(group);
-                    delete group;
-                }
-                group = NULL;
-            }
-        }
         delete _player;
         _player = 0;
-
-        // send group update after player has been deleted..
-        if(group)
-            group->SendUpdate();
 
         data.Initialize( SMSG_LOGOUT_COMPLETE, 0 );
         SendPacket( &data );
