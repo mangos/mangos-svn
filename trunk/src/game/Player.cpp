@@ -1068,11 +1068,10 @@ void Player::SendFriendlist()
 
             // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-            if( pObj->GetName() &&
-            ( security > 0 ||
-            ( pObj->GetTeam() == team || allowTwoSideWhoList ) &&
-            (pObj->GetSession()->GetSecurity() == 0 || gmInWhoList && pObj->isVisibleFor(this,false) )))
-            if( pObj && pObj->isVisibleFor(this,false))
+            if( pObj && pObj->GetName() &&
+                ( security > 0 ||
+                ( pObj->GetTeam() == team || allowTwoSideWhoList ) &&
+                (pObj->GetSession()->GetSecurity() == 0 || gmInWhoList && pObj->isVisibleFor(this,false) )))
             {
                 if(pObj->isAFK())
                     friendstr[i].Status = 2;
@@ -10129,12 +10128,14 @@ void Player::_SaveAuras()
     AuraMap const& auras = GetAuras();
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
+        // skip all auras from spell that apply at cast SPELL_AURA_MOD_SHAPESHIFT or SPELL_AURA_MOD_STEALTH auras.
         SpellEntry const *spellInfo = itr->second->GetSpellProto();
         uint8 i;
         for (i = 0; i < 3; i++)
             if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT ||
             spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
                 break;
+
         if (i == 3 && !itr->second->IsPassive())
             sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
     }
