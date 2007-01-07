@@ -656,11 +656,13 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
     uint32 pdamage = mod->m_amount;
 
-    //Calculate armor mitigation if it is a physical spell
-    if (spellProto->School == 0)
-        pdamage = CalcArmorReducedDamage(pVictim, pdamage);
+    if(mod->m_auraname != SPELL_AURA_PERIODIC_HEAL && mod->m_auraname != SPELL_AURA_OBS_MOD_HEALTH) {
+        //Calculate armor mitigation if it is a physical spell
+        if (spellProto->School == 0)
+            pdamage = CalcArmorReducedDamage(pVictim, pdamage);
 
-    CalcAbsorbResist(pVictim, spellProto->School, pdamage, &absorb, &resist);
+        CalcAbsorbResist(pVictim, spellProto->School, pdamage, &absorb, &resist);
+    }
 
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb);
