@@ -2529,23 +2529,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
         }
     }
 
-    //FIX ME: magic damage percent modifiers not implmented yet
-    // For examples with 20218 18789 18791 spells
-    /*
-    // magic damage
-    if((m_modifier.m_miscvalue & 126) != 0)
-    {
-        for(int8 x=1;x < MAX_SPELL_SCHOOOL;x++)
-        {
-            if(m_modifier.m_miscvalue & int32(1<<x))
-            {
-                SpellSchools school = SpellSchools(SPELL_SCHOOL_NORMAL + x);
-
-                m_target->ApplyPercentModFloatValue(***, m_modifier.m_amount, apply );
-            }
-        }
-    }
-    */
+    // Magic damage percent modifiers implemented in Unit::SpellDamageBonus
 }
 
 /********************************/

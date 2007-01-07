@@ -2159,6 +2159,7 @@ void Unit::ApplyStats(bool apply)
     int32 val2,tem_att_power;
     float totalstatmods[5] = {1,1,1,1,1};
     float totalresmods[7] = {1,1,1,1,1,1,1};
+    float totaldamgemods[3] = {1,1,1};
 
     AuraList& mModTotalStatPct = GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
     for(AuraList::iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
@@ -2175,10 +2176,57 @@ void Unit::ApplyStats(bool apply)
             if((*i)->GetModifier()->m_miscvalue & (1<<j))
                 totalresmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
+    AuraList& mModDamagePct = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for(AuraList::iterator i = mModDamagePct.begin(); i != mModDamagePct.end(); ++i)
+    {
+        if(((*i)->GetModifier()->m_miscvalue & 1) == 0)
+            continue;
+
+        if ((*i)->GetSpellProto()->EquippedItemClass == -1)
+        {
+            float mod = (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+            for(uint8 j = 0; j < 3; ++j)
+                totaldamgemods[j] *= mod;
+        }
+        else
+        {
+            Item* pItem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            if (pItem)
+            {
+                if ((int32(pItem->GetProto()->Class) == (*i)->GetSpellProto()->EquippedItemClass) &&
+                    ((( 1 << pItem->GetProto()->SubClass ) & (*i)->GetSpellProto()->EquippedItemSubClass) != 0))
+                {
+                    totaldamgemods[BASE_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+                }
+            }
+            pItem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            if (pItem)
+            {
+                if ((int32(pItem->GetProto()->Class) == (*i)->GetSpellProto()->EquippedItemClass) &&
+                    ((( 1 << pItem->GetProto()->SubClass ) & (*i)->GetSpellProto()->EquippedItemSubClass) != 0))
+                {
+                    totaldamgemods[OFF_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+                }
+            }
+            pItem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (pItem)
+            {
+                if ((int32(pItem->GetProto()->Class) == (*i)->GetSpellProto()->EquippedItemClass) &&
+                    ((( 1 << pItem->GetProto()->SubClass ) & (*i)->GetSpellProto()->EquippedItemSubClass) != 0))
+                {
+                    totaldamgemods[RANGED_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+                }
+            }
+        }
+    }
+
+
     for (uint8 i = 0; i < MAX_STATS; i++)
         totalstatmods[i] = totalstatmods[i] * 100.0f - 100.0f;
     for (uint8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
         totalresmods[i] = totalresmods[i] * 100.0f - 100.0f;
+    for (uint8 i = 0; i < 3; i++)
+        totaldamgemods[i] = totaldamgemods[i] * 100.0f - 100.0f;
 
     // restore percent mods
     if (apply)
@@ -2201,6 +2249,13 @@ void Unit::ApplyStats(bool apply)
                 ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);
             }
         }
+
+        ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, totaldamgemods[BASE_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, totaldamgemods[BASE_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, totaldamgemods[OFF_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, totaldamgemods[OFF_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, totaldamgemods[RANGED_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, totaldamgemods[RANGED_ATTACK], apply );
     }
 
     // Armor
@@ -2326,6 +2381,13 @@ void Unit::ApplyStats(bool apply)
                 ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);
             }
         }
+
+        ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, totaldamgemods[BASE_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, totaldamgemods[BASE_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, totaldamgemods[OFF_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, totaldamgemods[OFF_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, totaldamgemods[RANGED_ATTACK], apply );
+        ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, totaldamgemods[RANGED_ATTACK], apply );
     }
 }
 
@@ -2338,6 +2400,7 @@ void Unit::_RemoveAllAuraMods()
         {
             case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
             case SPELL_AURA_MOD_RESISTANCE_PCT:
+            case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
                 // these are already removed by applystats
                 break;
             default:
@@ -2353,17 +2416,24 @@ void Unit::_RemoveAllAuraMods()
     AuraList& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
     for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
         (*i)->ApplyModifier(false);
+    AuraList& mModDamagePct = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for(AuraList::iterator i = mModDamagePct .begin(); i != mModDamagePct .end(); ++i)
+        (*i)->ApplyModifier(false);
 }
 
 void Unit::_ApplyAllAuraMods()
 {
     // these must be applied before applystats
-    AuraList& mModTotalStatPct = GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
-    for(AuraList::iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
+    AuraList& mModDamagePct = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for(AuraList::iterator i = mModDamagePct .begin(); i != mModDamagePct .end(); ++i)
         (*i)->ApplyModifier(true);
     AuraList& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
     for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
         (*i)->ApplyModifier(true);
+    AuraList& mModTotalStatPct = GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+    for(AuraList::iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
+        (*i)->ApplyModifier(true);
+
     ApplyStats(false);
 
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
@@ -2372,6 +2442,7 @@ void Unit::_ApplyAllAuraMods()
         {
             case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
             case SPELL_AURA_MOD_RESISTANCE_PCT:
+            case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
                 // these are already applied by applystats
                 break;
             default:
@@ -3206,7 +3277,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     int32 TotalMod = 0;
     AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-        if((((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0) && (spellProto->School != 0))
+        if( spellProto->School != 0 && ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 )
             TotalMod *= ((int32)((*i)->GetModifier()->m_amount) + 100)/100;
 
     // TODO - fix PenaltyFactor and complete the formula from the wiki

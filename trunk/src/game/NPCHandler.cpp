@@ -389,7 +389,6 @@ void WorldSession::SendSpiritResurrect()
     if (!_player)
         return;
 
-    _player->ResurrectPlayer();
     uint32 level = _player->getLevel();
 
     //Characters from level 1-10 are not affected by resurrection sickness.
@@ -398,27 +397,12 @@ void WorldSession::SendSpiritResurrect()
     //Characters level 20 and up suffer from ten minutes of sickness.
     if (level > 10)
     {
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry( SPELL_PASSIVE_RESURRECTION_SICKNESS );
-        if(spellInfo)
-        {
-            for(uint32 i = 0;i<3;i++)
-            {
-                uint8 eff = spellInfo->Effect[i];
-                if(eff>=TOTAL_SPELL_EFFECTS)
-                    continue;
-                if(eff==6)
-                {
-                    Aura *Aur = new Aura(spellInfo, i, _player);
-                    bool added = _player->AddAura(Aur);
-                    if (added && level < 20)
-                    {
-                        Aur->SetAuraDuration((level-10)*60000);
-                        Aur->UpdateAuraDuration();
-                    }
-                }
-            }
-        }
+        // prepere resurrection sickness setup (will be set in ResurrectPlayer())
+        uint32 spellLvl = level < 20 ? level : 20;
+        _player->m_resurrectingSicknessExpire = time(NULL) + (spellLvl-10)*MINUTE;
     }
+
+    _player->ResurrectPlayer();
 
     _player->ApplyStats(false);
     _player->SetHealth( _player->GetMaxHealth()/2 );
