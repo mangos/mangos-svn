@@ -570,7 +570,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                ((Creature *)iter->second.source)->MonsterSay(iter->second.script->datatext.c_str(), 0, iter->second.target->GetGUID());
+                ((Creature *)iter->second.source)->MonsterSay(step.script->datatext.c_str(), 0, step.target->GetGUID());
                 break;
             case SCRIPT_COMMAND_EMOTE:
                 if(!step.source)

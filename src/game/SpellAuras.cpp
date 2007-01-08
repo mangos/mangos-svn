@@ -1486,7 +1486,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
     if(apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH);
 
         // only at real aura add
         if(Real)
@@ -1499,7 +1499,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
     else
     {
         m_target->m_stealthvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2<<24) );
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH);
 
         // only at real aura remove
         if(Real)
@@ -1529,7 +1529,7 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
     if(Apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH );
 
         // only at real aura add
         if(Real)
@@ -1542,7 +1542,7 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
     else
     {
         m_target->m_stealthvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH );
 
         // only at real aura remove
         if(Real)
