@@ -317,8 +317,24 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_SINGLE_ENEMY:
         {
-            if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
+            Unit* pUnitTarget = m_targets.getUnitTarget();
+            if(!pUnitTarget)
+                break;
+            TagUnitMap.push_back(pUnitTarget);
+            if (m_spellInfo->EffectChainTarget[i])
+            {
+                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+
+                MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(pUnitTarget, m_caster, radius ? radius : 5);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(TagUnitMap, u_check);
+
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, TypeMapContainer<AllObjectTypes> > unit_searcher(searcher);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+            }
         }break;
         case TARGET_ALL_ENEMY_IN_AREA:
         {
@@ -547,22 +563,32 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
     }
 
-    if (m_spellInfo->MaxAffectedTargets != 0 && TagUnitMap.size() > m_spellInfo->MaxAffectedTargets)
+    uint32 unMaxTargets = 0;
+    if(m_spellInfo->MaxAffectedTargets == 0 && m_spellInfo->EffectChainTarget[i] == 0)
+        unMaxTargets = 0;//no limits
+    else if(m_spellInfo->MaxAffectedTargets == 0 && m_spellInfo->EffectChainTarget[i] != 0)
+        unMaxTargets = m_spellInfo->EffectChainTarget[i] + 1;//selected enemy also
+    else if (m_spellInfo->MaxAffectedTargets != 0 && m_spellInfo->EffectChainTarget[i] != 0)
+        unMaxTargets = m_spellInfo->MaxAffectedTargets; //Unknown such spells;
+
+    if (m_spellInfo->EffectChainTarget[i] != 0 || (unMaxTargets != 0 && TagUnitMap.size() > unMaxTargets))
     {
         // make sure one unit is always removed per iteration
         uint32 removed_utarget = 0;
-        for (std::list<Unit*>::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end(); ++itr)
+        for (std::list<Unit*>::iterator itr = TagUnitMap.begin(), next; itr != TagUnitMap.end(); itr = next)
         {
+            next = itr;
+            next++;
             if (!*itr) continue;
             if ((*itr) == m_targets.getUnitTarget())
             {
                 TagUnitMap.erase(itr);
                 removed_utarget = 1;
-                break;
+        //        break;
             }
         }
         // remove random units from the map
-        while (TagUnitMap.size() > m_spellInfo->MaxAffectedTargets - removed_utarget)
+        while (TagUnitMap.size() > unMaxTargets - removed_utarget)
         {
             uint32 poz = urand(0, TagUnitMap.size()-1);
             for (std::list<Unit*>::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end(); ++itr, --poz)
