@@ -188,28 +188,28 @@ struct SpellEntry
     uint32    manaPerSecondPerLevel;
     uint32    rangeIndex;
     float     speed;
-    uint32    modalNextSpell;                               //35
+    uint32    modalNextSpell;                               //38
     uint32    StackAmount;
-    uint32    Totem[2];                                     //37,38
-    uint32    Reagent[8];                                   //39,40,41,42,43,44,45,46
-    uint32    ReagentCount[8];                              //47,48,49,50,51,52,53,54
-    int32     EquippedItemClass;                            //55
-    int32     EquippedItemSubClass;                         //56
-    uint32    Effect[3];                                    //57,58,59
-    int32     EffectDieSides[3];                            //60,61,62
-    uint32    EffectBaseDice[3];                            //63,64,65
-    float     EffectDicePerLevel[3];                        //66,67,68
-    float     EffectRealPointsPerLevel[3];                  //69,70,71
-    int32     EffectBasePoints[3];                          //72,73,74
-    uint32    EffectImplicitTargetA[3];                     //75,76,77
-    uint32    EffectImplicitTargetB[3];                     //78,79,80
-    uint32    EffectRadiusIndex[3];                         //81,82,83
-    uint32    EffectApplyAuraName[3];                       //84,85,86
-    uint32    EffectAmplitude[3];                           //87,88,89
-    float     EffectMultipleValue[3];                       //90,91,92
-    uint32    EffectChainTarget[3];                         //93,94,95
-    uint32    EffectItemType[3];                            //96,97,98
-    uint32    EffectMiscValue[3];                           //99,100,101
+    uint32    Totem[2];                                     //40-41
+    uint32    Reagent[8];                                   //42-49
+    uint32    ReagentCount[8];                              //50-57
+    int32     EquippedItemClass;                            //58
+    int32     EquippedItemSubClass;                         //59
+    uint32    Effect[3];                                    //61-63
+    int32     EffectDieSides[3];                            //64-66
+    uint32    EffectBaseDice[3];                            //67-69
+    float     EffectDicePerLevel[3];                        //70-72
+    float     EffectRealPointsPerLevel[3];                  //73-75
+    int32     EffectBasePoints[3];                          //76-78
+    uint32    EffectImplicitTargetA[3];                     //82-84
+    uint32    EffectImplicitTargetB[3];                     //85-87
+    uint32    EffectRadiusIndex[3];                         //88-90 - spellradius.dbc
+    uint32    EffectApplyAuraName[3];                       //91-93
+    uint32    EffectAmplitude[3];                           //94-96
+    float     EffectMultipleValue[3];                       //97-99
+    uint32    EffectChainTarget[3];                         //100-102
+    uint32    EffectItemType[3];                            //103-105
+    uint32    EffectMiscValue[3];                           //106-108
     uint32    EffectTriggerSpell[3];
     float     EffectPointsPerComboPoint[3];
     uint32    SpellVisual;
