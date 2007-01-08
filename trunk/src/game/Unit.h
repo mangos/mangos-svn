@@ -551,6 +551,16 @@ class MANGOS_DLL_SPEC Unit : public Object
         {
             return HasAuraType(SPELL_AURA_MOD_INVISIBILITY);
         }
+        bool isFeared() const                            // cache this in a bool someday
+        {
+            return HasAuraType(SPELL_AURA_MOD_FEAR);
+        }
+        bool isInRoots() const                            // cache this in a bool someday
+        {
+            return HasAuraType(SPELL_AURA_MOD_ROOT);
+        }
+        void RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype);
+
         bool isTargetableForAttack();
         bool IsInWater() const;
         bool IsUnderWater() const;
