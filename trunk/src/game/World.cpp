@@ -515,7 +515,8 @@ void World::Update(time_t diff)
     ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
 }
 
-void World::ScriptsStart(ScriptMapMap scripts, uint32 id, Object* source, Object* target) {
+void World::ScriptsStart(ScriptMapMap scripts, uint32 id, Object* source, Object* target)
+{
     ScriptMapMap::iterator s = scripts.find(id);
     if (s == scripts.end())
         return;
@@ -556,14 +557,15 @@ void World::ScriptsProcess()
     while ((scriptSchedule.size() > 0) && (iter->first < internalGameTime))
     {
         ScriptAction const& step = iter->second;
-        switch (step.script->command) {
+        switch (step.script->command)
+        {
             case SCRIPT_COMMAND_SAY:
                 if(!step.source)
                 {
                     sLog.outError("SCRIPT_COMMAND_SAY call for NULL creature.");
                     break;
                 }
-                    
+
                 if(step.source->GetTypeId()!=TYPEID_UNIT)
                 {
                     sLog.outError("SCRIPT_COMMAND_SAY call for non-creature (TypeId: %u), skipping.",step.source->GetTypeId());
@@ -578,7 +580,7 @@ void World::ScriptsProcess()
                     sLog.outError("SCRIPT_COMMAND_EMOTE call for NULL creature.");
                     break;
                 }
-                    
+
                 if(step.source->GetTypeId()!=TYPEID_UNIT)
                 {
                     sLog.outError("SCRIPT_COMMAND_EMOTE call for non-creature (TypeId: %u), skipping.",step.source->GetTypeId());
@@ -649,7 +651,7 @@ void World::ScriptsProcess()
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL unit.");
                     break;
                 }
-                    
+
                 if(!step.source->isType(TYPE_UNIT))
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-unit (TypeId: %u), skipping.",step.source->GetTypeId());

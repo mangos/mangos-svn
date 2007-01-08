@@ -125,7 +125,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
                 break;
             }
 
-    // can be in case now enough skill requirement for set appling but set has been appliend when skill requirement not enough 
+    // can be in case now enough skill requirement for set appling but set has been appliend when skill requirement not enough
     if(!eff)
         return;
 

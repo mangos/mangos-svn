@@ -344,7 +344,7 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 
     if( !result )
     {
-       sLog.outErrorDb("ERROR: Gameobject (GUID: %u) not found in table `gameobject`, can't load. ",guid);
+        sLog.outErrorDb("ERROR: Gameobject (GUID: %u) not found in table `gameobject`, can't load. ",guid);
         return false;
     }
 

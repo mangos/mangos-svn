@@ -767,7 +767,7 @@ void Spell::EffectOpenLock(uint32 i)
 
     if (!lockInfo)
     {
-        sLog.outError( "Spell::EffectOpenLock: %s [guid = %u] has an unknown lockId: %u!", 
+        sLog.outError( "Spell::EffectOpenLock: %s [guid = %u] has an unknown lockId: %u!",
             (gameObjTarget ? "gameobject" : "item"), GUID_LOPART(guid), lockId);
         SendCastResult(CAST_FAIL_INVALID_TARGET);
         return;
@@ -778,7 +778,7 @@ void Spell::EffectOpenLock(uint32 i)
     if(m_spellInfo->Effect[1]==SPELL_EFFECT_SKILL)
         SkillId = m_spellInfo->EffectMiscValue[1];
     else
-    if(m_spellInfo->EffectMiscValue[0]==1)                  // picklocking spells
+    if(m_spellInfo->EffectMiscValue[0]==1)              // picklocking spells
         SkillId = SKILL_LOCKPICKING;
 
     // skill bonus provided by casting spell (mostly item spells)
@@ -797,24 +797,24 @@ void Spell::EffectOpenLock(uint32 i)
         reqSkillValue = lockInfo->requiredlockskill;
     }
     else
-    if(SkillId == SKILL_LOCKPICKING)                        // apply picklock skill to wrong target
+    if(SkillId == SKILL_LOCKPICKING)                    // apply picklock skill to wrong target
     {
         SendCastResult(CAST_FAIL_INVALID_TARGET);
         return;
     }
-    
+
     if ( SkillId )
     {
         loottype = LOOT_SKINNING;
         if ( player->GetSkillValue(SkillId) + spellSkillBonus < reqSkillValue )
-        {  
+        {
             SendCastResult(CAST_FAIL_SKILL_NOT_HIGH_ENOUGH);
             return;
         }
-        
+
         // update skill if really known
         uint32 SkillValue = player->GetPureSkillValue(SkillId);
-        if(SkillValue)                                  // non only item base skill
+        if(SkillValue)                                      // non only item base skill
         {
             if(gameObjTarget)
             {
