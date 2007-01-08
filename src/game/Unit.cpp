@@ -241,6 +241,32 @@ bool Unit::HasAuraType(uint32 auraType) const
     return (!m_modAuras[auraType].empty());
 }
 
+void Unit::RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype)
+{
+    if(!HasAuraType(auraType))
+        return;
+
+    AuraList& damageaura = GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+
+    switch(damagetype)
+    {
+    case DIRECT_DAMAGE:
+        RemoveSpellsCausingAura(auraType);
+        return;
+    case DOT:
+        if(damageaura.size()==0)
+            return;
+        //if(auraType == SPELL_AURA_MOD_ROOT && damageaura.size() < 2) //sometimes Roots can break themselves - need to fix
+        //    return;
+        if(30.0f > urand(0,100)) //30% chance to break a spell
+            RemoveSpellsCausingAura(auraType);
+        return;              
+
+    default:
+        return;
+    }
+}
+
 void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
@@ -251,6 +277,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
     if(HasInvisibilityAura())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+
+    pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damagetype);
+
+    pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damagetype);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
@@ -689,10 +719,16 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
     {
+        DamageEffectType damagetype = DOT;
         pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, mod->m_amount, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
-        DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), DOT, procFlag, true);
+        for(uint8 i = 0; i < 3; i++)
+        {
+            if(spellProto->EffectApplyAuraName[i] == SPELL_AURA_MOD_ROOT)//HasAuraType(SPELL_AURA_MOD_ROOT))
+                damagetype = SELF_DAMAGE;
+        }
+        DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), damagetype, procFlag, true);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
     {
