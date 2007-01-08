@@ -1095,7 +1095,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
 {
-    if(hasUnitState(UNIT_STAT_CONFUSED) || hasUnitState(UNIT_STAT_STUNDED))
+    if(hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING) )
         return;
 
     if (!pVictim->isAlive())
