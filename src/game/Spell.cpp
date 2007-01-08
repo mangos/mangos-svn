@@ -2204,18 +2204,41 @@ uint8 Spell::CheckItems()
                 if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
                     break;
                 Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
-                if(!pItem || pItem->IsBroken())
+                if(!pItem || pItem->IsBroken() || pItem->GetProto()->Class != ITEM_CLASS_WEAPON )
                     return CAST_FAIL_MUST_HAVE_ITEM_EQUIPPED;
 
-                uint32 type = pItem->GetProto()->InventoryType;
-                uint32 ammo;
-                if( type == INVTYPE_THROWN )
-                    ammo = pItem->GetEntry();
-                else
-                    ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
+                switch(pItem->GetProto()->SubClass)
+                {
+                    case ITEM_SUBCLASS_WEAPON_THROWN:
+                    {
+                        uint32 ammo = pItem->GetEntry();
+                        if( !((Player*)m_caster)->HasItemCount( ammo, 1 ) )
+                            return CAST_FAIL_NO_AMMO;
+                    };  break;
+                    case ITEM_SUBCLASS_WEAPON_GUN:
+                    case ITEM_SUBCLASS_WEAPON_BOW:
+                    {
+                        uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
+                        if(!ammo)
+                            return CAST_FAIL_NO_AMMO;
 
-                if( !((Player*)m_caster)->HasItemCount( ammo, 1 ) )
-                    return CAST_FAIL_NO_AMMO;
+                        ItemPrototype const *ammoProto = objmgr.GetItemPrototype( ammo );
+                        if(!ammoProto)
+                            return CAST_FAIL_NO_AMMO;
+
+                        if(ammoProto->Class != ITEM_CLASS_PROJECTILE)
+                            return CAST_FAIL_NO_AMMO;
+
+                        if(pItem->GetProto()->SubClass != ammoProto->SubClass)
+                            return CAST_FAIL_NO_AMMO;
+
+                        if( !((Player*)m_caster)->HasItemCount( ammo, 1 ) )
+                            return CAST_FAIL_NO_AMMO;
+                    };  break;
+                    case ITEM_SUBCLASS_WEAPON_WAND:
+                    default:
+                        break;
+                }
                 break;
             }
             default:break;
