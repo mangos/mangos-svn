@@ -249,7 +249,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "speed",       1, &ChatHandler::HandleModifySpeedCommand,      "",   NULL },
         { "addquest",    3, &ChatHandler::HandleAddQuest,                "",   NULL },
         { "password",    0, &ChatHandler::HandlePasswordCommand,         "",   NULL },
-
+        { "lockaccount", 0, &ChatHandler::HandleLockAccountCommand,      "",   NULL },
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },
