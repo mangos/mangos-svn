@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup u2w User to World Communication
+/// @{
+/// \file
+
 #ifndef __WORLDSOCKETMGR_H
 #define __WORLDSOCKETMGR_H
 
@@ -23,6 +27,7 @@
 
 class WorldSocket;
 
+/// Manages the list of connected WorldSockets
 class WorldSocketMgr
 {
     public:
@@ -39,3 +44,4 @@ class WorldSocketMgr
 
 #define sWorldSocketMgr MaNGOS::Singleton<WorldSocketMgr>::Instance()
 #endif
+/// @}

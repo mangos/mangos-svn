@@ -48,6 +48,16 @@
 
 #define DEFAULT_SWITCH_WEAPON        1500
 
+typedef struct
+{
+    uint64 PlayerGUID;
+    unsigned char Status;
+
+    uint32 Area;
+    uint32 Level;
+    uint32 Class;
+} FriendStr ;
+
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
 Player::Player (WorldSession *session): Unit()

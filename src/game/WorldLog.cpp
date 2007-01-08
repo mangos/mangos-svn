@@ -16,10 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/** \file
+    \ingroup u2w
+*/
+
 #include "WorldLog.h"
 #include "Policies/SingletonImp.h"
 #include "Config/ConfigEnv.h"
-#include "Log.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<WorldLog, ZThread::FastMutex>
 INSTANTIATE_SINGLETON_2(WorldLog, CLASS_LOCK);
@@ -27,8 +30,8 @@ INSTANTIATE_CLASS_MUTEX(WorldLog, ZThread::FastMutex);
 
 #define WORLD_LOG_FILE_STRING   "world.log"
 
-void
-WorldLog::Initialize()
+/// Open the log file (if specified so in the configuration file)
+void WorldLog::Initialize()
 {
     if( sConfig.GetBoolDefault("LogWorld", false) )
     {

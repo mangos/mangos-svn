@@ -16,17 +16,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup u2w
+/// @{
+/// \file
+
 #ifndef __WORLDSOCKET_H
 #define __WORLDSOCKET_H
 
 #include "Network/TcpSocket.h"
-#include "Auth/BigNumber.h"
 #include "Auth/AuthCrypt.h"
 
 class WorldPacket;
 class SocketHandler;
 class WorldSession;
 
+/// Handle connection with the client software
 class WorldSocket : public TcpSocket
 {
     public:
@@ -46,8 +50,6 @@ class WorldSocket : public TcpSocket
         void _HandlePing(WorldPacket& recvPacket);
         void SendAuthWaitQue(uint32 PlayersInQue);
 
-        static uint32 _GetSeed();
-
     private:
         AuthCrypt _crypt;
         uint32 _seed;
@@ -61,3 +63,4 @@ class WorldSocket : public TcpSocket
         uint32 m_OverSpeedPings;
 };
 #endif
+/// @}

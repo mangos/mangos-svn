@@ -16,8 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup u2w
+/// @{
+/// \file
+
 #ifndef __NAMETABLES_H
 #define __NAMETABLES_H
+
+#include "Common.h"
 
 struct NameTableEntry
 {
@@ -25,6 +31,7 @@ struct NameTableEntry
     const char *name;
 };
 
+/// Lookup opcode name for human understandable logging
 inline const char* LookupName(uint32 id, NameTableEntry *table)
 {
     for(uint32 i = 0; table[i].name != 0; i++)
@@ -38,3 +45,4 @@ inline const char* LookupName(uint32 id, NameTableEntry *table)
 
 extern NameTableEntry g_worldOpcodeNames[];
 #endif
+/// @}

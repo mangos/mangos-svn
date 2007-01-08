@@ -16,9 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup u2w
+/// @{
+/// \file
+
 #ifndef _OPCODES_H
 #define _OPCODES_H
 
+/// List of OpCodes
 enum OpCodes
 {
     MSG_NULL_ACTION                                 = 0,
@@ -824,6 +829,7 @@ enum OpCodes
     SMSG_OUTDOORPVP_NOTIFY                          = 0x33B,// 827
 };
 
+/// Results of friend related commands
 enum FriendsResult
 {
     FRIEND_DB_ERROR                               = 0x00,
@@ -845,6 +851,7 @@ enum FriendsResult
     FRIEND_IGNORE_REMOVED                         = 0x10
 };
 
+/// Non Player Character flags
 enum NPCFlags
 {
     UNIT_NPC_FLAG_NONE              = 0,
@@ -864,14 +871,5 @@ enum NPCFlags
     UNIT_NPC_FLAG_STABLE            = 8192,
     UNIT_NPC_FLAG_ARMORER           = 16384,
 };
-
-typedef struct
-{
-    uint64 PlayerGUID;
-    unsigned char Status;
-
-    uint32 Area;
-    uint32 Level;
-    uint32 Class;
-} FriendStr ;
 #endif
+/// @}

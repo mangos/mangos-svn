@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/** \file
+    \ingroup u2w
+*/
+
 #include "Common.h"
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
@@ -23,20 +27,24 @@
 
 INSTANTIATE_SINGLETON_1( WorldSocketMgr );
 
+/// WorldSocketMgr constructor
 WorldSocketMgr::WorldSocketMgr()
 {
 }
 
+/// Add a WorldSocket to the set
 void WorldSocketMgr::AddSocket(WorldSocket *s)
 {
     m_sockets.insert(s);
 }
 
+/// Remove a WorldSocket to the set
 void WorldSocketMgr::RemoveSocket(WorldSocket *s)
 {
     m_sockets.erase(s);
 }
 
+/// Triggers an 'update' to all sockets in the set
 void WorldSocketMgr::Update(time_t diff)
 {
     SocketSet::iterator i;

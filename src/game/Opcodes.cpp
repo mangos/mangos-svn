@@ -16,10 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Common.h"
+/** \file
+    \ingroup u2w
+*/
+
 #include "Opcodes.h"
 #include "NameTables.h"
 
+/// Correspondance between opcodes and their names
 NameTableEntry g_worldOpcodeNames[] =
 {
 

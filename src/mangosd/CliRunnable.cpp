@@ -16,9 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/** \file
-    \ingroup mangosd
-*/
+/// \addtogroup mangosd
+/// @{
+/// \file
 
 #include "Common.h"
 #include "Log.h"
@@ -137,7 +137,7 @@ void CliDelete(char*command,pPrintf zprintf)
     uint32 account_id = fields[0].GetUInt32();
     delete result;
 
-    ///- Circle through characters belonging to this account ID and remove all characters related data (items, quests, ...) from the Database
+    ///- Circle through characters belonging to this account ID and remove all characters related data (items, quests, ...) from the database
     // No SQL injection (account_id is db internal)
     result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%d'",account_id);
 
@@ -380,7 +380,7 @@ void CliBan(char*command,pPrintf zprintf)
     }
 }
 
-/// Display MaNGOS version
+/// Display %MaNGOS version
 void CliVersion(char*,pPrintf zprintf)
 {
                                                             //<--maybe better append to info cmd
@@ -489,7 +489,7 @@ void CliCreate(char *command,pPrintf zprintf)
     //instead of using account registration page or accessing db directly?)
     //but still let it be
 
-    ///- Parse the command line arguments
+    ///- %Parse the command line arguments
     char *szAcc = strtok(command, " ");
     if(!szAcc)
     {
@@ -573,51 +573,6 @@ void ParseCommand( pPrintf zprintf, char* input)
         zprintf("Unknown command: %s\r\n", input);
 }
 
-/// %Thread start
-void CliRunnable::run()
-{
-    ///- Init new SQL thread for the world database (one connection call enough)
-    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
-
-    char commandbuf[256];
-
-    ///- Display the list of available CLI functions then beep
-    sLog.outString("");
-    /// \todo Shoudn't we use here also the sLog singleton?
-    CliHelp(NULL,&printf);
-
-    if(sConfig.GetIntDefault("BeepAtStart", 1) > 0)
-    {
-        printf("\a");                                       // \a = Alert
-    }
-
-    ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
-    while (!World::m_stopEvent)
-    {
-        printf("mangos>");
-        fflush(stdout);
-        char *command = fgets(commandbuf,sizeof(commandbuf),stdin);
-        if (command != NULL)
-        {
-            for(int x=0;command[x];x++)
-                if(command[x]=='\r'||command[x]=='\n')
-            {
-                command[x]=0;
-                break;
-            }
-            //// \todo Shoudn't we use here also the sLog singleton?
-            ParseCommand(&printf,command);
-        }
-        else if (feof(stdin))
-        {
-            World::m_stopEvent = true;
-        }
-    }
-
-    ///- End the database thread
-    sDatabase.ThreadEnd();                                  // free mySQL thread resources
-}
-
 /// Kick a character out of the realm
 void CliKick(char*command,pPrintf zprintf)
 {
@@ -670,3 +625,49 @@ void CliSetLogLevel(char*command,pPrintf zprintf)
     sLog.SetLogLevel(NewLevel);
 }
 #endif
+/// @}
+
+/// %Thread start
+void CliRunnable::run()
+{
+    ///- Init new SQL thread for the world database (one connection call enough)
+    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
+
+    char commandbuf[256];
+
+    ///- Display the list of available CLI functions then beep
+    sLog.outString("");
+    /// \todo Shoudn't we use here also the sLog singleton?
+    CliHelp(NULL,&printf);
+
+    if(sConfig.GetIntDefault("BeepAtStart", 1) > 0)
+    {
+        printf("\a");                                       // \a = Alert
+    }
+
+    ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
+    while (!World::m_stopEvent)
+    {
+        printf("mangos>");
+        fflush(stdout);
+        char *command = fgets(commandbuf,sizeof(commandbuf),stdin);
+        if (command != NULL)
+        {
+            for(int x=0;command[x];x++)
+                if(command[x]=='\r'||command[x]=='\n')
+            {
+                command[x]=0;
+                break;
+            }
+            //// \todo Shoudn't we use here also the sLog singleton?
+            ParseCommand(&printf,command);
+        }
+        else if (feof(stdin))
+        {
+            World::m_stopEvent = true;
+        }
+    }
+
+    ///- End the database thread
+    sDatabase.ThreadEnd();                                  // free mySQL thread resources
+}

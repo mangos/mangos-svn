@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup u2w
+/// @{
+/// \file
+
 #ifndef __WORLDSESSION_H
 #define __WORLDSESSION_H
 
@@ -37,12 +41,7 @@ struct OpcodeHandler
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
-enum SessionStatus
-{
-    STATUS_AUTHED = 0,
-    STATUS_LOGGEDIN
-};
-
+/// Player session in the World
 class MANGOS_DLL_SPEC WorldSession
 {
     public:
@@ -61,16 +60,20 @@ class MANGOS_DLL_SPEC WorldSession
         void SetSocket(WorldSocket *sock);
         void SetPlayer(Player *plr) { _player = plr; }
 
+        /// Is the user engaged in a log out process?
         bool isLogingOut() const
         {
             if (_logoutTime) return true;
             else return false;
         }
+
+        /// Engage the logout process for the user
         void LogoutRequest(time_t requestTime)
         {
             _logoutTime = requestTime;
         }
 
+        /// Is logout cooldown expired?
         bool ShouldLogOut(time_t currTime) const
         {
             return (_logoutTime > 0 && currTime >= _logoutTime + 20);
@@ -461,3 +464,4 @@ class MANGOS_DLL_SPEC WorldSession
         ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> _recvQueue;
 };
 #endif
+/// @}

@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/** \file
+    \ingroup u2w
+*/
+
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -25,7 +29,6 @@
 #include "WorldSession.h"
 #include "Player.h"
 #include "ObjectMgr.h"
-#include "AuctionHouseObject.h"
 #include "Group.h"
 #include "Guild.h"
 #include "World.h"
@@ -33,14 +36,23 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 
-WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec) : _player(0), _socket(sock),
+/// Player state
+enum SessionStatus
+{
+    STATUS_AUTHED = 0, ///< Player authenticated
+    STATUS_LOGGEDIN    ///< Player in game
+};
+
+/// WorldSession constructor
+WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec) : _player(NULL), _socket(sock),
 _security(sec), _accountId(id), _logoutTime(0)
 {
 
 }
-
+/// WorldSession destructor
 WorldSession::~WorldSession()
 {
+    ///- empty incoming packet queue
     WorldPacket *packet;
 
     while(!_recvQueue.empty())
@@ -50,22 +62,26 @@ WorldSession::~WorldSession()
     }
 }
 
+/// Get the player name
 char const* WorldSession::GetPlayerName() const
 {
     return GetPlayer() ? GetPlayer()->GetName() : "<none>";
 }
 
+/// Set the WorldSocket associated with this session
 void WorldSession::SetSocket(WorldSocket *sock)
 {
     _socket = sock;
 }
 
+/// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket* packet)
 {
     if (_socket)
         _socket->SendPacket(packet);
 }
 
+/// Add an incoming packet to the queue
 void WorldSession::QueuePacket(WorldPacket& packet)
 {
     WorldPacket *pck = new WorldPacket(packet);
@@ -74,18 +90,18 @@ void WorldSession::QueuePacket(WorldPacket& packet)
     _recvQueue.add(pck);
 }
 
+/// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(uint32 diff)
 {
     WorldPacket *packet;
     OpcodeHandler *table = _GetOpcodeHandlerTable();
     uint32 i;
 
+    ///- Retrieve packets from the receive queue and call the appropriate handlers
+    /// \todo Is there a way to consolidate the OpcondeHandlerTable and the g_worldOpcodeNames to only maintain 1 list?
     while (!_recvQueue.empty())
     {
         packet = _recvQueue.next();
-
-        if(packet==NULL)
-            continue;
 
         for (i = 0; table[i].handler != NULL; i++)
         {
@@ -115,48 +131,56 @@ bool WorldSession::Update(uint32 diff)
         delete packet;
     }
 
+    ///- If necessary, log the player out
     time_t currTime = time(NULL);
     if (!_socket || ShouldLogOut(currTime))
         LogoutPlayer(true);
 
     if (!_socket)
-        return false;
+        return false; //Will remove this session from the world session map
 
     return true;
 }
 
+/// %Log the player out
 void WorldSession::LogoutPlayer(bool Save)
 {
     if (_player)
     {
-        // logging out just after died
+        ///- If the player just died before logging out, make him appear as a ghost
         if (_player->GetDeathTimer())
         {
             _player->KillPlayer();
             _player->BuildPlayerRepop();
         }
-        // no point calling this here as Player::SaveToDB() will reset it to 1 since player has not been removed from world at this stage
-        //sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `guid` = '%u'", _player->GetGUIDLow());
+
+        ///- Reset the online field in the account table
+        // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
+        //No SQL injection as AccountID is uint32
         loginDatabase.PExecute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u'", GetAccountId());
 
+        ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         Guild *guild;
         guild = objmgr.GetGuildById(_player->GetGuildId());
         if(guild)
         {
             guild->LoadPlayerStatsByGuid(_player->GetGUID());
 
-            WorldPacket data(SMSG_GUILD_EVENT, (5+10));     // we guess size
+            WorldPacket data(SMSG_GUILD_EVENT, (5+12));     // name limited to 12 in character table.
             data<<(uint8)GE_SIGNED_OFF;
             data<<(uint8)1;
             data<<_player->GetName();
             data<<(uint8)0<<(uint8)0<<(uint8)0;
             guild->BroadcastPacket(&data);
         }
+
+        ///- Release charmed creatures and unsummon totems
         _player->Uncharm();
         _player->UnsummonTotem();
         _player->InvisiblePjsNear.clear();
 
-        // some save parts correct work only in case player present in map/player_lists (pets, etc)
+        ///- empty buyback items and save the player in the database
+        // some save parts only correctly work in case player present in map/player_lists (pets, etc)
         if(Save)
         {
             uint32 eslot;
@@ -168,11 +192,13 @@ void WorldSession::LogoutPlayer(bool Save)
                 _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+eslot,0);
             }
             _player->SaveToDB();
-
         }
 
+        ///- Remove the player's pet from the world
         _player->RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
+        ///- If the player is in a group (or invited), remove him. If the group if then only 1 person, disband the group.
+        /// \todo Should'nt we also check if there is no other invitees before disbanding the group?
         if(_player->groupInfo.invite)
         {
             Group *group = _player->groupInfo.invite;
@@ -194,25 +220,30 @@ void WorldSession::LogoutPlayer(bool Save)
             }
         }
 
+        ///- Remove the player from the world
         ObjectAccessor::Instance().RemovePlayer(_player);
         MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
 
-        // player went offline msgs
+        ///- Send update to raid group
         if(_player->groupInfo.group && _player->groupInfo.group->isRaidGroup())
             _player->groupInfo.group->SendUpdate();
 
+        ///- Broadcast a logout message to the player's friends
         WorldPacket data(SMSG_FRIEND_STATUS, (9));
         data<<uint8(FRIEND_OFFLINE);
         data<<_player->GetGUID();
         _player->BroadcastPacketToFriendListers(&data);
 
+        ///- Delete the player object
         delete _player;
         _player = 0;
 
+        ///- Send the 'logout complete' packet to the client
         data.Initialize( SMSG_LOGOUT_COMPLETE, 0 );
         SendPacket( &data );
 
-        // Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+        ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+        //No SQL injection as AccountId is uint32
         sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `account` = '%u'", GetAccountId());
         sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
@@ -220,6 +251,7 @@ void WorldSession::LogoutPlayer(bool Save)
     LogoutRequest(0);
 }
 
+/// Kick a player out of the World
 void WorldSession::KickPlayer()
 {
     if(!_socket)
@@ -231,6 +263,7 @@ void WorldSession::KickPlayer()
     _socket->SetCloseAndDelete(true);
 }
 
+/// Return the Opcode handler table
 OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 {
     static OpcodeHandler table[] =
@@ -568,6 +601,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
     return table;
 }
 
+/// Cancel channeling handler
+/// \todo Complete HandleCancelChanneling function
 void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )
 {
     uint32 spellid;
