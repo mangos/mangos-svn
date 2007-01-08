@@ -413,10 +413,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_GAMEOBJECT_ITEM:
         {
-            if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
-            if(m_targets.m_itemTarget)
-                TagItemMap.push_back(m_targets.m_itemTarget);
+            if(m_targets.m_GOTarget)
+                TagGOMap.push_back(m_targets.m_GOTarget);
+            else if(m_targets.m_itemTarget)
+                   TagItemMap.push_back(m_targets.m_itemTarget);
         }break;
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
         {
@@ -1463,10 +1463,6 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     damage = CalculateDamage((uint8)i);
     uint8 eff = m_spellInfo->Effect[i];
-
-    // DBC already have eff 33 in SpellEffect1 (this lines totaly redundant)
-    //if(m_spellInfo->Id==1804)
-    //    eff = 33;
 
     sLog.outDebug( "Spell: Effect : %u", eff);
     if(unitTarget)

@@ -159,6 +159,13 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
             sLog.outError( "WORLD::OpenItem: item [guid = %u] has an unknown lockId: %u!", pItem->GetGUIDLow() , lockId);
             return;
         }
+
+        // required picklocking
+        if(lockInfo->requiredlockskill)
+            return;
+
+        if(lockInfo->requiredskill)
+            return;
     }
 
     pUser->SendLoot(pItem->GetGUID(),LOOT_CORPSE);
