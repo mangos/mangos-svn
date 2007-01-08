@@ -2746,7 +2746,7 @@ void Player::BuildPlayerRepop()
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,(float)1.0);    //see radius of death player?
 
-    SetUInt32Value(UNIT_FIELD_BYTES_1, 0x1000000);          //Set standing so always be standing
+    SetUInt32Value(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_ALWAYS_STAND);
 
     if (getRace() == RACE_NIGHTELF)
         SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);        //10045 correct wisp model
@@ -3552,7 +3552,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
         m->PlayerRelocation(this, x, y, z, orientation);
 
         // remove at movement non-move stealth aura
-        if(HasFlag(UNIT_FIELD_BYTES_1,0x2000000))
+        if(HasFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_FLAG_STEALTH))
             RemoveAurasDueToSpell(20580);
     }
 
@@ -9957,25 +9957,9 @@ void Player::SaveToDB()
     if (isInFlight())
         return;
 
-    // save state
-    uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
-    uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
-    uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
-
     int is_save_resting = HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0;
                                                             //save, far from tavern/city
                                                             //save, but in tavern/city
-    // Set player sit state to standing on save
-    RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-
-    //remove restflag when save
-    //this is becouse of the rename char stuff
-    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-
-    // combat flags cleared at loading anyway.
-    //ClearInCombat();                                        // Remove combat flag
-
     sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
     outDebugValues();
 
@@ -9984,6 +9968,19 @@ void Player::SaveToDB()
         _RemoveAllItemMods();
         _RemoveAllAuraMods();
     }
+
+    // save state (after auras removing), if aura remove some flags then it must set it back by self)
+    uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
+    uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
+    uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
+
+    // Set player sit state to standing on save, also stealth and shifted form
+    RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT | PLAYER_STATE_FORM_ALL | PLAYER_STATE_FLAG_STEALTH);
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+
+    // remove restflag when save
+    //this is becouse of the rename char stuff
+    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     bool inworld = IsInWorld();
     if (inworld)
@@ -10092,19 +10089,16 @@ void Player::SaveToDB()
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
 
+    // restore state (before aura apply, if aura remove flag then aura must set it ack by self)
+    SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
+    SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
+    SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
+
     if(isAlive())
     {
         _ApplyAllAuraMods();
         _ApplyAllItemMods();
     }
-
-    // restore state
-    SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
-    SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
-    SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
-
-    if(is_save_resting)
-        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     if (inworld)
         AddToWorld();
