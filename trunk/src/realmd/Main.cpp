@@ -179,7 +179,7 @@ int main(int argc, char **argv)
         if( (++loopCounter) == numLoops )
         {
             loopCounter = 0;
-            sLog.outString("Ping MySQL to keep connection alive");
+            sLog.outDetail("Ping MySQL to keep connection alive");
             delete dbRealmServer.Query("SELECT 1 FROM `realmlist` LIMIT 1");
         }
     }

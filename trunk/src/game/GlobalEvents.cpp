@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/** \file
+    \ingroup u2w
+*/
+
 #include "Log.h"
 #include "Database/DatabaseEnv.h"
 #include "Common.h"
@@ -26,8 +30,11 @@
 #include "ObjectDefines.h"
 #include "Corpse.h"
 
+/// Handle periodic erase of corpses and bones
 static void CorpsesErase(CorpseType type,uint32 delay)
 {
+    ///- Get the list of eligible corpses/bones to be removed
+    //No SQL injection (uint32 and enum)
     QueryResult *result = sDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`map` FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
 
     if(result)
@@ -38,18 +45,16 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             uint32 guidlow = fields[0].GetUInt32();
             float positionX = fields[1].GetFloat();
             float positionY = fields[2].GetFloat();
-            //float positionZ = fields[4].GetFloat();
-            //float ort       = fields[5].GetFloat();
             uint32 mapid    = fields[3].GetUInt32();
 
             uint64 guid = MAKE_GUID(guidlow,HIGHGUID_CORPSE);
 
             sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,mapid);
 
-            // not load grid if grid not loaded for corpse/bones removing
+            ///- If the map where the corpse/bones is loaded
             if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))
             {
-                // convert corpse to bones
+                ///- convert corpses to bones
                 if(type==CORPSE_RESURRECTABLE)
                 {
                     Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
@@ -64,10 +69,9 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                         sDatabase.CommitTransaction();
                     }
                 }
-                // delete  bones
+                ///- or delete bones
                 else
                 {
-                    // not load grid if grid not loaded for bones removing
                     Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
                     if(corpse)
                         corpse->DeleteFromWorld(true);
@@ -82,7 +86,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             }
             else
             {
-                // remove corpse/bones from DB in any case
+                ///- else just remove corpse/bones from the database
                 sDatabase.BeginTransaction();
                 sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                 sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
@@ -94,13 +98,14 @@ static void CorpsesErase(CorpseType type,uint32 delay)
     }
 }
 
+/// not thread guarded variant for call from other thread
 void CorpsesErase()
 {
-    //sLog.outBasic("Global Event (corpses/bones removal)");
     CorpsesErase(CORPSE_BONES, 20*MINUTE);
     CorpsesErase(CORPSE_RESURRECTABLE,3*DAY);
 }
 
+/// thread guarded variant for call from event system
 void HandleCorpsesErase(void*)
 {
     sDatabase.ThreadStart();                                // let thread do safe mySQL requests

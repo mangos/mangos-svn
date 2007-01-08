@@ -16,8 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-// not thread guarded variant for call from other thread
-void CorpsesErase();
+/// \addtogroup u2w
+/// @{
+/// \file
 
-// thread guareded variant for call from event system
+#ifndef __GLOBALEVENTS_H
+#define __GLOBALEVENTS_H
+
+void CorpsesErase();
 void HandleCorpsesErase(void*);
+#endif
+/// @}
