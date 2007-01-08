@@ -250,6 +250,36 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
     };
 
+    template<class Check>
+    struct MANGOS_DLL_DECL UnitListSearcher
+    {
+        std::list<Unit*> &i_objects;
+        Check& i_check;
+
+        UnitListSearcher(std::list<Unit*> &objects, Check & check) : i_objects(objects),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Player *> &m)
+        {
+            for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+            {
+                if(i_check(itr->second))
+                    i_objects.push_back(itr->second);
+            }
+        }
+
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+        {
+            for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+            {
+                if(i_check(itr->second))
+                    i_objects.push_back(itr->second);
+            }
+        }
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+
     class AnyUnfriendlyUnitInObjectRangeCheck
     {
         public:
