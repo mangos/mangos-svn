@@ -251,6 +251,7 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype
     switch(damagetype)
     {
     case DIRECT_DAMAGE:
+    case SPELL_DIRECT_DAMAGE:
         RemoveSpellsCausingAura(auraType);
         return;
     case DOT:
