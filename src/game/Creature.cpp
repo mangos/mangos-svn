@@ -374,7 +374,7 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
 
     if(m_tspells.empty())
     {
-       sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
+        sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
             GetGUIDLow(),GetCreatureInfo()->Entry);
         return false;
     }
@@ -500,7 +500,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_VENDOR:
                         if(!GetItemCount())
                         {
-                           sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.",
+                            sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.",
                                 GetGUIDLow(),GetCreatureInfo()->Entry);
                             cantalking=false;
                         }
@@ -979,7 +979,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     SetUInt32Value(UNIT_FIELD_DISPLAYID,display_id );
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,display_id );
-	SetUInt32Value(UNIT_FIELD_BYTES_2,1);                       // let creature used equiped weapon in fight
+    SetUInt32Value(UNIT_FIELD_BYTES_2,1);                   // let creature used equiped weapon in fight
 
     SetName(GetCreatureInfo()->Name);
 

@@ -250,21 +250,21 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype
 
     switch(damagetype)
     {
-    case DIRECT_DAMAGE:
-    case SPELL_DIRECT_DAMAGE:
-        RemoveSpellsCausingAura(auraType);
-        return;
-    case DOT:
-        if(damageaura.size()==0)
-            return;
-        //if(auraType == SPELL_AURA_MOD_ROOT && damageaura.size() < 2) //sometimes Roots can break themselves - need to fix
-        //    return;
-        if(30.0f > urand(0,100)) //30% chance to break a spell
+        case DIRECT_DAMAGE:
+        case SPELL_DIRECT_DAMAGE:
             RemoveSpellsCausingAura(auraType);
-        return;              
+            return;
+        case DOT:
+            if(damageaura.size()==0)
+                return;
+            //if(auraType == SPELL_AURA_MOD_ROOT && damageaura.size() < 2) //sometimes Roots can break themselves - need to fix
+            //    return;
+            if(30.0f > urand(0,100))                        //30% chance to break a spell
+                RemoveSpellsCausingAura(auraType);
+            return;
 
-    default:
-        return;
+        default:
+            return;
     }
 }
 
@@ -695,7 +695,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
     uint32 pdamage = mod->m_amount;
 
-    if(mod->m_auraname != SPELL_AURA_PERIODIC_HEAL && mod->m_auraname != SPELL_AURA_OBS_MOD_HEALTH) {
+    if(mod->m_auraname != SPELL_AURA_PERIODIC_HEAL && mod->m_auraname != SPELL_AURA_OBS_MOD_HEALTH)
+    {
         //Calculate armor mitigation if it is a physical spell
         if (spellProto->School == 0)
             pdamage = CalcArmorReducedDamage(pVictim, pdamage);
@@ -726,7 +727,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         SendMessageToSet(&data,true);
         for(uint8 i = 0; i < 3; i++)
         {
-            if(spellProto->EffectApplyAuraName[i] == SPELL_AURA_MOD_ROOT)//HasAuraType(SPELL_AURA_MOD_ROOT))
+                                                            //HasAuraType(SPELL_AURA_MOD_ROOT))
+            if(spellProto->EffectApplyAuraName[i] == SPELL_AURA_MOD_ROOT)
                 damagetype = SELF_DAMAGE;
         }
         DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), damagetype, procFlag, true);
@@ -1842,7 +1844,8 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
 
     // adding linked auras
-    if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // add the shapeshift aura's boosts
+                                                            // add the shapeshift aura's boosts
+    if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
         Aur->HandleShapeshiftBoosts(true);
 
     Aur->_AddAura();
@@ -2117,7 +2120,8 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     Aura* Aur = i->second;
 
     // must remove before removeing from list (its remove dependent auras and _i_ is only safe iterator value
-    if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)  // remove the shapeshift aura's boosts
+                                                            // remove the shapeshift aura's boosts
+    if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
         Aur->HandleShapeshiftBoosts(false);
 
     m_Auras.erase(i++);
@@ -2266,7 +2270,6 @@ void Unit::ApplyStats(bool apply)
             }
         }
     }
-
 
     for (uint8 i = 0; i < MAX_STATS; i++)
         totalstatmods[i] = totalstatmods[i] * 100.0f - 100.0f;

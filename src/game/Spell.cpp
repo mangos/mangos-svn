@@ -416,7 +416,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             if(m_targets.m_GOTarget)
                 TagGOMap.push_back(m_targets.m_GOTarget);
             else if(m_targets.m_itemTarget)
-                   TagItemMap.push_back(m_targets.m_itemTarget);
+                TagItemMap.push_back(m_targets.m_itemTarget);
         }break;
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
         {
@@ -707,7 +707,8 @@ void Spell::cast(bool skipCheck)
     bool needspelllog = true;
     for(uint32 j = 0;j<3;j++)
     {
-        if(m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT) {
+        if(m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT)
+        {
             HandleEffects(NULL,NULL,NULL, j);
             continue;
         }

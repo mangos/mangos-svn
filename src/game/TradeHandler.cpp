@@ -54,7 +54,6 @@ void WorldSession::SendTradeStatus(uint32 status)
     SendPacket(&data);
 }
 
-
 void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug( "WORLD: Ignore Trade %u",_player->GetGUIDLow());
