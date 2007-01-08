@@ -2155,9 +2155,6 @@ uint8 Spell::CheckItems()
     if(totems != 0)
         return uint8(0x70);
 
-    if (!itemTarget)
-        return uint8(0);
-
     for(int i = 0; i < 3; i++)
     {
         switch (m_spellInfo->Effect[i])
@@ -2180,6 +2177,8 @@ uint8 Spell::CheckItems()
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
             {
+                if(!itemTarget)
+                    return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
                 if(int32(m_spellInfo->EquippedItemClass) >= 0 && itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
                 if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENCHANT_HELD_ITEM && !itemTarget->IsEquipped())
@@ -2188,6 +2187,9 @@ uint8 Spell::CheckItems()
             }
             case SPELL_EFFECT_DISENCHANT:
             {
+                if(!itemTarget)
+                    return CAST_FAIL_CANT_BE_DISENCHANTED;
+
                 // prevent disenchanting in trade slot
                 if( itemTarget->GetOwnerGUID() != m_caster->GetGUID() )
                     return (uint8)CAST_FAIL_CANT_BE_DISENCHANTED;
