@@ -1692,7 +1692,9 @@ void Spell::EffectWeaponDmg(uint32 i)
                 ((Player*)m_caster)->DestroyItemCount( pItem, count, true);
             }
             else
-                ((Player*)m_caster)->DestroyItemCount( ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID) , 1, true);
+            if(uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID))
+                ((Player*)m_caster)->DestroyItemCount( ammo , 1, true);
+            // wand not have ammo
         }
     }
 
