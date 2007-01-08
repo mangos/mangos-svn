@@ -307,3 +307,30 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleLockAccountCommand(const char* args)
+{
+    if (!*args)
+    {
+        SendSysMessage("You must send parameter");
+        return true;
+    }
+
+    std::string argstr = (char*)args;
+    if (argstr == "on")
+    {
+        loginDatabase.PExecute( "UPDATE `account` SET `locked` = '1' WHERE `id` = '%d';",m_session->GetAccountId());
+        PSendSysMessage("Your account now is locked");
+        return true;
+    }
+
+    if (argstr == "off")
+    {
+        loginDatabase.PExecute( "UPDATE `account` SET `locked` = '0' WHERE `id` = '%d';",m_session->GetAccountId());
+        PSendSysMessage("Your account now is unlocked");
+        return true;
+    }
+    else
+        SendSysMessage(LANG_BAD_VALUE);
+    return true;
+}

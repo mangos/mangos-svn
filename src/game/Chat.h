@@ -250,7 +250,7 @@ class ChatHandler
         bool HandleLookupSkillCommand(const char* args);
         bool HandleLookupCreatureCommand(const char* args);
         bool HandlePasswordCommand(const char* args);
-
+        bool HandleLockAccountCommand(const char* args);
         //! Development Commands
         bool HandleSetValue(const char* args);
         bool HandleGetValue(const char* args);
