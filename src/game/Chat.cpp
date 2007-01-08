@@ -291,7 +291,8 @@ ChatCommand * ChatHandler::getCommandTable()
                     }
                 }
             } while(result->NextRow());
-            delete result;
+		if(result)
+        	    delete result;
         }
         first_call = false;
     }
