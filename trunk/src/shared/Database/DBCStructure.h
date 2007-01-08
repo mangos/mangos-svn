@@ -122,7 +122,7 @@ struct LockEntry
 {
     uint32      ID;
     uint32      requiredskill;
-    uint32         requiredlockskill;
+    uint32      requiredlockskill;
 };
 
 struct MapEntry

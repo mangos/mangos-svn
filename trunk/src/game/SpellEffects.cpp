@@ -769,36 +769,66 @@ void Spell::EffectOpenLock(uint32 i)
     {
         sLog.outError( "Spell::EffectOpenLock: %s [guid = %u] has an unknown lockId: %u!", 
             (gameObjTarget ? "gameobject" : "item"), GUID_LOPART(guid), lockId);
+        SendCastResult(CAST_FAIL_INVALID_TARGET);
         return;
     }
 
+    uint32 SkillId = 0;
     // Check and skill-up skill
-    uint32 SkillId = m_spellInfo->EffectMiscValue[1];
-    if(m_spellInfo->Id==1804)
-        SkillId = 633;
+    if(m_spellInfo->Effect[1]==SPELL_EFFECT_SKILL)
+        SkillId = m_spellInfo->EffectMiscValue[1];
+    else
+    if(m_spellInfo->EffectMiscValue[0]==1)                  // picklocking spells
+        SkillId = SKILL_LOCKPICKING;
 
+    // skill bonus provided by casting spell (mostly item spells)
+    uint32 spellSkillBonus = uint32(m_spellInfo->EffectBasePoints[0]+1);
+
+    uint32 reqSkillValue = lockInfo->requiredskill;
+
+    if(lockInfo->requiredlockskill)                         // required pick lock skill applying
+    {
+        if(SkillId != SKILL_LOCKPICKING)                    // wrong skill (cheating?)
+        {
+            SendCastResult(CAST_FAIL_FIZZLED);
+            return;
+        }
+
+        reqSkillValue = lockInfo->requiredlockskill;
+    }
+    else
+    if(SkillId == SKILL_LOCKPICKING)                        // apply picklock skill to wrong target
+    {
+        SendCastResult(CAST_FAIL_INVALID_TARGET);
+        return;
+    }
+    
     if ( SkillId )
     {
         loottype = LOOT_SKINNING;
-        if ( player->GetSkillValue(SkillId) < (lockInfo->requiredskill+lockInfo->requiredlockskill) )
+        if ( player->GetSkillValue(SkillId) + spellSkillBonus < reqSkillValue )
         {  
             SendCastResult(CAST_FAIL_SKILL_NOT_HIGH_ENOUGH);
             return;
         }
         
-        if(gameObjTarget)
+        // update skill if really known
+        uint32 SkillValue = player->GetPureSkillValue(SkillId);
+        if(SkillValue)                                  // non only item base skill
         {
-            // Allow one skill-up until respawned
-            uint32 SkillValue = player->GetPureSkillValue(SkillId);
-            if ( !gameObjTarget->IsInSkillupList( player->GetGUIDLow() ) &&
-                player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill+lockInfo->requiredlockskill) )
-                gameObjTarget->AddToSkillupList( player->GetGUIDLow() );
-        }
-        else if(itemTarget)
-        {
-            // Do one skill-up
-            uint32 SkillValue = player->GetPureSkillValue(SkillId);
-            player->UpdateGatherSkill(SkillId, SkillValue, lockInfo->requiredskill+lockInfo->requiredlockskill);
+            if(gameObjTarget)
+            {
+                // Allow one skill-up until respawned
+                if ( !gameObjTarget->IsInSkillupList( player->GetGUIDLow() ) &&
+                    player->UpdateGatherSkill(SkillId, SkillValue, reqSkillValue) )
+                    gameObjTarget->AddToSkillupList( player->GetGUIDLow() );
+            }
+            else if(itemTarget)
+            {
+                // Do one skill-up
+                uint32 SkillValue = player->GetPureSkillValue(SkillId);
+                player->UpdateGatherSkill(SkillId, SkillValue, reqSkillValue);
+            }
         }
     }
 
