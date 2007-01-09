@@ -8171,7 +8171,11 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
             if( count <= 0 )
                 count = 1;
             uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, srcitem, count, false );
-            if( msg != EQUIP_ERR_OK )
+
+            // player already have max number (in most case 1) source item, no additional item needed and quest can be added.
+            if( msg = EQUIP_ERR_CANT_CARRY_MORE_OF_THIS )
+                return true;
+            else if( msg != EQUIP_ERR_OK )
             {
                 SendEquipError( msg, NULL, NULL );
                 return false;
@@ -8750,6 +8754,9 @@ bool Player::GiveQuestSourceItem( uint32 quest_id )
                 StoreNewItem(dest, srcitem, count, true);
                 return true;
             }
+            // player already have max amount required item, just report success
+            else if( msg == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS )
+                return true;
             else
                 SendEquipError( msg, NULL, NULL );
             return false;
