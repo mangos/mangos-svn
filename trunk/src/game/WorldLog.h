@@ -27,6 +27,8 @@
 #include "Policies/Singleton.h"
 #include "Errors.h"
 
+#include <stdarg.h>
+
 /// %Log packets to a file
 class MANGOS_DLL_DECL WorldLog : public MaNGOS::Singleton<WorldLog, MaNGOS::ClassLevelLockable<WorldLog, ZThread::FastMutex> >
 {
