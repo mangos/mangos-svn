@@ -129,8 +129,25 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                     Script->QuestAccept(_player, ((Creature*)pObject), qInfo );
                     break;
                 case TYPEID_ITEM:
+                {
                     Script->ItemQuestAccept(_player, ((Item*)pObject), qInfo );
+
+                    // destroy not required for quest finish quest starting item
+                    bool destroyItem = true;
+                    for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                    {
+                        if(qInfo->ReqItemId[i] == ((Item*)pObject)->GetEntry())
+                        {
+                            destroyItem = false;
+                            break;
+                        }
+                    }
+
+                    if(destroyItem)
+                        _player->DestroyItem(((Item*)pObject)->GetBagSlot(),((Item*)pObject)->GetSlot(),true);
+
                     break;
+                }   
                 case TYPEID_GAMEOBJECT:
                     Script->GOQuestAccept(_player, ((GameObject*)pObject), qInfo );
                     break;
