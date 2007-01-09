@@ -62,6 +62,12 @@ WorldSession::~WorldSession()
     }
 }
 
+void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
+{
+    sLog.outError("Size of packet %s (%u) is %u but expected %u, skip",
+        g_worldOpcodeNames[packet.GetOpcode()],packet.GetOpcode(),packet.size(),size);
+}
+
 /// Get the player name
 char const* WorldSession::GetPlayerName() const
 {
