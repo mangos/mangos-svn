@@ -25,6 +25,7 @@
 #include "Opcodes.h"
 #include "Mthread.h"
 #include "SpellAuraDefines.h"
+#include "Util.h"
 
 #include <list>
 
@@ -463,7 +464,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint32 GetAttackTime(WeaponAttackType att) const { return (uint32)GetFloatValue(UNIT_FIELD_BASEATTACKTIME+att); }
         void SetAttackTime(WeaponAttackType att, uint32 val) { SetFloatValue(UNIT_FIELD_BASEATTACKTIME+att,val); }
-        void ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att, val, !apply); }
+        void ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply) { ApplyPercentModFloatVar(m_modAttackSpeedPct[att], val, !apply); }
 
         // faction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
@@ -633,6 +634,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         int32 m_modSpellHitChance;
         int32 m_baseSpellCritChance;
         int32 m_modCastSpeedPct;
+        float m_modAttackSpeedPct[3];
 
         bool isInFront(Unit const* target,float distance);
         void SetInFront(Unit const* target);
