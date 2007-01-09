@@ -59,6 +59,9 @@ Unit::Unit() : Object()
     m_attackTimer[BASE_ATTACK]   = 0;
     m_attackTimer[OFF_ATTACK]    = 0;
     m_attackTimer[RANGED_ATTACK] = 0;
+    m_modAttackSpeedPct[BASE_ATTACK] = 1.0f;
+    m_modAttackSpeedPct[OFF_ATTACK] = 1.0f;
+    m_modAttackSpeedPct[RANGED_ATTACK] = 1.0f;
 
     m_state = 0;
     m_form = 0;
@@ -202,9 +205,9 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Wal
 void Unit::resetAttackTimer(WeaponAttackType type)
 {
     if (GetTypeId() == TYPEID_PLAYER)
-        m_attackTimer[type] = GetAttackTime(type);
+        m_attackTimer[type] = GetAttackTime(type) * m_modAttackSpeedPct[type];
     else
-        m_attackTimer[type] = 2000;
+        m_attackTimer[type] = 2000 * m_modAttackSpeedPct[type];
 }
 
 bool Unit::canReachWithAttack(Unit *pVictim) const
