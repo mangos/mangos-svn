@@ -158,7 +158,15 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
     float newspeed;
 
-    recv_data >> guid >> unk1;
+    recv_data >> guid;
+
+    // now can skip not our packet
+    if(_player->GetGUID() != guid)
+        return;
+
+    // continue parse packet
+
+    recv_data >> unk1;
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
@@ -182,55 +190,29 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     recv_data >> newspeed;
     /*----------------*/
 
-    Player *player = objmgr.GetPlayer(guid);
-    if(!player)
-        return;
+    UnitMoveType move_type;
+
+    static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "Walkback", "Swim", "Swimback", "Turn" };
 
     uint16 opcode = recv_data.GetOpcode();
     switch(opcode)
     {
-        case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:
-            if (fabs(player->GetSpeed(MOVE_WALK) - newspeed) > 0.01f)
-            {
-                sLog.outError("WalkSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_WALK), newspeed);
-                player->SetSpeed(MOVE_WALK,player->GetSpeedRate(MOVE_WALK),true);
-            }
-            break;
-        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:
-            if (fabs(player->GetSpeed(MOVE_RUN) - newspeed) > 0.01f)
-            {
-                sLog.outError("RunSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_RUN), newspeed);
-                player->SetSpeed(MOVE_RUN,player->GetSpeedRate(MOVE_RUN),true);
-            }
-            break;
-        case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:
-            if (fabs(player->GetSpeed(MOVE_WALKBACK) - newspeed) > 0.01f)
-            {
-                sLog.outError("RunBackSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_WALKBACK), newspeed);
-                player->SetSpeed(MOVE_WALKBACK,player->GetSpeedRate(MOVE_WALKBACK),true);
-            }
-            break;
-        case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:
-            if (fabs(player->GetSpeed(MOVE_SWIM) - newspeed) > 0.01f)
-            {
-                sLog.outError("SwimSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_SWIM), newspeed);
-                player->SetSpeed(MOVE_SWIM,player->GetSpeedRate(MOVE_SWIM),true);
-            }
-            break;
-        case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:
-            if (fabs(player->GetSpeed(MOVE_SWIMBACK) - newspeed) > 0.01f)
-            {
-                sLog.outError("SwimBackSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_SWIMBACK), newspeed);
-                player->SetSpeed(MOVE_SWIMBACK,player->GetSpeedRate(MOVE_SWIMBACK),true);
-            }
-            break;
-        case CMSG_FORCE_TURN_RATE_CHANGE_ACK:
-            if (fabs(player->GetSpeed(MOVE_TURN) - newspeed) > 0.01f)
-            {
-                sLog.outError("TurnSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", player->GetName(), player->GetSpeed(MOVE_TURN), newspeed);
-                player->SetSpeed(MOVE_TURN,player->GetSpeedRate(MOVE_TURN),true);
-            }
-            break;
+        case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:      move_type = MOVE_WALK;     break;
+        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:       move_type = MOVE_RUN;      break;
+        case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_WALKBACK; break;
+        case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:      move_type = MOVE_SWIM;     break;
+        case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK: move_type = MOVE_SWIMBACK; break;
+        case CMSG_FORCE_TURN_RATE_CHANGE_ACK:       move_type = MOVE_TURN;     break;
+        default:
+            sLog.outError("WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u",opcode);
+            return;
+    }
+
+    if (fabs(_player->GetSpeed(move_type) - newspeed) > 0.01f)
+    {
+        sLog.outError("%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value", 
+            move_type_name[move_type], _player->GetName(), _player->GetSpeed(move_type), newspeed);
+        _player->SetSpeed(move_type,_player->GetSpeedRate(move_type),true);
     }
 }
 
