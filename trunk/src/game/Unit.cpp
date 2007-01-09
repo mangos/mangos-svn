@@ -3452,15 +3452,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-    {
-        // old one
-        //damage += (*i)->GetModifier()->m_amount;
-        int32 _damage = (*pdamage + (*i)->GetModifier()->m_amount);
-        if (_damage < 0)
-            *pdamage = 0;
-        else
-            *pdamage = _damage;
-    }
+            damage += (*i)->GetModifier()->m_amount;
 
     AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
@@ -3470,7 +3462,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     AuraList& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
     for(AuraList::iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
         if(cinfo && (cinfo->type & uint32((*i)->GetModifier()->m_miscvalue)) != 0)
-            damage += uint32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+            damage += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
 
     // bonus result can be negative
     *pdamage = damage < 0 ? 0 : damage;

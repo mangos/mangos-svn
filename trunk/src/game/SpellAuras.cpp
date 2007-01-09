@@ -2462,7 +2462,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
 
 void Aura::HandleModDamageTaken(bool apply, bool Real)
 {
-
+    // has no immediate effect when adding / removing 
 }
 
 void Aura::HandleModDamagePercentDone(bool apply, bool Real)
