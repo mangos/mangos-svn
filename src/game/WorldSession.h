@@ -41,12 +41,16 @@ struct OpcodeHandler
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
+#define CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
+
 /// Player session in the World
 class MANGOS_DLL_SPEC WorldSession
 {
     public:
         WorldSession(uint32 id, WorldSocket *sock, uint32 sec);
         ~WorldSession();
+
+        void SizeError(WorldPacket const& packet, uint32 size) const;
 
         void SendPacket(WorldPacket* packet);
         void SendNotification(char const* msg);

@@ -221,6 +221,8 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
     //CMSG_SET_ACTIVE_MOVER
     sLog.outDebug("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
 
+    CHECK_PACKET_SIZE(recv_data,4+4);
+
     uint32 guild, time;
     recv_data >> guild >> time;
 }
