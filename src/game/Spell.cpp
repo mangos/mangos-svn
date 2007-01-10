@@ -1628,7 +1628,7 @@ uint8 Spell::CanCast()
             }
         }
         /*
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass > 0)
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
         {
             Item *pitem = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0,INVTYPE_WEAPON);
             if(!pitem)
@@ -2119,15 +2119,8 @@ uint8 Spell::CheckItems()
     }
     if(itemTarget)
     {
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
-        {
-            // filter by equiped class (weapon or armor) - raw class value
-            if(int32(itemTarget->GetProto()->Class) != m_spellInfo->EquippedItemClass)
-                return CAST_FAIL_INVALID_TARGET;
-            // filter by equiped subclass - bitmask of subclasses
-            if((( 1 << itemTarget->GetProto()->SubClass ) & m_spellInfo->EquippedItemSubClass) == 0 )
-                return CAST_FAIL_INVALID_TARGET;
-        }
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && !itemTarget->IsFitToSpellRequirements(m_spellInfo))
+            return CAST_FAIL_INVALID_TARGET;
     }
 
     if(m_spellInfo->RequiresSpellFocus)

@@ -157,6 +157,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded() const;
+        bool IsFitToSpellRequirements(SpellEntry const* spellInfo) const;
 
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
         uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }

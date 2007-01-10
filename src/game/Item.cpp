@@ -875,3 +875,28 @@ bool Item::CanBeTraded() const
         return false;
     return true;
 }
+
+bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
+{
+    ItemPrototype const* proto = GetProto();
+
+    if (spellInfo->EquippedItemClass != -1)                 // -1 == any item class
+    {
+        if(spellInfo->EquippedItemClass != int32(proto->Class))
+            return false;                                   //  wrong item class
+
+        if(spellInfo->EquippedItemSubClassMask != 0)        // 0 == any subclass
+        {
+            if((spellInfo->EquippedItemSubClassMask & (1 << proto->SubClass)) == 0)
+                return false;                               // subclass not present in mask
+        }
+    }
+
+    if(spellInfo->EquippedItemInventoryTypeMask != 0)       // 0 == any inventory type
+    {
+        if((spellInfo->EquippedItemInventoryTypeMask  & (1 << proto->InventoryType)) == 0)
+            return false;                                   // inventory type not present in mask
+    }
+
+    return true;
+}
