@@ -454,8 +454,13 @@ void World::Update(time_t diff)
                         objmgr.SendAuctionSuccessfulMail( itr->second );
                                                             //- this functions cleans ram!
                         objmgr.SendAuctionWonMail( itr->second );
-                        //delete itr->second - do not call this!
                     }
+                    //this is better way to dealocate memory, than to do it in some called functions..
+                    
+                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
+                    objmgr.RemoveAItem(itr->second->item_guid);
+                    delete itr->second;
+                    AuctionMap->RemoveAuction(itr->first);
                 }
             }
         }

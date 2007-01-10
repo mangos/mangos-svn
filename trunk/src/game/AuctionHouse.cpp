@@ -34,6 +34,9 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
     uint64 guid;                                            //NPC guid
     recv_data >> guid;
 
+    if (!guid) 
+        return;                                             //check for cheaters
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if (!unit)
     {
@@ -65,7 +68,7 @@ static uint8 AuctioneerFactionToLocation(uint32 faction)
         case 79:                                            //Nightelf
             return 2;
             break;
-        default:                                            /* 85 and so on ... neutral*/
+        default:                                            // 85 and so on ... neutral
             return 7;
     }
 }
@@ -91,7 +94,7 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     data << pItem->GetUInt32Value(OBJECT_FIELD_ENTRY);
     data << (uint32) 0;                                     //0 - HighBidder, 1 - outbid, BID TYPE - not sure
     data << (uint32) 0;                                     //unknown constant 0 ?
-    data << (uint32) 0;                                     //not pItem->GetCreator();// 4a d0 64 02, 0, unknown
+    data << (uint32) 0;                                     //not pItem->GetCreator();// 4a d0 64 02, 0, unknown, maybe enchating
     data << (uint32) pItem->GetCount();                     //item->count
                                                             //item->charge FFFFFFF
     data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES);
@@ -102,7 +105,7 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     data << (uint32) auction->buyout;                       //auction->buyout
     data << (uint32) (auction->time - time(NULL)) * 1000;   //time
     data << (uint32) auction->bidder;                       //auction->bidder current
-    data << (uint32) 0;                                     //0 ? .. player highguid
+    data << (uint32) 0;                                     //player highguid
     data << (uint32) auction->bid;                          //current bid
     return true;
 }
@@ -196,6 +199,9 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     recv_data >> bid >> buyout >> etime;
     Player *pl = GetPlayer();
 
+    if (!auctioneer || !item || !bid || !etime)
+        return;                                             //check for cheaters
+
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
     if(!pCreature||!pCreature->isAuctioner())
     {
@@ -208,8 +214,6 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
     if(!it || !it->CanBeTraded())
     {
-        //5b 02 00 00 00 00 00 00 00 00 02 00 00 00 -- -- : [.............
-                                                            //sure
         SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
         return;
     }
@@ -269,6 +273,9 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
     uint32 price;
     recv_data >> auctioneer;
     recv_data >> auctionId >> price;
+
+    if (!auctioneer || !auctionId || !price)
+        return;                                             //check for cheaters
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
     if(!pCreature||!pCreature->isAuctioner())
@@ -347,6 +354,12 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             objmgr.SendAuctionWonMail( auction );
 
             SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK);
+                       
+            objmgr.RemoveAItem(auction->item_guid);
+            mAuctions->RemoveAuction(auction->Id);
+            sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+
+            delete auction;
         }
     }
     else
