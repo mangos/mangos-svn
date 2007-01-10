@@ -43,6 +43,7 @@ GameObject::GameObject() : Object()
     m_respawnDelayTime = 25000;
     m_lootState = GO_CLOSED;
     m_usetimes = 0;
+    m_spellId = 0;
     lootid=0;
 }
 
@@ -227,7 +228,7 @@ void GameObject::Update(uint32 p_time)
             break;
     }
 
-    SpellEntry const *createSpell = sSpellStore.LookupEntry(m_spellId);
+    SpellEntry const *createSpell = m_spellId ? sSpellStore.LookupEntry(m_spellId) : NULL;
     if (!createSpell)
         return;
     int i;

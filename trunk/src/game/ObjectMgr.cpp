@@ -181,7 +181,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     msgAuctionWonBody.width(16);
     msgAuctionWonBody << right << hex << auction->owner;
     msgAuctionWonBody << dec << ":" << auction->bid << ":" << auction->buyout;
-    sLog.outError( "AuctionWon body string : %s", msgAuctionWonBody.str().c_str() );
+    sLog.outDebug( "AuctionWon body string : %s", msgAuctionWonBody.str().c_str() );
 
     //prepare mail data... :
     uint32 mailId = this->GenerateMailID();
@@ -220,7 +220,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
     auctionSuccessfulBody << right << hex << auction->bidder;
     auctionSuccessfulBody << dec << ":" << auction->bid << ":0:";
     auctionSuccessfulBody << auction->deposit << ":" << auctionCut;
-    sLog.outError("AuctionSuccessful body string : %s", auctionSuccessfulBody.str().c_str());
+    sLog.outDebug("AuctionSuccessful body string : %s", auctionSuccessfulBody.str().c_str());
 
     uint32 itemPage = this->CreateItemPage( auctionSuccessfulBody.str() );
 
