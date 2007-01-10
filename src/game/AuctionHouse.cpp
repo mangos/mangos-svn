@@ -210,7 +210,13 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     uint16 pos = pl->GetPosByGuid(item);
     Item *it = pl->GetItemByPos( pos );
-
+    //do not allow to sell already auctioned items 
+    if(objmgr.GetAItem(GUID_LOPART(item)))
+    {
+        sLog.outError("AuctionError, player %s is sending item id: %u, but item is already in another auction", pl->GetName(), GUID_LOPART(item));
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
+        return;
+    }
     // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
     if(!it || !it->CanBeTraded())
     {
@@ -249,9 +255,6 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     sLog.outDetail("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes) in location: %u", GUID_LOPART(item), GUID_LOPART(auctioneer), bid, buyout, GUID_LOPART(time), location);
     mAuctions->AddAuction(AH);
-
-    // DB can have outdate auction item with same guid
-    objmgr.RemoveAItem(GUID_LOPART(item));
 
     objmgr.AddAItem(it);
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
