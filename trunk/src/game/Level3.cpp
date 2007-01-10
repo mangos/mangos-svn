@@ -1233,17 +1233,15 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         return true;
     }
 
-    char* citemId = strtok((char*)args, " ");
-    char* ccount = strtok(NULL, " ");
-    uint32 itemId = atol(citemId);
-    uint32 count = 1;
+    uint32 itemId = 0;
 
-    if (itemId == 0)
+    if(args[0]=='[')                                        // [name] manual форм 
     {
-        char* citemName = strtok(NULL, "");
-        if(citemName)
+        char* citemName = citemName = strtok((char*)args, "]");
+
+        if(citemName && citemName[0])
         {
-            std::string itemName = citemName;
+            std::string itemName = citemName+1;
             sDatabase.escape_string(itemName);
             QueryResult *result = sDatabase.PQuery("SELECT entry FROM item_template WHERE name = '%s'", itemName.c_str());
             if (!result)
@@ -1260,6 +1258,23 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
             return true;
         }
     }
+    else if(args[0]=='|')                                   // [name] Shift-click форм |color|Hitem:item_id:0:0:0|h[name]|h|r
+    {
+        strtok((char*)args, ":");
+        char* citemId = strtok(NULL, ":");
+        itemId = atol(citemId);
+        strtok(NULL, "]");
+        strtok(NULL, " ");
+    }
+    else                                                          // item_id form
+    {
+        char* citemId = strtok((char*)args, " ");
+        itemId = atol(citemId);
+    }
+
+    char* ccount = strtok(NULL, " ");
+
+    uint32 count = 1;
 
     if (ccount) { count = atol(ccount); }
     if (count < 1) { count = 1; }
@@ -1383,7 +1398,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         Field *fields = result->Fetch();
         uint32 id = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
-        PSendSysMessage("%d - %s",id,name.c_str());
+        PSendSysMessage("%d - |cffffffff|Hitem:%d:0:0:0|h[%s]|h|r ",id,id,name.c_str());
     } while (result->NextRow());
 
     delete result;
