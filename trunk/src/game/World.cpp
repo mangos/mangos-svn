@@ -105,6 +105,8 @@ bool World::RemoveSession(uint32 id)
 
     if(itr != m_sessions.end() && itr->second)
     {
+        if (itr->second->PlayerLoading())
+            return false;
         itr->second->KickPlayer();
 
         // session can't be erased or delected currently (to prevent iterator invalidation and socket problems)
@@ -113,7 +115,7 @@ bool World::RemoveSession(uint32 id)
         return true;
     }
 
-    return false;
+    return true;
 }
 
 void World::AddSession(WorldSession* s)

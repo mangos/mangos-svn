@@ -45,7 +45,7 @@ enum SessionStatus
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec) : _player(NULL), _socket(sock),
-_security(sec), _accountId(id), _logoutTime(0)
+_security(sec), _accountId(id), _logoutTime(0), m_playerLoading(false)
 {
 
 }
@@ -140,7 +140,7 @@ bool WorldSession::Update(uint32 diff)
 
     ///- If necessary, log the player out
     time_t currTime = time(NULL);
-    if (!_socket || ShouldLogOut(currTime))
+    if (!_socket || (ShouldLogOut(currTime) && !m_playerLoading))
         LogoutPlayer(true);
 
     if (!_socket)
