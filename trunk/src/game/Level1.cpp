@@ -79,12 +79,6 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
     }
     else
     {
-        if(m_session->GetPlayer()->GetGuildId())
-        {
-            m_session->SendNotification( LANG_INVISIBLE_GUILD );
-            return true;
-        }
-
         m_session->SendNotification( LANG_INVISIBLE_INVISIBLE );
         m_session->GetPlayer()->SetGMVisible(false);
     }
