@@ -167,7 +167,8 @@ uint32 ObjectMgr::GetAuctionDeposit(uint32 location, uint32 time, Item *pItem)
     return (uint32) ( ((percentance * pItem->GetProto()->SellPrice * pItem->GetCount() ) / 100 ) * (time / 120 ) );
 }
 
-void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction ) //clears ram :D
+//does not clear ram
+void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
 {
     Item *pItem = objmgr.GetAItem(auction->item_guid);
     if(!pItem)
@@ -177,14 +178,9 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction ) //clears ram :D
     msgAuctionWonSubject << auction->item_template << ":0:" << AUCTION_WON;
 
     std::ostringstream msgAuctionWonBody;
-    std::ostringstream temp;
-    msgAuctionWonBody << "        ";                        //8 times " "
-    temp << hex << auction->owner;
-    for (int i = temp.str().size();i < 8; i++)
-        msgAuctionWonBody << " ";
-
-    msgAuctionWonBody << temp.str();
-    msgAuctionWonBody << ":" << auction->bid << ":" << auction->buyout;
+    msgAuctionWonBody.width(16);
+    msgAuctionWonBody << right << hex << auction->owner;
+    msgAuctionWonBody << dec << ":" << auction->bid << ":" << auction->buyout;
     sLog.outError( "AuctionWon body string : %s", msgAuctionWonBody.str().c_str() );
 
     //prepare mail data... :
@@ -202,22 +198,12 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction ) //clears ram :D
     else
         delete pItem;
 
-    sDatabase.BeginTransaction();
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '0', '0', '%d')",
         mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemPage, auction->item_guid, auction->item_template, (uint64)etime, AUCTION_CHECKED);
-
-    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
-    sDatabase.CommitTransaction();
-
-    this->RemoveAItem(auction->item_guid);
-    this->GetAuctionsMap(auction->location)->RemoveAuction(auction->Id);
-
-    delete auction;
 }
 
-//call this method to send mail to auctionowner, when auction is successful
-                                                            //this finction doesn't clear ram...
+//call this method to send mail to auctionowner, when auction is successful, it does not clear ram
 void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 {
     Item *pItem = objmgr.GetAItem(auction->item_guid);
@@ -228,19 +214,14 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
     msgAuctionSuccessfulSubject << auction->item_template << ":0:" << AUCTION_SUCCESSFUL;
 
     std::ostringstream auctionSuccessfulBody;
-    std::ostringstream temp;
-    auctionSuccessfulBody << "        ";                    //8 times " "
-    temp << hex << auction->bidder;
-    for (int i = temp.str().size();i < 8; i++)
-        auctionSuccessfulBody << " ";                       //fill " " before id
     uint32 auctionCut = this->GetAuctionCut(auction->location, auction->bid);
 
-    auctionSuccessfulBody << temp.str();
-    auctionSuccessfulBody << ":" << auction->bid << ":0:";
+    auctionSuccessfulBody.width(16);
+    auctionSuccessfulBody << right << hex << auction->bidder;
+    auctionSuccessfulBody << dec << ":" << auction->bid << ":0:";
     auctionSuccessfulBody << auction->deposit << ":" << auctionCut;
     sLog.outError("AuctionSuccessful body string : %s", auctionSuccessfulBody.str().c_str());
 
-                                                            //:D
     uint32 itemPage = this->CreateItemPage( auctionSuccessfulBody.str() );
 
     uint32 mailId = this->GenerateMailID();
@@ -261,7 +242,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
         mailId, AUCTIONHOUSE_MAIL, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemPage, (uint64)etime, profit, AUCTION_CHECKED);
 }
 
-                                                            //clears ram
+//does not clear ram
 void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
 {                                                           //return an item in auction to its owner by mail
     Item *pItem = objmgr.GetAItem(auction->item_guid);
@@ -274,9 +255,6 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         std::ostringstream subject;
         subject << auction->item_template << ":0:" << AUCTION_EXPIRED;
         time_t etime = time(NULL) + 30 * DAY;
-        //remove pointers from containers
-        this->RemoveAItem(auction->item_guid);
-        this->GetAuctionsMap(auction->location)->RemoveAuction(auction->Id);
 
         sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "', '0', '0', '0')",
@@ -296,8 +274,6 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
     {
         sLog.outError("Auction item (GUID: %u) not found, and lost.",auction->item_guid);
     }
-    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
-    delete auction;
 }
 
 CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)

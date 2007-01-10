@@ -360,7 +360,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
 
         data << (uint32) 0;                                 // Unknown Constant 0
         data << (uint32) 0;                                 // Unknown
-        data << (uint32) 0;                                 // not item->creator, it is another item's property
+        data << (uint32) 0;                                 // not item->creator, it is enchating?
         data << (uint8)  icount;                            // Attached item stack count
                                                             //sometimes more than zero, not sure when
         int32 charges = (it) ? int32(it->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES)) : 0;
@@ -379,80 +379,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     SendPacket(&data);
 }
 
-/* 
-extern char *fmtstring( char *format, ... );
-
-uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
-{
-
-    uint8 i = 0;
-    Item * srcitem;
-
-    for (i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
-    {
-        srcitem = pl->GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-
-        if (srcitem)
-        {
-            if (srcitem->GetProto()->DisplayInfoID == displayID)
-            {
-                break;
-            }
-        }
-    }
-
-    if( i >= BANK_SLOT_BAG_END )
-    {
-        QueryResult *result = sDatabase.PQuery( "SELECT `entry` FROM `item_template` WHERE `displayid`='%u'", displayID );
-
-        if( !result )
-        {
-            return (uint8)-1;
-        }
-
-        uint32 id = (*result)[0].GetUInt32();
-        return id;
-        delete result;
-    }
-
-    return srcitem->GetProto()->ItemId;
-}
-
-bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
-{
-    uint32 realID = GetItemGuidFromDisplayID(itemid, _player);
-    char const *itemInfo;
-
-    if (realID < 0)
-    {
-        sLog.outError( "WORLD: Unknown item id 0x%.8X", realID );
-        return false;
-    }
-
-    ItemPrototype const *itemProto = objmgr.GetItemPrototype(realID);
-
-    if(!itemProto)
-    {
-        sLog.outError( "WORLD: Unknown item id 0x%.8X", realID );
-        return false;
-    }
-
-    sLog.outDebug( "WORLD: Real item id is %u. Name %s.", realID, itemProto->Name1 );
-
-    data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-    data << itemid;
-
-    itemInfo = fmtstring("<HTML>\n<BODY>\n");
-
-    itemInfo = fmtstring("%s</P></BODY>\n</HTML>\n", itemInfo);
-
-    data << itemInfo;
-    data << uint32(0);
-    SendPacket(&data);
-
-    return true;
-}*/
-//TO DO FIXME, for mails and auction mails this function works great
+//TO DO FIXME, for mails and auction mails this function works
 void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 {
     uint32 itemPageId;
@@ -463,62 +390,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 
     Player* pl = _player;
 
-    /* //old code, doesn't needed now..
-    Mail *m;
-
-    m = pl->GetMail(mailId);
-    if(m) {
-        sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", bodyItemGuid, mailId, unk);
-        QueryResult *result = sDatabase.PQuery( "SELECT `text` FROM `item_page` WHERE `id` = '%u'", m->itemPageId );
-
-        data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-        data << bodyItemGuid;
-        // it is player's id in ASCII:numberInASCII:sameNumberInASCII -- but only for auctionhouse's mails...
-        if (result) {
-            Field *fields = result->Fetch();
-            data << fields[0].GetCppString();
-        } else {
-            data << (uint32) 0;
-        }
-        data.hexlike();
-        SendPacket(&data);
-        delete result;
-    }
-    else
-    {
-        uint16 item_pos = pl->GetPosByGuid(bodyItemGuid);
-        Item* pItem = pl->GetItemByPos( item_pos );
-        if (pItem) {
-            QueryResult *result = sDatabase.PQuery( "SELECT `text`,`next_page` FROM `item_page` WHERE `id` = '%u'", pItem->GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) );
-
-            if( result ) {
-                data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-                data << mailId;
-
-                uint32 nextpage = mailId;
-
-                while (nextpage) {
-                    data << (*result)[0].GetCppString();
-                    nextpage = (*result)[1].GetUInt32();
-                    data << nextpage;
-                }
-                data << (uint32) 0;
-                SendPacket(&data);
-                delete result;
-                return;
-            }
-        }
-        //print an error:
-        sLog.outError("There is no info for item, bodyItemGuid: %u, mailId: %u", bodyItemGuid, mailId);
-        data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-        data << bodyItemGuid;
-
-        data << "There is no info for this item.";
-
-        data << (uint32) 0;
-        SendPacket(&data);
-    }*/
-    //there maybe check, if player has item with guid mailId, or has mail with id mailId
+    //some check needed, if player has item with guid mailId, or has mail with id mailId
 
     sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", itemPageId, mailId, unk);
 
