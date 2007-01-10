@@ -147,7 +147,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                         _player->DestroyItem(((Item*)pObject)->GetBagSlot(),((Item*)pObject)->GetSlot(),true);
 
                     break;
-                }   
+                }
                 case TYPEID_GAMEOBJECT:
                     Script->GOQuestAccept(_player, ((GameObject*)pObject), qInfo );
                     break;

@@ -669,6 +669,5 @@ void CliRunnable::run()
     ///- End the database thread
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }
-
 #endif
 /// @}

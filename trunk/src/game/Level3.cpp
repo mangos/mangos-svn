@@ -1266,7 +1266,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         strtok(NULL, "]");
         strtok(NULL, " ");
     }
-    else                                                          // item_id form
+    else                                                    // item_id form
     {
         char* citemId = strtok((char*)args, " ");
         itemId = atol(citemId);

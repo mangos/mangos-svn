@@ -34,7 +34,7 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
     uint64 guid;                                            //NPC guid
     recv_data >> guid;
 
-    if (!guid) 
+    if (!guid)
         return;                                             //check for cheaters
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
@@ -354,7 +354,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             objmgr.SendAuctionWonMail( auction );
 
             SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK);
-                       
+
             objmgr.RemoveAItem(auction->item_guid);
             mAuctions->RemoveAuction(auction->Id);
             sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
