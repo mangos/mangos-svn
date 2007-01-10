@@ -262,4 +262,3 @@
 
 #define LANG_INVISIBLE_INVISIBLE         "You are now invisible."
 #define LANG_INVISIBLE_VISIBLE           "You are now visible."
-#define LANG_INVISIBLE_GUILD             "You can't used GM invisibility if you guild member."
