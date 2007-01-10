@@ -1235,7 +1235,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     uint32 itemId = 0;
 
-    if(args[0]=='[')                                        // [name] manual форм 
+    if(args[0]=='[')                                        // [name] manual form
     {
         char* citemName = citemName = strtok((char*)args, "]");
 
@@ -1258,7 +1258,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
             return true;
         }
     }
-    else if(args[0]=='|')                                   // [name] Shift-click форм |color|Hitem:item_id:0:0:0|h[name]|h|r
+    else if(args[0]=='|')                                   // [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
     {
         strtok((char*)args, ":");
         char* citemId = strtok(NULL, ":");
