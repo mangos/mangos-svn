@@ -2123,10 +2123,10 @@ uint8 Spell::CheckItems()
         {
             // filter by equiped class (weapon or armor) - raw class value
             if(int32(itemTarget->GetProto()->Class) != m_spellInfo->EquippedItemClass)
-                return CAST_FAIL_ITEM_NOT_READY;
+                return CAST_FAIL_INVALID_TARGET;
             // filter by equiped subclass - bitmask of subclasses
             if((( 1 << itemTarget->GetProto()->SubClass ) & m_spellInfo->EquippedItemSubClass) == 0 )
-                return CAST_FAIL_ITEM_NOT_READY;
+                return CAST_FAIL_INVALID_TARGET;
         }
     }
 
@@ -2198,14 +2198,15 @@ uint8 Spell::CheckItems()
             }
             case SPELL_EFFECT_ENCHANT_ITEM:
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
+                if(!itemTarget)
+                    return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
+                break;
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
             {
                 if(!itemTarget)
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
-                if(int32(m_spellInfo->EquippedItemClass) >= 0 && itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
-                    return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
-                if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENCHANT_HELD_ITEM && !itemTarget->IsEquipped())
-                    return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
+                if (!itemTarget->IsEquipped())
+                    return CAST_FAIL_MUST_HAVE_ITEM_EQUIPPED;
                 break;
             }
             case SPELL_EFFECT_DISENCHANT:
