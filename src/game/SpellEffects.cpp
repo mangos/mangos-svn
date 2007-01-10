@@ -843,19 +843,60 @@ void Spell::EffectSummonChangeItem(uint32 i)
 
     Player *player = (Player*)m_caster;
 
+    // applied only to using item
+    if(!m_CastItem)
+        return;
+
+    // ... only to item in own inventory/bank/equip_slot
+    if(m_CastItem->GetOwnerGUID()!=player->GetGUID())
+        return;
+
     uint32 newitemid = m_spellInfo->EffectItemType[i];
     if(!newitemid)
         return;
 
-    uint16 dest;
-    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, 1, false);
+    uint16 pos = (m_CastItem->GetBagSlot() << 8) | m_CastItem->GetSlot();
 
-    if( msg == EQUIP_ERR_OK )
+    Item *pNewItem = player->CreateItem( newitemid, 1 );
+    if( !pNewItem )
+        return;
+
+    uint16 dest;
+    uint8 msg;
+
+    if( player->IsInventoryPos( pos ) )
     {
-        player->StoreNewItem( dest, newitemid, 1, true);
+        msg = player->CanStoreItem( m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true );
+        if( msg == EQUIP_ERR_OK )
+        {
+            player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(),true);
+            player->StoreItem( dest, pNewItem, true);
+            return;
+        }
     }
-    else
-        player->SendEquipError( msg, NULL, NULL );
+    else if( player->IsBankPos ( pos ) )
+    {
+        msg = player->CanBankItem( m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true );
+        if( msg == EQUIP_ERR_OK )
+        {
+            player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(),true);
+            player->BankItem( dest, pNewItem, true);
+            return;
+        }
+    }
+    else if( player->IsEquipmentPos ( pos ) )
+    {
+        msg = player->CanEquipItem( m_CastItem->GetSlot(), dest, pNewItem, true );
+        if( msg == EQUIP_ERR_OK )
+        {
+            player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(),true);
+            player->EquipItem( dest, pNewItem, true);
+            return;
+        }
+    }
+
+    // fail
+    delete pNewItem;
 }
 
 void Spell::EffectOpenSecretSafe(uint32 i)
