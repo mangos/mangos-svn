@@ -2478,7 +2478,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     // 127 - full bitmask any damages
     //
     // mods must be applied base at equiped weapon class and subclass comparison
-    // with spell->EquippedItemClass and  EquippedItemSubClass
+    // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
     if (!m_target)
         return;
@@ -2499,8 +2499,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
             Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             if (pItem)
             {
-                if ((int32(pItem->GetProto()->Class) == GetSpellProto()->EquippedItemClass) &&
-                    ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
@@ -2509,8 +2508,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
             pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
             if (pItem)
             {
-                if ((int32(pItem->GetProto()->Class) == GetSpellProto()->EquippedItemClass) &&
-                    ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
@@ -2519,8 +2517,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
             pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
             if (pItem)
             {
-                if ((int32(pItem->GetProto()->Class) == GetSpellProto()->EquippedItemClass) &&
-                    ((( 1 << pItem->GetProto()->SubClass ) & GetSpellProto()->EquippedItemSubClass) != 0))
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
                 {
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
                     m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );

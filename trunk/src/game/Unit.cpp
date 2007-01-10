@@ -2245,32 +2245,16 @@ void Unit::ApplyStats(bool apply)
         else
         {
             Item* pItem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            if (pItem)
-            {
-                if ((int32(pItem->GetProto()->Class) == (*i)->GetSpellProto()->EquippedItemClass) &&
-                    ((( 1 << pItem->GetProto()->SubClass ) & (*i)->GetSpellProto()->EquippedItemSubClass) != 0))
-                {
-                    totaldamgemods[BASE_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-                }
-            }
+            if (pItem && pItem->IsFitToSpellRequirements((*i)->GetSpellProto()))
+                totaldamgemods[BASE_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+
             pItem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            if (pItem)
-            {
-                if ((int32(pItem->GetProto()->Class) == (*i)->GetSpellProto()->EquippedItemClass) &&
-                    ((( 1 << pItem->GetProto()->SubClass ) & (*i)->GetSpellProto()->EquippedItemSubClass) != 0))
-                {
-                    totaldamgemods[OFF_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-                }
-            }
+            if (pItem && pItem->IsFitToSpellRequirements((*i)->GetSpellProto()))
+                totaldamgemods[OFF_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+
             pItem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem)
-            {
-                if ((int32(pItem->GetProto()->Class) == (*i)->GetSpellProto()->EquippedItemClass) &&
-                    ((( 1 << pItem->GetProto()->SubClass ) & (*i)->GetSpellProto()->EquippedItemSubClass) != 0))
-                {
-                    totaldamgemods[RANGED_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-                }
-            }
+            if (pItem && pItem->IsFitToSpellRequirements((*i)->GetSpellProto()))
+                totaldamgemods[RANGED_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
         }
     }
 

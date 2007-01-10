@@ -193,8 +193,9 @@ struct SpellEntry
     uint32    Totem[2];                                     //40-41
     uint32    Reagent[8];                                   //42-49
     uint32    ReagentCount[8];                              //50-57
-    int32     EquippedItemClass;                            //58
-    int32     EquippedItemSubClass;                         //59
+    int32     EquippedItemClass;                            //58 (value)
+    int32     EquippedItemSubClassMask;                     //59 (mask)
+    int32     EquippedItemInventoryTypeMask;                //60 (mask)
     uint32    Effect[3];                                    //61-63
     int32     EffectDieSides[3];                            //64-66
     uint32    EffectBaseDice[3];                            //67-69

@@ -869,15 +869,15 @@ void Spell::EffectProficiency(uint32 i)
         return;
     Player *p_target = (Player*)unitTarget;
 
-    uint32 newflag = m_spellInfo->EquippedItemSubClass;
-    if(m_spellInfo->EquippedItemClass == 2 && !(p_target->GetWeaponProficiency() & newflag))
+    uint32 subClassMask = m_spellInfo->EquippedItemSubClassMask;
+    if(m_spellInfo->EquippedItemClass == 2 && !(p_target->GetWeaponProficiency() & subClassMask))
     {
-        p_target->AddWeaponProficiency(newflag);
+        p_target->AddWeaponProficiency(subClassMask);
         p_target->SendProficiency(uint8(0x02),p_target->GetWeaponProficiency());
     }
-    if(m_spellInfo->EquippedItemClass == 4 && !(p_target->GetArmorProficiency() & newflag))
+    if(m_spellInfo->EquippedItemClass == 4 && !(p_target->GetArmorProficiency() & subClassMask))
     {
-        p_target->AddArmorProficiency(newflag);
+        p_target->AddArmorProficiency(subClassMask);
         p_target->SendProficiency(uint8(0x04),p_target->GetArmorProficiency());
     }
 }
