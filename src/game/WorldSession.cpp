@@ -39,8 +39,8 @@
 /// Player state
 enum SessionStatus
 {
-    STATUS_AUTHED = 0, ///< Player authenticated
-    STATUS_LOGGEDIN    ///< Player in game
+    STATUS_AUTHED = 0,                                      ///< Player authenticated
+    STATUS_LOGGEDIN                                         ///< Player in game
 };
 
 /// WorldSession constructor
@@ -49,6 +49,7 @@ _security(sec), _accountId(id), _logoutTime(0)
 {
 
 }
+
 /// WorldSession destructor
 WorldSession::~WorldSession()
 {
@@ -143,7 +144,7 @@ bool WorldSession::Update(uint32 diff)
         LogoutPlayer(true);
 
     if (!_socket)
-        return false; //Will remove this session from the world session map
+        return false;                                       //Will remove this session from the world session map
 
     return true;
 }

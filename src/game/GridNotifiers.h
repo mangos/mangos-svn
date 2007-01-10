@@ -251,7 +251,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    struct MANGOS_DLL_DECL UnitListSearcher
+        struct MANGOS_DLL_DECL UnitListSearcher
     {
         std::list<Unit*> &i_objects;
         Check& i_check;
@@ -278,7 +278,6 @@ namespace MaNGOS
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
     };
-
 
     class AnyUnfriendlyUnitInObjectRangeCheck
     {

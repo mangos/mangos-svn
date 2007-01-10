@@ -565,11 +565,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
     uint32 unMaxTargets = 0;
     if(m_spellInfo->MaxAffectedTargets == 0 && m_spellInfo->EffectChainTarget[i] == 0)
-        unMaxTargets = 0;//no limits
+        unMaxTargets = 0;                                   //no limits
     else if(m_spellInfo->MaxAffectedTargets == 0 && m_spellInfo->EffectChainTarget[i] != 0)
-        unMaxTargets = m_spellInfo->EffectChainTarget[i] + 1;//selected enemy also
+                                                            //selected enemy also
+            unMaxTargets = m_spellInfo->EffectChainTarget[i] + 1;
     else if (m_spellInfo->MaxAffectedTargets != 0 && m_spellInfo->EffectChainTarget[i] != 0)
-        unMaxTargets = m_spellInfo->MaxAffectedTargets; //Unknown such spells;
+        unMaxTargets = m_spellInfo->MaxAffectedTargets;     //Unknown such spells;
 
     if (m_spellInfo->EffectChainTarget[i] != 0 || (unMaxTargets != 0 && TagUnitMap.size() > unMaxTargets))
     {
@@ -584,7 +585,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             {
                 TagUnitMap.erase(itr);
                 removed_utarget = 1;
-        //        break;
+                //        break;
             }
         }
         // remove random units from the map
