@@ -232,6 +232,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 {
+    m_playerLoading = true;
     uint64 playerGuid = 0;
 
     DEBUG_LOG( "WORLD: Recvd Player Logon Message" );
@@ -243,7 +244,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     plr->SetSession(this);
     if(!plr->LoadFromDB(GUID_LOPART(playerGuid)))
+    {
+        m_playerLoading = false;
         return;
+    }
     //plr->_RemoveAllItemMods();
 
     //set a count of unread mails:
@@ -504,6 +508,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     if(pCurrChar->isGameMaster())
         SendNotification("GM mode is ON");
+    m_playerLoading = false;
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

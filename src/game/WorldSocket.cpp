@@ -319,9 +319,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
 
     ///- kick already loaded player with same account (if any) and remove session
-    if(sWorld.RemoveSession(id))
+    /// or log in not logged player
+    /// if player is in loading and want to load again, return
+    if(!sWorld.RemoveSession(id))
     {
-        sLog.outDetail( "SOCKET: Already connected - player kicked." );
+        return;
     }
 
     ///- Check that Key and account name are the same on client and server
