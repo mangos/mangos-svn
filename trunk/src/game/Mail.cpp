@@ -249,6 +249,14 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         return;
     }
 
+    // prevent cheating with skip client money check
+    if(pl->GetMoney() < m->COD)
+    {
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_NOT_ENOUGH_MONEY);
+        return;
+    }
+
+
     Item *it = pl->GetMItem(m->item_guid);
 
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
@@ -272,7 +280,6 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
                 "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '8')",
                 newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, m->COD);
 
-            // client tests, if player has enought money
             pl->ModifyMoney( -int32(m->COD) );
         }
         m->COD = 0;
