@@ -1,3 +1,3 @@
-insert into command values('shuttdown','3','Syntax: .shuttdown seconds');
-insert into command values('cshuttdown','3','Syntax: .cshuttdown Cancels shuttdown');
+insert into command values('shutdown','3','Syntax: .shutdown seconds');
+insert into command values('cshutdown','3','Syntax: .cshutdown Cancels shuttdown');
 
