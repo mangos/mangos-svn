@@ -260,11 +260,19 @@ class Quest
         uint32 Repeatable;
 };
 
+enum QuestUpdateState
+{
+    QUEST_UNCHANGED = 0,
+    QUEST_CHANGED = 1,
+    QUEST_NEW = 2   
+};
+
+
 struct quest_status
 {
     quest_status()
         : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),m_explored(false),
-        m_completed_once(false), m_timer(0)
+        m_completed_once(false), m_timer(0), uState(QUEST_NEW)
     {
         memset(m_itemcount,    0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
@@ -277,6 +285,7 @@ struct quest_status
     bool m_explored;
     bool m_completed_once;                                  // for repeatable quests
     uint32 m_timer;
+    QuestUpdateState uState;
 
     uint32 m_itemcount[ QUEST_OBJECTIVES_COUNT ];
     uint32 m_creatureOrGOcount[ QUEST_OBJECTIVES_COUNT ];

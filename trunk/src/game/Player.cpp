@@ -684,6 +684,7 @@ void Player::Update( uint32 p_time )
             else
             {
                 mQuestStatus[*iter].m_timer -= p_time;
+                if (mQuestStatus[*iter].uState != QUEST_NEW) mQuestStatus[*iter].uState = QUEST_CHANGED;
                 iter++;
             }
             //}
@@ -2609,6 +2610,8 @@ void Player::DeleteFromDB()
     // remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(GetGUID());
 
+    sDatabase.BeginTransaction();
+
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
     {
         if(m_items[i] == NULL)
@@ -2616,7 +2619,6 @@ void Player::DeleteFromDB()
         m_items[i]->DeleteFromDB();                         // Bag items delete also by virtual call Bag::DeleteFromDB
     }
 
-    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
@@ -3493,7 +3495,7 @@ void Player::SendInitialActionButtons()
     for(int button = 0; button < 120; ++button)
     {
         ActionButtonList::const_iterator itr = m_actionButtons.find(button);
-        if(itr != m_actionButtons.end())
+        if(itr != m_actionButtons.end() && itr->second.uState != ACTIONBUTTON_DELETED)
         {
             data << uint16(itr->second.action);
             data << uint8(itr->second.misc);
@@ -3533,14 +3535,22 @@ void Player::addActionButton(const uint8 button, const uint16 action, const uint
         }
     }
 
-    m_actionButtons[button] = ActionButton(action,type,misc);
+    if (m_actionButtons.find(button)==m_actionButtons.end())
+    {    // just add new button
+        m_actionButtons[button] = ActionButton(action,type,misc);
+    } else
+    {    // change state of current button
+        ActionButtonUpdateState uState = m_actionButtons[button].uState;
+        m_actionButtons[button] = ActionButton(action,type,misc);
+        if (uState != ACTIONBUTTON_NEW) m_actionButtons[button].uState = ACTIONBUTTON_CHANGED;
+    };
 
     sLog.outDetail( "Player '%u' Added Action '%u' to Button '%u'", GetGUIDLow(), action, button );
 }
 
 void Player::removeActionButton(uint8 button)
 {
-    m_actionButtons.erase(button);
+    m_actionButtons[button].uState = ACTIONBUTTON_DELETED;
     sLog.outDetail( "Action Button '%u' Removed from Player '%u'", button, GetGUIDLow() );
 }
 
@@ -8330,10 +8340,22 @@ void Player::AddQuest( Quest *pQuest )
 
         uint32 quest_id = pQuest->GetQuestId();
 
+        // check for repeatable quests status
+        QuestUpdateState uState;
+        if (mQuestStatus.find(quest_id)==mQuestStatus.end()) 
+            {uState = QUEST_NEW;} else 
+            {
+                if (mQuestStatus[quest_id].uState != QUEST_NEW) 
+                    { uState = QUEST_CHANGED; } else
+                    { uState = QUEST_NEW; };
+            };
+
         mQuestStatus[quest_id].m_quest = pQuest;
         mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
         mQuestStatus[quest_id].m_rewarded = false;
         mQuestStatus[quest_id].m_explored = false;
+
+        mQuestStatus[quest_id].uState = uState; // mark quest as new or changed
 
         if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
         {
@@ -8475,6 +8497,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
 
         SendQuestReward( pQuest, XP, questGiver );
         mQuestStatus[quest_id].m_completed_once = true;     // in repeated quest case prevent recive XP at second complete
+        if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
     }
 }
 
@@ -8501,7 +8524,8 @@ void Player::FailTimedQuest( uint32 quest_id )
 {
     if( quest_id )
     {
-        mQuestStatus[quest_id].m_timer = 0;
+        if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
+        mQuestStatus[quest_id].m_timer = 0;    
 
         IncompleteQuest( quest_id );
 
@@ -8817,6 +8841,7 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
         }
 
         mQuestStatus[quest_id].m_status = status;
+        if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
     }
 }
 
@@ -8834,6 +8859,8 @@ void Player::AdjustQuestReqItemCount( uint32 quest_id )
                 {
                     uint32 curitemcount = GetItemCount(qInfo->ReqItemId[i]) + GetBankItemCount(qInfo->ReqItemId[i]);
                     mQuestStatus[quest_id].m_itemcount[i] = min(curitemcount, reqitemcount);
+                    if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
+
                 }
             }
         }
@@ -8858,6 +8885,7 @@ void Player::AreaExplored( uint32 questId )
         if( log_slot )
         {
             mQuestStatus[questId].m_explored = true;
+            if (mQuestStatus[questId].uState != QUEST_NEW) mQuestStatus[questId].uState = QUEST_CHANGED;
         }
         if( CanCompleteQuest( questId ) )
             CompleteQuest( questId );
@@ -8890,6 +8918,8 @@ void Player::ItemAddedQuestCheck( uint32 entry, uint32 count )
                         {
                             additemcount = ( curitemcount + count <= reqitemcount ? count : reqitemcount - curitemcount);
                             mQuestStatus[questid].m_itemcount[j] += additemcount;
+                            if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
+
                             SendQuestUpdateAddItem( questid, j, additemcount );
                         }
                         if ( CanCompleteQuest( questid ) )
@@ -8931,6 +8961,8 @@ void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
                         {
                             remitemcount = ( curitemcount <= reqitemcount ? count : count + reqitemcount - curitemcount);
                             mQuestStatus[questid].m_itemcount[j] = curitemcount - remitemcount;
+                            if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
+
                             IncompleteQuest( questid );
                         }
                         return;
@@ -8980,6 +9012,8 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
                         if ( curkillcount < reqkillcount )
                         {
                             mQuestStatus[questid].m_creatureOrGOcount[j] = curkillcount + addkillcount;
+                            if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
+
                             SendQuestUpdateAddCreature( questid, guid, j, curkillcount, addkillcount);
                         }
                         if ( CanCompleteQuest( questid ) )
@@ -9040,6 +9074,8 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
                         if ( curCastCount < reqCastCount )
                         {
                             mQuestStatus[questid].m_creatureOrGOcount[j] = curCastCount + addCastCount;
+                            if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
+
                             SendQuestUpdateAddCreature( questid, guid, j, curCastCount, addCastCount);
                         }
                         if ( CanCompleteQuest( questid ) )
@@ -9567,7 +9603,11 @@ void Player::_LoadActions()
         {
             Field *fields = result->Fetch();
 
-            addActionButton(fields[0].GetUInt8(), fields[1].GetUInt16(), fields[2].GetUInt8(), fields[3].GetUInt8());
+            uint8 button = fields[0].GetUInt8();
+
+            addActionButton(button, fields[1].GetUInt16(), fields[2].GetUInt8(), fields[3].GetUInt8());
+
+            m_actionButtons[button].uState = ACTIONBUTTON_UNCHANGED;
         }
         while( result->NextRow() );
 
@@ -9863,6 +9903,8 @@ void Player::_LoadQuestStatus()
                 mQuestStatus[quest_id].m_itemcount[2] = fields[12].GetUInt32();
                 mQuestStatus[quest_id].m_itemcount[3] = fields[13].GetUInt32();
 
+                mQuestStatus[quest_id].uState = QUEST_UNCHANGED;
+
                 sLog.outDebug("Quest status is {%u} for quest {%u}", mQuestStatus[quest_id].m_status, quest_id);
             }
         }
@@ -10087,8 +10129,6 @@ void Player::SaveToDB()
 
     sDatabase.Execute( ss.str().c_str() );
 
-    sDatabase.CommitTransaction();
-
     SaveEnchant();
 
     if(m_mailsUpdated)                                      //save mails only when needed
@@ -10102,6 +10142,8 @@ void Player::SaveToDB()
     _SaveActions();
     _SaveAuras();
     _SaveReputation();
+
+    sDatabase.CommitTransaction();
 
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
@@ -10123,12 +10165,30 @@ void Player::SaveToDB()
 
 void Player::_SaveActions()
 {
-    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",GetGUIDLow());
-
-    for(ActionButtonList::const_iterator itr = m_actionButtons.begin(); itr != m_actionButtons.end(); ++itr)
+    for(ActionButtonList::iterator itr = m_actionButtons.begin(); itr != m_actionButtons.end(); )
     {
-        sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')",
-            GetGUIDLow(), (uint32)itr->first, (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc);
+        switch (itr->second.uState)
+        {
+            case ACTIONBUTTON_NEW:
+                sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')", 
+                    GetGUIDLow(), (uint32)itr->first, (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc );
+                itr->second.uState = ACTIONBUTTON_UNCHANGED;
+                ++itr;
+                break;
+            case ACTIONBUTTON_CHANGED:
+                sDatabase.PExecute("UPDATE `character_action`  SET `action` = '%u', `type` = '%u', `misc`= '%u' WHERE `guid`= '%u' AND `button`= '%u' ", 
+                    (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc, GetGUIDLow(), (uint32)itr->first );
+                itr->second.uState = ACTIONBUTTON_UNCHANGED;
+                ++itr;
+                break;
+            case ACTIONBUTTON_DELETED:
+                sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u' and button = '%u'", GetGUIDLow(), (uint32)itr->first );
+                itr = m_actionButtons.erase(itr);
+                break;
+            default:
+                ++itr;
+                break;
+        };
     }
 }
 
@@ -10236,7 +10296,6 @@ void Player::_SaveMail()
         }
         else if (m->state == DELETED)
         {
-            sDatabase.BeginTransaction();
             if (m->item_guid)
                 sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
             if (m->itemPageId)
@@ -10244,7 +10303,6 @@ void Player::_SaveMail()
                 sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", m->itemPageId);
             }
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
-            sDatabase.CommitTransaction();
         }
     }
     //dealocate deleted mails...
@@ -10269,29 +10327,45 @@ void Player::_SaveMail()
 
 void Player::_SaveQuestStatus()
 {
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",GetGUIDLow());
-
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    // we don't need transactions here.
+    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++i )
     {
-        sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
-            GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
+        switch (i->second.uState)
+        {
+            case QUEST_NEW :
+                sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+                    GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
+                break;
+            case QUEST_CHANGED :
+                sDatabase.PExecute("UPDATE `character_queststatus` SET `status` = '%u',`rewarded` = '%u',`explored` = '%u',`completed_once` = '%u',`timer` = '" I64FMTD "',`mobcount1` = '%u',`mobcount2` = '%u',`mobcount3` = '%u',`mobcount4` = '%u',`itemcount1` = '%u',`itemcount2` = '%u',`itemcount3` = '%u',`itemcount4` = '%u'  WHERE `guid` = '%u' AND `quest` = '%u' ",
+                    i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3], GetGUIDLow(), i->first );
+                break;
+        };
+        i->second.uState = QUEST_UNCHANGED;
     }
-    sDatabase.CommitTransaction();
 }
 
 void Player::_SaveReputation()
 {
     std::list<Factions>::iterator itr;
 
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
-
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%i', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+        // it's better than rebuilding indexes multiple times
+        QueryResult *result = sDatabase.PQuery("SELECT count(*) AS r FROM `character_reputation` WHERE `guid` = '%u' AND `faction`='%u'", GetGUIDLow(), itr->ID );
+        Field *fields = result->Fetch();
+        uint32 Rows = fields[0].GetUInt32();
+        delete result;
+
+        if (Rows) 
+        {
+            sDatabase.PExecute("UPDATE `character_reputation` SET `reputation`='%u', `standing`='%i', `flags`='%u' WHERE `guid` = '%u' AND `faction`='%u'", 
+                itr->ReputationListID, itr->Standing, itr->Flags, GetGUIDLow(), itr->ID );
+        } else
+        {
+            sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%i', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+        };
     }
-    sDatabase.CommitTransaction();
 }
 
 void Player::_SaveSpells()
@@ -10312,10 +10386,19 @@ void Player::_SaveSpells()
 
 void Player::_SaveTutorials()
 {
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
-    sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
-    sDatabase.CommitTransaction();
+    // it's better than rebuilding indexes multiple times
+    QueryResult *result = sDatabase.PQuery("SELECT count(*) AS r FROM `character_tutorial` WHERE `guid` = '%u'", GetGUIDLow() );
+    Field *fields = result->Fetch();
+    uint32 Rows = fields[0].GetUInt32();
+    delete result;
+
+    if (Rows) {
+        sDatabase.PExecute("UPDATE `character_tutorial` SET `tut0`='%u', `tut1`='%u', `tut2`='%u', `tut3`='%u', `tut4`='%u', `tut5`='%u', `tut6`='%u', `tut7`='%u' WHERE `guid` = '%u'", 
+            m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetGUIDLow() );
+    } else
+    {
+        sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+    };
 }
 
 void Player::outDebugValues() const

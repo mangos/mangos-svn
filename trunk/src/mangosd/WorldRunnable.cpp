@@ -34,21 +34,25 @@ void WorldRunnable::run()
     ///- Init new SQL thread for the world database
     sDatabase.ThreadStart();                                // let thread do safe mySQL requests (one connection call enough)
 
-    uint32 realCurrTime = 0, realPrevTime = 0;
+    uint32 realCurrTime = 0;
+    uint32 realPrevTime = getMSTime();
 
     ///- While we have not World::m_stopEvent, update the world
     while (!World::m_stopEvent)
     {
-
-        if (realPrevTime > realCurrTime)
-            realPrevTime = 0;
-
         realCurrTime = getMSTime();
-        sWorld.Update( realCurrTime - realPrevTime );
+
+        uint32 diff;
+        if (realPrevTime > realCurrTime)                    // getMSTime() have limited data range and this is case when it overflow in this tick
+		    diff = 0xFFFFFFFF - (realPrevTime - realCurrTime);
+        else
+		    diff = realCurrTime - realPrevTime;
+
+        sWorld.Update( diff );
         realPrevTime = realCurrTime;
 
         #ifdef WIN32
-        ZThread::Thread::sleep(50);
+		ZThread::Thread::sleep(50);
         #else
         ZThread::Thread::sleep(100);
         #endif
