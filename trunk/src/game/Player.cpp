@@ -10183,7 +10183,7 @@ void Player::_SaveActions()
                 break;
             case ACTIONBUTTON_DELETED:
                 sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u' and button = '%u'", GetGUIDLow(), (uint32)itr->first );
-                itr = m_actionButtons.erase(itr);
+                m_actionButtons.erase(itr++);
                 break;
             default:
                 ++itr;
