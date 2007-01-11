@@ -146,6 +146,11 @@ GM.InWhoList = 0
 # Default: 2 (last save state)
 GM.LoginState = 2
 
+# Include GM trade and trade slot enchanting operations in GM log if it enable
+#          0 (not include)
+# Default: 1 (include)
+GM.LogTrade = 1
+
 # Group visibility modes
 # Default: 0 (standard setting: only members from same group can 100% auto detect invisible player)
 #          1 (raid members 100% auto detect invisible player from same raid)

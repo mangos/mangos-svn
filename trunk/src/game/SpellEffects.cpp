@@ -1346,6 +1346,12 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         if(!item_owner)
             return;
 
+        if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+            sLog.outCommand("GM Enchanting: %s (Entry: %d) GM: %s (Account: %u) Player: %s (Account: %u)",
+                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+                p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
+                item_owner->GetName(),item_owner->GetSession()->GetAccountId());
+
         // remove old enchanting before appling new if equiped
         if(itemTarget->IsEquipped())
             if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT))
@@ -1390,6 +1396,12 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         Player* item_owner = itemTarget->GetOwner();
         if(!item_owner)
             return;
+
+        if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+            sLog.outCommand("GM Enchanting: %s (Entry: %d) GM: %s (Account: %u) Player: %s (Account: %u)",
+                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+                p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
+                item_owner->GetName(),item_owner->GetSession()->GetAccountId());
 
         // remove old enchanting before applying new if equipped
         if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3))
@@ -2047,6 +2059,12 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         Player* item_owner = itemTarget->GetOwner();
         if(!item_owner)
             return;
+
+        if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+            sLog.outCommand("GM Enchanting: %s (Entry: %d) GM: %s (Account: %u) Player: %s (Account: %u)",
+                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+                p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
+                item_owner->GetName(),item_owner->GetSession()->GetAccountId());
 
         // remove old enchanting before appling new
         if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3))

@@ -222,6 +222,12 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, dst, myItems[i], false ) == EQUIP_ERR_OK)
                     {
                         sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
+                        if( _player->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+                            sLog.outCommand("GM Trade: %s (Entry: %d Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
+                                myItems[i]->GetProto()->Name1,myItems[i]->GetEntry(),myItems[i]->GetCount(),
+                                _player->GetName(),_player->GetSession()->GetAccountId(),
+                                _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
+
                         _player->ItemRemovedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
                         _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
                         myItems[i]->RemoveFromUpdateQueueOf(_player);
@@ -235,6 +241,12 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
                     {
                         sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
+                        if( _player->pTrader->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+                            sLog.outCommand("GM Trade: %s (Entry: %u Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
+                                hisItems[i]->GetProto()->Name1,hisItems[i]->GetEntry(),hisItems[i]->GetCount(),
+                                _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
+                                _player->GetName(),_player->GetSession()->GetAccountId());
+
                         _player->pTrader->ItemRemovedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
                         _player->pTrader->RemoveItem(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);
                         hisItems[i]->RemoveFromUpdateQueueOf(_player->pTrader);

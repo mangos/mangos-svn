@@ -269,6 +269,7 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_GM_IN_GM_LIST]  = sConfig.GetIntDefault("GM.InGMList",0);
     m_configs[CONFIG_GM_IN_WHO_LIST]  = sConfig.GetIntDefault("GM.InWhoList",0);
     m_configs[CONFIG_GM_LOGIN_STATE]  = sConfig.GetIntDefault("GM.LoginState",2);
+    m_configs[CONFIG_GM_LOG_TRADE] = sConfig.GetIntDefault("GM.LogTrade", 1);
 
     m_configs[CONFIG_GROUP_VISIBILITY] = sConfig.GetIntDefault("GroupVisibility",0);
 
