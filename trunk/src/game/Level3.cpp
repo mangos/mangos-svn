@@ -1285,27 +1285,100 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         plTarget = pl;
 
     sLog.outDetail(LANG_ADDITEM, itemId, count);
-    uint16 dest;
-    uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, count, false );
-    if( msg == EQUIP_ERR_OK )
-    {
-        plTarget->StoreNewItem( dest, itemId, count, true);
 
-        // remove binding (let GM give it to another player later)
-        if(pl==plTarget)
+    ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
+
+    uint32 countForStore = count;
+
+    // if possible create full stacks for better performance
+    while(countForStore >= pProto->Stackable)
+    {
+        uint16 dest;
+        uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, pProto->Stackable, false );
+        if( msg == EQUIP_ERR_OK )
         {
-            Item* item = pl->GetItemByPos(dest);
-            if(item)
-                item->SetBinding( false );
-        }
+            Item* item = plTarget->StoreNewItem( dest, itemId, pProto->Stackable, true, true);
 
-        PSendSysMessage(LANG_ITEM_CREATED, itemId, count);
+            countForStore-= pProto->Stackable;
+
+            // remove binding (let GM give it to another player later)
+            if(pl==plTarget)
+            {
+                // remove binding from original stack
+                Item* item1 = pl->GetItemByPos(dest);
+                if(item1!=item)
+                    item1->SetBinding( false );
+                // and new stack
+                item->SetBinding( false );
+            }
+        }
+        else
+            break;
     }
-    else
+
+    // create remaining items
+    if(countForStore < pProto->Stackable)
     {
-        pl->SendEquipError( msg, NULL, NULL );
-        PSendSysMessage(LANG_ITEM_CANNOT_CREATE, itemId, count);
+        uint16 dest;
+        uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, countForStore, false );
+
+        // if can add all countForStore items
+        if( msg == EQUIP_ERR_OK )
+        {
+            Item* item = plTarget->StoreNewItem( dest, itemId, countForStore, true);
+            countForStore = 0;
+
+            // remove binding (let GM give it to another player later)
+            if(pl==plTarget)
+            {
+                // remove binding from original stack
+                Item* item1 = pl->GetItemByPos(dest);
+                if(item1!=item)
+                    item1->SetBinding( false );
+                // and new stack
+                item->SetBinding( false );
+            }
+        }
     }
+
+    // ok search place for add only part from countForStore items in not full stacks
+    while(countForStore > 0)
+    {
+        // find not full stack (last possable place for times after prev. checks)
+        uint16 dest;
+        uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, 1, false );
+        if( msg == EQUIP_ERR_OK )                       // found
+        {
+            // we can fill this stack to max stack size
+            Item* itemStack = pl->GetItemByPos(dest);
+            if(itemStack)
+            {
+                uint32 countForStack = pProto->Stackable - itemStack->GetCount();
+                // recheck with real item amount
+                uint8 msg = plTarget->CanStoreNewItem( itemStack->GetBagSlot(), itemStack->GetSlot(), dest, itemId, countForStack, false );
+                if( msg == EQUIP_ERR_OK )
+                {
+                    Item* item = plTarget->StoreNewItem( dest, itemId, countForStack, true, true);
+                    countForStore-= countForStack;
+                        
+                    // remove binding (let GM give it to another player later)
+                    if(pl==plTarget)
+                        item->SetBinding( false );
+                }
+                else
+                    break;                                  // not possable with correct work
+            }
+            else
+                break;                                      // not possable with correct work
+        }
+        else
+            break;
+    }
+
+    if(count > countForStore)
+        PSendSysMessage(LANG_ITEM_CREATED, itemId, count - countForStore);
+    if(countForStore > 0)
+        PSendSysMessage(LANG_ITEM_CANNOT_CREATE, itemId, countForStore);
 
     return true;
 }
