@@ -1341,11 +1341,10 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         if(!pEnchant)
             return;
 
-        // item can be in trade slot and have owner diff. from caster 
+        // item can be in trade slot and have owner diff. from caster
         Player* item_owner = itemTarget->GetOwner();
         if(!item_owner)
             return;
-
 
         // remove old enchanting before appling new if equiped
         if(itemTarget->IsEquipped())
@@ -1387,7 +1386,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         if(!pEnchant)
             return;
 
-        // item can be in trade slot and have owner diff. from caster 
+        // item can be in trade slot and have owner diff. from caster
         Player* item_owner = itemTarget->GetOwner();
         if(!item_owner)
             return;

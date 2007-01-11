@@ -125,7 +125,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
         pItem->RemoveFromUpdateQueueOf( pl );
-    
+
         sDatabase.BeginTransaction();
         pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
         pItem->SaveToDB();                                  // recursive and not have transaction guard into self

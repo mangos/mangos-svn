@@ -85,7 +85,6 @@ enum ActionButtonUpdateState
     ACTIONBUTTON_DELETED   = 3
 };
 
-
 struct ActionButton
 {
     ActionButton() : action(0), type(0), misc(0), uState( ACTIONBUTTON_NEW ) {}

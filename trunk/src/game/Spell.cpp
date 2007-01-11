@@ -568,7 +568,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         unMaxTargets = 0;                                   //no limits
     else if(m_spellInfo->MaxAffectedTargets == 0 && m_spellInfo->EffectChainTarget[i] != 0)
                                                             //selected enemy also
-            unMaxTargets = m_spellInfo->EffectChainTarget[i] + 1;
+        unMaxTargets = m_spellInfo->EffectChainTarget[i] + 1;
     else if (m_spellInfo->MaxAffectedTargets != 0 && m_spellInfo->EffectChainTarget[i] != 0)
         unMaxTargets = m_spellInfo->MaxAffectedTargets;     //Unknown such spells;
 

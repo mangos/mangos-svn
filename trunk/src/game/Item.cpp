@@ -461,7 +461,7 @@ void Item::SaveToDB()
             delete result;
             // guess - instance exists ?
             if (!Rows)
-            {    
+            {
                 // no - we must insert new rec
                 std::ostringstream ss;
                 ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES (" << guid << ",'";

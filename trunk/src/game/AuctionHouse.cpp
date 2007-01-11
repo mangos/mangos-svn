@@ -210,7 +210,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     uint16 pos = pl->GetPosByGuid(item);
     Item *it = pl->GetItemByPos( pos );
-    //do not allow to sell already auctioned items 
+    //do not allow to sell already auctioned items
     if(objmgr.GetAItem(GUID_LOPART(item)))
     {
         sLog.outError("AuctionError, player %s is sending item id: %u, but item is already in another auction", pl->GetName(), GUID_LOPART(item));

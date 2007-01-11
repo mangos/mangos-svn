@@ -264,9 +264,8 @@ enum QuestUpdateState
 {
     QUEST_UNCHANGED = 0,
     QUEST_CHANGED = 1,
-    QUEST_NEW = 2   
+    QUEST_NEW = 2
 };
-
 
 struct quest_status
 {
