@@ -1035,7 +1035,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
             if (cinfo->civilian != 1 && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
                 SetPvP(true);
     } else
-    sLog.outErrorDb("Error: invalid faction for creature %u", GetGUID());
+        sLog.outErrorDb("Error: invalid faction (%u) for creature (GUIDLow: %u Entry: %u)", cinfo->faction, GetGUIDLow(),Entry);
 
     if (cinfo->mount != 0)
         Mount(cinfo->mount);
