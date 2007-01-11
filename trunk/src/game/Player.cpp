@@ -1317,16 +1317,16 @@ void Player::RemoveFromWorld()
 
 void Player::CalcRage( uint32 damage,bool attacker )
 {
-    uint32 addRage = 0;
+    float addRage;
 
     float rageconversion = ((0.0091107836 * getLevel()*getLevel())+3.225598133*getLevel())+4.2652911;
 
     if(attacker)
-        addRage = (uint32)(damage/rageconversion*7.5);
+        addRage = damage/rageconversion*7.5;
     else
-        addRage = (uint32)(damage/rageconversion*2.5);
+        addRage = damage/rageconversion*2.5;
 
-    ModifyPower(POWER_RAGE, addRage*10);
+    ModifyPower(POWER_RAGE, uint32(addRage*10));
 }
 
 void Player::RegenerateAll()
