@@ -1341,12 +1341,16 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         if(!pEnchant)
             return;
 
+        // item can be in trade slot and have owner diff. from caster 
+        Player* item_owner = itemTarget->GetOwner();
+        if(!item_owner)
+            return;
+
+
         // remove old enchanting before appling new if equiped
         if(itemTarget->IsEquipped())
-        {
             if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT))
-                p_caster->AddItemEnchant(itemTarget,old_enchant_id,false);
-        }
+                item_owner->AddItemEnchant(itemTarget,old_enchant_id,false);
 
         for(int x=0;x<3;x++)
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x,0);
@@ -1355,14 +1359,9 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
         // add new enchanting if equiped
         if(itemTarget->IsEquipped())
-        {
-            p_caster->AddItemEnchant(itemTarget,enchant_id,true);
-        }
+            item_owner->AddItemEnchant(itemTarget,enchant_id,true);
 
         itemTarget->SetState(ITEM_CHANGED);
-
-        //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
-        //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),pEnchant->display_type,duration);
     }
 }
 
@@ -1388,14 +1387,19 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         if(!pEnchant)
             return;
 
+        // item can be in trade slot and have owner diff. from caster 
+        Player* item_owner = itemTarget->GetOwner();
+        if(!item_owner)
+            return;
+
         // remove old enchanting before applying new if equipped
         if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3))
         {
             if(itemTarget->IsEquipped())
-                p_caster->AddItemEnchant(itemTarget,old_enchant_id,false);
+                item_owner->AddItemEnchant(itemTarget,old_enchant_id,false);
 
             // duration == 0 will remove EnchantDuration
-            p_caster->AddEnchantDuration(itemTarget,1,0);
+            item_owner->AddEnchantDuration(itemTarget,1,0);
         }
 
         for(int x=0;x<3;x++)
@@ -1408,17 +1412,12 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
         // add new enchanting if equipped
         if(itemTarget->IsEquipped())
-        {
-            p_caster->AddItemEnchant(itemTarget,enchant_id,true);
-        }
+            item_owner->AddItemEnchant(itemTarget,enchant_id,true);
 
         itemTarget->SetState(ITEM_CHANGED);
 
         // set duration
-        p_caster->AddEnchantDuration(itemTarget,1,duration*1000);
-
-        //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
-        p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),pEnchant->display_type,duration);
+        item_owner->AddEnchantDuration(itemTarget,1,duration*1000);
     }
 }
 
@@ -2045,9 +2044,14 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         if(!pEnchant)
             return;
 
+        // can be held by another player and accessable to caster in trade slot
+        Player* item_owner = itemTarget->GetOwner();
+        if(!item_owner)
+            return;
+
         // remove old enchanting before appling new
         if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3))
-            p_caster->AddItemEnchant(itemTarget,old_enchant_id,false);
+            item_owner->AddItemEnchant(itemTarget,old_enchant_id,false);
 
         for(int x=0;x<3;x++)
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);
@@ -2057,10 +2061,10 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         itemTarget->SetState(ITEM_CHANGED);
 
         // add new enchanting
-        p_caster->AddItemEnchant(itemTarget,enchant_id,true);
+        item_owner->AddItemEnchant(itemTarget,enchant_id,true);
 
-        //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
-        p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),pEnchant->display_type,duration);
+        // set duration
+        item_owner->AddEnchantDuration(itemTarget,1,duration*1000);
     }
 }
 
