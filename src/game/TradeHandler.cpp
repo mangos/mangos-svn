@@ -243,9 +243,12 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     }
                 }
             }
-            // desynced with the other saves here
+            // desynced with the other saves here (_SaveInventory not have own transaction guards)
+            sDatabase.BeginTransaction();
             _player->_SaveInventory();
             _player->pTrader->_SaveInventory();
+            sDatabase.CommitTransaction();
+
             _player->ModifyMoney( -((int32)_player->tradeGold) );
             _player->ModifyMoney(_player->pTrader->tradeGold );
             _player->pTrader->ModifyMoney( -((int32)_player->pTrader->tradeGold) );

@@ -454,13 +454,31 @@ void Item::SaveToDB()
     {
         case ITEM_NEW:
         {
-            std::ostringstream ss;
-            ss << "REPLACE INTO `item_instance` (`guid`,`data`) VALUES (" << guid << ",'";
-            for(uint16 i = 0; i < m_valuesCount; i++ )
-                ss << GetUInt32Value(i) << " ";
-            ss << "' )";
+            // it's better than rebuilding indexes multiple times
+            QueryResult *result = sDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
+            Field *fields = result->Fetch();
+            uint32 Rows = fields[0].GetUInt32();
+            delete result;
+            // guess - instance exists ?
+            if (!Rows)
+            {    
+                // no - we must insert new rec
+                std::ostringstream ss;
+                ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES (" << guid << ",'";
+                for(uint16 i = 0; i < m_valuesCount; i++ )
+                    ss << GetUInt32Value(i) << " ";
+                ss << "' )";
 
-            sDatabase.Execute( ss.str().c_str() );
+                sDatabase.Execute( ss.str().c_str() );
+            } else
+            {
+                std::ostringstream ss;
+                ss << "UPDATE `item_instance` SET `data` = '";
+                for(uint16 i = 0; i < m_valuesCount; i++ )
+                    ss << GetUInt32Value(i) << " ";
+                ss << "' WHERE `guid` = '" << guid << "'";
+                sDatabase.Execute( ss.str().c_str() );
+            };
         } break;
         case ITEM_CHANGED:
         {
@@ -474,11 +492,9 @@ void Item::SaveToDB()
         } break;
         case ITEM_REMOVED:
         {
-            sDatabase.BeginTransaction();
             if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 2282 )
                 sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
             sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
-            sDatabase.CommitTransaction();
             delete this;
             return;
         }
