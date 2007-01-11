@@ -1608,6 +1608,9 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_CANT_TARGET_PLAYERS;
                 else
                     castResult = CAST_FAIL_INVALID_TARGET;
+
+                SendCastResult(castResult);
+                return castResult;
             }
         }
 
@@ -1617,7 +1620,8 @@ uint8 Spell::CanCast()
             if(itr->type == m_spellInfo->Dispel)
             {
                 castResult = CAST_FAIL_IMMUNE;
-                break;
+                SendCastResult(castResult);
+                return castResult;
             }
         }
         for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_MECHANIC].begin(); itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); ++itr)
@@ -1625,7 +1629,8 @@ uint8 Spell::CanCast()
             if(itr->type == m_spellInfo->Mechanic)
             {
                 castResult = CAST_FAIL_IMMUNE;
-                break;
+                SendCastResult(castResult);
+                return castResult;
             }
         }
         /*
@@ -1659,16 +1664,36 @@ uint8 Spell::CanCast()
         else
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
+
+        if(castResult!=0)
+        {
+            SendCastResult(castResult);
+            return castResult;
+        }
     }
 
     if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
+    {
         castResult = CAST_FAIL_CANT_DO_WHILE_STUNNED;
+        SendCastResult(castResult);
+        return castResult;
+    }
+
+    if(m_caster->IsMounted() && !m_IsTriggeredSpell)
+    {
+        castResult = CAST_FAIL_CANT_USE_WHEN_MOUNTED;
+        SendCastResult(castResult);
+        return castResult;
+    }
 
     if(m_caster->m_silenced)
+    {
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
+        SendCastResult(castResult);
+        return castResult;
+    }
 
-    if(castResult == 0)
-        castResult = CheckItems();                          // always check items (focus object can be required for any type casts)
+    castResult = CheckItems();                          // always check items (focus object can be required for any type casts)
 
     if(castResult == 0)
         castResult = CheckRange();
