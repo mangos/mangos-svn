@@ -44,15 +44,15 @@ void WorldRunnable::run()
 
         uint32 diff;
         if (realPrevTime > realCurrTime)                    // getMSTime() have limited data range and this is case when it overflow in this tick
-		    diff = 0xFFFFFFFF - (realPrevTime - realCurrTime);
+            diff = 0xFFFFFFFF - (realPrevTime - realCurrTime);
         else
-		    diff = realCurrTime - realPrevTime;
+            diff = realCurrTime - realPrevTime;
 
         sWorld.Update( diff );
         realPrevTime = realCurrTime;
 
         #ifdef WIN32
-		ZThread::Thread::sleep(50);
+        ZThread::Thread::sleep(50);
         #else
         ZThread::Thread::sleep(100);
         #endif

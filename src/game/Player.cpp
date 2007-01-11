@@ -3536,10 +3536,10 @@ void Player::addActionButton(const uint8 button, const uint16 action, const uint
     }
 
     if (m_actionButtons.find(button)==m_actionButtons.end())
-    {    // just add new button
+    {                                                       // just add new button
         m_actionButtons[button] = ActionButton(action,type,misc);
     } else
-    {    // change state of current button
+    {                                                       // change state of current button
         ActionButtonUpdateState uState = m_actionButtons[button].uState;
         m_actionButtons[button] = ActionButton(action,type,misc);
         if (uState != ACTIONBUTTON_NEW) m_actionButtons[button].uState = ACTIONBUTTON_CHANGED;
@@ -8342,20 +8342,22 @@ void Player::AddQuest( Quest *pQuest )
 
         // check for repeatable quests status
         QuestUpdateState uState;
-        if (mQuestStatus.find(quest_id)==mQuestStatus.end()) 
-            {uState = QUEST_NEW;} else 
-            {
-                if (mQuestStatus[quest_id].uState != QUEST_NEW) 
-                    { uState = QUEST_CHANGED; } else
+        if (mQuestStatus.find(quest_id)==mQuestStatus.end())
+            {uState = QUEST_NEW;}
+            else
+        {
+            if (mQuestStatus[quest_id].uState != QUEST_NEW)
+                { uState = QUEST_CHANGED; }
+                else
                     { uState = QUEST_NEW; };
-            };
+        };
 
         mQuestStatus[quest_id].m_quest = pQuest;
         mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
         mQuestStatus[quest_id].m_rewarded = false;
         mQuestStatus[quest_id].m_explored = false;
 
-        mQuestStatus[quest_id].uState = uState; // mark quest as new or changed
+        mQuestStatus[quest_id].uState = uState;             // mark quest as new or changed
 
         if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
         {
@@ -8525,7 +8527,7 @@ void Player::FailTimedQuest( uint32 quest_id )
     if( quest_id )
     {
         if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
-        mQuestStatus[quest_id].m_timer = 0;    
+        mQuestStatus[quest_id].m_timer = 0;
 
         IncompleteQuest( quest_id );
 
@@ -10170,13 +10172,13 @@ void Player::_SaveActions()
         switch (itr->second.uState)
         {
             case ACTIONBUTTON_NEW:
-                sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')", 
+                sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')",
                     GetGUIDLow(), (uint32)itr->first, (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc );
                 itr->second.uState = ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
             case ACTIONBUTTON_CHANGED:
-                sDatabase.PExecute("UPDATE `character_action`  SET `action` = '%u', `type` = '%u', `misc`= '%u' WHERE `guid`= '%u' AND `button`= '%u' ", 
+                sDatabase.PExecute("UPDATE `character_action`  SET `action` = '%u', `type` = '%u', `misc`= '%u' WHERE `guid`= '%u' AND `button`= '%u' ",
                     (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc, GetGUIDLow(), (uint32)itr->first );
                 itr->second.uState = ACTIONBUTTON_UNCHANGED;
                 ++itr;
@@ -10357,9 +10359,9 @@ void Player::_SaveReputation()
         uint32 Rows = fields[0].GetUInt32();
         delete result;
 
-        if (Rows) 
+        if (Rows)
         {
-            sDatabase.PExecute("UPDATE `character_reputation` SET `reputation`='%u', `standing`='%i', `flags`='%u' WHERE `guid` = '%u' AND `faction`='%u'", 
+            sDatabase.PExecute("UPDATE `character_reputation` SET `reputation`='%u', `standing`='%i', `flags`='%u' WHERE `guid` = '%u' AND `faction`='%u'",
                 itr->ReputationListID, itr->Standing, itr->Flags, GetGUIDLow(), itr->ID );
         } else
         {
@@ -10392,8 +10394,9 @@ void Player::_SaveTutorials()
     uint32 Rows = fields[0].GetUInt32();
     delete result;
 
-    if (Rows) {
-        sDatabase.PExecute("UPDATE `character_tutorial` SET `tut0`='%u', `tut1`='%u', `tut2`='%u', `tut3`='%u', `tut4`='%u', `tut5`='%u', `tut6`='%u', `tut7`='%u' WHERE `guid` = '%u'", 
+    if (Rows)
+    {
+        sDatabase.PExecute("UPDATE `character_tutorial` SET `tut0`='%u', `tut1`='%u', `tut2`='%u', `tut3`='%u', `tut4`='%u', `tut5`='%u', `tut6`='%u', `tut7`='%u' WHERE `guid` = '%u'",
             m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetGUIDLow() );
     } else
     {
