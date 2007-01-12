@@ -48,7 +48,7 @@ ALTER TABLE `character_tutorial` MODIFY COLUMN `tut3` int(11) unsigned NOT NULL 
 ALTER TABLE `character_tutorial` MODIFY COLUMN `tut4` int(11) unsigned NOT NULL default '0';
 ALTER TABLE `character_tutorial` MODIFY COLUMN `tut5` int(11) unsigned NOT NULL default '0';
 ALTER TABLE `character_tutorial` MODIFY COLUMN `tut6` int(11) unsigned NOT NULL default '0';
-ALTER TABLE `character_tutorial` MODIFY COLUMN `tut7` int(11) unsigned NOT NULL default '0';,
+ALTER TABLE `character_tutorial` MODIFY COLUMN `tut7` int(11) unsigned NOT NULL default '0';
 ALTER TABLE `command` MODIFY COLUMN `name` varchar(50) NOT NULL default '';
 ALTER TABLE `command` MODIFY COLUMN `security` tinyint(3) unsigned NOT NULL DEFAULT '0';
 
