@@ -137,7 +137,7 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
         plLevel = (uint8)Player::GetUInt32ValueFromDB(UNIT_FIELD_LEVEL, plGuid);
         plZone = Player::GetZoneIdFromDB(plGuid);
 
-        QueryResult *result = sDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", plGuid);
+        QueryResult *result = sDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", GUID_LOPART(plGuid));
         if(!result)
             return;
         plClass = (*result)[0].GetUInt8();

@@ -301,7 +301,7 @@ uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 
     if(result)
     {
-        guid = (*result)[0].GetUInt32();
+        guid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
 
         delete result;
     }

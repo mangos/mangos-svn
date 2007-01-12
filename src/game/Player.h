@@ -1035,8 +1035,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetHonorRating() const { return m_rating; }
         void SetHonorRating(float rating) { m_rating = rating; }
         //Acessors of last week standing
-        int  GetHonorLastWeekStanding() const { return m_standing; }
-        void SetHonorLastWeekStanding(int standing){ m_standing = standing; }
+        int32 GetHonorLastWeekStanding() const { return m_standing; }
+        void SetHonorLastWeekStanding(int32 standing){ m_standing = standing; }
         //End of Honor System
 
         void SetDrunkValue(uint16 newDrunkValue);
@@ -1271,7 +1271,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_total_honor_points;
         float m_rating;
         uint32 m_highest_rank;
-        int m_standing;
+        int32 m_standing;
 
         int m_cinematic;
 
