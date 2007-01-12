@@ -464,7 +464,7 @@ void Item::SaveToDB()
             {
                 // no - we must insert new rec
                 std::ostringstream ss;
-                ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES (" << guid << ",'";
+                ss << "INSERT INTO `item_instance` (`guid`,`owner_guid`,`data`) VALUES (" << guid << "," << GUID_LOPART(GetOwnerGUID()) << ",'";
                 for(uint16 i = 0; i < m_valuesCount; i++ )
                     ss << GetUInt32Value(i) << " ";
                 ss << "' )";

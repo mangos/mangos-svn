@@ -198,7 +198,6 @@ class ChatHandler
         bool HandleWorldPortCommand(const char* args);
         bool HandleAddWeaponCommand(const char* args);
         bool HandleAllowMovementCommand(const char* args);
-        bool HandleAddSpiritCommand(const char* args);
         bool HandleGoCommand(const char* args);
         bool HandleLearnCommand(const char* args);
         bool HandleUnLearnCommand(const char* args);
@@ -217,7 +216,6 @@ class ChatHandler
         bool HandleUnAuraCommand(const char* args);
         bool HandleLinkGraveCommand(const char* args);
         bool HandleNearGraveCommand(const char* args);
-        bool HandleAddSHCommand(const char* args);
         bool HandleSpawnTransportCommand(const char* args);
         bool HandleExploreCheatCommand(const char* args);
         bool HandleEmoteCommand(const char* args);

@@ -495,7 +495,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     result = sDatabase.PQuery("SELECT `leaderGuid` FROM `raidgroup_member` WHERE `memberGuid`='%u'", GUID_LOPART(pCurrChar->GetGUID()));
     if(result)
     {
-        uint64 leaderGuid = (*result)[0].GetUInt64();
+        uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
         delete result;
 
         pCurrChar->groupInfo.group = objmgr.GetGroupByLeader(leaderGuid);
