@@ -28,7 +28,7 @@ namespace MaNGOS
     namespace Honor
     {
         //TODO: Implement this function
-        inline int CalculeStanding(Player *plr)
+        inline int32 CalculeStanding(Player *plr)
         {
             uint64 guid = 0;
             int standing = 0;
@@ -39,7 +39,7 @@ namespace MaNGOS
                 do
                 {
                     Field *fields = result->Fetch();
-                    guid = fields[0].GetUInt64();
+                    guid = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
 
                     standing++;
 

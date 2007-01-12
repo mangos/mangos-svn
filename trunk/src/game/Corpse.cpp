@@ -80,7 +80,7 @@ void Corpse::SaveToDB()
 
     std::ostringstream ss;
     ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`) VALUES ("
-        << GetGUIDLow() << ", " << GetOwnerGUID() << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", "
+        << GetGUIDLow() << ", " << GUID_LOPART(GetOwnerGUID()) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", "
         << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
@@ -117,7 +117,7 @@ void Corpse::DeleteFromDB(bool inner_transaction)
         ss  << "DELETE FROM `corpse` WHERE `guid` = '" << GetGUIDLow() << "'";
     else
         // all corpses (not bones)
-        ss  << "DELETE FROM `corpse` WHERE `player` = '" << GetOwnerGUID() << "' AND `bones_flag` = '0'";
+        ss  << "DELETE FROM `corpse` WHERE `player` = '" << GUID_LOPART(GetOwnerGUID()) << "' AND `bones_flag` = '0'";
     sDatabase.Execute( ss.str().c_str() );
 
     sDatabase.PExecute( "DELETE FROM `corpse_grid` WHERE `guid` = '%u'",GetGUIDLow());
