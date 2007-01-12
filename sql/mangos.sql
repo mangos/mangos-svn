@@ -93,16 +93,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `auctionhouse`;
 CREATE TABLE `auctionhouse` (
-  `id` bigint(20) unsigned NOT NULL default '0',
-  `auctioneerguid` int(32) NOT NULL default '0',
-  `itemguid` int(32) NOT NULL default '0',
+  `id` int(11) unsigned NOT NULL DEFAULT '0',
+  `auctioneerguid` int(11) NOT NULL default '0',
+  `itemguid` int(11) NOT NULL default '0',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  `itemowner` int(32) NOT NULL default '0',
-  `buyoutprice` int(32) NOT NULL default '0',
+  `itemowner` int(11) NOT NULL default '0',
+  `buyoutprice` int(11) NOT NULL default '0',
   `time` bigint(40) NOT NULL default '0',
-  `buyguid` int(32) NOT NULL default '0',
-  `lastbid` int(32) NOT NULL default '0',
-  `startbid` int(32) NOT NULL default '0',
+  `buyguid` int(11) NOT NULL default '0',
+  `lastbid` int(11) NOT NULL default '0',
+  `startbid` int(11) NOT NULL default '0',
   `deposit` int(11) NOT NULL default '0',
   `location` tinyint(3) unsigned NOT NULL default '3',
   PRIMARY KEY  (`id`)
@@ -146,8 +146,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character`;
 CREATE TABLE `character` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `account` bigint(20) unsigned NOT NULL default '0' COMMENT 'Account Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `account` int(11) unsigned NOT NULL default '0' COMMENT 'Account Identifier',
   `data` longtext,
   `name` varchar(12) NOT NULL default '',
   `race` tinyint(3) unsigned NOT NULL default '0',
@@ -166,7 +166,7 @@ CREATE TABLE `character` (
   `totaltime` int(11) unsigned NOT NULL default '0',
   `leveltime` int(11) unsigned NOT NULL default '0',
   `logout_time` int(11) NOT NULL DEFAULT '0',
-  `is_logout_resting` int(11) NOT NULL DEFAULT '0',
+  `is_logout_resting` tinyint(3) NOT NULL DEFAULT '0',
   `rest_bonus` FLOAT NOT NULL DEFAULT '0',
   `resettalents_cost` int(11) unsigned NOT NULL default '0',
   `resettalents_time` bigint(20) unsigned NOT NULL default '0',
@@ -197,11 +197,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_action`;
 CREATE TABLE `character_action` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `button` int(11) unsigned NOT NULL default '0',
-  `action` int(11) unsigned NOT NULL default '0',
-  `type` smallint(3) unsigned NOT NULL default '0',
-  `misc` smallint(3) unsigned NOT NULL default '0',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `button` tinyint(3)  unsigned NOT NULL default '0',
+  `action` smallint(5) unsigned NOT NULL default '0',
+  `type`   tinyint(3)  unsigned NOT NULL default '0',
+  `misc`   tinyint(3)  unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`button`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
@@ -221,7 +221,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_aura`;
 CREATE TABLE `character_aura` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid`  int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
@@ -244,8 +244,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_homebind`;
 CREATE TABLE `character_homebind` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `map`  int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   `zone` int(11) unsigned NOT NULL default '0' COMMENT 'Zone Identifier',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
@@ -269,10 +269,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_inventory`;
 CREATE TABLE `character_inventory` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `bag` bigint(20) unsigned NOT NULL default '0',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `bag`  int(11) unsigned NOT NULL default '0',
   `slot` tinyint(3) unsigned NOT NULL default '0',
-  `item` bigint(20) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
+  `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
   PRIMARY KEY  (`guid`,`bag`,`slot`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
@@ -293,11 +293,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_kill`;
 CREATE TABLE `character_kill` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `creature_template` int(11) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
   `honor` float NOT NULL default '0',
   `date` int(11) unsigned NOT NULL default '0',
-  `type` smallint(9) unsigned NOT NULL default '0',
+  `type` tinyint(3) unsigned NOT NULL default '0',
   KEY `idx_guid` (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
@@ -355,8 +355,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_queststatus`;
 CREATE TABLE `character_queststatus` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  `guid`   int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `quest`  int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
   `status` int(11) unsigned NOT NULL default '0',
   `rewarded` tinyint(1) unsigned NOT NULL default '0',
   `explored` tinyint(1) unsigned NOT NULL default '0',
@@ -389,7 +389,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_reputation`;
 CREATE TABLE `character_reputation` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid`    int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `faction` int(11) unsigned NOT NULL default '0',
   `reputation` int(11) unsigned NOT NULL default '0' COMMENT 'Reputation Identifier',
   `standing` int(11) NOT NULL default '0',
@@ -413,9 +413,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_social`;
 CREATE TABLE `character_social` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `name` varchar(21) NOT NULL default '',
-  `friend` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
+  `friend` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `flags` varchar(21) NOT NULL default '',
   PRIMARY KEY  (`guid`,`friend`,`flags`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
@@ -436,10 +436,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_spell`;
 CREATE TABLE `character_spell` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL default '0' COMMENT 'Spell Identifier',
   `slot` int(11) unsigned NOT NULL default '0',
-  `active` int(11) unsigned NOT NULL default '1',
+  `active` tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (`guid`,`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
@@ -508,7 +508,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `character_ticket`;
 CREATE TABLE `character_ticket` (
   `ticket_id` int(11) NOT NULL auto_increment,
-  `guid` int(6) unsigned NOT NULL default '0',
+  `guid` int(11) unsigned NOT NULL default '0',
   `ticket_text` varchar(255) NOT NULL default '',
   `ticket_category` int(1) NOT NULL default '0',
   PRIMARY KEY  (`ticket_id`)
@@ -530,15 +530,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_tutorial`;
 CREATE TABLE `character_tutorial` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `tut0` bigint(20) unsigned NOT NULL default '0',
-  `tut1` bigint(20) unsigned NOT NULL default '0',
-  `tut2` bigint(20) unsigned NOT NULL default '0',
-  `tut3` bigint(20) unsigned NOT NULL default '0',
-  `tut4` bigint(20) unsigned NOT NULL default '0',
-  `tut5` bigint(20) unsigned NOT NULL default '0',
-  `tut6` bigint(20) unsigned NOT NULL default '0',
-  `tut7` bigint(20) unsigned NOT NULL default '0',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `tut0` int(11) unsigned NOT NULL default '0',
+  `tut1` int(11) unsigned NOT NULL default '0',
+  `tut2` int(11) unsigned NOT NULL default '0',
+  `tut3` int(11) unsigned NOT NULL default '0',
+  `tut4` int(11) unsigned NOT NULL default '0',
+  `tut5` int(11) unsigned NOT NULL default '0',
+  `tut6` int(11) unsigned NOT NULL default '0',
+  `tut7` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
@@ -558,8 +558,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `command`;
 CREATE TABLE `command` (
-  `name` varchar(100) NOT NULL default '',
-  `security` int(11) unsigned NOT NULL default '0',
+  `name` varchar(50) NOT NULL default '',
+  `security` tinyint(3) unsigned NOT NULL default '0',
   `help` longtext,
   PRIMARY KEY  (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Chat System';
@@ -570,7 +570,7 @@ CREATE TABLE `command` (
 
 /*!40000 ALTER TABLE `command` DISABLE KEYS */;
 LOCK TABLES `command` WRITE;
-INSERT INTO `command` VALUES ('acct',0,'Syntax: .acct\r\n\r\nDisplay the access level of your account.'),('addgo',3,'Syntax: .addgo #id\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\n\r\nNote: this is a copy of .gameobject.'),('additem',3,'Syntax: .additem #itemid/[#itemname]/#shift-click-item-link #itemcount\r\n\r\nAdds the specified number of items of id #itemid (or exact (!) name $itemname in brackets, or link created by shift-click at item in inventory or recipe) to your or selected character inventory. If #itemcount is omitted, only one item will be added.\r\n.'),('additemset',3,'Syntax: .additemset #itemsetid\r\n\r\nAdd items from itemset of id #itemsetid to your or selected character inventory. Will add by one example each item from itemset.'),('addmove',2,'Syntax: .addmove #creature_guid [#waittime]\r\n\r\nAdd your current location as a waypoint for creature with guid #creature_guid. And optional add wait time.'),('addquest','3','Syntax: .addquest #quest_id\r\n\r\nAdd to character quest log quest #quest_id. Quest started from item can\'t be added by this command but correct .additem call provided in command output.'),('addtele',3,'Syntax: .addtele $name\r\n\r\nAdd current your position to .tele command target locations list with name $name.'),('addsh',3,'Syntax: .addsh\r\n\r\nAdd a spirit healer to your current location.\r\n\r\nNot yet implemented.'),('AddSpawn',2,'Not yet implemented.'),('addspirit',3,'Syntax: .addspirit\r\n\r\nSpawns the spirit healer for the current location, if there is one defined for the current location.\r\n\r\nCommand disabled.'),('addspw',2,'Syntax: .addspw #creatureid\r\n\r\nSpawn a creature by the given template id of #creatureid.'),('addweapon',3,'Not yet implemented.'),('allowmove',3,'Syntax: .allowmove\r\n\r\nEnable or disable movement for the selected creature.'),('anim',3,'Syntax: .anim #emoteid\r\n\r\nPlay emote #emoteid for your character.'),('announce',1,'Syntax: .announce $MessageToBroadcast\r\n\r\nSend a global message to all players online.'),('aura',3,'Syntax: .aura #spellid\r\n\r\nAdd the aura from spell #spellid to your character.'),('banaccount','3','Syntax: .banaccount $name\r\n\r\nBan account $name (can be view for player using .pinfo command) and kick affected player if he loginned at server.'),('banip','3','Syntax: .banip #ip\r\n\r\nBan loggining to server from computer with provide IP address and kick all affected players with equal last IP.'),('bank',3,'Syntax: .bank\r\n\r\nShow your bank inventory.'),('changelevel',2,'Syntax: .changelevel #level\r\n\r\nChange the level of the selected creature to #level.\r\n\r\n#level may range from 1 to 63.'),('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),('createguild',3,'Syntax: .createguild $GuildName $GuildLeaderName\r\n\r\nCreate a guild named $GuildName with the player $GuildLeaderName as leader.'),('cshutdown',3,'Syntax: .cshutdown Cancels shutdown'),('delete',2,'Syntax: .delete\r\n\r\nDelete the selected creature from the world.'),('delobject',2,'Syntax: .delobject #go_guid\r\nDelete gameobject with guid #go_guid.'),('deltele',3,'Syntax: .deltele $name\r\n\r\nRemove location with name $name for .tele command locations list.'),('delticket',2,'Syntax: .delticket all\r\n        .delticket #num\r\n        .delticket $character_name\r\n\rall to dalete all tickets at server, $character_name to delete ticket of this character, #num to delete ticket #num.'),('demorph',2,'Syntax: .demorph\r\n\r\nDemorph the selected player.'),('die',3,'Syntax: .die\r\n\r\nKill the selected player. If no player is selected, it will kill you.'),('dismount',0,'Syntax: .dismount\r\n\r\nDismount you, if you are mounted.'),('displayid',2,'Syntax: .displayid #displayid\r\n\r\nChange the model id of the selected creature to #displayid.'),('distance',3,'Syntax: .distance\r\n\r\nDisplay the distance from your character to the selected creature.'),('emote',3,'Syntax: .emote #emoteid\r\n\r\nMake the selected creature emote with an emote of id #emoteid.'),('explorecheat',3,'Syntax: .explorecheat #flag\r\n\r\nReveal  or hide all maps for the selected player. If no player is selected, hide or reveal maps to you.\r\n\r\nUse a #flag of value 1 to reveal, use a #flag value of 0 to hide all maps.'),('factionid',2,'Syntax: .factionid #factionid\r\n\r\nSet the faction of the selected creature to #factionid.'),('gameobject',3,'Syntax: .gameobject #id\r\n\r\nAdd a game object from game object templates to the world at your current position using the #id.'),('getvalue',3,'Syntax: .getvalue #field #isInt\r\n\r\nGet the field #field of the selected creature. If no creature is selected, get the content of your field.\r\n\r\nUse a #isInt of value 1 if the expected field content is an integer.'),('gmlist',0,'Syntax: .gmlist\r\n\r\nDisplay a list of available Game Masters.'),('gmoff',1,'Syntax: .gmoff\r\n\r\nDisable the <GM> prefix for your character.'),('gmon',1,'Syntax: .gmon\r\n\r\nEnable the <GM> prefix for your character.'),('go',3,'Syntax: .go #position_x #position_y #position_z #mapid\r\n\r\nTeleport to the given coordinates on the specified map.'),('gocreature',2,'Syntax: .gocreature #creature_guid\r\nTeleport your character to creature with guid #creature_guid.'),('goobject',1,'Syntax: .goobject #object_guid\r\nTeleport your character to gameobject with guid #object_guid'),('goname',1,'Syntax: .goname $charactername\r\n\r\nTeleport to the given character. Either specify the character name or click on the character\'s portrait, e.g. when you are in a group.'),('goxy','3','Syntax: .goxy #x #y [#mapid]\r\n\r\nTeleport player to point with (#x,#y) coordinates at ground(water) level at map #mapid or same map if #mapid not provided.'),('gps',1,'Syntax: .gps\r\n\r\nDisplay the position information for a selected character or creature. Position information includes X, Y, Z, and orientation, map Id and zone Id'),('guid',2,'Syntax: .guid\r\n\r\nDisplay the GUID for the selected character.'),('help',0,'Syntax: .help $command\r\n\r\nDisplay usage instructions for the given $command.'),('hidearea',3,'Syntax: .hidearea #areaid\r\n\r\nHide the area of #areaid to the selected character. If no character is selected, hide this area to you.'),('hover',3,'Syntax: .hover #flag\r\n\r\nEnable or disable hover mode for your character.\r\n\r\nUse a #flag of value 1 to enable, use a #flag value of 0 to disable hover.'),('idleshutdown','3','Syntax: .idleshutdown #delay|cancel\r\n\r\nShut the server down after #delay seconds if no active connections are present (no players) or cancel the shutdown if cancel value is used.'),('info',0,'Syntax: .info\r\n\r\nDisplay the number of connected players.'),('item',2,'Syntax: .item #guid #amount\r\n\r\nAdd the given amount #amount of the item with a GUID of #guid to the selected vendor. '),('itemmove',2,'Syntax: .itemmove #sourceslotid #destinationslotid\r\n\r\nMove an item from slots #sourceslotid to #destinationslotid in your inventory\r\n\r\nNot yet implemented'),('itemrmv',2,'Syntax: .itemrmv #guid\r\n\r\nRemove the given item with a GUID of #guid from the selected vendor. '),('kick',2,'Syntax: .kick [$charactername]\r\n\r\nKick the given character from the world. If no character name provide then selected player (except self) will be kicked.'),('learn',3,'Syntax: .learn #parameter\r\n\r\nSelected character learn a spell of id #parameter. A GM can use .learn all if he wants to learn all default spells for Game Masters, .learn all_lang to learn all languages, and .learn all_myclass to learn all spells available for his class (Character selection in these cases ignored).'),('learnskill',3,'Syntax: .learnskill #skillId [#level [#max]]\r\n\r\nLearn a skill of id #skill with a current skill value of #level (or 1 if not provide) and a maximum value of #max (or equal #level or 1 if not provide) for the selected character. If no character is selected, you learn the skill.'),('setskill', 3,'Syntax: .setskill #skill #level [#max]\r\n\r\nSet a skill of id #skill with a current skill value of #level and a maximum value of #max (or equal current maximum if not provide) for the selected character. If no character is selected, you learn the skill.'),('levelup',3,'Syntax: .levelup [$playername] [#numberoflevels]\r\n\r\nIncrease/decrease the level of character with $playername (or the selected if not name provided) by #numberoflevels Or +1 if no #numberoflevels provided). If #numberoflevels is omitted, the level will be increase by 1. If #numberoflevels is 0, the same level will be restarted. If no character is selected and name not provided, increase your level. Command can be used for offline character. All stats and dependent values recalculated. At level decrease talents can be reset if need. Also at level decrease equipped items with greater level requirement can be lost.'),('linkgrave',3,'Syntax: .linkgrave #graveyard_id [alliance|horde]\r\n\r\nLink current zone to graveyard for any (or alliance/horde faction ghosts). This let character ghost from zone teleport to graveyard after die if graveyard is nearest from linked to zone and accept ghost of this faction. Add only single graveyard at another map and only if no graveyards linked (or planned linked at same map).'),('loadscripts',3,'Syntax: .loadscripts $scriptlibraryname\r\n\r\nUnload current and load the script library $scriptlibraryname or reload current if $scriptlibraryname omitted, in case you changed it while the server was running.'),('lockaccount', 0,'Syntax: .lockaccount [on|off]\r\n\r\nAllow login from account only from current used IP or remove this requirement.'),('lookupitem',3,'Syntax: .lookupitem $itemname\r\n\r\nLooks up an item by $itemname, and returns all matches with their Item ID\'s.'),('lookupcreature',3,'Syntax: .lookupcreature $namepart\r\n\r\nLooks up a creature by $namepart, and returns all matches with their creature ID\'s.'),('lookupskill',3,'Syntax: .lookupskill $$namepart\r\n\r\nLooks up a skill by $namepart, and returns all matches with their skill ID\'s.'),('maxskill',3,'Syntax: .maxskill\r\nSets all skills of the targeted player to their maximum values for its current level.'),('Mod32Value',3,'Syntax: .Mod32Value #field #value\r\n\r\nAdd #value to field #field of your character.'),('modify',1,'Syntax: .modify $parameter $value\r\n\r\nModify the value of various parameters. Use .help modify $parameter to get help on specific parameter usage.\r\n\r\nSupported parameters include hp, mana, rage, energy, gold, speed, swim, scale, bit, bwalk, aspeed, faction, spell and tp.'),('modify aspeed',1,'Syntax: .modify aspeed #rate\r\n\r\nModify all speeds -run,swim,run back,swim back- of the selected player to "normalbase speed for this move type"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('modify bit',1,'Syntax: .modify bit #field #bit\r\n\r\nToggle the #bit bit of the #field field for the selected player. If no player is selected, modify your character.'),('modify bwalk',1,'Syntax: .modify bwalk #rate\r\n\r\nModify the speed of the selected player while running backwards to "normal walk back speed"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('modify energy',1,'Syntax: .modify energy #energy\r\n\r\nModify the energy of the selected player. If no player is selected, modify your energy.'),('modify faction',1,'Syntax: .modify faction #factionid #flagid #npcflagid #dynamicflagid\r\n\r\nModify the faction and flags of the selected creature. Without arguments, display the faction and flags of the selected creature.'),('modify money',1,'Syntax:\r\n.modify money #money\r\n.money #money\r\n\r\nAdd or remove money to the selected player. If no player is selected, modify your money.\r\n\r\n #gold can be negative to remove money.'),('modify hp',1,'Syntax: .modify hp #newhp\r\n\r\nModify the hp of the selected player. If no player is selected, modify your hp.'),('modify mana',1,'Syntax: .modify mana #newmana\r\n\r\nModify the mana of the selected player. If no player is selected, modify your mana.'),('modify rage',1,'Syntax: .modify rage #newrage\r\n\r\nModify the rage of the selected player. If no player is selected, modify your rage.'),('modify scale',1,''),('modify speed',1,'Syntax:\r\n.modify speed #rate\r\n.speed #rate\r\n\r\nModify the running speed of the selected player to "normal base run speed"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('modify spell',1,''),('modify swim',1,'Syntax: .modify swim #rate\r\n\r\nModify the swim speed of the selected player to "normal swim speed"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('money',1,'Syntax:\r\n.modify money #money\r\n.money #money\r\n\r\nAdd or remove money to the selected player. If no player is selected, modify your money.\r\n\r\n #gold can be negative to remove money.'),('morph',3,'Syntax: .morph #displayid\r\n\r\nChange your current model id to #displayid.'),('moveobject','2','Syntax: .moveobject #goguid [#x #y #z]\r\n\r\nMove gameobject #goguid to character coordinates (or to (#x,#y,#z) coordinates if its provide).'),('name',2,'Syntax: .name $name\r\n\r\nChange the name of the selected creature or character to $name.\r\n\r\nCommand disabled.'),('namego',1,'Syntax: .namego $charactername\r\n\r\nTeleport the given character to you. Either specify the character name or click on the player\'s portrait, e.g. when you are in a group.'),('neargrave',3,'Syntax: .neargrave [alliance|horde]\r\n\r\nFind nearest graveyard linked to zone (or only nearest from accepts alliance or horde faction ghosts).'),('NewMail',3,'Syntax: .NewMail #flag\r\n\r\nSend a new mail notification with flag #flag.'),('npcflag',2,'Syntax: .npcflag #npcflag\r\n\r\nSet the NPC flags of creature template of the selected creature and selected creature to #npcflag. NPC flags will applied to all creatures of selected creature template after server restart or grid unload/load.'),('npcinfo',3,'Syntax: .npcinfo\r\n\r\nDisplay a list of details for the selected creature.\r\n\r\nThe list includes:\r\n- GUID, Faction, NPC flags, Entry ID, Model ID,\r\n- Level,\r\n- Health (current/maximum),\r\n- Field flags, dynamic flags, faction template, \r\n- Position information,\r\n- and the creature type, e.g. if the creature is a vendor.'),('npcinfoset',3,'Syntax: .npcinfoset\r\n\r\nTODO: Write me.'),('object',3,'Syntax: .object #displayid $save\r\n\r\nAdd a new object of type mailbox with the display id of #displayid to your current position. If $save is set to \'true\', save the object in the database.'),('password', 0,'Syntax: .password $newpassword\r\n\r\nSet for your account $newpassword as new password.'),('pinfo','2','Syntax: .pinfo [$player_name] [rep]\r\n\r\nOutput account information for selected player or player find by $player_name. If "rep" parameter provided show reputation information for player.'),('playsound',1,'Syntax: .playsound #soundid\r\n\r\nPlay sound with #soundid.\r\nSound will be play only for you. Other players do not hear this.\r\nWarning: client may have more 5000 sounds...'),('prog',2,'Syntax: .prog\r\n\r\nTeleport you to Programmers Island.'),('QNM',3,'Syntax: .QNM #flag\r\n\r\nQuery next mail time with flag #flag.'),('random',2,'Syntax: .random #flag\r\n\r\nEnable or disable random movement for the selected creature.\r\n\r\nUse a #flag of value 1 to enable, use a #flag value of 0 to disable random movement. Not yet implemented.'),('recall',1,'Syntax: .recall $place\r\n\r\nTeleport you to various towns around the world. $place defines the target location. Available places include sunr, thun, cross, orgr, neth, thel, storm, iron, under, and darn.'),('reload',3,'Not yet implemented.'),('reset',3,'Syntax:\r\n.reset level\r\n  Reset level to 1 including reset stats and talents.  Equipped items with greater level requirement can be lost.\r\n.reset spells\r\n  Removes all non-original spells from spellbook.\r\n.reset stats\r\n  Resets(recalculate) all stats of the targeted player to their original values at current level.\r\n.reset talents\r\n  Removes all talents of the targeted player.'),('revive',3,'Syntax: .revive\r\n\r\nRevive the selected player. If no player is selected, it will revive you.'),('run',2,'Syntax: .run #flag\r\n\r\nEnable or disable running movement for a selected creature.\r\n\r\nUse a #flag of value 1 to enable, use a #flag value of 0 to disable running. Not yet implemented.'),('save',0,'Syntax: .save\r\n\r\nSaves your character.'),('saveall',1,'Syntax: .saveall\r\n\r\nSave all characters in game.'),('searchtele',1,'Syntax: .searchtele $substring\r\n\r\nSearch and output all .tele command locations with provide $substring in name.'),('security',3,'Syntax: .security $name #level\r\n\r\nSet the security level of player $name to a level of #level.\r\n\r\n#level may range from 0 to 5.'),('setvalue',3,'Syntax: .setvalue #field #value #isInt\r\n\r\nSet the field #field of the selected creature with value #value. If no creature is selected, set the content of your field.\r\n\r\nUse a #isInt of value 1 if #value is an integer.'),('showarea',3,'Syntax: .showarea #areaid\r\n\r\nReveal the area of #areaid to the selected character. If no character is selected, reveal this area to you.'),('showhonor',0,'Syntax: .showhonor\r\n\r\nDisplay your honor ranking.'),('shutdown',3,'Syntax: .shutdown seconds'),('speed',1,'Syntax:\r\n.modify speed #rate\r\n.speed #rate\r\n\r\nModify the running speed of the selected player to "normal base run speed"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('standstate',3,'Syntax: .standstate #emoteid\r\n\r\nChange the emote of your character while standing to #emoteid.'),('start',0,'Syntax: .start\r\n\r\nTeleport you to the starting area of your character.'),('subname',2,'Syntax: .subname $Name\r\n\r\nChange the subname of the selected creature or player to $Name.\r\n\r\nCommand disabled.'),('targetobject', 2, 'Syntax: .targetobject [#go_id|#go_name_part]\r\n\r\nLocate and show position nearest gameobject. If #go_id or #go_name_part provide then locate and show position of nearest gameobject with gameobject template id #go_id or name included #go_name_part as part.'),('taxicheat',1,'Syntax: .taxicheat #flag\r\n\r\nTemporary grant access or remove to all taxi routes for the selected character. If no character is selected, hide or reveal all routes to you.\r\n\r\nUse a #flag of value 1 to add access, use a #flag value of 0 to remove access. Visited taxi nodes sill accessible after removing access.'),('ticket',2,'Syntax: .ticket on\r\n        .ticket off\r\n        .ticket #num\r\n        .ticket $character_name\r\n\r\non/off for GMs to show or not a new ticket directly, $character_name to show ticket of this character, #num to show ticket #num.'),('transport',3,'Not yet implemented.'),('turnobject','2','Syntax: .turnobject #goguid \r\n\r\nSet for gameobject #goguid orientation same as current character orientation.'),('unaura',3,'Syntax: .unaura #spellid\r\n\r\nRemove aura due to spell #spellid from your character.'),('unbanaccount','3','Syntax: .unbanaccount $name\r\n\r\nUnban account $name.'),('unbanip','3','Syntax: .unbanip #ip\r\n\r\nUnban provide IP address.'),('unlearn',3,'Syntax: .unlearn #startspell #endspell\r\n\r\nUnlearn for selected player the range of spells between id #startspell and #endspell. If no #endspell is provided, just unlearn spell of id #startspell.'),('unlearnskill',3,'Syntax: .unlearnskill #skill\r\n\r\nUnlearn a skill of id #skill for the selected character. If no character is selected, you unlearn the skill.'),('update',3,'Syntax: .update #field #value\r\n\r\nUpdate the field #field of the selected character or creature with value #value.\r\n\r\nIf no #value is provided, display the content of field #field.'),('visible','1','Syntax: .visible [0||1]\r\n\r\nOutput current visibility state or make GM visible(1) and invisible(0) for other players.'),('wchange',3,'Syntax: .wchange #weathertype #status\r\n\r\nSet current weather to #weathertype with an intensity of #status.\r\n\r\n#weathertype can be 1 for rain, 2 for snow, and 3 for sand. #status can be 0 for disabled, and 1 for enabled.'),('worldport',3,'Syntax: .worldport #map #position_x #position_y #position_z\r\n\r\nTeleport to the given coordinates on the specified continent (map).'),('whispers',1,'Syntax: .whispers on|off\r\nEnable/disable accepting whispers by GM from players. By default use mangosd.conf setting.');
+INSERT INTO `command` VALUES ('acct',0,'Syntax: .acct\r\n\r\nDisplay the access level of your account.'),('addgo',3,'Syntax: .addgo #id\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\n\r\nNote: this is a copy of .gameobject.'),('additem',3,'Syntax: .additem #itemid/[#itemname]/#shift-click-item-link #itemcount\r\n\r\nAdds the specified number of items of id #itemid (or exact (!) name $itemname in brackets, or link created by shift-click at item in inventory or recipe) to your or selected character inventory. If #itemcount is omitted, only one item will be added.\r\n.'),('additemset',3,'Syntax: .additemset #itemsetid\r\n\r\nAdd items from itemset of id #itemsetid to your or selected character inventory. Will add by one example each item from itemset.'),('addmove',2,'Syntax: .addmove #creature_guid [#waittime]\r\n\r\nAdd your current location as a waypoint for creature with guid #creature_guid. And optional add wait time.'),('addquest','3','Syntax: .addquest #quest_id\r\n\r\nAdd to character quest log quest #quest_id. Quest started from item can\'t be added by this command but correct .additem call provided in command output.'),('addtele',3,'Syntax: .addtele $name\r\n\r\nAdd current your position to .tele command target locations list with name $name.'),('AddSpawn',2,'Not yet implemented.'),('addspw',2,'Syntax: .addspw #creatureid\r\n\r\nSpawn a creature by the given template id of #creatureid.'),('addweapon',3,'Not yet implemented.'),('allowmove',3,'Syntax: .allowmove\r\n\r\nEnable or disable movement for the selected creature.'),('anim',3,'Syntax: .anim #emoteid\r\n\r\nPlay emote #emoteid for your character.'),('announce',1,'Syntax: .announce $MessageToBroadcast\r\n\r\nSend a global message to all players online.'),('aura',3,'Syntax: .aura #spellid\r\n\r\nAdd the aura from spell #spellid to your character.'),('banaccount','3','Syntax: .banaccount $name\r\n\r\nBan account $name (can be view for player using .pinfo command) and kick affected player if he loginned at server.'),('banip','3','Syntax: .banip #ip\r\n\r\nBan loggining to server from computer with provide IP address and kick all affected players with equal last IP.'),('bank',3,'Syntax: .bank\r\n\r\nShow your bank inventory.'),('changelevel',2,'Syntax: .changelevel #level\r\n\r\nChange the level of the selected creature to #level.\r\n\r\n#level may range from 1 to 63.'),('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),('createguild',3,'Syntax: .createguild $GuildName $GuildLeaderName\r\n\r\nCreate a guild named $GuildName with the player $GuildLeaderName as leader.'),('cshutdown',3,'Syntax: .cshutdown Cancels shutdown'),('delete',2,'Syntax: .delete\r\n\r\nDelete the selected creature from the world.'),('delobject',2,'Syntax: .delobject #go_guid\r\nDelete gameobject with guid #go_guid.'),('deltele',3,'Syntax: .deltele $name\r\n\r\nRemove location with name $name for .tele command locations list.'),('delticket',2,'Syntax: .delticket all\r\n        .delticket #num\r\n        .delticket $character_name\r\n\rall to dalete all tickets at server, $character_name to delete ticket of this character, #num to delete ticket #num.'),('demorph',2,'Syntax: .demorph\r\n\r\nDemorph the selected player.'),('die',3,'Syntax: .die\r\n\r\nKill the selected player. If no player is selected, it will kill you.'),('dismount',0,'Syntax: .dismount\r\n\r\nDismount you, if you are mounted.'),('displayid',2,'Syntax: .displayid #displayid\r\n\r\nChange the model id of the selected creature to #displayid.'),('distance',3,'Syntax: .distance\r\n\r\nDisplay the distance from your character to the selected creature.'),('emote',3,'Syntax: .emote #emoteid\r\n\r\nMake the selected creature emote with an emote of id #emoteid.'),('explorecheat',3,'Syntax: .explorecheat #flag\r\n\r\nReveal  or hide all maps for the selected player. If no player is selected, hide or reveal maps to you.\r\n\r\nUse a #flag of value 1 to reveal, use a #flag value of 0 to hide all maps.'),('factionid',2,'Syntax: .factionid #factionid\r\n\r\nSet the faction of the selected creature to #factionid.'),('gameobject',3,'Syntax: .gameobject #id\r\n\r\nAdd a game object from game object templates to the world at your current position using the #id.'),('getvalue',3,'Syntax: .getvalue #field #isInt\r\n\r\nGet the field #field of the selected creature. If no creature is selected, get the content of your field.\r\n\r\nUse a #isInt of value 1 if the expected field content is an integer.'),('gmlist',0,'Syntax: .gmlist\r\n\r\nDisplay a list of available Game Masters.'),('gmoff',1,'Syntax: .gmoff\r\n\r\nDisable the <GM> prefix for your character.'),('gmon',1,'Syntax: .gmon\r\n\r\nEnable the <GM> prefix for your character.'),('go',3,'Syntax: .go #position_x #position_y #position_z #mapid\r\n\r\nTeleport to the given coordinates on the specified map.'),('gocreature',2,'Syntax: .gocreature #creature_guid\r\nTeleport your character to creature with guid #creature_guid.'),('goobject',1,'Syntax: .goobject #object_guid\r\nTeleport your character to gameobject with guid #object_guid'),('goname',1,'Syntax: .goname $charactername\r\n\r\nTeleport to the given character. Either specify the character name or click on the character\'s portrait, e.g. when you are in a group.'),('goxy','3','Syntax: .goxy #x #y [#mapid]\r\n\r\nTeleport player to point with (#x,#y) coordinates at ground(water) level at map #mapid or same map if #mapid not provided.'),('gps',1,'Syntax: .gps\r\n\r\nDisplay the position information for a selected character or creature. Position information includes X, Y, Z, and orientation, map Id and zone Id'),('guid',2,'Syntax: .guid\r\n\r\nDisplay the GUID for the selected character.'),('help',0,'Syntax: .help $command\r\n\r\nDisplay usage instructions for the given $command.'),('hidearea',3,'Syntax: .hidearea #areaid\r\n\r\nHide the area of #areaid to the selected character. If no character is selected, hide this area to you.'),('hover',3,'Syntax: .hover #flag\r\n\r\nEnable or disable hover mode for your character.\r\n\r\nUse a #flag of value 1 to enable, use a #flag value of 0 to disable hover.'),('idleshutdown','3','Syntax: .idleshutdown #delay|cancel\r\n\r\nShut the server down after #delay seconds if no active connections are present (no players) or cancel the shutdown if cancel value is used.'),('info',0,'Syntax: .info\r\n\r\nDisplay the number of connected players.'),('item',2,'Syntax: .item #guid #amount\r\n\r\nAdd the given amount #amount of the item with a GUID of #guid to the selected vendor. '),('itemmove',2,'Syntax: .itemmove #sourceslotid #destinationslotid\r\n\r\nMove an item from slots #sourceslotid to #destinationslotid in your inventory\r\n\r\nNot yet implemented'),('itemrmv',2,'Syntax: .itemrmv #guid\r\n\r\nRemove the given item with a GUID of #guid from the selected vendor. '),('kick',2,'Syntax: .kick [$charactername]\r\n\r\nKick the given character from the world. If no character name provide then selected player (except self) will be kicked.'),('learn',3,'Syntax: .learn #parameter\r\n\r\nSelected character learn a spell of id #parameter. A GM can use .learn all if he wants to learn all default spells for Game Masters, .learn all_lang to learn all languages, and .learn all_myclass to learn all spells available for his class (Character selection in these cases ignored).'),('learnskill',3,'Syntax: .learnskill #skillId [#level [#max]]\r\n\r\nLearn a skill of id #skill with a current skill value of #level (or 1 if not provide) and a maximum value of #max (or equal #level or 1 if not provide) for the selected character. If no character is selected, you learn the skill.'),('setskill', 3,'Syntax: .setskill #skill #level [#max]\r\n\r\nSet a skill of id #skill with a current skill value of #level and a maximum value of #max (or equal current maximum if not provide) for the selected character. If no character is selected, you learn the skill.'),('levelup',3,'Syntax: .levelup [$playername] [#numberoflevels]\r\n\r\nIncrease/decrease the level of character with $playername (or the selected if not name provided) by #numberoflevels Or +1 if no #numberoflevels provided). If #numberoflevels is omitted, the level will be increase by 1. If #numberoflevels is 0, the same level will be restarted. If no character is selected and name not provided, increase your level. Command can be used for offline character. All stats and dependent values recalculated. At level decrease talents can be reset if need. Also at level decrease equipped items with greater level requirement can be lost.'),('linkgrave',3,'Syntax: .linkgrave #graveyard_id [alliance|horde]\r\n\r\nLink current zone to graveyard for any (or alliance/horde faction ghosts). This let character ghost from zone teleport to graveyard after die if graveyard is nearest from linked to zone and accept ghost of this faction. Add only single graveyard at another map and only if no graveyards linked (or planned linked at same map).'),('loadscripts',3,'Syntax: .loadscripts $scriptlibraryname\r\n\r\nUnload current and load the script library $scriptlibraryname or reload current if $scriptlibraryname omitted, in case you changed it while the server was running.'),('lockaccount', 0,'Syntax: .lockaccount [on|off]\r\n\r\nAllow login from account only from current used IP or remove this requirement.'),('lookupitem',3,'Syntax: .lookupitem $itemname\r\n\r\nLooks up an item by $itemname, and returns all matches with their Item ID\'s.'),('lookupcreature',3,'Syntax: .lookupcreature $namepart\r\n\r\nLooks up a creature by $namepart, and returns all matches with their creature ID\'s.'),('lookupskill',3,'Syntax: .lookupskill $$namepart\r\n\r\nLooks up a skill by $namepart, and returns all matches with their skill ID\'s.'),('maxskill',3,'Syntax: .maxskill\r\nSets all skills of the targeted player to their maximum values for its current level.'),('Mod32Value',3,'Syntax: .Mod32Value #field #value\r\n\r\nAdd #value to field #field of your character.'),('modify',1,'Syntax: .modify $parameter $value\r\n\r\nModify the value of various parameters. Use .help modify $parameter to get help on specific parameter usage.\r\n\r\nSupported parameters include hp, mana, rage, energy, gold, speed, swim, scale, bit, bwalk, aspeed, faction, spell and tp.'),('modify aspeed',1,'Syntax: .modify aspeed #rate\r\n\r\nModify all speeds -run,swim,run back,swim back- of the selected player to "normalbase speed for this move type"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('modify bit',1,'Syntax: .modify bit #field #bit\r\n\r\nToggle the #bit bit of the #field field for the selected player. If no player is selected, modify your character.'),('modify bwalk',1,'Syntax: .modify bwalk #rate\r\n\r\nModify the speed of the selected player while running backwards to "normal walk back speed"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('modify energy',1,'Syntax: .modify energy #energy\r\n\r\nModify the energy of the selected player. If no player is selected, modify your energy.'),('modify faction',1,'Syntax: .modify faction #factionid #flagid #npcflagid #dynamicflagid\r\n\r\nModify the faction and flags of the selected creature. Without arguments, display the faction and flags of the selected creature.'),('modify money',1,'Syntax:\r\n.modify money #money\r\n.money #money\r\n\r\nAdd or remove money to the selected player. If no player is selected, modify your money.\r\n\r\n #gold can be negative to remove money.'),('modify hp',1,'Syntax: .modify hp #newhp\r\n\r\nModify the hp of the selected player. If no player is selected, modify your hp.'),('modify mana',1,'Syntax: .modify mana #newmana\r\n\r\nModify the mana of the selected player. If no player is selected, modify your mana.'),('modify rage',1,'Syntax: .modify rage #newrage\r\n\r\nModify the rage of the selected player. If no player is selected, modify your rage.'),('modify scale',1,''),('modify speed',1,'Syntax:\r\n.modify speed #rate\r\n.speed #rate\r\n\r\nModify the running speed of the selected player to "normal base run speed"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('modify spell',1,''),('modify swim',1,'Syntax: .modify swim #rate\r\n\r\nModify the swim speed of the selected player to "normal swim speed"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('money',1,'Syntax:\r\n.modify money #money\r\n.money #money\r\n\r\nAdd or remove money to the selected player. If no player is selected, modify your money.\r\n\r\n #gold can be negative to remove money.'),('morph',3,'Syntax: .morph #displayid\r\n\r\nChange your current model id to #displayid.'),('moveobject','2','Syntax: .moveobject #goguid [#x #y #z]\r\n\r\nMove gameobject #goguid to character coordinates (or to (#x,#y,#z) coordinates if its provide).'),('name',2,'Syntax: .name $name\r\n\r\nChange the name of the selected creature or character to $name.\r\n\r\nCommand disabled.'),('namego',1,'Syntax: .namego $charactername\r\n\r\nTeleport the given character to you. Either specify the character name or click on the player\'s portrait, e.g. when you are in a group.'),('neargrave',3,'Syntax: .neargrave [alliance|horde]\r\n\r\nFind nearest graveyard linked to zone (or only nearest from accepts alliance or horde faction ghosts).'),('NewMail',3,'Syntax: .NewMail #flag\r\n\r\nSend a new mail notification with flag #flag.'),('npcflag',2,'Syntax: .npcflag #npcflag\r\n\r\nSet the NPC flags of creature template of the selected creature and selected creature to #npcflag. NPC flags will applied to all creatures of selected creature template after server restart or grid unload/load.'),('npcinfo',3,'Syntax: .npcinfo\r\n\r\nDisplay a list of details for the selected creature.\r\n\r\nThe list includes:\r\n- GUID, Faction, NPC flags, Entry ID, Model ID,\r\n- Level,\r\n- Health (current/maximum),\r\n- Field flags, dynamic flags, faction template, \r\n- Position information,\r\n- and the creature type, e.g. if the creature is a vendor.'),('npcinfoset',3,'Syntax: .npcinfoset\r\n\r\nTODO: Write me.'),('object',3,'Syntax: .object #displayid $save\r\n\r\nAdd a new object of type mailbox with the display id of #displayid to your current position. If $save is set to \'true\', save the object in the database.'),('password', 0,'Syntax: .password $newpassword\r\n\r\nSet for your account $newpassword as new password.'),('pinfo','2','Syntax: .pinfo [$player_name] [rep]\r\n\r\nOutput account information for selected player or player find by $player_name. If "rep" parameter provided show reputation information for player.'),('playsound',1,'Syntax: .playsound #soundid\r\n\r\nPlay sound with #soundid.\r\nSound will be play only for you. Other players do not hear this.\r\nWarning: client may have more 5000 sounds...'),('prog',2,'Syntax: .prog\r\n\r\nTeleport you to Programmers Island.'),('QNM',3,'Syntax: .QNM #flag\r\n\r\nQuery next mail time with flag #flag.'),('random',2,'Syntax: .random #flag\r\n\r\nEnable or disable random movement for the selected creature.\r\n\r\nUse a #flag of value 1 to enable, use a #flag value of 0 to disable random movement. Not yet implemented.'),('recall',1,'Syntax: .recall $place\r\n\r\nTeleport you to various towns around the world. $place defines the target location. Available places include sunr, thun, cross, orgr, neth, thel, storm, iron, under, and darn.'),('reload',3,'Not yet implemented.'),('reset',3,'Syntax:\r\n.reset level\r\n  Reset level to 1 including reset stats and talents.  Equipped items with greater level requirement can be lost.\r\n.reset spells\r\n  Removes all non-original spells from spellbook.\r\n.reset stats\r\n  Resets(recalculate) all stats of the targeted player to their original values at current level.\r\n.reset talents\r\n  Removes all talents of the targeted player.'),('revive',3,'Syntax: .revive\r\n\r\nRevive the selected player. If no player is selected, it will revive you.'),('run',2,'Syntax: .run #flag\r\n\r\nEnable or disable running movement for a selected creature.\r\n\r\nUse a #flag of value 1 to enable, use a #flag value of 0 to disable running. Not yet implemented.'),('save',0,'Syntax: .save\r\n\r\nSaves your character.'),('saveall',1,'Syntax: .saveall\r\n\r\nSave all characters in game.'),('searchtele',1,'Syntax: .searchtele $substring\r\n\r\nSearch and output all .tele command locations with provide $substring in name.'),('security',3,'Syntax: .security $name #level\r\n\r\nSet the security level of player $name to a level of #level.\r\n\r\n#level may range from 0 to 5.'),('setvalue',3,'Syntax: .setvalue #field #value #isInt\r\n\r\nSet the field #field of the selected creature with value #value. If no creature is selected, set the content of your field.\r\n\r\nUse a #isInt of value 1 if #value is an integer.'),('showarea',3,'Syntax: .showarea #areaid\r\n\r\nReveal the area of #areaid to the selected character. If no character is selected, reveal this area to you.'),('showhonor',0,'Syntax: .showhonor\r\n\r\nDisplay your honor ranking.'),('shutdown',3,'Syntax: .shutdown seconds'),('speed',1,'Syntax:\r\n.modify speed #rate\r\n.speed #rate\r\n\r\nModify the running speed of the selected player to "normal base run speed"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),('standstate',3,'Syntax: .standstate #emoteid\r\n\r\nChange the emote of your character while standing to #emoteid.'),('start',0,'Syntax: .start\r\n\r\nTeleport you to the starting area of your character.'),('subname',2,'Syntax: .subname $Name\r\n\r\nChange the subname of the selected creature or player to $Name.\r\n\r\nCommand disabled.'),('targetobject', 2, 'Syntax: .targetobject [#go_id|#go_name_part]\r\n\r\nLocate and show position nearest gameobject. If #go_id or #go_name_part provide then locate and show position of nearest gameobject with gameobject template id #go_id or name included #go_name_part as part.'),('taxicheat',1,'Syntax: .taxicheat #flag\r\n\r\nTemporary grant access or remove to all taxi routes for the selected character. If no character is selected, hide or reveal all routes to you.\r\n\r\nUse a #flag of value 1 to add access, use a #flag value of 0 to remove access. Visited taxi nodes sill accessible after removing access.'),('ticket',2,'Syntax: .ticket on\r\n        .ticket off\r\n        .ticket #num\r\n        .ticket $character_name\r\n\r\non/off for GMs to show or not a new ticket directly, $character_name to show ticket of this character, #num to show ticket #num.'),('transport',3,'Not yet implemented.'),('turnobject','2','Syntax: .turnobject #goguid \r\n\r\nSet for gameobject #goguid orientation same as current character orientation.'),('unaura',3,'Syntax: .unaura #spellid\r\n\r\nRemove aura due to spell #spellid from your character.'),('unbanaccount','3','Syntax: .unbanaccount $name\r\n\r\nUnban account $name.'),('unbanip','3','Syntax: .unbanip #ip\r\n\r\nUnban provide IP address.'),('unlearn',3,'Syntax: .unlearn #startspell #endspell\r\n\r\nUnlearn for selected player the range of spells between id #startspell and #endspell. If no #endspell is provided, just unlearn spell of id #startspell.'),('unlearnskill',3,'Syntax: .unlearnskill #skill\r\n\r\nUnlearn a skill of id #skill for the selected character. If no character is selected, you unlearn the skill.'),('update',3,'Syntax: .update #field #value\r\n\r\nUpdate the field #field of the selected character or creature with value #value.\r\n\r\nIf no #value is provided, display the content of field #field.'),('visible','1','Syntax: .visible [0||1]\r\n\r\nOutput current visibility state or make GM visible(1) and invisible(0) for other players.'),('wchange',3,'Syntax: .wchange #weathertype #status\r\n\r\nSet current weather to #weathertype with an intensity of #status.\r\n\r\n#weathertype can be 1 for rain, 2 for snow, and 3 for sand. #status can be 0 for disabled, and 1 for enabled.'),('worldport',3,'Syntax: .worldport #map #position_x #position_y #position_z\r\n\r\nTeleport to the given coordinates on the specified continent (map).'),('whispers',1,'Syntax: .whispers on|off\r\nEnable/disable accepting whispers by GM from players. By default use mangosd.conf setting.');
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `command` ENABLE KEYS */;
 
@@ -580,8 +580,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `corpse`;
 CREATE TABLE `corpse` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `player` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Identifier',
+  `guid`   int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `player` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Identifier',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
@@ -611,7 +611,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `corpse_grid`;
 CREATE TABLE `corpse_grid` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `position_x` int(11) NOT NULL default '0',
   `position_y` int(11) NOT NULL default '0',
   `cell_position_x` int(11) NOT NULL default '0',
@@ -638,9 +638,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature`;
 CREATE TABLE `creature` (
-  `guid` bigint(20) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `guid` int(11) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
+  `id`   int(11) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
+  `map`  int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
@@ -656,8 +656,8 @@ CREATE TABLE `creature` (
   `curhealth` int(11) unsigned NOT NULL default '1',
   `curmana` int(11) unsigned NOT NULL default '0',
   `respawntimer` int(11) unsigned NOT NULL default '0',
-  `state` int(11) unsigned NOT NULL default '0',
-  `MovementType` int(11) unsigned NOT NULL default '0',
+  `state`        tinyint(3) unsigned NOT NULL default '0',
+  `MovementType` tinyint(3) unsigned NOT NULL default '0',
   `auras` longtext,
   PRIMARY KEY  (`guid`),
   KEY `idx_map` (`map`)
@@ -679,7 +679,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_grid`;
 CREATE TABLE `creature_grid` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `position_x` int(11) NOT NULL default '0',
   `position_y` int(11) NOT NULL default '0',
   `cell_position_x` int(11) NOT NULL default '0',
@@ -731,8 +731,8 @@ CREATE TABLE `creature_loot_template` (
   `item` int(11) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
-  `maxcount` int(11) unsigned NOT NULL default '1',
-  `quest_freeforall` int(1) unsigned NOT NULL default '1',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -803,8 +803,8 @@ CREATE TABLE `creature_template` (
   `modelid_f` int(11) unsigned default '0',
   `name` varchar(100) NOT NULL default '0',
   `subname` varchar(100) default NULL,
-  `minlevel` int(3) unsigned default '1',
-  `maxlevel` int(3) unsigned default '1',
+  `minlevel` tinyint(3) unsigned default '1',
+  `maxlevel` tinyint(3) unsigned default '1',
   `minhealth` int(5) unsigned default '0',
   `maxhealth` int(5) unsigned default '0',
   `minmana` int(5) unsigned default '0',
@@ -813,7 +813,7 @@ CREATE TABLE `creature_template` (
   `faction` int(4) unsigned default '0',
   `npcflag` int(4) unsigned default '0',
   `speed` float default '0',
-  `rank` int(1) unsigned default '0',
+  `rank` tinyint(3) unsigned default '0',
   `mindmg` float default '0',
   `maxdmg` float default '0',
   `attackpower` int(10) unsigned NOT NULL default '0',
@@ -825,16 +825,16 @@ CREATE TABLE `creature_template` (
   `size` float default '0',
   `family` int(11) default '0',
   `bounding_radius` float default '0',
-  `trainer_type` int(11) default '0',
+  `trainer_type` tinyint(3) default '0',
   `trainer_spell` int(11) unsigned default '0',
-  `class` int(11) unsigned default '0',
-  `race` int(11) unsigned default '0',
+  `class` tinyint(3) unsigned default '0',
+  `race`  tinyint(3) unsigned default '0',
   `minrangedmg` float NOT NULL default '0',
   `maxrangedmg` float NOT NULL default '0',
   `rangedattackpower` int(10) unsigned NOT NULL default '0',
   `combat_reach` float NOT NULL default '0',
   `type` int(2) unsigned default '0',
-  `civilian` int(4) unsigned NOT NULL default '0',
+  `civilian` tinyint(3) unsigned NOT NULL default '0',
   `flag1` int(11) unsigned default '0',
   `equipmodel1` int(10) unsigned NOT NULL default '0',
   `equipmodel2` int(10) unsigned NOT NULL default '0',
@@ -860,7 +860,7 @@ CREATE TABLE `creature_template` (
   `mingold` int(30) unsigned NOT NULL default '0',
   `maxgold` int(30) unsigned NOT NULL default '0',
   `AIName` varchar(128) NOT NULL default '',
-  `MovementType` int(11) unsigned NOT NULL default '0',
+  `MovementType` tinyint(3) unsigned NOT NULL default '0',
   `ScriptName` varchar(128) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
@@ -885,8 +885,8 @@ CREATE TABLE `fishing_loot_template` (
   `item` int(11) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
-  `maxcount` int(11) unsigned NOT NULL default '1',
-  `quest_freeforall` int(1) unsigned NOT NULL default '1',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -986,7 +986,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gameobject`;
 CREATE TABLE `gameobject` (
-  `guid` bigint(20) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Gameobject Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   `position_x` float NOT NULL default '0',
@@ -1019,7 +1019,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gameobject_grid`;
 CREATE TABLE `gameobject_grid` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `position_x` int(11) NOT NULL default '0',
   `position_y` int(11) NOT NULL default '0',
   `cell_position_x` int(11) NOT NULL default '0',
@@ -1071,8 +1071,8 @@ CREATE TABLE `gameobject_loot_template` (
   `item` int(11) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
-  `maxcount` int(11) unsigned NOT NULL default '1',
-  `quest_freeforall` int(1) unsigned NOT NULL default '1',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -1274,7 +1274,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `item_instance`;
 CREATE TABLE `item_instance` (
-  `guid` bigint(20) NOT NULL default '0',
+  `guid` int(11) unsigned NOT NULL default '0',
+  `owner_guid` int(11) unsigned NOT NULL DEFAULT '0',
   `data` longtext,
   PRIMARY KEY  (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
@@ -1299,8 +1300,8 @@ CREATE TABLE `item_loot_template` (
   `item` int(11) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
-  `maxcount` int(11) unsigned NOT NULL default '1',
-  `quest_freeforall` int(1) unsigned NOT NULL default '1',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -1344,23 +1345,23 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `item_template`;
 CREATE TABLE `item_template` (
   `entry` int(255) unsigned NOT NULL default '0',
-  `class` int(30) unsigned NOT NULL default '0',
-  `subclass` int(30) unsigned NOT NULL default '0',
+  `class` tinyint(3) unsigned NOT NULL default '0',
+  `subclass` tinyint(3) unsigned NOT NULL default '0',
   `name` varchar(255) NOT NULL default '',
   `name2` varchar(255) NOT NULL default '',
   `name3` varchar(255) NOT NULL default '',
   `name4` varchar(255) NOT NULL default '',
-  `displayid` int(70) unsigned NOT NULL default '0',
-  `Quality` int(30) unsigned NOT NULL default '0',
+  `displayid` int(11) unsigned NOT NULL default '0',
+  `Quality` tinyint(3) unsigned NOT NULL default '0',
   `Flags` int(30) unsigned NOT NULL default '0',
   `BuyCount` tinyint(3) unsigned NOT NULL default '1',
   `BuyPrice` int(30) unsigned NOT NULL default '0',
   `SellPrice` int(30) unsigned NOT NULL default '0',
-  `InventoryType` int(30) unsigned NOT NULL default '0',
+  `InventoryType` tinyint(3) unsigned NOT NULL default '0',
   `AllowableClass` int(30) unsigned NOT NULL default '0',
   `AllowableRace` int(30) unsigned NOT NULL default '0',
   `ItemLevel` int(30) unsigned NOT NULL default '0',
-  `RequiredLevel` int(30) unsigned NOT NULL default '0',
+  `RequiredLevel` tinyint(3) unsigned NOT NULL default '0',
   `RequiredSkill` int(30) unsigned NOT NULL default '0',
   `RequiredSkillRank` int(30) unsigned NOT NULL default '0',
   `requiredspell` int(30) unsigned NOT NULL default '0',
@@ -1368,44 +1369,44 @@ CREATE TABLE `item_template` (
   `RequiredCityRank` int(30) unsigned NOT NULL default '0',
   `RequiredReputationFaction` int(30) unsigned NOT NULL default '0',
   `RequiredReputationRank` int(30) unsigned NOT NULL default '0',
-  `maxcount` int(30) unsigned NOT NULL default '0',
-  `stackable` int(30) unsigned NOT NULL default '0',
-  `ContainerSlots` int(30) unsigned NOT NULL default '0',
-  `stat_type1` int(30) unsigned NOT NULL default '0',
-  `stat_value1` int(30) unsigned NOT NULL default '0',
-  `stat_type2` int(30) unsigned NOT NULL default '0',
-  `stat_value2` int(30) unsigned NOT NULL default '0',
-  `stat_type3` int(30) unsigned NOT NULL default '0',
-  `stat_value3` int(30) unsigned NOT NULL default '0',
-  `stat_type4` int(30) unsigned NOT NULL default '0',
-  `stat_value4` int(30) unsigned NOT NULL default '0',
-  `stat_type5` int(30) unsigned NOT NULL default '0',
-  `stat_value5` int(30) unsigned NOT NULL default '0',
-  `stat_type6` int(30) unsigned NOT NULL default '0',
-  `stat_value6` int(30) unsigned NOT NULL default '0',
-  `stat_type7` int(30) unsigned NOT NULL default '0',
-  `stat_value7` int(30) unsigned NOT NULL default '0',
-  `stat_type8` int(30) unsigned NOT NULL default '0',
-  `stat_value8` int(30) unsigned NOT NULL default '0',
-  `stat_type9` int(30) unsigned NOT NULL default '0',
-  `stat_value9` int(30) unsigned NOT NULL default '0',
-  `stat_type10` int(30) unsigned NOT NULL default '0',
-  `stat_value10` int(30) unsigned NOT NULL default '0',
+  `maxcount` smallint(5) unsigned NOT NULL default '0',
+  `stackable` smallint(5) unsigned NOT NULL default '0',
+  `ContainerSlots` tinyint(3) unsigned NOT NULL default '0',
+  `stat_type1` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value1` smallint(6) unsigned NOT NULL default '0',
+  `stat_type2` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value2` smallint(6) unsigned NOT NULL default '0',
+  `stat_type3` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value3` smallint(6) unsigned NOT NULL default '0',
+  `stat_type4` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value4` smallint(6) unsigned NOT NULL default '0',
+  `stat_type5` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value5` smallint(6) unsigned NOT NULL default '0',
+  `stat_type6` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value6` smallint(6) unsigned NOT NULL default '0',
+  `stat_type7` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value7` smallint(6) unsigned NOT NULL default '0',
+  `stat_type8` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value8` smallint(6) unsigned NOT NULL default '0',
+  `stat_type9` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value9` smallint(6) unsigned NOT NULL default '0',
+  `stat_type10` tinyint(4) unsigned NOT NULL default '0',
+  `stat_value10` smallint(6) unsigned NOT NULL default '0',
   `dmg_min1` float NOT NULL default '0',
   `dmg_max1` float NOT NULL default '0',
-  `dmg_type1` int(30) unsigned NOT NULL default '0',
+  `dmg_type1` tinyint(4) unsigned NOT NULL default '0',
   `dmg_min2` float NOT NULL default '0',
   `dmg_max2` float NOT NULL default '0',
-  `dmg_type2` int(30) unsigned NOT NULL default '0',
+  `dmg_type2` tinyint(4) unsigned NOT NULL default '0',
   `dmg_min3` float NOT NULL default '0',
   `dmg_max3` float NOT NULL default '0',
-  `dmg_type3` int(30) unsigned NOT NULL default '0',
+  `dmg_type3` tinyint(4) unsigned NOT NULL default '0',
   `dmg_min4` float NOT NULL default '0',
   `dmg_max4` float NOT NULL default '0',
-  `dmg_type4` int(30) unsigned NOT NULL default '0',
+  `dmg_type4` tinyint(4) unsigned NOT NULL default '0',
   `dmg_min5` float NOT NULL default '0',
   `dmg_max5` float NOT NULL default '0',
-  `dmg_type5` int(30) unsigned NOT NULL default '0',
+  `dmg_type5` tinyint(4) unsigned NOT NULL default '0',
   `armor` int(30) unsigned NOT NULL default '0',
   `holy_res` int(30) unsigned NOT NULL default '0',
   `fire_res` int(30) unsigned NOT NULL default '0',
@@ -1446,7 +1447,7 @@ CREATE TABLE `item_template` (
   `spellcooldown_5` int(30) unsigned NOT NULL default '0',
   `spellcategory_5` int(30) unsigned NOT NULL default '0',
   `spellcategorycooldown_5` int(30) unsigned NOT NULL default '0',
-  `bonding` int(30) unsigned NOT NULL default '0',
+  `bonding` tinyint(3) unsigned NOT NULL default '0',
   `description` varchar(255) NOT NULL default '',
   `PageText` int(30) unsigned NOT NULL default '0',
   `LanguageID` int(30) unsigned NOT NULL default '0',
@@ -1483,17 +1484,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `mail`;
 CREATE TABLE `mail` (
-  `id` bigint(20) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `messageType` int(11) unsigned NOT NULL default '0',
-  `sender` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
-  `receiver` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
+  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `messageType` tinyint(3) unsigned NOT NULL default '0',
+  `sender` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
+  `receiver` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `subject` longtext,
   `itemPageId` int(11) unsigned NOT NULL default '0',
-  `item_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Mail Item Global Unique Identifier',
+  `item_guid` int(11) unsigned NOT NULL default '0' COMMENT 'Mail Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
   `time` int(11) unsigned NOT NULL default '0',
   `money` int(11) unsigned NOT NULL default '0',
-  `cod` bigint(11) unsigned NOT NULL default '0',
+  `cod` int(11) unsigned NOT NULL default '0',
   `checked` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `idx_receiver` (`receiver`)
@@ -1579,32 +1580,6 @@ CREATE TABLE `npc_option` (
 LOCK TABLES `npc_option` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `npc_option` ENABLE KEYS */;
-
---
--- Table structure for table `npc_spirithealer`
---
-
-DROP TABLE IF EXISTS `npc_spirithealer`;
-CREATE TABLE `npc_spirithealer` (
-  `position_x` float default NULL,
-  `position_y` float default NULL,
-  `position_z` float default NULL,
-  `F` float default NULL,
-  `name_id` int(8) default NULL,
-  `zone` int(16) default NULL,
-  `map` int(16) default NULL,
-  `faction` int(32) unsigned default NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `npc_spirithealer`
---
-
-
-/*!40000 ALTER TABLE `npc_spirithealer` DISABLE KEYS */;
-LOCK TABLES `npc_spirithealer` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `npc_spirithealer` ENABLE KEYS */;
 
 --
 -- Table structure for table `npc_text`
@@ -1739,7 +1714,7 @@ DROP TABLE IF EXISTS `npc_vendor`;
 CREATE TABLE `npc_vendor` (
   `entry` int(11) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0',
-  `maxcount` int(11) unsigned NOT NULL default '0',
+  `maxcount` tinyint(3) unsigned NOT NULL default '0',
   `incrtime` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
@@ -1791,8 +1766,8 @@ CREATE TABLE `pickpocketing_loot_template` (
   `item` int(11) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
-  `maxcount` int(11) unsigned NOT NULL default '1',
-  `quest_freeforall` int(1) unsigned NOT NULL default '1',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -2150,9 +2125,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `raidgroup`;
 CREATE TABLE `raidgroup` (
-  `leaderGuid` bigint(20) NOT NULL,
-  `lootMethod` int(11) NOT NULL,
-  `looterGuid` bigint(20) NOT NULL,
+  `leaderGuid` int(11) NOT NULL,
+  `lootMethod` tinyint(4) NOT NULL,
+  `looterGuid` int(11) NOT NULL,
   `icon1` bigint(20) NOT NULL,
   `icon2` bigint(20) NOT NULL,
   `icon3` bigint(20) NOT NULL,
@@ -2180,8 +2155,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `raidgroup_member`;
 CREATE TABLE `raidgroup_member` (
-  `leaderGuid` bigint(20) NOT NULL,
-  `memberGuid` bigint(20) NOT NULL,
+  `leaderGuid` int(11) NOT NULL,
+  `memberGuid` int(11) NOT NULL,
   `assistant` tinyint(1) NOT NULL,
   `subgroup` smallint(6) NOT NULL,
   PRIMARY KEY  (`leaderGuid`,`memberGuid`)
@@ -2196,30 +2171,6 @@ CREATE TABLE `raidgroup_member` (
 LOCK TABLES `raidgroup_member` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `raidgroup_member` ENABLE KEYS */;
-
---
--- Table structure for table `skinning_loot_template`
---
-
-DROP TABLE IF EXISTS `skinning_loot_template`;
-CREATE TABLE `skinning_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
-  `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
-  `maxcount` int(11) unsigned NOT NULL default '1',
-  `quest_freeforall` int(1) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-
---
--- Dumping data for table `skinning_loot_template`
---
-
-/*!40000 ALTER TABLE `skinning_loot_template` DISABLE KEYS */;
-LOCK TABLES `skinning_loot_template` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
 
 --
 -- Table structure for table `scripts`
@@ -2247,6 +2198,30 @@ CREATE TABLE `scripts` (
 LOCK TABLES `scripts` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `scripts` ENABLE KEYS */;
+
+--
+-- Table structure for table `skinning_loot_template`
+--
+
+DROP TABLE IF EXISTS `skinning_loot_template`;
+CREATE TABLE `skinning_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `skinning_loot_template`
+--
+
+/*!40000 ALTER TABLE `skinning_loot_template` DISABLE KEYS */;
+LOCK TABLES `skinning_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
 
 --
 -- Table structure for table `spell_scripts`
@@ -2284,7 +2259,7 @@ CREATE TABLE `spell_chain` (
   `spell_id` int(5) NOT NULL default '0',
   `prev_spell` int(5) NOT NULL default '0',
   `first_spell` int(5) NOT NULL default '0',
-  `rank` int(2) NOT NULL default '0',
+  `rank` tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (`spell_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Spell Additinal Data';
 

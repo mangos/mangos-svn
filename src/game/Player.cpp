@@ -2623,7 +2623,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN ( SELECT `item` FROM `character_inventory` WHERE `guid` = '%u' )",guid);
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `owner_guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
@@ -2633,7 +2633,6 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u'",guid);
 
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
-    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` IN ( SELECT `item_guid` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0 )",guid);
     m_ignorelist.clear();
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
@@ -4202,7 +4201,7 @@ uint32 Player::GetRankFromDB(uint64 guid)
 uint32 Player::GetZoneIdFromDB(uint64 guid)
 {
     std::ostringstream ss;
-    ss<<"SELECT `map`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<guid<<"'";
+    ss<<"SELECT `map`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
     if( !result )
         return 0;
@@ -9323,7 +9322,7 @@ bool Player::MinimalLoadFromDB( uint32 guid )
 
 bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, uint64 guid)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `character` WHERE `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `character` WHERE `guid` = '%u'",GUID_LOPART(guid));
     if(!result)
         return false;
 
@@ -9342,7 +9341,7 @@ bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float&
 bool Player::LoadValuesArrayFromDB(vector<string> & data, uint64 guid)
 {
     std::ostringstream ss;
-    ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<guid<<"'";
+    ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
     if( !result )
         return false;
@@ -10444,7 +10443,7 @@ void Player::SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint
     std::ostringstream ss2;
     ss2 << "UPDATE `character` SET `position_x`='"<<x<<"',`position_y`='"<<y
         << "',`position_z`='"<<z<<"',`orientation`='"<<o<<"',`map`='"<<mapid
-        << "' WHERE `guid`='"<<guid<<"'";
+        << "' WHERE `guid`='"<< GUID_LOPART(guid) <<"'";
     sDatabase.Execute(ss2.str().c_str());
 }
 
@@ -10458,7 +10457,7 @@ bool Player::SaveValuesArrayInDB(vector<string> const& tokens, uint64 guid)
     {
         ss2<<tokens[i]<<" ";
     }
-    ss2<<"' WHERE `guid`='"<<guid<<"'";
+    ss2<<"' WHERE `guid`='"<< GUID_LOPART(guid) <<"'";
 
     return sDatabase.Execute(ss2.str().c_str());
 }

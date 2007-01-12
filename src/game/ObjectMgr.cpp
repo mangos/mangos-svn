@@ -1003,7 +1003,7 @@ void ObjectMgr::LoadRaidGroups()
         count++;
 
         group = new Group;
-        group->LoadRaidGroupFromDB((*result)[0].GetUInt64());
+        group->LoadRaidGroupFromDB(MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER));
         AddGroup(group);
 
     }while( result->NextRow() );

@@ -136,7 +136,6 @@ ChatCommand * ChatHandler::getCommandTable()
     {
         { "acct",        0, &ChatHandler::HandleAcctCommand,             "",   NULL },
         { "addmove",     2, &ChatHandler::HandleAddMoveCommand,          "",   NULL },
-        { "addspirit",   3, &ChatHandler::HandleAddSpiritCommand,        "",   NULL },
         { "anim",        3, &ChatHandler::HandleAnimCommand,             "",   NULL },
         { "announce",    1, &ChatHandler::HandleAnnounceCommand,         "",   NULL },
         { "go",          3, &ChatHandler::HandleGoCommand,               "",   NULL },
@@ -201,7 +200,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "allowmove",   3, &ChatHandler::HandleAllowMovementCommand,    "",   NULL },
         { "linkgrave",   3, &ChatHandler::HandleLinkGraveCommand,        "",   NULL },
         { "neargrave",   3, &ChatHandler::HandleNearGraveCommand,        "",   NULL },
-        { "addsh",       3, &ChatHandler::HandleAddSHCommand,            "",   NULL },
         { "transport",   3, &ChatHandler::HandleSpawnTransportCommand,   "",   NULL },
         { "explorecheat",3, &ChatHandler::HandleExploreCheatCommand,     "",   NULL },
         { "hover",       3, &ChatHandler::HandleHoverCommand,            "",   NULL },

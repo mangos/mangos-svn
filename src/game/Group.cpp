@@ -48,7 +48,7 @@ void Group::LoadRaidGroupFromDB(const uint64 &leaderGuid)
     objmgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName);
     m_groupType  = GROUPTYPE_RAID;
     m_lootMethod = (LootMethod)(*result)[0].GetUInt8();
-    m_looterGuid = (*result)[1].GetUInt64();
+    m_looterGuid = MAKE_GUID((*result)[1].GetUInt32(),HIGHGUID_PLAYER);
 
     for(int i=0; i<TARGETICONCOUNT; i++)
         m_targetIcons[i] = (*result)[2+i].GetUInt8();
@@ -61,7 +61,7 @@ void Group::LoadRaidGroupFromDB(const uint64 &leaderGuid)
     do
     {
         MemberSlot member;
-        member.guid      = (*result)[0].GetUInt64();
+        member.guid      = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
         objmgr.GetPlayerNameByGUID(member.guid, member.name);
         member.group     = (*result)[2].GetUInt8();
         member.assistant = (*result)[1].GetBool();
