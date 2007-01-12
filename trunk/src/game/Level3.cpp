@@ -1274,7 +1274,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     char* ccount = strtok(NULL, " ");
 
-    uint32 count = 1;
+    int32 count = 1;
 
     if (ccount) { count = atol(ccount); }
     if (count < 1) { count = 1; }
@@ -1287,6 +1287,11 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     sLog.outDetail(LANG_ADDITEM, itemId, count);
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
+    if(!pProto)
+    {
+        PSendSysMessage("Invalid item id: %u", itemId);
+        return true;
+    }
 
     uint32 countForStore = count;
 
@@ -1317,7 +1322,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     }
 
     // create remaining items
-    if(countForStore < pProto->Stackable)
+    if(countForStore > 0 && countForStore < pProto->Stackable)
     {
         uint16 dest;
         uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, countForStore, false );
