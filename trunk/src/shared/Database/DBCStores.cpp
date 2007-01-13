@@ -515,7 +515,7 @@ AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag)
 bool CanUsedWhileStealthed(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000)
+    if ( (spellInfo->AttributesEx & 0x20) || spellInfo->AttributesEx2 == 0x200000)
         return true;
     return false;
 }
