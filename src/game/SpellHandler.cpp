@@ -148,7 +148,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    // This part is for futur implementation of locked items
+    // locked item
     uint32 lockId = proto->LockID;
     if(lockId)
     {
