@@ -414,6 +414,9 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> item >> bagguid >> slot >> count;
 
+    // cheating attempt
+    if(count < 1) count = 1;
+
     if(!GetPlayer()->isAlive())
         return;
 
@@ -504,6 +507,9 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     uint8 count, unk1, vendorslot;
 
     recv_data >> vendorguid >> item >> count >> unk1;
+
+    // cheating attempt
+    if(count < 1) count = 1;
 
     if(!GetPlayer()->isAlive())
         return;
