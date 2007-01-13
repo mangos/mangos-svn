@@ -183,8 +183,8 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
 
     m_triggeredByAura = Aur;
     m_autoRepeat = false;
-    if( m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_RANGED_WEAPON_AUTOREPEAT )
-        m_autoRepeat = true;                                //Auto Shot & Shoot
+    if( m_spellInfo->AttributesEx2 == 0x000020 )            //Auto Shot & Shoot
+        m_autoRepeat = true;
 
     casttime = GetCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
 
@@ -1578,13 +1578,6 @@ uint8 Spell::CanCast()
     Unit *target = m_targets.getUnitTarget();
     if(target)
     {
-        // check creature state
-        if((m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_REQ_TARGET_CORPSE) && target->isAlive() )
-        {
-            SendCastResult(CAST_FAIL_TARGET_IS_ALIVE);
-            return CAST_FAIL_TARGET_IS_ALIVE;
-        }
-
         //check creaturetype
         uint32 SpellCreatureType = m_spellInfo->TargetCreatureType;
 
@@ -1656,7 +1649,7 @@ uint8 Spell::CanCast()
         //    castResult = CAST_FAIL_NOT_BEHIND_TARGET;
 
         //Must be behind the target.
-        if( (m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_REQ_BEHAIND) && (m_spellInfo->AttributesEx & SPELL_ATTR_EX_REQ_BEHAIND) && target->HasInArc(M_PI, m_caster) )
+        if( m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI, m_caster) )
         {
             SendInterrupted(2);
             castResult = CAST_FAIL_NOT_BEHIND_TARGET;
