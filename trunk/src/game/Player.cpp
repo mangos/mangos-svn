@@ -6079,8 +6079,8 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                     }
                 }
 
-                // search free slot - ammo special case
-                if( pProto->Class == ITEM_CLASS_PROJECTILE )
+                // search free slot - special bag case
+                if( pProto->BagFamily != BAG_FAMILY_NONE )
                 {
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                     {
@@ -6089,7 +6089,10 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                         if( pBag )
                         {
                             pBagProto = pBag->GetProto();
-                            if( pBagProto && pBagProto->SubClass == pProto->SubClass )
+
+                            // not plain container check
+                            if( pBagProto && (pBagProto->Class != ITEM_CLASS_CONTAINER || pBagProto->SubClass != ITEM_SUBCLASS_CONTAINER) &&
+                                pItem->CanGoIntoBag(pBagProto) )
                             {
                                 for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
@@ -6123,7 +6126,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                     if( pBag )
                     {
                         pBagProto = pBag->GetProto();
-                        if( pBagProto && pBagProto->Class != ITEM_CLASS_QUIVER )
+                        if( pBagProto && pItem->CanGoIntoBag(pBagProto))
                         {
                             for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                             {
@@ -6208,7 +6211,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             {
                                 if( pBagProto->Class == ITEM_CLASS_QUIVER && pBagProto->SubClass != pProto->SubClass )
                                     return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
-                                if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
+                                if( !pItem->CanGoIntoBag(pBagProto) )
                                     return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
                                 for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
@@ -6260,7 +6263,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                                 {
                                     if( pBagProto->Class == ITEM_CLASS_QUIVER && pBagProto->SubClass != pProto->SubClass )
                                         return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
-                                    if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
+                                    if( !pItem->CanGoIntoBag(pBagProto) )
                                         return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
                                     dest = ( (bag << 8) | slot );
                                     return EQUIP_ERR_OK;
@@ -6493,7 +6496,9 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                         }
                     }
                 }
-                if( pProto->Class == ITEM_CLASS_PROJECTILE )
+
+                // search place in special bag
+                if( pProto->BagFamily != BAG_FAMILY_NONE )
                 {
                     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                     {
@@ -6502,7 +6507,9 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                         if( pBag )
                         {
                             pBagProto = pBag->GetProto();
-                            if( pBagProto && pBagProto->SubClass == pProto->SubClass )
+                            // not plain container check
+                            if( pBagProto && (pBagProto->Class != ITEM_CLASS_CONTAINER || pBagProto->SubClass != ITEM_SUBCLASS_CONTAINER) &&
+                                pItem->CanGoIntoBag(pBagProto) )
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
@@ -6518,6 +6525,8 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                         }
                     }
                 }
+
+                // search free space
                 for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
                 {
                     pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
@@ -6533,7 +6542,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                     if( pBag )
                     {
                         pBagProto = pBag->GetProto();
-                        if( pBagProto && pBagProto->Class != ITEM_CLASS_QUIVER )
+                        if( pBagProto && pItem->CanGoIntoBag(pBagProto) )
                         {
                             for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                             {
@@ -6616,7 +6625,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                             {
                                 if( pBagProto->Class == ITEM_CLASS_QUIVER && pBagProto->SubClass != pProto->SubClass )
                                     return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
-                                if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
+                                if( !pItem->CanGoIntoBag(pBagProto) )
                                     return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
                                 for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
@@ -6686,7 +6695,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                                 {
                                     if( pBagProto->Class == ITEM_CLASS_QUIVER && pBagProto->SubClass != pProto->SubClass )
                                         return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
-                                    if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
+                                    if( !pItem->CanGoIntoBag(pBagProto) )
                                         return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
                                     dest = ( (bag << 8) | slot );
                                     return EQUIP_ERR_OK;

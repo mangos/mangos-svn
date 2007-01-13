@@ -1461,6 +1461,7 @@ CREATE TABLE `item_template` (
   `itemset` int(30) unsigned NOT NULL default '0',
   `MaxDurability` int(30) unsigned NOT NULL default '0',
   `area` int(30) unsigned NOT NULL default '0',
+  `BagFamily` tinyint(3) unsigned NOT NULL default '0',
   `Unknown1` int(30) unsigned NOT NULL default '0',
   `ScriptName` varchar(100) NOT NULL default '',
   PRIMARY KEY  (`entry`),

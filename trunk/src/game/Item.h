@@ -169,6 +169,7 @@ class MANGOS_DLL_SPEC Item : public Object
         uint8 GetBagSlot() const;
         void SetSlot(uint8 slot) {m_slot = slot;}
         void SetContainer(Bag *container) { m_container = container; }
+        bool CanGoIntoBag(ItemPrototype const *pBagProto);
 
         bool IsInBag() const { return m_container != NULL; }
         bool IsEquipped() const { return !IsInBag() && m_slot < 255; }

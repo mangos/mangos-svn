@@ -892,6 +892,57 @@ bool Item::CanBeTraded() const
     return true;
 }
 
+bool Item::CanGoIntoBag(ItemPrototype const *pBagProto)
+{
+    ItemPrototype const *pProto = GetProto();
+
+    if(!pProto || !pBagProto)
+        return false;
+
+    switch(pBagProto->Class)
+    {
+        case ITEM_CLASS_CONTAINER:
+            switch(pBagProto->SubClass)
+            {
+                case ITEM_SUBCLASS_CONTAINER:
+                    return true;
+                case ITEM_SUBCLASS_SOUL_CONTAINER:
+                    if(pProto->BagFamily != BAG_FAMILY_SOUL_SHARDS)
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_HERB_CONTAINER:
+                    if(pProto->BagFamily != BAG_FAMILY_HERBS)
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_ENCHANTING_CONTAINER:
+                    if(pProto->BagFamily != BAG_FAMILY_ENCHANTING_SUPP)
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_ENGINEERING_CONTAINER:
+                    if(pProto->BagFamily != BAG_FAMILY_ENGINEERING_SUPP)
+                        return false;
+                    return true;
+                default:
+                    return false;
+            }
+        case ITEM_CLASS_QUIVER:
+            switch(pBagProto->SubClass)
+            {
+                case ITEM_SUBCLASS_QUIVER:
+                    if(pProto->BagFamily != BAG_FAMILY_ARROWS)
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_AMMO_POUCH:
+                    if(pProto->BagFamily != BAG_FAMILY_BULLETS)
+                        return false;
+                    return true;
+                default:
+                    return false;
+            }
+    }
+    return false;
+}
+
 bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 {
     ItemPrototype const* proto = GetProto();
