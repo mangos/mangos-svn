@@ -219,16 +219,6 @@ enum SpellModOp
     SPELLMOD_MANA_LOST_PER_DAMAGE_TAKEN = 27,
 };
 
-// SPELL AttributeEx not fully known flags 
-#define SPELL_ATTR_EX_REQ_BEHAIND               0x0000000000000200  // also required SPELL_ATTR_EX2_REQ_BEHAIND for correct test
-
-// SPELL AttributeEx2 known flags
-#define SPELL_ATTR_EX2_REQ_TARGET_CORPSE        0x0000000000000001
-#define SPELL_ATTR_EX2_RANGED_WEAPON_AUTOREPEAT 0x0000000000000020
-
-// SPELL AttributeEx2 not fully known flags 
-#define SPELL_ATTR_EX2_REQ_BEHAIND              0x0000000000100000  // also required SPELL_ATTR_EX_REQ_BEHAIND for correct test
-
 enum SpellFailedReason
 {
     CAST_FAIL_IN_COMBAT = 0,

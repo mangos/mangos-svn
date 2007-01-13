@@ -1549,7 +1549,7 @@ void Unit::_UpdateSpells( uint32 time )
             if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
             {
                 //Auto Shot & Shoot
-                if( (m_currentSpell->m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_RANGED_WEAPON_AUTOREPEAT) && GetTypeId() == TYPEID_PLAYER )
+                if( m_currentSpell->m_spellInfo->AttributesEx2 == 0x000020 && GetTypeId() == TYPEID_PLAYER )
                     resetAttackTimer( RANGED_ATTACK );
                 else
                     setAttackTimer( RANGED_ATTACK, m_currentSpell->m_spellInfo->RecoveryTime);
