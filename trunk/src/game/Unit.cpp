@@ -1131,6 +1131,12 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
     uint32   absorbed_dmg = 0;
     uint32   resisted_dmg = 0;
 
+    if (PhysicalDamageImmune(pVictim))
+    {
+        SendAttackStateUpdate (HITINFO_MISS, pVictim, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
+        return;
+    }
+
     DoAttackDamage (pVictim, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
     if(attType == RANGED_ATTACK)
@@ -3382,16 +3388,14 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
     return healamount;
 }
 
-void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
+bool Unit::PhysicalDamageImmune(Unit *pVictim)
 {
-    if(!pVictim) return;
-
     //If m_immuneToDamage type contain magic, IMMUNE damage.
     for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_DAMAGE].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_DAMAGE].end(); itr = next)
     {
         if(itr->type & IMMUNE_DAMAGE_PHYSICAL)
         {
-            *pdamage = 0;
+            return true;
             break;
         }
     }
@@ -3400,10 +3404,16 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     {
         if(itr->type & IMMUNE_SCHOOL_PHYSICAL)
         {
-            *pdamage = 0;
+            return true;
             break;
         }
     }
+    return false;
+}
+
+void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
+{
+    if(!pVictim) return;
 
     if(*pdamage == 0)
         return;

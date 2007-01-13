@@ -1707,6 +1707,12 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 resisted_dmg = 0;
     bool criticalhit = false;
 
+    if (m_caster->PhysicalDamageImmune(unitTarget))
+    {
+        m_caster->SendAttackStateUpdate (HITINFO_MISS, unitTarget, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
+        return;
+    }
+
     m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
     // not add bonus to 0 damage

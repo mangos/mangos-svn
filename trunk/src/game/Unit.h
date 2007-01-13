@@ -680,6 +680,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage);
         uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount);
         bool SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect);
+        bool PhysicalDamageImmune(Unit *pVictim);
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
 
