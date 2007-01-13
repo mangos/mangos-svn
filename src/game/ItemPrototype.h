@@ -69,6 +69,23 @@ enum ITEM_FLAGS
     ITEM_FLAGS_BINDED = 1
 };
 
+enum BAG_FAMILY
+{
+    BAG_FAMILY_NONE                             = 0,
+    BAG_FAMILY_ARROWS                           = 1,
+    BAG_FAMILY_BULLETS                          = 2,
+    BAG_FAMILY_SOUL_SHARDS                      = 3,
+    //BAG_FAMILY_UNK1                           = 4,
+    //BAG_FAMILY_UNK1                           = 5,
+    BAG_FAMILY_HERBS                            = 6,
+    BAG_FAMILY_ENCHANTING_SUPP                  = 7,
+    BAG_FAMILY_ENGINEERING_SUPP                 = 8,
+    BAG_FAMILY_KEYS                             = 9,
+    BAG_FAMILY_GEMS                             = 10,
+    //BAG_FAMILY_UNK3                           = 11,
+    BAG_FAMILY_MINING_SUPP                      = 12
+};
+
 enum INVENTORY_TYPES
 {
     INVTYPE_NON_EQUIP      = 0,
@@ -303,6 +320,7 @@ struct ItemPrototype
     uint32 ItemSet;
     uint32 MaxDurability;
     uint32 Area;
+    uint32 BagFamily;
     uint32 Unknown1;
     char* ScriptName;
 };
