@@ -29,24 +29,19 @@ typedef void(MANGOS_IMPORT * scriptCallScriptsFree) ();
 
 typedef bool(MANGOS_IMPORT * scriptCallGossipHello) (Player *player, Creature *_Creature );
 typedef bool(MANGOS_IMPORT * scriptCallQuestAccept) (Player *player, Creature *_Creature, Quest *);
-typedef bool(MANGOS_IMPORT * scriptCallGossipSelect)(Player *player, Creature *_Creature, uint32 sender
-, uint32 action);
-typedef bool(MANGOS_IMPORT * scriptCallGossipSelectWithCode)( Player *player, Creature *_Creature,
-uint32 sender, uint64 action, char* sCode );
+typedef bool(MANGOS_IMPORT * scriptCallGossipSelect)(Player *player, Creature *_Creature, uint32 sender, uint32 action);
+typedef bool(MANGOS_IMPORT * scriptCallGossipSelectWithCode)( Player *player, Creature *_Creature, uint32 sender, uint64 action, char* sCode );
 typedef bool(MANGOS_IMPORT * scriptCallQuestSelect)( Player *player, Creature *_Creature, Quest * );
 typedef bool(MANGOS_IMPORT * scriptCallQuestComplete)(Player *player, Creature *_Creature, Quest *);
 typedef uint32(MANGOS_IMPORT * scriptCallNPCDialogStatus)( Player *player, Creature *_Creature);
-typedef bool(MANGOS_IMPORT * scriptCallChooseReward)( Player *player, Creature *_Creature, Quest *,
-uint32 opt );
+typedef bool(MANGOS_IMPORT * scriptCallChooseReward)( Player *player, Creature *_Creature, Quest *, uint32 opt );
 typedef bool(MANGOS_IMPORT * scriptCallItemHello)( Player *player, Item *, Quest *);
 typedef bool(MANGOS_IMPORT * scriptCallGOHello)( Player *player, GameObject * );
 typedef bool(MANGOS_IMPORT * scriptCallAreaTrigger)( Player *player, Quest *, uint32 triggerID );
-
 typedef bool(MANGOS_IMPORT * scriptCallItemQuestAccept)(Player *player, Item *, Quest *);
 typedef bool(MANGOS_IMPORT * scriptCallGOQuestAccept)(Player *player, GameObject *, Quest *);
-typedef bool(MANGOS_IMPORT * scriptCallGOChooseReward)(Player *player, GameObject *, Quest *,
-uint32 opt );
-
+typedef bool(MANGOS_IMPORT * scriptCallGOChooseReward)(Player *player, GameObject *, Quest *, uint32 opt );
+typedef bool(MANGOS_IMPORT * scriptCallReciveEmote) ( Player *player, Creature *_Creature, uint32 emote );
 typedef CreatureAI* (MANGOS_IMPORT * scriptCallGetAI)  ( Creature *_Creature );
 
 typedef struct
@@ -68,6 +63,7 @@ typedef struct
     scriptCallAreaTrigger scriptAreaTrigger;
     scriptCallItemQuestAccept ItemQuestAccept;
     scriptCallGOQuestAccept GOQuestAccept;
+    scriptCallReciveEmote ReciveEmote;
     scriptCallGetAI GetAI;
 
     MANGOS_LIBRARY_HANDLE hScriptsLib;

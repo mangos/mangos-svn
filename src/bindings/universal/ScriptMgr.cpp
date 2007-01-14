@@ -230,6 +230,17 @@ bool AreaTrigger      ( Player *player, Quest *_Quest, uint32 triggerID )
 }
 
 MANGOS_DLL_EXPORT
+bool ReciveEmote ( Player *player, Creature *_Creature, uint32 emote )
+{
+    Script *tmpscript = NULL;
+
+    tmpscript = GetScriptByName(_Creature->GetCreatureInfo()->ScriptName);
+    if(!tmpscript || !tmpscript->pReciveEmote) return false;
+
+    return tmpscript->pReciveEmote(player,_Creature, emote);
+}
+
+MANGOS_DLL_EXPORT
 CreatureAI* GetAI(Creature *_Creature )
 {
     Script *tmpscript = GetScriptByName(_Creature->GetCreatureInfo()->ScriptName);

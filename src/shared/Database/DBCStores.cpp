@@ -519,3 +519,7 @@ bool CanUsedWhileStealthed(uint32 spellId)
         return true;
     return false;
 }
+
+// script support functions
+MANGOS_DLL_SPEC DBCStorage <SpellEntry>      const* GetSpellStore()      { return &sSpellStore;      }
+MANGOS_DLL_SPEC DBCStorage <SpellRangeEntry> const* GetSpellRangeStore() { return &sSpellRangeStore; }

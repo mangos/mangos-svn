@@ -30,6 +30,7 @@
 #include "Guild.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
+#include "ScriptCalls.h"
 
 void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
@@ -356,6 +357,10 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
         WPAssert(data.size() == 20 + namlen);
         GetPlayer()->SendMessageToSet( &data, true );
+
+        //Send scripted event call
+        if (pCreature && Script)
+            Script->ReciveEmote(GetPlayer(),pCreature,emote_anim);
     }
 }
 

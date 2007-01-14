@@ -79,13 +79,13 @@ class DBCStorage
         ~DBCStorage(){if(data) delete [] data;};
 
         inline
-            T const* LookupEntry(uint32 id)
+            T const* LookupEntry(uint32 id) const
         {
             return (id>nCount)?NULL:data[id];
 
         }
         inline
-            unsigned int GetNumRows()
+            unsigned int GetNumRows() const
         {
             return nCount;
         }
@@ -152,4 +152,9 @@ extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;
 extern DBCStorage <WorldSafeLocsEntry>        sWorldSafeLocsStore;
 
 void LoadDBCStores(std::string dataPath);
+
+// script support functions
+MANGOS_DLL_SPEC DBCStorage <SpellEntry>      const* GetSpellStore()     ;
+MANGOS_DLL_SPEC DBCStorage <SpellRangeEntry> const* GetSpellRangeStore() ;
+
 #endif
