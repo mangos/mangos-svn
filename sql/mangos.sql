@@ -1000,6 +1000,7 @@ CREATE TABLE `gameobject` (
   `loot` int(11) unsigned NOT NULL default '0',
   `respawntimer` int(11) unsigned NOT NULL default '0',
   `animprogress` int(11) unsigned NOT NULL default '0',
+  `dynflags` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
 
