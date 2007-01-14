@@ -163,7 +163,17 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
 
     Player* p_caster;
 
-    m_spellInfo = info;                                     // custom SpellEntry in m_spellInfo will be delete at Spell delete
+    // make own copy of custom `info` (`info` can be created at stack)
+    // copy custom SpellEntry in m_spellInfo will be delete at Spell delete
+    if(info != sSpellStore.LookupEntry( info->Id )) 
+    { 
+        SpellEntry* sInfo = new SpellEntry;
+        *sInfo = *info;
+        m_spellInfo = sInfo;
+    }
+    else
+        m_spellInfo = info;
+
     m_caster = Caster;
 
     m_spellState = SPELL_STATE_NULL;
