@@ -41,8 +41,8 @@ typedef bool(MANGOS_IMPORT * scriptCallAreaTrigger)( Player *player, Quest *, ui
 typedef bool(MANGOS_IMPORT * scriptCallItemQuestAccept)(Player *player, Item *, Quest *);
 typedef bool(MANGOS_IMPORT * scriptCallGOQuestAccept)(Player *player, GameObject *, Quest *);
 typedef bool(MANGOS_IMPORT * scriptCallGOChooseReward)(Player *player, GameObject *, Quest *, uint32 opt );
-typedef bool(MANGOS_IMPORT * scriptCallReciveEmote) ( Player *player, Creature *_Creature, uint32 emote );
-typedef CreatureAI* (MANGOS_IMPORT * scriptCallGetAI)  ( Creature *_Creature );
+typedef bool(MANGOS_IMPORT * scriptCallReceiveEmote) ( Player *player, Creature *_Creature, uint32 emote );
+typedef CreatureAI* (MANGOS_IMPORT * scriptCallGetAI) ( Creature *_Creature );
 
 typedef struct
 {
@@ -63,7 +63,7 @@ typedef struct
     scriptCallAreaTrigger scriptAreaTrigger;
     scriptCallItemQuestAccept ItemQuestAccept;
     scriptCallGOQuestAccept GOQuestAccept;
-    scriptCallReciveEmote ReciveEmote;
+    scriptCallReceiveEmote ReceiveEmote;
     scriptCallGetAI GetAI;
 
     MANGOS_LIBRARY_HANDLE hScriptsLib;
