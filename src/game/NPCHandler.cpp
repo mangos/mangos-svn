@@ -468,6 +468,22 @@ void WorldSession::SendBindPoint(Creature *npc)
     // update sql homebind
     sDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%u', `zone` = '%u', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%u'", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetGUIDLow());
 
+    // if a player lost/dropped hist hearthstone, he will get a new one
+    uint32 hearthstone_itemid = 6948;
+    if ( !_player->HasItemCount(hearthstone_itemid, 1) && _player->GetBankItemCount(hearthstone_itemid) <1)
+    {
+        uint16 dest;
+        uint8 msg = _player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, hearthstone_itemid, 1, false );
+        if( msg == EQUIP_ERR_OK )
+        {
+            _player->StoreNewItem( dest, hearthstone_itemid, 1, true);
+        }
+        else
+        {
+            _player->SendEquipError( msg, NULL, NULL );
+        }
+    }
+
     // send spell for bind 3286 bind magic
     data.Initialize(SMSG_SPELL_START, (8+8+2+2+2+4+2) );
     data.append(_player->GetPackGUID());
