@@ -597,7 +597,7 @@ void Spell::EffectPowerDrain(uint32 i)
     unitTarget->ModifyPower(POWER_MANA,-new_damage);
 
     m_caster->ModifyPower(POWER_MANA,tmpvalue);
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage);
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage/2);
 
 }
 
