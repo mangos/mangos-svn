@@ -458,19 +458,11 @@ void Spell::EffectApplyAura(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
-    uint8 castResult = 0;
+
     //If m_immuneToState type contain this aura type, IMMUNE aura.
-    for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_EFFECT].begin(); itr != unitTarget->m_spellImmune[IMMUNITY_EFFECT].end(); ++itr)
+    if(unitTarget->IsImmunedToSpellEffect(m_spellInfo->EffectApplyAuraName[i]))
     {
-        if(itr->type == m_spellInfo->EffectApplyAuraName[i])
-        {
-            castResult = CAST_FAIL_IMMUNE;
-            break;
-        }
-    }
-    if(castResult)
-    {
-        SendCastResult(castResult);
+        SendCastResult(CAST_FAIL_IMMUNE);
         return;
     }
 
@@ -1707,7 +1699,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 resisted_dmg = 0;
     bool criticalhit = false;
 
-    if (m_caster->PhysicalDamageImmune(unitTarget))
+    if( unitTarget->IsImmunedToPhysicalDamage() )
     {
         m_caster->SendAttackStateUpdate (HITINFO_MISS, unitTarget, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
         return;
