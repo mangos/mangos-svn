@@ -311,7 +311,7 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
         PSendSysMessage(LANG_UNLEARNED_SKILL, target->GetName(), skill);
     }
     else
-        SendSysMessage(LANG_UNKNOWN_SKILL);
+        PSendSysMessage(LANG_UNKNOWN_SKILL,target==m_session->GetPlayer() ? "You" : target->GetName());
 
     return true;
 }
@@ -1109,6 +1109,39 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleCooldownCommand(const char* args)
+{
+    Player* target = getSelectedPlayer();
+    if(!target)
+    {
+        PSendSysMessage(LANG_PLAYER_NOT_FOUND); 
+        return true;
+    }
+    
+    if (!*args)
+    {
+        target->RemoveAllSpellCooldown();
+        PSendSysMessage(LANG_REMOVEALL_COOLDOWN, target->GetName()); 
+    }
+    else
+    {   
+        uint32 spell_id = atol((char*)args);
+        if(!sSpellStore.LookupEntry(spell_id))
+        {
+            PSendSysMessage(LANG_UNKNOWN_SPELL, target==m_session->GetPlayer() ? "You" : target->GetName());
+            return true;
+        }
+
+        WorldPacket data( SMSG_CLEAR_COOLDOWN, (4+8+4) );
+        data << uint32( spell_id );
+        data << target->GetGUID();
+        data << uint32(0); 
+        target->GetSession()->SendPacket(&data);
+        target->RemoveSpellCooldown(spell_id);
+        PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target==m_session->GetPlayer() ? "you" : target->GetName());
+    }
+    return true; 
+}
 bool ChatHandler::HandleUnLearnCommand(const char* args)
 {
     if (!*args)

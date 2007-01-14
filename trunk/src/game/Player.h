@@ -849,6 +849,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
         void AddSpellCooldown(uint32 spell_id, time_t end_time) { m_spellCooldowns[spell_id] = end_time; }
         void RemoveSpellCooldown(uint32 spell_id) { m_spellCooldowns.erase(spell_id); }
+        void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns();
         void _SaveSpellCooldowns();
 

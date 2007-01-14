@@ -166,6 +166,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "itemmove",    2, &ChatHandler::HandleItemMoveCommand,         "",   NULL },
         { "kick",        2, &ChatHandler::HandleKickPlayerCommand,       "",   NULL },
         { "learn",       3, &ChatHandler::HandleLearnCommand,            "",   NULL },
+        { "cooldown",    3, &ChatHandler::HandleCooldownCommand,         "",   NULL },
         { "unlearn",     3, &ChatHandler::HandleUnLearnCommand,          "",   NULL },
         { "learnskill",  3, &ChatHandler::HandleLearnSkillCommand,       "",   NULL },
         { "unlearnskill",3, &ChatHandler::HandleUnLearnSkillCommand,     "",   NULL },
