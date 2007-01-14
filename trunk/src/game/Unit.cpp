@@ -1131,7 +1131,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
     uint32   absorbed_dmg = 0;
     uint32   resisted_dmg = 0;
 
-    if (PhysicalDamageImmune(pVictim))
+    if( pVictim->IsImmunedToPhysicalDamage() )
     {
         SendAttackStateUpdate (HITINFO_MISS, pVictim, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
         return;
@@ -2637,17 +2637,15 @@ void Unit::RemoveDynObject(uint32 spellid)
 {
     if(m_dynObj.empty())
         return;
-    std::list<DynamicObject*>::iterator i, next;
-    for (i = m_dynObj.begin(); i != m_dynObj.end(); i = next)
+    for (std::list<DynamicObject*>::iterator i = m_dynObj.begin(); i != m_dynObj.end();)
     {
-        next = i;
         if(spellid == 0 || (*i)->GetSpellId() == spellid)
         {
             (*i)->Delete();
-            next = m_dynObj.erase(i);
+            i = m_dynObj.erase(i);
         }
         else
-            ++next;
+            ++i;
     }
 }
 
@@ -3267,30 +3265,10 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
 uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 pdamage)
 {
     if(!spellProto || !pVictim) return pdamage;
-    //If m_immuneToDamage type contain this damage type, IMMUNE damage.
-    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_DAMAGE].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_DAMAGE].end(); itr = next)
-    {
-        next = itr;
-        next++;
-        if(itr->type & uint32(1<<spellProto->School))
-        {
-            pdamage = 0;
-            break;
-        }
-    }
-    //If m_immuneToSchool type contain this school type, IMMUNE damage.
-    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_SCHOOL].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_SCHOOL].end(); itr = next)
-    {
-        next = itr;
-        next++;
-        if(itr->type & uint32(1<<spellProto->School))
-        {
-            pdamage = 0;
-            break;
-        }
-    }
-    if(pdamage == 0)
-        return pdamage;
+
+    if(pVictim->IsImmunedToSpellDamage(spellProto))
+        return 0;
+
     CreatureInfo const *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
@@ -3388,26 +3366,66 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
     return healamount;
 }
 
-bool Unit::PhysicalDamageImmune(Unit *pVictim)
+bool Unit::IsImmunedToPhysicalDamage() const
 {
     //If m_immuneToDamage type contain magic, IMMUNE damage.
-    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_DAMAGE].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_DAMAGE].end(); itr = next)
-    {
+    SpellImmuneList const& damageImmList = m_spellImmune[IMMUNITY_DAMAGE];
+    for (SpellImmuneList::const_iterator itr = damageImmList.begin(); itr != damageImmList.end(); ++itr)
         if(itr->type & IMMUNE_DAMAGE_PHYSICAL)
-        {
             return true;
-            break;
-        }
-    }
+
     //If m_immuneToSchool type contain this school type, IMMUNE damage.
-    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_SCHOOL].begin(); itr != pVictim->m_spellImmune[IMMUNITY_SCHOOL].end(); ++itr)
-    {
+    SpellImmuneList const& spellImmList = m_spellImmune[IMMUNITY_SCHOOL];
+    for (SpellImmuneList::const_iterator itr = spellImmList.begin(); itr != spellImmList.end(); ++itr)
         if(itr->type & IMMUNE_SCHOOL_PHYSICAL)
-        {
             return true;
-            break;
-        }
-    }
+
+    return false;
+}
+
+bool Unit::IsImmunedToSpellDamage(SpellEntry const* spellInfo) const
+{
+    //If m_immuneToDamage type contain magic, IMMUNE damage.
+    SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
+    for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
+        if(itr->type & uint32(1<<spellInfo->School))
+            return true;
+
+    //If m_immuneToSchool type contain this school type, IMMUNE damage.
+    SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
+    for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+        if(itr->type & uint32(1<<spellInfo->School))
+            return true;
+
+    return false;
+}
+
+bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
+{
+    if (!spellInfo)
+        return false;
+
+    SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
+    for(SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
+        if(itr->type == spellInfo->Dispel)
+            return true;
+
+    SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
+    for(SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        if(itr->type == spellInfo->Mechanic)
+            return true;
+
+    return false;
+}
+
+bool Unit::IsImmunedToSpellEffect(uint32 effect) const
+{
+    //If m_immuneToEffect type contain this effect type, IMMUNE effect.
+    SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];
+    for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
+        if(itr->type == effect)
+            return true;
+
     return false;
 }
 

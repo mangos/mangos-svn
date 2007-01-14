@@ -260,7 +260,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isCanWalkOrFly() const;
         bool isCanTrainingOf(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;
-
+        bool IsImmunedToSpell(SpellEntry const* spellInfo) const;
+                                                            // redefine Unit::IsImmunedTo
         bool isElite() const
         {
             if(isPet())

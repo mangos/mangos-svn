@@ -285,6 +285,15 @@ void Spell::FillTargetMap()
             }
         }
 
+        //Check targets for immune and remove immuned targets
+        for (std::list<Unit*>::iterator itr = tmpUnitMap.begin() ; itr != tmpUnitMap.end();)
+        {
+            if ((*itr)->IsImmunedToSpell(m_spellInfo))
+                itr = tmpUnitMap.erase(itr);
+            else
+                ++itr;
+        }
+
         m_targetUnits[i] = tmpUnitMap;
         m_targetItems[i] = tmpItemMap;
         m_targetGOs[i]   = tmpGOMap;
@@ -1484,7 +1493,6 @@ void Spell::TakeReagents()
 
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
 {
-    uint8 castResult = 0;
     unitTarget = pUnitTarget;
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
@@ -1493,23 +1501,9 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     uint8 eff = m_spellInfo->Effect[i];
 
     sLog.outDebug( "Spell: Effect : %u", eff);
-    if(unitTarget)
+    if(unitTarget && unitTarget->IsImmunedToSpellEffect(eff))
     {
-        //If m_immuneToEffect type contain this effect type, IMMUNE effect.
-        for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_EFFECT].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_EFFECT].end(); itr = next)
-        {
-            next = itr;
-            next++;
-            if(itr->type == eff)
-            {
-                castResult = CAST_FAIL_IMMUNE;
-                break;
-            }
-        }
-    }
-    if(castResult)
-    {
-        SendCastResult(castResult);
+        SendCastResult(CAST_FAIL_IMMUNE);
         return;
     }
 
@@ -1614,24 +1608,11 @@ uint8 Spell::CanCast()
             }
         }
 
-        //If m_immuneToDispel type contain this spell type, IMMUNE spell.
-        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_DISPEL].begin(); itr != target->m_spellImmune[IMMUNITY_DISPEL].end(); ++itr)
+        if(target->IsImmunedToSpell(m_spellInfo))
         {
-            if(itr->type == m_spellInfo->Dispel)
-            {
-                castResult = CAST_FAIL_IMMUNE;
-                SendCastResult(castResult);
-                return castResult;
-            }
-        }
-        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_MECHANIC].begin(); itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); ++itr)
-        {
-            if(itr->type == m_spellInfo->Mechanic)
-            {
-                castResult = CAST_FAIL_IMMUNE;
-                SendCastResult(castResult);
-                return castResult;
-            }
+            castResult = CAST_FAIL_IMMUNE;
+            SendCastResult(castResult);
+            return castResult;
         }
         /*
         if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
