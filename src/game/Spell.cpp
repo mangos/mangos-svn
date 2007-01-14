@@ -161,10 +161,9 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
 {
     ASSERT( Caster != NULL && info != NULL );
 
-    //SpellEntry *spellInfo;
     Player* p_caster;
 
-    m_spellInfo = info;
+    m_spellInfo = info;                                     // custom SpellEntry in m_spellInfo will be delete at Spell delete
     m_caster = Caster;
 
     m_spellState = SPELL_STATE_NULL;
@@ -216,6 +215,13 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
             }
         }
     }
+}
+
+Spell::~Spell()
+{
+    // free custom m_spellInfo
+    if(m_spellInfo != sSpellStore.LookupEntry(m_spellInfo->Id))
+        delete m_spellInfo;
 }
 
 void Spell::FillTargetMap()

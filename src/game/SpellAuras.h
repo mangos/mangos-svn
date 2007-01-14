@@ -168,7 +168,7 @@ class Aura
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
         Modifier* GetModifier() {return &m_modifier;}
 
-        SpellEntry const* GetSpellProto() const { return sSpellStore.LookupEntry( m_spellId ); }
+        SpellEntry const* GetSpellProto() const { return m_spellProto; }
         uint32 GetId() const{ return m_spellId; }
         uint32 GetEffIndex() const{ return m_effIndex; }
         void SetEffIndex(uint32 eff) { m_effIndex = eff; }
@@ -221,7 +221,7 @@ class Aura
         SpellModifier *m_spellmod;
         uint32 m_spellId;
         uint32 m_effIndex;
-        //SpellEntry *m_spellProto;
+        SpellEntry const *m_spellProto;
         uint64 m_caster_guid;
         Unit* m_target;
         int32 m_duration;

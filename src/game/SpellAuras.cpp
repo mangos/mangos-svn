@@ -218,6 +218,18 @@ m_procCharges(0), m_absorbDmg(0), m_isPersistent(false), m_removeOnDeath(false),
 m_isAreaAura(false)
 {
     assert(target);
+
+    // make own copy of custom `spellproto` (`spellproto` will be deleted at spell cast finished)
+    // copy custom SpellEntry in m_spellProto will be delete at Auara delete
+    if(spellproto != sSpellStore.LookupEntry( spellproto->Id )) 
+    { 
+        SpellEntry* sInfo = new SpellEntry;
+        *sInfo = *spellproto;
+        m_spellProto = sInfo;
+    }
+    else
+        m_spellProto = spellproto;
+
     m_duration = GetDuration(spellproto);
     int32 maxduration = GetMaxDuration(spellproto);
     if(m_duration == -1)
@@ -260,6 +272,9 @@ m_isAreaAura(false)
 
 Aura::~Aura()
 {
+    // free custom m_spellProto
+    if(m_spellProto != sSpellStore.LookupEntry(m_spellProto->Id))
+        delete m_spellProto;
 }
 
 AreaAura::AreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target,

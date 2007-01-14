@@ -448,6 +448,7 @@ class Spell
         void EffectResurrectNew(uint32 i);
 
         Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur );
+        ~Spell();
 
         void prepare(SpellCastTargets * targets);
         void cancel();
