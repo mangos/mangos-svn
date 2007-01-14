@@ -58,7 +58,7 @@ bool LoadScriptingModule(char const* libName)
         ||!(testScript->scriptAreaTrigger   =(scriptCallAreaTrigger         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"AreaTrigger"         ))
         ||!(testScript->ItemQuestAccept     =(scriptCallItemQuestAccept     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemQuestAccept"     ))
         ||!(testScript->GOQuestAccept       =(scriptCallGOQuestAccept       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOQuestAccept"       ))
-        ||!(testScript->ReciveEmote         =(scriptCallReciveEmote         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ReciveEmote"         ))
+        ||!(testScript->ReceiveEmote        =(scriptCallReceiveEmote        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ReceiveEmote"        ))
         ||!(testScript->GetAI               =(scriptCallGetAI               )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GetAI"               ))
         )
     {
