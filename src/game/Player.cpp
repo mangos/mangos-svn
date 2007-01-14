@@ -6282,7 +6282,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
     return 0;
 }
 
-uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive ) const
+uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading ) const
 {
     dest = 0;
     if( pItem )
@@ -6303,7 +6303,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             if( eslot == NULL_SLOT )
                 return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
 
-            uint8 msg = CanUseItem( pItem , check_alive );
+            uint8 msg = CanUseItem( pItem , not_loading );
             if( msg != EQUIP_ERR_OK )
                 return msg;
             if( !swap && GetItemByPos( INVENTORY_SLOT_BAG_0, eslot ) )
@@ -6383,7 +6383,7 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     return EQUIP_ERR_OK;
 }
 
-uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive ) const
+uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading ) const
 {
     dest = 0;
     if( pItem )
@@ -6652,7 +6652,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                             {
                                 if( !HasBankBagSlot( slot ) )
                                     return EQUIP_ERR_MUST_PURCHASE_THAT_BAG_SLOT;
-                                if( uint8 cantuse = CanUseItem( pItem, check_alive ) != EQUIP_ERR_OK )
+                                if( uint8 cantuse = CanUseItem( pItem, not_loading ) != EQUIP_ERR_OK )
                                     return cantuse;
                             }
                             else
@@ -6714,12 +6714,12 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
     return 0;
 }
 
-uint8 Player::CanUseItem( Item *pItem, bool check_alive ) const
+uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
 {
     if( pItem )
     {
         sLog.outDebug( "STORAGE: CanUseItem item = %u", pItem->GetEntry());
-        if( !isAlive() && check_alive )
+        if( !isAlive() && not_loading )
             return EQUIP_ERR_YOU_ARE_DEAD;
         //if( isStunned() )
         //    return EQUIP_ERR_YOU_ARE_STUNNED;
@@ -6744,7 +6744,7 @@ uint8 Player::CanUseItem( Item *pItem, bool check_alive ) const
             }
             if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-            if( GetHonorRank() < pProto->RequiredHonorRank )
+            if( not_loading && GetHonorRank() < pProto->RequiredHonorRank )
                 return EQUIP_ITEM_RANK_NOT_ENOUGH;
             if( pProto->RequiredReputationFaction && GetReputationRank(pProto->RequiredReputationFaction) < pProto->RequiredReputationRank )
                 return EQUIP_ITEM_REPUTATION_NOT_ENOUGH;
