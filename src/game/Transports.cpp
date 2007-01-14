@@ -393,7 +393,7 @@ void Transport::TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, flo
 
 bool Transport::AddPassenger(Player* passenger) {
     if (m_passengers.find(passenger) == m_passengers.end()) {
-        sLog.outString("Player %s boarded transport %s.", passenger->GetName(), this->m_name.c_str());
+        sLog.outDetail("Player %s boarded transport %s.", passenger->GetName(), this->m_name.c_str());
         m_passengers.insert(passenger);
     }
     return true;
@@ -401,7 +401,7 @@ bool Transport::AddPassenger(Player* passenger) {
 
 bool Transport::RemovePassenger(Player* passenger) {
     if (m_passengers.find(passenger) != m_passengers.end()) {
-        sLog.outString("Player %s removed from transport %s.", passenger->GetName(), this->m_name.c_str());
+        sLog.outDetail("Player %s removed from transport %s.", passenger->GetName(), this->m_name.c_str());
         m_passengers.erase(passenger);
     }
     return true;
