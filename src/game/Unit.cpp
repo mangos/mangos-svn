@@ -3091,6 +3091,9 @@ bool Unit::Attack(Unit *victim)
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
+    //Set our target
+    SetUInt32Value(UNIT_FIELD_TARGET, victim->GetGUIDLow());
+
     if( GetTypeId()==TYPEID_UNIT && !((Creature*)this)->isPet() )
     {
         ((Creature*)this)->CallAssistence();
@@ -3114,6 +3117,10 @@ bool Unit::AttackStop()
 
     m_attacking->_removeAttacker(this);
     m_attacking = NULL;
+
+    //Clear our target
+    SetUInt32Value(UNIT_FIELD_TARGET, NULL);
+
     clearUnitState(UNIT_STAT_ATTACKING);
     if(GetTypeId()!=TYPEID_PLAYER && m_attackers.empty())
         ClearInCombat();
