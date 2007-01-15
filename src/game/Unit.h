@@ -727,8 +727,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         AuraMap m_Auras;
 
         std::list<Aura *> m_scAuras;                        // casted singlecast auras
-        std::vector<DynamicObject*> m_dynObj;
-        std::vector<GameObject*> m_gameObj;
+        std::list<DynamicObject*> m_dynObj;
+        std::list<GameObject*> m_gameObj;
         HostilList m_hostilList;
         uint32 m_transform;
         uint32 m_removedAuras;

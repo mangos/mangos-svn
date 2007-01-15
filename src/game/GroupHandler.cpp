@@ -311,7 +311,7 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
 
     if(recv_data.size() < 13)
     {
-        sLog.outDebug("TOO SHORT LOOTROLL");
+        //sLog.outDebug("TOO SHORT LOOTROLL");
         return;
     }
 
@@ -322,7 +322,7 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     recv_data >> NumberOfPlayers;
     recv_data >> Choise;                                    //0: pass, 1: need, 2: greed
 
-    sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
+    //sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
 
     /** error handling **/
     /********************/
@@ -340,7 +340,7 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
     recv_data >> x;
     recv_data >> y;
 
-    sLog.outDebug("Received opcode MSG_MINIMAP_PING X: %f, Y: %f", x, y);
+    //sLog.outDebug("Received opcode MSG_MINIMAP_PING X: %f, Y: %f", x, y);
 
     /** error handling **/
     /********************/
@@ -367,7 +367,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
     // everything's fine, do it
     roll = urand(minimum, maximum);
 
-    sLog.outDebug("ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
+    //sLog.outDebug("ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
 
     WorldPacket data(MSG_RANDOM_ROLL, 24);
     data << minimum;
@@ -505,7 +505,7 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
 
 /*?*/void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 {
-    sLog.outDebug("WORLD RECIEVE CMSG_REQUEST_PARTY_MEMBER_STATS");
+    //sLog.outDebug("WORLD RECIEVE CMSG_REQUEST_PARTY_MEMBER_STATS");
     uint64 Guid;
     recv_data >> Guid;
     return;
@@ -538,7 +538,7 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
 
 /*!*/void WorldSession::HandleRequestRaidInfoOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
+    //sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
 
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
     data << (uint32)0;

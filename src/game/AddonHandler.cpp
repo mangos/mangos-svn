@@ -85,7 +85,7 @@ void AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, ui
             uint32 crc, unk7;
             AddOnPacked >> AddonNames >> crc >> unk7 >> unk6;
 
-            sLog.outDebug("ADDON: Name:%s CRC:%x Unknown1 :%x Unknown2 :%x", AddonNames.c_str(), crc, unk7, unk6);
+            //sLog.outDebug("ADDON: Name:%s CRC:%x Unknown1 :%x Unknown2 :%x", AddonNames.c_str(), crc, unk7, unk6);
 
             if (crc == 0x1c776d01LL)                        //If addon is Standard addon CRC
                 *Target << (uint8)2 << (uint8)1 << (uint32)0 << (uint16)0;

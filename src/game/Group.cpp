@@ -309,7 +309,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
         item = objmgr.GetItemPrototype(i->itemid);
         if (!item)
         {
-            sLog.outDebug("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
+            //sLog.outDebug("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
             continue;
         }
         if (item->Quality > THRESHOLD)
@@ -440,7 +440,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
             //end of the roll
             if (i->totalPass + i->totalGreed + i->totalNeed >= i->totalPlayersRolling)
             {
-                sLog.outDebug("Group::CountTheRoll - Finished item roll. itemSlot:%u;  total players rolling:%u; id of item:%u;", i->itemSlot, i->totalPlayersRolling, i->itemid);
+                //sLog.outDebug("Group::CountTheRoll - Finished item roll. itemSlot:%u;  total players rolling:%u; id of item:%u;", i->itemSlot, i->totalPlayersRolling, i->itemid);
 
                 if (i->totalNeed > 0)
                 {

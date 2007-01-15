@@ -31,11 +31,11 @@
 
 void WorldSession::HandleSplitItemOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: CMSG_SPLIT_ITEM");
+    //sLog.outDebug("WORLD: CMSG_SPLIT_ITEM");
     uint8 srcbag, srcslot, dstbag, dstslot, count;
 
     recv_data >> srcbag >> srcslot >> dstbag >> dstslot >> count;
-    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u, count = %u", srcbag, srcslot, dstbag, dstslot, count);
+    //sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u, count = %u", srcbag, srcslot, dstbag, dstslot, count);
 
     uint16 src = ( (srcbag << 8) | srcslot );
     uint16 dst = ( (dstbag << 8) | dstslot );
@@ -45,11 +45,11 @@ void WorldSession::HandleSplitItemOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: CMSG_SWAP_INV_ITEM");
+    //sLog.outDebug("WORLD: CMSG_SWAP_INV_ITEM");
     uint8 srcslot, dstslot;
 
     recv_data >> srcslot >> dstslot;
-    sLog.outDebug("STORAGE: receive srcslot = %u, dstslot = %u", srcslot, dstslot);
+    //sLog.outDebug("STORAGE: receive srcslot = %u, dstslot = %u", srcslot, dstslot);
 
     uint16 src = ( (INVENTORY_SLOT_BAG_0 << 8) | srcslot );
     uint16 dst = ( (INVENTORY_SLOT_BAG_0 << 8) | dstslot );
@@ -59,11 +59,11 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSwapItem( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: CMSG_SWAP_ITEM");
+    //sLog.outDebug("WORLD: CMSG_SWAP_ITEM");
     uint8 dstbag, dstslot, srcbag, srcslot;
 
     recv_data >> dstbag >> dstslot >> srcbag >> srcslot ;
-    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u", srcbag, srcslot, dstbag, dstslot);
+    //sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u", srcbag, srcslot, dstbag, dstslot);
 
     uint16 src = ( (srcbag << 8) | srcslot );
     uint16 dst = ( (dstbag << 8) | dstslot );
@@ -73,11 +73,11 @@ void WorldSession::HandleSwapItem( WorldPacket & recv_data )
 
 void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: CMSG_AUTOEQUIP_ITEM");
+    //sLog.outDebug("WORLD: CMSG_AUTOEQUIP_ITEM");
     uint8 srcbag, srcslot;
 
     recv_data >> srcbag >> srcslot;
-    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
+    //sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
 
     Item *pItem  = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )
@@ -123,11 +123,11 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: CMSG_DESTROYITEM");
+    //sLog.outDebug("WORLD: CMSG_DESTROYITEM");
     uint8 bag, slot, count, data1, data2, data3;
 
     recv_data >> bag >> slot >> count >> data1 >> data2 >> data3;
-    sLog.outDebug("STORAGE: receive bag = %u, slot = %u, count = %u", bag, slot, count);
+    //sLog.outDebug("STORAGE: receive bag = %u, slot = %u, count = %u", bag, slot, count);
 
     uint16 pos = (bag << 8) | slot;
 
@@ -147,7 +147,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
+    //sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
 
                                                             // guess size
     WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600 );
@@ -255,13 +255,13 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleReadItem( WorldPacket & recv_data )
 {
-    sLog.outDebug( "WORLD: CMSG_READ_ITEM");
+    //sLog.outDebug( "WORLD: CMSG_READ_ITEM");
 
     WorldPacket data;
     uint8 bag, slot;
     recv_data >> bag >> slot;
 
-    sLog.outDetail("STORAGE: Read bag = %u, slot = %u", bag, slot);
+    //sLog.outDetail("STORAGE: Read bag = %u, slot = %u", bag, slot);
     Item *pItem = _player->GetItemByPos( bag, slot );
 
     if( pItem && pItem->GetProto()->PageText )
@@ -639,11 +639,11 @@ void WorldSession::SendListInventory( uint64 guid )
 
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: CMSG_AUTOSTORE_BAG_ITEM");
+    //sLog.outDebug("WORLD: CMSG_AUTOSTORE_BAG_ITEM");
     uint8 srcbag, srcslot, dstbag;
 
     recv_data >> srcbag >> srcslot >> dstbag;
-    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u", srcbag, srcslot, dstbag);
+    //sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u", srcbag, srcslot, dstbag);
 
     Item *pItem = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )

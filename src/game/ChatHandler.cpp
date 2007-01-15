@@ -41,7 +41,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
     recv_data >> type;
     recv_data >> lang;
-    sLog.outDebug("CHAT: packet received. type %u, lang %u", type, lang );
+    //sLog.outDebug("CHAT: packet received. type %u, lang %u", type, lang );
 
     // prevent talking at unknown language (cheating)
     LanguageDesc const* langDesc = GetLanguageDescByID(lang);
@@ -368,7 +368,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 {
     WorldPacket data;
     uint64 iguid;
-    sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
+    //sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
 
     recv_data >> iguid;
 
