@@ -1065,7 +1065,7 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
-        //                                0    1     2            3            4            5             6               7           8                  9                 10                 11          12        13             14      15             16
+        //                                0    1     2            3            4            5             6               7           8                  9                  10                 11          12        13             14      15             16
         result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
 
     if(!result)
