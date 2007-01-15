@@ -83,14 +83,14 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     }
 
     if(m_targetMask & TARGET_FLAG_UNIT)
-        m_unitTarget = ObjectAccessor::Instance().GetUnit(*caster, readGUID(data));
+        m_unitTarget = ObjectAccessor::Instance().GetUnit(*caster, readGUID(*data));
 
     if(m_targetMask & TARGET_FLAG_OBJECT)
-        m_GOTarget = ObjectAccessor::Instance().GetGameObject(*caster, readGUID(data));
+        m_GOTarget = ObjectAccessor::Instance().GetGameObject(*caster, readGUID(*data));
 
     if((m_targetMask & TARGET_FLAG_ITEM) && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        uint64 _guid = readGUID(data);
+        uint64 _guid = readGUID(*data);
         m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(_guid));
         if (!m_itemTarget)
         {
@@ -236,6 +236,7 @@ Spell::~Spell()
 
 void Spell::FillTargetMap()
 {
+    // TODO: ADD the correct target FILLS!!!!!!
 
     std::list<Unit*> tmpUnitMap;
     std::list<Item*> tmpItemMap;
@@ -249,6 +250,7 @@ void Spell::FillTargetMap()
         if(!m_spellInfo->EffectImplicitTargetA[i] && !m_spellInfo->EffectImplicitTargetB[i] )
         {
             // add here custom effects that need default target.
+            // FOR EVERY TARGET TYPE THERE IS A DIFFERENT FILL!!
             switch(m_spellInfo->Effect[i])
             {
                 //case SPELL_EFFECT_PERSISTENT_AREA_AURA:
@@ -1037,7 +1039,7 @@ void Spell::finish(bool ok)
     m_spellState = SPELL_STATE_FINISHED;
     m_caster->m_canMove = true;
 
-    /*std::list<DynamicObject*>::iterator i;
+    /*std::vector<DynamicObject*>::iterator i;
     for(i = m_dynObjToDel.begin() ; i != m_dynObjToDel.end() ; i++)
     {
         data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);

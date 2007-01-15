@@ -21,7 +21,6 @@
 #include "WorldSession.h"
 #include "UpdateData.h"
 #include "Item.h"
-#include "Utilities.h"
 #include "Map.h"
 #include "MapManager.h"
 #include "Transports.h"

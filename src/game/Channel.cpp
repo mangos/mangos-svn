@@ -298,10 +298,11 @@ void Channel::List(Player *p)
         data << (uint8)3 << (uint32)players.size();
 
         PlayerList::iterator i;
+        uint8 mode;
         for(i = players.begin(); i!=players.end(); i++)
         {
             data << i->first->GetGUID();
-            uint8 mode = 0x00;
+                mode = 0x00;
             if(i->second.muted)
                 mode |= 0x04;
             if(i->second.moderator)

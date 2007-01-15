@@ -2436,7 +2436,8 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
     for(uint16 i = UNIT_FIELD_AURA; i < UNIT_FIELD_AURASTATE; i ++)
         updateMask->SetBit(i);
     updateMask->SetBit(UNIT_FIELD_BASEATTACKTIME);
-    updateMask->SetBit(UNIT_FIELD_OFFHANDATTACKTIME);
+    // TODO CHECK THIS
+    //updateMask->SetBit(UNIT_FIELD_OFFHANDATTACKTIME); not exsisting in 1.12
     updateMask->SetBit(UNIT_FIELD_RANGEDATTACKTIME);
     updateMask->SetBit(UNIT_FIELD_BOUNDINGRADIUS);
     updateMask->SetBit(UNIT_FIELD_COMBATREACH);
@@ -2477,14 +2478,14 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
     }
 
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02);
+    updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1);
+    updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 2);
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_01);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_02);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_03);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_04);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_05);
+    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 1);
+    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 2);
+    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 3);
+    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 4);
+    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 5);
 
 }
 
@@ -4079,7 +4080,8 @@ void Player::UpdateHonor(void)
 
     //TODO Fix next rank bar... it is not working fine! For while it be set with the total honor points...
     //NEXT RANK BAR
-    SetUInt32Value(PLAYER_FIELD_HONOR_BAR, (uint32)( (total_honor < 0) ? 0: total_honor) );
+    //PLAYER_FIELD_HONOR_BAR
+    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)( (total_honor < 0) ? 0: total_honor) );
 
     //RANK (Patent)
     if( CalculateHonorRank(total_honor) )
@@ -4102,8 +4104,8 @@ void Player::UpdateHonor(void)
 
     //LIFE TIME
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORBALE_KILLS, lifetime_dishonorableKills);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, lifetime_honorableKills);
     //TODO: Into what field we need to set it? Fix it!
     SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? ((GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 }
