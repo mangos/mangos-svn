@@ -1114,17 +1114,17 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
     Player* target = getSelectedPlayer();
     if(!target)
     {
-        PSendSysMessage(LANG_PLAYER_NOT_FOUND); 
+        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
         return true;
     }
-    
+
     if (!*args)
     {
         target->RemoveAllSpellCooldown();
-        PSendSysMessage(LANG_REMOVEALL_COOLDOWN, target->GetName()); 
+        PSendSysMessage(LANG_REMOVEALL_COOLDOWN, target->GetName());
     }
     else
-    {   
+    {
         uint32 spell_id = atol((char*)args);
         if(!sSpellStore.LookupEntry(spell_id))
         {
@@ -1135,13 +1135,14 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
         WorldPacket data( SMSG_CLEAR_COOLDOWN, (4+8+4) );
         data << uint32( spell_id );
         data << target->GetGUID();
-        data << uint32(0); 
+        data << uint32(0);
         target->GetSession()->SendPacket(&data);
         target->RemoveSpellCooldown(spell_id);
         PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target==m_session->GetPlayer() ? "you" : target->GetName());
     }
-    return true; 
+    return true;
 }
+
 bool ChatHandler::HandleUnLearnCommand(const char* args)
 {
     if (!*args)
@@ -1320,7 +1321,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         // find not full stack (last possable place for times after prev. checks)
         uint16 dest;
         uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, 1, false );
-        if( msg == EQUIP_ERR_OK )                       // found
+        if( msg == EQUIP_ERR_OK )                           // found
         {
             // we can fill this stack to max stack size
             Item* itemStack = pl->GetItemByPos(dest);
@@ -1333,7 +1334,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
                 {
                     Item* item = plTarget->StoreNewItem( dest, itemId, countForStack, true, true);
                     countForStore-= countForStack;
-                        
+
                     // remove binding (let GM give it to another player later)
                     if(pl==plTarget)
                         item->SetBinding( false );

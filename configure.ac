@@ -71,7 +71,7 @@ COMPILER_OPTIONS=""
 LINKER_OPTIONS=""
 
 # check for openssl path given
-+AC_ARG_WITH(openssl,
+AC_ARG_WITH(openssl,
 [  --with-openssl=/path/to/openssl/dir    OpenSSL directory],
 [
   AC_CHECK_FILE($withval/include/openssl/ssl.h,

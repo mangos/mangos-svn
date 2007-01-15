@@ -2119,10 +2119,10 @@ PlayerSpellMap::iterator Player::removeSpell(PlayerSpellMap::iterator itr)
 }
 
 void Player::RemoveAllSpellCooldown()
-{   
+{
     if(m_spellCooldowns.size() > 0)
     {
-        
+
         for(SpellCooldowns::const_iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); ++itr)
         {
             sLog.outError("SpellID:%u",uint32(itr->first));
@@ -2135,6 +2135,7 @@ void Player::RemoveAllSpellCooldown()
         m_spellCooldowns.clear();
     }
 }
+
 void Player::_LoadSpellCooldowns()
 {
     m_spellCooldowns.clear();

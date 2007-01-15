@@ -165,8 +165,8 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
 
     // make own copy of custom `info` (`info` can be created at stack)
     // copy custom SpellEntry in m_spellInfo will be delete at Spell delete
-    if(info != sSpellStore.LookupEntry( info->Id )) 
-    { 
+    if(info != sSpellStore.LookupEntry( info->Id ))
+    {
         SpellEntry* sInfo = new SpellEntry;
         *sInfo = *info;
         m_spellInfo = sInfo;
@@ -1692,7 +1692,7 @@ uint8 Spell::CanCast()
         return castResult;
     }
 
-    castResult = CheckItems();                          // always check items (focus object can be required for any type casts)
+    castResult = CheckItems();                              // always check items (focus object can be required for any type casts)
 
     if(castResult == 0)
         castResult = CheckRange();

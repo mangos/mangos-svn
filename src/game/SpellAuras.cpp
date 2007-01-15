@@ -221,8 +221,8 @@ m_isAreaAura(false)
 
     // make own copy of custom `spellproto` (`spellproto` will be deleted at spell cast finished)
     // copy custom SpellEntry in m_spellProto will be delete at Aura delete
-    if(spellproto != sSpellStore.LookupEntry( spellproto->Id )) 
-    { 
+    if(spellproto != sSpellStore.LookupEntry( spellproto->Id ))
+    {
         SpellEntry* sInfo = new SpellEntry;
         *sInfo = *spellproto;
         m_spellProto = sInfo;

@@ -194,7 +194,6 @@ libgame_a_SOURCES = \
 	UpdateData.h \
 	UpdateFields.h \
 	UpdateMask.h \
-	Utilities.h \
 	WaypointMovementGenerator.h \
 	Weather.h \
 	World.h \

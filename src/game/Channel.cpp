@@ -302,7 +302,7 @@ void Channel::List(Player *p)
         for(i = players.begin(); i!=players.end(); i++)
         {
             data << i->first->GetGUID();
-                mode = 0x00;
+            mode = 0x00;
             if(i->second.muted)
                 mode |= 0x04;
             if(i->second.moderator)
