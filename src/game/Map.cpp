@@ -328,7 +328,7 @@ Map::Add(T *obj)
         SetCurrentCell(obj,cell);
     }
 
-    DEBUG_LOG("Object " I64FMTD " enters grid[%u,%u]", obj->GetGUID(), cell.GridX(), cell.GridY());
+    DEBUG_LOG("Object %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
     cell.data.Part.reserved = ALL_DISTRICT;
 
     MaNGOS::ObjectVisibleNotifier notifier(*static_cast<Object *>(obj));
