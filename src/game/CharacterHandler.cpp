@@ -217,6 +217,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     {
         Player plr(this);
 
+        // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent deleting not own character using cheating tools)
         if(!plr.LoadFromDB( GUID_LOPART(guid) ))
             return;
         sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),plr.GetName(),guid);
@@ -243,6 +244,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     ASSERT(plr);
 
     plr->SetSession(this);
+    // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
     if(!plr->LoadFromDB(GUID_LOPART(playerGuid)))
     {
         m_playerLoading = false;
