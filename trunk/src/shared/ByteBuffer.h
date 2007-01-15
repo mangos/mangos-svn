@@ -86,19 +86,23 @@ class ByteBuffer
         }
 
         // signed as in 2e complement
-        ByteBuffer &operator<<(int8 value) {
+        ByteBuffer &operator<<(int8 value)
+        {
             append<int8>(value);
             return *this;
         }
-        ByteBuffer &operator<<(int16 value) {
+        ByteBuffer &operator<<(int16 value)
+        {
             append<int16>(value);
             return *this;
         }
-        ByteBuffer &operator<<(int32 value) {
+        ByteBuffer &operator<<(int32 value)
+        {
             append<int32>(value);
             return *this;
         }
-        ByteBuffer &operator<<(int64 value) {
+        ByteBuffer &operator<<(int64 value)
+        {
             append<int64>(value);
             return *this;
         }
@@ -154,19 +158,23 @@ class ByteBuffer
         }
 
         //signed as in 2e complement
-        ByteBuffer &operator>>(int8 &value) {
+        ByteBuffer &operator>>(int8 &value)
+        {
             value = read<int8>();
             return *this;
         }
-        ByteBuffer &operator>>(int16 &value) {
+        ByteBuffer &operator>>(int16 &value)
+        {
             value = read<int16>();
             return *this;
         }
-        ByteBuffer &operator>>(int32 &value) {
+        ByteBuffer &operator>>(int32 &value)
+        {
             value = read<int32>();
             return *this;
         }
-        ByteBuffer &operator>>(int64 &value) {
+        ByteBuffer &operator>>(int64 &value)
+        {
             value = read<int64>();
             return *this;
         }

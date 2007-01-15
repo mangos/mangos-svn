@@ -1278,20 +1278,19 @@ void Creature::MonsterSay(char const* message, uint32 language, uint64 targetGUI
 bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
 {
     if (!spellInfo)
-        return false;    
+        return false;
     if( CREATURE_ELITE_WORLDBOSS == GetCreatureInfo()->rank )
         if( (IMMUNE_MECHANIC_FEAR == spellInfo->Mechanic) ||
-            (IMMUNE_MECHANIC_STUNDED == spellInfo->Mechanic) ||
-            (IMMUNE_MECHANIC_DAZED == spellInfo->Mechanic) ||
-            (IMMUNE_MECHANIC_BANISH == spellInfo->Mechanic) ||
-            (IMMUNE_MECHANIC_FREEZE == spellInfo->Mechanic) ||
-            (IMMUNE_MECHANIC_ROOT == spellInfo->Mechanic) ||
-            (IMMUNE_MECHANIC_CONFUSED == spellInfo->Mechanic))
+        (IMMUNE_MECHANIC_STUNDED == spellInfo->Mechanic) ||
+        (IMMUNE_MECHANIC_DAZED == spellInfo->Mechanic) ||
+        (IMMUNE_MECHANIC_BANISH == spellInfo->Mechanic) ||
+        (IMMUNE_MECHANIC_FREEZE == spellInfo->Mechanic) ||
+        (IMMUNE_MECHANIC_ROOT == spellInfo->Mechanic) ||
+        (IMMUNE_MECHANIC_CONFUSED == spellInfo->Mechanic))
             return true;
 
     return Unit::IsImmunedToSpell(spellInfo);
 }
-
 
 SpellEntry const *Creature::reachWithSpellAttack(Unit *pVictim)
 {

@@ -156,5 +156,4 @@ void LoadDBCStores(std::string dataPath);
 // script support functions
 MANGOS_DLL_SPEC DBCStorage <SpellEntry>      const* GetSpellStore()     ;
 MANGOS_DLL_SPEC DBCStorage <SpellRangeEntry> const* GetSpellRangeStore() ;
-
 #endif

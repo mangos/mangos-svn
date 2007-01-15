@@ -256,7 +256,6 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         return;
     }
 
-
     Item *it = pl->GetMItem(m->item_guid);
 
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
