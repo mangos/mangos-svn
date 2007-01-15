@@ -358,7 +358,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         data << uint32( GetPlayer()->GetTutorialInt(i) );
 
     SendPacket(&data);
-    sLog.outDebug( "WORLD: Sent tutorial flags." );
+    //sLog.outDebug( "WORLD: Sent tutorial flags." );
 
     GetPlayer()->SendInitialSpells();
     GetPlayer()->SendInitialActionButtons();
@@ -444,7 +444,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
-    sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
+    //sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
 
     if (pCurrChar->m_transport)
     {
@@ -513,7 +513,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD SESSION: HandleSetFactionAtWar");
+    //sLog.outDebug("WORLD SESSION: HandleSetFactionAtWar");
 
     uint32 FactionID;
     uint8  Flag;
@@ -539,7 +539,7 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 //I think this function is never used :/ I dunno, but i guess this opcode not exists
 void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD SESSION: HandleSetFactionCheat");
+    //sLog.outDebug("WORLD SESSION: HandleSetFactionCheat");
     /*
         uint32 FactionID;
         uint32 Standing;
@@ -579,7 +579,7 @@ void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )
     tutflag |= (1 << rInt);
     GetPlayer()->SetTutorialInt( wInt, tutflag );
 
-    sLog.outDebug("Received Tutorial Flag Set {%u}.", iFlag);
+    //sLog.outDebug("Received Tutorial Flag Set {%u}.", iFlag);
 }
 
 void WorldSession::HandleTutorialClear( WorldPacket & recv_data )

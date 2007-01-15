@@ -36,16 +36,9 @@
 //to create guild from game you should create petition
 void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 {
-    /*
-    4D 18 00 00 00 10 00 F0 | 00 00 00 00 00 00 00 00
-    00 00 00 00 74 65 73 74 | 00 00 00 00 00 00 00 00
-    00 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00
-    00 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00
-    00 00 00 00 00 00 00 00 | 01 00 00 00
-    */
     if (_player->GetGuildId())
         return;
-    sLog.outDebug("Received opcode CMSG_PETITION_BUY");
+    //sLog.outDebug("Received opcode CMSG_PETITION_BUY");
     uint64 guidNPC;
     uint64 unk3;
     uint32 unk4;
@@ -72,7 +65,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     recv_data >> unk11;                                     // 0
     recv_data >> unk12;                                     // 0
     recv_data >> unk13;                                     // 1
-    sLog.outDebug("Guildmaster with GUID %u tried sell petition: guildname %s", GUID_LOPART(guidNPC), guildname.c_str());
+    //sLog.outDebug("Guildmaster with GUID %u tried sell petition: guildname %s", GUID_LOPART(guidNPC), guildname.c_str());
 
     // prevent cheating
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guidNPC);
@@ -124,14 +117,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 {
-    /*
-    Client >>> [10 bytes] CMSG_PETITION_SHOW_SIGNATURES=0x1BE -- dump/001287.c
-    0000: 00 00 8A E7 37 54 65 00  00 00                   | ....7Te. ..
-    Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/001288.s
-    0000: 8A E7 37 54 65 00 00 00  AE 60 80 00 00 00 00 00 | ..7Te... .`......
-    0010: 01 00 00 00 00                                  | .....
-    */
-    sLog.outDebug("Received opcode CMSG_PETITION_SHOW_SIGNATURES");
+    //sLog.outDebug("Received opcode CMSG_PETITION_SHOW_SIGNATURES");
     if(_player->GetGuildId())
         return;
     uint8 signs = 0;
@@ -177,16 +163,6 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionQueryOpcode( WorldPacket & recv_data )
 {
-    /*
-    Client >>> [14 bytes] CMSG_PETITION_QUERY=0x1C6 -- dump/001229.c
-    0000: 00 00 01 00 00 00 8A E7  37 54 65 00 00 00       | ........ 7Te...
-    Server >>> [73 bytes] SMSG_PETITION_QUERY_RESPONSE=0x1C7 -- dump/001237.s
-    0000: 01 00 00 00 AE 60 80 00  00 00 00 00 74 65 73 74 | .....`.. ....test
-    0010: 67 75 69 6C 64 00 00 01  00 00 00 00 00 00 00 09 | guild... ........
-    0020: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 | ........ ........
-    0030: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 | ........ ........
-    0040: 00 00 00 00 00 00 00 00  00                      | ........ .
-    */
     sLog.outDebug("Received opcode CMSG_PETITION_QUERY");
     uint32 guildguid;
     uint64 petitionguid;
@@ -237,10 +213,7 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
 
 void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 {
-    /*
-    06 00 00 00 00 00 00 00 | 64 61 61 64 61 77 64 00
-    */
-    sLog.outDebug("Received opcode MSG_PETITION_RENAME");
+    //sLog.outDebug("Received opcode MSG_PETITION_RENAME");
 
     uint64 petitionguid;
     std::string newguildname;
@@ -273,14 +246,7 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 {
-    /*
-    Client >>> [11 bytes] CMSG_PETITION_SIGN=0x1C0 -- dump/000676.c
-    0000: 00 00 8A E7 37 54 65 00  00 00 01                | ....7Te. ...
-    Server >>> [20 bytes] SMSG_PETITION_SIGN_RESULTS=0x1C1 -- dump/000677.s
-    0000: 8A E7 37 54 65 00 00 00  45 F5 7D 00 00 00 00 00 | ..7Te... E.}.....
-    0010: 00 00 00 00                                     | ....
-    */
-    sLog.outDebug("Received opcode CMSG_PETITION_SIGN");
+    //sLog.outDebug("Received opcode CMSG_PETITION_SIGN");
     Field *fields;
     uint64 petitionguid;
     uint64 ownerguid;
@@ -338,7 +304,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("Received opcode MSG_PETITION_DECLINE");
+    //sLog.outDebug("Received opcode MSG_PETITION_DECLINE");
 
     uint64 petitionguid;
     uint64 ownerguid;
@@ -364,15 +330,7 @@ void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
 {
-    /*
-    Client >>> [18 bytes] CMSG_OFFER_PETITION=0x1C3 -- dump/004811.c
-    0000: 00 00 8A E7 37 54 65 00  00 00 45 F5 7D 00 00 00 | ....7Te. ..E.}...
-    0010: 00 00                                           | ..
-    Server >>> [21 bytes] SMSG_PETITION_SHOW_SIGNATURES=0x1BF -- dump/000647.s
-    0000: 8A E7 37 54 65 00 00 00  AE 60 80 00 00 00 00 00 | ..7Te... .`......
-    0010: 01 00 00 00 00                                  | .....
-    */
-    sLog.outDebug("Received opcode CMSG_OFFER_PETITION");
+    //sLog.outDebug("Received opcode CMSG_OFFER_PETITION");
 
     uint8 signs = 0;
     uint64 petitionguid, plguid;
@@ -427,18 +385,10 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
 void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 {
     /*
-    Client >>> [10 bytes] CMSG_TURN_IN_PETITION=0x1C4 -- dump/001956.c
-    0000: 00 00 8A E7 37 54 65 00  00 00                   | ....7Te. ..
-    Server >>> [60 bytes] SMSG_MESSAGECHAT=0x96 -- dump/001957.s
-    0000: 0A 00 00 00 00 AE 60 80  00 00 00 00 00 2A 00 00 | ......`. .....*..
-    0010: 00 47 75 69 6C 64 20 63  68 61 72 74 65 72 20 68 | .Guild c harter h
-    0020: 61 76 65 20 6E 6F 74 20  65 6E 6F 75 67 68 20 73 | ave not  enough s
-    0030: 69 67 6E 61 74 75 72 65  73 2E 00 00             | ignature s...
-
     don't know how to cause this opcode, it is possible that charter-party has wrong properties \flags (are not present even names)...
     Here it is necessary to receive number of signatures, to compare with 9 and if it is equal - if guild, to add the players who have signed charter in guild, to remove charter-party and to send the answer...
     Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
-    sLog.outDebug("Received opcode CMSG_TURN_IN_PETITION");
+    //sLog.outDebug("Received opcode CMSG_TURN_IN_PETITION");
     WorldPacket data;
     uint64 petitionguid;
 
@@ -454,7 +404,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
         _player->GetSession()->SendPacket(&data);
     }
 
-    sLog.outDebug("Petition %u turned in by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
+    //sLog.outDebug("Petition %u turned in by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
 
     // Guild data
     QueryResult *result = sDatabase.PQuery("SELECT `ownerguid`, `guildname` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
@@ -546,6 +496,8 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
     uint64 guid;
+
+    // TODO: WHY STATIC??????????????
     unsigned char tdata[21] =
     {
         0x01, 0x01, 0x00, 0x00, 0x00, 0xe7, 0x16, 0x00, 0x00, 0xef, 0x23, 0x00, 0x00, 0xe8, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
@@ -581,7 +533,7 @@ void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
     uint32 guildId;
     Guild *guild;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_QUERY"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_QUERY"  );
 
     recvPacket >> guildId;
 
@@ -601,7 +553,7 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
     std::string gname;
     Guild *guild;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_CREATE"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_CREATE"  );
 
     recvPacket >> gname;
     if(!GetPlayer()->GetGuildId())
@@ -619,7 +571,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     Player * player;
     Guild *guild;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_INVITE"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_INVITE"  );
 
     recvPacket >> Invitedname;
 
@@ -677,7 +629,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     data << guild->GetName();
     player->GetSession()->SendPacket(&data);
 
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_INVITE)" );
+    //sLog.outDebug( "WORLD: Sent (SMSG_GUILD_INVITE)" );
 }
 
 void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
@@ -688,7 +640,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
     Guild *guild;
     Player *player;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_REMOVE"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_REMOVE"  );
 
     recvPacket >> plName;
 
@@ -741,7 +693,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
     Guild *guild;
     Player *player = GetPlayer();
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_ACCEPT"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_ACCEPT"  );
 
     guild = objmgr.GetGuildById(player->GetGuildIdInvited());
     if(!guild || player->GetGuildId())
@@ -759,13 +711,13 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
     data << player->GetName();
     guild->BroadcastPacket(&data);
 
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
+    //sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
 }
 
 void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_DECLINE"  );
+    //WorldPacket data;
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_DECLINE"  );
 
     GetPlayer()->SetGuildIdInvited(0);
     GetPlayer()->SetInGuild(0);
@@ -775,7 +727,7 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleGuildInfoOpcode(WorldPacket& recvPacket)
 {
     Guild *guild;
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_INFO"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_INFO"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -799,7 +751,7 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
 {
     Guild *guild;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_ROSTER"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_ROSTER"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild) return;
@@ -817,7 +769,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     Player * player;
     Guild *guild;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_PROMOTE"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_PROMOTE"  );
 
     recvPacket >> plName;
 
@@ -889,7 +841,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     Player *player;
     Guild *guild;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_DEMOTE"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_DEMOTE"  );
 
     recvPacket >> plName;
 
@@ -958,7 +910,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
     Guild *guild;
     Player *player = GetPlayer();
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_LEAVE"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_LEAVE"  );
 
     guild = objmgr.GetGuildById(player->GetGuildId());
     if(!guild)
@@ -988,7 +940,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
     data << plName;
     guild->BroadcastPacket(&data);
 
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
+    //sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
 
     SendCommandResult(GUILD_QUIT_S,plName,GUILD_PLAYER_NO_MORE_IN_GUILD);
 }
@@ -999,7 +951,7 @@ void WorldSession::HandleGuildDisbandOpcode(WorldPacket& recvPacket)
     std::string name;
     Guild *guild;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_DISBAND"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_DISBAND"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -1015,7 +967,7 @@ void WorldSession::HandleGuildDisbandOpcode(WorldPacket& recvPacket)
 
     guild->Disband();
 
-    sLog.outDebug( "WORLD: Guild Sucefully Disbanded" );
+    //sLog.outDebug( "WORLD: Guild Sucefully Disbanded" );
 }
 
 void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
@@ -1027,7 +979,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     Player * oldLeader = GetPlayer();
     Guild *guild;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_LEADER"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_LEADER"  );
 
     recvPacket >> name;
 
@@ -1081,7 +1033,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     data << name.c_str();
     guild->BroadcastPacket(&data);
 
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
+    //sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
 }
 
 void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
@@ -1089,7 +1041,7 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
     Guild *guild;
     std::string MOTD;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_MOTD"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_MOTD"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -1116,7 +1068,7 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
     data << MOTD;
     guild->BroadcastPacket(&data);
 
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
+    //sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
 }
 
 void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
@@ -1128,7 +1080,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
     uint32 plGuildId;
     std::string name,PNOTE;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_SET_PUBLIC_NOTE"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_SET_PUBLIC_NOTE"  );
 
     recvPacket >> name;
 
@@ -1186,7 +1138,7 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     uint32 plGuildId;
     std::string plName, OFFNOTE;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_SET_OFFICER_NOTE"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_SET_OFFICER_NOTE"  );
 
     recvPacket >> plName;
 
@@ -1243,7 +1195,7 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     uint32 rankId;
     uint32 rights;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_RANK"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_RANK"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -1276,7 +1228,7 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
     Guild *guild;
     std::string rankname;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_ADD_RANK"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_ADD_RANK"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -1304,7 +1256,7 @@ void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
     Guild *guild;
     std::string rankname;
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_DEL_RANK"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_DEL_RANK"  );
 
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -1333,13 +1285,13 @@ void WorldSession::SendCommandResult(uint32 typecmd,std::string str,uint32 cmdre
     data << cmdresult;
     SendPacket(&data);
 
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_COMMAND_RESULT)" );
+    //sLog.outDebug( "WORLD: Sent (SMSG_GUILD_COMMAND_RESULT)" );
 }
 
 void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
 {
 
-    sLog.outDebug( "WORLD: Received CMSG_GUILD_CHANGEINFO"  );
+    //sLog.outDebug( "WORLD: Received CMSG_GUILD_CHANGEINFO"  );
 
     std::string GINFO;
 
@@ -1358,7 +1310,7 @@ void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDebug( "WORLD: Received MSG_SAVE_GUILD_EMBLEM"  );
+    //sLog.outDebug( "WORLD: Received MSG_SAVE_GUILD_EMBLEM"  );
 
     uint32 stuff0;
     uint32 stuff1;

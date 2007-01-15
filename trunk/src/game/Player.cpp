@@ -4490,89 +4490,89 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         {
             case ITEM_STAT_POWER:                           // modify MP
                 ApplyMaxPowerMod(POWER_MANA, val, apply);
-                typestr = "Mana";
+                //typestr = "Mana";
                 break;
             case ITEM_STAT_HEALTH:                          // modify HP
                 ApplyMaxHealthMod(val, apply);
-                typestr = "Health";
+                //typestr = "Health";
                 break;
             case ITEM_STAT_AGILITY:                         // modify agility
                 ApplyStatMod(STAT_AGILITY,                val, apply);
                 ApplyPosStatMod(STAT_AGILITY,             val, apply);
-                typestr = "AGILITY";
+                //typestr = "AGILITY";
                 break;
             case ITEM_STAT_STRENGTH:                        //modify strength
                 ApplyStatMod(STAT_STRENGTH,               val, apply);
                 ApplyPosStatMod(STAT_STRENGTH,            val, apply);
-                typestr = "STRENGHT";
+                //typestr = "STRENGHT";
                 break;
             case ITEM_STAT_INTELLECT:                       //modify intellect
                 ApplyStatMod(STAT_INTELLECT,               val,    apply);
                 ApplyPosStatMod(STAT_INTELLECT,            val,    apply);
                 //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
-                typestr = "INTELLECT";
+                //typestr = "INTELLECT";
                 break;
             case ITEM_STAT_SPIRIT:                          //modify spirit
                 ApplyStatMod(STAT_SPIRIT,                 val, apply);
                 ApplyPosStatMod(STAT_SPIRIT,              val, apply);
-                typestr = "SPIRIT";
+                //typestr = "SPIRIT";
                 break;
             case ITEM_STAT_STAMINA:                         //modify stamina
                 ApplyStatMod(STAT_STAMINA                ,val,   apply);
                 ApplyPosStatMod(STAT_STAMINA             ,val,   apply);
                 //ApplyMaxHealthMod(                        val*10,apply);
-                typestr = "STAMINA";
+                //typestr = "STAMINA";
                 break;
         }
-        sLog.outDebug("%s %s: \t\t%u", applystr.c_str(), typestr.c_str(), val);
+        //sLog.outDebug("%s %s: \t\t%u", applystr.c_str(), typestr.c_str(), val);
     }
 
     if (proto->Armor)
     {
         ApplyArmorMod( proto->Armor, apply);
-        sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
+        //sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
     }
 
     if (proto->Block)
     {
         ApplyBlockValueMod(proto->Block, apply);
-        sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
+        //sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
     }
 
     if (proto->HolyRes)
     {
         ApplyResistanceMod(SPELL_SCHOOL_HOLY, proto->HolyRes, apply);
-        sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
+        //sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
     }
 
     if (proto->FireRes)
     {
         ApplyResistanceMod(SPELL_SCHOOL_FIRE, proto->FireRes, apply);
-        sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
+        //sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
     }
 
     if (proto->NatureRes)
     {
         ApplyResistanceMod(SPELL_SCHOOL_NATURE, proto->NatureRes, apply);
-        sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
+        //sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
     }
 
     if (proto->FrostRes)
     {
         ApplyResistanceMod(SPELL_SCHOOL_FROST, proto->FrostRes, apply);
-        sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
+        //sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
     }
 
     if (proto->ShadowRes)
     {
         ApplyResistanceMod(SPELL_SCHOOL_SHADOW, proto->ShadowRes, apply);
-        sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
+        //sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
     }
 
     if (proto->ArcaneRes)
     {
         ApplyResistanceMod(SPELL_SCHOOL_ARCANE, proto->ArcaneRes, apply);
-        sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
+        //sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
     }
 
     uint8 MINDAMAGEFIELD = 0;
@@ -4584,31 +4584,31 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
     {
         MINDAMAGEFIELD = UNIT_FIELD_MINRANGEDDAMAGE;
         MAXDAMAGEFIELD = UNIT_FIELD_MAXRANGEDDAMAGE;
-        typestr = "Ranged";
+        //typestr = "Ranged";
     }
     else if(slot==EQUIPMENT_SLOT_MAINHAND)
     {
         MINDAMAGEFIELD = UNIT_FIELD_MINDAMAGE;
         MAXDAMAGEFIELD = UNIT_FIELD_MAXDAMAGE;
-        typestr = "Mainhand";
+        //typestr = "Mainhand";
     }
     else if(slot==EQUIPMENT_SLOT_OFFHAND)
     {
         MINDAMAGEFIELD = UNIT_FIELD_MINOFFHANDDAMAGE;
         MAXDAMAGEFIELD = UNIT_FIELD_MAXOFFHANDDAMAGE;
-        typestr = "Offhand";
+        //typestr = "Offhand";
     }
 
     if (proto->Damage[0].DamageMin > 0 && MINDAMAGEFIELD)
     {
         ApplyModFloatValue(MINDAMAGEFIELD, proto->Damage[0].DamageMin, apply);
-        sLog.outDetail("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
+        //sLog.outDetail("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
     }
 
     if (proto->Damage[0].DamageMax  > 0 && MAXDAMAGEFIELD)
     {
         ApplyModFloatValue(MAXDAMAGEFIELD, proto->Damage[0].DamageMax, apply);
-        sLog.outDetail("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
+        //sLog.outDetail("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
     }
 
     if (proto->Delay)
@@ -4616,20 +4616,20 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         if(slot == EQUIPMENT_SLOT_RANGED)
         {
             SetAttackTime(RANGED_ATTACK, apply ? proto->Delay: 2000);
-            typestr = "Range";
-            sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
+            //typestr = "Range";
+            //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
         else if(slot==EQUIPMENT_SLOT_MAINHAND)
         {
             SetAttackTime(BASE_ATTACK, apply ? proto->Delay: 2000);
-            typestr = "Mainhand";
-            sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
+            //typestr = "Mainhand";
+            //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
         else if(slot==EQUIPMENT_SLOT_OFFHAND)
         {
             SetAttackTime(OFF_ATTACK, apply ? proto->Delay: 2000);
-            typestr = "Offhand";
-            sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
+            //typestr = "Offhand";
+            //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
     }
 }

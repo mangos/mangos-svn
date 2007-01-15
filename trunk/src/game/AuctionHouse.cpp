@@ -382,7 +382,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     uint32 auctionId;
     recv_data >> auctioneer;
     recv_data >> auctionId;
-    sLog.outDebug( "Cancel AUCTION AuctionID: %u", auctionId);
+    //sLog.outDebug( "Cancel AUCTION AuctionID: %u", auctionId);
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
     if(!pCreature||!pCreature->isAuctioner())
@@ -557,7 +557,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     AuctionHouseObject * mAuctions;
     mAuctions = objmgr.GetAuctionsMap( location );
 
-    sLog.outDebug("Auctionhouse search guid: " I64FMTD ", list from: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, listfrom, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
+    //sLog.outDebug("Auctionhouse search guid: " I64FMTD ", list from: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u", guid, listfrom, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
 
     WorldPacket data( SMSG_AUCTION_LIST_RESULT, (4+4+4) );
     count = 0;
