@@ -374,9 +374,9 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     if( _player != 0 )
         _player->SetSelection(guid);
 
-    if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
+    if(_player->GetUInt64Value(PLAYER__FIELD_COMBO_TARGET) != guid)
     {
-        _player->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
+        _player->SetUInt64Value(PLAYER__FIELD_COMBO_TARGET,0);
         _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 }
@@ -1009,9 +1009,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         _player->SetSelection(guid);
     }
 
-    if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
+    if(_player->GetUInt64Value(PLAYER__FIELD_COMBO_TARGET) != guid)
     {
-        _player->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
+        _player->SetUInt64Value(PLAYER__FIELD_COMBO_TARGET,0);
         _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 
@@ -1034,7 +1034,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
         WorldPacket data( MSG_INSPECT_HONOR_STATS, (8+1+4+4+4+4+4+4+4+4+4+4+1) );
         data << guid;                                       // player guid
                                                             // Rank, filling bar, PLAYER_BYTES_3, ??
-        data << (uint8)pl->GetUInt32Value(PLAYER_FIELD_HONOR_BAR);
+        data << (uint8)pl->GetUInt32Value(PLAYER_FIELD_BYTES2);
                                                             // Today Honorable and Dishonorable Kills
         data << pl->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
                                                             // Yesterday Honorable Kills
@@ -1044,9 +1044,9 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
                                                             // This Week Honorable kills
         data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
                                                             // Lifetime Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
                                                             // Lifetime Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORBALE_KILLS);
                                                             // Yesterday Honor
         data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
                                                             // Last Week Honor
@@ -1068,7 +1068,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     // Received opcode CMSG_WORLD_TELEPORT
     // Time is ***, map=469, x=452.000000, y=6454.000000, z=2536.000000, orient=3.141593
 
-    sLog.outDebug("Received opcode CMSG_WORLD_TELEPORT");
+    //sLog.outDebug("Received opcode CMSG_WORLD_TELEPORT");
 
     if(GetPlayer()->isInFlight())
     {

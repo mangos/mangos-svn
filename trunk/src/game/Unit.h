@@ -26,6 +26,7 @@
 #include "Mthread.h"
 #include "SpellAuraDefines.h"
 #include "Util.h"
+#include "UpdateFields.h"
 
 #include <list>
 
@@ -52,7 +53,7 @@
 
 #define CREATURE_MAX_SPELLS     4
 #define PLAYER_MAX_SKILLS       127
-#define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_START + ((x)*3))
+#define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_1_1 + ((x)*3))
 // DWORD definitions gathered from windows api
 #define SKILL_VALUE(x)          uint16(x)
 #define SKILL_MAX(x)            uint16((uint32(x) >> 16))
@@ -345,6 +346,8 @@ struct Hostil
     };
 };
 
+// we should NOT USE STD::LIST for this
+// lists's delete is VERY SLOW!!!!!!!!!!!!!!!!!!
 typedef std::list<Hostil> HostilList;
 
 enum MeleeHitOutcome
@@ -427,10 +430,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 getClassMask() const { return 1 << (getClass()-1); };
         uint8 getGender() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 16) & 0xFF); };
 
-        float GetStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_STATS+stat); }
-        void SetStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_STATS+stat, val); }
-        void ApplyStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_STATS+stat, val, apply); }
-        void ApplyStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_STATS+stat, val, apply); }
+        float GetStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_STR+stat); }
+        void SetStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_STR+stat, val); }
+        void ApplyStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_STR+stat, val, apply); }
+        void ApplyStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_STR+stat, val, apply); }
 
         float GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL) ; }
         void SetArmor(float val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
@@ -724,8 +727,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         AuraMap m_Auras;
 
         std::list<Aura *> m_scAuras;                        // casted singlecast auras
-        std::list<DynamicObject*> m_dynObj;
-        std::list<GameObject*> m_gameObj;
+        std::vector<DynamicObject*> m_dynObj;
+        std::vector<GameObject*> m_gameObj;
         HostilList m_hostilList;
         uint32 m_transform;
         uint32 m_removedAuras;

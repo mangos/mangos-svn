@@ -25,7 +25,6 @@
 #include "Player.h"
 #include "UpdateData.h"
 #include "CreatureAI.h"
-#include "Utilities.h"
 #include "SpellAuras.h"
 
 template<>
@@ -149,7 +148,7 @@ inline void
 MaNGOS::ObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
     for(std::map<OBJECT_HANDLE, Creature*>::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if(!MaNGOS::Utilities::IsSpiritHealer(iter->second))
+        if(!iter->second->isSpiritHealer())
             iter->second->Update(i_timeDiff);
 }
 

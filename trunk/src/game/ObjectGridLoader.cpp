@@ -19,10 +19,9 @@
 #include "ObjectGridLoader.h"
 #include "Database/DatabaseEnv.h"
 #include "ObjectAccessor.h"
-#include "Utilities.h"
 #include "MapManager.h"
 #include "RedZoneDistrict.h"
-
+#include "Creature.h"
 #include "GameObject.h"
 #include "DynamicObject.h"
 #include "Corpse.h"
@@ -83,7 +82,7 @@ template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
     Cell cell = RedZone::GetZone(cell_pair);
 
     obj->SetCurrentCell(cell);
-    if( MaNGOS::Utilities::IsSpiritHealer(obj) )
+    if( obj->isSpiritHealer())
         obj->setDeathState(DEAD);
 }
 

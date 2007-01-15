@@ -106,7 +106,7 @@ Unit::Unit() : Object()
 Unit::~Unit()
 {
     // remove references to unit
-    std::list<GameObject*>::iterator i;
+    std::vector<GameObject*>::iterator i;
     for (i = m_gameObj.begin(); i != m_gameObj.end();)
     {
         (*i)->SetOwnerGUID(0);
@@ -1653,7 +1653,7 @@ void Unit::_UpdateSpells( uint32 time )
 
     if(!m_dynObj.empty())
     {
-        std::list<DynamicObject*>::iterator ite, dnext;
+        std::vector<DynamicObject*>::iterator ite, dnext;
         for (ite = m_dynObj.begin(); ite != m_dynObj.end(); ite = dnext)
         {
             dnext = ite;
@@ -1669,7 +1669,7 @@ void Unit::_UpdateSpells( uint32 time )
     }
     if(!m_gameObj.empty())
     {
-        std::list<GameObject*>::iterator ite1, dnext1;
+        std::vector<GameObject*>::iterator ite1, dnext1;
         for (ite1 = m_gameObj.begin(); ite1 != m_gameObj.end(); ite1 = dnext1)
         {
             dnext1 = ite1;
@@ -2637,7 +2637,7 @@ void Unit::RemoveDynObject(uint32 spellid)
 {
     if(m_dynObj.empty())
         return;
-    for (std::list<DynamicObject*>::iterator i = m_dynObj.begin(); i != m_dynObj.end();)
+    for (std::vector<DynamicObject*>::iterator i = m_dynObj.begin(); i != m_dynObj.end();)
     {
         if(spellid == 0 || (*i)->GetSpellId() == spellid)
         {
@@ -2651,7 +2651,7 @@ void Unit::RemoveDynObject(uint32 spellid)
 
 DynamicObject * Unit::GetDynObject(uint32 spellId, uint32 effIndex)
 {
-    std::list<DynamicObject*>::iterator i;
+    std::vector<DynamicObject*>::iterator i;
     for (i = m_dynObj.begin(); i != m_dynObj.end(); ++i)
         if ((*i)->GetSpellId() == spellId && (*i)->GetEffIndex() == effIndex)
             return *i;
@@ -2667,18 +2667,30 @@ void Unit::AddGameObject(GameObject* gameObj)
 
 void Unit::RemoveGameObject(GameObject* gameObj, bool del)
 {
+    // TODO: check this
+    if(m_gameObj.empty())
+        return;
+
     assert(gameObj && gameObj->GetOwnerGUID()==GetGUID());
     gameObj->SetOwnerGUID(0);
-    m_gameObj.remove(gameObj);
-    if(del)
-        gameObj->Delete();
+
+    std::vector<GameObject*>::iterator i;
+    for (i = m_gameObj.begin(); i != m_gameObj.end(); i++)
+    {
+        if (gameObj == *i)
+        {
+            m_gameObj.erase(i);
+            if(del)
+                gameObj->Delete();
+        }
+    }
 }
 
 void Unit::RemoveGameObject(uint32 spellid, bool del)
 {
     if(m_gameObj.empty())
         return;
-    std::list<GameObject*>::iterator i, next;
+    std::vector<GameObject*>::iterator i, next;
     for (i = m_gameObj.begin(); i != m_gameObj.end(); i = next)
     {
         next = i;

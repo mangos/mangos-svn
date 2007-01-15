@@ -20,7 +20,6 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "Player.h"
-#include "Utilities.h"
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 #include <list>

@@ -28,6 +28,7 @@ namespace MaNGOS
     namespace Honor
     {
         //TODO: Implement this function
+        // NOTE: DO NOT IMPLEMENT A FUNCTION THAT USES A QUERY, SAVE THE DATA
         inline int32 CalculeStanding(Player *plr)
         {
             uint64 guid = 0;
@@ -79,6 +80,9 @@ namespace MaNGOS
                 return result;
         }
 
+        // THIS FUNCTION WILL NEVER BE FAST as it uses a mysql query
+        // TODO: Load it at player load and modify it while the player is playing
+        // then when player save, save it!!!
         inline float HonorableKillPoints( Player *killer, Player *victim )
         {
             int total_kills  = killer->CalculateTotalKills(victim);

@@ -345,9 +345,9 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
             if( isType(TYPE_UNIT) && (
                 index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
                 index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
-                index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES_06 )
+                index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES + 6 )
                 || isType(TYPE_PLAYER) &&
-                index >= PLAYER_FIELD_POSSTAT0 && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06 )
+                index >= PLAYER_FIELD_POSSTAT0 && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6 )
             {
                 // convert from float to uint32 and send
                 *data << uint32(m_floatValues[ index ]);

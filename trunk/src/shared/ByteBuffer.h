@@ -31,14 +31,17 @@ class ByteBuffer
 
         const static size_t DEFAULT_SIZE = 0x1000;
 
+        // constructor
         ByteBuffer(): _rpos(0), _wpos(0)
         {
             _storage.reserve(DEFAULT_SIZE);
         }
+        // constructor
         ByteBuffer(size_t res): _rpos(0), _wpos(0)
         {
             _storage.reserve(res);
         }
+        // copy constructor
         ByteBuffer(const ByteBuffer &buf): _rpos(buf._rpos), _wpos(buf._wpos), _storage(buf._storage) { }
 
         void clear()
@@ -81,6 +84,26 @@ class ByteBuffer
             append<uint64>(value);
             return *this;
         }
+
+        // signed as in 2e complement
+        ByteBuffer &operator<<(int8 value) {
+            append<int8>(value);
+            return *this;
+        }
+        ByteBuffer &operator<<(int16 value) {
+            append<int16>(value);
+            return *this;
+        }
+        ByteBuffer &operator<<(int32 value) {
+            append<int32>(value);
+            return *this;
+        }
+        ByteBuffer &operator<<(int64 value) {
+            append<int64>(value);
+            return *this;
+        }
+
+        // floating points
         ByteBuffer &operator<<(float value)
         {
             append<float>(value);
@@ -129,6 +152,25 @@ class ByteBuffer
             value = read<uint64>();
             return *this;
         }
+
+        //signed as in 2e complement
+        ByteBuffer &operator>>(int8 &value) {
+            value = read<int8>();
+            return *this;
+        }
+        ByteBuffer &operator>>(int16 &value) {
+            value = read<int16>();
+            return *this;
+        }
+        ByteBuffer &operator>>(int32 &value) {
+            value = read<int32>();
+            return *this;
+        }
+        ByteBuffer &operator>>(int64 &value) {
+            value = read<int64>();
+            return *this;
+        }
+
         ByteBuffer &operator>>(float &value)
         {
             value = read<float>();
@@ -275,7 +317,6 @@ class ByteBuffer
                     {
                         printf("| %X ", read<uint8>(i) );
                     }
-
                     j++;
                 }
                 else if (i == (k*16))
