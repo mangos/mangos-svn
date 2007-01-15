@@ -1044,9 +1044,9 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
                                                             // This Week Honorable kills
         data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
                                                             // Lifetime Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
                                                             // Lifetime Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORBALE_KILLS);
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
                                                             // Yesterday Honor
         data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
                                                             // Last Week Honor

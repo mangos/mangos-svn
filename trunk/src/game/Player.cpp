@@ -4105,8 +4105,8 @@ void Player::UpdateHonor(void)
 
     //LIFE TIME
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORBALE_KILLS, lifetime_dishonorableKills);
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, lifetime_honorableKills);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
     //TODO: Into what field we need to set it? Fix it!
     SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? ((GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 }

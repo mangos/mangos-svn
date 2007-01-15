@@ -208,8 +208,8 @@ bool ChatHandler::HandleGMListCommand(const char* args)
 
 bool ChatHandler::HandleShowHonor(const char* args)
 {
-    uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORBALE_KILLS);
-    uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
+    uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+    uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
     uint32 highest_rank             = (m_session->GetPlayer()->GetHonorHighestRank() < 16)? m_session->GetPlayer()->GetHonorHighestRank() : 0;
     uint32 today_honorable_kills    = (uint16)m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
     uint32 today_dishonorable_kills = (uint16)(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS)>>16);
