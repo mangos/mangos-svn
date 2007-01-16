@@ -563,11 +563,6 @@ void Aura::UpdateAuraDuration()
     ((Player*)m_target)->SendDirectMessage(&data);
 }
 
-void Aura::DelayPeriodicTimer(int32 delaytime)
-{
-    m_periodicTimer += delaytime;
-}
-
 void Aura::_AddAura()
 {
     if (!m_spellId)

@@ -3885,21 +3885,21 @@ bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputa
 bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing)
 {
     std::list<struct Factions>::iterator itr;
-    int32 BaseRep;
 
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
         if(int32(itr->ReputationListID) == factionEntry->reputationListID)
         {
-            BaseRep = GetBaseReputation(factionEntry);
-            itr->Standing = BaseRep + itr->Standing + standing;
+            int32 BaseRep = GetBaseReputation(factionEntry);
+            int32 new_rep = BaseRep + itr->Standing + standing;
 
-            if (itr->Standing > Reputation_Cap)
-                itr->Standing = Reputation_Cap;
-            else if (itr->Standing < Reputation_Bottom)
-                itr->Standing = Reputation_Bottom;
+            if (new_rep > Reputation_Cap)
+                new_rep = Reputation_Cap;
+            else
+            if (new_rep < Reputation_Bottom)
+                new_rep = Reputation_Bottom;
 
-            itr->Standing -= BaseRep;
+            itr->Standing = new_rep - BaseRep;
 
             itr->Flags = (itr->Flags | 0x00000001);
             SendSetFactionStanding(&*itr);
