@@ -3967,7 +3967,7 @@ void Player::UpdateHonor(void)
     uint32 today = 0;
     uint32 date = 0;
 
-    uint32 Yestarday = 0;
+    uint32 Yesterday = 0;
     uint32 ThisWeekBegin = 0;
     uint32 ThisWeekEnd = 0;
     uint32 LastWeekBegin = 0;
@@ -3978,12 +3978,12 @@ void Player::UpdateHonor(void)
     uint32 today_honorableKills = 0;
     uint32 today_dishonorableKills = 0;
 
-    uint32 yestardayKills = 0;
+    uint32 yesterdayKills = 0;
     uint32 thisWeekKills = 0;
     uint32 lastWeekKills = 0;
 
     float total_honor = 0;
-    float yestardayHonor = 0;
+    float yesterdayHonor = 0;
     float thisWeekHonor = 0;
     float lastWeekHonor = 0;
 
@@ -3992,7 +3992,7 @@ void Player::UpdateHonor(void)
 
     today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
 
-    Yestarday     = today - 1;
+    Yesterday     = today - 1;
     ThisWeekBegin = today - now->tm_wday;
     ThisWeekEnd   = ThisWeekBegin + 7;
     LastWeekBegin = ThisWeekBegin - 7;
@@ -4018,10 +4018,10 @@ void Player::UpdateHonor(void)
                 {
                     today_honorableKills++;
                 }
-                if( date == Yestarday)
+                if( date == Yesterday)
                 {
-                    yestardayKills++;
-                    yestardayHonor += fields[1].GetFloat();
+                    yesterdayKills++;
+                    yesterdayHonor += fields[1].GetFloat();
                 }
                 if( (date >= ThisWeekBegin) && (date < ThisWeekEnd) )
                 {
@@ -4093,8 +4093,8 @@ void Player::UpdateHonor(void)
     //TODAY
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
     //YESTERDAY
-    SetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS, yestardayKills);
-    SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)yestardayHonor);
+    SetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS, yesterdayKills);
+    SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)yesterdayHonor);
     //THIS WEEK
     SetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS, thisWeekKills);
     SetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION, (uint32)thisWeekHonor);
