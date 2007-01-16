@@ -4974,7 +4974,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if(lootid)
             {
                 sLog.outDebug("       if(lootid)");
-                FillLoot(this,loot,lootid,LootTemplates_Gameobject);
+                FillLoot(loot, lootid, LootTemplates_Gameobject);
             }
 
             if(loot_type == LOOT_FISHING)
@@ -4995,7 +4995,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         if(!item->m_lootGenerated)
         {
             item->m_lootGenerated = true;
-            FillLoot(this,loot,item->GetEntry(),LootTemplates_Item);
+            FillLoot(loot, item->GetEntry(), LootTemplates_Item);
         }
     }
     else
@@ -5022,7 +5022,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 loot->clear();
 
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-                    FillLoot(this,loot,lootid,LootTemplates_Pickpocketing);
+                    FillLoot(loot, lootid, LootTemplates_Pickpocketing);
                 // Generate extra money for pick pocket loot
                 loot->gold = uint32((10* (rand() % ( (creature->getLevel() / 2) + 1) + rand() % ( (getLevel() / 2) + 1 )))*sWorld.getRate(RATE_DROP_MONEY));
             }
@@ -5047,7 +5047,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 creature->lootForBody = true;
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-                    FillLoot(this,loot,lootid,LootTemplates_Creature);
+                    FillLoot(loot, lootid, LootTemplates_Creature);
 
                 creature->generateMoneyLoot();
 
@@ -5079,7 +5079,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             }
 
             if (loot_type == LOOT_SKINNING)
-                FillLoot(this,loot,creature->GetCreatureInfo()->SkinLootId,LootTemplates_Skinning);
+                FillLoot(loot, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning);
 
             if (!groupInfo.group && recipient == this)
                 permission = ALL_PERMISSION;

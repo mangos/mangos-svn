@@ -162,7 +162,7 @@ extern LootStore LootTemplates_Pickpocketing;
 extern LootStore LootTemplates_Skinning;
 
 QuestItemList* FillQuestLoot(Player* player, Loot *loot);
-void FillLoot(Player* player,Loot *loot, uint32 loot_id, LootStore& store);
+void FillLoot(Loot *loot, uint32 loot_id, LootStore& store);
 void LoadLootTables();
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
