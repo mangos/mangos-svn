@@ -2187,11 +2187,12 @@ void Unit::DelayAura(uint32 spellId, uint32 effindex, int32 delaytime)
     AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
     if (iter != m_Auras.end())
     {
-        iter->second->SetAuraDuration(iter->second->GetAuraDuration() + delaytime);
-        if(iter->second->IsPeriodic())
-            iter->second->DelayPeriodicTimer(delaytime);
+        if (iter->second->GetAuraDuration() < delaytime)
+            iter->second->SetAuraDuration(0);
+        else
+            iter->second->SetAuraDuration(iter->second->GetAuraDuration() - delaytime);
         iter->second->UpdateAuraDuration();
-        sLog.outDebug("Aura %u delayed on unit %u, new duration: %u ms",iter->second->GetModifier()->m_auraname, GetGUIDLow(), iter->second->GetAuraDuration());
+        sLog.outDebug("Aura %u partially interrupted on unit %u, new duration: %u ms",iter->second->GetModifier()->m_auraname, GetGUIDLow(), iter->second->GetAuraDuration());
     }
 }
 

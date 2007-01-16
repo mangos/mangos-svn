@@ -209,7 +209,6 @@ class Aura
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
         void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }
-        void DelayPeriodicTimer(int32 delaytime);
 
         int32 m_procCharges;
         int32 m_absorbDmg;

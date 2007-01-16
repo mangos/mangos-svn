@@ -66,17 +66,12 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
 
 void DynamicObject::Update(uint32 p_time)
 {
-    if(m_aliveDuration > 0)
+    if(m_aliveDuration > int32(p_time))
+        m_aliveDuration -= p_time;
+    else
     {
-        if(uint32(m_aliveDuration) > p_time)
-            m_aliveDuration -= p_time;
-        else
-        {
-            if(IsInWorld())
-            {
-                deleteThis = true;
-            }
-        }
+        if(IsInWorld())
+            deleteThis = true;
     }
 
     // TODO: make a timer and update this in larger intervals
@@ -107,7 +102,7 @@ void DynamicObject::Delete()
 
 void DynamicObject::Delay(int32 delaytime)
 {
-    m_aliveDuration += delaytime;
+    m_aliveDuration -= delaytime;
     for(AffectedSet::iterator iunit= m_affected.begin();iunit != m_affected.end();++iunit)
         if (*iunit)
             (*iunit)->DelayAura(m_spellId, m_effIndex, delaytime);

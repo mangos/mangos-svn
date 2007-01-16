@@ -536,7 +536,6 @@ class Spell
 
         uint32 m_spellState;
         uint32 m_timer;
-        int32 m_delayedTime;
         SpellEntry const* m_TriggerSpell;
         uint16 m_castFlags;
 

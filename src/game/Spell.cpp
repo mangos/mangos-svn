@@ -205,7 +205,6 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
     }
 
     m_timer = casttime<0?0:casttime;
-    m_delayedTime = 0;
 
     for(int i=0;i<3;i++)
         m_needAliveTarget[i] = false;
@@ -2395,42 +2394,24 @@ void Spell::DelayedChannel(int32 delaytime)
         return;
 
     int32 appliedDelayTime = delaytime;
-    uint32 duration = GetDuration(m_spellInfo);
 
-    if(m_timer + delaytime < 0)
+    if(int32(m_timer) < delaytime)
     {
         appliedDelayTime = m_timer;
         m_timer = 0;
-    }
-    else
-        m_timer += delaytime;
+    } else
+        m_timer -= delaytime;
 
-    if(m_timer > duration)
-    {
-        appliedDelayTime -= (m_timer - duration);
-        m_timer = duration;
-    }
-
-    m_delayedTime += appliedDelayTime;
-
-    // Cancel spell if aggregate channeling delay is greater than base channeling duration
-    if(m_delayedTime >= int32(duration))
-    {
-        sLog.outDebug("Spell %u canceled because of accumulated delay: %i ms", m_spellInfo->Id, m_delayedTime);
-        cancel();
-        return;
-    }
-
-    sLog.outDebug("Spell %u delayed for %i ms, new duration: %u ms", m_spellInfo->Id, appliedDelayTime, m_timer);
+    sLog.outDebug("Spell %u partially interrupted for %i ms, new duration: %u ms", m_spellInfo->Id, appliedDelayTime, m_timer);
 
     for(int j = 0; j < 3; j++)
     {
-        // Delay auras with fixed targets
+        // partially interrupt auras with fixed targets
         for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
             if (*iunit)
                 (*iunit)->DelayAura(m_spellInfo->Id, j, appliedDelayTime);
 
-        // Delay persistent area auras
+        // partially interrupt persistent area auras
         DynamicObject* dynObj = m_caster->GetDynObject(m_spellInfo->Id, j);
         if(dynObj)
             dynObj->Delay(appliedDelayTime);
