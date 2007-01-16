@@ -226,7 +226,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             GetPlayer()->afkMsg = msg;
-            if(msg.size() == 0 || !GetPlayer()->isAFK())
+            if((msg.size() == 0 || !GetPlayer()->isAFK()) && !GetPlayer()->isInCombat() )
             {
                 GetPlayer()->ToggleAFK();
                 if(GetPlayer()->isAFK() && GetPlayer()->isDND())
