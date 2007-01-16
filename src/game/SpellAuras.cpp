@@ -1123,18 +1123,65 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
 
     if (apply)
     {
-        CreatureInfo const * ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
-        if(!ci)
+        // special case
+        if(m_modifier.m_miscvalue==0)
         {
-                                                            //pig pink ^_^
-            m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 16358);
-            sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetSpellProto()->Id);
+            if(m_target->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            uint32 orb_model = m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
+            switch(orb_model)
+            {
+                // Troll Female
+                case 1479: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10134); break;
+                // Troll Male
+                case 1478: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10135); break;
+                // Tauren Male
+                case 59:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10136); break;
+                // Human Male
+                case 49:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10137); break;
+                // Human Female
+                case 50:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10138); break;
+                // Orc Male
+                case 51:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10139); break;
+                // Orc Female
+                case 52:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10140); break;
+                // Dwarf Male
+                case 53:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10141); break;
+                // Dwarf Female
+                case 54:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10142); break;
+                // NightElf Male
+                case 55:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10143); break;
+                // NightElf Female
+                case 56:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10144); break;
+                // Undead Female
+                case 58:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10145); break;
+                // Undead Male
+                case 57:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10146); break;
+                // Tauren Female
+                case 60:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10147); break;
+                // Gnome Male
+                case 1563: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10148); break;
+                // Gnome Female
+                case 1564: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10149); break;
+                default: break;
+            }
         }
         else
         {
-            m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->randomDisplayID());
+            CreatureInfo const * ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
+            if(!ci)
+            {
+                                                            //pig pink ^_^
+                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 16358);
+                sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetSpellProto()->Id);
+            }
+            else
+            {
+                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->randomDisplayID());
+            }
+            m_target->setTransForm(GetSpellProto()->Id);
         }
-        m_target->setTransForm(GetSpellProto()->Id);
     }
     else
     {
