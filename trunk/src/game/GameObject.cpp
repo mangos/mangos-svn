@@ -300,7 +300,7 @@ void GameObject::Delete()
 void GameObject::getFishLoot(Loot *fishloot)
 {
     uint32 zone = GetZoneId();
-    FillLoot(0,fishloot,zone,LootTemplates_Fishing);
+    FillLoot(fishloot, zone, LootTemplates_Fishing);
 }
 
 void GameObject::SaveToDB()

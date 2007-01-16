@@ -195,7 +195,7 @@ struct HasQuestChance
     inline bool operator() ( LootStoreItem &itm )   { return itm.questChanceOrGroup > rand_chance(); }
 };
 
-void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
+void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
 {
     loot->clear();
 
