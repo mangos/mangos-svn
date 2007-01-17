@@ -1,20 +1,20 @@
 /* 
-* Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include "Common.h"
 #include "Log.h"
@@ -44,11 +44,11 @@
 float baseMoveSpeed[MAX_MOVE_TYPE] =
 {
     2.5f,                                                   // MOVE_WALK
-        7.0f,                                                   // MOVE_RUN
-        1.25f,                                                  // MOVE_WALKBACK
-        4.722222f,                                              // MOVE_SWIM
-        4.5f,                                                   // MOVE_SWIMBACK
-        3.141594f                                               // MOVE_TURN
+    7.0f,                                                   // MOVE_RUN
+    1.25f,                                                  // MOVE_WALKBACK
+    4.722222f,                                              // MOVE_SWIM
+    4.5f,                                                   // MOVE_SWIMBACK
+    3.141594f                                               // MOVE_TURN
 };
 
 Unit::Unit() : Object()
@@ -253,21 +253,21 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype
 
     switch(damagetype)
     {
-    case DIRECT_DAMAGE:
-    case SPELL_DIRECT_DAMAGE:
-        RemoveSpellsCausingAura(auraType);
-        return;
-    case DOT:
-        if(damageaura.size()==0)
-            return;
-        //if(auraType == SPELL_AURA_MOD_ROOT && damageaura.size() < 2) //sometimes Roots can break themselves - need to fix
-        //    return;
-        if(30.0f > urand(0,100))                        //30% chance to break a spell
+        case DIRECT_DAMAGE:
+        case SPELL_DIRECT_DAMAGE:
             RemoveSpellsCausingAura(auraType);
-        return;
+            return;
+        case DOT:
+            if(damageaura.size()==0)
+                return;
+            //if(auraType == SPELL_AURA_MOD_ROOT && damageaura.size() < 2) //sometimes Roots can break themselves - need to fix
+            //    return;
+            if(30.0f > urand(0,100))                        //30% chance to break a spell
+                RemoveSpellsCausingAura(auraType);
+            return;
 
-    default:
-        return;
+        default:
+            return;
     }
 }
 
@@ -673,17 +673,17 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
         SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
         return;
     }else                                                   // If we didn't fully absorb check if we fully resisted
-        if( pdamage <= resist)
-        {
-            SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
-            return;
-        }
+    if( pdamage <= resist)
+    {
+        SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
+        return;
+    }
 
-        sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
+    sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u",
+        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
 
-        SendSpellNonMeleeDamageLog(pVictim, spellID, pdamage, spellInfo->School, absorb, resist, false, 0, crit);
-        DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), SPELL_DIRECT_DAMAGE, 0, true);
+    SendSpellNonMeleeDamageLog(pVictim, spellID, pdamage, spellInfo->School, absorb, resist, false, 0, crit);
+    DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), SPELL_DIRECT_DAMAGE, 0, true);
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod)
@@ -960,78 +960,78 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
     switch (outcome)
     {
-    case MELEE_HIT_CRIT:
-        //*hitInfo = 0xEA;
-        // 0xEA
-        *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;
-        *damage *= 2;
+        case MELEE_HIT_CRIT:
+            //*hitInfo = 0xEA;
+            // 0xEA
+            *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;
+            *damage *= 2;
 
-        if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
-            ((Player*)this)->UpdateWeaponSkill(attType);
+            if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
+                ((Player*)this)->UpdateWeaponSkill(attType);
 
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
-        break;
+            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
+            break;
 
-    case MELEE_HIT_PARRY:
-        *damage = 0;
-        *victimState = VICTIMSTATE_PARRY;
+        case MELEE_HIT_PARRY:
+            *damage = 0;
+            *victimState = VICTIMSTATE_PARRY;
 
-        // instant (maybe with small delay) counter attack
-        {
-            uint32 offtime  = pVictim->getAttackTimer(OFF_ATTACK);
-            uint32 basetime = pVictim->getAttackTimer(BASE_ATTACK);
-
-            if (pVictim->haveOffhandWeapon() && offtime < basetime)
+            // instant (maybe with small delay) counter attack
             {
-                if( offtime > ATTACK_DISPLAY_DELAY )
-                    pVictim->setAttackTimer(OFF_ATTACK,ATTACK_DISPLAY_DELAY);
+                uint32 offtime  = pVictim->getAttackTimer(OFF_ATTACK);
+                uint32 basetime = pVictim->getAttackTimer(BASE_ATTACK);
+
+                if (pVictim->haveOffhandWeapon() && offtime < basetime)
+                {
+                    if( offtime > ATTACK_DISPLAY_DELAY )
+                        pVictim->setAttackTimer(OFF_ATTACK,ATTACK_DISPLAY_DELAY);
+                }
+                else
+                {
+                    if ( basetime > ATTACK_DISPLAY_DELAY )
+                        pVictim->setAttackTimer(BASE_ATTACK,ATTACK_DISPLAY_DELAY);
+                }
             }
-            else
-            {
-                if ( basetime > ATTACK_DISPLAY_DELAY )
-                    pVictim->setAttackTimer(BASE_ATTACK,ATTACK_DISPLAY_DELAY);
-            }
-        }
 
-        if(pVictim->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)pVictim)->UpdateDefense();
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)pVictim)->UpdateDefense();
 
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-        pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
-        return;
-
-    case MELEE_HIT_DODGE:
-        *damage = 0;
-        *victimState = VICTIMSTATE_DODGE;
-
-        if(pVictim->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)pVictim)->UpdateDefense();
-
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-        pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
-        return;
-
-    case MELEE_HIT_BLOCK:
-        *blocked_amount = uint32(pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
-
-        if (pVictim->GetUnitBlockChance())
-            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
-        else
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
+            return;
 
-        //Only set VICTIMSTATE_BLOCK on a full block
-        if (*blocked_amount >= *damage)
-        {
-            *victimState = VICTIMSTATE_BLOCKS;
-            *blocked_amount = *damage;
-        }
+        case MELEE_HIT_DODGE:
+            *damage = 0;
+            *victimState = VICTIMSTATE_DODGE;
 
-        if(pVictim->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)pVictim)->UpdateDefense();
-        pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
-        break;
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)pVictim)->UpdateDefense();
 
-    case MELEE_HIT_GLANCING:
+            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
+            return;
+
+        case MELEE_HIT_BLOCK:
+            *blocked_amount = uint32(pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
+
+            if (pVictim->GetUnitBlockChance())
+                pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
+            else
+                pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+
+            //Only set VICTIMSTATE_BLOCK on a full block
+            if (*blocked_amount >= *damage)
+            {
+                *victimState = VICTIMSTATE_BLOCKS;
+                *blocked_amount = *damage;
+            }
+
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)pVictim)->UpdateDefense();
+            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
+            break;
+
+        case MELEE_HIT_GLANCING:
         {
             // 30% reduction at 15 skill diff, no reduction at 5 skill diff
             int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue(attType) - 5) * 3;
@@ -1041,15 +1041,15 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             *hitInfo |= HITINFO_GLANCING;
             break;
         }
-    case MELEE_HIT_CRUSHING:
-        // 150% normal damage
-        *damage += (*damage / 2);
-        *hitInfo |= HITINFO_CRUSHING;
-        // TODO: victimState, victim animation?
-        break;
+        case MELEE_HIT_CRUSHING:
+            // 150% normal damage
+            *damage += (*damage / 2);
+            *hitInfo |= HITINFO_CRUSHING;
+            // TODO: victimState, victim animation?
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     MeleeDamageBonus(pVictim, damage);
@@ -1185,10 +1185,10 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
 
     if (GetTypeId() == TYPEID_PLAYER)
         DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg, absorbed %u, blocked %u, resisted %u.",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
     else
         DEBUG_LOG("AttackerStateUpdate: (NPC)    %u %X attacked %u %X for %u dmg, absorbed %u, blocked %u, resisted %u.",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const
@@ -1323,19 +1323,19 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
 
     switch (attType)
     {
-    case RANGED_ATTACK:
-        min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
-        max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-        break;
-    case BASE_ATTACK:
-        min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE);
-        max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
-        break;
-    case OFF_ATTACK:
-        // TODO: add offhand dmg from talents
-        min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) * 0.5;
-        max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE) * 0.5;
-        break;
+        case RANGED_ATTACK:
+            min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
+            max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
+            break;
+        case BASE_ATTACK:
+            min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE);
+            max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+            break;
+        case OFF_ATTACK:
+            // TODO: add offhand dmg from talents
+            min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) * 0.5;
+            max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE) * 0.5;
+            break;
     }
 
     if (min_damage > max_damage)
@@ -1492,9 +1492,9 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         uint16  slot;
         switch (attType)
         {
-        case BASE_ATTACK: slot = EQUIPMENT_SLOT_MAINHAND; break;
-        case OFF_ATTACK: slot = EQUIPMENT_SLOT_OFFHAND; break;
-        case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED; break;
+            case BASE_ATTACK: slot = EQUIPMENT_SLOT_MAINHAND; break;
+            case OFF_ATTACK: slot = EQUIPMENT_SLOT_OFFHAND; break;
+            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED; break;
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
@@ -1516,9 +1516,9 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
         uint16  slot;
         switch (attType)
         {
-        case BASE_ATTACK: slot = EQUIPMENT_SLOT_MAINHAND; break;
-        case OFF_ATTACK: slot = EQUIPMENT_SLOT_OFFHAND; break;
-        case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED; break;
+            case BASE_ATTACK: slot = EQUIPMENT_SLOT_MAINHAND; break;
+            case OFF_ATTACK: slot = EQUIPMENT_SLOT_OFFHAND; break;
+            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED; break;
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
@@ -1572,20 +1572,20 @@ void Unit::_UpdateSpells( uint32 time )
                 }
                 else
                     // recheck range and req. items (ammo and gun, etc)
-                    if(m_currentSpell->CheckRange() == 0 && m_currentSpell->CheckItems() == 0 )
+                if(m_currentSpell->CheckRange() == 0 && m_currentSpell->CheckItems() == 0 )
+                {
+                    m_currentSpell->setState(SPELL_STATE_PREPARING);
+                    m_currentSpell->ReSetTimer();
+                }
+                else
+                {
+                    if(GetTypeId()==TYPEID_PLAYER)
                     {
-                        m_currentSpell->setState(SPELL_STATE_PREPARING);
-                        m_currentSpell->ReSetTimer();
+                        WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 0);
+                        ((Player*)this)->GetSession()->SendPacket(&data);
                     }
-                    else
-                    {
-                        if(GetTypeId()==TYPEID_PLAYER)
-                        {
-                            WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 0);
-                            ((Player*)this)->GetSession()->SendPacket(&data);
-                        }
-                        castSpell(NULL);
-                    }
+                    castSpell(NULL);
+                }
             }
         }
         else if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
@@ -1964,22 +1964,22 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                     next =  m_Auras.begin();
             }
             else                                            // Potions stack aura by aura
-                if (Aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION &&
-                    (*i).second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION)
+            if (Aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION &&
+                (*i).second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION)
+            {
+                if (IsNoStackAuraDueToAura(spellId, effIndex, i_spellId, i_effIndex))
                 {
-                    if (IsNoStackAuraDueToAura(spellId, effIndex, i_spellId, i_effIndex))
-                    {
-                        if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
-                            return false;                       // cannot remove higher rank
+                    if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
+                        return false;                       // cannot remove higher rank
 
-                        RemoveAura(i);
+                    RemoveAura(i);
 
-                        if( m_Auras.empty() )
-                            break;
-                        else
-                            next =  m_Auras.begin();
-                    }
+                    if( m_Auras.empty() )
+                        break;
+                    else
+                        next =  m_Auras.begin();
                 }
+            }
         }
     }
     return true;
@@ -1999,19 +1999,19 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
                 bool positive = true;
                 switch((*i).second->GetSpellProto()->EffectImplicitTargetA[(*i).second->GetEffIndex()])
                 {
-                case TARGET_SINGLE_ENEMY:
-                case TARGET_ALL_ENEMY_IN_AREA:
-                case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-                case TARGET_ALL_ENEMIES_AROUND_CASTER:
-                case TARGET_IN_FRONT_OF_CASTER:
-                case TARGET_DUELVSPLAYER:
-                case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-                case TARGET_CURRENT_SELECTED_ENEMY:
-                    positive = false;
-                    break;
+                    case TARGET_SINGLE_ENEMY:
+                    case TARGET_ALL_ENEMY_IN_AREA:
+                    case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+                    case TARGET_ALL_ENEMIES_AROUND_CASTER:
+                    case TARGET_IN_FRONT_OF_CASTER:
+                    case TARGET_DUELVSPLAYER:
+                    case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
+                    case TARGET_CURRENT_SELECTED_ENEMY:
+                        positive = false;
+                        break;
 
-                default:
-                    positive = ((*i).second->GetSpellProto()->AttributesEx & (1<<7)) ? false : true;
+                    default:
+                        positive = ((*i).second->GetSpellProto()->AttributesEx & (1<<7)) ? false : true;
                 }
                 if(positive)
                     continue;
@@ -2177,8 +2177,8 @@ void Unit::RemoveAllAurasOnDeath()
     for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
         if (!iter->second->IsPassive())
             RemoveAura(iter, true);
-        else
-            ++iter;
+    else
+        ++iter;
     _RemoveAllAuraMods();
 }
 
@@ -2352,15 +2352,15 @@ void Unit::ApplyStats(bool apply)
 
     switch(getClass())
     {
-    case CLASS_WARRIOR: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
-    case CLASS_PALADIN: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
-    case CLASS_ROGUE:   val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
-    case CLASS_HUNTER:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
-    case CLASS_SHAMAN:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20); break;
-    case CLASS_DRUID:   val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
-    case CLASS_MAGE:    val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
-    case CLASS_PRIEST:  val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
-    case CLASS_WARLOCK: val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
+        case CLASS_WARRIOR: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_PALADIN: val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_ROGUE:   val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
+        case CLASS_HUNTER:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
+        case CLASS_SHAMAN:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_DRUID:   val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_MAGE:    val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
+        case CLASS_PRIEST:  val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
+        case CLASS_WARLOCK: val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
     }
     tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
 
@@ -2442,13 +2442,13 @@ void Unit::_RemoveAllAuraMods()
     {
         switch ((*i).second->GetModifier()->m_auraname)
         {
-        case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
-        case SPELL_AURA_MOD_RESISTANCE_PCT:
-        case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
-            // these are already removed by applystats
-            break;
-        default:
-            (*i).second->ApplyModifier(false);
+            case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+            case SPELL_AURA_MOD_RESISTANCE_PCT:
+            case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+                // these are already removed by applystats
+                break;
+            default:
+                (*i).second->ApplyModifier(false);
         }
     }
     ApplyStats(true);
@@ -2484,13 +2484,13 @@ void Unit::_ApplyAllAuraMods()
     {
         switch ((*i).second->GetModifier()->m_auraname)
         {
-        case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
-        case SPELL_AURA_MOD_RESISTANCE_PCT:
-        case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
-            // these are already applied by applystats
-            break;
-        default:
-            (*i).second->ApplyModifier(true);
+            case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+            case SPELL_AURA_MOD_RESISTANCE_PCT:
+            case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+                // these are already applied by applystats
+                break;
+            default:
+                (*i).second->ApplyModifier(true);
         }
     }
     ApplyStats(true);
@@ -2913,10 +2913,10 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                         uint32 mana = 0;
                         switch(objmgr.GetSpellRank(spellProto->Id))
                         {
-                        case 1:mana = 33;break;
-                        case 2:mana = 46;break;
-                        case 3:mana = 59;break;
-                        default:break;
+                            case 1:mana = 33;break;
+                            case 2:mana = 46;break;
+                            case 3:mana = 59;break;
+                            default:break;
                         }
                         ModifyPower(POWER_MANA,mana);
                         SendHealSpellOnPlayerPet(this,spellProto->Id,mana,POWER_MANA);
@@ -2927,11 +2927,11 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2)
                     uint32 health = 0;
                     switch(objmgr.GetSpellRank(spellProto->Id))
                     {
-                    case 1:health = 25;break;
-                    case 2:health = 34;break;
-                    case 3:health = 49;break;
-                    case 4:health = 61;break;
-                    default:break;
+                        case 1:health = 25;break;
+                        case 2:health = 34;break;
+                        case 3:health = 49;break;
+                        case 4:health = 61;break;
+                        default:break;
                     }
                     ModifyHealth(health);
                     SendHealSpellOnPlayer(this,spellProto->Id,health);
@@ -2952,25 +2952,25 @@ void Unit::setPowerType(Powers new_powertype)
     SetUInt32Value(UNIT_FIELD_BYTES_0,((tem_bytes_0<<8)>>8) + (uint32(new_powertype)<<24));
     switch(new_powertype)
     {
-    default:
-    case POWER_MANA:
-        break;
-    case POWER_RAGE:
-        SetMaxPower(POWER_RAGE,1000);
-        SetPower(   POWER_RAGE,0);
-        break;
-    case POWER_FOCUS:
-        SetMaxPower(POWER_FOCUS,100);
-        SetPower(   POWER_FOCUS,100);
-        break;
-    case POWER_ENERGY:
-        SetMaxPower(POWER_ENERGY,100);
-        SetPower(   POWER_ENERGY,100);
-        break;
-    case POWER_HAPPINESS:
-        SetMaxPower(POWER_HAPPINESS,1000000);
-        SetPower(POWER_HAPPINESS,1000000);
-        break;
+        default:
+        case POWER_MANA:
+            break;
+        case POWER_RAGE:
+            SetMaxPower(POWER_RAGE,1000);
+            SetPower(   POWER_RAGE,0);
+            break;
+        case POWER_FOCUS:
+            SetMaxPower(POWER_FOCUS,100);
+            SetPower(   POWER_FOCUS,100);
+            break;
+        case POWER_ENERGY:
+            SetMaxPower(POWER_ENERGY,100);
+            SetPower(   POWER_ENERGY,100);
+            break;
+        case POWER_HAPPINESS:
+            SetMaxPower(POWER_HAPPINESS,1000000);
+            SetPower(POWER_HAPPINESS,1000000);
+            break;
     }
 }
 
@@ -3586,8 +3586,8 @@ void Unit::ModifyHealth(int32 dVal)
     if(uint32(val) < maxHealth)
         SetHealth(val);
     else
-        if(curHealth!=maxHealth)
-            SetHealth(maxHealth);
+    if(curHealth!=maxHealth)
+        SetHealth(maxHealth);
 }
 
 void Unit::ModifyPower(Powers power, int32 dVal)
@@ -3609,8 +3609,8 @@ void Unit::ModifyPower(Powers power, int32 dVal)
     if(uint32(val) < maxPower)
         SetPower(power,val);
     else
-        if(curPower != maxPower)
-            SetPower(power,maxPower);
+    if(curPower != maxPower)
+        SetPower(power,maxPower);
 }
 
 bool Unit::isVisibleFor(Unit* u, bool detect)
@@ -3686,15 +3686,15 @@ void Unit::SetVisibility(UnitVisibility x)
 
     switch (x)
     {
-    case VISIBILITY_ON:
-        m_UpdateVisibility = VISIBLE_SET_VISIBLE;
-        break;
-    case VISIBILITY_OFF:
-        m_UpdateVisibility = VISIBLE_SET_INVISIBLE;
-        break;
-    case VISIBILITY_GROUP:
-        m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_GROUP;
-        break;
+        case VISIBILITY_ON:
+            m_UpdateVisibility = VISIBLE_SET_VISIBLE;
+            break;
+        case VISIBILITY_OFF:
+            m_UpdateVisibility = VISIBLE_SET_INVISIBLE;
+            break;
+        case VISIBILITY_GROUP:
+            m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_GROUP;
+            break;
     }
     if(GetTypeId() == TYPEID_PLAYER)
     {
@@ -3728,30 +3728,30 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
 
     switch(mtype)
     {
-    case MOVE_WALK:
-        if(forced) { data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16); }
-        else { data.Initialize(MSG_MOVE_SET_WALK_SPEED, 16); }
-        break;
-    case MOVE_RUN:
-        if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 16); }
-        else { data.Initialize(MSG_MOVE_SET_RUN_SPEED, 16); }
-        break;
-    case MOVE_WALKBACK:
-        if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE, 16); }
-        else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED, 16); }
-        break;
-    case MOVE_SWIM:
-        if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, 16); }
-        else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED, 16); }
-        break;
-    case MOVE_SWIMBACK:
-        data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED, 16);
-        break;
-    case MOVE_TURN:
-        return;                                         // ignore
-    default:
-        sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
-        return;
+        case MOVE_WALK:
+            if(forced) { data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_WALK_SPEED, 16); }
+            break;
+        case MOVE_RUN:
+            if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_RUN_SPEED, 16); }
+            break;
+        case MOVE_WALKBACK:
+            if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED, 16); }
+            break;
+        case MOVE_SWIM:
+            if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED, 16); }
+            break;
+        case MOVE_SWIMBACK:
+            data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED, 16);
+            break;
+        case MOVE_TURN:
+            return;                                         // ignore
+        default:
+            sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
+            return;
     }
 
     data.append(GetPackGUID());

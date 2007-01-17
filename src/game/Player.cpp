@@ -9431,12 +9431,12 @@ bool Player::LoadFromDB( uint32 guid )
 
     uint32 dbAccountId = fields[1].GetUInt32();
 
-    // check if the character's account in the db and the logged in account match. 
+    // check if the character's account in the db and the logged in account match.
     // player should be able to load/delete character only with correct account!
     if( dbAccountId != GetSession()->GetAccountId() )
     {
         sLog.outError("ERROR: Player (GUID: %u) loading from wrong account (is: %u, should be: %u)",guid,GetSession()->GetAccountId(),dbAccountId);
-        delete result; 
+        delete result;
         return false;
     }
 
