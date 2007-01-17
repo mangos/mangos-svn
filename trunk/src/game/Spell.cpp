@@ -2400,7 +2400,7 @@ void Spell::DelayedChannel(int32 delaytime)
         appliedDelayTime = m_timer;
         m_timer = 0;
     } else
-        m_timer -= delaytime;
+    m_timer -= delaytime;
 
     sLog.outDebug("Spell %u partially interrupted for %i ms, new duration: %u ms", m_spellInfo->Id, appliedDelayTime, m_timer);
 

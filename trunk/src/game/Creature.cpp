@@ -874,7 +874,7 @@ void Creature::SaveToDB()
         << m_positionY << ","
         << m_positionZ << ","
         << m_orientation << ","
-        << m_respawnDelay << ","                            //respawn time 
+        << m_respawnDelay << ","                            //respawn time
         << (float) 0  << ","                                //spawn distance (float)
         << (uint32) (0) << ","                              //currentwaypoint
         << respawn_cord[0] << ","                           //spawn_position_x
