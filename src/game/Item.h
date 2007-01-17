@@ -172,7 +172,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool CanGoIntoBag(ItemPrototype const *pBagProto);
 
         bool IsInBag() const { return m_container != NULL; }
-        bool IsEquipped() const { return !IsInBag() && m_slot < 255; }
+        bool IsEquipped() const;
 
         uint32 GetSkill();
         uint32 GetSpell();
