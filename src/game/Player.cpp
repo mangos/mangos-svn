@@ -10975,7 +10975,7 @@ void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + m_spells.size()*8);
     data << GetGUID();
     time_t curTime = time(NULL);
-    for(PlayerSpellMap::const_iterator itr = m_spells.begin(); m_spells.end() != itr; ++itr)
+    for(PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if (itr->second->state == PLAYERSPELL_REMOVED)
             continue;
