@@ -620,6 +620,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 GetAurDuration(uint32 spellId, uint32 effindex);
 
         void castSpell(Spell * pSpell);
+        virtual void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs ) { }
         void InterruptSpell();
         Spell * m_currentSpell;
         Spell * m_oldSpell;

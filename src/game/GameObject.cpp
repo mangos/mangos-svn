@@ -258,7 +258,7 @@ void GameObject::Update(uint32 p_time)
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(GetMapId()));
         if (ok)
         {
-            owner->CastSpell(ok, GetGOInfo()->castsSpell, true);
+            owner->CastSpell(ok, GetGOInfo()->sound3, true);
             // removed on unit update
             m_respawnTimer = 0;
         }

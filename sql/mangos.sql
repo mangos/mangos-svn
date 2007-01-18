@@ -1131,7 +1131,6 @@ CREATE TABLE `gameobject_template` (
   `sound8` int(11) unsigned NOT NULL default '0',
   `sound9` int(11) unsigned NOT NULL default '0',
   `ScriptName` varchar(100) NOT NULL default '',
-  `castsSpell` int(11) NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
 

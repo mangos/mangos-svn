@@ -10969,3 +10969,29 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
 
     return true;
 }
+
+void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs )
+{
+    WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + m_spells.size()*8);
+    data << GetGUID();
+    time_t curTime = time(NULL);
+    for(PlayerSpellMap::const_iterator itr = m_spells.begin(); m_spells.end() != itr; ++itr)
+    {
+        if (itr->second->state == PLAYERSPELL_REMOVED)
+            continue;
+        uint32 unSpellId = itr->first;
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(unSpellId);
+        if (!spellInfo)
+        {
+            ASSERT(spellInfo);
+            continue;
+        }
+        if(idSchool == spellInfo->School && GetSpellCooldownDelay(unSpellId) < unTimeMs )
+        {
+            data << uint32(unSpellId);
+            data << uint32(uint32(unTimeMs));   // in m.secs
+            AddSpellCooldown(unSpellId, curTime + unTimeMs/1000);
+        }
+    }
+    GetSession()->SendPacket(&data);
+}

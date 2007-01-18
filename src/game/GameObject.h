@@ -51,7 +51,6 @@ struct GameObjectInfo
     uint32  sound8;
     uint32  sound9;
     char   *ScriptName;
-    uint32  castsSpell;
 };
 
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
