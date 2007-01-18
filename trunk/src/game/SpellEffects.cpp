@@ -1784,7 +1784,13 @@ void Spell::EffectInterruptCast(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    unitTarget->InterruptSpell();
+    // TODO: not all spells that used this effect apply cooldown at school spells
+    // also exist case: apply cooldown to interupted cast only and to all spells 
+    if (unitTarget->m_currentSpell && unitTarget->m_currentSpell->m_spellInfo)
+    {
+        unitTarget->ProhibitSpellScholl(unitTarget->m_currentSpell->m_spellInfo->School, GetDuration(m_spellInfo));
+        unitTarget->InterruptSpell();
+    }
 }
 
 void Spell::EffectSummonObjectWild(uint32 i)
