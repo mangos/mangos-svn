@@ -700,7 +700,8 @@ void Spell::cancel()
         {
             for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
             {
-                Unit* unit = ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                // check m_caster->GetGUID() let load auras at login and speedup most often case
+                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
                 if (unit && unit->isAlive())
                     unit->RemoveAurasDueToSpell(m_spellInfo->Id);
             }
@@ -784,7 +785,8 @@ void Spell::cast(bool skipCheck)
                 if((m_spellInfo->TargetCreatureType & cinfo->type) == 0)
                     continue;
             }*/
-            Unit* unit = ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+            // check m_caster->GetGUID() let load auras at login and speedup most often case
+            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
             if(unit)
                 HandleEffects(unit,NULL,NULL,j);
         }
@@ -1009,7 +1011,8 @@ void Spell::update(uint32 difftime)
                         bool targetLeft = false;
                         for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[i].begin();iunit != m_targetUnitGUIDs[i].end();++iunit)
                         {
-                            Unit* unit = ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                            // check m_caster->GetGUID() let load auras at login and speedup most often case
+                            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
                             if(unit && unit->isAlive())
                             {
                                 targetLeft = true;
@@ -1243,7 +1246,8 @@ void Spell::writeSpellGoTargets( WorldPacket * data )
                 }
             }
 
-            Unit* unit =  ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+            // check m_caster->GetGUID() let load auras at login and speedup most often case
+            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
             if(unit && add)
                 UniqueTargets.push_back(unit);
             add = true;
@@ -2422,7 +2426,8 @@ void Spell::DelayedChannel(int32 delaytime)
         // partially interrupt auras with fixed targets
         for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
         {
-            Unit* unit = ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+            // check m_caster->GetGUID() let load auras at login and speedup most often case
+            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
             if (unit)
                 unit->DelayAura(m_spellInfo->Id, j, appliedDelayTime);
         }
