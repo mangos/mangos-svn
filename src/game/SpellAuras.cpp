@@ -195,7 +195,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_CREATURE_IMMUNITY = 147,
     &Aura::HandleNULL,                                      //SPELL_AURA_RETAIN_COMBO_POINTS = 148,
     &Aura::HandleNULL,                                      //SPELL_AURA_RESIST_PUSHBACK    =    149    ,//    Resist Pushback
-    &Aura::HandleModShieldBlock,                            //SPELL_AURA_MOD_SHIELD_BLOCK    =    150    ,//    Mod Shield Block %
+    &Aura::HandleModShieldBlock,                            //SPELL_AURA_MOD_SHIELD_BLOCK_PCT   = 150   ,//    Mod Shield Block %
     &Aura::HandleNULL,                                      //SPELL_AURA_TRACK_STEALTHED    =    151    ,//    Track Stealthed
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECTED_RANGE    =    152    ,//    Mod Detected Range
     &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE_FLAT    =    153    ,//    Split Damage Flat
@@ -203,11 +203,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_WATER_BREATHING    =    155    ,//    Mod Water Breathing
     &Aura::HandleModReputationGain,                         //SPELL_AURA_MOD_REPUTATION_GAIN    =    156    ,//    Mod Reputation Gain
     &Aura::HandleNULL,                                      //SPELL_AURA_PET_DAMAGE_MULTI       = 157   ,//    Mod Pet Damage
-    &Aura::HandleNULL,                                      //                                  = 158    ,//
-    &Aura::HandleNULL,                                      //                                  = 159    ,//
-    &Aura::HandleNULL,                                      //                                  = 160    ,//
-    &Aura::HandleNULL,                                      //                                  = 161    ,//
-    &Aura::HandleNULL                                       //                                  = 162    ,//
+    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SHIELD_BLOCK            = 158 ,//
+    &Aura::HandleNULL,                                      //SPELL_AURA_NO_PVP_CREDIT               = 159 ,//
+    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_AOE_AVOIDANCE           = 160 ,//
+    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT  = 161 ,//
+    &Aura::HandleNULL                                       //SPELL_AURA_POWER_BURN_MANA             = 162 ,//
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
