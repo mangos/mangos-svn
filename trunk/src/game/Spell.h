@@ -523,7 +523,7 @@ class Spell
         uint32 damage;
 
         // List of all Spell targets
-        std::list<Unit*> m_targetUnits[3];
+        std::list<uint64> m_targetUnitGUIDs[3];
         std::list<Item*> m_targetItems[3];
         std::list<GameObject*> m_targetGOs[3];
         // -------------------------------------------

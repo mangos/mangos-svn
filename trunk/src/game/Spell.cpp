@@ -311,7 +311,9 @@ void Spell::FillTargetMap()
                 ++itr;
         }
 
-        m_targetUnits[i] = tmpUnitMap;
+        for(std::list<Unit*>::iterator iunit= tmpUnitMap.begin();iunit != tmpUnitMap.end();++iunit)
+            m_targetUnitGUIDs[i].push_back((*iunit)->GetGUID());
+
         m_targetItems[i] = tmpItemMap;
         m_targetGOs[i]   = tmpGOMap;
 
@@ -695,9 +697,15 @@ void Spell::cancel()
     else if(m_spellState == SPELL_STATE_CASTING)
     {
         for (int j = 0; j < 3; j++)
-            for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
-                if (*iunit && (*iunit)->isAlive())
-                    (*iunit)->RemoveAurasDueToSpell(m_spellInfo->Id);
+        {
+            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
+            {
+                Unit* unit = ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                if (unit && unit->isAlive())
+                    unit->RemoveAurasDueToSpell(m_spellInfo->Id);
+            }
+        }
+
 
         m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
         SendChannelUpdate(0);
@@ -753,7 +761,6 @@ void Spell::cast(bool skipCheck)
         SendChannelStart(GetDuration(m_spellInfo));
     }
 
-    std::list<Unit*>::iterator iunit;
     std::list<Item*>::iterator iitem;
     std::list<GameObject*>::iterator igo;
 
@@ -768,7 +775,7 @@ void Spell::cast(bool skipCheck)
                                                             // Dont do spell log, if is school damage spell
         if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)
             needspelllog = false;
-        for(iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();iunit++)
+        for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
         {
             // let the client worry about this
             /*if((*iunit)->GetTypeId() != TYPEID_PLAYER && m_spellInfo->TargetCreatureType)
@@ -777,7 +784,9 @@ void Spell::cast(bool skipCheck)
                 if((m_spellInfo->TargetCreatureType & cinfo->type) == 0)
                     continue;
             }*/
-            HandleEffects((*iunit),NULL,NULL,j);
+            Unit* unit = ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+            if(unit)
+                HandleEffects(unit,NULL,NULL,j);
         }
         for(iitem= m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
             HandleEffects(NULL,(*iitem),NULL,j);
@@ -820,7 +829,7 @@ void Spell::cast(bool skipCheck)
 
     if(canreflect)
     {
-        for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
+        for(std::list<Unit*>::iterator iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
             reflect(*iunit);
     }
 
@@ -998,14 +1007,17 @@ void Spell::update(uint32 difftime)
                     if(m_needAliveTarget[i])
                     {
                         bool targetLeft = false;
-                        for(std::list<Unit*>::iterator iunit= m_targetUnits[i].begin();iunit != m_targetUnits[i].end();++iunit)
-                            if(*iunit && (*iunit)->isAlive())
+                        for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[i].begin();iunit != m_targetUnitGUIDs[i].end();++iunit)
                         {
-                            targetLeft = true;
-                            break;
+                            Unit* unit = ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                            if(unit && unit->isAlive())
+                            {
+                                targetLeft = true;
+                                break;
+                            }
+                            if(!targetLeft)
+                                cancel();
                         }
-                        if(!targetLeft)
-                            cancel();
                     }
                 }
 
@@ -1216,23 +1228,24 @@ void Spell::writeSpellGoTargets( WorldPacket * data )
 {
     bool add = true;
 
-    std::list<Unit*>::iterator i,j;
     std::list<GameObject*>::iterator m,n;
 
     for(int k=0;k<3;k++)
     {
-        for ( i = m_targetUnits[k].begin(); i != m_targetUnits[k].end(); i++ )
+        for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[k].begin();iunit != m_targetUnitGUIDs[k].end();++iunit)
         {
-            for(j = UniqueTargets.begin(); j != UniqueTargets.end(); j++ )
+            for(std::list<Unit*>::iterator junit = UniqueTargets.begin(); junit != UniqueTargets.end(); junit++ )
             {
-                if((*j) == (*i))
+                if((*junit)->GetGUID() == (*iunit))
                 {
                     add = false;
                     break;
                 }
             }
-            if(*i && add)
-                UniqueTargets.push_back(*i);
+
+            Unit* unit =  ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+            if(unit && add)
+                UniqueTargets.push_back(unit);
             add = true;
         }
         for ( m = m_targetGOs[k].begin(); m != m_targetGOs[k].end(); m++ )
@@ -2407,9 +2420,12 @@ void Spell::DelayedChannel(int32 delaytime)
     for(int j = 0; j < 3; j++)
     {
         // partially interrupt auras with fixed targets
-        for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
-            if (*iunit)
-                (*iunit)->DelayAura(m_spellInfo->Id, j, appliedDelayTime);
+        for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
+        {
+            Unit* unit = ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+            if (unit)
+                unit->DelayAura(m_spellInfo->Id, j, appliedDelayTime);
+        }
 
         // partially interrupt persistent area auras
         DynamicObject* dynObj = m_caster->GetDynObject(m_spellInfo->Id, j);
