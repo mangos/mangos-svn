@@ -3086,6 +3086,10 @@ bool Unit::Attack(Unit *victim)
             return false;
         AttackStop();
     }
+
+    //Set our target
+    SetUInt32Value(UNIT_FIELD_TARGET, victim->GetGUIDLow());
+
     addUnitState(UNIT_STAT_ATTACKING);
     if(GetTypeId()==TYPEID_UNIT)
         SetInCombat();
@@ -3115,6 +3119,10 @@ bool Unit::AttackStop()
 
     m_attacking->_removeAttacker(this);
     m_attacking = NULL;
+
+    //Clear our target
+    SetUInt32Value(UNIT_FIELD_TARGET, NULL);
+
     clearUnitState(UNIT_STAT_ATTACKING);
     if(GetTypeId()!=TYPEID_PLAYER && m_attackers.empty())
         ClearInCombat();
