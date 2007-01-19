@@ -2335,6 +2335,9 @@ void Spell::EffectFeedPet(uint32 i)
 
     Player *_player = (Player*)m_caster;
 
+    if(!itemTarget)
+        return;
+
     Creature *pet = _player->GetPet();
     if(!pet)
         return;
@@ -2342,6 +2345,9 @@ void Spell::EffectFeedPet(uint32 i)
         return;
 
     pet->ModifyPower(POWER_HAPPINESS,damage);
+
+    uint32 count = 1;
+    _player->DestroyItemCount(itemTarget,count,true);
 
     SpellEntry const *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     Spell _spell(m_caster, spellinfo, true, 0);

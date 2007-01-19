@@ -462,3 +462,61 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             break;
     }
 }
+
+bool Pet::HaveInDiet(ItemPrototype const* item) const
+{
+    CreatureInfo const* cInfo = GetCreatureInfo();
+    if(!cInfo)
+        return false;
+
+    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->family);
+    if(!cFamily)
+        return false;
+
+    // all (?) pet food is in trade goods or consumable class
+    if( item->Class != ITEM_CLASS_TRADE_GOODS && item->Class != ITEM_CLASS_CONSUMABLE || 
+        item->Class == ITEM_CLASS_TRADE_GOODS && item->SubClass != ITEM_SUBCLASS_TRADE_GOODS ||
+        item->Class == ITEM_CLASS_CONSUMABLE  && item->SubClass != 0 && item->SubClass != ITEM_SUBCLASS_FOOD )
+        return false;
+
+    // FIXME: food type check not implemented
+    return true;
+    
+    /*
+    uint32 diet = cFamily->petFoodMask;
+
+    if(diet & PET_DIET_MEAT)
+    {
+    }
+
+    if(diet & PET_DIET_FISH)
+    {
+    }
+
+    if(diet & PET_DIET_CHEESE)
+    {
+    }
+
+    if(diet & PET_DIET_BREAD)
+    {
+    }
+
+    if(diet & PET_DIET_FUNGAS)
+    {
+    }
+
+    if(diet & PET_DIET_FRUIT)
+    {
+    }
+
+    if(diet & PET_DIET_RAW_MEAT)
+    {
+    }
+
+    if(diet & PET_DIET_RAW_FISH)
+    {
+    }
+
+    return false;
+    */
+}
