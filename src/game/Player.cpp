@@ -825,19 +825,13 @@ void Player::Update( uint32 p_time )
     {
         KillPlayer();
 
-        Item* soulstone = GetSoulStone();
-        if( GetSoulStoneSpell() && soulstone)
+        if( GetSoulStoneSpell() )
         {
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(GetSoulStoneSpell());
             if(spellInfo)
                 CastSpell(this,spellInfo,false,0);
 
-            SetSoulStone(NULL);
             SetSoulStoneSpell(0);
-
-            // destroy manually (charges counting apllied to soul adding to stone)
-            uint32 count = 1;
-            DestroyItemCount( soulstone, count, true );
         }
     }
 
@@ -912,6 +906,36 @@ void Player::Update( uint32 p_time )
             m_deathTimer -= p_time;
     }
     UpdateEnchantTime(p_time);
+}
+
+void Player::setDeathState(DeathState s)
+{
+    uint32 soulstoneSpellId = 0;
+
+    bool cur = isAlive();
+
+    if(s == JUST_DIED && cur)
+    {
+        _RemoveAllItemMods();
+        RemovePet(NULL,PET_SAVE_AS_CURRENT);
+
+        // save value before aura remove in Unit::setDeathState
+        soulstoneSpellId = GetSoulStoneSpell();
+    }
+    Unit::setDeathState(s);
+
+    // restore soulstone spell id for player after aura remove
+    if(s == JUST_DIED && cur)
+        SetSoulStoneSpell(soulstoneSpellId);
+
+    if(isAlive() && !cur)
+    {
+        _ApplyAllItemMods();
+
+        // restore default warrior stance
+        if(getClass()== CLASS_WARRIOR)
+            CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
+    }
 }
 
 void Player::BuildEnumData( WorldPacket * p_data )
