@@ -177,7 +177,8 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
     recv_data >> guid;
 
     std::string membername;
-    objmgr.GetPlayerNameByGUID(guid, membername);
+    if(!objmgr.GetPlayerNameByGUID(guid, membername))
+        return;                                             // not found
 
     HandleGroupUninvite(guid, membername);
 }
@@ -191,6 +192,10 @@ void WorldSession::HandleGroupUninviteNameOpcode(WorldPacket & recv_data)
     normalizePlayerName(membername);
 
     uint64 guid = objmgr.GetPlayerGUIDByName(membername.c_str());
+
+    // player not found
+    if(!guid)
+        return;
 
     HandleGroupUninvite(guid, membername);
 }
