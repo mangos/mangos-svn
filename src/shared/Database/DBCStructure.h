@@ -67,7 +67,8 @@ struct ChrRacesEntry
 struct CreatureFamilyEntry
 {
     uint32    ID;
-    uint32    petfood_id;
+    uint32    tamable;                                      //if this = 270 then "is tamable Creature" (or 0 is non-tamable)
+    uint32    petFoodMask;
     char*     Name;
 };
 

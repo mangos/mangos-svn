@@ -1753,7 +1753,8 @@ uint8 Spell::CanCast()
                     break;
                 }
                 CreatureInfo const *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
-                if(cinfo->type != CREATURE_TYPE_BEAST)
+                CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
+                if( cinfo->type != CREATURE_TYPE_BEAST || !cFamily || !cFamily->tamable )
                 {
                     castResult = CAST_FAIL_INVALID_TARGET;
                     break;
