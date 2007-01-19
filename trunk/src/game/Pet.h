@@ -55,6 +55,17 @@ enum PetSaveMode
     PET_SAVE_AS_DELETED
 };
 
+// Used for values in CreatureFamilyEntry.petDietMask
+enum PetDietMask
+{
+    PET_DIET_MEAT   = 0x01,
+    PET_DIET_FISH   = 0x02,
+    PET_DIET_CHEESE = 0x04,
+    PET_DIET_BREAD  = 0x08,
+    PET_DIET_FUNGAS = 0x10,
+    PET_DIET_FRUIT  = 0x20
+};
+
 #define OWNER_MAX_DISTANCE 100
 
 #define PET_FOLLOW_DIST  1
