@@ -506,24 +506,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetTotalPlayedTime() { return m_Played_time[0]; };
         uint32 GetLevelPlayedTime() { return m_Played_time[1]; };
 
-        void setDeathState(DeathState s)
-        {
-            bool cur = isAlive();
-            if(s == JUST_DIED && cur)
-            {
-                _RemoveAllItemMods();
-                RemovePet(NULL,PET_SAVE_AS_CURRENT);
-            }
-            Unit::setDeathState(s);
-            if(isAlive() && !cur)
-            {
-                _ApplyAllItemMods();
-
-                // restore default warrior stance
-                if(getClass()== CLASS_WARRIOR)
-                    CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
-            }
-        };
+        void setDeathState(DeathState s);                   // overwrite Unit::setDeathState
 
         void InnEnter (int time,float x,float y,float z)
         {
@@ -1078,9 +1061,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendNotifyLootMoneyRemoved();
         int32 FishingMinSkillForCurrentZone() const;
         void SetSoulStoneSpell(uint32 spellid) { m_soulStoneSpell = spellid; }
-        void SetSoulStone(Item *item) {  m_soulStoneGUIDLow = item ? item->GetGUIDLow() : 0;}
         uint32 GetSoulStoneSpell()const { return m_soulStoneSpell;}
-        Item *GetSoulStone() const { return m_soulStoneGUIDLow ? GetItemByPos( GetPosByGuid( MAKE_GUID(m_soulStoneGUIDLow,HIGHGUID_ITEM) ) ) : NULL; }
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

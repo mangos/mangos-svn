@@ -869,41 +869,32 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 m_procCharges = -1;
         }
     }
-    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 && caster
-        && caster->GetTypeId() == TYPEID_PLAYER && m_castItem)
+
+    // only at real add/remove
+    if( Real && GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 && 
+        caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
     {
-        if(m_target && m_target->GetTypeId() == TYPEID_PLAYER)
+        Player * player = (Player*)m_target;
+        if(apply)
         {
-            Player * player = (Player*)m_target;
             uint32 spellid = 0;
-            uint32 itemflag = m_castItem->GetUInt32Value(ITEM_FIELD_FLAGS);
-            if(apply)
+            switch(GetId())
             {
-                // 1<<20 just a temp value to detect if any one has be stored,
-                // we should find out a field to correctly mask the target.
-                if(itemflag & (1<<20))
-                    return;
-                switch(GetId())
-                {
-                    case 20707:spellid = 3026;break;
-                    case 20762:spellid = 20758;break;
-                    case 20763:spellid = 20759;break;
-                    case 20764:spellid = 20760;break;
-                    case 20765:spellid = 20761;break;
-                    default:break;
-                }
-                if(!spellid)
-                    return;
-                m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),true);
-                player->SetSoulStone(m_castItem);
-                player->SetSoulStoneSpell(spellid);
+                case 20707:spellid = 3026;break;
+                case 20762:spellid = 20758;break;
+                case 20763:spellid = 20759;break;
+                case 20764:spellid = 20760;break;
+                case 20765:spellid = 20761;break;
+                default:break;
             }
-            else
-            {
-                m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),false);
-            }
+            if(!spellid)
+                return;
+            player->SetSoulStoneSpell(spellid);
         }
+        else
+            player->SetSoulStoneSpell(0);
     }
+
     if(!apply)
     {
         // only at real remove
