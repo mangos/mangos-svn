@@ -148,7 +148,7 @@ Player::Player (WorldSession *session): Unit()
 
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;
-    m_soulStone = NULL;
+    m_soulStoneGUIDLow = 0;
     m_soulStoneSpell = 0;
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
@@ -824,20 +824,20 @@ void Player::Update( uint32 p_time )
     if (m_deathState == JUST_DIED)
     {
         KillPlayer();
-        if( GetSoulStoneSpell() && GetSoulStone())
+
+        Item* soulstone = GetSoulStone();
+        if( GetSoulStoneSpell() && soulstone)
         {
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(GetSoulStoneSpell());
             if(spellInfo)
-            {
-                Spell spell(this, spellInfo, true, NULL);
+                CastSpell(this,spellInfo,false,0);
 
-                SpellCastTargets targets;
-                targets.setUnitTarget( this );
-                spell.m_CastItem = GetSoulStone();
-                spell.prepare(&targets);
-            }
             SetSoulStone(NULL);
             SetSoulStoneSpell(0);
+
+            // destroy manually (charges counting apllied to soul adding to stone)
+            uint32 count = 1;
+            DestroyItemCount( soulstone, count, true );
         }
     }
 

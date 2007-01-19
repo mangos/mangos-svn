@@ -1078,9 +1078,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendNotifyLootMoneyRemoved();
         int32 FishingMinSkillForCurrentZone() const;
         void SetSoulStoneSpell(uint32 spellid) { m_soulStoneSpell = spellid; }
-        void SetSoulStone(Item *item) {  m_soulStone = item;}
+        void SetSoulStone(Item *item) {  m_soulStoneGUIDLow = item ? item->GetGUIDLow() : 0;}
         uint32 GetSoulStoneSpell()const { return m_soulStoneSpell;}
-        Item *GetSoulStone() const { return m_soulStone;}
+        Item *GetSoulStone() const { return m_soulStoneGUIDLow ? GetItemByPos( GetPosByGuid( MAKE_GUID(m_soulStoneGUIDLow,HIGHGUID_ITEM) ) ) : NULL; }
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -1298,7 +1298,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_BlockValue;
         uint32 m_soulStoneSpell;
-        Item *m_soulStone;
+        uint32 m_soulStoneGUIDLow;
         uint32 m_WeaponProficiency;
         uint32 m_ArmorProficiency;
         bool m_canParry;
