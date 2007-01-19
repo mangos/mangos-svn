@@ -285,7 +285,7 @@ namespace MaNGOS
             AnyUnfriendlyUnitInObjectRangeCheck(Object* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range), i_result(NULL) {}
             bool operator()(Unit* u)
             {
-                if(!i_funit->IsFriendlyTo(u) && i_obj->IsWithinDist(u, i_range))
+                if(u->isAlive() && !i_funit->IsFriendlyTo(u) && i_obj->IsWithinDist(u, i_range))
                 {
                     i_result = u;
                     return true;
