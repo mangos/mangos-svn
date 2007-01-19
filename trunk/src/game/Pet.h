@@ -58,12 +58,14 @@ enum PetSaveMode
 // Used for values in CreatureFamilyEntry.petDietMask
 enum PetDietMask
 {
-    PET_DIET_MEAT   = 0x01,
-    PET_DIET_FISH   = 0x02,
-    PET_DIET_CHEESE = 0x04,
-    PET_DIET_BREAD  = 0x08,
-    PET_DIET_FUNGAS = 0x10,
-    PET_DIET_FRUIT  = 0x20
+    PET_DIET_MEAT     = 0x01,
+    PET_DIET_FISH     = 0x02,
+    PET_DIET_CHEESE   = 0x04,
+    PET_DIET_BREAD    = 0x08,
+    PET_DIET_FUNGAS   = 0x10,
+    PET_DIET_FRUIT    = 0x20,
+    PET_DIET_RAW_MEAT = 0x40,
+    PET_DIET_RAW_FISH = 0x80
 };
 
 #define OWNER_MAX_DISTANCE 100
@@ -98,6 +100,7 @@ class Pet : public Creature
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
         void InitStatsForLevel(uint32 level);
+        bool HaveInDiet(ItemPrototype const* item) const;
     protected:
         uint32 m_actState;
         uint32 m_fealty;

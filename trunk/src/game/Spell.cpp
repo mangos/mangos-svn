@@ -264,8 +264,11 @@ void Spell::FillTargetMap()
                     if(m_targets.getUnitTarget())
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
-                case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_FEED_PET:
+                    if(m_targets.m_itemTarget)
+                        tmpItemMap.push_back(m_targets.m_itemTarget);
+                    break;
+                case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
                     tmpUnitMap.push_back(m_caster);
                     break;
@@ -1732,7 +1735,12 @@ uint8 Spell::CanCast()
         {
             case SPELL_EFFECT_DUMMY:
             {
-                if (!unitTarget) return CAST_FAIL_FAILED;
+                if (!unitTarget)
+                {
+                    castResult = CAST_FAIL_FAILED;
+                    break;
+                }
+
                 if(m_spellInfo->SpellIconID == 1648)
                 {
                     if(unitTarget->GetHealth() > unitTarget->GetMaxHealth()*0.2)
@@ -1745,8 +1753,12 @@ uint8 Spell::CanCast()
             }
             case SPELL_EFFECT_TAMECREATURE:
             {
-                if (!unitTarget) return CAST_FAIL_FAILED;
-                if (unitTarget->GetTypeId() == TYPEID_PLAYER) return CAST_FAIL_FAILED;
+                if (!unitTarget || unitTarget->GetTypeId() == TYPEID_PLAYER)
+                {
+                    castResult = CAST_FAIL_FAILED;
+                    break;
+                }
+
                 if (unitTarget->getLevel() > m_caster->getLevel())
                 {
                     castResult = CAST_FAIL_TARGET_IS_TOO_HIGH;
@@ -1773,10 +1785,20 @@ uint8 Spell::CanCast()
             }
             case SPELL_EFFECT_LEARN_PET_SPELL:
             {
-                if(!unitTarget) return CAST_FAIL_FAILED;
-                if(unitTarget->GetTypeId() == TYPEID_PLAYER) return CAST_FAIL_FAILED;
+                if(!unitTarget || unitTarget->GetTypeId() == TYPEID_PLAYER)
+                {
+                    castResult = CAST_FAIL_FAILED;
+                    break;
+                }
+
                 SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
-                if(!learn_spellproto) return CAST_FAIL_FAILED;
+
+                if(!learn_spellproto)
+                {
+                    castResult = CAST_FAIL_FAILED;
+                    break;
+                }
+
                 Creature* creatureTarget = (Creature*)unitTarget;
                 uint8 learn_msg = 1;
                 for(int8 x=0;x<4;x++)
@@ -1795,10 +1817,37 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_SPELL_NOT_LEARNED;
                 break;
             }
+            case SPELL_EFFECT_FEED_PET:
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || !itemTarget )
+                {
+                    castResult = CAST_FAIL_FAILED;
+                    break;
+                }
+
+                Pet* pet = m_caster->GetPet();
+
+                if(!pet)
+                {
+                    castResult = CAST_FAIL_YOU_DO_NOT_HAVE_PET;
+                    break;
+                }
+
+                if(!pet->HaveInDiet(itemTarget->GetProto()))
+                {
+                    castResult = CAST_FAIL_PET_DOESNT_LIKE_THAT_FOOD;
+                    break;
+                }
+
+                break;
+            }
             case SPELL_EFFECT_SKINNING:
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
-                    return CAST_FAIL_FAILED;
+                {
+                    castResult = CAST_FAIL_FAILED;
+                    break;
+                }
 
                 if( !(unitTarget->GetUInt32Value(UNIT_FIELD_FLAGS) & UNIT_FLAG_SKINNABLE) )
                 {
@@ -1836,9 +1885,16 @@ uint8 Spell::CanCast()
             {
                 Creature *pet = m_caster->GetPet();
                 if(!pet)
-                    return CAST_FAIL_FAILED;
+                {
+                    castResult = CAST_FAIL_YOU_DO_NOT_HAVE_PET;
+                    break;
+                }
+
                 if(pet->isAlive())
-                    return CAST_FAIL_FAILED;
+                {
+                    castResult = CAST_FAIL_FAILED;
+                    break;
+                }
                 break;
             }
             case SPELL_EFFECT_SUMMON:
