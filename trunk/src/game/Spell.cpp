@@ -521,8 +521,6 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_CHAIN:
         {
-            bool onlyParty = false;
-
             if(!m_targets.getUnitTarget())
                 break;
 
@@ -534,22 +532,11 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                     if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
                         continue;
 
-                    if(m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetGUID() == pGroup->GetMemberGUID(p))
-                    {
-                        onlyParty = true;
-                        break;
-                    }
-                }
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
-                {
-                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
-                        continue;
-
                     Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
 
                     if(!Target || Target->GetGUID() == m_caster->GetGUID())
                         continue;
-                    if(Target->getFaction() == m_caster->getFaction() && m_caster->IsWithinDist(Target, radius))
+                    if(m_caster->IsWithinDist(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
             }
