@@ -652,7 +652,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool GiveQuestSourceItem( uint32 quest_id );
         void TakeQuestSourceItem( uint32 quest_id );
         bool GetQuestRewardStatus( uint32 quest_id );
-        uint32 GetQuestStatus( uint32 quest_id );
+        QuestStatus GetQuestStatus( uint32 quest_id );
         void SetQuestStatus( uint32 quest_id, QuestStatus status );
         void AdjustQuestReqItemCount( uint32 questId );
         uint16 GetQuestSlot( uint32 quest_id );

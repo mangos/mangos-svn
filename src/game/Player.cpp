@@ -8064,7 +8064,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     for( std::list<uint32>::iterator i = pObject->mInvolvedQuests.begin( ); i != pObject->mInvolvedQuests.end( ); i++ )
     {
         uint32 quest_id = *i;
-        uint32 status = GetQuestStatus( quest_id );
+        QuestStatus status = GetQuestStatus( quest_id );
         if ( status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus( quest_id ) )
             qm->AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
         else if ( status == QUEST_STATUS_INCOMPLETE )
@@ -8078,7 +8078,7 @@ void Player::PrepareQuestMenu( uint64 guid )
         uint32 quest_id = *i;
         Quest* pQuest = objmgr.QuestTemplates[quest_id];
 
-        uint32 status = GetQuestStatus( quest_id );
+        QuestStatus status = GetQuestStatus( quest_id );
 
         if ((strlen(pQuest->GetObjectives()) == 0) && (CanTakeQuest(pQuest, false)))
         {
@@ -8872,7 +8872,7 @@ bool Player::GetQuestRewardStatus( uint32 quest_id )
     return false;
 }
 
-uint32 Player::GetQuestStatus( uint32 quest_id )
+QuestStatus Player::GetQuestStatus( uint32 quest_id )
 {
     if( quest_id )
     {

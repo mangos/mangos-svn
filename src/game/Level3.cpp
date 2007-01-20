@@ -1215,17 +1215,14 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
             QueryResult *result = sDatabase.PQuery("SELECT entry FROM item_template WHERE name = '%s'", itemName.c_str());
             if (!result)
             {
-                PSendSysMessage("Could not find '%s'", citemName);
+                PSendSysMessage("Could not find '%s'", citemName+1);
                 return true;
             }
             itemId = result->Fetch()->GetUInt16();
             delete result;
         }
         else
-        {
-            PSendSysMessage("Could not find: '%s'", citemName);
-            return true;
-        }
+            return false;
     }
     else if(args[0]=='|')                                   // [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
     {
@@ -1458,12 +1455,97 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
         return false;
 
     std::string namepart = args;
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
+    // Search in SkillLine.dbc
+    for (uint32 id = 0; id < sSkillLineStore.GetNumRows(); id++)
+    {
+        SkillLineEntry const *skillInfo = sSkillLineStore.LookupEntry(id);
+        if(skillInfo)
+        {
+            // name - is first name field from dbc (English localized)
+            std::string name = skillInfo->name[0];
+
+            // converting SkillName to lower case
+            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+            // converting string that we try to find to lower case
+            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+
+            if (name.find(namepart) != std::string::npos)
+            {
+                uint16 skill = m_session->GetPlayer()->GetPureSkillValue(id);
+                // send skill in "id - name" format
+                PSendSysMessage("%d - %s%s",id,skillInfo->name[0],(skill == 0 ? "" : " [known]"));
+
+                counter++;
+            }
+        }
+    }
+    if (counter == 0)                                       // if counter == 0 then we found nth
+        SendSysMessage("No skills found!");
+    return true;
+}
+
+bool ChatHandler::HandleLookupSpellCommand(const char* args)
+{
+    if(!*args)
+        return false;
+    std::string namepart = args;
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
+    // Search in Spell.dbc
+    for (uint32 id = 0; id < sSpellStore.GetNumRows(); id++)
+    {
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(id);
+        if(spellInfo)
+        {
+            // name - is first name field from dbc (English localized)
+            std::string name = spellInfo->SpellName[0];
+
+            // converting SpellName to lower case
+            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+
+            // converting string that we try to find to lower case
+            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+
+            if (name.find(namepart) != std::string::npos)
+            {
+                std::string rank = spellInfo->Rank[0];
+
+                bool known = m_session->GetPlayer()->HasSpell(id);
+
+                // if spell has rank then send it to client
+                if (!rank.empty())
+                {
+                    // send spell in "id - name - rank" format
+                    PSendSysMessage("%d - %s - %s%s",id,spellInfo->SpellName[0],rank.c_str(),(known ? " [known]" : ""));
+                    counter++;
+                }
+                else
+                {
+                    // send spell in "id - name" format
+                    PSendSysMessage("%d - %s%s",id,spellInfo->SpellName[0],(known ? " [known]" : ""));
+                    counter++;
+                }
+            }
+        }
+    }
+    if (counter == 0)                                       // if counter == 0 then we found nth
+        SendSysMessage("No spells found!");
+    return true;
+}
+
+bool ChatHandler::HandleLookupQuestCommand(const char* args)
+{
+    if(!*args)
+        return false;
+    std::string namepart = args;
     sDatabase.escape_string(namepart);
 
-    QueryResult *result=sDatabase.PQuery("SELECT DISTINCT `skill`,`note` FROM `playercreateinfo_skill` WHERE `note` LIKE \"%%%s%%\" ORDER BY `skill`",namepart.c_str());
+    QueryResult *result=sDatabase.PQuery("SELECT `entry`,`Title` FROM `quest_template` WHERE `Title` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
     if(!result)
     {
-        SendSysMessage("No skills found!");
+        SendSysMessage("No quests found!");
         return true;
     }
 
@@ -1472,7 +1554,21 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
         Field *fields = result->Fetch();
         uint16 id = fields[0].GetUInt16();
         std::string name = fields[1].GetCppString();
-        PSendSysMessage("%d - %s",id,name.c_str());
+
+        QuestStatus status = m_session->GetPlayer()->GetQuestStatus(id);
+        
+        char const* statusStr = "";
+        if(status == QUEST_STATUS_COMPLETE)
+        {
+            if(m_session->GetPlayer()->GetQuestRewardStatus(id))
+                statusStr = " [rewarded]";
+            else
+                statusStr = " [complete]";
+        }
+        else if(status == QUEST_STATUS_INCOMPLETE)
+            statusStr = " [active]";
+
+        PSendSysMessage("%d - %s%s",id,name.c_str(),(status == QUEST_STATUS_COMPLETE ? " [complete]" : (status == QUEST_STATUS_INCOMPLETE ? " [active]" : "") ));
     } while (result->NextRow());
 
     delete result;
