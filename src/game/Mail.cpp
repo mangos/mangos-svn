@@ -120,6 +120,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     {
         itemPageId = objmgr.CreateItemPage( body );
     }
+
+    pl->ModifyMoney( -30 - money );
+
     if (pItem)
     {
         //item reminds in item_instance table already, used it in mail now
@@ -132,7 +135,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         sDatabase.CommitTransaction();
     }
     uint32 messagetype = 0;
-    pl->ModifyMoney( -30 - money );
     uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
     mailId = objmgr.GenerateMailID();
     time_t etime = time(NULL) + DAY * ((COD > 0)? 3 : 30);  //time if COD 3 days, if no COD 30 days
@@ -151,9 +153,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     //there is small problem:
     //one player sends big sum of money to another player, then server crashes, but mail with money is
     //is DB .. so receiver will receive money, BUT sender has also that money..., we will have to save also players money...
-
-    // save to db
-    pl->SaveToDB();
+    sDatabase.BeginTransaction();
+    pl->SaveInventoryAndGoldToDB();
+    sDatabase.CommitTransaction();
 }
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
@@ -290,10 +292,16 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             it->SetState(ITEM_NEW, pl);
         pl->ItemAddedQuestCheck(it2->GetEntry(),it2->GetCount());
 
+        sDatabase.BeginTransaction();
+        pl->SaveInventoryAndGoldToDB();
+        pl->_SaveMail();
+        sDatabase.CommitTransaction();
+
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, 0);
-    } else
-                                                            //works great
-    pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_BAG_FULL, msg);
+    }
+    else                                                    //works great
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_BAG_FULL, msg);
+
 }
 
 void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
@@ -314,6 +322,12 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     m->money = 0;
     m->state = CHANGED;
     pl->m_mailsUpdated = true;
+
+    // save money and mail to prevent cheating
+    sDatabase.BeginTransaction();
+    pl->SetUInt32ValueInDB(PLAYER_FIELD_COINAGE,pl->GetMoney(),pl->GetGUID());
+    pl->_SaveMail();
+    sDatabase.CommitTransaction();
 }
 
 void WorldSession::HandleGetMail(WorldPacket & recv_data )

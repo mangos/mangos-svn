@@ -701,6 +701,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         void SaveToDB();
+        void SaveInventoryAndGoldToDB();                    // fast save function for item/money cheating preventing
         static bool SaveValuesArrayInDB(vector<string> const& data,uint64 guid);
         static void SetUInt32ValueInArray(vector<string>& data,uint16 index, uint32 value);
         static void SetFloatValueInArray(vector<string>& data,uint16 index, float value);
