@@ -431,17 +431,16 @@ void Pet::InitStatsForLevel(uint32 petlevel)
 
     SetLevel( petlevel);
 
-    // remove elite bonuses included in DB values
-    SetMaxHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
-    SetHealth(GetMaxHealth());
-    SetMaxPower(POWER_MANA, ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
-    SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
 
     SetArmor(petlevel*50);
 
     switch(getPetType())
     {
         case HUNTER_PET:
+            // remove elite bonuses included in DB values
+            SetMaxHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+            SetMaxPower(POWER_MANA, ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+
             // remove elite bonuses included in DB values
             SetFloatValue(UNIT_FIELD_MINDAMAGE, (cinfo->mindmg / (1 + 2 * cinfo->rank)) + float(petlevel-cinfo->minlevel)*1.5f);
             SetFloatValue(UNIT_FIELD_MAXDAMAGE, (cinfo->maxdmg / (1 + 2 * cinfo->rank)) + float(petlevel-cinfo->minlevel)*1.5f);
@@ -453,16 +452,38 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
             break;
         case SUMMON_PET:
-            SetStat(STAT_STRENGTH,22);
-            SetStat(STAT_AGILITY,22);
-            SetStat(STAT_STAMINA,25);
-            SetStat(STAT_INTELLECT,28);
-            SetStat(STAT_SPIRIT,27);
-            break;
+        {
+            PetLevelInfo const* pInfo = objmgr.GetPetLevelInfo(cinfo->Entry,petlevel);
+            if(pInfo)                                       // exist in DB
+            {
+                SetMaxHealth(pInfo->health);
+                SetMaxPower(POWER_MANA, pInfo->mana);
+
+                for(int stat = 0; stat < MAX_STATS; ++stat)
+                    SetStat(Stats(stat),pInfo->stats[stat]);
+            }
+            else                                            // not exist in DB, use some default fake data
+            {
+                sLog.outErrorDb("Summoned pet (Entry: %u) not have pet stats data in DB",cinfo->Entry);
+
+                // remove elite bonuses included in DB values
+                SetMaxHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+                SetMaxPower(POWER_MANA, ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+
+                SetStat(STAT_STRENGTH,22);
+                SetStat(STAT_AGILITY,22);
+                SetStat(STAT_STAMINA,25);
+                SetStat(STAT_INTELLECT,28);
+                SetStat(STAT_SPIRIT,27);
+            }
+        };  break;
         default:
             sLog.outError("Pet have incorrect type (%u) for levelup.",getPetType());
             break;
     }
+
+    SetHealth(GetMaxHealth());
+    SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
 }
 
 bool Pet::HaveInDiet(ItemPrototype const* item) const

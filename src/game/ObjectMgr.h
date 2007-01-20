@@ -79,6 +79,15 @@ struct ScriptInfo
 #define SCRIPT_COMMAND_FLAG_REMOVE  5
 #define SCRIPT_COMMAND_TEMP_SUMMON 10
 
+struct PetLevelInfo
+{
+    PetLevelInfo() : health(0), mana(0) { for(int i=0; i < MAX_STATS; ++i ) stats[i] = 0; }
+
+    uint16 stats[MAX_STATS];
+    uint16 health;
+    uint16 mana;
+};
+
 class ObjectMgr
 {
     public:
@@ -185,6 +194,8 @@ class ObjectMgr
         uint32 GetAuctionCut( uint32 location, uint32 highBid );
         uint32 GetAuctionDeposit(uint32 location, uint32 time, Item *pItem);
 
+        PetLevelInfo const* GetPetLevelInfo(uint32 creature_id, uint32 level) const;
+
         PlayerInfo const* GetPlayerInfo(uint32 race, uint32 class_) const
         {
             if(race   >= MAX_RACES)   return NULL;
@@ -248,6 +259,7 @@ class ObjectMgr
         void LoadAuctionItems();
         void LoadAuctions();
         void LoadPlayerInfo();
+        void LoadPetLevelInfo();
         void LoadPetNames();
 
         std::string GeneratePetName(uint32 entry);
@@ -347,6 +359,10 @@ class ObjectMgr
         TeleportMap         mTeleports;
 
     private:
+        typedef std::map<uint32,PetLevelInfo*> PetLevelIfoMap; 
+                // PetLevelInfoMap[creature_id][level]
+        PetLevelIfoMap petInfo;                             // [creature_id][level]
+
         void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
         PlayerInfo **playerInfo;                            // [race][class]
 

@@ -2287,6 +2287,12 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
             FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_DOWN,newlevel-oldlevel));
 
         chr->GetSession()->SendPacket( &data );
+
+        // give level to summoned pet
+        Pet* pet = chr->GetPet();
+        if(pet && pet->getPetType()==SUMMON_PET)
+            pet->GivePetLevel(newlevel);
+
     }
     else
     {
@@ -2769,6 +2775,11 @@ bool ChatHandler::HandleResetCommand (const char * args)
         {
             player->InitStatsForLevel(1,false);
             player->SetUInt32Value(PLAYER_XP,0);
+
+            // reset level to summoned pet
+            Pet* pet = player->GetPet();
+            if(pet && pet->getPetType()==SUMMON_PET)
+                pet->InitStatsForLevel(1);
         }
         else
             player->InitStatsForLevel(player->getLevel(),false);

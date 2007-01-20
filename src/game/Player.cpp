@@ -1632,6 +1632,11 @@ void Player::GiveLevel()
     level += 1;
 
     InitStatsForLevel(level);
+
+    // give level to summoned pet
+    Pet* pet = GetPet();
+    if(pet && pet->getPetType()==SUMMON_PET)
+        pet->GivePetLevel(level);
 }
 
 void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)

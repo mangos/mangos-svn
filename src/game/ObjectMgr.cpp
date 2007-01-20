@@ -76,6 +76,23 @@ ObjectMgr::~ObjectMgr()
         delete i->second;
     }
     mTeleports.clear();
+
+    for(PetLevelIfoMap::iterator i = petInfo.begin( ); i != petInfo.end( ); ++ i )
+    {
+        delete[] i->second;
+    }
+    petInfo.clear();
+
+    for (int race = 0; race < MAX_RACES; ++race)
+    {
+        for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
+        {
+            delete[] playerInfo[race][class_].levelInfo;
+        }
+        delete[] playerInfo[race];
+    }
+    delete[] playerInfo;
+
 }
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
@@ -450,6 +467,110 @@ void ObjectMgr::LoadAuctionItems()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u auction items", count );
+}
+
+void ObjectMgr::LoadPetLevelInfo()
+{
+    // Loading levels data
+    {
+        //                                              0               1       2    3      4     5     6     7     8
+        QueryResult *result  = sDatabase.Query("SELECT `creature_entry`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi` FROM `pet_levelstats`");
+
+        uint32 count = 0;
+
+        if (!result)
+        {
+            barGoLink bar( 1 );
+
+            sLog.outString( "" );
+            sLog.outString( ">> Loaded %u level pet stats definitions", count );
+            sLog.outErrorDb( "Error loading pet_levelstats table or table empty.");
+            return;
+        }
+
+        barGoLink bar( result->GetRowCount() );
+
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 creature_id = fields[0].GetUInt32();
+            if(!sCreatureStorage.LookupEntry<CreatureInfo>(creature_id))
+            {
+                sLog.outErrorDb("Wrong creature id %u in `pet_levelstats` table, ignoring.",creature_id);
+                continue;
+            }
+
+            uint32 current_level = fields[1].GetUInt32();
+            if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+            {
+                if(current_level > 255)                     // harcoded level maximum
+                    sLog.outErrorDb("Wrong (> 255) level %u in `pet_levelstats` table, ignoring.",current_level);
+                else
+                    sLog.outDetail("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `pet_levelstats` table, ignoring.",current_level);
+                continue;
+            }
+
+            PetLevelInfo*& pInfoMapEntry = petInfo[creature_id];
+
+            if(pInfoMapEntry==NULL)
+                pInfoMapEntry =  new PetLevelInfo[sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)];
+
+            PetLevelInfo* pLevelInfo = &pInfoMapEntry[current_level-1];
+
+            pLevelInfo->health = fields[2].GetUInt16();
+            pLevelInfo->mana   = fields[3].GetUInt16();
+
+            for (int i = 0; i < MAX_STATS; i++)
+            {
+                pLevelInfo->stats[i] = fields[i+4].GetUInt16();
+            }
+
+            bar.step();
+            count++;
+        }
+        while (result->NextRow());
+
+        delete result;
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u level pet stats definitions", count );
+    }
+
+    // Fill gaps and check integrity
+    for (PetLevelIfoMap::iterator itr = petInfo.begin(); itr != petInfo.end(); ++itr)
+    {
+        PetLevelInfo* pInfo = itr->second;
+
+        // fatal error if no level 1 data
+        if(!pInfo || pInfo[0].health == 0 )
+        {
+            sLog.outErrorDb("Creature %u Level 1 not have pet stats data!",itr->first);
+            exit(1);
+        }
+
+        // fill level gaps
+        for (uint32 level = 1; level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+        {
+            if(pInfo[level].health == 0)
+            {
+                sLog.outErrorDb("Creature %u Level %i not have pet stats data, using data for %i.",itr->first,level+1, level);
+                pInfo[level] = pInfo[level-1];
+            }
+        }
+    }
+}
+
+PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint32 level) const
+{
+    if(level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        level = sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL);
+
+    PetLevelIfoMap::const_iterator itr = petInfo.find(creature_id);
+    if(itr == petInfo.end())
+        return NULL;
+
+    return &itr->second[level];
 }
 
 void ObjectMgr::LoadPlayerInfo()
