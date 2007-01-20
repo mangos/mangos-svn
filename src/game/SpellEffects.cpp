@@ -951,13 +951,8 @@ void Spell::EffectSummon(uint32 i)
     }
 
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-    spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
-    spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
     spawnCreature->setPowerType(POWER_MANA);
-    spawnCreature->SetHealth( 28 + 30*level);
-    spawnCreature->SetMaxHealth( 28 + 30*level);
-    spawnCreature->SetLevel( level);
     spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
@@ -965,14 +960,9 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
     spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
-    /*
-    spawnCreature->SetStat(STAT_STRENGTH,int(20+level*1.55));
-    spawnCreature->SetStat(STAT_AGILITY,int(20+level*0.64));
-    spawnCreature->SetStat(STAT_STAMINA,int(20+level*1.27));
-    spawnCreature->SetStat(STAT_INTELLECT,int(20+level*0.18));
-    spawnCreature->SetStat(STAT_SPIRIT,int(20+level*0.36));
-    */
-    spawnCreature->SetArmor(level*50);
+
+    spawnCreature->InitStatsForLevel(level);
+
     spawnCreature->AIM_Initialize();
 
     std::string name;
@@ -1547,30 +1537,24 @@ void Spell::EffectSummonPet(uint32 i)
 
     if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
     {
-        uint32 petlevel=m_caster->getLevel();
-        NewSummon->SetLevel(petlevel);
+        uint32 petlevel = m_caster->getLevel();
+
         NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         NewSummon->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-        NewSummon->SetHealth(    28 + 10 * petlevel);
-        NewSummon->SetMaxHealth( 28 + 10 * petlevel);
-        NewSummon->SetPower(   POWER_MANA , 28 + 10 * petlevel);
-        NewSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
-                                                            // this enables popup window (pet detals, abandon)
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER,1);  // this enables pet detals window (Shift+P)
-        NewSummon->SetStat(STAT_STRENGTH,22);
-        NewSummon->SetStat(STAT_AGILITY,22);
-        NewSummon->SetStat(STAT_STAMINA,25);
-        NewSummon->SetStat(STAT_INTELLECT,28);
-        NewSummon->SetStat(STAT_SPIRIT,27);
+
+        // this enables popup window (pet dismiss, cancel), hunter pet additinal flags set later
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1);
+                                                            
+        NewSummon->InitStatsForLevel( petlevel);
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
             NewSummon->m_spells[i] = 0;
@@ -1581,17 +1565,17 @@ void Spell::EffectSummonPet(uint32 i)
             NewSummon->AddActState(STATE_RA_SPELL1);
         }
 
-        // generate new name for warlock pet
-        if(m_caster->getClass() == CLASS_WARLOCK)
+        // generate new name for summon pet
+        if(NewSummon->getPetType()==SUMMON_PET)
         {
             std::string new_name=objmgr.GeneratePetName(petentry);
             if(new_name!="")
                 NewSummon->SetName(new_name);
         }
-        else if(m_caster->getClass() == CLASS_HUNTER && cInfo->type == CREATURE_TYPE_BEAST)
+        else if(NewSummon->getPetType()==HUNTER_PET)
         {
             // this enables popup window (pet detals, abandon, rename)
-            NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);
+            NewSummon->SetFlag(UNIT_FIELD_FLAGS,(UNIT_FLAG_RESTING | UNIT_FLAG_RENAME));
         }
 
         NewSummon->AIM_Initialize();

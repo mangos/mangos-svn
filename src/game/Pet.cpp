@@ -100,12 +100,14 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
             petlevel=owner->getLevel();
 
             SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
+                                                            // this enables popup window (pet dismiss, cancel)
             SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
             break;
         case HUNTER_PET:
             SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[13].GetUInt32()<<8));
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
+                                                            // this enables popup window (pet abandon, cancel)
 
             // pet not renamed yet, let rename if wont
             if(!fields[17].GetBool())
@@ -430,10 +432,10 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     SetLevel( petlevel);
 
     // remove elite bonuses included in DB values
-    SetHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
     SetMaxHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+    SetHealth(GetMaxHealth());
     SetMaxPower(POWER_MANA, ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
-    SetPower(   POWER_MANA, ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank))* petlevel);
+    SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
 
     SetArmor(petlevel*50);
 

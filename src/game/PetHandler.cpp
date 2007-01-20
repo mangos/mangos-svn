@@ -114,9 +114,9 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     SendPacket(&data);
                     break;
                 }
-                case 3:
+                case 3:                                     // abandon (hunter pet) or dismiss (summoned pet)
                     if(pet->isPet())
-                        _player->RemovePet((Pet*)pet,PET_SAVE_AS_DELETED);
+                        _player->RemovePet((Pet*)pet,((Pet*)pet)->getPetType()==HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_AS_STORED);
                     else                                    // charmed
                         _player->Uncharm();
                     break;
