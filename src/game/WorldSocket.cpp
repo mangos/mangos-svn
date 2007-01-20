@@ -264,7 +264,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     v = g.ModExp(x, N);
 
     sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), (*result)[6].GetString(), v.AsHexStr() );
-    loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", account.c_str());
+    loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", safe_account.c_str());
     if ( strcmp(v.AsHexStr(),(*result)[6].GetString() ) )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
