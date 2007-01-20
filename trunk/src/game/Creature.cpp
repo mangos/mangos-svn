@@ -302,7 +302,7 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
 uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 {
     uint32 result = DIALOG_STATUS_NONE;
-    uint32 status;
+    QuestStatus status;
     uint32 quest_id;
     Quest *pQuest;
 

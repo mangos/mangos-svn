@@ -239,7 +239,7 @@ class ChatHandler
         bool HandleAddTeleCommand(const char * args);
         bool HandleDelTeleCommand(const char * args);
         bool HandleListAurasCommand (const char * args);
-        bool HandleSearchTeleCommand(const char * args);
+        bool HandleLookupTeleCommand(const char * args);
         bool HandleResetCommand (const char * args);
         bool HandleFixUnlearnCommand (const char * args);
         bool HandleTicketCommand(const char* args);
@@ -247,6 +247,8 @@ class ChatHandler
         bool HandleMaxSkillCommand(const char* args);
         bool HandleSetSkillCommand(const char* args);
         bool HandleLookupSkillCommand(const char* args);
+        bool HandleLookupSpellCommand(const char* args);
+        bool HandleLookupQuestCommand(const char* args);
         bool HandleLookupCreatureCommand(const char* args);
         bool HandlePasswordCommand(const char* args);
         bool HandleLockAccountCommand(const char* args);

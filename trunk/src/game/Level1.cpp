@@ -1244,7 +1244,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     return true;
 }
 
-bool ChatHandler::HandleSearchTeleCommand(const char * args)
+bool ChatHandler::HandleLookupTeleCommand(const char * args)
 {
     QueryResult *result;
     if(!*args)
