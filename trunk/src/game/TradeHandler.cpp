@@ -255,11 +255,6 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     }
                 }
             }
-            // desynced with the other saves here (_SaveInventory not have own transaction guards)
-            sDatabase.BeginTransaction();
-            _player->_SaveInventory();
-            _player->pTrader->_SaveInventory();
-            sDatabase.CommitTransaction();
 
             _player->ModifyMoney( -((int32)_player->tradeGold) );
             _player->ModifyMoney(_player->pTrader->tradeGold );
@@ -267,6 +262,13 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             _player->pTrader->ModifyMoney(_player->tradeGold );
             _player->ClearTrade();
             _player->pTrader->ClearTrade();
+
+
+            // desynced with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
+            sDatabase.BeginTransaction();
+            _player->SaveInventoryAndGoldToDB();
+            _player->pTrader->SaveInventoryAndGoldToDB();
+            sDatabase.CommitTransaction();
 
             _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_COMPLETE);
             SendTradeStatus(TRADE_STATUS_TRADE_COMPLETE);

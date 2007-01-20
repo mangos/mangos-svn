@@ -10233,6 +10233,14 @@ void Player::SaveToDB()
         AddToWorld();
 }
 
+// fast save function for item/money cheating preventing - save only inventory and money state
+void Player::SaveInventoryAndGoldToDB()
+{
+    _SaveInventory();
+    SetUInt32ValueInDB(PLAYER_FIELD_COINAGE,GetMoney(),GetGUID());
+}
+
+
 void Player::_SaveActions()
 {
     for(ActionButtonList::iterator itr = m_actionButtons.begin(); itr != m_actionButtons.end(); )

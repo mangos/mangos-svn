@@ -266,10 +266,10 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location`) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u')",
         AH->Id, AH->auctioneer, AH->item_guid, AH->item_template, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);
+    pl->SaveInventoryAndGoldToDB();
     sDatabase.CommitTransaction();
 
     SendAuctionCommandResult(AH->Id, AUCTION_SELL_ITEM, AUCTION_OK);
-    //pl->SaveToDB() - isn't needed, because item will be removed from inventory now, only money are problem
 }
 
 void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
@@ -367,6 +367,9 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
             delete auction;
         }
+        sDatabase.BeginTransaction();
+        pl->SaveInventoryAndGoldToDB();
+        sDatabase.CommitTransaction();
     }
     else
     {
@@ -420,6 +423,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
                 "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "', '0', '0', '0')",
                 messageID, AUCTIONHOUSE_MAIL, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime);
+
         }
         else
         {
@@ -439,7 +443,10 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     //inform player, that auction is removed
     SendAuctionCommandResult( auction->Id, AUCTION_CANCEL, AUCTION_OK );
     // Now remove the auction
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+    pl->SaveInventoryAndGoldToDB();
+    sDatabase.CommitTransaction();
     objmgr.RemoveAItem( auction->item_guid );
     mAuctions->RemoveAuction( auction->Id );
     delete auction;
