@@ -79,12 +79,12 @@ struct MANGOS_DLL_DECL FactionTemplateResolver
 
     bool IsHostileTo(const FactionTemplateResolver &holder) const
     {
-        return( IsHostileToAll() || (data.Faction.hostile_mask.ALL & holder.data.Faction.friendly_mask.ALL) );
+        return( !(IsHostileToAll() && holder.IsHostileToAll()) && ( IsHostileToAll() || (data.Faction.hostile_mask.ALL & holder.data.Faction.friendly_mask.ALL) ) );
     }
 
     bool IsFriendlyTo(const FactionTemplateResolver &holder) const
     {
-        return( !IsHostileToAll() && (data.Faction.friendly_mask.ALL & holder.data.Faction.friendly_mask.ALL) );
+        return( IsHostileToAll() && holder.IsHostileToAll() || !IsHostileToAll() && (data.Faction.friendly_mask.ALL & holder.data.Faction.friendly_mask.ALL) );
     }
 };
 #endif
