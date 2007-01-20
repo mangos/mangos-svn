@@ -3002,6 +3002,9 @@ bool Unit::IsHostileToAll() const
 
 bool Unit::IsHostileTo(Unit const* unit) const
 {
+    if(unit==this)
+        return false;
+
     // test pet/charm masters instead pers/charmeds
     Unit const* testerOwner = GetOwner();
     Unit const* targetOwner = unit->GetOwner();
@@ -3034,6 +3037,9 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
 {
+    if(unit==this)
+        return true;
+
     // test pet/charm masters instead pers/charmeds
     Unit const* testerOwner = GetOwner();
     Unit const* targetOwner = unit->GetOwner();
