@@ -331,7 +331,7 @@ Map::Add(T *obj)
     DEBUG_LOG("Object %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
     cell.data.Part.reserved = ALL_DISTRICT;
 
-    MaNGOS::ObjectVisibleNotifier notifier(*static_cast<Object *>(obj));
+    MaNGOS::ObjectVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
     TypeContainerVisitor<MaNGOS::ObjectVisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
 
     CellLock<ReadGuard> cell_lock(cell, p);
@@ -359,7 +359,7 @@ Map::Find(T *obj) const
 }
 
 template <class T>
-T* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl)
+T* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl)
 {
     return GetObjectNear<T>(obj.GetPositionX(), obj.GetPositionY(), hdl);
 }
@@ -419,7 +419,7 @@ void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool 
     cell_lock->Visit(cell_lock, message, *this);
 }
 
-void Map::MessageBoardcast(Object *obj, WorldPacket *msg)
+void Map::MessageBoardcast(WorldObject *obj, WorldPacket *msg)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
 
@@ -534,7 +534,7 @@ Map::Remove(T *obj, bool remove)
     {
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;
-        MaNGOS::ObjectNotVisibleNotifier notifier(*static_cast<Object *>(obj));
+        MaNGOS::ObjectNotVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
         TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
         CellLock<ReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, player_notifier, *this);
@@ -1080,11 +1080,11 @@ template bool Map::Find(GameObject *) const;
 template bool Map::Find(DynamicObject *) const;
 template bool Map::Find(Corpse *) const;
 
-template Creature* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+template Creature* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
 template Creature* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
-template GameObject* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+template GameObject* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
 template GameObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
-template DynamicObject* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+template DynamicObject* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
 template DynamicObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
-template Corpse* Map::GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+template Corpse* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
 template Corpse* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);

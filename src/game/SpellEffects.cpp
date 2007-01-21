@@ -1783,7 +1783,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
 
-    Object* target = focusObject;
+    WorldObject* target = focusObject;
     if( !target )
         target = m_caster;
 

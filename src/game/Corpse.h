@@ -32,7 +32,7 @@ enum CorpseType
 #define CORPSE_RECLAIM_RADIUS 39
 #define CORPSE_RECLAIM_DELAY  30
 
-class Corpse : public Object
+class Corpse : public WorldObject
 {
     public:
         explicit Corpse( CorpseType type = CORPSE_BONES );

@@ -33,7 +33,7 @@
 #include "CellImpl.h"
 #include "Transports.h"
 
-GameObject::GameObject() : Object()
+GameObject::GameObject() : WorldObject()
 {
     m_objectType |= TYPE_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -66,12 +66,8 @@ GameObject::~GameObject()
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 dynflags)
 {
-    m_positionX = x;
-    m_positionY = y;
-    m_positionZ = z;
-    m_orientation = ang;
-
-    m_mapId = mapid;
+    Relocate(x,y,z,ang);
+    SetMapId(mapid);
 
     if(!IsPositionValid())
     {

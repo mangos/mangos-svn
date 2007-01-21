@@ -379,7 +379,7 @@ enum MeleeHitOutcome
 // delay time next attack to privent client attack animanation problems
 #define ATTACK_DISPLAY_DELAY 200
 
-class MANGOS_DLL_SPEC Unit : public Object
+class MANGOS_DLL_SPEC Unit : public WorldObject
 {
     public:
         typedef std::set<Unit*> AttackerSet;

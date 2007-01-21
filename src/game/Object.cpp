@@ -39,22 +39,9 @@ Object::Object( )
     m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPE_OBJECT;
 
-    m_positionX         = 0.0f;
-    m_positionY         = 0.0f;
-    m_positionZ         = 0.0f;
-    m_orientation       = 0.0f;
-
-    m_mapId             = 0;
-
     m_uint32Values      = 0;
-
-    m_inWorld           = false;
-
-    m_minZ              = -500;
-
     m_valuesCount       = 0;
 
-    mSemaphoreTeleport  = false;
     m_inWorld           = false;
     m_objectUpdated     = false;
 }
@@ -82,19 +69,6 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh )
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
     m_PackGUID.clear();
     _SetPackGUID(&m_PackGUID,GetGUID());
-}
-
-void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId )
-{
-    _Create(guidlow, guidhigh);
-
-    SetUInt32Value( OBJECT_FIELD_ENTRY,nameId);
-
-    m_mapId = mapid;
-    m_positionX = x;
-    m_positionY = y;
-    m_positionZ = z;
-    m_orientation = ang;
 }
 
 void Object::BuildMovementUpdateBlock(UpdateData * data, uint32 flags ) const
@@ -231,10 +205,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
         if (!((Player *)this)->GetTransport())
         {
-            *data << (float)m_positionX;
-            *data << (float)m_positionY;
-            *data << (float)m_positionZ;
-            *data << (float)m_orientation;
+            *data << ((Player *)this)->GetPositionX();
+            *data << ((Player *)this)->GetPositionY();
+            *data << ((Player *)this)->GetPositionZ();
+            *data << ((Player *)this)->GetOrientation();
         }
         else
         {
@@ -274,10 +248,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     {
         *data << (uint32)flags2;
         *data << (uint32)0xB5771D7F;
-        *data << (float)m_positionX;
-        *data << (float)m_positionY;
-        *data << (float)m_positionZ;
-        *data << (float)m_orientation;
+        *data << ((Unit *)this)->GetPositionX();
+        *data << ((Unit *)this)->GetPositionY();
+        *data << ((Unit *)this)->GetPositionZ();
+        *data << ((Unit *)this)->GetOrientation();
         *data << (float)0;
         *data << ((Creature*)this)->GetSpeed( MOVE_WALK );
         *data << ((Creature*)this)->GetSpeed( MOVE_RUN );
@@ -305,9 +279,9 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     {
         if(GUID_HIPART(GetGUID()) != HIGHGUID_TRANSPORT)
         {
-            *data << (float)m_positionX;
-            *data << (float)m_positionY;
-            *data << (float)m_positionZ;
+            *data << ((WorldObject *)this)->GetPositionX();
+            *data << ((WorldObject *)this)->GetPositionY();
+            *data << ((WorldObject *)this)->GetPositionZ();
         }
         else
         {
@@ -315,7 +289,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << (uint32)0;
             *data << (uint32)0;
         }
-        *data << (float)m_orientation;
+        *data << ((WorldObject *)this)->GetOrientation();
     }
 
     *data << (uint32)0x1;
@@ -359,42 +333,6 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
             }
         }
     }
-}
-
-void Object::BuildHeartBeatMsg(WorldPacket *data) const
-{
-    data->Initialize(MSG_MOVE_HEARTBEAT, 32);               //2
-
-    *data << GetGUID();                                     //8
-    *data << uint32(0);                                     //4
-    *data << uint32(0);                                     //4
-
-    *data << m_positionX;                                   //4
-    *data << m_positionY;                                   //4
-    *data << m_positionZ;                                   //4
-
-    *data << m_orientation;                                 //4
-}
-
-void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
-{
-    data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
-    *data << uint8(0xFF);
-    *data << GetGUID();
-    *data << uint32(0x800000);
-    *data << uint16(0x67EE);
-    *data << uint16(0xD1EB);
-    *data << m_orientation;                                 // instead of *data << z;
-    *data << x;
-    *data << y;
-    *data << z;                                             // instead of *data << ang;
-    *data << ang;
-    *data << uint32(0x0);
-}
-
-void Object::SendMessageToSet(WorldPacket *data, bool bToSelf)
-{
-    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data);
 }
 
 bool Object::LoadValues(const char* data)
@@ -556,145 +494,6 @@ void Object::RemoveFlag( uint16 index, uint32 oldFlag )
     }
 }
 
-uint32 Object::GetZoneId() const
-{
-    return MapManager::Instance().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
-}
-
-uint32 Object::GetAreaId() const
-{
-    return MapManager::Instance().GetMap(m_mapId)->GetAreaId(m_positionX,m_positionY);
-}
-
-float Object::GetDistanceSq(const Object* obj) const        //slow
-{
-    float dx = GetPositionX() - obj->GetPositionX();
-    float dy = GetPositionY() - obj->GetPositionY();
-    float dz = GetPositionZ() - obj->GetPositionZ();
-    float sizefactor = GetObjectSize() + obj->GetObjectSize();
-    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
-    return ( dist > 0 ? dist * dist : 0);
-}
-
-float Object::GetDistanceSq(const float x, const float y, const float z) const
-{
-    float dx = GetPositionX() - x;
-    float dy = GetPositionY() - y;
-    float dz = GetPositionZ() - z;
-    float sizefactor = GetObjectSize();
-    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
-    return ( dist > 0 ? dist * dist : 0);
-}
-
-float Object::GetDistance2dSq(const Object* obj) const      //slow
-{
-    float dx = GetPositionX() - obj->GetPositionX();
-    float dy = GetPositionY() - obj->GetPositionY();
-    float sizefactor = GetObjectSize() + obj->GetObjectSize();
-    float dist = sqrt((dx*dx) + (dy*dy)) - sizefactor;
-    return ( dist > 0 ? dist * dist : 0);
-}
-
-float Object::GetDistanceZ(const Object* obj) const
-{
-    float dz = fabs(GetPositionZ() - obj->GetPositionZ());
-    float sizefactor = GetObjectSize() + obj->GetObjectSize();
-    float dist = dz - sizefactor;
-    return ( dist > 0 ? dist : 0);
-}
-
-bool Object::IsWithinDistInMap(const Object* obj, const float dist2compare) const
-{
-    if (GetMapId()!=obj->GetMapId()) return false;
-    return IsWithinDist(obj, dist2compare);
-}
-
-bool Object::IsWithinDist(const Object* obj, const float dist2compare) const
-{
-    float dx = GetPositionX() - obj->GetPositionX();
-    float dy = GetPositionY() - obj->GetPositionY();
-    float dz = GetPositionZ() - obj->GetPositionZ();
-    float distsq = dx*dx + dy*dy + dz*dz;
-    float sizefactor = GetObjectSize() + obj->GetObjectSize();
-    float maxdist = dist2compare + sizefactor;
-    return distsq < maxdist * maxdist;
-}
-
-float Object::GetAngle(const Object* obj) const
-{
-    if(!obj) return 0;
-    return GetAngle( obj->GetPositionX(), obj->GetPositionY() );
-}
-
-// Retirn angle in range 0..2*pi
-float Object::GetAngle( const float x, const float y ) const
-{
-    float dx = x - GetPositionX();
-    float dy = y - GetPositionY();
-
-    float ang = atan2(dy, dx);
-    ang = (ang >= 0) ? ang : 2 * M_PI + ang;
-    return ang;
-}
-
-bool Object::HasInArc(const float arcangle, const Object* obj) const
-{
-    float arc = arcangle;
-
-    // move arc to range 0.. 2*pi
-    while( arc >= 2.0f * M_PI )
-        arc -=  2.0f * M_PI;
-    while( arc < 0 )
-        arc +=  2.0f * M_PI;
-
-    float angle = GetAngle( obj );
-    angle -= m_orientation;
-
-    // move angle to range -pi ... +pi
-    while( angle > M_PI)
-        angle -= 2.0f * M_PI;
-    while(angle < -M_PI)
-        angle += 2.0f * M_PI;
-
-    float lborder =  -1 * (arc/2.0f);                       // in range -pi..0
-    float rborder = (arc/2.0f);                             // in range 0..pi
-    return (( angle >= lborder ) && ( angle <= rborder ));
-}
-
-void Object::GetContactPoint( const Object* obj, float &x, float &y, float &z ) const
-{
-    float angle = GetAngle( obj );
-    x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + OBJECT_CONTACT_DISTANCE) * cos(angle);
-    y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + OBJECT_CONTACT_DISTANCE) * sin(angle);
-    z = GetPositionZ();
-}
-
-void Object::GetClosePoint( const Object* victim, float &x, float &y, float &z ) const
-{
-    if( victim )
-        GetClosePoint( victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ(), x, y, z);
-    else
-        GetClosePoint( 0, 0, 0, x, y, z);
-}
-
-void Object::GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const
-{
-    float angle;
-    if( ox == 0 && oy == 0 )
-        angle = GetOrientation();
-    else
-        angle = GetAngle( ox, oy );
-    x = GetPositionX() + GetObjectSize() * cos(angle);
-    y = GetPositionY() + GetObjectSize() * sin(angle);
-    z = GetPositionZ();
-
-}
-
-bool Object::IsPositionValid() const
-{
-    return MaNGOS::IsValidMapCoord(m_positionX) && MaNGOS::IsValidMapCoord(m_positionY);
-}
-
 bool Object::hasQuest(uint32 quest_id)
 {
     return (find(mQuests.begin(), mQuests.end(), quest_id) != mQuests.end());
@@ -727,16 +526,217 @@ void Object::_SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const
     }
 }
 
-void Object::SendDestroyObject(uint64 guid)
+WorldObject::WorldObject( )
+{
+    m_positionX         = 0.0f;
+    m_positionY         = 0.0f;
+    m_positionZ         = 0.0f;
+    m_orientation       = 0.0f;
+
+    m_mapId             = 0;
+
+    mSemaphoreTeleport  = false;
+}
+
+void WorldObject::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId )
+{
+    Object::_Create(guidlow, guidhigh);
+
+    SetUInt32Value( OBJECT_FIELD_ENTRY,nameId);
+
+    m_mapId = mapid;
+    m_positionX = x;
+    m_positionY = y;
+    m_positionZ = z;
+    m_orientation = ang;
+}
+
+uint32 WorldObject::GetZoneId() const
+{
+    return MapManager::Instance().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
+}
+
+uint32 WorldObject::GetAreaId() const
+{
+    return MapManager::Instance().GetMap(m_mapId)->GetAreaId(m_positionX,m_positionY);
+}
+
+float WorldObject::GetDistanceSq(const WorldObject* obj) const        //slow
+{
+    float dx = GetPositionX() - obj->GetPositionX();
+    float dy = GetPositionY() - obj->GetPositionY();
+    float dz = GetPositionZ() - obj->GetPositionZ();
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
+    return ( dist > 0 ? dist * dist : 0);
+}
+
+float WorldObject::GetDistanceSq(const float x, const float y, const float z) const
+{
+    float dx = GetPositionX() - x;
+    float dy = GetPositionY() - y;
+    float dz = GetPositionZ() - z;
+    float sizefactor = GetObjectSize();
+    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
+    return ( dist > 0 ? dist * dist : 0);
+}
+
+float WorldObject::GetDistance2dSq(const WorldObject* obj) const      //slow
+{
+    float dx = GetPositionX() - obj->GetPositionX();
+    float dy = GetPositionY() - obj->GetPositionY();
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float dist = sqrt((dx*dx) + (dy*dy)) - sizefactor;
+    return ( dist > 0 ? dist * dist : 0);
+}
+
+float WorldObject::GetDistanceZ(const WorldObject* obj) const
+{
+    float dz = fabs(GetPositionZ() - obj->GetPositionZ());
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float dist = dz - sizefactor;
+    return ( dist > 0 ? dist : 0);
+}
+
+bool WorldObject::IsWithinDistInMap(const WorldObject* obj, const float dist2compare) const
+{
+    if (GetMapId()!=obj->GetMapId()) return false;
+    return IsWithinDist(obj, dist2compare);
+}
+
+bool WorldObject::IsWithinDist(const WorldObject* obj, const float dist2compare) const
+{
+    float dx = GetPositionX() - obj->GetPositionX();
+    float dy = GetPositionY() - obj->GetPositionY();
+    float dz = GetPositionZ() - obj->GetPositionZ();
+    float distsq = dx*dx + dy*dy + dz*dz;
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float maxdist = dist2compare + sizefactor;
+    return distsq < maxdist * maxdist;
+}
+
+float WorldObject::GetAngle(const WorldObject* obj) const
+{
+    if(!obj) return 0;
+    return GetAngle( obj->GetPositionX(), obj->GetPositionY() );
+}
+
+// Retirn angle in range 0..2*pi
+float WorldObject::GetAngle( const float x, const float y ) const
+{
+    float dx = x - GetPositionX();
+    float dy = y - GetPositionY();
+
+    float ang = atan2(dy, dx);
+    ang = (ang >= 0) ? ang : 2 * M_PI + ang;
+    return ang;
+}
+
+bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
+{
+    float arc = arcangle;
+
+    // move arc to range 0.. 2*pi
+    while( arc >= 2.0f * M_PI )
+        arc -=  2.0f * M_PI;
+    while( arc < 0 )
+        arc +=  2.0f * M_PI;
+
+    float angle = GetAngle( obj );
+    angle -= m_orientation;
+
+    // move angle to range -pi ... +pi
+    while( angle > M_PI)
+        angle -= 2.0f * M_PI;
+    while(angle < -M_PI)
+        angle += 2.0f * M_PI;
+
+    float lborder =  -1 * (arc/2.0f);                       // in range -pi..0
+    float rborder = (arc/2.0f);                             // in range 0..pi
+    return (( angle >= lborder ) && ( angle <= rborder ));
+}
+
+void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, float &z ) const
+{
+    float angle = GetAngle( obj );
+    x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + OBJECT_CONTACT_DISTANCE) * cos(angle);
+    y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + OBJECT_CONTACT_DISTANCE) * sin(angle);
+    z = GetPositionZ();
+}
+
+void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, float &z ) const
+{
+    if( victim )
+        GetClosePoint( victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ(), x, y, z);
+    else
+        GetClosePoint( 0, 0, 0, x, y, z);
+}
+
+void WorldObject::GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const
+{
+    float angle;
+    if( ox == 0 && oy == 0 )
+        angle = GetOrientation();
+    else
+        angle = GetAngle( ox, oy );
+    x = GetPositionX() + GetObjectSize() * cos(angle);
+    y = GetPositionY() + GetObjectSize() * sin(angle);
+    z = GetPositionZ();
+
+}
+
+bool WorldObject::IsPositionValid() const
+{
+    return MaNGOS::IsValidMapCoord(m_positionX) && MaNGOS::IsValidMapCoord(m_positionY);
+}
+
+void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
+{
+    data->Initialize(MSG_MOVE_HEARTBEAT, 32);               //2
+
+    *data << GetGUID();                                     //8
+    *data << uint32(0);                                     //4
+    *data << uint32(0);                                     //4
+
+    *data << m_positionX;                                   //4
+    *data << m_positionY;                                   //4
+    *data << m_positionZ;                                   //4
+
+    *data << m_orientation;                                 //4
+}
+
+void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
+{
+    data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
+    *data << uint8(0xFF);
+    *data << GetGUID();
+    *data << uint32(0x800000);
+    *data << uint16(0x67EE);
+    *data << uint16(0xD1EB);
+    *data << m_orientation;                                 // instead of *data << z;
+    *data << x;
+    *data << y;
+    *data << z;                                             // instead of *data << ang;
+    *data << ang;
+    *data << uint32(0x0);
+}
+
+void WorldObject::SendMessageToSet(WorldPacket *data, bool bToSelf)
+{
+    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data);
+}
+
+void WorldObject::SendDestroyObject(uint64 guid)
 {
     WorldPacket data(SMSG_DESTROY_OBJECT, 8);
     data << guid;
     SendMessageToSet(&data, true);
 }
 
-void Object::SendObjectDeSpawnAnim(uint64 guid)
+void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
 {
     WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
     data << guid;
     SendMessageToSet(&data, true);
 }
+

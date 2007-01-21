@@ -619,7 +619,7 @@ void World::ScriptsProcess()
                 if(iter->second.source && iter->second.source->isType(TYPE_UNIT))
                 {
                     ((Unit *)iter->second.source)->SendMoveToPacket(iter->second.script->x, iter->second.script->y, iter->second.script->z, false, iter->second.script->datalong2 );
-                    MapManager::Instance().GetMap(((Object *)iter->second.source)->GetMapId())->CreatureRelocation(((Creature *)iter->second.source), iter->second.script->x, iter->second.script->y, iter->second.script->z, 0);
+                    MapManager::Instance().GetMap(((Unit *)iter->second.source)->GetMapId())->CreatureRelocation(((Creature *)iter->second.source), iter->second.script->x, iter->second.script->y, iter->second.script->z, 0);
                     //char buffff[255];
                     //sprintf(buffff, "M:%d", iter->second.script->datalong2);
                     //((Creature *)iter->second.source)->MonsterSay(buffff, 0, iter->second.target->GetGUID());
@@ -681,7 +681,7 @@ void World::ScriptsProcess()
                 float o = step.script->o;
 
                 TemporarySummon* pCreature = new TemporarySummon;
-                if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), step.source->GetMapId(), x, y, z, o, step.script->datalong))
+                if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), ((Unit*)step.source)->GetMapId(), x, y, z, o, step.script->datalong))
                 {
                     delete pCreature;
                     return;

@@ -51,7 +51,7 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     3.141594f                                               // MOVE_TURN
 };
 
-Unit::Unit() : Object()
+Unit::Unit() : WorldObject()
 {
     m_objectType |= TYPE_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -1762,7 +1762,7 @@ bool Unit::isInFront(Unit const* target, float radius)
 
 void Unit::SetInFront(Unit const* target)
 {
-    m_orientation = GetAngle(target);
+    SetOrientation(GetAngle(target));
 }
 
 bool Unit::isInAccessablePlaceFor(Creature* c) const

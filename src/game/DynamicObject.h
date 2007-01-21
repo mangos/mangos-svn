@@ -24,7 +24,7 @@
 class Unit;
 struct SpellEntry;
 
-class DynamicObject : public Object
+class DynamicObject : public WorldObject
 {
     public:
         typedef std::set<Unit*> AffectedSet;
