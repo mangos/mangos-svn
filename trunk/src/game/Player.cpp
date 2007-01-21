@@ -259,10 +259,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_race = race;
     m_class = class_;
 
-    m_mapId = info->mapId;
-    m_positionX = info->positionX;
-    m_positionY = info->positionY;
-    m_positionZ = info->positionZ;
+    SetMapId(info->mapId);
+    Relocate(info->positionX,info->positionY,info->positionZ);
 
     // Taxi nodes setup
     memset(m_taximask, 0, sizeof(m_taximask));
@@ -962,14 +960,14 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << uint8(bytes);
 
     *p_data << uint8(getLevel());                           //1
-    uint32 zoneId = MapManager::Instance ().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
+    uint32 zoneId = MapManager::Instance ().GetMap(GetMapId())->GetZoneId(GetPositionX(),GetPositionY());
 
     *p_data << zoneId;
     *p_data << GetMapId();
 
-    *p_data << m_positionX;
-    *p_data << m_positionY;
-    *p_data << m_positionZ;
+    *p_data << GetPositionX();
+    *p_data << GetPositionY();
+    *p_data << GetPositionZ();
 
     *p_data << GetUInt32Value(PLAYER_GUILDID);              //probebly wrong
 
@@ -3046,7 +3044,7 @@ void Player::DurabilityRepair(uint16 pos, bool cost)
 
 void Player::RepopAtGraveyard()
 {
-    WorldSafeLocsEntry const *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId(), GetTeam() );
+    WorldSafeLocsEntry const *ClosestGrave = objmgr.GetClosestGraveYard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam() );
 
     if(ClosestGrave)
     {
@@ -3595,11 +3593,11 @@ void Player::SetDontMove(bool dontMove)
 
 bool Player::SetPosition(float x, float y, float z, float orientation)
 {
-    Map *m = MapManager::Instance().GetMap(m_mapId);
+    Map *m = MapManager::Instance().GetMap(GetMapId());
 
-    const float old_x = m_positionX;
-    const float old_y = m_positionY;
-    const float old_r = m_orientation;
+    const float old_x = GetPositionX();
+    const float old_y = GetPositionY();
+    const float old_r = GetOrientation();
 
     if( old_x != x || old_y != y || old_r != orientation)
     {
@@ -3612,9 +3610,9 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
 
     // reread after Ma::Relocation
     m = MapManager::Instance().GetMap(GetMapId());
-    x = m_positionX;
-    y = m_positionY;
-    z = m_positionZ;
+    x = GetPositionX();
+    y = GetPositionY();
+    z = GetPositionZ();
 
     float water_z = m->GetWaterLevel(x,y);
     uint8 flag1 = m->GetTerrainType(x,y);
@@ -3650,12 +3648,12 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
 
 void Player::SendMessageToSet(WorldPacket *data, bool self)
 {
-    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self);
+    MapManager::Instance().GetMap(GetMapId())->MessageBoardcast(this, data, self);
 }
 
 void Player::SendMessageToOwnTeamSet(WorldPacket *data, bool self)
 {
-    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self,true);
+    MapManager::Instance().GetMap(GetMapId())->MessageBoardcast(this, data, self,true);
 }
 
 void Player::SendDirectMessage(WorldPacket *data)
@@ -3672,13 +3670,13 @@ void Player::CheckExploreSystem()
     if (isInFlight())
         return;
 
-    uint16 areaFlag=MapManager::Instance().GetMap(GetMapId())->GetAreaFlag(m_positionX,m_positionY);
+    uint16 areaFlag=MapManager::Instance().GetMap(GetMapId())->GetAreaFlag(GetPositionX(),GetPositionY());
     if(areaFlag==0xffff)return;
     int offset = areaFlag / 32;
 
     if(offset >= 64)
     {
-        sLog.outError("ERROR: Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u ( %u must be < 64 ).",areaFlag,m_positionX,m_positionY,offset,offset);
+        sLog.outError("ERROR: Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u ( %u must be < 64 ).",areaFlag,GetPositionX(),GetPositionY(),offset,offset);
         return;
     }
 
@@ -3692,7 +3690,7 @@ void Player::CheckExploreSystem()
         AreaTableEntry const *p = GetAreaEntryByAreaFlag(areaFlag);
         if(!p)
         {
-            sLog.outError("PLAYER: Player %u discovered unknown area (x: %f y: %f map: %u", GetGUIDLow(), m_positionX,m_positionY,GetMapId());
+            sLog.outError("PLAYER: Player %u discovered unknown area (x: %f y: %f map: %u", GetGUIDLow(), GetPositionX(),GetPositionY(),GetMapId());
         }
         else if(p->area_level > 0)
         {
@@ -9355,10 +9353,8 @@ bool Player::MinimalLoadFromDB( uint32 guid )
     }
 
     m_name = fields[1].GetCppString();
-    m_positionX = fields[2].GetFloat();
-    m_positionY = fields[3].GetFloat();
-    m_positionZ = fields[4].GetFloat();
-    m_mapId = fields[5].GetUInt32();
+    Relocate(fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
+    SetMapId(fields[5].GetUInt32());
 
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; i++)
         m_items[i] = NULL;
@@ -9508,11 +9504,8 @@ bool Player::LoadFromDB( uint32 guid )
     }
 
     uint32 transGUID = fields[27].GetUInt32();
-    m_positionX = fields[6].GetFloat();
-    m_positionY = fields[7].GetFloat();
-    m_positionZ = fields[8].GetFloat();
-    m_mapId = fields[9].GetUInt32();
-    m_orientation = fields[10].GetFloat();
+    Relocate(fields[6].GetFloat(),fields[7].GetFloat(),fields[8].GetFloat(),fields[10].GetFloat());
+    SetMapId(fields[9].GetUInt32());
 
     if (transGUID != 0)
     {
@@ -9527,7 +9520,7 @@ bool Player::LoadFromDB( uint32 guid )
             {
                 m_transport = MapManager::Instance().m_Transports[i];
                 m_transport->AddPassenger(this);
-                m_mapId = m_transport->GetMapId();
+                SetMapId(m_transport->GetMapId());
             }
         }
     }
@@ -9552,12 +9545,10 @@ bool Player::LoadFromDB( uint32 guid )
 
     if(!IsPositionValid())
     {
-        sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %d Y: ^%d). Teleport to default race/class locations.",guid,m_positionX,m_positionY);
+        sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %d Y: ^%d). Teleport to default race/class locations.",guid,GetPositionX(),GetPositionY());
 
-        m_mapId = info->mapId;
-        m_positionX = info->positionX;
-        m_positionY = info->positionY;
-        m_positionZ = info->positionZ;
+        SetMapId(info->mapId);
+        Relocate(info->positionX,info->positionY,info->positionZ);
     }
 
     m_highest_rank = fields[12].GetUInt32();
@@ -10092,10 +10083,13 @@ void Player::SaveToDB()
     uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
     uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
     uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
+    uint32 tmp_displayid = GetUInt32Value(UNIT_FIELD_DISPLAYID);
 
     // Set player sit state to standing on save, also stealth and shifted form
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT | PLAYER_STATE_FORM_ALL | PLAYER_STATE_FLAG_STEALTH);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+    SetUInt32Value(UNIT_FIELD_DISPLAYID,GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+
 
     // remove restflag when save
     //this is becouse of the rename char stuff
@@ -10120,11 +10114,11 @@ void Player::SaveToDB()
         << m_name << "', "
         << m_race << ", "
         << m_class << ", "
-        << m_mapId << ", "
-        << m_positionX << ", "
-        << m_positionY << ", "
-        << m_positionZ << ", "
-        << m_orientation << ", '";
+        << GetMapId() << ", "
+        << GetPositionX() << ", "
+        << GetPositionY() << ", "
+        << GetPositionZ() << ", "
+        << GetOrientation() << ", '";
 
     uint16 i;
     for( i = 0; i < m_valuesCount; i++ )
@@ -10209,6 +10203,7 @@ void Player::SaveToDB()
     outDebugValues();
 
     // restore state (before aura apply, if aura remove flag then aura must set it ack by self)
+    SetUInt32Value(UNIT_FIELD_DISPLAYID, tmp_displayid);
     SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
     SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
     SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
@@ -10868,10 +10863,10 @@ void Player::SetRestBonus (float rest_bonus_new)
 
 void Player::HandleInvisiblePjs()
 {
-    Map *m = MapManager::Instance().GetMap(m_mapId);
+    Map *m = MapManager::Instance().GetMap(GetMapId());
 
     //this is to be sure that InvisiblePjsNear vector has active pjs only.
-    m->PlayerRelocation(this, m_positionX, m_positionY, m_positionZ, m_orientation, true);
+    m->PlayerRelocation(this, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), true);
 
     for (std::vector<Player *>::iterator i = InvisiblePjsNear.begin(); i != InvisiblePjsNear.end(); i++)
     {
@@ -10879,7 +10874,7 @@ void Player::HandleInvisiblePjs()
         {
             m_DiscoveredPj = *i;
             m_enableDetect = false;
-            m->PlayerRelocation(this, m_positionX, m_positionY, m_positionZ, m_orientation, true);
+            m->PlayerRelocation(this, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), true);
             m_enableDetect = true;
             m_DiscoveredPj = 0;
         }

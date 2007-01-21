@@ -282,10 +282,8 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
     respawn_cord[0] = x;
     respawn_cord[1] = y;
     respawn_cord[2] = z;
-    m_mapId =mapid;
-    m_positionX =x;
-    m_positionY=y;
-    m_positionZ=z;
+    SetMapId(mapid);
+    Relocate(x,y,z);
 
     if(!IsPositionValid())
     {
@@ -293,7 +291,7 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
         return false;
     }
 
-    m_orientation=ang;
+    SetOrientation(ang);
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
     return  CreateFromProto(guidlow, Entry);
 
@@ -666,7 +664,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
         Field *fields;
         uint32 mapid=GetMapId();
         Map* map=MapManager::Instance().GetMap( mapid );
-        uint16 areaflag=map->GetAreaFlag(m_positionX,m_positionY);
+        uint16 areaflag=map->GetAreaFlag(GetPositionX(),GetPositionY());
         uint32 zoneid=map->GetZoneId(areaflag);
         std::string areaname= gossip->Option;
         uint16 pflag;
@@ -680,7 +678,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
             fields = result->Fetch();
             x=fields[0].GetFloat();
             y=fields[1].GetFloat();
-            pflag=map->GetAreaFlag(m_positionX,m_positionY);
+            pflag=map->GetAreaFlag(GetPositionX(),GetPositionY());
             if(pflag==areaflag)
             {
                 findnpc=true;
@@ -869,11 +867,11 @@ void Creature::SaveToDB()
     ss << "INSERT INTO `creature` VALUES ("
         << GetGUIDLow () << ","
         << GetEntry() << ","
-        << m_mapId <<","
-        << m_positionX << ","
-        << m_positionY << ","
-        << m_positionZ << ","
-        << m_orientation << ","
+        << GetMapId() <<","
+        << GetPositionX() << ","
+        << GetPositionY() << ","
+        << GetPositionZ() << ","
+        << GetOrientation() << ","
         << m_respawnDelay << ","                            //respawn time
         << (float) 0  << ","                                //spawn distance (float)
         << (uint32) (0) << ","                              //currentwaypoint

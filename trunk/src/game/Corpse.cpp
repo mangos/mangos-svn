@@ -28,7 +28,7 @@
 #include "WorldPacket.h"
 #include "GossipDef.h"
 
-Corpse::Corpse( CorpseType type ) : Object()
+Corpse::Corpse( CorpseType type ) : WorldObject()
 {
     m_objectType |= TYPE_CORPSE;
     m_objectTypeId = TYPEID_CORPSE;
@@ -54,7 +54,7 @@ bool Corpse::Create( uint32 guidlow )
 
 bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang )
 {
-    Object::_Create(guidlow, HIGHGUID_CORPSE, mapid, x, y, z, ang, (uint8)-1);
+    WorldObject::_Create(guidlow, HIGHGUID_CORPSE, mapid, x, y, z, ang, (uint8)-1);
 
     if(!IsPositionValid())
     {

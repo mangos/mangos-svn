@@ -89,15 +89,15 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL ObjectVisibleNotifier
     {
-        Object &i_object;
-        ObjectVisibleNotifier(Object &obj) : i_object(obj) {}
+        WorldObject &i_object;
+        ObjectVisibleNotifier(WorldObject &obj) : i_object(obj) {}
         void Visit(PlayerMapType &);
     };
 
     struct MANGOS_DLL_DECL ObjectNotVisibleNotifier
     {
-        Object &i_object;
-        ObjectNotVisibleNotifier(Object &obj) : i_object(obj) {}
+        WorldObject &i_object;
+        ObjectNotVisibleNotifier(WorldObject &obj) : i_object(obj) {}
         void Visit(PlayerMapType &);
     };
 
@@ -282,7 +282,7 @@ namespace MaNGOS
     class AnyUnfriendlyUnitInObjectRangeCheck
     {
         public:
-            AnyUnfriendlyUnitInObjectRangeCheck(Object* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range), i_result(NULL) {}
+            AnyUnfriendlyUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range), i_result(NULL) {}
             bool operator()(Unit* u)
             {
                 if(u->isAlive() && !i_funit->IsFriendlyTo(u) && i_obj->IsWithinDist(u, i_range))
@@ -294,7 +294,7 @@ namespace MaNGOS
             }
             Unit *GetResult() const { return i_result; }
         private:
-            Object* const i_obj;
+            WorldObject* const i_obj;
             Unit* const i_funit;
             float i_range;
             Unit* i_result;

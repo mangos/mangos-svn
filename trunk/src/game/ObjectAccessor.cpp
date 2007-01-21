@@ -43,7 +43,7 @@ INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 
 Creature*
-ObjectAccessor::GetCreature(Object const &u, uint64 guid)
+ObjectAccessor::GetCreature(WorldObject const &u, uint64 guid)
 {
     return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<Creature>(u, guid);
 }
@@ -61,7 +61,7 @@ ObjectAccessor::GetCorpse(float x, float y, uint32 mapid, uint64 guid)
 }
 
 Unit*
-ObjectAccessor::GetUnit(Object const &u, uint64 guid)
+ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
 {
     Unit *unit = NULL;
 
@@ -211,12 +211,7 @@ ObjectAccessor::RemoveUpdateObject(Object *obj)
         i_objects.erase( iter );
 }
 
-void ObjectAccessor::AddObjectToRemoveList(Creature      *obj) { _AddObjectToRemoveList(obj); }
-void ObjectAccessor::AddObjectToRemoveList(GameObject    *obj) { _AddObjectToRemoveList(obj); }
-void ObjectAccessor::AddObjectToRemoveList(Corpse        *obj) { _AddObjectToRemoveList(obj); }
-void ObjectAccessor::AddObjectToRemoveList(DynamicObject *obj) { _AddObjectToRemoveList(obj); }
-
-void ObjectAccessor::_AddObjectToRemoveList(Object *obj)
+void ObjectAccessor::AddObjectToRemoveList(WorldObject *obj)
 {
     if(!obj) return;
 
@@ -240,7 +235,7 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
     //sLog.outDebug("Object remover 1 check.");
     while(!i_objectsToRemove.empty())
     {
-        Object* obj = *i_objectsToRemove.begin();
+        WorldObject* obj = *i_objectsToRemove.begin();
         i_objectsToRemove.erase(i_objectsToRemove.begin());
         switch(obj->GetTypeId())
         {
@@ -287,7 +282,10 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
         _buildPacket(pl, obj, update_players);
 
     if( build_for_all )
-        _buildChangeObjectForPlayer(obj, update_players);
+    {
+        assert(dynamic_cast<WorldObject*>(obj)!=NULL);
+        _buildChangeObjectForPlayer((WorldObject*)obj, update_players);
+    }
 }
 
 void
@@ -320,7 +318,7 @@ ObjectAccessor::GetCorpseForPlayer(Player const &player)
 }
 
 void
-ObjectAccessor::_buildChangeObjectForPlayer(Object *obj, UpdateDataMapType &update_players)
+ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType &update_players)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     Cell cell = RedZone::GetZone(p);
@@ -461,7 +459,7 @@ ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
 }
 
 void
-ObjectAccessor::RemoveBonesFromPlayerView(Object *o)
+ObjectAccessor::RemoveBonesFromPlayerView(Corpse *o)
 {
     MaNGOS::BonesViewRemover remover(*o);
     TypeContainerVisitor<MaNGOS::BonesViewRemover, ContainerMapList<Player> > player_notifier(remover);

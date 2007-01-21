@@ -108,12 +108,9 @@ void MapManager::LoadTransports()
 
 bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
 {
-    m_positionX = x;
-    m_positionY = y;
-    m_positionZ = z;
-    m_orientation = ang;
+    Relocate(x,y,z,ang);
 
-    m_mapId = mapid;
+    SetMapId(mapid);
 
     if(!IsPositionValid())
     {

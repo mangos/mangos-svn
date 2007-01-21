@@ -74,7 +74,7 @@ class Unit;
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 2000
 
-class MANGOS_DLL_SPEC GameObject : public Object
+class MANGOS_DLL_SPEC GameObject : public WorldObject
 {
     public:
         GameObject();

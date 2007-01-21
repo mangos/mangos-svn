@@ -96,7 +96,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         template<class T> void Remove(T *, bool);
         template<class T> bool Find(T *) const;
 
-        template<class T> T* GetObjectNear(Object const &obj, OBJECT_HANDLE hdl);
+        template<class T> T* GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
         template<class T> T* GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
 
         void Update(const uint32&);
@@ -104,7 +104,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void MessageBoardcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
 
-        void MessageBoardcast(Object *, WorldPacket *);
+        void MessageBoardcast(WorldObject *, WorldPacket *);
 
         void PlayerRelocation(Player *, float x, float y, float z, float angl, bool visibilityChanges = false);
 
@@ -117,7 +117,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
             i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
         }
 
-        inline bool IsActiveGrid(Object *obj) const
+        inline bool IsActiveGrid(WorldObject *obj) const
         {
             return IsActiveGrid(obj->GetPositionX(),obj->GetPositionY());
         }

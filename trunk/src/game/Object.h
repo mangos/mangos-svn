@@ -105,43 +105,6 @@ class MANGOS_DLL_SPEC Object
 
         virtual void DestroyForPlayer( Player *target ) const;
 
-        void BuildHeartBeatMsg( WorldPacket *data ) const;
-        void BuildTeleportAckMsg( WorldPacket *data, float x, float y, float z, float ang) const;
-        bool IsBeingTeleported() { return mSemaphoreTeleport; }
-        void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
-
-        void SendDestroyObject(uint64 guid);
-        void SendObjectDeSpawnAnim(uint64 guid);
-
-        void Relocate(float x, float y, float z, float orientation)
-        {
-            m_positionX = x;
-            m_positionY = y;
-            m_positionZ = z;
-            m_orientation = orientation;
-        }
-
-        float GetPositionX( ) const { return m_positionX; }
-        float GetPositionY( ) const { return m_positionY; }
-        float GetPositionZ( ) const { return m_positionZ; }
-        void GetPosition( float &x, float &y, float &z ) const
-            { x = m_positionX; y = m_positionY; z = m_positionZ; }
-        float GetOrientation( ) const { return m_orientation; }
-        void GetClosePoint( const Object* victim, float &x, float &y, float &z ) const;
-        void GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const;
-        const float GetObjectSize() const
-        {
-            return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
-        }
-        bool IsPositionValid() const;
-
-        void SetMapId(uint32 newMap) { m_mapId = newMap; }
-
-        uint32 GetMapId() const { return m_mapId; }
-
-        uint32 GetZoneId() const;
-        uint32 GetAreaId() const;
-
         const uint32& GetUInt32Value( uint16 index ) const
         {
             ASSERT( index < m_valuesCount || PrintIndexError( index , false) );
@@ -203,19 +166,6 @@ class MANGOS_DLL_SPEC Object
             m_objectUpdated = false;
         }
 
-        float GetDistanceSq( const Object* obj ) const;
-        float GetDistance2dSq( const Object* obj ) const;
-        float GetDistanceSq(const float x, const float y, const float z) const;
-        float GetDistanceZ(const Object* obj) const;
-        bool IsWithinDistInMap(const Object* obj, const float dist2compare) const;
-        bool IsWithinDist(const Object* obj, const float dist2compare) const;
-        float GetAngle( const Object* obj ) const;
-        float GetAngle( const float x, const float y ) const;
-        bool HasInArc( const float arcangle, const Object* obj ) const;
-        void GetContactPoint( const Object* obj, float &x, float &y, float &z ) const;
-
-        virtual void SendMessageToSet(WorldPacket *data, bool self);
-
         bool LoadValues(const char* data);
 
         uint16 GetValuesCount() const { return m_valuesCount; }
@@ -244,7 +194,6 @@ class MANGOS_DLL_SPEC Object
         }
 
         void _Create (uint32 guidlow, uint32 guidhigh);
-        void _Create (uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId);
 
         virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
 
@@ -256,17 +205,6 @@ class MANGOS_DLL_SPEC Object
         uint16 m_objectType;
 
         uint8 m_objectTypeId;
-
-        uint32 m_mapId;
-
-        float m_positionX;
-        float m_positionY;
-        float m_positionZ;
-        float m_orientation;
-
-        bool mSemaphoreTeleport;
-
-        float m_minZ;
 
         union
         {
@@ -290,4 +228,84 @@ class MANGOS_DLL_SPEC Object
         Object(const Object&);                              // prevent generation copy constructor
         Object& operator=(Object const&);                   // prevent generation assigment operator
 };
+
+class MANGOS_DLL_SPEC WorldObject : public Object
+{
+    public:
+        virtual ~WorldObject ( ) {}
+
+        void _Create (uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId);
+
+        void Relocate(float x, float y, float z, float orientation)
+        {
+            m_positionX = x;
+            m_positionY = y;
+            m_positionZ = z;
+            m_orientation = orientation;
+        }
+
+        void Relocate(float x, float y, float z)
+        {
+            m_positionX = x;
+            m_positionY = y;
+            m_positionZ = z;
+        }
+
+        void SetOrientation(float orientation) { m_orientation = orientation; }
+
+        float GetPositionX( ) const { return m_positionX; }
+        float GetPositionY( ) const { return m_positionY; }
+        float GetPositionZ( ) const { return m_positionZ; }
+        void GetPosition( float &x, float &y, float &z ) const
+            { x = m_positionX; y = m_positionY; z = m_positionZ; }
+        float GetOrientation( ) const { return m_orientation; }
+        void GetClosePoint( const WorldObject* victim, float &x, float &y, float &z ) const;
+        void GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const;
+        const float GetObjectSize() const
+        {
+            return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
+        }
+        bool IsPositionValid() const;
+
+        void SetMapId(uint32 newMap) { m_mapId = newMap; }
+
+        uint32 GetMapId() const { return m_mapId; }
+
+        uint32 GetZoneId() const;
+        uint32 GetAreaId() const;
+
+        float GetDistanceSq( const WorldObject* obj ) const;
+        float GetDistance2dSq( const WorldObject* obj ) const;
+        float GetDistanceSq(const float x, const float y, const float z) const;
+        float GetDistanceZ(const WorldObject* obj) const;
+        bool IsWithinDistInMap(const WorldObject* obj, const float dist2compare) const;
+        bool IsWithinDist(const WorldObject* obj, const float dist2compare) const;
+        float GetAngle( const WorldObject* obj ) const;
+        float GetAngle( const float x, const float y ) const;
+        bool HasInArc( const float arcangle, const WorldObject* obj ) const;
+        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z ) const;
+
+        virtual void SendMessageToSet(WorldPacket *data, bool self);
+        void BuildHeartBeatMsg( WorldPacket *data ) const;
+        void BuildTeleportAckMsg( WorldPacket *data, float x, float y, float z, float ang) const;
+        bool IsBeingTeleported() { return mSemaphoreTeleport; }
+        void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
+
+        void SendDestroyObject(uint64 guid);
+        void SendObjectDeSpawnAnim(uint64 guid);
+
+    protected:
+        WorldObject( );
+
+    private:
+        uint32 m_mapId;
+
+        float m_positionX;
+        float m_positionY;
+        float m_positionZ;
+        float m_orientation;
+
+        bool mSemaphoreTeleport;
+};
+
 #endif

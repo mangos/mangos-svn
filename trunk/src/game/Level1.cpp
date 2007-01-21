@@ -88,7 +88,7 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
 
 bool ChatHandler::HandleGPSCommand(const char* args)
 {
-    Object *obj = getSelectedUnit();
+    WorldObject *obj = getSelectedUnit();
 
     if(!obj)
     {

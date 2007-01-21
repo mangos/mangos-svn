@@ -35,6 +35,7 @@ class Unit;
 class GameObject;
 class DynamicObject;
 class Object;
+class WorldObject;
 
 class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex> >
 {
@@ -52,10 +53,10 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);
-        Creature* GetCreature(Object const &, uint64);
+        Creature* GetCreature(WorldObject const &, uint64);
         Corpse*   GetCorpse(Unit const &u, uint64 guid);
         Corpse*   GetCorpse(float x, float y, uint32 mapid, uint64 guid);
-        Unit* GetUnit(Object const &, uint64);
+        Unit* GetUnit(WorldObject const &, uint64);
         Player* GetPlayer(Unit const &, uint64);
         GameObject* GetGameObject(Unit const &, uint64);
         DynamicObject* GetDynamicObject(Unit const &, uint64);
@@ -71,15 +72,12 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void AddUpdateObject(Object *obj);
         void RemoveUpdateObject(Object *obj);
 
-        void AddObjectToRemoveList(Creature      *obj);
-        void AddObjectToRemoveList(GameObject    *obj);
-        void AddObjectToRemoveList(Corpse        *obj);
-        void AddObjectToRemoveList(DynamicObject *obj);
+        void AddObjectToRemoveList(WorldObject   *obj);
 
         void DoDelayedMovesAndRemoves();
 
         void RemoveCreatureCorpseFromPlayerView(Creature *);
-        void RemoveBonesFromPlayerView(Object *);
+        void RemoveBonesFromPlayerView(Corpse *);
         void RemovePlayerFromPlayerView(Player *, Player *);
         void RemoveInvisiblePlayerFromPlayerView(Player *, Player *);
         void RemoveCreatureFromPlayerView(Player *pl, Creature *c);
@@ -111,13 +109,12 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         typedef ZThread::FastMutex LockType;
         typedef MaNGOS::GeneralLock<LockType > Guard;
 
-        void _buildChangeObjectForPlayer(Object *, UpdateDataMapType &);
+        void _buildChangeObjectForPlayer(WorldObject *, UpdateDataMapType &);
         void _buildUpdateObject(Object *, UpdateDataMapType &);
         void _buildPacket(Player *, Object *, UpdateDataMapType &);
         void _update(void);
         std::set<Object *> i_objects;
-        void _AddObjectToRemoveList(Object *obj);
-        std::set<Object *> i_objectsToRemove;
+        std::set<WorldObject *> i_objectsToRemove;
         LockType i_playerGuard;
         LockType i_updateGuard;
         LockType i_removeGuard;

@@ -33,7 +33,7 @@
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 
-DynamicObject::DynamicObject() : Object()
+DynamicObject::DynamicObject() : WorldObject()
 {
     m_objectType |= TYPE_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;
@@ -43,7 +43,7 @@ DynamicObject::DynamicObject() : Object()
 
 bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius )
 {
-    Object::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0, (uint8)-1);
+    WorldObject::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0, (uint8)-1);
 
     SetUInt32Value( OBJECT_FIELD_ENTRY, spellId );
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );
