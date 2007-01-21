@@ -516,6 +516,7 @@ void ObjectMgr::LoadPetLevelInfo()
             if(pInfoMapEntry==NULL)
                 pInfoMapEntry =  new PetLevelInfo[sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)];
 
+            // data for level 1 stored in [0] array element, ...
             PetLevelInfo* pLevelInfo = &pInfoMapEntry[current_level-1];
 
             pLevelInfo->health = fields[2].GetUInt16();
@@ -570,7 +571,7 @@ PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint32 level)
     if(itr == petInfo.end())
         return NULL;
 
-    return &itr->second[level];
+    return &itr->second[level-1];                           // data for level 1 stored in [0] array element, ...
 }
 
 void ObjectMgr::LoadPlayerInfo()
