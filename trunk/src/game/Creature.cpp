@@ -1083,6 +1083,9 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
         return false;
     }
 
+    if(GetCreatureInfo()->rank > 0)
+        this->m_corpseDelay *= 3;                                  //if creature is elite, then remove corpse later
+
     SetHealth(fields[11].GetUInt32());
     SetPower(POWER_MANA,fields[12].GetUInt32());
 
