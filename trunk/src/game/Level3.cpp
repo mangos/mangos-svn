@@ -2747,21 +2747,32 @@ bool ChatHandler::HandleResetCommand (const char * args)
             return true;
         }
 
-        if ( player->getRace() == RACE_TAUREN )
-            player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
-        else
-            player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+        // reset m_form if no aura
+        if(!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+            player->m_form = 0;
 
         player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
         player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
 
-        player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId + player->getGender());
-        player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId + player->getGender() );
-
         player->setFactionForRace(player->getRace());
 
         player->SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( player->getRace() ) | ( player->getClass() << 8 ) | ( player->getGender() << 16 ) | ( powertype << 24 ) ) );
-        player->SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
+
+        // reset only if player not in some form;
+        if(!player->m_form)
+        {
+            if ( player->getRace() == RACE_TAUREN )
+                player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
+            else
+                player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+
+            player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId + player->getGender());
+            player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId + player->getGender() );
+        }
+
+        // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
+        player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
+
         player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
         player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 );
 

@@ -604,6 +604,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag ;}
         uint32 GetWeaponProficiency() const { return m_WeaponProficiency;}
         uint32 GetArmorProficiency() const { return m_ArmorProficiency;}
+        bool IsUseEquipedWeapon() const { return m_form != FORM_CAT && m_form != FORM_BEAR && m_form != FORM_DIREBEAR; }
 
         Player* GetTrader() const { return pTrader; }
         void ClearTrade();
@@ -1044,6 +1045,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _ApplyAllItemMods();
         void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
         void _ApplyAmmoBonuses(bool apply);
+        void InitDataForForm();
 
         void CastItemEquipSpell(Item *item);
         void CastItemCombatSpell(Item *item,Unit* Target);

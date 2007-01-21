@@ -916,6 +916,11 @@ void Player::setDeathState(DeathState s)
 
     if(s == JUST_DIED && cur)
     {
+        // remove resurrection sickness before other mods to prevent incorrect stats calculation
+        RemoveAurasDueToSpell(SPELL_PASSIVE_RESURRECTION_SICKNESS);
+        // remove form before other mods to prevent incorrect stats calculation
+        RemoveAurasDueToSpell(m_ShapeShiftForm);
+
         _RemoveAllItemMods();
         RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
@@ -1723,27 +1728,9 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
 
-    // reset misc. values
-    SetAttackTime(BASE_ATTACK,   2000 );
-    SetAttackTime(OFF_ATTACK,    2000 );
-    SetAttackTime(RANGED_ATTACK, 2000 );
-
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
+    InitDataForForm();
 
     SetArmor(m_createStats[STAT_AGILITY]*2);
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,            0 );
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0 );
-    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0 );
-    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
-
-    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
-    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
-    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetPosStat(Stats(i), 0);
@@ -3284,7 +3271,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
         {
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
-            if (!tmpitem || tmpitem->IsBroken())
+            if (!tmpitem || tmpitem->IsBroken() || !IsUseEquipedWeapon())
                 UpdateSkill(SKILL_UNARMED);
             else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
                 UpdateSkill(tmpitem->GetSkill());
@@ -3294,14 +3281,14 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
         {
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-            if (tmpitem && !tmpitem->IsBroken())
+            if (tmpitem && !tmpitem->IsBroken() && IsUseEquipedWeapon())
                 UpdateSkill(tmpitem->GetSkill());
         };break;
         case RANGED_ATTACK:
         {
             Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
-            if (tmpitem && !tmpitem->IsBroken())
+            if (tmpitem && !tmpitem->IsBroken() && IsUseEquipedWeapon())
                 UpdateSkill(tmpitem->GetSkill());
         };break;
     }
@@ -4604,6 +4591,9 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         //sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
     }
 
+    if(!IsUseEquipedWeapon())
+        return; 
+
     uint8 MINDAMAGEFIELD = 0;
     uint8 MAXDAMAGEFIELD = 0;
 
@@ -5606,16 +5596,16 @@ void Player::SetSheath( uint32 sheathed )
         case 1:                                             // prepeared melee weapon
         {
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            SetVirtualItemSlot(0,item && !item->IsBroken() ? item : NULL);
+            SetVirtualItemSlot(0,item && !item->IsBroken() && IsUseEquipedWeapon() ? item : NULL);
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            SetVirtualItemSlot(1,item && !item->IsBroken() ? item : NULL);
+            SetVirtualItemSlot(1,item && !item->IsBroken() && IsUseEquipedWeapon() ? item : NULL);
             SetVirtualItemSlot(2,NULL);
         };  break;
         case 2:                                             // prepeared ranged weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            SetVirtualItemSlot(2,item && !item->IsBroken() ? item : NULL);
+            SetVirtualItemSlot(2,item && !item->IsBroken() && IsUseEquipedWeapon() ? item : NULL);
             break;
         default:
             SetVirtualItemSlot(0,NULL);
@@ -11031,4 +11021,62 @@ void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32
         }
     }
     GetSession()->SendPacket(&data);
+}
+
+void Player::InitDataForForm()
+{
+    switch(m_form)
+    {
+        case FORM_CAT:
+        {
+            SetAttackTime(BASE_ATTACK,1000);  //Speed 1
+            SetAttackTime(OFF_ATTACK,1000);   //Speed 1
+            uint32 tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
+            float val = tem_att_power/14.0f + getLevel(); 
+                                                            // Damage in cat form (Correct ???)
+            SetFloatValue(UNIT_FIELD_MINDAMAGE, val*0.9);    
+            SetFloatValue(UNIT_FIELD_MAXDAMAGE, val*1.1);
+            SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val*0.9);
+            SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val*1.1);
+            break;
+        }
+        case FORM_BEAR:
+        case FORM_DIREBEAR:
+        {
+            SetAttackTime(BASE_ATTACK,2500);            //Speed 2.5
+            SetAttackTime(OFF_ATTACK,2500);             //Speed 2.5
+            uint32 tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
+            float val = tem_att_power/14.0f + getLevel(); 
+                                                            // Damage in Bear forms (Correct ???)
+            SetFloatValue(UNIT_FIELD_MINDAMAGE, val*0.9);    
+            SetFloatValue(UNIT_FIELD_MAXDAMAGE, val*1.1);
+            SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val*0.9);
+            SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val*1.1);
+            break;
+        }
+        default:                                            // 0, for example
+        {
+            SetAttackTime(BASE_ATTACK,   2000 );
+            SetAttackTime(OFF_ATTACK,    2000 );
+
+            SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
+            SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
+            SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, 0 );
+            SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, 0 );
+            break;
+        }
+    }
+
+    SetAttackTime(RANGED_ATTACK, 2000 );
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
+
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,            0 );
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0 );
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0 );
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
+
+    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
+    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
+    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 }
