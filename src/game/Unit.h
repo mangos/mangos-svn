@@ -51,6 +51,26 @@
 // Horde Racial Passives
 #define SPELL_HORDE_PASSIVE_NATURE_RESISTANCE 20551*/
 
+enum ShapeshiftForm
+{
+    FORM_CAT              = 1,
+    FORM_TREE             = 2,
+    FORM_TRAVEL           = 3,
+    FORM_AQUA             = 4,
+    FORM_BEAR             = 5,
+    FORM_AMBIENT          = 6,
+    FORM_GHOUL            = 7,
+    FORM_DIREBEAR         = 8,
+    FORM_CREATUREBEAR     = 14,
+    FORM_GHOSTWOLF        = 16,
+    FORM_BATTLESTANCE     = 17,
+    FORM_DEFENSIVESTANCE  = 18,
+    FORM_BERSERKERSTANCE  = 19,
+    FORM_SHADOW           = 28,
+    FORM_STEALTH          = 30,
+    FORM_MOONKIN          = 31
+};
+
 #define CREATURE_MAX_SPELLS     4
 #define PLAYER_MAX_SKILLS       127
 #define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_1_1 + ((x)*3))
@@ -702,14 +722,14 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void SetHover(bool on);
         bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
-    protected:
-        Unit ( );
 
         void _RemoveStatsMods();
         void _ApplyStatsMods();
 
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
+    protected:
+        Unit ( );
 
         void _UpdateSpells(uint32 time);
         void _UpdateHostil( uint32 time );

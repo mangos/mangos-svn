@@ -1450,7 +1450,7 @@ float Unit::GetUnitParryChance() const
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Player const* player = (Player const*)this;
-        if(player->CanParry())
+        if(player->CanParry() && player->IsUseEquipedWeapon() )
         {
             Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             if(!tmpitem || tmpitem->IsBroken())
@@ -1498,7 +1498,7 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken()))
+        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||  !((Player*)this)->IsUseEquipedWeapon() ))
             return 0;
 
         // in range
@@ -1522,7 +1522,7 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken()))
+        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||  !((Player*)this)->IsUseEquipedWeapon() ))
             return 0;
 
         // in range
@@ -2357,7 +2357,17 @@ void Unit::ApplyStats(bool apply)
         case CLASS_ROGUE:   val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
         case CLASS_HUNTER:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
         case CLASS_SHAMAN:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20); break;
-        case CLASS_DRUID:   val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
+        case CLASS_DRUID:
+            switch(m_form)
+            {
+                case FORM_CAT: 
+                    val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20 + GetStat(STAT_AGILITY)); break;
+                case FORM_BEAR: 
+                case FORM_DIREBEAR: 
+                    val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
+                default:
+                    val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
+            }
         case CLASS_MAGE:    val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
         case CLASS_PRIEST:  val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
         case CLASS_WARLOCK: val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;

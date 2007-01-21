@@ -1007,6 +1007,20 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 {
     if(!m_target)
         return;
+    if(!Real)
+        return;
+
+    Player* player = m_target->GetTypeId()==TYPEID_PLAYER ? ((Player*)m_target) : NULL;
+
+    // remove for old form
+    if(player)
+    {
+        player->_ApplyStatsMods();
+        player->_RemoveAllItemMods();
+        player->_RemoveAllAuraMods();
+        player->_RemoveStatsMods();
+    }
+
     Unit *unit_target = m_target;
     uint32 modelid = 0;
     Powers PowerType = POWER_MANA;
@@ -1104,6 +1118,18 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             unit_target->setPowerType(POWER_MANA);
         unit_target->m_ShapeShiftForm = 0;
         unit_target->m_form = 0;
+    }
+
+    if(player)
+        player->InitStatsForLevel(player->getLevel(),false,false);
+
+    // apply for new form
+    if(player)
+    {
+        player->_ApplyStatsMods();
+        player->_ApplyAllAuraMods();
+        player->_ApplyAllItemMods();
+        player->_RemoveStatsMods();
     }
 }
 
