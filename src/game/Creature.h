@@ -375,6 +375,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetCurrentCell(Cell const& cell) { m_currentCell = cell; }
 
         bool IsVisibleInGridForPlayer(Player* pl) const;
+
+        void SaveRespawnTime();
     protected:
         void _LoadGoods();
         void _LoadQuests();
@@ -388,10 +390,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint64 m_lootRecipient;
 
         /// Timers
-        uint32 m_deathTimer;                                // timer for death or corpse disappearance
-        uint32 m_respawnTimer;                              // timer for respawn to happen
-        uint32 m_respawnDelay;                              // delay between corpse disappearance and respawning
-        uint32 m_corpseDelay;                               // delay between death and corpse disappearance
+        uint32 m_deathTimer;                                // (msecs)timer for death or corpse disappearance
+        time_t m_respawnTime;                               // (secs) time of next respawn
+        uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
+        uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
         float m_respawnradius;
         CreatureItem item_list[MAX_CREATURE_ITEMS];
         int itemcount;

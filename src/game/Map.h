@@ -138,6 +138,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         void SetUnloadFlag(const GridPair &p, bool unload) { i_info[p.x_coord][p.y_coord]->i_unloadflag = unload; }
         void LoadGrid(const Cell& cell, bool no_unload = false);
         bool UnloadGrid(const uint32 &x, const uint32 &y);
+        void UnloadAll();
 
         void GetUnitList(float x, float y, std::list<Unit*> &unlist);
 

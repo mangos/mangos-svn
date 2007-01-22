@@ -72,7 +72,7 @@ enum LootState
 class Unit;
 
 // 5 sec for bobber catch
-#define FISHING_BOBBER_READY_TIME 2000
+#define FISHING_BOBBER_READY_TIME 5
 
 class MANGOS_DLL_SPEC GameObject : public WorldObject
 {
@@ -94,8 +94,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool LoadFromDB(uint32 guid, QueryResult *result = NULL);
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }
-        void SetRespawnTimer(uint32 respawn) { m_respawnTimer = respawn; }
-        bool isFinished() { return m_respawnTimer == 0;}
+        void SetRespawnTime(uint32 respawn) { m_respawnTime = respawn ? time(NULL) + respawn : 0; }
+        bool isFinished() { return m_respawnTime == 0;}
         void Refresh();
         void Delete();
         void SetSpellId(uint32 id) { m_spellId = id;}
@@ -115,6 +115,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         void CountUseTimes();
 
+        void SaveRespawnTime();
+
         Loot        loot;
         uint32      lootid;
 
@@ -125,8 +127,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void _LoadQuests();
 
         uint32      m_spellId;
-        uint32      m_respawnTimer;
-        uint32      m_respawnDelayTime;
+        time_t      m_respawnTime;                          // (secs) time of next respawn
+        uint32      m_respawnDelayTime;                     // (secs)
         uint32      m_flags;
         LootState   m_lootState;
         std::list<uint32> m_SkillupList;

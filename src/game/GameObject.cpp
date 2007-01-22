@@ -39,8 +39,8 @@ GameObject::GameObject() : WorldObject()
     m_objectTypeId = TYPEID_GAMEOBJECT;
 
     m_valuesCount = GAMEOBJECT_END;
-    m_respawnTimer = 0;
-    m_respawnDelayTime = 25000;
+    m_respawnTime = 0;
+    m_respawnDelayTime = 25;
     m_lootState = GO_CLOSED;
     m_usetimes = 0;
     m_spellId = 0;
@@ -130,11 +130,7 @@ void GameObject::Update(uint32 p_time)
             if (GetGoType()==17)
             {
                 // fishing code (bobber not ready)
-                if( m_respawnTimer > p_time + FISHING_BOBBER_READY_TIME )
-                {
-                    m_respawnTimer -= p_time;               // not ready and will fail at open attempt
-                }
-                else
+                if( m_respawnTime > time(NULL) - FISHING_BOBBER_READY_TIME )
                 {
                     // splash bobber (bobber ready now)
                     Unit* caster = GetOwner();
@@ -164,15 +160,11 @@ void GameObject::Update(uint32 p_time)
             m_lootState = GO_CLOSED;                        // for not bobber is same as GO_CLOSED
             // NO BREAK
         case GO_CLOSED:
-            if (m_respawnTimer > 0)
+            if (m_respawnTime > 0)                          // timer om
             {
-                if (m_respawnTimer > p_time)
+                if (m_respawnTime <= time(NULL))            // timer expired
                 {
-                    m_respawnTimer -= p_time;
-                }
-                else                                        // timer expired
-                {
-                    m_respawnTimer = 0;
+                    m_respawnTime = 0;
                     m_SkillupList.clear();
 
                     switch (GetGoType())
@@ -210,6 +202,7 @@ void GameObject::Update(uint32 p_time)
             switch(GetGoType())
             {
                 case GAMEOBJECT_TYPE_FISHINGNODE:
+                    m_respawnTime = 0;
                     Delete();
                     return;
                 default:
@@ -218,7 +211,7 @@ void GameObject::Update(uint32 p_time)
                     SetLootState(GO_CLOSED);
 
                     SendDestroyObject(GetGUID());
-                    m_respawnTimer = m_respawnDelayTime;
+                    m_respawnTime = time(NULL) + m_respawnDelayTime;
                 }break;
             }
             break;
@@ -241,7 +234,8 @@ void GameObject::Update(uint32 p_time)
         Unit* ok = NULL, *owner = GetOwner();
         if (!owner)
         {
-            m_respawnTimer = 0;
+            m_respawnTime = 0;                              // to prevent save respawn timer
+            Delete();
             return;
         }
 
@@ -255,13 +249,14 @@ void GameObject::Update(uint32 p_time)
         if (ok)
         {
             owner->CastSpell(ok, GetGOInfo()->sound3, true);
-            // removed on unit update
-            m_respawnTimer = 0;
+            m_respawnTime = 0;                              // to prevent save respawn timer
+            Delete();
         }
     }
 
     if (m_usetimes >= 5)
     {
+        m_respawnTime = 0;                                  // to prevent save respawn timer
         Delete();
     }
 
@@ -336,8 +331,9 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
-        //                                0    1     2            3            4            5             6           7           8           9           10     11             12             13         14
-        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`respawntimer`,`animprogress`,`dynflags`,`guid` FROM `gameobject` WHERE `guid` = '%u'", guid);
+        //                                0    1     2            3            4            5             6           7           8           9           10     11              12             13         14            15
+        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`respawntime`,`guid` "
+            "FROM `gameobject` LEFT JOIN `gameobject_respawn` ON `gameobject`.`guid`=`gameobject_respawn`.`guid` WHERE `guid` = '%u'", guid);
 
     if( !result )
     {
@@ -369,6 +365,10 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 
     lootid=fields[10].GetUInt32();
     m_respawnDelayTime=fields[11].GetUInt32();
+    m_respawnTime=fields[14].GetUInt64();
+    if(m_respawnTime <= time(NULL))                         // ready to respawn
+        m_respawnTime = 0;
+
     if (!external) delete result;
 
     _LoadQuests();
@@ -378,6 +378,7 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 void GameObject::DeleteFromDB()
 {
     sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u'", GetGUIDLow());
 }
 
 GameObjectInfo const *GameObject::GetGOInfo() const
@@ -442,4 +443,11 @@ bool GameObject::IsTransport() const
 Unit* GameObject::GetOwner() const
 {
     return ObjectAccessor::Instance().GetUnit(*this, GetOwnerGUID());
+}
+
+void GameObject::SaveRespawnTime()
+{
+    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+    if(m_respawnTime > time(NULL) && !GetOwnerGUID())
+        sDatabase.PExecute("INSERT INTO `gameobject_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(m_respawnTime));
 }

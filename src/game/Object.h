@@ -294,6 +294,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void SendDestroyObject(uint64 guid);
         void SendObjectDeSpawnAnim(uint64 guid);
 
+        virtual void SaveRespawnTime() {}
+
     protected:
         WorldObject( );
 
