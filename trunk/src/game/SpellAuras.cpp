@@ -1121,7 +1121,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
 
     if(player)
-        player->InitStatsForLevel(player->getLevel(),false,false);
+        player->InitDataForForm();
 
     // apply for new form
     if(player)
