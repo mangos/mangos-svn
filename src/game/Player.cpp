@@ -6359,9 +6359,12 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 {
                     if(mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON)
                         return EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED;
-                }else
-                // not let equip offhand item if mainhand not equiped
-                return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+                }
+                else if(type != INVTYPE_HOLDABLE)
+                {
+                    // not let equip offhand non-holdable item if mainhand not equiped
+                    return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+                }
 
             }
 
