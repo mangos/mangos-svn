@@ -114,8 +114,8 @@ class Aura
         void HandleAuraModDispelImmunity(bool Apply, bool Real);
         void HandleAuraProcTriggerSpell(bool Apply, bool Real);
         void HandleAuraProcTriggerDamage(bool Apply, bool Real);
-        void HandleAuraTracCreatures(bool Apply, bool Real);
-        void HandleAuraTracResources(bool Apply, bool Real);
+        void HandleAuraTrackCreatures(bool Apply, bool Real);
+        void HandleAuraTrackResources(bool Apply, bool Real);
         void HandleAuraModParryPercent(bool Apply, bool Real);
         void HandleAuraModDodgePercent(bool Apply, bool Real);
         void HandleAuraModBlockPercent(bool Apply, bool Real);
@@ -156,6 +156,7 @@ class Aura
         void HandleModResistancePercent(bool Apply, bool Real);
         void HandleAuraModBaseResistancePCT(bool Apply, bool Real);
         void HandleModShieldBlock(bool Apply, bool Real);
+        void HandleAuraTrackStealthed(bool Apply, bool Real);
         void HandleModReputationGain(bool Apply, bool Real);
         void HandleForceReaction(bool Apply, bool Real);
         void HandleAuraModRangedHaste(bool Apply, bool Real);

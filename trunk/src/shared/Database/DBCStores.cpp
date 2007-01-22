@@ -419,6 +419,13 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             return SPELL_ASPECT;
     }
 
+    for(int i = 0; i < 3; i++)
+        if(spellInfo->Effect[i] == 6                        //SPELL_EFFECT_APPLY_AURA
+          && (spellInfo->EffectApplyAuraName[i] == 44       //SPELL_AURA_TRACK_CREATURES
+          || spellInfo->EffectApplyAuraName[i] == 45        //SPELL_AURA_TRACK_RESOURCES
+          || spellInfo->EffectApplyAuraName[i] == 151))     //SPELL_AURA_TRACK_STEALTHED
+            return SPELL_TRACKER;
+
     return SPELL_NORMAL;
 }
 
@@ -432,6 +439,7 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
         case SPELL_STING:
         case SPELL_CURSE:
         case SPELL_ASPECT:
+        case SPELL_TRACKER:
             return true;
         default:
             return false;
