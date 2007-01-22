@@ -197,7 +197,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             //obj->SetUInt32Value(GAMEOBJECT_TIMESTAMP,0x465EE6D2); //load timestamp
 
             obj->SetLootState(GO_CLOSED);
-            obj->SetRespawnTimer(5000);                     //close door in 5 seconds
+            obj->SetRespawnTime(5);                         //close door in 5 seconds
 
             return;
         case GAMEOBJECT_TYPE_QUESTGIVER:                    // 2

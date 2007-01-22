@@ -110,6 +110,7 @@ Unit::~Unit()
     for (i = m_gameObj.begin(); i != m_gameObj.end();)
     {
         (*i)->SetOwnerGUID(0);
+        (*i)->SetRespawnTime(0);
         (*i)->Delete();
         i = m_gameObj.erase(i);
     }
@@ -1677,6 +1678,7 @@ void Unit::_UpdateSpells( uint32 time )
             if( (*ite1)->isFinished() )
             {
                 (*ite1)->SetOwnerGUID(0);
+                (*ite1)->SetRespawnTime(0);
                 (*ite1)->Delete();
                 dnext1 = m_gameObj.erase(ite1);
             }
@@ -2682,7 +2684,9 @@ void Unit::RemoveGameObject(GameObject* gameObj, bool del)
     gameObj->SetOwnerGUID(0);
     m_gameObj.remove(gameObj);
     if(del)
+    {   gameObj->SetRespawnTime(0);
         gameObj->Delete();
+    }
 }
 
 void Unit::RemoveGameObject(uint32 spellid, bool del)
@@ -2697,7 +2701,10 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
         {
             (*i)->SetOwnerGUID(0);
             if(del)
+            {
+                (*i)->SetRespawnTime(0);
                 (*i)->Delete();
+            }
 
             next = m_gameObj.erase(i);
         }

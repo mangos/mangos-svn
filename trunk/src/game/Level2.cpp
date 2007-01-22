@@ -430,6 +430,7 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
         owner->RemoveGameObject(obj,false);
     }
 
+    obj->SetRespawnTime(0);                                 // not save respawn time
     obj->Delete();
     obj->DeleteFromDB();
 
@@ -1224,9 +1225,10 @@ bool ChatHandler::HandleSpawnTimeCommand(const char* args)
 
 	int i_stime = atoi((char*)stime);
 
-	if (i_stime < 0) {
+	if (i_stime < 0)
+    {
 		 SendSysMessage(LANG_BAD_VALUE);
-		 return false;
+		 return true;
 	}
 
 	Creature *pCreature = getSelectedCreature();
@@ -1237,7 +1239,7 @@ bool ChatHandler::HandleSpawnTimeCommand(const char* args)
 	else
 		return false;
 
-	sDatabase.PQuery("UPDATE `creature` SET `spawntimesecs`=%i, `respawntimer`=%i WHERE `guid`=%u",i_stime,i_stime,u_guid);
+	sDatabase.PQuery("UPDATE `creature` SET `spawntimesecs`=%i WHERE `guid`=%u",i_stime,u_guid);
 	PSendSysMessage("Spawn time changed to: %i",i_stime);
 
 	return true;

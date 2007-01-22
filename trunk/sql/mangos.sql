@@ -654,7 +654,6 @@ CREATE TABLE `creature` (
   `spawn_orientation` float NOT NULL default '0',
   `curhealth` int(11) unsigned NOT NULL default '1',
   `curmana` int(11) unsigned NOT NULL default '0',
-  `respawntimer` int(11) unsigned NOT NULL default '0',
   `state`        tinyint(3) unsigned NOT NULL default '0',
   `MovementType` tinyint(3) unsigned NOT NULL default '0',
   `auras` longtext,
@@ -790,6 +789,26 @@ CREATE TABLE `creature_questrelation` (
 LOCK TABLES `creature_questrelation` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `creature_questrelation` ENABLE KEYS */;
+
+--
+-- Table structure for table `creature_respawn`
+--
+
+DROP TABLE IF EXISTS `creature_respawn`;
+CREATE TABLE `creature_respawn` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `respawntime` bigint(40) NOT NULL default '0',
+  PRIMARY KEY (`guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
+
+--
+-- Dumping data for table `creature_respawn`
+--
+
+/*!40000 ALTER TABLE `creature_respawn` DISABLE KEYS */;
+LOCK TABLES `creature_respawn` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `creature_respawn` ENABLE KEYS */;
 
 --
 -- Table structure for table `creature_template`
@@ -997,7 +1016,7 @@ CREATE TABLE `gameobject` (
   `rotation2` float NOT NULL default '0',
   `rotation3` float NOT NULL default '0',
   `loot` int(11) unsigned NOT NULL default '0',
-  `respawntimer` int(11) unsigned NOT NULL default '0',
+  `spawntimesecs` int(11) unsigned NOT NULL default '0',
   `animprogress` int(11) unsigned NOT NULL default '0',
   `dynflags` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)
@@ -1106,6 +1125,26 @@ CREATE TABLE `gameobject_questrelation` (
 LOCK TABLES `gameobject_questrelation` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `gameobject_questrelation` ENABLE KEYS */;
+
+--
+-- Table structure for table `gameobject_respawn`
+--
+
+DROP TABLE IF EXISTS `gameobject_respawn`;
+CREATE TABLE `gameobject_respawn` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `respawntime` bigint(40) NOT NULL default '0',
+  PRIMARY KEY (`guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
+
+--
+-- Dumping data for table `gameobject_respawn`
+--
+
+/*!40000 ALTER TABLE `gameobject_respawn` DISABLE KEYS */;
+LOCK TABLES `gameobject_respawn` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `gameobject_respawn` ENABLE KEYS */;
 
 --
 -- Table structure for table `gameobject_template`

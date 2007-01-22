@@ -139,3 +139,9 @@ void MapManager::LoadGrid(int mapid, float x, float y, bool no_unload)
     Cell cell = RedZone::GetZone(p);
     GetMap(mapid)->LoadGrid(cell,no_unload);
 }
+
+void MapManager::UnloadAll()
+{
+    for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
+        iter->second->UnloadAll();
+}

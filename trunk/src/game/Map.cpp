@@ -541,7 +541,10 @@ Map::Remove(T *obj, bool remove)
     }
 
     if( remove )
+    {
+        obj->SaveRespawnTime();
         delete obj;
+    }
 }
 
 void
@@ -843,6 +846,22 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
     DEBUG_LOG("Unloading grid[%u,%u] for map %u finished", x,y, i_id);
     return true;
 }
+
+void Map::UnloadAll()
+{
+    for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
+    {
+        uint64 mask = 1;
+        for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
+        {
+            if( i_gridMask[i] & mask )
+                UnloadGrid(i, j);
+
+            mask <<= 1;
+        }
+    }
+}
+
 
 void Map::GetUnitList(float x, float y, std::list<Unit*> &unlist)
 {

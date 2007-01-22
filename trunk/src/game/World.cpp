@@ -751,14 +751,21 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
     SendZoneMessage(zone, &data, self);
 }
 
+void World::KickAll()
+{
+    // session not removed at kick and will removed in next update tick
+    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        itr->second->KickPlayer();
+}
+
+
 bool World::KickPlayer(std::string playerName)
 {
-    SessionMap::iterator itr, next;
+    SessionMap::iterator itr;
 
-    for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
+    // session not removed at kick and will removed in next update tick
+    for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        next = itr;
-        next++;
         if(!itr->second)
             continue;
         Player *player = itr->second->GetPlayer();

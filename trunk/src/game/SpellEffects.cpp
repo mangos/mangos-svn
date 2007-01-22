@@ -1794,7 +1794,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
         delete pGameObj;
         return;
     }
-    pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetRespawnTime(GetDuration(m_spellInfo)/1000);
 
     m_caster->AddGameObject(pGameObj);
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
@@ -1933,7 +1933,7 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->getFaction() );
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
-    pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetRespawnTime(GetDuration(m_spellInfo)/1000);
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     m_caster->AddGameObject(pGameObj);
@@ -2390,7 +2390,7 @@ void Spell::EffectSummonObject(uint32 i)
     }
 
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
-    pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetRespawnTime(GetDuration(m_spellInfo)/1000);
     pGameObj->SetSpellId(m_spellInfo->Id);
     pGameObj->SetLootState(GO_CLOSED);
     m_caster->AddGameObject(pGameObj);
@@ -2718,13 +2718,13 @@ void Spell::EffectTransmitted(uint32 i)
 
         // end time of range when posable catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
         // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
-        uint32 fish = urand(FISHING_BOBBER_READY_TIME,GetDuration(m_spellInfo));
-        pGameObj->SetRespawnTimer(fish);
+        uint32 fish = urand(FISHING_BOBBER_READY_TIME,GetDuration(m_spellInfo)/1000);
+        pGameObj->SetRespawnTime(fish);
     }
     else
     {
         pGameObj->SetOwnerGUID(m_caster->GetGUID() );
-        pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
+        pGameObj->SetRespawnTime(GetDuration(m_spellInfo)/1000);
     }
 
     pGameObj->SetUInt32Value(12, 0x3F63BB3C );

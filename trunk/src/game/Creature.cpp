@@ -51,7 +51,7 @@ uint32 CreatureInfo::randomDisplayID() const
 
 Creature::Creature() :
 Unit(), i_AI(NULL), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
-m_deathTimer(0), m_respawnTimer(0), m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
+m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
@@ -150,9 +150,10 @@ void Creature::Update(uint32 diff)
             break;
         case DEAD:
         {
-            if( m_respawnTimer <= diff )
+            if( m_respawnTime <= time(NULL) )
             {
                 DEBUG_LOG("Respawning...");
+                m_respawnTime = 0;
 
                 CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
 
@@ -167,8 +168,6 @@ void Creature::Update(uint32 diff)
                 i_motionMaster.Clear();
                 MapManager::Instance().GetMap(GetMapId())->Add(this);
             }
-            else
-                m_respawnTimer -= diff;
             break;
         }
         case CORPSE:
@@ -182,7 +181,7 @@ void Creature::Update(uint32 diff)
                 lootForBody         = false;
                 loot.clear();
                 setDeathState(DEAD);
-                m_respawnTimer = m_respawnDelay;
+                m_respawnTime = time(NULL) + m_respawnDelay;
 
                 float x,y,z;
                 GetRespawnCoord(x, y, z);
@@ -881,7 +880,6 @@ void Creature::SaveToDB()
         << (float)(0) << ","                                //spawn_orientation
         << GetHealth() << ","                               //curhealth
         << GetPower(POWER_MANA) << ","                      //curmana
-        << m_respawnTimer << ","                            //respawntimer
 
         << (uint32)(m_deathState) << ","                    // is it really death state or just state?
     //or
@@ -1063,8 +1061,9 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
-        //                                0    1     2            3            4            5             6               7           8                  9                  10                 11          12        13             14      15             16
-        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntimer`,`state`,`MovementType`,`auras` FROM `creature` WHERE `guid` = '%u'", guid);
+        //                                0    1     2            3            4            5             6               7           8                  9                  10                 11          12        13            14      15             16
+        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`state`,`MovementType`,`auras` "
+            "FROM `creature` LEFT JOIN `creature_respawn` ON `creature`.`guid`=`creature_respawn`.`guid` WHERE `guid` = '%u'", guid);
 
     if(!result)
     {
@@ -1092,9 +1091,14 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
     respawn_cord[1] = fields[9].GetFloat();
     respawn_cord[2] = fields[10].GetFloat();
 
-    m_respawnDelay =(fields[6].GetUInt32())*1000;
-    m_respawnTimer = fields[13].GetUInt32();
+    m_respawnDelay = fields[6].GetUInt32();
     m_deathState = (DeathState)fields[14].GetUInt32();
+
+    m_respawnTime  = (time_t)fields[13].GetUInt64();
+    if(m_respawnTime > time(NULL))                          // not ready to respawn
+        m_deathState = DEAD;
+    else                                                    // ready to respawn
+        m_respawnTime = 0;
 
     {
         uint32 mtg = fields[15].GetUInt32();
@@ -1239,7 +1243,7 @@ void Creature::setDeathState(DeathState s)
 {
     if(s == JUST_DIED)
     {
-        m_deathTimer = m_corpseDelay;
+        m_deathTimer = m_corpseDelay*1000;
 
         if(!IsStopped()) StopMoving();
     }
@@ -1420,4 +1424,13 @@ void Creature::CallAssistence()
     {
         CastSpell(this,SPELL_ID_AGGRO, true);
     }
+}
+
+void Creature::SaveRespawnTime()
+{
+    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+    if(m_respawnTime > time(NULL))                           // dead (no corpse)
+        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(m_respawnTime));
+    else if(m_deathTimer > 0)                               // dead (corpse)
+        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(time(NULL)+m_respawnDelay+m_deathTimer/1000));
 }
