@@ -651,6 +651,7 @@ void Spell::prepare(SpellCastTargets * targets)
             SendChannelUpdate(0);
             m_triggeredByAura->SetAuraDuration(0);
         }
+        SendCastResult(result);
         finish(false);
         return;
     }
@@ -723,7 +724,7 @@ void Spell::cast(bool skipCheck)
         return;
     }
 
-    // triggered cast called from Spell::preper where it already checked
+    // triggered cast called from Spell::prepare where it was already checked
     if(!skipCheck)
     {
         castResult = CanCast();
@@ -1577,18 +1578,12 @@ uint8 Spell::CanCast()
 {
     // check cooldowns to prevent cheating
     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->HaveSpellCooldown(m_spellInfo->Id))
-    {
-        SendCastResult(CAST_FAIL_SPELL_NOT_READY_YET);
         return CAST_FAIL_SPELL_NOT_READY_YET;
-    }
 
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
     if( ((Player*)m_caster)->GetMovementFlags() &&  (IsAutoRepeat() || m_rangedShoot) )
-    {
-        SendCastResult(CAST_FAIL_CANT_DO_WHILE_MOVING);
         return CAST_FAIL_CANT_DO_WHILE_MOVING;
-    }
 
     uint8 castResult = 0;
 
@@ -1626,17 +1621,12 @@ uint8 Spell::CanCast()
                 else
                     castResult = CAST_FAIL_INVALID_TARGET;
 
-                SendCastResult(castResult);
                 return castResult;
             }
         }
 
         if(target->IsImmunedToSpell(m_spellInfo))
-        {
-            castResult = CAST_FAIL_IMMUNE;
-            SendCastResult(castResult);
-            return castResult;
-        }
+            return CAST_FAIL_IMMUNE;
         /*
         if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
         {
@@ -1670,32 +1660,17 @@ uint8 Spell::CanCast()
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
 
         if(castResult!=0)
-        {
-            SendCastResult(castResult);
             return castResult;
-        }
     }
 
     if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
-    {
-        castResult = CAST_FAIL_CANT_DO_WHILE_STUNNED;
-        SendCastResult(castResult);
-        return castResult;
-    }
+        return CAST_FAIL_CANT_DO_WHILE_STUNNED;
 
     if(m_caster->IsMounted() && !m_IsTriggeredSpell)
-    {
-        castResult = CAST_FAIL_CANT_USE_WHEN_MOUNTED;
-        SendCastResult(castResult);
-        return castResult;
-    }
+        return CAST_FAIL_CANT_USE_WHEN_MOUNTED;
 
     if(m_caster->m_silenced)
-    {
-        castResult = CAST_FAIL_SILENCED;                    //0x5A;
-        SendCastResult(castResult);
-        return castResult;
-    }
+        return CAST_FAIL_SILENCED;
 
     castResult = CheckItems();                              // always check items (focus object can be required for any type casts)
 
@@ -1709,10 +1684,7 @@ uint8 Spell::CanCast()
     }
 
     if( castResult != 0 )
-    {
-        SendCastResult(castResult);
         return castResult;
-    }
 
     for (int i = 0; i < 3; i++)
     {
@@ -1857,13 +1829,38 @@ uint8 Spell::CanCast()
                     break;
                 }
 
-                // Fizzle at the skinning attempt finish
-                if (m_caster->m_currentSpell == this && ReqValue > irand(SkinningValue-25, SkinningValue+5) )
+                // chance for fail at orange skinning attempt
+                if (m_caster->m_currentSpell == this && (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
+                    castResult = CAST_FAIL_FAILED_ATTEMPT;
+                break;
+            }
+            case SPELL_EFFECT_OPEN_LOCK:
+            {
+                if (m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT)
+                    break;
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || !gameObjTarget)
+                    return CAST_FAIL_FAILED;
+
+                // chance for fail at orange mining/herb gathering attempt
+                if (gameObjTarget->GetGoType() == GAMEOBJECT_TYPE_CHEST && m_caster->m_currentSpell == this)
                 {
-                    castResult = CAST_FAIL_FIZZLED;
-                    // 10% chance to damage the skin when fizzled
-                    if ( urand(1, 100) <= 10 )
-                        unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+                    int32 SkillValue;
+                    if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_HERBALISM)
+                        SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM);
+                    else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_MINING)
+                        SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_MINING);
+                    else
+                        break;
+
+                    int32 ReqValue;
+                    LockEntry const *lockInfo = sLockStore.LookupEntry(gameObjTarget->GetGOInfo()->sound0);
+                    if (lockInfo)
+                        ReqValue = lockInfo->requiredskill;
+                    else
+                        break;
+
+                    if (ReqValue > irand(SkillValue-25, SkillValue+37))
+                        castResult = CAST_FAIL_FAILED_ATTEMPT;
                 }
                 break;
             }
@@ -1923,10 +1920,7 @@ uint8 Spell::CanCast()
         }
 
         if(castResult != 0)
-        {
-            SendCastResult(castResult);
             return castResult;
-        }
     }
 
     // Conflagrate - do only when preparing
@@ -1948,10 +1942,7 @@ uint8 Spell::CanCast()
             }
         }
         if(!hasImmolate)
-        {
-            SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
             return CAST_FAIL_CANT_DO_THAT_YET;
-        }
     }
 
     for (int i = 0; i < 3; i++)
@@ -2019,10 +2010,7 @@ uint8 Spell::CanCast()
             default:break;
         }
         if(castResult != 0)
-        {
-            SendCastResult(castResult);
             return castResult;
-        }
     }
     return castResult;
 }
