@@ -317,9 +317,6 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading player create info & level stats..." );
     objmgr.LoadPlayerInfo();
 
-    sLog.outString( "Loading Quests..." );
-    objmgr.LoadQuests();
-
     sLog.outString( "Loading Spell Chain Data..." );
     objmgr.LoadSpellChains();
 
@@ -346,6 +343,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Creature templates..." );
     objmgr.LoadCreatureTemplates();
+
+    sLog.outString( "Loading Quests..." );
+    objmgr.LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables
 
     sLog.outString( "Loading Guilds..." );
     objmgr.LoadGuilds();
