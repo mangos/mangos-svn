@@ -1556,7 +1556,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         std::string name = fields[1].GetCppString();
 
         QuestStatus status = m_session->GetPlayer()->GetQuestStatus(id);
-        
+
         char const* statusStr = "";
         if(status == QUEST_STATUS_COMPLETE)
         {

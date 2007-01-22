@@ -263,7 +263,6 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             _player->ClearTrade();
             _player->pTrader->ClearTrade();
 
-
             // desynced with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
             sDatabase.BeginTransaction();
             _player->SaveInventoryAndGoldToDB();

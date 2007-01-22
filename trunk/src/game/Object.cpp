@@ -561,7 +561,8 @@ uint32 WorldObject::GetAreaId() const
     return MapManager::Instance().GetMap(m_mapId)->GetAreaId(m_positionX,m_positionY);
 }
 
-float WorldObject::GetDistanceSq(const WorldObject* obj) const        //slow
+                                                            //slow
+float WorldObject::GetDistanceSq(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
@@ -581,7 +582,8 @@ float WorldObject::GetDistanceSq(const float x, const float y, const float z) co
     return ( dist > 0 ? dist * dist : 0);
 }
 
-float WorldObject::GetDistance2dSq(const WorldObject* obj) const      //slow
+                                                            //slow
+float WorldObject::GetDistance2dSq(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
@@ -739,4 +741,3 @@ void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
     data << guid;
     SendMessageToSet(&data, true);
 }
-

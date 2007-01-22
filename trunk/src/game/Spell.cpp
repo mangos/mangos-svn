@@ -697,7 +697,6 @@ void Spell::cancel()
             }
         }
 
-
         m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
         SendChannelUpdate(0);
         SendInterrupted(0);

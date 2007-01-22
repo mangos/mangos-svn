@@ -1553,7 +1553,7 @@ void Spell::EffectSummonPet(uint32 i)
 
         // this enables popup window (pet dismiss, cancel), hunter pet additinal flags set later
         NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1);
-                                                            
+
         NewSummon->InitStatsForLevel( petlevel);
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
@@ -1769,7 +1769,7 @@ void Spell::EffectInterruptCast(uint32 i)
         return;
 
     // TODO: not all spells that used this effect apply cooldown at school spells
-    // also exist case: apply cooldown to interupted cast only and to all spells 
+    // also exist case: apply cooldown to interupted cast only and to all spells
     if (unitTarget->m_currentSpell && unitTarget->m_currentSpell->m_spellInfo)
     {
         unitTarget->ProhibitSpellScholl(unitTarget->m_currentSpell->m_spellInfo->School, GetDuration(m_spellInfo));
