@@ -1183,3 +1183,62 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
     PSendSysMessage("Character %s ticket deleted.",px);
     return true;
 }
+
+bool ChatHandler::HandleSpawnDistCommand(const char* args)
+{
+	if(!*args)
+       return false;
+
+	int option = atoi((char*)args);
+	if (option < 0) {
+		 SendSysMessage(LANG_BAD_VALUE);
+		 return false;
+	}
+
+	int mtype=0; // MovementType
+	if (option > 0)
+		mtype=1;
+
+	Creature *pCreature = getSelectedCreature();
+	uint64 u_guid = 0;
+
+	if (pCreature)
+		u_guid = pCreature->GetGUID();
+	else
+		return false;
+	
+	sDatabase.PQuery("UPDATE `creature` SET `spawndist`=%i, `MovementType`=%i WHERE `guid`=%u",option,mtype,u_guid);
+	PSendSysMessage("Spawn distance changed to: %i",option);
+	return true;
+}
+
+bool ChatHandler::HandleSpawnTimeCommand(const char* args)
+{
+	if(!*args)
+       return false;
+
+	char* stime = strtok((char*)args, " ");
+
+    if (!stime)
+        return false;
+
+	int i_stime = atoi((char*)stime);
+
+	if (i_stime < 0) {
+		 SendSysMessage(LANG_BAD_VALUE);
+		 return false;
+	}
+
+	Creature *pCreature = getSelectedCreature();
+	uint64 u_guid = 0;
+
+	if (pCreature)
+		u_guid = pCreature->GetGUID();
+	else
+		return false;
+
+	sDatabase.PQuery("UPDATE `creature` SET `spawntimesecs`=%i, `respawntimer`=%i WHERE `guid`=%u",i_stime,i_stime,u_guid);
+	PSendSysMessage("Spawn time changed to: %i",i_stime);
+
+	return true;
+}
