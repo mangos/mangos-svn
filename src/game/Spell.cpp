@@ -2233,8 +2233,20 @@ uint8 Spell::CheckItems()
         if((itemid = m_spellInfo->Reagent[i]) == 0)
             continue;
         itemcount = m_spellInfo->ReagentCount[i];
+        // CastItem is also spell reagent
         if( m_CastItem && m_CastItem->GetEntry() == itemid )
-            itemcount++;
+        {
+            ItemPrototype const *proto = m_CastItem->GetProto();
+            if(!proto)
+                return CAST_FAIL_ITEM_NOT_READY;
+            for(int s=0;s<5;s++)
+                // CastItem will be used up and does not count as reagent
+                if(proto->Spells[s].SpellCharges < 0 && m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+s) < 2)
+                {
+                    itemcount++;
+                    break;
+                }
+        }
         if( !p_caster->HasItemCount(itemid,itemcount) )
             return (uint8)CAST_FAIL_ITEM_NOT_READY;         //0x54
     }

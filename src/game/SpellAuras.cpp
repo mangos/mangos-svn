@@ -89,8 +89,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModDispelImmunity,                     //SPELL_AURA_DISPEL_IMMUNITY = 41,
     &Aura::HandleAuraProcTriggerSpell,                      //SPELL_AURA_PROC_TRIGGER_SPELL = 42,
     &Aura::HandleAuraProcTriggerDamage,                     //SPELL_AURA_PROC_TRIGGER_DAMAGE = 43,
-    &Aura::HandleAuraTracCreatures,                         //SPELL_AURA_TRACK_CREATURES = 44,
-    &Aura::HandleAuraTracResources,                         //SPELL_AURA_TRACK_RESOURCES = 45,
+    &Aura::HandleAuraTrackCreatures,                        //SPELL_AURA_TRACK_CREATURES = 44,
+    &Aura::HandleAuraTrackResources,                        //SPELL_AURA_TRACK_RESOURCES = 45,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PARRY_SKILL = 46, obsolete?
     &Aura::HandleAuraModParryPercent,                       //SPELL_AURA_MOD_PARRY_PERCENT = 47,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DODGE_SKILL = 48, obsolete?
@@ -196,7 +196,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_RETAIN_COMBO_POINTS = 148,
     &Aura::HandleNULL,                                      //SPELL_AURA_RESIST_PUSHBACK    =    149    ,//    Resist Pushback
     &Aura::HandleModShieldBlock,                            //SPELL_AURA_MOD_SHIELD_BLOCK_PCT   = 150   ,//    Mod Shield Block %
-    &Aura::HandleNULL,                                      //SPELL_AURA_TRACK_STEALTHED    =    151    ,//    Track Stealthed
+    &Aura::HandleAuraTrackStealthed,                        //SPELL_AURA_TRACK_STEALTHED    =    151    ,//    Track Stealthed
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECTED_RANGE    =    152    ,//    Mod Detected Range
     &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE_FLAT    =    153    ,//    Split Damage Flat
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STEALTH_LEVEL    =    154    ,//    Stealth Level Modifier
@@ -1318,20 +1318,35 @@ void Aura::HandleFarSight(bool apply, bool Real)
     m_target->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
 }
 
-void Aura::HandleAuraTracCreatures(bool apply, bool Real)
+void Aura::HandleAuraTrackCreatures(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
+    if(apply)
+        m_target->RemoveNoStackAurasDueToAura(this);
     m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1) : 0 );
 }
 
-void Aura::HandleAuraTracResources(bool apply, bool Real)
+void Aura::HandleAuraTrackResources(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
+    if(apply)
+        m_target->RemoveNoStackAurasDueToAura(this);
     m_target->SetUInt32Value(PLAYER_TRACK_RESOURCES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1): 0 );
+}
+
+void Aura::HandleAuraTrackStealthed(bool apply, bool Real)
+{
+    if(m_target->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
+    if(apply)
+        m_target->RemoveNoStackAurasDueToAura(this);
+
+    //TODO: add stealthed tracking effect
 }
 
 void Aura::HandleAuraModScale(bool apply, bool Real)
