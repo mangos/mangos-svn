@@ -161,6 +161,7 @@ GroupVisibility = 0
 Motd = "Welcome to the Massive Network Game Object Server."
 
 # Health and power regeneration.
+# Power1 - Mana; Power2 - Rage; Power3 - Focus (?).
 Rate.Health = 1;
 Rate.Power1 = 1;
 Rate.Power2 = 1;
