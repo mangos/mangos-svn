@@ -9101,14 +9101,14 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
                     // GO activate objective
                     if(qInfo->ReqCreatureOrGOId[j] < 0)
                     {
+                        // checked at quest_template loading
                         reqTarget = - qInfo->ReqCreatureOrGOId[j];
-                        assert(sGOStorage.LookupEntry<GameObject>(reqTarget));
                     }
                     // creature acivate objectives
                     else if(qInfo->ReqCreatureOrGOId[j] > 0)
                     {
+                        // checked at quest_template loading
                         reqTarget = qInfo->ReqCreatureOrGOId[j];
-                        assert(sCreatureStorage.LookupEntry<Creature>(reqTarget));
                     }
                     // other not creature/GO related obejctives
                     else
