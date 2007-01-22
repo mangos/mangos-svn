@@ -2360,10 +2360,10 @@ void Unit::ApplyStats(bool apply)
         case CLASS_DRUID:
             switch(m_form)
             {
-                case FORM_CAT: 
+                case FORM_CAT:
                     val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20 + GetStat(STAT_AGILITY)); break;
-                case FORM_BEAR: 
-                case FORM_DIREBEAR: 
+                case FORM_BEAR:
+                case FORM_DIREBEAR:
                     val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
                 default:
                     val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;

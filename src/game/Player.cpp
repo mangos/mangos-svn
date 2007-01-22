@@ -4590,7 +4590,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
     }
 
     if(!IsUseEquipedWeapon())
-        return; 
+        return;
 
     uint8 MINDAMAGEFIELD = 0;
     uint8 MAXDAMAGEFIELD = 0;
@@ -10090,7 +10090,6 @@ void Player::SaveToDB()
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
     SetUInt32Value(UNIT_FIELD_DISPLAYID,GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
 
-
     // remove restflag when save
     //this is becouse of the rename char stuff
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
@@ -10224,7 +10223,6 @@ void Player::SaveInventoryAndGoldToDB()
     _SaveInventory();
     SetUInt32ValueInDB(PLAYER_FIELD_COINAGE,GetMoney(),GetGUID());
 }
-
 
 void Player::_SaveActions()
 {
@@ -11011,7 +11009,7 @@ void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32
         if(idSchool == spellInfo->School && GetSpellCooldownDelay(unSpellId) < unTimeMs )
         {
             data << uint32(unSpellId);
-            data << uint32(uint32(unTimeMs));   // in m.secs
+            data << uint32(uint32(unTimeMs));               // in m.secs
             AddSpellCooldown(unSpellId, curTime + unTimeMs/1000);
         }
     }
@@ -11024,12 +11022,12 @@ void Player::InitDataForForm()
     {
         case FORM_CAT:
         {
-            SetAttackTime(BASE_ATTACK,1000);  //Speed 1
-            SetAttackTime(OFF_ATTACK,1000);   //Speed 1
+            SetAttackTime(BASE_ATTACK,1000);                //Speed 1
+            SetAttackTime(OFF_ATTACK,1000);                 //Speed 1
             uint32 tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
-            float val = tem_att_power/14.0f + getLevel(); 
+            float val = tem_att_power/14.0f + getLevel();
                                                             // Damage in cat form (Correct ???)
-            SetFloatValue(UNIT_FIELD_MINDAMAGE, val*0.9);    
+            SetFloatValue(UNIT_FIELD_MINDAMAGE, val*0.9);
             SetFloatValue(UNIT_FIELD_MAXDAMAGE, val*1.1);
             SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val*0.9);
             SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val*1.1);
@@ -11038,12 +11036,12 @@ void Player::InitDataForForm()
         case FORM_BEAR:
         case FORM_DIREBEAR:
         {
-            SetAttackTime(BASE_ATTACK,2500);            //Speed 2.5
-            SetAttackTime(OFF_ATTACK,2500);             //Speed 2.5
+            SetAttackTime(BASE_ATTACK,2500);                //Speed 2.5
+            SetAttackTime(OFF_ATTACK,2500);                 //Speed 2.5
             uint32 tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
-            float val = tem_att_power/14.0f + getLevel(); 
+            float val = tem_att_power/14.0f + getLevel();
                                                             // Damage in Bear forms (Correct ???)
-            SetFloatValue(UNIT_FIELD_MINDAMAGE, val*0.9);    
+            SetFloatValue(UNIT_FIELD_MINDAMAGE, val*0.9);
             SetFloatValue(UNIT_FIELD_MAXDAMAGE, val*1.1);
             SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val*0.9);
             SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val*1.1);

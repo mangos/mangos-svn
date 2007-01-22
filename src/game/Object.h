@@ -307,5 +307,4 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         bool mSemaphoreTeleport;
 };
-
 #endif

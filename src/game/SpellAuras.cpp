@@ -871,7 +871,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 
     // only at real add/remove
-    if( Real && GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 && 
+    if( Real && GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
         caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
     {
         Player * player = (Player*)m_target;
