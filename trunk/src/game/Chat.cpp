@@ -209,6 +209,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "showarea",    3, &ChatHandler::HandleShowAreaCommand,         "",   NULL },
         { "hidearea",    3, &ChatHandler::HandleHideAreaCommand,         "",   NULL },
         { "addspw",      2, &ChatHandler::HandleAddSpwCommand,           "",   NULL },
+        { "spawndist",   2, &ChatHandler::HandleSpawnDistCommand,        "",   NULL },
+        { "spawntime",   2, &ChatHandler::HandleSpawnTimeCommand,        "",   NULL },
         { "additem",     3, &ChatHandler::HandleAddItemCommand,          "",   NULL },
         { "additemset",  3, &ChatHandler::HandleAddItemSetCommand,       "",   NULL },
         { "createguild", 3, &ChatHandler::HandleCreateGuildCommand,      "",   NULL },

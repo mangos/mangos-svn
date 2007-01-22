@@ -179,6 +179,8 @@ class ChatHandler
         bool HandleDisplayIdCommand(const char* args);
         bool HandleFactionIdCommand(const char* args);
         bool HandleAddSpwCommand(const char* args);
+        bool HandleSpawnDistCommand(const char* args);
+        bool HandleSpawnTimeCommand(const char* args);
         bool HandleGoCreatureCommand(const char* args);
         bool HandleGoObjectCommand(const char* args);
         bool HandleTargetObjectCommand(const char* args);
