@@ -19,7 +19,7 @@
 #ifndef MANGOS_BAG_H
 #define MANGOS_BAG_H
 
-// Maximum 20 Slots ( (CONTAINER_END - CONTAINER_FIELD_SLOT_1)/2
+// Maximum 28 Slots ( (CONTAINER_END - CONTAINER_FIELD_SLOT_1)/2
 #define MAX_BAG_SIZE 28
 
 #include "Object.h"
