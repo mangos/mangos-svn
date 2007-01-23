@@ -333,7 +333,7 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
     if (!external)
         //                                0    1     2            3            4            5             6           7           8           9           10     11              12             13         14            15
         result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`respawntime`,`guid` "
-            "FROM `gameobject` LEFT JOIN `gameobject_respawn` ON `gameobject`.`guid`=`gameobject_respawn`.`guid` WHERE `guid` = '%u'", guid);
+            "FROM `gameobject` LEFT JOIN `gameobject_respawn` ON `gameobject`.`guid`=`gameobject_respawn`.`guid` WHERE `gameobject`.`guid` = '%u'", guid);
 
     if( !result )
     {
