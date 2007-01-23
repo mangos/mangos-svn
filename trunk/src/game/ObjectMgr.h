@@ -359,9 +359,9 @@ class ObjectMgr
         TeleportMap         mTeleports;
 
     private:
-        typedef std::map<uint32,PetLevelInfo*> PetLevelIfoMap;
+        typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]
-        PetLevelIfoMap petInfo;                             // [creature_id][level]
+        PetLevelInfoMap petInfo;                            // [creature_id][level]
 
         void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
         PlayerInfo **playerInfo;                            // [race][class]

@@ -77,7 +77,7 @@ ObjectMgr::~ObjectMgr()
     }
     mTeleports.clear();
 
-    for(PetLevelIfoMap::iterator i = petInfo.begin( ); i != petInfo.end( ); ++ i )
+    for(PetLevelInfoMap::iterator i = petInfo.begin( ); i != petInfo.end( ); ++ i )
     {
         delete[] i->second;
     }
@@ -539,7 +539,7 @@ void ObjectMgr::LoadPetLevelInfo()
     }
 
     // Fill gaps and check integrity
-    for (PetLevelIfoMap::iterator itr = petInfo.begin(); itr != petInfo.end(); ++itr)
+    for (PetLevelInfoMap::iterator itr = petInfo.begin(); itr != petInfo.end(); ++itr)
     {
         PetLevelInfo* pInfo = itr->second;
 
@@ -567,7 +567,7 @@ PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint32 level)
     if(level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
         level = sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL);
 
-    PetLevelIfoMap::const_iterator itr = petInfo.find(creature_id);
+    PetLevelInfoMap::const_iterator itr = petInfo.find(creature_id);
     if(itr == petInfo.end())
         return NULL;
 
