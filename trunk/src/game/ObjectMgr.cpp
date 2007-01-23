@@ -1237,11 +1237,11 @@ void ObjectMgr::LoadQuests()
 
         for(int j = 0; j < qinfo->ReqSourceRef.size(); ++j )
         {
-            uint32 id = qinfo->ReqSourceRef[j];
-            if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
+            uint32 ref = qinfo->ReqSourceRef[j];
+            if(ref && qinfo->ReqSourceId[j] && !qinfo->ReqItemId[ref])
             {
-                sLog.outErrorDb("Quest %u have `ReqSourceRef%d` = %u but `ReqSourceId%u` = 0, quest can't be done.",
-                    qinfo->GetQuestId(),j+1,id,id);
+                sLog.outErrorDb("Quest %u have `ReqSourceRef%d` = %u but `ReqItemId%u` = 0, quest can't be done.",
+                    qinfo->GetQuestId(),j+1,ref,ref);
                 // no changes, quest can't be done for this requirement
             }
         }
