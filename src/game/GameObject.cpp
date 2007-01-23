@@ -366,8 +366,11 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
     lootid=fields[10].GetUInt32();
     m_respawnDelayTime=fields[11].GetUInt32();
     m_respawnTime=fields[14].GetUInt64();
-    if(m_respawnTime <= time(NULL))                         // ready to respawn
+    if(m_respawnTime && m_respawnTime <= time(NULL))        // ready to respawn
+    {
         m_respawnTime = 0;
+        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+    }
 
     if (!external) delete result;
 
@@ -447,7 +450,9 @@ Unit* GameObject::GetOwner() const
 
 void GameObject::SaveRespawnTime()
 {
-    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u'", GetGUIDLow());
     if(m_respawnTime > time(NULL) && !GetOwnerGUID())
+    {
+        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u'", GetGUIDLow());
         sDatabase.PExecute("INSERT INTO `gameobject_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(m_respawnTime));
+    }
 }

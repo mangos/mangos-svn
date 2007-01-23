@@ -271,6 +271,14 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
         }
 
+        bool isWorldBoss() const
+        {
+            if(isPet())
+                return false;
+
+            return GetCreatureInfo()->rank == CREATURE_ELITE_WORLDBOSS;
+        }
+
         void AIM_Initialize(void);
         MotionMaster* operator->(void) { return &i_motionMaster; }
 

@@ -1098,7 +1098,10 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
     if(m_respawnTime > time(NULL))                          // not ready to respawn
         m_deathState = DEAD;
     else                                                    // ready to respawn
+    {
         m_respawnTime = 0;
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+    }
 
     {
         uint32 mtg = fields[15].GetUInt32();
@@ -1245,6 +1248,10 @@ void Creature::setDeathState(DeathState s)
     {
         m_deathTimer = m_corpseDelay*1000;
 
+        // save booss respawn time at death to prevent crash cheating
+        if(isWorldBoss())
+            SaveRespawnTime();
+
         if(!IsStopped()) StopMoving();
     }
     Unit::setDeathState(s);
@@ -1283,7 +1290,7 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
 {
     if (!spellInfo)
         return false;
-    if( CREATURE_ELITE_WORLDBOSS == GetCreatureInfo()->rank )
+    if( isWorldBoss() )
         if( (IMMUNE_MECHANIC_FEAR == spellInfo->Mechanic) ||
         (IMMUNE_MECHANIC_STUNDED == spellInfo->Mechanic) ||
         (IMMUNE_MECHANIC_DAZED == spellInfo->Mechanic) ||
@@ -1428,9 +1435,17 @@ void Creature::CallAssistence()
 
 void Creature::SaveRespawnTime()
 {
-    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+    if(isPet())
+        return;
+
     if(m_respawnTime > time(NULL))                           // dead (no corpse)
+    {
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
         sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(m_respawnTime));
+    }
     else if(m_deathTimer > 0)                               // dead (corpse)
+    {
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
         sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(time(NULL)+m_respawnDelay+m_deathTimer/1000));
+    }
 }
