@@ -1238,11 +1238,21 @@ void ObjectMgr::LoadQuests()
         for(int j = 0; j < qinfo->ReqSourceRef.size(); ++j )
         {
             uint32 ref = qinfo->ReqSourceRef[j];
-            if(ref && qinfo->ReqSourceId[j] && !qinfo->ReqItemId[ref])
+            if(ref)
             {
-                sLog.outErrorDb("Quest %u have `ReqSourceRef%d` = %u but `ReqItemId%u` = 0, quest can't be done.",
-                    qinfo->GetQuestId(),j+1,ref,ref);
-                // no changes, quest can't be done for this requirement
+                if(ref > 4)
+                {
+                    sLog.outErrorDb("Quest %u have `ReqSourceRef%d` = %u but max value in `ReqSourceRef%d` can be 4, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,ref,j+1);
+                    // no changes, quest can't be done for this requirement
+                }
+                else
+                if(qinfo->ReqSourceId.size() > j && qinfo->ReqSourceId[j] && (qinfo->ReqItemId.size() < ref || !qinfo->ReqItemId[ref-1]))
+                {
+                    sLog.outErrorDb("Quest %u have `ReqSourceRef%d` = %u but `ReqItemId%u` = 0, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,ref,ref);
+                    // no changes, quest can't be done for this requirement
+                }
             }
         }
 
