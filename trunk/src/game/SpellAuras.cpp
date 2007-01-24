@@ -1560,7 +1560,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         m_target->clearUnitState(UNIT_STAT_STUNDED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
         Unit* caster = GetCaster();
-        if(caster)  // set creature facing on root effect
+        if(caster)                                          // set creature facing on root effect
         {
             m_target->SetUInt64Value (UNIT_FIELD_TARGET,caster->GetGUIDLow());
         }
@@ -1689,7 +1689,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         m_target->clearUnitState(UNIT_STAT_ROOT);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
         Unit* caster = GetCaster();
-        if(caster)  // set creature facing on root effect
+        if(caster)                                          // set creature facing on root effect
         {
             m_target->SetUInt64Value (UNIT_FIELD_TARGET,caster->GetGUIDLow());
         }

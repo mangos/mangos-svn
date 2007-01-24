@@ -1174,42 +1174,42 @@ void ObjectMgr::LoadQuests()
         if(qinfo->RequiredSkill && !sSkillLineStore.LookupEntry(qinfo->RequiredSkill))
         {
             sLog.outErrorDb("Quest %u have `RequiredSkill` = %u but skill %u not exist, quest can't be done.",
-                    qinfo->GetQuestId(),qinfo->RequiredSkill,qinfo->RequiredSkill);
+                qinfo->GetQuestId(),qinfo->RequiredSkill,qinfo->RequiredSkill);
             // no changes, quest can't be done for this requirement
         }
 
         if(qinfo->RequiredSkillValue && qinfo->RequiredSkillValue > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)*5)
         {
             sLog.outErrorDb("Quest %u have `RequiredSkillValue` = %u but max possible skill is %u, quest can't be done.",
-                    qinfo->GetQuestId(),qinfo->RequiredSkillValue,sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)*5);
+                qinfo->GetQuestId(),qinfo->RequiredSkillValue,sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)*5);
             // no changes, quest can't be done for this requirement
         }
 
         if(qinfo->RequiredRepFaction && !sFactionTemplateStore.LookupEntry(qinfo->RequiredRepFaction))
         {
             sLog.outErrorDb("Quest %u have `RequiredRepFaction` = %u but faction template %u isn't exist, quest can't be done.",
-                    qinfo->GetQuestId(),qinfo->RequiredRepFaction,qinfo->RequiredRepFaction);
+                qinfo->GetQuestId(),qinfo->RequiredRepFaction,qinfo->RequiredRepFaction);
             // no changes, quest can't be done for this requirement
         }
 
         if(qinfo->RequiredRepValue && qinfo->RequiredRepValue > Player::Reputation_Cap)
         {
             sLog.outErrorDb("Quest %u have `RequiredRepValue` = %u but max reputation is %u, quest can't be done.",
-                    qinfo->GetQuestId(),qinfo->RequiredRepValue,Player::Reputation_Cap);
+                qinfo->GetQuestId(),qinfo->RequiredRepValue,Player::Reputation_Cap);
             // no changes, quest can't be done for this requirement
         }
 
         if(qinfo->SrcItemId && !sItemStorage.LookupEntry<ItemPrototype>(qinfo->SrcItemId))
         {
             sLog.outErrorDb("Quest %u have `SrcItemId` = %u but item with entry %u not exist, quest can't be done.",
-                    qinfo->GetQuestId(),qinfo->SrcItemId,qinfo->SrcItemId);
+                qinfo->GetQuestId(),qinfo->SrcItemId,qinfo->SrcItemId);
             qinfo->SrcItemId = 0;                           // quest can't be done for this requirement
         }
 
         if(qinfo->SrcSpell && !sSpellStore.LookupEntry(qinfo->SrcSpell))
         {
             sLog.outErrorDb("Quest %u have `SrcSpell` = %u but spell %u not exist, quest can't be done.",
-                    qinfo->GetQuestId(),qinfo->SrcSpell,qinfo->SrcSpell);
+                qinfo->GetQuestId(),qinfo->SrcSpell,qinfo->SrcSpell);
             qinfo->SrcSpell = 0;                            // quest can't be done for this requirement
         }
 
@@ -1284,7 +1284,7 @@ void ObjectMgr::LoadQuests()
                 // no changes, quest can't be done for this requirement
             }
         }
-        
+
         for(int j = 0; j < qinfo->RewChoiceItemId.size(); ++j )
         {
             uint32 id = qinfo->RewChoiceItemId[j];
@@ -1295,7 +1295,7 @@ void ObjectMgr::LoadQuests()
                 qinfo->RewChoiceItemId[j] = 0;              // no changes, quest will not reward this
             }
         }
-        
+
         for(int j = 0; j < qinfo->RewItemId.size(); ++j )
         {
             uint32 id = qinfo->RewItemId[j];
@@ -1306,32 +1306,32 @@ void ObjectMgr::LoadQuests()
                 qinfo->RewItemId[j] = 0;                    // no changes, quest will not reward this
             }
         }
-        
+
         if(qinfo->RewRepFaction1 && !sFactionTemplateStore.LookupEntry(qinfo->RewRepFaction1))
         {
             sLog.outErrorDb("Quest %u have `RewRepFaction1` = %u but faction template %u isn't exist, quest will not reward reputation for this faction.",
-                    qinfo->GetQuestId(),qinfo->RewRepFaction1 ,qinfo->RewRepFaction1 );
+                qinfo->GetQuestId(),qinfo->RewRepFaction1 ,qinfo->RewRepFaction1 );
             qinfo->RewRepFaction1 = 0;                      // no changes, quest will not reward this
         }
-        
+
         if(qinfo->RewRepFaction2 && !sFactionTemplateStore.LookupEntry(qinfo->RewRepFaction2))
         {
             sLog.outErrorDb("Quest %u have `RewRepFaction2` = %u but faction template %u isn't exist, quest will not reward reputation for this faction.",
-                    qinfo->GetQuestId(),qinfo->RewRepFaction2 ,qinfo->RewRepFaction2 );
+                qinfo->GetQuestId(),qinfo->RewRepFaction2 ,qinfo->RewRepFaction2 );
             qinfo->RewRepFaction2 = 0;                      // no changes, quest will not reward this
         }
-        
+
         if(qinfo->RewSpell && !sSpellStore.LookupEntry(qinfo->RewSpell))
         {
             sLog.outErrorDb("Quest %u have `RewSpell` = %u but spell %u not exist, quest will not casted as reward.",
-                    qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
+                qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
             qinfo->RewSpell = 0;                            // no changes, quest will not reward this
         }
 
         if(qinfo->HaveQuestId && QuestTemplates.find(qinfo->HaveQuestId) == QuestTemplates.end())
         {
             sLog.outErrorDb("Quest %u have `HaveQuestId` = %u but quest %u not exist, quest can't be done.",
-                    qinfo->GetQuestId(),qinfo->HaveQuestId ,qinfo->HaveQuestId );
+                qinfo->GetQuestId(),qinfo->HaveQuestId ,qinfo->HaveQuestId );
             // no changes, quest can't be done for this requirement
         }
 

@@ -758,7 +758,6 @@ void World::KickAll()
         itr->second->KickPlayer();
 }
 
-
 bool World::KickPlayer(std::string playerName)
 {
     SessionMap::iterator itr;

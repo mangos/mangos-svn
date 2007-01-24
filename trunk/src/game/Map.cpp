@@ -862,7 +862,6 @@ void Map::UnloadAll()
     }
 }
 
-
 void Map::GetUnitList(float x, float y, std::list<Unit*> &unlist)
 {
 

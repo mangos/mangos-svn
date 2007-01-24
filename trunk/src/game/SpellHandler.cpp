@@ -59,11 +59,11 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     if (pUser->isInCombat())
     {
-        uint8 consumable = proto->Class == ITEM_CLASS_CONSUMABLE && 
-            proto->SubClass != ITEM_SUBCLASS_POTION && 
-            proto->SubClass != ITEM_SUBCLASS_SCROLL && 
-            proto->SubClass != ITEM_SUBCLASS_BANDAGE && 
-            proto->SubClass != ITEM_SUBCLASS_HEALTHSTONE && 
+        uint8 consumable = proto->Class == ITEM_CLASS_CONSUMABLE &&
+            proto->SubClass != ITEM_SUBCLASS_POTION &&
+            proto->SubClass != ITEM_SUBCLASS_SCROLL &&
+            proto->SubClass != ITEM_SUBCLASS_BANDAGE &&
+            proto->SubClass != ITEM_SUBCLASS_HEALTHSTONE &&
             proto->SubClass != ITEM_SUBCLASS_COMBAT_EFFECT;
 
         uint8 trade_goods = proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass != ITEM_SUBCLASS_EXPLOSIVES;

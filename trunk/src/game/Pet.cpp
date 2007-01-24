@@ -281,7 +281,7 @@ void Pet::Update(uint32 diff)
                 Remove(PET_SAVE_AS_CURRENT);
                 return;
             }
-                
+
             if(owner->GetPetGUID()!=GetGUID())
             {
                 Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_AS_STORED);
