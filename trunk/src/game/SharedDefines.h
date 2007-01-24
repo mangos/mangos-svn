@@ -991,6 +991,7 @@ enum Team
 #define SKILL_RACIAL_TROLL              733
 #define SKILL_RACIAL_GNOME              753
 #define SKILL_RACIAL_HUMAN              754
+#define SKILL_RIDING                    762
 
 #define UNIT_DYNFLAG_LOOTABLE           0x0001
 
