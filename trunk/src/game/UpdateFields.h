@@ -271,7 +271,7 @@ enum EPlayerFields
     PLAYER_FIELD_VENDORBUYBACK_SLOT_1             = UNIT_END + 0x01B4,
     PLAYER_FIELD_KEYRING_SLOT_1                   = UNIT_END + 0x01CC,
     PLAYER_FARSIGHT                               = UNIT_END + 0x020C,
-    PLAYER__FIELD_COMBO_TARGET                    = UNIT_END + 0x020E,
+    PLAYER_FIELD_COMBO_TARGET                     = UNIT_END + 0x020E,
     PLAYER_XP                                     = UNIT_END + 0x0210,
     PLAYER_NEXT_LEVEL_XP                          = UNIT_END + 0x0211,
     PLAYER_SKILL_INFO_1_1                         = UNIT_END + 0x0212,
