@@ -3690,7 +3690,7 @@ bool Unit::isVisibleFor(Unit* u, bool detect)
     // Function for detection (can be improved)
     // Take into account that this function is executed every x secs, so prob must be low for right working
 
-    int8 x = u->getLevel() + (m_detectStealth / 5) - (m_stealthvalue / 5) + 59;
+    int32 x = u->getLevel() + (u->m_detectStealth / 5) - (m_stealthvalue / 5) + 59;
     if (x<0) x = 0;
     float AverageDist = 1 - 0.11016949*x + 0.00301637*x*x;  //at this distance, the detector has to be a 15% prob of detect
     if (AverageDist < 1) AverageDist = 1;
