@@ -374,9 +374,9 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     if( _player != 0 )
         _player->SetSelection(guid);
 
-    if(_player->GetUInt64Value(PLAYER__FIELD_COMBO_TARGET) != guid)
+    if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
     {
-        _player->SetUInt64Value(PLAYER__FIELD_COMBO_TARGET,0);
+        _player->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
         _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 }
@@ -1009,9 +1009,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         _player->SetSelection(guid);
     }
 
-    if(_player->GetUInt64Value(PLAYER__FIELD_COMBO_TARGET) != guid)
+    if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
     {
-        _player->SetUInt64Value(PLAYER__FIELD_COMBO_TARGET,0);
+        _player->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
         _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 
