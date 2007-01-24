@@ -3365,7 +3365,8 @@ void Player::UpdateMaxSkills()
         if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
             || pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
             || pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
-            || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING || pskill == SKILL_SKINNING)
+            || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING || pskill == SKILL_SKINNING
+            || pskill == SKILL_RIDING)
             continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
         uint32 max = data>>16;
@@ -3387,7 +3388,8 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
         if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
             || pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
             || pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
-            || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING || pskill == SKILL_SKINNING)
+            || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING || pskill == SKILL_SKINNING
+            || pskill == SKILL_RIDING)
             continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
 
