@@ -2684,7 +2684,8 @@ void Unit::RemoveGameObject(GameObject* gameObj, bool del)
     gameObj->SetOwnerGUID(0);
     m_gameObj.remove(gameObj);
     if(del)
-    {   gameObj->SetRespawnTime(0);
+    {
+        gameObj->SetRespawnTime(0);
         gameObj->Delete();
     }
 }

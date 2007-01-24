@@ -137,7 +137,7 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
     CellPair cell_pair(x,y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
     QueryResult *result = sDatabase.PQuery(
-        //      0    1                  2                         3                         4            5             6           7           8           9           10     11              12             13         14            15
+    //      0    1                  2                         3                         4            5             6           7           8           9           10     11              12             13         14            15
         "SELECT `id`,`gameobject`.`map`,`gameobject`.`position_x`,`gameobject`.`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`respawntime`,`gameobject`.`guid` "
         "FROM `gameobject` LEFT JOIN `gameobject_grid` ON `gameobject`.`guid` = `gameobject_grid`.`guid` "
         "LEFT JOIN `gameobject_respawn` ON `gameobject`.`guid`=`gameobject_respawn`.`guid` "

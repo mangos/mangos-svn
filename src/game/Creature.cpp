@@ -1438,7 +1438,7 @@ void Creature::SaveRespawnTime()
     if(isPet())
         return;
 
-    if(m_respawnTime > time(NULL))                           // dead (no corpse)
+    if(m_respawnTime > time(NULL))                          // dead (no corpse)
     {
         sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
         sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(m_respawnTime));
