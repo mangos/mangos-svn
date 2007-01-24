@@ -129,8 +129,8 @@ void GameObject::Update(uint32 p_time)
         case GO_NOT_READY:
             if (GetGoType()==17)
             {
-                // fishing code (bobber not ready)
-                if( m_respawnTime > time(NULL) - FISHING_BOBBER_READY_TIME )
+                // fishing code (bobber ready)
+                if( time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME )
                 {
                     // splash bobber (bobber ready now)
                     Unit* caster = GetOwner();
