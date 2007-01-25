@@ -98,7 +98,7 @@ ObjectMgr::~ObjectMgr()
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
 {
     GroupSet::const_iterator itr;
-    for (itr = mGroupSet.begin(); itr != mGroupSet.end(); itr++)
+    for (itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
     {
         if ((*itr)->GetLeaderGUID() == guid)
         {

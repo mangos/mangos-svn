@@ -337,6 +337,9 @@ void Pet::GivePetXP(uint32 xp)
     if ( xp < 1 )
         return;
 
+    if(!isAlive())
+        return;
+
     uint32 level = getLevel();
 
     // XP to money conversion processed in Player::RewardQuest
