@@ -1666,7 +1666,8 @@ uint8 Spell::CanCast()
     if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
         return CAST_FAIL_CANT_DO_WHILE_STUNNED;
 
-    if(m_caster->IsMounted() && !m_IsTriggeredSpell)
+    // not let players cast non-triggered spells at mount (and let do it to creatures)
+    if(m_caster->IsMounted() && !m_IsTriggeredSpell && m_caster->GetTypeId()==TYPEID_PLAYER)
         return CAST_FAIL_CANT_USE_WHEN_MOUNTED;
 
     if(m_caster->m_silenced)
