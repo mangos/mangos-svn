@@ -754,6 +754,13 @@ void Spell::EffectOpenLock(uint32 i)
         return;
     }
 
+    if(!lockId)                                             // possible case for GO and maybe for items.
+    {
+        player->SendLoot(guid,loottype);
+        return;
+    }
+
+
     // Get LockInfo
     LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
 
@@ -789,7 +796,7 @@ void Spell::EffectOpenLock(uint32 i)
         reqSkillValue = lockInfo->requiredlockskill;
     }
     else
-    if(SkillId == SKILL_LOCKPICKING)                    // apply picklock skill to wrong target
+    if(SkillId == SKILL_LOCKPICKING)                        // apply picklock skill to wrong target
     {
         SendCastResult(CAST_FAIL_INVALID_TARGET);
         return;
