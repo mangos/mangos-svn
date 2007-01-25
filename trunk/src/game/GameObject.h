@@ -95,6 +95,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }
         void SetRespawnTime(uint32 respawn) { m_respawnTime = respawn ? time(NULL) + respawn : 0; }
+        void Respawn() { if(m_respawnTime > 0) m_respawnTime = time(NULL); }
         bool isFinished() { return m_respawnTime == 0;}
         void Refresh();
         void Delete();

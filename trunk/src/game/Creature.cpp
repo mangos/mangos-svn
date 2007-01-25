@@ -1270,6 +1270,17 @@ void Creature::setDeathState(DeathState s)
     }
 }
 
+void Creature::Respawn()
+{
+    if(getDeathState()==CORPSE)
+    {
+        m_deathTimer = 0;
+        Update(0);                                          // despawn corpse
+    }
+    if(getDeathState()==DEAD)
+        m_respawnTime = time(NULL);                         // respawn at next tick
+}
+
 void Creature::Say(char const* message, uint32 language)
 {
     WorldPacket data;

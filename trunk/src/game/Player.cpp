@@ -5034,10 +5034,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         loot   = &creature->loot;
 
-        uint32 lootid = creature->GetCreatureInfo()->lootid;
-
         if(loot_type == LOOT_PICKPOKETING)
         {
+            uint32 lootid = creature->GetCreatureInfo()->pickpocketLootId;
+
             if ( !creature->lootForPickPocketed )
             {
                 creature->lootForPickPocketed = true;
@@ -5051,6 +5051,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         }
         else
         {
+            uint32 lootid = creature->GetCreatureInfo()->lootid;
+
             // the player whose group may loot the corpse
             Player *recipient = creature->GetLootRecipient();
             if (!recipient)

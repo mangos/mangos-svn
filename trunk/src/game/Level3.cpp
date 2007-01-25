@@ -33,6 +33,9 @@
 #include "SpellAuras.h"
 #include "ScriptCalls.h"
 #include "Language.h"
+#include "RedZoneDistrict.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 bool ChatHandler::HandleReloadCommand(const char* args)
 {
@@ -2988,8 +2991,27 @@ bool ChatHandler::HandleUnBanAccountCommand(const char* args)
         return false;
 
     if(sWorld.RemoveBanAccount(args))
-
         PSendSysMessage("Account %s unbanned.",args);
+
+    return true;
+}
+
+bool ChatHandler::HandleRespawnCommand(const char* args)
+{
+    Player* pl = m_session->GetPlayer();
+
+    CellPair p(MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY()));
+    Cell cell = RedZone::GetZone(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+
+    MaNGOS::RespawnDo u_do;
+    MaNGOS::WorldObjectWorker<MaNGOS::RespawnDo> worker(u_do);
+
+    TypeContainerVisitor<MaNGOS::WorldObjectWorker<MaNGOS::RespawnDo>, TypeMapContainer<AllObjectTypes> > obj_worker(worker);
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, obj_worker, *MapManager::Instance().GetMap(pl->GetMapId()));
+
     return true;
 }
 

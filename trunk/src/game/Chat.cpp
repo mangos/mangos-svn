@@ -253,6 +253,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "addquest",    3, &ChatHandler::HandleAddQuest,                "",   NULL },
         { "password",    0, &ChatHandler::HandlePasswordCommand,         "",   NULL },
         { "lockaccount", 0, &ChatHandler::HandleLockAccountCommand,      "",   NULL },
+        { "respawn",     3, &ChatHandler::HandleRespawnCommand,          "",   NULL },
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },

@@ -54,6 +54,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 {
     LootStore::iterator tab;
     uint32 item, displayid, entry;
+    uint32 mincount = 0;
     uint32 maxcount = 0;
     float chance;
     int32 questchance;
@@ -62,7 +63,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
     sLog.outString( "%s :", tablename);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `mincount`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
 
     if (result)
     {
@@ -79,8 +80,9 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             item = fields[1].GetUInt32();;
             chance = fields[2].GetFloat();
             questchance = int32(fields[3].GetUInt32());
-            maxcount = fields[4].GetUInt32();
-            is_ffa = fields[5].GetBool();
+            mincount = fields[4].GetUInt32();
+            maxcount = fields[5].GetUInt32();
+            is_ffa = fields[6].GetBool();
 
             ItemPrototype const *proto = objmgr.GetItemPrototype(item);
 
@@ -88,9 +90,9 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
             // non-quest (maybe group) loot with low chance
             if( chance >= 0 && chance < 0.000001 && questchance <= 0 )
-                ssNonLootableItems << "loot entry = " << entry << " item = " << item << " maxcount = " << maxcount << "\n";
+                ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << "\n";
 
-            lootstore[entry].push_back( LootStoreItem(item, displayid, chance, questchance,is_ffa,maxcount) );
+            lootstore[entry].push_back( LootStoreItem(item, displayid, chance, questchance,is_ffa,mincount,maxcount) );
 
             count++;
         } while (result->NextRow());
@@ -100,7 +102,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
         sLog.outString( "" );
         sLog.outString( ">> Loaded %u loot definitions", count );
         if(ssNonLootableItems.str().size() > 0)
-            sLog.outErrorDb("Some items can't be succesfully looted: have in chance field value < 0.000001 with and quest chance ==0 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
+            sLog.outErrorDb("Some items can't be succesfully looted: have in chance field value < 0.000001 with quest chance ==0 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
     }
     else
     {
@@ -218,12 +220,12 @@ void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
     {
         // There are stats of count variations for 100% drop - so urand used
         if ( loot->quest_items.size() < MAX_NR_QUEST_ITEMS && hasQuestChance(*item_iter) )
-            loot->quest_items.push_back(LootItem(*item_iter, urand(1, item_iter->maxcount)));
+            loot->quest_items.push_back(LootItem(*item_iter, urand(item_iter->mincount, item_iter->maxcount)));
         else if ( loot->items.size() < MAX_NR_LOOT_ITEMS )
         {
             LootStoreItem* LootedItem = hasChance(*item_iter);
             if ( LootedItem )
-                loot->items.push_back(LootItem(*LootedItem, urand(1, LootedItem->maxcount)));
+                loot->items.push_back(LootItem(*LootedItem, urand(LootedItem->mincount, LootedItem->maxcount)));
         }
     }
     loot->unlootedCount = loot->items.size();
