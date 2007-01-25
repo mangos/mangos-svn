@@ -63,14 +63,15 @@ struct LootStoreItem
     uint32  displayid;
     float   chance;
     int32   questChanceOrGroup;
+    uint8   mincount;
     uint8   maxcount;
     bool    is_ffa;                                         // free for all
 
     LootStoreItem()
-        : itemid(0), displayid(0), chance(0), questChanceOrGroup(0), maxcount(1), is_ffa(true) {}
+        : itemid(0), displayid(0), chance(0), questChanceOrGroup(0), mincount(1), maxcount(1), is_ffa(true) {}
 
-    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chance, int32 _questChanceOrGroup, bool _isffa = true, uint8 _maxcount = 1)
-        : itemid(_itemid), displayid(_displayid), chance(_chance), questChanceOrGroup(_questChanceOrGroup), maxcount(_maxcount), is_ffa(_isffa) {}
+    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chance, int32 _questChanceOrGroup, bool _isffa = true, uint8 _mincount = 1, uint8 _maxcount = 1)
+        : itemid(_itemid), displayid(_displayid), chance(_chance), questChanceOrGroup(_questChanceOrGroup), mincount(_mincount), maxcount(_maxcount), is_ffa(_isffa) {}
 
     int32 GetGroupId() const { return -questChanceOrGroup -1; }
 };

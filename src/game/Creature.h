@@ -186,6 +186,7 @@ struct CreatureInfo
     uint32  equipinfo[3];
     uint32  equipslot[3];
     uint32  lootid;
+    uint32  pickpocketLootId;
     uint32  SkinLootId;
     uint32  resistance1;
     uint32  resistance2;
@@ -384,6 +385,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool IsVisibleInGridForPlayer(Player* pl) const;
 
+        void SetRespawnTime(uint32 respawn) { m_respawnTime = respawn ? time(NULL) + respawn : 0; }
+        void Respawn();
         void SaveRespawnTime();
     protected:
         void _LoadGoods();

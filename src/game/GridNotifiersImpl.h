@@ -269,6 +269,158 @@ MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Player *>  &m)
     }
 }
 
+// SEARCHERS & LIST SEARCHERS & WORKERS
+
+// WorldObject searchers & workers
+
+template<class Check>
+void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+}
+
+template<class Check>
+void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player*> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+}
+
+template<class Check>
+void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, Creature*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+}
+
+template<class Check>
+void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Corpse*> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, Corpse *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+}
+
+template<class Check>
+void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, DynamicObject*> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, DynamicObject*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+}
+
+template<class Check>
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
+template<class Check>
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
+template<class Check>
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Corpse *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
+template<class Check>
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+{
+    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
+template<class Check>
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
+{
+    for(std::map<OBJECT_HANDLE, DynamicObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
+// Gameobject searchers
+
+template<class Check>
+void MaNGOS::GameObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+}
+
+template<class Check>
+void MaNGOS::GameObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+{
+    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
+// Unit searchers
+
 template<class Check>
 void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
@@ -283,7 +435,6 @@ void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
             return;
         }
     }
-    i_object = i_check.GetResult();
 }
 
 template<class Check>
@@ -300,6 +451,48 @@ void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
             return;
         }
     }
-    i_object = i_check.GetResult();
 }
+
+template<class Check>
+void MaNGOS::UnitListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
+template<class Check>
+void MaNGOS::UnitListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
+// Creature searchers
+
+template<class Check>
+void MaNGOS::CreatureSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    // already found
+    if(i_object) return;
+
+    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->second))
+        {
+            i_object = itr->second;
+            return;
+        }
+    }
+}
+
+template<class Check>
+void MaNGOS::CreatureListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->second))
+            i_objects.push_back(itr->second);
+}
+
 #endif                                                      // MANGOS_GRIDNOTIFIERSIMPL_H

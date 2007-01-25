@@ -39,7 +39,7 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL PlayerNotifier
     {
-        PlayerNotifier(Player &pl) : i_player(pl) {}
+        explicit PlayerNotifier(Player &pl) : i_player(pl) {}
         void Visit(PlayerMapType &);
         void BuildForMySelf(void);
         Player &i_player;
@@ -49,7 +49,7 @@ namespace MaNGOS
     {
         Player &i_player;
         UpdateData i_data;
-        VisibleNotifier(Player &player) : i_player(player) {}
+        explicit VisibleNotifier(Player &player) : i_player(player) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
         void Visit(std::map<OBJECT_HANDLE, GameObject *> &);
         void Notify(void);
@@ -64,7 +64,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL VisibleChangesNotifier
     {
         Player &i_player;
-        VisibleChangesNotifier(Player &player) : i_player(player) {}
+        explicit VisibleChangesNotifier(Player &player) : i_player(player) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
 
         #ifdef WIN32
@@ -76,7 +76,7 @@ namespace MaNGOS
     {
         Player &i_player;
         UpdateData i_data;
-        NotVisibleNotifier(Player &player) : i_player(player) {}
+        explicit NotVisibleNotifier(Player &player) : i_player(player) {}
         void Notify(void);
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
         void Visit(std::map<OBJECT_HANDLE, GameObject *> &);
@@ -90,14 +90,14 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL ObjectVisibleNotifier
     {
         WorldObject &i_object;
-        ObjectVisibleNotifier(WorldObject &obj) : i_object(obj) {}
+        explicit ObjectVisibleNotifier(WorldObject &obj) : i_object(obj) {}
         void Visit(PlayerMapType &);
     };
 
     struct MANGOS_DLL_DECL ObjectNotVisibleNotifier
     {
         WorldObject &i_object;
-        ObjectNotVisibleNotifier(WorldObject &obj) : i_object(obj) {}
+        explicit ObjectNotVisibleNotifier(WorldObject &obj) : i_object(obj) {}
         void Visit(PlayerMapType &);
     };
 
@@ -141,21 +141,21 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL CreatureVisibleMovementNotifier
     {
         Creature &i_creature;
-        CreatureVisibleMovementNotifier(Creature &creature) : i_creature(creature) {}
+        explicit CreatureVisibleMovementNotifier(Creature &creature) : i_creature(creature) {}
         void Visit(PlayerMapType &m);
     };
 
     struct MANGOS_DLL_DECL CreatureNotVisibleMovementNotifier
     {
         Creature &i_creature;
-        CreatureNotVisibleMovementNotifier(Creature &creature) : i_creature(creature) {}
+        explicit CreatureNotVisibleMovementNotifier(Creature &creature) : i_creature(creature) {}
         void Visit(PlayerMapType &m);
     };
 
     struct MANGOS_DLL_DECL ObjectUpdater
     {
         uint32 i_timeDiff;
-        ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
+        explicit ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
         #ifdef WIN32
         template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
@@ -188,122 +188,10 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
     };
 
-    template<class Check>
-        struct MANGOS_DLL_DECL GameObjectSearcher
-    {
-        GameObject* &i_object;
-        Check const& i_check;
-
-        GameObjectSearcher(GameObject* & result, Check const& check) : i_object(result),i_check(check) {}
-
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
-    };
-
-    template<class Check>
-        void GameObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
-    {
-        // already found
-        if(i_object) return;
-
-        for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
-        {
-            if(i_check(itr->second))
-            {
-                i_object = itr->second;
-                return;
-            }
-        }
-    }
-
-    class GameObjectFocusCheck
-    {
-        public:
-            GameObjectFocusCheck(Unit* unit,uint32 focusId) : i_unit(unit), i_focusId(focusId) {}
-            bool operator()(GameObject* go) const
-            {
-                if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS || go->GetGOInfo()->sound0 != i_focusId)
-                    return false;
-
-                float dist = go->GetGOInfo()->sound1;
-
-                return go->IsWithinDist(i_unit, dist);
-            }
-        private:
-            Unit* i_unit;
-            uint32 i_focusId;
-
-    };
-
-    template<class Check>
-        struct MANGOS_DLL_DECL UnitSearcher
-    {
-        Unit* &i_object;
-        Check & i_check;
-
-        UnitSearcher(Unit* & result, Check & check) : i_object(result),i_check(check) {}
-
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
-        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
-
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
-    };
-
-    template<class Check>
-        struct MANGOS_DLL_DECL UnitListSearcher
-    {
-        std::list<Unit*> &i_objects;
-        Check& i_check;
-
-        UnitListSearcher(std::list<Unit*> &objects, Check & check) : i_objects(objects),i_check(check) {}
-
-        void Visit(std::map<OBJECT_HANDLE, Player *> &m)
-        {
-            for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
-            {
-                if(i_check(itr->second))
-                    i_objects.push_back(itr->second);
-            }
-        }
-
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m)
-        {
-            for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
-            {
-                if(i_check(itr->second))
-                    i_objects.push_back(itr->second);
-            }
-        }
-
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
-    };
-
-    class AnyUnfriendlyUnitInObjectRangeCheck
-    {
-        public:
-            AnyUnfriendlyUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range), i_result(NULL) {}
-            bool operator()(Unit* u)
-            {
-                if(u->isAlive() && !i_funit->IsFriendlyTo(u) && i_obj->IsWithinDist(u, i_range))
-                {
-                    i_result = u;
-                    return true;
-                }
-                return false;
-            }
-            Unit *GetResult() const { return i_result; }
-        private:
-            WorldObject* const i_obj;
-            Unit* const i_funit;
-            float i_range;
-            Unit* i_result;
-    };
-
     struct MANGOS_DLL_DECL GridUnitListNotifier
     {
         std::list<Unit*> &i_data;
-        GridUnitListNotifier(std::list<Unit*> &data) : i_data(data) {}
+        explicit GridUnitListNotifier(std::list<Unit*> &data) : i_data(data) {}
 
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
         {
@@ -352,6 +240,266 @@ namespace MaNGOS
         template<> inline void Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
         template<> inline void Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
         #endif
+    };
+
+    // SEARCHERS & LIST SEARCHERS & WORKERS
+
+    // WorldObject searchers & workers
+
+    template<class Check>
+        struct MANGOS_DLL_DECL WorldObjectSearcher
+    {
+        WorldObject* &i_object;
+        Check const& i_check;
+
+        WorldObjectSearcher(WorldObject* & result, Check const& check) : i_object(result),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Player*> &m);
+        void Visit(std::map<OBJECT_HANDLE, Creature*> &m);
+        void Visit(std::map<OBJECT_HANDLE, Corpse*> &m);
+        void Visit(std::map<OBJECT_HANDLE, DynamicObject*> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    template<class Check>
+        struct MANGOS_DLL_DECL WorldObjectListSearcher
+    {
+        std::list<WorldObject*> &i_objects;
+        Check& i_check;
+
+        WorldObjectListSearcher(std::list<WorldObject*> &objects, Check & check) : i_objects(objects),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
+        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+        void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    template<class Do>
+        struct MANGOS_DLL_DECL WorldObjectWorker
+    {
+        Do const& i_do;
+
+        explicit WorldObjectWorker(Do const& _do) : i_do(_do) {}
+
+        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+        {
+            for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+                i_do(itr->second);
+        }
+
+        void Visit(std::map<OBJECT_HANDLE, Player*> &m)
+        {
+            for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+                i_do(itr->second);
+        }
+        void Visit(std::map<OBJECT_HANDLE, Creature*> &m)
+        {
+            for(std::map<OBJECT_HANDLE, Creature*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+                i_do(itr->second);
+        }
+
+        void Visit(std::map<OBJECT_HANDLE, Corpse*> &m)
+        {
+            for(std::map<OBJECT_HANDLE, Corpse *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+                i_do(itr->second);
+        }
+
+        void Visit(std::map<OBJECT_HANDLE, DynamicObject*> &m)
+        {
+            for(std::map<OBJECT_HANDLE, DynamicObject*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+                i_do(itr->second);
+        }
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    // Gameobject searchers
+
+    template<class Check>
+        struct MANGOS_DLL_DECL GameObjectSearcher
+    {
+        GameObject* &i_object;
+        Check const& i_check;
+
+        GameObjectSearcher(GameObject* & result, Check const& check) : i_object(result),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    template<class Check>
+        struct MANGOS_DLL_DECL GameObjectListSearcher
+    {
+        std::list<GameObject*> &i_objects;
+        Check& i_check;
+
+        GameObjectListSearcher(std::list<GameObject*> &objects, Check & check) : i_objects(objects),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    // Unit searchers
+
+    template<class Check>
+        struct MANGOS_DLL_DECL UnitSearcher
+    {
+        Unit* &i_object;
+        Check & i_check;
+
+        UnitSearcher(Unit* & result, Check & check) : i_object(result),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    template<class Check>
+        struct MANGOS_DLL_DECL UnitListSearcher
+    {
+        std::list<Unit*> &i_objects;
+        Check& i_check;
+
+        UnitListSearcher(std::list<Unit*> &objects, Check & check) : i_objects(objects),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    // Creature searchers
+
+    template<class Check>
+        struct MANGOS_DLL_DECL CreatureSearcher
+    {
+        Creature* &i_object;
+        Check & i_check;
+
+        CreatureSearcher(Creature* & result, Check & check) : i_object(result),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    template<class Check>
+        struct MANGOS_DLL_DECL CreatureListSearcher
+    {
+        std::list<Creature*> &i_objects;
+        Check& i_check;
+
+        CreatureListSearcher(std::list<Creature*> &objects, Check & check) : i_objects(objects),i_check(check) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+
+        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+    };
+
+    // CHECKS && DO classes
+
+    // WorldObject do classes
+
+    class RespawnDo
+    {
+        public:
+            RespawnDo() {}
+            void operator()(Creature* u) const { u->Respawn(); }
+            void operator()(GameObject* u) const { u->Respawn(); }
+            void operator()(WorldObject* u) const {}
+    };
+
+    // GameObject checks
+
+    class GameObjectFocusCheck
+    {
+        public:
+            GameObjectFocusCheck(Unit* unit,uint32 focusId) : i_unit(unit), i_focusId(focusId) {}
+            bool operator()(GameObject* go) const
+            {
+                if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS || go->GetGOInfo()->sound0 != i_focusId)
+                    return false;
+
+                float dist = go->GetGOInfo()->sound1;
+
+                return go->IsWithinDist(i_unit, dist);
+            }
+        private:
+            Unit* i_unit;
+            uint32 i_focusId;
+
+    };
+
+    // Unit checks
+
+    class AnyUnfriendlyUnitInObjectRangeCheck
+    {
+        public:
+            AnyUnfriendlyUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
+            bool operator()(Unit* u)
+            {
+                if(u->isAlive() && !i_funit->IsFriendlyTo(u) && i_obj->IsWithinDist(u, i_range))
+                    return true;
+
+                return false;
+            }
+        private:
+            WorldObject* const i_obj;
+            Unit* const i_funit;
+            float i_range;
+    };
+
+    class AnyDeadUnitCheck
+    {
+        public:
+            AnyDeadUnitCheck() {}
+            bool operator()(Unit* u)
+            {
+                if(!u->isAlive())
+                    return true;
+
+                return false;
+            }
+    };
+
+    class CannibalizeUnitCheck
+    {
+        public:
+            CannibalizeUnitCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
+            bool operator()(Player* u)
+            {
+                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ) 
+                    return false;
+
+                if(i_funit->IsWithinDist(u, i_range) )
+                    return true;
+
+                return false;
+            }
+            bool operator()(Creature* u)
+            {
+                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() || 
+                    ((Creature*)u)->GetCreatureInfo()->type != CREATURE_TYPE_HUMANOID && 
+                    ((Creature*)u)->GetCreatureInfo()->type != CREATURE_TYPE_UNDEAD)
+                    return false;
+
+                if(i_funit->IsWithinDist(u, i_range) )
+                    return true;
+
+                return false;
+            }
+        private:
+            Unit* const i_funit;
+            float i_range;
     };
 
     #ifndef WIN32

@@ -307,22 +307,22 @@ void Spell::EffectDummy(uint32 i)
         // non-standard cast requirement check
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
         float max_range = GetMaxRange(srange);
-        bool found=false;
-        std::list<Unit*> UnitList;
-        MapManager::Instance().GetMap(m_caster->GetMapId())->GetUnitList(m_caster->GetPositionX(), m_caster->GetPositionY(),UnitList);
-        for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
-        {
-            if( m_caster->IsFriendlyTo(*iter) || (*iter)->isAlive() || (*iter)->isInFlight() ||
-                (((Creature*)(*iter))->GetCreatureInfo()->type != CREATURE_TYPE_HUMANOID && ((Creature*)(*iter))->GetCreatureInfo()->type != CREATURE_TYPE_UNDEAD))
-                continue;
 
-            if(m_caster->IsWithinDist(*iter, max_range) )
-            {
-                found = true;
-                break;
-            }
-        }
-        if (!found)
+        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+        Cell cell = RedZone::GetZone(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+        cell.SetNoCreate();
+
+        Unit* result = NULL;
+
+        MaNGOS::CannibalizeUnitCheck u_check(m_caster, max_range);
+        MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck> searcher(result, u_check);
+
+        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck>, TypeMapContainer<AllObjectTypes> > unit_searcher(searcher);
+        CellLock<GridReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+
+        if (result)
         {
             // clear cooldown at fail
             if(m_caster->GetTypeId()==TYPEID_PLAYER)
