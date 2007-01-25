@@ -172,7 +172,6 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     }
 
     pUser->SendLoot(pItem->GetGUID(),LOOT_CORPSE);
-
 }
 
 void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )

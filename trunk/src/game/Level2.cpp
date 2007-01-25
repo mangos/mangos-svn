@@ -888,7 +888,7 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
         Player* player = getSelectedPlayer();
         if(player==m_session->GetPlayer())
         {
-            SendSysMessage("You can't kick self by selecting, use .kick name ;)");
+            SendSysMessage("You can't kick self, logout instead");
             return true;
         }
 
@@ -898,8 +898,17 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
     {
         std::string name = kickName;
         normalizePlayerName(name);
+
+        if(name==m_session->GetPlayer()->GetName())
+        {
+            SendSysMessage("You can't kick self, logout instead");
+            return true;
+        }
+
         if(sWorld.KickPlayer(name))
+        {
             PSendSysMessage("Player %s kicked.",name.c_str());
+        }
         else
             PSendSysMessage("Player %s not found.",name.c_str());
     }
