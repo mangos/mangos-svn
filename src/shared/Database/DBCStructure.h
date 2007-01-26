@@ -225,9 +225,12 @@ struct SpellEntry
     uint32    ManaCostPercentage;
     uint32    StartRecoveryCategory;
     uint32    StartRecoveryTime;
+    uint32    AffectedTargetLevel;
     uint32    SpellFamilyName;
-    uint32    SpellFamilyFlags ;
+    uint32    SpellFamilyFlags;
     uint32    MaxAffectedTargets;
+    uint32    DmgClass;
+    float     DmgMultiplier[3];
 };
 
 struct SpellCastTimesEntry
@@ -240,6 +243,18 @@ struct SpellFocusObjectEntry
 {
     uint32    ID;
     char*     Name;
+};
+
+// stored in SQL table
+struct SpellProcEventEntry
+{
+    uint32      spellId;                                    // obviously, id of spell capable to proc on event
+    uint32      schoolMask;                                 // if nonzero - bit mask for matching proc condition based on spell candidate's school: Fire=2, Mask=1<<(2-1)=2
+    uint32      category;                                   // if nonzero - match proc condition based on candidate spell's category
+    uint32      skillId;                                    // if nonzero - for matching proc condition based on candidate spell's skillId from SkillLineAbility.dbc (Shadow Bolt = Destruction)
+    uint32      spellMask;                                  // if nonzero - for matching proc condition based on candidate spell's SpellFamilyFlags (like auras 107 and 108 do)
+    uint32      procFlags;                                  // bitmask for matching proc event
+    float       ppmRate;                                    // for melee (ranged?) damage spells - proc rate per minute. if zero, falls back to flat chance from Spell.dbc
 };
 
 struct SpellRadiusEntry

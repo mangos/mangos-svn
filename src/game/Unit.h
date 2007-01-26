@@ -114,6 +114,7 @@ enum ShapeshiftForm
 struct FactionTemplateEntry;
 struct Modifier;
 struct SpellEntry;
+struct SpellEntryExt;
 
 class Aura;
 class Creature;
@@ -227,23 +228,41 @@ enum UnitFlags
     UNIT_FLAG_SKINNABLE      = 0x04000000,
     UNIT_FLAG_SHEATHE        = 0x40000000
 };
+
 enum ProcFlags
 {
-    PROC_FLAG_NONE            = 0x00000000,
-    PROC_FLAG_UNKOWN1         = 0x00000001,
-    PROC_FLAG_DIE             = 0x00000002,
-    PROC_FLAG_SHORT_ATTACK    = 0x00000004,
-    PROC_FLAG_BE_SHORT_ATTACK = 0x00000008,
-    PROC_FLAG_SHORT_HIT       = 0x00000010,
-    PROC_FLAG_BE_SHORT_HIT    = 0x00000020,
-    PROC_FLAG_LONG_ATTACK     = 0x00000040,
-    PROC_FLAG_BE_LONG_ATTACK  = 0x00000080,
-    PROC_FLAG_LONG_HIT        = 0x00000100,
-    PROC_FLAG_BE_LONG_HIT     = 0x00000200,
-    PROC_FLAG_HEAL_SPELL      = 0x00004000,
-    PROC_FLAG_SPELL_DAMAGE    = 0x00010000,
-    PROC_FLAG_BE_SPELL_DAMAGED= 0x00020000,
+    PROC_FLAG_NONE               = 0x00000000,                    // None
+    PROC_FLAG_HIT_MELEE          = 0x00000001,                    // On melee hit
+    PROC_FLAG_STRUCK_MELEE       = 0x00000002,                    // On being struck melee
+    PROC_FLAG_KILL_XP_GIVER      = 0x00000004,                    // On kill target giving XP or honor
+    PROC_FLAG_SPECIAL_DROP       = 0x00000008,                    //
+    PROC_FLAG_DODGE              = 0x00000010,                    // On dodge melee attack
+    PROC_FLAG_PARRY              = 0x00000020,                    // On parry melee attack
+    PROC_FLAG_BLOCK              = 0x00000040,                    // On block attack
+    PROC_FLAG_TOUCH              = 0x00000080,                    // On being touched (for bombs, probably?)
+    PROC_FLAG_TARGET_LOW_HEALTH  = 0x00000100,                    // On deal damage to enemy with 20% or less health
+    PROC_FLAG_LOW_HEALTH         = 0x00000200,                    // On health dropped below 20%
+    PROC_FLAG_STRUCK_RANGED      = 0x00000400,                    // On being struck ranged 
+    PROC_FLAG_HIT_SPECIAL        = 0x00000800,                    // On hit with a specific weapon (Bow Specialization, for example). This can be reassigned, though.
+    PROC_FLAG_CRIT_MELEE         = 0x00001000,                    // On crit melee
+    PROC_FLAG_STRUCK_CRIT_MELEE  = 0x00002000,                    // On being critically struck in melee
+    PROC_FLAG_CAST_SPELL         = 0x00004000,                    // On cast spell (and broken Aspect of Hawk)
+    PROC_FLAG_TAKE_DAMAGE        = 0x00008000,                    // On take damage
+    PROC_FLAG_CRIT_SPELL         = 0x00010000,                    // On crit spell
+    PROC_FLAG_HIT_SPELL          = 0x00020000,                    // On hit spell
+    PROC_FLAG_STRUCK_CRIT_SPELL  = 0x00040000,                    // On being critically struck by a spell
+    PROC_FLAG_HIT_RANGED         = 0x00080000,                    // On getting ranged hit
+    PROC_FLAG_STRUCK_SPELL       = 0x00100000,                    // On being struck by a spell
+    PROC_FLAG_TRAP               = 0x00200000,                    // On trap activation (?)
+    PROC_FLAG_CRIT_RANGED        = 0x00400000,                  // On getting ranged crit
+    PROC_FLAG_STRUCK_CRIT_RANGED = 0x00800000,                  // On being critically struck by a ranged attack
+    PROC_FLAG_RESIST_SPELL       = 0x01000000,                  // On resist enemy spell
+    PROC_FLAG_TARGET_RESISTS     = 0x02000000,                  // On enemy resisted spell
+    PROC_FLAG_TARGET_AVOID_ATTACK= 0x04000000,                  // On enemy blocks/dodges/parries
+    PROC_FLAG_HEAL               = 0x08000000,                  // On heal
+    PROC_FLAG_CRIT_HEAL          = 0x10000000                   // On critical healing effect
 };
+
 enum AuraState
 {
     AURA_STATE_DODGE          = 1,
@@ -508,10 +527,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void Unmount();
 
         void DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint32 procFlag, bool durabilityLoss);
-        void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType);
-        void ProcDamageAndSpell(Unit *pVictim, uint32 procflag1, uint32 procflag2);
+        void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
+        void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage = 0, SpellEntry const *procSpell = NULL, bool isTriggeredSpell = false, WeaponAttackType attType = BASE_ATTACK);
+        void HandleDummyAuraProc(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 damage);
         void HandleEmoteCommand(uint32 anim_id);
-        void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK);
+        void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK, bool isTriggered = false);
         uint32 SpellMissChanceCalc(Unit *pVictim) const;
         int32 MeleeMissChanceCalc(const Unit *pVictim) const;
 
@@ -526,7 +546,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint16 GetPureDefenceSkillValue() const;
         uint16 GetWeaponSkillValue(WeaponAttackType attType) const;
         uint16 GetPureWeaponSkillValue(WeaponAttackType attType) const;
-        uint32 GetWeaponProcChance() const;
+        float GetWeaponProcChance() const;
+        float GetPPMProcChance(uint32 WeaponSpeed, float PPM) const;
         MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const;
 
         bool isVendor()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
@@ -593,7 +614,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical = false);
         void SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype, bool critical = false);
         void PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod);
-        void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
+        void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool isTriggeredSpell = false);
         void CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem = NULL);
         void CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, Item *castItem= NULL);
 

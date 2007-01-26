@@ -34,9 +34,6 @@
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
-extern SQLStorage sItemStorage;
-extern SQLStorage sGOStorage;
-extern SQLStorage sCreatureStorage;
 ScriptMapMap sScripts;
 ScriptMapMap sSpellScripts;
 
@@ -304,6 +301,14 @@ void ObjectMgr::LoadCreatureTemplates()
     sCreatureStorage.Load();
 
     sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
+    sLog.outString( "" );
+}
+
+void ObjectMgr::LoadSpellProcEvents()
+{
+    sSpellProcEventStore.Load();
+
+    sLog.outString( ">> Loaded %u spell proc event conditions", sSpellProcEventStore.RecordCount );
     sLog.outString( "" );
 }
 

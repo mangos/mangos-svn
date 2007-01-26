@@ -753,6 +753,10 @@ void Spell::cast(bool skipCheck)
         SendChannelStart(GetDuration(m_spellInfo));
     }
 
+    // Pass cast spell event to handler
+    if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED)
+        m_caster->ProcDamageAndSpell(m_caster->getVictim(), PROC_FLAG_CAST_SPELL, PROC_FLAG_NONE, 0, m_spellInfo, m_IsTriggeredSpell);
+    
     std::list<Item*>::iterator iitem;
     std::list<GameObject*>::iterator igo;
 

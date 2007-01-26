@@ -836,6 +836,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 {
     Unit* caster = GetCaster();
 
+    // currently all dummy auras applyed/un-applied only at real add/remove
+    if(!Real)
+        return;
+
+    if(apply && !m_procCharges)
+    {
+        m_procCharges = GetSpellProto()->procCharges;
+        if (!m_procCharges)
+            m_procCharges = -1;
+    }
+
     if(GetSpellProto()->SpellVisual == 5622 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
@@ -845,15 +856,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 tAuraProcTriggerDamage.push_back(this);
             else
                 tAuraProcTriggerDamage.remove(this);
-
-            if(apply && !m_procCharges)
-            {
-                m_procCharges = GetSpellProto()->procCharges;
-                if (!m_procCharges)
-                    m_procCharges = -1;
-            }
         }
     }
+
     if(GetSpellProto()->SpellVisual == 7395 && GetSpellProto()->SpellIconID == 278 && caster->GetTypeId() == TYPEID_PLAYER)
     {
         Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
@@ -861,17 +866,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             tAuraProcTriggerDamage.push_back(this);
         else
             tAuraProcTriggerDamage.remove(this);
-
-        if(apply && !m_procCharges)
-        {
-            m_procCharges = GetSpellProto()->procCharges;
-            if (!m_procCharges)
-                m_procCharges = -1;
-        }
     }
 
     // only at real add/remove
-    if( Real && GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
+    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
         caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
     {
         Player * player = (Player*)m_target;
@@ -897,42 +895,38 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
     if(!apply)
     {
-        // only at real remove
-        if(Real)
+        if( IsQuestTameSpell(GetId()) && caster && caster->isAlive() && m_target && m_target->isAlive())
         {
-            if( IsQuestTameSpell(GetId()) && caster && caster->isAlive() && m_target && m_target->isAlive())
+            uint32 finalSpelId = 0;
+            switch(GetId())
             {
-                uint32 finalSpelId = 0;
-                switch(GetId())
-                {
-                    case 19548: finalSpelId = 19597; break;
-                    case 19674: finalSpelId = 19677; break;
-                    case 19687: finalSpelId = 19676; break;
-                    case 19688: finalSpelId = 19678; break;
-                    case 19689: finalSpelId = 19679; break;
-                    case 19692: finalSpelId = 19680; break;
-                    case 19693: finalSpelId = 19684; break;
-                    case 19694: finalSpelId = 19681; break;
-                    case 19696: finalSpelId = 19682; break;
-                    case 19697: finalSpelId = 19683; break;
-                    case 19699: finalSpelId = 19685; break;
-                    case 19700: finalSpelId = 19686; break;
-                }
+                case 19548: finalSpelId = 19597; break;
+                case 19674: finalSpelId = 19677; break;
+                case 19687: finalSpelId = 19676; break;
+                case 19688: finalSpelId = 19678; break;
+                case 19689: finalSpelId = 19679; break;
+                case 19692: finalSpelId = 19680; break;
+                case 19693: finalSpelId = 19684; break;
+                case 19694: finalSpelId = 19681; break;
+                case 19696: finalSpelId = 19682; break;
+                case 19697: finalSpelId = 19683; break;
+                case 19699: finalSpelId = 19685; break;
+                case 19700: finalSpelId = 19686; break;
+            }
 
-                if(finalSpelId)
-                {
-                    SpellEntry const *spell_proto = sSpellStore.LookupEntry(finalSpelId);
-                    if(!spell_proto)
-                        return;
+            if(finalSpelId)
+            {
+                SpellEntry const *spell_proto = sSpellStore.LookupEntry(finalSpelId);
+                if(!spell_proto)
+                    return;
 
-                    Spell spell(caster, spell_proto, true, 0);
-                    SpellCastTargets targets;
-                    targets.setUnitTarget(m_target);
-                    // prevent double stat apply for triggered auras
-                    m_target->ApplyStats(true);
-                    spell.prepare(&targets);
-                    m_target->ApplyStats(false);
-                }
+                Spell spell(caster, spell_proto, true, 0);
+                SpellCastTargets targets;
+                targets.setUnitTarget(m_target);
+                // prevent double stat apply for triggered auras
+                m_target->ApplyStats(true);
+                spell.prepare(&targets);
+                m_target->ApplyStats(false);
             }
         }
     }
