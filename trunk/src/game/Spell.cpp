@@ -315,6 +315,7 @@ void Spell::FillTargetMap()
                 ++itr;
         }
 
+        m_targetUnitGUIDs[i].clear();
         for(std::list<Unit*>::iterator iunit= tmpUnitMap.begin();iunit != tmpUnitMap.end();++iunit)
             m_targetUnitGUIDs[i].push_back((*iunit)->GetGUID());
 
