@@ -363,7 +363,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     data << uint32(0);
     data << uint32(0);
 
-    data << uint32(pQuest->GetNextQuestId());
+    data << uint32(pQuest->GetNextQuestId() < 0 ? 0 : pQuest->GetNextQuestId());
     data << uint32(pQuest->GetRewOrReqMoney());
     data << uint32(pQuest->GetRewXP());
 
