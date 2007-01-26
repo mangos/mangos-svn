@@ -200,6 +200,9 @@ Rate.Rest.InGame = 1
 Rate.Rest.Offline.InTavernOrCity = 1
 Rate.Rest.Offline.InWilderness = 1
 
+# Damage after fall rate. (1 - standart, 2 - double damage, 0.5 - half damage, etc)
+Rate.Damage.Fall = 1
+
 # Skill chance values (0..100) 
 # default: 100-75-25-0
 SkillChance.Orange = 100

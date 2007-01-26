@@ -115,7 +115,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             Map *map = MapManager::Instance().GetMap(target->GetMapId());
             float posz = map->GetWaterLevel(x,y);
             float fallperc = float(fallTime)*10/11000;
-            uint32 damage = (uint32)((fallperc*fallperc -1) / 9 * target->GetMaxHealth());
+            uint32 damage = (uint32)(((fallperc*fallperc -1) / 9 * target->GetMaxHealth())*sWorld.getRate(RATE_DAMAGE_FALL));
 
             if (damage > 0 && damage < 2* target->GetMaxHealth())
                 target->EnvironmentalDamage(target->GetGUID(),DAMAGE_FALL, damage);
