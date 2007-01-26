@@ -3354,7 +3354,7 @@ void Player::ModifySkillBonus(uint32 skillid,int32 val)
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
         if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skillid)
     {
-        SetUInt32Value(PLAYER_SKILL(i)+2,uint32(int32(GetUInt32Value(PLAYER_SKILL(i)+2))+val));
+        SetUInt32Value(PLAYER_SKILL(i)+2,uint16(int16(GetUInt32Value(PLAYER_SKILL(i)+2))+val));
         return;
     }
 }
@@ -3492,7 +3492,8 @@ uint16 Player::GetSkillValue(uint32 skill) const
     {
         if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
         {
-            return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+1))+GetUInt32Value(PLAYER_SKILL(i)+2);
+            int16 result = SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+1))+int16(GetUInt32Value(PLAYER_SKILL(i)+2));
+            return result < 0 ? 0 : result;
         }
     }
     return 0;
@@ -9605,6 +9606,10 @@ bool Player::LoadFromDB( uint32 guid )
 
     // reset stats before loading any modifiers
     InitStatsForLevel(getLevel(),false,false);
+
+    // reset skill modifiers
+    for (uint32 i = 0; i < PLAYER_MAX_SKILLS; i++)
+        SetUInt32Value(PLAYER_SKILL(i)+2,0);
 
     // make sure the unit is considered out of combat for proper loading
     ClearInCombat();
