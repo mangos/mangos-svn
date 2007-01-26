@@ -320,6 +320,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Spell Chain Data..." );
     objmgr.LoadSpellChains();
 
+    sLog.outString( "Loading Spell Proc Event conditions..." );
+    objmgr.LoadSpellProcEvents();
+
     sLog.outString( "Loading Scripts..." );
     objmgr.LoadScripts(sScripts,      "scripts");           // quest scripts
     objmgr.LoadScripts(sSpellScripts, "spell_scripts");     // spell casting scripts

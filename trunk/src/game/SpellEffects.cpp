@@ -203,7 +203,7 @@ void Spell::EffectInstaKill(uint32 i)
 void Spell::EffectSchoolDMG(uint32 i)
 {
     if( unitTarget && unitTarget->isAlive() )
-        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
+        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell);
 
     if (m_caster->GetTypeId()==TYPEID_PLAYER && m_spellInfo->Attributes == 0x150010)
         m_caster->AttackStop();
@@ -322,7 +322,7 @@ void Spell::EffectDummy(uint32 i)
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 
-        if (result)
+        if (!result)
         {
             // clear cooldown at fail
             if(m_caster->GetTypeId()==TYPEID_PLAYER)
@@ -589,7 +589,7 @@ void Spell::EffectPowerDrain(uint32 i)
     unitTarget->ModifyPower(POWER_MANA,-new_damage);
 
     m_caster->ModifyPower(POWER_MANA,tmpvalue);
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage/2);
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage/2, m_IsTriggeredSpell);
 
 }
 
@@ -603,6 +603,12 @@ void Spell::EffectHeal( uint32 i )
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth, crit);
 
         unitTarget->ModifyHealth( addhealth );
+        
+        uint32 procHealer = PROC_FLAG_HEAL;
+        if (crit)
+            procHealer |= PROC_FLAG_CRIT_HEAL;
+        if (m_caster != unitTarget)
+            m_caster->ProcDamageAndSpell(unitTarget,procHealer,PROC_FLAG_NONE,addhealth,m_spellInfo,m_IsTriggeredSpell);
     }
 }
 
@@ -630,7 +636,7 @@ void Spell::EffectHealthLeach(uint32 i)
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, uint32(tmpvalue));
 
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage);
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell);
 }
 
 void Spell::DoCreateItem(uint32 i, uint32 itemtype)
@@ -1696,7 +1702,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         return;
     }
 
-    m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+    m_caster->DoAttackDamage(unitTarget, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
 
     // not add bonus to 0 damage
     if( damage > 0 && damage + bonus > 0 )
