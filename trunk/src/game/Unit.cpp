@@ -2903,7 +2903,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
 
                 uint32 procFlags = spellProcEvent ? spellProcEvent->procFlags : spellProto->procFlags;
                 // Check if current equipment allows aura to proc
-                if((GetTypeId() == TYPEID_PLAYER) && !(procFlags & PROC_FLAG_HIT_SPECIAL) && ((Player*)this)->IsUseEquipedWeapon())
+                if(GetTypeId() == TYPEID_PLAYER)
                 {
                     if(spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
                     {
@@ -2917,15 +2917,13 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 
                         if(!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((1<<item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
                             continue;
-                        procFlag |= PROC_FLAG_HIT_SPECIAL;
                     }
                     else if(spellProto->EquippedItemClass == ITEM_CLASS_ARMOR)
                     {
-                        // Check shield
+                        // Check if player is wearing shield
                         Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                         if(!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_ARMOR || !((1<<item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
                             continue;
-                        procFlag |= PROC_FLAG_HIT_SPECIAL;
                     }
                 }
                 if((procFlag & procFlags) == 0)
@@ -3112,15 +3110,15 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         switch (dummySpell->Id)
         {
             case 11119:
-                igniteDot.EffectBasePoints[0]=uint32(0.08f*damage);break;
+                igniteDot.EffectBasePoints[0]=uint32(0.04f*damage);break;
             case 11120:
-                igniteDot.EffectBasePoints[0]=uint32(0.16f*damage);break;
+                igniteDot.EffectBasePoints[0]=uint32(0.08f*damage);break;
             case 12846:
-                igniteDot.EffectBasePoints[0]=uint32(0.24f*damage);break;
+                igniteDot.EffectBasePoints[0]=uint32(0.12f*damage);break;
             case 12847:
-                igniteDot.EffectBasePoints[0]=uint32(0.32f*damage);break;
+                igniteDot.EffectBasePoints[0]=uint32(0.16f*damage);break;
             case 12848:
-                igniteDot.EffectBasePoints[0]=uint32(0.40f*damage);break;
+                igniteDot.EffectBasePoints[0]=uint32(0.20f*damage);break;
         };        
         CastSpell(pVictim, &igniteDot, true, NULL);
     }
