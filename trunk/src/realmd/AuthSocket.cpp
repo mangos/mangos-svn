@@ -627,9 +627,8 @@ void AuthSocket::_HandleRealmList()
         pkt << i->second->address;
         /// \todo Fix realm population
         pkt << (float) 0.0;                                 //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
-        //result = i->second->dbRealm.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = '%d'",id);
         // No SQL injection. id of realm is controlled by the database.
-        result = dbRealmServer.PQuery( "SELECT SUM(`numchars`) AS numchars FROM `realmcharacters` WHERE `realmid` = '%d' GROUP BY `realmid`",i->second->m_ID);
+        result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `realmid` = '%d' AND `acctid`='%u'",i->second->m_ID,id);
         if( result )
         {
             Field *fields = result->Fetch();
