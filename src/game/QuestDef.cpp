@@ -44,8 +44,8 @@ Quest::Quest(Field * questRecord)
     RequiredRepValue = questRecord[11].GetUInt32();
     LimitTime = questRecord[12].GetUInt32();
     SpecialFlags = questRecord[13].GetUInt32();
-    PrevQuestId = questRecord[14].GetUInt32();
-    NextQuestId = questRecord[15].GetUInt32();
+    PrevQuestId = questRecord[14].GetInt32();
+    NextQuestId = questRecord[15].GetInt32();
     ExclusiveGroup = questRecord[16].GetUInt32();
     SrcItemId = questRecord[17].GetUInt32();
     SrcItemCount = questRecord[18].GetUInt32();

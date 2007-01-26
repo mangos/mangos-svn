@@ -8182,7 +8182,7 @@ Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
                 return NULL;
         }
 
-        uint32 nextQuestID = pQuest->GetNextQuestId();
+        uint32 nextQuestID = pQuest->GetNextQuestId() < 0 ? 0 : pQuest->GetNextQuestId();
         list<uint32>::iterator iter = find(pObject->mQuests.begin(), pObject->mQuests.end(), nextQuestID);
         if (iter != pObject->mQuests.end())
         {
@@ -8662,18 +8662,25 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
         if( qInfo->prevQuests.size() == 0)
             return true;
 
-        // If any of the previous quests completed, return true
-        for(vector<uint32>::iterator iter = qInfo->prevQuests.begin(); iter != qInfo->prevQuests.end(); iter++ )
+        for(vector<int32>::iterator iter = qInfo->prevQuests.begin(); iter != qInfo->prevQuests.end(); iter++ )
         {
-            uint32 prevId = *iter;
+            uint32 prevId = abs(*iter);
 
             StatusMap::iterator i_prevstatus = mQuestStatus.find( prevId );
 
-            if( i_prevstatus != mQuestStatus.end() && i_prevstatus->second.m_rewarded )
-                return true;
+            if( i_prevstatus != mQuestStatus.end() )
+            {
+                // If any of the positive previous quests completed, return true
+                if( *iter > 0 && i_prevstatus->second.m_rewarded )
+                    return true;
+                // If any of the negative previous quests active, return true
+                if( *iter < 0 && i_prevstatus->second.m_status == QUEST_STATUS_INCOMPLETE )
+                    return true;
+            }
         }
 
-        // Have only prev. quests in non-rewarded state
+        // Has only positive prev. quests in non-rewarded state
+        // and negative prev. quests in non-active state
         if( msg )
             SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
     }

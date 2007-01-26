@@ -2234,11 +2234,13 @@ uint8 Spell::CheckItems()
             if(!proto)
                 return CAST_FAIL_ITEM_NOT_READY;
             for(int s=0;s<5;s++)
+            {
                 // CastItem will be used up and does not count as reagent
                 if(proto->Spells[s].SpellCharges < 0 && m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+s) < 2)
-            {
-                itemcount++;
-                break;
+                {
+                    itemcount++;
+                    break;
+                }
             }
         }
         if( !p_caster->HasItemCount(itemid,itemcount) )

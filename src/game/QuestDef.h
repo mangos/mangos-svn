@@ -143,7 +143,7 @@ class Quest
         uint32 GetRequiredRepFaction() { return RequiredRepFaction; }
         uint32 GetRequiredRepValue() { return RequiredRepValue; }
         uint32 GetLimitTime() { return LimitTime; }
-        uint32 GetNextQuestId() { return NextQuestId; }
+        int32  GetNextQuestId() { return NextQuestId; }
         uint32 GetExclusiveGroup() { return ExclusiveGroup; }
         uint32 GetSrcItemId() { return SrcItemId; }
         uint32 GetSrcItemCount() { return SrcItemCount; }
@@ -205,7 +205,7 @@ class Quest
         uint32 GetRewChoiceItemsCount() { return m_rewchoiceitemscount; }
         uint32 GetRewItemsCount() { return m_rewitemscount; }
 
-        vector<uint32> prevQuests;
+        vector<int32> prevQuests;
 
         // cached data
     private:
@@ -230,8 +230,8 @@ class Quest
         uint32 RequiredRepValue;
         uint32 LimitTime;
         uint32 SpecialFlags;
-        uint32 PrevQuestId;
-        uint32 NextQuestId;
+        int32  PrevQuestId;
+        int32  NextQuestId;
         uint32 ExclusiveGroup;
         uint32 SrcItemId;
         uint32 SrcItemCount;

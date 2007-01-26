@@ -1346,12 +1346,15 @@ void ObjectMgr::LoadQuests()
 
         if(qinfo->NextQuestId)
         {
-            if (QuestTemplates.find(qinfo->NextQuestId) == QuestTemplates.end())
+            if (QuestTemplates.find(abs(qinfo->GetNextQuestId())) == QuestTemplates.end())
             {
-                sLog.outErrorDb("Quest %d has NextQuestId %d, but no such quest", qinfo->GetQuestId(), qinfo->NextQuestId);
+                sLog.outErrorDb("Quest %d has NextQuestId %i, but no such quest", qinfo->GetQuestId(), qinfo->GetNextQuestId());
             }
             else
-                QuestTemplates[qinfo->NextQuestId]->prevQuests.push_back(qinfo->GetQuestId());
+            {
+                int32 signedQuestId = qinfo->NextQuestId < 0 ? -int32(qinfo->GetQuestId()) : int32(qinfo->GetQuestId());
+                QuestTemplates[abs(qinfo->GetNextQuestId())]->prevQuests.push_back(signedQuestId);
+            }
         }
 
         if(qinfo->ExclusiveGroup)
