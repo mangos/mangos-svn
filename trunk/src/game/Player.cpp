@@ -8281,8 +8281,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
-                    // skip GO activate objectives
-                    if( qInfo->ReqCreatureOrGOId[i] <= 0 )
+                    if( qInfo->ReqCreatureOrGOId[i] == 0 )
                         continue;
 
                     if( qInfo->ReqCreatureOrGOCount[i] != 0 && mQuestStatus[quest_id].m_creatureOrGOcount[i] < qInfo->ReqCreatureOrGOCount[i] )
@@ -8298,9 +8297,10 @@ bool Player::CanCompleteQuest( uint32 quest_id )
 
             if ( qInfo->GetRewOrReqMoney() < 0 )
             {
-                if ( int32(GetMoney()) < -qInfo->GetRewOrReqMoney() )
+                if ( GetMoney() < uint32(-qInfo->GetRewOrReqMoney()) )
                     return false;
             }
+
             return true;
         }
     }
