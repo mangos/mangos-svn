@@ -2903,7 +2903,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
 
                 uint32 procFlags = spellProcEvent ? spellProcEvent->procFlags : spellProto->procFlags;
                 // Check if current equipment allows aura to proc
-                if(GetTypeId() == TYPEID_PLAYER)
+                if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->IsUseEquipedWeapon())
                 {
                     if(spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
                     {
