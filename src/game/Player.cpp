@@ -4713,7 +4713,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
 
         if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
 
-        uint32 chance = spellInfo->procChance <= 100 ? spellInfo->procChance : GetWeaponProcChance();
+        uint32 chance = uint32(spellInfo->procChance <= 100 ? spellInfo->procChance : GetWeaponProcChance());
         if (chance > rand_chance())
             this->CastSpell(Target, spellInfo->Id, true, item);
     }
@@ -4725,7 +4725,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
         uint32 enchant_display = pEnchant->display_type;
-        uint32 chance = pEnchant->value1 != 0 ? pEnchant->value1 : GetWeaponProcChance();
+        uint32 chance = uint32(pEnchant->value1 != 0 ? pEnchant->value1 : GetWeaponProcChance());
         uint32 enchant_spell_id = pEnchant->spellid;
         SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
         if(!enchantSpell_info) continue;

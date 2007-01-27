@@ -522,9 +522,11 @@ class Spell
         std::list<GameObject*> UniqueGOsTargets;
         // -------------------------------------------
 
+	//List For Triggered Spells
+	std::list<SpellEntry const*> m_TriggerSpell;
+
         uint32 m_spellState;
         uint32 m_timer;
-        SpellEntry const* m_TriggerSpell;
         uint16 m_castFlags;
 
         float m_castPositionX;

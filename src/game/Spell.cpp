@@ -180,7 +180,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
     m_spellState = SPELL_STATE_NULL;
 
     m_castPositionX = m_castPositionY = m_castPositionZ = 0;
-    m_TriggerSpell = NULL;
+    m_TriggerSpell.clear();
     m_targetCount = 0;
     m_IsTriggeredSpell = triggered;
     //m_AreaAura = false;
@@ -1095,7 +1095,7 @@ void Spell::finish(bool ok)
     }
 
     // call triggered spell only at successful cast
-    if(ok && m_TriggerSpell)
+    if(ok && m_TriggerSpell.size() > 0)
         TriggerSpell();
 }
 
@@ -1571,12 +1571,15 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
 void Spell::TriggerSpell()
 {
-    if(!m_TriggerSpell) return;
+    if(m_TriggerSpell.size() < 1) return;
 
-    Spell spell(m_caster, m_TriggerSpell, true, 0);
-    SpellCastTargets targets;
-    targets.setUnitTarget( m_targets.getUnitTarget());
-    spell.prepare(&targets);
+    for(std::list<SpellEntry const*>::iterator si=m_TriggerSpell.begin(); si!=m_TriggerSpell.end(); ++si)
+    {
+	Spell spell(m_caster, (*si), true, 0);
+	SpellCastTargets targets;
+	targets.setUnitTarget(m_targets.getUnitTarget());
+	spell.prepare(&targets);
+    }
 
 }
 

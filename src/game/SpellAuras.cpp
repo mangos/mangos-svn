@@ -321,8 +321,8 @@ int32 Aura::CalculateDamage()
 
     float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[m_effIndex];
     float randomPointsPerLevel = spellproto->EffectDicePerLevel[m_effIndex];
-    int32 basePoints = spellproto->EffectBasePoints[m_effIndex] + level * basePointsPerLevel;
-    int32 randomPoints = spellproto->EffectDieSides[m_effIndex] + level * randomPointsPerLevel;
+    int32 basePoints = int32(spellproto->EffectBasePoints[m_effIndex] + level * basePointsPerLevel);
+    int32 randomPoints = int32(spellproto->EffectDieSides[m_effIndex] + level * randomPointsPerLevel);
     float comboDamage = spellproto->EffectPointsPerComboPoint[m_effIndex];
     uint8 comboPoints=0;
     if(caster->GetTypeId() == TYPEID_PLAYER)
