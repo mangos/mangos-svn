@@ -767,6 +767,8 @@ void ObjectMgr::LoadPlayerInfo()
         }
         else
         {
+            uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
+
             barGoLink bar( result->GetRowCount() );
 
             do
@@ -789,8 +791,16 @@ void ObjectMgr::LoadPlayerInfo()
 
                 PlayerInfo* pInfo = &playerInfo[current_race][current_class];
                 pInfo->skill[0].push_back(fields[2].GetUInt16());
-                pInfo->skill[1].push_back(fields[3].GetUInt16());
-                pInfo->skill[2].push_back(fields[4].GetUInt16());
+
+                int32 minskill = fields[3].GetInt32();
+                if(minskill < 0 || minskill > maxconfskill) // -1 - is special value for max in game skill
+                    minskill = maxconfskill;
+                pInfo->skill[1].push_back(minskill);
+
+                int32 maxskill = fields[4].GetInt32();
+                if(maxskill < 0 || maxskill > maxconfskill) // -1 - is special value for max in game skill
+                    maxskill = maxconfskill;
+                pInfo->skill[2].push_back(maxskill);
 
                 bar.step();
                 count++;
@@ -1183,10 +1193,10 @@ void ObjectMgr::LoadQuests()
             // no changes, quest can't be done for this requirement
         }
 
-        if(qinfo->RequiredSkillValue && qinfo->RequiredSkillValue > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)*5)
+        if(qinfo->RequiredSkillValue && qinfo->RequiredSkillValue > sWorld.GetConfigMaxSkillValue())
         {
             sLog.outErrorDb("Quest %u have `RequiredSkillValue` = %u but max possible skill is %u, quest can't be done.",
-                qinfo->GetQuestId(),qinfo->RequiredSkillValue,sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)*5);
+                qinfo->GetQuestId(),qinfo->RequiredSkillValue,sWorld.GetConfigMaxSkillValue());
             // no changes, quest can't be done for this requirement
         }
 

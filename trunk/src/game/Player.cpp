@@ -2007,7 +2007,9 @@ void Player::learnSpell(uint16 spell_id)
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
 
-    uint16 maxskill = getLevel()*5 > 300 ? 300 :getLevel()*5;
+    uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
+    uint16 maxskill     = GetMaxSkillValueForLevel();
+
     switch(spell_id)
     {
         //Armor
@@ -2087,13 +2089,13 @@ void Player::learnSpell(uint16 spell_id)
             SetSkill(762,150,150);
             break;
         case 1804:                                          //Pick Lock(Rogue)
-            SetSkill(633,1,this->getLevel()*5);
+            SetSkill(633,1,maxskill);
             break;
-            // Languages
+        // Languages
         case 668: case 669: case 670: case 671:  case 672:  case 813: case 814:
         case 815: case 816: case 817: case 7340: case 7341: case 17737:
             if(LanguageDesc const* lang = GetLanguageDescBySpell(spell_id))
-                SetSkill(lang->skill_id,1,300);
+                SetSkill(lang->skill_id,1,maxconfskill);
             break;
         default:break;
     }
@@ -3361,6 +3363,8 @@ void Player::ModifySkillBonus(uint32 skillid,int32 val)
 
 void Player::UpdateMaxSkills()
 {
+    uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
+
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
         if (GetUInt32Value(PLAYER_SKILL(i)))
     {
@@ -3373,12 +3377,13 @@ void Player::UpdateMaxSkills()
             continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
         uint32 max = data>>16;
-        uint32 max_Skill = data%0x10000+getLevel()*5*0x10000;
-        if((max_Skill>>16) > 300)
-            max_Skill = data%0x10000+300*0x10000;
 
-        if(max!=1 && max != 300)
+        // update only level dependent max skill values
+        if(max!=1 && max != maxconfskill)
+        {
+            uint32 max_Skill = data%0x10000+GetMaxSkillValueForLevel()*0x10000;
             SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill);
+        }
     }
 }
 
@@ -5543,7 +5548,7 @@ int32 Player::FishingMinSkillForCurrentZone() const
     }
 
     // impossable or unknown
-    return 999;
+    return 9999;
 }
 
 void Player::SetBindPoint(uint64 guid)

@@ -1023,6 +1023,8 @@ const char *gmSpellList[] =
 
 bool ChatHandler::HandleLearnCommand(const char* args)
 {
+    uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
+
     if (!*args)
         return false;
 
@@ -1087,7 +1089,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         for(int i = 1; i < LANGUAGES_COUNT; ++i)
         {
             m_session->GetPlayer()->learnSpell(lang_description[i].spell_id);
-            m_session->GetPlayer()->SetSkill(lang_description[i].skill_id,300,300);
+            m_session->GetPlayer()->SetSkill(lang_description[i].skill_id,maxconfskill,maxconfskill);
         }
         return true;
     }
