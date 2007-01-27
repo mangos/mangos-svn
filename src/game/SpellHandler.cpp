@@ -241,18 +241,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             }
 
-            obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
-
-            info = obj->GetGOInfo();
-            if(info)
-            {
-                spellId = info->sound0;
-                if (spellId == 0)
-                    spellId = info->sound3;
-
-                guid=_player->GetGUID();
-
-            }
             break;
             //fishing bobber
         case GAMEOBJECT_TYPE_FISHINGNODE:                   //17

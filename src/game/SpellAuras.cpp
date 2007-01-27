@@ -1088,7 +1088,14 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         }
 
         if(PowerType != POWER_MANA)
+        {
             unit_target->setPowerType(PowerType);
+
+            // energy in cat start with 0.
+            //TODO: implement SPELL_AURA_ADD_TARGET_TRIGGER that used for receiving with some chance non-0 energy at transformation
+            if(m_modifier.m_miscvalue == FORM_CAT)
+                unit_target->SetPower(POWER_ENERGY,0);
+        }
 
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
