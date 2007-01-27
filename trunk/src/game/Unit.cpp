@@ -206,9 +206,9 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Wal
 void Unit::resetAttackTimer(WeaponAttackType type)
 {
     if (GetTypeId() == TYPEID_PLAYER)
-        m_attackTimer[type] = GetAttackTime(type) * m_modAttackSpeedPct[type];
+        m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
     else
-        m_attackTimer[type] = 2000 * m_modAttackSpeedPct[type];
+        m_attackTimer[type] = uint32(2000 * m_modAttackSpeedPct[type]);
 }
 
 bool Unit::canReachWithAttack(Unit *pVictim) const
@@ -3305,7 +3305,7 @@ bool Unit::AttackStop()
     m_attacking = NULL;
 
     //Clear our target
-    SetUInt32Value(UNIT_FIELD_TARGET, NULL);
+    SetUInt32Value(UNIT_FIELD_TARGET, 0);
 
     clearUnitState(UNIT_STAT_ATTACKING);
     if(GetTypeId()!=TYPEID_PLAYER && m_attackers.empty())
@@ -3722,7 +3722,7 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
 {
     // proc per minute chance calculation
     if (PPM <= 0) return 0.0f;
-    uint32 result = (WeaponSpeed * PPM) / 600.0f; // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
+    uint32 result = uint32((WeaponSpeed * PPM) / 600.0f); // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
     return result;
 }
 

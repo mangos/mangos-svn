@@ -442,7 +442,8 @@ void Spell::EffectTriggerSpell(uint32 i)
         return;
     }
 
-    m_TriggerSpell = spellInfo;
+    m_TriggerSpell.push_back(spellInfo);
+
 }
 
 void Spell::EffectTeleportUnits(uint32 i)
