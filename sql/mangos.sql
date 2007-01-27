@@ -2101,6 +2101,7 @@ CREATE TABLE `quest_template` (
   `PrevQuestId` int(11) NOT NULL default '0',
   `NextQuestId` int(11) NOT NULL default '0',
   `ExclusiveGroup` int(11) unsigned NOT NULL default '0',
+  `NextQuestInChain` int(11) unsigned NOT NULL default '0',
   `SrcItemId` int(11) unsigned NOT NULL default '0',
   `SrcItemCount` int(11) unsigned NOT NULL default '0',
   `SrcSpell` int(11) unsigned NOT NULL default '0',
@@ -2176,7 +2177,6 @@ CREATE TABLE `quest_template` (
   `OfferRewardEmote` int(11) unsigned NOT NULL default '0',
   `RequestItemsEmote` int(11) unsigned NOT NULL default '1',
   `CompleteScript` int(11) unsigned NOT NULL default '0',
-  `HaveQuestId` int(11) unsigned NOT NULL default '0',
   `Repeatable` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest System';

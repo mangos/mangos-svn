@@ -8188,7 +8188,7 @@ Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
                 return NULL;
         }
 
-        uint32 nextQuestID = pQuest->GetNextQuestId() < 0 ? 0 : pQuest->GetNextQuestId();
+        uint32 nextQuestID = pQuest->GetNextQuestInChain();
         list<uint32>::iterator iter = find(pObject->mQuests.begin(), pObject->mQuests.end(), nextQuestID);
         if (iter != pObject->mQuests.end())
         {
@@ -8204,7 +8204,7 @@ bool Player::CanSeeStartQuest( uint32 quest_id )
     {
         if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) && SatisfyQuestExclusiveGroup( quest_id, false )
             && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
-            && SatisfyQuestPreviousQuest( quest_id, false ) && SatisfyQuestHaveQuest(quest_id, false) )
+            && SatisfyQuestPreviousQuest( quest_id, false ) && SatisfyQuestChain( quest_id, false ) )
             return ( getLevel() + 7 >= objmgr.QuestTemplates[quest_id]->GetMinLevel() );
     }
     return false;
@@ -8219,7 +8219,7 @@ bool Player::CanTakeQuest( Quest *pQuest, bool msg )
             && SatisfyQuestRace( quest_id, msg ) && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
             && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg )
             && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg )
-            && SatisfyQuestHaveQuest( quest_id, msg ) );
+            && SatisfyQuestChain( quest_id, msg ) );
     }
     return false;
 }
@@ -8693,25 +8693,6 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
     return false;
 }
 
-bool Player::SatisfyQuestHaveQuest( uint32 quest_id, bool msg )
-{
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
-    if(!qInfo)
-        return false;
-
-    if (!qInfo->GetHaveQuestId())
-        return true;
-
-    StatusMap::iterator iter = mQuestStatus.find(qInfo->GetHaveQuestId());
-    if (iter == mQuestStatus.end())
-        return false;
-
-    if (iter->second.m_status == QUEST_STATUS_NONE)
-        return false;
-
-    return true;
-}
-
 bool Player::SatisfyQuestRace( uint32 quest_id, bool msg )
 {
     Quest * qInfo = objmgr.QuestTemplates[quest_id];
@@ -8813,17 +8794,39 @@ bool Player::SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg )
         {
             uint32 exclude_Id = iter->second;
 
-            // skip checked quest id, intrested only state of another quests in group
+            // skip checked quest id, only state of other quests in group is interesting
             if(exclude_Id == quest_id)
                 continue;
 
             StatusMap::iterator i_exstatus = mQuestStatus.find( exclude_Id );
 
-            // altearnative quest already start or complete
+            // alternative quest already started or completed
             if( i_exstatus != mQuestStatus.end()
                 && (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE) )
                 return false;
         }
+        return true;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestChain( uint32 quest_id, bool msg )
+{
+    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    if( qInfo )
+    {
+        if(!qInfo->GetNextQuestInChain())
+            return true;
+
+        // next quest in chain already started or completed
+        StatusMap::iterator itr = mQuestStatus.find( qInfo->GetNextQuestInChain() );
+        if( itr != mQuestStatus.end()
+            && (itr->second.m_status == QUEST_STATUS_COMPLETE || itr->second.m_status == QUEST_STATUS_INCOMPLETE) )
+            return false;
+
+        // check for all quests further up the chain
+        // only necessary if there are quest chains with more than one quest that can be skipped
+        //return SatisfyQuestChain( qInfo->GetNextQuestInChain(), msg );
         return true;
     }
     return false;

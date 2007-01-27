@@ -145,6 +145,7 @@ class Quest
         uint32 GetLimitTime() { return LimitTime; }
         int32  GetNextQuestId() { return NextQuestId; }
         uint32 GetExclusiveGroup() { return ExclusiveGroup; }
+        uint32 GetNextQuestInChain() { return NextQuestInChain; }
         uint32 GetSrcItemId() { return SrcItemId; }
         uint32 GetSrcItemCount() { return SrcItemCount; }
         uint32 GetSrcSpell() { return SrcSpell; }
@@ -168,7 +169,6 @@ class Quest
         uint32 GetOfferRewardEmote() { return OfferRewardEmote; }
         uint32 GetRequestItemsEmote() { return RequestItemsEmote; }
         uint32 GetQuestCompleteScript() { return QuestCompleteScript; }
-        uint32 GetHaveQuestId() { return HaveQuestId; }
         uint32 IsRepeatable() { return Repeatable; }
         uint32 GetSpecialFlags() { return SpecialFlags; }
 
@@ -233,6 +233,7 @@ class Quest
         int32  PrevQuestId;
         int32  NextQuestId;
         uint32 ExclusiveGroup;
+        uint32 NextQuestInChain;
         uint32 SrcItemId;
         uint32 SrcItemCount;
         uint32 SrcSpell;
@@ -256,7 +257,6 @@ class Quest
         uint32 OfferRewardEmote;
         uint32 RequestItemsEmote;
         uint32 QuestCompleteScript;
-        uint32 HaveQuestId;
         uint32 Repeatable;
 };
 
