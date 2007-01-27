@@ -276,13 +276,13 @@ void Pet::Update(uint32 diff)
         {
             // unsummon pet that lost owner
             Unit* owner = GetOwner();
-            if(!owner || !IsWithinDistInMap(owner, OWNER_MAX_DISTANCE) || !owner->GetPetGUID())
+            if(!owner || !IsWithinDistInMap(owner, OWNER_MAX_DISTANCE) || isControlled() && !owner->GetPetGUID())
             {
                 Remove(PET_SAVE_AS_CURRENT);
                 return;
             }
 
-            if(owner->GetPetGUID()!=GetGUID())
+            if(isControlled() && owner->GetPetGUID() != GetGUID())
             {
                 Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_AS_STORED);
                 return;
