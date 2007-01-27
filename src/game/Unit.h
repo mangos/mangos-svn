@@ -526,6 +526,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void Mount(uint32 mount, bool taxi = false);
         void Unmount();
 
+        uint16 GetMaxSkillValueForLevel() const { return getLevel()*5; }
+
         void DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
         void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage = 0, SpellEntry const *procSpell = NULL, bool isTriggeredSpell = false, WeaponAttackType attType = BASE_ATTACK);

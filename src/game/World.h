@@ -172,6 +172,8 @@ class World
 
         time_t GetGameTime() const { return m_gameTime; }
 
+        uint16 GetConfigMaxSkillValue() const { return getConfig(CONFIG_MAX_PLAYER_LEVEL)*5; }
+
         void SetInitialWorldSettings();
 
         void SendWorldText(const char *text, WorldSession *self = 0);

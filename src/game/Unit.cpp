@@ -1357,9 +1357,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         && ((getLevel() < pVictim->getLevel())))
     {
         tmp = GetWeaponSkillValue(attType);
-        int32   maxskill = getLevel() * 5;
+        int32   maxskill = GetMaxSkillValueForLevel();
         tmp = (tmp > maxskill) ? maxskill : tmp;
-        tmp = ((pVictim->getLevel()* 5 - tmp - 5) * 300 + 1000 );
+        tmp = ((pVictim->GetMaxSkillValueForLevel() - tmp - 5) * 300 + 1000 );
         tmp = tmp > 4000 ? 4000 : tmp;
         if (roll < (sum += tmp))
         {
@@ -1379,11 +1379,11 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     // mobs can score crushing blows if they're 3 or more levels above victim
     // or when their weapon skill is 15 or more above victim's defense skill
     tmp = pVictim->GetDefenceSkillValue();
-    uint32 tmpmax = pVictim->getLevel() * 5;
+    uint32 tmpmax = pVictim->GetMaxSkillValueForLevel();
     // having defense above your maximum (from items, talents etc.) has no effect
     tmp = tmp > tmpmax ? tmpmax : tmp;
     // tmp = mob's level * 5 - player's current defense skill
-    tmp = getLevel() * 5 - tmp;
+    tmp = GetMaxSkillValueForLevel() - tmp;
     if (GetTypeId() != TYPEID_PLAYER && (tmp >= 15))
     {
         // add 2% chance per lacking skill point, min. is 15%
