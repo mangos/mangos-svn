@@ -1848,7 +1848,7 @@ uint8 Spell::CanCast()
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !gameObjTarget)
                     return CAST_FAIL_FAILED;
 
-                // chance for fail at orange mining/herb gathering attempt
+                // chance for fail at orange mining/herb/LockPicking gathering attempt
                 if (gameObjTarget->GetGoType() == GAMEOBJECT_TYPE_CHEST && m_caster->m_currentSpell == this)
                 {
                     int32 SkillValue;
@@ -1856,15 +1856,28 @@ uint8 Spell::CanCast()
                         SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM);
                     else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_MINING)
                         SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_MINING);
+                    else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
+                        SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_LOCKPICKING);
                     else
                         break;
 
                     int32 ReqValue;
                     LockEntry const *lockInfo = sLockStore.LookupEntry(gameObjTarget->GetGOInfo()->sound0);
                     if (lockInfo)
-                        ReqValue = lockInfo->requiredskill;
+                    {
+                        if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
+                            ReqValue = lockInfo->requiredlockskill;
+                        else
+                            ReqValue = lockInfo->requiredskill;
+                    }
                     else
                         break;
+
+                    if (ReqValue > SkillValue)
+                    {
+                        castResult = CAST_FAIL_SKILL_NOT_HIGH_ENOUGH;
+                        break;
+                    }
 
                     if (ReqValue > irand(SkillValue-25, SkillValue+37))
                         castResult = CAST_FAIL_FAILED_ATTEMPT;
