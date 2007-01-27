@@ -119,8 +119,8 @@ class Pet : public Creature
 class PetWithIdCheck
 {
     public:
-        PetWithIdCheck(Unit* owner, uint32 entry) : i_owner(owner), i_entry(entry), i_result(NULL) {}
-        bool operator()(Unit* u)
+        PetWithIdCheck(Unit const* owner, uint32 entry) : i_owner(owner), i_entry(entry) {}
+        bool operator()(Unit const* u) const
         {
             if(u->GetTypeId()!=TYPEID_UNIT)
                 return false;
@@ -134,13 +134,10 @@ class PetWithIdCheck
             if(u->GetOwnerGUID()!=i_owner->GetGUID())
                 return false;
 
-            i_result = (Pet*)u;
             return true;
         }
-        Pet *GetResult() const { return i_result; }
     private:
-        Unit* const i_owner;
+        Unit const* i_owner;
         uint32 i_entry;
-        Pet* i_result;
 };
 #endif
