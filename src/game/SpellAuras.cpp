@@ -464,7 +464,7 @@ void AreaAura::Update(uint32 diff)
             for(uint32 p=0;p<pGroup->GetMembersCount();p++)
             {
                 Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
-                if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || pGroup->SameSubGroup(m_caster_guid, Target->GetGUID()))
+                if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup(m_caster_guid, Target->GetGUID()))
                     continue;
                 Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
 
