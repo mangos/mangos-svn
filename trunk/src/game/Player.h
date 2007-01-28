@@ -741,7 +741,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             ASSERT( (intId < 8) );
             m_Tutorials[intId] = value;
         }
-
         bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool HasSpaceForItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
 
@@ -1120,6 +1119,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetTransOffsetY() const { return m_transY; }
         float GetTransOffsetZ() const { return m_transZ; }
         float GetTransOffsetO() const { return m_transO; }
+
+        uint32 GetSaveTimer() const { return m_nextSave; }
+        void   SetSaveTimer(uint32 timer) { m_nextSave = timer; }
 
         // Invisibility and detection system
         std::vector<Player *> InvisiblePjsNear;

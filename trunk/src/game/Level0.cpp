@@ -174,8 +174,25 @@ bool ChatHandler::HandleDismountCommand(const char* args)
 
 bool ChatHandler::HandleSaveCommand(const char* args)
 {
-    m_session->GetPlayer()->SaveToDB();
-    SendSysMessage(LANG_PLAYER_SAVED);
+    Player *player=m_session->GetPlayer();
+
+    // save GM account without delay and output message (testing, etc)
+    if(m_session->GetSecurity())
+    {
+        player->SaveToDB();
+        SendSysMessage(LANG_PLAYER_SAVED);
+        return true;
+    }
+
+    uint32 lastsave = sWorld.getConfig(CONFIG_INTERVAL_SAVE) - player->GetSaveTimer();
+
+    // let save only after 20 sec (logout delay) after prev. save and _not_ output any messages to prevent cheat planning
+    if (lastsave > 20*1000)
+        player->SaveToDB();
+    // plan next save by player request after 20 delay finish
+    else
+        player->SetSaveTimer(20*1000 - lastsave);
+
     return true;
 }
 
