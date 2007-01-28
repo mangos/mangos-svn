@@ -973,9 +973,6 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
-    uint32 procAttacker = PROC_FLAG_NONE;
-    uint32 procVictim   = PROC_FLAG_NONE;
-
     pVictim->RemoveFlag(UNIT_FIELD_AURASTATE, uint32((1<<(AURA_STATE_PARRY-1)) | 1<<(AURA_STATE_DODGE-1)));
     MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim, attType);
     if (outcome == MELEE_HIT_MISS)
@@ -1009,17 +1006,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 ((Player*)this)->UpdateWeaponSkill(attType);
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
-
-            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
-            {
-                procAttacker = PROC_FLAG_HIT_MELEE | PROC_FLAG_CRIT_MELEE;
-                procVictim = PROC_FLAG_STRUCK_MELEE | PROC_FLAG_STRUCK_CRIT_MELEE;
-            }
-            else
-            {
-                procAttacker = PROC_FLAG_HIT_RANGED | PROC_FLAG_CRIT_RANGED;
-                procVictim = PROC_FLAG_STRUCK_RANGED | PROC_FLAG_STRUCK_CRIT_RANGED;
-            }
             break;
 
         case MELEE_HIT_PARRY:
@@ -1048,9 +1034,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
             pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
-
-            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
-            procVictim = PROC_FLAG_PARRY;
             return;
 
         case MELEE_HIT_DODGE:
@@ -1062,9 +1045,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
             pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
-
-            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
-            procVictim = PROC_FLAG_DODGE;
             return;
 
         case MELEE_HIT_BLOCK:
@@ -1085,9 +1065,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
             pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
-
-            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
-            procVictim = PROC_FLAG_BLOCK;
             break;
 
         case MELEE_HIT_GLANCING:
@@ -1098,17 +1075,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 reducePerc = 70;
             *damage = *damage * reducePerc / 100;
             *hitInfo |= HITINFO_GLANCING;
-
-            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
-            {
-                procAttacker = PROC_FLAG_HIT_MELEE;
-                procVictim = PROC_FLAG_STRUCK_MELEE;
-            }
-            else
-            {
-                procAttacker = PROC_FLAG_HIT_RANGED;
-                procVictim = PROC_FLAG_STRUCK_RANGED;
-            }
             break;
         }
         case MELEE_HIT_CRUSHING:
@@ -1117,33 +1083,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             *damage += (*damage / 2);
             *hitInfo |= HITINFO_CRUSHING;
             // TODO: victimState, victim animation?
-
-            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
-            {
-                procAttacker = PROC_FLAG_HIT_MELEE | PROC_FLAG_CRIT_MELEE;
-                procVictim = PROC_FLAG_STRUCK_MELEE | PROC_FLAG_STRUCK_CRIT_MELEE;
-            }
-            else
-            {
-                procAttacker = PROC_FLAG_HIT_RANGED | PROC_FLAG_CRIT_RANGED;
-                procVictim = PROC_FLAG_STRUCK_RANGED | PROC_FLAG_STRUCK_CRIT_RANGED;
-            }
             break;
         }
         default:
-        {
-            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
-            {
-                procAttacker = PROC_FLAG_HIT_MELEE;
-                procVictim = PROC_FLAG_STRUCK_MELEE;
-            }
-            else
-            {
-                procAttacker = PROC_FLAG_HIT_RANGED;
-                procVictim = PROC_FLAG_STRUCK_RANGED;
-            }
             break;
-        }
     }
 
     MeleeDamageBonus(pVictim, damage);
@@ -1157,12 +1100,11 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         //*hitInfo = 0x00010020;
         //*hitInfo |= HITINFO_SWINGNOHITSOUND;
         //*damageType = 0;
-        ProcDamageAndSpell(pVictim,procAttacker,procVictim,0,spellCasted,isTriggeredSpell,attType);
+        CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
         return;
-    }else
-        procVictim |= PROC_FLAG_TAKE_DAMAGE;
+    }
 
-    ProcDamageAndSpell(pVictim,procAttacker,procVictim,(*damage-*absorbDamage-*resistDamage-*blocked_amount),spellCasted,isTriggeredSpell,attType);
+    CastMeleeProcDamageAndSpell(pVictim, (*damage - *absorbDamage - *resistDamage - *blocked_amount), attType, outcome, spellCasted, isTriggeredSpell);
 
     // victim's damage shield
     AuraList& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
@@ -3098,6 +3040,74 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
             }            
         }
     }
+}
+
+void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted, bool isTriggeredSpell)
+{
+    if(!pVictim)
+        return;
+
+    uint32 procAttacker = PROC_FLAG_NONE;
+    uint32 procVictim   = PROC_FLAG_NONE;
+
+    switch(outcome)
+    {
+        case MELEE_HIT_MISS:
+            return;
+        case MELEE_HIT_CRIT:
+            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
+            {
+                procAttacker = PROC_FLAG_HIT_MELEE | PROC_FLAG_CRIT_MELEE;
+                procVictim = PROC_FLAG_STRUCK_MELEE | PROC_FLAG_STRUCK_CRIT_MELEE;
+            }
+            else
+            {
+                procAttacker = PROC_FLAG_HIT_RANGED | PROC_FLAG_CRIT_RANGED;
+                procVictim = PROC_FLAG_STRUCK_RANGED | PROC_FLAG_STRUCK_CRIT_RANGED;
+            }
+            break;
+        case MELEE_HIT_PARRY:
+            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
+            procVictim = PROC_FLAG_PARRY;
+            break;
+        case MELEE_HIT_BLOCK:
+            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
+            procVictim = PROC_FLAG_BLOCK;
+            break;
+        case MELEE_HIT_DODGE:
+            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
+            procVictim = PROC_FLAG_DODGE;
+            break;
+        case MELEE_HIT_CRUSHING:
+            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
+            {
+                procAttacker = PROC_FLAG_HIT_MELEE | PROC_FLAG_CRIT_MELEE;
+                procVictim = PROC_FLAG_STRUCK_MELEE | PROC_FLAG_STRUCK_CRIT_MELEE;
+            }
+            else
+            {
+                procAttacker = PROC_FLAG_HIT_RANGED | PROC_FLAG_CRIT_RANGED;
+                procVictim = PROC_FLAG_STRUCK_RANGED | PROC_FLAG_STRUCK_CRIT_RANGED;
+            }
+            break;
+        default:
+            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
+            {
+                procAttacker = PROC_FLAG_HIT_MELEE;
+                procVictim = PROC_FLAG_STRUCK_MELEE;
+            }
+            else
+            {
+                procAttacker = PROC_FLAG_HIT_RANGED;
+                procVictim = PROC_FLAG_STRUCK_RANGED;
+            }
+            break;
+    }
+
+    if(damage > 0)
+        procVictim |= PROC_FLAG_TAKE_DAMAGE;
+ 
+    ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
 }
 
 void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage)
