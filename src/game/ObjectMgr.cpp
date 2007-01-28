@@ -1322,16 +1322,16 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        if(qinfo->RewRepFaction1 && !sFactionTemplateStore.LookupEntry(qinfo->RewRepFaction1))
+        if(qinfo->RewRepFaction1 && !sFactionStore.LookupEntry(qinfo->RewRepFaction1))
         {
-            sLog.outErrorDb("Quest %u has `RewRepFaction1` = %u but faction template %u doesn't exist, quest will not reward reputation for this faction.",
+            sLog.outErrorDb("Quest %u has `RewRepFaction1` = %u but raw faction (faction.dbc) %u doesn't exist, quest will not reward reputation for this faction.",
                 qinfo->GetQuestId(),qinfo->RewRepFaction1 ,qinfo->RewRepFaction1 );
             qinfo->RewRepFaction1 = 0;                      // no changes, quest will not reward this
         }
 
         if(qinfo->RewRepFaction2 && !sFactionTemplateStore.LookupEntry(qinfo->RewRepFaction2))
         {
-            sLog.outErrorDb("Quest %u has `RewRepFaction2` = %u but faction template %u doesn't exist, quest will not reward reputation for this faction.",
+            sLog.outErrorDb("Quest %u has `RewRepFaction2` = %u but raw faction (faction.dbc) %u doesn't exist, quest will not reward reputation for this faction.",
                 qinfo->GetQuestId(),qinfo->RewRepFaction2 ,qinfo->RewRepFaction2 );
             qinfo->RewRepFaction2 = 0;                      // no changes, quest will not reward this
         }
