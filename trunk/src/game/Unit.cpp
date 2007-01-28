@@ -3488,18 +3488,18 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    int32 TotalMod = 0;
+    float TotalMod = 0;
     AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         if( spellProto->School != 0 && ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 )
-            TotalMod *= ((int32)((*i)->GetModifier()->m_amount) + 100)/100;
+            TotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
     // TODO - fix PenaltyFactor and complete the formula from the wiki
-    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500) * (float)(100 - PenaltyFactor) / 100;
-    pdamage = (int32)(pdamage*TotalMod)/100 + pdamage;
-    pdamage = uint32(pdamage+ActualBenefit);
+    float ActualBenefit = AdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - PenaltyFactor) / 100.0f;
 
-    return pdamage;
+    int32 tmpDamage = int32(pdamage*TotalMod+ActualBenefit);
+
+    return tmpDamage > 0 ? tmpDamage : 0;
 }
 
 bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
