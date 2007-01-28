@@ -3488,7 +3488,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    float TotalMod = 0;
+    float TotalMod = 1;
     AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         if( spellProto->School != 0 && ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 )
