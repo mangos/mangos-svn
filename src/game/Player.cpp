@@ -3977,18 +3977,14 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
     }
 
     // special quest reputation reward/losts
-    if(pQuest->GetRewRepFaction1() && pQuest->GetRewRepValue1() )
+    for(int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
     {
-        FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->GetRewRepFaction1());
-        if(factionEntry)
-            ModifyFactionReputation(factionEntry, pQuest->GetRewRepValue1() );
-    }
-
-    if(pQuest->GetRewRepFaction2() && pQuest->GetRewRepValue2() )
-    {
-        FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->GetRewRepFaction2());
-        if(factionEntry)
-            ModifyFactionReputation(factionEntry, pQuest->GetRewRepValue2() );
+        if(pQuest->RewRepFaction[i] && pQuest->RewRepValue[i] )
+        {
+            FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]);
+            if(factionEntry)
+                ModifyFactionReputation(factionEntry, pQuest->RewRepValue[i]);
+        }
     }
 }
 
