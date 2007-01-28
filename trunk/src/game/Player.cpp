@@ -3978,10 +3978,18 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 
     // special quest reputation reward/losts
     if(pQuest->GetRewRepFaction1() && pQuest->GetRewRepValue1() )
-        ModifyFactionReputation(pQuest->GetRewRepFaction1(), pQuest->GetRewRepValue1() );
+    {
+        FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->GetRewRepFaction1());
+        if(factionEntry)
+            ModifyFactionReputation(factionEntry, pQuest->GetRewRepValue1() );
+    }
 
     if(pQuest->GetRewRepFaction2() && pQuest->GetRewRepValue2() )
-        ModifyFactionReputation(pQuest->GetRewRepFaction2(), pQuest->GetRewRepValue2() );
+    {
+        FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->GetRewRepFaction2());
+        if(factionEntry)
+            ModifyFactionReputation(factionEntry, pQuest->GetRewRepValue2() );
+    }
 }
 
 //Update honor fields
