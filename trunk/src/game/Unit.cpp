@@ -2451,6 +2451,7 @@ void Unit::ApplyStats(bool apply)
                 default:
                     val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
             }
+            break;
         case CLASS_MAGE:    val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
         case CLASS_PRIEST:  val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
         case CLASS_WARLOCK: val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
