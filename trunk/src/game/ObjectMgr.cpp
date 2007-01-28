@@ -1153,7 +1153,33 @@ void ObjectMgr::LoadRaidGroups()
 
 void ObjectMgr::LoadQuests()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `quest_template`");
+    //                                            0       1        2           3          4            5
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`ZoneId`,`QuestSort`,`MinLevel`,`QuestLevel`,`Type`,"
+        //6              7               8               9                    10                   11
+        "`RequiredRaces`,`RequiredClass`,`RequiredSkill`,`RequiredSkillValue`,`RequiredRepFaction`,`RequiredRepValue`,"
+        //12         13             14            15            16               17                 18          19             20
+        "`LimitTime`,`SpecialFlags`,`PrevQuestId`,`NextQuestId`,`ExclusiveGroup`,`NextQuestInChain`,`SrcItemId`,`SrcItemCount`,`SrcSpell`,"
+        //21     22        23           24                25                 26        27               28               29               30
+        "`Title`,`Details`,`Objectives`,`OfferRewardText`,`RequestItemsText`,`EndText`,`ObjectiveText1`,`ObjectiveText2`,`ObjectiveText3`,`ObjectiveText4`,"
+        //31          32           33           34           35              36              37              38
+        "`ReqItemId1`,`ReqItemId2`,`ReqItemId3`,`ReqItemId4`,`ReqItemCount1`,`ReqItemCount2`,`ReqItemCount3`,`ReqItemCount4`,"
+        //39            40             41             42             43              44              45              46
+        "`ReqSourceId1`,`ReqSourceId2`,`ReqSourceId3`,`ReqSourceId4`,`ReqSourceRef1`,`ReqSourceRef2`,`ReqSourceRef3`,`ReqSourceRef4`,"
+        //47                  48                   49                   50                   51                      52                      53                      54
+        "`ReqCreatureOrGOId1`,`ReqCreatureOrGOId2`,`ReqCreatureOrGOId3`,`ReqCreatureOrGOId4`,`ReqCreatureOrGOCount1`,`ReqCreatureOrGOCount2`,`ReqCreatureOrGOCount3`,`ReqCreatureOrGOCount4`,"
+        //55             56              57              58
+        "`ReqSpellCast1`,`ReqSpellCast2`,`ReqSpellCast3`,`ReqSpellCast4`,"
+        //59                60                 61                 62                 63                 64
+        "`RewChoiceItemId1`,`RewChoiceItemId2`,`RewChoiceItemId3`,`RewChoiceItemId4`,`RewChoiceItemId5`,`RewChoiceItemId6`,"
+        //65                   66                    67                    68                    69                    70
+        "`RewChoiceItemCount1`,`RewChoiceItemCount2`,`RewChoiceItemCount3`,`RewChoiceItemCount4`,`RewChoiceItemCount5`,`RewChoiceItemCount6`,"
+        //71          72           73           74           75              76              77              78
+        "`RewItemId1`,`RewItemId2`,`RewItemId3`,`RewItemId4`,`RewItemCount1`,`RewItemCount2`,`RewItemCount3`,`RewItemCount4`,"
+        //79              80               81               82               83               84             85             86             87             88
+        "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
+        //89             90      91         92           93       94       95         96                 97                  98               99
+        "`RewOrReqMoney`,`RewXP`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`OfferRewardEmote`,`RequestItemsEmote`,`CompleteScript`,`Repeatable`"
+        " FROM `quest_template`");
     if(result == NULL)
     {
         barGoLink bar( 1 );
@@ -1228,7 +1254,7 @@ void ObjectMgr::LoadQuests()
             qinfo->SrcSpell = 0;                            // quest can't be done for this requirement
         }
 
-        for(int j = 0; j < qinfo->ReqItemId.size(); ++j )
+        for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
         {
             uint32 id = qinfo->ReqItemId[j];
             if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
@@ -1239,7 +1265,7 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        for(int j = 0; j < qinfo->ReqSourceId.size(); ++j )
+        for(int j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j )
         {
             uint32 id = qinfo->ReqSourceId[j];
             if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
@@ -1250,19 +1276,19 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        for(int j = 0; j < qinfo->ReqSourceRef.size(); ++j )
+        for(int j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j )
         {
             uint32 ref = qinfo->ReqSourceRef[j];
             if(ref)
             {
-                if(ref > 4)
+                if(ref > QUEST_OBJECTIVES_COUNT)
                 {
                     sLog.outErrorDb("Quest %u has `ReqSourceRef%d` = %u but max value in `ReqSourceRef%d` is 4, quest can't be done.",
                         qinfo->GetQuestId(),j+1,ref,j+1);
                     // no changes, quest can't be done for this requirement
                 }
                 else
-                if(qinfo->ReqSourceId.size() > j && qinfo->ReqSourceId[j] && (qinfo->ReqItemId.size() < ref || !qinfo->ReqItemId[ref-1]))
+                if(qinfo->ReqSourceId[j] && !qinfo->ReqItemId[ref-1] )
                 {
                     sLog.outErrorDb("Quest %u has `ReqSourceRef%d` = %u but `ReqItemId%u` = 0, quest can't be done.",
                         qinfo->GetQuestId(),j+1,ref,ref);
@@ -1271,7 +1297,7 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        for(int j = 0; j < qinfo->ReqCreatureOrGOId.size(); ++j )
+        for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
         {
             int32 id = qinfo->ReqCreatureOrGOId[j];
             if(id < 0 && !sGOStorage.LookupEntry<GameObject>(-id))
@@ -1289,7 +1315,7 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        for(int j = 0; j < qinfo->ReqSpell.size(); ++j )
+        for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
         {
             uint32 id = qinfo->ReqSpell[j];
             if(id && !sSpellStore.LookupEntry(id))
@@ -1300,7 +1326,7 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        for(int j = 0; j < qinfo->RewChoiceItemId.size(); ++j )
+        for(int j = 0; j < QUEST_REWARD_CHOICES_COUNT; ++j )
         {
             uint32 id = qinfo->RewChoiceItemId[j];
             if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
@@ -1311,29 +1337,25 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        for(int j = 0; j < qinfo->RewItemId.size(); ++j )
+        for(int j = 0; j < QUEST_REWARDS_COUNT; ++j )
         {
             uint32 id = qinfo->RewItemId[j];
             if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
             {
                 sLog.outErrorDb("Quest %u has `RewItemId%d` = %u but item with entry %u doesn't exist, quest will not reward this item.",
                     qinfo->GetQuestId(),j+1,id,id);
-                qinfo->RewItemId[j] = 0;                    // no changes, quest will not reward this
+                qinfo->RewItemId[j] = 0;                    // no changes, quest will not reward this item
             }
         }
 
-        if(qinfo->RewRepFaction1 && !sFactionStore.LookupEntry(qinfo->RewRepFaction1))
+        for(int j = 0; j < QUEST_REPUTATIONS_COUNT; ++j)
         {
-            sLog.outErrorDb("Quest %u has `RewRepFaction1` = %u but raw faction (faction.dbc) %u doesn't exist, quest will not reward reputation for this faction.",
-                qinfo->GetQuestId(),qinfo->RewRepFaction1 ,qinfo->RewRepFaction1 );
-            qinfo->RewRepFaction1 = 0;                      // no changes, quest will not reward this
-        }
-
-        if(qinfo->RewRepFaction2 && !sFactionTemplateStore.LookupEntry(qinfo->RewRepFaction2))
-        {
-            sLog.outErrorDb("Quest %u has `RewRepFaction2` = %u but raw faction (faction.dbc) %u doesn't exist, quest will not reward reputation for this faction.",
-                qinfo->GetQuestId(),qinfo->RewRepFaction2 ,qinfo->RewRepFaction2 );
-            qinfo->RewRepFaction2 = 0;                      // no changes, quest will not reward this
+            if(qinfo->RewRepFaction[j] && !sFactionStore.LookupEntry(qinfo->RewRepFaction[j]))
+            {
+                sLog.outErrorDb("Quest %u has `RewRepFaction%d` = %u but raw faction (faction.dbc) %u doesn't exist, quest will not reward reputation for this faction.",
+                    qinfo->GetQuestId(),j+1,qinfo->RewRepFaction[j] ,qinfo->RewRepFaction[j] );
+                qinfo->RewRepFaction[j] = 0;                // no changes, quest will not reward this
+            }
         }
 
         if(qinfo->RewSpell && !sSpellStore.LookupEntry(qinfo->RewSpell))

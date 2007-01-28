@@ -23,7 +23,6 @@
 #include "Database/DatabaseEnv.h"
 #include <string>
 #include <vector>
-using namespace std;
 
 class Player;
 
@@ -37,6 +36,7 @@ class ObjectMgr;
 #define QUEST_REWARD_CHOICES_COUNT 6
 #define QUEST_REWARDS_COUNT 4
 #define QUEST_DEPLINK_COUNT 10
+#define QUEST_REPUTATIONS_COUNT 5
 
 enum
 {
@@ -155,10 +155,6 @@ class Quest
         const char* GetOfferRewardText() { return OfferRewardText.c_str(); }
         const char* GetRequestItemsText() { return RequestItemsText.c_str(); }
         const char* GetEndText() { return EndText.c_str(); }
-        uint32 GetRewRepFaction1() { return RewRepFaction1; }
-        uint32 GetRewRepFaction2() { return RewRepFaction2; }
-        int32  GetRewRepValue1() { return RewRepValue1; }
-        int32  GetRewRepValue2() { return RewRepValue2; }
         int32  GetRewOrReqMoney() { return RewOrReqMoney; }
         uint32 GetRewXP() { return RewXP; }
         uint32 GetRewSpell() { return RewSpell; }
@@ -173,39 +169,27 @@ class Quest
         uint32 GetSpecialFlags() { return SpecialFlags; }
 
         // multiple values
-        vector<string> ObjectiveText;
-        vector<uint32> ReqItemId;
-        vector<uint32> ReqItemCount;
-        vector<uint32> ReqSourceId;
-        vector<uint32> ReqSourceRef;
-        vector<int32> ReqCreatureOrGOId;                    // >0 Creature <0 Gameobject
-        vector<uint32> ReqCreatureOrGOCount;
-        vector<uint32> ReqSpell;
-        vector<uint32> RewChoiceItemId;
-        vector<uint32> RewChoiceItemCount;
-        vector<uint32> RewItemId;
-        vector<uint32> RewItemCount;
-
-        // multiple values
-        /*vector<char*> GetObjectiveText() { return ObjectiveText; }
-        vector<uint32> GetReqItemId() { return ReqItemId; }
-        vector<uint32> GetReqItemCount() { return ReqItemCount; }
-        vector<uint32> GetReqSourceId() { return ReqSourceId; }
-        vector<uint32> GetReqSourceRef() { return ReqSourceRef; }
-        vector<int32>  GetReqCreatureOrGOId() { return ReqCreatureOrGOId; }    // >0 Creature <0 Gameobject
-        vector<uint32> GetReqCreatureOrGOCount() { return ReqCreatureOrGOCount; }
-        vector<uint32> GetReqSpell() { return ReqSpell; }
-        vector<uint32> GetRewChoiceItemId() { return RewChoiceItemId; }
-        vector<uint32> GetRewChoiceItemCount() { return RewChoiceItemCount; }
-        vector<uint32> GetRewItemId() { return RewItemId; }
-        vector<uint32> GetRewItemCount() { return RewItemCount; }*/
+        std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
+        uint32 ReqItemId[QUEST_OBJECTIVES_COUNT];
+        uint32 ReqItemCount[QUEST_OBJECTIVES_COUNT];
+        uint32 ReqSourceId[QUEST_SOURCE_ITEM_IDS_COUNT];
+        uint32 ReqSourceRef[QUEST_SOURCE_ITEM_IDS_COUNT];
+        int32  ReqCreatureOrGOId[QUEST_OBJECTIVES_COUNT];   // >0 Creature <0 Gameobject
+        uint32 ReqCreatureOrGOCount[QUEST_OBJECTIVES_COUNT];
+        uint32 ReqSpell[QUEST_OBJECTIVES_COUNT];
+        uint32 RewChoiceItemId[QUEST_REWARD_CHOICES_COUNT];
+        uint32 RewChoiceItemCount[QUEST_REWARD_CHOICES_COUNT];
+        uint32 RewItemId[QUEST_REWARDS_COUNT];
+        uint32 RewItemCount[QUEST_REWARDS_COUNT];
+        uint32 RewRepFaction[QUEST_REPUTATIONS_COUNT];
+        int32  RewRepValue[QUEST_REPUTATIONS_COUNT];
 
         uint32 GetReqItemsCount() { return m_reqitemscount; }
         uint32 GetReqCreatureOrGOcount() { return m_reqCreatureOrGOcount; }
         uint32 GetRewChoiceItemsCount() { return m_rewchoiceitemscount; }
         uint32 GetRewItemsCount() { return m_rewitemscount; }
 
-        vector<int32> prevQuests;
+        std::vector<int32> prevQuests;
 
         // cached data
     private:
@@ -237,16 +221,12 @@ class Quest
         uint32 SrcItemId;
         uint32 SrcItemCount;
         uint32 SrcSpell;
-        string Title;
-        string Details;
-        string Objectives;
-        string OfferRewardText;
-        string RequestItemsText;
-        string EndText;
-        uint32 RewRepFaction1;
-        uint32 RewRepFaction2;
-        int32  RewRepValue1;
-        int32  RewRepValue2;
+        std::string Title;
+        std::string Details;
+        std::string Objectives;
+        std::string OfferRewardText;
+        std::string RequestItemsText;
+        std::string EndText;
         int32  RewOrReqMoney;
         uint32 RewXP;
         uint32 RewSpell;
