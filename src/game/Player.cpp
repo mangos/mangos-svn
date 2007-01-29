@@ -6898,15 +6898,15 @@ void Player::SetAmmo( uint32 item )
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
-Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,bool fromLoot )
+Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,uint32 randomPropertyId )
 {
     Item *pItem = CreateItem( item, count );
     if( pItem )
     {
         ItemPrototype const *pProto = pItem->GetProto();
         ItemAddedQuestCheck( item, count );
-        if(fromLoot)
-            pItem->SetItemRandomProperties();
+        if(randomPropertyId)
+            pItem->SetItemRandomProperties(randomPropertyId);
         Item * retItem = StoreItem( pos, pItem, update );
 
         return retItem;

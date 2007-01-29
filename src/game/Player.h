@@ -580,7 +580,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 CanUseItem( Item *pItem, bool not_loading = true ) const;
         bool CanUseItem( ItemPrototype const *pItem );
         uint8 CanUseAmmo( uint32 item ) const;
-        Item* StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update,bool fromLoot = false );
+        Item* StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update,uint32 randomPropertyId = 0 );
         Item* StoreItem( uint16 pos, Item *pItem, bool update );
         void EquipItem( uint16 pos, Item *pItem, bool update );
         void SetAmmo( uint32 item );

@@ -1273,7 +1273,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, pProto->Stackable, false );
         if( msg == EQUIP_ERR_OK )
         {
-            Item* item = plTarget->StoreNewItem( dest, itemId, pProto->Stackable, true, true);
+            Item* item = plTarget->StoreNewItem( dest, itemId, pProto->Stackable, true, Item::GenerateItemRandomPropertyId(itemId));
 
             countForStore-= pProto->Stackable;
 
@@ -1301,7 +1301,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         // if can add all countForStore items
         if( msg == EQUIP_ERR_OK )
         {
-            Item* item = plTarget->StoreNewItem( dest, itemId, countForStore, true);
+            Item* item = plTarget->StoreNewItem( dest, itemId, countForStore, true, Item::GenerateItemRandomPropertyId(itemId));
             countForStore = 0;
 
             // remove binding (let GM give it to another player later)
@@ -1334,7 +1334,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
                 uint8 msg = plTarget->CanStoreNewItem( itemStack->GetBagSlot(), itemStack->GetSlot(), dest, itemId, countForStack, false );
                 if( msg == EQUIP_ERR_OK )
                 {
-                    Item* item = plTarget->StoreNewItem( dest, itemId, countForStack, true, true);
+                    Item* item = plTarget->StoreNewItem( dest, itemId, countForStack, true, Item::GenerateItemRandomPropertyId(itemId));
                     countForStore-= countForStack;
 
                     // remove binding (let GM give it to another player later)

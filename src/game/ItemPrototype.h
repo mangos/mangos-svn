@@ -21,6 +21,57 @@
 
 #include "Common.h"
 
+#define    ITEM_STAT_ARMOR_MOD                   0.10
+#define    ITEM_STAT_DBU_ATTACK_POWER_MOD        0.33
+#define    ITEM_STAT_RANGED_ATTACK_POWER_MOD     0.40
+#define    ITEM_STAT_HEALING_MOD                 0.45
+#define    ITEM_STAT_ATTACK_POWER_MOD            0.50
+#define    ITEM_STAT_DBU_SPELL_DAMAGE_MOD        0.55
+#define    ITEM_STAT_BLOCK_MOD                   0.65
+#define    ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD     0.70
+#define    ITEM_STAT_ALL_SPELL_DAMAGE_MOD        0.85
+#define    ITEM_STAT_MAGIC_PENETRATION_MOD       0.90
+#define    ITEM_STAT_SCHOOL_RESIST_MOD           1.00
+#define    ITEM_STAT_ALL_SPELL_RESIST_MOD        2.50
+#define    ITEM_STAT_ATTRIBUTE_MOD               1.00
+#define    ITEM_STAT_DEFENSE_MOD                 1.50
+#define    ITEM_STAT_REGEN_IN_5_SEC_MOD          2.40
+#define    ITEM_STAT_OTHER_WEAPON_SKILL_MOD      2.30
+#define    ITEM_STAT_DAGGER_WEAPON_SKILL_MOD     3.00
+#define    ITEM_STAT_DAMAGE_SHIELD_MOD           3.15
+#define    ITEM_STAT_BLOCK_PCT_MOD               4.33
+#define    ITEM_STAT_HIT_PCT_MOD                10.00
+#define    ITEM_STAT_SPELL_HIT_PCT_MOD           8.00
+#define    ITEM_STAT_DODGE_PCT_MOD              12.00
+#define    ITEM_STAT_SPELL_CRIT_PCT_MOD         14.00
+#define    ITEM_STAT_CRIT_PCT_MOD               14.00
+#define    ITEM_STAT_PARRY_PCT_MOD              20.00
+
+#define    ITEM_STAT_SCHOOL_RESIST_RING_MOD     0.72
+#define    ITEM_STAT_ALL_SPELL_RESIST_RING_MOD  1.80
+#define    ITEM_STAT_HP_REGEN_IN_5_SEC_RING_MOD 3.50
+#define    ITEM_STAT_HP_REGEN_IN_5_SEC_NECK_MOD 3.50
+#define    ITEM_STAT_BLOCK_SHIELD_MOD           0.60
+#define    ITEM_STAT_DEFENSE_SHIELD_MOD         1.20
+
+#define    ITEM_SLOT_HEAD_MOD           1.00
+#define    ITEM_SLOT_NECK_MOD           1.82
+#define    ITEM_SLOT_SHOULDERS_MOD      1.29
+#define    ITEM_SLOT_CHEST_MOD          1.00
+#define    ITEM_SLOT_WAIST_MOD          1.29
+#define    ITEM_SLOT_LEGS_MOD           1.00
+#define    ITEM_SLOT_FEET_MOD           1.29
+#define    ITEM_SLOT_WRISTS_MOD         1.82
+#define    ITEM_SLOT_HANDS_MOD          1.29
+#define    ITEM_SLOT_FINGER_MOD         1.82
+#define    ITEM_SLOT_TRINKET_MOD        1.43
+#define    ITEM_SLOT_SHIELD_MOD         1.82
+#define    ITEM_SLOT_RANGED_MOD         3.33
+#define    ITEM_SLOT_BACK_MOD           1.82
+#define    ITEM_SLOT_2HAND_MOD          1.00
+#define    ITEM_SLOT_MAIN_HAND_MOD      2.38
+#define    ITEM_SLOT_OFF_HAND_MOD       1.82
+
 enum ITEM_STAT_TYPE
 {
     ITEM_STAT_POWER      = 0,

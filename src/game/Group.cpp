@@ -474,7 +474,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                         {
                             item->is_looted = true;
                             i->loot->NotifyItemRemoved(i->itemSlot);
-                            player->StoreNewItem( dest, i->itemid, item->count, true, true);
+                            player->StoreNewItem( dest, i->itemid, item->count, true, item->randomPropertyId);
                         }
                         else
                         {
@@ -517,7 +517,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                             {
                                 item->is_looted = true;
                                 i->loot->NotifyItemRemoved(i->itemSlot);
-                                player->StoreNewItem( dest, i->itemid, item->count, true, true);
+                                player->StoreNewItem( dest, i->itemid, item->count, true, item->randomPropertyId);
                             }
                             else
                             {
