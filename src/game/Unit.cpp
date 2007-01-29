@@ -1969,12 +1969,12 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
         if(i_spellId != spellId)
         {
             bool sec_match = false;
-            if (is_sec && IsSpellSingleEffectPerCaster(i_spellId))
+            bool is_i_sec = IsSpellSingleEffectPerCaster(i_spellId);
+            if( is_sec && is_i_sec )
                 if (Aur->GetCasterGUID() == (*i).second->GetCasterGUID())
                     if (GetSpellSpecific(spellId) == GetSpellSpecific(i_spellId))
                         sec_match = true;
-
-            if(IsNoStackSpellDueToSpell(spellId, i_spellId) || sec_match)
+            if( sec_match || IsNoStackSpellDueToSpell(spellId, i_spellId) && !is_sec && !is_i_sec )
             {
                 // if sec_match this isnt always true, needs to be rechecked
                 if (IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
