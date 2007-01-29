@@ -1,7 +1,26 @@
-MaNGOS 0.6    (Jan 29, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.6
+MaNGOS 0.7    (??? ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.7
 
- MaNGOS 0.6 adds further improvements to the server core as well as to
- the majority of game classes and the game content database.
+ MaNGOS 0.7 - Codename "Eye of the Storm" -adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
+
+ ==== Game Features ====
+ *
+
+ ==== Server Features ====
+ *
+
+ * Fixed Bugs: ???
+ * Total number of changes: ???
+
+ The complete list of closed tickets can be found here:
+   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.7
+
+MaNGOS 0.6    (Jan 29, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.6
+
+ MaNGOS 0.6 - Codename "Black Dragonflight" - adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
 
  ==== Game Features ====
  * Creature and game object respawning has finally been fixed and is considered finished.
@@ -41,8 +60,9 @@ MaNGOS 0.6    (Jan 29, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone
 
 MaNGOS 0.5    (Sep 20, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.5
 
- MaNGOS 0.5 adds further improvements to the server core as well as to
- the majority of game classes and the game content database.
+ MaNGOS 0.5 - Codename "Stable Master" - adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
 
  Most noteable changes include cleaning up the database backend, adding proper
  support for game clients of version 1.10.2, and closing lots of threading and
@@ -60,9 +80,9 @@ MaNGOS 0.5    (Sep 20, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone
 
 MaNGOS 0.1    (Dec 04, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.1
 
- MaNGOS 0.1 adds further improvements to the server core as well as to
- the majority of game classes and the game content database. A complete
- list of all updated items follows below:
+ MaNGOS 0.1 - Codename "Lightbringer" -adds further improvements to the server
+ core as well as to the majority of game classes and the game content database.
+ A complete list of all updated items follows below:
 
  === Game Features ===
  * Add all AI files to the build process on Windows
@@ -178,6 +198,7 @@ MaNGOS 0.1    (Dec 04, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Updated: Spell time recution talents now fully work.
  * Updated: The Grid System (TGS) is now on by default.  Not support grid off. Next, (1) deliver phase 2 stuff and (2) remove ifdef and ALL old classes.
  * Updated: TRUNCATE is faster than DELETE
+
  === Server Features ===
  * Added CLI interface for server. Needs to be enabled on compile-time.
  * Reorganized Spell System, separated effects to a diferent file, for better fixing.
@@ -187,11 +208,18 @@ MaNGOS 0.1    (Dec 04, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone
  The complete list of closed tickets can be found here:
    https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.1
 
+MaNGOS 0.0.3  (Nov 15, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.0.3
+
+ MaNGOS 0.0.3 - Codename "Mango Carpet" - was mainly a bug fix release, which
+ never was published on the web, and just marks a point in development where
+ a damn lot of bugs had been fixed, but we still felt the need for further work
+ to be done before a release could be pushed to the world.
+
 MaNGOS 0.0.2  (Oct 31, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.0.2
 
- MaNGOS 0.0.2 adds another bunch of improvements, bug fixes and major
- enhancements to the overall functionality of the daemon. A complete
- list of all updated items follows below:
+ MaNGOS 0.0.2 - Codename "Library" - adds another bunch of improvements, bug
+ fixes and major enhancements to the overall functionality of the daemon. A
+ complete list of all updated items follows below:
  
  ==== Game Features ====
  * Added support for area exploration.
@@ -233,8 +261,8 @@ MaNGOS 0.0.2  (Oct 31, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone
 
 MaNGOS 0.0.1  (Sept 13, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.0.1
 
- MaNGOS 0.0.1 contains a great number of new features, improvements and
- bug fixes. The following list contains all of them:
+ MaNGOS 0.0.1 - Codename "Endeavour" - contains a great number of new features,
+ improvements and bug fixes. The following list contains all of them:
 
  * NPC gossips now hash by Guid instead of ID. ID is meaningless and we should revisit its usage.
  * Fixed client crash issue. GameObject still not interactive. Flags issues.
