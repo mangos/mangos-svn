@@ -1,0 +1,13 @@
+# This table only filter out gameobjects in the world.save
+TypeTable{GUID=hex}
+InfoTable{id=GUID,table=gameobjects_spawn,outfile=gameobjects_spawn.sql,fileName=world.save,apply-preprocessor=gameobjects.scp}
+GUID->id(*)
+Link_XYZ->positionX(*),positionY(*),positionZ(*),orientation(*)
+ZONE->zoneId(*)
+MAP->mapId(0)
+ENTRY->name_id(*)
+OBJECT_TYPE->type(33)
+
+#this is used to filter out game objects only
+ROTATION->rotation0(*),rotation1(*),rotation2(*),rotation3(*)
+

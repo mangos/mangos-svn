@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+#
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+TESTAUTOMAKE=`automake --version 2>&1|head -n 1|awk '{ split($4, t, "."); if(t[2]>4 && t[1]==1) { print t[2] }}'`
+TESTACLOCAL=`aclocal --version 2>&1|head -n 1|awk '{ split($4, t, "."); if(t[2]>4 && t[1]==1) { print t[2] }}'`
+TESTAUTOCONF=`autoconf --version 2>&1|head -n 1|awk '{ split($4, t, "."); if(t[2]>4 && t[1]==2) { print t[2] }}'`
+TESTAUTOHEADER=`autoheader --version 2>&1|head -n 1|awk '{ split($4, t, "."); if(t[2]>4 && t[1]==2) { print t[2] }}'`
+
+if test -z "$TESTAUTOMAKE"; then
+        echo "Sorry, automake 1.5 or above is required.";
+        exit 1;
+fi
+
+if test -z "$TESTACLOCAL"; then
+        echo "Sorry, aclocal 1.5 or above is required.";
+        exit 1;
+fi
+
+if test -z "$TESTAUTOCONF"; then
+        echo "Sorry, autoconf 2.5 or above is required.";
+        exit 1;
+fi
+
+if test -z "$TESTAUTOHEADER"; then
+        echo "Sorry, autoheader 2.5 or above is required.";
+        exit 1;
+fi
+
+rm -f config.cache
+echo "- aclocal."
+aclocal
+echo "- autoconf."
+autoconf
+echo "- autoheader."
+autoheader
+echo "- automake."
+automake -a -c
+exit

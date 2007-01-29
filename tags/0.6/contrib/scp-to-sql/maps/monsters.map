@@ -1,0 +1,28 @@
+TypeTable{GUID=hex,NPCFLAGS=int,creatures_flags1=hex,creatures_combat_reach=float,creatures_bounding_radius=float,creatures_size=float}
+InfoTable{id=GUID,table=creatures,outfile=monsters.sql,apply-preprocessor=true,fileName=world.save}
+GUID->id(*)
+Link_XYZ->positionX(*),positionY(*),positionZ(*),orientation(*)
+# remove objects in the world
+ROTATION->NOT_INTERESTED(!*)
+# for now default it to be the elf
+ZONE->zoneId(*)
+RND->moverandom(1)
+RUNNING->running(1)
+MAP->mapId(0)
+ENTRY->name_id
+# Note: data has 176 fields OBJECT_END + 0xAA = 0x006 + 0xAA = 0xB0 = 176
+# Note MAXPOWERS = X29 X30 X31 X32 X33
+# X2 = TYPE
+# X3 = ENTRY == display id
+# X22=HEALTH
+# X23= POWER1 (mana)
+# X28=MAXHEALTH 
+# X46 = FALGS (ether FLAGS in world.sav or creatures_flags1)
+# X131 = BASEATTACKTIME (creatures_attack)
+# X133 = RANGED ATTACK TIME (creatures_attack)
+# X134 = BOUNDING RADIUS
+# X135 = COMBATREACH
+# X138 = MOUNTDISPLAYID
+# X139 = MINDAMAGE X140=MAXDAMAGE
+# X168 = BASE_MANA
+ConCat(GUID,X1,CREATURE_TYPE,ENTRY,creatures_size,X5,X6,X7,X8,X9,X10,X11,X12,X13,X14,X15,X16,X17,X18,X19,X20,X21,MAXHEALTH,creatures_maxmana,X24,X25,X26,X27,MAXHEALTH,X29,X30,X31,X32,X33,LEVEL,FACTION,X36,X37,X38,X39,X40,X41,X42,X43,X44,X45,creatures_flags1,X47,X48,X49,X50,X51,X52,X53,X54,X55,X56,X57,X58,X59,X60,X61,X62,X63,X64,X65,X66,X67,X68,X69,X70,X71,X72,X73,X74,X75,X76,X77,X78,X79,X80,X81,X82,X83,X84,X85,X86,X87,X88,X89,X90,X91,X92,X93,X94,X95,X96,X97,X98,X99,X100,X101,X102,X103,X104,X105,X106,X107,X108,X109,X110,X111,X112,X113,X114,X115,X116,X117,X118,X119,X120,X121,X122,X123,X124,X125,X126,X127,X128,X129,X130,creatures_attack_0,X132,creatures_attack_1,creatures_bounding_radius,creatures_combat_reach,MODEL,X137,MOUNT,creatures_damage_0,creatures_damage_1,X141,X142,X143,X144,X145,X146,X147,X148,X149,X150,X151,NPCFLAGS,X153,X154,X155,X156,X157,X158,X159,X160,X161,X162,X163,X164,X165,X166,X167,creatures_maxmana,X169,X170,X171,X172,X173,X174,X175)->data(0,0,9,0,1.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,!*,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
