@@ -1627,32 +1627,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `npc_option` ENABLE KEYS */;
 
 --
--- Table structure for table `npc_spirithealer`
---
-
-DROP TABLE IF EXISTS `npc_spirithealer`;
-CREATE TABLE `npc_spirithealer` (
-  `position_x` float default NULL,
-  `position_y` float default NULL,
-  `position_z` float default NULL,
-  `F` float default NULL,
-  `name_id` int(8) default NULL,
-  `zone` int(16) default NULL,
-  `map` int(16) default NULL,
-  `faction` int(32) unsigned default NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `npc_spirithealer`
---
-
-
-/*!40000 ALTER TABLE `npc_spirithealer` DISABLE KEYS */;
-LOCK TABLES `npc_spirithealer` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `npc_spirithealer` ENABLE KEYS */;
-
---
 -- Table structure for table `npc_text`
 --
 
