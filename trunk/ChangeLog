@@ -1,10 +1,40 @@
-MaNGOS 0.6    (??? ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.6
+MaNGOS 0.6    (Jan 29, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.6
 
  MaNGOS 0.6 adds further improvements to the server core as well as to
  the majority of game classes and the game content database.
 
- * Fixed Bugs: ???
- * Total number of changes: ???
+ ==== Game Features ====
+ * Creature and game object respawning has finally been fixed and is considered finished.
+ * Many improvements to decrease time for saving player data, and transaction support for save operations has been added.
+ * Many item fixes for using / equipping/ enhancing function (some errors still remain and have to be resolved).
+ * All professions work now (many fixes have been implemented, you may now enjoy fishing).
+ * Mail and auction house system has been rewritten, finally should work as it supposed to be.
+ * Spell system has received a HUGE number of improvements, and should feel much better. (Still many problems are left to be fixed, most notable include procflag spell casting, also many effects and auras are not implemented yet).
+ * Pet-stable implemented. Many improvements in hunter and warlock pet system (Problems with pet casting exists, various other minor bugs too).
+ * Rest system can be considered finished.
+ * Quest system has been rewritten (some problems remain unresolved).
+ * Implemented PvP system, and support PvE and PvP realm types.
+ * Duel system has been rewritten and can be considered complete (minor bugs still remain: e.g. characters sometimes may be killed in duels by channeled spells, or after duels finished by pets still attacking).
+ * Guild system improvements, including guild charter, guild master, and guild tabard work. (Some bugs reported about losing tabard style, etc).
+ * Some taxi system fixes and improvements. Switched to use DBC only data for taxi system work.
+ * Group related code has been rewritten, and extended to support raid groups.
+ * Loot code improvements and implementing group loot modes (except master loot mode).
+ * Correct implementation for creature skinning has been added.
+ * Unlearning talents, and unlearning spells with first rank received from unlearned talent implemented.
+ * Transports (ships/zeppelins) system implemented (still have some synchronization problems).
+ * Many fixes in combat system (Still have many problems).
+ * Enchanting in trade slot implemented as last not implemented part of trade system. Many other fixes.
+ * Rogue stealth for other players implemented and many fixes in druid forms.
+
+ ==== Server Features ====
+ * Full support for 1.12.x client branch has been implemented.
+ * Many GM-commands added and improved including GM mode state and GM invisibility.
+ * Many cheating preventing checks added and code rewrites.
+ * DB-based scripting support added for quest emote scripts and spell event scripts.
+ * Many improvements in less client-server data amount transferring.
+
+ * Fixed Bugs: 306
+ * Total number of changes: 874
 
  The complete list of closed tickets can be found here:
    https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.6
