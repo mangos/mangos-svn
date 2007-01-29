@@ -73,7 +73,7 @@ WaypointMovementGenerator::_load(Creature &c)
 void
 WaypointMovementGenerator::Initialize()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `creature_movement`");
+    QueryResult *result = sDatabase.Query("SELECT distinct(`id`) as uniqueid FROM `creature_movement`");
 
     if( result )
     {

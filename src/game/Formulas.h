@@ -34,28 +34,15 @@ namespace MaNGOS
             uint64 guid = 0;
             int standing = 0;
 
-            QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character` ORDER BY `rating` DESC");
+            float m_rating = plr->GetHonorRating();
+            QueryResult *result = sDatabase.PQuery("SELECT count(*) as cnt FROM `character` WHERE `rating` >= '%f'", m_rating );
             if(result)
             {
-                do
-                {
-                    Field *fields = result->Fetch();
-                    guid = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
-
-                    standing++;
-
-                    if(plr->GetGUID() == guid)
-                    {
-                        delete result;
-                        return standing;
-                    }
-                }
-                while( result->NextRow() );
-
+                Field *fields = result->Fetch();
+                standing = fields[0].GetUInt32();
                 delete result;
             }
-
-            return 0;
+            return standing;
         }
         //TODO: Fix this formula, for now the weekly rating is how many honor player gain all life time
         inline float CalculeRating(Player *plr)
