@@ -757,7 +757,7 @@ void Spell::cast(bool skipCheck)
     // Pass cast spell event to handler
     if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED)
         m_caster->ProcDamageAndSpell(m_caster->getVictim(), PROC_FLAG_CAST_SPELL, PROC_FLAG_NONE, 0, m_spellInfo, m_IsTriggeredSpell);
-    
+
     std::list<Item*>::iterator iitem;
     std::list<GameObject*>::iterator igo;
 
@@ -1575,10 +1575,10 @@ void Spell::TriggerSpell()
 
     for(std::list<SpellEntry const*>::iterator si=m_TriggerSpell.begin(); si!=m_TriggerSpell.end(); ++si)
     {
-	Spell spell(m_caster, (*si), true, 0);
-	SpellCastTargets targets;
-	targets.setUnitTarget(m_targets.getUnitTarget());
-	spell.prepare(&targets);
+        Spell spell(m_caster, (*si), true, 0);
+        SpellCastTargets targets;
+        targets.setUnitTarget(m_targets.getUnitTarget());
+        spell.prepare(&targets);
     }
 
 }

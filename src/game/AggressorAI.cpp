@@ -87,8 +87,8 @@ AggressorAI::_needToStop() const
 
 void AggressorAI::AttackStop(Unit *)
 {
-	DEBUG_LOG("What we do HERE ?");
-	return;
+    DEBUG_LOG("What we do HERE ?");
+    return;
 }
 
 void AggressorAI::_stopAttack()

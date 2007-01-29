@@ -459,7 +459,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                     }
                     player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
                 }
-                
+
                 if(xp || honordiff < 0)
                     ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
             }
@@ -496,18 +496,18 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
     else
     {
         DEBUG_LOG("DealDamageAlive");
-        
+
         // Check if health is below 20%
         if((health-damage)*5 < pVictim->GetMaxHealth())
         {
             uint32 procVictim = PROC_FLAG_NONE;
-            if(health*5 > pVictim->GetMaxHealth()) // if just dropped below 20% (for CheatDeath)
-                procVictim = PROC_FLAG_LOW_HEALTH;            
+            if(health*5 > pVictim->GetMaxHealth())          // if just dropped below 20% (for CheatDeath)
+                procVictim = PROC_FLAG_LOW_HEALTH;
             ProcDamageAndSpell(pVictim,PROC_FLAG_TARGET_LOW_HEALTH,procVictim);
         }
-        
+
         pVictim->ModifyHealth(- (int32)damage);
-        
+
         if(damagetype != DOT)
         {
             Attack(pVictim);
@@ -704,7 +704,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
 
     SendSpellNonMeleeDamageLog(pVictim, spellID, pdamage, spellInfo->School, absorb, resist, false, 0, crit);
     DealDamage(pVictim, (pdamage-absorb-resist), SPELL_DIRECT_DAMAGE, 0, true);
-    
+
     uint32 procAttacker = PROC_FLAG_HIT_SPELL;
     uint32 procVictim   = (PROC_FLAG_STRUCK_SPELL|PROC_FLAG_TAKE_DAMAGE);
 
@@ -713,7 +713,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         procAttacker |= PROC_FLAG_CRIT_SPELL;
         procVictim   |= PROC_FLAG_STRUCK_CRIT_SPELL;
     }
-    
+
     ProcDamageAndSpell(pVictim, procAttacker, procVictim, (pdamage-absorb-resist), spellInfo, isTriggeredSpell);
 }
 
@@ -2795,7 +2795,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     sLog.outDebug("ProcDamageAndSpell: attacker flags are 0x%x, victim flags 0x%x", procAttacker, procVictim);
     if(procSpell)
         sLog.outDebug("ProcDamageAndSpell: invoked due to spell id %u %s", procSpell->Id, (isTriggeredSpell?"(triggered)":""));
-        
+
     // Assign melee/ranged proc flags for magic attacks, that are actually melee/ranged abilities
     // That is the question though if it's fully correct
     if(procSpell)
@@ -2806,7 +2806,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
             if(procAttacker & PROC_FLAG_CRIT_SPELL) procAttacker |= PROC_FLAG_CRIT_MELEE;
             if(procVictim & PROC_FLAG_STRUCK_SPELL) procVictim |= PROC_FLAG_STRUCK_MELEE;
             if(procVictim & PROC_FLAG_STRUCK_CRIT_SPELL) procVictim |= PROC_FLAG_STRUCK_CRIT_MELEE;
-            attType = BASE_ATTACK; // Melee abilities are assumed to be dealt with mainhand weapon
+            attType = BASE_ATTACK;                          // Melee abilities are assumed to be dealt with mainhand weapon
         }
         else if (procSpell->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
         {
@@ -2820,7 +2820,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     if(damage && (procVictim & (PROC_FLAG_STRUCK_MELEE|PROC_FLAG_STRUCK_RANGED|PROC_FLAG_STRUCK_SPELL)))
         procVictim |= (PROC_FLAG_TAKE_DAMAGE|PROC_FLAG_TOUCH);
 
-    // auraTypes contains auras capable of proc'ing  
+    // auraTypes contains auras capable of proc'ing
     std::list<uint32> auraTypes;
     auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_SPELL);
     auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_DAMAGE);
@@ -2830,7 +2830,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     if (procAttacker &&  !(procSpell && isTriggeredSpell))
     {
         for(std::list<uint32>::iterator aur = auraTypes.begin(); aur != auraTypes.end(); ++aur)
-        {       
+        {
             // List of spells (effects) that proced. Spell prototype and aura-specific value (damage for TRIGGER_DAMAGE)
             ProcTriggeredList procTriggered;
 
@@ -2839,7 +2839,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
             {
                 next = i; next++;
                 uint32 procFlag = procAttacker;
-    
+
                 SpellEntry const *spellProto = (*i)->GetSpellProto();
                 if(!spellProto) continue;
                 SpellProcEventEntry const *spellProcEvent = sSpellProcEventStore.LookupEntry<SpellProcEventEntry>(spellProto->Id);
@@ -2857,7 +2857,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                             item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                         else
                             item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-                
+
                         if(!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((1<<item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
                             continue;
                     }
@@ -2896,7 +2896,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 uint32 WeaponSpeed = GetAttackTime(attType);
                 if(spellProcEvent && spellProcEvent->ppmRate != 0)
                     chance = GetPPMProcChance(WeaponSpeed, spellProcEvent->ppmRate);
-            
+
                 if(chance > rand_chance())
                 {
                     if((*i)->m_procCharges > 0)
@@ -2911,7 +2911,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     }
                     if(*aur == SPELL_AURA_DUMMY)
                         i_spell_param = i_spell_eff;
-                
+
                     if(spellProto)
                         procTriggered.push_back( std::pair<SpellEntry const*,uint32>(spellProto,i_spell_param) );
                 }
@@ -2955,7 +2955,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     RemoveAurasDueToSpell((*i)->GetId());
                     next = attackerAuras.begin();
                 }
-            }            
+            }
         }
     }
 
@@ -2977,13 +2977,13 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 SpellEntry const *spellProto = (*i)->GetSpellProto();
                 if(!spellProto) continue;
                 SpellProcEventEntry const *spellProcEvent = sSpellProcEventStore.LookupEntry<SpellProcEventEntry>(spellProto->Id);
-    
+
                 uint32 procFlags = spellProcEvent ? spellProcEvent->procFlags : spellProto->procFlags;
                 if((procFlag & procFlags) == 0)
                     continue;
-                
+
                 // procChance is exact number in percents anyway
-                uint32 chance = spellProto->procChance;  
+                uint32 chance = spellProto->procChance;
                 if(chance > uint32(rand_chance()))
                 {
                     if((*i)->m_procCharges > 0)
@@ -2998,7 +2998,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     }
                     if(*aur == SPELL_AURA_DUMMY)
                         i_spell_param = i_spell_eff;
-                
+
                     if(spellProto)
                         procTriggered.push_back( std::pair<SpellEntry const*,uint32>(spellProto,i_spell_param) );
                 }
@@ -3037,7 +3037,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     pVictim->RemoveAurasDueToSpell((*i)->GetId());
                     next = victimAuras.begin();
                 }
-            }            
+            }
         }
     }
 }
@@ -3106,7 +3106,7 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
 
     if(damage > 0)
         procVictim |= PROC_FLAG_TAKE_DAMAGE;
- 
+
     ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
 }
 
@@ -3117,7 +3117,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     {
         SpellEntry const *igniteDotTemplate = sSpellStore.LookupEntry(12654);
         SpellEntry igniteDot = *igniteDotTemplate;
-        
+
         switch (dummySpell->Id)
         {
             case 11119:
@@ -3130,7 +3130,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 igniteDot.EffectBasePoints[0]=uint32(0.16f*damage);break;
             case 12848:
                 igniteDot.EffectBasePoints[0]=uint32(0.20f*damage);break;
-        };        
+        };
         CastSpell(pVictim, &igniteDot, true, NULL);
     }
 }
@@ -3720,7 +3720,7 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
 
 float Unit::GetWeaponProcChance() const
 {
-    // normalized proc chance for weapon attack speed 
+    // normalized proc chance for weapon attack speed
     // (odd formulae...)
     if(isAttackReady(BASE_ATTACK))
         return (GetAttackTime(BASE_ATTACK) * 1.8f / 1000.0f);
@@ -3733,10 +3733,9 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
 {
     // proc per minute chance calculation
     if (PPM <= 0) return 0.0f;
-    uint32 result = uint32((WeaponSpeed * PPM) / 600.0f); // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
+    uint32 result = uint32((WeaponSpeed * PPM) / 600.0f);   // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
     return result;
 }
-
 
 void Unit::Mount(uint32 mount, bool taxi)
 {

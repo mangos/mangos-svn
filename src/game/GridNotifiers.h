@@ -477,7 +477,7 @@ namespace MaNGOS
             CannibalizeUnitCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
             bool operator()(Player* u)
             {
-                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ) 
+                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() )
                     return false;
 
                 if(i_funit->IsWithinDist(u, i_range) )
@@ -487,8 +487,8 @@ namespace MaNGOS
             }
             bool operator()(Creature* u)
             {
-                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() || 
-                    ((Creature*)u)->GetCreatureInfo()->type != CREATURE_TYPE_HUMANOID && 
+                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
+                    ((Creature*)u)->GetCreatureInfo()->type != CREATURE_TYPE_HUMANOID &&
                     ((Creature*)u)->GetCreatureInfo()->type != CREATURE_TYPE_UNDEAD)
                     return false;
 

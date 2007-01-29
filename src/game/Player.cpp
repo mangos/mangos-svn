@@ -2091,7 +2091,7 @@ void Player::learnSpell(uint16 spell_id)
         case 1804:                                          //Pick Lock(Rogue)
             SetSkill(633,1,maxskill);
             break;
-        // Languages
+            // Languages
         case 668: case 669: case 670: case 671:  case 672:  case 813: case 814:
         case 815: case 816: case 817: case 7340: case 7341: case 17737:
             if(LanguageDesc const* lang = GetLanguageDescBySpell(spell_id))

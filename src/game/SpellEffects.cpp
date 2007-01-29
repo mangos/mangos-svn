@@ -604,7 +604,7 @@ void Spell::EffectHeal( uint32 i )
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth, crit);
 
         unitTarget->ModifyHealth( addhealth );
-        
+
         uint32 procHealer = PROC_FLAG_HEAL;
         if (crit)
             procHealer |= PROC_FLAG_CRIT_HEAL;
@@ -767,7 +767,6 @@ void Spell::EffectOpenLock(uint32 i)
         return;
     }
 
-
     // Get LockInfo
     LockEntry const *lockInfo = sLockStore.LookupEntry(lockId);
 
@@ -803,7 +802,7 @@ void Spell::EffectOpenLock(uint32 i)
         reqSkillValue = lockInfo->requiredlockskill;
     }
     else
-    if(SkillId == SKILL_LOCKPICKING)                        // apply picklock skill to wrong target
+    if(SkillId == SKILL_LOCKPICKING)                    // apply picklock skill to wrong target
     {
         SendCastResult(CAST_FAIL_INVALID_TARGET);
         return;
