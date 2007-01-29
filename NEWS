@@ -10,9 +10,22 @@ https://svn.mangosproject.org/trac/MaNGOS/
 Visit our forums for support:
 http://www.mangosproject.org/
 
+Version 0.7
+ * Under discussion.
+
 Version 0.6
  * MaNGOS development moved to http://sourceforge.net/projects/mangos/
- * Under discussion.
+ * A lots of speed improvements to data handling and data transfer have been
+   completed.
+ * Mail, auction house, profession, creature, and game object systems have seen
+   a lot of improvements and can be considered feature complete. Some minor bugs
+   still are left.
+ * Rest system has been finished.
+ * Initial pet stable support has been added.
+ * PvP and duel system have seen lots of improvements
+ * Guilds are not just a myth anymore. Coming closer to full guild support.
+ * Taxi and transport system is close to a fully working system.
+ * A lot more has been added.
 
 Version 0.5
  * Core stability improvements, lots of threading and memory usage related

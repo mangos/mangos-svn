@@ -12,7 +12,7 @@
 
 AC_PREREQ(2.59)
 AC_INIT([MaNGOS],
-        [0.6-SVN],
+        [0.6],
         [http://www.mangosproject.org/],
         [mangos])
 AM_CONFIG_HEADER([config.h])
