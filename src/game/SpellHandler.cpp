@@ -159,16 +159,17 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
         if (!lockInfo)
         {
+            pUser->SendEquipError(EQUIP_ERR_ITEM_LOCKED, pItem, NULL );
             sLog.outError( "WORLD::OpenItem: item [guid = %u] has an unknown lockId: %u!", pItem->GetGUIDLow() , lockId);
             return;
         }
 
         // required picklocking
-        if(lockInfo->requiredlockskill)
+        if(lockInfo->requiredlockskill || lockInfo->requiredskill)
+        {
+            pUser->SendEquipError(EQUIP_ERR_ITEM_LOCKED, pItem, NULL );
             return;
-
-        if(lockInfo->requiredskill)
-            return;
+        }
     }
 
     pUser->SendLoot(pItem->GetGUID(),LOOT_CORPSE);
