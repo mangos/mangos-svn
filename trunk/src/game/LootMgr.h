@@ -80,19 +80,20 @@ struct LootItem
 {
     uint32  itemid;
     uint32  displayid;
+    uint32  randomPropertyId;
     uint8   count;
     bool    is_looted;
     bool    is_blocked;
     bool    is_ffa;                                         // free for all
 
     LootItem()
-        : itemid(0), displayid(0), count(1), is_looted(true), is_blocked(false), is_ffa(true) {}
+        : itemid(0), displayid(0), randomPropertyId(0), count(1), is_looted(true), is_blocked(false), is_ffa(true) {}
 
-    LootItem(uint32 _itemid, uint32 _displayid, bool _isffa, uint8 _count = 1)
-        : itemid(_itemid), displayid(_displayid), count(_count), is_looted(false), is_blocked(false), is_ffa(_isffa) {}
+    LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomProp, bool _isffa, uint8 _count = 1)
+        : itemid(_itemid), displayid(_displayid), randomPropertyId(_randomProp), count(_count), is_looted(false), is_blocked(false), is_ffa(_isffa) {}
 
-    LootItem(LootStoreItem const& li,uint8 _count)
-        : itemid(li.itemid), displayid(li.displayid), count(_count), is_looted(false), is_blocked(false), is_ffa(li.is_ffa) {}
+    LootItem(LootStoreItem const& li,uint8 _count, uint32 _randomProp = 0)
+        : itemid(li.itemid), displayid(li.displayid),  randomPropertyId(_randomProp), count(_count), is_looted(false), is_blocked(false), is_ffa(li.is_ffa) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
