@@ -10,10 +10,10 @@ https://svn.mangosproject.org/trac/MaNGOS/
 Visit our forums for support:
 http://www.mangosproject.org/
 
-Version 0.7
+Version 0.7, Codename "Eye of the Storm"
  * Under discussion.
 
-Version 0.6
+Version 0.6, Codename "Black Dragonflight"
  * MaNGOS development moved to http://sourceforge.net/projects/mangos/
  * A lots of speed improvements to data handling and data transfer have been
    completed.
@@ -27,7 +27,7 @@ Version 0.6
  * Taxi and transport system is close to a fully working system.
  * A lot more has been added.
 
-Version 0.5
+Version 0.5, Codename "Stable Master"
  * Core stability improvements, lots of threading and memory usage related
    bugs have been resolved.
  * MySQL Database backend has been cleaned up.
@@ -37,22 +37,22 @@ Version 0.5
  * Cross-platform issues have been resolved, MaNGOS should now build on
    more platforms, including FreeBSD.
 
-Version 0.1
+Version 0.1, Codename "Lightbringer"
  * AI system
  * Grid system
  * Lots a game features working.
  * Lovely optimizations for the beloved server.
 
-Version 0.0.3
+Version 0.0.3, Codename "Mango Carpet"
  * Interim release, not gone public.
 
-Version 0.0.2
+Version 0.0.2, Codename "Library"
  * Most data conversions working.
  * Database cleanup.
  * More features working.
  * Many bugs fixed.
 
-Version 0.0.1
+Version 0.0.1, Codename "Endeavour"
  * Data converter added.
  * Build system improvements.
  * Bug fixing and code cleaning.
