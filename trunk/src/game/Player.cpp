@@ -4163,11 +4163,12 @@ int Player::CalculateTotalKills(Player *pVictim) const
 {
     int total_kills = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `honor` FROM `character_kill` WHERE `guid` = '%u' AND `creature_template` = '%u'", GetGUIDLow(), pVictim->GetEntry());
+    QueryResult *result = sDatabase.PQuery("SELECT count(*) as cnt FROM `character_kill` WHERE `guid` = '%u' AND `creature_template` = '%u'", GetGUIDLow(), pVictim->GetEntry());
 
     if(result)
     {
-        total_kills = result->GetRowCount();
+        Field *fields = result->Fetch();
+        total_kills = fields[0].GetUInt32();
         delete result;
     }
     return total_kills;
