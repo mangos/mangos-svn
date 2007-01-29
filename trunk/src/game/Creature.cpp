@@ -146,7 +146,8 @@ void Creature::Update(uint32 diff)
     switch( m_deathState )
     {
         case JUST_DIED:
-            assert(false);                                  // Dont must be called, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
+            // Dont must be called, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
+            sLog.outError("Creature (GUIDLow: %u Entry: %u ) in wrong state: JUST_DEAD (1)",GetGUIDLow(),GetEntry());
             break;
         case DEAD:
         {
@@ -1100,6 +1101,17 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
 
     m_respawnDelay = fields[6].GetUInt32();
     m_deathState = (DeathState)fields[14].GetUInt32();
+    if(m_deathState == JUST_DIED)                           // Dont must be set to JUST_DEAD, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
+    {
+        sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) in wrong state: JUST_DEAD (1). State set to ALIVE.",GetGUIDLow(),GetEntry());
+        m_deathState = ALIVE;
+    }
+    else
+    if(m_deathState < ALIVE || m_deathState > DEAD)
+    {
+        sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) in wrong state: %d. State set to ALIVE.",GetGUIDLow(),GetEntry(),m_deathState);
+        m_deathState = ALIVE;
+    }
 
     m_respawnTime  = (time_t)fields[13].GetUInt64();
     if(m_respawnTime > time(NULL))                          // not ready to respawn
