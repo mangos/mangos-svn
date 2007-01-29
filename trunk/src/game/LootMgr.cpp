@@ -227,7 +227,7 @@ void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
             if ( LootedItem )
                 loot->items.push_back(
                     LootItem(*LootedItem, urand(LootedItem->mincount, LootedItem->maxcount),
-                        Item::GenerateItemRandomPropertyId(LootedItem->itemid)));
+                    Item::GenerateItemRandomPropertyId(LootedItem->itemid)));
         }
     }
     loot->unlootedCount = loot->items.size();

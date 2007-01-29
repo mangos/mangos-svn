@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: realmd
 -- ------------------------------------------------------
--- Server version	5.0.22-Debian_0ubuntu6.06.2-log
+-- Server version	5.0.24a-Debian_9-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -40,7 +40,7 @@ CREATE TABLE `account` (
   UNIQUE KEY `idx_username` (`username`),
   KEY `idx_banned` (`banned`),
   KEY `idx_gmlevel` (`gmlevel`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Account System';
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Account System';
 
 --
 -- Dumping data for table `account`
@@ -110,7 +110,7 @@ CREATE TABLE `realmlist` (
   `timezone` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `idx_name` (`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Realm System';
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Realm System';
 
 --
 -- Dumping data for table `realmlist`

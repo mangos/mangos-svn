@@ -494,5 +494,4 @@ void MaNGOS::CreatureListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }
-
 #endif                                                      // MANGOS_GRIDNOTIFIERSIMPL_H
