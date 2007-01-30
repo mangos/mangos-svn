@@ -382,7 +382,8 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
             data << (uint32) 0;                             // Any item attached
 
         data << (uint32) 0;                                 // Unknown Constant 0
-        data << (uint32) 0;                                 // Unknown
+        data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
+                                                            // Item random property Id
         data << (uint32) 0;                                 // not item->creator, it is enchating?
         data << (uint8)  icount;                            // Attached item stack count
                                                             //sometimes more than zero, not sure when
