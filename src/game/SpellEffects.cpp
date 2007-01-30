@@ -128,7 +128,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonObjectWild,                         //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
     &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT = 77
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK = 78 //Useless
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SANCTUARY = 79
+    &Spell::EffectSanctuary,                                //SPELL_EFFECT_SANCTUARY = 79
     &Spell::EffectAddComboPoints,                           //SPELL_EFFECT_ADD_COMBO_POINTS = 80
     &Spell::EffectNULL,                                     //SPELL_EFFECT_CREATE_HOUSE = 81
     &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND_SIGHT = 82
@@ -443,7 +443,6 @@ void Spell::EffectTriggerSpell(uint32 i)
     }
 
     m_TriggerSpell.push_back(spellInfo);
-
 }
 
 void Spell::EffectTeleportUnits(uint32 i)
@@ -1889,6 +1888,12 @@ void Spell::EffectScriptEffect(uint32 i)
     }
 }
 
+void Spell::EffectSanctuary(uint32 i)
+{
+    if(!unitTarget) 
+        return;
+    unitTarget->CombatStop();
+}
 void Spell::EffectAddComboPoints(uint32 i)
 {
     if(!unitTarget)
