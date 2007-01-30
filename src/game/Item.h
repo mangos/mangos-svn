@@ -176,6 +176,8 @@ class MANGOS_DLL_SPEC Item : public Object
 
         uint32 GetSkill();
         uint32 GetSpell();
+
+        uint32 GetItemRandomPropertyId() const { return GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); }
         void SetItemRandomProperties(uint32 randomPropId);
         static uint32 GenerateItemRandomPropertyId(uint32 item_id);
         static float GetEnchantMod(uint32 enchant_id, ItemPrototype const * itemProto);
