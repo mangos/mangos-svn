@@ -208,6 +208,14 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
             return;
     }
 
+    // skip all forced speed changes except last and unexpected
+    if(_player->m_forced_speed_changes[move_type] > 0)
+    {
+        --_player->m_forced_speed_changes[move_type];
+        if(_player->m_forced_speed_changes[move_type] > 0)
+            return;
+    }
+
     if (fabs(_player->GetSpeed(move_type) - newspeed) > 0.01f)
     {
         sLog.outError("%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",

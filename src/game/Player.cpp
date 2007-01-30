@@ -170,6 +170,9 @@ Player::Player (WorldSession *session): Unit()
     m_resetTalentsCost = 0;
     m_resetTalentsTime = 0;
     m_itemUpdateQueueBlocked = false;
+
+    for (int i = 0; i < MAX_MOVE_TYPE; ++i)
+        m_forced_speed_changes[i] = 0;
 }
 
 Player::~Player ()
@@ -11107,4 +11110,11 @@ void Player::InitDataForForm()
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
+}
+
+void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
+{
+    if(forced)
+        ++m_forced_speed_changes[mtype];                    // register forced speed chaged for WorldSession::HandleForceSpeedChangeAck
+    Unit::ApplySpeedMod(mtype,rate,forced,apply);
 }

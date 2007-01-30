@@ -1130,6 +1130,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void HandleInvisiblePjs();
         bool m_enableDetect;
 
+
+        void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply);
+                                                            // overwrite Unit version
+        uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
     protected:
 
         /*********************************************************/

@@ -742,7 +742,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
         void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
-        void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool aplly);
+        virtual void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool aplly);
 
         void SetHover(bool on);
         bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
