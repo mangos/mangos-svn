@@ -2497,7 +2497,7 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
     for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
         updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
-        //updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + 1 + (i*12)));
+        updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*12)));
     }
 
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
