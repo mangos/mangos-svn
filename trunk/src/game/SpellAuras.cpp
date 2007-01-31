@@ -464,8 +464,19 @@ void AreaAura::Update(uint32 diff)
             for(uint32 p=0;p<pGroup->GetMembersCount();p++)
             {
                 Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
-                if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup(m_caster_guid, Target->GetGUID()))
-                    continue;
+
+		if (caster->GetTypeId() == TYPEID_PLAYER)
+		{
+		    if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup(m_caster_guid, Target->GetGUID()))
+			continue;
+		}
+		else if(((Creature*)caster)->isTotem())
+		{
+		    Unit *owner = ((Totem*)caster)->GetOwner();
+		    if(!Target || !Target->isAlive() || !pGroup->SameSubGroup(owner->GetGUID(), Target->GetGUID()))
+			continue;
+		}
+
                 Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
 
                 if(caster->IsWithinDist(Target, radius) )
@@ -473,7 +484,7 @@ void AreaAura::Update(uint32 diff)
                     // apply aura to players in range that dont have it yet
                     if (!t_aura)
                     {
-                        Aura *aur = new Aura(GetSpellProto(), m_effIndex, Target, caster);
+			AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, Target, caster);
                         Target->AddAura(aur);
                     }
                 }
@@ -497,7 +508,7 @@ void AreaAura::Update(uint32 diff)
                 {
                     if (!o_aura)
                     {
-                        Aura *aur = new Aura(GetSpellProto(), m_effIndex, owner, caster);
+			AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, owner, caster);
                         owner->AddAura(aur);
                     }
                 }
