@@ -86,11 +86,21 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
             ItemPrototype const *proto = objmgr.GetItemPrototype(item);
 
-            displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
+            if(!proto)
+            {
+                ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << " (not exist)\n";
+                continue;
+            }
+
+
+            displayid = proto->DisplayInfoID;
 
             // non-quest (maybe group) loot with low chance
             if( chance >= 0 && chance < 0.000001 && questchance <= 0 )
-                ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << "\n";
+            {
+                ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << " (no chance)\n";
+                continue;
+            }
 
             lootstore[entry].push_back( LootStoreItem(item, displayid, chance, questchance,is_ffa,mincount,maxcount) );
 
@@ -102,7 +112,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
         sLog.outString( "" );
         sLog.outString( ">> Loaded %u loot definitions", count );
         if(ssNonLootableItems.str().size() > 0)
-            sLog.outErrorDb("Some items can't be succesfully looted: have in chance field value < 0.000001 with quest chance ==0 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
+            sLog.outErrorDb("Some items can't be succesfully looted: not exist or have in chance field value < 0.000001 with quest chance ==0 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
     }
     else
     {

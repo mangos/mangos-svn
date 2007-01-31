@@ -645,6 +645,9 @@ uint32 Item::GenerateItemRandomPropertyId(uint32 item_id)
 {
     ItemPrototype const *itemProto = sItemStorage.LookupEntry<ItemPrototype>(item_id);
 
+    if(!itemProto)
+        return 0;
+
     // only for bounded item
     if(itemProto->Bonding != BIND_WHEN_PICKED_UP && itemProto->Bonding != BIND_WHEN_EQUIPED)
         return 0;
