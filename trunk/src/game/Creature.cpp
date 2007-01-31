@@ -805,7 +805,7 @@ void Creature::generateMoneyLoot()
     {
         uint32 mingold = GetCreatureInfo()->mingold;
         uint32 maxgold = GetCreatureInfo()->maxgold;
-        uint32 diff = maxgold > mingold ? maxgold - mingold + 1 : 0;
+        uint32 diff = maxgold > mingold ? maxgold - mingold : 0;
 
         if(diff == 0)
         {
@@ -815,13 +815,17 @@ void Creature::generateMoneyLoot()
             // rand() result (RAND_MAX) small for large gold loots
         if(diff > 10000)
         {
-            uint32 gold_part              = rand() % (diff / 10000);
-            uint32 silver_and_copper_part = rand() % (diff % 10000);
+            uint32 gold_part              = rand() % (diff / 10000 + 1);
+            uint32 silver_and_copper_part;
+            if(gold_part == diff / 10000)
+                silver_and_copper_part = rand() % (diff % 10000 + 1);
+            else
+                silver_and_copper_part = rand() % 10000;
             loot.gold = uint32((gold_part * 10000 + silver_and_copper_part + mingold) * sWorld.getRate(RATE_DROP_MONEY));
         }
         else
         {
-            loot.gold = uint32((rand() % diff + mingold) * sWorld.getRate(RATE_DROP_MONEY));
+            loot.gold = uint32((rand() % (diff + 1) + mingold) * sWorld.getRate(RATE_DROP_MONEY));
         }
     }
 }
