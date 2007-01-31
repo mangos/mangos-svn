@@ -742,7 +742,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
 
     AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( Trigger_ID );
-    if( pArea )
+    if( pArea && GetPlayer()->isAlive())
     {
         uint32 quest_id = pArea->Quest_ID;
         Quest* pQuest = GetPlayer()->GetActiveQuest(quest_id);
