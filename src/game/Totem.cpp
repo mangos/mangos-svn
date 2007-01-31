@@ -21,6 +21,10 @@
 #include "MapManager.h"
 #include "Database/DBCStores.h"
 #include "Log.h"
+#include "Group.h"
+#include "Player.h"
+#include "ObjectMgr.h"
+
 
 Totem::Totem()
 {
@@ -77,7 +81,23 @@ void Totem::UnSummon()
     RemoveAurasDueToSpell(m_spell);
     Unit *owner = this->GetOwner();
     if (owner)
+    {
         owner->RemoveAurasDueToSpell(m_spell);
+	//remove aura all party members too
+        Group *pGroup = NULL;
+        pGroup = ((Player*)owner)->groupInfo.group;
+        if (pGroup)
+        {
+            for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+            {
+                if(!pGroup->SameSubGroup(owner->GetGUID(), pGroup->GetMemberGUID(p)))
+                    continue;
+
+                Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                if (Target) Target->RemoveAurasDueToSpell(m_spell);
+            }
+        }
+    }
 
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
