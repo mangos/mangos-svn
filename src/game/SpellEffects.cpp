@@ -1894,6 +1894,7 @@ void Spell::EffectSanctuary(uint32 i)
         return;
     unitTarget->CombatStop();
 }
+
 void Spell::EffectAddComboPoints(uint32 i)
 {
     if(!unitTarget)
