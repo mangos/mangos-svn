@@ -83,7 +83,8 @@ void Totem::UnSummon()
     if (owner)
     {
         owner->RemoveAurasDueToSpell(m_spell);
-	//remove aura all party members too
+
+        //remove aura all party members too
         Group *pGroup = NULL;
         pGroup = ((Player*)owner)->groupInfo.group;
         if (pGroup)

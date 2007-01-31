@@ -3,6 +3,9 @@ ConfVersion=2006060401
 
 # Database connection settings for the realm server.
 # Default: hostname;port;username;password;database
+#          .;somenumber;username;password;database - use named pipes at Windows and Unix sockets at Unix/Linux
+#                Named pipes: mySQL required adding "enable-named-pipe" to [mysqld] section my.ini
+#                Unix sockets: experimental, not tested
 LoginDatabaseInfo = "127.0.0.1;3306;mangos;mangos;realmd"
 
 # Settings for maximum database-ping interval (minutes between pings)

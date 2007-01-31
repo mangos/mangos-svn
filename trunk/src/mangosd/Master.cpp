@@ -191,8 +191,8 @@ void Master::Run()
         {
             loopCounter = 0;
             sLog.outDetail("Ping MySQL to keep connection alive");
-            delete sDatabase.Query("SELECT 1 FROM `command` LIMIT 1");
-            delete loginDatabase.Query("SELECT 1 FROM `realmlist` LIMIT 1");
+            sDatabase.Ping();
+            loginDatabase.Ping();
         }
     }
 
