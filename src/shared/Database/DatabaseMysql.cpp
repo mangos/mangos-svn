@@ -19,6 +19,7 @@
 #include "DatabaseEnv.h"
 #include "Util.h"
 #include "Policies/SingletonImp.h"
+#include "Platform/Define.h"
 #include "../src/zthread/ThreadImpl.h"
 
 using namespace std;
@@ -91,6 +92,21 @@ bool DatabaseMysql::Initialize(const char *infoString)
         database = *iter++;
 
     mysql_options(mysqlInit,MYSQL_SET_CHARSET_NAME,"utf8");
+#ifdef WIN32
+    if(host==".")                                           // named pipe use option
+    {
+        unsigned int opt = MYSQL_PROTOCOL_PIPE;
+        mysql_options(mysqlInit,MYSQL_OPT_PROTOCOL,(char const*)&opt);
+    }
+#else
+    if(host==".")                                           // socket use option
+    {
+        unsigned int opt = MYSQL_PROTOCOL_SOCKET;
+        mysql_options(mysqlInit,MYSQL_OPT_PROTOCOL,(char const*)&opt);
+        host = "localhost";
+    }
+#endif
+
     mMysql = mysql_real_connect(mysqlInit, host.c_str(), user.c_str(),
         password.c_str(), database.c_str(), atoi(port.c_str()), 0, 0);
 
