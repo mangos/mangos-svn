@@ -89,18 +89,18 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    for(size_t i = 0; i < name.size(); ++i)
-    {
-        if(!isalpha(name[i]))
-        {
-            data.Initialize( SMSG_CHAR_CREATE, 1 );
-            data << (uint8)0x33;
-            SendPacket( &data );
-            return;
-        }
-    }
-
     normalizePlayerName(name);
+
+    // check used symbols
+    static std::string const notAllowedChars = "\t\v\b\f\a\n\r\\\0\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789";
+
+    if(name.find_first_of(notAllowedChars)!=name.npos)
+    {
+        data.Initialize( SMSG_CHAR_CREATE, 1 );
+        data << (uint8)0x33;
+        SendPacket( &data );
+        return;
+    }
 
     sDatabase.escape_string(name);
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
