@@ -122,6 +122,7 @@ struct ItemSetEntry
 struct LockEntry
 {
     uint32      ID;
+    uint32      key;
     uint32      requiredskill;
     uint32      requiredlockskill;
 };

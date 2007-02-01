@@ -777,6 +777,13 @@ void Spell::EffectOpenLock(uint32 i)
         return;
     }
 
+    // check key
+    if(lockInfo->key && m_CastItem && m_CastItem->GetEntry()==lockInfo->key)
+    {
+        player->SendLoot(guid,loottype);
+        return;
+    }
+
     uint32 SkillId = 0;
     // Check and skill-up skill
     if(m_spellInfo->Effect[1]==SPELL_EFFECT_SKILL)
