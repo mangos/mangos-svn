@@ -417,20 +417,21 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
             {
                 case 0:                                     //Player choose pass
                 {
-                    SendLootRoll(0, playerGUID, i->itemid, 0, 128, 0, *i);
+                    SendLootRoll(0, playerGUID, i->itemid, 0, 128, 128, *i);
                     i->totalPass++;
                     itr2->second = PASS;
                 }
                 break;
                 case 1:                                     //player choose Need
                 {
-                    SendLootRoll(0, playerGUID, i->itemid, 0, 1, 0, *i);
+                    SendLootRoll(0, playerGUID, i->itemid, 0, 1, 1, *i);
                     i->totalNeed++;
                     itr2->second = NEED;
                 }
                 break;
                 case 2:                                     //player choose Greed
                 {
+                    SendLootRoll(0, playerGUID, i->itemid, 0, 2, 2, *i);
                     i->totalGreed++;
                     itr2->second = GREED;
                 }
@@ -498,7 +499,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                                 continue;
 
                             uint8 randomN = rand() % 100;
-                            SendLootRoll(0, itr2->first, i->itemid, 0, randomN, 1, *i);
+                            SendLootRoll(0, itr2->first, i->itemid, 0, randomN, 2, *i);
                             if (maxresul < randomN)
                             {
                                 maxguid  = itr2->first;
