@@ -5026,12 +5026,25 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         if (!item)
             return;
 
-        loot = &item->loot;
-
-        if(!item->m_lootGenerated)
+        if(loot_type == LOOT_DISENCHANTING)
         {
-            item->m_lootGenerated = true;
-            FillLoot(loot, item->GetEntry(), LootTemplates_Item);
+            loot = &item->loot;
+
+            if(!item->m_lootGenerated)
+            {
+                item->m_lootGenerated = true;
+                FillLoot(loot, item->GetProto()->DisenchantID, LootTemplates_Disenchant);
+            }
+        }
+        else
+        {
+            loot = &item->loot;
+
+            if(!item->m_lootGenerated)
+            {
+                item->m_lootGenerated = true;
+                FillLoot(loot, item->GetEntry(), LootTemplates_Item);
+            }
         }
     }
     else
@@ -5152,8 +5165,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             q_list = itr->second;
     }
 
-    // LOOT_PICKPOKETING unsupported by client, sending LOOT_SKINNING instead
-    if(loot_type == LOOT_PICKPOKETING)
+    // LOOT_PICKPOKETING and LOOT_DISENCHANTING unsupported by client, sending LOOT_SKINNING instead
+    if(loot_type == LOOT_PICKPOKETING || loot_type == LOOT_DISENCHANTING)
         loot_type = LOOT_SKINNING;
 
     WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));           // we guess size

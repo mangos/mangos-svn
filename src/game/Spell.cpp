@@ -2320,12 +2320,8 @@ uint8 Spell::CheckItems()
                 if( itemTarget->GetOwnerGUID() != m_caster->GetGUID() )
                     return (uint8)CAST_FAIL_CANT_BE_DISENCHANTED;
 
-                uint32 item_quality = itemTarget->GetProto()->Quality;
-                if(item_quality > 4 || item_quality < 2)
+                if (!itemTarget->GetProto()->DisenchantID)
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
-                if(itemTarget->GetProto()->Class != ITEM_CLASS_WEAPON && itemTarget->GetProto()->Class != ITEM_CLASS_ARMOR)
-                    return CAST_FAIL_CANT_BE_DISENCHANTED;
-                break;
             }
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
