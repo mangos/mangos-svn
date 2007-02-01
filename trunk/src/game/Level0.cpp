@@ -184,14 +184,9 @@ bool ChatHandler::HandleSaveCommand(const char* args)
         return true;
     }
 
-    uint32 lastsave = sWorld.getConfig(CONFIG_INTERVAL_SAVE) - player->GetSaveTimer();
-
-    // let save only after 20 sec (logout delay) after prev. save and _not_ output any messages to prevent cheat planning
-    if (lastsave > 20*1000)
-        player->SaveToDB();
-    // plan next save by player request after 20 delay finish
-    else
-        player->SetSaveTimer(20*1000 - lastsave);
+    // plan save after 20 sec (logout delay) if current next save time more this value and _not_ output any messages to prevent cheat planning
+    if(player->GetSaveTimer() > 20*1000)
+        player->SetSaveTimer(20*1000);
 
     return true;
 }
