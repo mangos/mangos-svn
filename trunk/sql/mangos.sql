@@ -274,7 +274,8 @@ CREATE TABLE `character_inventory` (
   `slot` tinyint(3) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  PRIMARY KEY  (`guid`,`bag`,`slot`)
+  PRIMARY KEY  (`guid`,`bag`,`slot`),
+  UNIQUE KEY `idx_item` (`item`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
@@ -896,6 +897,33 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
+
+--
+-- Table structure for table `disenchant_loot_template`
+--
+
+DROP TABLE IF EXISTS `disenchant_loot_template`;
+CREATE TABLE `disenchant_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0' COMMENT 'Recommended id selection: item_level*100 + item_quality',	
+  `item` int(11) unsigned NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `mincount` tinyint(3) unsigned NOT NULL default '1',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `disenchant_loot_template`
+--
+
+
+/*!40000 ALTER TABLE `disenchant_loot_template` DISABLE KEYS */;
+LOCK TABLES `disenchant_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `disenchant_loot_template` ENABLE KEYS */;
+
 
 --
 -- Table structure for table `fishing_loot_template`

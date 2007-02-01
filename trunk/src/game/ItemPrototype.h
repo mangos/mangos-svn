@@ -375,6 +375,7 @@ struct ItemPrototype
     uint32 BagFamily;
     uint32 Unknown1;
     char* ScriptName;
+    uint32 DisenchantID;
 };
 
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)

@@ -23,7 +23,7 @@
 
 #ifndef _VERSION
 #if PLATFORM == PLATFORM_WIN32
-# define _VERSION "0.6-SVN"
+# define _VERSION "0.7-SVN"
 #else
 # define _VERSION "@VERSION@"
 #endif

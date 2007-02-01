@@ -162,6 +162,7 @@ extern LootStore LootTemplates_Gameobject;
 extern LootStore LootTemplates_Item;
 extern LootStore LootTemplates_Pickpocketing;
 extern LootStore LootTemplates_Skinning;
+extern LootStore LootTemplates_Disenchant;
 
 QuestItemList* FillQuestLoot(Player* player, Loot *loot);
 void FillLoot(Loot *loot, uint32 loot_id, LootStore& store);

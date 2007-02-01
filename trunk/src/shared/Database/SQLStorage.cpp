@@ -23,7 +23,7 @@
 
 extern DatabaseMysql  sDatabase;
 
-const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiiiis";
+const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiiiisi";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
 const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisis";
 const char SpellProcEventfmt[]="iiiiiif";

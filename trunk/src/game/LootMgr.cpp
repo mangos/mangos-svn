@@ -39,6 +39,7 @@ LootStore LootTemplates_Gameobject;
 LootStore LootTemplates_Item;
 LootStore LootTemplates_Pickpocketing;
 LootStore LootTemplates_Skinning;
+LootStore LootTemplates_Disenchant;
 
 void UnloadLoot()
 {
@@ -48,6 +49,7 @@ void UnloadLoot()
     LootTemplates_Item.clear();
     LootTemplates_Pickpocketing.clear();
     LootTemplates_Skinning.clear();
+    LootTemplates_Disenchant.clear();
 }
 
 void LoadLootTable(LootStore& lootstore,char const* tablename)
@@ -123,6 +125,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 void LoadLootTables()
 {
     LoadLootTable(LootTemplates_Creature,     "creature_loot_template");
+    LoadLootTable(LootTemplates_Disenchant,   "disenchant_loot_template");
     LoadLootTable(LootTemplates_Fishing,      "fishing_loot_template");
     LoadLootTable(LootTemplates_Gameobject,   "gameobject_loot_template");
     LoadLootTable(LootTemplates_Item,         "item_loot_template");
