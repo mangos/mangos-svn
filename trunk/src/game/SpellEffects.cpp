@@ -1890,7 +1890,7 @@ void Spell::EffectScriptEffect(uint32 i)
 
 void Spell::EffectSanctuary(uint32 i)
 {
-    if(!unitTarget) 
+    if(!unitTarget)
         return;
     unitTarget->CombatStop();
 }

@@ -25,7 +25,6 @@
 #include "Player.h"
 #include "ObjectMgr.h"
 
-
 Totem::Totem()
 {
     m_isTotem = true;

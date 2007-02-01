@@ -508,7 +508,7 @@ void AreaAura::Update(uint32 diff)
                 {
                     if (!o_aura)
                     {
-			AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, owner, caster);
+                        AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, owner, caster);
                         owner->AddAura(aur);
                     }
                 }
