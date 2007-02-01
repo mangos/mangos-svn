@@ -92,7 +92,6 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                 continue;
             }
 
-
             displayid = proto->DisplayInfoID;
 
             // non-quest (maybe group) loot with low chance
