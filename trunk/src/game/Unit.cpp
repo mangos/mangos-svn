@@ -272,7 +272,7 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype
     }
 }
 
-void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint32 procFlag, bool durabilityLoss)
+void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint8 damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
 
@@ -284,7 +284,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
 
     pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damagetype);
-
     pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damagetype);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -316,16 +315,16 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
 
         duel_hasEnded = true;
     }
+    //Get in CombatState
+    if(pVictim != this && damagetype != DOT)
+    {
+        SetInCombat();
+        pVictim->SetInCombat();
+    }
 
     if (health <= damage)
     {
-        if(pVictim->GetTypeId() == TYPEID_UNIT)             //leave combat mode when killing mobs
-            ClearInCombat();
-        else
-            SetInCombat();
-
-        pVictim->ClearInCombat();
-
+        
         DEBUG_LOG("DealDamage: victim just died");
 
         DEBUG_LOG("DealDamageAttackStop");
@@ -515,12 +514,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 SendAttackStart(pVictim);
         }
 
-        //Get in CombatState
-        if(pVictim != this && damagetype != DOT)
-        {
-            SetInCombat();
-            pVictim->SetInCombat();
-        }
 
         if(pVictim->getTransForm())
         {
@@ -531,7 +524,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
-            pVictim->AddHostil(GetGUID(), damage);
+            if(spellProto && IsDamageToThreatSpell(spellProto))
+                damage *= 2;
+            pVictim->AddHostil(this->GetGUID(), float (damage));
         }
         else
         {
@@ -703,7 +698,8 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
 
     SendSpellNonMeleeDamageLog(pVictim, spellID, pdamage, spellInfo->School, absorb, resist, false, 0, crit);
-    DealDamage(pVictim, (pdamage-absorb-resist), SPELL_DIRECT_DAMAGE, 0, true);
+    DealDamage(pVictim, (pdamage-absorb-resist), SPELL_DIRECT_DAMAGE, spellInfo->School, spellInfo, 0, true);
+
 
     uint32 procAttacker = PROC_FLAG_HIT_SPELL;
     uint32 procVictim   = (PROC_FLAG_STRUCK_SPELL|PROC_FLAG_TAKE_DAMAGE);
@@ -765,7 +761,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             if(spellProto->EffectApplyAuraName[i] == SPELL_AURA_MOD_ROOT)
                 damagetype = SELF_DAMAGE;
         }
-        DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), damagetype, procFlag, true);
+        DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), damagetype, spellProto->School, spellProto, procFlag, true);
         ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), spellProto);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
@@ -774,7 +770,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         int32 pdamage = GetHealth()*(100+mod->m_amount)/100;
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
-        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, procFlag, true);
+        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
+
         ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL || mod->m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
@@ -804,7 +801,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 tmpvalue = uint32(pVictim->GetHealth()*tmpvalue2);
 
             SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, tmpvalue, spellProto->School, absorb, resist, false, 0);
-            DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), DOT, procFlag, false);
+            DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), DOT, spellProto->School, spellProto, procFlag, false);
             ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), spellProto);
             if (!pVictim->isAlive() && m_currentSpell)
                 if (m_currentSpell->m_spellInfo)
@@ -1194,7 +1191,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
         else
             damage = 0;
 
-        DealDamage (pVictim, damage, DIRECT_DAMAGE, 0, true);
+        DealDamage (pVictim, damage, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, true);
 
         // rage from maked damage TO creatures and players (target dead case)
         if(GetTypeId() == TYPEID_PLAYER && (getPowerType() == POWER_RAGE))
@@ -1375,7 +1372,7 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
 
 void Unit::SendAttackStart(Unit* pVictim)
 {
-    if(GetTypeId()!=TYPEID_PLAYER)
+    if(GetTypeId()!=TYPEID_PLAYER || !pVictim)
         return;
 
     WorldPacket data( SMSG_ATTACKSTART, 16 );
@@ -1388,6 +1385,9 @@ void Unit::SendAttackStart(Unit* pVictim)
 
 void Unit::SendAttackStop(Unit* victim)
 {
+    if(!victim)
+        return;
+
     WorldPacket data( SMSG_ATTACKSTOP, (4+16) );            // we guess size
     data.append(GetPackGUID());
     data.append(victim->GetPackGUID());
@@ -3268,7 +3268,7 @@ bool Unit::IsNeutralToAll() const
 
 bool Unit::Attack(Unit *victim)
 {
-    if(victim == this)
+    if(!victim || victim == this)
         return false;
 
     // player don't must attack in mount state
@@ -3629,6 +3629,22 @@ bool Unit::IsImmunedToSpellEffect(uint32 effect) const
     for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
         if(itr->type == effect)
             return true;
+
+    return false;
+}
+
+bool Unit::IsDamageToThreatSpell(SpellEntry const * spellInfo) const
+{
+    if(!spellInfo)
+        return false;
+    
+    uint32 family = spellInfo->SpellFamilyName;
+    uint32 flags = spellInfo->SpellFamilyFlags;
+
+    if((family == 5 && flags == 256) ||                     //Searing Pain
+       (family == 6 && flags == 8192) ||                    //Mind Blast
+       (family == 11 && flags == 1048576))                  //Earth Shock
+       return true;
 
     return false;
 }

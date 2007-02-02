@@ -46,6 +46,7 @@ extern SQLStorage sCreatureStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sItemStorage;
 extern SQLStorage sSpellProcEventStore;
+extern SQLStorage sSpellThreatStore;
 
 struct ScriptInfo;
 typedef multimap<uint32, ScriptInfo> ScriptMap;
@@ -248,6 +249,7 @@ class ObjectMgr
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();
         void LoadSpellProcEvents();
+        void LoadSpellThreats();
         void LoadItemPrototypes();
 
         void LoadGossipText();

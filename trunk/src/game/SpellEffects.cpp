@@ -196,7 +196,7 @@ void Spell::EffectInstaKill(uint32 i)
     if( unitTarget && unitTarget->isAlive() )
     {
         uint32 health = unitTarget->GetHealth();
-        m_caster->DealDamage(unitTarget, health, DIRECT_DAMAGE, 0, false);
+        m_caster->DealDamage(unitTarget, health, DIRECT_DAMAGE, 0, NULL, 0, false);
     }
 }
 
@@ -1727,7 +1727,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         criticalhit = true;
 
     m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage + absorbed_dmg + resisted_dmg + blocked_dmg, m_spellInfo->School, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
-    m_caster->DealDamage(unitTarget, damage, SPELL_DIRECT_DAMAGE, 0, true);
+    m_caster->DealDamage(unitTarget, damage, SPELL_DIRECT_DAMAGE, 0, NULL, 0, true);
 
     // take ammo
     if(m_caster->GetTypeId() == TYPEID_PLAYER)

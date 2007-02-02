@@ -758,6 +758,8 @@ void Spell::cast(bool skipCheck)
     if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED)
         m_caster->ProcDamageAndSpell(m_caster->getVictim(), PROC_FLAG_CAST_SPELL, PROC_FLAG_NONE, 0, m_spellInfo, m_IsTriggeredSpell);
 
+    HandleThreatSpells(m_spellInfo->Id);
+
     std::list<Item*>::iterator iitem;
     std::list<GameObject*>::iterator igo;
 
@@ -1519,6 +1521,20 @@ void Spell::TakeReagents()
             return;
         }
     }
+}
+
+void Spell::HandleThreatSpells(uint32 spellId)
+{
+    if(!unitTarget || !spellId)
+        return;
+
+    SpellThreatEntry const *threatSpell = sSpellThreatStore.LookupEntry<SpellThreatEntry>(spellId);
+    if(!threatSpell)
+        return;
+    
+    unitTarget->AddHostil(m_caster->GetGUID(), float(threatSpell->threat));
+
+    DEBUG_LOG("Spell %u, rank %u, added an additional %i threat", spellId, objmgr.GetSpellRank(spellId), threatSpell->threat);
 }
 
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)

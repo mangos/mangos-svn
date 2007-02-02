@@ -481,6 +481,7 @@ class Spell
         void SendPlaySpellVisual(uint32 SpellID);
 
         void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);
+        void HandleThreatSpells(uint32 spellId);
         //void HandleAddAura(Unit* Target);
 
         SpellEntry const* m_spellInfo;

@@ -1854,7 +1854,7 @@ bool ChatHandler::HandleDieCommand(const char* args)
 
     if( target->isAlive() )
     {
-        m_session->GetPlayer()->DealDamage(target, target->GetHealth(), DIRECT_DAMAGE, 0, false);
+        m_session->GetPlayer()->DealDamage(target, target->GetHealth(), DIRECT_DAMAGE, 0, NULL, 0, false);
     }
 
     return true;
