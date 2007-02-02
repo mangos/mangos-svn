@@ -77,13 +77,16 @@ bool DatabaseMysql::Initialize(const char *infoString)
 
     vector<string>::iterator iter;
 
-    std::string host, port, user, password, database;
+    std::string host, port_or_socket, user, password, database;
+    int port;
+    char const* unix_socket;
+
     iter = tokens.begin();
 
     if(iter != tokens.end())
         host = *iter++;
     if(iter != tokens.end())
-        port = *iter++;
+        port_or_socket = *iter++;
     if(iter != tokens.end())
         user = *iter++;
     if(iter != tokens.end())
@@ -93,22 +96,36 @@ bool DatabaseMysql::Initialize(const char *infoString)
 
     mysql_options(mysqlInit,MYSQL_SET_CHARSET_NAME,"utf8");
     #ifdef WIN32
-    if(host==".")                                           // named pipe use option
+    if(host==".")                                           // named pipe use option (Windows)
     {
         unsigned int opt = MYSQL_PROTOCOL_PIPE;
         mysql_options(mysqlInit,MYSQL_OPT_PROTOCOL,(char const*)&opt);
+        port = 0;
+        unix_socket = 0;
+    }
+    else                                                    // generic case
+    {
+        port = atoi(port_or_socket.c_str());
+        unix_socket = 0;
     }
     #else
-    if(host==".")                                           // socket use option
+    if(host==".")                                           // socket use option (Unix/Linux)
     {
         unsigned int opt = MYSQL_PROTOCOL_SOCKET;
         mysql_options(mysqlInit,MYSQL_OPT_PROTOCOL,(char const*)&opt);
         host = "localhost";
+        port = 0;
+        unix_socket = port_or_socket.c_str();
+    }
+    else                                                    // generic case
+    {
+        port = atoi(port_or_socket.c_str());
+        unix_socket = 0;
     }
     #endif
 
     mMysql = mysql_real_connect(mysqlInit, host.c_str(), user.c_str(),
-        password.c_str(), database.c_str(), atoi(port.c_str()), 0, 0);
+        password.c_str(), database.c_str(), port, unix_socket, 0);
 
     if (mMysql)
     {
