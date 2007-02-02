@@ -45,7 +45,7 @@ bool FileExists(const char * fn)
     return true;
 }
 
-bool Map::ExistMAP(int mapid,int x,int y)
+bool Map::ExistMAP(uint32 mapid,int x,int y)
 {
     std::string dataPath="./";
 
@@ -61,10 +61,9 @@ bool Map::ExistMAP(int mapid,int x,int y)
 
     FILE *pf=fopen(tmp,"rb");
 
-    sLog.outDetail("Check existing of map file '%s': %s",tmp,(pf ? "exist." : "not exist!"));
-
     if(!pf)
     {
+        sLog.outError("Check existing of map file '%s': not exist!",tmp);
         delete[] tmp;
         return false;
     }
@@ -84,7 +83,7 @@ bool Map::ExistMAP(int mapid,int x,int y)
     return true;
 }
 
-GridMap * Map::LoadMAP(int mapid,int x,int y)
+GridMap * Map::LoadMAP(uint32 mapid,int x,int y)
 {
     char *tmp;
     static bool showcheckmapInfo=false;

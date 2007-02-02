@@ -116,9 +116,9 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
     int mapid = fields[4].GetUInt16();
     delete result;
 
-    if(!MapManager::ExistMAP(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
-        PSendSysMessage("target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
     }
 
@@ -157,9 +157,9 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
 
     delete result;
 
-    if(!MapManager::ExistMAP(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
-        PSendSysMessage("target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
     }
 
@@ -532,9 +532,9 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
         float y = (float)atof(py);
         float z = (float)atof(pz);
 
-        if(!MapManager::ExistMAP(obj->GetMapId(),x,y))
+        if(!MapManager::IsValidMapCoord(obj->GetMapId(),x,y))
         {
-            PSendSysMessage(".move target map not exist (X: %f Y: %f MapId:%u)",x,y,obj->GetMapId());
+            PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,obj->GetMapId());
             return true;
         }
 

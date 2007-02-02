@@ -1234,9 +1234,9 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     int mapid = fields[4].GetUInt16();
     delete result;
 
-    if(!MapManager::ExistMAP(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
-        PSendSysMessage(".tele target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
     }
 
