@@ -60,7 +60,9 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         void LoadGrid(int mapid, float x, float y, bool no_unload = false);
         void UnloadAll();
 
-        static bool ExistMAP(int mapid, float x, float y);
+        static bool ExistMAP(uint32 mapid, float x, float y);
+        static bool IsValidMAP(uint32 mapid);
+        static bool IsValidMapCoord(uint32 mapid, float x,float y);
 
         void MoveAllCreaturesInMoveList();
 

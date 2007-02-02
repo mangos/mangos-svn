@@ -150,8 +150,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
         uint32 GetId(void) const { return i_id; }
 
-        static bool ExistMAP(int mapid, int x, int y);
-        GridMap * LoadMAP(int mapid, int x, int y);
+        static bool ExistMAP(uint32 mapid, int x, int y);
+        GridMap * LoadMAP(uint32 mapid, int x, int y);
 
         static void InitStateMachine();
         static void DeleteStateMachine();

@@ -143,5 +143,10 @@ namespace MaNGOS
     {
         return (std::abs(c) < MAP_HALFSIZE - 0.5);
     }
+
+    inline bool IsValidMapCoord(float x, float y)
+    {
+        return IsValidMapCoord(x) && IsValidMapCoord(y);
+    }
 }
 #endif

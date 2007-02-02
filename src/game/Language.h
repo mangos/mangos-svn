@@ -163,6 +163,9 @@
 #define LANG_VALUE_SAVED                 "Value saved."
 #define LANG_VALUE_SAVED_REJOIN          "Value saved, you may need to rejoin or clean your client cache."
 
+#define LANG_INVALID_TARGET_COORD        "Target map or coordinates is invalid (X: %f Y: %f MapId:%u)"
+
+
 // level 3 chat
 #define LANG_SCRITPS_RELOADED            "|cffff0000[System Message]:|rScripts reloaded"
 #define LANG_YOU_CHANGE_SECURITY         "You change security level of %s to %i."

@@ -689,7 +689,7 @@ void WorldObject::GetClosePoint( const float ox, const float oy, const float oz,
 
 bool WorldObject::IsPositionValid() const
 {
-    return MaNGOS::IsValidMapCoord(m_positionX) && MaNGOS::IsValidMapCoord(m_positionY);
+    return MaNGOS::IsValidMapCoord(m_positionX,m_positionY);
 }
 
 void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const

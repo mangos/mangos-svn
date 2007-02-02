@@ -24,6 +24,7 @@
 #include "FlightMaster.h"
 #include "RedZoneDistrict.h"
 #include "Transports.h"
+#include "GridDefines.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
@@ -123,7 +124,7 @@ void MapManager::MoveAllCreaturesInMoveList()
         iter->second->MoveAllCreaturesInMoveList();
 }
 
-bool MapManager::ExistMAP(int mapid, float x,float y)
+bool MapManager::ExistMAP(uint32 mapid, float x,float y)
 {
     GridPair p = MaNGOS::ComputeGridPair(x,y);
 
@@ -131,6 +132,16 @@ bool MapManager::ExistMAP(int mapid, float x,float y)
     int gy=63-p.y_coord;
 
     return Map::ExistMAP(mapid,gx,gy);
+}
+
+bool MapManager::IsValidMAP(uint32 mapid)
+{
+    return sMapStore.LookupEntry(mapid);
+}
+
+bool MapManager::IsValidMapCoord(uint32 mapid, float x,float y)
+{
+    return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y);
 }
 
 void MapManager::LoadGrid(int mapid, float x, float y, bool no_unload)

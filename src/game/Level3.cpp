@@ -141,9 +141,9 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
         mapid = (uint32)atoi(pmapid);
     else mapid = m_session->GetPlayer()->GetMapId();
 
-    if(!MapManager::ExistMAP(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
-        PSendSysMessage(".goxy: target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
     }
 
@@ -178,9 +178,9 @@ bool ChatHandler::HandleWorldPortCommand(const char* args)
     float z = atof(pz);
     uint32 mapid = atoi(pContinent);
 
-    if(!MapManager::ExistMAP(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
-        PSendSysMessage(".worldport target map not exist (X: %f Y: %f MapId: %u)",x,y,mapid);
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
     }
 
@@ -225,9 +225,9 @@ bool ChatHandler::HandleGoCommand(const char* args)
     float z = (float)atof(pz);
     uint32 mapid = (uint32)atoi(pmapid);
 
-    if(!MapManager::ExistMAP(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
-        PSendSysMessage(".go target map not exist (X: %f Y: %f MapId:%u)",x,y,mapid);
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
     }
 
