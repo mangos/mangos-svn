@@ -457,6 +457,10 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void BuildEnumData( WorldPacket * p_data );
 
+        void SetInWater(bool apply);
+
+        bool IsInWater() const { return m_isInWater; }
+
         bool ToggleAFK();
         bool ToggleDND();
         bool isAFK() { return this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); };
@@ -1203,6 +1207,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void StopMirrorTimer(MirrorTimerType Type);
         void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
         uint8 m_isunderwater;
+        bool m_isInWater;
 
         void outDebugValues() const;
         bool _removeSpell(uint16 spell_id);

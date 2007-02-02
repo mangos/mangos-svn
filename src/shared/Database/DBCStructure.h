@@ -258,6 +258,12 @@ struct SpellProcEventEntry
     float       ppmRate;                                    // for melee (ranged?) damage spells - proc rate per minute. if zero, falls back to flat chance from Spell.dbc
 };
 
+struct SpellThreatEntry
+{
+    uint32      spellId;
+    int32       threat;
+};
+
 struct SpellRadiusEntry
 {
     uint32    ID;

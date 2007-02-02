@@ -129,6 +129,7 @@ Player::Player (WorldSession *session): Unit()
     m_weaponChangeTimer = 0;
     m_breathTimer = 0;
     m_isunderwater = 0;
+    m_isInWater = false;
     m_drunkTimer = 0;
     m_drunk = 0;
     m_restTime = 0;
@@ -528,7 +529,7 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
     //m_session->SendPacket(&data);
     //Let other players see that you get damage
     SendMessageToSet(&data, true);
-    DealDamage((Unit*)this, Amount, SELF_DAMAGE, 0, true);
+    DealDamage((Unit*)this, Amount, SELF_DAMAGE, 0, NULL, 0, true);
 }
 
 void Player::HandleDrowning(uint32 UnderWaterTime)
@@ -1529,6 +1530,12 @@ void Player::RegenerateHealth()
 bool Player::isAcceptTickets() const
 {
     return GetSession()->GetSecurity() >=2 && (m_GMFlags & GM_ACCEPT_TICKETS);
+}
+
+void Player::SetInWater(bool apply)
+{ 
+    //define player in water by opcodes
+    m_isInWater = apply; 
 }
 
 void Player::SetGameMaster(bool on)

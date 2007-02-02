@@ -312,6 +312,22 @@ void ObjectMgr::LoadSpellProcEvents()
     sLog.outString( "" );
 }
 
+void ObjectMgr::LoadSpellThreats()
+{
+    sSpellThreatStore.Load();
+
+    sLog.outString( ">> Loaded %u aggro generating spells", sSpellThreatStore.RecordCount );
+    sLog.outString( "" );
+
+    for(uint32 i = 1; i <= sSpellThreatStore.MaxEntry; ++i)
+    {
+        SpellThreatEntry const * e = sSpellThreatStore.LookupEntry<SpellThreatEntry>(i);
+        if(!e) continue;
+        if(!sSpellStore.LookupEntry(e->spellId))
+            sLog.outError("Unknown spell %u",e->spellId);
+    }
+}
+
 // name must be checked to correctness (if recived) before call this function
 uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 {

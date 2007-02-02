@@ -27,11 +27,13 @@ const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiif
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
 const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisis";
 const char SpellProcEventfmt[]="iiiiiif";
+const char SpellThreatfmt[]="ii";
 
 SQLStorage sCreatureStorage(CreatureInfofmt,"creature_template");
 SQLStorage sGOStorage(GameObjectInfofmt,"gameobject_template");
 SQLStorage sItemStorage(ItemPrototypefmt,"item_template");
 SQLStorage sSpellProcEventStore(SpellProcEventfmt,"spell_proc_event");
+SQLStorage sSpellThreatStore(SpellThreatfmt,"spell_threat");
 
 void FreeStorage(SQLStorage * p)
 {

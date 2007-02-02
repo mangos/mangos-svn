@@ -324,6 +324,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Spell Proc Event conditions..." );
     objmgr.LoadSpellProcEvents();
 
+    sLog.outString( "Loading Aggro Spells Definitions...");
+    objmgr.LoadSpellThreats();
+
     sLog.outString( "Loading Scripts..." );
     objmgr.LoadScripts(sScripts,      "scripts");           // quest scripts
     objmgr.LoadScripts(sSpellScripts, "spell_scripts");     // spell casting scripts

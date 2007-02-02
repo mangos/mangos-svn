@@ -527,8 +527,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void Unmount();
 
         uint16 GetMaxSkillValueForLevel() const { return getLevel()*5; }
-
-        void DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint32 procFlag, bool durabilityLoss);
+        void DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint8 damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
         void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage = 0, SpellEntry const *procSpell = NULL, bool isTriggeredSpell = false, WeaponAttackType attType = BASE_ATTACK);
         void CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
@@ -610,7 +609,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype);
 
         bool isTargetableForAttack();
-        bool IsInWater() const;
+        virtual bool IsInWater() const;
         bool IsUnderWater() const;
         bool isInAccessablePlaceFor(Creature* c) const;
 
@@ -620,6 +619,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool isTriggeredSpell = false);
         void CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem = NULL);
         void CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, Item *castItem= NULL);
+        bool IsDamageToThreatSpell(SpellEntry const * spellInfo) const;
 
         void DeMorph();
 
