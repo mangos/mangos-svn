@@ -48,7 +48,6 @@ class DatabaseMysql : public Database
         bool BeginTransaction();
         bool CommitTransaction();
         bool RollbackTransaction();
-        bool Ping() { return mysql_ping(mMysql); }
 
         operator bool () const { return mMysql != NULL; }
 
