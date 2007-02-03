@@ -170,8 +170,3 @@ void SQLStorage::Load ()
     MaxEntry=maxi;
     data=_data;
 }
-
-void SQLStorage::printIndexError(uint32 id) const
-{
-    sLog.outError("ERROR: There is no record %u in DB table `%s`",id,table);
-}

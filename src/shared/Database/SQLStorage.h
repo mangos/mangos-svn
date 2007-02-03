@@ -46,10 +46,7 @@ class SQLStorage
             if( id == 0 )
                 return NULL;
             if(id >= MaxEntry)
-            {
-                printIndexError(id);
                 return NULL;
-            }
             return reinterpret_cast<T const*>(pIndex[id]);
         }
 
@@ -58,7 +55,6 @@ class SQLStorage
         uint32 iNumFields;
         void Load();
         void Free();
-        void printIndexError(uint32 id) const;
     private:
         char** pIndex;
 
