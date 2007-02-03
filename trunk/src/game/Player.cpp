@@ -5941,7 +5941,7 @@ bool Player::HasBankBagSlot( uint8 slot ) const
     return false;
 }
 
-bool Player::IsInventoryPos( uint8 bag, uint8 slot ) const
+bool Player::IsInventoryPos( uint8 bag, uint8 slot )
 {
     if( bag == INVENTORY_SLOT_BAG_0 && slot == NULL_SLOT )
         return true;
@@ -5952,7 +5952,7 @@ bool Player::IsInventoryPos( uint8 bag, uint8 slot ) const
     return false;
 }
 
-bool Player::IsEquipmentPos( uint8 bag, uint8 slot ) const
+bool Player::IsEquipmentPos( uint8 bag, uint8 slot )
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot < EQUIPMENT_SLOT_END ) )
         return true;
@@ -5961,7 +5961,7 @@ bool Player::IsEquipmentPos( uint8 bag, uint8 slot ) const
     return false;
 }
 
-bool Player::IsBankPos( uint8 bag, uint8 slot ) const
+bool Player::IsBankPos( uint8 bag, uint8 slot )
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= BANK_SLOT_ITEM_START && slot < BANK_SLOT_ITEM_END ) )
         return true;
@@ -5972,7 +5972,7 @@ bool Player::IsBankPos( uint8 bag, uint8 slot ) const
     return false;
 }
 
-bool Player::IsBagPos( uint16 pos ) const
+bool Player::IsBagPos( uint16 pos )
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
