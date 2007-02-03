@@ -1356,7 +1356,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         // remove old enchanting before appling new if equiped
         if(itemTarget->IsEquipped())
             if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT))
-                item_owner->AddItemEnchant(itemTarget,old_enchant_id,false);
+                item_owner->AddItemEnchant(itemTarget,old_enchant_id,0,false);
 
         for(int x=0;x<3;x++)
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x,0);
@@ -1365,7 +1365,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
         // add new enchanting if equiped
         if(itemTarget->IsEquipped())
-            item_owner->AddItemEnchant(itemTarget,enchant_id,true);
+            item_owner->AddItemEnchant(itemTarget,enchant_id,0,true);
 
         itemTarget->SetState(ITEM_CHANGED);
     }
@@ -1408,23 +1408,23 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3))
         {
             if(itemTarget->IsEquipped())
-                item_owner->AddItemEnchant(itemTarget,old_enchant_id,false);
+                item_owner->AddItemEnchant(itemTarget,old_enchant_id,1,false);
 
             // duration == 0 will remove EnchantDuration
             item_owner->AddEnchantDuration(itemTarget,1,0);
         }
 
         for(int x=0;x<3;x++)
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+x,0);
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+x,0);
 
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3, enchant_id);
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+1, duration*1000);
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3, enchant_id);
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+1, duration*1000);
         if(m_spellInfo->SpellFamilyName == 8)
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2, 45+objmgr.GetSpellRank(m_spellInfo->Id)*15);
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+2, 45+objmgr.GetSpellRank(m_spellInfo->Id)*15);
 
         // add new enchanting if equipped
         if(itemTarget->IsEquipped())
-            item_owner->AddItemEnchant(itemTarget,enchant_id,true);
+            item_owner->AddItemEnchant(itemTarget,enchant_id,1,true);
 
         itemTarget->SetState(ITEM_CHANGED);
 
@@ -2082,7 +2082,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
 
         // remove old enchanting before appling new
         if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3))
-            item_owner->AddItemEnchant(itemTarget,old_enchant_id,false);
+            item_owner->AddItemEnchant(itemTarget,old_enchant_id,pEnchant->display_type,false);
 
         for(int x=0;x<3;x++)
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);
@@ -2092,7 +2092,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         itemTarget->SetState(ITEM_CHANGED);
 
         // add new enchanting
-        item_owner->AddItemEnchant(itemTarget,enchant_id,true);
+        item_owner->AddItemEnchant(itemTarget,enchant_id,pEnchant->display_type,true);
 
         // set duration
         item_owner->AddEnchantDuration(itemTarget,1,duration*1000);

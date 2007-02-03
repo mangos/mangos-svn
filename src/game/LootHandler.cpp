@@ -130,7 +130,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         data << uint32(0xFFFFFFFF);
         data << uint8(0xFF);
         data << uint32(item->itemid);
-        data << uint64(0);
+        data << uint32(0);
+        data << uint32(item->randomPropertyId);
         data << uint32(item->count);
 
         if (player->groupInfo.group)
