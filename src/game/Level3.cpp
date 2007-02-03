@@ -1428,6 +1428,293 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleListItemCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    char* c_item_id = strtok((char*)args, " ");
+    uint32 item_id = atol(c_item_id);
+
+    if(!item_id || !objmgr.GetItemPrototype(item_id))
+    {
+        PSendSysMessage("Invalid item id: %u", item_id);
+        return true;
+    }
+
+    char* c_count = strtok(NULL, " ");
+    int count = c_count ? atol(c_count) : 10;
+
+    if(count < 0)
+        return false;
+
+    QueryResult *result;
+
+    // inventory case 
+    uint32 inv_count = 0;
+    result=sDatabase.PQuery("SELECT COUNT(`item_template`) FROM `character_inventory` WHERE `item_template`='%u'",item_id);
+    if(result)
+    {
+        inv_count = (*result)[0].GetUInt32();
+        delete result;
+    }
+
+    result=sDatabase.PQuery(
+        //           0              1           2           3                  4                     5
+        "SELECT `ci`.`item`,`cibag`.`slot` AS `bag`,`ci`.`slot`,`ci`.`guid`,`character`.`account`,`character`.`name` "
+        "FROM `character_inventory` AS `ci` LEFT JOIN `character_inventory` AS `cibag` ON (`cibag`.`item`=`ci`.`bag`),`character` "
+        "WHERE `ci`.`item_template`='%u' AND `ci`.`guid` = `character`.`guid` LIMIT %u ",
+        item_id,uint32(count));
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 item_guid = fields[0].GetUInt32();
+            uint32 item_bag = fields[1].GetUInt32();
+            uint32 item_slot = fields[2].GetUInt32();
+            uint32 owner_guid = fields[3].GetUInt32();
+            uint32 owner_acc = fields[4].GetUInt32();
+            std::string owner_name = fields[5].GetCppString();
+
+            char const* item_pos = 0;
+            if(Player::IsEquipmentPos(item_bag,item_slot))
+                item_pos = "[equipped]";
+            else if(Player::IsInventoryPos(item_bag,item_slot))
+                item_pos = "[in inventory]";
+            else if(Player::IsBankPos(item_bag,item_slot))
+                item_pos = "[in bank]";
+            else
+                item_pos = "";
+
+            PSendSysMessage("%d - owner: %s (guid: %u account: %u ) %s",
+                item_guid,owner_name.c_str(),owner_guid,owner_acc,item_pos);
+        } while (result->NextRow());
+
+        uint64 res_count = result->GetRowCount();
+
+        delete result;
+
+        if(count > res_count)
+            count-=res_count;
+        else if(count)
+            count = 0;
+    }
+    
+    // mail case 
+    uint32 mail_count = 0;
+    result=sDatabase.PQuery("SELECT COUNT(`item_template`) FROM `mail` WHERE `item_template`='%u'",item_id);
+    if(result)
+    {
+        mail_count = (*result)[0].GetUInt32();
+        delete result;
+    }
+
+    if(count > 0)
+    {
+        result=sDatabase.PQuery(
+            //             0                  1               2                   3                  4               5                  6
+            "SELECT `mail`.`item_guid`,`mail`.`sender`,`mail`.`receiver`,`char_s`.`account`,`char_s`.`name`,`char_r`.`account`,`char_r`.`name` "
+            "FROM `mail`,`character` as `char_s`,`character` as `char_r` "
+            "WHERE `mail`.`item_template`='%u' AND `char_s`.`guid` = `mail`.`sender` AND `char_r`.`guid` = `mail`.`receiver` LIMIT %u",
+            item_id,uint32(count));
+    }
+    else
+        result = NULL;
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 item_guid        = fields[0].GetUInt32();
+            uint32 item_s           = fields[1].GetUInt32();
+            uint32 item_r           = fields[2].GetUInt32();
+            uint32 item_s_acc       = fields[3].GetUInt32();
+            std::string item_s_name = fields[4].GetCppString();
+            uint32 item_r_acc       = fields[5].GetUInt32();
+            std::string item_r_name = fields[6].GetCppString();
+
+            char const* item_pos = "[in mail]";
+
+            PSendSysMessage("%d - sender: %s (guid: %u account: %u ) receiver: %s (guid: %u account: %u ) %s",
+                item_guid,item_s_name.c_str(),item_s,item_s_acc,item_r_name.c_str(),item_r,item_r_acc,item_pos);
+        } while (result->NextRow());
+
+        uint64 res_count = result->GetRowCount();
+
+        delete result;
+
+        if(count > res_count)
+            count-=res_count;
+        else if(count)
+            count = 0;
+    }
+
+    // auction case 
+    uint32 auc_count = 0;
+    result=sDatabase.PQuery("SELECT COUNT(`item_template`) FROM `auctionhouse` WHERE `item_template`='%u'",item_id);
+    if(result)
+    {
+        auc_count = (*result)[0].GetUInt32();
+        delete result;
+    }
+
+    if(count > 0)
+    {
+        result=sDatabase.PQuery(
+            //                     0                         1                       2                     3
+            "SELECT `auctionhouse`.`itemguid`,`auctionhouse`.`itemowner`,`character`.`account`,`character`.`name` "
+            "FROM `auctionhouse`,`character` WHERE `auctionhouse`.`item_template`='%u' AND `character`.`guid` = `auctionhouse`.`itemowner` LIMIT %u",
+            item_id,uint32(count));
+    }
+    else
+        result = NULL;
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 item_guid       = fields[0].GetUInt32();
+            uint32 owner           = fields[1].GetUInt32();
+            uint32 owner_acc       = fields[2].GetUInt32();
+            std::string owner_name = fields[3].GetCppString();
+
+            char const* item_pos = "[in auction]";
+
+            PSendSysMessage("%d - owner: %s (guid: %u account: %u ) %s",item_guid,owner_name.c_str(),owner,owner_acc,item_pos);
+        } while (result->NextRow());
+
+        delete result;
+    }
+
+    if(inv_count+mail_count+auc_count == 0)
+    {
+        SendSysMessage("No items found!");
+        return true;
+    }
+
+    PSendSysMessage("Fount items %u: %u ( inventory %u mail %u auction %u )",item_id,inv_count+mail_count+auc_count,inv_count,mail_count,auc_count);
+
+    return true;
+}
+
+bool ChatHandler::HandleListObjectCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    char* c_go_id = strtok((char*)args, " ");
+    uint32 go_id = atol(c_go_id);
+
+    if(!go_id || !objmgr.GetGameObjectInfo(go_id))
+    {
+        PSendSysMessage("Invalid gameobject id: %u", go_id);
+        return true;
+    }
+
+    char* c_count = strtok(NULL, " ");
+    int count = c_count ? atol(c_count) : 10;
+
+    if(count < 0)
+        return false;
+
+    Player* pl = m_session->GetPlayer();
+    QueryResult *result;
+
+    uint32 obj_count = 0;
+    result=sDatabase.PQuery("SELECT COUNT(`guid`) FROM `gameobject` WHERE `id`='%u'",go_id);
+    if(result)
+    {
+        obj_count = (*result)[0].GetUInt32();
+        delete result;
+    }
+
+    result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `gameobject` WHERE `id` = '%u' ORDER BY `order` ASC LIMIT %u",
+        pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),go_id,uint32(count));
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 guid = fields[0].GetUInt32();
+            uint32 id = fields[1].GetUInt32();
+            float x = fields[2].GetFloat();
+            float y = fields[3].GetFloat();
+            float z = fields[4].GetFloat();
+            float o = fields[5].GetFloat();
+            int mapid = fields[6].GetUInt16();
+
+            PSendSysMessage("%d - X: %f Y: %f Z: %f MapId: %u", guid, x, y, z, mapid);
+        } while (result->NextRow());
+
+        delete result;
+    }
+
+    PSendSysMessage("Found gameobjects %u: %u ",go_id,obj_count);
+    return true;
+}
+
+bool ChatHandler::HandleListCreatureCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    char* c_cr_id = strtok((char*)args, " ");
+    uint32 cr_id = atol(c_cr_id);
+
+    if(!cr_id || !objmgr.GetCreatureTemplate(cr_id))
+    {
+        PSendSysMessage("Invalid creature id: %u", cr_id);
+        return true;
+    }
+
+    char* c_count = strtok(NULL, " ");
+    int count = c_count ? atol(c_count) : 10;
+
+    if(count < 0)
+        return false;
+
+    Player* pl = m_session->GetPlayer();
+    QueryResult *result;
+
+    uint32 cr_count = 0;
+    result=sDatabase.PQuery("SELECT COUNT(`guid`) FROM `creature` WHERE `id`='%u'",cr_id);
+    if(result)
+    {
+        cr_count = (*result)[0].GetUInt32();
+        delete result;
+    }
+
+    result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `creature` WHERE `id` = '%u' ORDER BY `order` ASC LIMIT %u",
+        pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), cr_id,uint32(count));
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 guid = fields[0].GetUInt32();
+            uint32 id = fields[1].GetUInt32();
+            float x = fields[2].GetFloat();
+            float y = fields[3].GetFloat();
+            float z = fields[4].GetFloat();
+            float o = fields[5].GetFloat();
+            int mapid = fields[6].GetUInt16();
+
+            PSendSysMessage("%d - X: %f Y: %f Z: %f MapId: %u", guid, x, y, z, mapid);
+        } while (result->NextRow());
+
+        delete result;
+    }
+
+    PSendSysMessage("Found creatures %u: %u ",cr_id,cr_count);
+    return true;
+}
+
 bool ChatHandler::HandleLookupItemCommand(const char* args)
 {
     if(!*args)
@@ -1591,7 +1878,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
     QueryResult *result=sDatabase.PQuery("SELECT `entry`,`name` FROM `creature_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
     if(!result)
     {
-        SendSysMessage("No mobs found!");
+        SendSysMessage("No creatures found!");
         return true;
     }
 
@@ -1601,6 +1888,33 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         uint16 id = fields[0].GetUInt16();
         std::string name = fields[1].GetCppString();
         PSendSysMessage("%d - %s",id,name.c_str());
+    } while (result->NextRow());
+
+    delete result;
+    return true;
+}
+
+bool ChatHandler::HandleLookupObjectCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    std::string namepart = args;
+    sDatabase.escape_string(namepart);
+
+    QueryResult *result=sDatabase.PQuery("SELECT `entry`,`name` FROM `gameobject_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
+    if(!result)
+    {
+        SendSysMessage("No gameobjects found!");
+        return true;
+    }
+
+    do
+    {
+        Field *fields = result->Fetch();
+        uint32 id = fields[0].GetUInt32();
+        std::string name = fields[1].GetCppString();
+        PSendSysMessage("%u - %s",id,name.c_str());
     } while (result->NextRow());
 
     delete result;

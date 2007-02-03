@@ -248,10 +248,14 @@ class ChatHandler
         bool HandleDelTicketCommand(const char* args);
         bool HandleMaxSkillCommand(const char* args);
         bool HandleSetSkillCommand(const char* args);
+        bool HandleListCreatureCommand(const char* args);
+        bool HandleListItemCommand(const char* args);
+        bool HandleListObjectCommand(const char* args);
         bool HandleLookupSkillCommand(const char* args);
         bool HandleLookupSpellCommand(const char* args);
         bool HandleLookupQuestCommand(const char* args);
         bool HandleLookupCreatureCommand(const char* args);
+        bool HandleLookupObjectCommand(const char* args);
         bool HandlePasswordCommand(const char* args);
         bool HandleLockAccountCommand(const char* args);
         bool HandleRespawnCommand(const char* args);
