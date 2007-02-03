@@ -49,11 +49,6 @@ class Database
             return false;
         }
 
-        virtual bool Ping()                                 // send ping to server and restore if possible connection
-        {
-            return true;
-        }
-
         virtual operator bool () const = 0;
 
         virtual unsigned long escape_string(char *to, const char *from, unsigned long length) { strncpy(to,from,length); return length; }
