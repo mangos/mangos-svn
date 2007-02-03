@@ -203,15 +203,15 @@ void Group::Disband(bool hideDestroy)
     m_leaderName = "";
 }
 
-void Group::SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntry, uint32 ItemInfo, uint32 CountDown, const Roll &r)
+void Group::SendLootStartRoll(uint64 Guid, uint32 CountDown, const Roll &r)
 {
     WorldPacket data(SMSG_LOOT_START_ROLL, (8+4+4+4+4+4));
-    data << Guid;                                           // guid of the creature/go that has the item which is being rolled for
-    data << NumberinGroup;                                  // maybe the number of players rolling for it???
-    data << ItemEntry;                                      // the itemEntryId for the item that shall be rolled for
+    data << uint64(Guid);                                   // guid of the creature/go that has the item which is being rolled for
+    data << uint32(r.totalPlayersRolling);                  // maybe the number of players rolling for it???
+    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
     data << uint32(0);                                      // unknown
-    data << ItemInfo;                                       // ItemInfo this is related to special additionals to a item
-    data << CountDown;                                      // the countdown time to choose "need" or "greed"
+    data << uint32(r.itemRandomPropId);                     // item random property ID
+    data << uint32(CountDown);                              // the countdown time to choose "need" or "greed"
 
     map<uint64, RollVote>::const_iterator itr;
     for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
@@ -225,17 +225,17 @@ void Group::SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntr
     }
 }
 
-void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r)
+void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r)
 {
     WorldPacket data(SMSG_LOOT_ROLL, (8+4+8+4+4+4+1+1));
-    data << SourceGuid;                                     // guid of the item rolled
+    data << uint64(SourceGuid);                             // guid of the item rolled
     data << (uint32)0;                                      // unknown, maybe amount of players
-    data << TargetGuid;
-    data << ItemEntry;                                      // the itemEntryId for the item that shall be rolled for
+    data << uint64(TargetGuid);
+    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
     data << uint32(0);                                      // unknown
-    data << ItemInfo;                                       // ItemInfo this is related to special additionals to a item
-    data << RollNumber;                                     // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
-    data << RollType;                                       // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
+    data << uint32(r.itemRandomPropId);                     // Item random property ID
+    data << uint8(RollNumber);                              // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
+    data << uint8(RollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
 
     map<uint64, RollVote>::const_iterator itr;
     for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
@@ -249,17 +249,17 @@ void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry,
     }
 }
 
-void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r)
+void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r)
 {
     WorldPacket data(SMSG_LOOT_ROLL_WON, (8+4+4+4+4+1+1));
-    data << SourceGuid;                                     // guid of the item rolled
+    data << uint64(SourceGuid);                             // guid of the item rolled
     data << (uint32)0;                                      // unknown, maybe amount of players
-    data << ItemEntry;                                      // the itemEntryId for the item that shall be rolled for
+    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
     data << uint32(0);                                      // unknown
-    data << ItemInfo;                                       // ItemInfo this is related to special additionals to a item
-    data << TargetGuid;                                     // guid of the player who won.
-    data << RollNumber;                                     // rollnumber realted to SMSG_LOOT_ROLL
-    data << RollType;                                       // Rolltype related to SMSG_LOOT_ROLL
+    data << uint32(r.itemRandomPropId);                     // Item random property
+    data << uint64(TargetGuid);                             // guid of the player who won.
+    data << uint8(RollNumber);                              // rollnumber realted to SMSG_LOOT_ROLL
+    data << uint8(RollType);                                // Rolltype related to SMSG_LOOT_ROLL
 
     map<uint64, RollVote>::const_iterator itr;
     for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
@@ -273,13 +273,13 @@ void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEnt
     }
 }
 
-void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, uint32 ItemEntry, uint32 ItemInfo, const Roll &r)
+void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r)
 {
     WorldPacket data(SMSG_LOOT_ALL_PASSED, (8+4+4+4+4));
-    data << Guid;                                           // Guid of the item rolled
-    data << NumberOfPlayers;                                // The number of players rolling for it???
-    data << ItemEntry;                                      // The itemEntryId for the item that shall be rolled for
-    data << ItemInfo;                                       // ItemInfo
+    data << uint64(Guid);                                   // Guid of the item rolled
+    data << uint32(NumberOfPlayers);                        // The number of players rolling for it???
+    data << uint32(r.itemid);                               // The itemEntryId for the item that shall be rolled for
+    data << uint32(r.itemRandomPropId);                     // Item random property ID
     data << uint32(0x3F3);                                  // unknown, I think it can be number of roll
 
     map<uint64, RollVote>::const_iterator itr;
@@ -318,6 +318,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
             r.itemGUID = newitemGUID;
             r.itemid = i->itemid;
+            r.itemRandomPropId = i->randomPropertyId;
 
             //a vector is filled with only near party members
             for (int j = 0; j < m_members.size(); j++)
@@ -333,10 +334,11 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
                 }
             }
 
-            group->SendLootStartRoll(newitemGUID, r.totalPlayersRolling, i->itemid, 0, 60000, r);
-
             r.loot = loot;
             r.itemSlot = itemSlot;
+
+            group->SendLootStartRoll(newitemGUID, 60000, r);
+
             loot->items[itemSlot].is_blocked = true;
 
             RollId.push_back(r);
@@ -362,6 +364,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
             r.itemGUID = newitemGUID;
             r.itemid = i->itemid;
+            r.itemRandomPropId = i->randomPropertyId;
 
             //a vector is filled with only near party members
             for (int j = 0; j < m_members.size(); j++)
@@ -382,10 +385,11 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
 
             if (r.totalPlayersRolling > 0)
             {
-                group->SendLootStartRoll(newitemGUID, r.totalPlayersRolling, i->itemid, 0, 60000, r);
-
                 r.loot = loot;
                 r.itemSlot = itemSlot;
+
+                group->SendLootStartRoll(newitemGUID, 60000, r);
+
                 loot->items[itemSlot].is_blocked = true;
 
                 RollId.push_back(r);
@@ -417,21 +421,21 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
             {
                 case 0:                                     //Player choose pass
                 {
-                    SendLootRoll(0, playerGUID, i->itemid, 0, 128, 128, *i);
+                    SendLootRoll(0, playerGUID, 128, 128, *i);
                     i->totalPass++;
                     itr2->second = PASS;
                 }
                 break;
                 case 1:                                     //player choose Need
                 {
-                    SendLootRoll(0, playerGUID, i->itemid, 0, 1, 1, *i);
+                    SendLootRoll(0, playerGUID, 1, 1, *i);
                     i->totalNeed++;
                     itr2->second = NEED;
                 }
                 break;
                 case 2:                                     //player choose Greed
                 {
-                    SendLootRoll(0, playerGUID, i->itemid, 0, 2, 2, *i);
+                    SendLootRoll(0, playerGUID, 2, 2, *i);
                     i->totalGreed++;
                     itr2->second = GREED;
                 }
@@ -456,14 +460,14 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                             continue;
 
                         uint8 randomN = rand() % 100;
-                        SendLootRoll(0, itr2->first, i->itemid, 0, randomN, 1, *i);
+                        SendLootRoll(0, itr2->first, randomN, 1, *i);
                         if (maxresul < randomN)
                         {
                             maxguid  = itr2->first;
                             maxresul = randomN;
                         }
                     }
-                    SendLootRollWon(0, maxguid, i->itemid, 0, maxresul, 1, *i);
+                    SendLootRollWon(0, maxguid, maxresul, 1, *i);
                     player = objmgr.GetPlayer(maxguid);
 
                     if(player && player->GetSession())
@@ -499,14 +503,14 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                                 continue;
 
                             uint8 randomN = rand() % 100;
-                            SendLootRoll(0, itr2->first, i->itemid, 0, randomN, 2, *i);
+                            SendLootRoll(0, itr2->first, randomN, 2, *i);
                             if (maxresul < randomN)
                             {
                                 maxguid  = itr2->first;
                                 maxresul = randomN;
                             }
                         }
-                        SendLootRollWon(0, maxguid, i->itemid, 0, maxresul, 2, *i);
+                        SendLootRollWon(0, maxguid, maxresul, 2, *i);
                         player = objmgr.GetPlayer(maxguid);
 
                         if(player && player->GetSession())
@@ -529,7 +533,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                     }
                     else
                     {
-                        SendLootAllPassed(i->itemGUID, NumberOfPlayers, i->itemid, 0, *i);
+                        SendLootAllPassed(i->itemGUID, NumberOfPlayers, *i);
                         LootItem *item = &(i->loot->items[i->itemSlot]);
                         item->is_blocked = false;
                     }

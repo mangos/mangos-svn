@@ -51,10 +51,11 @@ class MANGOS_DLL_SPEC Group
         };
         struct Roll
         {
-            Roll(): itemGUID(0), itemid(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), loot(NULL), itemSlot(0) {}
+            Roll(): itemGUID(0), itemid(0), itemRandomPropId(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), loot(NULL), itemSlot(0) {}
 
             uint64 itemGUID;
             uint32 itemid;
+            uint32 itemRandomPropId;
             map<uint64, RollVote> playerVote;               //vote position correspond with player position (in group)
             uint8 totalPlayersRolling;
             uint8 totalNeed;
@@ -159,10 +160,10 @@ class MANGOS_DLL_SPEC Group
         void BroadcastPacket(WorldPacket *packet, int group=-1, uint64 ignore=0);
 
         // roll system
-        void SendLootStartRoll(uint64 Guid, uint32 NumberinGroup, uint32 ItemEntry, uint32 ItemInfo, uint32 CountDown, const Roll &r);
-        void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r);
-        void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint32 ItemEntry, uint32 ItemInfo, uint8 RollNumber, uint8 RollType, const Roll &r);
-        void SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, uint32 ItemEntry, uint32 ItemInfo, const Roll &r);
+        void SendLootStartRoll(uint64 Guid, uint32 CountDown, const Roll &r);
+        void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
+        void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
+        void SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r);
         void GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature);
         void NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature);
         void CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise);

@@ -2503,7 +2503,16 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
     //431) = 884 (0x374) = main weapon
     for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
-        updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
+        uint16 visual_base = PLAYER_VISIBLE_ITEM_1_0 + (i*12);
+
+        // item entry
+        updateMask->SetBit(visual_base + 0);
+
+        // item enchantment IDs 
+        for(uint8 j = 0; j < 7; ++j)
+            updateMask->SetBit(visual_base +1 + j);
+
+        // rendom properties
         updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*12)));
     }
 
@@ -4506,7 +4515,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     {
         uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
         if(Enchant_id)
-            AddItemEnchant(item,Enchant_id, apply);
+            AddItemEnchant(item,Enchant_id, enchant_slot, apply);
     }
 
     sLog.outDebug("_ApplyItemMods complete.");
@@ -4836,11 +4845,11 @@ void Player::_RemoveAllItemMods()
                     RemoveAurasDueToSpell(proto->Spells[m].SpellId );
             }
 
-            for(int enchant_slot =  0 ; enchant_slot < 7; enchant_slot++)
+            for(int enchant_slot =  0 ; enchant_slot < 7; ++enchant_slot)
             {
                 uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                 if(Enchant_id)
-                    AddItemEnchant(m_items[i],Enchant_id, false);
+                    AddItemEnchant(m_items[i],Enchant_id, enchant_slot, false);
             }
         }
     }
@@ -4956,7 +4965,7 @@ void Player::_ApplyAllItemMods()
             {
                 uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
                 if(Enchant_id)
-                    AddItemEnchant(m_items[i],Enchant_id, true);
+                    AddItemEnchant(m_items[i],Enchant_id, enchant_slot, true);
             }
         }
     }
@@ -5615,7 +5624,7 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
             item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2,charges-1);
         else if(charges <= 1)
         {
-            AddItemEnchant(item,item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3),false);
+            AddItemEnchant(item,item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3),1,false);
             for(int y=0;y<3;y++)
                 item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+y,0);
         }
@@ -7077,13 +7086,10 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
     {
         int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
         SetUInt32Value(VisibleBase, pItem->GetEntry());
-        SetUInt32Value(VisibleBase + 1, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
-        SetUInt32Value(VisibleBase + 2, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 1*3));
-        SetUInt32Value(VisibleBase + 3, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 2*3));
-        SetUInt32Value(VisibleBase + 4, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3*3));
-        SetUInt32Value(VisibleBase + 5, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 4*3));
-        SetUInt32Value(VisibleBase + 6, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 5*3));
-        SetUInt32Value(VisibleBase + 7, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6*3));
+
+        for(int i = 0; i < 7; ++i)
+            SetUInt32Value(VisibleBase + 1 + i, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 ));
+
         SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
     }
 
@@ -7904,7 +7910,7 @@ void Player::UpdateEnchantTime(uint32 time)
         }
         else if(itr->leftduration <= time)
         {
-            AddItemEnchant(itr->item,itr->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3),false);
+            AddItemEnchant(itr->item,itr->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3),itr->slot,false);
             for(int y=0;y<3;y++)
                 itr->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3+y,0);
             next = m_enchantDuration.erase(itr);
@@ -7960,7 +7966,7 @@ void Player::ReducePoisonCharges(uint32 enchantId)
                 continue;
             if(charges <= 1)
             {
-                AddItemEnchant(pItem,enchantId,false);
+                AddItemEnchant(pItem,enchantId,x,false);
                 for(int y=0;y<3;y++)
                     pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+y,0);
                 break;

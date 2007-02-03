@@ -2618,12 +2618,18 @@ void Unit::AddHostil(uint64 guid, float hostility)
     m_hostilList.push_back(Hostil(guid,hostility));
 }
 
-void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
+void Unit::AddItemEnchant(Item *item,uint32 enchant_id,uint8 enchant_slot,bool apply)
 {
     if (GetTypeId() != TYPEID_PLAYER)
         return;
 
     if(!item)
+        return;
+
+    if(!item->IsEquipped())
+        return;
+
+    if(enchant_slot > 7)
         return;
 
     SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
@@ -2663,6 +2669,10 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
         }
         else RemoveAurasDueToSpell(enchant_spell_id);
     }
+
+    // visualize enchantment at player and equipped items
+    int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 12);
+    SetUInt32Value(VisibleBase+1 + enchant_slot, apply? item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3) : 0);
 }
 
 void Unit::AddDynObject(DynamicObject* dynObj)

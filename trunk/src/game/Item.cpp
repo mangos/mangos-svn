@@ -784,9 +784,9 @@ void Item::SetItemRandomProperties(uint32 randomPropId)
     if(item_rand)
     {
         SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
-        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+9,item_rand->enchant_id_1);
-        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+12,item_rand->enchant_id_2);
-        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+15,item_rand->enchant_id_3);
+        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3*3,item_rand->enchant_id_1);
+        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3*4,item_rand->enchant_id_2);
+        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3*5,item_rand->enchant_id_3);
     }
 }
 
