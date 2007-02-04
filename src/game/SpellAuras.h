@@ -72,6 +72,7 @@ class Aura
         void HandlePeriodicHeal(bool Apply, bool Real);
         void HandleModAttackSpeed(bool Apply, bool Real);
         void HandleModThreat(bool Apply, bool Real);
+        void HandleFeignDeath(bool Apply, bool Real);
         void HandleAuraWaterWalk(bool Apply, bool Real);
         void HandleAuraFeatherFall(bool Apply, bool Real);
         void HandleAuraHover(bool Apply, bool Real);
@@ -148,6 +149,7 @@ class Aura
         void HandleModPowerCostSchool(bool Apply, bool Real);
         void HandleReflectSpellsSchool(bool Apply, bool Real);
         void HandleFarSight(bool Apply, bool Real);
+        void HandleModPossessPet(bool Apply, bool Real);
         void HandleModMechanicImmunity(bool Apply, bool Real);
         void HandleAuraModSkill(bool Apply, bool Real);
         void HandleModCreatureAttackPower(bool Apply, bool Real);

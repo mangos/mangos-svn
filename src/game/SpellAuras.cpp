@@ -111,7 +111,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_MANA_FUNNEL = 63,
     &Aura::HandlePeriodicManaLeech,                         //SPELL_AURA_PERIODIC_MANA_LEECH = 64,
     &Aura::HandleModCastingSpeed,                           //SPELL_AURA_MOD_CASTING_SPEED = 65,
-    &Aura::HandleNULL,                                      //SPELL_AURA_FEIGN_DEATH = 66,
+    &Aura::HandleFeignDeath,                                //SPELL_AURA_FEIGN_DEATH = 66,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DISARM = 67,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STALKED = 68,
     &Aura::HandleAuraSchoolAbsorb,                          //SPELL_AURA_SCHOOL_ABSORB = 69,
@@ -173,7 +173,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN = 125,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT = 126,
     &Aura::HandleNULL,                                      //SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS = 127,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POSSESS_PET = 128,
+    &Aura::HandleModPossessPet,                             //SPELL_AURA_MOD_POSSESS_PET = 128,
     &Aura::HandleAuraModIncreaseSpeedAlways,                //SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS = 129,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS = 130,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER = 131,
@@ -1313,10 +1313,10 @@ void Aura::HandleBindSight(bool apply, bool Real)
     if(!m_target)
         return;
 
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
+    if(GetCaster()->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    m_target->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
+    GetCaster()->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
 }
 
 void Aura::HandleFarSight(bool apply, bool Real)
@@ -1324,10 +1324,10 @@ void Aura::HandleFarSight(bool apply, bool Real)
     if(!m_target)
         return;
 
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
+    if(GetCaster()->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    m_target->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
+    GetCaster()->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
 }
 
 void Aura::HandleAuraTrackCreatures(bool apply, bool Real)
@@ -1370,114 +1370,140 @@ void Aura::HandleModPossess(bool apply, bool Real)
 {
     if(!m_target)
         return;
-
-    if(m_target->GetTypeId() != TYPEID_UNIT)
-        return;
-
     if(!Real)
         return;
 
-    Creature* creatureTarget = (Creature*)m_target;
+    if(m_target->GetTypeId() == TYPEID_UNIT)
+    {
+        CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+        if(cinfo->type != CREATURE_TYPE_HUMANOID)
+            return;
+    }
+
+    Unit* caster = GetCaster();
+    if(!caster)
+        return;
 
     if(int32(m_target->getLevel()) <= m_modifier.m_amount)
     {
-        CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
         if( apply )
         {
-            Unit* caster = GetCaster();
-            if(caster)
+            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
+            m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
+            caster->SetCharm((Creature*)m_target);
+            if(caster->GetTypeId() == TYPEID_PLAYER)
             {
-                creatureTarget->AttackStop();
-                if(caster->getVictim()==creatureTarget)
-                    caster->AttackStop();
-
-                creatureTarget->CombatStop();
-
-                creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
-                creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
-                caster->SetCharm(creatureTarget);
-                creatureTarget->AIM_Initialize();
-
-                if(caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    ((Player*)caster)->PetSpellInitialize();
-                }
+                ((Player*)caster)->PetSpellInitialize();
             }
+            if(caster->getVictim()==m_target)
+                caster->AttackStop();
+            m_target->CombatStop();
         }
         else
         {
-            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
-            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
 
-            if(Unit* caster = GetCaster())
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
             {
-                caster->SetCharm(0);
-
-                if(caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    WorldPacket data(SMSG_PET_SPELLS, 8);
-                    data << uint64(0);
-                    ((Player*)caster)->GetSession()->SendPacket(&data);
-                }
+                ((Player*)m_target)->setFactionForRace(m_target->getRace());
             }
-            creatureTarget->AIM_Initialize();
+            else if(m_target->GetTypeId() == TYPEID_UNIT)
+            {
+                CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+                m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+            }
+
+            caster->SetCharm(0);
+
+            if(caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                WorldPacket data(SMSG_PET_SPELLS, 8);
+                data << uint64(0);
+                ((Player*)caster)->GetSession()->SendPacket(&data);
+            }
+            if(m_target->GetTypeId() == TYPEID_UNIT)
+            {
+                ((Creature*)m_target)->AIM_Initialize();
+                ((Creature*)m_target)->Attack(caster);
+            }
         }
+        if(caster->GetTypeId() == TYPEID_PLAYER)
+            GetCaster()->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
     }
+}
+
+void Aura::HandleModPossessPet(bool apply, bool Real)
+{
+    if(!m_target)
+        return;
+    if(!Real)
+        return;
+
+    Unit* caster = GetCaster();
+    if(!caster || caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(GetCaster()->GetPet() != m_target)
+        return;
+
+    if(caster->GetTypeId() == TYPEID_PLAYER)
+        GetCaster()->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
 }
 
 void Aura::HandleModCharm(bool apply, bool Real)
 {
     if(!m_target)
         return;
-
-    if(m_target->GetTypeId() != TYPEID_UNIT)
-        return;
-
     if(!Real)
         return;
 
-    Creature* creatureTarget = (Creature*)m_target;
+    Unit* caster = GetCaster();
+    if(!caster)
+        return;
 
     if(int32(m_target->getLevel()) <= m_modifier.m_amount)
     {
-        CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
         if( apply )
         {
-            Unit* caster = GetCaster();
-            if(caster)
+            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
+            m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
+            caster->SetCharm((Creature*)m_target);
+
+            if(caster->getVictim()==m_target)
+                caster->AttackStop();
+            m_target->CombatStop();
+
+            if(caster->GetTypeId() == TYPEID_PLAYER)
             {
-                creatureTarget->AttackStop();
-                if(caster->getVictim()==creatureTarget)
-                    caster->AttackStop();
-
-                creatureTarget->CombatStop();
-
-                creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
-                creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
-                caster->SetCharm(creatureTarget);
-                creatureTarget->AIM_Initialize();
-                if(caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    ((Player*)caster)->PetSpellInitialize();
-                }
+                ((Player*)caster)->PetSpellInitialize();
             }
         }
         else
         {
-            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
-            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
-            Unit* caster = GetCaster();
-            if(caster)
+            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
             {
-                caster->SetCharm(0);
-                if(caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    WorldPacket data(SMSG_PET_SPELLS);
-                    data << uint64(0);
-                    ((Player*)caster)->GetSession()->SendPacket(&data);
-                }
+                ((Player*)m_target)->setFactionForRace(m_target->getRace());
             }
-            creatureTarget->AIM_Initialize();
+            else if(m_target->GetTypeId() == TYPEID_UNIT)
+            {
+                CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+                m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+            }
+
+            caster->SetCharm(0);
+
+            if(caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                WorldPacket data(SMSG_PET_SPELLS, 8);
+                data << uint64(0);
+                ((Player*)caster)->GetSession()->SendPacket(&data);
+            }
+            if(m_target->GetTypeId() == TYPEID_UNIT)
+            {
+                ((Creature*)m_target)->AIM_Initialize();
+                ((Creature*)m_target)->Attack(caster);
+            }
         }
     }
 }
@@ -1548,6 +1574,52 @@ void Aura::HandleModFear(bool Apply, bool Real)
     }
 }
 
+void Aura::HandleFeignDeath(bool Apply, bool Real)
+{
+    uint32 apply_stat = UNIT_STAT_DIED;
+    if( Apply )
+    {
+        //m_target->addUnitState(UNIT_STAT_DIED);
+        // m_target->AttackStop();
+
+        //m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+
+        // only at real add aura
+        if(Real)
+        {
+            /*
+            WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
+            data<<m_target->GetGUID();
+            data<<uint8(0);
+            m_target->SendMessageToSet(&data,true);
+            */
+            m_target->HandleEmoteCommand(EMOTE_STATE_DEAD);
+            m_target->ClearInCombat();
+            m_target->AttackStop();
+            m_target->setDeathState(CORPSE);
+            m_target->SetHealth(0);
+            
+        }
+    }
+    else
+    {
+        m_target->SetHealth(m_target->GetMaxHealth()/2);
+        m_target->setDeathState(ALIVE);
+        //m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+
+        // only at real remove aura
+        if(!Real)
+        {
+            /*
+            WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
+            data<<m_target->GetGUID();
+            data<<uint8(1);
+            m_target->SendMessageToSet(&data,true);
+            */
+            
+        }
+    }
+}
 void Aura::HandleAuraModStun(bool apply, bool Real)
 {
     if (apply)
