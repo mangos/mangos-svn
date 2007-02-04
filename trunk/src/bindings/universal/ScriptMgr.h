@@ -79,7 +79,7 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
     void AttackStart(Unit *) {}
 
     // Called at stoping attack by any attacker
-    void AttackStop(Unit *);
+    void EnterEvadeMode();
 
     // Called at any heal cast/item used (call non implemented in mangos)
     void HealBy(Unit *healer, uint32 amount_healed) {}

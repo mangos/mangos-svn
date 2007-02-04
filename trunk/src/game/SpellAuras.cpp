@@ -56,7 +56,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandlePeriodicHeal,                              //SPELL_AURA_PERIODIC_HEAL = 8,
     &Aura::HandleModAttackSpeed,                            //SPELL_AURA_MOD_ATTACKSPEED = 9,
     &Aura::HandleModThreat,                                 //SPELL_AURA_MOD_THREAT = 10,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TAUNT = 11,
+    &Aura::HandleModTaunt,                                  //SPELL_AURA_MOD_TAUNT = 11,
     &Aura::HandleAuraModStun,                               //SPELL_AURA_MOD_STUN = 12,
     &Aura::HandleModDamageDone,                             //SPELL_AURA_MOD_DAMAGE_DONE = 13,
     &Aura::HandleModDamageTaken,                            //SPELL_AURA_MOD_DAMAGE_TAKEN = 14,
@@ -1811,7 +1811,48 @@ void Aura::HandleModThreat(bool apply, bool Real)
     if(!caster || !caster->isAlive())
         return;
 
-    m_target->AddHostil(m_caster_guid,apply ? float(m_modifier.m_amount) : -float(m_modifier.m_amount));
+    if(m_modifier.m_miscvalue < SPELL_SCHOOL_NORMAL || m_modifier.m_miscvalue >= (1<<MAX_SPELL_SCHOOOL))
+    {
+        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_THREAT not valid");
+        return;
+    }
+
+    bool positive = m_modifier.m_miscvalue2 == 0;
+
+    for(int8 x=0;x < MAX_SPELL_SCHOOOL;x++)
+    {
+        if(m_modifier.m_miscvalue & int32(1<<x))
+        {
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                ApplyPercentModFloatVar(m_target->m_threatModifier[x], positive ? m_modifier.m_amount : -m_modifier.m_amount, apply);
+        }
+    }
+}
+
+void Aura::HandleModTaunt(bool apply, bool Real)
+{
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
+    if(!m_target || !m_target->isAlive() || !m_target->CanHaveThreatList())
+        return;
+
+    Unit* caster = GetCaster();
+    
+    if(!caster || !caster->isAlive() || caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if(apply)
+    {
+        if (m_target->getVictim() != caster)
+            m_target->TauntApply(caster);
+    }
+    else
+    {
+        // When taunt aura fades out, mob will switch to previous target if current has less than 1.1 * secondthreat
+        m_target->TauntFadeOut(caster);
+    }
 }
 
 /*********************************************************/
@@ -2395,7 +2436,14 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
     if(apply && m_periodicTimer <= 0)
     {
         m_periodicTimer += 5000;
-        m_target->ModifyHealth(m_modifier.m_amount);
+        int32 gain = m_target->ModifyHealth(m_modifier.m_amount);
+        Unit *caster = GetCaster();
+        if (caster)
+        {
+            SpellEntry const *spellProto = GetSpellProto();
+            if (spellProto)
+                caster->ThreatAssist(m_target, float(gain) * 0.5f, spellProto->School, spellProto);
+        }
     }
 
     m_isPeriodic = apply;
@@ -2413,7 +2461,14 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
         // Prevent rage regeneration in combat with rage loss slowdown warrior talant and 0<->1 switching range out combat.
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
-            m_target->ModifyPower(pt, m_modifier.m_amount);
+            int32 gain = m_target->ModifyPower(pt, m_modifier.m_amount);
+            Unit *caster = GetCaster();
+            if (caster && pt == POWER_MANA)
+            {
+                SpellEntry const *spellProto = GetSpellProto();
+                if (spellProto)
+                    caster->ThreatAssist(m_target, float(gain) * 0.5f, spellProto->School, spellProto);
+            }
         }
     }
 

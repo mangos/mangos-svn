@@ -41,7 +41,7 @@ class MANGOS_DLL_SPEC CreatureAI
 
         virtual void AttackStart(Unit *) = 0;
 
-        virtual void AttackStop(Unit *) = 0;
+        virtual void EnterEvadeMode() = 0;
 
         virtual void HealBy(Unit *healer, uint32 amount_healed) = 0;
 

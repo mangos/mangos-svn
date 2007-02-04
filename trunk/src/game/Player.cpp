@@ -1535,7 +1535,25 @@ bool Player::isAcceptTickets() const
 void Player::SetInWater(bool apply)
 { 
     //define player in water by opcodes
-    m_isInWater = apply; 
+    //move player's guid into HateOfflineList of those mobs
+    //which can't swim and move guid back into ThreatList when
+    //on surface.
+    //TODO: exist also swimming mobs, and function must be symmetric to enter/leave water
+     m_isInWater = apply; 
+
+    if(apply)
+    {
+        uint64 guid = GetGUID();
+        InHateListOf& InHateList = GetInHateListOf();
+        for(InHateListOf::iterator iter = InHateList.begin(); iter != InHateList.end(); iter++)
+        {
+            Unit* unit = (*iter);
+            if(isInAccessablePlaceFor(((Creature*)unit)) )
+                (*iter)->MoveGuidToOfflineList(guid);
+        }
+    }
+    else
+        MoveToThreatList();
 }
 
 void Player::SetGameMaster(bool on)
@@ -1546,6 +1564,8 @@ void Player::SetGameMaster(bool on)
         setFaction(35);
         SetFlag(PLAYER_BYTES_2, 0x8);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+        MoveToHateOfflineList();
+        CombatStop();
     }
     else
     {
@@ -1553,6 +1573,7 @@ void Player::SetGameMaster(bool on)
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_BYTES_2, 0x8);
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+        MoveToThreatList();
     }
 }
 
@@ -4444,7 +4465,7 @@ void Player::FlightComplete()
     clearUnitState(UNIT_STAT_IN_FLIGHT);
     SetMoney( m_dismountCost);
     Unmount();
-
+    MoveToThreatList();
     if(pvpInfo.inHostileArea)
         CastSpell(this, 2479, false);
 }

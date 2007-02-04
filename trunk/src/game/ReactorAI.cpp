@@ -42,21 +42,23 @@ ReactorAI::MoveInLineOfSight(Unit *)
 void
 ReactorAI::AttackStart(Unit *p)
 {
-    if( i_creature.getVictim() == NULL )
+    if(!p)
+        return;
+
+    DEBUG_LOG("Start to attack");
+    if(i_creature.Attack(p))
     {
-        if(i_creature.Attack(p))
-        {
-            DEBUG_LOG("Tag unit LowGUID(%u) HighGUID(%u) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
-            i_victimGuid = p->GetGUID();
-            i_creature->Mutate(new TargetedMovementGenerator(*p));
-            if (p->GetTypeId() == TYPEID_PLAYER)
-                i_creature.SetLootRecipient((Player*)p);
-        }
+        DEBUG_LOG("Tag unit LowGUID(%u) HighGUID(%u) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
+        i_creature.AddThreat(p, 0.0f);
+        i_victimGuid = p->GetGUID();
+        i_creature->Mutate(new TargetedMovementGenerator(*p));
+        if (p->GetTypeId() == TYPEID_PLAYER)
+            i_creature.SetLootRecipient((Player*)p);
     }
 }
 
 void
-ReactorAI::AttackStop(Unit *)
+ReactorAI::stopAttack()
 {
 
 }
@@ -81,34 +83,27 @@ void
 ReactorAI::UpdateAI(const uint32 time_diff)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
-    if(i_creature.getVictim())
-        i_victimGuid = i_creature.getVictim()->GetGUID();
+    if(!i_creature.SelectHostilTarget())
+        return;
+
+    i_victimGuid = i_creature.getVictim()->GetGUID();
 
     // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() cleared at Unit death etc.
     if( i_victimGuid )
     {
         if( needToStop() )
         {
-            DEBUG_LOG("Creature %u stopped attacking.", i_creature.GetGUIDLow());
-            stopAttack();                                   // i_victimGuid == 0 && i_creature.getVictim() == NULL now
+            DEBUG_LOG("Reactor AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
+            EnterEvadeMode();    // i_victimGuid == 0 && i_creature.getVictim() == NULL now
             return;
         }
-        else if( i_creature.IsWithinDist(i_creature.getVictim(), ATTACK_DIST))
+        
+        if( i_creature.IsWithinDist(i_creature.getVictim(), ATTACK_DIST))
         {
             if( i_creature.isAttackReady() )
             {
-                Unit* newtarget = i_creature.SelectHostilTarget();
-                if(newtarget)
-                    AttackStart(newtarget);
-
                 i_creature.AttackerStateUpdate(i_creature.getVictim());
                 i_creature.resetAttackTimer();
-
-                if ( !i_creature.getVictim() )
-                    return;
-
-                if( needToStop() )
-                    stopAttack();
             }
         }
     }
@@ -117,24 +112,23 @@ ReactorAI::UpdateAI(const uint32 time_diff)
 bool
 ReactorAI::needToStop() const
 {
-    if( !i_creature.isAlive() || !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() )
+    if( !i_creature.isAlive() || !i_creature.getVictim())
         return true;
 
-    if(!i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
-        return true;
+    /*if(!i_creature.getVictim()->isTargetableForAttack() || !i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
+        return true;*/
+    //no need for this checks because mob changes its victim only when 
+    //1) victim is dead (check is in SelectHostilTarget() func)
+    //2) victim is out of threat radius
 
     float rx,ry,rz;
     i_creature.GetRespawnCoord(rx, ry, rz);
-    float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
-    float length = i_creature.GetDistanceSq(i_creature.getVictim());
-    float hostillen=i_creature.GetHostility( i_creature.getVictim()->GetGUID())/(2.5f * i_creature.getLevel()+1.0f);
-    return (( length > (10.0f + hostillen) * (10.0f + hostillen) && spawndist > 6400.0f )
-        || ( length > (20.0f + hostillen) * (20.0f + hostillen) && spawndist > 2500.0f )
-        || ( length > (30.0f + hostillen) * (30.0f + hostillen) ));
+    float length = i_creature.getVictim()->GetDistanceSq(rx,ry,rz);
+    return ( length > CREATURE_THREAT_RADIUS );
 }
 
 void
-ReactorAI::stopAttack()
+ReactorAI::EnterEvadeMode()
 {
     if( !i_creature.isAlive() )
     {
@@ -143,10 +137,9 @@ ReactorAI::stopAttack()
         i_creature->Idle();
         i_victimGuid = 0;
         i_creature.CombatStop();
+        i_creature.DeleteThreatList();
         return;
     }
-
-    assert( i_victimGuid );
 
     Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
 
@@ -167,8 +160,10 @@ ReactorAI::stopAttack()
         DEBUG_LOG("Creature stopped attacking due to target %s [guid=%u]", victim->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
     }
 
+    i_creature.RemoveAllAuras();
+    i_creature.DeleteThreatList();
     i_victimGuid = 0;
-    i_creature.AttackStop();
+    i_creature.CombatStop();
 
     // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
     if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
