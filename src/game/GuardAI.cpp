@@ -38,7 +38,7 @@ GuardAI::GuardAI(Creature &c) : i_creature(c), i_victimGuid(0), i_state(STATE_NO
 
 void GuardAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_creature.getVictim() == NULL && u->isTargetableForAttack() && IsVisible(u) && u->isInAccessablePlaceFor(&i_creature))
+    if( !i_creature.getVictim() && u->isTargetableForAttack() && IsVisible(u) && u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.IsWithinDist(u,attackRadius) && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
@@ -64,27 +64,26 @@ void GuardAI::DamageInflict(Unit *healer, uint32 amount_healed)
 
 bool GuardAI::_needToStop() const
 {
-    if( !i_creature.isAlive() || !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() )
+    if( !i_creature.isAlive() || !i_creature.getVictim())
         return true;
 
-    if(!i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
-        return true;
+    /*if(!i_creature.getVictim()->isTargetableForAttack() || !i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
+        return true;*/
+    //no need for this checks because mob changes its victim only when 
+    //1) victim is dead (check is in SelectHostilTarget() func)
+    //2) victim is out of threat radius
 
     float rx,ry,rz;
     i_creature.GetRespawnCoord(rx, ry, rz);
-    float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
-    float length = i_creature.GetDistanceSq(i_creature.getVictim());
-    float hostillen=i_creature.GetHostilityDistance( i_creature.getVictim()->GetGUID());
-    return (( length > (10.0f + hostillen) * (10.0f + hostillen) && spawndist > 6400.0f )
-        || ( length > (20.0f + hostillen) * (20.0f + hostillen) && spawndist > 2500.0f )
-        || ( length > (30.0f + hostillen) * (30.0f + hostillen) ));
-}
-
-void GuardAI::AttackStop(Unit *)
-{
+    float length = i_creature.getVictim()->GetDistanceSq(rx,ry,rz);
+    return ( length > CREATURE_THREAT_RADIUS );
 }
 
 void GuardAI::_stopAttack()
+{
+}
+
+void GuardAI::EnterEvadeMode()
 {
     if( !i_creature.isAlive() )
     {
@@ -96,10 +95,9 @@ void GuardAI::_stopAttack()
 
         i_victimGuid = 0;
         i_creature.CombatStop();
+        i_creature.DeleteThreatList();
         return;
     }
-
-    assert( i_victimGuid );
 
     Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
 
@@ -124,10 +122,11 @@ void GuardAI::_stopAttack()
         DEBUG_LOG("Creature stopped attacking because victim outran him [guid=%u]", i_creature.GetGUIDLow());
     }
 
-    i_state = STATE_NORMAL;
-
+    i_creature.RemoveAllAuras();
+    i_creature.DeleteThreatList();
     i_victimGuid = 0;
-    i_creature.AttackStop();
+    i_creature.CombatStop();
+    i_state = STATE_NORMAL;
 
     // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
     if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
@@ -137,76 +136,28 @@ void GuardAI::_stopAttack()
 void GuardAI::UpdateAI(const uint32 diff)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
-    if(i_creature.getVictim())
+    if(i_creature.SelectHostilTarget())
         i_victimGuid = i_creature.getVictim()->GetGUID();
 
-    // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() clearóâ at Unit death etc.
+    // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() cleared at Unit death etc.
     if( i_victimGuid )
     {
         if( _needToStop() )
         {
             DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            _stopAttack();                                  // i_victimGuid == 0 && i_creature.getVictim() == NULL now
+            EnterEvadeMode();    // i_victimGuid == 0 && i_creature.getVictim() == NULL now
             return;
         }
 
         assert((i_victimGuid != 0) == (i_creature.getVictim() != NULL) && "i_victimGuid and i_creature.getVictim() not synchronized.");
 
-        switch( i_state )
+        if( i_creature.IsWithinDist(i_creature.getVictim(), ATTACK_DIST))
         {
-            case STATE_LOOK_AT_VICTIM:
+            if( i_creature.isAttackReady() )
             {
-                if( i_creature.getVictim() && IsVisible(i_creature.getVictim()) )
-                {
-                    DEBUG_LOG("Victim %u re-enters creature's aggro radius fater stop attacking", i_creature.getVictim()->GetGUIDLow());
-                    i_state = STATE_NORMAL;
-                    i_creature->MovementExpired();
-                    break;                                  // move on
-                    // back to the cat and mice game if you move back in range
-                }
-
-                i_tracker.Update(diff);
-                if( i_tracker.Passed() )
-                {
-                    DEBUG_LOG("Creature running back home [guid=%u]", i_creature.GetGUIDLow());
-                    i_state = STATE_NORMAL;
-                    i_creature->TargetedHome();
-                }
-                /*else if( !i_creature.canReachWithAttack( i_pVictim ))
-                {
-
-                    float dx = i_pVictim->GetPositionX() - i_creature.GetPositionX();
-                    float dy = i_pVictim->GetPositionY() - i_creature.GetPositionY();
-                    float orientation = (float)atan2((double)dy, (double)dx);
-                    i_creature.Relocate(i_pVictim->GetPositionX(), i_pVictim->GetPositionY(), i_pVictim->GetPositionZ(), orientation);
-                }*/
-
-                break;
+                i_creature.AttackerStateUpdate(i_creature.getVictim());
+                i_creature.resetAttackTimer();
             }
-            case STATE_NORMAL:
-            {
-                if( i_creature.IsWithinDist(i_creature.getVictim(), ATTACK_DIST))
-                {
-                    if( i_creature.isAttackReady() )
-                    {
-                        Unit* newtarget = i_creature.SelectHostilTarget();
-                        if(newtarget)
-                            AttackStart(newtarget);
-
-                        i_creature.AttackerStateUpdate(i_creature.getVictim());
-                        i_creature.resetAttackTimer();
-
-                        if ( !i_creature.getVictim() )
-                            return;
-
-                        if( _needToStop() )
-                            _stopAttack();
-                    }
-                }
-                break;
-            }
-            default:
-                break;
         }
     }
     else
@@ -231,11 +182,13 @@ bool GuardAI::IsVisible(Unit *pl) const
 
 void GuardAI::AttackStart(Unit *u)
 {
-    if( i_creature.getVictim() || !u )
+    if( !u )
         return;
+
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     if(i_creature.Attack(u))
     {
+        i_creature.AddThreat(u, 0.0f);
         i_victimGuid = u->GetGUID();
         i_creature->Mutate(new TargetedMovementGenerator(*u));
     }

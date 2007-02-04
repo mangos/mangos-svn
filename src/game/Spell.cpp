@@ -1528,11 +1528,14 @@ void Spell::HandleThreatSpells(uint32 spellId)
     if(!unitTarget || !spellId)
         return;
 
+    if(!unitTarget->CanHaveThreatList())
+        return;
+
     SpellThreatEntry const *threatSpell = sSpellThreatStore.LookupEntry<SpellThreatEntry>(spellId);
     if(!threatSpell)
         return;
     
-    unitTarget->AddHostil(m_caster->GetGUID(), float(threatSpell->threat));
+    unitTarget->AddThreat(m_caster, float(threatSpell->threat));
 
     DEBUG_LOG("Spell %u, rank %u, added an additional %i threat", spellId, objmgr.GetSpellRank(spellId), threatSpell->threat);
 }

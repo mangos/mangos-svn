@@ -30,7 +30,7 @@ class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI
 
         void MoveInLineOfSight(Unit *) {}
         void AttackStart(Unit *) {}
-        void AttackStop(Unit *) {}
+        void EnterEvadeMode() {}
         void HealBy(Unit *healer, uint32 amount_healed) {}
         void DamageInflict(Unit *healer, uint32 amount_healed) {}
         bool IsVisible(Unit *) const { return false;  }

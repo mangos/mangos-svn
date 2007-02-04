@@ -70,7 +70,7 @@ TotemAI::DamageInflict(Unit *healer, uint32 amount_healed)
 {
 }
 
-void TotemAI::AttackStop(Unit *)
+void TotemAI::EnterEvadeMode()
 {
 }
 

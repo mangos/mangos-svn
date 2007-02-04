@@ -372,22 +372,21 @@ inline SpellSchools immuneToSchool(ImmuneToSchool immune)
 
 struct Hostil
 {
-    Hostil(uint64 _UnitGuid, float _Hostility) : UnitGuid(_UnitGuid), Hostility(_Hostility) {}
+    Hostil(uint64 _UnitGuid, float _Threat) : UnitGuid(_UnitGuid), Threat(_Threat) {}
 
     uint64 UnitGuid;
-    float Hostility;
+    float Threat;
     bool operator <(Hostil item)
     {
-        if(Hostility < item.Hostility)
+        if(Threat < item.Threat)
             return true;
         else
             return false;
     };
 };
 
-// we should NOT USE STD::LIST for this
-// lists's delete is VERY SLOW!!!!!!!!!!!!!!!!!!
-typedef std::list<Hostil> HostilList;
+typedef std::list<Hostil> ThreatList;
+typedef std::list<Hostil> HateOfflineList;
 
 enum MeleeHitOutcome
 {
@@ -405,6 +404,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::pair<uint32, uint32> spellEffectPair;
         typedef std::multimap< spellEffectPair, Aura*> AuraMap;
         typedef std::list<Aura *> AuraList;
+        typedef std::set<Creature *> InHateListOf;
         virtual ~Unit ( );
 
         virtual void Update( uint32 time );
@@ -488,7 +488,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 GetMaxHealth() const { return (uint32)GetFloatValue(UNIT_FIELD_MAXHEALTH); }
         void SetHealth(   uint32 val) { SetUInt32Value(UNIT_FIELD_HEALTH,val); }
         void SetMaxHealth(uint32 val) { SetFloatValue(UNIT_FIELD_MAXHEALTH,val); }
-        void ModifyHealth(int32 val);
+        int32 ModifyHealth(int32 val);
         void ApplyMaxHealthMod(uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_MAXHEALTH, val, apply); }
         void ApplyMaxHealthPercentMod(float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_MAXHEALTH, val, apply); }
 
@@ -498,7 +498,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 GetMaxPower(Powers power) const { return (uint32)GetFloatValue(UNIT_FIELD_MAXPOWER1+power); }
         void SetPower(   Powers power, uint32 val) { SetFloatValue(UNIT_FIELD_POWER1   +power,val); }
         void SetMaxPower(Powers power, uint32 val) { SetFloatValue(UNIT_FIELD_MAXPOWER1+power,val); }
-        void ModifyPower(Powers power, int32 val);
+        int32 ModifyPower(Powers power, int32 val);
         void ApplyPowerMod(Powers power, uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_POWER1+power, val, apply); }
         void ApplyPowerPercentMod(Powers power, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_POWER1+power, val, apply); }
         void ApplyMaxPowerMod(Powers power, uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_MAXPOWER1+power, val, apply); }
@@ -682,6 +682,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 m_modSpellHitChance;
         int32 m_baseSpellCritChance;
         int32 m_modCastSpeedPct;
+        float m_threatModifier[MAX_SPELL_SCHOOOL];
         float m_modAttackSpeedPct[3];
 
         bool isInFront(Unit const* target,float distance);
@@ -699,11 +700,37 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
         SpellImmuneList m_spellImmune[6];
 
-        float GetHostility(uint64 guid) const;
-        float GetHostilityDistance(uint64 guid) const { return GetHostility( guid )/(3.5f * getLevel()+1.0f); }
-        HostilList& GetHostilList() { return m_hostilList; }
-        void AddHostil(uint64 guid, float hostility);
-        Unit* SelectHostilTarget();
+
+        float GetThreat(uint64 guid) const;
+        ThreatList& GetThreatList() { return m_threatList; }
+        HateOfflineList& GetHateOfflineList() { return m_offlineList; }
+        InHateListOf& GetInHateListOf() { return m_inhateList; }
+        bool CanHaveThreatList() const;
+        void ThreatAssist(Unit* target, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
+        void AddThreat(Unit* pVictim, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
+        void AddToInHateList(Creature* attacker);
+        void RemoveFromInHateListOf(Creature* attacker);
+        void RemoveFromThreatList(uint64 guid);
+        void DeleteThreatList();
+        void DeleteInHateListOf();
+        bool SelectHostilTarget();
+        Unit* SelectNextVictim();
+        void MoveToHateOfflineList();
+        void MoveToThreatList();
+        bool MoveGuidToThreatList(uint64 guid);
+        bool MoveGuidToOfflineList(uint64 guid);
+        bool IsThreatListEmpty() const { return m_threatList.empty(); };
+        bool IsInHateListEmpty() const { return m_inhateList.empty(); };
+        bool IsHateOfflineListEmpty() const { return m_offlineList.empty(); };
+        float ApplyTotalThreatModifier(float threat, uint8 school = 0);
+        void SortList(bool sorted) { m_isSorted = sorted; };
+        bool IsThreatListNeedsSorting() const { return m_isSorted; };
+        void UpdateCurrentVictimThreat(float threat) { m_victimThreat += threat; };
+        void SetCurrentVictimThreat(float threat) { m_victimThreat = threat; };
+        float GetCurrentVictimThreat() const { return m_victimThreat; };
+        void TauntApply(Unit* pVictim);
+        void TauntFadeOut(Unit *taunter);
+
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap& GetAuras( ) {return m_Auras;}
@@ -756,7 +783,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Unit ( );
 
         void _UpdateSpells(uint32 time);
-        void _UpdateHostil( uint32 time );
         //void _UpdateAura();
 
         //Aura* m_aura;
@@ -774,7 +800,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         std::list<Aura *> m_scAuras;                        // casted singlecast auras
         std::list<DynamicObject*> m_dynObj;
         std::list<GameObject*> m_gameObj;
-        HostilList m_hostilList;
+        ThreatList m_threatList;
+        HateOfflineList m_offlineList;
+        InHateListOf m_inhateList;
+        bool m_isSorted;
+        float m_victimThreat;
         uint32 m_transform;
         uint32 m_removedAuras;
 

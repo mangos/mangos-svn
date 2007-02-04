@@ -46,7 +46,7 @@ void PetAI::AttackStart(Unit *u)
     _taggedToKill(u);
 }
 
-void PetAI::AttackStop(Unit *)
+void PetAI::EnterEvadeMode()
 {
 
 }
@@ -89,6 +89,7 @@ void PetAI::_stopAttack()
         i_pet->Idle();
         i_victimGuid = 0;
         i_pet.CombatStop();
+        i_pet.DeleteInHateListOf();
         return;
     }
     else if( !victim  )
@@ -208,6 +209,7 @@ void PetAI::_taggedToKill(Unit *u)
     if( i_pet.getVictim() || !u || i_pet.isPet() && ((Pet&)i_pet).getPetType()==MINI_PET )
         return;
 
+    DEBUG_LOG("Start to attack");
     if(i_pet.Attack(u))
     {
         i_pet.clearUnitState(UNIT_STAT_FOLLOW);

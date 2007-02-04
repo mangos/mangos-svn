@@ -231,6 +231,7 @@ typedef std::list<GossipOption> GossipOptionList;
 
 // max different by z coordinate for creature aggro reaction
 #define CREATURE_Z_ATTACK_RANGE 3
+#define CREATURE_THREAT_RADIUS 10000.0f
 
 class MANGOS_DLL_SPEC Creature : public Unit
 {
@@ -261,6 +262,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isCanWalkOrFly() const;
         bool isCanTrainingOf(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;
+        bool IsOutOfThreatArea(Unit* pVictim) const;
         bool IsImmunedToSpell(SpellEntry const* spellInfo) const;
                                                             // redefine Unit::IsImmunedTo
         bool isElite() const

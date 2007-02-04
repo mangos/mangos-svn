@@ -74,6 +74,8 @@ Creature::~Creature()
     if(m_uint32Values)                                      // only for fully created object
     {
         CombatStop();
+        DeleteThreatList();
+        DeleteInHateListOf();
         RemoveAllAuras();
     }
 
@@ -1482,4 +1484,18 @@ void Creature::SaveRespawnTime()
         sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
         sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(time(NULL)+m_respawnDelay+m_deathTimer/1000));
     }
+}
+
+bool Creature::IsOutOfThreatArea(Unit* pVictim) const
+{
+    if(!pVictim)
+        return true;
+
+    if(!pVictim->isTargetableForAttack())
+        return true;
+
+    float rx,ry,rz;
+    GetRespawnCoord(rx, ry, rz);
+    float length = pVictim->GetDistanceSq(rx,ry,rz);
+    return ( length > CREATURE_THREAT_RADIUS );
 }

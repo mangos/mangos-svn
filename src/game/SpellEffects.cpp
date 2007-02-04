@@ -1762,7 +1762,11 @@ void Spell::EffectThreat(uint32 i)
 {
     if(!unitTarget || !unitTarget->isAlive() || !m_caster->isAlive())
         return;
-    unitTarget->AddHostil(m_caster->GetGUID(),float(damage));
+
+    if(!unitTarget->CanHaveThreatList())
+        return;
+
+    unitTarget->AddThreat(m_caster,float(damage));
 }
 
 void Spell::EffectHealMaxHealth(uint32 i)

@@ -155,8 +155,10 @@ void WorldSession::LogoutPlayer(bool Save)
     if (_player)
     {
         ///- If the player just died before logging out, make him appear as a ghost
-        if (_player->GetDeathTimer())
+        if (_player->GetDeathTimer() || _player->isAttacked())
         {
+            _player->CombatStop();
+            _player->DeleteInHateListOf();
             _player->KillPlayer();
             _player->BuildPlayerRepop();
         }

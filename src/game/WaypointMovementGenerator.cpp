@@ -155,6 +155,7 @@ FlightPathMovementGenerator::LoadPath(Player &pl)
 void
 FlightPathMovementGenerator::Initialize()
 {
+    i_player.MoveToHateOfflineList();
     i_player.addUnitState(UNIT_STAT_IN_FLIGHT);
     LoadPath(i_player);
     i_currentNode = 0;
