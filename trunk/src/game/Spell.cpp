@@ -1613,6 +1613,7 @@ uint8 Spell::CanCast()
     uint8 castResult = 0;
 
     Unit *target = m_targets.getUnitTarget();
+
     if(target)
     {
         //check creaturetype
@@ -1627,6 +1628,14 @@ uint8 Spell::CanCast()
 
         if(SpellCreatureType)
         {
+            for(int j=0;j<3;j++)
+            {
+                if(m_spellInfo->EffectImplicitTargetA[j] == TARGET_PET)
+                {
+                    target = m_caster->GetPet();
+                    break;
+                }
+            }
             uint32 TargetCreatureType = 0;
             if(target->GetTypeId() == TYPEID_PLAYER)
                 TargetCreatureType = 0x40;                  //1<<(7-1)
@@ -2044,7 +2053,6 @@ uint8 Spell::CanCast()
                         }
                     }
                 }
-
             };break;
             default:break;
         }
