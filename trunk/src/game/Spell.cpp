@@ -1534,7 +1534,7 @@ void Spell::HandleThreatSpells(uint32 spellId)
     SpellThreatEntry const *threatSpell = sSpellThreatStore.LookupEntry<SpellThreatEntry>(spellId);
     if(!threatSpell)
         return;
-    
+
     unitTarget->AddThreat(m_caster, float(threatSpell->threat));
 
     DEBUG_LOG("Spell %u, rank %u, added an additional %i threat", spellId, objmgr.GetSpellRank(spellId), threatSpell->threat);

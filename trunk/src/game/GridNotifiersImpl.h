@@ -196,7 +196,7 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
 {
     if( c1->AI().IsVisible(c2) )
         c1->AI().MoveInLineOfSight(c2);
-    
+
     if( c2->AI().IsVisible(c1) )
         c2->AI().MoveInLineOfSight(c1);
 }

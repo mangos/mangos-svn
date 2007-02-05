@@ -40,7 +40,7 @@ MotionMaster::Initialize()
         if( !isStatic( curr ) )
             delete curr;
     }
-    
+
     // set new default movement generator
     MovementGenerator* movement = FactorySelector::selectMovementGenerator(i_owner);
     push(  movement == NULL ? &si_idleMovement : movement );

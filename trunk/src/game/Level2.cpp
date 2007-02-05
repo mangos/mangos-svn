@@ -717,7 +717,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     {
         pCreature->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
         (*pCreature)->Initialize();
-        if(pCreature->isAlive())                                // dead creature will reset movement generator at respawn
+        if(pCreature->isAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
             pCreature->Respawn();
@@ -795,7 +795,7 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
     {
         pCreature->SetDefaultMovementType(move_type);
         (*pCreature)->Initialize();
-        if(pCreature->isAlive())                                // dead creature will reset movement generator at respawn
+        if(pCreature->isAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
             pCreature->Respawn();

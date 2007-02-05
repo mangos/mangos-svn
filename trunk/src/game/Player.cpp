@@ -1533,13 +1533,13 @@ bool Player::isAcceptTickets() const
 }
 
 void Player::SetInWater(bool apply)
-{ 
+{
     //define player in water by opcodes
     //move player's guid into HateOfflineList of those mobs
     //which can't swim and move guid back into ThreatList when
     //on surface.
     //TODO: exist also swimming mobs, and function must be symmetric to enter/leave water
-     m_isInWater = apply; 
+    m_isInWater = apply;
 
     if(apply)
     {
@@ -2529,7 +2529,7 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
         // item entry
         updateMask->SetBit(visual_base + 0);
 
-        // item enchantment IDs 
+        // item enchantment IDs
         for(uint8 j = 0; j < 7; ++j)
             updateMask->SetBit(visual_base +1 + j);
 
@@ -3826,7 +3826,7 @@ void Player::SendInitialReputations()
     for(uint32 a=0; a<64; a++)
     {
         std::list<struct Factions>::iterator itr = FindReputationIdInTheList(a);
-        
+
         if(itr != factions.end())
         {
             data << uint8  (itr->Flags);
@@ -3842,7 +3842,7 @@ void Player::SendInitialReputations()
 }
 
 std::list<struct Factions>::iterator Player::FindReputationIdInTheList(uint32 faction)
-{ 
+{
     for(std::list<struct Factions>::iterator itr = factions.begin(); itr != factions.end(); ++itr)
     {
         if(itr->ReputationListID == faction) return itr;

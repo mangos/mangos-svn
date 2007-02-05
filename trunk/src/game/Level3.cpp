@@ -1450,7 +1450,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
 
     QueryResult *result;
 
-    // inventory case 
+    // inventory case
     uint32 inv_count = 0;
     result=sDatabase.PQuery("SELECT COUNT(`item_template`) FROM `character_inventory` WHERE `item_template`='%u'",item_id);
     if(result)
@@ -1460,7 +1460,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     }
 
     result=sDatabase.PQuery(
-        //           0              1           2           3                  4                     5
+    //           0              1           2           3                  4                     5
         "SELECT `ci`.`item`,`cibag`.`slot` AS `bag`,`ci`.`slot`,`ci`.`guid`,`character`.`account`,`character`.`name` "
         "FROM `character_inventory` AS `ci` LEFT JOIN `character_inventory` AS `cibag` ON (`cibag`.`item`=`ci`.`bag`),`character` "
         "WHERE `ci`.`item_template`='%u' AND `ci`.`guid` = `character`.`guid` LIMIT %u ",
@@ -1501,8 +1501,8 @@ bool ChatHandler::HandleListItemCommand(const char* args)
         else if(count)
             count = 0;
     }
-    
-    // mail case 
+
+    // mail case
     uint32 mail_count = 0;
     result=sDatabase.PQuery("SELECT COUNT(`item_template`) FROM `mail` WHERE `item_template`='%u'",item_id);
     if(result)
@@ -1514,7 +1514,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     if(count > 0)
     {
         result=sDatabase.PQuery(
-            //             0                  1               2                   3                  4               5                  6
+        //             0                  1               2                   3                  4               5                  6
             "SELECT `mail`.`item_guid`,`mail`.`sender`,`mail`.`receiver`,`char_s`.`account`,`char_s`.`name`,`char_r`.`account`,`char_r`.`name` "
             "FROM `mail`,`character` as `char_s`,`character` as `char_r` "
             "WHERE `mail`.`item_template`='%u' AND `char_s`.`guid` = `mail`.`sender` AND `char_r`.`guid` = `mail`.`receiver` LIMIT %u",
@@ -1552,7 +1552,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
             count = 0;
     }
 
-    // auction case 
+    // auction case
     uint32 auc_count = 0;
     result=sDatabase.PQuery("SELECT COUNT(`item_template`) FROM `auctionhouse` WHERE `item_template`='%u'",item_id);
     if(result)
@@ -1564,7 +1564,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     if(count > 0)
     {
         result=sDatabase.PQuery(
-            //                     0                         1                       2                     3
+        //                     0                         1                       2                     3
             "SELECT `auctionhouse`.`itemguid`,`auctionhouse`.`itemowner`,`character`.`account`,`character`.`name` "
             "FROM `auctionhouse`,`character` WHERE `auctionhouse`.`item_template`='%u' AND `character`.`guid` = `auctionhouse`.`itemowner` LIMIT %u",
             item_id,uint32(count));
