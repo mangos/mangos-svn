@@ -1390,35 +1390,29 @@ void Player::Regenerate(Powers power)
 
     if(power != POWER_RAGE)
     {
-        if (curValue >= maxValue)   return;
+        if (curValue >= maxValue)
+            return;
     }
     else if (curValue == 0)
         return;
-
-    float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
-    float RageIncreaseRate = sWorld.getRate(RATE_POWER_RAGE);
-
-    float Spirit = GetStat(STAT_SPIRIT);
-    uint8 Class = getClass();
-
-    if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
-    if( RageIncreaseRate <= 0 ) RageIncreaseRate = 1;
 
     float addvalue = 0.0;
 
     switch (power)
     {
         case POWER_MANA:
+        {
+            float Spirit = GetStat(STAT_SPIRIT);
+            uint8 Class = getClass();
+
+            float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
+            if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
             // If < 5s after previous cast which used mana, no regeneration unless
             // we happen to have a modifer that adds it back
             // If > 5s, get portion between the 5s and now, up to a maximum of 2s worth
             uint32 msecSinceLastCast;
             msecSinceLastCast = ((uint32)getMSTime() - m_lastManaUse);
-            if (msecSinceLastCast >= 7000)
-            {
-                ManaIncreaseRate *= 1;
-            }
-            else
+            if (msecSinceLastCast < 7000)
             {
                 long regenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
                 if (msecSinceLastCast < 5000)
@@ -1444,10 +1438,13 @@ void Player::Regenerate(Powers power)
                 case CLASS_SHAMAN:  addvalue = (Spirit/5 + 17)   * ManaIncreaseRate; break;
                 case CLASS_WARLOCK: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
             }
-            break;
+        }   break;
         case POWER_RAGE:                                    // Regenerate rage
+        {        
+            float RageIncreaseRate = sWorld.getRate(RATE_POWER_RAGE);
+            if( RageIncreaseRate <= 0 ) RageIncreaseRate = 1;
             addvalue = 30 * RageIncreaseRate;               // 3 rage by tick
-            break;
+        }   break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue = 20;
             break;
@@ -1459,7 +1456,8 @@ void Player::Regenerate(Powers power)
     if (power != POWER_RAGE)
     {
         curValue += uint32(addvalue);
-        if (curValue > maxValue) curValue = maxValue;
+        if (curValue > maxValue)
+            curValue = maxValue;
     }
     else
     {
