@@ -170,7 +170,7 @@ class ChatHandler
         bool HandleItemCommand(const char* args);
         bool HandleItemRemoveCommand(const char* args);
         bool HandleAddMoveCommand(const char* args);
-        bool HandleRandomCommand(const char* args);
+        bool HandleSetMoveTypeCommand(const char* args);
         bool HandleRunCommand(const char* args);
         bool HandleChangeLevelCommand(const char* args);
         bool HandleSetPoiCommand(const char* args);

@@ -30,10 +30,18 @@ inline bool isStatic(MovementGenerator *mv)
 }
 
 void
-MotionMaster::Initialize(Creature *creature)
+MotionMaster::Initialize()
 {
-    if (!empty()) Clear();
-    i_owner = creature;
+    // clear ALL movement generators (including default)
+    while(!empty())
+    {
+        MovementGenerator *curr = top();
+        pop();
+        if( !isStatic( curr ) )
+            delete curr;
+    }
+    
+    // set new default movement generator
     MovementGenerator* movement = FactorySelector::selectMovementGenerator(i_owner);
     push(  movement == NULL ? &si_idleMovement : movement );
     top()->Initialize(*i_owner);

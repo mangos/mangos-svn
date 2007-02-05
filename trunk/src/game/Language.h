@@ -159,6 +159,7 @@
 #define LANG_ITEM_NOT_IN_LIST            "Item '%i' Not Found in List."
 
 #define LANG_WAYPOINT_ADDED              "Waypoint added."
+#define LANG_MOVE_TYPE_SET               "Creature movement type set to '%s', waypoints removed (if any)."
 #define LANG_USE_BOL                     "Incorrect value, use 0 or 1"
 #define LANG_VALUE_SAVED                 "Value saved."
 #define LANG_VALUE_SAVED_REJOIN          "Value saved, you may need to rejoin or clean your client cache."

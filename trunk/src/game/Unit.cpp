@@ -4049,9 +4049,9 @@ void Unit::AddThreat(Unit* pVictim, float threat, uint8 school, SpellEntry const
 
     pVictim->AddToInHateList((Creature*)this);
     uint64 guid = pVictim->GetGUID();
-        
+    
     if (pVictim->GetTypeId() == TYPEID_PLAYER && threatSpell)
-        threat = ((Player*)pVictim)->ApplySpellMod(threatSpell->Id, SPELLMOD_THREAT, threat);
+        ((Player*)pVictim)->ApplySpellMod(threatSpell->Id, SPELLMOD_THREAT, threat);
             
     threat = pVictim->ApplyTotalThreatModifier(threat, school);
 
