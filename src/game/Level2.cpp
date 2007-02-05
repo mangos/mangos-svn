@@ -677,10 +677,16 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     if(lowguid)
         pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
 
+    // attempt check creature existance by DB
     if(!pCreature)
     {
-        PSendSysMessage("Creature (GUID: %u) not found", lowguid);
-        return true;
+        QueryResult *result = sDatabase.PQuery( "SELECT `guid` FROM `creature` WHERE `guid` = '%u'",lowguid);
+        if(!result)
+        {
+            PSendSysMessage("Creature (GUID: %u) not found", lowguid);
+            return true;
+        }
+        delete result;
     }
 
     int wait = wait_str ? atoi(wait_str) : 0;
@@ -690,7 +696,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
 
     uint32 point;
 
-    QueryResult *result = sDatabase.PQuery( "SELECT MAX(`point`) FROM `creature_movement` WHERE `id` = '%u'",pCreature->GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery( "SELECT MAX(`point`) FROM `creature_movement` WHERE `id` = '%u'",lowguid);
     if( result )
     {
         point = (*result)[0].GetUInt32()+1;
@@ -703,13 +709,19 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     Player* player = m_session->GetPlayer();
 
     sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`waittime`) VALUES ('%u','%u','%f', '%f', '%f','%u')",
-        pCreature->GetGUIDLow(), point, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), wait);
+        lowguid, point, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), wait);
 
     // update movement type
-    if(pCreature->GetDefaultMovementType()!=WAYPOINT_MOTION_TYPE)
+    sDatabase.PExecute("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", WAYPOINT_MOTION_TYPE,lowguid);
+    if(pCreature)
     {
         pCreature->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
-        sDatabase.PExecute("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", pCreature->GetDefaultMovementType(),pCreature->GetGUIDLow());
+        (*pCreature)->Initialize();
+        if(pCreature->isAlive())                                // dead creature will reset movement generator at respawn
+        {
+            pCreature->setDeathState(JUST_DIED);
+            pCreature->Respawn();
+        }
     }
 
     SendSysMessage(LANG_WAYPOINT_ADDED);
@@ -717,35 +729,80 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleRandomCommand(const char* args)
+bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
 {
     if(!*args)
         return false;
 
-    int option = atoi((char*)args);
+    char* guid_str = strtok((char*)args, " ");
+    char* type_str = strtok((char*)NULL, " ");
 
-    if (option != 0 && option != 1)
+    if(!guid_str)
+        return false;
+
+    uint32 lowguid = 0;
+    Creature* pCreature = NULL;
+
+    if(!type_str)                                           // case .setmovetype $move_type (with selected creature)
     {
-        //m_session->GetPlayer( )->SendMessageToSet( &data, true );
-        SendSysMessage(LANG_USE_BOL);
-        return true;
+        type_str = guid_str;
+        pCreature = getSelectedCreature();
+        if(!pCreature)
+            return false;
+        lowguid = pCreature->GetGUIDLow();
+    }
+    else                                                    // case .setmovetype #creature_guid $move_type (with selected creature)
+    {
+        lowguid = atoi((char*)guid_str);
+        if(lowguid)
+            pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+
+        // attempt check creature existance by DB
+        if(!pCreature)
+        {
+            QueryResult *result = sDatabase.PQuery( "SELECT `guid` FROM `creature` WHERE `guid` = '%u'",lowguid);
+            if(!result)
+            {
+                PSendSysMessage("Creature (GUID: %u) not found", lowguid);
+                return true;
+            }
+            delete result;
+        }
     }
 
-    Creature* pCreature = getSelectedCreature();
+    // now lowguid is low guid really existed creature
+    // and pCreature point (maybe) to this creature or NULL
 
-    if(!pCreature)
+    MovementGeneratorType move_type;
+
+    std::string type = type_str;
+
+    if(type == "stay")
+        move_type = IDLE_MOTION_TYPE;
+    else if(type == "random")
+        move_type = RANDOM_MOTION_TYPE;
+    else if(type == "way")
+        move_type = WAYPOINT_MOTION_TYPE;
+    else
+        return false;
+
+    // update movement type
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", move_type,lowguid);
+    sDatabase.PExecute("DELETE FROM `creature_movement` WHERE `id` = '%u'",lowguid);
+    sDatabase.CommitTransaction();
+    if(pCreature)
     {
-        SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        pCreature->SetDefaultMovementType(move_type);
+        (*pCreature)->Initialize();
+        if(pCreature->isAlive())                                // dead creature will reset movement generator at respawn
+        {
+            pCreature->setDeathState(JUST_DIED);
+            pCreature->Respawn();
+        }
     }
 
-    // fix me : 'moverandom' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creature ?
-    // perhaps it should be 'state'?
-    sDatabase.PExecute("UPDATE `creature` SET `moverandom` = '%i' WHERE `guid` = '%u'", option, pCreature->GetGUIDLow());
-
-    pCreature->setMoveRandomFlag(option > 0);
-
-    SendSysMessage(LANG_VALUE_SAVED);
+    PSendSysMessage(LANG_MOVE_TYPE_SET,type_str);
 
     return true;
 }

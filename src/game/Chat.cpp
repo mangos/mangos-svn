@@ -136,6 +136,7 @@ ChatCommand * ChatHandler::getCommandTable()
     {
         { "acct",        0, &ChatHandler::HandleAcctCommand,             "",   NULL },
         { "addmove",     2, &ChatHandler::HandleAddMoveCommand,          "",   NULL },
+        { "setmovetype", 2, &ChatHandler::HandleSetMoveTypeCommand,      "",   NULL },
         { "anim",        3, &ChatHandler::HandleAnimCommand,             "",   NULL },
         { "announce",    1, &ChatHandler::HandleAnnounceCommand,         "",   NULL },
         { "go",          3, &ChatHandler::HandleGoCommand,               "",   NULL },
@@ -181,7 +182,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "gameobject",  3, &ChatHandler::HandleGameObjectCommand,       "",   NULL },
         { "addgo",       3, &ChatHandler::HandleGameObjectCommand,       "",   NULL },
         { "prog",        2, &ChatHandler::HandleProgCommand,             "",   NULL },
-        { "random",      2, &ChatHandler::HandleRandomCommand,           "",   NULL },
         { "recall",      1, &ChatHandler::HandleRecallCommand,           "",   NULL },
         { "run",         2, &ChatHandler::HandleRunCommand,              "",   NULL },
         { "save",        0, &ChatHandler::HandleSaveCommand,             "",   NULL },

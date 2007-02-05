@@ -125,23 +125,15 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
             creature.StopMoving();
             creature.setMoveRunFlag(!urand(0,10));
 
-            if( creature.getMoveRandomFlag() )
+            ++i_nextMove;
+            if( i_nextMove == MAX_RAND_WAYPOINTS )
             {
-                i_nextMove = (rand() % MAX_RAND_WAYPOINTS) + 1;
-                i_nextMoveTime.Reset((rand() % 7000));
+                i_nextMove = 0;
+                i_nextMoveTime.Reset(rand() % 3000);
             }
             else
             {
-                ++i_nextMove;
-                if( i_nextMove == MAX_RAND_WAYPOINTS )
-                {
-                    i_nextMove = 0;
-                    i_nextMoveTime.Reset(rand() % 3000);
-                }
-                else
-                {
-                    i_nextMoveTime.Reset((rand() % 7000));
-                }
+                i_nextMoveTime.Reset((rand() % 7000));
             }
         }
     }

@@ -50,10 +50,9 @@ uint32 CreatureInfo::randomDisplayID() const
 }
 
 Creature::Creature() :
-Unit(), i_AI(NULL), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
+Unit(), i_AI(NULL), i_motionMaster(this), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
-itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
-m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
+itemcount(0), mTaxiNode(0), m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
 {
     m_valuesCount = UNIT_END;
@@ -275,7 +274,7 @@ void Creature::RegenerateHealth()
 
 void Creature::AIM_Initialize()
 {
-    i_motionMaster.Initialize(this);
+    i_motionMaster.Initialize();
     i_AI = FactorySelector::selectAI(this);
 }
 

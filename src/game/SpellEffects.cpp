@@ -1466,9 +1466,6 @@ void Spell::EffectTameCreature(uint32 i)
 
         pet->CreateBaseAtCreature(creatureTarget);
 
-        ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(creatureTarget);
-        creatureTarget->setDeathState(JUST_DIED);
-
         pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
         pet->SetMaxPower(POWER_HAPPINESS,1000000);
@@ -1486,6 +1483,9 @@ void Spell::EffectTameCreature(uint32 i)
 
         pet->AddToWorld();
         MapManager::Instance().GetMap(pet->GetMapId())->Add((Creature*)pet);
+
+        ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(creatureTarget);
+        creatureTarget->setDeathState(JUST_DIED);
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {

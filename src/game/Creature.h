@@ -288,9 +288,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, bool WalkBack);
         inline CreatureAI &AI(void) { return *i_AI; }
 
-        inline void setMoveRandomFlag(bool f) { m_moveRandom = f; }
         inline void setMoveRunFlag(bool f) { m_moveRun = f; }
-        inline bool getMoveRandomFlag() { return m_moveRandom; }
         inline bool getMoveRunFlag() { return m_moveRun; }
         inline bool IsStopped(void) const { return !(hasUnitState(UNIT_STAT_MOVING)); }
         inline void StopMoving(void)
@@ -418,8 +416,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         GossipOptionList m_goptions;
 
         float respawn_cord[3];
-        bool m_moveBackward;
-        bool m_moveRandom;
         bool m_moveRun;
 
         uint8 m_emoteState;
