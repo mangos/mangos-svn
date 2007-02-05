@@ -300,7 +300,6 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
     vector<LootItem>::iterator i;
     ItemPrototype const *item;
     uint8 itemSlot = 0;
-    uint8 THRESHOLD = 1;
     Player *player = objmgr.GetPlayer(playerGUID);
     Group *group = player->groupInfo.group;
 
@@ -312,7 +311,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             //sLog.outDebug("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
             continue;
         }
-        if (item->Quality > THRESHOLD)
+        if (item->Quality > ITEM_QUALITY_NORMAL)
         {
             Roll r;
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
@@ -351,14 +350,13 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
     vector<LootItem>::iterator i;
     ItemPrototype const *item;
     uint8 itemSlot = 0;
-    uint8 THRESHOLD = 1;
     Player *player = objmgr.GetPlayer(playerGUID);
     Group *group = player->groupInfo.group;
 
     for (i=loot->items.begin(); i != loot->items.end(); i++)
     {
         item = objmgr.GetItemPrototype(i->itemid);
-        if (item->Quality > THRESHOLD)
+        if (item->Quality > ITEM_QUALITY_NORMAL)
         {
             Roll r;
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);

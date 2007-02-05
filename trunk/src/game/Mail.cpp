@@ -42,7 +42,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     if (receiver.size() == 0)
         return;
     normalizePlayerName(receiver);
-    sDatabase.escape_string(receiver);                      // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(receiver);                      // prevent SQL injection
 
     Player* pl = _player;
 
@@ -150,14 +150,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '0')",
         mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemPageId, GUID_LOPART(itemId), item_template, (uint64)etime, money, COD);
-    //there is small problem:
-    //one player sends big sum of money to another player, then server crashes, but mail with money is
-    //is DB .. so receiver will receive money, BUT sender has also that money..., we will have to save also players money...
     sDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
     sDatabase.CommitTransaction();
 }
 
+//called when mail is read
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
 {
     uint64 mailbox;
@@ -177,6 +175,7 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
     }
 }
 
+//called when client deletes mail
 void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 {
     uint64 mailbox;
@@ -226,7 +225,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 
     std::string subject;
     subject = m->subject;
-    sDatabase.escape_string(subject);
+    sDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '%u', '0', '16')",
         messageID, m->receiver, m->sender, subject.c_str(), m->itemPageId, m->item_guid, m->item_template, (uint64)etime, m->money);
@@ -234,6 +233,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
 }
 
+//called when player takes item attached in mail
 void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 {
     uint64 mailbox;
@@ -246,7 +246,6 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Mail* m = pl->GetMail(mailId);
     if(!m || m->state == DELETED)
     {
-                                                            //not sure
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
         return;
     }
@@ -266,7 +265,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         m->item_guid = 0;
         m->item_template = 0;
 
-        if (m->COD > 0)
+        if (m->COD > 0)                                     //if there is COD, take COD money from player and send them to sender by mail
         {
             Player *receive = objmgr.GetPlayer(MAKE_GUID(m->sender,HIGHGUID_PLAYER));
             time_t etime = time(NULL) + (30 * DAY);
@@ -301,7 +300,6 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     }
     else                                                    //works great
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_BAG_FULL, msg);
-
 }
 
 void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
@@ -330,6 +328,7 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     sDatabase.CommitTransaction();
 }
 
+//called when player lists his received mails
 void WorldSession::HandleGetMail(WorldPacket & recv_data )
 {
     uint64 mailbox;
@@ -403,7 +402,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     SendPacket(&data);
 }
 
-//TO DO FIXME, for mails and auction mails this function works
+///this function is called when client needs mail message body, or when player clicks on item which has ITEM_FIELD_ITEM_TEXT_ID > 0
 void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 {
     uint32 itemPageId;
@@ -431,6 +430,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     SendPacket(&data);
 }
 
+//used when player copies mail body to his inventory
 void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 {
     uint64 mailbox;
@@ -478,6 +478,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     }
 }
 
+//TODO Fix me! ... this void has probably bad condition, but good data are sent
 void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
 {
     WorldPacket data;
