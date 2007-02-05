@@ -3819,15 +3819,35 @@ void Player::SendSetFactionStanding(const Factions* faction) const
     }
 }
 
-bool Player::FactionIsInTheList(uint32 faction)
+void Player::SendInitialReputations()
 {
-    std::list<struct Factions>::iterator itr;
-
-    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    WorldPacket data(SMSG_INITIALIZE_FACTIONS, (4+64*5));
+    data << uint32 (0x00000040);
+    for(uint32 a=0; a<64; a++)
     {
-        if(itr->ReputationListID == faction) return true;
+        std::list<struct Factions>::iterator itr = FindReputationIdInTheList(a);
+        
+        if(itr != factions.end())
+        {
+            data << uint8  (itr->Flags);
+            data << uint32 (itr->Standing);
+        }
+        else
+        {
+            data << uint8  (0x00);
+            data << uint32 (0x00000000);
+        }
     }
-    return false;
+    GetSession()->SendPacket(&data);
+}
+
+std::list<struct Factions>::iterator Player::FindReputationIdInTheList(uint32 faction)
+{ 
+    for(std::list<struct Factions>::iterator itr = factions.begin(); itr != factions.end(); ++itr)
+    {
+        if(itr->ReputationListID == faction) return itr;
+    }
+    return factions.end();
 }
 
 void Player::SetInitialFactions()
@@ -3848,18 +3868,9 @@ void Player::SetInitialFactions()
             if( GetTeam() == factionEntry->team ) newFaction.Flags = 1;
             else newFaction.Flags = 0;
 
-            //If the faction's team is enemy of my one we are at war!
-            if(GetTeam() == ALLIANCE )
-            {
-                if( factionEntry->team == HORDE || factionEntry->team == HORDE_FORCES )
-                    newFaction.Flags = (newFaction.Flags | 2);
-            }
-            else
-            if(GetTeam() == HORDE    )
-            {
-                if( factionEntry->team == ALLIANCE || factionEntry->team == ALLIANCE_FORCES )
-                    newFaction.Flags = (newFaction.Flags | 2);
-            }
+            //If the faction is Hostile or Hated  of my one we are at war!
+            if(GetBaseReputationRank(factionEntry) <= REP_HOSTILE)
+                newFaction.Flags = (newFaction.Flags | 2 );
 
             factions.push_back(newFaction);
         }
@@ -3915,17 +3926,28 @@ ReputationRank Player::GetReputationRank(uint32 faction) const
     return GetReputationRank(factionEntry);
 }
 
-ReputationRank Player::GetReputationRank(const FactionEntry *factionEntry) const
+ReputationRank Player::ReputationToRank(int32 standing) const
 {
-    int32 Reputation = GetReputation(factionEntry);
     int32 Limit = Reputation_Cap + 1;
-    for (int i = MAX_REPUTATION_RANK-1; i >= MIN_REPUTATION_RANK; i--)
+    for (int i = MAX_REPUTATION_RANK-1; i >= MIN_REPUTATION_RANK; --i)
     {
         Limit -= ReputationRank_Length[i];
-        if (Reputation >= Limit )
+        if (standing >= Limit )
             return ReputationRank(i);
     }
     return MIN_REPUTATION_RANK;
+}
+
+ReputationRank Player::GetReputationRank(const FactionEntry *factionEntry) const
+{
+    int32 Reputation = GetReputation(factionEntry);
+    return ReputationToRank(Reputation);
+}
+
+ReputationRank Player::GetBaseReputationRank(const FactionEntry *factionEntry) const
+{
+    int32 Reputation = GetBaseReputation(factionEntry);
+    return ReputationToRank(Reputation);
 }
 
 bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation)

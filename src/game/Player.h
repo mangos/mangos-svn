@@ -993,10 +993,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         int32 GetReputation(const FactionEntry *factionEntry) const;
         ReputationRank GetReputationRank(uint32 faction) const;
         ReputationRank GetReputationRank(const FactionEntry *factionEntry) const;
+        ReputationRank GetBaseReputationRank(const FactionEntry *factionEntry) const;
+        ReputationRank ReputationToRank(int32 standing) const;
         const static int32 ReputationRank_Length[MAX_REPUTATION_RANK];
         const static int32 Reputation_Cap    =  42999;
         const static int32 Reputation_Bottom = -42000;
-
         bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);
         bool ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing);
         void CalculateReputation(Unit *pVictim);
@@ -1004,6 +1005,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetInitialFactions();
         void UpdateReputation() const;
         void SendSetFactionStanding(const Factions* faction) const;
+        void SendInitialReputations();
+
         void UpdateMaxSkills();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
         void ModifySkillBonus(uint32 skillid,int32 val);
@@ -1193,7 +1196,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
         void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;
 
-        bool FactionIsInTheList(uint32 faction);
+        std::list<struct Factions>::iterator FindReputationIdInTheList(uint32 RepId);
 
         /*********************************************************/
         /***              ENVIROMENTAL SYSTEM                  ***/
