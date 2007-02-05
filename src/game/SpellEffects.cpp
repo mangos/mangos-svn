@@ -479,7 +479,7 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_MOD_CHARM:
                 break;
             default:
-                if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT)
+                if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat())
                     ((Creature*)Aur->GetTarget())->AI().AttackStart(m_caster);
                 else
                 {
