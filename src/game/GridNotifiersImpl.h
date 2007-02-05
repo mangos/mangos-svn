@@ -192,6 +192,15 @@ inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
         c->AI().MoveInLineOfSight(pl);
 }
 
+inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
+{
+    if( c1->AI().IsVisible(c2) )
+        c1->AI().MoveInLineOfSight(c2);
+    
+    if( c2->AI().IsVisible(c1) )
+        c2->AI().MoveInLineOfSight(c1);
+}
+
 template<>
 inline void
 MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
@@ -223,6 +232,18 @@ MaNGOS::CreatureRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
         if( iter->second->isAlive() && !iter->second->isInFlight())
             PlayerCreatureRelocationWorker(iter->second, &i_creature);
+}
+
+template<>
+inline void
+MaNGOS::CreatureRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    if(!i_creature.isAlive() || i_creature.isInFlight())
+        return;
+
+    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+        if( iter->second->isAlive() && !iter->second->isInFlight())
+            CreatureCreatureRelocationWorker(iter->second, &i_creature);
 }
 
 template<>

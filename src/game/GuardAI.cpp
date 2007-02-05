@@ -160,18 +160,6 @@ void GuardAI::UpdateAI(const uint32 diff)
             }
         }
     }
-    else
-    {
-        std::list<Unit*> unitlist;
-        MapManager::Instance().GetMap(i_creature.GetMapId())->GetUnitList(i_creature.GetPositionX(), i_creature.GetPositionY(),unitlist);
-        for(std::list<Unit*>::iterator iter=unitlist.begin();iter!=unitlist.end();iter++)
-        {
-            if((*iter) && (*iter)->isAlive() && !(*iter)->isInFlight() && IsVisible( *iter ) )
-            {
-                MoveInLineOfSight(*iter);
-            }
-        }
-    }
 }
 
 bool GuardAI::IsVisible(Unit *pl) const

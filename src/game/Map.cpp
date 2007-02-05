@@ -659,6 +659,8 @@ void Map::CreatureRelocationNotifying(Creature *creature, Cell new_cell, CellPai
         new_cell.SetNoCreate();                             // not trigger load unloaded grids at notifier call
         TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, ContainerMapList<Player> > c2p_relocation(relocationNotifier);
         cell_lock->Visit(cell_lock, c2p_relocation, *this);
+        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, TypeMapContainer<AllObjectTypes> > c2c_relocation(relocationNotifier);
+        cell_lock->Visit(cell_lock, c2c_relocation, *this);
     }
 }
 
