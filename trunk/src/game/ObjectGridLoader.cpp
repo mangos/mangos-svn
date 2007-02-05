@@ -234,7 +234,31 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
     m.clear();
 }
 
+template<>
+void
+ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
+{
+    if( m.size() == 0 )
+        return;
+
+    // remove all cross-reference before deleting
+    for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        iter->second->CombatStop();
+        iter->second->DeleteThreatList();
+        iter->second->DeleteInHateListOf();
+        iter->second->RemoveAllAuras();
+    }
+
+    for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        iter->second->SaveRespawnTime();
+        delete iter->second;
+    }
+
+    m.clear();
+}
+
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
-template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature *> &m);
