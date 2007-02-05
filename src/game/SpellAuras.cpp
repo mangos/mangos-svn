@@ -1598,7 +1598,7 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
             m_target->AttackStop();
             m_target->setDeathState(CORPSE);
             m_target->SetHealth(0);
-            
+
         }
     }
     else
@@ -1616,10 +1616,11 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
             data<<uint8(1);
             m_target->SendMessageToSet(&data,true);
             */
-            
+
         }
     }
 }
+
 void Aura::HandleAuraModStun(bool apply, bool Real)
 {
     if (apply)
@@ -1839,7 +1840,7 @@ void Aura::HandleModTaunt(bool apply, bool Real)
         return;
 
     Unit* caster = GetCaster();
-    
+
     if(!caster || !caster->isAlive() || caster->GetTypeId() != TYPEID_PLAYER)
         return;
 

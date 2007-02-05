@@ -700,7 +700,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
         SpellImmuneList m_spellImmune[6];
 
-
         float GetThreat(uint64 guid) const;
         ThreatList& GetThreatList() { return m_threatList; }
         HateOfflineList& GetHateOfflineList() { return m_offlineList; }
@@ -730,7 +729,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetCurrentVictimThreat() const { return m_victimThreat; };
         void TauntApply(Unit* pVictim);
         void TauntFadeOut(Unit *taunter);
-
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap& GetAuras( ) {return m_Auras;}

@@ -69,7 +69,7 @@ bool GuardAI::_needToStop() const
 
     /*if(!i_creature.getVictim()->isTargetableForAttack() || !i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
         return true;*/
-    //no need for this checks because mob changes its victim only when 
+    //no need for this checks because mob changes its victim only when
     //1) victim is dead (check is in SelectHostilTarget() func)
     //2) victim is out of threat radius
 
@@ -145,7 +145,7 @@ void GuardAI::UpdateAI(const uint32 diff)
         if( _needToStop() )
         {
             DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            EnterEvadeMode();    // i_victimGuid == 0 && i_creature.getVictim() == NULL now
+            EnterEvadeMode();                               // i_victimGuid == 0 && i_creature.getVictim() == NULL now
             return;
         }
 
