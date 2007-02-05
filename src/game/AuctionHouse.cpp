@@ -29,6 +29,7 @@
 //pls DO NOT use iterator++, because it is slowlier than ++iterator!!!
 //post-incrementation is always slowlier than pre-incrementation !
 
+//void called when player click on auctionhouse npc
 void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 {
     uint64 guid;                                            //NPC guid
@@ -73,6 +74,7 @@ static uint8 AuctioneerFactionToLocation(uint32 faction)
     }
 }
 
+//this void causes that auction window is opened
 void WorldSession::SendAuctionHello( uint64 guid, Creature* unit )
 {
     WorldPacket data( MSG_AUCTION_HELLO, 12 );
@@ -136,6 +138,7 @@ void WorldSession::SendAuctionBidderNotification( uint32 location, uint32 auctio
     SendPacket(&data);
 }
 
+//this void causes on client to display: "Your auction sold"
 void WorldSession::SendAuctionOwnerNotification( AuctionEntry* auction)
 {
     WorldPacket data(SMSG_AUCTION_OWNER_NOTIFICATION, (7*4));
@@ -191,6 +194,7 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
         mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionCancelledSubject.str().c_str(), (uint64)etime, auction->bid, NOT_READ);
 }
 
+//this void creates new auction and adds auction to some auctionhouse
 void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 {
     uint64 auctioneer, item;
@@ -272,6 +276,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     SendAuctionCommandResult(AH->Id, AUCTION_SELL_ITEM, AUCTION_OK);
 }
 
+//this function is called when client bids or buys out auction
 void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 {
     uint64 auctioneer;
@@ -319,7 +324,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 }
                 else
                 {
-                    // mail to last bidder if there's one... + return money
+                    // mail to last bidder and return money
                     SendAuctionOutbiddedMail( auction , price );
                     pl->ModifyMoney(((int32) price) * -1);
                 }
@@ -378,7 +383,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
     }
 }
 
-//will be fixed soon , but now it's not used....
+//this void is called when auction_owner cancels his auction
 void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 {
     uint64 auctioneer;
@@ -412,7 +417,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
                 SendAuctionCancelledToBidderMail( auction );
                 pl->ModifyMoney( ((int32) auctionCut) * -1 );
             }
-            // Return the item
+            // Return the item by mail
             std::ostringstream msgAuctionCanceledOwner;
             msgAuctionCanceledOwner << auction->item_template << ":0:" << AUCTION_CANCELED;
 
@@ -452,6 +457,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     delete auction;
 }
 
+//called when player lists his bids
 void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
 {
     uint64 guid;                                            //NPC guid
@@ -507,6 +513,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
     SendPacket(&data);
 }
 
+//this void sends player info about his auctions
 void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 {
     uint32 listfrom;
@@ -542,6 +549,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
     SendPacket(&data);
 }
 
+//this void is called when player clicks on search button
 void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 {
     std::string searchedname, name;
