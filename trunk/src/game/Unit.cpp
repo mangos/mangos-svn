@@ -285,6 +285,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
     if(HasInvisibilityAura())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+    // remove death simulation at damage
+    if(hasUnitState(UNIT_STAT_DIED))
+        RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damagetype);
     pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damagetype);
@@ -3736,7 +3739,7 @@ bool Unit::isTargetableForAttack()
 {
     if (GetTypeId()==TYPEID_PLAYER && ((Player *)this)->isGameMaster())
         return false;
-    return isAlive() && !isInFlight() /*&& !isStealth()*/;
+    return isAlive() && !hasUnitState(UNIT_STAT_DIED)&& !isInFlight() /*&& !isStealth()*/;
 }
 
 int32 Unit::ModifyHealth(int32 dVal)

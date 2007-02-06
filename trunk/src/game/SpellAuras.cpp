@@ -1576,47 +1576,56 @@ void Aura::HandleModFear(bool Apply, bool Real)
 
 void Aura::HandleFeignDeath(bool Apply, bool Real)
 {
+    if(!Real)
+        return;
+
     uint32 apply_stat = UNIT_STAT_DIED;
     if( Apply )
     {
-        //m_target->addUnitState(UNIT_STAT_DIED);
         // m_target->AttackStop();
 
         //m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real add aura
-        if(Real)
-        {
-            /*
-            WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
-            data<<m_target->GetGUID();
-            data<<uint8(0);
-            m_target->SendMessageToSet(&data,true);
-            */
-            m_target->HandleEmoteCommand(EMOTE_STATE_DEAD);
-            m_target->ClearInCombat();
-            m_target->AttackStop();
-            m_target->setDeathState(CORPSE);
-            m_target->SetHealth(0);
 
-        }
+        /*
+        WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
+        data<<m_target->GetGUID();
+        data<<uint8(0);
+        m_target->SendMessageToSet(&data,true);
+        */
+        m_target->HandleEmoteCommand(EMOTE_STATE_DEAD);
+        m_target->addUnitState(UNIT_STAT_DIED);
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_DEAD);
+        m_target->CombatStop();
+        m_target->MoveToHateOfflineList();
+
+        /* THis is totally wrong explicitly call setDeathState(CORPSE)
+        // this will broke stats (aura/item mods not removed)
+        m_target->setDeathState(CORPSE);
+        m_target->SetHealth(0);
+        */
     }
     else
     {
+        /*
         m_target->SetHealth(m_target->GetMaxHealth()/2);
         m_target->setDeathState(ALIVE);
+        */
         //m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real remove aura
-        if(!Real)
-        {
             /*
             WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
             data<<m_target->GetGUID();
             data<<uint8(1);
             m_target->SendMessageToSet(&data,true);
             */
-
+        m_target->clearUnitState(UNIT_STAT_DIED);
+        if(m_target->isAlive())                             // only if still alive really
+        {
+            m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_DEAD);
+            m_target->MoveToThreatList();
         }
     }
 }

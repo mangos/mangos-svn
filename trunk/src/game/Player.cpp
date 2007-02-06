@@ -3655,6 +3655,10 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
         // remove at movement non-move stealth aura
         if(HasFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_FLAG_STEALTH))
             RemoveAurasDueToSpell(20580);
+
+        // remove death simulation at move
+        if(hasUnitState(UNIT_STAT_DIED))
+            RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
 
     // reread after Ma::Relocation
