@@ -705,7 +705,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         HateOfflineList& GetHateOfflineList() { return m_offlineList; }
         InHateListOf& GetInHateListOf() { return m_inhateList; }
         bool CanHaveThreatList() const;
-        void ThreatAssist(Unit* target, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
+        void ThreatAssist(Unit* target, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL, bool singletarget = false);
         void AddThreat(Unit* pVictim, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
         void AddToInHateList(Creature* attacker);
         void RemoveFromInHateListOf(Creature* attacker);
@@ -777,6 +777,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
+
+        int32 CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index);
     protected:
         Unit ( );
 

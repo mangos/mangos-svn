@@ -148,7 +148,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_AURAS_VISIBLE = 100,
     &Aura::HandleModResistancePercent,                      //SPELL_AURA_MOD_RESISTANCE_PCT = 101,
     &Aura::HandleModCreatureAttackPower,                    //SPELL_AURA_MOD_CREATURE_ATTACK_POWER = 102,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TOTAL_THREAT = 103,
+    &Aura::HandleAuraModTotalThreat,                        //SPELL_AURA_MOD_TOTAL_THREAT = 103,
     &Aura::HandleAuraWaterWalk,                             //SPELL_AURA_WATER_WALK = 104,
     &Aura::HandleAuraFeatherFall,                           //SPELL_AURA_FEATHER_FALL = 105,
     &Aura::HandleAuraHover,                                 //SPELL_AURA_HOVER = 106,
@@ -308,40 +308,14 @@ Unit* Aura::GetCaster() const
 int32 Aura::CalculateDamage()
 {
     SpellEntry const* spellproto = GetSpellProto();
-    int32 value = 0;
-    uint32 level = 0;
+
     if(!m_target)
         return 0;
     Unit* caster = GetCaster();
     if(!caster)
         caster = m_target;
-    /*level= caster->getLevel();
-    if( level > spellproto->maxLevel && spellproto->maxLevel > 0)
-        level = spellproto->maxLevel;*/
 
-    float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[m_effIndex];
-    float randomPointsPerLevel = spellproto->EffectDicePerLevel[m_effIndex];
-    int32 basePoints = int32(spellproto->EffectBasePoints[m_effIndex] + level * basePointsPerLevel);
-    int32 randomPoints = int32(spellproto->EffectDieSides[m_effIndex] + level * randomPointsPerLevel);
-    float comboDamage = spellproto->EffectPointsPerComboPoint[m_effIndex];
-    uint8 comboPoints=0;
-    if(caster->GetTypeId() == TYPEID_PLAYER)
-        comboPoints = (uint8)((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
-
-    value += spellproto->EffectBaseDice[m_effIndex];
-    if(randomPoints <= 1)
-        value = basePoints+1;
-    else
-        value = basePoints+rand()%randomPoints;
-
-    if(comboDamage > 0)
-    {
-        value += (int32)(comboDamage * comboPoints);
-        if(caster->GetTypeId() == TYPEID_PLAYER)
-            caster->SetUInt32Value(PLAYER_FIELD_BYTES,((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
-    }
-
-    return value;
+    return caster->CalculateSpellDamage(spellproto,m_effIndex);
 }
 
 void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
@@ -1579,6 +1553,9 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
     if(!Real)
         return;
 
+    if(!m_target || m_target->GetTypeId() == TYPEID_UNIT)
+        return;
+
     uint32 apply_stat = UNIT_STAT_DIED;
     if( Apply )
     {
@@ -1598,7 +1575,7 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         m_target->addUnitState(UNIT_STAT_DIED);
         m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_DEAD);
         m_target->CombatStop();
-        m_target->MoveToHateOfflineList();
+        m_target->DeleteInHateListOf();
 
         /* THis is totally wrong explicitly call setDeathState(CORPSE)
         // this will broke stats (aura/item mods not removed)
@@ -1625,7 +1602,6 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         if(m_target->isAlive())                             // only if still alive really
         {
             m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_DEAD);
-            m_target->MoveToThreatList();
         }
     }
 }
@@ -1837,6 +1813,29 @@ void Aura::HandleModThreat(bool apply, bool Real)
                 ApplyPercentModFloatVar(m_target->m_threatModifier[x], positive ? m_modifier.m_amount : -m_modifier.m_amount, apply);
         }
     }
+}
+
+void Aura::HandleAuraModTotalThreat(bool Apply, bool Real)
+{
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
+    if(!m_target || !m_target->isAlive() || m_target->GetTypeId()!= TYPEID_PLAYER)
+        return;
+
+    Unit* caster = GetCaster();
+
+    if(!caster || !caster->isAlive())
+        return;
+
+    float threatMod = 0.0f;
+    if(Apply)
+        threatMod = float(m_modifier.m_amount);
+    else
+        threatMod =  float(-m_modifier.m_amount);
+
+    caster->ThreatAssist(m_target, threatMod, true);
 }
 
 void Aura::HandleModTaunt(bool apply, bool Real)

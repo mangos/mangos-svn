@@ -4098,7 +4098,7 @@ void Unit::AddToInHateList(Creature* attacker)
     }
 }
 
-void Unit::ThreatAssist(Unit* target, float threat, uint8 school, SpellEntry const *threatSpell)
+void Unit::ThreatAssist(Unit* target, float threat, uint8 school, SpellEntry const *threatSpell, bool singletarget)
 {
     if(!target)
         return;
@@ -4107,9 +4107,11 @@ void Unit::ThreatAssist(Unit* target, float threat, uint8 school, SpellEntry con
     //of those mobs which have target in it
     //use for buffs and healing threat functionality
     InHateListOf& InHateList = target->GetInHateListOf();
+    uint32 count_enemies = singletarget ? 1 : InHateList.size();
+
     for(InHateListOf::iterator iter = InHateList.begin(); iter != InHateList.end(); ++iter)
     {
-        (*iter)->AddThreat(this, threat, school, threatSpell);
+        (*iter)->AddThreat(this, float (threat) / count_enemies, school, threatSpell);
     }
 }
 
@@ -4168,23 +4170,27 @@ void Unit::DeleteThreatList()
     if(GetTypeId()==TYPEID_UNIT)                            // only creatures can be in inHateListOf
     {
         //used to clear mob's threat list
-        ThreatList::iterator i;
-        for(i = m_threatList.begin(); i != m_threatList.end(); i++)
+        while(!m_threatList.empty())
         {
-            Unit* unit = ObjectAccessor::Instance().GetUnit(*this, i->UnitGuid);
-            if(unit)
-                unit->RemoveFromInHateListOf((Creature*)this);
-        }
-        m_threatList.clear();
+            ThreatList::iterator i = m_threatList.begin();
+            uint64 guid = i->UnitGuid;
+            m_threatList.erase(i);
 
-        HateOfflineList::iterator iter;
-        for(iter = m_offlineList.begin(); iter != m_offlineList.end(); iter++)
-        {
-            Unit* unit = ObjectAccessor::Instance().GetUnit(*this, iter->UnitGuid);
+            Unit* unit = ObjectAccessor::Instance().GetUnit(*this, guid);
             if(unit)
                 unit->RemoveFromInHateListOf((Creature*)this);
         }
-        m_offlineList.clear();
+
+        while(!m_offlineList.empty())
+        {
+            HateOfflineList::iterator iter = m_offlineList.begin();
+            uint64 guid = iter->UnitGuid;
+            m_threatList.erase(iter);
+
+            Unit* unit = ObjectAccessor::Instance().GetUnit(*this, guid);
+            if(unit)
+                unit->RemoveFromInHateListOf((Creature*)this);
+        }
     }
 
     SetCurrentVictimThreat(0.0f);
@@ -4204,12 +4210,15 @@ void Unit::DeleteInHateListOf()
     uint64 guid = GetGUID();
     DEBUG_LOG("InHateList list deletion started");
     //use for players to delete InHateListOf
-    for(InHateListOf::iterator iter = m_inhateList.begin(); iter != m_inhateList.end(); ++iter)
+    while(!m_inhateList.empty())
     {
-        (*iter)->RemoveFromThreatList(guid);
+        InHateListOf::iterator iter = m_inhateList.begin();
+        Creature* unit = *iter;
+        m_inhateList.erase(iter);
+
+        unit->RemoveFromThreatList(guid);
     }
 
-    m_inhateList.clear();
     DEBUG_LOG("InHateList list deleted");
 }
 
@@ -4471,4 +4480,39 @@ void Unit::TauntFadeOut(Unit *taunter)
         SetInFront(target);
         ((Creature*)this)->AI().AttackStart(target);
     }
+}
+
+int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index)
+{
+    int32 value = 0;
+    uint32 level = 0;
+
+    // currently the damage should not be increased by level
+    /*level= caster->getLevel();
+    if( level > spellproto->maxLevel && spellproto->maxLevel > 0)
+        level = spellproto->maxLevel;*/
+
+    float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
+    float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
+    int32 basePoints = int32(spellProto->EffectBasePoints[effect_index] + level * basePointsPerLevel);
+    int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
+    float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
+    uint8 comboPoints=0;
+    if(GetTypeId() == TYPEID_PLAYER)
+        comboPoints = (uint8)((GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
+
+    value += spellProto->EffectBaseDice[effect_index];
+    if(randomPoints <= 1)
+        value = basePoints+1;
+    else
+        value = basePoints+rand()%randomPoints;
+
+    if(comboDamage > 0)
+    {
+        value += (int32)(comboDamage * comboPoints);
+        if(GetTypeId() == TYPEID_PLAYER)
+            SetUInt32Value(PLAYER_FIELD_BYTES,((GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
+    }
+
+    return value;
 }
