@@ -229,42 +229,15 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
 bool ChatHandler::HandleRecallCommand(const char* args)
 {
-    if(!*args)
-        return false;
+    Player* _player = m_session->GetPlayer();
 
-    if(m_session->GetPlayer()->isInFlight())
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
     }
 
-    if (strncmp((char*)args,"sunr",5)==0)
-        m_session->GetPlayer()->TeleportTo(1, -180.949f, -296.467f, 11.5384f,0.0f);
-    else if (strncmp((char*)args,"thun",5)==0)
-        m_session->GetPlayer()->TeleportTo(1, -1196.22f, 29.0941f, 176.949f,0.0f);
-    else if (strncmp((char*)args,"cross",6)==0)
-        m_session->GetPlayer()->TeleportTo(1, -443.128f, -2598.87f, 96.2114f,0.0f);
-    else if (strncmp((char*)args,"orgr",5)==0)
-        m_session->GetPlayer()->TeleportTo(1, 1676.21f, -4315.29f, 61.5293f,0.0f);
-    else if (strncmp((char*)args,"neth",5)==0)
-        m_session->GetPlayer()->TeleportTo(0, -10996.9f, -3427.67f, 61.996f,0.0f);
-    else if (strncmp((char*)args,"thel",5)==0)
-        m_session->GetPlayer()->TeleportTo(0, -5395.57f, -3015.79f, 327.58f,0.0f);
-    else if (strncmp((char*)args,"storm",6)==0)
-        m_session->GetPlayer()->TeleportTo(0, -8913.23f, 554.633f, 93.7944f,0.0f);
-    else if (strncmp((char*)args,"iron",5)==0)
-        m_session->GetPlayer()->TeleportTo(0, -4981.25f, -881.542f, 501.66f,0.0f);
-    else if (strncmp((char*)args,"under",6)==0)
-        m_session->GetPlayer()->TeleportTo(0, 1586.48f, 239.562f, -52.149f,0.0f);
-    else if (strncmp((char*)args,"darn",5)==0)
-        m_session->GetPlayer()->TeleportTo(1, 10037.6f, 2496.8f, 1318.4f,0.0f);
-    else if (strncmp((char*)args,"gm",5)==0)
-        m_session->GetPlayer()->TeleportTo(1, 16202.5, 16205, 1,1.15);
-    else if (strncmp((char*)args,"g",2)==0)
-        m_session->GetPlayer()->TeleportTo(1, 1335.3f, -4646.8f, 53.54f, 3.6909f);
-    else
-        return false;
-
+    _player->TeleportTo(_player->m_recallMap, _player->m_recallX, _player->m_recallY, _player->m_recallZ, _player->m_recallO);
     return true;
 }
 
@@ -1191,7 +1164,9 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
 
 bool ChatHandler::HandleTeleCommand(const char * args)
 {
-    if(m_session->GetPlayer()->isInFlight())
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -1240,7 +1215,9 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
 
-    m_session->GetPlayer()->TeleportTo(mapid, x, y, z, ort);
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+
+    _player->TeleportTo(mapid, x, y, z, ort);
     return true;
 }
 

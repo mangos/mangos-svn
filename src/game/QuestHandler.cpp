@@ -389,7 +389,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
 
                             if( _player->GetDistanceSq( pPlayer ) > 100 )
                             {
-                                _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_TO_FAR );
+                                _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_TOO_FAR );
                                 continue;
                             }
 

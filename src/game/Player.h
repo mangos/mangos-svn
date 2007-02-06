@@ -654,7 +654,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestStatus( uint32 quest_id, bool msg );
         bool SatisfyQuestTimed( uint32 quest_id, bool msg );
         bool SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg );
-        bool SatisfyQuestChain( uint32 quest_id, bool msg );
+        bool SatisfyQuestNextChain( uint32 quest_id, bool msg );
+        bool SatisfyQuestPrevChain( uint32 quest_id, bool msg );
         bool GiveQuestSourceItem( uint32 quest_id );
         void TakeQuestSourceItem( uint32 quest_id );
         bool GetQuestRewardStatus( uint32 quest_id );
@@ -1130,6 +1131,14 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 GetSaveTimer() const { return m_nextSave; }
         void   SetSaveTimer(uint32 timer) { m_nextSave = timer; }
+
+        // Recall position
+        uint32 m_recallMap;
+        float  m_recallX;
+        float  m_recallY;
+        float  m_recallZ;
+        float  m_recallO;
+        void   SetRecallPosition(uint32 map, float x, float y, float z, float o);
 
         // Invisibility and detection system
         std::vector<Player *> InvisiblePjsNear;
