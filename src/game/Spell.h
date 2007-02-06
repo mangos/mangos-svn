@@ -452,7 +452,7 @@ class Spell
         uint8 CheckItems();
         uint8 CheckRange();
         uint8 CheckMana(uint32 *mana);
-        uint32 CalculateDamage(uint8 i);
+        int32 CalculateDamage(uint8 i);
         void HandleTeleport(uint32 id, Unit* Target);
         void Delayed(int32 delaytime);
         void DelayedChannel(int32 delaytime);
@@ -510,7 +510,7 @@ class Spell
         // -------------------------------------------
         GameObject* focusObject;
 
-        uint32 damage;
+        int32 damage;
 
         // List of all Spell targets
         std::list<uint64> m_targetUnitGUIDs[3];

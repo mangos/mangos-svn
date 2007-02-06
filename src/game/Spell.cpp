@@ -2013,7 +2013,7 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_ALREADY_HAVE_CHARMED;
                     break;
                 }
-                if(unitTarget->getLevel() > CalculateDamage(i))
+                if(int32(unitTarget->getLevel()) > CalculateDamage(i))
                 {
                     castResult = CAST_FAIL_TARGET_IS_TOO_HIGH;
                     break;
@@ -2401,34 +2401,9 @@ uint8 Spell::CheckItems()
     return uint8(0);
 }
 
-uint32 Spell::CalculateDamage(uint8 i)
+int32 Spell::CalculateDamage(uint8 i)
 {
-    uint32 value = 0;
-    uint32 level = 0;
-    // currently the damage should not be increased by level
-    /*uint32 level = m_caster->getLevel();
-    if( level > m_spellInfo->maxLevel && m_spellInfo->maxLevel > 0)
-        level = m_spellInfo->maxLevel;*/
-    float basePointsPerLevel = m_spellInfo->EffectRealPointsPerLevel[i];
-    float randomPointsPerLevel = m_spellInfo->EffectDicePerLevel[i];
-    uint32 basePoints = uint32(m_spellInfo->EffectBasePoints[i]+level*basePointsPerLevel);
-    uint32 randomPoints = uint32(m_spellInfo->EffectDieSides[i]+level*randomPointsPerLevel);
-    float comboDamage = m_spellInfo->EffectPointsPerComboPoint[i];
-    uint8 comboPoints=0;
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        comboPoints = (uint8)((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
-    value += m_spellInfo->EffectBaseDice[i];
-    if(randomPoints <= 1)
-        value = basePoints+1;
-    else
-        value = basePoints+rand()%randomPoints;
-
-    if(comboDamage > 0)
-    {
-        value += (uint32)(comboDamage * comboPoints);
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
-    }
+    int32 value = m_caster->CalculateSpellDamage(m_spellInfo,i);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, value);
