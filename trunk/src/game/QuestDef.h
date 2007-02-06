@@ -55,7 +55,7 @@ enum
     QUEST_PARTY_MSG_CANT_TAKE_QUEST = 1,
     QUEST_PARTY_MSG_ACCEPT_QUEST    = 2,
     QUEST_PARTY_MSG_REFUSE_QUEST    = 3,
-    QUEST_PARTY_MSG_TO_FAR          = 4,
+    QUEST_PARTY_MSG_TOO_FAR         = 4,
     QUEST_PARTY_MSG_BUSY            = 5,
     QUEST_PARTY_MSG_LOG_FULL        = 6,
     QUEST_PARTY_MSG_HAVE_QUEST      = 7,
@@ -112,7 +112,7 @@ enum __QuestSpecialFlags                                    //according to mango
 
     QUEST_SPECIAL_FLAGS_KILL_OR_CAST  = 8,
     QUEST_SPECIAL_FLAGS_TIMED         = 16,
-    QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,                 //?
+    QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,
 
     QUEST_SPECIAL_FLAGS_REPUTATION    = 64,
 };
@@ -159,13 +159,14 @@ class Quest
         uint32 GetRewXP() { return RewXP; }
         uint32 GetRewSpell() { return RewSpell; }
         uint32 GetPointMapId() { return PointMapId; }
-        float GetPointX() { return PointX; }
-        float GetPointY (){ return PointY; }
+        float  GetPointX() { return PointX; }
+        float  GetPointY (){ return PointY; }
         uint32 GetPointOpt() { return PointOpt; }
         uint32 GetOfferRewardEmote() { return OfferRewardEmote; }
         uint32 GetRequestItemsEmote() { return RequestItemsEmote; }
         uint32 GetQuestCompleteScript() { return QuestCompleteScript; }
-        uint32 IsRepeatable() { return Repeatable; }
+        bool   IsRepeatable() { return HasSpecialFlag(QUEST_SPECIAL_FLAGS_REPEATABLE); }
+        bool   IsAutoComplete() { return strlen(GetObjectives()) == 0; }
         uint32 GetSpecialFlags() { return SpecialFlags; }
 
         // multiple values
@@ -190,6 +191,7 @@ class Quest
         uint32 GetRewItemsCount() { return m_rewitemscount; }
 
         std::vector<int32> prevQuests;
+        std::vector<uint32> prevChainQuests;
 
         // cached data
     private:
@@ -231,13 +233,12 @@ class Quest
         uint32 RewXP;
         uint32 RewSpell;
         uint32 PointMapId;
-        float PointX;
-        float PointY;
+        float  PointX;
+        float  PointY;
         uint32 PointOpt;
         uint32 OfferRewardEmote;
         uint32 RequestItemsEmote;
         uint32 QuestCompleteScript;
-        uint32 Repeatable;
 };
 
 enum QuestUpdateState
@@ -251,7 +252,7 @@ struct quest_status
 {
     quest_status()
         : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),m_explored(false),
-        m_completed_once(false), m_timer(0), uState(QUEST_NEW)
+        m_timer(0), uState(QUEST_NEW)
     {
         memset(m_itemcount,    0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
@@ -262,7 +263,6 @@ struct quest_status
     QuestStatus m_status;
     bool m_rewarded;
     bool m_explored;
-    bool m_completed_once;                                  // for repeatable quests
     uint32 m_timer;
     QuestUpdateState uState;
 

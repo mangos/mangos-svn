@@ -311,11 +311,11 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         pQuest = objmgr.QuestTemplates[quest_id];
         status = pPlayer->GetQuestStatus( quest_id );
         if ((status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
-            ((strlen(pQuest->GetObjectives()) == 0) && pPlayer->CanTakeQuest(pQuest, false)))
+            (pQuest->IsAutoComplete() && pPlayer->CanTakeQuest(pQuest, false)))
         {
             SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
 
-            if ( pQuest->IsRepeatable() )
+            if ( pQuest->IsAutoComplete() && pQuest->IsRepeatable() )
                 return DIALOG_STATUS_REWARD_REP;
             else
                 return DIALOG_STATUS_REWARD;
@@ -343,7 +343,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             {
                 if ( pPlayer->SatisfyQuestLevel(quest_id, false) )
                 {
-                    if ( pQuest->IsRepeatable() )
+                    if ( pQuest->IsAutoComplete() )
                         return DIALOG_STATUS_REWARD_REP;
                     else
                         return DIALOG_STATUS_AVAILABLE;

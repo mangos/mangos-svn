@@ -1185,8 +1185,8 @@ void ObjectMgr::LoadQuests()
         "`RewItemId1`,`RewItemId2`,`RewItemId3`,`RewItemId4`,`RewItemCount1`,`RewItemCount2`,`RewItemCount3`,`RewItemCount4`,"
     //79              80               81               82               83               84             85             86             87             88
         "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
-    //89             90      91         92           93       94       95         96                 97                  98               99
-        "`RewOrReqMoney`,`RewXP`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`OfferRewardEmote`,`RequestItemsEmote`,`CompleteScript`,`Repeatable`"
+    //89             90      91         92           93       94       95         96                 97                  98               
+        "`RewOrReqMoney`,`RewXP`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`OfferRewardEmote`,`RequestItemsEmote`,`CompleteScript`"
         " FROM `quest_template`");
     if(result == NULL)
     {
@@ -1373,11 +1373,16 @@ void ObjectMgr::LoadQuests()
             qinfo->RewSpell = 0;                            // no changes, quest will not reward this
         }
 
-        if(qinfo->NextQuestInChain && QuestTemplates.find(qinfo->NextQuestInChain) == QuestTemplates.end())
+        if(qinfo->NextQuestInChain)
         {
-            sLog.outErrorDb("Quest %u has `NextQuestInChain` = %u but quest %u doesn't exist, quest chain will not work.",
-                qinfo->GetQuestId(),qinfo->NextQuestInChain ,qinfo->NextQuestInChain );
-            qinfo->NextQuestInChain = 0;
+            if(QuestTemplates.find(qinfo->NextQuestInChain) == QuestTemplates.end())
+            {
+                sLog.outErrorDb("Quest %u has `NextQuestInChain` = %u but quest %u doesn't exist, quest chain will not work.",
+                    qinfo->GetQuestId(),qinfo->NextQuestInChain ,qinfo->NextQuestInChain );
+                qinfo->NextQuestInChain = 0;
+            }
+            else
+                QuestTemplates[qinfo->NextQuestInChain]->prevChainQuests.push_back(qinfo->GetQuestId());
         }
 
         // fill additional data stores

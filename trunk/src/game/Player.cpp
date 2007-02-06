@@ -3699,6 +3699,15 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     return true;
 }
 
+void Player::SetRecallPosition(uint32 map, float x, float y, float z, float o)
+{
+    m_recallMap = map;
+    m_recallX = x;
+    m_recallY = y;
+    m_recallZ = z;
+    m_recallO = o;
+}
+
 void Player::SendMessageToSet(WorldPacket *data, bool self)
 {
     MapManager::Instance().GetMap(GetMapId())->MessageBoardcast(this, data, self);
@@ -8168,12 +8177,10 @@ void Player::PrepareQuestMenu( uint64 guid )
 
         QuestStatus status = GetQuestStatus( quest_id );
 
-        if ((strlen(pQuest->GetObjectives()) == 0) && (CanTakeQuest(pQuest, false)))
-        {
-            // perhaps find a better check for quests that autocomplete
+        if (pQuest->IsAutoComplete() && CanTakeQuest(pQuest, false))
             qm->AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
-        } else if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
-        qm->AddMenuItem(quest_id, DIALOG_STATUS_AVAILABLE);
+        else if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
+            qm->AddMenuItem(quest_id, DIALOG_STATUS_AVAILABLE);
     }
 }
 
@@ -8196,20 +8203,7 @@ void Player::SendPreparedQuest( uint64 guid )
             else if( status == DIALOG_STATUS_INCOMPLETE )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, false, true );
             else
-            {
-                // perhaps find a better auto-complete test
-                if ((strlen(pQuest->GetObjectives()) == 0) && (CanTakeQuest(pQuest, false)))
-                {
-                    //if (CanCompleteQuest(quest_id))
-                    //    PlayerTalkClass->SendQuestGiverOfferReward(quest_id, guid, true, NULL, 0);
-                    //else
-                    PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanCompleteQuest(quest_id), true);
-                }
-                else
-                {
-                    PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, guid, true );
-                }
-            }
+                PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, guid, true );
         }
     }
     else
@@ -8283,7 +8277,7 @@ bool Player::CanSeeStartQuest( uint32 quest_id )
     {
         if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) && SatisfyQuestExclusiveGroup( quest_id, false )
             && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
-            && SatisfyQuestPreviousQuest( quest_id, false ) && SatisfyQuestChain( quest_id, false ) )
+            && SatisfyQuestPreviousQuest( quest_id, false ) && SatisfyQuestNextChain( quest_id, false ) && SatisfyQuestPrevChain( quest_id, false ) )
             return ( getLevel() + 7 >= objmgr.QuestTemplates[quest_id]->GetMinLevel() );
     }
     return false;
@@ -8298,7 +8292,7 @@ bool Player::CanTakeQuest( Quest *pQuest, bool msg )
             && SatisfyQuestRace( quest_id, msg ) && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
             && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg )
             && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg )
-            && SatisfyQuestChain( quest_id, msg ) );
+            && SatisfyQuestNextChain( quest_id, msg ) && SatisfyQuestPrevChain( quest_id, msg ) );
     }
     return false;
 }
@@ -8346,20 +8340,21 @@ bool Player::CanCompleteQuest( uint32 quest_id )
 
         Quest* qInfo = objmgr.QuestTemplates[quest_id];
 
-        if ((mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE) ||
-            (strlen(qInfo->GetObjectives()) == 0))
+        // auto complete quest
+        if (qInfo->IsAutoComplete() && CanTakeQuest(qInfo, false))
+            return true;
+
+        if ( mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE )
         {
 
-            //if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
-            //{
-            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
             {
-                if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
-                    // Need to do something so repeatable quests can be counted:
-                    //if (GetItemCount(qInfo->ReqItemId[i]) < qInfo->ReqItemCount[i])
-                    return false;
+                for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                {
+                    if( qInfo->ReqItemCount[i]!= 0 && mQuestStatus[quest_id].m_itemcount[i] < qInfo->ReqItemCount[i] )
+                        return false;
+                }
             }
-            //}
 
             if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
             {
@@ -8395,19 +8390,15 @@ bool Player::CanRewardQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
     {
-        // auto complete quest, return true (maybe need a better check)
-        if ((strlen(pQuest->GetObjectives()) == 0) && CanTakeQuest(pQuest, false))
-            return true;
-
-        // not completed quest (only cheating case, then ignore without message)
-        if(GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
+        // not auto complete quest and not completed quest (only cheating case, then ignore without message)
+        if(!pQuest->IsAutoComplete() && GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
             return false;
 
         // rewarded and not repeatable quest (only cheating case, then ignore without message)
-        if(GetQuestRewardStatus(pQuest->GetQuestId()) && !pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_REPEATABLE))
+        if(GetQuestRewardStatus(pQuest->GetQuestId()))
             return false;
 
-        // prevent recive reward with quest items in bank
+        // prevent receive reward with quest items in bank
         if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
         {
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
@@ -8431,7 +8422,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 {
     if( pQuest )
     {
-        // prevent recive reward with quest items in bank or for not completed quest
+        // prevent receive reward with quest items in bank or for not completed quest
         if(!CanRewardQuest(pQuest,msg))
             return false;
 
@@ -8483,18 +8474,20 @@ void Player::AddQuest( Quest *pQuest )
         // check for repeatable quests status
         QuestUpdateState uState;
         if (mQuestStatus.find(quest_id)==mQuestStatus.end())
-            {uState = QUEST_NEW;}
-            else
+        {
+            uState = QUEST_NEW;
+            mQuestStatus[quest_id].m_rewarded = false;
+        }
+        else
         {
             if (mQuestStatus[quest_id].uState != QUEST_NEW)
-                { uState = QUEST_CHANGED; }
-                else
-                    { uState = QUEST_NEW; };
-        };
+                uState = QUEST_CHANGED;
+            else
+                uState = QUEST_NEW;
+        }
 
         mQuestStatus[quest_id].m_quest = pQuest;
         mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
-        mQuestStatus[quest_id].m_rewarded = false;
         mQuestStatus[quest_id].m_explored = false;
 
         mQuestStatus[quest_id].uState = uState;             // mark quest as new or changed
@@ -8617,8 +8610,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
         }
 
         // Not give XP in case already completed once repeatable quest
-        uint32 XP = mQuestStatus[quest_id].m_completed_once && pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE )
-            ? 0 : uint32(pQuest->XPValue( this )*sWorld.getRate(RATE_XP_QUEST));
+        uint32 XP = mQuestStatus[quest_id].m_rewarded ? 0 : uint32(pQuest->XPValue( this )*sWorld.getRate(RATE_XP_QUEST));
 
         if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
             GiveXP( XP , NULL );
@@ -8628,17 +8620,12 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
         ModifyMoney( pQuest->GetRewOrReqMoney() );
 
         if ( !pQuest->IsRepeatable() )
-        {
             SetQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
-            mQuestStatus[quest_id].m_rewarded = true;
-        }
         else
-        {
             SetQuestStatus(quest_id, QUEST_STATUS_NONE);
-        }
 
+        mQuestStatus[quest_id].m_rewarded = true;
         SendQuestReward( pQuest, XP, questGiver );
-        mQuestStatus[quest_id].m_completed_once = true;     // in repeated quest case prevent recive XP at second complete
         if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
     }
 }
@@ -8739,15 +8726,14 @@ bool Player::SatisfyQuestLog( bool msg )
 
 bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
 {
-    if( quest_id)
+    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    if( qInfo )
     {
-        Quest * qInfo = objmgr.QuestTemplates[quest_id];
-
         // No previous quest (might be first quest in a series)
-        if( qInfo->prevQuests.size() == 0)
+        if( qInfo->prevQuests.size() == 0 )
             return true;
 
-        for(vector<int32>::iterator iter = qInfo->prevQuests.begin(); iter != qInfo->prevQuests.end(); iter++ )
+        for(vector<int32>::iterator iter = qInfo->prevQuests.begin(); iter != qInfo->prevQuests.end(); ++iter )
         {
             uint32 prevId = abs(*iter);
 
@@ -8759,7 +8745,8 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
                 if( *iter > 0 && i_prevstatus->second.m_rewarded )
                     return true;
                 // If any of the negative previous quests active, return true
-                if( *iter < 0 && i_prevstatus->second.m_status == QUEST_STATUS_INCOMPLETE )
+                if( *iter < 0 && (i_prevstatus->second.m_status == QUEST_STATUS_INCOMPLETE
+                    || (i_prevstatus->second.m_status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus(prevId))))
                     return true;
             }
         }
@@ -8889,7 +8876,7 @@ bool Player::SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg )
     return false;
 }
 
-bool Player::SatisfyQuestChain( uint32 quest_id, bool msg )
+bool Player::SatisfyQuestNextChain( uint32 quest_id, bool msg )
 {
     Quest * qInfo = objmgr.QuestTemplates[quest_id];
     if( qInfo )
@@ -8905,7 +8892,42 @@ bool Player::SatisfyQuestChain( uint32 quest_id, bool msg )
 
         // check for all quests further up the chain
         // only necessary if there are quest chains with more than one quest that can be skipped
-        //return SatisfyQuestChain( qInfo->GetNextQuestInChain(), msg );
+        //return SatisfyQuestNextChain( qInfo->GetNextQuestInChain(), msg );
+        return true;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestPrevChain( uint32 quest_id, bool msg )
+{
+    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    if( qInfo )
+    {
+        // No previous quest in chain
+        if( qInfo->prevChainQuests.size() == 0 )
+            return true;
+
+        for(vector<uint32>::iterator iter = qInfo->prevChainQuests.begin(); iter != qInfo->prevChainQuests.end(); ++iter )
+        {
+            uint32 prevId = *iter;
+
+            StatusMap::iterator i_prevstatus = mQuestStatus.find( prevId );
+
+            if( i_prevstatus != mQuestStatus.end() )
+            {
+                // If any of the previous quests in chain active, return false
+                if( i_prevstatus->second.m_status == QUEST_STATUS_INCOMPLETE
+                    || (i_prevstatus->second.m_status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus(prevId)))
+                    return false;
+            }
+
+            // check for all quests further down the chain
+            // only necessary if there are quest chains with more than one quest that can be skipped
+            //if( !SatisfyQuestPrevChain( prevId, msg ) )
+            //    return false;
+        }
+
+        // No previous quest in chain active
         return true;
     }
     return false;
@@ -8959,11 +8981,14 @@ void Player::TakeQuestSourceItem( uint32 quest_id )
 
 bool Player::GetQuestRewardStatus( uint32 quest_id )
 {
-    if( quest_id  )
+    Quest* qInfo = objmgr.QuestTemplates[quest_id];
+    if( qInfo )
     {
+        // for repeatable quests: rewarded field is set after first reward only to prevent getting XP more than once
         StatusMap::iterator itr = mQuestStatus.find( quest_id );
-        if  ( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE )
-            return mQuestStatus[quest_id ].m_rewarded;
+        if( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE 
+            && !qInfo->IsRepeatable() )
+            return mQuestStatus[quest_id].m_rewarded;
 
         return false;
     }
@@ -8974,7 +8999,7 @@ QuestStatus Player::GetQuestStatus( uint32 quest_id )
 {
     if( quest_id )
     {
-        if  ( mQuestStatus.find( quest_id ) != mQuestStatus.end() )
+        if( mQuestStatus.find( quest_id ) != mQuestStatus.end() )
             return mQuestStatus[quest_id].m_status;
     }
     return QUEST_STATUS_NONE;
@@ -9611,6 +9636,7 @@ bool Player::LoadFromDB( uint32 guid )
     uint32 transGUID = fields[27].GetUInt32();
     Relocate(fields[6].GetFloat(),fields[7].GetFloat(),fields[8].GetFloat(),fields[10].GetFloat());
     SetMapId(fields[9].GetUInt32());
+    SetRecallPosition(GetMapId(),GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
 
     if (transGUID != 0)
     {
@@ -10018,7 +10044,7 @@ void Player::_LoadQuestStatus()
 {
     mQuestStatus.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
 
     if(result)
     {
@@ -10043,25 +10069,24 @@ void Player::_LoadQuestStatus()
 
                 mQuestStatus[quest_id].m_rewarded = ( fields[2].GetUInt8() > 0 );
                 mQuestStatus[quest_id].m_explored = ( fields[3].GetUInt8() > 0 );
-                mQuestStatus[quest_id].m_completed_once = ( fields[4].GetUInt8() > 0 );
 
-                if( objmgr.QuestTemplates[quest_id]->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !mQuestStatus[quest_id].m_rewarded )
+                if( objmgr.QuestTemplates[quest_id]->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) )
                     AddTimedQuest( quest_id );
 
-                if (fields[5].GetUInt32() <= sWorld.GetGameTime())
+                if (fields[4].GetUInt32() <= sWorld.GetGameTime())
                 {
                     mQuestStatus[quest_id].m_timer = 1;
                 } else
-                mQuestStatus[quest_id].m_timer = (fields[5].GetUInt32() - sWorld.GetGameTime()) * 1000;
+                mQuestStatus[quest_id].m_timer = (fields[4].GetUInt32() - sWorld.GetGameTime()) * 1000;
 
-                mQuestStatus[quest_id].m_creatureOrGOcount[0] = fields[6].GetUInt32();
-                mQuestStatus[quest_id].m_creatureOrGOcount[1] = fields[7].GetUInt32();
-                mQuestStatus[quest_id].m_creatureOrGOcount[2] = fields[8].GetUInt32();
-                mQuestStatus[quest_id].m_creatureOrGOcount[3] = fields[9].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[0] = fields[10].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[1] = fields[11].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[2] = fields[12].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[3] = fields[13].GetUInt32();
+                mQuestStatus[quest_id].m_creatureOrGOcount[0] = fields[5].GetUInt32();
+                mQuestStatus[quest_id].m_creatureOrGOcount[1] = fields[6].GetUInt32();
+                mQuestStatus[quest_id].m_creatureOrGOcount[2] = fields[7].GetUInt32();
+                mQuestStatus[quest_id].m_creatureOrGOcount[3] = fields[8].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[0] = fields[9].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[1] = fields[10].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[2] = fields[11].GetUInt32();
+                mQuestStatus[quest_id].m_itemcount[3] = fields[12].GetUInt32();
 
                 mQuestStatus[quest_id].uState = QUEST_UNCHANGED;
 
@@ -10503,12 +10528,12 @@ void Player::_SaveQuestStatus()
         switch (i->second.uState)
         {
             case QUEST_NEW :
-                sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`completed_once`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
-                    GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
+                sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+                    GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
                 break;
             case QUEST_CHANGED :
-                sDatabase.PExecute("UPDATE `character_queststatus` SET `status` = '%u',`rewarded` = '%u',`explored` = '%u',`completed_once` = '%u',`timer` = '" I64FMTD "',`mobcount1` = '%u',`mobcount2` = '%u',`mobcount3` = '%u',`mobcount4` = '%u',`itemcount1` = '%u',`itemcount2` = '%u',`itemcount3` = '%u',`itemcount4` = '%u'  WHERE `guid` = '%u' AND `quest` = '%u' ",
-                    i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_completed_once, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3], GetGUIDLow(), i->first );
+                sDatabase.PExecute("UPDATE `character_queststatus` SET `status` = '%u',`rewarded` = '%u',`explored` = '%u',`timer` = '" I64FMTD "',`mobcount1` = '%u',`mobcount2` = '%u',`mobcount3` = '%u',`mobcount4` = '%u',`itemcount1` = '%u',`itemcount2` = '%u',`itemcount3` = '%u',`itemcount4` = '%u'  WHERE `guid` = '%u' AND `quest` = '%u' ",
+                    i->second.m_status, i->second.m_rewarded, i->second.m_explored, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3], GetGUIDLow(), i->first );
                 break;
         };
         i->second.uState = QUEST_UNCHANGED;
