@@ -943,6 +943,13 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
     if (!kickName)
     {
         Player* player = getSelectedPlayer();
+
+        if(!player)
+        {
+            SendSysMessage(LANG_NO_CHAR_SELECTED);
+            return true;
+        }
+
         if(player==m_session->GetPlayer())
         {
             SendSysMessage("You can't kick self, logout instead");
