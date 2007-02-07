@@ -1038,7 +1038,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         static const char* ReputationRankStr[MAX_REPUTATION_RANK] = {"Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Reverted", "Exalted"};
         std::list<struct Factions>::const_iterator itr;
         char* FactionName;
-        for(itr = target->factions.begin(); itr != target->factions.end(); ++itr)
+        for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
         {
             FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->ID);
             if (factionEntry)

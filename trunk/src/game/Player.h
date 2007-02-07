@@ -181,13 +181,23 @@ struct Areas
     float y2;
 };
 
-struct Factions
+enum FactionState
+{
+    FACTION_UNCHANGED = 0,
+    FACTION_CHANGED   = 1,
+    FACTION_NEW       = 2
+};
+
+struct Faction
 {
     uint32 ID;
     uint32 ReputationListID;
     uint32 Flags;
     int32  Standing;
+    FactionState uState;
 };
+
+typedef std::list<Faction> FactionsList;
 
 struct EnchantDuration
 {
@@ -988,7 +998,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
 
-        std::list<struct Factions> factions;
+        FactionsList m_factions;
         int32 GetBaseReputation(const FactionEntry *factionEntry) const;
         int32 GetReputation(uint32 FactionTemplateId) const;
         int32 GetReputation(const FactionEntry *factionEntry) const;
@@ -1005,8 +1015,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CalculateReputation(Quest *pQuest, uint64 guid);
         void SetInitialFactions();
         void UpdateReputation() const;
-        void SendSetFactionStanding(const Factions* faction) const;
+        void SendSetFactionStanding(const Faction* faction) const;
         void SendInitialReputations();
+        void SetFactionAtWar(uint32 repListID, bool atWar);
 
         void UpdateMaxSkills();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
@@ -1205,7 +1216,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
         void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;
 
-        std::list<struct Factions>::iterator FindReputationIdInTheList(uint32 RepId);
+        FactionsList::iterator FindReputationListIdInFactionList(uint32 repListId);
 
         /*********************************************************/
         /***              ENVIROMENTAL SYSTEM                  ***/
