@@ -556,7 +556,7 @@ bool ChatHandler::HandleModifyTalentCommand (const char* args)
     int tp = atoi((char*)args);
     if (tp>0)
     {
-        Player* player = m_session->GetPlayer();
+        Player* player = getSelectedPlayer();
         if(!player)
         {
             SendSysMessage(LANG_NO_CHAR_SELECTED);
