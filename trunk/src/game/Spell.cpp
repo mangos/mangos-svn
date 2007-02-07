@@ -1081,9 +1081,13 @@ void Spell::finish(bool ok)
 
     m_ObjToDel.clear();*/
 
+    // other code realated only to successfully finished spells
+    if(!ok)
+        return;
+
     // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-    if( ok && m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
+    if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
     {
         if( unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT )
         {
@@ -1097,8 +1101,15 @@ void Spell::finish(bool ok)
     }
 
     // call triggered spell only at successful cast
-    if(ok && m_TriggerSpell.size() > 0)
+    if(m_TriggerSpell.size() > 0)
         TriggerSpell();
+
+    if (IsMeleeAttackResetSpell())
+    {
+         m_caster->resetAttackTimer(BASE_ATTACK);
+         if(m_caster->haveOffhandWeapon())
+             m_caster->resetAttackTimer(OFF_ATTACK);
+    }
 }
 
 void Spell::SendCastResult(uint8 result)
