@@ -1963,11 +1963,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                         return false;                       // cannot remove higher rank
 
                     RemoveAura(i);
-
-                    if( m_Auras.empty() )
-                        break;
-                    else
-                        next =  m_Auras.begin();
+                    next = i;
                 }
             }
         }
@@ -1977,11 +1973,9 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
 void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
 {
-    AuraMap::iterator i,next;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
+    AuraMap::iterator i;
+    for (i = m_Auras.begin(); i != m_Auras.end();)
     {
-        next = i;
-        next++;
         if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
         {
             if(dispel_type == 1)
@@ -2004,14 +1998,15 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
                         positive = ((*i).second->GetSpellProto()->AttributesEx & (1<<7)) ? false : true;
                 }
                 if(positive)
+                {
+                    ++i;
                     continue;
+                }
             }
             RemoveAura(i);
-            if( m_Auras.empty() )
-                break;
-            else
-                next =  m_Auras.begin();
         }
+        else
+            ++i;
     }
 }
 
@@ -2123,11 +2118,17 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
         Aur->HandleShapeshiftBoosts(false);
 
-    m_Auras.erase(i++);
+    m_Auras.erase(i);
     m_removedAuras++;                                       // internal count used by unit update
 
     Aur->_RemoveAura();
     delete Aur;
+
+    // only way correctly remove all auras from list
+    if( m_Auras.empty() )
+       i = m_Auras.end();
+    else
+       i = m_Auras.begin();
 }
 
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
@@ -2165,10 +2166,12 @@ void Unit::RemoveAllAurasOnDeath()
     // used just after dieing to remove all visible auras
     // and disable the mods for the passive ones
     for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
+    {
         if (!iter->second->IsPassive())
             RemoveAura(iter, true);
-    else
-        ++iter;
+        else
+            ++iter;
+    }
     _RemoveAllAuraMods();
 }
 
