@@ -456,6 +456,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
     if (!spellproto) return false;
 
+    // non-positive targets
     switch(spellproto->EffectImplicitTargetA[effIndex])
     {
         case 6:                                             //TARGET_S_E:
@@ -468,8 +469,38 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 53:                                            //TARGET_AE_SELECTED:
             return false;
         default:
-            return (spellproto->AttributesEx & (1<<7)) ? false : true;
+            break;
     }
+
+    // AttributesEx check
+    if(spellproto->AttributesEx & (1<<7))
+        return false;
+
+    // non-positive aura use
+    if(spellproto->Effect[effIndex]==6 /*SPELL_EFFECT_APPLY_AURA*/)
+    {
+        switch(spellproto->EffectApplyAuraName[effIndex])
+        {
+            case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
+            {
+                // non-positive immunities
+                switch(spellproto->EffectMiscValue[effIndex])
+                {
+                    case 16 /*IMMUNE_MECHANIC_HEAL    */:
+                    case 19 /*IMMUNE_MECHANIC_SHIELDED*/:
+                    case 21 /*IMMUNE_MECHANIC_MOUNT   */:
+                        return false;
+                    default:
+                        break;
+                }
+            } break;
+            default:
+                break;
+        }
+    }
+
+    // ok, positive
+    return true; 
 }
 
 bool IsPositiveSpell(uint32 spellId)
