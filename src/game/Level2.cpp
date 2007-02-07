@@ -1036,7 +1036,6 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     if ( py && strncmp(py, "rep", 3) == 0 )
     {
         static const char* ReputationRankStr[MAX_REPUTATION_RANK] = {"Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Reverted", "Exalted"};
-        std::list<struct Factions>::const_iterator itr;
         char* FactionName;
         for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
         {
