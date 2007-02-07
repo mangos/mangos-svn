@@ -2483,7 +2483,11 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
     if(apply && m_periodicTimer <= 0)
     {
         m_periodicTimer += 5000;
+
         Powers pt = m_target->getPowerType();
+        if(int32(pt) != m_modifier.m_miscvalue)
+            return;
+
         // Prevent rage regeneration in combat with rage loss slowdown warrior talant and 0<->1 switching range out combat.
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
