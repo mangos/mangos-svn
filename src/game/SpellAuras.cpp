@@ -2164,6 +2164,23 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
         m_periodicTimer += m_modifier.periodictime;
 
     m_isPeriodic = apply;
+
+    if (GetSpellProto()->Mechanic == 16)
+    {
+        Unit* caster = GetTarget();
+        
+        SpellEntry const *spell_proto = sSpellStore.LookupEntry(11196);
+        if(!spell_proto)
+            return;
+        
+        Spell spell(caster, spell_proto, true, 0);
+        SpellCastTargets targets;
+        targets.setUnitTarget(m_target);
+        // prevent double stat apply for triggered auras
+        m_target->ApplyStats(true);
+        spell.prepare(&targets);
+        m_target->ApplyStats(false);
+    }    
 }
 
 void Aura::HandlePeriodicDamage(bool apply, bool Real)
