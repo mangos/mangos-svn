@@ -420,6 +420,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         pCurrChar->SetRank(fields[1].GetUInt32());
         delete result;
     }
+    else if(pCurrChar->GetGuildId())                        // clear guild related fields in case wrong data about non existed membership
+    {
+        pCurrChar->SetInGuild(0);
+        pCurrChar->SetRank(0);
+    }
 
     MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
