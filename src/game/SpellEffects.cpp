@@ -1732,7 +1732,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
             eff_damage = uint32(eff_damage * (m_spellInfo->EffectBasePoints[j]+1) / 100);
 
-    if (hitInfo & nohitMask)
+    if ((hitInfo & nohitMask) && attType != RANGED_ATTACK)   // not send ranged miss/etc
         m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, m_spellInfo->School, eff_damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
 
     if(hitInfo & HITINFO_CRITICALHIT)
