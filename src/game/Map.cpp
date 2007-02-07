@@ -791,6 +791,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
     {
         c->Relocate(resp_x, resp_y, resp_z, c->GetOrientation());
         CreatureRelocationNotifying(c,resp_cell,resp_cell.cellPair());
+        (*c)->Initialize();                                 // prevent possible problems with default move generators
         return true;
     }
     else
