@@ -3808,17 +3808,15 @@ void Player::setFactionForRace(uint8 race)
 
 void Player::UpdateReputation() const
 {
-    std::list<struct Factions>::const_iterator itr;
-
     sLog.outDebug( "WORLD: Player::UpdateReputation" );
 
-    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    for(FactionsList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
         SendSetFactionStanding(&*itr);
     }
 }
 
-void Player::SendSetFactionStanding(const Factions* faction) const
+void Player::SendSetFactionStanding(const Faction* faction) const
 {
     if(faction->Flags & 0x00000001 )                        //If faction is visible then update it
     {
@@ -3836,9 +3834,9 @@ void Player::SendInitialReputations()
     data << uint32 (0x00000040);
     for(uint32 a=0; a<64; a++)
     {
-        std::list<struct Factions>::iterator itr = FindReputationIdInTheList(a);
+        FactionsList::iterator itr = FindReputationListIdInFactionList(a);
 
-        if(itr != factions.end())
+        if(itr != m_factions.end())
         {
             data << uint8  (itr->Flags);
             data << uint32 (itr->Standing);
@@ -3852,18 +3850,37 @@ void Player::SendInitialReputations()
     GetSession()->SendPacket(&data);
 }
 
-std::list<struct Factions>::iterator Player::FindReputationIdInTheList(uint32 faction)
+void Player::SetFactionAtWar(uint32 repListID, bool atWar)
 {
-    for(std::list<struct Factions>::iterator itr = factions.begin(); itr != factions.end(); ++itr)
+    for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        if(itr->ReputationListID == faction) return itr;
+        if(itr->ReputationListID == repListID)
+        {
+            if(((itr->Flags & 2)!=0)==atWar)                // already set
+                break;
+
+            if( atWar )
+                itr->Flags |= 2;
+            else
+                itr->Flags &= ~(uint32)2;
+            if(itr->uState != FACTION_NEW) itr->uState = FACTION_CHANGED;
+            break;
+        }
     }
-    return factions.end();
+}
+
+FactionsList::iterator Player::FindReputationListIdInFactionList(uint32 repListId)
+{
+    for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    {
+        if(itr->ReputationListID == repListId) return itr;
+    }
+    return m_factions.end();
 }
 
 void Player::SetInitialFactions()
 {
-    Factions newFaction;
+    Faction newFaction;
     FactionEntry const *factionEntry = NULL;
 
     for(unsigned int i = 1; i <= sFactionStore.GetNumRows(); i++)
@@ -3875,6 +3892,7 @@ void Player::SetInitialFactions()
             newFaction.ID = factionEntry->ID;
             newFaction.ReputationListID = factionEntry->reputationListID;
             newFaction.Standing = 0;
+            newFaction.uState = FACTION_NEW;
             //Set visible to factions of own team
             if( GetTeam() == factionEntry->team ) newFaction.Flags = 1;
             else newFaction.Flags = 0;
@@ -3883,7 +3901,7 @@ void Player::SetInitialFactions()
             if(GetBaseReputationRank(factionEntry) <= REP_HOSTILE)
                 newFaction.Flags = (newFaction.Flags | 2 );
 
-            factions.push_back(newFaction);
+            m_factions.push_back(newFaction);
         }
     }
 }
@@ -3918,8 +3936,7 @@ int32 Player::GetReputation(const FactionEntry *factionEntry) const
     if(!factionEntry)
         return 0;
 
-    std::list<struct Factions>::const_iterator itr;
-    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    for(FactionsList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
         if(int32(itr->ReputationListID) == factionEntry->reputationListID)
             return GetBaseReputation(factionEntry) + itr->Standing;
@@ -3982,9 +3999,7 @@ bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputa
 
 bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing)
 {
-    std::list<struct Factions>::iterator itr;
-
-    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
         if(int32(itr->ReputationListID) == factionEntry->reputationListID)
         {
@@ -3998,8 +4013,9 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
                 new_rep = Reputation_Bottom;
 
             itr->Standing = new_rep - BaseRep;
-
             itr->Flags = (itr->Flags | 0x00000001);
+            itr->uState = FACTION_CHANGED;
+
             SendSetFactionStanding(&*itr);
             return true;
         }
@@ -10101,9 +10117,7 @@ void Player::_LoadQuestStatus()
 
 void Player::_LoadReputation()
 {
-    Factions newFaction;
-
-    factions.clear();
+    m_factions.clear();
 
     QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
 
@@ -10113,12 +10127,14 @@ void Player::_LoadReputation()
         {
             Field *fields = result->Fetch();
 
+            Faction newFaction;
             newFaction.ID               = fields[0].GetUInt32();
             newFaction.ReputationListID = fields[1].GetUInt32();
             newFaction.Standing         = int32(fields[2].GetUInt32());
             newFaction.Flags            = fields[3].GetUInt32();
+            newFaction.uState           = FACTION_UNCHANGED;
 
-            factions.push_back(newFaction);
+            m_factions.push_back(newFaction);
         }
         while( result->NextRow() );
 
@@ -10542,24 +10558,25 @@ void Player::_SaveQuestStatus()
 
 void Player::_SaveReputation()
 {
-    std::list<Factions>::iterator itr;
-
-    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        // it's better than rebuilding indexes multiple times
-        QueryResult *result = sDatabase.PQuery("SELECT count(*) AS r FROM `character_reputation` WHERE `guid` = '%u' AND `faction`='%u'", GetGUIDLow(), itr->ID );
-        Field *fields = result->Fetch();
-        uint32 Rows = fields[0].GetUInt32();
-        delete result;
-
-        if (Rows)
+        switch(itr->uState)
         {
-            sDatabase.PExecute("UPDATE `character_reputation` SET `reputation`='%u', `standing`='%i', `flags`='%u' WHERE `guid` = '%u' AND `faction`='%u'",
-                itr->ReputationListID, itr->Standing, itr->Flags, GetGUIDLow(), itr->ID );
-        } else
-        {
-            sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%i', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
-        };
+            case FACTION_UNCHANGED:
+                break;
+            case FACTION_CHANGED:
+                sDatabase.PExecute("UPDATE `character_reputation` SET `reputation`='%u', `standing`='%i', `flags`='%u' WHERE `guid` = '%u' AND `faction`='%u'",
+                    itr->ReputationListID, itr->Standing, itr->Flags, GetGUIDLow(), itr->ID );
+                itr->uState = FACTION_UNCHANGED;
+                break;
+            case FACTION_NEW:
+                sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%i', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+                itr->uState = FACTION_UNCHANGED;
+                break;
+            default:
+                sLog.outError("Unknown faction lists entry state: %d",itr->uState);
+                break;
+        }
     }
 }
 

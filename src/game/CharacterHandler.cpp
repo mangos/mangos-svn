@@ -494,25 +494,13 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 {
     //sLog.outDebug("WORLD SESSION: HandleSetFactionAtWar");
 
-    uint32 FactionID;
-    uint8  Flag;
+    uint32 repListID;
+    uint8  flag;
 
-    recv_data >> FactionID;
-    recv_data >> Flag;
+    recv_data >> repListID;
+    recv_data >> flag;
 
-    std::list<struct Factions>::iterator itr;
-
-    for(itr = GetPlayer()->factions.begin(); itr != GetPlayer()->factions.end(); ++itr)
-    {
-        if(itr->ReputationListID == FactionID)
-        {
-            if( Flag )
-                itr->Flags |= 2;
-            else
-                itr->Flags &= ~(uint32)2;
-            break;
-        }
-    }
+    GetPlayer()->SetFactionAtWar(repListID,flag);
 }
 
 //I think this function is never used :/ I dunno, but i guess this opcode not exists
