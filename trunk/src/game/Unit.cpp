@@ -4185,7 +4185,7 @@ void Unit::DeleteThreatList()
         {
             HateOfflineList::iterator iter = m_offlineList.begin();
             uint64 guid = iter->UnitGuid;
-            m_threatList.erase(iter);
+            m_offlineList.erase(iter);
 
             Unit* unit = ObjectAccessor::Instance().GetUnit(*this, guid);
             if(unit)
