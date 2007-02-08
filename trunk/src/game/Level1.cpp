@@ -47,7 +47,6 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
 bool ChatHandler::HandleGMOnCommand(const char* args)
 {
     m_session->GetPlayer()->SetGameMaster(true);
-    m_session->GetPlayer()->CombatStop();
     m_session->SendNotification("GM mode is ON");
 
     return true;

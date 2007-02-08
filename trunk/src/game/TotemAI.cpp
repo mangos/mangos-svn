@@ -39,25 +39,26 @@ TotemAI::TotemAI(Creature &c) : i_totem(c), i_victimGuid(0), i_tracker(TIME_INTE
 void
 TotemAI::MoveInLineOfSight(Unit *u)
 {
-    // would be a faster solution but it doesnt work
-    /*if (i_totem.isTotem() && ((Totem*)&i_totem)->GetTotemType() == TOTEM_ACTIVE)
+    if (!i_totem.isTotem() || ((Totem*)&i_totem)->GetTotemType() != TOTEM_ACTIVE)
+        return;
+
+    if(i_totem.getVictim() || i_totem.IsFriendlyTo(u) || i_totem.IsNeutralToAll() || u->IsNeutralToAll())
+        return;
+
+    if(!u->isTargetableForAttack()|| !IsVisible(u))
+        return;
+
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
+    if (!spellInfo) return;
+    SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+    float attackRadius = GetMaxRange(srange);
+
+    if(i_totem.IsWithinDist(u, attackRadius))
     {
-        if (ObjectAccessor::Instance().GetUnit(*(Unit*)&i_totem, i_victimGuid))
-            return;
-        i_victimGuid = 0;
-
-        FactionTemplateResolver its_faction = u->getFactionTemplateEntry();
-        if(i_myFaction.IsFriendlyTo(its_faction) || i_myFaction.IsNeutralToAll() || its_faction.IsNeutralToAll())
-            return;
-
-        SpellEntry *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
-        if (!spellInfo) return;
-        SpellRange* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
-        float max_range = GetMaxRange(srange);
-
-        if (i_totem.GetDistanceSq(u) < max_range * max_range)
-            i_victimGuid = u->GetGUID();
-    }*/
+        AttackStart(u);
+        if(u->HasStealthAura())
+            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    }
 }
 
 void
@@ -97,24 +98,6 @@ TotemAI::UpdateAI(const uint32 diff)
     }
     else
         i_victimGuid = 0;
-
-    // look for a new victim in range
-    std::list<Unit*> UnitList;
-    MapManager::Instance().GetMap(i_totem.GetMapId())->GetUnitList(i_totem.GetPositionX(), i_totem.GetPositionY(),UnitList);
-    for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
-    {
-        if((*iter) && (*iter)->isTargetableForAttack()&& IsVisible(*iter))
-        {
-            if(i_totem.IsFriendlyTo(*iter) || i_totem.IsNeutralToAll() || (*iter)->IsNeutralToAll())
-                continue;
-            if(i_totem.IsWithinDist(*iter, max_range) )
-            {
-                i_victimGuid = (*iter)->GetGUID();
-                AttackStart(*iter);
-                break;
-            }
-        }
-    }
 }
 
 bool

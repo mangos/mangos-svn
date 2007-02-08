@@ -2042,30 +2042,18 @@ uint8 Spell::CanCast()
                 Cell cell = RedZone::GetZone(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
 
-                std::list<Unit*> i_data;
-                std::list<Unit*>::iterator itr;
-                MaNGOS::GridUnitListNotifier checker(i_data);
+                Creature* found_creature = NULL;
 
-                TypeContainerVisitor<MaNGOS::GridUnitListNotifier, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+                MaNGOS::InAttackDistanceFromAnyHostileCreatureCheck u_check(m_caster);
+                MaNGOS::CreatureSearcher<MaNGOS::InAttackDistanceFromAnyHostileCreatureCheck> checker(found_creature, u_check);
+                TypeContainerVisitor<MaNGOS::CreatureSearcher<MaNGOS::InAttackDistanceFromAnyHostileCreatureCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
                 CellLock<GridReadGuard> cell_lock(cell, p);
                 cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-                for(itr = i_data.begin();itr != i_data.end();++itr)
+
+                if(found_creature)
                 {
-                    if( !(*itr)->isAlive() )
-                        continue;
-
-                    if( !(*itr)->IsHostileTo(m_caster) )
-                        continue;
-
-                    if((*itr)->GetTypeId() != TYPEID_PLAYER)
-                    {
-                        float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster);
-                        if((*itr)->GetDistanceSq(m_caster) < attackdis*attackdis )
-                        {
-                            castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
-                            break;
-                        }
-                    }
+                    castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
+                    break;
                 }
             };break;
             default:break;
