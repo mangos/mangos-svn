@@ -100,12 +100,12 @@ enum FactionMasks
 struct FactionTemplateEntry
 {
     uint32      ID;
+    uint32      faction;
     uint32      ourMask;                                    // if mask set (see FactionMasks) then faction included in masked team
     uint32      friendlyMask;                               // if mask set (see FactionMasks) then faction friendly to masked team
     uint32      hostileMask;                                // if mask set (see FactionMasks) then faction hostile to masked team
     uint32      enemyFaction1;
     uint32      enemyFaction2;
-    uint32      faction;
 
     // helpers
     bool IsFriendlyTo(FactionTemplateEntry const& entry) const
