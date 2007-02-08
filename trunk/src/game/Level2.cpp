@@ -88,7 +88,9 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
 
 bool ChatHandler::HandleGoObjectCommand(const char* args)
 {
-    if(m_session->GetPlayer()->isInFlight())
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -122,13 +124,17 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
         return true;
     }
 
-    m_session->GetPlayer()->TeleportTo(mapid, x, y, z, ort);
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+
+    _player->TeleportTo(mapid, x, y, z, ort);
     return true;
 }
 
 bool ChatHandler::HandleGoCreatureCommand(const char* args)
 {
-    if(m_session->GetPlayer()->isInFlight())
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -163,7 +169,9 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
         return true;
     }
 
-    m_session->GetPlayer()->TeleportTo(mapid, x, y, z, ort);
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+
+    _player->TeleportTo(mapid, x, y, z, ort);
     return true;
 }
 
@@ -282,13 +290,17 @@ bool ChatHandler::HandleNYICommand(const char* args)
 
 bool ChatHandler::HandleProgCommand(const char* args)
 {
-    if(m_session->GetPlayer()->isInFlight())
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
     }
 
-    m_session->GetPlayer()->TeleportTo(451, 16391.80f, 16341.20f, 69.44f,0.0f);
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+
+    _player->TeleportTo(451, 16391.80f, 16341.20f, 69.44f,0.0f);
 
     return true;
 }

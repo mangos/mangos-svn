@@ -154,6 +154,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             chr->GetSession()->SendPacket( &data );
         }
 
+        chr->SetRecallPosition(chr->GetMapId(),chr->GetPositionX(),chr->GetPositionY(),chr->GetPositionZ(),chr->GetOrientation());
         chr->TeleportTo(m_session->GetPlayer()->GetMapId(),
             m_session->GetPlayer()->GetPositionX(),
             m_session->GetPlayer()->GetPositionY(),
@@ -177,7 +178,9 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
 bool ChatHandler::HandleGonameCommand(const char* args)
 {
-    if(m_session->GetPlayer()->isInFlight())
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -195,17 +198,18 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     {
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());
 
-        if (m_session->GetPlayer()->isVisibleFor(chr,false))
+        if (_player->isVisibleFor(chr,false))
         {
             char buf0[256];
-            sprintf((char*)buf0,LANG_APPEARING_TO, m_session->GetPlayer()->GetName());
+            sprintf((char*)buf0,LANG_APPEARING_TO, _player->GetName());
 
             WorldPacket data;
             FillSystemMessageData(&data, m_session, buf0);
             chr->GetSession()->SendPacket(&data);
         }
 
-        m_session->GetPlayer()->TeleportTo(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),m_session->GetPlayer()->GetOrientation());
+        _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+        _player->TeleportTo(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),_player->GetOrientation());
         return true;
     }
 
@@ -217,7 +221,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         uint32 map;
         if(Player::LoadPositionFromDB(map,x,y,z,o,guid))
         {
-            m_session->GetPlayer()->TeleportTo(map, x, y, z,m_session->GetPlayer()->GetOrientation());
+            _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+            _player->TeleportTo(map, x, y, z,_player->GetOrientation());
             return true;
         }
     }
@@ -229,15 +234,51 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
 bool ChatHandler::HandleRecallCommand(const char* args)
 {
-    Player* _player = m_session->GetPlayer();
+    Player* chr = NULL;
 
-    if(_player->isInFlight())
+    if(!*args)
     {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        chr = getSelectedPlayer();
+
+        if(!chr)
+        {
+            chr = m_session->GetPlayer();
+
+            if(chr->isInFlight())
+            {
+                SendSysMessage(LANG_YOU_IN_FLIGHT);
+                return true;
+            }
+        }
+    }
+    else
+    {
+        std::string name = args;
+        normalizePlayerName(name);
+        sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    
+        chr = objmgr.GetPlayer(name.c_str());
+
+        if(!chr)
+        {
+            PSendSysMessage(LANG_NO_PLAYER, args);
+            return true;
+        }
+    }
+
+    if(chr->IsBeingTeleported())
+    {
+        PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());
         return true;
     }
 
-    _player->TeleportTo(_player->m_recallMap, _player->m_recallX, _player->m_recallY, _player->m_recallZ, _player->m_recallO);
+    if(chr->isInFlight())
+    {
+        PSendSysMessage(LANG_CHAR_IN_FLIGHT, chr->GetName());
+        return true;
+    }
+
+    chr->TeleportTo(chr->m_recallMap, chr->m_recallX, chr->m_recallY, chr->m_recallZ, chr->m_recallO);
     return true;
 }
 
