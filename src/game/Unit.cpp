@@ -37,7 +37,6 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Totem.h"
-#include "FactionTemplateResolver.h"
 
 #include <math.h>
 
@@ -3135,13 +3134,6 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
     return entry;
 }
 
-bool Unit::IsHostileToAll() const
-{
-    FactionTemplateResolver my_faction = getFactionTemplateEntry();
-
-    return my_faction.IsHostileToAll();
-}
-
 bool Unit::IsHostileTo(Unit const* unit) const
 {
     if(unit==this)
@@ -3171,10 +3163,13 @@ bool Unit::IsHostileTo(Unit const* unit) const
     }
 
     // common case (CvC,PvC, CvP)
-    FactionTemplateResolver tester_faction = tester->getFactionTemplateEntry();
-    FactionTemplateResolver target_faction = target->getFactionTemplateEntry();
+    FactionTemplateEntry const*tester_faction = tester->getFactionTemplateEntry();
+    FactionTemplateEntry const*target_faction = target->getFactionTemplateEntry();
 
-    return tester_faction.IsHostileTo(target_faction);
+    if(!tester_faction || !target_faction)
+        return false;
+
+    return tester_faction->IsHostileTo(*target_faction);
 }
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
@@ -3206,17 +3201,31 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     }
 
     // common case (CvC, PvC, CvP)
-    FactionTemplateResolver tester_faction = tester->getFactionTemplateEntry();
-    FactionTemplateResolver target_faction = target->getFactionTemplateEntry();
+    FactionTemplateEntry const*tester_faction = tester->getFactionTemplateEntry();
+    FactionTemplateEntry const*target_faction = target->getFactionTemplateEntry();
 
-    return tester_faction.IsFriendlyTo(target_faction);
+    if(!tester_faction || !target_faction)
+        return false;
+
+    return tester_faction->IsFriendlyTo(*target_faction);
+}
+
+bool Unit::IsHostileToPlayer() const
+{
+    FactionTemplateEntry const* my_faction = getFactionTemplateEntry();
+    if(!my_faction)
+        return false;
+
+    return my_faction->IsHostileToPlayer();
 }
 
 bool Unit::IsNeutralToAll() const
 {
-    FactionTemplateResolver my_faction = getFactionTemplateEntry();
+    FactionTemplateEntry const* my_faction = getFactionTemplateEntry();
+    if(!my_faction)
+        return true;
 
-    return my_faction.IsNeutralToAll();
+    return my_faction->IsNeutralToAll();
 }
 
 bool Unit::Attack(Unit *victim)
