@@ -1736,18 +1736,6 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetLevel( level);
     UpdateMaxSkills ();
 
-    // save new stats
-    SetMaxPower(POWER_MANA, info.mana);
-    if(getPowerType() == POWER_RAGE)
-        SetMaxPower(POWER_RAGE, 1000 );
-    else if(getPowerType()== POWER_ENERGY)
-        SetMaxPower(POWER_ENERGY, 100 );
-
-    SetMaxPower(POWER_FOCUS, 0 );
-    SetMaxPower(POWER_HAPPINESS, 0 );
-
-    SetMaxHealth(info.health);
-
     // save base values (bonuses already included in stored stats
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
@@ -1757,8 +1745,6 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
 
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
-
-    InitDataForForm();
 
     SetArmor(m_createStats[STAT_AGILITY]*2);
 
@@ -1798,6 +1784,17 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
         SetResistanceBuffMods(SpellSchools(i), true, 0);
         SetResistanceBuffMods(SpellSchools(i), false, 0);
     }
+
+    InitDataForForm();
+
+    // save new stats
+    SetMaxPower(POWER_MANA,  info.mana);
+    SetMaxPower(POWER_RAGE,  1000 );
+    SetMaxPower(POWER_ENERGY,100 );
+    SetMaxPower(POWER_FOCUS, 0 );
+    SetMaxPower(POWER_HAPPINESS, 0 );
+
+    SetMaxHealth(info.health);
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
@@ -11182,6 +11179,7 @@ void Player::InitDataForForm()
             SetFloatValue(UNIT_FIELD_MAXDAMAGE, val*1.1);
             SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val*0.9);
             SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val*1.1);
+            if(getPowerType()!=POWER_ENERGY) setPowerType(POWER_ENERGY);
             break;
         }
         case FORM_BEAR:
@@ -11196,6 +11194,7 @@ void Player::InitDataForForm()
             SetFloatValue(UNIT_FIELD_MAXDAMAGE, val*1.1);
             SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val*0.9);
             SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val*1.1);
+            if(getPowerType()!=POWER_RAGE) setPowerType(POWER_RAGE);
             break;
         }
         default:                                            // 0, for example
@@ -11207,6 +11206,10 @@ void Player::InitDataForForm()
             SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
             SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, 0 );
             SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, 0 );
+
+            ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
+            if(cEntry && cEntry->powerType < MAX_POWERS && uint32(getPowerType()) != cEntry->powerType)
+                setPowerType(Powers(cEntry->powerType));
             break;
         }
     }
