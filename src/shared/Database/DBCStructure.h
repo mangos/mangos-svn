@@ -103,13 +103,25 @@ struct FactionTemplateEntry
     uint32      ourMask;                                    // if mask set (see FactionMasks) then faction included in masked team
     uint32      friendlyMask;                               // if mask set (see FactionMasks) then faction friendly to masked team
     uint32      hostileMask;                                // if mask set (see FactionMasks) then faction hostile to masked team
+    uint32      enemyFaction1;
+    uint32      enemyFaction2;
     uint32      faction;
 
     // helpers
-    bool IsFriendlyTo(FactionTemplateEntry const& entry) const { return friendlyMask & entry.ourMask; }
-    bool IsHostileTo(FactionTemplateEntry const& entry) const { return hostileMask & entry.ourMask; }
+    bool IsFriendlyTo(FactionTemplateEntry const& entry) const
+    {
+        if(enemyFaction1 == entry.faction || enemyFaction2 == entry.faction)
+            return false;
+        return friendlyMask & entry.ourMask;
+    }
+    bool IsHostileTo(FactionTemplateEntry const& entry) const
+    {
+        if(enemyFaction1 == entry.faction || enemyFaction2 == entry.faction)
+            return true;
+        return hostileMask & entry.ourMask;
+    }
     bool IsHostileToPlayer() const { return hostileMask & FACTION_MASK_PLAYER; }
-    bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0; } 
+    bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0 && enemyFaction1==0 && enemyFaction2==0; } 
 };
 
 struct ItemDisplayInfoEntry
