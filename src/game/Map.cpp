@@ -864,23 +864,6 @@ void Map::UnloadAll()
     }
 }
 
-void Map::GetUnitList(float x, float y, std::list<Unit*> &unlist)
-{
-
-    CellPair p = MaNGOS::ComputeCellPair(x, y);
-    assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
-        p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
-
-    Cell cell = RedZone::GetZone(p);
-
-    cell.data.Part.reserved = ALL_DISTRICT;
-    cell.SetNoCreate();
-    MaNGOS::GridUnitListNotifier notifier(unlist);
-    TypeContainerVisitor<MaNGOS::GridUnitListNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *this);
-}
-
 float Map::GetHeight(float x, float y )
 {
     //local x,y coords
