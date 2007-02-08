@@ -253,7 +253,7 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
     for(uint8 i = 0; i < loot->quest_items.size(); i++)
     {
         LootItem &item = loot->quest_items[i];
-        if(!item.is_looted && player->HaveQuestForItem(item.itemid))
+        if(!item.is_looted && player->HasQuestForItem(item.itemid))
         {
             ql->push_back(QuestItem(i));
             // questitems get blocked when they first apper in a

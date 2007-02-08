@@ -1616,7 +1616,7 @@ void Spell::TriggerSpell()
 uint8 Spell::CanCast()
 {
     // check cooldowns to prevent cheating
-    if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->HaveSpellCooldown(m_spellInfo->Id))
+    if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->HasSpellCooldown(m_spellInfo->Id))
         return CAST_FAIL_SPELL_NOT_READY_YET;
 
     // cancel autorepeat spells if cast start when moving

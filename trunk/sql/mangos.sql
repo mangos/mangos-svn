@@ -2168,6 +2168,7 @@ CREATE TABLE `quest_template` (
   `OfferRewardEmote` int(11) unsigned NOT NULL default '0',
   `RequestItemsEmote` int(11) unsigned NOT NULL default '1',
   `CompleteScript` int(11) unsigned NOT NULL default '0',
+  `Repeatable` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest System';
 

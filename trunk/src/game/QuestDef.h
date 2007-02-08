@@ -109,11 +109,9 @@ enum __QuestSpecialFlags                                    //according to mango
     QUEST_SPECIAL_FLAGS_DELIVER       = 1,
     QUEST_SPECIAL_FLAGS_EXPLORATION   = 2,
     QUEST_SPECIAL_FLAGS_SPEAKTO       = 4,
-
     QUEST_SPECIAL_FLAGS_KILL_OR_CAST  = 8,
     QUEST_SPECIAL_FLAGS_TIMED         = 16,
-    QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,
-
+    //QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,               // meaning of flag 32 unknown
     QUEST_SPECIAL_FLAGS_REPUTATION    = 64,
 };
 
@@ -165,7 +163,7 @@ class Quest
         uint32 GetOfferRewardEmote() { return OfferRewardEmote; }
         uint32 GetRequestItemsEmote() { return RequestItemsEmote; }
         uint32 GetQuestCompleteScript() { return QuestCompleteScript; }
-        bool   IsRepeatable() { return HasSpecialFlag(QUEST_SPECIAL_FLAGS_REPEATABLE); }
+        bool   IsRepeatable() { return bool(Repeatable); }
         bool   IsAutoComplete() { return strlen(GetObjectives()) == 0; }
         uint32 GetSpecialFlags() { return SpecialFlags; }
 
@@ -239,6 +237,7 @@ class Quest
         uint32 OfferRewardEmote;
         uint32 RequestItemsEmote;
         uint32 QuestCompleteScript;
+        uint32 Repeatable;
 };
 
 enum QuestUpdateState
