@@ -122,7 +122,7 @@ bool ChatHandler::HandleStartCommand(const char* args)
     }
 
     // not let used .start command as free replacement for hearthstone
-    if(chr->HaveSpellCooldown(8690))
+    if(chr->HasSpellCooldown(8690))
     {
         SendSysMessage(LANG_YOU_USED_IT_RECENTLY);
         return true;

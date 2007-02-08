@@ -679,7 +679,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void KilledMonster( uint32 entry, uint64 guid );
         void CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id );
         void MoneyChanged( uint32 value );
-        bool HaveQuestForItem( uint32 itemid );
+        bool HasQuestForItem( uint32 itemid );
 
         void SendQuestComplete( uint32 quest_id );
         void SendQuestReward( Quest *pQuest, uint32 XP, Object* questGiver );
@@ -836,7 +836,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         int32 GetTotalPctMods(uint32 spellId, uint8 op);
         template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue);
 
-        bool HaveSpellCooldown(uint32 spell_id) const
+        bool HasSpellCooldown(uint32 spell_id) const
         {
             SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
             return itr != m_spellCooldowns.end() && itr->second > time(NULL);

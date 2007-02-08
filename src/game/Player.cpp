@@ -2236,7 +2236,7 @@ void Player::_LoadSpellCooldowns()
                 for(int ii = 0; ii < 5; ++ii)
                 {
                     uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
-                    if(spell_id != 0 && HaveSpellCooldown(spell_id))
+                    if(spell_id != 0 && HasSpellCooldown(spell_id))
                     {
                         sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
                         WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
@@ -2259,7 +2259,7 @@ void Player::_LoadSpellCooldowns()
                         for(int ii = 0; ii < 5; ++ii)
                         {
                             uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
-                            if(spell_id != 0 && HaveSpellCooldown(spell_id))
+                            if(spell_id != 0 && HasSpellCooldown(spell_id))
                             {
                                 sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
                                 WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
@@ -9307,7 +9307,7 @@ void Player::MoneyChanged( uint32 count )
     }
 }
 
-bool Player::HaveQuestForItem( uint32 itemid )
+bool Player::HasQuestForItem( uint32 itemid )
 {
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
