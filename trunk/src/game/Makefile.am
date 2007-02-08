@@ -137,7 +137,6 @@ libgame_a_SOURCES = \
 	DestinationHolder.h \
 	DestinationHolderImp.h \
 	DynamicObject.h \
-	FactionTemplateResolver.h \
 	FlightMaster.h \
 	Formulas.h \
 	GameObject.h \

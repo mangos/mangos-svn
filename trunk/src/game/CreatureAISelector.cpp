@@ -37,9 +37,17 @@ namespace FactorySelector
         CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
         assert( creature->GetCreatureInfo() != NULL );
         CreatureInfo const *cinfo=creature->GetCreatureInfo();
+
+        const CreatureAICreator *ai_factory = NULL;
+
         std::string ainame=cinfo->AIName;
 
-        if( ainame=="")
+        // select by script name
+        if( ainame!="")
+            ai_factory = ai_registry.GetRegistryItem( ainame.c_str() );
+
+        // select by NPC flags
+        if(!ai_factory)
         {
             if( creature->isGuard() )
                 ainame="GuardAI";
@@ -47,11 +55,12 @@ namespace FactorySelector
                 ainame="PetAI";
             else if(creature->isTotem())
                 ainame="TotemAI";
+
+            ai_factory = ai_registry.GetRegistryItem( ainame.c_str() );
         }
 
-        const CreatureAICreator *ai_factory = ai_registry.GetRegistryItem( ainame.c_str() );
-
-        if( ai_factory == NULL  )
+        // select by permit check
+        if(!ai_factory)
         {
             int best_val = -1;
             std::vector<std::string> l;
@@ -69,7 +78,10 @@ namespace FactorySelector
                 }
             }
         }
+
+        // select NullCreatureAI if not another cases
         ainame = (ai_factory == NULL) ? "NullCreatureAI" : ai_factory->key();
+
         DEBUG_LOG("Creature %u used AI is %s.", creature->GetGUIDLow(), ainame.c_str() );
         return ( ai_factory == NULL ? new NullCreatureAI : ai_factory->Create(creature) );
     }

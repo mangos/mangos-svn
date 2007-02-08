@@ -88,13 +88,28 @@ struct FactionEntry
     char*       name;
 };
 
+enum FactionMasks
+{
+    FACTION_MASK_PLAYER   = 1,                              // any player
+    FACTION_MASK_ALLIANCE = 2,                              // player or creature from alliance team
+    FACTION_MASK_HORDE    = 4,                              // player or creature from horde team
+    FACTION_MASK_MONSTER  = 8                               // aggressive creature from monster team
+                                                            // if none flags set then non-aggressive creature
+};
+
 struct FactionTemplateEntry
 {
     uint32      ID;
-    uint32      fightsupport;
-    uint32      friendly;
-    uint32      hostile;
+    uint32      ourMask;                                    // if mask set (see FactionMasks) then faction included in masked team
+    uint32      friendlyMask;                               // if mask set (see FactionMasks) then faction friendly to masked team
+    uint32      hostileMask;                                // if mask set (see FactionMasks) then faction hostile to masked team
     uint32      faction;
+
+    // helpers
+    bool IsFriendlyTo(FactionTemplateEntry const& entry) const { return friendlyMask & entry.ourMask; }
+    bool IsHostileTo(FactionTemplateEntry const& entry) const { return hostileMask & entry.ourMask; }
+    bool IsHostileToPlayer() const { return hostileMask & FACTION_MASK_PLAYER; }
+    bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0; } 
 };
 
 struct ItemDisplayInfoEntry

@@ -563,10 +563,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\FactionTemplateResolver.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\FlightMaster.cpp"
 				>
 			</File>

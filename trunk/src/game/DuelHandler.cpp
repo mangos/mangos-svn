@@ -27,7 +27,6 @@
 #include "UpdateData.h"
 #include "Chat.h"
 #include "MapManager.h"
-#include "FactionTemplateResolver.h"
 #include "EventSystem.h"
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
