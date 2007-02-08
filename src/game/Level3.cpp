@@ -121,7 +121,9 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
 
 bool ChatHandler::HandleGoXYCommand(const char* args)
 {
-    if(m_session->GetPlayer()->isInFlight())
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -139,7 +141,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     uint32 mapid;
     if (pmapid)
         mapid = (uint32)atoi(pmapid);
-    else mapid = m_session->GetPlayer()->GetMapId();
+    else mapid = _player->GetMapId();
 
     if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
@@ -149,14 +151,18 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
 
     Map *map = MapManager::Instance().GetMap(mapid);
     float z = max(map->GetHeight(x, y), map->GetWaterLevel(x, y));
-    m_session->GetPlayer()->TeleportTo(mapid, x, y, z, m_session->GetPlayer()->GetOrientation());
+
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
     return true;
 }
 
 bool ChatHandler::HandleWorldPortCommand(const char* args)
 {
-    if(m_session->GetPlayer()->isInFlight())
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -184,7 +190,9 @@ bool ChatHandler::HandleWorldPortCommand(const char* args)
         return true;
     }
 
-    m_session->GetPlayer()->TeleportTo(mapid, x, y, z,m_session->GetPlayer()->GetOrientation());
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+
+    _player->TeleportTo(mapid, x, y, z,_player->GetOrientation());
 
     return true;
 }
@@ -206,7 +214,9 @@ bool ChatHandler::HandleAllowMovementCommand(const char* args)
 
 bool ChatHandler::HandleGoCommand(const char* args)
 {
-    if(m_session->GetPlayer()->isInFlight())
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -231,7 +241,9 @@ bool ChatHandler::HandleGoCommand(const char* args)
         return true;
     }
 
-    m_session->GetPlayer()->TeleportTo(mapid, x, y, z,m_session->GetPlayer()->GetOrientation());
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+
+    _player->TeleportTo(mapid, x, y, z,_player->GetOrientation());
 
     return true;
 }
