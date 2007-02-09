@@ -1003,23 +1003,53 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             break;
 
         case MELEE_HIT_PARRY:
+            // at parry warrior also recieve rage like from hit to enemy
+            if(GetTypeId() == TYPEID_PLAYER && getPowerType() == POWER_RAGE)
+                ((Player*)this)->CalcRage(*damage,true);
+
             *damage = 0;
             *victimState = VICTIMSTATE_PARRY;
 
             // instant (maybe with small delay) counter attack
             {
-                uint32 offtime  = pVictim->getAttackTimer(OFF_ATTACK);
-                uint32 basetime = pVictim->getAttackTimer(BASE_ATTACK);
+                float offtime  = float(pVictim->getAttackTimer(OFF_ATTACK));
+                float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
 
+                // after parry nearest next attack time will reduced at %40 from full attack time.
+                // The delay cannot be reduced to less than 20% of your weapon’s base swing delay.
                 if (pVictim->haveOffhandWeapon() && offtime < basetime)
                 {
-                    if( offtime > ATTACK_DISPLAY_DELAY )
-                        pVictim->setAttackTimer(OFF_ATTACK,ATTACK_DISPLAY_DELAY);
+                    float percent20 = pVictim->GetAttackTime(OFF_ATTACK)*0.20;
+                    float percent60 = 3*percent20;
+                    // set to 20% if in range 20%...20+40% of full time
+                    if(offtime > percent20 && offtime <= percent60)
+                    {
+                        pVictim->setAttackTimer(OFF_ATTACK,uint32(percent20));
+                    }
+                    // decrease at %40 from full time
+                    else if(offtime > percent60)
+                    {
+                        offtime -= 2*percent20;
+                        pVictim->setAttackTimer(OFF_ATTACK,uint32(offtime));
+                    }
+                    // ELSE not changed
                 }
                 else
                 {
-                    if ( basetime > ATTACK_DISPLAY_DELAY )
-                        pVictim->setAttackTimer(BASE_ATTACK,ATTACK_DISPLAY_DELAY);
+                    float percent20 = pVictim->GetAttackTime(BASE_ATTACK)*0.20;
+                    float percent60 = 3*percent20;
+                    // set to 20% if in range 20%...20+40% of full time
+                    if(basetime > percent20 && basetime <= percent60)
+                    {
+                        pVictim->setAttackTimer(BASE_ATTACK,uint32(percent20));
+                    }
+                    // decrease at %40 from full time
+                    else if(basetime > percent60)
+                    {
+                        basetime -= 2*percent20;
+                        pVictim->setAttackTimer(BASE_ATTACK,uint32(basetime));
+                    }
+                    // ELSE not changed
                 }
             }
 
@@ -1028,6 +1058,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
             pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
+
+            CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
 
         case MELEE_HIT_DODGE:
@@ -1039,6 +1071,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
             pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
+
+            CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
 
         case MELEE_HIT_BLOCK:
@@ -1477,8 +1511,11 @@ float Unit::GetUnitParryChance() const
             if(!tmpitem || tmpitem->IsBroken())
                 tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-            if(tmpitem && !tmpitem->IsBroken() &&
-                (tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || tmpitem->GetProto()->InventoryType == INVTYPE_2HWEAPON))
+            if(tmpitem && !tmpitem->IsBroken() && (
+                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || 
+                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND ||
+                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND || 
+                tmpitem->GetProto()->InventoryType == INVTYPE_2HWEAPON))
                 chance = GetFloatValue(PLAYER_PARRY_PERCENTAGE);
         }
     }
@@ -2915,6 +2952,9 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     // Not much to do if no flags are set or there is no victim
     if(pVictim && procVictim)
     {
+        // additinal auraTypes contains auras capable of proc'ing for victim
+        auraTypes.push_back(SPELL_AURA_MOD_PARRY_PERCENT);
+
         for(std::list<uint32>::iterator aur = auraTypes.begin(); aur != auraTypes.end(); aur++)
         {
             // List of spells (effects) that proced. Spell prototype and aura-specific value (damage for TRIGGER_DAMAGE)

@@ -2119,7 +2119,7 @@ void Aura::HandleReflectSpellsSchool(bool apply, bool Real)
 
 void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
 {
-    if(apply && !m_procCharges)
+    if(Real && apply && !m_procCharges)
     {
         m_procCharges = GetSpellProto()->procCharges;
         if (!m_procCharges)
@@ -2129,7 +2129,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
 
 void Aura::HandleAuraProcTriggerDamage(bool apply, bool Real)
 {
-    if(apply && !m_procCharges)
+    if(Real && apply && !m_procCharges)
     {
         m_procCharges = GetSpellProto()->procCharges;
         if (!m_procCharges)
@@ -2542,6 +2542,13 @@ void Aura::HandleAuraModParryPercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
+
+    if(Real && apply && !m_procCharges)
+    {
+        m_procCharges = GetSpellProto()->procCharges;
+        if (!m_procCharges)
+            m_procCharges = -1;
+    }
 
     m_target->ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,m_modifier.m_amount,apply);
 }
