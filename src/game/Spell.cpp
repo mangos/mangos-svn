@@ -721,8 +721,8 @@ void Spell::cast(bool skipCheck)
     uint32 mana = 0;
     uint8 castResult = 0;
 
-    // recheck unitTarget existance
-    if(unitTargetGUID)
+    // recheck unitTarget existance (if not caster, in this case spells can be casted before adding caster to world)
+    if(unitTargetGUID && unitTargetGUID!= m_caster->GetGUID())
     {
         unitTarget = ObjectAccessor::Instance().GetUnit(*m_caster,unitTargetGUID);
         if(!unitTarget)
