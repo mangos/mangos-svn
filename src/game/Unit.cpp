@@ -91,7 +91,6 @@ Unit::Unit() : WorldObject()
         m_spellImmune[i].clear();
 
     m_attacking = NULL;
-    m_modDamagePCT = 0;
     m_modHitChance = 0;
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
@@ -3477,39 +3476,57 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
     // Damage Done
-    int32 AdvertisedBenefit = 0;
     uint32 PenaltyFactor = 0;
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 3500) CastingTime = 3500;
     if (CastingTime < 1500) CastingTime = 1500;
 
+    // Taken/Done fixed damage bonus auras
+    int32 DoneAdvertisedBenefit = 0;
+    int32 TakenAdvertisedBenefit = 0;
+
+    // ..done (for creature type by mask) in taken
     AuraList& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
-        if(cinfo && (cinfo->type & (*i)->GetModifier()->m_miscvalue) != 0)
-            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+        if(cinfo && cinfo->type && ((1 << (cinfo->type-1)) & uint32((*i)->GetModifier()->m_miscvalue)))
+            TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    // ..done
+    AuraList& mDamageDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
-            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+            DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
+    // ..taken
     AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
-            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+            TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    float TotalMod = 1;
-    AuraList& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    // Taken/Done total percent damage auras
+    float DoneTotalMod = 1;
+    float TakenTotalMod = 1;
+
+    // ..done
+    AuraList& mModDamagePercentDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for(AuraList::iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         if( spellProto->School != 0 && ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 )
-            TotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+            DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+
+    // ..taken
+    AuraList& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+    for(AuraList::iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
+        if( spellProto->School != 0 && ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 )
+            TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
     // TODO - fix PenaltyFactor and complete the formula from the wiki
-    float ActualBenefit = AdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - PenaltyFactor) / 100.0f;
+    float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - PenaltyFactor) / 100.0f;
+    float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - PenaltyFactor) / 100.0f;
 
-    int32 tmpDamage = int32(pdamage*TotalMod+ActualBenefit);
+    float tmpDamage = (pdamage+DoneActualBenefit)*DoneTotalMod;
+    tmpDamage = (tmpDamage+TakenActualBenefit)*TakenTotalMod;
 
-    return tmpDamage > 0 ? tmpDamage : 0;
+    return tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
 
 bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
@@ -3672,33 +3689,46 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
         }
     }
 
-    // bonus result can be negative
-    int32 damage = *pdamage;
+    // Taken/Done fixed damage bonus auras
+    int32 TakenFlatBenefit = 0;
 
-    AuraList& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
+    // ..done (for creature type by mask) in taken
+    AuraList& mDamageDoneCreature = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
-        if(cinfo && cinfo->type == uint32((*i)->GetModifier()->m_miscvalue))
-            damage += (*i)->GetModifier()->m_amount;
+        if(cinfo && cinfo->type && ((1 << (cinfo->type-1)) & uint32((*i)->GetModifier()->m_miscvalue)))
+            TakenFlatBenefit += (*i)->GetModifier()->m_amount;
 
-    AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
-    for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-            damage += (*i)->GetModifier()->m_amount;
+    // ..done
+    // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
 
+    // ..taken
     AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-            damage += (*i)->GetModifier()->m_amount;
+            TakenFlatBenefit += (*i)->GetModifier()->m_amount;
 
+    // ..done (base at attack power and creature type)
     AuraList& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
     for(AuraList::iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
-        if(cinfo && (cinfo->type & uint32((*i)->GetModifier()->m_miscvalue)) != 0)
-            damage += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+        if(cinfo && cinfo->type && ((1 << (cinfo->type-1)) & uint32((*i)->GetModifier()->m_miscvalue)))
+            TakenFlatBenefit += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+
+    // Done/Taken total percent damage auras
+    float TakenTotalMod = 1;
+
+    // ..done
+    // SPELL_AURA_MOD_DAMAGE_PERCENT_DONE included in weapon damage
+
+    // ..taken
+    AuraList& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+    for(AuraList::iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+            TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+
+    float tmpDamage = (*pdamage + TakenFlatBenefit)*TakenTotalMod;
 
     // bonus result can be negative
-    *pdamage = damage < 0 ? 0 : damage;
-
-    *pdamage = uint32(*pdamage * (m_modDamagePCT+100)/100);
+    *pdamage =  tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
 
 void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)

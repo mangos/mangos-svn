@@ -1753,6 +1753,40 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleLookupItemSetCommand(const char* args)
+{
+    if(!*args)
+        return false;
+    std::string namepart = args;
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
+    // Search in ItemSet.dbc
+    for (uint32 id = 0; id < sItemSetStore.GetNumRows(); id++)
+    {
+        ItemSetEntry const *set = sItemSetStore.LookupEntry(id);
+        if(set)
+        {
+            std::string name = set->name;
+
+            // converting name to lower case
+            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+
+            // converting string that we try to find to lower case
+            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+
+            if (name.find(namepart) != std::string::npos)
+            {
+                // send item set in "id - name" format
+                PSendSysMessage("%d - %s",id,set->name);
+                counter++;
+            }
+        }
+    }
+    if (counter == 0)                                       // if counter == 0 then we found nth
+        SendSysMessage("No item sets found!");
+    return true;
+}
+
 bool ChatHandler::HandleLookupSkillCommand(const char* args)
 {
     if(!*args)
