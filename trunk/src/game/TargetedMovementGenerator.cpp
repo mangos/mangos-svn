@@ -93,6 +93,13 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 
     Traveller<Creature> traveller(owner);
 
+    if( !i_destinationHolder.HasDestination() )
+        _setTargetLocation(owner, 0);
+    if( owner.IsStopped() && !i_destinationHolder.HasArrived() ) {
+        owner.addUnitState(UNIT_STAT_CHASE);
+        i_destinationHolder.StartTravel(traveller);
+    }
+
     if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
     {
         // put targeted movement generators on a higher priority

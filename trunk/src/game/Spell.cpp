@@ -186,6 +186,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
     //m_AreaAura = false;
     m_CastItem = NULL;
 
+    unitTargetGUID = 0;
     unitTarget = NULL;
     itemTarget = NULL;
     gameObjTarget = NULL;
@@ -632,7 +633,11 @@ void Spell::prepare(SpellCastTargets * targets)
 {
     m_targets = *targets;
     if(!unitTarget)
+    {
         unitTarget = m_targets.getUnitTarget();
+        if(unitTarget)
+            unitTargetGUID = unitTarget->GetGUID();
+    }
     if(!itemTarget)
         itemTarget = m_targets.m_itemTarget;
     if(!gameObjTarget)
@@ -715,6 +720,18 @@ void Spell::cast(bool skipCheck)
 {
     uint32 mana = 0;
     uint8 castResult = 0;
+
+    // recheck unitTarget existance
+    if(unitTargetGUID)
+    {
+        unitTarget = ObjectAccessor::Instance().GetUnit(*m_caster,unitTargetGUID);
+        if(!unitTarget)
+        {
+            cancel();
+            return;
+        }
+    }
+
     if(m_caster->GetTypeId() != TYPEID_PLAYER && unitTarget)
         m_caster->SetInFront(unitTarget);
 
@@ -943,13 +960,23 @@ void Spell::SendSpellCooldown()
 
 void Spell::update(uint32 difftime)
 {
-    if(unitTarget && !unitTarget->isAlive())
+    if(unitTargetGUID)
     {
-        if(m_autoRepeat)
+        unitTarget = ObjectAccessor::Instance().GetUnit(*m_caster,unitTargetGUID);
+        if(!unitTarget || !unitTarget->isAlive())
         {
-            m_autoRepeat = false;
-            m_spellState = SPELL_STATE_FINISHED;
-            return;
+            if(m_autoRepeat)
+            {
+                m_autoRepeat = false;
+                m_spellState = SPELL_STATE_FINISHED;
+                return;
+            }
+
+            if(!unitTarget)
+            {
+                cancel();
+                return;
+            }
         }
     }
 

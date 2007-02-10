@@ -504,6 +504,9 @@ class Spell
         bool m_rangedShoot;
         bool m_needAliveTarget[3];
 
+        // used to re-find unitTarget at delayed Spell calls (in start Spell::cast and Spell::update)
+        // to prevent crash at lost target (logout/deleted) after preper/prev cast()/update() calls
+        uint64 unitTargetGUID;
         // Current targets, to be used in SpellEffects
         Unit* unitTarget;
         Item* itemTarget;
