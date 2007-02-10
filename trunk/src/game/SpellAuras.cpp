@@ -132,7 +132,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModRegen,                                  //SPELL_AURA_MOD_REGEN = 84,
     &Aura::HandleModPowerRegen,                             //SPELL_AURA_MOD_POWER_REGEN = 85,
     &Aura::HandleChannelDeathItem,                          //SPELL_AURA_CHANNEL_DEATH_ITEM = 86,
-    &Aura::HandleModDamagePCTTaken,                         //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
+    &Aura::HandleModDamagePercentTaken,                     //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
     &Aura::HandleModPCTRegen,                               //SPELL_AURA_MOD_HEALTH_REGEN_PERCENT = 88,
     &Aura::HandlePeriodicDamagePCT,                         //SPELL_AURA_PERIODIC_DAMAGE_PERCENT = 89,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RESIST_CHANCE = 90,// Useless
@@ -2696,9 +2696,9 @@ void Aura::HandleAuraModRangedAttackPower(bool apply, bool Real)
 /***        DAMAGE BONUS      ***/
 /********************************/
 
-void Aura::HandleModDamagePCTTaken(bool apply, bool Real)
+void Aura::HandleModDamagePercentTaken(bool apply, bool Real)
 {
-    m_target->m_modDamagePCT = apply ? m_modifier.m_amount : 0;
+    // has no immediate effect when adding / removing
 }
 
 void Aura::HandleModPCTRegen(bool apply, bool Real)
@@ -2718,21 +2718,70 @@ void Aura::HandleModDamageDoneCreature(bool apply, bool Real)
 
 void Aura::HandleModDamageDone(bool apply, bool Real)
 {
-    // physical damage modifier is applied to damage fields
-    if(m_modifier.m_miscvalue & (int32)(1<<SPELL_SCHOOL_NORMAL))
+    // m_modifier.m_miscvalue is bitmask of spell schools
+    // 1 ( 0-bit ) - normal school damage (IMMUNE_SCHOOL_PHYSICAL)
+    // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_PHYSICAL)
+    // 127 - full bitmask any damages
+    //
+    // mods must be applied base at equiped weapon class and subclass comparison
+    // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
+    // m_modifier.m_miscvalue comparison with item generated damage types
+    if (!m_target)
+        return;
+
+    if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) != 0)
     {
-        m_target->ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,m_modifier.m_amount,apply);
-        m_target->ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,m_modifier.m_amount,apply);
-        // TODO: add ranged support and maybe offhand ?
-        // not completely sure how this should work
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        if (GetSpellProto()->EquippedItemClass == -1 || m_target->GetTypeId() != TYPEID_PLAYER)
         {
-            if(m_modifier.m_miscvalue2)
-                m_target->ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
-            else
-                m_target->ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+            m_target->ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
+            m_target->ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
+        }
+        else
+        {
+            Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            if (pItem)
+            {
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+                {
+                    m_target->ApplyModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
+                    m_target->ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
+                }
+            }
+
+            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            if (pItem)
+            {
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+                {
+                    m_target->ApplyModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
+                    m_target->ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
+                }
+            }
+            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (pItem)
+            {
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+                {
+                    m_target->ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
+                    m_target->ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
+                }
+            }
         }
     }
+
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+    {
+        if(m_modifier.m_miscvalue2)
+            m_target->ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
+        else
+            m_target->ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+    }
+
+    // Magic damage modifiers implemented in Unit::SpellDamageBonus
 }
 
 void Aura::HandleModDamageTaken(bool apply, bool Real)
@@ -2744,12 +2793,9 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
 {
     sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
 
-    // FIX ME: This is wrong code.
-    // It not work with 20218 18791 spells
-
     // m_modifier.m_miscvalue is bitmask of spell schools
-    // 1 ( 0-bit ) - normal school damage
-    // 126 - full bitmask all magic damages
+    // 1 ( 0-bit ) - normal school damage (IMMUNE_SCHOOL_PHYSICAL)
+    // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_PHYSICAL)
     // 127 - full bitmask any damages
     //
     // mods must be applied base at equiped weapon class and subclass comparison
@@ -2758,7 +2804,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     if (!m_target)
         return;
 
-    if((m_modifier.m_miscvalue & 1) != 0)
+    if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) != 0)
     {
         if (GetSpellProto()->EquippedItemClass == -1 || m_target->GetTypeId() != TYPEID_PLAYER)
         {

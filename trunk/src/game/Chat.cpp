@@ -247,6 +247,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "listitem",    3, &ChatHandler::HandleListItemCommand,         "",   NULL },
         { "listobject",  3, &ChatHandler::HandleListObjectCommand,       "",   NULL },
         { "lookupitem",  3, &ChatHandler::HandleLookupItemCommand,       "",   NULL },
+        { "lookupitemset",3,&ChatHandler::HandleLookupItemSetCommand,    "",   NULL },
         { "lookupskill", 3, &ChatHandler::HandleLookupSkillCommand,      "",   NULL },
         { "lookupspell", 3, &ChatHandler::HandleLookupSpellCommand,      "",   NULL },
         { "lookupquest", 3, &ChatHandler::HandleLookupQuestCommand,      "",   NULL },

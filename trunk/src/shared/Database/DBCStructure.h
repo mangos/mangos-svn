@@ -140,6 +140,7 @@ struct ItemRandomPropertiesEntry
 
 struct ItemSetEntry
 {
+    char*     name;
     uint32    spells[8];
     uint32    items_to_triggerspell[8];
     uint32    required_skill_id;
