@@ -627,6 +627,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void UpdateEnchantTime(uint32 time);
         void ReducePoisonCharges(uint32 enchantId);
+        void AddEnchantDurations(Item *item);
+        void RemoveEnchantDurations(Item *item);
         void AddEnchantDuration(Item *item,uint32 slot,uint32 duration);
         void SaveEnchant();
         void LoadEnchant();

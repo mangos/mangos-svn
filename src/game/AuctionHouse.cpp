@@ -94,7 +94,8 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     }
     data << auction->Id;
     data << pItem->GetUInt32Value(OBJECT_FIELD_ENTRY);
-    data << (uint32) 0;                                     //0 - HighBidder, 1 - outbid, BID TYPE - not sure
+    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0);
+                                                            // Permanent enchantment id
     data << (uint32) pItem->GetItemRandomPropertyId();      //random item properity id
     data << (uint32) 0;                                     //not pItem->GetCreator();// 4a d0 64 02, 0, unknown, maybe enchating
     data << (uint32) pItem->GetCount();                     //item->count
