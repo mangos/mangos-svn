@@ -7063,6 +7063,8 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
                     pBag->SetState(ITEM_CHANGED, this);
                 }
             }
+
+            AddEnchantDurations(pItem);
         }
         else
         {
@@ -7080,9 +7082,12 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
             pItem->SetState(ITEM_REMOVED, this);
             pItem2->SetState(ITEM_CHANGED, this);
 
+            RemoveEnchantDurations(pItem);
+            AddEnchantDurations(pItem2);
             return pItem2;
         }
     }
+
     return pItem;
 }
 
@@ -7090,6 +7095,8 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
+        AddEnchantDurations(pItem);
+
         VisualizeItem( pos, pItem);
         uint8 slot = pos & 255;
 
@@ -7180,6 +7187,8 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
     if( pItem )
     {
         sLog.outDebug( "STORAGE: RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+
+        RemoveEnchantDurations(pItem);
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
@@ -7288,16 +7297,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
         ItemPrototype const *pProto = pItem->GetProto();
 
-        for(EnchantDurationList::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr = next)
-        {
-            next = itr;
-            if(itr->item == pItem)
-            {
-                next = m_enchantDuration.erase(itr);
-            }
-            else
-                ++next;
-        }
+        RemoveEnchantDurations(pItem);
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
@@ -7990,6 +7990,35 @@ void Player::UpdateEnchantTime(uint32 time)
     }
 }
 
+void Player::AddEnchantDurations(Item *item)
+{
+    for(int x=0;x<7;x++)
+    {
+        uint32 duration = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
+        if( duration == 0 )
+            continue;
+        else if( duration > 0 )
+            AddEnchantDuration(item,x,duration);
+    }
+}
+
+void Player::RemoveEnchantDurations(Item *item)
+{
+    for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();)
+    {
+        if(itr->item == item)
+        {
+            // save duration in item
+            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3+1,itr->leftduration);
+            item->SetState(ITEM_CHANGED);
+
+            itr = m_enchantDuration.erase(itr);
+        }
+        else
+            ++itr;
+    }
+}
+
 // duration == 0 will remove item enchant
 void Player::AddEnchantDuration(Item *item,uint32 slot,uint32 duration)
 {
@@ -8049,8 +8078,6 @@ void Player::ReducePoisonCharges(uint32 enchantId)
 
 void Player::SaveEnchant()
 {
-    uint32 duration = 0;
-
     for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();++itr)
     {
         assert(itr->item);
@@ -8077,14 +8104,8 @@ void Player::LoadEnchant()
             continue;
         if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
             continue;
-        for(int x=0;x<7;x++)
-        {
-            duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
-            if( duration == 0 )
-                continue;
-            else if( duration > 0 )
-                AddEnchantDuration(pItem,x,duration);
-        }
+
+        AddEnchantDurations(pItem);
     }
     Bag *pBag;
     ItemPrototype const *pBagProto;
@@ -8105,14 +8126,7 @@ void Player::LoadEnchant()
                         continue;
                     if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
                         continue;
-                    for(int x=0;x<7;x++)
-                    {
-                        duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
-                        if( duration == 0 )
-                            continue;
-                        else if( duration > 0 )
-                            AddEnchantDuration(pItem,x,duration);
-                    }
+                    AddEnchantDurations(pItem);
                 }
             }
         }
@@ -8134,14 +8148,7 @@ void Player::LoadEnchant()
                         continue;
                     if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
                         continue;
-                    for(int x=0;x<7;x++)
-                    {
-                        duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
-                        if( duration == 0 )
-                            continue;
-                        else if( duration > 0 )
-                            AddEnchantDuration(pItem,x,duration);
-                    }
+                    AddEnchantDurations(pItem);
                 }
             }
         }

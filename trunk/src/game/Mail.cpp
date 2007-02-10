@@ -380,7 +380,8 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         else
             data << (uint32) 0;                             // Any item attached
 
-        data << (uint32) 0;                                 // Unknown Constant 0
+        data << (uint32) (it ? it->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0) : 0);
+                                                            // Permanent enchantment id
         data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
                                                             // Item random property Id
         data << (uint32) 0;                                 // not item->creator, it is enchating?
