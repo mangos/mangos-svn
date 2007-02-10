@@ -65,35 +65,26 @@ template<typename TRAVELLER>
 uint32
 DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, float offset)
 {
-    if (i_destX == dest_x && i_destY == dest_y && i_destZ == dest_z)
+    if (i_destSet && i_destX == dest_x && i_destY == dest_y && i_destZ == dest_z)
         return 0;
+
+    i_destSet = true;
+    i_destX = dest_x;
+    i_destY = dest_y;
+    i_destZ = dest_z;
+
+    return StartTravel(traveller);
+}
+
+template<typename TRAVELLER>
+uint32
+DestinationHolder<TRAVELLER>::StartTravel(TRAVELLER &traveller)
+{
+    if(!i_destSet) return 0;
 
     i_fromX = traveller.GetPositionX();
     i_fromY = traveller.GetPositionY();
     i_fromZ = traveller.GetPositionZ();
-
-    UpdateLocation(traveller, dest_x, dest_y, dest_z);
-
-    float dx = dest_x - i_fromX;
-    float dy = dest_y - i_fromY;
-    float dz = dest_z - i_fromZ;
-    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz));
-    double speed = traveller.Speed();
-    if( speed <= 0 )
-        speed = 2.5f;
-    speed *= 0.001f;
-    uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
-    traveller.MoveTo(dest_x, dest_y, dest_z, travel_time);
-    return travel_time;
-}
-
-template<typename TRAVELLER>
-void
-DestinationHolder<TRAVELLER>::UpdateLocation(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z)
-{
-    i_destX = dest_x;
-    i_destY = dest_y;
-    i_destZ = dest_z;
 
     float dx = i_destX - i_fromX;
     float dy = i_destY - i_fromY;
@@ -105,6 +96,9 @@ DestinationHolder<TRAVELLER>::UpdateLocation(TRAVELLER &traveller, float dest_x,
     speed *=  0.001f;                                       // speed is in seconds so convert from second to millisecond
     i_totalTravelTime = static_cast<uint32>( dist/speed + 0.5 );
     i_timeStarted = getMSTime();
+    i_timeElapsed = 0;
+    traveller.MoveTo(i_destX, i_destY, i_destZ, i_totalTravelTime);
+    return i_totalTravelTime;
 }
 
 template<typename TRAVELLER>
@@ -112,9 +106,11 @@ bool
 DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update)
 {
     i_tracker.Update(diff);
+    i_timeElapsed += diff;
     if( i_tracker.Passed() || force_update )
     {
         ResetUpdate();
+        if(!i_destSet) return true;
         float x,y,z;
         GetLocationNow(x, y, z);
         if( x == -431602080 )
@@ -133,9 +129,7 @@ template<typename TRAVELLER>
 void
 DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
 {
-    uint32 time_elapsed = getMSTime() - i_timeStarted;
-
-    if( i_totalTravelTime == 0 || time_elapsed >= i_totalTravelTime )
+    if( HasArrived() )
     {
         x = i_destX;
         y = i_destY;
@@ -143,7 +137,7 @@ DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
     }
     else
     {
-        double percent_passed = (double)time_elapsed / (double)i_totalTravelTime;
+        double percent_passed = (double)i_timeElapsed / (double)i_totalTravelTime;
         x = i_fromX + ((i_destX - i_fromX) * percent_passed);
         y = i_fromY + ((i_destY - i_fromY) * percent_passed);
         z = i_fromZ + ((i_destZ - i_fromZ) * percent_passed);

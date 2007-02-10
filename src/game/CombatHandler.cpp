@@ -35,13 +35,14 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     DEBUG_LOG( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
 
     Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
-    if(pEnemy)
+
+    if(pEnemy && !_player->IsFriendlyTo(pEnemy))
     {
         _player->Attack(pEnemy);
         return;
     }
 
-    sLog.outError( "WORLD: Enemy %u %.8X not found, or not a player or a creature",GUID_LOPART(guid), GUID_HIPART(guid));
+    sLog.outError( "WORLD: Enemy %u %.8X not found, or not a player or a creature or friendly",GUID_LOPART(guid), GUID_HIPART(guid));
 }
 
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
