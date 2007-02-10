@@ -9747,6 +9747,10 @@ bool Player::LoadFromDB( uint32 guid )
     // make sure the unit is considered out of combat for proper loading
     ClearInCombat();
 
+    // make sure the unit is considered not in duel for proper loading
+    SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
+    SetUInt32Value(PLAYER_DUEL_TEAM, 0);
+
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
