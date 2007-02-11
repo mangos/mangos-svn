@@ -228,12 +228,12 @@ void Spell::EffectDummy(uint32 i)
         if( unitTarget->isInCombat() )
             return;
 
-        // skip friendly to caster enemy creatures (to prevent attack unattackable creatures)
-        if( ((Creature*)unitTarget)->IsFriendlyTo(m_caster->getVictim()) )
+        // skip non hostile to caster enemy creatures
+        if( !((Creature*)unitTarget)->IsHostileTo(m_caster->getVictim()) )
             return;
 
-        // only from friendly creature faction
-        if(unitTarget->IsFriendlyTo( m_caster ))
+        // only from same creature faction
+        if(unitTarget->getFaction() != m_caster->getFaction() )
             return;
 
         ((Creature*)m_caster)->SetNoCallAssistence(true);
