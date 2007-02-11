@@ -313,6 +313,9 @@ enum GMFlags
 
 typedef std::set<uint32> IgnoreList;
 
+typedef std::map<uint32, struct quest_status> QuestStatusMap;
+
+
 #define IS_BACK_SLOT(s) (s == 0xFF)
 
 class Quest;
@@ -762,7 +765,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool HasSpaceForItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
 
-        std::map<uint32, struct quest_status> getQuestStatusMap() { return mQuestStatus; };
+        QuestStatusMap& getQuestStatusMap() { return mQuestStatus; };
 
         const uint64& GetSelection( ) const { return m_curSelection; }
         const uint64& GetTarget( ) const { return m_curTarget; }
@@ -1263,8 +1266,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint64 m_curTarget;
         uint64 m_curSelection;
 
-        typedef std::map<uint32, struct quest_status> StatusMap;
-        StatusMap mQuestStatus;
+        QuestStatusMap mQuestStatus;
 
         uint32 m_GuildIdInvited;
 

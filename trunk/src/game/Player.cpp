@@ -8257,7 +8257,7 @@ void Player::SendPreparedQuest( uint64 guid )
 
 Quest *Player::GetActiveQuest( uint32 quest_id ) const
 {
-    StatusMap::const_iterator itr = mQuestStatus.find(quest_id);
+    QuestStatusMap::const_iterator itr = mQuestStatus.find(quest_id);
 
     return itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE ?  itr->second.m_quest : NULL;
 }
@@ -8757,7 +8757,7 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
         {
             uint32 prevId = abs(*iter);
 
-            StatusMap::iterator i_prevstatus = mQuestStatus.find( prevId );
+            QuestStatusMap::iterator i_prevstatus = mQuestStatus.find( prevId );
 
             if( i_prevstatus != mQuestStatus.end() )
             {
@@ -8835,7 +8835,7 @@ bool Player::SatisfyQuestStatus( uint32 quest_id, bool msg )
 {
     if( quest_id )
     {
-        StatusMap::iterator itr = mQuestStatus.find( quest_id );
+        QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
         if  ( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE )
         {
             if( msg )
@@ -8884,7 +8884,7 @@ bool Player::SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg )
             if(exclude_Id == quest_id)
                 continue;
 
-            StatusMap::iterator i_exstatus = mQuestStatus.find( exclude_Id );
+            QuestStatusMap::iterator i_exstatus = mQuestStatus.find( exclude_Id );
 
             // alternative quest already started or completed
             if( i_exstatus != mQuestStatus.end()
@@ -8905,7 +8905,7 @@ bool Player::SatisfyQuestNextChain( uint32 quest_id, bool msg )
             return true;
 
         // next quest in chain already started or completed
-        StatusMap::iterator itr = mQuestStatus.find( qInfo->GetNextQuestInChain() );
+        QuestStatusMap::iterator itr = mQuestStatus.find( qInfo->GetNextQuestInChain() );
         if( itr != mQuestStatus.end()
             && (itr->second.m_status == QUEST_STATUS_COMPLETE || itr->second.m_status == QUEST_STATUS_INCOMPLETE) )
             return false;
@@ -8931,7 +8931,7 @@ bool Player::SatisfyQuestPrevChain( uint32 quest_id, bool msg )
         {
             uint32 prevId = *iter;
 
-            StatusMap::iterator i_prevstatus = mQuestStatus.find( prevId );
+            QuestStatusMap::iterator i_prevstatus = mQuestStatus.find( prevId );
 
             if( i_prevstatus != mQuestStatus.end() )
             {
@@ -9005,7 +9005,7 @@ bool Player::GetQuestRewardStatus( uint32 quest_id )
     if( qInfo )
     {
         // for repeatable quests: rewarded field is set after first reward only to prevent getting XP more than once
-        StatusMap::iterator itr = mQuestStatus.find( quest_id );
+        QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
         if( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE 
             && !qInfo->IsRepeatable() )
             return mQuestStatus[quest_id].m_rewarded;
@@ -9316,7 +9316,7 @@ void Player::MoneyChanged( uint32 count )
 
 bool Player::HasQuestForItem( uint32 itemid )
 {
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    for( QuestStatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++i )
     {
         quest_status qs=i->second;
 
@@ -10547,7 +10547,7 @@ void Player::_SaveMail()
 void Player::_SaveQuestStatus()
 {
     // we don't need transactions here.
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++i )
+    for( QuestStatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++i )
     {
         switch (i->second.uState)
         {
