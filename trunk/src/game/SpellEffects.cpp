@@ -224,25 +224,21 @@ void Spell::EffectDummy(uint32 i)
         if( unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT )
             return;
 
-        // skip non hostile to caster enemy creatures
-        if( !((Creature*)unitTarget)->IsHostileTo(m_caster->getVictim()) )
+        // if creature not figthing currently
+        if( unitTarget->isInCombat() )
             return;
 
-        // only from same creature faction
-        if(unitTarget->getFaction() != m_caster->getFaction() )
+        // skip friendly to caster enemy creatures (to prevent attack unattackable creatures)
+        if( ((Creature*)unitTarget)->IsFriendlyTo(m_caster->getVictim()) )
             return;
 
-        // only if enimy is player or pet.
-        if( m_caster->getVictim()->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_caster->getVictim())->isPet() )
-        {
-            // and finally if creature not figthing currently
-            if( !unitTarget->isInCombat() )
-            {
-                ((Creature*)m_caster)->SetNoCallAssistence(true);
-                ((Creature*)unitTarget)->SetNoCallAssistence(true);
-                ((Creature*)unitTarget)->AI().AttackStart(m_caster->getVictim());
-            }
-        }
+        // only from friendly creature faction
+        if(unitTarget->IsFriendlyTo( m_caster ))
+            return;
+
+        ((Creature*)m_caster)->SetNoCallAssistence(true);
+        ((Creature*)unitTarget)->SetNoCallAssistence(true);
+        ((Creature*)unitTarget)->AI().AttackStart(m_caster->getVictim());
         return;
     }
 
