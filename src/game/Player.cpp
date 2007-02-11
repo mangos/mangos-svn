@@ -6131,8 +6131,8 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
             if(pItem->IsBindedNotWith(GetGUID()))
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
 
-            // check count of items
-            if( !swap && pProto->MaxCount > 0 )
+            // check count of items (skip for auto move for same player from bank)
+            if( !swap && pProto->MaxCount > 0 && !(pItem->GetOwnerGUID()==GetGUID() && IsBankPos(pItem->GetBagSlot(),pItem->GetSlot())) )
             {
                 uint32 curcount = 0;
                 for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
@@ -6436,6 +6436,20 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
     return 0;
 }
 
+uint8 Player::CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const
+{
+    dest = 0;
+    Item *pItem = CreateItem( item, count );
+    if( pItem )
+    {
+        uint8 result = CanEquipItem(slot, dest, pItem, swap );
+        delete pItem;
+        return result;
+    }
+
+    return EQUIP_ERR_ITEM_NOT_FOUND;
+}
+
 uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading ) const
 {
     dest = 0;
@@ -6557,7 +6571,8 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( bag == 0 )
             {
-                if( !swap && pProto->MaxCount > 0 )
+                // check count of items (skip for auto move for same player from inventory/bag)
+                if( !swap && pProto->MaxCount > 0 && !(pItem->GetOwnerGUID()==GetGUID() && IsInventoryPos(pItem->GetBagSlot(),pItem->GetSlot())) )
                 {
                     uint32 curcount = 0;
                     for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
@@ -7093,34 +7108,79 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
     return pItem;
 }
 
-void Player::EquipItem( uint16 pos, Item *pItem, bool update )
+Item* Player::EquipNewItem( uint16 pos, uint32 item, uint32 count, bool update )
+{
+    Item *pItem = CreateItem( item, count );
+    if( pItem )
+    {
+        ItemPrototype const *pProto = pItem->GetProto();
+        ItemAddedQuestCheck( item, count );
+        Item * retItem = EquipItem( pos, pItem, update );
+
+        return retItem;
+    }
+    return NULL;
+}
+
+Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
         AddEnchantDurations(pItem);
 
-        VisualizeItem( pos, pItem);
+        uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
 
-        if(isAlive())
-        {
-            _ApplyItemMods(pItem, slot, true);
+        Item *pItem2 = GetItemByPos( bag, slot );
 
-            ItemPrototype const *pProto = pItem->GetProto();
-            if(pProto && isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0)
+        if( !pItem2 )
+        {
+            VisualizeItem( pos, pItem);
+            uint8 slot = pos & 255;
+
+            if(isAlive())
             {
-                m_weaponChangeTimer = DEFAULT_SWITCH_WEAPON;
-                if (getClass() == CLASS_ROGUE)
-                    m_weaponChangeTimer = ROGUE_SWITCH_WEAPON;
+                _ApplyItemMods(pItem, slot, true);
+
+                ItemPrototype const *pProto = pItem->GetProto();
+                if(pProto && isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0)
+                {
+                    m_weaponChangeTimer = DEFAULT_SWITCH_WEAPON;
+                    if (getClass() == CLASS_ROGUE)
+                        m_weaponChangeTimer = ROGUE_SWITCH_WEAPON;
+                }
+            }
+
+            if( IsInWorld() && update )
+            {
+                pItem->AddToWorld();
+                pItem->SendUpdateToPlayer( this );
             }
         }
-
-        if( IsInWorld() && update )
+        else
         {
-            pItem->AddToWorld();
-            pItem->SendUpdateToPlayer( this );
+            pItem2->SetCount( pItem2->GetCount() + pItem->GetCount() );
+            if( IsInWorld() && update )
+                pItem2->SendUpdateToPlayer( this );
+
+            // delete item (it not in any slot currently)
+            //pItem->DeleteFromDB();
+            if( IsInWorld() && update )
+            {
+                pItem->RemoveFromWorld();
+                pItem->DestroyForPlayer( this );
+            }
+
+            pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case traid/mail/buy from vendor
+            pItem->SetState(ITEM_REMOVED, this);
+            pItem2->SetState(ITEM_CHANGED, this);
+
+            RemoveEnchantDurations(pItem);
+            AddEnchantDurations(pItem2);
+            return pItem2;
         }
     }
+    return pItem;
 }
 
 void Player::QuickEquipItem( uint16 pos, Item *pItem)
@@ -7545,11 +7605,20 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                 msg = CanStoreItem( dstbag, dstslot, dest, pNewItem, false );
                 if( msg == EQUIP_ERR_OK )
                 {
-                    pSrcItem->SetCount( pSrcItem->GetCount() - count );
-                    if( IsInWorld() )
-                        pSrcItem->SendUpdateToPlayer( this );
-                    pSrcItem->SetState(ITEM_CHANGED, this);
-                    StoreItem( dest, pNewItem, true);
+                    Item *pDstItem = GetItemByPos(dstbag, dstslot);
+                    if (!pDstItem || pDstItem && pDstItem->GetCount() + pSrcItem->GetCount() <= pSrcItem->GetProto()->Stackable)
+                    {
+                        pSrcItem->SetCount( pSrcItem->GetCount() - count );
+                        if( IsInWorld() )
+                            pSrcItem->SendUpdateToPlayer( this );
+                        pSrcItem->SetState(ITEM_CHANGED, this);
+                        StoreItem( dest, pNewItem, true);
+                    }
+                    else
+                    {
+                        delete pNewItem;
+                        SendEquipError( EQUIP_ERR_COULDNT_SPLIT_ITEMS, pSrcItem, NULL );
+                    }
                 }
                 else
                 {
@@ -7562,11 +7631,20 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                 msg = CanBankItem( dstbag, dstslot, dest, pNewItem, false );
                 if( msg == EQUIP_ERR_OK )
                 {
-                    pSrcItem->SetCount( pSrcItem->GetCount() - count );
-                    if( IsInWorld() )
-                        pSrcItem->SendUpdateToPlayer( this );
-                    pSrcItem->SetState(ITEM_CHANGED, this);
-                    BankItem( dest, pNewItem, true);
+                    Item *pDstItem = GetItemByPos(dstbag, dstslot);
+                    if (!pDstItem || pDstItem && pDstItem->GetCount() + pSrcItem->GetCount() <= pSrcItem->GetProto()->Stackable)
+                    {
+                        pSrcItem->SetCount( pSrcItem->GetCount() - count );
+                        if( IsInWorld() )
+                            pSrcItem->SendUpdateToPlayer( this );
+                        pSrcItem->SetState(ITEM_CHANGED, this);
+                        BankItem( dest, pNewItem, true);
+                    }
+                    else
+                    {
+                        delete pNewItem;
+                        SendEquipError( EQUIP_ERR_COULDNT_SPLIT_ITEMS, pSrcItem, NULL );
+                    }
                 }
                 else
                 {
@@ -7579,11 +7657,20 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                 msg = CanEquipItem( dstslot, dest, pNewItem, false );
                 if( msg == EQUIP_ERR_OK )
                 {
-                    pSrcItem->SetCount( pSrcItem->GetCount() - count );
-                    if( IsInWorld() )
-                        pSrcItem->SendUpdateToPlayer( this );
-                    pSrcItem->SetState(ITEM_CHANGED, this);
-                    EquipItem( dest, pNewItem, true);
+                    Item *pDstItem = GetItemByPos(dstbag, dstslot);
+                    if (!pDstItem || pDstItem && pDstItem->GetCount() + pSrcItem->GetCount() <= pSrcItem->GetProto()->Stackable)
+                    {
+                        pSrcItem->SetCount( pSrcItem->GetCount() - count );
+                        if( IsInWorld() )
+                            pSrcItem->SendUpdateToPlayer( this );
+                        pSrcItem->SetState(ITEM_CHANGED, this);
+                        EquipItem( dest, pNewItem, true);
+                    }
+                    else
+                    {
+                        delete pNewItem;
+                        SendEquipError( EQUIP_ERR_COULDNT_SPLIT_ITEMS, pSrcItem, NULL );
+                    }
                 }
                 else
                 {
