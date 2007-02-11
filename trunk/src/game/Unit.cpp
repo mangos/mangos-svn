@@ -342,6 +342,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         DEBUG_LOG("DealDamageHealth1");
         pVictim->SetHealth(0);
 
+        // Call KilledUnit for creatures
+        if (GetTypeId() == TYPEID_UNIT)
+            ((Creature*)this)->AI().KilledUnit(pVictim);
+
         // 10% durability loss on death
         // clean InHateListOf
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
@@ -375,6 +379,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             DEBUG_LOG("DealDamageNotPlayer");
             if(!((Creature*)pVictim)->isPet())
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+            // Call creature just died function
+            ((Creature*)pVictim)->AI().JustDied(this);
         }
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
