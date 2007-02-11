@@ -1835,9 +1835,12 @@ void Spell::EffectSummonObjectWild(uint32 i)
         delete pGameObj;
         return;
     }
-    pGameObj->SetRespawnTime(GetDuration(m_spellInfo)/1000);
+
+    int32 duration = GetDuration(m_spellInfo);
+    pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
 
     m_caster->AddGameObject(pGameObj);
+    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 }
 
@@ -1984,10 +1987,12 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->getFaction() );
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
-    pGameObj->SetRespawnTime(GetDuration(m_spellInfo)/1000);
+    int32 duration = GetDuration(m_spellInfo);
+    pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     m_caster->AddGameObject(pGameObj);
+    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
     //END
 
@@ -2234,11 +2239,13 @@ void Spell::EffectSummonObject(uint32 i)
     }
 
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
-    pGameObj->SetRespawnTime(GetDuration(m_spellInfo)/1000);
+    int32 duration = GetDuration(m_spellInfo);
+    pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
     pGameObj->SetLootState(GO_CLOSED);
     m_caster->AddGameObject(pGameObj);
 
+    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << pGameObj->GetGUID();
@@ -2572,7 +2579,8 @@ void Spell::EffectTransmitted(uint32 i)
     else
     {
         pGameObj->SetOwnerGUID(m_caster->GetGUID() );
-        pGameObj->SetRespawnTime(GetDuration(m_spellInfo)/1000);
+        int32 duration = GetDuration(m_spellInfo);
+        pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
     }
 
     pGameObj->SetUInt32Value(12, 0x3F63BB3C );
@@ -2584,8 +2592,8 @@ void Spell::EffectTransmitted(uint32 i)
     //m_caster->AddGameObject(pGameObj);
     //m_ObjToDel.push_back(pGameObj);
 
-    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
     pGameObj->AddToWorld();
+    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << uint64(pGameObj->GetGUID());

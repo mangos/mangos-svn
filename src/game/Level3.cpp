@@ -2048,6 +2048,8 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     }
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     sLog.outDebug(LANG_ADD_OBJ_LV3);
+
+    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     if(strcmp(safe,"true") == 0)
@@ -2170,6 +2172,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     sLog.outError(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
 
     pGameObj->SaveToDB();
+    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     PSendSysMessage(LANG_GAMEOBJECT_ADD,id,goI->name,x,y,z);

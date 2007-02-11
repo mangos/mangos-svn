@@ -110,7 +110,7 @@ void
 VisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
     for(std::map<OBJECT_HANDLE, GameObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if(iter->second->isFinished())                      // show only respawned GO
+        if(iter->second->isSpawned())                       // show only respawned GO
             iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
 }
 
@@ -146,8 +146,7 @@ void
 ObjectVisibleNotifier::Visit(PlayerMapType &m)
 {
     // ignore not respawned gameobjects
-    if(i_object.GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject&)i_object).isFinished() &&
-        ((GameObject&)i_object).GetOwnerGUID() == 0)
+    if(i_object.GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject&)i_object).isSpawned())
         return;
 
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
