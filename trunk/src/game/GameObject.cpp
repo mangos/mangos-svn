@@ -122,8 +122,6 @@ void GameObject::Update(uint32 p_time)
         return;
     }
 
-    WorldPacket     data;
-
     switch (m_lootState)
     {
         case GO_NOT_READY:
@@ -160,7 +158,8 @@ void GameObject::Update(uint32 p_time)
             m_lootState = GO_CLOSED;                        // for not bobber is same as GO_CLOSED
             // NO BREAK
         case GO_CLOSED:
-            if (m_respawnTime > 0)                          // timer om
+            if (m_respawnTime > 0)
+                                                            // timer on
             {
                 if (m_respawnTime <= time(NULL))            // timer expired
                 {
@@ -190,6 +189,13 @@ void GameObject::Update(uint32 p_time)
                         case GAMEOBJECT_TYPE_TRAP:
                             break;
                         default:
+                            if(GetOwnerGUID())              // despawn timer
+                            {
+                                m_respawnTime = 0;
+                                Delete();
+                                return;
+                            }
+                                                            // respawn timer
                             MapManager::Instance().GetMap(GetMapId())->Add(this);
                             break;
                     }
@@ -199,21 +205,18 @@ void GameObject::Update(uint32 p_time)
         case GO_OPEN:
             break;
         case GO_LOOTED:
-            switch(GetGoType())
+            if(GetOwnerGUID())
             {
-                case GAMEOBJECT_TYPE_FISHINGNODE:
-                    m_respawnTime = 0;
-                    Delete();
-                    return;
-                default:
-                {
-                    loot.clear();
-                    SetLootState(GO_CLOSED);
-
-                    SendDestroyObject(GetGUID());
-                    m_respawnTime = time(NULL) + m_respawnDelayTime;
-                }break;
+                m_respawnTime = 0;
+                Delete();
+                return;
             }
+
+            loot.clear();
+            SetLootState(GO_CLOSED);
+
+            SendDestroyObject(GetGUID());
+            m_respawnTime = time(NULL) + m_respawnDelayTime;
             break;
     }
 
@@ -264,6 +267,10 @@ void GameObject::Update(uint32 p_time)
 
 void GameObject::Refresh()
 {
+    // not refresh despawned not casted GO (despawned casted GO destroyed in all cases anyway)
+    if(m_respawnTime > 0 && !GetOwnerGUID())
+        return;
+
     SendDestroyObject(GetGUID());
 
     MapManager::Instance().GetMap(GetMapId())->Add(this);

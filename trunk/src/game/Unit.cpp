@@ -1731,7 +1731,7 @@ void Unit::_UpdateSpells( uint32 time )
         {
             dnext1 = ite1;
             //(*i)->Update( difftime );
-            if( (*ite1)->isFinished() )
+            if( !(*ite1)->isSpawned() )
             {
                 (*ite1)->SetOwnerGUID(0);
                 (*ite1)->SetRespawnTime(0);
