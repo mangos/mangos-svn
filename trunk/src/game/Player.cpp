@@ -7079,6 +7079,8 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
                 pItem->RemoveFromWorld();
                 pItem->DestroyForPlayer( this );
             }
+
+            pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case traid/mail/buy from vendor
             pItem->SetState(ITEM_REMOVED, this);
             pItem2->SetState(ITEM_CHANGED, this);
 
