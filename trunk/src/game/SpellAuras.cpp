@@ -1632,7 +1632,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         Unit* caster = GetCaster();
         if(caster)                                          // set creature facing on root effect
         {
-            m_target->SetUInt64Value (UNIT_FIELD_TARGET,caster->GetGUIDLow());
+            m_target->SetUInt64Value (UNIT_FIELD_TARGET,caster->GetGUID());
         }
 
         // only at real remove aura
@@ -1761,7 +1761,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         Unit* caster = GetCaster();
         if(caster)                                          // set creature facing on root effect
         {
-            m_target->SetUInt64Value (UNIT_FIELD_TARGET,caster->GetGUIDLow());
+            m_target->SetUInt64Value (UNIT_FIELD_TARGET,caster->GetGUID());
         }
 
         // only at real remove aura

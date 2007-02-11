@@ -3284,7 +3284,7 @@ bool Unit::Attack(Unit *victim)
     }
 
     //Set our target
-    SetUInt32Value(UNIT_FIELD_TARGET, victim->GetGUIDLow());
+    SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
 
     addUnitState(UNIT_STAT_ATTACKING);
     SetInCombat();
@@ -3316,7 +3316,7 @@ bool Unit::AttackStop()
     m_attacking = NULL;
 
     //Clear our target
-    SetUInt32Value(UNIT_FIELD_TARGET, 0);
+    SetUInt64Value(UNIT_FIELD_TARGET, 0);
 
     clearUnitState(UNIT_STAT_ATTACKING);
 
