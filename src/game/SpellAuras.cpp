@@ -2165,7 +2165,8 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
 
     m_isPeriodic = apply;
 
-    if (GetSpellProto()->Mechanic == 16)
+    // only at real apply
+    if (Real && apply && GetSpellProto()->Mechanic == 16)
     {
         Unit* caster = GetTarget();
         

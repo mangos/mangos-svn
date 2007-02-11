@@ -256,6 +256,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "money",       1, &ChatHandler::HandleModifyMoneyCommand,      "",   NULL },
         { "speed",       1, &ChatHandler::HandleModifySpeedCommand,      "",   NULL },
         { "addquest",    3, &ChatHandler::HandleAddQuest,                "",   NULL },
+        { "removequest", 3, &ChatHandler::HandleRemoveQuest,             "",   NULL },
         { "password",    0, &ChatHandler::HandlePasswordCommand,         "",   NULL },
         { "lockaccount", 0, &ChatHandler::HandleLockAccountCommand,      "",   NULL },
         { "respawn",     3, &ChatHandler::HandleRespawnCommand,          "",   NULL },

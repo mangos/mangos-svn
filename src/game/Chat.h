@@ -269,6 +269,7 @@ class ChatHandler
         bool HandleQueryNextMailTime(const char * args);
         bool HandleOutOfRange(const char * args);
         bool HandleAddQuest(const char * args);
+        bool HandleRemoveQuest(const char * args);
         bool HandleSaveAllCommand(const char* args);
         bool HandleGetItemState(const char * args);
 

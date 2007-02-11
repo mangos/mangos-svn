@@ -3298,6 +3298,55 @@ bool ChatHandler::HandleAddQuest(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleRemoveQuest(const char* args)
+{
+    Player* player = getSelectedPlayer();
+    if(!player)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    // .removequest #entry'
+    char* pentry = strtok((char*)args, " ");
+
+    if(!pentry)
+        return false;
+
+    uint32 entry = (uint32)atoi(pentry);
+
+    ObjectMgr::QuestMap::iterator qIter = objmgr.QuestTemplates.find(entry);
+
+    if(qIter == objmgr.QuestTemplates.end())
+    {
+        PSendSysMessage("Quest %u not found.",entry);
+        return true;
+    }
+
+    // remove all quest entries for 'entry' from quest log
+    for(uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot )
+    {
+        uint32 quest = player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0);
+        if(quest==entry)
+        {
+            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0, 0);
+            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 1, 0);
+            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 2, 0);
+
+            player->TakeQuestSourceItem( quest );
+        }
+    }
+
+    // set quest status to not started (will updated in DB at next save)
+    player->SetQuestStatus( entry, QUEST_STATUS_NONE);
+
+    // reset rewarded for restart repeatable quest
+    player->getQuestStatusMap()[entry].m_rewarded = false;
+
+    SendSysMessage("Quest removed.");
+    return true;
+}
+
 bool ChatHandler::HandleBanIPCommand(const char* args)
 {
     if(!args)
