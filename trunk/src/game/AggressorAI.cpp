@@ -42,7 +42,7 @@ void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
     if( !i_creature.getVictim() && u->isTargetableForAttack() && 
-        ( i_creature.IsHostileTo( u ) || u->getVictim() && i_creature.IsFriendlyTo( u->getVictim() ) ) && 
+        ( i_creature.IsHostileTo( u ) /*|| u->getVictim() && i_creature.IsFriendlyTo( u->getVictim() )*/ ) && 
         u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);

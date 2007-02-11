@@ -39,7 +39,7 @@ GuardAI::GuardAI(Creature &c) : i_creature(c), i_victimGuid(0), i_state(STATE_NO
 void GuardAI::MoveInLineOfSight(Unit *u)
 {
     if( !i_creature.getVictim() && u->isTargetableForAttack() && 
-        ( u->IsHostileToPlayer() || i_creature.IsHostileTo(u) || u->getVictim() && i_creature.IsFriendlyTo(u->getVictim()) ) &&
+        ( u->IsHostileToPlayer() || i_creature.IsHostileTo(u) /*|| u->getVictim() && i_creature.IsFriendlyTo(u->getVictim())*/ ) &&
         u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);
