@@ -50,6 +50,10 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual bool IsVisible(Unit *) const = 0;
 
         virtual void UpdateAI(const uint32 diff) = 0;
+
+        virtual void JustDied(Unit *) {};
+
+        virtual void KilledUnit(Unit *) {};
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
