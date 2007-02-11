@@ -592,6 +592,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasItemCount( uint32 item, uint32 count ) const;
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
+        uint8 CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
         uint8 CanUnequipItem( uint16 src, bool swap ) const;
         uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
@@ -600,7 +601,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 CanUseAmmo( uint32 item ) const;
         Item* StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update,uint32 randomPropertyId = 0 );
         Item* StoreItem( uint16 pos, Item *pItem, bool update );
-        void EquipItem( uint16 pos, Item *pItem, bool update );
+        Item* EquipNewItem( uint16 pos, uint32 item, uint32 count, bool update );
+        Item* EquipItem( uint16 pos, Item *pItem, bool update );
         void SetAmmo( uint32 item );
         void QuickEquipItem( uint16 pos, Item *pItem);
         void VisualizeItem( uint16 pos, Item *pItem);

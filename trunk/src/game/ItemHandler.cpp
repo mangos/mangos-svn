@@ -410,7 +410,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM_IN_SLOT" );
     uint64 vendorguid, bagguid;
     uint32 item;
-    uint8 bag, slot, count, vendorslot;
+    uint8 slot, count, vendorslot;
 
     recv_data >> vendorguid >> item >> bagguid >> slot >> count;
 
@@ -461,8 +461,11 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 return;
             }
             Bag *pBag;
+            uint8 bag = 0;                                  // init for case invalid bagGUID
             if( bagguid == _player->GetGUID() )
+            {
                 bag = INVENTORY_SLOT_BAG_0;
+            }
             else
             {
                 for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END;i++)
@@ -493,6 +496,23 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 else
                     _player->SendEquipError( msg, NULL, NULL );
             }
+            else
+            if( _player->IsEquipmentPos( dest ) )
+            {
+
+                msg = _player->CanEquipNewItem( slot, dest, item, pProto->BuyCount * count, false );
+                if( msg == EQUIP_ERR_OK )
+                {
+                    _player->ModifyMoney( -(int32)price );
+                    _player->EquipNewItem( dest, item, pProto->BuyCount * count, true );
+                    if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
+                        pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pProto->BuyCount );
+                }
+                else
+                    _player->SendEquipError( msg, NULL, NULL );
+            }
+            else
+                _player->SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, NULL, NULL );
         }
         return;
     }
