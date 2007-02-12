@@ -3577,20 +3577,23 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
 
     // TODO - fix PenaltyFactor and complete the formula from the wiki
     float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500) * (float)(100 - PenaltyFactor) / 100;
-    healamount += uint32(ActualBenefit);
+
+    // use float as more appropriate for negative values and precent applying
+    float heal = healamount + ActualBenefit;
 
     // TODO: check for ALL/SPELLS type
     AuraList& mHealingPct = GetAurasByType(SPELL_AURA_MOD_HEALING_PCT);
     for(AuraList::iterator i = mHealingPct.begin();i != mHealingPct.end(); ++i)
-        healamount *= uint32((100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
+        heal *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
     AuraList& mHealingDonePct = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for(AuraList::iterator i = mHealingDonePct.begin();i != mHealingDonePct.end(); ++i)
-        healamount *= uint32((100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
+        heal *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
-    healamount += m_AuraModifiers[SPELL_AURA_MOD_HEALING];
-    if (int32(healamount) < 0) healamount = 0;
+    heal += float(m_AuraModifiers[SPELL_AURA_MOD_HEALING]);
+    
+    if (heal < 0) heal = 0;
 
-    return healamount;
+    return uint32(heal);
 }
 
 bool Unit::IsImmunedToPhysicalDamage() const

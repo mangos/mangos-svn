@@ -81,6 +81,7 @@ class Aura
         void HandleAuraModStun(bool Apply, bool Real);
         void HandleModDamageDone(bool Apply, bool Real);
         void HandleModDamageTaken(bool Apply, bool Real);
+        void HandleModHealingPercent(bool Apply, bool Real);
         void HandleAuraEmpathy(bool Apply, bool Real);
         void HandleAuraModRangedAttackPower(bool Apply, bool Real);
         void HandleAuraModIncreaseSpeedAlways(bool Apply, bool Real);
@@ -164,6 +165,8 @@ class Aura
         void HandleForceReaction(bool Apply, bool Real);
         void HandleAuraModRangedHaste(bool Apply, bool Real);
         void HandleRangedAmmoHaste(bool Apply, bool Real);
+        void HandleModHealingDone(bool Apply, bool Real);
+        void HandleModHealingDonePercent(bool Apply, bool Real);
         void HandleModTotalPercentStat(bool Apply, bool Real);
         void HandleAuraModTotalThreat(bool Apply, bool Real);
 
