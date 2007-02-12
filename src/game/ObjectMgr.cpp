@@ -1291,15 +1291,15 @@ void ObjectMgr::LoadQuests()
             {
                 if(ref > QUEST_OBJECTIVES_COUNT)
                 {
-                    sLog.outErrorDb("Quest %u has `ReqSourceRef%d` = %u but max value in `ReqSourceRef%d` is 4, quest can't be done.",
-                        qinfo->GetQuestId(),j+1,ref,j+1);
+                    sLog.outErrorDb("Quest %u has `ReqSourceRef%d` = %u but max value in `ReqSourceRef%d` is %u, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,ref,j+1,QUEST_OBJECTIVES_COUNT);
                     // no changes, quest can't be done for this requirement
                 }
                 else
-                if(qinfo->ReqSourceId[j] && !qinfo->ReqItemId[ref-1] )
+                    if(qinfo->ReqSourceId[j] && !qinfo->ReqItemId[ref-1] && !qinfo->ReqSpell[ref-1])
                 {
-                    sLog.outErrorDb("Quest %u has `ReqSourceRef%d` = %u but `ReqItemId%u` = 0, quest can't be done.",
-                        qinfo->GetQuestId(),j+1,ref,ref);
+                    sLog.outErrorDb("Quest %u has `ReqSourceRef%d` = %u but `ReqItemId%u` = 0 and `ReqSpellCast%u` = 0, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,ref,ref,ref);
                     // no changes, quest can't be done for this requirement
                 }
             }

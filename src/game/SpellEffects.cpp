@@ -2346,7 +2346,6 @@ void Spell::EffectSelfResurrect(uint32 i)
     if(unitTarget->GetTypeId() != TYPEID_PLAYER) return;
     if(unitTarget->isAlive()) return;
     if(!unitTarget->IsInWorld()) return;
-    if(damage < 0) return;
 
     uint32 health = 0;
     uint32 mana = 0;
@@ -2359,6 +2358,7 @@ void Spell::EffectSelfResurrect(uint32 i)
     }
     else
     {
+        if(damage < 0) return;
         health = uint32(damage/100*unitTarget->GetMaxHealth());
         if(unitTarget->getPowerType() == POWER_MANA)
             mana = uint32(damage/100*unitTarget->GetMaxPower(unitTarget->getPowerType()));
