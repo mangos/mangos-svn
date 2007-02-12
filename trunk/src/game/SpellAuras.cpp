@@ -163,7 +163,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING = 115,
     &Aura::HandleNULL,                                      //SPELL_AURA_IGNORE_REGEN_INTERRUPT = 116,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MECHANIC_RESISTANCE = 117,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_PCT = 118,
+    &Aura::HandleModHealingPercent,                         //SPELL_AURA_MOD_HEALING_PCT = 118,
     &Aura::HandleNULL,                                      //SPELL_AURA_SHARE_PET_TRACKING = 119,
     &Aura::HandleNULL,                                      //SPELL_AURA_UNTRACKABLE = 120,
     &Aura::HandleAuraEmpathy,                               //SPELL_AURA_EMPATHY = 121,
@@ -180,8 +180,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModIncreaseEnergyPercent,              //SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT = 132,
     &Aura::HandleAuraModIncreaseHealthPercent,              //SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT = 133,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MANA_REGEN_INTERRUPT = 134,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_DONE = 135,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_DONE_PERCENT = 136,
+    &Aura::HandleModHealingDone,                            //SPELL_AURA_MOD_HEALING_DONE = 135,
+    &Aura::HandleModHealingDonePercent,                     //SPELL_AURA_MOD_HEALING_DONE_PERCENT = 136,
     &Aura::HandleModTotalPercentStat,                       //SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE = 137,
     &Aura::HandleHaste,                                     //SPELL_AURA_MOD_HASTE = 138,
     &Aura::HandleForceReaction,                             //SPELL_AURA_FORCE_REACTION = 139,
@@ -2383,6 +2383,16 @@ void Aura::HandleModPercentStat(bool apply, bool Real)
     }
 }
 
+void Aura::HandleModHealingDone(bool apply, bool Real)
+{
+    // implemented in Unit::SpellHealingBonus
+}
+
+void Aura::HandleModHealingDonePercent(bool apply, bool Real)
+{
+    // implemented in Unit::SpellHealingBonus
+}
+
 void Aura::HandleModTotalPercentStat(bool apply, bool Real)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
@@ -3026,6 +3036,11 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 
     double healthPercentage = (double)m_target->GetHealth() / (double)m_target->GetMaxHealth();
     m_target->SetHealth(uint32(ceil((double)m_target->GetMaxHealth() * healthPercentage)));
+}
+
+void Aura::HandleModHealingPercent(bool apply, bool Real)
+{
+    // implemented in Unit::SpellHealingBonus
 }
 
 void Aura::HandleAuraEmpathy(bool apply, bool Real)
