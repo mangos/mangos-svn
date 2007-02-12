@@ -9821,8 +9821,16 @@ bool Player::LoadFromDB( uint32 guid )
     SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1,0);
     SetUInt32Value(UNIT_CHANNEL_SPELL,0);
 
-    // remember loaded power values to restore after stats initialization and modifier applying
-    float savedPower[MAX_POWERS];
+    // clear charm/summon related fields
+    SetUInt64Value(UNIT_FIELD_CHARM,0);
+    SetUInt64Value(UNIT_FIELD_SUMMON,0);
+    SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+    SetUInt64Value(UNIT_FIELD_SUMMONEDBY,0);
+    SetUInt64Value(UNIT_FIELD_CREATEDBY,0);
+
+    // remember loaded power/health values to restore after stats initialization and modifier applying
+    uint32 savedHealth = GetHealth();
+    uint32 savedPower[MAX_POWERS];
     for(uint32 i = 0; i < MAX_POWERS; ++i)
         savedPower[i] = GetPower(Powers(i));
 
@@ -9860,9 +9868,10 @@ bool Player::LoadFromDB( uint32 guid )
     // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
     // Skip _ApplyAllItemMods(); -- already applied in _LoadInventory()
 
-    // restore remembered power values
+    // restore remembered power/health values (but not more max values)
+    SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
     for(uint32 i = 0; i < MAX_POWERS; ++i)
-        SetPower(Powers(i),uint32(savedPower[i]));
+        SetPower(Powers(i),savedPower[i] > GetMaxPower(Powers(i)) ? GetMaxPower(Powers(i)) : savedPower[i]);
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugValues();
@@ -10320,6 +10329,12 @@ void Player::SaveToDB()
     sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
     outDebugValues();
 
+    // remember current power/health values with all auras/item/stats mods to save and restore at load
+    uint32 currentHealth = GetHealth();
+    uint32 currentPower[MAX_POWERS];
+    for(uint32 i = 0; i < MAX_POWERS; ++i)
+        currentPower[i] = GetPower(Powers(i));
+
     if(isAlive())
     {
         _RemoveAllItemMods();
@@ -10344,6 +10359,17 @@ void Player::SaveToDB()
     bool inworld = IsInWorld();
     if (inworld)
         RemoveFromWorld();
+
+    // remember base (exactly) power/health values before temporary set to saved currentPower/currentHealth data
+    uint32 baseHealth = GetUInt32Value(UNIT_FIELD_HEALTH);
+    float basePower[MAX_POWERS];
+    for(uint32 i = 0; i < MAX_POWERS; ++i)
+        basePower[i] = GetFloatValue(UNIT_FIELD_POWER1+i);
+
+    // temorary set current power/health values to save
+    SetUInt32Value(UNIT_FIELD_HEALTH,currentHealth);
+    for(uint32 i = 0; i < MAX_POWERS; ++i)
+        SetFloatValue(UNIT_FIELD_POWER1+i,float(currentPower[i]));
 
     sDatabase.BeginTransaction();
 
@@ -10444,6 +10470,11 @@ void Player::SaveToDB()
     _SaveReputation();
 
     sDatabase.CommitTransaction();
+
+    // restore base power/health values before restore mods
+    SetUInt32Value(UNIT_FIELD_HEALTH,baseHealth);
+    for(uint32 i = 0; i < MAX_POWERS; ++i)
+        SetFloatValue(UNIT_FIELD_POWER1+i,basePower[i]);
 
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
