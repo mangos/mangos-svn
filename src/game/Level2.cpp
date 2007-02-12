@@ -323,6 +323,9 @@ bool ChatHandler::HandleItemMoveCommand(const char* args)
     uint16 src = ((INVENTORY_SLOT_BAG_0 << 8) | srcslot);
     uint16 dst = ((INVENTORY_SLOT_BAG_0 << 8) | dstslot);
 
+    if(srcslot==dstslot)
+        return true;
+
     m_session->GetPlayer()->SwapItem( src, dst );
 
     return true;
