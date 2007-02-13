@@ -40,6 +40,9 @@ void WorldSession::HandleSplitItemOpcode( WorldPacket & recv_data )
     uint16 src = ( (srcbag << 8) | srcslot );
     uint16 dst = ( (dstbag << 8) | dstslot );
 
+    if(src==dst)
+        return;
+
     _player->SplitItem( src, dst, count );
 }
 
@@ -98,7 +101,13 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         uint8 msg = _player->CanEquipItem( NULL_SLOT, dest, pItem, !not_swapable );
 
         if( msg == EQUIP_ERR_OK )
+        {
+            uint16 src = ( (srcbag << 8) | srcslot );
+            if(dest==src)                                   // prevent equip in same slot
+                return;
+
             msg = _player->CanUnequipItem( dest, !not_swapable );
+        }
 
         if( msg == EQUIP_ERR_OK )
         {
@@ -150,7 +159,20 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
         }
     }
 
-    _player->DestroyItem( bag, slot, true );
+    Item *pItem  = _player->GetItemByPos( bag, slot );
+    if(!pItem)
+    {
+        _player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+        return;
+    }
+
+    if(count)
+    {
+        uint32 i_count = count;
+        _player->DestroyItemCount( pItem, i_count, true );
+    }
+    else
+        _player->DestroyItem( bag, slot, true );
 }
 
 void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
@@ -311,6 +333,8 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
         data << pItem->GetGUID();
         SendPacket(&data);
     }
+    else
+        _player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
 }
 
 void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
@@ -333,7 +357,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
     recv_data >> vendorguid >> itemguid >> count;
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
-    if( pCreature )
+    if( pCreature && !pCreature->IsHostileTo(GetPlayer()) && pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
     {
         uint16 pos = _player->GetPosByGuid(itemguid);
         Item *pItem = _player->GetItemByPos( pos );
@@ -411,7 +435,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
     if( pItem )
     {
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
-        if( pCreature )
+        if( pCreature && !pCreature->IsHostileTo(GetPlayer()) && pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         {
             uint32 price = _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
             if( _player->GetMoney() < price )
@@ -454,7 +478,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     if( pProto )
     {
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
-        if( pCreature )
+        if( pCreature && !pCreature->IsHostileTo(GetPlayer()) && pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         {
             vendorslot = 0;
             for(int i = 0; i < pCreature->GetItemCount(); i++)
@@ -568,7 +592,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     if( pProto )
     {
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
-        if( pCreature )
+        if( pCreature && !pCreature->IsHostileTo(GetPlayer()) && pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         {
             vendorslot = 0;
             for(int i = 0; i < pCreature->GetItemCount(); i++)
@@ -640,7 +664,7 @@ void WorldSession::SendListInventory( uint64 guid )
 {
     sLog.outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if( pCreature )
+    if( pCreature && !pCreature->IsHostileTo(GetPlayer()) && pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
     {
         uint8 numitems = pCreature->GetItemCount();
         uint8 count = 0;
@@ -702,6 +726,10 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         uint8 msg = _player->CanStoreItem( dstbag, NULL_SLOT, dest, pItem, false );
         if( msg == EQUIP_ERR_OK )
         {
+            uint16 src = ( (srcbag << 8) | srcslot );
+            if(dest==src)                                   // prevent store in same slot
+                return;
+
             _player->RemoveItem(srcbag, srcslot, true);
             _player->StoreItem( dest, pItem, true );
         }
@@ -753,6 +781,10 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
         uint8 msg = _player->CanBankItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
         if( msg == EQUIP_ERR_OK )
         {
+            uint16 src = ( (srcbag << 8) | srcslot );
+            if(dest==src)                                   // prevent store in same slot
+                return;
+
             _player->RemoveItem(srcbag, srcslot, true);
             _player->BankItem( dest, pItem, true );
         }

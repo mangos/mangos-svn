@@ -55,6 +55,9 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
     if( !unit->isTabardVendor())                            // it's not tabard vendor
         return;
 
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+        return;
+
     SendTabardVendorActivate(guid);
 }
 
@@ -88,6 +91,9 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
         return;
 
     if( !unit->isBanker())                                  // it's not banker
+        return;
+
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
 
     SendShowBank(guid);
@@ -131,6 +137,9 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     }
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
 
     if(!unit->isCanTrainingOf(_player,true))
@@ -234,6 +243,9 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+        return;
+
     if(!unit->isCanTrainingOf(_player,true))
         return;
 
@@ -325,6 +337,9 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+        return;
+
     if(!GetPlayer()->isAlive())
         return;
 
@@ -351,6 +366,9 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     }
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
 
     if(!GetPlayer()->isAlive())
@@ -434,7 +452,7 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
     }
 
     // prevent cheating
-    if(!unit->isInnkeeper() || !unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
+    if(!unit->isInnkeeper() || unit->IsHostileTo(GetPlayer()) || !unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
         return;
 
     SendBindPoint(unit);
@@ -520,6 +538,9 @@ void WorldSession::HandleListStabledPetsOpcode( WorldPacket & recv_data )
     }
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
 
     SendStablePet(npcGUID);
@@ -619,6 +640,9 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+        return;
+
     Pet *pet = _player->GetPet();
 
     WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
@@ -691,6 +715,9 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+        return;
+
     WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
     Pet* pet = _player->GetPet();
@@ -760,6 +787,9 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
         return;
 
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+        return;
+
     WorldPacket data(SMSG_STABLE_RESULT, 200);
 
     QueryResult *result;
@@ -826,6 +856,9 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
     }
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
 
     WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
@@ -901,6 +934,9 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     }
 
     if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
 
     if (itemGUID)
