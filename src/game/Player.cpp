@@ -97,8 +97,7 @@ Player::Player (WorldSession *session): Unit()
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;
 
-    memset(m_items, 0, sizeof(Item*)*BANK_SLOT_BAG_END);
-    memset(m_buybackitems, 0, sizeof(Item*)*(BUYBACK_SLOT_END - BUYBACK_SLOT_START));
+    memset(m_items, 0, sizeof(Item*)*KEYRING_SLOT_END);
 
     groupInfo.group  = NULL;
     groupInfo.invite = NULL;
@@ -190,12 +189,10 @@ Player::~Player ()
 
     RemoveAllAuras();
 
-    uint32 eslot;
     for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
     {
-        eslot = j - BUYBACK_SLOT_START;
-        if(m_buybackitems[eslot])
-            delete m_buybackitems[eslot];
+        if(m_items[j])
+            delete m_items[j];
         // already deleted from DB when player was saved
     }
     for(int i = 0; i < BANK_SLOT_BAG_END; i++)
@@ -247,18 +244,15 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         return false;
     }
 
-    for (i = 0; i < BANK_SLOT_BAG_END; i++)
+    for (i = 0; i < KEYRING_SLOT_END; i++)
         m_items[i] = NULL;
 
-    uint32 eslot;
-    for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
-    {
-        eslot = j - BUYBACK_SLOT_START;
-        m_buybackitems[eslot] = NULL;
-        //        SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1+j*2,0);
-        //        SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+j,0);
-        //        SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+j,0);
-    }
+    //for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
+    //{
+    //    SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1+j*2,0);
+    //    SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+j,0);
+    //    SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+j,0);
+    //}
 
     m_race = race;
     m_class = class_;
@@ -300,11 +294,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         sLog.outError("Invalid default powertype %u for player (class %u)",powertype,class_);
         return false;
     }
-
-    if ( race == RACE_TAUREN )
-        SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
-    else
-        SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
@@ -1735,6 +1724,12 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     // update level, max level of skills
     SetLevel( level);
     UpdateMaxSkills ();
+
+    // reset size before reapply auras
+    if (getRace() == RACE_TAUREN)
+        SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
+    else
+        SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
 
     // save base values (bonuses already included in stored stats
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
@@ -5997,7 +5992,7 @@ Item* Player::GetItemByPos( uint16 pos ) const
 
 Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
 {
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot < BANK_SLOT_BAG_END ) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot < BANK_SLOT_BAG_END || slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_END ) )
         return m_items[slot];
     else if(bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END
         || bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END )
@@ -6024,6 +6019,8 @@ bool Player::IsInventoryPos( uint8 bag, uint8 slot )
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= INVENTORY_SLOT_ITEM_START && slot < INVENTORY_SLOT_ITEM_END ) )
         return true;
     if( bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END )
+        return true;
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_END ) )
         return true;
     return false;
 }
@@ -6146,6 +6143,17 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                     }
                 }
+                for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+                {
+                    pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                    pItem2 = GetItemByPos( pos );
+                    if( pItem2 && pItem2!= pItem && pItem2->GetEntry() == pItem->GetEntry() )
+                    {
+                        curcount += pItem2->GetCount();
+                        if( curcount + pItem->GetCount() > pProto->MaxCount )
+                            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+                    }
+                }
                 for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                 {
                     pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
@@ -6196,7 +6204,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
 
             if( bag == 0 )
             {
-                // search stack for merge to
+                // search stack for merge to (ignore keyring - keys not merged)
                 if( pProto->Stackable > 1 )
                 {
                     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
@@ -6236,6 +6244,22 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                 // search free slot - special bag case
                 if( pProto->BagFamily != BAG_FAMILY_NONE )
                 {
+                    /* not active until keyring show at key add implementation
+                    if(pProto->BagFamily == BAG_FAMILY_KEYS)
+                    {
+                        uint32 keyringSize = GetMaxKeyringSize();
+                        for(uint32 j = KEYRING_SLOT_START; j < KEYRING_SLOT_START+keyringSize; j++)
+                        {
+                            pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, j );
+                            if( !pItem2 )
+                            {
+                                dest = ( (INVENTORY_SLOT_BAG_0 << 8) | j );
+                                return EQUIP_ERR_OK;
+                            }
+                        }
+                    }
+                    */
+
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                     {
                         pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
@@ -6307,7 +6331,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             return EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG;
                     }
 
-                    // search stack in bag for merge to
+                    // search stack in bag for merge to (ignore keyring - keys not merged)
                     if( pProto->Stackable > 1 )
                     {
                         if( bag == INVENTORY_SLOT_BAG_0 )
@@ -6345,6 +6369,23 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                     }
                     if( bag == INVENTORY_SLOT_BAG_0 )
                     {
+                        // search free slot - keyring case
+                        /* not active until keyring show at key add implementation
+                        if(pProto->BagFamily == BAG_FAMILY_KEYS)
+                        {
+                            uint32 keyringSize = GetMaxKeyringSize();
+                            for(uint32 j = KEYRING_SLOT_START; j < KEYRING_SLOT_START+keyringSize; j++)
+                            {
+                                pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, j );
+                                if( !pItem2 )
+                                {
+                                    dest = ( (INVENTORY_SLOT_BAG_0 << 8) | j );
+                                    return EQUIP_ERR_OK;
+                                }
+                            }
+                        }
+                        */
+
                         for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
                         {
                             pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
@@ -6404,6 +6445,15 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                     {
                         if( bag == INVENTORY_SLOT_BAG_0 )
                         {
+
+                            // keyring case
+                            if(slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_START+GetMaxKeyringSize() && pProto->BagFamily != BAG_FAMILY_KEYS)
+                                return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
+
+                            // prevent cheating
+                            if(slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END || slot >= KEYRING_SLOT_END)
+                                return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
+
                             dest = ( (bag << 8) | slot );
                             return EQUIP_ERR_OK;
                         }
@@ -7913,26 +7963,26 @@ void Player::AddItemToBuyBackSlot( Item *pItem )
     {
         uint32 slot = m_currentBuybackSlot;
         // if current back slot non-empty search oldest or free
-        if(m_buybackitems[slot-BUYBACK_SLOT_START])
+        if(m_items[slot])
         {
             uint32 oldest_time = GetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 );
             uint32 oldest_slot = BUYBACK_SLOT_START;
 
-            for(uint32 i = 1; i < BUYBACK_SLOT_END-BUYBACK_SLOT_START; ++i )
+            for(uint32 i = BUYBACK_SLOT_START+1; i < BUYBACK_SLOT_END; ++i )
             {
                 // found empty
-                if(!m_buybackitems[i])
+                if(!m_items[i])
                 {
-                    slot = BUYBACK_SLOT_START+i;
+                    slot = i;
                     break;
                 }
 
-                uint32 i_time = GetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + i);
+                uint32 i_time = GetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + i - BUYBACK_SLOT_START);
 
                 if(oldest_time > i_time)
                 {
                     oldest_time = i_time;
-                    oldest_slot = BUYBACK_SLOT_START+i;
+                    oldest_slot = i;
                 }
             }
 
@@ -7942,11 +7992,11 @@ void Player::AddItemToBuyBackSlot( Item *pItem )
 
         RemoveItemFromBuyBackSlot( slot, true );
         sLog.outDebug( "STORAGE: AddItemToBuyBackSlot item = %u, slot = %u", pItem->GetEntry(), slot);
-        uint32 eslot = slot - BUYBACK_SLOT_START;
 
-        m_buybackitems[eslot] = pItem;
+        m_items[slot] = pItem;
         time_t base = time(NULL);
         uint32 etime = uint32(base - m_logintime + (30 * 3600));
+        uint32 eslot = slot - BUYBACK_SLOT_START;
 
         SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + eslot * 2, pItem->GetGUID() );
         ItemPrototype const *pProto = pItem->GetProto();
@@ -7966,7 +8016,7 @@ Item* Player::GetItemFromBuyBackSlot( uint32 slot )
 {
     sLog.outDebug( "STORAGE: GetItemFromBuyBackSlot slot = %u", slot);
     if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
-        return m_buybackitems[slot - BUYBACK_SLOT_START];
+        return m_items[slot];
     return NULL;
 }
 
@@ -7975,21 +8025,22 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot, bool del )
     sLog.outDebug( "STORAGE: RemoveItemFromBuyBackSlot slot = %u", slot);
     if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
     {
-        uint32 eslot = slot - BUYBACK_SLOT_START;
-        Item *pItem = m_buybackitems[eslot];
+        Item *pItem = m_items[slot];
         if( pItem )
         {
             pItem->RemoveFromWorld();
             if(del) pItem->SetState(ITEM_REMOVED, this);
         }
 
-        m_buybackitems[eslot] = NULL;
+        m_items[slot] = NULL;
+
+        uint32 eslot = slot - BUYBACK_SLOT_START;
         SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + eslot * 2, 0 );
         SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, 0 );
         SetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + eslot, 0 );
 
         // if cuurent backslot is filled set to now free slot
-        if(m_buybackitems[m_currentBuybackSlot])
+        if(m_items[m_currentBuybackSlot])
             m_currentBuybackSlot = slot;
     }
 }
@@ -10555,13 +10606,13 @@ void Player::_SaveInventory()
 {
     // force items in buyback slots to new state
     // and remove those that aren't already
-    for (uint8 i = 0; i < 12; i++)
+    for (uint8 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; i++)
     {
-        Item *item = m_buybackitems[i];
+        Item *item = m_items[i];
         if (!item || item->GetState() == ITEM_NEW) continue;
         sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
         sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", item->GetGUIDLow());
-        m_buybackitems[i]->FSetState(ITEM_NEW);
+        m_items[i]->FSetState(ITEM_NEW);
     }
 
     if (m_itemUpdateQueue.empty()) return;

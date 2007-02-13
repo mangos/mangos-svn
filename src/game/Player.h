@@ -424,6 +424,9 @@ class WorldSession;
 #define BUYBACK_SLOT_12              80
 #define BUYBACK_SLOT_END             81
 
+#define KEYRING_SLOT_START           81
+#define KEYRING_SLOT_END             97
+
 #define DEFAULT_SWITCH_WEAPON        1500                   //cooldown in ms
 #define ROGUE_SWITCH_WEAPON          1000
 
@@ -617,6 +620,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddItemToBuyBackSlot( Item *pItem );
         Item* GetItemFromBuyBackSlot( uint32 slot );
         void RemoveItemFromBuyBackSlot( uint32 slot, bool del );
+        uint32 GetMaxKeyringSize() const { return getLevel() <= 40 ? 8 : ( getLevel() <= 50 ? 8 : 12 ); }
         void SendEquipError( uint8 msg, Item* pItem, Item *pItem2 );
         void SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param );
         void SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param );
@@ -1255,8 +1259,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_dismountCost;
         uint32 m_nextSave;
 
-        Item* m_items[BANK_SLOT_BAG_END];
-        Item* m_buybackitems[BUYBACK_SLOT_END - BUYBACK_SLOT_START];
+        Item* m_items[KEYRING_SLOT_END];
         uint32 m_currentBuybackSlot;
 
         std::vector<Item*> m_itemUpdateQueue;

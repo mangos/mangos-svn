@@ -1084,20 +1084,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
-        if(unit_target->m_form == FORM_DIREBEAR)
-            if (m_target->getRace() == RACE_TAUREN)
-        {
-            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
-        }
-        else
-            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
     }
     else
     {
-        if (m_target->getRace() == RACE_TAUREN)
-            unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
-        else
-            unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
         unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,unit_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(unit_target->getClass() == CLASS_DRUID)
