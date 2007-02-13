@@ -221,16 +221,38 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         for(int s = 0; s < 5; s++)
         {
             // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
-            // use `item_template` only if spell not have own cooldowns
+            // use `item_template` or if not set then only use spell cooldowns
             SpellEntry const* spell = sSpellStore.LookupEntry(pProto->Spells[s].SpellId);
-            bool dbc_data = spell && ( spell->RecoveryTime > 0 || spell->CategoryRecoveryTime > 0 );
+            if(!spell)
+            {
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(-1);
+                data << uint32(0);
+                data << uint32(-1);
+            }
+            else
+            {
+                bool db_data = pProto->Spells[s].SpellCooldown > 0 || pProto->Spells[s].SpellCategoryCooldown > 0;
 
-            data << pProto->Spells[s].SpellId;
-            data << pProto->Spells[s].SpellTrigger;
-            data << uint32(-abs(pProto->Spells[s].SpellCharges));
-            data << uint32(dbc_data ? spell->RecoveryTime         : pProto->Spells[s].SpellCooldown);
-            data << uint32(dbc_data ? spell->Category             : pProto->Spells[s].SpellCategory);
-            data << uint32(dbc_data ? spell->CategoryRecoveryTime : pProto->Spells[s].SpellCategoryCooldown);
+                data << pProto->Spells[s].SpellId;
+                data << pProto->Spells[s].SpellTrigger;
+                data << uint32(-abs(pProto->Spells[s].SpellCharges));
+
+                if(db_data)
+                {
+                    data << uint32(pProto->Spells[s].SpellCooldown);
+                    data << uint32(pProto->Spells[s].SpellCategory);
+                    data << uint32(pProto->Spells[s].SpellCategoryCooldown);
+                }
+                else
+                {
+                    data << uint32(spell->RecoveryTime);
+                    data << uint32(spell->Category);
+                    data << uint32(spell->CategoryRecoveryTime);
+                }
+            }
         }
         data << pProto->Bonding;
         data << pProto->Description;

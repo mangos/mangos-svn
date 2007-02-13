@@ -861,18 +861,15 @@ void Spell::SendSpellCooldown()
 
     Player* _player = (Player*)m_caster;
 
-    uint32 cat = m_spellInfo->Category;
-    int32 rec = m_spellInfo->RecoveryTime;
-    int32 catrec = m_spellInfo->CategoryRecoveryTime;
-
-    // shoot spells used equiped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
-    if (!rec && !catrec && (cat == 76 || cat == 351))
-        rec = _player->GetAttackTime(RANGED_ATTACK);
+    // init vooldown values
+    uint32 cat   = 0;
+    int32 rec    = 0;
+    int32 catrec = 0;
 
     // some special item spells without correct cooldown in SpellInfo
     // cooldown information stored in item prototype
     // This used in same way in WorldSession::HandleItemQuerySingleOpcode data sending to client.
-    if( rec == 0 && catrec == 0 && m_CastItem)
+    if(m_CastItem)
     {
         ItemPrototype const* proto = m_CastItem->GetProto();
         if(proto)
@@ -890,6 +887,19 @@ void Spell::SendSpellCooldown()
         }
     }
 
+    // if no cooldown found above then base at DBC data
+    if(!rec && !catrec)
+    {
+        cat = m_spellInfo->Category;
+        rec = m_spellInfo->RecoveryTime;
+        catrec = m_spellInfo->CategoryRecoveryTime;
+    }
+
+    // shoot spells used equiped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
+    if (!rec && !catrec && (cat == 76 || cat == 351))
+        rec = _player->GetAttackTime(RANGED_ATTACK);
+
+    // Now we have cooldown data (if found any), time to apply mods
     if(rec > 0)
         _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec);
 
@@ -925,23 +935,16 @@ void Spell::SendSpellCooldown()
         _player->AddSpellCooldown(m_spellInfo->Id,catrecTime);
     }
 
-    if (catrec > 0)
+    if (catrec && cat)
     {
-        PlayerSpellMap const& player_spells = _player->GetSpellMap();
-        for (PlayerSpellMap::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
+        SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(cat);
+        if(i_scstore != sSpellCategoryStore.end())
         {
-            if(m_spellInfo->Id==itr->first)
-                continue;
-
-            if(itr->second->state == PLAYERSPELL_REMOVED || !itr->second->active)
-                continue;
-
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-            if( spellInfo->Category == cat)
+            for(SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {
-                data << uint32(itr->first);
+                data << uint32(*i_scset);
                 data << uint32(catrec);
-                _player->AddSpellCooldown(itr->first,catrecTime);
+                _player->AddSpellCooldown(*i_scset,catrecTime);
             }
         }
     }
