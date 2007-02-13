@@ -3129,11 +3129,6 @@ bool ChatHandler::HandleResetCommand (const char * args)
         // reset only if player not in some form;
         if(!player->m_form)
         {
-            if ( player->getRace() == RACE_TAUREN )
-                player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
-            else
-                player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
-
             player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId + player->getGender());
             player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId + player->getGender() );
         }
