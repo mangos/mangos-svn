@@ -323,6 +323,9 @@ class Spell;
 class Item;
 class WorldSession;
 
+// first slot for item stored (in any way in player m_items data)
+#define PLAYER_SLOT_START            0
+
 #define EQUIPMENT_SLOT_START         0
 #define EQUIPMENT_SLOT_HEAD          0
 #define EQUIPMENT_SLOT_NECK          1
@@ -426,6 +429,10 @@ class WorldSession;
 
 #define KEYRING_SLOT_START           81
 #define KEYRING_SLOT_END             97
+
+// last+1 slot for item stored (in any way in player m_items data)
+#define PLAYER_SLOT_END              97
+#define PLAYER_SLOTS_COUNT           (PLAYER_SLOT_END - PLAYER_SLOT_START)
 
 #define DEFAULT_SWITCH_WEAPON        1500                   //cooldown in ms
 #define ROGUE_SWITCH_WEAPON          1000
@@ -1259,7 +1266,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_dismountCost;
         uint32 m_nextSave;
 
-        Item* m_items[KEYRING_SLOT_END];
+        Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
 
         std::vector<Item*> m_itemUpdateQueue;

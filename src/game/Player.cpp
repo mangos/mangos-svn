@@ -97,7 +97,7 @@ Player::Player (WorldSession *session): Unit()
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;
 
-    memset(m_items, 0, sizeof(Item*)*KEYRING_SLOT_END);
+    memset(m_items, 0, sizeof(Item*)*PLAYER_SLOTS_COUNT);
 
     groupInfo.group  = NULL;
     groupInfo.invite = NULL;
@@ -244,7 +244,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         return false;
     }
 
-    for (i = 0; i < KEYRING_SLOT_END; i++)
+    for (i = 0; i < PLAYER_SLOTS_COUNT; i++)
         m_items[i] = NULL;
 
     //for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
@@ -2692,6 +2692,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `owner_guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
@@ -6451,7 +6452,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                                 return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
 
                             // prevent cheating
-                            if(slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END || slot >= KEYRING_SLOT_END)
+                            if(slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END || slot >= PLAYER_SLOT_END)
                                 return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
 
                             dest = ( (bag << 8) | slot );
@@ -7403,6 +7404,9 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
     if( pItem )
     {
         sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+
+        if(pItem->HasFlag(ITEM_FIELD_FLAGS, 8))
+            sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
 
         //pItem->SetOwnerGUID(0);
         pItem->SetSlot( NULL_SLOT );

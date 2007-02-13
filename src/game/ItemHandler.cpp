@@ -847,3 +847,87 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
     else
         sLog.outDebug("WORLD: CMSG_ITEM_NAME_QUERY for item %u failed (unknown item)", itemid);
 }
+
+void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
+{
+    sLog.outDebug("Received opcode CMSG_WRAP_ITEM");
+
+    uint8 gift_bag, gift_slot, item_bag, item_slot;
+    recv_data.hexlike();
+
+    recv_data >> gift_bag >> gift_slot; // paper
+    recv_data >> item_bag >> item_slot; // item
+
+    sLog.outDebug("WRAP: receive gift_bag = %u, gift_slot = %u, item_bag = %u, item_slot = %u", gift_bag, gift_slot, item_bag, item_slot);
+
+    Item *gift = _player->GetItemByPos( gift_bag, gift_slot );
+    if(!gift)
+    {
+        _player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, gift, NULL );
+        return;
+    }
+
+    Item *item = _player->GetItemByPos( item_bag, item_slot );
+
+    if( !item )
+    {
+        _player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, item, NULL );
+        return;
+    }
+
+    if(item==gift)                                          // not possable with pacjket from real client
+    {
+        _player->SendEquipError( EQUIP_ERR_WRAPPED_CANT_BE_WRAPPED, item, NULL );
+        return;
+    }
+
+    if(item->IsEquipped())
+    {
+        _player->SendEquipError( EQUIP_ERR_EQUIPPED_CANT_BE_WRAPPED, item, NULL );
+        return;
+    }
+    
+    if(item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR)) // HasFlag(ITEM_FIELD_FLAGS, 8);
+    {
+        _player->SendEquipError( EQUIP_ERR_WRAPPED_CANT_BE_WRAPPED, item, NULL );
+        return;
+    }
+    
+    if(item->IsBag())
+    {
+        _player->SendEquipError( EQUIP_ERR_BAGS_CANT_BE_WRAPPED, item, NULL );
+        return;
+    }
+    
+    if(item->IsSoulBound() || item->GetProto()->Class == ITEM_CLASS_QUEST)
+    {
+        _player->SendEquipError( EQUIP_ERR_BOUND_CANT_BE_WRAPPED, item, NULL );
+        return;
+    }
+
+    if(item->GetMaxStackCount() != 1)
+    {
+        _player->SendEquipError( EQUIP_ERR_STACKABLE_CANT_BE_WRAPPED, item, NULL );
+        return;
+    }
+    
+    //if(item->IsUnique()) // need figure out unique item flags...
+    //{
+    //    _player->SendEquipError( EQUIP_ERR_UNIQUE_CANT_BE_WRAPPED, item, NULL );
+    //    return;
+    //}
+
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("INSERT INTO `character_gifts` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(item->GetOwnerGUID()), item->GetGUIDLow(), item->GetEntry(), item->GetUInt32Value(ITEM_FIELD_FLAGS));
+    item->SetUInt32Value(OBJECT_FIELD_ENTRY, gift->GetUInt32Value(OBJECT_FIELD_ENTRY));
+    item->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, _player->GetGUID());
+    item->SetUInt32Value(ITEM_FIELD_FLAGS, 8); // wrapped ?
+    item->SetState(ITEM_CHANGED, _player);
+
+    if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_template`
+        item->SaveToDB();
+    sDatabase.CommitTransaction();
+
+    uint32 count = 1;
+    _player->DestroyItemCount(gift, count, true);
+}
