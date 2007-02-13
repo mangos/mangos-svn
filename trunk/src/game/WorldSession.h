@@ -363,6 +363,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleBuybackItem(WorldPacket & recvPacket);
         void HandleAutoBankItemOpcode(WorldPacket& recvPacket);
         void HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket);
+        void HandleWrapItemOpcode(WorldPacket& recvPacket);
 
         void HandleAttackSwingOpcode(WorldPacket& recvPacket);
         void HandleAttackStopOpcode(WorldPacket& recvPacket);

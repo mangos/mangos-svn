@@ -172,7 +172,29 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         }
     }
 
-    pUser->SendLoot(pItem->GetGUID(),LOOT_CORPSE);
+    if(pItem->HasFlag(ITEM_FIELD_FLAGS, 8)) // wrapped?
+    {
+        QueryResult *result = sDatabase.PQuery("SELECT `entry`, `flags` FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
+        if (result)
+        {
+            Field *fields = result->Fetch();
+            uint32 entry = fields[0].GetUInt32();
+            uint32 flags = fields[1].GetUInt32();
+
+            pItem->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, 0);
+            pItem->SetUInt32Value(OBJECT_FIELD_ENTRY, entry);
+            pItem->SetUInt32Value(ITEM_FIELD_FLAGS, flags);
+            pItem->SetState(ITEM_CHANGED, pUser);
+        }
+        else
+        {
+            sLog.outError("Wrapped item %u don't have record in character_gifts table and will deleted");
+            pUser->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+        }
+        sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
+    }
+    else
+        pUser->SendLoot(pItem->GetGUID(),LOOT_CORPSE);
 }
 
 void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
