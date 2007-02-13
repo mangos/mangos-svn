@@ -272,6 +272,9 @@ struct SpellEntry
     float     DmgMultiplier[3];
 };
 
+typedef std::set<uint32> SpellCategorySet;
+typedef std::map<uint32,SpellCategorySet > SpellCategoryStore;
+
 struct SpellCastTimesEntry
 {
     uint32    ID;

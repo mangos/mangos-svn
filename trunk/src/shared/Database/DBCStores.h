@@ -141,6 +141,7 @@ extern DBCStorage <SkillLineAbilityEntry>     sSkillLineAbilityStore;
 extern DBCStorage <SpellDurationEntry>        sSpellDurationStore;
 //extern DBCStorage <SpellFocusObjectEntry>     sSpellFocusObjectStore;
 extern DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore;
+extern SpellCategoryStore                     sSpellCategoryStore;
 extern DBCStorage <SpellRadiusEntry>          sSpellRadiusStore;
 extern DBCStorage <SpellRangeEntry>           sSpellRangeStore;
 extern DBCStorage <SpellEntry>                sSpellStore;
