@@ -1333,7 +1333,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_BlockValue;
         uint32 m_soulStoneSpell;
-        uint32 m_soulStoneGUIDLow;
         uint32 m_WeaponProficiency;
         uint32 m_ArmorProficiency;
         bool m_canParry;

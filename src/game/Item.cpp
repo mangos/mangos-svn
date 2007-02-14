@@ -486,7 +486,7 @@ void Item::SaveToDB()
             ss << "UPDATE `item_instance` SET `data` = '";
             for(uint16 i = 0; i < m_valuesCount; i++ )
                 ss << GetUInt32Value(i) << " ";
-            ss << "' WHERE `guid` = '" << guid << "'";
+            ss << "', `owner_guid` = '" << GUID_LOPART(GetOwnerGUID()) << "' WHERE `guid` = '" << guid << "'";
 
             sDatabase.Execute( ss.str().c_str() );
 
