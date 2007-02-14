@@ -1519,6 +1519,12 @@ bool Player::isAcceptTickets() const
     return GetSession()->GetSecurity() >=2 && (m_GMFlags & GM_ACCEPT_TICKETS);
 }
 
+bool Player::IsUnderWater() const
+{ 
+    return IsInWater() && 
+        GetPositionZ() < (MapManager::Instance().GetMap(GetMapId())->GetWaterLevel(GetPositionX(),GetPositionY())-2);
+}
+
 void Player::SetInWater(bool apply)
 {
     //define player in water by opcodes
@@ -1528,19 +1534,30 @@ void Player::SetInWater(bool apply)
     //TODO: exist also swimming mobs, and function must be symmetric to enter/leave water
     m_isInWater = apply;
 
+    // form update
     if(apply)
     {
-        uint64 guid = GetGUID();
-        InHateListOf& InHateList = GetInHateListOf();
-        for(InHateListOf::iterator iter = InHateList.begin(); iter != InHateList.end(); iter++)
-        {
-            Unit* unit = (*iter);
-            if(isInAccessablePlaceFor(((Creature*)unit)) )
-                (*iter)->MoveGuidToOfflineList(guid);
-        }
+        // remove travel forms
+        if(m_form == FORM_TRAVEL || m_form == FORM_GHOSTWOLF)
+            RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
     else
-        MoveToThreatList();
+    {
+        // remove aqua form
+        if(m_form == FORM_AQUA)
+            RemoveAurasDueToSpell(m_ShapeShiftForm);
+    }
+
+    // update threat tables
+    uint64 guid = GetGUID();
+    InHateListOf& InHateList = GetInHateListOf();
+    for(InHateListOf::iterator iter = InHateList.begin(); iter != InHateList.end(); iter++)
+    {
+        if(!isInAccessablePlaceFor(*iter) )
+            (*iter)->MoveGuidToOfflineList(guid);
+        else
+            (*iter)->MoveGuidToThreatList(guid);
+    }
 }
 
 void Player::SetGameMaster(bool on)
@@ -3672,20 +3689,6 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     //!in lava check
     if ((z < (water_z - 0)) && (flag1 & 0x02))
         m_isunderwater|= 0x80;
-
-    // form checks
-    if ( IsUnderWater() )
-    {
-        // remove travel forms
-        if(m_form == FORM_TRAVEL || m_form == FORM_GHOSTWOLF)
-            RemoveAurasDueToSpell(m_ShapeShiftForm);
-    }
-    // IsInWater check ignore bridge and underwater ways case, check additional z
-    else if( !IsInWater() && z < water_z + 1 )
-    {
-        if(m_form == FORM_AQUA)
-            RemoveAurasDueToSpell(m_ShapeShiftForm);
-    }
 
     CheckExploreSystem();
 
