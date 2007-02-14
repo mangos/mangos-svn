@@ -297,8 +297,7 @@ CREATE TABLE `character_inventory` (
   `slot` tinyint(3) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  PRIMARY KEY  (`guid`,`bag`,`slot`),
-  UNIQUE KEY `idx_item` (`item`)
+  PRIMARY KEY  (`item`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --

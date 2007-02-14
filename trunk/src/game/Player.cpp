@@ -148,7 +148,6 @@ Player::Player (WorldSession *session): Unit()
 
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;
-    m_soulStoneGUIDLow = 0;
     m_soulStoneSpell = 0;
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
