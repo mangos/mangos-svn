@@ -800,6 +800,9 @@ void Aura::TriggerSpell()
 
     Unit* caster = GetCaster();
 
+    if(!caster)
+        return;
+
     Spell spell(caster, spellInfo, true, this);
     Unit* target = m_target;
     if(!target && caster && caster->GetTypeId() == TYPEID_PLAYER)
@@ -1276,10 +1279,11 @@ void Aura::HandleBindSight(bool apply, bool Real)
     if(!m_target)
         return;
 
-    if(GetCaster()->GetTypeId() != TYPEID_PLAYER)
+    Unit* caster = GetCaster();
+    if(!caster || caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    GetCaster()->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
+    caster->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
 }
 
 void Aura::HandleFarSight(bool apply, bool Real)
@@ -1287,10 +1291,11 @@ void Aura::HandleFarSight(bool apply, bool Real)
     if(!m_target)
         return;
 
-    if(GetCaster()->GetTypeId() != TYPEID_PLAYER)
+    Unit* caster = GetCaster();
+    if(!caster || caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    GetCaster()->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
+    caster->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
 }
 
 void Aura::HandleAuraTrackCreatures(bool apply, bool Real)
@@ -1391,7 +1396,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
             }
         }
         if(caster->GetTypeId() == TYPEID_PLAYER)
-            GetCaster()->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
+            caster->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
     }
 }
 
@@ -1405,11 +1410,11 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
     Unit* caster = GetCaster();
     if(!caster || caster->GetTypeId() != TYPEID_PLAYER)
         return;
-    if(GetCaster()->GetPet() != m_target)
+    if(caster->GetPet() != m_target)
         return;
 
     if(caster->GetTypeId() == TYPEID_PLAYER)
-        GetCaster()->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
+        caster->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
 }
 
 void Aura::HandleModCharm(bool apply, bool Real)
@@ -1527,8 +1532,9 @@ void Aura::HandleModFear(bool Apply, bool Real)
         // only at real remove aura
         if(Real)
         {
-            if(m_target->GetTypeId() != TYPEID_PLAYER)
-                m_target->Attack(GetCaster());
+            Unit* caster = GetCaster();
+            if(m_target->GetTypeId() != TYPEID_PLAYER && caster)
+                m_target->Attack(caster);
             WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
             data<<m_target->GetGUID();
             data<<uint8(1);
@@ -1618,11 +1624,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     {
         m_target->clearUnitState(UNIT_STAT_STUNDED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
-        Unit* caster = GetCaster();
-        if(caster)                                          // set creature facing on root effect
-        {
-            m_target->SetUInt64Value (UNIT_FIELD_TARGET,caster->GetGUID());
-        }
+        m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
 
         // only at real remove aura
         if(Real)
@@ -2899,7 +2901,12 @@ void HandleTriggerSpellEvent(void *obj)
         return;
     }
 
-    Spell spell(Aur->GetCaster(), spellInfo, true, Aur);
+    Unit* caster = Aur->GetCaster();
+
+    if(!caster)
+        return;
+
+    Spell spell(caster, spellInfo, true, Aur);
     SpellCastTargets targets;
     targets.setUnitTarget(Aur->GetTarget());
     //WorldPacket dump;

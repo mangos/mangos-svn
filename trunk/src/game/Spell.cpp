@@ -1677,6 +1677,9 @@ uint8 Spell::CanCast()
                 if(m_spellInfo->EffectImplicitTargetA[j] == TARGET_PET)
                 {
                     target = m_caster->GetPet();
+                    if(!target)
+                        return CAST_FAIL_YOU_DO_NOT_HAVE_PET;
+
                     break;
                 }
             }

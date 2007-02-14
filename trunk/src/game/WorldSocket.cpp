@@ -76,6 +76,9 @@ WorldSocket::WorldSocket(SocketHandler &sh): TcpSocket(sh), _cmd(0), _remaining(
 /// WorldSocket destructor
 WorldSocket::~WorldSocket()
 {
+    if(_session)
+        _session->SetSocket(0);
+
     WorldPacket *packet;
 
     ///- Go through the to-be-sent queue and delete remaining packets

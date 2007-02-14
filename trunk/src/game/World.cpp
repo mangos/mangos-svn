@@ -525,7 +525,7 @@ void World::Update(time_t diff)
         m_timers[WUPDATE_OBJECTS].Reset();
         MapManager::Instance().Update(diff);
 
-        if (scriptSchedule.size() > 0)
+        if (!scriptSchedule.empty())
             ScriptsProcess();
     }
 
@@ -542,7 +542,7 @@ void World::ScriptsStart(ScriptMapMap scripts, uint32 id, Object* source, Object
     ScriptMap *s2 = &(s->second);
     ScriptMap::iterator iter;
     bool immedScript = false;
-    for (iter = s2->begin(); iter != s2->end(); iter++)
+    for (iter = s2->begin(); iter != s2->end(); ++iter)
     {
         if (iter->first == 0)
         {
@@ -550,7 +550,7 @@ void World::ScriptsStart(ScriptMapMap scripts, uint32 id, Object* source, Object
             sa.source = source;
             sa.script = &iter->second;
             sa.target = target;
-            sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(0, sa));
+            scriptSchedule.insert(pair<uint64, ScriptAction>(0, sa));
             immedScript = true;
         }
         else
@@ -559,11 +559,11 @@ void World::ScriptsStart(ScriptMapMap scripts, uint32 id, Object* source, Object
             sa.source = source;
             sa.script = &iter->second;
             sa.target = target;
-            sWorld.scriptSchedule.insert(pair<uint64, ScriptAction>(sWorld.internalGameTime + iter->first, sa));
+            scriptSchedule.insert(pair<uint64, ScriptAction>(internalGameTime + iter->first, sa));
         }
     }
     if (immedScript)
-        sWorld.ScriptsProcess();
+        ScriptsProcess();
 }
 
 void World::ScriptsProcess()
@@ -572,7 +572,7 @@ void World::ScriptsProcess()
         return;
 
     multimap<uint64, ScriptAction>::iterator iter = scriptSchedule.begin();
-    while ((scriptSchedule.size() > 0) && (iter->first < internalGameTime))
+    while (!scriptSchedule.empty() && (iter->first < internalGameTime))
     {
         ScriptAction const& step = iter->second;
         switch (step.script->command)
