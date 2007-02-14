@@ -116,7 +116,7 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
     if(Player::GetGuildIdFromDB(plGuid) != 0)               // player already in guild
         return;
 
-    // remove oll player signs from another petitions
+    // remove all player signs from another petitions
     // this will be prevent attempt joining player to many guilds and corrupt guild data integrity
     Player::RemovePetitionsAndSigns(plGuid);
 
@@ -501,86 +501,62 @@ void Guild::BroadcastPacket(WorldPacket *packet)
 
 void Guild::CreateRank(std::string name,uint32 rights)
 {
-    uint32 rid;
+    uint32 rank;
 
-    std::ostringstream ss;
-    ss<<"SELECT MAX(`rid`) FROM `guild_rank` WHERE `guildid`='"<<Id<<"'";
-    QueryResult *result = sDatabase.Query( ss.str().c_str() );
+    QueryResult *result = sDatabase.PQuery( "SELECT MAX(`rid`) FROM `guild_rank` WHERE `guildid`='%u'",Id);
     if( result )
     {
-        rid = (*result)[0].GetUInt32() + 1;
+        rank = (*result)[0].GetUInt32();                     // rank always = rid-1
         delete result;
     }
     else
-        rid = 0;
+        rank = 0;
 
-    ranks.push_back(RankInfo(name,rights));
+    AddRank(name,rights);
 
     // name now can be used for encoding to DB
     sDatabase.escape_string(name);
-    sDatabase.PExecute( "INSERT INTO `guild_rank` (`guildid`,`rid`,`rname`,`rights`) VALUES ('%u', '%u', '%s', '%u')", Id, rid, name.c_str(), rights );
+    sDatabase.PExecute( "INSERT INTO `guild_rank` (`guildid`,`rid`,`rname`,`rights`) VALUES ('%u', '%u', '%s', '%u')", Id, (rank+1), name.c_str(), rights );
 }
 
 void Guild::AddRank(std::string name,uint32 rights)
 {
-    ranks.push_back(RankInfo(name,rights));
+    m_ranks.push_back(RankInfo(name,rights));
 }
 
 void Guild::DelRank()
 {
-    uint32 rank = ranks.size();
-    //sDatabase.PExecute("UPDATE `guild_member` SET `rank`='%u' WHERE `rank`='%u' AND `guildid`='%u'", (rank-1), rank, Id);
-    sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `rid`='%u' AND `guildid`='%u'", rank, Id);
+    if(m_ranks.empty())
+        return;
 
-    ranks.pop_back();
+    uint32 rank = m_ranks.size()-1;
+    sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `rid`>='%u' AND `guildid`='%u'", (rank+1), Id);
+
+    m_ranks.pop_back();
 }
 
 std::string Guild::GetRankName(uint32 rankId)
 {
-    RankList::iterator itr;
+    if(rankId >= m_ranks.size())
+        return "<unknown>";
 
-    if(rankId > ranks.size()-1) return NULL;
-    uint32 i=0;
-    for (itr = ranks.begin(); itr != ranks.end();itr++)
-    {
-        if (i == rankId)
-            return itr->name;
-        i++;
-    }
-    return 0;
+    return m_ranks[rankId].name;
 }
 
 uint32 Guild::GetRankRights(uint32 rankId)
 {
-    RankList::iterator itr;
+    if(rankId >= m_ranks.size())
+        return 0;
 
-    if(rankId > ranks.size()-1) return 0;
-    uint32 i=0;
-    for (itr = ranks.begin(); itr != ranks.end();itr++)
-    {
-        if (i == rankId)
-            return itr->rights;
-        i++;
-    }
-    return 0;
+    return m_ranks[rankId].rights;
 }
 
 void Guild::SetRankName(uint32 rankId, std::string name)
 {
-    RankList::iterator itr;
+    if(rankId >= m_ranks.size())
+        return;
 
-    if(rankId > ranks.size()-1) return;
-    uint32 i=0;
-
-    for (itr = ranks.begin(); itr != ranks.end();itr++)
-    {
-        if (i == rankId)
-        {
-            itr->name = name;
-            break;
-        }
-        i++;
-    }
+    m_ranks[rankId].name = name;
 
     // name now can be used for encoding to DB
     sDatabase.escape_string(name);
@@ -589,20 +565,11 @@ void Guild::SetRankName(uint32 rankId, std::string name)
 
 void Guild::SetRankRights(uint32 rankId, uint32 rights)
 {
-    RankList::iterator itr;
+    if(rankId >= m_ranks.size())
+        return;
 
-    if(rankId > ranks.size()-1) return;
-    uint32 i=0;
+    m_ranks[rankId].rights = rights;
 
-    for (itr = ranks.begin(); itr != ranks.end();itr++)
-    {
-        if (i == rankId)
-        {
-            itr->rights = rights;
-            break;
-        }
-        i++;
-    }
     sDatabase.PExecute("UPDATE `guild_rank` SET `rights`='%u' WHERE `rid`='%u' AND `guildid`='%u'", rights, (rankId+1), Id);
 }
 
@@ -639,18 +606,16 @@ void Guild::Roster(WorldSession *session)
     Player *pl;
 
                                                             // we can only guess size
-    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+ranks.size()*4+members.size()*50));
+    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+m_ranks.size()*4+members.size()*50));
     data << (uint32)members.size();
     data << MOTD;
     data << GINFO;
-    data << (uint32)ranks.size();
 
-    RankList::iterator ritr;
-    for (ritr = ranks.begin(); ritr != ranks.end();ritr++)
+    data << (uint32)m_ranks.size();
+    for (RankList::iterator ritr = m_ranks.begin(); ritr != m_ranks.end();++ritr)
         data << ritr->rights;
 
-    MemberList::iterator itr;
-    for (itr = members.begin(); itr != members.end(); itr++)
+    for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
         pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
         if (pl)
@@ -658,7 +623,7 @@ void Guild::Roster(WorldSession *session)
             data << pl->GetGUID();
             data << (uint8)1;
             data << (std::string)pl->GetName();
-            data << pl->GetRank();
+            data << itr->RankId;
             data << (uint8)pl->getLevel();
             data << pl->getClass();
             data << pl->GetZoneId();
@@ -702,7 +667,7 @@ void Guild::Query(WorldSession *session)
     data << Id;
     data << name;
     RankList::iterator itr;
-    for (itr = ranks.begin(); itr != ranks.end();itr++)
+    for (itr = m_ranks.begin(); itr != m_ranks.end();itr++)
         data << itr->name;
 
     data << (uint32)0;

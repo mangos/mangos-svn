@@ -167,8 +167,7 @@ void WorldSession::LogoutPlayer(bool Save)
         loginDatabase.PExecute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u'", GetAccountId());
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-        Guild *guild;
-        guild = objmgr.GetGuildById(_player->GetGuildId());
+        Guild *guild = objmgr.GetGuildById(_player->GetGuildId());
         if(guild)
         {
             guild->LoadPlayerStatsByGuid(_player->GetGUID());
