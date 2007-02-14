@@ -118,7 +118,7 @@ class Guild
         void Disband();
 
         typedef std::list<MemberSlot> MemberList;
-        typedef std::list<RankInfo> RankList;
+        typedef std::vector<RankInfo> RankList;
 
         uint32 GetId(){ return Id; }
         const uint64& GetLeader(){ return leaderGuid; }
@@ -162,11 +162,10 @@ class Guild
         void BroadcastPacket(WorldPacket *packet);
 
         void CreateRank(std::string name,uint32 rights);
-        void AddRank(std::string name,uint32 rights);
         void DelRank();
         std::string GetRankName(uint32 rankId);
         uint32 GetRankRights(uint32 rankId);
-        uint32 GetNrRanks(){ return ranks.size(); }
+        uint32 GetNrRanks() const { return m_ranks.size(); }
 
         void SetRankName(uint32 rankId, std::string name);
         void SetRankRights(uint32 rankId, uint32 rights);
@@ -179,6 +178,7 @@ class Guild
         void Query(WorldSession *session);
 
     protected:
+        void AddRank(std::string name,uint32 rights);
 
         uint32 Id;
         std::string name;
@@ -195,7 +195,7 @@ class Guild
         uint32 BorderColor;
         uint32 BackgroundColor;
 
-        RankList ranks;
+        RankList m_ranks;
 
         MemberList members;
 };

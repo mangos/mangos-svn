@@ -575,6 +575,8 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> Invitedname;
 
+    normalizePlayerName(Invitedname);
+
     player = ObjectAccessor::Instance().FindPlayerByName(Invitedname.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -819,16 +821,25 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
         SendCommandResult(GUILD_INVITE_S,"",GUILD_PERMISSIONS);
         return;
     }
-    else if((plRankId-1) == 0 || (plRankId-1) < this->GetPlayer()->GetRank()) return;
+    else if((plRankId-1) == 0 || (plRankId-1) < this->GetPlayer()->GetRank()) 
+        return;
 
-    guild->ChangeRank(plGuid, (plRankId-1));
+    if(plRankId < 1)
+    {
+        SendCommandResult(GUILD_INVITE_S,"",GUILD_INTERNAL);
+        return;
+    }
+
+    uint32 newRankId = plRankId < guild->GetNrRanks() ? plRankId-1 : guild->GetNrRanks()-1;
+
+    guild->ChangeRank(plGuid, newRankId);
 
     WorldPacket data(SMSG_GUILD_EVENT, (2+30));             // guess size
     data << (uint8)GE_PROMOTION;
     data << (uint8)3;
     data << GetPlayer()->GetName();
     data << plName;
-    data << guild->GetRankName(plRankId-1);
+    data << guild->GetRankName(newRankId);
     guild->BroadcastPacket(&data);
 }
 
@@ -871,27 +882,33 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
         SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
         return;
     }
-    else if( !plGuid )
+    
+    if( !plGuid )
     {
         SendCommandResult(GUILD_INVITE_S,plName,GUILD_PLAYER_NOT_FOUND);
         return;
     }
-    else if(plGuid == GetPlayer()->GetGUID())
+    
+    if(plGuid == GetPlayer()->GetGUID())
     {
         SendCommandResult(GUILD_INVITE_S,"",GUILD_NAME_INVALID);
         return;
     }
-    else if(GetPlayer()->GetGuildId() != plGuildId)
+    
+    if(GetPlayer()->GetGuildId() != plGuildId)
     {
         SendCommandResult(GUILD_INVITE_S,plName,GUILD_PLAYER_NOT_IN_GUILD_S);
         return;
     }
-    else if(!guild->HasRankRight(GetPlayer()->GetRank(),GR_RIGHT_DEMOTE))
+    
+    if(!guild->HasRankRight(GetPlayer()->GetRank(),GR_RIGHT_DEMOTE))
     {
         SendCommandResult(GUILD_INVITE_S,"",GUILD_PERMISSIONS);
         return;
     }
-    else if((plRankId+1) >= guild->GetNrRanks() || plRankId <= this->GetPlayer()->GetRank()) return;
+    
+    if((plRankId+1) >= guild->GetNrRanks() || plRankId <= this->GetPlayer()->GetRank())
+        return;
 
     guild->ChangeRank(plGuid, (plRankId+1));
 
