@@ -483,6 +483,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetInWater(bool apply);
 
         bool IsInWater() const { return m_isInWater; }
+        bool IsUnderWater() const;
 
         bool ToggleAFK();
         bool ToggleDND();

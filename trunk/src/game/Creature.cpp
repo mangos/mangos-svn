@@ -130,7 +130,7 @@ bool Creature::isCanSwimOrFly() const
     uint32 family = GetCreatureInfo()->family;
 
     // Creature that can swim in water or fly above water or walk by bottom (maybe wrong family filter - please fix)
-    return (family != 3 && family != 10 && family != 11 && family != 12 && family != 20 && family != 21 && family != 27 );
+    return (family != 0 && family != 3 && family != 10 && family != 11 && family != 12 && family != 20 && family != 21 && family != 27 );
 }
 
 bool Creature::isCanWalkOrFly() const

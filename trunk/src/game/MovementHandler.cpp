@@ -134,11 +134,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         }
     }
 
-    uint16 opcode = recv_data.GetOpcode();
-    if(opcode == MSG_MOVE_START_SWIM)
-        GetPlayer()->SetInWater( true );
-    if(opcode == MSG_MOVE_STOP_SWIM)
-        GetPlayer()->SetInWater( false );
+    if(((flags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
+        GetPlayer()->SetInWater( !GetPlayer()->IsInWater() );
     /*----------------------*/
 
     /* process position-change */
