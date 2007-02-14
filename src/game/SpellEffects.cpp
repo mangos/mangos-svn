@@ -1879,14 +1879,12 @@ void Spell::EffectScriptEffect(uint32 i)
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId2);
             if(!spellInfo)
                 return;
-            Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
+            Spell spell(m_caster,spellInfo,true,0);
 
             SpellCastTargets targets;
             Unit *ptarget = unitTarget;
             targets.setUnitTarget(ptarget);
-            p_spell->prepare(&targets);
-
-            delete p_spell;                                 // triggered spell not self deleted
+            spell.prepare(&targets);
         }
     }
     else

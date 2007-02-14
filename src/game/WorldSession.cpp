@@ -92,8 +92,6 @@ void WorldSession::SendPacket(WorldPacket* packet)
 void WorldSession::QueuePacket(WorldPacket& packet)
 {
     WorldPacket *pck = new WorldPacket(packet);
-    ASSERT(pck);
-
     _recvQueue.add(pck);
 }
 
@@ -270,6 +268,7 @@ void WorldSession::KickPlayer()
 
     // session will removed in next update tick
     _socket->SetCloseAndDelete(true);
+    _socket = NULL;
 }
 
 /// Return the Opcode handler table
