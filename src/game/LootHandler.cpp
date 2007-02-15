@@ -103,7 +103,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count, false );
     if ( msg == EQUIP_ERR_OK )
     {
-        player->StoreNewItem( dest, item->itemid, item->count, true ,item->randomPropertyId);
+        Item * newitem = player->StoreNewItem( dest, item->itemid, item->count, true, item->randomPropertyId);
 
         if (qitem)
         {
@@ -120,24 +120,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         item->is_looted = true;
         loot->unlootedCount--;
 
-        WorldPacket data( SMSG_ITEM_PUSH_RESULT, (8+8+4+4+1+4+8+4) );
-        data << player->GetGUID();
-        data << uint64(0x00000000);
-        data << uint8(0x01);
-        data << uint8(0x00);
-        data << uint8(0x00);
-        data << uint8(0x00);
-        data << uint32(0xFFFFFFFF);
-        data << uint8(0xFF);
-        data << uint32(item->itemid);
-        data << uint32(0);
-        data << uint32(item->randomPropertyId);
-        data << uint32(item->count);
-
-        if (player->groupInfo.group)
-            player->groupInfo.group->BroadcastPacket(&data);
-        else
-            SendPacket( &data );
+        player->SendNewItem(newitem, uint32(item->count), false, false, true);
     }
     else
         player->SendEquipError( msg, NULL, NULL );

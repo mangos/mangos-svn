@@ -8299,7 +8299,26 @@ void Player::LoadEnchant()
             }
         }
     }
+}
 
+void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, bool broadcast)
+{
+    WorldPacket data( SMSG_ITEM_PUSH_RESULT, (8+4+4+4+1+4+4+4+4+4) );
+    data << GetGUID();
+    data << uint32(received);
+    data << uint32(created);
+    data << uint32(1);
+    data << uint8(0xFF);
+    data << uint32(0xFFFFFFFF);
+    data << uint32(item->GetEntry());
+    data << uint32(0);
+    data << uint32(item->GetItemRandomPropertyId());
+    data << uint32(count);
+
+    if (broadcast && groupInfo.group)
+        groupInfo.group->BroadcastPacket(&data);
+    else
+        GetSession()->SendPacket(&data);
 }
 
 /*********************************************************/
@@ -8743,12 +8762,16 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
         if (find(m_timedquests.begin(), m_timedquests.end(), pQuest->GetQuestId()) != m_timedquests.end())
             m_timedquests.remove(pQuest->GetQuestId());
 
+        Item * item;
         if ( pQuest->GetRewChoiceItemsCount() > 0 )
         {
             if( pQuest->RewChoiceItemId[reward] )
             {
                 if( CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, pQuest->RewChoiceItemId[reward], pQuest->RewChoiceItemCount[reward], false ) == EQUIP_ERR_OK )
-                    StoreNewItem( dest, pQuest->RewChoiceItemId[reward], pQuest->RewChoiceItemCount[reward], true);
+                {
+                    item = StoreNewItem( dest, pQuest->RewChoiceItemId[reward], pQuest->RewChoiceItemCount[reward], true);
+                    SendNewItem(item, pQuest->RewChoiceItemCount[reward], true, false);
+                }
             }
         }
 
@@ -8759,7 +8782,10 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
                 if( pQuest->RewItemId[i] )
                 {
                     if( CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, pQuest->RewItemId[i], pQuest->RewItemCount[i], false ) == EQUIP_ERR_OK )
-                        StoreNewItem( dest, pQuest->RewItemId[i], pQuest->RewItemCount[i], true);
+                    {
+                        item = StoreNewItem( dest, pQuest->RewItemId[i], pQuest->RewItemCount[i], true);
+                        SendNewItem(item, pQuest->RewItemCount[i], true, false);
+                    }
                 }
             }
         }
@@ -9115,7 +9141,8 @@ bool Player::GiveQuestSourceItem( uint32 quest_id )
             uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, srcitem, count, false );
             if( msg == EQUIP_ERR_OK )
             {
-                StoreNewItem(dest, srcitem, count, true);
+                Item * item = StoreNewItem(dest, srcitem, count, true);
+                SendNewItem(item, count, true, false);
                 return true;
             }
             // player already have max amount required item, just report success
