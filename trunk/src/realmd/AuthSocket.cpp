@@ -146,7 +146,7 @@ typedef struct
 {
     eAuthCmd cmd;
     uint32 status;
-    void (AuthSocket::*handler)(void);
+    bool (AuthSocket::*handler)(void);
 }AuthHandler;
 
 // Only GCC 4.1.0 and later support #pragma pack(pop) syntax
@@ -253,7 +253,11 @@ void AuthSocket::OnRead()
             {
                 DEBUG_LOG("[Auth] got data for cmd %u ibuf length %u", (uint32)_cmd, ibuf.GetLength());
 
-                (*this.*table[i].handler)();
+                if (!(*this.*table[i].handler)())
+                {
+                    DEBUG_LOG("Command handler failed for cmd %u ibuf length %u", (uint32)_cmd, ibuf.GetLength());
+                    return;
+                }
                 break;
             }
         }
@@ -288,11 +292,11 @@ void AuthSocket::_SetVSFields(std::string password)
 }
 
 /// Logon Challenge command handler
-void AuthSocket::_HandleLogonChallenge()
+bool AuthSocket::_HandleLogonChallenge()
 {
     DEBUG_LOG("Entering _HandleLogonChallenge");
     if (ibuf.GetLength() < sizeof(sAuthLogonChallenge_C))
-        return ;
+        return false;
 
     ///- Read the first 4 bytes (header) to get the length of the remaining of the packet
     std::vector<uint8> buf;
@@ -303,7 +307,7 @@ void AuthSocket::_HandleLogonChallenge()
     DEBUG_LOG("[AuthChallenge] got header, body is %#04x bytes", remaining);
 
     if ((remaining < sizeof(sAuthLogonChallenge_C) - buf.size()) || (ibuf.GetLength() < remaining))
-        return ;
+        return false;
 
     //No big fear of memory outage (size is int16, i.e. < 65536)
     buf.resize(remaining + buf.size() + 1);
@@ -472,20 +476,21 @@ void AuthSocket::_HandleLogonChallenge()
             xferh.file_size=ftell(pPatch);
 
             SendBuf((const char*)&xferh,sizeof(xferh));
-            return;
+            return true;
         }
     }
     /// </ul>
     SendBuf((char *)pkt.contents(), pkt.size());
+    return true;
 }
 
 /// Logon Proof command handler
-void AuthSocket::_HandleLogonProof()
+bool AuthSocket::_HandleLogonProof()
 {
     DEBUG_LOG("Entering _HandleLogonProof");
     ///- Read the packet
     if (ibuf.GetLength() < sizeof(sAuthLogonProof_C))
-        return ;
+        return false;
 
     sAuthLogonProof_C lp;
     ibuf.Read((char *)&lp, sizeof(sAuthLogonProof_C));
@@ -587,14 +592,15 @@ void AuthSocket::_HandleLogonProof()
         char data[2]={AUTH_LOGON_PROOF,REALM_AUTH_NO_MATCH};
         SendBuf(data,sizeof(data));
     }
+    return true;
 }
 
 /// %Realm List command handler
-void AuthSocket::_HandleRealmList()
+bool AuthSocket::_HandleRealmList()
 {
     DEBUG_LOG("Entering _HandleRealmList");
     if (ibuf.GetLength() < 5)
-        return ;
+        return false;
 
     ibuf.Remove(5);
 
@@ -605,7 +611,7 @@ void AuthSocket::_HandleRealmList()
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find him in the database.",_login.c_str());
         this->Close();
-        return;
+        return false;
     }
 
     uint32 id = (*result)[0].GetUInt32();
@@ -655,17 +661,18 @@ void AuthSocket::_HandleRealmList()
 
     // Set check field before possable reloagin to realm
     _SetVSFields(password);
+    return true;
 }
 
 /// Resume patch transfer
-void AuthSocket::_HandleXferResume()
+bool AuthSocket::_HandleXferResume()
 {
     DEBUG_LOG("Entering _HandleXferResume");
     ///- Check packet length
     if (ibuf.GetLength()<9)
     {
         sLog.outError("Error while resuming patch transfer (wrong packet)");
-        return;
+        return false;
     }
 
     ///- Launch a PatcherRunnable thread starting at given patch file offset
@@ -675,10 +682,11 @@ void AuthSocket::_HandleXferResume()
     fseek(pPatch,start,0);
 
     ZThread::Thread u(new PatcherRunnable(this));
+    return true;
 }
 
 /// Cancel patch transfer
-void AuthSocket::_HandleXferCancel()
+bool AuthSocket::_HandleXferCancel()
 {
     DEBUG_LOG("Entering _HandleXferCancel");
 
@@ -689,10 +697,11 @@ void AuthSocket::_HandleXferCancel()
     /// \todo What is the difference between SetCloseAndDelete() and the this->Close() higher?
     SetCloseAndDelete();
 
+    return true;
 }
 
 /// Accept patch transfer
-void AuthSocket::_HandleXferAccept()
+bool AuthSocket::_HandleXferAccept()
 {
     DEBUG_LOG("Entering _HandleXferAccept");
     ///- Launch a PatcherRunnable thread, starting at the begining of the patch file
@@ -700,6 +709,8 @@ void AuthSocket::_HandleXferAccept()
     fseek(pPatch,0,0);
 
     ZThread::Thread u(new PatcherRunnable(this));
+    
+    return true;
 }
 
 /// Check if there is lag on the connection to the client
