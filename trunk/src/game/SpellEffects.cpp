@@ -685,7 +685,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
     if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE )
         pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
 
-    //should send message "create item" to client.-FIX ME
+    player->SendNewItem(pItem, num_to_add, true, true);
     player->UpdateCraftSkill(m_spellInfo->Id);
 }
 

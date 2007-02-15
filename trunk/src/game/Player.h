@@ -637,6 +637,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetWeaponProficiency() const { return m_WeaponProficiency;}
         uint32 GetArmorProficiency() const { return m_ArmorProficiency;}
         bool IsUseEquipedWeapon() const { return m_form != FORM_CAT && m_form != FORM_BEAR && m_form != FORM_DIREBEAR; }
+        void SendNewItem( Item *item, uint32 count, bool received, bool created, bool broadcast = false );
 
         Player* GetTrader() const { return pTrader; }
         void ClearTrade();
