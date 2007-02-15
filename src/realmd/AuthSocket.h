@@ -39,14 +39,14 @@ class AuthSocket: public TcpSocket
         void OnAccept();
         void OnRead();
 
-        void _HandleLogonChallenge();
-        void _HandleLogonProof();
-        void _HandleRealmList();
+        bool _HandleLogonChallenge();
+        bool _HandleLogonProof();
+        bool _HandleRealmList();
         //data transfer handle for patch
 
-        void _HandleXferResume();
-        void _HandleXferCancel();
-        void _HandleXferAccept();
+        bool _HandleXferResume();
+        bool _HandleXferCancel();
+        bool _HandleXferAccept();
 
         void _SetVSFields(std::string password);
 
