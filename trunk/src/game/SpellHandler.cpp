@@ -185,11 +185,13 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
             pItem->SetUInt32Value(OBJECT_FIELD_ENTRY, entry);
             pItem->SetUInt32Value(ITEM_FIELD_FLAGS, flags);
             pItem->SetState(ITEM_CHANGED, pUser);
+            delete result;
         }
         else
         {
-            sLog.outError("Wrapped item %u don't have record in character_gifts table and will deleted");
+            sLog.outError("Wrapped item %u don't have record in character_gifts table and will deleted", pItem->GetGUIDLow());
             pUser->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+            return;
         }
         sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
     }
