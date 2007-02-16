@@ -25,7 +25,7 @@
 #define LANG_NO_CMD                      "There is no such command"
 #define LANG_AVIABLE_CMD                 "Commands aviable to you:"
 #define LANG_ACCOUNT_LEVEL               "Your account level is: %i"
-#define LANG_CONNECTED_USERS             "Number of users connected: %i"
+#define LANG_CONNECTED_USERS             "Number of users connected: %u (max from last restart: %u)"
 #define LANG_PLAYER_SAVED                "Player saved."
 #define LANG_PLAYERS_SAVED               "All players saved."
 #define LANG_GMS_ON_SRV                  "There are following active GMs on this server:"

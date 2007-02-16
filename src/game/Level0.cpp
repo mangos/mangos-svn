@@ -146,8 +146,9 @@ bool ChatHandler::HandleStartCommand(const char* args)
 bool ChatHandler::HandleInfoCommand(const char* args)
 {
     uint32 clientsNum = sWorld.GetSessionCount();
+    uint32 maxClientsNum = sWorld.GetMaxSessionCount();
 
-    PSendSysMessage(LANG_CONNECTED_USERS, (int) clientsNum);
+    PSendSysMessage(LANG_CONNECTED_USERS, clientsNum, maxClientsNum);
 
     return true;
 }
