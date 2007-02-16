@@ -309,7 +309,11 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
         SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
-
+    if (strlen(args) > 16)
+    {
+        PSendSysMessage("Your password cant be long then 16 charatcers (client limit), Password dont change!");
+        return true;
+    }
     std::string password = args;
     loginDatabase.escape_string(password);
 
