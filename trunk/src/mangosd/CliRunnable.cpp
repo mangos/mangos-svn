@@ -273,7 +273,8 @@ void CliInfo(char*,pPrintf zprintf)
 
     if (!resultDB)
     {
-        zprintf("NO online users\r\n");
+        int maxUsers = sWorld.GetMaxSessionCount();
+        zprintf("Online users: 0 (max: %d)\r\n",maxUsers);
         return;
     }
 
@@ -309,7 +310,8 @@ void CliInfo(char*,pPrintf zprintf)
     *bufPos = '\0';
 
     ///- Display the list of account/characters online
-    zprintf("Online users: %d\x0d\x0a",resultDB->GetRowCount());
+    uint32 maxUsers = sWorld.GetMaxSessionCount();
+    zprintf("Online users: %u (max: %u)\r\n",uint32(resultDB->GetRowCount()),maxUsers);
     zprintf("=================================================================\r\n");
     zprintf("|    Account    |       Character      |       IP        |  GM  |\r\n");
     zprintf("=================================================================\r\n");
