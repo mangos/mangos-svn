@@ -72,11 +72,23 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 {
+    // in Player::Create:
+    //uint8 race,class_,gender,skin,face,hairStyle,hairColor,facialHair,outfitId;
+    //data >> name
+    //data >> race >> class_ >> gender >> skin >> face;
+    //data >> hairStyle >> hairColor >> facialHair >> outfitId;
+
+    CHECK_PACKET_SIZE(recv_data,1+1+1+1+1+1+1+1+1+1);
+
     std::string name;
     WorldPacket data;
     uint8 race_;
 
     recv_data >> name;
+
+    // recheck with known string size
+    CHECK_PACKET_SIZE(recv_data,(name.size()+1)+1+1+1+1+1+1+1+1+1);
+
     recv_data >> race_;
     recv_data.rpos(0);
 
@@ -207,6 +219,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 guid;
     recv_data >> guid;
 
@@ -233,6 +247,8 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     m_playerLoading = true;
     uint64 playerGuid = 0;
 
@@ -497,6 +513,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+1);
+
     //sLog.outDebug("WORLD SESSION: HandleSetFactionAtWar");
 
     uint32 repListID;
@@ -511,6 +529,8 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 //I think this function is never used :/ I dunno, but i guess this opcode not exists
 void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 {
+    //CHECK_PACKET_SIZE(recv_data,4+4);
+
     //sLog.outDebug("WORLD SESSION: HandleSetFactionCheat");
     /*
         uint32 FactionID;
@@ -541,6 +561,8 @@ void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data )
 
 void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4);
+
     uint32 iFlag;
     recv_data >> iFlag;
 
@@ -568,6 +590,8 @@ void WorldSession::HandleTutorialReset( WorldPacket & recv_data )
 
 void WorldSession::HandleSetWatchedFactionIndexOpcode(WorldPacket & recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,4);
+
     DEBUG_LOG("WORLD: Received CMSG_SET_WATCHED_FACTION_INDEX");
     uint32 fact;
     recv_data >> fact;

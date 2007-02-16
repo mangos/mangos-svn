@@ -34,6 +34,8 @@
 
 void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+4+1);
+
     WorldPacket data;
 
     uint32 type;
@@ -152,7 +154,12 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         case CHAT_MSG_WHISPER:
         {
             std::string to, msg;
-            recv_data >> to >> msg;
+            recv_data >> to;
+
+            // recheck
+            CHECK_PACKET_SIZE(recv_data,4+4+(to.size()+1)+1);
+
+            recv_data >> msg;
 
             if(to.size() == 0)
             {
@@ -214,6 +221,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string channel = "", msg = "";
             recv_data >> channel;
+
+            // recheck
+            CHECK_PACKET_SIZE(recv_data,4+4+(channel.size()+1)+1);
+
             recv_data >> msg;
 
             if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
@@ -304,6 +315,8 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+4+8);
+
     uint32 text_emote, emoteNum;
     uint64 guid;
 
@@ -367,6 +380,8 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     WorldPacket data;
     uint64 iguid;
     //sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");

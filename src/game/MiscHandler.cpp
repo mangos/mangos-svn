@@ -347,6 +347,8 @@ void WorldSession::HandleTogglePvP(WorldPacket& recvPacket)
 
 void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4);
+
     uint32 newZone;
     recv_data >> newZone;
 
@@ -357,6 +359,8 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 guid ;
     recv_data >> guid;
 
@@ -368,6 +372,8 @@ void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 guid;
     recv_data >> guid;
 
@@ -383,6 +389,8 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     sLog.outDebug( "WORLD: Received CMSG_STAND_STATE_CHANGE"  );
     if( GetPlayer() != 0 )
     {
@@ -426,6 +434,8 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND"  );
 
     std::string friendName = "UNKNOWN";
@@ -512,6 +522,8 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 FriendGUID;
 
     sLog.outDebug( "WORLD: Received CMSG_DEL_FRIEND"  );
@@ -534,6 +546,8 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     sLog.outDebug( "WORLD: Received CMSG_ADD_IGNORE"  );
 
     std::string IgnoreName = "UNKNOWN";
@@ -593,6 +607,8 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 IgnoreGUID;
 
     sLog.outDebug( "WORLD: Received CMSG_DEL_IGNORE"  );
@@ -614,12 +630,19 @@ void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+4+1+4+1);
+
     uint32 suggestion, contentlen;
     std::string content;
     uint32 typelen;
     std::string type;
 
-    recv_data >> suggestion >> contentlen >> content >> typelen >> type;
+    recv_data >> suggestion >> contentlen >> content;
+
+    //recheck
+    CHECK_PACKET_SIZE(recv_data,4+4+(content.size()+1)+4+1);
+
+    recv_data >> typelen >> type;
 
     if( suggestion == 0 )
         sLog.outDebug( "WORLD: Received CMSG_BUG [Bug Report]" );
@@ -637,6 +660,8 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     sLog.outDetail("WORLD: Received CMSG_RECLAIM_CORPSE");
     if (GetPlayer()->isAlive())
         return;
@@ -680,6 +705,8 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
 
 void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8+1);
+
     sLog.outDetail("WORLD: Received CMSG_RESURRECT_RESPONSE");
 
     if(GetPlayer()->isAlive())
@@ -727,6 +754,8 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,4);
+
     sLog.outDebug("WORLD: Received CMSG_AREATRIGGER");
 
     uint32 Trigger_ID;
@@ -825,6 +854,8 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,1+2+1+1);
+
     sLog.outDetail( "WORLD: Received CMSG_SET_ACTION_BUTTON" );
     uint8 button, misc, type;
     uint16 action;
@@ -883,6 +914,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8+8+4+4+4+4+4);
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
     WorldPacket data;
@@ -920,6 +952,7 @@ void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8+8+4+4+4+4+4);
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
     WorldPacket data;
@@ -951,6 +984,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8+4);
 
     WorldPacket data;
     uint64 guid;
@@ -964,6 +998,8 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
 void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     uint8 ActionBar;
     uint32 temp;
 
@@ -981,6 +1017,8 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     uint8 tmp;
     recv_data >> tmp;
     sLog.outDebug("Received opcode CMSG_WARDEN_DATA, not resolve.uint8 = %u",tmp);
@@ -999,6 +1037,7 @@ void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
 
 void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8);
 
     uint64 guid;
     recv_data >> guid;
@@ -1023,6 +1062,8 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     Player *pl;
     uint64 guid;
     recv_data >> guid;
@@ -1064,6 +1105,8 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,4+4+4+4+4+4);
+
     // write in client console: worldport 469 452 6454 2536 180 or /console worldport 469 452 6454 2536 180
     // Received opcode CMSG_WORLD_TELEPORT
     // Time is ***, map=469, x=452.000000, y=6454.000000, z=2536.000000, orient=3.141593

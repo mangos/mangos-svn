@@ -192,7 +192,7 @@ class ByteBuffer
         ByteBuffer &operator>>(std::string& value)
         {
             value.clear();
-            while (true)
+            while (rpos() < size())                         // prevent crash at wrong string format in packet
             {
                 char c=read<char>();
                 if (c==0)

@@ -42,6 +42,8 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+4+4+4+4+4);
+
     if(GetPlayer()->GetDontMove())
         return;
 
@@ -58,17 +60,30 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     recv_data >> x >> y >> z >> orientation;
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
     {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4+4+4);
+
         recv_data >> t_GUIDl >> t_GUIDh;
         recv_data >> t_x >> t_y >> t_z >> t_o;
     }
     if (flags & MOVEMENTFLAG_SWIMMING)
     {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+
         recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+
     recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
 
     if (flags & MOVEMENTFLAG_JUMPING)
     {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4);
+
         recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
         recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
         recv_data >> j_xyspeed;                             // speed of xy movement
@@ -150,6 +165,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8+4+4+4+4+4+4+4);
+
     /* extract packet */
     uint64 guid;
     uint32 unk1, flags, time, fallTime;
@@ -174,21 +191,37 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     recv_data >> x >> y >> z >> orientation;
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
     {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4+4+4);
+
         recv_data >> t_GUIDl >> t_GUIDh;
         recv_data >> t_x >> t_y >> t_z >> t_o;
     }
     if (flags & MOVEMENTFLAG_SWIMMING)
     {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+
         recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+
     recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
 
     if (flags & MOVEMENTFLAG_JUMPING)
     {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4);
+
         recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
         recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
         recv_data >> j_xyspeed;                             // speed of xy movement
     }
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
 
     recv_data >> newspeed;
     /*----------------*/
@@ -250,6 +283,8 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
 
 void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 {
+    // CHECK_PACKET_SIZE(recv_data,?);
+
     // Currently not used but maybe use later for recheck final player position
     // (must be at call same as into "recv_data >> x >> y >> z >> orientation;"
 

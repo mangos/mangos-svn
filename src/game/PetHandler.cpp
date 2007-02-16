@@ -33,6 +33,7 @@
 
 void WorldSession::HandlePetAction( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+2+2+8);
 
     uint64 guid1;
     uint16 spellid;
@@ -184,6 +185,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
 void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+8);
+
     sLog.outDetail( "HandlePetNameQuery. CMSG_PET_NAME_QUERY\n" );
 
     uint32 petnumber;
@@ -218,6 +221,8 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 
 void WorldSession::HandlePetRename( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+1);
+
     sLog.outDetail( "HandlePetRename. CMSG_PET_RENAME\n" );
 
     uint64 petguid;
@@ -242,6 +247,8 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
 void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 guid;
     recv_data >> guid;                                      //pet guid
     sLog.outDetail( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );

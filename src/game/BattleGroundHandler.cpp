@@ -39,6 +39,8 @@
 
 void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 guid;
     recv_data >> guid;
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from: " I64FMT, guid);
@@ -83,6 +85,8 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 guid;
     recv_data >> guid;                                      // >> MapID >> Instance;
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: " I64FMT, guid);
@@ -205,6 +209,8 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
 
 void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4);
+
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEFIELD_LIST Message");
 
     uint32 MapID;
@@ -235,6 +241,8 @@ void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
 
 void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
 {
+    //CHECK_PACKET_SIZE(recv_data,?);
+
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEFIELD_PORT Message");
     //CMSG_BATTLEFIELD_PORT
 
@@ -306,6 +314,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
 
 void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket &recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4);
                                                             //0x2E1
     sLog.outDebug( "WORLD: Recvd CMSG_LEAVE_BATTLEFIELD Message");
     uint32 MapID;

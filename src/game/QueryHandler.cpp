@@ -91,6 +91,8 @@ void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+8);
+
     WorldPacket data;
     uint32 entry;
     uint64 guid;
@@ -369,6 +371,8 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
 void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+8);
+
     uint32 entryID;
     uint64 guid;
 
@@ -457,6 +461,8 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 
 void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+4+4);
+
     uint32 textID;
     uint32 uField0, uField1;
     GossipText *pGossip;
@@ -509,6 +515,8 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4);
+
     uint32 pageID;
 
     recv_data >> pageID;

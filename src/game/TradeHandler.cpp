@@ -317,6 +317,8 @@ void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,8);
+
     if( GetPlayer()->pTrader )
         return;
 
@@ -404,6 +406,8 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,4);
+
     if(!_player->pTrader)
         return;
 
@@ -420,6 +424,8 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1+1);
+
     if(!_player->pTrader)
         return;
 
@@ -453,6 +459,8 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     if(!_player->pTrader)
         return;
 

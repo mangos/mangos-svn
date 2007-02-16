@@ -24,8 +24,14 @@ INSTANTIATE_SINGLETON_1( HordeChannelMgr );
 
 void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,pass;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> pass;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         cMgr->GetJoinChannel(channelname,GetPlayer())->Join(GetPlayer(),pass.c_str());
@@ -33,6 +39,8 @@ void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     string channelname;
     recvPacket >> channelname;
 
@@ -48,6 +56,8 @@ void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     string channelname;
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
@@ -56,8 +66,14 @@ void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,pass;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> pass;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->Password(GetPlayer(),pass.c_str());
@@ -65,8 +81,14 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,newp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> newp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->SetOwner(GetPlayer(),newp.c_str());
@@ -74,6 +96,8 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     string channelname;
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
@@ -82,8 +106,14 @@ void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,otp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->SetModerator(GetPlayer(),otp.c_str());
@@ -91,8 +121,14 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,otp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->UnsetModerator(GetPlayer(),otp.c_str());
@@ -100,8 +136,14 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,otp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->SetMute(GetPlayer(),otp.c_str());
@@ -109,8 +151,14 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,otp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->UnsetMute(GetPlayer(),otp.c_str());
@@ -118,8 +166,14 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,otp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->Invite(GetPlayer(),otp.c_str());
@@ -127,8 +181,14 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,otp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->Kick(GetPlayer(),otp.c_str());
@@ -136,8 +196,14 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,otp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->Ban(GetPlayer(),otp.c_str());
@@ -145,8 +211,14 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     string channelname,otp;
     recvPacket >> channelname;
+
+    // recheck
+    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,GetPlayer())) chn->UnBan(GetPlayer(),otp.c_str());
@@ -154,6 +226,8 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelAnnounce(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     string channelname;
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
@@ -162,6 +236,8 @@ void WorldSession::HandleChannelAnnounce(WorldPacket& recvPacket)
 
 void WorldSession::HandleChannelModerate(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     string channelname;
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
