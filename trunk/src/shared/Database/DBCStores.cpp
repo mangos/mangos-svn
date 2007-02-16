@@ -509,7 +509,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     }
 
     // ok, positive
-    return true; 
+    return true;
 }
 
 bool IsPositiveSpell(uint32 spellId)

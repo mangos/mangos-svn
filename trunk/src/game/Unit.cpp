@@ -1518,9 +1518,9 @@ float Unit::GetUnitParryChance() const
                 tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
             if(tmpitem && !tmpitem->IsBroken() && (
-                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || 
+                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON ||
                 tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND ||
-                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND || 
+                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND ||
                 tmpitem->GetProto()->InventoryType == INVTYPE_2HWEAPON))
                 chance = GetFloatValue(PLAYER_PARRY_PERCENTAGE);
         }
@@ -2168,9 +2168,9 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 
     // only way correctly remove all auras from list
     if( m_Auras.empty() )
-       i = m_Auras.end();
+        i = m_Auras.end();
     else
-       i = m_Auras.begin();
+        i = m_Auras.begin();
 }
 
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
@@ -3590,7 +3590,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
         heal *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
     heal += float(m_AuraModifiers[SPELL_AURA_MOD_HEALING]);
-    
+
     if (heal < 0) heal = 0;
 
     return uint32(heal);

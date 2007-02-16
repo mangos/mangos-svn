@@ -254,8 +254,8 @@ bool ChatHandler::HandleRecallCommand(const char* args)
     {
         std::string name = args;
         normalizePlayerName(name);
-        sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
-    
+        sDatabase.escape_string(name);                      // prevent SQL injection - normal name don't must changed by this call
+
         chr = objmgr.GetPlayer(name.c_str());
 
         if(!chr)

@@ -1428,7 +1428,7 @@ void Player::Regenerate(Powers power)
             }
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
-        {        
+        {
             float RageIncreaseRate = sWorld.getRate(RATE_POWER_RAGE);
             if( RageIncreaseRate <= 0 ) RageIncreaseRate = 1;
             addvalue = 30 * RageIncreaseRate;               // 3 rage by tick
@@ -1519,8 +1519,8 @@ bool Player::isAcceptTickets() const
 }
 
 bool Player::IsUnderWater() const
-{ 
-    return IsInWater() && 
+{
+    return IsInWater() &&
         GetPositionZ() < (MapManager::Instance().GetMap(GetMapId())->GetWaterLevel(GetPositionX(),GetPositionY())-2);
 }
 
@@ -9179,7 +9179,7 @@ bool Player::GetQuestRewardStatus( uint32 quest_id )
     {
         // for repeatable quests: rewarded field is set after first reward only to prevent getting XP more than once
         QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
-        if( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE 
+        if( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE
             && !qInfo->IsRepeatable() )
             return mQuestStatus[quest_id].m_rewarded;
 

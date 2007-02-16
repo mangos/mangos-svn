@@ -506,7 +506,7 @@ void Guild::CreateRank(std::string name,uint32 rights)
     QueryResult *result = sDatabase.PQuery( "SELECT MAX(`rid`) FROM `guild_rank` WHERE `guildid`='%u'",Id);
     if( result )
     {
-        rank = (*result)[0].GetUInt32();                     // rank always = rid-1
+        rank = (*result)[0].GetUInt32();                    // rank always = rid-1
         delete result;
     }
     else

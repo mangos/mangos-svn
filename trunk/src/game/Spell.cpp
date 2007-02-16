@@ -1136,9 +1136,9 @@ void Spell::finish(bool ok)
 
     if (IsMeleeAttackResetSpell())
     {
-         m_caster->resetAttackTimer(BASE_ATTACK);
-         if(m_caster->haveOffhandWeapon())
-             m_caster->resetAttackTimer(OFF_ATTACK);
+        m_caster->resetAttackTimer(BASE_ATTACK);
+        if(m_caster->haveOffhandWeapon())
+            m_caster->resetAttackTimer(OFF_ATTACK);
     }
 }
 

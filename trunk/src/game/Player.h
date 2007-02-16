@@ -315,7 +315,6 @@ typedef std::set<uint32> IgnoreList;
 
 typedef std::map<uint32, struct quest_status> QuestStatusMap;
 
-
 #define IS_BACK_SLOT(s) (s == 0xFF)
 
 class Quest;
