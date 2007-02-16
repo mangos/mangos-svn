@@ -29,6 +29,9 @@
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
+    // TODO: add targets.read() check
+    CHECK_PACKET_SIZE(recvPacket,1+1+1);
+
     sLog.outDetail("WORLD: CMSG_USE_ITEM packet, data length = %i",recvPacket.size());
 
     Player* pUser = _player;
@@ -128,6 +131,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1+1);
+
     sLog.outDetail("WORLD: CMSG_OPEN_ITEM packet, data length = %i",recvPacket.size());
 
     Player* pUser = _player;
@@ -201,6 +206,8 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 guid;
     uint32 spellId = OPEN_CHEST;
     const GameObjectInfo *info;
@@ -390,6 +397,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,4);
+
     uint32 spellId;
 
     recvPacket >> spellId;
@@ -428,6 +437,8 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,4);
+
     uint32 spellId;
     recvPacket >> spellId;
     _player->RemoveAurasDueToSpell(spellId);

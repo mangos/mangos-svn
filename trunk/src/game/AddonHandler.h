@@ -31,7 +31,7 @@ class AddonHandler
         AddonHandler();
         ~AddonHandler();
                                                             //built addon packet
-        void BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset);
+        bool BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset);
 };
 #define sAddOnHandler MaNGOS::Singleton<AddonHandler>::Instance()
 #endif

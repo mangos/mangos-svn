@@ -173,6 +173,8 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     uint64 guid;
     recv_data >> guid;
 
@@ -185,6 +187,8 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleGroupUninviteNameOpcode(WorldPacket & recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     std::string membername;
     recv_data >> membername;
     if(membername.size() <= 0)
@@ -249,6 +253,8 @@ void WorldSession::HandleGroupUninvite(uint64 guid, std::string name)
 
 void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     if(!GetPlayer()->groupInfo.group)
         return;
 
@@ -289,6 +295,8 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+8);
+
     if(!GetPlayer()->groupInfo.group)
         return;
 
@@ -311,14 +319,10 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLootRoll( WorldPacket &recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+4+1);
+
     if(!GetPlayer()->groupInfo.group)
         return;
-
-    if(recv_data.size() < 13)
-    {
-        //sLog.outDebug("TOO SHORT LOOTROLL");
-        return;
-    }
 
     uint64 Guid;
     uint32 NumberOfPlayers;
@@ -338,6 +342,8 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,4+4);
+
     if(!GetPlayer()->groupInfo.group)
         return;
 
@@ -360,6 +366,8 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,4+4);
+
     uint32 minimum, maximum, roll;
     recv_data >> minimum;
     recv_data >> maximum;
@@ -387,6 +395,8 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleRaidIconTargetOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     if(!GetPlayer()->groupInfo.group)
         return;
 
@@ -403,6 +413,9 @@ void WorldSession::HandleRaidIconTargetOpcode( WorldPacket & recv_data )
     }
     else                                                    // target icon update
     {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,1+8);
+
         if(!GetPlayer()->groupInfo.group->IsLeader(GetPlayer()->GetGUID()) && !GetPlayer()->groupInfo.group->IsAssistant(GetPlayer()->GetGUID()))
             return;
 
@@ -431,12 +444,18 @@ void WorldSession::HandleRaidConvertOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1+1);
+
     if(!GetPlayer()->groupInfo.group)
         return;
 
     std::string name;
     uint8 groupNr;
     recv_data >> name;
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,(name.size()+1)+1);
+
     recv_data >> groupNr;
 
     Group *group = GetPlayer()->groupInfo.group;
@@ -453,6 +472,8 @@ void WorldSession::HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAssistantOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+1);
+
     if(!GetPlayer()->groupInfo.group)
         return;
 
@@ -510,6 +531,8 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
 
 /*?*/void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     //sLog.outDebug("WORLD RECIEVE CMSG_REQUEST_PARTY_MEMBER_STATS");
     uint64 Guid;
     recv_data >> Guid;

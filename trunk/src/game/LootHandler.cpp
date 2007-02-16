@@ -28,6 +28,8 @@
 
 void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     sLog.outDebug("WORLD: CMSG_AUTOSTORE_LOOT_ITEM");
     Player  *player =   GetPlayer();
     uint64   lguid =    player->GetLootGUID();
@@ -189,6 +191,8 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     sLog.outDebug("WORLD: CMSG_LOOT");
 
     uint64 guid;
@@ -199,6 +203,8 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     sLog.outDebug("WORLD: CMSG_LOOT_RELEASE");
     Player  *player = GetPlayer();
     Loot    *loot;

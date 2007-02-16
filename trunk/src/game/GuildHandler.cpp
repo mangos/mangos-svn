@@ -36,6 +36,8 @@
 //to create guild from game you should create petition
 void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+8+4+1+1+2+4+8+8+8+8+8+4);
+
     if (_player->GetGuildId())
         return;
     //sLog.outDebug("Received opcode CMSG_PETITION_BUY");
@@ -56,6 +58,10 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     recv_data >> unk3;                                      // 0
     recv_data >> unk4;                                      // 0
     recv_data >> guildname;                                 // Guild name
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,8+8+4+(guildname.size()+1)+1+2+4+8+8+8+8+8+4);
+
     recv_data >> unk5;                                      // 0
     recv_data >> unk6;                                      // 0
     recv_data >> unk7;                                      // 0
@@ -117,6 +123,8 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     //sLog.outDebug("Received opcode CMSG_PETITION_SHOW_SIGNATURES");
     if(_player->GetGuildId())
         return;
@@ -163,6 +171,8 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionQueryOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+8);
+
     sLog.outDebug("Received opcode CMSG_PETITION_QUERY");
     uint32 guildguid;
     uint64 petitionguid;
@@ -213,6 +223,8 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
 
 void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+1);
+
     //sLog.outDebug("Received opcode MSG_PETITION_RENAME");
 
     uint64 petitionguid;
@@ -246,6 +258,8 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     //sLog.outDebug("Received opcode CMSG_PETITION_SIGN");
     Field *fields;
     uint64 petitionguid;
@@ -304,6 +318,8 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     //sLog.outDebug("Received opcode MSG_PETITION_DECLINE");
 
     uint64 petitionguid;
@@ -330,6 +346,8 @@ void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+8);
+
     //sLog.outDebug("Received opcode CMSG_OFFER_PETITION");
 
     uint8 signs = 0;
@@ -384,6 +402,8 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     /*
     don't know how to cause this opcode, it is possible that charter-party has wrong properties \flags (are not present even names)...
     Here it is necessary to receive number of signatures, to compare with 9 and if it is equal - if guild, to add the players who have signed charter in guild, to remove charter-party and to send the answer...
@@ -494,6 +514,8 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     WorldPacket data;
     uint64 guid;
 
@@ -530,6 +552,8 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
 //old guild code
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,4);
+
     uint32 guildId;
     Guild *guild;
 
@@ -549,6 +573,8 @@ void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     WorldPacket data;
     std::string gname;
     Guild *guild;
@@ -566,6 +592,8 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     WorldPacket data;
     std::string Invitedname,plname;
     Player * player;
@@ -636,6 +664,8 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     WorldPacket data;
     std::string plName;
     uint64 plGuid;
@@ -764,6 +794,8 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     std::string plName;
     uint64 plGuid;
     uint32 plGuildId;
@@ -845,6 +877,8 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     std::string plName;
     uint64 plGuid;
     uint32 plGuildId;
@@ -989,6 +1023,8 @@ void WorldSession::HandleGuildDisbandOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     std::string name;
     Player * newLeader;
     uint64 newLeaderGUID;
@@ -1090,6 +1126,7 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
 
     Guild *guild;
     Player * player;
@@ -1149,6 +1186,8 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     Guild *guild;
     Player *player;
     uint64 plGuid;
@@ -1207,6 +1246,8 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,4+4+1);
+
     Guild *guild;
     std::string rankname;
     uint32 rankId;
@@ -1242,6 +1283,8 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
+
     Guild *guild;
     std::string rankname;
 
@@ -1307,6 +1350,7 @@ void WorldSession::SendCommandResult(uint32 typecmd,std::string str,uint32 cmdre
 
 void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,1);
 
     //sLog.outDebug( "WORLD: Received CMSG_GUILD_CHANGEINFO"  );
 
@@ -1327,6 +1371,8 @@ void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,4+4+4+4+4+4+4);
+
     //sLog.outDebug( "WORLD: Received MSG_SAVE_GUILD_EMBLEM"  );
 
     uint32 stuff0;

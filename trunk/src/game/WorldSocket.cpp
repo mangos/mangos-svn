@@ -388,8 +388,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     #endif
 
     ///- Create and send the Addon packet
-    sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
-    SendPacket(&SendAddonPacked);
+    if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos()))
+        SendPacket(&SendAddonPacked);
 
     return;
 }

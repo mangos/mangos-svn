@@ -33,7 +33,7 @@ AddonHandler::~AddonHandler()
 {
 }
 
-void AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, uint32 Packetoffset)
+bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, uint32 Packetoffset)
 {
     ByteBuffer AddOnPacked;
     uLongf AddonRealSize;
@@ -61,11 +61,15 @@ void AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, ui
         0xD2
     };
 
+    // broken addon packet, can't be recieve from real client
+    if(Source->size() < 4)
+        return false;
+
     *Source >> TempValue;                                   //get real size of the packed structure
 
     // empty addon packet, nothing proccess, can't be recieve from real client
     if(!TempValue)
-        return;
+        return false;
 
     AddonRealSize = TempValue;                              //temp value becouse ZLIB only excepts uLongf
 
@@ -83,7 +87,18 @@ void AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, ui
             std::string AddonNames;
             uint8 unk6;
             uint32 crc, unk7;
-            AddOnPacked >> AddonNames >> crc >> unk7 >> unk6;
+
+            // check next addon data format correctness
+            if(AddOnPacked.rpos()+1+4+4+1 > AddOnPacked.size())
+                return false;
+
+            AddOnPacked >> AddonNames;
+
+            // recheck next addon data format correctness
+            if(AddOnPacked.rpos()+4+4+1 > AddOnPacked.size())
+                return false;
+
+            AddOnPacked >> crc >> unk7 >> unk6;
 
             //sLog.outDebug("ADDON: Name:%s CRC:%x Unknown1 :%x Unknown2 :%x", AddonNames.c_str(), crc, unk7, unk6);
 
@@ -101,7 +116,9 @@ void AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, ui
     else
     {
         sLog.outDebug("Addon packet uncompress error :(");
+        return false;
     }
+    return true;
 }
 
 /* Code use in 1.10.2 when client not ignore ban state sended for addons. Saved for reference if client switch to use server ban state information

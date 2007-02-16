@@ -65,8 +65,8 @@ WorldSession::~WorldSession()
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
 {
-    sLog.outError("Size of packet %s (%u) is %u but expected %u, skip",
-        g_worldOpcodeNames[packet.GetOpcode()],packet.GetOpcode(),packet.size(),size);
+    sLog.outError("Client (account %u) send packet %s (%u) with size %u but expected %u (attempt crash server?), skipped",
+        GetAccountId(),g_worldOpcodeNames[packet.GetOpcode()],packet.GetOpcode(),packet.size(),size);
 }
 
 /// Get the player name
