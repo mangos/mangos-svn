@@ -61,6 +61,7 @@ World::World()
     m_ShutdownTimer = 0;
     internalGameTime = 0;
     m_logFilter = 0;
+    m_maxSessionsCount = 0;
 }
 
 World::~World()
@@ -122,6 +123,7 @@ void World::AddSession(WorldSession* s)
 {
     ASSERT(s);
     m_sessions[s->GetAccountId()] = s;
+    m_maxSessionsCount = max(m_maxSessionsCount,m_sessions.size());
 }
 
 Weather* World::FindWeather(uint32 id) const
