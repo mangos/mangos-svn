@@ -95,7 +95,8 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 
     if( !i_destinationHolder.HasDestination() )
         _setTargetLocation(owner, 0);
-    if( owner.IsStopped() && !i_destinationHolder.HasArrived() ) {
+    if( owner.IsStopped() && !i_destinationHolder.HasArrived() )
+    {
         owner.addUnitState(UNIT_STAT_CHASE);
         i_destinationHolder.StartTravel(traveller);
     }

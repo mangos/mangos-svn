@@ -1226,7 +1226,7 @@ void Creature::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM `creature_grid` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM `creature_movement` WHERE `id` = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());  
+    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.CommitTransaction();
 }
 

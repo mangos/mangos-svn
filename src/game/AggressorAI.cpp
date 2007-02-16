@@ -41,8 +41,8 @@ AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_victimGuid(0), i_state(
 void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
-    if( !i_creature.getVictim() && u->isTargetableForAttack() && 
-        ( i_creature.IsHostileTo( u ) /*|| u->getVictim() && i_creature.IsFriendlyTo( u->getVictim() )*/ ) && 
+    if( !i_creature.getVictim() && u->isTargetableForAttack() &&
+        ( i_creature.IsHostileTo( u ) /*|| u->getVictim() && i_creature.IsFriendlyTo( u->getVictim() )*/ ) &&
         u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);
@@ -50,7 +50,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
         {
             AttackStart(u);
             if(u->HasStealthAura())
-            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
     }
 }

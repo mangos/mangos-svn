@@ -95,8 +95,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }
         void SetRespawnTime(int32 respawn)
-        { 
-            m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0; 
+        {
+            m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
             m_respawnDelayTime = respawn > 0 ? respawn : 0;
         }
         void Respawn() { if(m_respawnTime > 0) m_respawnTime = time(NULL); }
@@ -132,7 +132,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void _LoadQuests();
 
         uint32      m_spellId;
-        time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()), 
+        time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
         uint32      m_flags;
         LootState   m_lootState;

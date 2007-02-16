@@ -853,7 +853,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
         SendCommandResult(GUILD_INVITE_S,"",GUILD_PERMISSIONS);
         return;
     }
-    else if((plRankId-1) == 0 || (plRankId-1) < this->GetPlayer()->GetRank()) 
+    else if((plRankId-1) == 0 || (plRankId-1) < this->GetPlayer()->GetRank())
         return;
 
     if(plRankId < 1)
@@ -916,31 +916,31 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
         SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
         return;
     }
-    
+
     if( !plGuid )
     {
         SendCommandResult(GUILD_INVITE_S,plName,GUILD_PLAYER_NOT_FOUND);
         return;
     }
-    
+
     if(plGuid == GetPlayer()->GetGUID())
     {
         SendCommandResult(GUILD_INVITE_S,"",GUILD_NAME_INVALID);
         return;
     }
-    
+
     if(GetPlayer()->GetGuildId() != plGuildId)
     {
         SendCommandResult(GUILD_INVITE_S,plName,GUILD_PLAYER_NOT_IN_GUILD_S);
         return;
     }
-    
+
     if(!guild->HasRankRight(GetPlayer()->GetRank(),GR_RIGHT_DEMOTE))
     {
         SendCommandResult(GUILD_INVITE_S,"",GUILD_PERMISSIONS);
         return;
     }
-    
+
     if((plRankId+1) >= guild->GetNrRanks() || plRankId <= this->GetPlayer()->GetRank())
         return;
 

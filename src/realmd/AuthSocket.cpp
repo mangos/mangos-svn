@@ -709,7 +709,7 @@ bool AuthSocket::_HandleXferAccept()
     fseek(pPatch,0,0);
 
     ZThread::Thread u(new PatcherRunnable(this));
-    
+
     return true;
 }
 

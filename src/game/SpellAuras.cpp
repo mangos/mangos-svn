@@ -1587,12 +1587,12 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         //m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real remove aura
-            /*
-            WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
-            data<<m_target->GetGUID();
-            data<<uint8(1);
-            m_target->SendMessageToSet(&data,true);
-            */
+        /*
+        WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
+        data<<m_target->GetGUID();
+        data<<uint8(1);
+        m_target->SendMessageToSet(&data,true);
+        */
         m_target->clearUnitState(UNIT_STAT_DIED);
         if(m_target->isAlive())                             // only if still alive really
         {
@@ -2160,11 +2160,11 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
     if (Real && apply && GetSpellProto()->Mechanic == 16)
     {
         Unit* caster = GetTarget();
-        
+
         SpellEntry const *spell_proto = sSpellStore.LookupEntry(11196);
         if(!spell_proto)
             return;
-        
+
         Spell spell(caster, spell_proto, true, 0);
         SpellCastTargets targets;
         targets.setUnitTarget(m_target);
@@ -2172,7 +2172,7 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
         m_target->ApplyStats(true);
         spell.prepare(&targets);
         m_target->ApplyStats(false);
-    }    
+    }
 }
 
 void Aura::HandlePeriodicDamage(bool apply, bool Real)

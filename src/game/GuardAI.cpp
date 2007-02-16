@@ -38,7 +38,7 @@ GuardAI::GuardAI(Creature &c) : i_creature(c), i_victimGuid(0), i_state(STATE_NO
 
 void GuardAI::MoveInLineOfSight(Unit *u)
 {
-    if( !i_creature.getVictim() && u->isTargetableForAttack() && 
+    if( !i_creature.getVictim() && u->isTargetableForAttack() &&
         ( u->IsHostileToPlayer() || i_creature.IsHostileTo(u) /*|| u->getVictim() && i_creature.IsFriendlyTo(u->getVictim())*/ ) &&
         u->isInAccessablePlaceFor(&i_creature))
     {
@@ -48,7 +48,7 @@ void GuardAI::MoveInLineOfSight(Unit *u)
             //Need add code to let guard suport player
             AttackStart(u);
             if(u->HasStealthAura())
-            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
     }
 }

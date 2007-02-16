@@ -924,8 +924,8 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     uint8 gift_bag, gift_slot, item_bag, item_slot;
     recv_data.hexlike();
 
-    recv_data >> gift_bag >> gift_slot; // paper
-    recv_data >> item_bag >> item_slot; // item
+    recv_data >> gift_bag >> gift_slot;                     // paper
+    recv_data >> item_bag >> item_slot;                     // item
 
     sLog.outDebug("WRAP: receive gift_bag = %u, gift_slot = %u, item_bag = %u, item_slot = %u", gift_bag, gift_slot, item_bag, item_slot);
 
@@ -955,19 +955,19 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         _player->SendEquipError( EQUIP_ERR_EQUIPPED_CANT_BE_WRAPPED, item, NULL );
         return;
     }
-    
-    if(item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR)) // HasFlag(ITEM_FIELD_FLAGS, 8);
+
+    if(item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR))        // HasFlag(ITEM_FIELD_FLAGS, 8);
     {
         _player->SendEquipError( EQUIP_ERR_WRAPPED_CANT_BE_WRAPPED, item, NULL );
         return;
     }
-    
+
     if(item->IsBag())
     {
         _player->SendEquipError( EQUIP_ERR_BAGS_CANT_BE_WRAPPED, item, NULL );
         return;
     }
-    
+
     if(item->IsSoulBound() || item->GetProto()->Class == ITEM_CLASS_QUEST)
     {
         _player->SendEquipError( EQUIP_ERR_BOUND_CANT_BE_WRAPPED, item, NULL );
@@ -979,7 +979,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         _player->SendEquipError( EQUIP_ERR_STACKABLE_CANT_BE_WRAPPED, item, NULL );
         return;
     }
-    
+
     // maybe not correct check  (it is better than nothing)
     if(item->GetProto()->MaxCount>0)
     {
@@ -990,8 +990,9 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     sDatabase.BeginTransaction();
     sDatabase.PExecute("INSERT INTO `character_gifts` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(item->GetOwnerGUID()), item->GetGUIDLow(), item->GetEntry(), item->GetUInt32Value(ITEM_FIELD_FLAGS));
     item->SetUInt32Value(OBJECT_FIELD_ENTRY, gift->GetUInt32Value(OBJECT_FIELD_ENTRY));
-    
-    switch (item->GetEntry()) {
+
+    switch (item->GetEntry())
+    {
         case 5042:  item->SetUInt32Value(OBJECT_FIELD_ENTRY,  5043); break;
         case 5048:  item->SetUInt32Value(OBJECT_FIELD_ENTRY,  5044); break;
         case 17303: item->SetUInt32Value(OBJECT_FIELD_ENTRY, 17302); break;
@@ -1000,7 +1001,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         case 21830: item->SetUInt32Value(OBJECT_FIELD_ENTRY, 21831); break;
     }
     item->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, _player->GetGUID());
-    item->SetUInt32Value(ITEM_FIELD_FLAGS, 8); // wrapped ?
+    item->SetUInt32Value(ITEM_FIELD_FLAGS, 8);              // wrapped ?
     item->SetState(ITEM_CHANGED, _player);
 
     if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_template`
