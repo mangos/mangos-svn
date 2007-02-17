@@ -1303,7 +1303,7 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if(guild->m_ranks.size() >= 10)                         // cleint not let create more 10 ranks
+    if(guild->GetNrRanks() >= 10)                         // cleint not let create more 10 ranks
         return;
 
     recvPacket >> rankname;
