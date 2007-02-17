@@ -667,16 +667,19 @@ void Guild::Query(WorldSession *session)
     data << Id;
     data << name;
     RankList::iterator itr;
-    for (itr = m_ranks.begin(); itr != m_ranks.end();itr++)
-        data << itr->name;
+    for (int i = 0 ; i < 10; ++i)                           // show always 10 ranks
+    {
+        if(i < m_ranks.size())
+            data << m_ranks[i].name;
+        else
+            data << "Unused";
+    }
 
-    data << (uint32)0;
-    data << (EmblemStyle << 8);
-    data << (EmblemColor << 8);
-    data << (BorderStyle << 8);
-    data << (BorderColor << 8);
-    data << (BackgroundColor << 8);
-    data << (uint32)0;
+    data << uint32(EmblemStyle);
+    data << uint32(EmblemColor);
+    data << uint32(BorderStyle);
+    data << uint32(BorderColor);
+    data << uint32(BackgroundColor);
 
     session->SendPacket( &data );
 

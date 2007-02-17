@@ -212,10 +212,8 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
         return;                                             //check for cheaters
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
-    if(!pCreature||!pCreature->isAuctioner())
-    {
+    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
-    }
 
     uint16 pos = pl->GetPosByGuid(item);
     Item *it = pl->GetItemByPos( pos );
@@ -296,8 +294,9 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         return;                                             //check for cheaters
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
-    if(!pCreature||!pCreature->isAuctioner())
+    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
+
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
     AuctionHouseObject * mAuctions;
@@ -402,8 +401,9 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     //sLog.outDebug( "Cancel AUCTION AuctionID: %u", auctionId);
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
-    if(!pCreature||!pCreature->isAuctioner())
+    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
+
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
     AuctionHouseObject * mAuctions;
@@ -485,8 +485,9 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
     }
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if(!pCreature||!pCreature->isAuctioner())
+    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
+
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
     AuctionHouseObject * mAuctions;
@@ -536,8 +537,9 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
     recv_data >> listfrom;                                  // page of auctions
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if(!pCreature||!pCreature->isAuctioner())
+    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
+
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
     AuctionHouseObject * mAuctions;
@@ -584,7 +586,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     recv_data >> quality >> usable;
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if(!pCreature||!pCreature->isAuctioner())
+    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
 
     location = AuctioneerFactionToLocation(pCreature->getFaction());
