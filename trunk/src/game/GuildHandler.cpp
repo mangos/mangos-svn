@@ -75,7 +75,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 
     // prevent cheating
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guidNPC);
-    if(!pCreature||!pCreature->isGuildMaster())
+    if( !pCreature || !pCreature->isGuildMaster() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
         return;
 
     if(objmgr.GetGuildByName(guildname))
@@ -1297,11 +1297,14 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    else if(GetPlayer()->GetGUID() != guild->GetLeader())
+    if(GetPlayer()->GetGUID() != guild->GetLeader())
     {
         SendCommandResult(GUILD_INVITE_S,"",GUILD_PERMISSIONS);
         return;
     }
+
+    if(guild->m_ranks.size() >= 10)                         // cleint not let create more 10 ranks
+        return;
 
     recvPacket >> rankname;
 
@@ -1375,8 +1378,7 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 
     //sLog.outDebug( "WORLD: Received MSG_SAVE_GUILD_EMBLEM"  );
 
-    uint32 stuff0;
-    uint32 stuff1;
+    uint64 vendorGuid;
 
     uint32 EmblemStyle;
     uint32 EmblemColor;
@@ -1384,8 +1386,11 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
     uint32 BorderColor;
     uint32 BackgroundColor;
 
-    recvPacket >> stuff0;
-    recvPacket >> stuff1;
+    recvPacket >> vendorGuid;
+
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorGuid);
+    if( !pCreature || !pCreature->isTabardVendor() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+        return;
 
     recvPacket >> EmblemStyle;
     recvPacket >> EmblemColor;
@@ -1396,21 +1401,25 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
     Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
     {
-        SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
+        WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);
+        data << (uint32)2;                                  // not part of guild
+        SendPacket( &data );
         return;
     }
 
     if (guild->GetLeader() != GetPlayer()->GetGUID())
     {
-        SendCommandResult(GUILD_CREATE_S,"",GUILD_PERMISSIONS);
+        WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);
+        data << (uint32)3;                                  // only leader can
+        SendPacket( &data );
         return;
     }
 
     guild->SetEmblem(EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
 
-    guild->Query(this);
-
     WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);
     data << (uint32)0;
     SendPacket( &data );
+
+    guild->Query(this);
 }
