@@ -1218,6 +1218,8 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         m_transO = 0.0f;
     }
 
+    SetSemaphoreTeleport(true);
+
     if ((this->GetMapId() == mapid) && (!m_transport))
     {
         // near teleport
@@ -1302,6 +1304,8 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
             RemovePet(pet,PET_SAVE_AS_CURRENT);
     }
+
+    SetSemaphoreTeleport(false);
 
     UpdateZone();
     if(pvpInfo.inHostileArea)
