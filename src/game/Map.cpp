@@ -584,10 +584,17 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
 
     MaNGOS::VisibleNotifier notifier(*player);
 
-    if( !same_cell )
+    if( !same_cell || player->IsBeingTeleported() )
     {
+	if( player->IsBeingTeleported() )
+	    new_cell.data.Part.reserved = ALL_DISTRICT;
+
         TypeContainerVisitor<MaNGOS::VisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
         cell_lock->Visit(cell_lock, player_notifier, *this);
+	TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+	cell_lock->Visit(cell_lock, object_notifier, *this);
+	notifier.Notify();
+
     }
 
     MaNGOS::PlayerRelocationNotifier relocationNotifier(*player);
@@ -606,10 +613,6 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
 
     if( same_cell )
         return;
-
-    TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-    cell_lock->Visit(cell_lock, object_notifier, *this);
-    notifier.Notify();
 
     MaNGOS::NotVisibleNotifier notifier2(*player);
     TypeContainerVisitor<MaNGOS::NotVisibleNotifier, ContainerMapList<Player> > player_notifier2(notifier2);
