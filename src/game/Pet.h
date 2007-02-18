@@ -98,11 +98,13 @@ class Pet : public Creature
         void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
         void Update(uint32 diff);                           // overwrite virtual Creature::Update and Unit::Update
 
+	void RegenerateFocus();
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
         void InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
     protected:
+	uint32 m_regenTimer;
         uint32 m_actState;
         uint32 m_fealty;
         PetType m_petType;
