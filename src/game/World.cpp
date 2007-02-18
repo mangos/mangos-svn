@@ -123,7 +123,7 @@ void World::AddSession(WorldSession* s)
 {
     ASSERT(s);
     m_sessions[s->GetAccountId()] = s;
-    m_maxSessionsCount = max(m_maxSessionsCount,m_sessions.size());
+    m_maxSessionsCount = max(m_maxSessionsCount,uint32(m_sessions.size()));
 }
 
 Weather* World::FindWeather(uint32 id) const
