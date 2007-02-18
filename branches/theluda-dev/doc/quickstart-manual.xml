@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!--
+To produce readable docs, use the "xmlto" utility, for example:
+
+xmlto txt quickstart-manual.xml
+
+Should produce quickstart-manual.txt.  Other formats and options are
+available, check the xmlto documentation for details.
+-->
+<book>
+    <bookinfo>
+        <title>MaNGOS For Fun And Profit</title>
+        <authorgroup>
+            <author>
+                <firstname>Daniel</firstname>
+                <surname>aka. theluda</surname>
+                <affiliation>
+                    <address><email>theluda@googlemail.com</email></address>
+                </affiliation>
+            </author>
+        </authorgroup>
+        <copyright>
+            <year>2006</year>
+            <holder>MaNGOS project team</holder>
+        </copyright>
+        <copyright>
+            <year>2006</year>
+            <holder>MaNGOS documentation team</holder>
+        </copyright>
+        <abstract>
+            <para>This manual documents the workings and usage of
+            MaNGOS, a free reference implementation of a MMORPG
+            server system.</para>
+        </abstract>
+    </bookinfo>
+</book>
+<!--
+Local Variables:
+mode: sgml
+sgml-indent-step: 4
+End:
+-->

@@ -5,57 +5,54 @@ Copyright (c) 2005,2006 MaNGOS <http://www.mangosproject.org/>
 See the COPYING file for copying conditions.
 
 == Installation Instructions ==
-This documents describes the installation process for MaNGOS on Unix platforms
-using the standard Makefile build process. This includes systems like Fedora
-Core, Debian, FreeBSD, etc.
+This documents describes the installation process for MaNGOS on Unix
+platforms using the standard Makefile build process. This includes systems
+like Fedora Core, Debian, Ubuntu, FreeBSD, etc.
 
 === Configuring ===
-MaNGOS uses the standard autoconf configure, thus all normal autoconf options
+MaNGOS uses the standard autoconf configure, thus all autoconf options
 apply. In common we will assume that you do have a working C++ compiler on
 your systems. If not, GCC (http://gcc.gnu.org/) is your friend.
 
 There are several programs and libraries required in order to compile MaNGOS
 successfully:
 
- * pthread development package (headers) are required, as MaNGOS uses threads.
-   Note: on some systems, the phtread development files are part of the glibc
-   packages.
+ * pthread development package (headers) are required, as MaNGOS uses
+   threads. 
+   Note: on some systems, the phtread development files are part of the
+   glibc packages.
+ * zthread development package (headers) are required, as MaNGOS uses
+   threads.
  * zlib development package (headers) are required, as we use them for data
    compression.
- * MySQL development package (headers) are required, because we are using this
-   backend for keeping world data.
- * OpenSSL development package (headers) are required, because we are using them
-   for authenticating the game client.
+ * MySQL development package (headers) are required, because we are using
+   this backend for storing all data.
+ * OpenSSL development package (headers) are required, because we are using
+   them for authenticating the game client.
 
 Optional packages to enhance the functionality of MaNGOS are:
 
  * Curses or termcap headers are not required but highly recommended because
    you'll get a much nicer console input/output.
+ * LUA 5.1 development package (headers) are required to build the scripting
+   library based on LUA.
  * Python 2.4 development package (headers) are required to build the Python
-   scripting library if you want to script the MaNGOS world daemon using Python.
-   This will also require the included PyCXX package.
+   scripting library. This will also require the included PyCXX package.
 
-Optional packages included in MaNGOS as they are not installed or available on
-several systems include:
-
- * LUA and tolua++ package are not required, but highly recommended if you want
-   to build and use the LUA scripting library and create .lua scripts for the
-   world daemon.
- * PyCXX package is not required, but highly recommended if you want to build
-   and use the the Python scripting library.
-
-Here's a list of options that is specifically useful when configuring MaNGOS:
+Here's a list of options that is specifically useful for configuring MaNGOS:
 
  --sysconfdir=/etc/mangos
    
    This will set the directory where the compiled daemons will look for the
-   configuration files. By default it's something like /usr/local/etc.
+   configuration files.
 
+ --prefix=/home/your-username
+   This will allow you to build and run MaNGOS and related tools from your
  --enable-debug
    If you use this option, the DEBUG_PRINTF macro and some other debugging
-   macros will be enabled. This means you will get much more information about
-   what goes on, so use this option if something doesn't work and you don't
-   understand what happens.
+   macros will be enabled. This means you will get much more information
+   about what goes on, so use this option if something doesn't work and you
+   don't understand what happens.
 
 Here's a sample sequence that configures MaNGOS for a debug build (this is
 usually called cfg-debug.sh):
@@ -81,16 +78,18 @@ I especially recommend the -fno-exceptions switch since the resulting
 executable will be around 20% smaller and we don't use exceptions anyway.
 
 === Compiling ===
-Well, it should be fairly simple if you got all the pre-requisites. Just type
+Well, it should be fairly simple if you got all the pre-requisites. Just
+type
 
 $ make
 
-If you have a problem during compilation, we can't tell you what to do. Figure
-it out yourself. If we would know in advance what problems you would encounter,
-we would fix it in advance, or put a warning message in configure at least.
+If you have a problem during compilation, we can't tell you what to do.
+Figure it out yourself. If we would know in advance what problems you would
+encounter, we would fix it in advance, or put a warning message in configure
+at least.
 
-Until this development branch will be merged into the trunk of our SubVersion
-repository, no support will be provided.
+Until this development branch will be merged into the trunk of our
+SubVersion repository, no support will be provided.
 
 Thank you for understanding.
 

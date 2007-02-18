@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!--
+To produce readable docs, use the "xmlto" utility, for example:
+
+xmlto txt developer-manual.xml
+
+Should produce developer-manual.txt.  Other formats and options are
+available, check the xmlto documentation for details.
+-->
+<book>
+    <bookinfo>
+        <title>MaNGOS For Fun And Profit</title>
+        <authorgroup>
+            <author>
+                <firstname>Daniel</firstname>
+                <surname>aka. theluda</surname>
+                <affiliation>
+                    <address><email>theluda@googlemail.com</email></address>
+                </affiliation>
+            </author>
+        </authorgroup>
+        <copyright>
+            <year>2006</year>
+            <holder>MaNGOS project team</holder>
+        </copyright>
+        <copyright>
+            <year>2006</year>
+            <holder>MaNGOS documentation team</holder>
+        </copyright>
+        <abstract>
+            <para>This manual documents the workings and usage of
+            MaNGOS, a free reference implementation of a MMORPG
+            server system.</para>
+        </abstract>
+    </bookinfo>
+    <chapter>
+        <title>MaNGOS Overview</title>
+        <sect1>
+            <title>Introduction</title>
+
+            <para>MaNGOS is the abbreviation for Massive Network Game Object
+            Server. It is a collection of daemons and tools required to build
+            a large scale online gaming platform, for games know as MMORPG.
+            It's not a fixed system where you can only play one kind of MMORPG
+            but nearly any kind of MMORPG as MaNGOS only provides a foundation
+            of tools and daemons required to build such services. We do include
+            sample game services for well known MMORPGs' available, but we as
+            well include everything you need to create a new gaming daemon for
+            your own MMORPG.</para>
+
+            <para>The main terms describing MaNGOS are "object orientation" and
+            "automation". MaNGOS' goal is to provide a strong and complete
+            framework for the development of large scale MMORPG services on
+            multiple platforms, and aims to provide learning developers with a
+            reference implementation for professional software development.</para>
+
+            <para>Developers will enjoy the possibilities to define custom
+            communication schemes for their own game client, as well as the
+            abilitiy to use various backends for authentication, as well as
+            for identification of access control rights.</para>
+
+            <para>On a higher level, MaNGOS allows users - read MMORPG content
+            developers - to create and define custom game content, including
+            basic objects, characters, and everything you might think of. The
+            only limits are your own imagination.</para>
+        </sect1>
+    </chapter>
+</book>
+<!--
+Local Variables:
+mode: sgml
+sgml-indent-step: 4
+End:
+-->

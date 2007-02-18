@@ -1,4 +1,4 @@
-# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,5 +16,31 @@
 
 ## Process this file with automake to produce Makefile.in
 
-## Parse these sub-directories
-SUBDIRS = dep doc
+## Sub-directories to parse
+SUBDIRS = doc dep src sql
+
+## Additional files to include when running 'make dist'
+#  Add guidelines for working with the sources.
+EXTRA_DIST = HACKING
+
+#  Add installation instructions, and a special ReadMe for Windows users,
+#  these are convenience files, using DOS linefeeds.
+EXTRA_DIST = HACKING.Win32.txt INSTALL.Win32.txt README.Win32.txt
+
+# Win32 project workspace for Visual C++ 2003 Toolkit and Visual C++ 2003
+EXTRA_DIST += \
+	win32/mangosdVC71.sln \
+	win32/VC71/framework.vcproj \
+	win32/VC71/game.vcproj \
+	win32/VC71/mangosd.vcproj \
+	win32/VC71/realmd.vcproj \
+	win32/VC71/shared.vcproj
+
+# Win32 project workspace for Visual Studio .NET 2005
+EXTRA_DIST += \
+	win32/mangosdVC80.sln \
+	win32/VC80/framework.vcproj \
+	win32/VC80/game.vcproj \
+	win32/VC80/mangosd.vcproj \
+	win32/VC80/realmd.vcproj \
+	win32/VC80/shared.vcproj
