@@ -125,14 +125,14 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.\n", flag, spellid);
             }
             break;
-        case 1536:
+        case 1536:                                          // 0x600
             switch(spellid)
             {
                 case 0:                                     //passive
                     if(pet->isPet())
                     {
                         ((Pet*)pet)->AddActState( STATE_RA_PASSIVE );
-                        ((Pet*)pet)->ClearActState( STATE_RA_PROACTIVE | STATE_RA_PROACTIVE );
+                        ((Pet*)pet)->ClearActState( STATE_RA_PROACTIVE | STATE_RA_REACTIVE );
                     }
                     break;
                 case 1:                                     //recovery
