@@ -183,13 +183,13 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else
     {
-        if(i_owner && i_owner->isInCombat())
+        if(i_owner && i_owner->isInCombat() && (!((Pet*)&i_pet)->HasActState(STATE_RA_PASSIVE)))
         {
             AttackStart(i_owner->getAttackerForHelper());
         }
         else if(i_owner && ((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
         {
-            if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW))
+            if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW) && i_pet.IsWithinDistInMap(i_owner,PET_FOLLOW_START_DIST))
             {
                 i_pet.addUnitState(UNIT_STAT_FOLLOW);
                 i_pet->Clear();

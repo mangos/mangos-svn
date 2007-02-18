@@ -11052,13 +11052,17 @@ void Player::PetSpellInitialize()
 
         data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x1010000);
 
-        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+        data << uint16 (2) << uint16(Command << 8);         // 2 command from 0x700 group place to 1 slot
+        data << uint16 (1) << uint16(Command << 8);         // 1 command from 0x700 group place to 2 slot
+        data << uint16 (0) << uint16(Command << 8);         // 0 command from 0x700 group place to 3 slot
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
                                                             //C100 = maybe group
             data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
 
-        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+        data << uint16 (2) << uint16(State << 8);           // 2 command from 0x600 group place to 8 slot
+        data << uint16 (1) << uint16(State << 8);           // 1 command from 0x600 group place to 9 slot
+        data << uint16 (0) << uint16(State << 8);           // 0 command from 0x600 group place to 10 slot
 
         if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
         {

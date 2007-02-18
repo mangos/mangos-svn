@@ -38,7 +38,7 @@ Pet::Pet(PetType type)
 {
     m_isPet = true;
     m_name = "Pet";
-    m_actState = STATE_RA_FOLLOW;
+    m_actState = STATE_RA_FOLLOW | STATE_RA_PASSIVE;
     m_fealty = 0;
     m_petType = type;
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
@@ -135,7 +135,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     m_spells[1] = fields[8].GetUInt32();
     m_spells[2] = fields[9].GetUInt32();
     m_spells[3] = fields[10].GetUInt32();
-    m_actState = fields[11].GetUInt32();
+    m_actState  = fields[11].GetUInt32();
 
     // set current pet as current
     if(fields[15].GetUInt32() != 1)
