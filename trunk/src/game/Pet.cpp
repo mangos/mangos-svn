@@ -41,6 +41,7 @@ Pet::Pet(PetType type)
     m_actState = STATE_RA_FOLLOW | STATE_RA_PASSIVE;
     m_fealty = 0;
     m_petType = type;
+    m_regenTimer = 4000;
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
         m_spells[i]=0;
 }
@@ -267,7 +268,7 @@ void Pet::Update(uint32 diff)
             if( m_deathTimer <= diff )
             {
                 assert(getPetType()!=SUMMON_PET && "Must be already removed.");
-                Remove(PET_SAVE_AS_DELETED);                // delete hunter pet from DB also
+		Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_CURRENT:PET_SAVE_AS_DELETED);//hunters' pets never get removed because of death, NEVER!
                 return;
             }
             break;
@@ -287,12 +288,36 @@ void Pet::Update(uint32 diff)
                 Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_AS_STORED);
                 return;
             }
+
+	    //regenerate Focus
+	    if(m_regenTimer > 0)
+	    {
+		if(m_regenTimer > diff)
+		    m_regenTimer = 0;
+		else
+		    m_regenTimer -= diff;
+	    }
+	    else
+	    {
+		RegenerateFocus();
+		m_regenTimer = 4000;
+	    }
+
             break;
         }
         default:
             break;
     }
     Creature::Update(diff);
+}
+
+void Pet::RegenerateFocus()
+{
+    uint32 curValue = GetPower(POWER_FOCUS);
+    uint32 maxValue = GetMaxPower(POWER_FOCUS);
+    if (curValue >= maxValue) return;
+	uint32 addvalue = 25;
+    ModifyPower(POWER_FOCUS, addvalue);
 }
 
 void Pet::Remove(PetSaveMode mode)
