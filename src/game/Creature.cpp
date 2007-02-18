@@ -72,7 +72,7 @@ Creature::~Creature()
 {
     if(m_uint32Values)                                      // only for fully created object
     {
-        CombatStop();
+        CombatStop(true);
         DeleteThreatList();
         DeleteInHateListOf();
         RemoveAllAuras();

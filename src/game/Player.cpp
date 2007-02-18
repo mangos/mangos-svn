@@ -178,7 +178,7 @@ Player::~Player ()
 {
     if(m_uint32Values)                                      // only for fully created Object
     {
-        CombatStop();
+        CombatStop(true);
         RemovePet(NULL, PET_SAVE_AS_CURRENT);
     }
 
@@ -1572,7 +1572,7 @@ void Player::SetGameMaster(bool on)
         SetFlag(PLAYER_BYTES_2, 0x8);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
         MoveToHateOfflineList();
-        CombatStop();
+        CombatStop(true);
     }
     else
     {
@@ -9930,7 +9930,7 @@ bool Player::LoadFromDB( uint32 guid )
         SetUInt32Value(PLAYER_SKILL(i)+2,0);
 
     // make sure the unit is considered out of combat for proper loading
-    ClearInCombat();
+    ClearInCombat(true);
 
     // make sure the unit is considered not in duel for proper loading
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
@@ -11001,7 +11001,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode)
     if(GetPetGUID()==pet->GetGUID())
         SetPet(0);
 
-    pet->CombatStop();
+    pet->CombatStop(true);
 
     pet->SavePetToDB(mode);
 

@@ -76,7 +76,7 @@ void Totem::UnSummon()
     SendObjectDeSpawnAnim(GetGUID());
     SendDestroyObject(GetGUID());
 
-    CombatStop();
+    CombatStop(true);
     RemoveAurasDueToSpell(m_spell);
     Unit *owner = this->GetOwner();
     if (owner)

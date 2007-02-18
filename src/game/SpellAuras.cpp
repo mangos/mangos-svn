@@ -139,7 +139,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModDetectRange,                            //SPELL_AURA_MOD_DETECT_RANGE = 91,
     &Aura::HandleNULL,                                      //SPELL_AURA_PREVENTS_FLEEING = 92,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_UNATTACKABLE = 93,
-    &Aura::HandleNULL,                                      //SPELL_AURA_INTERRUPT_REGEN = 94,
+    &Aura::HandleInterruptRegen,                            //SPELL_AURA_INTERRUPT_REGEN = 94,
     &Aura::HandleNULL,                                      //SPELL_AURA_GHOST = 95,
     &Aura::HandleNULL,                                      //SPELL_AURA_SPELL_MAGNET = 96,
     &Aura::HandleAuraManaShield,                            //SPELL_AURA_MANA_SHIELD = 97,
@@ -819,6 +819,16 @@ void Aura::TriggerSpell()
 /*********************************************************/
 /***                  AURA EFFECTS                     ***/
 /*********************************************************/
+
+void Aura::HandleInterruptRegen(bool apply, bool Real)
+{
+    Unit* caster = GetCaster();
+
+    if(Real && apply)
+        caster->SetInCombat();
+
+    // Has no effect at removing
+}
 
 void Aura::HandleAuraDummy(bool apply, bool Real)
 {

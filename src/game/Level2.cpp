@@ -404,7 +404,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
         return true;
     }
 
-    unit->CombatStop();
+    unit->CombatStop(true);
 
     unit->DeleteFromDB();
 

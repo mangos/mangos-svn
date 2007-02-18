@@ -169,6 +169,7 @@ class Aura
         void HandleModHealingDonePercent(bool Apply, bool Real);
         void HandleModTotalPercentStat(bool Apply, bool Real);
         void HandleAuraModTotalThreat(bool Apply, bool Real);
+        void HandleInterruptRegen(bool Apply, bool Real);
 
         Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
