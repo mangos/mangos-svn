@@ -88,7 +88,7 @@ void PetAI::_stopAttack()
         i_pet->Clear();
         i_pet->Idle();
         i_victimGuid = 0;
-        i_pet.CombatStop();
+        i_pet.CombatStop(true);
         i_pet.DeleteInHateListOf();
         return;
     }

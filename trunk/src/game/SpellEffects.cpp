@@ -1463,7 +1463,7 @@ void Spell::EffectTameCreature(uint32 i)
         if(m_caster->getVictim()==creatureTarget)
             m_caster->AttackStop();
 
-        creatureTarget->CombatStop();
+        creatureTarget->CombatStop(true);
         creatureTarget->StopMoving();
 
         // cast finish succesfully

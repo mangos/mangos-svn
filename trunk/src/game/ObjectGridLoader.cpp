@@ -244,7 +244,7 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
     // remove all cross-reference before deleting
     for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        iter->second->CombatStop();
+        iter->second->CombatStop(true);
         iter->second->DeleteThreatList();
         iter->second->DeleteInHateListOf();
         iter->second->RemoveAllAuras();

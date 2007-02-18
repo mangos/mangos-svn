@@ -132,10 +132,14 @@ void Unit::Update( uint32 p_time )
     {
         if(IsInHateListEmpty())
         {
-            if ( m_CombatTimer <= p_time )
-                ClearInCombat();
-            else
-                m_CombatTimer -= p_time;
+            // m_CombatTimer set at aura start and it will be freezy until aura removing
+            if(!HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+            {
+                if ( m_CombatTimer <= p_time )
+                    ClearInCombat();
+                else
+                    m_CombatTimer -= p_time;
+            }
         }
     }
 
@@ -298,7 +302,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         {
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
-            pVictim->CombatStop();
+            pVictim->CombatStop(true);
             return;
         }
         if(!pVictim->isInCombat())
@@ -334,7 +338,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
 
         DEBUG_LOG("DealDamageAttackStop");
         AttackStop();
-        pVictim->CombatStop();
+        pVictim->CombatStop(true);
 
         DEBUG_LOG("SET JUST_DIED");
         pVictim->setDeathState(JUST_DIED);
@@ -364,7 +368,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             if(pet)
             {
                 pet->setDeathState(JUST_DIED);
-                pet->CombatStop();
+                pet->CombatStop(true);
                 pet->SetHealth(0);
                 pet->addUnitState(UNIT_STAT_DIED);
                 pet->DeleteInHateListOf();
@@ -394,10 +398,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 PvP = true;
         }
+        // FIXME: or charmed (can be player). Maybe must be check before GetTypeId() == TYPEID_PLAYER
         else if(GetOwnerGUID())                             // Pet or timed creature, etc
         {
-            Creature* pet = (Creature*)this;
-            Unit* owner = ((Creature*)this)->GetOwner();
+            Unit* pet = this;
+            Unit* owner = pet->GetOwner();
 
             if(owner && owner->GetTypeId() == TYPEID_PLAYER)
             {
@@ -405,7 +410,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 player->ClearInCombat();
             }
 
-            if(pet->isPet())
+            if(pet->GetTypeId()==TYPEID_UNIT && ((Creature*)pet)->isPet())
             {
                 uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
                 ((Pet*)pet)->GivePetXP(petxp);
@@ -3821,8 +3826,12 @@ void Unit::SetInCombat()
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 }
 
-void Unit::ClearInCombat()
+void Unit::ClearInCombat(bool force)
 {
+    // wait aura and combat timer expire  
+    if(!force && HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+        return;
+  
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 }
@@ -4072,7 +4081,7 @@ void Unit::setDeathState(DeathState s)
 {
     if (s != ALIVE)
     {
-        CombatStop();
+        CombatStop(true);
 
         if(m_currentSpell)
             m_currentSpell->cancel();
