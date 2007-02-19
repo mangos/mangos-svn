@@ -132,7 +132,10 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
     uint64 petitionguid;
     recv_data >> petitionguid;                              // petition guid
 
-    QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    // solve (possible) some strange compile problems with explicit use GUID_LOPART(petitionguid) at some GCC versions (wrong code optimization in compiler?)
+    uint32 petitionguid_low = GUID_LOPART(petitionguid);
+
+    QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", petitionguid_low);
     if(!result)
     {
         sLog.outError("any charter on server...");
@@ -141,18 +144,18 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 
     delete result;
 
-    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", petitionguid_low);
 
     // result==NULL also correct in case no sign yet
     if(result)
         signs = result->GetRowCount();
 
-    sLog.outDebug("CMSG_PETITION_SHOW_SIGNATURES petition entry: '%u'", GUID_LOPART(petitionguid));
+    sLog.outDebug("CMSG_PETITION_SHOW_SIGNATURES petition entry: '%u'", petitionguid_low);
 
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+1+signs*12));
     data << petitionguid;                                   // petition guid
     data << _player->GetGUID();                             // owner guid
-    data << GUID_LOPART(petitionguid);                      // guild guid (in mangos always same as GUID_LOPART(petitionguid)
+    data << petitionguid_low;                               // guild guid (in mangos always same as GUID_LOPART(petitionguid)
     data << signs;                                          // sign's count
 
     for(uint8 i = 1; i <= signs; i++)
