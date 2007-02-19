@@ -1798,7 +1798,7 @@ void Aura::HandleModThreat(bool apply, bool Real)
     if(!caster || !caster->isAlive())
         return;
 
-    if(m_modifier.m_miscvalue < SPELL_SCHOOL_NORMAL || m_modifier.m_miscvalue >= (1<<MAX_SPELL_SCHOOOL))
+    if(m_modifier.m_miscvalue < SPELL_SCHOOL_NORMAL || m_modifier.m_miscvalue >= (1<<MAX_SPELL_SCHOOL))
     {
         sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_THREAT not valid");
         return;
@@ -1806,7 +1806,7 @@ void Aura::HandleModThreat(bool apply, bool Real)
 
     bool positive = m_modifier.m_miscvalue2 == 0;
 
-    for(int8 x=0;x < MAX_SPELL_SCHOOOL;x++)
+    for(int8 x=0;x < MAX_SPELL_SCHOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -2240,7 +2240,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply, bool Real)
 
     bool positive = m_modifier.m_miscvalue2 == 0;
 
-    for(int8 x=0;x < MAX_SPELL_SCHOOOL;x++)
+    for(int8 x=0;x < MAX_SPELL_SCHOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -2263,7 +2263,7 @@ void Aura::HandleAuraModResistance(bool apply, bool Real)
 
     bool positive = m_modifier.m_miscvalue2 == 0;
 
-    for(int8 x=0;x < MAX_SPELL_SCHOOOL;x++)
+    for(int8 x=0;x < MAX_SPELL_SCHOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -2289,7 +2289,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
         return;
     Player *p_target = (Player*)m_target;
 
-    for(int8 x=0;x < MAX_SPELL_SCHOOOL;x++)
+    for(int8 x=0;x < MAX_SPELL_SCHOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -2304,7 +2304,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
 
 void Aura::HandleModResistancePercent(bool apply, bool Real)
 {
-    for(int8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
+    for(int8 i = 0; i < MAX_SPELL_SCHOOL; i++)
     {
         if(m_modifier.m_miscvalue & int32(1<<i))
         {
@@ -2325,7 +2325,7 @@ void Aura::HandleModBaseResistance(bool apply, bool Real)
         return;
     Player *p_target = (Player*)m_target;
 
-    for(int i = 0; i < MAX_SPELL_SCHOOOL; i++)
+    for(int i = 0; i < MAX_SPELL_SCHOOL; i++)
         if(m_modifier.m_miscvalue & (1<<i))
             p_target->ApplyResistanceMod(SpellSchools(SPELL_SCHOOL_NORMAL + i),m_modifier.m_amount, apply);
 }

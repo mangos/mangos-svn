@@ -263,6 +263,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_PROFICIENCY:
                 case SPELL_EFFECT_PARRY:
                 case SPELL_EFFECT_DUMMY:
+                case SPELL_EFFECT_CREATE_ITEM:
                     if(m_targets.getUnitTarget())
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;

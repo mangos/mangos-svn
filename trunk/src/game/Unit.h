@@ -681,7 +681,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 m_modSpellHitChance;
         int32 m_baseSpellCritChance;
         int32 m_modCastSpeedPct;
-        float m_threatModifier[MAX_SPELL_SCHOOOL];
+        float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
 
         bool isInFront(Unit const* target,float distance);

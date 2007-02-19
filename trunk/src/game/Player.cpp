@@ -1793,7 +1793,7 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetResistanceBuffMods(SpellSchools(0), true, 0);
     SetResistanceBuffMods(SpellSchools(0), false, 0);
     // set other resistence to original value (0)
-    for (int i = 1; i < MAX_SPELL_SCHOOOL; i++)
+    for (int i = 1; i < MAX_SPELL_SCHOOL; i++)
     {
         SetResistance(SpellSchools(i), 0);
         SetResistanceBuffMods(SpellSchools(i), true, 0);

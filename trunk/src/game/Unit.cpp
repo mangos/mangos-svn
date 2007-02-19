@@ -97,7 +97,7 @@ Unit::Unit() : WorldObject()
     m_modCastSpeedPct = 0;
     m_CombatTimer = 0;
     m_victimThreat = 0.0f;
-    for (int i = 0; i < MAX_SPELL_SCHOOOL; ++i)
+    for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         m_threatModifier[i] = 1.0f;
     m_isSorted = true;
     for (int i = 0; i < MAX_MOVE_TYPE; ++i)
@@ -2273,7 +2273,7 @@ void Unit::ApplyStats(bool apply)
     }
     AuraList& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
     for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
-        for(uint8 j = 0; j < MAX_SPELL_SCHOOOL; j++)
+        for(uint8 j = 0; j < MAX_SPELL_SCHOOL; j++)
             if((*i)->GetModifier()->m_miscvalue & (1<<j))
                 totalresmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
@@ -2307,7 +2307,7 @@ void Unit::ApplyStats(bool apply)
 
     for (uint8 i = 0; i < MAX_STATS; i++)
         totalstatmods[i] = totalstatmods[i] * 100.0f - 100.0f;
-    for (uint8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
+    for (uint8 i = 0; i < MAX_SPELL_SCHOOL; i++)
         totalresmods[i] = totalresmods[i] * 100.0f - 100.0f;
     for (uint8 i = 0; i < 3; i++)
         totaldamgemods[i] = totaldamgemods[i] * 100.0f - 100.0f;
@@ -2324,7 +2324,7 @@ void Unit::ApplyStats(bool apply)
                 ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );
             }
         }
-        for (uint8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
+        for (uint8 i = 0; i < MAX_SPELL_SCHOOL; i++)
         {
             if (totalresmods[i] != 0)
             {
@@ -2467,7 +2467,7 @@ void Unit::ApplyStats(bool apply)
                 ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );
             }
         }
-        for (uint8 i = 0; i < MAX_SPELL_SCHOOOL; i++)
+        for (uint8 i = 0; i < MAX_SPELL_SCHOOL; i++)
         {
             if (totalresmods[i])
             {
@@ -4490,7 +4490,7 @@ float Unit::ApplyTotalThreatModifier(float threat, uint8 school)
     if(!HasAuraType(SPELL_AURA_MOD_THREAT))
         return threat;
 
-    if(school >= MAX_SPELL_SCHOOOL)
+    if(school >= MAX_SPELL_SCHOOL)
         return threat;
 
     return threat * m_threatModifier[school];

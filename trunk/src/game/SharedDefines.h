@@ -121,7 +121,7 @@ enum SpellSchools
     SPELL_SCHOOL_ARCANE                = 6
 };
 
-#define MAX_SPELL_SCHOOOL                7
+#define MAX_SPELL_SCHOOL                 7
 
 #define ITEM_QUALITY_POOR                   0               //GREY
 #define ITEM_QUALITY_NORMAL                 1               //WHITE
