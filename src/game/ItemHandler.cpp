@@ -517,7 +517,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             }
             else
                 vendorslot -= 1;
-            if( pCreature->GetMaxItemCount( vendorslot ) != 0 && ((int)pCreature->GetItemCount( vendorslot ) - count) < 0 )
+            if( pCreature->GetMaxItemCount( vendorslot ) != 0 && pCreature->GetItemCount( vendorslot ) < count )
             {
                 _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
                 return;

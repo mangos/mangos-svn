@@ -682,7 +682,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         return;
     }
 
-    if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE )
+    if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE && pItem->GetProto()->Class != ITEM_CLASS_QUEST)
         pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
 
     player->SendNewItem(pItem, num_to_add, true, true);
