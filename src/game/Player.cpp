@@ -9331,7 +9331,7 @@ void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
                             curitemcount = mQuestStatus[questid].m_itemcount[j];
                         else
                             curitemcount = GetItemCount(entry) + GetBankItemCount(entry);
-                        if ( curitemcount - count < reqitemcount )
+                        if ( curitemcount < reqitemcount + count )
                         {
                             remitemcount = ( curitemcount <= reqitemcount ? count : count + reqitemcount - curitemcount);
                             mQuestStatus[questid].m_itemcount[j] = curitemcount - remitemcount;

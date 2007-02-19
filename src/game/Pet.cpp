@@ -268,7 +268,7 @@ void Pet::Update(uint32 diff)
             if( m_deathTimer <= diff )
             {
                 assert(getPetType()!=SUMMON_PET && "Must be already removed.");
-		Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_CURRENT:PET_SAVE_AS_DELETED);//hunters' pets never get removed because of death, NEVER!
+                Remove(PET_SAVE_AS_CURRENT);                //hunters' pets never get removed because of death, NEVER!
                 return;
             }
             break;
