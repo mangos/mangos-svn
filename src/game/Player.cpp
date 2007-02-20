@@ -9522,12 +9522,12 @@ bool Player::HasQuestForItem( uint32 itemid )
                     uint32 idx = qinfo->ReqSourceRef[j]-1;
                     // total count of created ReqItems and SourceItems is less than ReqItemCount
                     if(qinfo->ReqItemId[idx] != 0 &&
-                        qs.m_itemcount[idx] + GetItemCount(itemid)+ GetBankItemCount(itemid) < qinfo->ReqItemCount[idx])
+                        qs.m_itemcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqItemCount[idx] * qinfo->ReqSourceCount[j])
                         return true;
 
                     // total count of casted ReqCreatureOrGOs and SourceItems is less than ReqCreatureOrGOCount
                     if (qinfo->ReqCreatureOrGOId[idx] != 0 &&
-                        qs.m_creatureOrGOcount[idx] + GetItemCount(itemid)+ GetBankItemCount(itemid) < qinfo->ReqCreatureOrGOCount[idx])
+                        qs.m_creatureOrGOcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqCreatureOrGOCount[idx] * qinfo->ReqSourceCount[j])
                         return true;
                 }
             }
