@@ -3255,6 +3255,7 @@ bool ChatHandler::HandleOutOfRange(const char* args)
 
 bool ChatHandler::HandleAddQuest(const char* args)
 {
+    Player* player = getSelectedPlayer();
     // .addquest #entry'
     char* pentry = strtok((char*)args, " ");
 
@@ -3285,12 +3286,12 @@ bool ChatHandler::HandleAddQuest(const char* args)
 
     // ok, normal (creature/GO starting) quest
     Quest* pQuest = qIter->second;
-    if( m_session->GetPlayer()->CanAddQuest( pQuest, true ) )
+    if( player->CanAddQuest( pQuest, true ) )
     {
-        m_session->GetPlayer()->AddQuest( pQuest );
+        player->AddQuest( pQuest );
 
-        if ( m_session->GetPlayer()->CanCompleteQuest( entry ) )
-            m_session->GetPlayer()->CompleteQuest( entry );
+        if ( player->CanCompleteQuest( entry ) )
+            player->CompleteQuest( entry );
     }
 
     return true;
