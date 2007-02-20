@@ -11,6 +11,10 @@ Visit our forums for support:
 http://www.mangosproject.org/
 
 Version 0.7, Codename "Eye of the Storm"
+ * Full rewrite of the GNU autotools based build system, in order to
+   smooth and clean up the build process.
+ * Full rewrite of the Windows build system, allowing MaNGOS to be built
+   from Visual C++ 2003 Toolkit, Visual C++ 2003, Visual C++ 2005.
  * Under discussion.
 
 Version 0.6, Codename "Black Dragonflight"
