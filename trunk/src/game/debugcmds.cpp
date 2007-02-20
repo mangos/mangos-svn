@@ -161,8 +161,11 @@ bool ChatHandler::HandleGetItemState(const char* args)
     {
         state_str = "The player has the following " + state_str + " items: ";
         SendSysMessage(state_str.c_str());
-        for (uint8 i = 0; i < INVENTORY_SLOT_ITEM_END; i++)
+        for (uint8 i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; i++)
         {
+            if(i >= BUYBACK_SLOT_START && i < BUYBACK_SLOT_END)
+                continue;
+
             Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
             if (!item) continue;
             if (!item->IsBag())
@@ -215,8 +218,11 @@ bool ChatHandler::HandleGetItemState(const char* args)
     {
         bool error = false;
         std::vector<Item *> &updateQueue = player->GetItemUpdateQueue();
-        for (uint8 i = 0; i < INVENTORY_SLOT_ITEM_END; i++)
+        for (uint8 i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; i++)
         {
+            if(i >= BUYBACK_SLOT_START && i < BUYBACK_SLOT_END)
+                continue;
+
             Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
             if (!item) continue;
 
