@@ -188,13 +188,8 @@ Player::~Player ()
 
     RemoveAllAuras();
 
-    for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
-    {
-        if(m_items[j])
-            delete m_items[j];
-        // already deleted from DB when player was saved
-    }
-    for(int i = 0; i < BANK_SLOT_BAG_END; i++)
+    // Note: buy back item already deleted from DB when player was saved
+    for(int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
     {
         if(m_items[i])
             delete m_items[i];
@@ -427,7 +422,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         }
     }
 
-    // bags and main-hamd weapon must equiped ant this moment
+    // bags and main-hand weapon must equiped at this moment
     // now second pass for not equiped (offhand weapon/shield if it attempt equiped before main-hand weapon)
     // or ammo not equiped in special bag
     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
@@ -691,15 +686,6 @@ void Player::Update( uint32 p_time )
             // TODO add weapon,skill check
 
             float pldistance = ATTACK_DIST;
-
-            /*if(getClass() == WARRIOR)
-                pldistance += 1;
-
-            if(GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND ) != 0)
-                pldistance += 2;
-
-            if(GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS) != 0)
-                pldistance += 3;*/
 
             if (isAttackReady(BASE_ATTACK))
             {
@@ -1321,6 +1307,11 @@ void Player::AddToWorld()
         if(m_items[i])
             m_items[i]->AddToWorld();
     }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+    {
+        if(m_items[i])
+            m_items[i]->AddToWorld();
+    }
     AddWeather();
 
     if(Corpse* corpse = GetCorpse())
@@ -1331,6 +1322,11 @@ void Player::RemoveFromWorld()
 {
 
     for(int i = 0; i < BANK_SLOT_BAG_END; i++)
+    {
+        if(m_items[i])
+            m_items[i]->RemoveFromWorld();
+    }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
     {
         if(m_items[i])
             m_items[i]->RemoveFromWorld();
@@ -2244,6 +2240,7 @@ void Player::_LoadSpellCooldowns()
     // setup item coldowns
     if(m_spellCooldowns.size() > 0)
     {
+        // keys in KEYRING_SLOT_START..KEYRING_SLOT_END can't have cooldowns
         for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
             if(Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
@@ -2573,7 +2570,14 @@ void Player::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target )
     if(target == this)
     {
 
-        for(int i = EQUIPMENT_SLOT_END; i < BANK_SLOT_BAG_END; i++)
+        for(int i = INVENTORY_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+        {
+            if(m_items[i] == NULL)
+                continue;
+
+            m_items[i]->BuildCreateUpdateBlockForPlayer( data, target );
+        }
+        for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
         {
             if(m_items[i] == NULL)
                 continue;
@@ -2600,7 +2604,14 @@ void Player::DestroyForPlayer( Player *target ) const
     if(target == this)
     {
 
-        for(int i = EQUIPMENT_SLOT_END; i < BANK_SLOT_BAG_END; i++)
+        for(int i = INVENTORY_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+        {
+            if(m_items[i] == NULL)
+                continue;
+
+            m_items[i]->DestroyForPlayer( target );
+        }
+        for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
         {
             if(m_items[i] == NULL)
                 continue;
@@ -5897,6 +5908,12 @@ uint32 Player::GetItemCount( uint32 item ) const
         if( pItem && pItem->GetEntry() == item )
             count += pItem->GetCount();
     }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+            count += pItem->GetCount();
+    }
     Bag *pBag;
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
@@ -5904,6 +5921,7 @@ uint32 Player::GetItemCount( uint32 item ) const
         if( pBag )
             count += pBag->GetItemCount(item);
     }
+
     return count;
 }
 
@@ -5932,6 +5950,13 @@ uint16 Player::GetPosByGuid( uint64 guid ) const
     Item *pItem;
     uint16 pos;
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        pItem = GetItemByPos( pos );
+        if( pItem && pItem->GetGUID() == guid )
+            return pos;
+    }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
     {
         pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
         pItem = GetItemByPos( pos );
@@ -6068,6 +6093,16 @@ bool Player::HasItemCount( uint32 item, uint32 count ) const
     Item *pItem;
     uint32 tempcount = 0;
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            tempcount += pItem->GetCount();
+            if( tempcount >= count )
+                return true;
+        }
+    }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
     {
         pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetEntry() == item )
@@ -7366,6 +7401,29 @@ void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
             }
         }
     }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            if( pItem->GetCount() + remcount <= count )
+            {
+                remcount += pItem->GetCount();
+                RemoveItem( INVENTORY_SLOT_BAG_0, i, update );
+
+                if(remcount >=count)
+                    return;
+            }
+            else
+            {
+                pItem->SetCount( pItem->GetCount() - count + remcount );
+                if( IsInWorld() && update )
+                    pItem->SendUpdateToPlayer( this );
+                pItem->SetState(ITEM_CHANGED, this);
+                return;
+            }
+        }
+    }
     Bag *pBag;
     ItemPrototype const *pBagProto;
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
@@ -7510,6 +7568,31 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
 
     // in inventory
     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            if( pItem->GetCount() + remcount <= count )
+            {
+                remcount += pItem->GetCount();
+                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+
+                if(remcount >=count)
+                    return;
+            }
+            else
+            {
+                pProto = pItem->GetProto();
+                ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
+                pItem->SetCount( pItem->GetCount() - count + remcount );
+                if( IsInWorld() & update )
+                    pItem->SendUpdateToPlayer( this );
+                pItem->SetState(ITEM_CHANGED, this);
+                return;
+            }
+        }
+    }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
     {
         pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetEntry() == item )
@@ -8245,6 +8328,7 @@ void Player::LoadEnchant()
     Item *pItem;
     uint16 pos;
 
+    // ignore keyring, keys can't be enchanted
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
