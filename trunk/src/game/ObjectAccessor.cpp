@@ -325,7 +325,7 @@ ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType 
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
     ObjectChangeAccumulator notifier(*obj, update_players, *this);
-    TypeContainerVisitor<ObjectChangeAccumulator, ContainerMapList<Player> > player_notifier(notifier);
+    TypeContainerVisitor<ObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(obj->GetMapId()));
     obj->ClearUpdateMask();
@@ -367,7 +367,7 @@ ObjectAccessor::Update(const uint32  &diff)
 
         uint32 map_id = 0;
         MaNGOS::ObjectUpdater updater(diff);
-        TypeContainerVisitor<MaNGOS::ObjectUpdater, TypeMapContainer<AllObjectTypes> > object_update(updater);
+        TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer > object_update(updater);
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cell(0);
         for(CreatureLocationHolderType::iterator iter=creature_locations.begin(); iter != creature_locations.end(); ++iter)
         {
@@ -449,7 +449,7 @@ void
 ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
 {
     MaNGOS::CreatureCorpseViewRemover remover(*c);
-    TypeContainerVisitor<MaNGOS::CreatureCorpseViewRemover, ContainerMapList<Player> > player_notifier(remover);
+    TypeContainerVisitor<MaNGOS::CreatureCorpseViewRemover, WorldTypeMapContainer > player_notifier(remover);
     CellPair p = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
     Cell cell = RedZone::GetZone(p);
     cell.SetNoCreate();
@@ -462,7 +462,7 @@ void
 ObjectAccessor::RemoveBonesFromPlayerView(Corpse *o)
 {
     MaNGOS::BonesViewRemover remover(*o);
-    TypeContainerVisitor<MaNGOS::BonesViewRemover, ContainerMapList<Player> > player_notifier(remover);
+    TypeContainerVisitor<MaNGOS::BonesViewRemover, WorldTypeMapContainer > player_notifier(remover);
     CellPair p = MaNGOS::ComputeCellPair(o->GetPositionX(), o->GetPositionY());
     Cell cell = RedZone::GetZone(p);
     cell.SetNoCreate();
@@ -475,7 +475,7 @@ void
 ObjectAccessor::RemovePlayerFromPlayerView(Player *pl, Player *pl2)
 {
     MaNGOS::PlayerDeadViewRemover remover(*pl,*pl2);
-    TypeContainerVisitor<MaNGOS::PlayerDeadViewRemover, ContainerMapList<Player> > player_notifier(remover);
+    TypeContainerVisitor<MaNGOS::PlayerDeadViewRemover, WorldTypeMapContainer > player_notifier(remover);
     CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
     Cell cell = RedZone::GetZone(p);
     cell.SetNoCreate();
@@ -488,7 +488,7 @@ void
 ObjectAccessor::RemoveInvisiblePlayerFromPlayerView(Player *pl, Player *pl2)
 {
     MaNGOS::PlayerInvisibilityRemover remover(*pl,*pl2);
-    TypeContainerVisitor<MaNGOS::PlayerInvisibilityRemover, ContainerMapList<Player> > player_notifier(remover);
+    TypeContainerVisitor<MaNGOS::PlayerInvisibilityRemover, WorldTypeMapContainer > player_notifier(remover);
     CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
     Cell cell = RedZone::GetZone(p);
     cell.SetNoCreate();
@@ -501,7 +501,7 @@ void
 ObjectAccessor::RemoveCreatureFromPlayerView(Player *pl, Creature *c)
 {
     MaNGOS::CreatureViewRemover remover(*pl,*c);
-    TypeContainerVisitor<MaNGOS::CreatureViewRemover, ContainerMapList<Player> > player_notifier(remover);
+    TypeContainerVisitor<MaNGOS::CreatureViewRemover, WorldTypeMapContainer > player_notifier(remover);
     CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
     Cell cell = RedZone::GetZone(p);
     cell.SetNoCreate();

@@ -3418,7 +3418,7 @@ bool ChatHandler::HandleRespawnCommand(const char* args)
     MaNGOS::RespawnDo u_do;
     MaNGOS::WorldObjectWorker<MaNGOS::RespawnDo> worker(u_do);
 
-    TypeContainerVisitor<MaNGOS::WorldObjectWorker<MaNGOS::RespawnDo>, TypeMapContainer<AllObjectTypes> > obj_worker(worker);
+    TypeContainerVisitor<MaNGOS::WorldObjectWorker<MaNGOS::RespawnDo>, GridTypeMapContainer > obj_worker(worker);
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, obj_worker, *MapManager::Instance().GetMap(pl->GetMapId()));
 

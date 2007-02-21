@@ -52,15 +52,18 @@ class Player;
 #define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
 #define MAP_HALFSIZE            (MAP_SIZE/2)
 
-typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse)    AllObjectTypes;
-typedef Grid<Player, AllObjectTypes> GridType;
+typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse)    AllGridObjectTypes;
+typedef Grid<Player, AllGridObjectTypes> GridType;
 typedef std::map<OBJECT_HANDLE, Player* > PlayerMapType;
 typedef std::map<OBJECT_HANDLE, Creature* > CreatureMapType;
 typedef std::map<OBJECT_HANDLE, GameObject* > GameObjectMapType;
 typedef std::map<OBJECT_HANDLE, DynamicObject* > DynamicObjectMapType;
 typedef std::map<OBJECT_HANDLE, Corpse* > CorpseMapType;
 
-typedef NGrid<8, Player, AllObjectTypes> NGridType;
+typedef NGrid<8, Player, AllGridObjectTypes> NGridType;
+
+typedef TypeMapContainer<AllGridObjectTypes> GridTypeMapContainer;
+typedef ContainerMapList<Player> WorldTypeMapContainer;
 
 template<const unsigned int LIMIT>
 struct MANGOS_DLL_DECL CoordPair

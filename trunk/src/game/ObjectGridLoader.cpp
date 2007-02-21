@@ -40,7 +40,7 @@ class MANGOS_DLL_DECL ObjectGridRespawnMover
 void
 ObjectGridRespawnMover::Move(GridType &grid)
 {
-    TypeContainerVisitor<ObjectGridRespawnMover, TypeMapContainer<AllObjectTypes> > mover(*this);
+    TypeContainerVisitor<ObjectGridRespawnMover, GridTypeMapContainer > mover(*this);
     grid.VisitGridObjects(mover);
 }
 
@@ -178,7 +178,7 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
 void
 ObjectGridLoader::Load(GridType &grid)
 {
-    TypeContainerVisitor<ObjectGridLoader, TypeMapContainer<AllObjectTypes> > loader(*this);
+    TypeContainerVisitor<ObjectGridLoader, GridTypeMapContainer > loader(*this);
     grid.VisitGridObjects(loader);
 }
 
@@ -192,7 +192,7 @@ void ObjectGridLoader::LoadN(void)
         for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
         {
             i_cell.data.Part.cell_y = y;
-            GridLoader<Player, AllObjectTypes> loader;
+            GridLoader<Player, AllGridObjectTypes> loader;
             loader.Load(i_grid(x, y), *this);
         }
     }
@@ -214,7 +214,7 @@ void ObjectGridUnloader::MoveToRespawnN()
 void
 ObjectGridUnloader::Unload(GridType &grid)
 {
-    TypeContainerVisitor<ObjectGridUnloader, TypeMapContainer<AllObjectTypes> > unloader(*this);
+    TypeContainerVisitor<ObjectGridUnloader, GridTypeMapContainer > unloader(*this);
     grid.VisitGridObjects(unloader);
 }
 

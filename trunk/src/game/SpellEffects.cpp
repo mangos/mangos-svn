@@ -314,7 +314,7 @@ void Spell::EffectDummy(uint32 i)
         MaNGOS::CannibalizeUnitCheck u_check(m_caster, max_range);
         MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck> searcher(result, u_check);
 
-        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck>, TypeMapContainer<AllObjectTypes> > unit_searcher(searcher);
+        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck>, GridTypeMapContainer > unit_searcher(searcher);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 
@@ -1206,7 +1206,7 @@ void Spell::EffectSummonWild(uint32 i)
 
         PetWithIdCheck u_check(m_caster, pet_entry);
         MaNGOS::UnitSearcher<PetWithIdCheck> checker((Unit*&)old_wild, u_check);
-        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, GridTypeMapContainer > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
     }
@@ -2415,7 +2415,7 @@ void Spell::EffectSummonCritter(uint32 i)
 
         PetWithIdCheck u_check(m_caster, pet_entry);
         MaNGOS::UnitSearcher<PetWithIdCheck> checker(old_critter, u_check);
-        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, GridTypeMapContainer > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
     }

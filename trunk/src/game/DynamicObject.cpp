@@ -83,8 +83,8 @@ void DynamicObject::Update(uint32 p_time)
 
     MaNGOS::DynamicObjectUpdater notifier(*this);
 
-    TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, ContainerMapList<Player> > player_notifier(notifier);
-    TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+    TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, WorldTypeMapContainer > player_notifier(notifier);
+    TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, GridTypeMapContainer > object_notifier(notifier);
 
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
