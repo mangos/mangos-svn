@@ -96,6 +96,7 @@ template<class OBJECT_TYPES>
 class MANGOS_DLL_DECL TypeMapContainer
 {
     public:
+        template<class SPECIFIC_TYPE> size_t Count() const { return MaNGOS::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
 
         template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl) { return MaNGOS::Find(i_elements, hdl,(SPECIFIC_TYPE*)NULL); }
 

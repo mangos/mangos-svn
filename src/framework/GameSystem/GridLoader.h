@@ -36,8 +36,9 @@
 
 template
 <
-class OBJECT,
-class OBJECT_TYPES
+class ACTIVE_OBJECT,
+class WORLD_OBJECT_TYPES,
+class GRID_OBJECT_TYPES
 >
 class MANGOS_DLL_DECL GridLoader
 {
@@ -46,7 +47,7 @@ class MANGOS_DLL_DECL GridLoader
         /** Loads the grid
          */
         template<class LOADER>
-            void Load(Grid<OBJECT, OBJECT_TYPES> &grid, LOADER &loader)
+            void Load(Grid<ACTIVE_OBJECT,WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES> &grid, LOADER &loader)
         {
             grid.LockGrid();
             loader.Load(grid);
@@ -56,7 +57,7 @@ class MANGOS_DLL_DECL GridLoader
         /** Unloads the grid
          */
         template<class UNLOADER>
-            void Unload(Grid<OBJECT, OBJECT_TYPES> &grid, UNLOADER &unloader)
+            void Unload(Grid<ACTIVE_OBJECT,WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES> &grid, UNLOADER &unloader)
         {
             grid.LockGrid();
             unloader.Unload(grid);

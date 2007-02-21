@@ -41,7 +41,7 @@ void
 ObjectGridRespawnMover::Move(GridType &grid)
 {
     TypeContainerVisitor<ObjectGridRespawnMover, GridTypeMapContainer > mover(*this);
-    grid.VisitGridObjects(mover);
+    grid.Visit(mover);
 }
 
 void
@@ -179,7 +179,7 @@ void
 ObjectGridLoader::Load(GridType &grid)
 {
     TypeContainerVisitor<ObjectGridLoader, GridTypeMapContainer > loader(*this);
-    grid.VisitGridObjects(loader);
+    grid.Visit(loader);
 }
 
 void ObjectGridLoader::LoadN(void)
@@ -192,7 +192,7 @@ void ObjectGridLoader::LoadN(void)
         for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
         {
             i_cell.data.Part.cell_y = y;
-            GridLoader<Player, AllGridObjectTypes> loader;
+            GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> loader;
             loader.Load(i_grid(x, y), *this);
         }
     }
@@ -215,7 +215,7 @@ void
 ObjectGridUnloader::Unload(GridType &grid)
 {
     TypeContainerVisitor<ObjectGridUnloader, GridTypeMapContainer > unloader(*this);
-    grid.VisitGridObjects(unloader);
+    grid.Visit(unloader);
 }
 
 template<class T>

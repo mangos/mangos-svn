@@ -36,18 +36,19 @@
 #include "TypeContainerVisitor.h"
 
 // forward declaration
-template<class T, class O> class GridLoader;
+template<class A, class T, class O> class GridLoader;
 
 template
 <
-class OBJECT,
-class OBJECT_TYPES,
-class ThreadModel = MaNGOS::SingleThreaded<OBJECT>
+class ACTIVE_OBJECT,
+class WORLD_OBJECT_TYPES,
+class GRID_OBJECT_TYPES,
+class ThreadModel = MaNGOS::SingleThreaded<ACTIVE_OBJECT>
 >
 class MANGOS_DLL_DECL Grid
 {
     // allows the GridLoader to access its internals
-    template<class T, class O> friend class GridLoader;
+    template<class A, class T, class O> friend class GridLoader;
     public:
 
         /** destructor to clean up its resources. This includes unloading the
@@ -57,16 +58,18 @@ class MANGOS_DLL_DECL Grid
 
         /** an object of interested enters the grid
          */
-        void AddObject(OBJECT *obj, OBJECT_HANDLE hdl) { i_objects._element[hdl] = obj; }
+        template<class SPECIFIC_OBJECT> bool AddWorldObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
+        {
+            return i_objects.template insert<SPECIFIC_OBJECT>(hdl, obj);
+        }
 
         /** an object of interested exits the grid
          */
-        void RemoveObject(OBJECT *obj, OBJECT_HANDLE hdl)
+        template<class SPECIFIC_OBJECT> bool RemoveWorldObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            typename std::map<OBJECT_HANDLE, OBJECT *>::iterator iter= i_objects._element.find(hdl);
-            if( iter != i_objects._element.end() )
-                i_objects._element.erase(iter);
+            return i_objects.template remove<SPECIFIC_OBJECT>(obj, hdl);
         }
+
 
         /** Refreshes/update the grid. This required for remote grids.
          */
@@ -82,23 +85,23 @@ class MANGOS_DLL_DECL Grid
 
         /** Grid visitor for grid objects
          */
-        template<class T> void VisitGridObjects(TypeContainerVisitor<T, TypeMapContainer<OBJECT_TYPES> > &visitor)
+        template<class T> void Visit(TypeContainerVisitor<T, TypeMapContainer<GRID_OBJECT_TYPES> > &visitor)
         {
             visitor.Visit(i_container);
         }
 
-        /** Grid visitor for object of interested
+        /** Grid visitor for world objects
          */
-        template<class T> void VisitObjects(TypeContainerVisitor<T, ContainerMapList<OBJECT> > &visitor)
+        template<class T> void Visit(TypeContainerVisitor<T, TypeMapContainer<WORLD_OBJECT_TYPES> > &visitor)
         {
             visitor.Visit(i_objects);
         }
 
         /** Returns the number of object within the grid.
          */
-        unsigned int ObjectsInGrid(void) const { return i_objects._element.size(); }
+        unsigned int ActiveObjectsInGrid(void) const { return i_objects.Count<ACTIVE_OBJECT>(); }
 
-        /** Accessors: Returns a specific type of object in the OBJECT_TYPES
+        /** Accessors: Returns a specific type of object in the GRID_OBJECT_TYPES
          */
         template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
         template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
@@ -116,7 +119,7 @@ class MANGOS_DLL_DECL Grid
         typedef typename ThreadModel::Lock Guard;
         typedef typename ThreadModel::VolatileType VolatileType;
 
-        TypeMapContainer<OBJECT_TYPES> i_container;
-        ContainerMapList<OBJECT> i_objects;
+        TypeMapContainer<GRID_OBJECT_TYPES> i_container;
+        TypeMapContainer<WORLD_OBJECT_TYPES> i_objects;
 };
 #endif

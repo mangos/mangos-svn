@@ -65,7 +65,7 @@ class MANGOS_DLL_DECL ObjectGridUnloader
             {
                 for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
                 {
-                    GridLoader<Player, AllGridObjectTypes> loader;
+                    GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> loader;
                     loader.Unload(i_grid(x, y), *this);
                 }
             }
@@ -77,5 +77,5 @@ class MANGOS_DLL_DECL ObjectGridUnloader
         NGridType &i_grid;
 };
 
-typedef GridLoader<Player, AllGridObjectTypes> GridLoaderType;
+typedef GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> GridLoaderType;
 #endif
