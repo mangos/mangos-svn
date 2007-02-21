@@ -27,6 +27,7 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "GossipDef.h"
+#include "RedZoneDistrict.h"
 
 Corpse::Corpse( CorpseType type ) : WorldObject()
 {
@@ -69,6 +70,8 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
     SetFloatValue( CORPSE_FIELD_FACING, ang );
     SetUInt64Value( CORPSE_FIELD_OWNER, owner->GetGUID() );
 
+    m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
+
     return true;
 }
 
@@ -98,8 +101,9 @@ void Corpse::SaveToDB()
     sDatabase.CommitTransaction();
 }
 
-void Corpse::DeleteFromWorld(bool remove)
+void Corpse::DeleteBonnesFromWorld()
 {
+    assert(GetType()==CORPSE_BONES);
     ObjectAccessor::Instance().RemoveBonesFromPlayerView(this);
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
     RemoveFromWorld();
@@ -130,7 +134,7 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
-        result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse` WHERE `guid` = '%u'",guid);
+        result = sDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse` WHERE `guid` = '%u'",guid);
 
     if( ! result )
     {
@@ -139,7 +143,20 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
     }
 
     Field *fields = result->Fetch();
-    //uint64 guid = fields[0].GetUInt64();
+
+    if(!LoadFromDB(guid,fields))
+    {
+        if (!external) delete result;
+        return false;
+    }
+
+    if (!external) delete result;
+    return true;
+}
+
+bool Corpse::LoadFromDB(uint32 guid, Field *fields)
+{
+    // SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse`
     float positionX = fields[0].GetFloat();
     float positionY = fields[1].GetFloat();
     float positionZ = fields[2].GetFloat();
@@ -151,15 +168,12 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
     if(!LoadValues( fields[5].GetString() ))
     {
         sLog.outError("ERROR: Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
-        if (!external) delete result;
         return false;
     }
 
     // place
     SetMapId(mapid);
     Relocate(positionX,positionY,positionZ,ort);
-
-    if (!external) delete result;
 
     if(!IsPositionValid())
     {
@@ -169,34 +183,9 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
 
     // set before return to prevent attempting remove Corpse (CORPSE_RESURRECTABLE) from World at Load fail
     m_type = (bones == 0) ? CORPSE_RESURRECTABLE : CORPSE_BONES;
+    m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
 
     return true;
-}
-
-void Corpse::AddToWorld()
-{
-    Object::AddToWorld();
-
-    if(GetType() == CORPSE_RESURRECTABLE)
-    {
-        ObjectAccessor::Instance().AddCorpse(this);
-
-        if(Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID()))
-        {
-            if(player->isAlive())
-                ConvertCorpseToBones();
-            else
-                UpdateForPlayer(player,true);
-        }
-    }
-}
-
-void Corpse::RemoveFromWorld()
-{
-    Object::RemoveFromWorld();
-
-    if(GetType() == CORPSE_RESURRECTABLE)
-        ObjectAccessor::Instance().RemoveCorpse(this);
 }
 
 void Corpse::UpdateForPlayer(Player* player, bool first)
@@ -228,6 +217,13 @@ void Corpse::ConvertCorpseToBones()
 
     DEBUG_LOG("Deleting Corpse and swpaning bones.\n");
 
+    // check if grid loaded where corpse placed
+    bool loaded = !MapManager::Instance().GetMap(GetMapId())->IsRemovalGrid(GetPositionX(),GetPositionY());
+
+    // remove resurrectable corpse from grid object registry
+    if(loaded)
+        MapManager::Instance().GetMap(GetMapId())->Remove(this,false);
+
     // remove corpse from player_guid -> corpse map
     ObjectAccessor::Instance().RemoveCorpse(this);
 
@@ -249,10 +245,7 @@ void Corpse::ConvertCorpseToBones()
     // add bones to DB
     SaveToDB();
 
-    if(player)
-    {
-        WorldPacket data(SMSG_DESTROY_OBJECT, 8);
-        data << (uint64)GetGUID();
-        player->GetSession()->SendPacket(&data);
-    }
+    // add bones in grid store
+    if(loaded)
+        MapManager::Instance().GetMap(GetMapId())->Add(this);
 }

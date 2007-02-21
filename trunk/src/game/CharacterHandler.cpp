@@ -487,7 +487,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     // Place charcter in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();
-    pCurrChar->LoadPet();
+
+    // Load pet if any and player is alive
+    if(pCurrChar->isAlive())
+        pCurrChar->LoadPet();
+
     // show time before shutdown if shudown planned.
     if(sWorld.IsShutdowning())
         sWorld.ShutdownMsg(true,pCurrChar);

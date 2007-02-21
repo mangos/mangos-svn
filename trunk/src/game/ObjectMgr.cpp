@@ -2311,3 +2311,48 @@ bool ObjectMgr::canStackSpellRank(SpellEntry const *spellInfo)
     }
     return false;
 }
+
+void ObjectMgr::LoadCorpses()
+{
+    uint32 count = 0;
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`guid` FROM `corpse` WHERE `bones_flag` = 0");
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u corpses", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        bar.step();
+
+        Field *fields = result->Fetch();
+
+        uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
+
+        Corpse* corpse = new Corpse();
+        if(!corpse->LoadFromDB(guid,fields))
+        {
+            delete corpse;
+            continue;
+        }
+
+        ObjectAccessor::Instance().AddCorpse(corpse);
+
+        count++;
+    }
+    while (result->NextRow());
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u corpses", count );
+}
+

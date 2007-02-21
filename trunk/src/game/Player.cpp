@@ -963,21 +963,25 @@ void Player::BuildEnumData( WorldPacket * p_data )
         uint32 petLevel   = 0;
         uint32 petFamily  = 0;
 
-        QueryResult *result = sDatabase.PQuery("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'", GetGUIDLow() );
-        if(result)
+        // show pet at selection character in character list  only for non-ghost character
+        if(isAlive())
         {
-            Field* fields = result->Fetch();
-
-            uint32 entry = fields[0].GetUInt32();
-            CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
-            if(cInfo)
+            QueryResult *result = sDatabase.PQuery("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'", GetGUIDLow() );
+            if(result)
             {
-                petDisplayId = fields[1].GetUInt32();
-                petLevel     = fields[2].GetUInt32();
-                petFamily    = cInfo->family;
-            }
+                Field* fields = result->Fetch();
 
-            delete result;
+                uint32 entry = fields[0].GetUInt32();
+                CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
+                if(cInfo)
+                {
+                    petDisplayId = fields[1].GetUInt32();
+                    petLevel     = fields[2].GetUInt32();
+                    petFamily    = cInfo->family;
+                }
+
+                delete result;
+            }
         }
 
         *p_data << (uint32)petDisplayId;
@@ -3015,6 +3019,8 @@ Corpse* Player::CreateCorpse()
 
     // register for player, but not show
     corpse->AddToWorld();
+    ObjectAccessor::Instance().AddCorpse(corpse);
+
     return corpse;
 }
 
@@ -3032,7 +3038,7 @@ void Player::SpawnCorpseBones()
 
 Corpse* Player::GetCorpse() const
 {
-    return ObjectAccessor::Instance().GetCorpseForPlayer(*this);
+    return ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetGUID());
 }
 
 void Player::DurabilityLossAll(double percent)
@@ -9767,10 +9773,13 @@ bool Player::MinimalLoadFromDB( uint32 guid )
     Relocate(fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
     SetMapId(fields[5].GetUInt32());
 
-    for (int i = 0; i < MAX_QUEST_LOG_SIZE; i++)
+    delete result;
+
+    for (int i = 0; i < PLAYER_SLOTS_COUNT; i++)
         m_items[i] = NULL;
 
-    delete result;
+    if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
+        m_deathState = DEAD;
 
     return true;
 }
@@ -9976,10 +9985,10 @@ bool Player::LoadFromDB( uint32 guid )
     // reserve some flags + ad ghost flag
     uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & ( PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM );
 
-    if( HasFlag(PLAYER_FLAGS, 8) )
+    if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM) )
         SetUInt32Value(PLAYER_FLAGS, 0 | old_safe_flags  );
 
-    if( HasFlag(PLAYER_FLAGS, 0x11) )
+    if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
 
     _LoadTaxiMask( fields[11].GetString() );

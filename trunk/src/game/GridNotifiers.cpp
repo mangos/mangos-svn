@@ -115,6 +115,49 @@ VisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 }
 
 void
+MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        // Invisibility for gms
+        if(iter->second != &i_player)
+        {
+            switch(i_player.GetUpdateVisibility())
+            {
+                case VISIBLE_SET_INVISIBLE:
+                {
+                    ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
+                    iter->second->m_DetectInvTimer = 1;
+                }
+                break;
+                case VISIBLE_SET_INVISIBLE_FOR_GROUP:
+                    if (!iter->second->IsGroupVisibleFor(&i_player))
+                    {
+                        ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
+                        iter->second->m_DetectInvTimer = 1;
+                    }
+                    break;
+                case VISIBLE_SET_VISIBLE:
+                    i_player.SendUpdateToPlayer(iter->second);
+                    break;
+            }
+
+            // Detect invisible pjs
+            if (i_player.m_enableDetect && iter->second->GetVisibility() == VISIBILITY_GROUP && !iter->second->IsGroupVisibleFor(&i_player))
+            {
+                if(i_player.IsWithinDist(iter->second, 20))
+                    i_player.InvisiblePjsNear.push_back(iter->second);
+            }
+
+            // Reveal Invisible Pjs
+            if (iter->second == i_player.m_DiscoveredPj)
+                iter->second->SendUpdateToPlayer(&i_player);
+        }
+    }
+}
+
+
+void
 NotVisibleNotifier::Notify()
 {
     if( i_data.HasData() )

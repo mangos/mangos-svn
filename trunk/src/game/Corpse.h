@@ -21,6 +21,7 @@
 
 #include "Object.h"
 #include "Database/DatabaseEnv.h"
+#include "GridDefines.h"
 
 enum CorpseType
 {
@@ -43,12 +44,10 @@ class Corpse : public WorldObject
 
         void SaveToDB();
         bool LoadFromDB(uint32 guid, QueryResult *result = NULL);
+        bool LoadFromDB(uint32 guid, Field *fields);
 
-        void DeleteFromWorld(bool remove);
+        void DeleteBonnesFromWorld();
         void DeleteFromDB(bool inner_transaction = true);
-
-        void AddToWorld();
-        void RemoveFromWorld();
 
         uint64 const& GetOwnerGUID() const { return GetUInt64Value(CORPSE_FIELD_OWNER); }
 
@@ -61,8 +60,10 @@ class Corpse : public WorldObject
         CorpseType GetType() const { return m_type; }
         void ConvertCorpseToBones();
 
+        GridPair const& GetGrid() const { return m_grid; }
     private:
         CorpseType m_type;
         time_t m_time;
+        GridPair m_grid;                                    // gride for corpse position for fast search
 };
 #endif

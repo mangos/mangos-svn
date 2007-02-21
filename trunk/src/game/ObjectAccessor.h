@@ -26,6 +26,8 @@
 #include "ByteBuffer.h"
 #include "UpdateData.h"
 
+#include "GridDefines.h"
+
 #include <set>
 
 class Creature;
@@ -54,8 +56,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);
         Creature* GetCreature(WorldObject const &, uint64);
-        Corpse*   GetCorpse(Unit const &u, uint64 guid);
-        Corpse*   GetCorpse(float x, float y, uint32 mapid, uint64 guid);
         Unit* GetUnit(WorldObject const &, uint64);
         Player* GetPlayer(Unit const &, uint64);
         GameObject* GetGameObject(Unit const &, uint64);
@@ -84,9 +84,10 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         void Update(const uint32 &diff);
 
-        Corpse* GetCorpseForPlayer(Player const &);
+        Corpse* GetCorpseForPlayerGUID(uint64 guid);
         void RemoveCorpse(Corpse *corpse);
         void AddCorpse(Corpse *corpse);
+        void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid);
 
         bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
@@ -100,11 +101,12 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
             ObjectAccessor &i_accessor;
             ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d, ObjectAccessor &a) : i_updateDatas(d), i_object(obj), i_accessor(a) {}
             void Visit(std::map<OBJECT_HANDLE, Player *> &);
+            template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
         };
 
         friend struct ObjectChangeAccumulator;
         PlayersMapType        i_players;
-        Player2CorpsesMapType i_corpse;
+        Player2CorpsesMapType i_player2corpse;
 
         typedef ZThread::FastMutex LockType;
         typedef MaNGOS::GeneralLock<LockType > Guard;
@@ -130,6 +132,7 @@ namespace MaNGOS
         ObjectAccessor::UpdateDataMapType &i_updatePlayers;
         BuildUpdateForPlayer(Player &player, ObjectAccessor::UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
         void Visit(std::map<OBJECT_HANDLE, Player *> &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL CreatureCorpseViewRemover
@@ -137,6 +140,7 @@ namespace MaNGOS
         Creature &i_creature;
         CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL BonesViewRemover
@@ -144,6 +148,7 @@ namespace MaNGOS
         Object &i_objects;
         BonesViewRemover(Object &o) : i_objects(o) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL PlayerDeadViewRemover
@@ -152,6 +157,7 @@ namespace MaNGOS
         Player &i_player2;
         PlayerDeadViewRemover(Player &pl, Player &pl2) : i_player(pl), i_player2(pl2) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL PlayerInvisibilityRemover
@@ -160,6 +166,7 @@ namespace MaNGOS
         Player &i_player2;
         PlayerInvisibilityRemover(Player &pl, Player &pl2) : i_player(pl), i_player2(pl2) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL CreatureViewRemover
@@ -168,6 +175,7 @@ namespace MaNGOS
         Creature &i_creature;
         CreatureViewRemover(Player &pl, Creature &c) : i_player(pl), i_creature(c) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 }
 #endif

@@ -579,7 +579,7 @@ namespace MaNGOS
         Spell &i_spell;
         const uint32& i_index;
         SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i) : i_data(data), i_spell(spell), i_index(i) {}
-        inline void Visit(PlayerMapType &m)
+        void Visit(PlayerMapType &m)
         {
             float radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
 
@@ -595,6 +595,7 @@ namespace MaNGOS
                     i_data.push_back(itr->second);
             }
         }
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL SpellNotifierCreatureAndPlayer

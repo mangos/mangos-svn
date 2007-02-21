@@ -371,6 +371,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading pet level stats..." );
     objmgr.LoadPetLevelInfo();
 
+    sLog.outString( "Loading Player Corpses..." );
+    objmgr.LoadCorpses();
+
     objmgr.SetHighestGuids();
 
     sLog.outString( "Loading Loot Tables..." );
@@ -409,7 +412,6 @@ void World::SetInitialWorldSettings()
     // global event to erase corpses/bones
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
-    // need good tests on windows
     AddEvent(&HandleCorpsesErase,NULL,20*MINUTE*1000,false,true);
 }
 

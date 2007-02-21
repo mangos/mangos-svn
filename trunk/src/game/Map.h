@@ -92,6 +92,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void Add(Player *);
         void Remove(Player *, bool);
+        void Add(Corpse *);
+        void Remove(Corpse *, bool);
         template<class T> void Add(T *);
         template<class T> void Remove(T *, bool);
         template<class T> bool Find(T *) const;

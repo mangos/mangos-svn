@@ -52,8 +52,8 @@ class Player;
 #define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
 #define MAP_HALFSIZE            (MAP_SIZE/2)
 
-typedef TYPELIST_1(Player)                                      AllWorldObjectTypes;
-typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse) AllGridObjectTypes;
+typedef TYPELIST_2(Player, Corpse/*resurrectable*/)                      AllWorldObjectTypes; 
+typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse/*Bones*/) AllGridObjectTypes;
 typedef Grid<Player, AllWorldObjectTypes,AllGridObjectTypes> GridType;
 typedef std::map<OBJECT_HANDLE, Player* > PlayerMapType;
 typedef std::map<OBJECT_HANDLE, Creature* > CreatureMapType;
