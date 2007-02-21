@@ -98,8 +98,6 @@ class ObjectMgr
 
         typedef HM_NAMESPACE::hash_map<uint32, Item*> ItemMap;
 
-        typedef HM_NAMESPACE::hash_map<uint32, Player*> PlayerMap;
-
         typedef std::set< Group * > GroupSet;
         typedef std::set< Guild * > GuildSet;
 
@@ -265,6 +263,7 @@ class ObjectMgr
         void LoadPlayerInfo();
         void LoadPetLevelInfo();
         void LoadPetNames();
+        void LoadCorpses();
 
         std::string GeneratePetName(uint32 entry);
 

@@ -41,6 +41,7 @@ namespace MaNGOS
     {
         explicit PlayerNotifier(Player &pl) : i_player(pl) {}
         void Visit(PlayerMapType &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
         void BuildForMySelf(void);
         Player &i_player;
     };
@@ -55,7 +56,6 @@ namespace MaNGOS
         void Notify(void);
 
         #ifdef WIN32
-
         template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
         template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
         #endif
@@ -65,11 +65,8 @@ namespace MaNGOS
     {
         Player &i_player;
         explicit VisibleChangesNotifier(Player &player) : i_player(player) {}
-        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
-
-        #ifdef WIN32
-        template<> void VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
-        #endif
+        void Visit(std::map<OBJECT_HANDLE, Player *> &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL NotVisibleNotifier
@@ -92,6 +89,7 @@ namespace MaNGOS
         WorldObject &i_object;
         explicit ObjectVisibleNotifier(WorldObject &obj) : i_object(obj) {}
         void Visit(PlayerMapType &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL ObjectNotVisibleNotifier
@@ -99,6 +97,7 @@ namespace MaNGOS
         WorldObject &i_object;
         explicit ObjectNotVisibleNotifier(WorldObject &obj) : i_object(obj) {}
         void Visit(PlayerMapType &);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL GridUpdater
@@ -128,6 +127,7 @@ namespace MaNGOS
         bool i_ownTeamOnly;
         MessageDeliverer(Player &pl, WorldPacket *msg, bool to_self, bool ownTeamOnly) : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly) {}
         void Visit(PlayerMapType &m);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL ObjectMessageDeliverer
@@ -136,6 +136,7 @@ namespace MaNGOS
         WorldPacket *i_message;
         ObjectMessageDeliverer(Object &obj, WorldPacket *msg) : i_object(obj), i_message(msg) {}
         void Visit(PlayerMapType &m);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL CreatureVisibleMovementNotifier
@@ -143,6 +144,7 @@ namespace MaNGOS
         Creature &i_creature;
         explicit CreatureVisibleMovementNotifier(Creature &creature) : i_creature(creature) {}
         void Visit(PlayerMapType &m);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL CreatureNotVisibleMovementNotifier
@@ -150,6 +152,7 @@ namespace MaNGOS
         Creature &i_creature;
         explicit CreatureNotVisibleMovementNotifier(Creature &creature) : i_creature(creature) {}
         void Visit(PlayerMapType &m);
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
 
     struct MANGOS_DLL_DECL ObjectUpdater
@@ -503,7 +506,6 @@ namespace MaNGOS
 
     template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void VisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
-    template<> void VisibleChangesNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void NotVisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);

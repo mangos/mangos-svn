@@ -48,18 +48,6 @@ ObjectAccessor::GetCreature(WorldObject const &u, uint64 guid)
     return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<Creature>(u, guid);
 }
 
-Corpse*
-ObjectAccessor::GetCorpse(Unit const &u, uint64 guid)
-{
-    return GetCorpse(u.GetPositionX(), u.GetPositionY(), u.GetMapId(), guid);
-}
-
-Corpse*
-ObjectAccessor::GetCorpse(float x, float y, uint32 mapid, uint64 guid)
-{
-    return MapManager::Instance().GetMap(mapid)->GetObjectNear<Corpse>(x, y, guid);
-}
-
 Unit*
 ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
 {
@@ -305,12 +293,12 @@ ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_
 }
 
 Corpse*
-ObjectAccessor::GetCorpseForPlayer(Player const &player)
+ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
 {
     Guard guard(i_corpseGuard);
 
-    Player2CorpsesMapType::iterator iter = i_corpse.find(player.GetGUID());
-    if( iter == i_corpse.end() ) return NULL;
+    Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
+    if( iter == i_player2corpse.end() ) return NULL;
 
     assert(iter->second->GetType() == CORPSE_RESURRECTABLE);
 
@@ -337,9 +325,9 @@ ObjectAccessor::RemoveCorpse(Corpse *corpse)
     assert(corpse && corpse->GetType() == CORPSE_RESURRECTABLE);
 
     Guard guard(i_corpseGuard);
-    Player2CorpsesMapType::iterator iter = i_corpse.find(corpse->GetOwnerGUID());
-    if( iter != i_corpse.end() )
-        i_corpse.erase(iter);
+    Player2CorpsesMapType::iterator iter = i_player2corpse.find(corpse->GetOwnerGUID());
+    if( iter != i_player2corpse.end() )
+        i_player2corpse.erase(iter);
 }
 
 void
@@ -348,8 +336,17 @@ ObjectAccessor::AddCorpse(Corpse *corpse)
     assert(corpse && corpse->GetType() == CORPSE_RESURRECTABLE);
 
     Guard guard(i_corpseGuard);
-    assert(i_corpse.find(corpse->GetOwnerGUID()) == i_corpse.end());
-    i_corpse[corpse->GetOwnerGUID()] = corpse;
+    assert(i_player2corpse.find(corpse->GetOwnerGUID()) == i_player2corpse.end());
+    i_player2corpse[corpse->GetOwnerGUID()] = corpse;
+}
+
+void
+ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid)
+{
+    Guard guard(i_corpseGuard);
+    for(Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
+        if(iter->second->GetGrid()==gridpair)
+            grid.AddWorldObject(iter->second,iter->second->GetGUID());
 }
 
 void

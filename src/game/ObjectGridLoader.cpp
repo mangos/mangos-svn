@@ -168,10 +168,12 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
     CellPair cell_pair(x,y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+    // Load bones to grid store
     QueryResult *result = sDatabase.PQuery(
         "SELECT `corpse`.`position_x`,`corpse`.`position_y`,`position_z`,`orientation`,`corpse`.`map`,`data`,`bones_flag`,`corpse`.`guid` "
         "FROM `corpse` LEFT JOIN `corpse_grid` ON `corpse`.`guid` = `corpse_grid`.`guid` "
-        "WHERE `grid` = '%u' AND `cell` = '%u' AND `corpse_grid`.`map` = '%u'", i_grid.GetGridId(), cell_id, i_mapId);
+        "WHERE `grid` = '%u' AND `cell` = '%u' AND `corpse_grid`.`map` = '%u' AND `bones_flag` = 1", i_grid.GetGridId(), cell_id, i_mapId);
     LoadHelper(result, cell_pair, m, i_corpses);
 }
 

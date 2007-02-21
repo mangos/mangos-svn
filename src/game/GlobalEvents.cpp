@@ -35,7 +35,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 {
     ///- Get the list of eligible corpses/bones to be removed
     //No SQL injection (uint32 and enum)
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`map` FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`map`,`player` FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
 
     if(result)
     {
@@ -46,38 +46,22 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             float positionX = fields[1].GetFloat();
             float positionY = fields[2].GetFloat();
             uint32 mapid    = fields[3].GetUInt32();
+            uint64 player_guid = MAKE_GUID(fields[4].GetUInt32(),HIGHGUID_PLAYER);
 
             uint64 guid = MAKE_GUID(guidlow,HIGHGUID_CORPSE);
 
             sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,mapid);
 
-            ///- If the map where the corpse/bones is loaded
-            if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))
+            /// Resurrectable - convert corpses to bones
+            if(type==CORPSE_RESURRECTABLE)
             {
-                ///- convert corpses to bones
-                if(type==CORPSE_RESURRECTABLE)
-                {
-                    Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
-                    if(corpse)
-                        corpse->ConvertCorpseToBones();
-                    else
-                    {
-                        sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
-                        sDatabase.BeginTransaction();
-                        sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
-                        sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
-                        sDatabase.CommitTransaction();
-                    }
-                }
-                ///- or delete bones
+                // must be in world object list
+                Corpse *corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(player_guid);
+                if(corpse)
+                    corpse->ConvertCorpseToBones();
                 else
                 {
-                    Corpse *corpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
-                    if(corpse)
-                        corpse->DeleteFromWorld(true);
-                    else
-                        sLog.outDebug("Bones %u not found in world. Delete from DB also.",guidlow);
-
+                    sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
                     sDatabase.BeginTransaction();
                     sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                     sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
@@ -85,8 +69,21 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                 }
             }
             else
+            ///- or delete bones
             {
-                ///- else just remove corpse/bones from the database
+                ///- If the map where the bones is loaded
+                if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))
+                {
+                    ///- delete bones from world
+                    Corpse *corpse = MapManager::Instance().GetMap(mapid)->GetObjectNear<Corpse>(positionX,positionY,guid);
+                    if(corpse)
+                        corpse->DeleteBonnesFromWorld();
+                    else
+                        sLog.outDebug("Bones %u not found in world. Delete from DB also.",guidlow);
+
+                }
+
+                ///- remove bones from the database
                 sDatabase.BeginTransaction();
                 sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                 sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",guidlow);
