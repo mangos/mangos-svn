@@ -99,7 +99,7 @@ class MANGOS_DLL_DECL Grid
 
         /** Returns the number of object within the grid.
          */
-        unsigned int ActiveObjectsInGrid(void) const { return i_objects.Count<ACTIVE_OBJECT>(); }
+        unsigned int ActiveObjectsInGrid(void) const { return i_objects.template Count<ACTIVE_OBJECT>(); }
 
         /** Accessors: Returns a specific type of object in the GRID_OBJECT_TYPES
          */
