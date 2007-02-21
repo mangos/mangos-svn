@@ -246,7 +246,7 @@ void GameObject::Update(uint32 p_time)
         MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
         MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
 
-        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(GetMapId()));
         if (ok)

@@ -69,7 +69,7 @@ HomeMovementGenerator::_reLocate(Creature &owner) // resend clients the creature
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;
         MaNGOS::CreatureVisibleMovementNotifier notifier(owner);
-        TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, ContainerMapList<Player> > player_notifier(notifier);
+        TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, WorldTypeMapContainer > player_notifier(notifier);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(owner.GetMapId()));
     }

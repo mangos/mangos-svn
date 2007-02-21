@@ -269,8 +269,8 @@ Map::NotifyPlayerVisibility(const Cell &cell, const CellPair &cell_pair, Player 
 {
     MaNGOS::PlayerNotifier pl_notifier(*player);
     MaNGOS::VisibleNotifier obj_notifier(*player);
-    TypeContainerVisitor<MaNGOS::PlayerNotifier, ContainerMapList<Player> > player_notifier(pl_notifier);
-    TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(obj_notifier);
+    TypeContainerVisitor<MaNGOS::PlayerNotifier, WorldTypeMapContainer > player_notifier(pl_notifier);
+    TypeContainerVisitor<MaNGOS::VisibleNotifier, GridTypeMapContainer > object_notifier(obj_notifier);
 
     CellLock<ReadGuard> cell_lock(cell, cell_pair);
     cell_lock->Visit(cell_lock, player_notifier, *this);
@@ -331,7 +331,7 @@ Map::Add(T *obj)
     cell.data.Part.reserved = ALL_DISTRICT;
 
     MaNGOS::ObjectVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
-    TypeContainerVisitor<MaNGOS::ObjectVisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
+    TypeContainerVisitor<MaNGOS::ObjectVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
 
     CellLock<ReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *this);
@@ -413,7 +413,7 @@ void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool 
         return;
 
     MaNGOS::MessageDeliverer post_man(*player, msg, to_self, own_team_only);
-    TypeContainerVisitor<MaNGOS::MessageDeliverer, ContainerMapList<Player> > message(post_man);
+    TypeContainerVisitor<MaNGOS::MessageDeliverer, WorldTypeMapContainer > message(post_man);
     CellLock<ReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, message, *this);
 }
@@ -436,7 +436,7 @@ void Map::MessageBoardcast(WorldObject *obj, WorldPacket *msg)
         return;
 
     MaNGOS::ObjectMessageDeliverer post_man(*obj, msg);
-    TypeContainerVisitor<MaNGOS::ObjectMessageDeliverer, ContainerMapList<Player> > message(post_man);
+    TypeContainerVisitor<MaNGOS::ObjectMessageDeliverer, WorldTypeMapContainer > message(post_man);
     CellLock<ReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, message, *this);
 }
@@ -497,7 +497,7 @@ void Map::Remove(Player *player, bool remove)
 
     cell.data.Part.reserved = ALL_DISTRICT;
     MaNGOS::NotVisibleNotifier notifier(*player);
-    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
+    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
     CellLock<ReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *this);
     notifier.Notify();
@@ -534,7 +534,7 @@ Map::Remove(T *obj, bool remove)
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;
         MaNGOS::ObjectNotVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
-        TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
+        TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
         CellLock<ReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, player_notifier, *this);
     }
@@ -589,9 +589,9 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
 	if( player->IsBeingTeleported() )
 	    new_cell.data.Part.reserved = ALL_DISTRICT;
 
-        TypeContainerVisitor<MaNGOS::VisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
+        TypeContainerVisitor<MaNGOS::VisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
         cell_lock->Visit(cell_lock, player_notifier, *this);
-	TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+	TypeContainerVisitor<MaNGOS::VisibleNotifier, GridTypeMapContainer > object_notifier(notifier);
 	cell_lock->Visit(cell_lock, object_notifier, *this);
 	notifier.Notify();
 
@@ -599,15 +599,15 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
 
     MaNGOS::PlayerRelocationNotifier relocationNotifier(*player);
     new_cell.data.Part.reserved = ALL_DISTRICT;
-    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, TypeMapContainer<AllObjectTypes> > p2c_relocation(relocationNotifier);
+    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, GridTypeMapContainer > p2c_relocation(relocationNotifier);
     cell_lock->Visit(cell_lock, p2c_relocation, *this);
-    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > p2p_relocation(relocationNotifier);
+    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, WorldTypeMapContainer > p2p_relocation(relocationNotifier);
     cell_lock->Visit(cell_lock, p2p_relocation, *this);
 
     if (visibilityChanges)
     {
         MaNGOS::VisibleChangesNotifier visualChangesNotifier(*player);
-        TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, ContainerMapList<Player> > player_Vnotifier(visualChangesNotifier);
+        TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_Vnotifier(visualChangesNotifier);
         cell_lock->Visit(cell_lock, player_Vnotifier, *this);
     }
 
@@ -615,8 +615,8 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
         return;
 
     MaNGOS::NotVisibleNotifier notifier2(*player);
-    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, ContainerMapList<Player> > player_notifier2(notifier2);
-    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier2(notifier2);
+    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, WorldTypeMapContainer > player_notifier2(notifier2);
+    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, GridTypeMapContainer > object_notifier2(notifier2);
     cell_lock = CellLock<ReadGuard>(old_cell, old_val);
     cell_lock->Visit(cell_lock, player_notifier2, *this);
     cell_lock->Visit(cell_lock, object_notifier2, *this);
@@ -660,9 +660,9 @@ void Map::CreatureRelocationNotifying(Creature *creature, Cell new_cell, CellPai
         MaNGOS::CreatureRelocationNotifier relocationNotifier(*creature);
         new_cell.data.Part.reserved = ALL_DISTRICT;
         new_cell.SetNoCreate();                             // not trigger load unloaded grids at notifier call
-        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, ContainerMapList<Player> > c2p_relocation(relocationNotifier);
+        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, WorldTypeMapContainer > c2p_relocation(relocationNotifier);
         cell_lock->Visit(cell_lock, c2p_relocation, *this);
-        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, TypeMapContainer<AllObjectTypes> > c2c_relocation(relocationNotifier);
+        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, GridTypeMapContainer > c2c_relocation(relocationNotifier);
         cell_lock->Visit(cell_lock, c2c_relocation, *this);
     }
 }
