@@ -232,14 +232,14 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
             grid->SetGridState(GRID_STATE_ACTIVE);
 
             if( add_player && player != NULL )
-                (*grid)(cell.CellX(), cell.CellY()).AddObject(player, player->GetGUID());
+                (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(player, player->GetGUID());
             i_gridStatus[cell.GridX()] |= mask;
         }
     }
     else if( add_player )
     {
         WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).AddObject(player, player->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(player, player->GetGUID());
     }
 }
 
@@ -491,7 +491,7 @@ void Map::Remove(Player *player, bool remove)
 
     {
         WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        grid->RemoveObject(cell.CellX(), cell.CellY(), player, player->GetGUID());
+        grid->RemoveWorldObject(cell.CellX(), cell.CellY(), player, player->GetGUID());
         player->RemoveFromWorld();
     }
 
@@ -570,10 +570,10 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
             assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
 
             WriteGuard guard(i_info[old_cell.GridX()][old_cell.GridY()]->i_lock);
-            grid(old_cell.CellX(),old_cell.CellY()).RemoveObject(player, player->GetGUID());
+            grid(old_cell.CellX(),old_cell.CellY()).RemoveWorldObject(player, player->GetGUID());
 
             if( !old_cell.DiffGrid(new_cell) )
-                grid(new_cell.CellX(),new_cell.CellY()).AddObject(player, player->GetGUID());
+                grid(new_cell.CellX(),new_cell.CellY()).AddWorldObject(player, player->GetGUID());
         }
 
         if( old_cell.DiffGrid(new_cell) )

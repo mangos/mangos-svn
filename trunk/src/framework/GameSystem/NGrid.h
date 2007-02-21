@@ -36,15 +36,16 @@ typedef enum
 template
 <
 unsigned int N,
-class OBJECT,
-class OBJECT_TYPES,
-class ThreadModel = MaNGOS::SingleThreaded<OBJECT>
+class ACTIVE_OBJECT,
+class WORLD_OBJECT_TYPES,
+class GRID_OBJECT_TYPES,
+class ThreadModel = MaNGOS::SingleThreaded<ACTIVE_OBJECT>
 >
 class MANGOS_DLL_DECL NGrid
 {
     public:
 
-        typedef Grid<OBJECT, OBJECT_TYPES, ThreadModel> GridType;
+        typedef Grid<ACTIVE_OBJECT, WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES, ThreadModel> GridType;
         NGrid(uint32 id) : i_gridId(id), i_cellstate(GRID_STATE_INVALID) {}
 
         const GridType& operator()(unsigned short x, unsigned short y) const { return i_cells[x][y]; }
@@ -55,46 +56,34 @@ class MANGOS_DLL_DECL NGrid
         inline grid_state_t GetGridState(void) const { return i_cellstate; }
         inline void SetGridState(grid_state_t s) { i_cellstate = s; }
 
-        void AddObject(const uint32 x, const uint32 y, OBJECT *obj, OBJECT_HANDLE hdl)
+        template<class SPECIFIC_OBJECT> void AddWorldObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            i_cells[x][y].AddObject(obj, hdl);
+            i_cells[x][y].AddWorldObject(obj, hdl);
         }
 
-        void RemoveObject(const uint32 x, const uint32 y, OBJECT *obj, OBJECT_HANDLE hdl)
+        template<class SPECIFIC_OBJECT> void RemoveWorldObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            i_cells[x][y].RemoveObject(obj, hdl);
+            i_cells[x][y].RemoveWorldObject(obj, hdl);
         }
 
-        template<class T> void Visit(TypeContainerVisitor<T, TypeMapContainer<OBJECT_TYPES> > &visitor)
-        {
-            for(unsigned int x=0; x < N; ++x)
-                for(unsigned int y=0; y < N; ++y)
-                    i_cells[x][y].VisitGridObjects(visitor);
-        }
-
-        template<class T> void Visit(const uint32 &x, const uint32 &y, TypeContainerVisitor<T, TypeMapContainer<OBJECT_TYPES> > &visitor)
-        {
-            i_cells[x][y].VisitGridObjects(visitor);
-        }
-
-        template<class T> void Visit(TypeContainerVisitor<T, ContainerMapList<OBJECT> > &visitor)
+        template<class T, class TT> void Visit(TypeContainerVisitor<T, TypeMapContainer<TT> > &visitor)
         {
             for(unsigned int x=0; x < N; ++x)
                 for(unsigned int y=0; y < N; ++y)
-                    i_cells[x][y].VisitObjects(visitor);
+                    i_cells[x][y].Visit(visitor);
         }
 
-        template<class T> void Visit(const uint32 &x, const uint32 &y, TypeContainerVisitor<T, ContainerMapList<OBJECT> > &visitor)
+        template<class T, class TT> void Visit(const uint32 &x, const uint32 &y, TypeContainerVisitor<T, TypeMapContainer<TT> > &visitor)
         {
-            i_cells[x][y].VisitObjects(visitor);
+            i_cells[x][y].Visit(visitor);
         }
 
-        unsigned int ObjectsInGrid(void) const
+        unsigned int ActiveObjectsInGrid(void) const
         {
             unsigned int count=0;
             for(unsigned int x=0; x < N; ++x)
                 for(unsigned int y=0; y < N; ++y)
-                    count += i_cells[x][y].ObjectsInGrid();
+                    count += i_cells[x][y].ActiveObjectsInGrid();
             return count;
         }
 
@@ -110,12 +99,12 @@ class MANGOS_DLL_DECL NGrid
 
         template<class SPECIFIC_OBJECT> bool AddGridObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            return i_cells[x][y].template insert<SPECIFIC_OBJECT>(hdl, obj);
+            return i_cells[x][y].AddGridObject(hdl, obj);
         }
 
         template<class SPECIFIC_OBJECT> bool RemoveGridObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            return i_cells[x][y].template remove<SPECIFIC_OBJECT>(obj, hdl);
+            return i_cells[x][y].RemoveGridObject(obj, hdl);
         }
 
     private:
