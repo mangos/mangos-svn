@@ -2324,7 +2324,7 @@ uint32 Player::resetTalentsCost() const
         return 10*GOLD;
     else
     {
-        uint32 months = (sWorld.GetLastTickTime() - m_resetTalentsTime)/MONTH;
+        uint32 months = (sWorld.GetGameTime() - m_resetTalentsTime)/MONTH;
         if(months > 0)
         {
             // This cost will be reduced by a rate of 5 gold per month
@@ -3201,16 +3201,23 @@ void Player::ApplyDefenseBonusesMod(float value, bool apply)
 void Player::UpdateBlockPercentage()
 {
     AuraList& mModBlockPercent = GetAurasByType(SPELL_AURA_MOD_BLOCK_PERCENT);
-    for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
-        (*i)->ApplyModifier(false);
+
+    if (HasAuraType(SPELL_AURA_MOD_BLOCK_PERCENT))
+    {
+        for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
+            (*i)->ApplyModifier(false);
+    }
 
     float chance = 5 - (getLevel()*5 - GetPureDefenceSkillValue()) * 0.04;
     chance = chance < 0 ? 0 : chance;
 
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, chance);
 
-    for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
-        (*i)->ApplyModifier(true);
+    if (HasAuraType(SPELL_AURA_MOD_BLOCK_PERCENT))
+    {
+        for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
+            (*i)->ApplyModifier(true);
+    }
 
 }
 

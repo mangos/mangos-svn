@@ -27,6 +27,7 @@
 #include "SpellAuraDefines.h"
 #include "Util.h"
 #include "UpdateFields.h"
+#include "SharedDefines.h"
 
 #include <list>
 

@@ -143,9 +143,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         delete result;
     }
 
-    uint32 GameType           = sWorld.getConfig(CONFIG_GAME_TYPE);
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
-    if(GameType == 1 || GameType == 8)
+    if(sWorld.IsPvPRealm())
     {
         QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
         if(result2)

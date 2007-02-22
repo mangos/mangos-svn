@@ -440,14 +440,14 @@ void Transport::Update(uint32 p_time) {
 
         m_nextNodeTime = m_curr->first;
         
-        if (m_curr == m_WayPoints.begin() && (sWorld.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES)==0)
+        if (m_curr == m_WayPoints.begin() && (sLog.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES)==0)
             sLog.outDetail(" >>>>>>>>>>>> BEGIN <<<<<<<<<<<<<< %s", this->m_name.c_str());
 
 //        MapManager::Instance().GetMap(m_curr->second.mapid)->Add(&this); // -> // ->Add(t);        
         //MapManager::Instance().GetMap(m_curr->second.mapid)->Remove((GameObject *)this, false); // -> // ->Add(t);        
         //MapManager::Instance().GetMap(m_curr->second.mapid)->Add((GameObject *)this); // -> // ->Add(t);        
 
-        if ((sWorld.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES)==0)
+        if ((sLog.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES)==0)
             sLog.outDetail("%s moved to %f %f %f", this->m_name.c_str(), m_curr->second.x, m_curr->second.y, m_curr->second.z);
     }
 }

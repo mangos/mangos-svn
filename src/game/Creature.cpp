@@ -810,7 +810,7 @@ void Creature::generateMoneyLoot()
 
         if(diff == 0)
         {
-            loot.gold = maxgold * sWorld.getRate(RATE_DROP_MONEY);
+            loot.gold = uint32(maxgold * sWorld.getRate(RATE_DROP_MONEY));
         }
         else
             // rand() result (RAND_MAX) small for large gold loots
