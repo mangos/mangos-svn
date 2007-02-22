@@ -489,8 +489,10 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> item >> bagguid >> slot >> count;
 
+    GetPlayer()->BuyItemFromVendor(vendorguid,item,count,bagguid,slot);
+
     // cheating attempt
-    if(count < 1) count = 1;
+    /*if(count < 1) count = 1;
 
     if(!GetPlayer()->isAlive())
         return;
@@ -591,7 +593,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
         }
         return;
     }
-    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);*/
 }
 
 void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
@@ -605,8 +607,10 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> item >> count >> unk1;
 
+    GetPlayer()->BuyItemFromVendor(vendorguid,item,count,NULL_BAG,NULL_SLOT);
+
     // cheating attempt
-    if(count < 1) count = 1;
+    /*if(count < 1) count = 1;
 
     if(!GetPlayer()->isAlive())
         return;
@@ -666,7 +670,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
         }
         return;
     }
-    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);*/
 }
 
 void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )

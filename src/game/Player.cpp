@@ -11557,3 +11557,118 @@ void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool app
         ++m_forced_speed_changes[mtype];                    // register forced speed chaged for WorldSession::HandleForceSpeedChangeAck
     Unit::ApplySpeedMod(mtype,rate,forced,apply);
 }
+
+void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint64 bagguid, uint8 slot)
+{
+    // cheating attempt
+    if(count < 1) count = 1;
+
+    if(!isAlive())
+        return;
+
+    uint8 vendorslot;
+
+    ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
+    if( pProto )
+    {
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, vendorguid);
+        if( pCreature && !pCreature->IsHostileTo(this) && pCreature->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
+        {
+            vendorslot = 0;
+            for(int i = 0; i < pCreature->GetItemCount(); i++)
+            {
+                if ( pCreature->GetItemId(i) == item )
+                {
+                    vendorslot = i + 1;
+                    break;
+                }
+            }
+            if( !vendorslot )
+            {
+                SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+                return;
+            }
+            else
+                vendorslot -= 1;
+            if( pCreature->GetMaxItemCount( vendorslot ) != 0 && pCreature->GetItemCount( vendorslot ) < count )
+            {
+                SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
+                return;
+            }
+            // not check level requiremnt for normal items (PvP related bonus items is another case)
+            if(pProto->RequiredHonorRank && (GetHonorHighestRank() < pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
+            {
+                SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
+                return;
+            }
+
+            uint32 price  = pProto->BuyPrice * count;
+            if( GetMoney() < price )
+            {
+                SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+                return;
+            }
+
+            uint8 bag = 0; // init for case invalid bagGUID
+            uint16 dest = 0;
+
+            if (bagguid != NULL_BAG && slot != NULL_SLOT)
+            {
+                Bag *pBag;                                              
+                if( bagguid == GetGUID() )
+                {
+                    bag = INVENTORY_SLOT_BAG_0;
+                }
+                else
+                {
+                    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END;i++)
+                    {
+                        pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0,i);
+                        if( pBag )
+                        {
+                            if( bagguid == pBag->GetGUID() )
+                            {
+                                bag = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+                dest = ((bag << 8) | slot);
+            }
+
+            uint8 msg;
+            if( IsInventoryPos( dest ) || (bagguid == NULL_BAG && slot == NULL_SLOT) )
+            {
+                msg = CanStoreNewItem( bag, slot, dest, item, pProto->BuyCount * count, false );
+                if( msg == EQUIP_ERR_OK )
+                {
+                    ModifyMoney( -(int32)price );
+                    StoreNewItem( dest, item, pProto->BuyCount * count, true );
+                    if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
+                        pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pProto->BuyCount );
+                }
+                else
+                    SendEquipError( msg, NULL, NULL );
+            }
+            else if( IsEquipmentPos( dest ) )
+            {
+                msg = CanEquipNewItem( slot, dest, item, pProto->BuyCount * count, false );
+                if( msg == EQUIP_ERR_OK )
+                {
+                    ModifyMoney( -(int32)price );
+                    EquipNewItem( dest, item, pProto->BuyCount * count, true );
+                    if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
+                        pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pProto->BuyCount );
+                }
+                else
+                    SendEquipError( msg, NULL, NULL );
+            }
+            else
+                SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, NULL, NULL );
+
+        }
+        return;
+    }
+    SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+}
