@@ -268,7 +268,6 @@ void CliShutdown(char* command,pPrintf zprintf)
 void CliInfo(char*,pPrintf zprintf)
 {
     ///- Get the list of accounts ID logged to the realm
-    // No SQL injection. RealmID is uint32
     QueryResult *resultDB = sDatabase.Query("SELECT `name`,`account` FROM `character` WHERE `online` > 0");
 
     if (!resultDB)
@@ -626,6 +625,7 @@ void CliSetLogLevel(char*command,pPrintf zprintf)
     }
     sLog.SetLogLevel(NewLevel);
 }
+/// @}
 
 /// %Thread start
 void CliRunnable::run()
@@ -672,4 +672,4 @@ void CliRunnable::run()
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }
 #endif
-/// @}
+
