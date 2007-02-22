@@ -51,9 +51,16 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 {
     std::string membername;
     recv_data >> membername;
-    normalizePlayerName(membername);
 
-    Player *player = objmgr.GetPlayer(membername.c_str());
+    Player *player = NULL;
+
+    // attempt add selected player
+    if(membername.size()!=0)
+    {
+        normalizePlayerName(membername);
+        player = objmgr.GetPlayer(membername.c_str());
+    }
+
     Group  *group = GetPlayer()->groupInfo.group;
     bool newGroup=false;
 
