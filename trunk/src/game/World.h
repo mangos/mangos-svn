@@ -16,13 +16,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup world The World
+/// @{
+/// \file
+
 #ifndef __WORLD_H
 #define __WORLD_H
 
+#include "Common.h"
 #include "Timer.h"
 #include "Policies/Singleton.h"
-#include "SharedDefines.h"
-#include <string>
 using namespace std;
 
 class Object;
@@ -30,7 +33,10 @@ class WorldPacket;
 class WorldSession;
 class Player;
 class Weather;
+struct ScriptAction;
+struct ScriptInfo;
 
+/// Timers for different object refresh rates
 enum WorldTimers
 {
     WUPDATE_OBJECTS = 0,
@@ -40,18 +46,16 @@ enum WorldTimers
     WUPDATE_COUNT = 4
 };
 
+/// Configuration elements
 enum WorldConfigs
 {
-    CONFIG_LOG_LEVEL = 0,
-    CONFIG_LOG_WORLD,
-    CONFIG_COMPRESSION,
+    CONFIG_COMPRESSION = 0,
     CONFIG_GRID_UNLOAD,
     CONFIG_INTERVAL_SAVE,
     CONFIG_INTERVAL_GRIDCLEAN,
     CONFIG_INTERVAL_MAPUPDATE,
     CONFIG_INTERVAL_CHANGEWEATHER,
     CONFIG_PORT_WORLD,
-    CONFIG_PORT_REALM,
     CONFIG_SOCKET_SELECTTIME,
     CONFIG_GROUP_XP_DISTANCE,
     CONFIG_GROUP_XP_LEVELDIFF,
@@ -79,13 +83,7 @@ enum WorldConfigs
     CONFIG_VALUE_COUNT
 };
 
-// bitmask
-enum LogFilters
-{
-    LOG_FILTER_TRANSPORT_MOVES = 1,
-    LOG_FILTER_CREATURE_MOVES  = 2
-};
-
+/// Server rates
 enum Rates
 {
     RATE_HEALTH=0,
@@ -115,6 +113,7 @@ enum Rates
     MAX_RATES
 };
 
+/// Type of environmental damages
 enum EnviromentalDamage
 {
     DAMAGE_EXHAUSTED = 0,
@@ -125,24 +124,17 @@ enum EnviromentalDamage
     DAMAGE_FIRE = 5
 };
 
-// ServerMessages.dbc
-enum ServerMessageType
+/// Type of server
+enum RealmType
 {
-    SERVER_MSG_SHUTDOWN_TIME      = 1,
-    SERVER_MSG_RESTART_TIME       = 2,
-    SERVER_MSG_STRING             = 3,
-    SERVER_MSG_SHUTDOWN_CANCELLED = 4,
-    SERVER_MSG_RESTART_CANCELLED  = 5
+    REALM_NORMAL = 0,
+    REALM_PVP = 1,
+    REALM_NORMAL2 = 4,
+    REALM_RP = 6,
+    REALM_RPPVP = 8
 };
 
-struct ScriptInfo;
-struct ScriptAction
-{
-    Object* source;
-    Object* target;
-    ScriptInfo* script;
-};
-
+/// The World
 class World
 {
     public:
@@ -154,7 +146,9 @@ class World
         WorldSession* FindSession(uint32 id) const;
         void AddSession(WorldSession *s);
         bool RemoveSession(uint32 id);
+        /// Get the number of current active sessions
         uint32 GetSessionCount() const { return m_sessions.size(); }
+        /// Get the maximum number of parallel sessions on the server since last reboot
         uint32 GetMaxSessionCount() const { return m_maxSessionsCount; }
         Player* FindPlayerInZone(uint32 zone);
 
@@ -162,17 +156,29 @@ class World
         void AddWeather(Weather *w);
         void RemoveWeather(uint32 id);
 
+        /// Get the active session server limit
         uint32 GetPlayerLimit() const { return m_playerLimit; }
+        /// Set the active session server limit
         void SetPlayerLimit(uint32 limit) { m_playerLimit = limit; }
 
+        /// \todo Actions on m_allowMovement still to be implemented
+        /// Is movement allowed?
         bool getAllowMovement() const { return m_allowMovement; }
+        /// Allow/Disallow object movements
         void SetAllowMovement(bool allow) { m_allowMovement = allow; }
 
+        /// Set a new Message of the Day
         void SetMotd(const char *motd) { m_motd = motd; }
+        /// Get the current Message of the Day
         const char* GetMotd() const { return m_motd.c_str(); }
 
+        /// Get the path where data (dbc, maps) are stored on disk
+        std::string GetDataPath() const { return m_dataPath; }
+
+        /// What time is it?
         time_t GetGameTime() const { return m_gameTime; }
 
+        /// Get the maximum skill level a player can reach
         uint16 GetConfigMaxSkillValue() const { return getConfig(CONFIG_MAX_PLAYER_LEVEL)*5; }
 
         void SetInitialWorldSettings();
@@ -181,25 +187,29 @@ class World
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
         void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0);
         void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0);
-        void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
+        void SendServerMessage(uint32 type, const char *text = "", Player* player = NULL);
 
+        /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
         void ShutdownServ(uint32 time, bool idle = false);
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);
 
         void Update(time_t diff);
-        time_t GetLastTickTime() const { return m_Last_tick; }
 
+        /// Set a server rate (see #Rates)
         void setRate(Rates rate,float value) { rate_values[rate]=value; }
+        /// Get a server rate (see #Rates)
         float getRate(Rates rate) const { return rate_values[rate]; }
 
+        /// Set a server configuration element (see #WorldConfigs)
         void setConfig(uint32 index,uint32 value)
         {
             if(index<CONFIG_VALUE_COUNT)
                 m_configs[index]=value;
         }
 
+        /// Get a server configuration element (see #WorldConfigs)
         uint32 getConfig(uint32 index) const
         {
             if(index<CONFIG_VALUE_COUNT)
@@ -207,26 +217,25 @@ class World
             else
                 return 0;
         }
-        uint32 getLogFilter() const { return m_logFilter; }
 
-        bool IsPvPRealm() { return (MaNGOS::Singleton<World>::Instance().getConfig(CONFIG_GAME_TYPE) == 1 || MaNGOS::Singleton<World>::Instance().getConfig(CONFIG_GAME_TYPE) == 8); }
+        /// Are we on a "Player versus Player" server?
+        bool IsPvPRealm() { return (getConfig(CONFIG_GAME_TYPE) == REALM_PVP || getConfig(CONFIG_GAME_TYPE) == REALM_RPPVP); }
 
         bool KickPlayer(std::string playerName);
         void KickAll();
         bool BanAccount(std::string nameOrIP);
         bool RemoveBanAccount(std::string nameOrIP);
 
-        multimap<uint64, ScriptAction> scriptSchedule;
         void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > scripts, uint32 id, Object* source, Object* target);
-        void ScriptsProcess();
-        uint64 internalGameTime;
 
     protected:
 
-        time_t _UpdateGameTime();
+        void _UpdateGameTime();
+        void ScriptsProcess();
 
     private:
 
+        time_t m_gameTime;
         IntervalTimer m_timers[WUPDATE_COUNT];
         uint32 mail_timer;
         uint32 mail_timer_expires;
@@ -237,17 +246,16 @@ class World
         SessionMap m_sessions;
         uint32 m_maxSessionsCount;
         std::set<WorldSession*> m_kicked_sessions;
+
+        multimap<uint64, ScriptAction> scriptSchedule;
+
         float rate_values[MAX_RATES];
+        uint32 m_configs[CONFIG_VALUE_COUNT];
         uint32 m_playerLimit;
         bool m_allowMovement;
         std::string m_motd;
+        std::string m_dataPath;
 
-        time_t m_gameTime;
-
-        time_t m_nextThinkTime;
-        uint32 m_configs[CONFIG_VALUE_COUNT];
-        uint32 m_logFilter;
-        time_t m_Last_tick;
         uint32 m_ShutdownIdleMode;
         uint32 m_ShutdownTimer;
 };
@@ -256,3 +264,4 @@ extern uint32 realmID;
 
 #define sWorld MaNGOS::Singleton<World>::Instance()
 #endif
+/// @}

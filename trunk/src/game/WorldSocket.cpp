@@ -193,7 +193,7 @@ void WorldSocket::OnDelete()
     if (_session)
     {
         _session->SetSocket(0);
-        /// Session deleted from World session list at socket==0, This is only back reference from socket to session.
+        // Session deleted from World session list at socket==0, This is only back reference from socket to session.
         _session = 0;
     }
 
@@ -278,7 +278,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    /// Re-check ip locking (same check as in realmd).
+    ///- Re-check ip locking (same check as in realmd).
     if((*result)[4].GetUInt8() == 1)                        // if ip is locked
     {
         if ( strcmp((*result)[3].GetString(),GetRemoteAddress().c_str()) )
@@ -293,7 +293,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         }
     }
 
-    /// Re-check account ban (ame check as in realmd).
+    ///- Re-check account ban (ame check as in realmd).
     if((*result)[8].GetUInt8() == 1)                        // if account banned
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
@@ -322,8 +322,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
 
     ///- kick already loaded player with same account (if any) and remove session
-    /// or log in not logged player
-    /// if player is in loading and want to load again, return
+    ///- if player is in loading and want to load again, return
     if(!sWorld.RemoveSession(id))
     {
         return;

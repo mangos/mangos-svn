@@ -48,12 +48,6 @@ extern SQLStorage sItemStorage;
 extern SQLStorage sSpellProcEventStore;
 extern SQLStorage sSpellThreatStore;
 
-struct ScriptInfo;
-typedef multimap<uint32, ScriptInfo> ScriptMap;
-typedef map<uint32, ScriptMap > ScriptMapMap;
-extern ScriptMapMap sScripts;
-extern ScriptMapMap sSpellScripts;
-
 class Group;
 class Guild;
 class Path;
@@ -73,13 +67,10 @@ struct ScriptInfo
     float o;
 };
 
-#define SCRIPT_COMMAND_SAY          0
-#define SCRIPT_COMMAND_EMOTE        1
-#define SCRIPT_COMMAND_FIELD_SET    2
-#define SCRIPT_COMMAND_MOVE_TO      3
-#define SCRIPT_COMMAND_FLAG_SET     4
-#define SCRIPT_COMMAND_FLAG_REMOVE  5
-#define SCRIPT_COMMAND_TEMP_SUMMON 10
+typedef multimap<uint32, ScriptInfo> ScriptMap;
+typedef map<uint32, ScriptMap > ScriptMapMap;
+extern ScriptMapMap sScripts;
+extern ScriptMapMap sSpellScripts;
 
 struct PetLevelInfo
 {

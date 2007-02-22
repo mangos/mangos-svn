@@ -42,22 +42,14 @@
 # define _FULLVERSION "/" _VERSION " (Win32)"
 # define _MANGOSD_CONFIG  "mangosd.conf"
 # define _REALMD_CONFIG   "realmd.conf"
-# define _MANGOSD_DATA "data/"
 #else
 # define _FULLVERSION "/" _VERSION " (Unix)"
 # define _MANGOSD_CONFIG  "@MANGOSD_CONFIG@"
 # define _REALMD_CONFIG  "@REALMD_CONFIG@"
-# define _MANGOSD_DATA "@MANGOSD_DATA@"
 #endif
 
-#define DEFAULT_LOOP_TIME 0                                 /* 0 millisecs - instant */
-#define DEFAULT_LOG_LEVEL 0
 #define DEFAULT_PLAYER_LIMIT 100
 #define DEFAULT_WORLDSERVER_PORT 8085                       //8129
 #define DEFAULT_REALMSERVER_PORT 3724
-#define DEFAULT_HOST "127.0.0.1"
-#define DEFAULT_REGEN_RATE 0.15
-#define DEFAULT_XP_RATE 1
-#define DEFAULT_DROP_RATE 1
 #define DEFAULT_SOCKET_SELECT_TIME 10000
 #endif

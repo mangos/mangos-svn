@@ -48,16 +48,3 @@ namespace AIRegistry
     }
 }
 
-namespace MaNGOS
-{
-    namespace Game
-    {
-        void Initialize()
-        {
-            MapManager::Instance().Initialize();
-            RedZone::Initialize();
-            AIRegistry::Initialize();
-            WaypointMovementGenerator::Initialize();
-        }
-    }
-}

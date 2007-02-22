@@ -47,17 +47,9 @@ bool FileExists(const char * fn)
 
 bool Map::ExistMAP(uint32 mapid,int x,int y)
 {
-    std::string dataPath="./";
-
-    if(sConfig.GetString("DataDir",&dataPath))
-    {
-        if(dataPath.at(dataPath.length()-1)!='/')
-            dataPath.append("/");
-    }
-
-    int len = dataPath.length()+strlen("maps/%03u%02u%02u.map")+1;
+    int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
     char* tmp = new char[len];
-    snprintf(tmp, len, (char *)(dataPath+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
+    snprintf(tmp, len, (char *)(sWorld.GetDataPath()+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
 
     FILE *pf=fopen(tmp,"rb");
 
@@ -730,7 +722,7 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
     {
         #ifdef MANGOS_DEBUG
-        if((sWorld.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
+        if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
             MaNGOS::Singleton<Log>::Instance().outDebug("Creature (GUID: %u Entry: %u) added to moving list from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", creature->GetGUIDLow(), creature->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
         #endif
         AddCreatureToMoveList(creature,x,y,z,ang);
@@ -795,7 +787,7 @@ void Map::MoveAllCreaturesInMoveList()
             {
                 // ... or unload (if respawn grid also not loaded)
                 #ifdef MANGOS_DEBUG
-                if((sWorld.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
+                if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
                     MaNGOS::Singleton<Log>::Instance().outDebug("Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.",c->GetGUIDLow(),c->GetEntry());
                 #endif
                 ObjectAccessor::Instance().AddObjectToRemoveList(c);
@@ -813,7 +805,7 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
         if(old_cell.DiffCell(new_cell))
         {
             #ifdef MANGOS_DEBUG
-            if((sWorld.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
+            if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
                 MaNGOS::Singleton<Log>::Instance().outDebug("Creature (GUID: %u Entry: %u) moved in grid[%u,%u] from cell[%u,%u] to cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.CellX(), new_cell.CellY());
             #endif
 
@@ -829,7 +821,7 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
         else
         {
             #ifdef MANGOS_DEBUG
-            if((sWorld.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
+            if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
                 MaNGOS::Singleton<Log>::Instance().outDebug("Creature (GUID: %u Entry: %u) move in same grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY());
             #endif
         }
@@ -838,7 +830,7 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
     if(loaded(GridPair(new_cell.GridX(), new_cell.GridY())))
     {
         #ifdef MANGOS_DEBUG
-        if((sWorld.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
+        if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
             MaNGOS::Singleton<Log>::Instance().outDebug("Creature (GUID: %u Entry: %u) moved from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
         #endif
 
@@ -856,7 +848,7 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
     else
     {
         #ifdef MANGOS_DEBUG
-        if((sWorld.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
+        if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
             MaNGOS::Singleton<Log>::Instance().outDebug("Creature (GUID: %u Entry: %u) attempt move from grid[%u,%u]cell[%u,%u] to unloaded grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
         #endif
         return false;
@@ -877,7 +869,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
     (*c)->Clear();
 
     #ifdef MANGOS_DEBUG
-    if((sWorld.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
+    if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
         MaNGOS::Singleton<Log>::Instance().outDebug("Creature (GUID: %u Entry: %u) will moved from grid[%u,%u]cell[%u,%u] to respawn grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), c->GetCurrentCell().GridX(), c->GetCurrentCell().GridY(), c->GetCurrentCell().CellX(), c->GetCurrentCell().CellY(), resp_cell.GridX(), resp_cell.GridY(), resp_cell.CellX(), resp_cell.CellY());
     #endif
 

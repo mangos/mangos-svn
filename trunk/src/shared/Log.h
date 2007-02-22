@@ -22,8 +22,14 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 
-//extern uint8 loglevel;
 class Config;
+
+// bitmask
+enum LogFilters
+{
+    LOG_FILTER_TRANSPORT_MOVES = 1,
+    LOG_FILTER_CREATURE_MOVES  = 2
+};
 
 enum Color
 {
@@ -81,6 +87,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void SetColor(bool stdout_stream, Color color);
         void ResetColor(bool stdout_stream);
         void outTimestamp(FILE* file);
+        uint32 getLogFilter() const { return m_logFilter; }
     private:
         FILE* logfile;
         FILE* gmlogfile;
@@ -89,6 +96,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         uint32 m_logFileLevel;
         bool m_colored;
         Color m_colors[4];
+        uint32 m_logFilter;
 };
 
 #define sLog MaNGOS::Singleton<Log>::Instance()
