@@ -599,26 +599,30 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     WorldPacket data;
     std::string Invitedname,plname;
-    Player * player;
-    Guild *guild;
 
     //sLog.outDebug( "WORLD: Received CMSG_GUILD_INVITE"  );
 
+    Player * player = NULL;
+
     recvPacket >> Invitedname;
 
-    normalizePlayerName(Invitedname);
-
-    player = ObjectAccessor::Instance().FindPlayerByName(Invitedname.c_str());
-    guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
-    if(!guild)
+    if(Invitedname.size()!=0)
     {
-        SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
-        return;
+        normalizePlayerName(Invitedname);
+
+        player = ObjectAccessor::Instance().FindPlayerByName(Invitedname.c_str());
     }
 
     if( !player )
     {
         SendCommandResult(GUILD_INVITE_S,Invitedname,GUILD_PLAYER_NOT_FOUND);
+        return;
+    }
+
+    Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
+    if(!guild)
+    {
+        SendCommandResult(GUILD_CREATE_S,"",GUILD_PLAYER_NOT_IN_GUILD);
         return;
     }
 
