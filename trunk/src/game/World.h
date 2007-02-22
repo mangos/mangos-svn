@@ -226,7 +226,7 @@ class World
         bool BanAccount(std::string nameOrIP);
         bool RemoveBanAccount(std::string nameOrIP);
 
-        void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > scripts, uint32 id, Object* source, Object* target);
+        void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
 
     protected:
 

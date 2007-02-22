@@ -65,7 +65,7 @@ struct ScriptAction
 {
     Object* source;
     Object* target;
-    ScriptInfo* script;
+    ScriptInfo const* script;                               // pointer to static script data
 };
 
 #define SCRIPT_COMMAND_SAY          0
@@ -601,18 +601,17 @@ void World::Update(time_t diff)
 }
 
 /// Put scripts in the execution queue
-void World::ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > scripts, uint32 id, Object* source, Object* target)
+void World::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, Object* target)
 {
     ///- Find the script map
-    ScriptMapMap::iterator s = scripts.find(id);
+    ScriptMapMap::const_iterator s = scripts.find(id);
     if (s == scripts.end())
         return;
 
     ///- Schedule script execution for all scripts in the script map
-    ScriptMap *s2 = &(s->second);
-    ScriptMap::iterator iter;
+    ScriptMap const *s2 = &(s->second);
     bool immedScript = false;
-    for (iter = s2->begin(); iter != s2->end(); ++iter)
+    for (ScriptMap::const_iterator iter = s2->begin(); iter != s2->end(); ++iter)
     {
         ScriptAction sa;
         sa.source = source;
