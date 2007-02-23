@@ -2885,6 +2885,7 @@ void Player::ResurrectPlayer()
 {
     // remove death flag + set aura
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
+    RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_ALL);
 
     setDeathState(ALIVE);
 
@@ -11369,6 +11370,15 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
         return false;
     }
 
+    // not let cheating with start flight in time of logout process
+    if(GetSession()->isLogingOut())
+    {
+        WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
+        data << uint32( 7 );                                // you can't used taxi service now
+        GetSession()->SendPacket( &data );
+        return false;
+    }
+
     if( HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
         return false;
 
@@ -11376,7 +11386,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
     if(m_currentSpell)
     {
         WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
-        data << uint32( 7 );
+        data << uint32( 7 );                                // you can't used taxi service now
         GetSession()->SendPacket( &data );
         return false;
     }
