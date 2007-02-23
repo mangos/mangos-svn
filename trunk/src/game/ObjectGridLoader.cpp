@@ -58,6 +58,9 @@ ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
         next = iter; ++next;
 
         Creature * c = iter->second;
+
+        assert(!c->isPet() && "ObjectGridRespawnMover don't must be called for pets");
+
         Cell const& cur_cell  = c->GetCurrentCell();
 
         float resp_x, resp_y, resp_z;

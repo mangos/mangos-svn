@@ -92,8 +92,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void Add(Player *);
         void Remove(Player *, bool);
-        void Add(Corpse *);
-        void Remove(Corpse *, bool);
         template<class T> void Add(T *);
         template<class T> void Remove(T *, bool);
         template<class T> bool Find(T *) const;
@@ -211,6 +209,16 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 
         time_t i_gridExpiry;
+
+        // Type specific code for add/remove to/from grid
+        template<class T>
+        void AddToGrid(T*, NGridType *, Cell const&);
+
+        template<class T>
+        void RemoveFromGrid(T*, NGridType *, Cell const&);
+
+        template<class T>
+        T* FindInGrid(uint64 guid, NGridType *, Cell const&) const;
 };
 
 inline

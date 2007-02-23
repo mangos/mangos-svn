@@ -3197,7 +3197,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
     Unit const* tester = testerOwner ? testerOwner : this;
     Unit const* target = targetOwner ? targetOwner : unit;
 
-    // special cases (Duel)
+    // special cases (Duel, etc)
     if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
     {
         // Duel
@@ -3393,14 +3393,14 @@ Pet* Unit::GetPet() const
     uint64 pet_guid = GetPetGUID();
     if(pet_guid)
     {
-        Creature* pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
-        if(!pet||!pet->isPet())
+        Pet* pet = ObjectAccessor::Instance().GetPet(pet_guid);
+        if(!pet)
         {
             sLog.outError("Unit::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
             const_cast<Unit*>(this)->SetPet(0);
             return NULL;
         }
-        return (Pet*)pet;
+        return pet;
     }
 
     return NULL;

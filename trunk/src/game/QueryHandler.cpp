@@ -100,7 +100,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     recv_data >> entry;
     recv_data >> guid;
 
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    Creature *unit = ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
 
     if (unit == NULL)
     {
@@ -180,7 +180,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 {
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    Creature *unit = ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
 
     if (unit == NULL)
     {
@@ -281,7 +281,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
 void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue )
 {
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    Creature *unit = ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
 
     if (unit == NULL)
     {

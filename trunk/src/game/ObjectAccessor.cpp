@@ -43,6 +43,15 @@ INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 
 Creature*
+ObjectAccessor::GetCreatureOrPet(WorldObject const &u, uint64 guid)
+{
+    if(Creature *unit = GetPet(guid))
+        return unit;
+
+    return GetCreature(u, guid);
+}
+
+Creature*
 ObjectAccessor::GetCreature(WorldObject const &u, uint64 guid)
 {
     return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<Creature>(u, guid);
@@ -51,13 +60,10 @@ ObjectAccessor::GetCreature(WorldObject const &u, uint64 guid)
 Unit*
 ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
 {
-    Unit *unit = NULL;
+    if(GUID_HIPART(guid)==HIGHGUID_PLAYER)
+        return FindPlayer(guid);
 
-    unit = FindPlayer(guid);
-    if(!unit)
-        return GetCreature(u, guid);
-
-    return unit;
+    return GetCreature(u, guid);
 }
 
 Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32 typemask)
@@ -72,7 +78,7 @@ Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32
 
     if(typemask & TYPE_UNIT)
     {
-        obj = GetCreature(p,guid);
+        obj = GetCreatureOrPet(p,guid);
         if(obj) return obj;
     }
 
@@ -95,12 +101,6 @@ Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32
     }
 
     return NULL;
-}
-
-Player*
-ObjectAccessor::GetPlayer(Unit const &u, uint64 guid)
-{
-    return FindPlayer(guid);
 }
 
 GameObject*
@@ -292,19 +292,6 @@ ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_
 
 }
 
-Corpse*
-ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
-{
-    Guard guard(i_corpseGuard);
-
-    Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
-    if( iter == i_player2corpse.end() ) return NULL;
-
-    assert(iter->second->GetType() == CORPSE_RESURRECTABLE);
-
-    return iter->second;
-}
-
 void
 ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType &update_players)
 {
@@ -317,6 +304,47 @@ ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType 
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(obj->GetMapId()));
     obj->ClearUpdateMask();
+}
+
+Pet*
+ObjectAccessor::GetPet(uint64 guid)
+{
+    Guard guard(i_petGuard);
+
+    PetsMapType::iterator iter = i_pets.find(guid);
+    if( iter == i_pets.end() ) return NULL;
+
+    return iter->second;
+}
+
+void
+ObjectAccessor::RemovePet(Pet *pet)
+{
+    Guard guard(i_petGuard);
+    PetsMapType::iterator iter = i_pets.find(pet->GetGUID());
+    if( iter != i_pets.end() )
+        i_pets.erase(iter);
+}
+
+void
+ObjectAccessor::AddPet(Pet *pet)
+{
+    Guard guard(i_petGuard);
+    assert(i_pets.find(pet->GetGUID()) == i_pets.end());
+    i_pets[pet->GetGUID()] = pet;
+}
+
+Corpse*
+ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
+{
+    Guard guard(i_corpseGuard);
+
+    Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
+    if( iter == i_player2corpse.end() ) return NULL;
+
+    assert(iter->second->GetType() == CORPSE_RESURRECTABLE);
+
+    return iter->second;
 }
 
 void
@@ -364,7 +392,11 @@ ObjectAccessor::Update(const uint32  &diff)
 
         uint32 map_id = 0;
         MaNGOS::ObjectUpdater updater(diff);
-        TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer > object_update(updater);
+        // for creature
+        TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer  > grid_object_update(updater);
+        // for pets
+        TypeContainerVisitor<MaNGOS::ObjectUpdater, WorldTypeMapContainer > world_object_update(updater);
+
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cell(0);
         for(CreatureLocationHolderType::iterator iter=creature_locations.begin(); iter != creature_locations.end(); ++iter)
         {
@@ -392,8 +424,8 @@ ObjectAccessor::Update(const uint32  &diff)
                         cell.data.Part.reserved = CENTER_DISTRICT;
                         cell.SetNoCreate();
                         CellLock<NullGuard> cell_lock(cell, cell_iter);
-                        cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(map_id));
-
+                        cell_lock->Visit(cell_lock, grid_object_update,  *MapManager::Instance().GetMap(map_id));
+                        cell_lock->Visit(cell_lock, world_object_update, *MapManager::Instance().GetMap(map_id));
                     }
 
                     if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)

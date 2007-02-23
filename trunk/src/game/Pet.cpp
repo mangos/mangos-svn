@@ -149,6 +149,8 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
 
     delete result;
 
+    ObjectAccessor::Instance().AddPet(this);
+
     AIM_Initialize();
     AddToWorld();
     MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
@@ -182,9 +184,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
         case PET_SAVE_AS_STORED:
         {
             uint32 loyalty =1;
-            if(getPetType()==HUNTER_PET)
-                loyalty = 1;
-            else loyalty = getloyalty();
+            if(getPetType()!=HUNTER_PET)
+                loyalty = getloyalty();
 
             uint32 owner = GUID_LOPART(GetOwnerGUID());
             std::string name = m_name;

@@ -28,6 +28,7 @@ class Corpse;
 class Creature;
 class DynamicObject;
 class GameObject;
+class Pet;
 class Player;
 
 #define MAX_NUMBER_OF_GRIDS      64
@@ -52,15 +53,17 @@ class Player;
 #define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
 #define MAP_HALFSIZE            (MAP_SIZE/2)
 
-typedef TYPELIST_2(Player, Corpse/*resurrectable*/)                      AllWorldObjectTypes; 
-typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse/*Bones*/) AllGridObjectTypes;
-typedef Grid<Player, AllWorldObjectTypes,AllGridObjectTypes> GridType;
-typedef std::map<OBJECT_HANDLE, Player* > PlayerMapType;
-typedef std::map<OBJECT_HANDLE, Creature* > CreatureMapType;
-typedef std::map<OBJECT_HANDLE, GameObject* > GameObjectMapType;
-typedef std::map<OBJECT_HANDLE, DynamicObject* > DynamicObjectMapType;
-typedef std::map<OBJECT_HANDLE, Corpse* > CorpseMapType;
+// Creature used instead pet to simplify *::Visit templates (not requared duplicate code for Creature->Pet case)
+typedef TYPELIST_3(Player, Creature/*pets*/, Corpse/*resurrectable*/)                   AllWorldObjectTypes; 
+typedef TYPELIST_4(GameObject, Creature/*except pets*/, DynamicObject, Corpse/*Bones*/) AllGridObjectTypes;
 
+typedef std::map<OBJECT_HANDLE, Corpse* >        CorpseMapType;
+typedef std::map<OBJECT_HANDLE, Creature* >      CreatureMapType;
+typedef std::map<OBJECT_HANDLE, DynamicObject* > DynamicObjectMapType;
+typedef std::map<OBJECT_HANDLE, GameObject* >    GameObjectMapType;
+typedef std::map<OBJECT_HANDLE, Player* >        PlayerMapType;
+
+typedef Grid<Player, AllWorldObjectTypes,AllGridObjectTypes> GridType;
 typedef NGrid<8, Player, AllWorldObjectTypes, AllGridObjectTypes> NGridType;
 
 typedef TypeMapContainer<AllGridObjectTypes> GridTypeMapContainer;

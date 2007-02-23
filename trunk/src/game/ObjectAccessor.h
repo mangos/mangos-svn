@@ -49,6 +49,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
     public:
 
+        typedef HM_NAMESPACE::hash_map<uint64, Pet* >    PetsMapType;
         typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayersMapType;
         typedef HM_NAMESPACE::hash_map<uint64, Corpse* > Player2CorpsesMapType;
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;
@@ -56,8 +57,10 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);
         Creature* GetCreature(WorldObject const &, uint64);
+        Creature* GetCreatureOrPet(WorldObject const &, uint64);
         Unit* GetUnit(WorldObject const &, uint64);
-        Player* GetPlayer(Unit const &, uint64);
+        Pet* GetPet(Unit const &, uint64 guid) { return GetPet(guid); }
+        Player* GetPlayer(Unit const &, uint64 guid) { return FindPlayer(guid); }
         GameObject* GetGameObject(Unit const &, uint64);
         DynamicObject* GetDynamicObject(Unit const &, uint64);
 
@@ -89,6 +92,10 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void AddCorpse(Corpse *corpse);
         void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid);
 
+        void AddPet(Pet *pet);
+        void RemovePet(Pet *pet);
+        Pet* GetPet(uint64 guid);
+
         bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
     private:
@@ -106,6 +113,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         friend struct ObjectChangeAccumulator;
         PlayersMapType        i_players;
+        PetsMapType           i_pets;
         Player2CorpsesMapType i_player2corpse;
 
         typedef ZThread::FastMutex LockType;
@@ -121,6 +129,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         LockType i_updateGuard;
         LockType i_removeGuard;
         LockType i_corpseGuard;
+        LockType i_petGuard;
 };
 
 namespace MaNGOS

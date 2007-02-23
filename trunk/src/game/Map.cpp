@@ -171,6 +171,135 @@ Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
     }
 }
 
+// Template specuialization of utility methods
+template<class T>
+void Map::AddToGrid(T* obj, NGridType *grid, Cell const& cell)
+{
+    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+    (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
+}
+
+template<>
+void Map::AddToGrid(Player* obj, NGridType *grid, Cell const& cell)
+{
+    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+    (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj, obj->GetGUID());
+}
+
+template<>
+void Map::AddToGrid(Corpse* obj, NGridType *grid, Cell const& cell)
+{
+    // add to world object registry in grid
+    if(obj->GetType()==CORPSE_RESURRECTABLE)
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject<Corpse>(obj, obj->GetGUID());
+    }
+    // add to grid object store
+    else
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        (*grid)(cell.CellX(), cell.CellY()).AddGridObject<Corpse>(obj, obj->GetGUID());
+    }
+}
+
+template<>
+void Map::AddToGrid(Creature* obj, NGridType *grid, Cell const& cell)
+{
+    // add to world object registry in grid
+    if(obj->isPet())
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject<Creature>(obj, obj->GetGUID());
+        obj->SetCurrentCell(cell);
+    }
+    // add to grid object store
+    else
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        (*grid)(cell.CellX(), cell.CellY()).AddGridObject<Creature>(obj, obj->GetGUID());
+        obj->SetCurrentCell(cell);
+    }
+}
+
+template<class T>
+void Map::RemoveFromGrid(T* obj, NGridType *grid, Cell const& cell)
+{
+    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+    (*grid)(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj, obj->GetGUID());
+}
+
+template<>
+void Map::RemoveFromGrid(Player* obj, NGridType *grid, Cell const& cell)
+{
+    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+    (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj, obj->GetGUID());
+}
+
+template<>
+void Map::RemoveFromGrid(Corpse* obj, NGridType *grid, Cell const& cell)
+{
+    // remove from world object registry in grid
+    if(obj->GetType()==CORPSE_RESURRECTABLE)
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject<Corpse>(obj, obj->GetGUID());
+    }
+    // remove from grid object store
+    else
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject<Corpse>(obj, obj->GetGUID());
+    }
+}
+
+template<>
+void Map::RemoveFromGrid(Creature* obj, NGridType *grid, Cell const& cell)
+{
+    // remove from world object registry in grid
+    if(obj->isPet())
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject<Creature>(obj, obj->GetGUID());
+    }
+    // remove from grid object store
+    else
+    {
+        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject<Creature>(obj, obj->GetGUID());
+    }
+}
+
+template<class T>
+T* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
+{
+    return ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(guid);
+}
+
+template<>
+Player* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
+{
+    return ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Player>(guid);
+}
+
+template<>
+Corpse* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
+{
+    Corpse* obj = ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Corpse>(guid);
+    if(obj)
+        return obj;
+    return ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<Corpse>(guid);
+}
+
+template<>
+Creature* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
+{
+    Creature* obj = ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Creature>(guid);
+    if(obj)
+        return obj;
+    return ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<Creature>(guid);
+}
+
 uint64
 Map::EnsureGridCreated(const GridPair &p)
 {
@@ -236,10 +365,7 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
         }
     }
     else if( add_player )
-    {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(player, player->GetGUID());
-    }
+        AddToGrid(player,grid,cell);
 }
 
 void
@@ -298,51 +424,6 @@ void Map::Add(Player *player)
     NotifyPlayerVisibility(cell, p, player);
 }
 
-void Map::Add(Corpse *obj)
-{
-    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    assert( obj && p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
-        p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
-
-    Cell cell = RedZone::GetZone(p);
-
-    EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
-    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
-    assert( grid != NULL );
-
-    // add to world object registry in grid
-    if(obj->GetType()==CORPSE_RESURRECTABLE)
-    {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject<Corpse>(obj, obj->GetGUID());
-    }
-    // add to grid object store
-    else
-    {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).AddGridObject<Corpse>(obj, obj->GetGUID());
-    }
-
-    DEBUG_LOG("Creature %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
-    cell.data.Part.reserved = ALL_DISTRICT;
-
-    MaNGOS::ObjectVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
-    TypeContainerVisitor<MaNGOS::ObjectVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
-
-    CellLock<ReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *this);
-}
-
-template<class T>
-void SetCurrentCell(T*, Cell const&)
-{
-}
-
-template<>
-void SetCurrentCell(Creature* c, Cell const& cell)
-{
-    c->SetCurrentCell(cell);
-}
 
 template<class T>
 void
@@ -363,11 +444,7 @@ Map::Add(T *obj)
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
 
-    {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
-        SetCurrentCell(obj,cell);
-    }
+    AddToGrid(obj,grid,cell);
 
     DEBUG_LOG("Object %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
     cell.data.Part.reserved = ALL_DISTRICT;
@@ -396,7 +473,7 @@ Map::Find(T *obj) const
 
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
-    return ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(obj->GetGUID())!=0;
+    return this->FindInGrid<T>(obj->GetGUID(),grid,cell)!=0;
 }
 
 template <class T>
@@ -429,7 +506,7 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl)
             NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
             assert( grid != NULL );
 
-            T *result = ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(hdl);
+            T *result = FindInGrid<T>(hdl,grid,cell);
             if (result) return result;
 
             if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
@@ -531,11 +608,8 @@ void Map::Remove(Player *player, bool remove)
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert(grid != NULL);
 
-    {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        grid->RemoveWorldObject(cell.CellX(), cell.CellY(), player, player->GetGUID());
-        player->RemoveFromWorld();
-    }
+    RemoveFromGrid(player,grid,cell);
+    player->RemoveFromWorld();
 
     cell.data.Part.reserved = ALL_DISTRICT;
     MaNGOS::NotVisibleNotifier notifier(*player);
@@ -546,48 +620,6 @@ void Map::Remove(Player *player, bool remove)
 
     if( remove )
         delete player;
-}
-
-void
-Map::Remove(Corpse *obj, bool remove)
-{
-    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    assert( obj && p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
-        p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
-
-    Cell cell = RedZone::GetZone(p);
-
-    if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
-        return;
-
-    DEBUG_LOG("Remove creature " I64FMTD " from grid[%u,%u]", obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
-    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
-    assert( grid != NULL );
-
-    // remove to world object registry in grid
-    if(obj->GetType()==CORPSE_RESURRECTABLE)
-    {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject<Corpse>(obj, obj->GetGUID());
-    }
-    // remove to grid object store
-    else
-    {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject<Corpse>(obj, obj->GetGUID());
-    }
-
-    {
-        cell.data.Part.reserved = ALL_DISTRICT;
-        MaNGOS::ObjectNotVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
-        TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
-        CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-        CellLock<ReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, player_notifier, *this);
-    }
-
-    if( remove )
-        delete obj;
 }
 
 template<class T>
@@ -609,10 +641,7 @@ Map::Remove(T *obj, bool remove)
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
 
-    {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj, obj->GetGUID());
-    }
+    RemoveFromGrid(obj,grid,cell);
 
     {
         Cell cell = RedZone::GetZone(p);
@@ -653,11 +682,10 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
         {
             assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
 
-            WriteGuard guard(i_info[old_cell.GridX()][old_cell.GridY()]->i_lock);
-            grid(old_cell.CellX(),old_cell.CellY()).RemoveWorldObject(player, player->GetGUID());
+            RemoveFromGrid(player,&grid,old_cell);
 
             if( !old_cell.DiffGrid(new_cell) )
-                grid(new_cell.CellX(),new_cell.CellY()).AddWorldObject(player, player->GetGUID());
+                AddToGrid(player,&grid,new_cell);
         }
 
         if( old_cell.DiffGrid(new_cell) )
@@ -670,23 +698,26 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
 
     if( !same_cell || player->IsBeingTeleported() )
     {
-	if( player->IsBeingTeleported() )
-	    new_cell.data.Part.reserved = ALL_DISTRICT;
+        if( player->IsBeingTeleported() )
+            new_cell.data.Part.reserved = ALL_DISTRICT;
 
-    TypeContainerVisitor<MaNGOS::VisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
-    cell_lock->Visit(cell_lock, player_notifier, *this);
-	TypeContainerVisitor<MaNGOS::VisibleNotifier, GridTypeMapContainer > object_notifier(notifier);
-	cell_lock->Visit(cell_lock, object_notifier, *this);
-	notifier.Notify();
+        TypeContainerVisitor<MaNGOS::VisibleNotifier, WorldTypeMapContainer > world_object_notifier(notifier);
+        TypeContainerVisitor<MaNGOS::VisibleNotifier, GridTypeMapContainer >  grid_object_notifier(notifier);
 
+        cell_lock->Visit(cell_lock, world_object_notifier, *this);
+        cell_lock->Visit(cell_lock, grid_object_notifier, *this);
+
+        notifier.Notify();
     }
 
     MaNGOS::PlayerRelocationNotifier relocationNotifier(*player);
     new_cell.data.Part.reserved = ALL_DISTRICT;
-    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, GridTypeMapContainer > p2c_relocation(relocationNotifier);
-    cell_lock->Visit(cell_lock, p2c_relocation, *this);
-    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, WorldTypeMapContainer > p2p_relocation(relocationNotifier);
-    cell_lock->Visit(cell_lock, p2p_relocation, *this);
+
+    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, GridTypeMapContainer >  p2grid_relocation(relocationNotifier);
+    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, WorldTypeMapContainer > p2world_relocation(relocationNotifier);
+
+    cell_lock->Visit(cell_lock, p2grid_relocation, *this);
+    cell_lock->Visit(cell_lock, p2world_relocation, *this);
 
     if (visibilityChanges)
     {
@@ -699,11 +730,14 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
         return;
 
     MaNGOS::NotVisibleNotifier notifier2(*player);
-    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, WorldTypeMapContainer > player_notifier2(notifier2);
-    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, GridTypeMapContainer > object_notifier2(notifier2);
+    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, WorldTypeMapContainer > world_object_notifier2(notifier2);
+    TypeContainerVisitor<MaNGOS::NotVisibleNotifier, GridTypeMapContainer >  grid_object_notifier2(notifier2);
+
     cell_lock = CellLock<ReadGuard>(old_cell, old_val);
-    cell_lock->Visit(cell_lock, player_notifier2, *this);
-    cell_lock->Visit(cell_lock, object_notifier2, *this);
+    
+    cell_lock->Visit(cell_lock, world_object_notifier2, *this);
+    cell_lock->Visit(cell_lock, grid_object_notifier2, *this);
+
     i_grids[new_cell.GridX()][new_cell.GridY()]->SetGridState(GRID_STATE_ACTIVE);
     notifier2.Notify();
 }
@@ -744,10 +778,12 @@ void Map::CreatureRelocationNotifying(Creature *creature, Cell new_cell, CellPai
         MaNGOS::CreatureRelocationNotifier relocationNotifier(*creature);
         new_cell.data.Part.reserved = ALL_DISTRICT;
         new_cell.SetNoCreate();                             // not trigger load unloaded grids at notifier call
-        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, WorldTypeMapContainer > c2p_relocation(relocationNotifier);
-        cell_lock->Visit(cell_lock, c2p_relocation, *this);
-        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, GridTypeMapContainer > c2c_relocation(relocationNotifier);
-        cell_lock->Visit(cell_lock, c2c_relocation, *this);
+
+        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, WorldTypeMapContainer > c2world_relocation(relocationNotifier);
+        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, GridTypeMapContainer >  c2grid_relocation(relocationNotifier);
+
+        cell_lock->Visit(cell_lock, c2world_relocation, *this);
+        cell_lock->Visit(cell_lock, c2grid_relocation, *this);
     }
 }
 
@@ -810,11 +846,10 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
             #endif
 
             assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
-            WriteGuard guard(i_info[old_cell.GridX()][old_cell.GridY()]->i_lock);
             if( !old_cell.DiffGrid(new_cell) )
             {
-                (*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).RemoveGridObject<Creature>(c, c->GetGUID());
-                (*i_grids[new_cell.GridX()][new_cell.GridY()])(new_cell.CellX(), new_cell.CellY()).AddGridObject<Creature>(c, c->GetGUID());
+                RemoveFromGrid(c,i_grids[old_cell.GridX()][old_cell.GridY()],old_cell);
+                AddToGrid(c,i_grids[new_cell.GridX()][new_cell.GridY()],new_cell);
                 c->SetCurrentCell(new_cell);
             }
         }
@@ -834,15 +869,10 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
             MaNGOS::Singleton<Log>::Instance().outDebug("Creature (GUID: %u Entry: %u) moved from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
         #endif
 
-        {
-            WriteGuard guard(i_info[old_cell.GridX()][old_cell.GridY()]->i_lock);
-            (*i_grids[old_cell.GridX()][old_cell.GridY()])(old_cell.CellX(), old_cell.CellY()).RemoveGridObject<Creature>(c, c->GetGUID());
-        }
+        RemoveFromGrid(c,i_grids[old_cell.GridX()][old_cell.GridY()],old_cell);
         {
             EnsureGridCreated(GridPair(new_cell.GridX(), new_cell.GridY()));
-            WriteGuard guard(i_info[new_cell.GridX()][new_cell.GridY()]->i_lock);
-            (*i_grids[new_cell.GridX()][new_cell.GridY()])(new_cell.CellX(), new_cell.CellY()).AddGridObject<Creature>(c, c->GetGUID());
-            c->SetCurrentCell(new_cell);
+            AddToGrid(c,i_grids[new_cell.GridX()][new_cell.GridY()],new_cell);
         }
     }
     else
@@ -1131,8 +1161,8 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
 {
     Cell const& cur_cell = c->GetCurrentCell();
 
-    if(!i_grids[cur_cell.GridX()][cur_cell.GridY()] ||
-        (*i_grids[cur_cell.GridX()][cur_cell.GridY()])(cur_cell.CellX(), cur_cell.CellY()).GetGridObject<Creature>(c->GetGUID())!=c)
+    if(!i_grids[cur_cell.GridX()][cur_cell.GridY()] || 
+        FindInGrid<Creature>(c->GetGUID(),i_grids[cur_cell.GridX()][cur_cell.GridY()],cur_cell)!=c)
     {
         sLog.outError("ERROR: %s (GUID: %u) not find in %s grid[%u,%u]cell[%u,%u]",
             (c->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature"),c->GetGUIDLow(), (moved ? "final" : "original"),
@@ -1155,10 +1185,12 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
     return true;
 }
 
+template void Map::Add(Corpse *);
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);
 template void Map::Add(DynamicObject *);
 
+template void Map::Remove(Corpse *,bool);
 template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);

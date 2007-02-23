@@ -162,6 +162,7 @@ namespace MaNGOS
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
         #ifdef WIN32
         template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
+        template<> void Visit(std::map<OBJECT_HANDLE, Player *> &) {}
         #endif
     };
 
@@ -503,6 +504,7 @@ namespace MaNGOS
     };
 
     #ifndef WIN32
+    template<> inline void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Player *> &) {}
 
     template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void VisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
