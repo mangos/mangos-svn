@@ -163,7 +163,7 @@ inline void
 MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
 {
     for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if( !i_player.isAlive() )
+        if( !i_player.isAlive() && iter->second->GetType()==CORPSE_RESURRECTABLE )
             iter->second->UpdateForPlayer(&i_player,false);
 }
 

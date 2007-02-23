@@ -10682,6 +10682,11 @@ void Player::SaveToDB()
 
     if (inworld)
         AddToWorld();
+
+    // save hunter pet level and expirience at owner save. spells and etc for summoned pets saved at learn and apply.
+    Pet* pet = GetPet();
+    if(pet && pet->getPetType()==HUNTER_PET)
+        pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state

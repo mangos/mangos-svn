@@ -70,6 +70,11 @@ class MANGOS_DLL_DECL Grid
             return i_objects.template remove<SPECIFIC_OBJECT>(obj, hdl);
         }
 
+        /** Accessors: Returns a specific type of object in the WORDL_OBJECT_TYPES
+         */
+        template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetWorldObject(OBJECT_HANDLE hdl) const { return i_objects.template find<SPECIFIC_OBJECT>(hdl); }
+        template<class SPECIFIC_OBJECT>       SPECIFIC_OBJECT* GetWorldObject(OBJECT_HANDLE hdl)       { return i_objects.template find<SPECIFIC_OBJECT>(hdl); }
+
 
         /** Refreshes/update the grid. This required for remote grids.
          */
@@ -104,7 +109,7 @@ class MANGOS_DLL_DECL Grid
         /** Accessors: Returns a specific type of object in the GRID_OBJECT_TYPES
          */
         template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
-        template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
+        template<class SPECIFIC_OBJECT>       SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl)       { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
 
         /** Inserts a container type object into the grid.
          */

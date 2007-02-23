@@ -234,7 +234,7 @@ void GameObject::Update(uint32 p_time)
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;
 
-        Unit* ok = NULL, *owner = GetOwner();
+        Unit* owner = GetOwner();
         if (!owner)
         {
             m_respawnTime = 0;                              // to prevent save respawn timer
@@ -242,13 +242,27 @@ void GameObject::Update(uint32 p_time)
             return;
         }
 
+        Unit* ok = NULL;                                    // pointer to appropriate target if found any
+
         float radius = GetRadius(sSpellRadiusStore.LookupEntry(createSpell->EffectRadiusIndex[i]));
         MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
         MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
 
-        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(GetMapId()));
+
+        // search unfriedly creature
+        {
+            TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+            cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId()));
+        }
+
+        // or unfriendly player/pet
+        if(!ok)
+        {
+            TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
+            cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId()));
+        }
+
         if (ok)
         {
             owner->CastSpell(ok, GetGOInfo()->sound3, true);

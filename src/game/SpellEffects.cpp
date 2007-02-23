@@ -998,6 +998,7 @@ void Spell::EffectSummon(uint32 i)
     name.append(petTypeSuffix[spawnCreature->getPetType()]);
     spawnCreature->SetName( name );
 
+    ObjectAccessor::Instance().AddPet(spawnCreature);
     spawnCreature->AddToWorld();
     MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
 
@@ -1206,7 +1207,7 @@ void Spell::EffectSummonWild(uint32 i)
 
         PetWithIdCheck u_check(m_caster, pet_entry);
         MaNGOS::UnitSearcher<PetWithIdCheck> checker((Unit*&)old_wild, u_check);
-        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, GridTypeMapContainer > object_checker(checker);
+        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, WorldTypeMapContainer > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
     }
@@ -1275,6 +1276,7 @@ void Spell::EffectSummonWild(uint32 i)
         name.append(petTypeSuffix[spawnCreature->getPetType()]);
         spawnCreature->SetName( name );
 
+        ObjectAccessor::Instance().AddPet(spawnCreature);
         spawnCreature->AddToWorld();
         MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
         /*
@@ -1489,6 +1491,7 @@ void Spell::EffectTameCreature(uint32 i)
                                                             // this enables pet detals window (Shift+P)
         pet->AIM_Initialize();
 
+        ObjectAccessor::Instance().AddPet(pet);
         pet->AddToWorld();
         MapManager::Instance().GetMap(pet->GetMapId())->Add((Creature*)pet);
 
@@ -1607,6 +1610,7 @@ void Spell::EffectSummonPet(uint32 i)
 
         NewSummon->AIM_Initialize();
 
+        ObjectAccessor::Instance().AddPet(NewSummon);
         NewSummon->AddToWorld();
         MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);
 
@@ -2415,7 +2419,7 @@ void Spell::EffectSummonCritter(uint32 i)
 
         PetWithIdCheck u_check(m_caster, pet_entry);
         MaNGOS::UnitSearcher<PetWithIdCheck> checker(old_critter, u_check);
-        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, GridTypeMapContainer > object_checker(checker);
+        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, WorldTypeMapContainer > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
     }
@@ -2456,6 +2460,7 @@ void Spell::EffectSummonCritter(uint32 i)
         critter->SetName( name );
         //m_caster->SetPet(critter);
 
+        ObjectAccessor::Instance().AddPet(critter);
         critter->AddToWorld();
         MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)critter);
     }

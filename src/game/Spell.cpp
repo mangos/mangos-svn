@@ -366,9 +366,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(pUnitTarget, m_caster, radius ? radius : 5);
                 MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(TagUnitMap, u_check);
 
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer > unit_searcher(searcher);
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+
                 CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId()));
             }
         }break;
         case TARGET_ALL_ENEMY_IN_AREA:
@@ -386,12 +389,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
                 MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_DEST_CENTER);
 
-                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > player_notifier(notifier);
-                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > object_notifier(notifier);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
 
                 CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-                cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
             }
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
@@ -429,12 +432,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
             MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_SELF_CENTER);
 
-            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > player_notifier(notifier);
-            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > object_notifier(notifier);
+            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
+            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
 
             CellLock<GridReadGuard> cell_lock(cell, p);
-            cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-            cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+            cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+            cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
         }break;
         case TARGET_GAMEOBJECT:
         {
@@ -450,12 +453,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
             MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_IN_FRONT);
 
-            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > player_notifier(notifier);
-            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > object_notifier(notifier);
+            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
+            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
 
             CellLock<GridReadGuard> cell_lock(cell, p);
-            cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-            cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+            cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+            cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
         }break;
         case TARGET_DUELVSPLAYER:
         {
@@ -481,12 +484,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
                 MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_DEST_CENTER);
 
-                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > player_notifier(notifier);
-                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > object_notifier(notifier);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
 
                 CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-                cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
             }
         }break;
         case TARGET_MINION:
@@ -1652,7 +1655,7 @@ uint8 Spell::CanCast()
 
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
-    if( ((Player*)m_caster)->GetMovementFlags() &&  (IsAutoRepeat() || m_rangedShoot) )
+    if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetMovementFlags() &&  (IsAutoRepeat() || m_rangedShoot) )
         return CAST_FAIL_CANT_DO_WHILE_MOVING;
 
     uint8 castResult = 0;
@@ -1704,6 +1707,33 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_INVALID_TARGET;
 
                 return castResult;
+            }
+        }
+
+        if(m_caster!=target)
+        {
+            // check corectness positive/negative cast target (pet cast real check and cheating check in player/pet case)
+            if(IsPositiveSpell(m_spellInfo->Id))
+            {
+                if(m_caster->IsHostileTo(target))
+                {
+                    #ifdef MANGOS_DEBUG
+                    if(m_caster->GetTypeId()==TYPEID_PLAYER)
+                        sLog.outError("Spell %u (positive) rejected to casted at hostile target, but client alloow it. Bug?",m_spellInfo->Id);
+                    #endif
+                    return CAST_FAIL_INVALID_TARGET;
+                }
+            }
+            else
+            {
+                if(m_caster->IsFriendlyTo(target))
+                {
+                    #ifdef MANGOS_DEBUG
+                    if(m_caster->GetTypeId()==TYPEID_PLAYER)
+                        sLog.outError("Spell %u (negative) rejected to casted at friendly target, but client aloow it. Bug?",m_spellInfo->Id);
+                    #endif
+                    return CAST_FAIL_INVALID_TARGET;
+                }
             }
         }
 
@@ -1826,9 +1856,11 @@ uint8 Spell::CanCast()
             }
             case SPELL_EFFECT_LEARN_PET_SPELL:
             {
-                if(!unitTarget || unitTarget->GetTypeId() == TYPEID_PLAYER)
+                Pet* pet = m_caster->GetPet();
+
+                if(!pet)
                 {
-                    castResult = CAST_FAIL_FAILED;
+                    castResult = CAST_FAIL_YOU_DO_NOT_HAVE_PET;
                     break;
                 }
 
@@ -1840,16 +1872,15 @@ uint8 Spell::CanCast()
                     break;
                 }
 
-                Creature* creatureTarget = (Creature*)unitTarget;
                 uint8 learn_msg = 1;
                 for(int8 x=0;x<4;x++)
                 {
-                    if((creatureTarget)->m_spells[x] == learn_spellproto->Id)
+                    if(pet->m_spells[x] == learn_spellproto->Id)
                     {
                         castResult = CAST_FAIL_ALREADY_LEARNED_THAT_SPELL;
                         break;
                     }
-                    SpellEntry const *has_spellproto = sSpellStore.LookupEntry(creatureTarget ->m_spells[x]);
+                    SpellEntry const *has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
                     if (!has_spellproto) learn_msg = 0;
                     else if (has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
                         learn_msg = 0;

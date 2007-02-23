@@ -39,6 +39,18 @@ PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_L
 
 void PetAI::MoveInLineOfSight(Unit *u)
 {
+    if( !i_pet.getVictim() && i_pet.isPet() && ((Pet&)i_pet).HasActState(STATE_RA_PROACTIVE) &&
+        u->isTargetableForAttack() && i_pet.IsHostileTo( u )  &&
+        u->isInAccessablePlaceFor(&i_pet))
+    {
+        float attackRadius = i_pet.GetAttackDistance(u);
+        if(i_pet.IsWithinDist(u, attackRadius) && i_pet.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
+        {
+            AttackStart(u);
+            if(u->HasStealthAura())
+                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+        }
+    }
 }
 
 void PetAI::AttackStart(Unit *u)

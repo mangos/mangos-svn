@@ -44,7 +44,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     recv_data >> flag;                                      //delete = 0x0700 CastSpell = C100
     recv_data >> guid2;                                     //tag guid
 
-    Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid1);
+    // used also for charmed creature
+    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid1);
     sLog.outDetail( "HandlePetAction.Pet %u flag is %u, spellid is %u, target %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
     if(!pet)
     {
@@ -158,11 +159,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             if(!unit_target)
                 return;
 
-            // do not spell attack of friends
-            if(_player->IsFriendlyTo(unit_target))
-                return;
-
-            pet->clearUnitState(UNIT_STAT_FOLLOW);
+            // do not cast unknown spells
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellid );
             if(!spellInfo)
             {
@@ -170,6 +167,27 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 return;
             }
 
+            // do not cast not learned spells
+            bool spell_found = false;
+            for(int i = 0; i < 4; ++i)
+            {
+                if(pet->m_spells[i] == spellid)
+                {
+                    spell_found = true;
+                    break;
+                }
+            }
+
+            if(!spell_found)
+                return;
+
+            // FIXME: this is _wrong_ check not allow cast positive spells, but without it pet can cast negative spell at anyone
+            // do not spell attack of friends 
+            //if(_player->IsFriendlyTo(unit_target))
+            //    return;
+
+            // do cast now
+            pet->clearUnitState(UNIT_STAT_FOLLOW);
             Spell *spell = new Spell(pet, spellInfo, false, 0);
             WPAssert(spell);
 
@@ -200,8 +218,7 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 
 void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
 {
-
-    Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,petguid);
+    Pet* pet=ObjectAccessor::Instance().GetPet(petguid);
     if(!pet || !pet->GetEntry())
         return;
 
@@ -232,7 +249,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     recv_data >> petguid;
     recv_data >> name;
 
-    Creature* pet = ObjectAccessor::Instance().GetCreature(*_player,petguid);
+    Pet* pet = ObjectAccessor::Instance().GetPet(petguid);
     if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || !pet->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME) || pet->GetOwnerGUID() != _player->GetGUID() )
         return;
 
@@ -252,7 +269,9 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;                                      //pet guid
     sLog.outDetail( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
-    Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    // pet/charmed
+    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
     if(pet)
     {
         if(pet->isPet())

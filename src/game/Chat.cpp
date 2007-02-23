@@ -595,7 +595,7 @@ Unit* ChatHandler::getSelectedUnit()
 
 Creature* ChatHandler::getSelectedCreature()
 {
-    return ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
+    return ObjectAccessor::Instance().GetCreatureOrPet(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
 }
 
 char const *fmtstring( char const *format, ... )
