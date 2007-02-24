@@ -243,6 +243,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         Creature();
         virtual ~Creature();
 
+        void CleanupCrossRefsBeforeDelete();                // used in ~Creature (or before mass creature delete to remove cross-references to already deleted creature)
+
         typedef std::list<TrainerSpell*> SpellsList;
 
         bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);

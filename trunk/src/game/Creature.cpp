@@ -68,7 +68,7 @@ m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
     m_AlreadyCallAssistence = false;
 }
 
-Creature::~Creature()
+void Creature::CleanupCrossRefsBeforeDelete()
 {
     if(m_uint32Values)                                      // only for fully created object
     {
@@ -77,6 +77,11 @@ Creature::~Creature()
         DeleteInHateListOf();
         RemoveAllAuras();
     }
+}
+
+Creature::~Creature()
+{
+    CleanupCrossRefsBeforeDelete();
 
     for( SpellsList::iterator i = m_tspells.begin( ); i != m_tspells.end( ); i++ )
         delete (*i);

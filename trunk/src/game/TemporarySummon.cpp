@@ -60,6 +60,7 @@ void TemporarySummon::UnSummon()
 {
     CombatStop(true);
 
+    CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 
@@ -68,7 +69,9 @@ void TemporarySummon::setDeathState(DeathState s)
     Creature::setDeathState( s );
 
     if( ( m_deathState == DEAD   && m_type == TEMPSUMMON_REMOVE_DEAD ) ||
-        ( m_deathState == CORPSE && m_type == TEMPSUMMON_REMOVE_CORPSE ) ) {
+        ( m_deathState == CORPSE && m_type == TEMPSUMMON_REMOVE_CORPSE ) )
+    {
+        CleanupCrossRefsBeforeDelete();
         ObjectAccessor::Instance().AddObjectToRemoveList(this);
     }
 }

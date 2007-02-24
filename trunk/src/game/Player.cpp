@@ -11113,6 +11113,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode)
 
     SendDestroyObject(pet->GetGUID());
 
+    pet->CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(pet);
 
     if(pet->isControlled())

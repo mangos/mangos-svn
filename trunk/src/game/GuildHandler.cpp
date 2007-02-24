@@ -108,8 +108,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     }
 
     _player->ModifyMoney( -(int32)price );
-    _player->StoreNewItem( dest, GUILD_CHARTER_ITEM_ID, 1, true );
-    Item *charter = _player->GetItemByPos(dest);
+    Item *charter = _player->StoreNewItem( dest, GUILD_CHARTER_ITEM_ID, 1, true );
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
     charter->SetState(ITEM_CHANGED, _player);
 
