@@ -4038,7 +4038,7 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
 
             itr->Standing = new_rep - BaseRep;
             itr->Flags = (itr->Flags | 0x00000001);
-            itr->uState = FACTION_CHANGED;
+            if(itr->uState != FACTION_NEW) itr->uState = FACTION_CHANGED;
 
             SendSetFactionStanding(&*itr);
             return true;
