@@ -300,7 +300,7 @@ struct _Damage
 struct _ItemStat
 {
     uint32 ItemStatType;
-    uint32 ItemStatValue;
+    int32  ItemStatValue;
 
 };
 struct _Spell

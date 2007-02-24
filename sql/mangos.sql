@@ -65,6 +65,7 @@ DROP TABLE IF EXISTS `areatrigger_template`;
 CREATE TABLE `areatrigger_template` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `name` text,
+  `required_level` tinyint(3) unsigned NOT NULL default '0',
   `trigger_map` int(11) unsigned NOT NULL default '0',
   `trigger_position_x` float NOT NULL default '0',
   `trigger_position_y` float NOT NULL default '0',
@@ -604,7 +605,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `corpse`;
 CREATE TABLE `corpse` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `player` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Identifier',
+  `player` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
@@ -874,9 +875,9 @@ CREATE TABLE `creature_template` (
   `race` tinyint(3) unsigned default '0',
   `minrangedmg` float NOT NULL default '0',
   `maxrangedmg` float NOT NULL default '0',
-  `rangedattackpower` int(10) unsigned NOT NULL default '0',
+  `rangedattackpower` smallint(5) unsigned NOT NULL default '0',
   `combat_reach` float NOT NULL default '0',
-  `type` int(2) unsigned default '0',
+  `type` tinyint(3) unsigned default '0',
   `civilian` tinyint(3) unsigned NOT NULL default '0',
   `flag1` int(11) unsigned default '0',
   `equipmodel1` int(10) unsigned NOT NULL default '0',
@@ -1428,8 +1429,8 @@ CREATE TABLE `item_template` (
   `BuyPrice` int(30) unsigned NOT NULL default '0',
   `SellPrice` int(30) unsigned NOT NULL default '0',
   `InventoryType` tinyint(3) unsigned NOT NULL default '0',
-  `AllowableClass` int(30) unsigned NOT NULL default '0',
-  `AllowableRace` int(30) unsigned NOT NULL default '0',
+  `AllowableClass` mediumint(9) NOT NULL default '0',
+  `AllowableRace` mediumint(9) NOT NULL default '0',
   `ItemLevel` int(30) unsigned NOT NULL default '0',
   `RequiredLevel` tinyint(3) unsigned NOT NULL default '0',
   `RequiredSkill` int(30) unsigned NOT NULL default '0',
@@ -1443,40 +1444,40 @@ CREATE TABLE `item_template` (
   `stackable` smallint(5) unsigned NOT NULL default '0',
   `ContainerSlots` tinyint(3) unsigned NOT NULL default '0',
   `stat_type1` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value1` smallint(6) unsigned NOT NULL default '0',
+  `stat_value1` smallint(6) NOT NULL default '0',
   `stat_type2` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value2` smallint(6) unsigned NOT NULL default '0',
+  `stat_value2` smallint(6) NOT NULL default '0',
   `stat_type3` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value3` smallint(6) unsigned NOT NULL default '0',
+  `stat_value3` smallint(6) NOT NULL default '0',
   `stat_type4` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value4` smallint(6) unsigned NOT NULL default '0',
+  `stat_value4` smallint(6) NOT NULL default '0',
   `stat_type5` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value5` smallint(6) unsigned NOT NULL default '0',
+  `stat_value5` smallint(6) NOT NULL default '0',
   `stat_type6` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value6` smallint(6) unsigned NOT NULL default '0',
+  `stat_value6` smallint(6) NOT NULL default '0',
   `stat_type7` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value7` smallint(6) unsigned NOT NULL default '0',
+  `stat_value7` smallint(6) NOT NULL default '0',
   `stat_type8` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value8` smallint(6) unsigned NOT NULL default '0',
+  `stat_value8` smallint(6) NOT NULL default '0',
   `stat_type9` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value9` smallint(6) unsigned NOT NULL default '0',
+  `stat_value9` smallint(6) NOT NULL default '0',
   `stat_type10` tinyint(4) unsigned NOT NULL default '0',
-  `stat_value10` smallint(6) unsigned NOT NULL default '0',
+  `stat_value10` smallint(6) NOT NULL default '0',
   `dmg_min1` float NOT NULL default '0',
   `dmg_max1` float NOT NULL default '0',
-  `dmg_type1` tinyint(4) unsigned NOT NULL default '0',
+  `dmg_type1` tinyint(3) unsigned NOT NULL default '0',
   `dmg_min2` float NOT NULL default '0',
   `dmg_max2` float NOT NULL default '0',
-  `dmg_type2` tinyint(4) unsigned NOT NULL default '0',
+  `dmg_type2` tinyint(3) unsigned NOT NULL default '0',
   `dmg_min3` float NOT NULL default '0',
   `dmg_max3` float NOT NULL default '0',
-  `dmg_type3` tinyint(4) unsigned NOT NULL default '0',
+  `dmg_type3` tinyint(3) unsigned NOT NULL default '0',
   `dmg_min4` float NOT NULL default '0',
   `dmg_max4` float NOT NULL default '0',
-  `dmg_type4` tinyint(4) unsigned NOT NULL default '0',
+  `dmg_type4` tinyint(3) unsigned NOT NULL default '0',
   `dmg_min5` float NOT NULL default '0',
   `dmg_max5` float NOT NULL default '0',
-  `dmg_type5` tinyint(4) unsigned NOT NULL default '0',
+  `dmg_type5` tinyint(3) unsigned NOT NULL default '0',
   `armor` int(30) unsigned NOT NULL default '0',
   `holy_res` int(30) unsigned NOT NULL default '0',
   `fire_res` int(30) unsigned NOT NULL default '0',
@@ -1524,7 +1525,7 @@ CREATE TABLE `item_template` (
   `PageMaterial` int(30) unsigned NOT NULL default '0',
   `startquest` int(30) unsigned NOT NULL default '0',
   `lockid` int(30) unsigned NOT NULL default '0',
-  `Material` int(30) unsigned NOT NULL default '0',
+  `Material` int(30) NOT NULL default '0',
   `sheath` int(30) unsigned NOT NULL default '0',
   `Extra` int(30) unsigned NOT NULL default '0',
   `block` int(30) unsigned NOT NULL default '0',
@@ -1534,6 +1535,7 @@ CREATE TABLE `item_template` (
   `BagFamily` tinyint(3) unsigned NOT NULL default '0',
   `Unknown1` int(30) unsigned NOT NULL default '0',
   `ScriptName` varchar(100) NOT NULL default '',
+  `DisenchantID` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`),
   KEY `items_index` (`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
@@ -1882,7 +1884,7 @@ CREATE TABLE `pet_name_generation` (
   `entry` int(11) NOT NULL default '0',
   `half` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=199 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=199 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `pet_name_generation`
@@ -2150,10 +2152,10 @@ CREATE TABLE `quest_template` (
   `ReqItemCount2` int(11) unsigned NOT NULL default '0',
   `ReqItemCount3` int(11) unsigned NOT NULL default '0',
   `ReqItemCount4` int(11) unsigned NOT NULL default '0',
-  `ReqSourceId1` int(11) unsigned NOT NULL default '0' COMMENT 'Id of item to be used for ReqItemX creation. X = ReqSourceRef1',
-  `ReqSourceId2` int(11) unsigned NOT NULL default '0' COMMENT 'Id of item to be used for ReqItemX creation. X = ReqSourceRef2',
-  `ReqSourceId3` int(11) unsigned NOT NULL default '0' COMMENT 'Id of item to be used for ReqItemX creation. X = ReqSourceRef3',
-  `ReqSourceId4` int(11) unsigned NOT NULL default '0' COMMENT 'Id of item to be used for ReqItemX creation. X = ReqSourceRef4',
+  `ReqSourceId1` int(11) unsigned NOT NULL default '0',
+  `ReqSourceId2` int(11) unsigned NOT NULL default '0',
+  `ReqSourceId3` int(11) unsigned NOT NULL default '0',
+  `ReqSourceId4` int(11) unsigned NOT NULL default '0',
   `ReqSourceCount1` int(11) unsigned NOT NULL default '0',
   `ReqSourceCount2` int(11) unsigned NOT NULL default '0',
   `ReqSourceCount3` int(11) unsigned NOT NULL default '0',
@@ -2297,7 +2299,7 @@ CREATE TABLE `scripts` (
   `y` float NOT NULL default '0',
   `z` float NOT NULL default '0',
   `o` float NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `scripts`
@@ -2373,7 +2375,7 @@ CREATE TABLE `spell_proc_event` (
   `procFlags` int(11) NOT NULL default '0',
   `ppmRate` float NOT NULL default '0',
   PRIMARY KEY  (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `spell_proc_event`
@@ -2402,7 +2404,7 @@ CREATE TABLE `spell_scripts` (
   `y` float NOT NULL default '0',
   `z` float NOT NULL default '0',
   `o` float NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `spell_scripts`

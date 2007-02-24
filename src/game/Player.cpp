@@ -4624,7 +4624,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
     std::string applystr = apply ? "Add" : "Remove";
     for (int i = 0; i < 10; i++)
     {
-        val = proto->ItemStat[i].ItemStatValue ;
+        val = proto->ItemStat[i].ItemStatValue;
 
         if(val==0)
             continue;
@@ -4641,28 +4641,43 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 break;
             case ITEM_STAT_AGILITY:                         // modify agility
                 ApplyStatMod(STAT_AGILITY,                val, apply);
-                ApplyPosStatMod(STAT_AGILITY,             val, apply);
+                if(val > 0)
+                    ApplyPosStatMod(STAT_AGILITY,         val, apply);
+                else
+                    ApplyNegStatMod(STAT_AGILITY,        -val, apply);
                 //typestr = "AGILITY";
                 break;
             case ITEM_STAT_STRENGTH:                        //modify strength
                 ApplyStatMod(STAT_STRENGTH,               val, apply);
-                ApplyPosStatMod(STAT_STRENGTH,            val, apply);
+                if(val > 0)
+                    ApplyPosStatMod(STAT_STRENGTH,        val, apply);
+                else
+                    ApplyNegStatMod(STAT_STRENGTH,       -val, apply);
                 //typestr = "STRENGHT";
                 break;
             case ITEM_STAT_INTELLECT:                       //modify intellect
-                ApplyStatMod(STAT_INTELLECT,               val,    apply);
-                ApplyPosStatMod(STAT_INTELLECT,            val,    apply);
+                ApplyStatMod(STAT_INTELLECT,              val, apply);
+                if(val > 0)
+                    ApplyPosStatMod(STAT_INTELLECT,       val, apply);
+                else
+                    ApplyNegStatMod(STAT_INTELLECT,      -val, apply);
                 //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
                 //typestr = "INTELLECT";
                 break;
             case ITEM_STAT_SPIRIT:                          //modify spirit
                 ApplyStatMod(STAT_SPIRIT,                 val, apply);
-                ApplyPosStatMod(STAT_SPIRIT,              val, apply);
+                if(val > 0)
+                    ApplyPosStatMod(STAT_SPIRIT,          val, apply);
+                else
+                    ApplyNegStatMod(STAT_SPIRIT,         -val, apply);
                 //typestr = "SPIRIT";
                 break;
             case ITEM_STAT_STAMINA:                         //modify stamina
-                ApplyStatMod(STAT_STAMINA                ,val,   apply);
-                ApplyPosStatMod(STAT_STAMINA             ,val,   apply);
+                ApplyStatMod(STAT_STAMINA,                val, apply);
+                if(val > 0)
+                    ApplyPosStatMod(STAT_STAMINA,         val, apply);
+                else
+                    ApplyNegStatMod(STAT_STAMINA,        -val, apply);
                 //ApplyMaxHealthMod(                        val*10,apply);
                 //typestr = "STAMINA";
                 break;

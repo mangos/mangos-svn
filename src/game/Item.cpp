@@ -668,7 +668,7 @@ uint32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     // only if not other stats bonuses
     for(uint8 i = 0; i < 10; i++)
     {
-        if(itemProto->ItemStat[i].ItemStatValue > 0)
+        if(itemProto->ItemStat[i].ItemStatValue != 0)
             return 0;
     }
 
