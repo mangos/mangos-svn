@@ -99,6 +99,7 @@ void Totem::UnSummon()
         }
     }
 
+    CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 

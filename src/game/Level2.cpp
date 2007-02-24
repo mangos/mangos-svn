@@ -408,6 +408,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
     unit->DeleteFromDB();
 
+    unit->CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(unit);
 
     SendSysMessage("Creature Removed");

@@ -353,6 +353,7 @@ void Pet::Remove(PetSaveMode mode)
     else
     */
 
+    CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 
