@@ -1276,11 +1276,20 @@ void ObjectMgr::LoadQuests()
         for(int j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j )
         {
             uint32 id = qinfo->ReqSourceId[j];
-            if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
+            if(id)
             {
-                sLog.outErrorDb("Quest %u has `ReqSourceId%d` = %u but item with entry %u doesn't exist, quest can't be done.",
-                    qinfo->GetQuestId(),j+1,id,id);
-                // no changes, quest can't be done for this requirement
+                if(!sItemStorage.LookupEntry<ItemPrototype>(id))
+                {
+                    sLog.outErrorDb("Quest %u has `ReqSourceId%d` = %u but item with entry %u doesn't exist, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,id);
+                    // no changes, quest can't be done for this requirement
+                }
+                if(!qinfo->ReqSourceCount[j])
+                {
+                    sLog.outErrorDb("Quest %u has `ReqSourceId%d` = %u but `ReqSourceCount%d` = 0, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,j+1);
+                    // no changes, quest can't be done for this requirement
+                }
             }
         }
 
