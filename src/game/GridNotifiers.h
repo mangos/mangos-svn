@@ -160,9 +160,10 @@ namespace MaNGOS
         uint32 i_timeDiff;
         explicit ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Player *> &) {}
+
         #ifdef WIN32
         template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
-        template<> void Visit(std::map<OBJECT_HANDLE, Player *> &) {}
         #endif
     };
 
@@ -504,8 +505,6 @@ namespace MaNGOS
     };
 
     #ifndef WIN32
-    template<> inline void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Player *> &) {}
-
     template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void VisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
