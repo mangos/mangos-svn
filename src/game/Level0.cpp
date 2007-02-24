@@ -306,21 +306,47 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
 {
     if(!*args)
     {
-        SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        return false;
     }
-    if (strlen(args) > 16)
-    {
-        PSendSysMessage("Your password cant be long then 16 charatcers (client limit), Password dont change!");
-        return true;
-    }
-    std::string password = args;
-    loginDatabase.escape_string(password);
+    char *old_pass = strtok ((char*)args, " ");
+    char *new_pass = strtok (NULL, " ");
+    char *new_pass_c  = strtok (NULL, " ");
+        
+    if( !old_pass || !new_pass || !new_pass_c )
+        return false;
 
-    if(loginDatabase.PExecute( "UPDATE `account` SET `password` = '%s' WHERE `id` = '%d';",password.c_str(), m_session->GetAccountId()))
+    std::string password_old = old_pass;
+    std::string password_new = new_pass;
+    std::string password_new_c = new_pass_c;
+
+    if (password_new.size() > 16)
     {
-        PSendSysMessage("New password %s",password.c_str());
+        SendSysMessage("Your password cant be long then 16 charatcers (client limit), Password dont change!");
         return true;
+    }
+
+    QueryResult *result = loginDatabase.PQuery("SELECT `password` FROM `account` WHERE `id` = '%d'",m_session->GetAccountId());
+    if(result)
+    {
+         // in result already encoded password
+        loginDatabase.escape_string(password_old);
+
+        if( (*result)[0].GetCppString()==password_old && password_new == password_new_c)
+        {
+            loginDatabase.escape_string(password_new);
+
+            if(loginDatabase.PExecute( "UPDATE `account` SET `password` = '%s' WHERE `id` = '%d';",password_new.c_str(), m_session->GetAccountId()))
+            {
+                SendSysMessage("The password is changed");
+                return true;
+            }
+        }
+        else
+        {
+            SendSysMessage("The new passwords do not match, or the wrong old password");
+        }
+
+        delete result;
     }
 
     return true;
