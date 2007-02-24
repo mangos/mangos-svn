@@ -1710,30 +1710,20 @@ uint8 Spell::CanCast()
             }
         }
 
-        if(m_caster!=target)
+        // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
+        // check target for pet casts
+        if(m_caster->GetTypeId()==TYPEID_UNIT && ((Creature*)m_caster)->isPet())
         {
-            // check corectness positive/negative cast target (pet cast real check and cheating check in player/pet case)
+            // check corectness positive/negative cast target (pet cast real check and cheating check)
             if(IsPositiveSpell(m_spellInfo->Id))
             {
                 if(m_caster->IsHostileTo(target))
-                {
-                    #ifdef MANGOS_DEBUG
-                    if(m_caster->GetTypeId()==TYPEID_PLAYER)
-                        sLog.outError("Spell %u (positive) rejected to casted at hostile target, but client alloow it. Bug?",m_spellInfo->Id);
-                    #endif
                     return CAST_FAIL_INVALID_TARGET;
-                }
             }
             else
             {
                 if(m_caster->IsFriendlyTo(target))
-                {
-                    #ifdef MANGOS_DEBUG
-                    if(m_caster->GetTypeId()==TYPEID_PLAYER)
-                        sLog.outError("Spell %u (negative) rejected to casted at friendly target, but client aloow it. Bug?",m_spellInfo->Id);
-                    #endif
                     return CAST_FAIL_INVALID_TARGET;
-                }
             }
         }
 
