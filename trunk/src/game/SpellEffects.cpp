@@ -1474,7 +1474,11 @@ void Spell::EffectTameCreature(uint32 i)
 
         Pet* pet = new Pet(HUNTER_PET);
 
-        pet->CreateBaseAtCreature(creatureTarget);
+        if(!pet->CreateBaseAtCreature(creatureTarget))
+        {
+            delete pet;
+            return;
+        }
 
         pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());

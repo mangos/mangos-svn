@@ -218,6 +218,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         void RemoveFromGrid(T*, NGridType *, Cell const&);
 
         template<class T>
+        void DeleteFromWorld(T*);
+
+        template<class T>
         T* FindInGrid(uint64 guid, NGridType *, Cell const&) const;
 };
 

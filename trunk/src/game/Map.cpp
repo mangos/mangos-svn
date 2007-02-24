@@ -271,6 +271,30 @@ void Map::RemoveFromGrid(Creature* obj, NGridType *grid, Cell const& cell)
 }
 
 template<class T>
+void Map::DeleteFromWorld(T* obj)
+{
+    delete obj;
+}
+
+template<>
+void Map::DeleteFromWorld(Corpse* obj)
+{
+    if(obj->GetType()==CORPSE_RESURRECTABLE)
+        ObjectAccessor::Instance().RemoveCorpse(obj);
+
+    delete obj;
+}
+
+template<>
+void Map::DeleteFromWorld(Creature* obj)
+{
+    if(obj->isPet())
+        ObjectAccessor::Instance().RemovePet((Pet*)obj);
+
+    delete obj;
+}
+
+template<class T>
 T* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
 {
     return ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(guid);
@@ -619,7 +643,7 @@ void Map::Remove(Player *player, bool remove)
     notifier.Notify();
 
     if( remove )
-        delete player;
+        DeleteFromWorld(player);
 }
 
 template<class T>
@@ -655,7 +679,7 @@ Map::Remove(T *obj, bool remove)
     if( remove )
     {
         obj->SaveRespawnTime();
-        delete obj;
+        DeleteFromWorld(obj);
     }
 }
 

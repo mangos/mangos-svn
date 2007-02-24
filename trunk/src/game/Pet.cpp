@@ -424,7 +424,7 @@ void Pet::GivePetLevel(uint32 level)
     SetUInt32Value(UNIT_FIELD_BYTES_1,(loyalty << 8));
 }
 
-void Pet::CreateBaseAtCreature(Creature* creature)
+bool Pet::CreateBaseAtCreature(Creature* creature)
 {
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
 
@@ -434,9 +434,7 @@ void Pet::CreateBaseAtCreature(Creature* creature)
     if(cinfo->type == CREATURE_TYPE_CRITTER)
     {
         m_petType = MINI_PET;
-        AIM_Initialize();
-        MapManager::Instance().GetMap(creature->GetMapId())->Add((Creature*)this);
-        return;
+        return true;
     }
     SetUInt64Value(UNIT_FIELD_DISPLAYID,       creature->GetUInt64Value(UNIT_FIELD_DISPLAYID));
     SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, creature->GetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID));
@@ -458,6 +456,7 @@ void Pet::CreateBaseAtCreature(Creature* creature)
     m_spells[1] = creature->m_spells[1];
     m_spells[2] = creature->m_spells[2];
     m_spells[3] = creature->m_spells[3];
+    return true;
 }
 
 void Pet::InitStatsForLevel(uint32 petlevel)

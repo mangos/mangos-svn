@@ -78,7 +78,7 @@ class Pet : public Creature
 {
     public:
         explicit Pet(PetType type);
-        virtual ~Pet(){};
+        virtual ~Pet() {}
 
         uint32 GetActState() { return m_actState; }
         void SetActState(uint32 st) { m_actState=st; }
@@ -90,7 +90,7 @@ class Pet : public Creature
         PetType getPetType() const { return m_petType; }
         bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
 
-        void CreateBaseAtCreature( Creature* creature );
+        bool CreateBaseAtCreature( Creature* creature );
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0 );
         void SavePetToDB(PetSaveMode mode);
         void Remove(PetSaveMode mode);
