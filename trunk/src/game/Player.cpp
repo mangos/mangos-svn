@@ -1894,7 +1894,7 @@ void Player::RemoveMail(uint32 id)
 }
 
 //call this function when mail receiver is online
-void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemPageId, uint32 itemGuid, uint32 item_template, time_t etime, uint32 money, uint32 COD, uint32 checked, Item* pItem)
+void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t etime, uint32 money, uint32 COD, uint32 checked, Item* pItem)
 {
     if ( !m_mailsLoaded )
     {
@@ -1908,7 +1908,7 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
     m->sender = sender;
     m->receiver = this->GetGUIDLow();
     m->subject = subject;
-    m->itemPageId = itemPageId;
+    m->itemTextId = itemTextId;
     m->item_guid = itemGuid;
     m->item_template = item_template;
     m->time = etime;
@@ -10317,7 +10317,7 @@ void Player::_LoadMail()
 
     m_mail.clear();
     //mails are in right order
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
     if(result)
     {
         do
@@ -10329,7 +10329,7 @@ void Player::_LoadMail()
             m->sender = fields[2].GetUInt32();
             m->receiver = fields[3].GetUInt32();
             m->subject = fields[4].GetCppString();
-            m->itemPageId = fields[5].GetUInt32();
+            m->itemTextId = fields[5].GetUInt32();
             m->item_guid = fields[6].GetUInt32();
             m->item_template = fields[7].GetUInt32();
             m->time = fields[8].GetUInt32();
@@ -10823,17 +10823,17 @@ void Player::_SaveMail()
         Mail *m = (*itr);
         if (m->state == CHANGED)
         {
-            sDatabase.PExecute("UPDATE `mail` SET `itemPageId` = '%u',`item_guid` = '%u',`item_template` = '%u',`time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
-                m->itemPageId, m->item_guid, m->item_template, (uint64)m->time, m->money, m->COD, m->checked, m->messageID);
+            sDatabase.PExecute("UPDATE `mail` SET `itemTextId` = '%u',`item_guid` = '%u',`item_template` = '%u',`time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
+                m->itemTextId, m->item_guid, m->item_template, (uint64)m->time, m->money, m->COD, m->checked, m->messageID);
             m->state = UNCHANGED;
         }
         else if (m->state == DELETED)
         {
             if (m->item_guid)
                 sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
-            if (m->itemPageId)
+            if (m->itemTextId)
             {
-                sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", m->itemPageId);
+                sDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", m->itemTextId);
             }
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
         }

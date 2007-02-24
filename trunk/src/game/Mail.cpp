@@ -131,10 +131,10 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
     pl->SendMailResult(0, 0, MAIL_OK);
 
-    uint32 itemPageId = 0;
+    uint32 itemTextId = 0;
     if (body.size() > 0)
     {
-        itemPageId = objmgr.CreateItemPage( body );
+        itemTextId = objmgr.CreateItemText( body );
     }
 
     pl->ModifyMoney( -30 - money );
@@ -156,16 +156,16 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     time_t etime = time(NULL) + DAY * ((COD > 0)? 3 : 30);  //time if COD 3 days, if no COD 30 days
     if (receive)
     {
-        receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemPageId, GUID_LOPART(itemId), item_template, etime, money, COD, NOT_READ, pItem);
+        receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemTextId, GUID_LOPART(itemId), item_template, etime, money, COD, NOT_READ, pItem);
     }
     else if (pItem)
         delete pItem;                                       //item is sent, but receiver isn't online .. so remove it from RAM
     // backslash all '
     sDatabase.escape_string(subject);
     //not needed : sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '0')",
-        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemPageId, GUID_LOPART(itemId), item_template, (uint64)etime, money, COD);
+        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, GUID_LOPART(itemId), item_template, (uint64)etime, money, COD);
     sDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
     sDatabase.CommitTransaction();
@@ -241,16 +241,16 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     time_t etime = time(NULL) + 30*DAY;
     Player *receiver = objmgr.GetPlayer((uint64)m->sender);
     if(receiver)
-        receiver->CreateMail(messageID,0,m->receiver,m->subject,m->itemPageId,m->item_guid,m->item_template,etime,m->money,0,RETURNED_CHECKED,pItem);
+        receiver->CreateMail(messageID,0,m->receiver,m->subject,m->itemTextId,m->item_guid,m->item_template,etime,m->money,0,RETURNED_CHECKED,pItem);
     else if ( pItem )
         delete pItem;
 
     std::string subject;
     subject = m->subject;
     sDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '%u', '0', '16')",
-        messageID, m->receiver, m->sender, subject.c_str(), m->itemPageId, m->item_guid, m->item_template, (uint64)etime, m->money);
+        messageID, m->receiver, m->sender, subject.c_str(), m->itemTextId, m->item_guid, m->item_template, (uint64)etime, m->money);
     delete m;                                               //we can deallocate old mail
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
 }
@@ -300,7 +300,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             //escape apostrophes
             std::string subject = m->subject;
             sDatabase.escape_string(subject);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
                 "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '8')",
                 newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, m->COD);
 
@@ -383,7 +383,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         if ((*itr)->messageType == 0)
             data << (uint32) 0;                             // HIGHGUID_PLAYER
         data << (*itr)->subject.c_str();                    // Subject string - once 00, when mail type = 3
-        data << (uint32) (*itr)->itemPageId;                // sure about this
+        data << (uint32) (*itr)->itemTextId;                // sure about this
         data << (uint32) 0;                                 // Constant
         if ((*itr)->messageType == 0)
             data << (uint32) 0x29;                          // Constant
@@ -436,28 +436,21 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+4+4);
 
-    uint32 itemPageId;
+    uint32 itemTextId;
     uint32 mailId;                                          //this value can be item id in bag, but it is also mail id
     uint32 unk;                                             //maybe something like state - 0x70000000
 
-    recv_data >> itemPageId >> mailId >> unk;
+    recv_data >> itemTextId >> mailId >> unk;
 
     Player* pl = _player;
 
     //some check needed, if player has item with guid mailId, or has mail with id mailId
 
-    sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", itemPageId, mailId, unk);
+    sLog.outDebug("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", itemTextId, mailId, unk);
 
     WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, (4+10));// guess size
-    data << itemPageId;
-    /*QueryResult *result = sDatabase.PQuery( "SELECT `text` FROM `item_page` WHERE `id` = '%u'", itemPageId );
-    if (result) {
-        Field *fields = result->Fetch();
-        data << fields[0].GetCppString();
-    } else {
-        data << "There is no info for this item.";
-    }*/
-    data << objmgr.GetItemPage( itemPageId );
+    data << itemTextId;
+    data << objmgr.GetItemText( itemTextId );
     SendPacket(&data);
 }
 
@@ -474,7 +467,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     Player *pl = _player;
 
     Mail* m = pl->GetMail(mailId);
-    if(!m || !m->itemPageId || m->state == DELETED)
+    if(!m || !m->itemTextId || m->state == DELETED)
     {
         pl->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_INTERNAL_ERROR);
         return;
@@ -487,7 +480,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
         return;
     }
 
-    bodyItem->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , m->itemPageId );
+    bodyItem->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , m->itemTextId );
     bodyItem->SetUInt32Value( ITEM_FIELD_CREATOR, m->sender);
 
     sLog.outDetail("HandleMailCreateTextItem mailid=%u",mailId);
@@ -496,7 +489,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, bodyItem, false );
     if( msg == EQUIP_ERR_OK )
     {
-        m->itemPageId = 0;
+        m->itemTextId = 0;
         m->state = CHANGED;
         pl->m_mailsUpdated = true;
 

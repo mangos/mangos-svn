@@ -199,7 +199,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
 
     //prepare mail data... :
     uint32 mailId = this->GenerateMailID();
-    uint32 itemPage = this->CreateItemPage( msgAuctionWonBody.str() );
+    uint32 itemTextId = this->CreateItemText( msgAuctionWonBody.str() );
     time_t etime = time(NULL) + (30 * DAY);
 
     Player *bidder = objmgr.GetPlayer((uint64) auction->bidder);
@@ -207,14 +207,14 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     {
         bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, (uint64) auction->bidder, 0, 0, auction->item_template);
 
-        bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionWonSubject.str(), itemPage, auction->item_guid, auction->item_template, etime, 0, 0, AUCTION_CHECKED, pItem);
+        bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, 0, 0, AUCTION_CHECKED, pItem);
     }
     else
         delete pItem;
 
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '0', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemPage, auction->item_guid, auction->item_template, (uint64)etime, AUCTION_CHECKED);
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime, AUCTION_CHECKED);
 }
 
 //call this method to send mail to auctionowner, when auction is successful, it does not clear ram
@@ -236,7 +236,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
     auctionSuccessfulBody << auction->deposit << ":" << auctionCut;
     sLog.outDebug("AuctionSuccessful body string : %s", auctionSuccessfulBody.str().c_str());
 
-    uint32 itemPage = this->CreateItemPage( auctionSuccessfulBody.str() );
+    uint32 itemTextId = this->CreateItemText( auctionSuccessfulBody.str() );
 
     uint32 mailId = this->GenerateMailID();
     time_t etime = time(NULL) + (30 * DAY);
@@ -248,12 +248,12 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
         //send auctionowner notification, bidder must be current!
         owner->GetSession()->SendAuctionOwnerNotification( auction );
 
-        owner->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionSuccessfulSubject.str(), itemPage, 0, 0, etime, profit, 0, AUCTION_CHECKED, NULL);
+        owner->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, profit, 0, AUCTION_CHECKED, NULL);
     }
 
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "', '%u', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemPage, (uint64)etime, profit, AUCTION_CHECKED);
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, profit, AUCTION_CHECKED);
 }
 
 //does not clear ram
@@ -270,7 +270,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         subject << auction->item_template << ":0:" << AUCTION_EXPIRED;
         time_t etime = time(NULL) + 30 * DAY;
 
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemPageId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "', '0', '0', '0')",
             messageId, auction->location, auction->owner, subject.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime );
         if ( seller )
@@ -1554,9 +1554,9 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
     sLog.outString( ">> Loaded %u script definitions", count );
 }
 
-void ObjectMgr::LoadItemPages()
+void ObjectMgr::LoadItemTexts()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `item_page`");
+    QueryResult *result = sDatabase.PQuery("SELECT `id`, `text` FROM `item_text`");
 
     uint32 count = 0;
 
@@ -1579,7 +1579,7 @@ void ObjectMgr::LoadItemPages()
 
         fields = result->Fetch();
 
-        mItemPages[ fields[0].GetUInt32() ] = fields[1].GetCppString();
+        mItemTexts[ fields[0].GetUInt32() ] = fields[1].GetCppString();
 
         ++count;
 
@@ -1588,7 +1588,15 @@ void ObjectMgr::LoadItemPages()
     delete result;
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %u item pages", count );
+    sLog.outString( ">> Loaded %u item texts", count );
+}
+
+
+void ObjectMgr::LoadPageTexts()
+{
+    sPageTextStore.Load ();
+    sLog.outString( ">> Loaded %u page texts", sPageTextStore.RecordCount );
+    sLog.outString( "" );
 }
 
 void ObjectMgr::AddGossipText(GossipText *pGText)
@@ -1676,8 +1684,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     sLog.outDebug("Returning mails current time: hour: %d, minute: %d, second: %d ", localtime(&basetime)->tm_hour, localtime(&basetime)->tm_min, localtime(&basetime)->tm_sec);
     //delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
-        sDatabase.PExecute("DELETE FROM `mail` WHERE `time` < '%u' AND `item_guid` = '0' AND `itemPageId` = 0", basetime);
-    QueryResult* result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemPageId`,`item_guid`,`time`,`cod`,`checked` FROM `mail` WHERE `time` < '%u'", basetime);
+        sDatabase.PExecute("DELETE FROM `mail` WHERE `time` < '%u' AND `item_guid` = '0' AND `itemTextId` = 0", basetime);
+    QueryResult* result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`item_guid`,`time`,`cod`,`checked` FROM `mail` WHERE `time` < '%u'", basetime);
     if ( !result )
         return;                                             // any mails need to be returned or deleted
     Field *fields;
@@ -1693,7 +1701,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         m->messageType = fields[1].GetUInt8();
         m->sender = fields[2].GetUInt32();
         m->receiver = fields[3].GetUInt32();
-        m->itemPageId = fields[4].GetUInt32();
+        m->itemTextId = fields[4].GetUInt32();
         m->item_guid = fields[5].GetUInt32();
         m->time = fields[6].GetUInt32();
         m->COD = fields[7].GetUInt32();
@@ -1724,9 +1732,9 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
                 sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
             }
         }
-        if (m->itemPageId)
+        if (m->itemTextId)
         {
-            sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", m->itemPageId);
+            sDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", m->itemTextId);
         }
         //deletemail = true;
         //delmails << m->messageID << ", ";
@@ -1734,34 +1742,6 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         delete m;
     } while (result->NextRow());
     delete result;
-}
-
-ItemPage *ObjectMgr::RetreiveItemPageText(uint32 Page_ID)
-{
-    ItemPage *pIText;
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`text`,`next_page` FROM `item_page` WHERE `id` = '%u'", Page_ID);
-
-    if( !result ) return NULL;
-    int cic, count = 0;
-    pIText = new ItemPage;
-
-    do
-    {
-        count++;
-        cic = 0;
-
-        Field *fields = result->Fetch();
-
-        pIText->Page_ID    = fields[cic++].GetUInt32();
-
-        pIText->PageText   = fields[cic++].GetCppString();
-        pIText->Next_Page  = fields[cic++].GetUInt32();
-
-        if ( !pIText->Page_ID ) break;
-    } while( result->NextRow() );
-
-    delete result;
-    return pIText;
 }
 
 void ObjectMgr::AddAreaTriggerPoint(AreaTriggerPoint *pArea)
@@ -2161,15 +2141,15 @@ void ObjectMgr::SetHighestGuids()
     {
         m_mailid = 0;
     }
-    result = sDatabase.Query( "SELECT MAX(`id`) FROM `item_page`" );
+    result = sDatabase.Query( "SELECT MAX(`id`) FROM `item_text`" );
     if( result )
     {
-        m_ItemPageId = (*result)[0].GetUInt32();
+        m_ItemTextId = (*result)[0].GetUInt32();
 
         delete result;
     }
     else
-        m_ItemPageId = 0;
+        m_ItemTextId = 0;
 
     result = sDatabase.Query( "SELECT MAX(`guid`) FROM `corpse`" );
     if( result )
@@ -2191,23 +2171,23 @@ uint32 ObjectMgr::GenerateMailID()
     return ++m_mailid;
 }
 
-uint32 ObjectMgr::GenerateItemPageID()
+uint32 ObjectMgr::GenerateItemTextID()
 {
-    return ++m_ItemPageId;
+    return ++m_ItemTextId;
 }
 
-uint32 ObjectMgr::CreateItemPage(std::string text)
+uint32 ObjectMgr::CreateItemText(std::string text)
 {
-    uint32 newItemPageId = GenerateItemPageID();
+    uint32 newItemTextId = GenerateItemTextID();
     //insert new itempage to container
-    mItemPages[ newItemPageId ] = text;
+    mItemTexts[ newItemTextId ] = text;
     //save new itempage
     sDatabase.escape_string(text);
     //any Delete query needed, itempageId is maximum of all ids
     std::ostringstream query;
-    query << "INSERT INTO `item_page` (`id`,`text`,`next_page`) VALUES ( '" << newItemPageId << "', '" << text << "', '0' )";
+    query << "INSERT INTO `item_text` (`id`,`text`) VALUES ( '" << newItemTextId << "', '" << text << "')";
     sDatabase.Execute(query.str().c_str());                 //needs to be run this way, because mail body may be more than 1024 characters
-    return newItemPageId;
+    return newItemTextId;
 }
 
 uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)

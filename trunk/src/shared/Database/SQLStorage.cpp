@@ -26,12 +26,14 @@ extern DatabaseMysql  sDatabase;
 const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiiiisi";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
 const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisis";
+const char PageTextfmt[]="isi";
 const char SpellProcEventfmt[]="iiiiiif";
 const char SpellThreatfmt[]="ii";
 
 SQLStorage sCreatureStorage(CreatureInfofmt,"creature_template");
 SQLStorage sGOStorage(GameObjectInfofmt,"gameobject_template");
 SQLStorage sItemStorage(ItemPrototypefmt,"item_template");
+SQLStorage sPageTextStore(PageTextfmt,"page_text");
 SQLStorage sSpellProcEventStore(SpellProcEventfmt,"spell_proc_event");
 SQLStorage sSpellThreatStore(SpellThreatfmt,"spell_threat");
 

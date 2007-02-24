@@ -40,10 +40,10 @@ struct GossipText
     GossipTextOption Options[8];
 };
 
-struct ItemPage
+struct PageText
 {
     uint32 Page_ID;
-    std::string PageText;
+    char * Text;
 
     uint32 Next_Page;
 };

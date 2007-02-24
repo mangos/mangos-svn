@@ -44,6 +44,7 @@
 
 extern SQLStorage sCreatureStorage;
 extern SQLStorage sGOStorage;
+extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
 extern SQLStorage sSpellProcEventStore;
 extern SQLStorage sSpellThreatStore;
@@ -209,7 +210,6 @@ class ObjectMgr
 
         void AddAreaTriggerPoint(AreaTriggerPoint *pArea);
         AreaTriggerPoint *GetAreaTriggerQuestPoint(uint32 Trigger_ID);
-        ItemPage *RetreiveItemPageText(uint32 Page_ID);
 
         void AddGossipText(GossipText *pGText);
         GossipText *GetGossipText(uint32 Text_ID);
@@ -244,7 +244,8 @@ class ObjectMgr
         void LoadGossipText();
         void LoadAreaTriggerPoints();
 
-        void LoadItemPages();
+        void LoadItemTexts();
+        void LoadPageTexts();
 
         void LoadTeleportCoords();
 
@@ -264,13 +265,13 @@ class ObjectMgr
         uint32 GenerateLowGuid(uint32 guidhigh);
         uint32 GenerateAuctionID();
         uint32 GenerateMailID();
-        uint32 GenerateItemPageID();
+        uint32 GenerateItemTextID();
 
-        uint32 CreateItemPage(std::string text);
-        std::string GetItemPage( uint32 id )
+        uint32 CreateItemText(std::string text);
+        std::string GetItemText( uint32 id )
         {
-            ItemPageMap::const_iterator itr = mItemPages.find( id );
-            if ( itr != mItemPages.end() )
+            ItemTextMap::const_iterator itr = mItemTexts.find( id );
+            if ( itr != mItemTexts.end() )
                 return itr->second;
             else
                 return "There is no info for this item";
@@ -320,7 +321,7 @@ class ObjectMgr
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
-        uint32 m_ItemPageId;
+        uint32 m_ItemTextId;
 
         uint32 m_hiCharGuid;
         uint32 m_hiCreatureGuid;
@@ -334,7 +335,7 @@ class ObjectMgr
 
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
-        typedef HM_NAMESPACE::hash_map<uint32, std::string> ItemPageMap;
+        typedef HM_NAMESPACE::hash_map<uint32, std::string> ItemTextMap;
 
         GroupSet            mGroupSet;
         GuildSet            mGuildSet;
@@ -342,7 +343,7 @@ class ObjectMgr
         ItemMap             mItems;
         ItemMap             mAitems;
 
-        ItemPageMap         mItemPages;
+        ItemTextMap         mItemTexts;
 
         AuctionHouseObject  mHordeAuctions;
         AuctionHouseObject  mAllianceAuctions;

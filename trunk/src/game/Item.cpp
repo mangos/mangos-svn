@@ -495,8 +495,8 @@ void Item::SaveToDB()
         } break;
         case ITEM_REMOVED:
         {
-            if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 2282 )
-                sDatabase.PExecute("DELETE FROM `item_page` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
+            if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 0 )
+                sDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
             sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
             if(HasFlag(ITEM_FIELD_FLAGS, 8))
                 sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", GetGUIDLow());

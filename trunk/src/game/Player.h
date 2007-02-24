@@ -788,7 +788,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetSelection(const uint64 &guid) { m_curSelection = guid; }
         void SetTarget(const uint64 &guid) { m_curTarget = guid; }
 
-        void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemPageId, uint32 itemGuid, uint32 item_template, time_t etime, uint32 money, uint32 COD, uint32 checked, Item* pItem);
+        void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t etime, uint32 money, uint32 COD, uint32 checked, Item* pItem);
         void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0);
         void AddMail(Mail *m);
         //void SetMail(Mail *m);

@@ -1409,29 +1409,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `item_loot_template` ENABLE KEYS */;
 
 --
--- Table structure for table `item_page`
---
-
-DROP TABLE IF EXISTS `item_page`;
-CREATE TABLE `item_page` (
-  `id` int(11) NOT NULL default '0',
-  `text` longtext,
-  `next_page` bigint(20) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`id`),
-  KEY `item_pages_index` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
-
---
--- Dumping data for table `item_page`
---
-
-
-/*!40000 ALTER TABLE `item_page` DISABLE KEYS */;
-LOCK TABLES `item_page` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `item_page` ENABLE KEYS */;
-
---
 -- Table structure for table `item_template`
 --
 
@@ -1573,6 +1550,27 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `item_template` ENABLE KEYS */;
 
 --
+-- Table structure for table `item_text`
+--
+
+DROP TABLE IF EXISTS `item_text`;
+CREATE TABLE `item_text` (
+  `id` int(11) NOT NULL default '0',
+  `text` longtext,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
+
+--
+-- Dumping data for table `item_text`
+--
+
+
+/*!40000 ALTER TABLE `item_text` DISABLE KEYS */;
+LOCK TABLES `item_text` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `item_text` ENABLE KEYS */;
+
+--
 -- Table structure for table `mail`
 --
 
@@ -1583,7 +1581,7 @@ CREATE TABLE `mail` (
   `sender` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `receiver` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `subject` longtext,
-  `itemPageId` int(11) unsigned NOT NULL default '0',
+  `itemTextId` int(11) unsigned NOT NULL default '0',
   `item_guid` int(11) unsigned NOT NULL default '0' COMMENT 'Mail Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
   `time` int(11) unsigned NOT NULL default '0',
@@ -1822,6 +1820,28 @@ CREATE TABLE `npc_vendor` (
 LOCK TABLES `npc_vendor` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `npc_vendor` ENABLE KEYS */;
+
+--
+-- Table structure for table `page_text`
+--
+
+DROP TABLE IF EXISTS `page_text`;
+CREATE TABLE `page_text` (
+  `entry` int(11) NOT NULL default '0',
+  `text` longtext,
+  `next_page` bigint(20) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
+
+--
+-- Dumping data for table `page_text`
+--
+
+
+/*!40000 ALTER TABLE `page_text` DISABLE KEYS */;
+LOCK TABLES `page_text` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `page_text` ENABLE KEYS */;
 
 --
 -- Table structure for table `pet_levelstats`
