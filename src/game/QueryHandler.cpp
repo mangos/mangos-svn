@@ -524,7 +524,7 @@ void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
 
     while (pageID)
     {
-        ItemPage *pPage = objmgr.RetreiveItemPageText( pageID );
+        PageText const *pPage = sPageTextStore.LookupEntry<PageText>( pageID );
                                                             // guess size
         WorldPacket data( SMSG_PAGE_TEXT_QUERY_RESPONSE, 50 );
         data << pageID;
@@ -537,7 +537,7 @@ void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
         }
         else
         {
-            data << pPage->PageText;
+            data << pPage->Text;
             data << uint32(pPage->Next_Page);
             pageID = pPage->Next_Page;
         }

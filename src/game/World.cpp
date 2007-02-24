@@ -366,8 +366,11 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Items..." );
     objmgr.LoadItemPrototypes();
 
-    sLog.outString( "Loading Item Pages..." );
-    objmgr.LoadItemPages();
+    sLog.outString( "Loading Page Texts..." );
+    objmgr.LoadPageTexts();
+
+    sLog.outString( "Loading Item Texts..." );
+    objmgr.LoadItemTexts();
 
     sLog.outString( "Loading Creature Templates..." );
     objmgr.LoadCreatureTemplates();

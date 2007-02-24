@@ -78,7 +78,7 @@ struct Mail
     uint32 sender;
     uint32 receiver;
     std::string subject;
-    uint32 itemPageId;
+    uint32 itemTextId;
     uint32 item_guid;
     uint32 item_template;
     time_t time;
