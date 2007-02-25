@@ -114,7 +114,7 @@ class Guild
         Guild();
         ~Guild();
 
-        void create(uint64 lGuid, std::string gname);
+        bool create(uint64 lGuid, std::string gname);
         void Disband();
 
         typedef std::list<MemberSlot> MemberList;
