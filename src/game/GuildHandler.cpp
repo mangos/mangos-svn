@@ -486,7 +486,11 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
     // create guild
     Guild* guild = new Guild;
-    guild->create(_player->GetGUID(),guildname);
+    if(!guild->create(_player->GetGUID(),guildname))
+    {
+        delete guild;
+        return;
+    }
 
     // register guild and add guildmaster
     objmgr.AddGuild(guild);
@@ -577,26 +581,29 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
 {
     CHECK_PACKET_SIZE(recvPacket,1);
 
-    WorldPacket data;
     std::string gname;
-    Guild *guild;
-
+    
     //sLog.outDebug( "WORLD: Received CMSG_GUILD_CREATE"  );
 
     recvPacket >> gname;
-    if(!GetPlayer()->GetGuildId())
+
+    if(GetPlayer()->GetGuildId())
+        return;
+
+    Guild *guild = new Guild;
+    if(!guild->create(GetPlayer()->GetGUID(),gname))
     {
-        guild = new Guild;
-        guild->create(GetPlayer()->GetGUID(),gname);
-        objmgr.AddGuild(guild);
+        delete guild;
+        return;
     }
+
+    objmgr.AddGuild(guild);
 }
 
 void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 {
     CHECK_PACKET_SIZE(recvPacket,1);
 
-    WorldPacket data;
     std::string Invitedname,plname;
 
     //sLog.outDebug( "WORLD: Received CMSG_GUILD_INVITE"  );
@@ -660,7 +667,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     player->SetGuildIdInvited(GetPlayer()->GetGuildId());
 
-    data.Initialize(SMSG_GUILD_INVITE, (8+10));             // guess size
+    WorldPacket data(SMSG_GUILD_INVITE, (8+10));            // guess size
     data << GetPlayer()->GetName();
     data << guild->GetName();
     player->GetSession()->SendPacket(&data);
@@ -672,7 +679,6 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 {
     CHECK_PACKET_SIZE(recvPacket,1);
 
-    WorldPacket data;
     std::string plName;
     uint64 plGuid;
     Guild *guild;
@@ -718,7 +724,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     guild->DelMember(plGuid);
 
-    data.Initialize(SMSG_GUILD_EVENT, (2+20));              // guess size
+    WorldPacket data(SMSG_GUILD_EVENT, (2+20));             // guess size
     data << (uint8)GE_REMOVED;
     data << (uint8)2;
     data << plName;

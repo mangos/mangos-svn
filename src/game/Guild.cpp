@@ -49,15 +49,15 @@ Guild::~Guild()
 
 }
 
-void Guild::create(uint64 lGuid, std::string gname)
+bool Guild::create(uint64 lGuid, std::string gname)
 {
     std::string rname;
     std::string lName;
 
     if(!objmgr.GetPlayerNameByGUID(lGuid, lName))
-        return;
+        return false;
     if(objmgr.GetGuildByName(gname))
-        return;
+        return false;
 
     sLog.outDebug("GUILD: creating guild %s to leader: %u", gname.c_str(), GUID_LOPART(lGuid));
 
@@ -103,6 +103,7 @@ void Guild::create(uint64 lGuid, std::string gname)
     CreateRank(rname,GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 
     AddMember(lGuid, (uint32)GR_GUILDMASTER);
+    return true;
 }
 
 void Guild::AddMember(uint64 plGuid, uint32 plRank)
