@@ -202,8 +202,15 @@ void Spell::EffectInstaKill(uint32 i)
 
 void Spell::EffectSchoolDMG(uint32 i)
 {
-    if( unitTarget && unitTarget->isAlive() && damage >= 0)
-        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell);
+    if( unitTarget && unitTarget->isAlive())
+    {
+        // Bloodthirst
+        if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
+            return EffectWeaponDmg(i); 
+
+        if(damage >= 0)
+            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell);
+    }
 
     if (m_caster->GetTypeId()==TYPEID_PLAYER && m_spellInfo->Attributes == 0x150010)
         m_caster->AttackStop();
@@ -241,6 +248,33 @@ void Spell::EffectDummy(uint32 i)
         ((Creature*)unitTarget)->AI().AttackStart(m_caster->getVictim());
         return;
     }
+    
+    // Gift of Life (warrior bwl trinket)
+    if(m_spellInfo->Id == 23725)
+    {
+        uint32 health_mod = uint32(m_caster->GetMaxHealth()*0.15);
+
+        SpellEntry const *OriginalHealthModSpell = sSpellStore.LookupEntry(23782);
+        SpellEntry CustomHealthModSpell = *OriginalHealthModSpell;
+        SpellEntry const *OriginalHealingSpell = sSpellStore.LookupEntry(23783);
+        SpellEntry CustomHealingSpell = *OriginalHealingSpell;
+        CustomHealthModSpell.EffectBasePoints[0] = health_mod;
+        CustomHealingSpell.EffectBasePoints[0] = health_mod;
+        m_caster->CastSpell(m_caster,&CustomHealthModSpell,true,NULL);
+        m_caster->CastSpell(m_caster,&CustomHealingSpell,true,NULL);
+        return;
+    }
+
+    // Last Stand
+    if(m_spellInfo->Id == 12975)
+    {
+        uint32 health_mod = uint32(m_caster->GetMaxHealth()*0.3);
+        SpellEntry const* OriginalHealthModSpell = sSpellStore.LookupEntry(12976);
+        SpellEntry CustomHealthModSpell = *OriginalHealthModSpell;
+        CustomHealthModSpell.EffectBasePoints[0] = health_mod;
+        m_caster->CastSpell(m_caster,&CustomHealthModSpell,true,NULL);
+        return;
+    } 
 
     // Preparation Rogue - immediately finishes the cooldown on other Rogue abilities
     if(m_spellInfo->Id == 14185)
@@ -1681,6 +1715,21 @@ void Spell::EffectWeaponDmg(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
+        
+    // Bloodthirst
+    uint32 BTAura = 0;
+    if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
+    {
+        switch(m_spellInfo->Id)
+        {
+            case 23881: BTAura = 23885; break;
+            case 23892: BTAura = 23886; break;
+            case 23893: BTAura = 23887; break;
+            case 23894: BTAura = 23888; break;
+            default: break;
+        }
+        damage = 0.45 * (m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS));
+    } 
 
     uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };
 
@@ -1743,6 +1792,10 @@ void Spell::EffectWeaponDmg(uint32 i)
         criticalhit = true;
 
     m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, m_spellInfo->School, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
+    
+    // Bloodthirst
+    if (BTAura)
+        m_caster->CastSpell(m_caster,BTAura,true); 
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
         eff_damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);
