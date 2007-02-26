@@ -164,9 +164,9 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
 
     Player* p_caster;
 
-    // make own copy of custom `info` (`info` can be created at stack)
+    // make own copy of custom `info` (`info` can be created at stack) for non-triggered spell
     // copy custom SpellEntry in m_spellInfo will be delete at Spell delete
-    if(info != sSpellStore.LookupEntry( info->Id ))
+    if(info != sSpellStore.LookupEntry( info->Id ) && !triggered)
     {
         SpellEntry* sInfo = new SpellEntry;
         *sInfo = *info;
@@ -230,8 +230,8 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
 
 Spell::~Spell()
 {
-    // free custom m_spellInfo
-    if(m_spellInfo != sSpellStore.LookupEntry(m_spellInfo->Id))
+    // free custom m_spellInfo for non-triggered spell
+    if(m_spellInfo != sSpellStore.LookupEntry(m_spellInfo->Id) && !m_IsTriggeredSpell)
         delete m_spellInfo;
 }
 
@@ -1729,6 +1729,7 @@ uint8 Spell::CanCast()
 
         if(target->IsImmunedToSpell(m_spellInfo))
             return CAST_FAIL_IMMUNE;
+
         /*
         if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
         {
@@ -1801,7 +1802,7 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_FAILED;
                     break;
                 }
-
+                // Execute
                 if(m_spellInfo->SpellIconID == 1648)
                 {
                     if(unitTarget->GetHealth() > unitTarget->GetMaxHealth()*0.2)
@@ -1812,6 +1813,19 @@ uint8 Spell::CanCast()
                 }
                 break;
             }
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            {
+                // Hammer of Wrath
+                if(m_spellInfo->SpellVisual == 7250)
+                {
+                    if(unitTarget->GetHealth() > unitTarget->GetMaxHealth()*0.2)
+                    {
+                        castResult = CAST_FAIL_INVALID_TARGET;
+                        break;
+                    }
+                }
+                break;
+            } 
             case SPELL_EFFECT_TAMECREATURE:
             {
                 if (!unitTarget || unitTarget->GetTypeId() == TYPEID_PLAYER)
