@@ -84,6 +84,8 @@ class Aura
         void HandleModHealingPercent(bool Apply, bool Real);
         void HandleAuraEmpathy(bool Apply, bool Real);
         void HandleAuraModRangedAttackPower(bool Apply, bool Real);
+        void HandleAuraModMeleeDamageTaken(bool Apply, bool Real);
+        void HandleAuraModMeleeDamageTakenPercent(bool Apply, bool Real);
         void HandleAuraModIncreaseSpeedAlways(bool Apply, bool Real);
         void HandleAuraModIncreaseEnergyPercent(bool Apply, bool Real);
         void HandleAuraModIncreaseHealthPercent(bool Apply, bool Real);
