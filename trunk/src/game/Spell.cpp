@@ -928,26 +928,41 @@ void Spell::SendSpellCooldown()
     // self spell cooldown
     if (rec > 0)
     {
-        data << uint32(m_spellInfo->Id);
-        data << uint32(rec);
+        // only send if different from client known cooldown
+        if(m_spellInfo->RecoveryTime != rec)
+        {
+            data << uint32(m_spellInfo->Id);
+            data << uint32(rec);
+        }
         _player->AddSpellCooldown(m_spellInfo->Id,recTime);
     }
     else
     {
-        data << uint32(m_spellInfo->Id);
-        data << uint32(catrec);
+        // only send if different from client known cooldown
+        if(m_spellInfo->RecoveryTime && m_spellInfo->RecoveryTime != catrec || m_spellInfo->CategoryRecoveryTime != catrec)
+        {
+            data << uint32(m_spellInfo->Id);
+            data << uint32(catrec);
+        }
         _player->AddSpellCooldown(m_spellInfo->Id,catrecTime);
     }
 
-    if (catrec && cat)
+    if (catrec)
     {
         SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(cat);
         if(i_scstore != sSpellCategoryStore.end())
         {
             for(SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {
-                data << uint32(*i_scset);
-                data << uint32(catrec);
+                if(*i_scset == m_spellInfo->Id)             // skip casted spell
+                    continue;
+
+                // only send if different from client known cooldown
+                if(cat != m_spellInfo->Category || m_spellInfo->CategoryRecoveryTime != catrec)
+                {
+                    data << uint32(*i_scset);
+                    data << uint32(catrec);
+                }
                 _player->AddSpellCooldown(*i_scset,catrecTime);
             }
         }
@@ -957,12 +972,7 @@ void Spell::SendSpellCooldown()
 
     // show cooldown for item
     if(m_CastItem)
-    {
-        data.Initialize(SMSG_ITEM_COOLDOWN, (8+4));
-        data << m_CastItem->GetGUID();
-        data << uint32(m_spellInfo->Id);
-        _player->GetSession()->SendPacket(&data);
-    }
+        _player->SetItemsCooldown(cat);
 }
 
 void Spell::update(uint32 difftime)

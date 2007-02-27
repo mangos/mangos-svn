@@ -140,6 +140,11 @@ bool ChatHandler::HandleStartCommand(const char* args)
     // set hearthstone cooldown
     chr->AddSpellCooldown(8690,time(NULL)+3600);
 
+    SpellEntry const* spell = sSpellStore.LookupEntry(8690);
+
+    if(spell)
+        chr->SetItemsCooldown(spell->Category);
+
     return true;
 }
 
