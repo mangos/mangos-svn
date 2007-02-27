@@ -220,6 +220,8 @@ enum SpellModOp
     SPELLMOD_MANA_LOST_PER_DAMAGE_TAKEN = 27,
 };
 
+#define SPELLMOD_COUNT 32
+
 enum SpellFailedReason
 {
     CAST_FAIL_IN_COMBAT = 0,
