@@ -1291,7 +1291,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         ActionButtonList m_actionButtons;
 
-        SpellModList m_spellMods[32];
+        SpellModList m_spellMods[32];                       // 32 = SPELLMOD_COUNT
         EnchantDurationList m_enchantDuration;
 
         uint64 m_resurrectGUID;

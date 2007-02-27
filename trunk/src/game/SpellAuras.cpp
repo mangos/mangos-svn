@@ -728,7 +728,10 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     int32 value = spellInfo->EffectBasePoints[m_effIndex]+1;
     uint8 type = spellInfo->EffectApplyAuraName[m_effIndex];
     uint32 mask = spellInfo->EffectItemType[m_effIndex];
-    if (!op) return;
+
+    if(op >= SPELLMOD_COUNT)
+        return;
+
     SpellModList *p_mods = p_target->getSpellModList(op);
     if (!p_mods) return;
 
@@ -781,7 +784,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     }
     else
     {
-        SpellModList *p_mods = p_target->getSpellModList(spellInfo->EffectMiscValue[m_effIndex]);
         p_mods->remove(this->m_spellmod);
     }
 }
