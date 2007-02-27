@@ -2130,16 +2130,18 @@ void Spell::EffectSummonTotem(uint32 i)
 
 void Spell::EffectEnchantHeldItem(uint32 i)
 {
-    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+    // this is only item spell effect applied to main-hand weapon of target player (players in area)
+    if(!unitTarget && unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player* p_caster = (Player*)m_caster;
+    Player* item_owner = (Player*)unitTarget;
+    Item* item = item_owner->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
-    if(!itemTarget)
+    if(!item )
         return;
 
     // must be equipped
-    if(!itemTarget->IsEquipped())
+    if(!item ->IsEquipped())
         return;
 
     if (m_spellInfo->EffectMiscValue[i])
@@ -2154,33 +2156,22 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         if(!pEnchant)
             return;
 
-        // can be held by another player and accessable to caster in trade slot
-        Player* item_owner = itemTarget->GetOwner();
-        if(!item_owner)
-            return;
-
-        if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-            sLog.outCommand("GM Enchanting: %s (Entry: %d) GM: %s (Account: %u) Player: %s (Account: %u)",
-                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
-                p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
-                item_owner->GetName(),item_owner->GetSession()->GetAccountId());
-
         // remove old enchanting before appling new
-        if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3))
-            item_owner->AddItemEnchant(itemTarget,old_enchant_id,pEnchant->display_type,false);
+        if(uint32 old_enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3))
+            item_owner->AddItemEnchant(item,old_enchant_id,pEnchant->display_type,false);
 
         for(int x=0;x<3;x++)
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);
+            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);
 
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3, enchant_id);
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+1, duration*1000);
-        itemTarget->SetState(ITEM_CHANGED);
+        item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3, enchant_id);
+        item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+1, duration*1000);
+        item->SetState(ITEM_CHANGED);
 
         // add new enchanting
-        item_owner->AddItemEnchant(itemTarget,enchant_id,pEnchant->display_type,true);
+        item_owner->AddItemEnchant(item,enchant_id,pEnchant->display_type,true);
 
         // set duration
-        item_owner->AddEnchantDuration(itemTarget,1,duration*1000);
+        item_owner->AddEnchantDuration(item,1,duration*1000);
     }
 }
 
