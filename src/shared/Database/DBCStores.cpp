@@ -492,10 +492,11 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         {
             case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:
                 if(spellId != spellproto->EffectTriggerSpell[effIndex])
-                    {
-                        if(!IsPositiveSpell(spellproto->EffectTriggerSpell[effIndex]))
-                            return false;
-                    }
+                {
+                    if(!IsPositiveSpell(spellproto->EffectTriggerSpell[effIndex]))
+                        return false;
+                }
+                break;
             case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
             {
                 // non-positive immunities

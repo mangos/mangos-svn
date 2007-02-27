@@ -3725,6 +3725,10 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             TakenFlatBenefit += (*i)->GetModifier()->m_amount;
 
+    AuraList& mModMeleeDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN);
+    for(AuraList::iterator i = mModMeleeDamageTaken.begin(); i != mModMeleeDamageTaken.end(); ++i)
+        TakenFlatBenefit += (*i)->GetModifier()->m_amount;
+
     // ..done (base at attack power and creature type)
     AuraList& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
     for(AuraList::iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
@@ -3742,6 +3746,10 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
     for(AuraList::iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+
+    AuraList& mModMeleeDamageTakenPercent = pVictim->GetAurasByType(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT);
+    for(AuraList::iterator i = mModMeleeDamageTakenPercent.begin(); i != mModMeleeDamageTakenPercent.end(); ++i)
+        TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
     float tmpDamage = (*pdamage + TakenFlatBenefit)*TakenTotalMod;
 

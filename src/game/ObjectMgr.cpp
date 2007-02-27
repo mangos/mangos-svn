@@ -2192,7 +2192,7 @@ uint32 ObjectMgr::CreateItemText(std::string text)
     mItemTexts[ newItemTextId ] = text;
     //save new itempage
     sDatabase.escape_string(text);
-    //any Delete query needed, itempageId is maximum of all ids
+    //any Delete query needed, itemTextId is maximum of all ids
     std::ostringstream query;
     query << "INSERT INTO `item_text` (`id`,`text`) VALUES ( '" << newItemTextId << "', '" << text << "')";
     sDatabase.Execute(query.str().c_str());                 //needs to be run this way, because mail body may be more than 1024 characters

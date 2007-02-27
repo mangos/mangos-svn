@@ -170,8 +170,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT = 122,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_COST_PCT = 123,
     &Aura::HandleAuraModRangedAttackPower,                  //SPELL_AURA_MOD_RANGED_ATTACK_POWER = 124,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN = 125,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT = 126,
+    &Aura::HandleAuraModMeleeDamageTaken,                   //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN = 125,
+    &Aura::HandleAuraModMeleeDamageTakenPercent,            //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT = 126,
     &Aura::HandleNULL,                                      //SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS = 127,
     &Aura::HandleModPossessPet,                             //SPELL_AURA_MOD_POSSESS_PET = 128,
     &Aura::HandleAuraModIncreaseSpeedAlways,                //SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS = 129,
@@ -2759,6 +2759,16 @@ void Aura::HandleAuraModRangedAttackPower(bool apply, bool Real)
 /********************************/
 /***        DAMAGE BONUS      ***/
 /********************************/
+
+void Aura::HandleAuraModMeleeDamageTaken(bool Apply, bool Real)
+{
+    // has no immediate effect when adding / removing
+}
+
+void Aura::HandleAuraModMeleeDamageTakenPercent(bool Apply, bool Real)
+{
+    // has no immediate effect when adding / removing
+}
 
 void Aura::HandleModDamagePercentTaken(bool apply, bool Real)
 {
