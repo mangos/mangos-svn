@@ -199,7 +199,6 @@ class Aura
         void SetPositive() { m_positive = true; }
 
         bool IsPermanent() const { return m_permanent; }
-        void SetPermanent(bool value) { m_permanent = value; }
         bool IsAreaAura() const { return m_isAreaAura; }
         bool IsPeriodic() const { return m_isPeriodic; }
         bool IsTrigger() const { return m_isTrigger; }
