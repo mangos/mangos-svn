@@ -312,7 +312,11 @@ void Spell::FillTargetMap()
         for (std::list<Unit*>::iterator itr = tmpUnitMap.begin() ; itr != tmpUnitMap.end();)
         {
             if ((*itr)->IsImmunedToSpell(m_spellInfo))
+            {
+                // FIXME: this must be spell immune message instead melee attack message
+                m_caster->SendAttackStateUpdate(HITINFO_NOACTION, *itr, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
                 itr = tmpUnitMap.erase(itr);
+            }
             else
                 ++itr;
         }
@@ -1736,9 +1740,6 @@ uint8 Spell::CanCast()
                     return CAST_FAIL_INVALID_TARGET;
             }
         }
-
-        if(target->IsImmunedToSpell(m_spellInfo))
-            return CAST_FAIL_IMMUNE;
 
         /*
         if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
