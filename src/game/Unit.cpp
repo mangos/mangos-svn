@@ -2367,10 +2367,13 @@ void Unit::ApplyStats(bool apply)
     // && Melee DPS - (Damage Per Second)
 
     //Ranged
-    if(getClass() == CLASS_HUNTER)
-        val2 = uint32(getLevel() * 2 + GetStat(STAT_AGILITY) * 2 - 20);
-    else
-        val2 = uint32(getLevel() + GetStat(STAT_AGILITY) * 2 - 20);
+    switch(getClass())
+    {
+        case CLASS_HUNTER: val2 = uint32(getLevel() * 2 + GetStat(STAT_AGILITY) * 2 - 20); break;
+        case CLASS_ROGUE:  val2 = uint32(getLevel()     + GetStat(STAT_AGILITY) * 2 - 20); break;
+        case CLASS_WARRIOR:val2 = uint32(getLevel()     + GetStat(STAT_AGILITY) * 2 - 20); break;
+        default:           val2 = 0;                                                      break;
+    }
 
     if(!apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS);

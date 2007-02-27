@@ -873,6 +873,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns();
         void _SaveSpellCooldowns();
+        void SetItemsCooldown(uint32 category = 0);
 
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
         {

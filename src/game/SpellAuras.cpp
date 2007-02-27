@@ -2788,9 +2788,9 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     if(m_target->GetTypeId() == TYPEID_PLAYER)
     {
         if(m_modifier.m_miscvalue2)
-            m_target->ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
         else
-            m_target->ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
     }
 
     // Magic damage modifiers implemented in Unit::SpellDamageBonus

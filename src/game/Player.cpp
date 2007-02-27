@@ -2241,49 +2241,76 @@ void Player::_LoadSpellCooldowns()
             GetSession()->SendPacket(&data);
     }
 
-    // setup item coldowns
-    if(m_spellCooldowns.size() > 0)
+    if(!m_spellCooldowns.empty())
+        SetItemsCooldown();
+}
+
+void Player::SetItemsCooldown(uint32 category)
+{
+    // keys in KEYRING_SLOT_START..KEYRING_SLOT_END can't have cooldowns
+    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
     {
-        // keys in KEYRING_SLOT_START..KEYRING_SLOT_END can't have cooldowns
-        for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+        if(Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
         {
-            if(Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+            for(int ii = 0; ii < 5; ++ii)
             {
-                for(int ii = 0; ii < 5; ++ii)
+                uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
+                if(spell_id != 0 && (pItem->GetProto()->Spells[ii].SpellCategory == category || !category && HasSpellCooldown(spell_id)))
                 {
-                    uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
-                    if(spell_id != 0 && HasSpellCooldown(spell_id))
+                    sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown setup.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
+                    WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
+                    data << pItem->GetGUID();
+                    data << uint32(spell_id);
+                    GetSession()->SendPacket(&data);
+                    break;
+                }
+            }
+        }
+    }
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+        {
+            for(uint32 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
+            {
+                if(Item* pItem = GetItemByPos( i, j ))
+                {
+                    for(int ii = 0; ii < 5; ++ii)
                     {
-                        sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
-                        WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
-                        data << pItem->GetGUID();
-                        data << uint32(spell_id);
-                        GetSession()->SendPacket(&data);
-                        break;
+                        uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
+                        if(spell_id != 0 && (pItem->GetProto()->Spells[ii].SpellCategory == category || !category && HasSpellCooldown(spell_id)))
+                        {
+                            sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown setup.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
+                            WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
+                            data << pItem->GetGUID();
+                            data << uint32(spell_id);
+                            GetSession()->SendPacket(&data);
+                            break;
+                        }
                     }
                 }
             }
         }
-        for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    }
+    for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+    {
+        if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
         {
-            if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+            for(uint32 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
             {
-                for(uint32 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
+                if(Item* pItem = GetItemByPos( i, j ))
                 {
-                    if(Item* pItem = GetItemByPos( i, j ))
+                    for(int ii = 0; ii < 5; ++ii)
                     {
-                        for(int ii = 0; ii < 5; ++ii)
+                        uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
+                        if(spell_id != 0 && (pItem->GetProto()->Spells[ii].SpellCategory == category || !category && HasSpellCooldown(spell_id)))
                         {
-                            uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
-                            if(spell_id != 0 && HasSpellCooldown(spell_id))
-                            {
-                                sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown loaded.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
-                                WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
-                                data << pItem->GetGUID();
-                                data << uint32(spell_id);
-                                GetSession()->SendPacket(&data);
-                                break;
-                            }
+                            sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown setup.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
+                            WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
+                            data << pItem->GetGUID();
+                            data << uint32(spell_id);
+                            GetSession()->SendPacket(&data);
+                            break;
                         }
                     }
                 }
@@ -11511,7 +11538,7 @@ void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32
         if(idSchool == spellInfo->School && GetSpellCooldownDelay(unSpellId) < unTimeMs )
         {
             data << uint32(unSpellId);
-            data << uint32(uint32(unTimeMs));               // in m.secs
+            data << uint32(unTimeMs);                       // in m.secs
             AddSpellCooldown(unSpellId, curTime + unTimeMs/1000);
         }
     }
@@ -11578,8 +11605,8 @@ void Player::InitDataForForm()
     SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
 
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
-    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
-    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
+    SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
+    SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 }
 
 void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
