@@ -2409,14 +2409,6 @@ uint8 Spell::CheckItems()
                 if(!itemTarget)
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
                 break;
-            case SPELL_EFFECT_ENCHANT_HELD_ITEM:
-            {
-                if(!itemTarget)
-                    return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
-                if (!itemTarget->IsEquipped())
-                    return CAST_FAIL_MUST_HAVE_ITEM_EQUIPPED;
-                break;
-            }
             case SPELL_EFFECT_DISENCHANT:
             {
                 if(!itemTarget)

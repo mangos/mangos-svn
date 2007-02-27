@@ -1567,7 +1567,7 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||  !((Player*)this)->IsUseEquipedWeapon() ))
+        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
             return 0;
 
         // in range
@@ -1591,7 +1591,7 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||  !((Player*)this)->IsUseEquipedWeapon() ))
+        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
             return 0;
 
         // in range

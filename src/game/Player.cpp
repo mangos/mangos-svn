@@ -3387,14 +3387,14 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
         {
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-            if (tmpitem && !tmpitem->IsBroken() && IsUseEquipedWeapon())
+            if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon())
                 UpdateSkill(tmpitem->GetSkill());
         };break;
         case RANGED_ATTACK:
         {
             Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
-            if (tmpitem && !tmpitem->IsBroken() && IsUseEquipedWeapon())
+            if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon())
                 UpdateSkill(tmpitem->GetSkill());
         };break;
     }
@@ -6695,9 +6695,17 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
 
     uint8 slot = pos & 255;
 
-    // can't unequip mainhand item if offhand item equiped
-    if(slot == EQUIPMENT_SLOT_MAINHAND && GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND ))
-        return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+    // can't unequip mainhand item if offhand item equiped (weapon or shield)
+    if(slot == EQUIPMENT_SLOT_MAINHAND)
+    {
+        Item * offhand = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        if(offhand)
+        {
+            ItemPrototype const *offProto = offhand->GetProto();
+            if(offProto && (offProto->Class == ITEM_CLASS_WEAPON || offProto->InventoryType == INVTYPE_SHIELD))
+                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+        }
+    }
 
     return EQUIP_ERR_OK;
 }
