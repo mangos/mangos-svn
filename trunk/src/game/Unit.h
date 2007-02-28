@@ -274,10 +274,42 @@ enum AuraState
     AURA_STATE_UNKNOWN2       = 6,
     AURA_STATE_PARRY          = 7                           // unsure.
 };
+
+enum Mechanics
+{
+    MECHANIC_CHARM            =1,
+    MECHANIC_CONFUSED         =2,
+    MECHANIC_DISARM           =3,
+    MECHANIC_ATTRACT          =4,
+    MECHANIC_FEAR             =5,
+    MECHANIC_STUPID           =6,
+    MECHANIC_ROOT             =7,
+    MECHANIC_PEACE            =8,
+    MECHANIC_SILENCE          =9,
+    MECHANIC_SLEEP            =10,
+    MECHANIC_CHASE            =11,
+    MECHANIC_STUNDED          =12,
+    MECHANIC_FREEZE           =13,
+    MECHANIC_KNOCKOUT         =14,
+    MECHANIC_BLEED            =15,
+    MECHANIC_HEAL             =16,
+    MECHANIC_POLYMORPH        =17,
+    MECHANIC_BANISH           =18,
+    MECHANIC_SHIELDED         =19,
+    MECHANIC_DURANCED         =20,
+    MECHANIC_MOUNT            =21,
+    MECHANIC_PERSUADED        =22,
+    MECHANIC_TURNED           =23,
+    MECHANIC_HORROR           =24,
+    MECHANIC_INVULNERABILITY  =25,
+    MECHANIC_INTERRUPTED      =26,
+    MECHANIC_DAZED            =27
+};
+
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
 //some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
-//some aura(related to ImmuneToMechanic or ImmuneToState<aura>) can't apply to it.
+//some aura(related to Mechanics or ImmuneToState<aura>) can't apply to it.
 enum SpellImmunity
 {
     IMMUNITY_EFFECT                = 0,
@@ -289,36 +321,32 @@ enum SpellImmunity
 
 };
 
-enum ImmuneToMechanic
+enum DiminishingMechanics
 {
-    IMMUNE_MECHANIC_CHARM            =1,
-    IMMUNE_MECHANIC_CONFUSED         =2,
-    IMMUNE_MECHANIC_DISARM           =3,
-    IMMUNE_MECHANIC_ATTRACT          =4,
-    IMMUNE_MECHANIC_FEAR             =5,
-    IMMUNE_MECHANIC_STUPID           =6,
-    IMMUNE_MECHANIC_ROOT             =7,
-    IMMUNE_MECHANIC_PEACE            =8,
-    IMMUNE_MECHANIC_SILENCE          =9,
-    IMMUNE_MECHANIC_SLEEP            =10,
-    IMMUNE_MECHANIC_CHASE            =11,
-    IMMUNE_MECHANIC_STUNDED          =12,
-    IMMUNE_MECHANIC_FREEZE           =13,
-    IMMUNE_MECHANIC_KNOCKOUT         =14,
-    IMMUNE_MECHANIC_BLEED            =15,
-    IMMUNE_MECHANIC_HEAL             =16,
-    IMMUNE_MECHANIC_POLYMORPH        =17,
-    IMMUNE_MECHANIC_BANISH           =18,
-    IMMUNE_MECHANIC_SHIELDED         =19,
-    IMMUNE_MECHANIC_DURANCED         =20,
-    IMMUNE_MECHANIC_MOUNT            =21,
-    IMMUNE_MECHANIC_PERSUADED        =22,
-    IMMUNE_MECHANIC_TURNED           =23,
-    IMMUNE_MECHANIC_HORROR           =24,
-    IMMUNE_MECHANIC_INVULNERABILITY  =25,
-    IMMUNE_MECHANIC_INTERRUPTED      =26,
-    IMMUNE_MECHANIC_DAZED            =27
+    DIMINISHING_NONE                = 0,
+    DIMINISHING_MECHANIC_CONFUSE    = 1,    // incapacitate, confuse
+    DIMINISHING_MECHANIC_CHARM      = 2,    // fear, mind control, sleep
+    DIMINISHING_MECHANIC_STUN       = 3,    // stun
+    DIMINISHING_MECHANIC_ROOT       = 4,    // roots, freeze
+    DIMINISHING_MECHANIC_SPEED      = 5     // speed reduction
 };
+
+enum DiminishingLevels
+{
+    DIMINISHING_LEVEL_1             = 0,
+    DIMINISHING_LEVEL_2             = 1,
+    DIMINISHING_LEVEL_3             = 2,
+    DIMINISHING_LEVEL_IMMUNE        = 3
+};
+
+struct DiminishingReturn
+{
+    DiminishingReturn(DiminishingMechanics mech, uint32 t, uint32 count) : Mechanic(mech), hitTime(t), hitCount(count) {}
+
+    DiminishingMechanics    Mechanic;
+    uint32                  hitTime;
+    uint32                  hitCount;
+};  
 
 enum ImmuneToDispel
 {
@@ -406,7 +434,15 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::multimap< spellEffectPair, Aura*> AuraMap;
         typedef std::list<Aura *> AuraList;
         typedef std::set<Creature *> InHateListOf;
+        typedef std::list<DiminishingReturn> Diminishing;
         virtual ~Unit ( );
+
+        static DiminishingMechanics Mechanic2DiminishingMechanics(uint32 mech);
+        void AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount);
+        DiminishingLevels GetDiminishing(DiminishingMechanics  mech);
+        void IncrDiminishing(DiminishingMechanics  mech, uint32 duration);
+        void UpdateDiminishingTime(DiminishingMechanics  mech);
+        void ApplyDiminishingToDuration(DiminishingMechanics  mech, int32& duration);
 
         virtual void Update( uint32 time );
 
@@ -824,5 +860,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         UnitVisibilityUpdate m_UpdateVisibility;
         UnitVisibility m_Visibility;
+
+        Diminishing m_Diminishing;
 };
 #endif

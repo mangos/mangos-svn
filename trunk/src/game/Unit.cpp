@@ -2160,6 +2160,14 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     // remove from list before mods removing (prevent cyclic calls, mods added before including to aura list - use reverse order)
     Aura* Aur = i->second;
 
+    DiminishingMechanics mech = DIMINISHING_NONE;
+    if(Aur->GetSpellProto()->Mechanic)
+    {
+        mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
+        if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER && mech != DIMINISHING_NONE)
+            UpdateDiminishingTime(mech);
+    } 
+
     // must remove before removeing from list (its remove dependent auras and _i_ is only safe iterator value
     // remove the shapeshift aura's boosts
     if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
@@ -4627,4 +4635,125 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     }
 
     return value;
+}
+
+void Unit::AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount)
+{
+    m_Diminishing.push_back(DiminishingReturn(mech,hitTime,hitCount));
+}
+
+DiminishingLevels Unit::GetDiminishing(DiminishingMechanics mech)
+{
+    for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
+    {
+        if(i->Mechanic != mech) continue;
+        if(!i->hitCount) return DIMINISHING_LEVEL_1;
+        if(!i->hitTime)  return DIMINISHING_LEVEL_1;
+        // If last spell was casted more than 15 seconds ago - reset the count.
+        if((getMSTime() - i->hitTime) > 15000)
+        {
+            i->hitCount = DIMINISHING_LEVEL_1;
+            return DIMINISHING_LEVEL_1;
+        }
+        // or else increase the count.
+        else
+        {
+            if(i->hitCount > DIMINISHING_LEVEL_2)
+            {
+                i->hitCount = DIMINISHING_LEVEL_IMMUNE;
+                return DIMINISHING_LEVEL_IMMUNE;
+            }
+            else return DiminishingLevels(i->hitCount);
+        }
+    }
+    return DIMINISHING_LEVEL_1;
+}
+
+void Unit::IncrDiminishing(DiminishingMechanics mech, uint32 duration)
+{
+    // Checking for existing in the table
+    bool IsExist = false;
+    for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
+    {
+        if(i->Mechanic != mech) 
+            continue;
+
+        IsExist = true;
+        if(i->hitCount < DIMINISHING_LEVEL_IMMUNE)
+        {
+            i->hitCount += 1;
+            switch(i->hitCount)
+            {
+                case DIMINISHING_LEVEL_2:       i->hitTime = uint32(getMSTime() + duration); break;
+                case DIMINISHING_LEVEL_3:       i->hitTime = uint32(getMSTime() + duration*0.5); break;
+                case DIMINISHING_LEVEL_IMMUNE:  i->hitTime = uint32(getMSTime() + duration*0.25); break;
+                default: break;
+            }
+        }
+        break;
+    }
+    
+    if(!IsExist)
+        AddDiminishing(mech,uint32(getMSTime() + duration),DIMINISHING_LEVEL_2);
+} 
+
+void Unit::UpdateDiminishingTime(DiminishingMechanics mech)
+{
+    // Checking for existing in the table
+    bool IsExist = false;
+    for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
+    {
+        if(i->Mechanic != mech)
+            continue;
+
+        IsExist = true;
+        i->hitTime = getMSTime();
+        break;
+    }
+    
+    if(!IsExist)
+        AddDiminishing(mech,getMSTime(),DIMINISHING_LEVEL_1);
+}
+
+DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
+{
+    switch(mech)
+    {
+        case MECHANIC_CHARM: case MECHANIC_FEAR: case MECHANIC_SLEEP:
+            return DIMINISHING_MECHANIC_CHARM;
+        case MECHANIC_CONFUSED: case MECHANIC_KNOCKOUT: case MECHANIC_POLYMORPH:
+            return DIMINISHING_MECHANIC_CONFUSE;
+        case MECHANIC_ROOT: case MECHANIC_FREEZE:
+            return DIMINISHING_MECHANIC_ROOT;
+        case MECHANIC_STUNDED:
+            return DIMINISHING_MECHANIC_STUN;
+        case MECHANIC_CHASE:
+            return DIMINISHING_MECHANIC_SPEED;
+        default:
+            break;
+    }
+    return DIMINISHING_NONE;
+}
+
+void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32& duration)
+{
+    if(duration == -1)
+        return;
+
+    if(mech != DIMINISHING_NONE)
+    {
+        // Stun diminishing is applies to mobs too
+        if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER)
+        {
+            DiminishingLevels diminish = GetDiminishing(mech);
+            switch(diminish)
+            {
+                case DIMINISHING_LEVEL_1: IncrDiminishing(mech, duration); break;
+                case DIMINISHING_LEVEL_2: IncrDiminishing(mech, duration); duration = int32(duration*0.5f); break;
+                case DIMINISHING_LEVEL_3: IncrDiminishing(mech, duration); duration = int32(duration*0.25f); break;
+                case DIMINISHING_LEVEL_IMMUNE: duration = 0; break;
+                default: break;
+            }
+        }
+    }
 }
