@@ -1194,6 +1194,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // prepering unsommon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
+    // preper zone change detect
+    uint32 old_zone = GetZoneId();
+
+
     // if we were on a transport, leave
     if (ignore_transport && m_transport)
     {
@@ -1295,7 +1299,8 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     SetSemaphoreTeleport(false);
 
     UpdateZone();
-    if(pvpInfo.inHostileArea)
+
+    if(old_zone != GetZoneId() && pvpInfo.inHostileArea)        // only at zone change
         CastSpell(this, 2479, false);
 }
 
