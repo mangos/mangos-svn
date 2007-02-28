@@ -16,28 +16,19 @@
 
 ## Process this file with automake to produce Makefile.in
 
-## Sub-directories to parse
-SUBDIRS = dep doc sql src
-
 ## Additional files to include when running 'make dist'
-# Win32 project workspace for Visual Studio .NET 2003
+#  Debug libraries for Win32 builds.
 EXTRA_DIST = \
-	win/mangosdVC71.sln \
-	win/VC71/framework.vcproj \
-	win/VC71/game.vcproj \
-	win/VC71/mangosd.vcproj \
-	win/VC71/realmd.vcproj \
-	win/VC71/shared.vcproj \
-	win/VC71/zlib.vcproj \
-	win/VC71/zthread.vcproj
+	debug/libeay32.dll \
+	debug/libeay32.lib \
+	debug/libmySQL.dll \
+	debug/libmySQL.lib \
+	debug/sqlite.lib
 
-# Win32 project workspace for Visual Studio .NET 2005
+# Release libraries for Win32 builds.
 EXTRA_DIST += \
-	win/mangosdVC80.sln \
-	win/VC80/framework.vcproj \
-	win/VC80/game.vcproj \
-	win/VC80/mangosd.vcproj \
-	win/VC80/realmd.vcproj \
-	win/VC80/shared.vcproj \
-	win/VC80/zlib.vcproj \
-	win/VC80/zthread.vcproj
+	release/libeay32.dll \
+	release/libeay32.lib \
+	release/libmySQL.dll \
+	release/libmySQL.lib \
+	release/sqlite.lib

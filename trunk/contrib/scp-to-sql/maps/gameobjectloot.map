@@ -1,3 +1,0 @@
-InfoTable{table=gameobj_loot,outfile=gameobj_loot.sql,fileName=gameobjects.scp}
-gameobj->obj_id(*)
-loot[UNIQUE(gameobj)]->item_id(*),chance(0.05)

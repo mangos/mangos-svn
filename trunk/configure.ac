@@ -109,26 +109,28 @@ AC_SUBST(DOXYGENPATH)
 ## Set output files.
 AC_CONFIG_HEADERS( [config.h] )
 AC_CONFIG_FILES([
-   ./Makefile
-   doc/Doxyfile
-   doc/Makefile
-   sql/Makefile
-   src/Makefile
-   src/shared/Makefile
-   src/shared/SystemConfig.h
-   src/realmd/Makefile
-   src/realmd/realmd.conf
-   src/framework/Makefile
-   src/game/Makefile
-   src/bindings/Makefile
-   src/bindings/universal/Makefile
-   src/mangosd/Makefile
-   src/mangosd/mangosd.conf
+   dep/include/Makefile
+   dep/lib/Makefile
    dep/Makefile
    dep/src/Makefile
    dep/src/zlib/Makefile
    dep/src/zthread/Makefile
-	])
+   doc/Doxyfile
+   doc/Makefile
+   Makefile
+   sql/Makefile
+   src/bindings/Makefile
+   src/bindings/universal/Makefile
+   src/framework/Makefile
+   src/game/Makefile
+   src/Makefile
+   src/mangosd/Makefile
+   src/mangosd/mangosd.conf
+   src/realmd/Makefile
+   src/realmd/realmd.conf
+   src/shared/Makefile
+   src/shared/SystemConfig.h
+])
 
 ## Output files.
 AC_OUTPUT
