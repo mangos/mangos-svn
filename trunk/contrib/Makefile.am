@@ -20,4 +20,4 @@
 SUBDIRS = map_extractor
 
 ## Additional files to include when running 'make dist'
-# Nothing yet.
+#  Nothing yet.
