@@ -46,6 +46,14 @@ Pet::Pet(PetType type)
         m_spells[i]=0;
 }
 
+Pet::~Pet()
+{
+    if(m_uint32Values)                                      // only for fully created Object
+    {
+        ObjectAccessor::Instance().RemovePet(this);
+    }
+}
+
 bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
 {
     uint32 ownerid = owner->GetGUIDLow();

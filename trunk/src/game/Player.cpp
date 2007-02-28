@@ -179,14 +179,11 @@ Player::~Player ()
     if(m_uint32Values)                                      // only for fully created Object
     {
         CombatStop(true);
-        RemovePet(NULL, PET_SAVE_AS_CURRENT);
+        DuelComplete(0);
+        RemoveAllAuras();
     }
 
-    DuelComplete(0);
-
     TradeCancel(false);
-
-    RemoveAllAuras();
 
     // Note: buy back item already deleted from DB when player was saved
     for(int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
@@ -11151,7 +11148,8 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode)
     if(!pet)
         pet = GetPet();
 
-    if(!pet||pet->GetOwnerGUID()!=GetGUID()) return;
+    if(!pet || pet->GetOwnerGUID()!=GetGUID())
+        return;
 
     // only if current pet in slot
     if(GetPetGUID()==pet->GetGUID())

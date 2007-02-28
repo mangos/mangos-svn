@@ -43,8 +43,11 @@ Corpse::Corpse( CorpseType type ) : WorldObject()
 
 Corpse::~Corpse()
 {
-    if(GetType() == CORPSE_RESURRECTABLE)
-        ObjectAccessor::Instance().RemoveCorpse(this);
+    if(m_uint32Values)                                      // only for fully created Object
+    {
+        if(GetType() == CORPSE_RESURRECTABLE)
+            ObjectAccessor::Instance().RemoveCorpse(this);
+    }
 }
 
 bool Corpse::Create( uint32 guidlow )

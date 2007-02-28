@@ -78,7 +78,7 @@ class Pet : public Creature
 {
     public:
         explicit Pet(PetType type);
-        virtual ~Pet() {}
+        virtual ~Pet();
 
         uint32 GetActState() { return m_actState; }
         void SetActState(uint32 st) { m_actState=st; }
