@@ -3256,6 +3256,12 @@ bool ChatHandler::HandleOutOfRange(const char* args)
 bool ChatHandler::HandleAddQuest(const char* args)
 {
     Player* player = getSelectedPlayer();
+    if(!player)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
     // .addquest #entry'
     char* pentry = strtok((char*)args, " ");
 
