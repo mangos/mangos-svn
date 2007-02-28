@@ -16,6 +16,8 @@
 
 ## Process this file with automake to produce Makefile.in
 
+## Sub-directories to parse
+
 ## Additional files to include when running 'make dist'
 #  MySQL header files for Win32 builds
 EXTRA_DIST = \

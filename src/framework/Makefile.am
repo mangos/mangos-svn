@@ -1,4 +1,4 @@
-# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,41 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-INCLUDES += -I$(srcdir)
-noinst_LIBRARIES = libframework.a 
+## Process this file with automake to produce Makefile.in
 
-libframework_a_SOURCES = \
+## Sub-directories to parse
+
+## CPP flags for includes, defines, etc.
+AM_CPPFLAGS = -I$(srcdir)
+
+## Build MaNGOS framework library as convenience library.
+#  libMaNGOSScript shared library will later be reused by world server daemon.
+noinst_LIBRARIES = libmangosframework.a 
+libmangosframework_a_SOURCES = \
 	Policies/ObjectLifeTime.cpp 
+
+## Additional files to include when running 'make dist'
+#  Source and header files for the Framework.
+EXTRA_DIST = \
+	Dynamic/FactoryHolder.h \
+	Dynamic/ObjectRegistry.h \
+	GameSystem/Grid.h \
+	GameSystem/GridLoader.h \
+	GameSystem/NGrid.h \
+	GameSystem/TypeContainer.h \
+	GameSystem/TypeContainerFunctions.h \
+	GameSystem/TypeContainerVisitor.h \
+	Network/SocketDefines.h \
+	Platform/CompilerDefs.h \
+	Platform/Define.h \
+	Policies/CreationPolicy.h \
+	Policies/ObjectLifeTime.h \
+	Policies/Singleton.h \
+	Policies/SingletonImp.h \
+	Policies/ThreadingModel.h \
+	Utilities/ByteConverter.h \
+	Utilities/HashMap.h \
+	Utilities/Reference.h \
+	Utilities/ReferenceHolder.h \
+	Utilities/ReferenceImpl.h \
+	Utilities/TypeList.h

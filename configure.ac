@@ -119,18 +119,21 @@ AC_CONFIG_FILES([
    doc/Makefile
    Makefile
    sql/Makefile
-   src/bindings/Makefile
-   src/bindings/universal/Makefile
    src/framework/Makefile
-   src/game/Makefile
    src/Makefile
-   src/mangosd/Makefile
-   src/mangosd/mangosd.conf
-   src/realmd/Makefile
-   src/realmd/realmd.conf
    src/shared/Makefile
    src/shared/SystemConfig.h
 ])
+
+## Disabled Makefiles, until they are ready for a successful make and
+#  make dist run.
+#   src/bindings/Makefile
+#   src/bindings/universal/Makefile
+#   src/game/Makefile
+#   src/mangosd/Makefile
+#   src/mangosd/mangosd.conf
+#   src/realmd/Makefile
+#   src/realmd/realmd.conf
 
 ## Output files.
 AC_OUTPUT

@@ -16,10 +16,15 @@
 
 ## Process this file with automake to produce Makefile.in
 
-# SQL files for MaNGOS database to be installed to datadir
+## Sub-directories to parse
+
+## Files to be installed
+#  Install basic SQL files to datadir
 pkgdata_DATA = \
 	mangos.sql \
-	realmd.sql
+	realmd.sql \
+	create_mysql.sql \
+	drop_mysql.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL files for MaNGOS database
@@ -27,7 +32,7 @@ EXTRA_DIST = \
 	create_mysql.sql \
 	drop_mysql.sql \
 	mangos.sql \
-	realmd.sql \
+	realmd.sql
 
 #  SQL update files, to upgrade database schema from older revisions
 EXTRA_DIST += \

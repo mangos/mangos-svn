@@ -1,4 +1,4 @@
-# Copyright (C) 2007 MaNGOS project <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 ## Process this file with automake to produce Makefile.in
+
+## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
 AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../shared/  -I$(srcdir)/../../framework/
@@ -48,7 +50,7 @@ LTMANGOS_AGE = 0
 libMaNGOSScript_la_LDFLAGS = -version-info $(LTMANGOS_CURRENT):$(LTMANGOS_REVISION):$(LTMANGOS_AGE)
 
 ## Additional files to include when running 'make dist'
-#  Nothing yet.
+#  Scripts defaults.
 EXTRA_DIST = \
 	Scripts/sc_default.cpp \
 	Scripts/sc_defines.cpp \
