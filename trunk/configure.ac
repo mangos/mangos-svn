@@ -44,11 +44,6 @@ else
     MYPATH=$PATH
 fi
 
-dnl
-dnl Find some common programs
-dnl
-AC_PATH_PROG(__PYTHON, python, /usr/bin/python, $MYPATH)
-
 dnl Set up ZThread build.
 LIBZTHREAD_MAJOR_VERSION=2
 LIBZTHREAD_MINOR_VERSION=3
@@ -161,75 +156,6 @@ AC_CHECK_FUNCS(                                               \
    gettimeofday localtime_r memset rint select socket         \
    sqrt stpcpy strchr strpbrk strrchr strstr strtol strtoul   \
 )
-
-dnl
-dnl Auto-detect which python bindings should be built.
-dnl
-withval=auto
-AC_ARG_WITH(python, [  --with-python           build python bindings ])
-
-WITH_PYTHON_VERSION=$withval
-if test $withval = auto ; then
-
-AC_MSG_CHECKING(for python 2.4)
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <python2.4/Python.h>
-main() {
-  exit(strncmp("2.4", PY_VERSION, 3));
-} ]])],[withval=yes],[withval=no],[withval=yes])
-  AC_MSG_RESULT($withval)
-  if test $withval = yes ; then
-    WITH_PYTHON_VERSION="2.4"
-  else
-    
-  AC_MSG_CHECKING(for python 2.3)
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-  #include <python2.3/Python.h>
-  main() {
-    exit(strncmp("2.3", PY_VERSION, 3));
-  } ]])],[withval=yes],[withval=no],[withval=yes])
-    AC_MSG_RESULT($withval)
-    if test $withval = yes ; then
-      WITH_PYTHON_VERSION="2.3"
-    else
-    
-      AC_MSG_CHECKING(for python 2.2)
-      AC_RUN_IFELSE([AC_LANG_SOURCE([[
-    #include <python2.2/Python.h>
-    main() {
-      exit(strncmp("2.2", PY_VERSION, 3));
-    } ]])],[withval=yes],[withval=no],[withval=yes])
-      AC_MSG_RESULT($withval)
-      if test $withval = yes ; then
-        WITH_PYTHON_VERSION="2.2"
-      else
-    
-        AC_MSG_CHECKING(for python 1.5.2)
-        AC_RUN_IFELSE([AC_LANG_SOURCE([[
-    #include <python1.5/Python.h>
-    main() {
-      exit(strcmp("1.5.2", PY_VERSION));
-    } ]])],[withval=yes],[withval=no],[withval=yes])
-        AC_MSG_RESULT($withval)
-        if test $withval = yes ; then
-          WITH_PYTHON_VERSION="1.5"
-        fi
-      fi
-    fi
-  fi
-fi
-
-if test "$WITH_PYTHON_VERSION" != no ; then
-  WITH_PYTHON_SUBDIR=python
-  WITH_PYTHON_SUBPACKAGE=1
-else
-  WITH_PYTHON_SUBDIR=
-  WITH_PYTHON_SUBPACKAGE=0
-fi
-
-AC_SUBST(WITH_PYTHON_SUBDIR)
-AC_SUBST(WITH_PYTHON_SUBPACKAGE)
-AC_SUBST(WITH_PYTHON_VERSION)
 
 AC_PATH_PROG(__DOXYGEN, doxygen, no, $PATH)
 dnl
@@ -387,7 +313,6 @@ AC_CONFIG_FILES([
    src/framework/Makefile
    src/game/Makefile
    src/bindings/Makefile
-   src/bindings/python/Makefile
    src/bindings/universal/Makefile
    src/mangosd/Makefile
    src/mangosd/mangosd.conf
