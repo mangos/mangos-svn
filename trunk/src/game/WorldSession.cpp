@@ -153,12 +153,31 @@ void WorldSession::LogoutPlayer(bool Save)
     if (_player)
     {
         ///- If the player just died before logging out, make him appear as a ghost
+        //FIXME: logout must be delayed in case lost connection with client in time of combat
         if (_player->GetDeathTimer() || _player->isAttacked())
         {
             _player->CombatStop(true);
             _player->DeleteInHateListOf();
             _player->KillPlayer();
             _player->BuildPlayerRepop();
+
+            // build set of player who attack _player or who have pet attacking of _player
+            std::set<Player*> aset;
+            for(Unit::AttackerSet::const_iterator itr = _player->getAttackers().begin(); itr != _player->getAttackers().end(); ++itr)
+            {
+                Unit* owner = (*itr)->GetOwner();           // including player controled case
+                if(owner)
+                { 
+                    if(owner->GetTypeId()==TYPEID_PLAYER)
+                        aset.insert((Player*)owner);
+                }
+                else
+                if((*itr)->GetTypeId()==TYPEID_PLAYER)
+                    aset.insert((Player*)(*itr));
+            }
+            // give honor to all attackers from set
+            for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
+                (*itr)->CalculateHonor(_player);
         }
 
         ///- Reset the online field in the account table

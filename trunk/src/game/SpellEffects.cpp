@@ -133,7 +133,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_CREATE_HOUSE = 81
     &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND_SIGHT = 82
     &Spell::EffectDuel,                                     //SPELL_EFFECT_DUEL = 83
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_STUCK = 84
+    &Spell::EffectStuck,                                    //SPELL_EFFECT_STUCK = 84
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PLAYER = 85
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ACTIVATE_OBJECT = 86
     &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT1 = 87
@@ -2076,6 +2076,15 @@ void Spell::EffectDuel(uint32 i)
     caster->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
     target->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
 
+}
+
+void Spell::EffectStuck(uint32 i)
+{
+    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    sLog.outDebug("Spell Effect: Stuck");
+    HandleTeleport(m_spellInfo->Id, m_caster);
 }
 
 void Spell::EffectSummonTotem(uint32 i)

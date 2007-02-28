@@ -273,6 +273,7 @@ void Spell::FillTargetMap()
                     break;
                 case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
+                case SPELL_EFFECT_STUCK:
                     tmpUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_LEARN_PET_SPELL:
@@ -2484,14 +2485,13 @@ int32 Spell::CalculateDamage(uint8 i)
 
 void Spell::HandleTeleport(uint32 id, Unit* Target)
 {
-
     if(!Target || Target->GetTypeId() != TYPEID_PLAYER)
         return;
 
     if(Target->isInFlight())
         return;
 
-    if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556 )
+    if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556)
     {
         Field *fields;
         QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
@@ -2502,16 +2502,25 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
         }
         fields = result->Fetch();
 
-        TeleportCoords* TC = new TeleportCoords();
-        TC->mapId = fields[0].GetUInt32();
-        TC->x = fields[2].GetFloat();
-        TC->y = fields[3].GetFloat();
-        TC->z = fields[4].GetFloat();
+        TeleportCoords TC;
+        TC.mapId = fields[0].GetUInt32();
+        TC.x = fields[2].GetFloat();
+        TC.y = fields[3].GetFloat();
+        TC.z = fields[4].GetFloat();
 
         delete result;
 
-        ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,Target->GetOrientation());
-        delete TC;
+        ((Player*)Target)->TeleportTo(TC.mapId,TC.x,TC.y,TC.z,Target->GetOrientation());
+    }
+    else
+    if(m_spellInfo->Id == 7355)                             // Stuck
+    {
+        PlayerInfo const *info = objmgr.GetPlayerInfo(Target->getRace(), Target->getClass());
+
+        Target->SetUInt32Value(PLAYER_FARSIGHT, 0x01);
+        ((Player*)Target)->SetRecallPosition(Target->GetMapId(),Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),Target->GetOrientation());
+        ((Player*)Target)->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,Target->GetOrientation());
+        Target->SetUInt32Value(PLAYER_FARSIGHT, 0x00);
     }
     else
     {

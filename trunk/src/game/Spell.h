@@ -430,6 +430,7 @@ class Spell
         void EffectSanctuary(uint32 i);
         void EffectAddComboPoints(uint32 i);
         void EffectDuel(uint32 i);
+        void EffectStuck(uint32 i);
         void EffectSummonTotem(uint32 i);
         void EffectEnchantHeldItem(uint32 i);
         void EffectSummonObject(uint32 i);
