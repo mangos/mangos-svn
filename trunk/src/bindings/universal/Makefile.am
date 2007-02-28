@@ -52,4 +52,4 @@ libMaNGOSScript_la_LDFLAGS = -version-info $(LTMANGOS_CURRENT):$(LTMANGOS_REVISI
 EXTRA_DIST = \
 	Scripts/sc_default.cpp \
 	Scripts/sc_defines.cpp \
-	Scripts/sc_defines.h \
+	Scripts/sc_defines.h
