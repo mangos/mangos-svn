@@ -1,4 +1,4 @@
-# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2007 MaNGOS project <http://www.mangosproject.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -10,296 +10,104 @@
 
 ## Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.59)
-AC_INIT([MaNGOS],
-        [0.7-SVN],
-        [http://www.mangosproject.org/],
-        [mangos])
-AM_CONFIG_HEADER([config.h])
-AC_CONFIG_SRCDIR(src/mangosd/Main.cpp)
+## Prelude, basic settings for Autoconf
+#  PACKAGE:            mangos
+#  VERSION:            0.7.01 (trunk)
+#  BUG-REPORT-ADDRESS: mangos-devs@lists.sourceforge.net
+AC_INIT( [mangos], [0.7.01], [mangos-devs@lists.sourceforge.net])
+AC_CONFIG_SRCDIR([src/mangosd/Main.cpp])
 
-dnl Automake is needed for the build system.
-dnl
-AM_INIT_AUTOMAKE([1.6 dist-bzip2])
+## Prelude, basic settings for Automake
+#  Turn on all warnings and error messages, and enforce GNU
+#  standards for the package.
+AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AM_MAINTAINER_MODE
 
-AC_PROG_CC(gcc cc)
+## Check for required dependencies.
+
+## Check for a valid build environment.
+#  Valid equals having:
+#  - a C++ compiler compliant with the ISO98 C++ specification.
+#  - a working library tool for creating convenience libraries.
+#  - a working linker for creating static and shared libraries.
+AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
-AC_LANG([C++])
-AC_EXEEXT
-AC_OBJEXT
 
-dnl Checks for programs.
-AM_PROG_LIBTOOL
-
-dnl
-dnl use defaults if cross-compiling, otherwise use the default path.
-dnl
-if test "$cross_compiling" = "yes"; then
-    MYPATH=":"
-else
-#    MYPATH="/bin:/usr/bin:/usr/local/bin:$PATH:/sbin:/usr/sbin:/usr/local/sbin:/opt/gnu/bin"
-    MYPATH=$PATH
+AC_PATH_PROG(DOXYGENPATH, doxygen)
+if test "_$DOXYGENPATH" = _ ; then
+    AC_MSG_WARN([doxygen is required to build the API documentation.])
 fi
+AM_CONDITIONAL([USE_DOXYGEN], [test "_$DOXYGENPATH" != _])
 
-dnl Set up ZThread build.
-LIBZTHREAD_MAJOR_VERSION=2
-LIBZTHREAD_MINOR_VERSION=3
-LIBZTHREAD_MICRO_VERSION=2
-LT_RELEASE=$LIBZTHREAD_MAJOR_VERSION.$LIBZTHREAD_MINOR_VERSION.$LIBZTHREAD_MICRO_VERSION
-LT_CURRENT=$LIBZTHREAD_MAJOR_VERSION
-LT_REVISION=$LIBZTHREAD_MINOR_VERSION
-LT_AGE=$LIBZTHREAD_MICRO_VERSION
-
-dnl Set up Scripting build.
-LIBMANGOSSCRIPT_MAJOR_VERSION=0
-LIBMANGOSSCRIPT_MINOR_VERSION=2
-LIBMANGOSSCRIPT_MICRO_VERSION=0
-LTMS_RELEASE=$LIBMANGOSSCRIPT_MAJOR_VERSION.$LIBMANGOSSCRIPT_MINOR_VERSION.$LIBMANGOSSCRIPT_MICRO_VERSION
-LTMS_CURRENT=$LIBMANGOSSCRIPT_MAJOR_VERSION
-LTMS_REVISION=$LIBMANGOSSCRIPT_MINOR_VERSION
-LTMS_AGE=$LIBMANGOSSCRIPT_MICRO_VERSION
-
-COMPILER_OPTIONS=""
-LINKER_OPTIONS=""
-
-# check for openssl path given
-AC_ARG_WITH(openssl,
-[  --with-openssl=/path/to/openssl/dir    OpenSSL directory],
-[
-  AC_CHECK_FILE($withval/include/openssl/ssl.h,
-  [
-    OPENSSL_INCLUDES="-I$withval/include"
-    OPENSSL_LDFLAGS="-L$withval/lib"],
-  [AC_MSG_ERROR([Directory '$withval' does not exist, or does not contain OpenSSL])]) ],
- [
-  OPENSSL_INCLUDES=""
-  OPENSSL_LDFLAGS="" ])
-
-AC_SUBST(OPENSSL_INCLUDES)
-AC_SUBST(OPENSSL_LDFLAGS)
-
-# check for mysql path given
-AC_ARG_WITH(mysql,
-[  --with-mysql=/path/to/mysql/dir        MySQL directory]],
-[
-  AC_CHECK_FILE($withval/include/mysql.h,
-    [MYSQL_INCLUDES="-I$withval/include"
-    MYSQL_LDFLAGS="-L$withval/lib"],
-    [AC_MSG_ERROR([Directory '$withval' does not exist, or does not contain MySQL])]) ],
-[
-  MYSQL_INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql"
-  MYSQL_LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"])
-
-AC_SUBST(MYSQL_INCLUDES)
-AC_SUBST(MYSQL_LDFLAGS)
-
-INCLUDES="$MYSQL_INCLUDES $OPENSSL_INCLUDES"
-LDFLAGS="$MYSQL_LDFLAGS $OPENSSL_LDFLAGS"
-AC_SUBST(INCLUDES)
-AC_SUBST(LDFLAGS)
-
-
-dnl Checks for libraries.
-
-dnl Checks for library functions.
-AC_CHECK_LIB( pthread, pthread_create, [],
+## Check for required libraries.
+AC_CHECK_LIB( pthread, pthread_create, [], 
     [LDFLAGS="-pthread $LDFLAGS"
      AC_TRY_LINK([char pthread_create();],
-        pthread_create();,
-        [], [AC_MSG_ERROR([Missing pthread])])
+         pthread_create();,
+         [], [AC_MSG_ERROR([Missing pthread])])
     ])
-AC_CHECK_LIB( z, compress, [],[AC_MSG_ERROR([Missing zlib])] )
-AC_CHECK_LIB( compat, ftime )
-AC_CHECK_LIB( mysqlclient_r, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
-AC_CHECK_LIB( ssl, SHA1_Init, [], [AC_CHECK_LIB(ssl, SHA1_Init,[],[AC_MSG_ERROR([Missing openssl])])])
+AC_CHECK_LIB( z, compress, [ZLIB=-lz],[AC_MSG_ERROR([Missing zlib])] )
+#AC_CHECK_LIB( mysqlclient, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
+AC_CHECK_LIB( compat, ftime, [COMPATLIB=-lcompat] )
+AC_CHECK_LIB( ssl, BN_cmp, [SSLLIB=-lssl], [AC_MSG_ERROR([Missing openssl])])
 
-CPPFLAGS_SAVE=$CPPFLAGS
-CPPFLAGS=$INCLUDES $CPPFLAGS
-
-dnl Checks for header files.
-AC_HEADER_STDC
-AC_HEADER_STDBOOL
-AC_HEADER_TIME
-AC_CHECK_HEADERS(                                             \
-   limits.h sys/ioctl.h unistd.h fcntl.h float.h mysql.h      \
-   netdb.h netinet/in.h stddef.h sys/socket.h                 \
-   sys/time.h sys/timeb.h openssl/opensslv.h                          \
- ,[],[AC_MSG_ERROR([Missing required header])])
-
-CPPFLAGS=$CPPFLAGS_SAVE
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_C_INLINE
-AC_C_VOLATILE
-AC_TYPE_SIZE_T
-AC_TYPE_OFF_T
-AC_TYPE_SIGNAL
-AC_STRUCT_TM
-AC_CHECK_TYPES([ ptrdiff_t ])
-
-dnl Checks for library functions.
-AC_FUNC_MEMCMP
-AC_FUNC_STRCOLL
-AC_FUNC_ALLOCA
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_FUNC_SELECT_ARGTYPES
-AC_FUNC_STRFTIME
-AC_FUNC_STRNLEN
-AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(                                               \
-   ftime strcspn strtoul atexit bzero floor gethostbyname     \
-   gettimeofday localtime_r memset rint select socket         \
-   sqrt stpcpy strchr strpbrk strrchr strstr strtol strtoul   \
+AC_ARG_WITH(mysql-libs,
+[  --with-mysql-libs=DIR     Look for mysql libs in this dir ],
+    MYSQL_LIBS="-L$withval -lmysqlclient"
+)
+AC_ARG_WITH(mysql-includes,
+[  --with-mysql-includes=DIR Look for mysql includes in this dir ],
+    MYSQL_INCLUDES="-I$withval"
 )
 
-AC_PATH_PROG(__DOXYGEN, doxygen, no, $PATH)
-dnl
-dnl Auto-detect whether doxygen generated API docs should be included.
-dnl
-withval=auto
-AC_ARG_WITH(apidocs, [  --with-apidocs          build MaNGOS API docs ])
-
-if test $withval = auto -a $__DOXYGEN != no ; then
-    withval=yes
-elif test $withval = yes -a $__DOXYGEN = no ; then
-    AC_MSG_ERROR(--> MaNGOS API docs needs doxygen in PATH)
-fi
-    
-if test $withval = yes; then
-    WITH_APIDOCS_TARGET=apidocs
-    WITH_APIDOCS=1
-else
-    WITH_APIDOCS=0
-fi
-AC_SUBST(WITH_APIDOCS_TARGET)
-AC_SUBST(WITH_APIDOCS)
-      
-AC_MSG_CHECKING(whether to include debug info in library)
-MANGOSD_DEBUG_INFO=no
-AC_ARG_WITH(debug-info,
-[
-Debugging options:
-
-  --with-debug-info       Include debug info in library],
-[
-    if test "$withval" = "yes" ; then
-	CFLAGS="-g -DMANGOS_DEBUG $CFLAGS"
-	CXXFLAGS="-g -DMANGOS_DEBUG $CXXFLAGS"
-	MANGOSD_DEBUG_INFO=yes
-    elif test "$withval" != "no" ; then
-	AC_MSG_ERROR(Please choose yes or no)
-    fi
-])
-AC_MSG_RESULT($MANGOSD_DEBUG_INFO)
-
-
-# check for cli console enable
-AC_MSG_CHECKING(whether cli console is enabled)
-MANGOSD_ENABLE_CLI=no
-AC_ARG_ENABLE(cli,
-[  --enable-cli Turn on command console system],
-[
-    if test "$enableval" = "yes" ; then
-	CFLAGS="-DENABLE_CLI $CFLAGS"
-	CXXFLAGS="-DENABLE_CLI $CXXFLAGS"
-	MANGOSD_ENABLE_CLI=yes
-    elif test "$withval" != "no" ; then
-	AC_MSG_ERROR(Please choose yes or no)
-    fi
-])
-AC_MSG_RESULT($MANGOSD_ENABLE_CLI)
-
-# check for remote console enable
-AC_MSG_CHECKING(whether remote console is enabled)
-MANGOSD_ENABLE_RA=no
-AC_ARG_ENABLE(ra,
-[  --enable-ra Turn on remote console system],
-[
-    if test "$enableval" = "yes" ; then
-	CFLAGS="-DENABLE_RA $CFLAGS"
-	CXXFLAGS="-DENABLE_RA $CXXFLAGS"
-	MANGOSD_ENABLE_RA=yes
-    elif test "$withval" != "no" ; then
-	AC_MSG_ERROR(Please choose yes or no)
-    fi
-])
-AC_MSG_RESULT($MANGOSD_ENABLE_RA)
-
-
-MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
-MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
-REALMD_CONFIG_TEMP="$sysconfdir/realmd.conf"
-REALMD_CONFIGDIR_TEMP="$sysconfdir"
-if test $sysconfdir = '${prefix}/etc'; then
-    MANGOSD_CONFIG_TEMP="${prefix}/mangos/mangosd.conf"
-    MANGOSD_CONFIGDIR_TEMP="${prefix}/mangos"
-    REALMD_CONFIG_TEMP="${prefix}/mangos/realmd.conf"
-    REALMD_CONFIGDIR_TEMP="${prefix}/mangos"
-else
-  if test $sysconfdir = '/'; then
-	MANGOSD_CONFIG_TEMP="/mangosd.conf"
-	MANGOSD_CONFIGDIR_TEMP="/"
-	REALMD_CONFIG_TEMP="/realmd.conf"
-	REALMD_CONFIGDIR_TEMP="/"
-  else
-	MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
-	MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
-	REALMD_CONFIG_TEMP="$sysconfdir/realmd.conf"
-	REALMD_CONFIGDIR_TEMP="$sysconfdir"
-  fi
+AC_PATH_PROGS(MYSQL_CONFIG, mysql_config, mysql_config, $PATH)
+if test -x "$MYSQL_CONFIG"
+then
+    # MySQL v4 uses --include while v3 uses --cflags
+    MYSQL_INCLUDES="`$MYSQL_CONFIG --include`" || \
+        MYSQL_INCLUDES="`$MYSQL_CONFIG --cflags`"
+    MYSQL_LIBS="`$MYSQL_CONFIG --libs`"
 fi
 
-if test $datadir = '${prefix}/share'; then
-    MANGOSD_DATA_TEMP="${prefix}/share/mangos"
-else
-   if test $datadir = '/'; then
-   	MANGOSD_DATA_TEMP="/mangos"
-   else
-	MANGOSD_DATA_TEMP="$datadir/mangos"
-   fi
-fi
+## Check for required header files.
+AC_HEADER_STDC
+AC_HEADER_DIRENT
+AC_CHECK_HEADERS([ arpa/inet.h fcntl.h limits.h locale.h malloc.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h strings.h sys/ioctl.h sys/param.h sys/socket.h sys/timeb.h sys/time.h termios.h unistd.h  ])
 
-eval "MANGOSD_CONFIG=$MANGOSD_CONFIG_TEMP"
-eval "MANGOSD_CONFIGDIR=$MANGOSD_CONFIGDIR_TEMP"
-eval "REALMD_CONFIG=$REALMD_CONFIG_TEMP"
-eval "REALMD_CONFIGDIR=$REALMD_CONFIGDIR_TEMP"
-eval "MANGOSD_DATA=$MANGOSD_DATA_TEMP"
+## Check for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+AC_STRUCT_TM
+AC_TYPE_UINT64_T
+AC_C_VOLATILE
+AC_CHECK_TYPES([ptrdiff_t])
 
-dnl Configure the final compiler & linker options
-COMPILER_OPTIONS="$COMPILER_OPTIONS $CXXFLAGS"
-LINKER_OPTIONS="$LINKER_OPTIONS $LDFLAGS"
+## Check for required library functions.
+AC_FUNC_CLOSEDIR_VOID
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_MALLOC
+AC_FUNC_MEMCMP
+AC_FUNC_REALLOC
+AC_FUNC_SELECT_ARGTYPES
+AC_TYPE_SIGNAL
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([atexit ftime gethostbyaddr gethostbyname gethostname gettimeofday memmove memset pow realpath select socket sqrt strchr strdup strerror strstr])
 
-dnl Configured flags for compiling
-AC_SUBST(LINKER_OPTIONS)
-AC_SUBST(COMPILER_OPTIONS)
+## Export defined variables
+AC_SUBST(ZLIB)
+AC_SUBST(COMPATLIB)
+AC_SUBST(SSLLIB)
+AC_SUBST(MYSQL_INCLUDES)
+AC_SUBST(MYSQL_LIBS)
+AC_SUBST(DOXYGENPATH)
 
-dnl Extra variables users can customize
-AC_SUBST(EXTRA_LINKER_OPTIONS)
-AC_SUBST(EXTRA_COMPILER_OPTIONS)
-
-dnl Configured MaNGOS variables
-AC_SUBST(MANGOSD_CONFIG)
-AC_SUBST(MANGOSD_CONFIGDIR)
-AC_SUBST(REALMD_CONFIG)
-AC_SUBST(REALMD_CONFIGDIR)
-AC_SUBST(MANGOSD_DATA)
-AC_SUBST(MANGOSD_ENABLE_CLI)
-AC_SUBST(MANGOSD_ENABLE_RA)
-AC_SUBST(VERSION)
-AC_SUBST(LT_RELEASE)
-AC_SUBST(LT_CURRENT)
-AC_SUBST(LT_AGE)
-AC_SUBST(LT_REVISION)
-AC_SUBST(LTMS_RELEASE)
-AC_SUBST(LTMS_CURRENT)
-AC_SUBST(LTMS_AGE)
-AC_SUBST(LTMS_REVISION)
-
+## Set output files.
+AC_CONFIG_HEADERS( [config.h] )
 AC_CONFIG_FILES([
    ./Makefile
    doc/Doxyfile
@@ -320,6 +128,7 @@ AC_CONFIG_FILES([
    dep/src/Makefile
    dep/src/zlib/Makefile
    dep/src/zthread/Makefile
-])
+	])
 
+## Output files.
 AC_OUTPUT
