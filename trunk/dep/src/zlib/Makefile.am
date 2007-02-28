@@ -20,7 +20,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = -I$(srcdir)/../../include -I$(srcdir)/../../include/zlib
+AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../../include -I$(srcdir)/../../include/zlib
 
 ## Build zlib as convenience library.
 #  libzlib conveniece library will later be reused by ...
@@ -42,3 +42,15 @@ libzlib_a_SOURCES = \
 
 ## Additional files to include when running 'make dist'
 #  Nothing yet.
+EXTRA_DIST = \
+	crc32.h \
+	deflate.h \
+	inffast.h \
+	inffixed.h \
+	inflate.h \
+	inftrees.h \
+	trees.h \
+	zconf.h \
+	zlib.h \
+	zutil.h
+
