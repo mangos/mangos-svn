@@ -106,7 +106,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         return;
     }
     // test the receiver's Faction...
-    if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && pl->GetTeam() != rc_team)
+    if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE) && pl->GetTeam() != rc_team)
     {
         pl->SendMailResult(0, 0, MAIL_ERR_NOT_YOUR_TEAM);
         return;
