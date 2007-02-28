@@ -1,6 +1,0 @@
-InfoTable{id=GUID,table=npc_gossip,outfile=npc_gossip.sql,apply-preprocessor=creatures.scp,fileName=world.save}
-TypeTable{GUID=hex,creatures_npctext0_0=string}
-GUID->NPC_GUID(*)
-ENTRY->TEXTID
-# only interested in npcs that has a text message
-creatures_npctext0_0->!NOT_IMPORTANT(*)

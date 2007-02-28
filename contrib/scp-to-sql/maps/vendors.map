@@ -1,6 +1,0 @@
-InfoTable{id=GUID,table=vendors,outfile=vendors.sql,fileName=world.save,apply-preprocessor=creatures.scp}
-TypeTable{GUID=hex}
-GUID->vendorGuid(*)
-amount->amount(5)
-sell[]->__Referencer__
-creatures_sell[UNIQUE(GUID,amount)]->itemGuid
