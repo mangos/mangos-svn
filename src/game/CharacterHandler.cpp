@@ -61,6 +61,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
             }
         }
         while( result->NextRow() );
+
         delete plr;
         delete result;
     }

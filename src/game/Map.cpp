@@ -273,24 +273,7 @@ void Map::RemoveFromGrid(Creature* obj, NGridType *grid, Cell const& cell)
 template<class T>
 void Map::DeleteFromWorld(T* obj)
 {
-    delete obj;
-}
-
-template<>
-void Map::DeleteFromWorld(Corpse* obj)
-{
-    if(obj->GetType()==CORPSE_RESURRECTABLE)
-        ObjectAccessor::Instance().RemoveCorpse(obj);
-
-    delete obj;
-}
-
-template<>
-void Map::DeleteFromWorld(Creature* obj)
-{
-    if(obj->isPet())
-        ObjectAccessor::Instance().RemovePet((Pet*)obj);
-
+    // Note: In case resurrectable corpse and pet its removed from gloabal lists in own destructors
     delete obj;
 }
 
