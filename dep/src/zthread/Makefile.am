@@ -69,4 +69,64 @@ LTZTHREAD_AGE = 2
 libZThread_la_LDFLAGS = -version-info $(LTZTHREAD_CURRENT):$(LTZTHREAD_REVISION):$(LTZTHREAD_AGE)
 
 ## Additional files to include when running 'make dist'
-#  Nothing yet.
+#  Header files.
+EXTRA_DIST = \
+	ConditionImpl.h \
+	Debug.h \
+	DeferredInterruptionScope.h \
+	FastLock.h \
+	FastRecursiveLock.h \
+	IntrusivePtr.h \
+	Monitor.h \
+	MutexImpl.h \
+	RecursiveMutexImpl.h \
+	Scheduling.h \
+	SemaphoreImpl.h \
+	State.h \
+	Status.h \
+	TSS.h \
+	ThreadImpl.h \
+	ThreadOps.h \
+	ThreadQueue.h \
+	TimeStrategy.h \
+	config.h
+
+#  Implementation specific files.
+EXTRA_DIST += \
+	linux/AtomicCount.cxx \
+	linux/AtomicFastLock.h \
+	linux/FastRecursiveLock.h \
+	macos/FastLock.h \
+	macos/Monitor.cxx \
+	macos/Monitor.h \
+	macos/TSS.h \
+	macos/ThreadOps.cxx \
+	macos/ThreadOps.h \
+	macos/UpTimeStrategy.h \
+	posix/ConditionRecursiveLock.h \
+	posix/FastLock.h \
+	posix/FtimeStrategy.h \
+	posix/GetTimeOfDayStrategy.h \
+	posix/Monitor.cxx \
+	posix/Monitor.h \
+	posix/PriorityOps.h \
+	posix/TSS.h \
+	posix/ThreadOps.cxx \
+	posix/ThreadOps.h \
+	solaris/FastRecursiveLock.h \
+	vanilla/DualMutexRecursiveLock.h \
+	vanilla/SimpleAtomicCount.cxx \
+	vanilla/SimpleRecursiveLock.h \
+	win32/AtomicCount.cxx \
+	win32/AtomicFastLock.h \
+	win32/AtomicFastRecursiveLock.h \
+	win32/FastLock.h \
+	win32/FastRecursiveLock.h \
+	win32/Monitor.cxx \
+	win32/Monitor.h \
+	win32/PerformanceCounterStrategy.h \
+	win32/TSS.h \
+	win32/ThreadOps.cxx \
+	win32/ThreadOps.h \
+	win9x/AtomicCount.cxx \
+	win9x/AtomicFastLock.h
