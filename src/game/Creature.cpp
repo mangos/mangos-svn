@@ -1333,13 +1333,13 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
     if (!spellInfo)
         return false;
     if( isWorldBoss() )
-        if( (IMMUNE_MECHANIC_FEAR == spellInfo->Mechanic) ||
-        (IMMUNE_MECHANIC_STUNDED == spellInfo->Mechanic) ||
-        (IMMUNE_MECHANIC_DAZED == spellInfo->Mechanic) ||
-        (IMMUNE_MECHANIC_BANISH == spellInfo->Mechanic) ||
-        (IMMUNE_MECHANIC_FREEZE == spellInfo->Mechanic) ||
-        (IMMUNE_MECHANIC_ROOT == spellInfo->Mechanic) ||
-        (IMMUNE_MECHANIC_CONFUSED == spellInfo->Mechanic))
+        if( (MECHANIC_FEAR      == spellInfo->Mechanic) ||
+            (MECHANIC_STUNDED   == spellInfo->Mechanic) ||
+            (MECHANIC_DAZED     == spellInfo->Mechanic) ||
+            (MECHANIC_BANISH    == spellInfo->Mechanic) ||
+            (MECHANIC_FREEZE    == spellInfo->Mechanic) ||
+            (MECHANIC_ROOT      == spellInfo->Mechanic) ||
+            (MECHANIC_CONFUSED  == spellInfo->Mechanic))
             return true;
 
     return Unit::IsImmunedToSpell(spellInfo);

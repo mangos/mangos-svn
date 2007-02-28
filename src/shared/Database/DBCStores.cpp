@@ -502,9 +502,9 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                 // non-positive immunities
                 switch(spellproto->EffectMiscValue[effIndex])
                 {
-                    case 16 /*IMMUNE_MECHANIC_HEAL    */:
-                    case 19 /*IMMUNE_MECHANIC_SHIELDED*/:
-                    case 21 /*IMMUNE_MECHANIC_MOUNT   */:
+                    case 16 /*MECHANIC_HEAL    */:
+                    case 19 /*MECHANIC_SHIELDED*/:
+                    case 21 /*MECHANIC_MOUNT   */:
                         return false;
                     default:
                         break;

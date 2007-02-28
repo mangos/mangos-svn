@@ -520,10 +520,47 @@ void Spell::EffectApplyAura(uint32 i)
         }
     }
 
-    bool added = unitTarget->AddAura(Aur);
+    // Diminishing
+    // Use Spell->Mechanic if possible
+    DiminishingMechanics mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
+
+    if(mech == DIMINISHING_NONE)
+    {
+        switch(m_spellInfo->EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_MOD_CONFUSE:
+                mech = DIMINISHING_MECHANIC_CONFUSE; break;
+            case SPELL_AURA_MOD_CHARM: case SPELL_AURA_MOD_FEAR:
+                mech = DIMINISHING_MECHANIC_CHARM; break;
+            case SPELL_AURA_MOD_STUN:
+                mech = DIMINISHING_MECHANIC_STUN; break;
+            case SPELL_AURA_MOD_ROOT:
+                mech = DIMINISHING_MECHANIC_ROOT; break;
+            case SPELL_AURA_MOD_DECREASE_SPEED:
+                mech = DIMINISHING_MECHANIC_SPEED; break;
+            default: break;
+        }
+    }
+
+    // Death Coil and Curse of Exhaustion are not diminished.
+    if((m_spellInfo->SpellVisual == 64 && m_spellInfo->SpellIconID == 88) ||
+        (m_spellInfo->SpellVisual == 185 && m_spellInfo->SpellIconID == 228))
+        mech = DIMINISHING_NONE;
+
+    int32 auraDuration = Aur->GetAuraDuration();
+
+    unitTarget->ApplyDiminishingToDuration(mech,auraDuration);
+
+    bool added = unitTarget->AddAura(Aur); 
 
     if (added)
     {
+        if(auraDuration == 0)
+            unitTarget->RemoveAura(m_spellInfo->Id,i);
+        else
+        if(auraDuration != Aur->GetAuraDuration())
+            unitTarget->SetAurDuration(m_spellInfo->Id,i,auraDuration); 
+
         // Check for Power Word: Shield
         // TODO Make a way so it works for every related spell!
         if(unitTarget->GetTypeId()==TYPEID_PLAYER)          // Negative buff should only be applied on players
