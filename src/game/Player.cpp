@@ -10407,6 +10407,8 @@ void Player::_LoadQuestStatus()
 {
     mQuestStatus.clear();
 
+    uint32 slot = 0;
+
     QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
 
     if(result)
@@ -10433,14 +10435,20 @@ void Player::_LoadQuestStatus()
                 mQuestStatus[quest_id].m_rewarded = ( fields[2].GetUInt8() > 0 );
                 mQuestStatus[quest_id].m_explored = ( fields[3].GetUInt8() > 0 );
 
+                uint32 quest_time = fields[4].GetUInt32();
+
                 if( objmgr.QuestTemplates[quest_id]->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) )
+                {
                     AddTimedQuest( quest_id );
 
-                if (fields[4].GetUInt32() <= sWorld.GetGameTime())
-                {
-                    mQuestStatus[quest_id].m_timer = 1;
-                } else
-                mQuestStatus[quest_id].m_timer = (fields[4].GetUInt32() - sWorld.GetGameTime()) * 1000;
+                    if (quest_time <= sWorld.GetGameTime())
+                        mQuestStatus[quest_id].m_timer = 1;
+                    else
+                        mQuestStatus[quest_id].m_timer = (quest_time - sWorld.GetGameTime()) * 1000;
+                    }
+                else
+                    quest_time = 0;
+
 
                 mQuestStatus[quest_id].m_creatureOrGOcount[0] = fields[5].GetUInt32();
                 mQuestStatus[quest_id].m_creatureOrGOcount[1] = fields[6].GetUInt32();
@@ -10453,12 +10461,42 @@ void Player::_LoadQuestStatus()
 
                 mQuestStatus[quest_id].uState = QUEST_UNCHANGED;
 
+                // add to quest log
+                if( slot < MAX_QUEST_LOG_SIZE && 
+                    ( mQuestStatus[quest_id].m_status==QUEST_STATUS_INCOMPLETE || 
+                      mQuestStatus[quest_id].m_status==QUEST_STATUS_COMPLETE && !mQuestStatus[quest_id].m_rewarded ) )
+                {
+                    uint32 state = 0;
+                    if(mQuestStatus[quest_id].m_status == QUEST_STATUS_COMPLETE)
+                        state |= 1 << 24;
+
+                    for(uint8 idx = 0; idx < QUEST_OBJECTIVES_COUNT; ++idx)
+                    {
+                        if(mQuestStatus[quest_id].m_creatureOrGOcount[idx])
+                            state += (mQuestStatus[quest_id].m_creatureOrGOcount[idx] << ( 6 * idx ));
+                    }
+
+                    SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot+0,quest_id);
+                    SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot+1,state);
+                    SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot+2,quest_time);
+
+                    ++slot;
+                }
+
                 sLog.outDebug("Quest status is {%u} for quest {%u}", mQuestStatus[quest_id].m_status, quest_id);
             }
         }
         while( result->NextRow() );
 
         delete result;
+    }
+
+    // clear quest log tail
+    for ( uint16 i = slot; i < MAX_QUEST_LOG_SIZE; ++i )
+    {
+        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i+0,0);
+        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i+1,0);
+        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i+2,0);
     }
 }
 

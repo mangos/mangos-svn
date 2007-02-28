@@ -870,7 +870,7 @@ void Spell::SendSpellCooldown()
 
     Player* _player = (Player*)m_caster;
 
-    // init vooldown values
+    // init cooldown values
     uint32 cat   = 0;
     int32 rec    = 0;
     int32 catrec = 0;
