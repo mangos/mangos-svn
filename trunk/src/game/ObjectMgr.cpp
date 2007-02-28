@@ -165,7 +165,7 @@ AuctionHouseObject * ObjectMgr::GetAuctionsMap( uint32 location )
 
 uint32 ObjectMgr::GetAuctionCut(uint32 location, uint32 highBid)
 {
-    if (location == 7 && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
+    if (location == 7 && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE))
         return (uint32) (0.15 * highBid);
     else
         return (uint32) (0.05 * highBid);
@@ -174,7 +174,7 @@ uint32 ObjectMgr::GetAuctionCut(uint32 location, uint32 highBid)
 uint32 ObjectMgr::GetAuctionDeposit(uint32 location, uint32 time, Item *pItem)
 {
     uint32 percentance;
-    if ( location == 7 && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
+    if ( location == 7 && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE))
         percentance = 25;
     else
         percentance = 5;
@@ -2344,4 +2344,5 @@ void ObjectMgr::LoadCorpses()
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u corpses", count );
 }
+
 

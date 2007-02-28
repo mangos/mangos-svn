@@ -54,7 +54,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     }
 
     // send in universal language infaction iteration allowed mode and if player in .gmon mode
-    if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) || _player->isGameMaster())
+    if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
         lang = LANG_UNIVERSAL;
 
     switch(type)
@@ -179,7 +179,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 SendPacket(&data);
                 break;
             }
-            if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
+            if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
             {
                 uint32 sidea = GetPlayer()->GetTeam();
                 uint32 sideb = player->GetTeam();

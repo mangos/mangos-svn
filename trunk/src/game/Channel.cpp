@@ -359,7 +359,7 @@ void Channel::Say(Player *p, const char *what, uint32 lang)
 {
     if(!what)
         return;
-    if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION))
+    if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
         lang = LANG_UNIVERSAL;
 
     WorldPacket data;

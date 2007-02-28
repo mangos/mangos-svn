@@ -121,7 +121,11 @@ AllowTwoSide.Accounts = 0
 # Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade for players from different teams.
 # Defaullt: 0 (Not allowed)
 #           1 (Allowed)
-AllowTwoSide.Interaction = 0
+AllowTwoSide.Interaction.Chat = 0
+AllowTwoSide.Interaction.Channel = 0
+AllowTwoSide.Interaction.Group = 0
+AllowTwoSide.Interaction.Guild = 0
+AllowTwoSide.Interaction.Trade = 0
 
 # Allow or not show player from both team in who list.
 # Defaullt: 0 (Not allowed)

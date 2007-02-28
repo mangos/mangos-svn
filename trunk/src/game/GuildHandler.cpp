@@ -292,7 +292,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
         return;
 
     // not let enemies sign guild charter
-    if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && GetPlayer()->GetTeam() != objmgr.GetPlayerTeamByGUID(ownerguid) )
+    if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != objmgr.GetPlayerTeamByGUID(ownerguid) )
         return;
 
     signs += 1;
@@ -364,7 +364,7 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
         return;
 
     // not let offer to enemies
-    if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && GetPlayer()->GetTeam() != player->GetTeam() )
+    if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != player->GetTeam() )
         return;
 
     QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
@@ -637,7 +637,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
         return;
 
     // not let enemies sign guild charter
-    if ( !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && player->GetTeam() != GetPlayer()->GetTeam() )
+    if ( !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && player->GetTeam() != GetPlayer()->GetTeam() )
     {
         SendCommandResult(GUILD_INVITE_S,Invitedname,GUILD_NOT_ALLIED);
         return;
@@ -744,7 +744,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
         return;
 
     // not let enemies sign guild charter
-    if ( !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION) && player->GetTeam() != objmgr.GetPlayerTeamByGUID(guild->GetLeader()) )
+    if ( !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && player->GetTeam() != objmgr.GetPlayerTeamByGUID(guild->GetLeader()) )
         return;
 
     guild->AddMember(GetPlayer()->GetGUID());
