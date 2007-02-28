@@ -121,30 +121,15 @@ bool ChatHandler::HandleStartCommand(const char* args)
         return true;
     }
 
-    // not let used .start command as free replacement for hearthstone
-    if(chr->HasSpellCooldown(8690))
-    {
-        SendSysMessage(LANG_YOU_USED_IT_RECENTLY);
+    // cast spell Stuck
+    SpellEntry const* sInfo = sSpellStore.LookupEntry(7355);
+    if(!sInfo)
         return true;
-    }
 
-    chr->SetUInt32Value(PLAYER_FARSIGHT, 0x01);
-
-    PlayerInfo const *info = objmgr.GetPlayerInfo(chr->getRace(), chr->getClass());
-
-    chr->SetRecallPosition(chr->GetMapId(),chr->GetPositionX(),chr->GetPositionY(),chr->GetPositionZ(),chr->GetOrientation());
-    chr->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,chr->GetOrientation());
-
-    chr->SetUInt32Value(PLAYER_FARSIGHT, 0x00);
-
-    // set hearthstone cooldown
-    chr->AddSpellCooldown(8690,time(NULL)+3600);
-
-    SpellEntry const* spell = sSpellStore.LookupEntry(8690);
-
-    if(spell)
-        chr->SetItemsCooldown(spell->Category);
-
+    Spell *spell = new Spell(chr, sInfo , false, 0);
+    SpellCastTargets targets;
+    targets.setUnitTarget( chr );
+    spell->prepare(&targets);
     return true;
 }
 
