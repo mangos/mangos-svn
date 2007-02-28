@@ -3212,7 +3212,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
     if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
     {
         // Duel
-        if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target)
+        if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target && ((Player const*)tester)->duel->startTime != 0)
             return true;
 
         //= PvP states
@@ -3250,7 +3250,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
     {
         // Duel
-        if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target)
+        if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target && ((Player const*)tester)->duel->startTime != 0)
             return false;
 
         //= PvP states
