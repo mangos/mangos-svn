@@ -490,6 +490,8 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     {
         switch(spellproto->EffectApplyAuraName[effIndex])
         {
+            case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:
+                return false;
             case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:
                 if(spellId != spellproto->EffectTriggerSpell[effIndex])
                 {
