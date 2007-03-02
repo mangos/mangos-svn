@@ -51,7 +51,7 @@ AC_CHECK_LIB( pthread, pthread_create, [],
 AC_CHECK_LIB( z, compress, [ZLIB=-lz],[AC_MSG_ERROR([Missing zlib])] )
 #AC_CHECK_LIB( mysqlclient, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
 AC_CHECK_LIB( compat, ftime, [COMPATLIB=-lcompat] )
-AC_CHECK_LIB( ssl, BN_cmp, [SSLLIB=-lssl], [AC_MSG_ERROR([Missing openssl])])
+AC_CHECK_LIB( ssl, SHA1_Init, [SSLLIB=-lssl], [AC_MSG_ERROR([Missing openssl])])
 
 AC_ARG_WITH(mysql-libs,
 [  --with-mysql-libs=DIR     Look for mysql libs in this dir ],
@@ -70,6 +70,59 @@ then
         MYSQL_INCLUDES="`$MYSQL_CONFIG --cflags`"
     MYSQL_LIBS="`$MYSQL_CONFIG --libs`"
 fi
+
+## Check for options
+#  Include debug info in library?
+AC_MSG_CHECKING(whether to include debug info in library)
+MANGOSD_DEBUG_INFO=no
+AC_ARG_WITH(debug-info,
+[
+Debugging options:
+
+  --with-debug-info       Include debug info in library],
+[
+    if test "$withval" = "yes" ; then
+	CFLAGS="-g -DMANGOS_DEBUG $CFLAGS"
+	CXXFLAGS="-g -DMANGOS_DEBUG $CXXFLAGS"
+	MANGOSD_DEBUG_INFO=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_DEBUG_INFO)
+
+
+# Enable CLI console?
+AC_MSG_CHECKING(whether cli console is enabled)
+MANGOSD_ENABLE_CLI=no
+AC_ARG_ENABLE(cli,
+[  --enable-cli Turn on command console system],
+[
+    if test "$enableval" = "yes" ; then
+	CFLAGS="-DENABLE_CLI $CFLAGS"
+	CXXFLAGS="-DENABLE_CLI $CXXFLAGS"
+	MANGOSD_ENABLE_CLI=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_ENABLE_CLI)
+
+# Enable remote console?
+AC_MSG_CHECKING(whether remote console is enabled)
+MANGOSD_ENABLE_RA=no
+AC_ARG_ENABLE(ra,
+[  --enable-ra Turn on remote console system],
+[
+    if test "$enableval" = "yes" ; then
+	CFLAGS="-DENABLE_RA $CFLAGS"
+	CXXFLAGS="-DENABLE_RA $CXXFLAGS"
+	MANGOSD_ENABLE_RA=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_ENABLE_RA)
 
 ## Check for required header files.
 AC_HEADER_STDC
@@ -105,35 +158,38 @@ AC_SUBST(SSLLIB)
 AC_SUBST(MYSQL_INCLUDES)
 AC_SUBST(MYSQL_LIBS)
 AC_SUBST(DOXYGENPATH)
+AC_SUBST(MANGOSD_DEBUG_INFO)
+AC_SUBST(MANGOSD_ENABLE_CLI)
+AC_SUBST(MANGOSD_ENABLE_RA)
 
 ## Set output files.
 AC_CONFIG_HEADERS( [config.h] )
 AC_CONFIG_FILES([
    dep/include/Makefile
    dep/lib/Makefile
-   dep/Makefile
    dep/src/Makefile
    dep/src/zlib/Makefile
    dep/src/zthread/Makefile
+   dep/Makefile
    doc/Doxyfile
    doc/Makefile
    Makefile
    sql/Makefile
-   src/framework/Makefile
    src/Makefile
+   src/framework/Makefile
    src/shared/Makefile
    src/shared/SystemConfig.h
+   src/game/Makefile
+   src/realmd/Makefile
+   src/realmd/realmd.conf
+   src/mangosd/Makefile
+   src/mangosd/mangosd.conf
+   src/bindings/Makefile
+   src/bindings/universal/Makefile
 ])
 
 ## Disabled Makefiles, until they are ready for a successful make and
 #  make dist run.
-#   src/bindings/Makefile
-#   src/bindings/universal/Makefile
-#   src/game/Makefile
-#   src/mangosd/Makefile
-#   src/mangosd/mangosd.conf
-#   src/realmd/Makefile
-#   src/realmd/realmd.conf
 
 ## Output files.
 AC_OUTPUT

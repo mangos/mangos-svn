@@ -19,7 +19,7 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework
+AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared
 ## AM_CPPFLAGS += -I$(srcdir)/../game -I$(srcdir)/../realmd
 
 ## Build MaNGOS shared library and its parts as convenience library.
@@ -131,6 +131,10 @@ libmangosnetwork_a_SOURCES = \
 EXTRA_DIST = \
 	PacketLog.cpp \
 	PacketLog.h
+
+# System configuration
+EXTRA_DIST += \
+	SystemConfig.h
 
 #  VC++ project workspace for dotconfpp
 EXTRA_DIST += \
