@@ -19,16 +19,15 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../shared/  -I$(srcdir)/../../framework/
+AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../shared/  -I$(srcdir)/../../framework/
 
 ## Build MaNGOS script library as shared library.
-#  libMaNGOSScript shared library will later be reused by world server daemon.
-lib_LTLIBRARIES = libMaNGOSScript.la
-libMaNGOSScript_la_SOURCES = \
-	config.h \
-	script.h \
+#  libmangosscript shared library will later be reused by world server daemon.
+lib_LTLIBRARIES = libmangosscript.la
+libmangosscript_la_SOURCES = \
 	ScriptMgr.cpp \
 	ScriptMgr.h \
+	config.h \
 	system.cpp \
 	Scripts/sc_default.cpp \
 	Scripts/sc_defines.cpp \
@@ -47,7 +46,8 @@ libMaNGOSScript_la_SOURCES = \
 LTMANGOS_CURRENT = 0
 LTMANGOS_REVISION = 0
 LTMANGOS_AGE = 0
-libMaNGOSScript_la_LDFLAGS = -version-info $(LTMANGOS_CURRENT):$(LTMANGOS_REVISION):$(LTMANGOS_AGE)
+libmangosscript_la_LIBADD = $(MYSQL_LIBS)
+libmangosscript_la_LIBFLAGS = -version-info $(LTMANGOS_CURRENT):$(LTMANGOS_REVISION):$(LTMANGOS_AGE)
 
 ## Additional files to include when running 'make dist'
 #  Scripts defaults.

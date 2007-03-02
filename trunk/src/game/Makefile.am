@@ -1,4 +1,4 @@
-# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,194 +14,207 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-INCLUDES += -I$(srcdir) -I$(srcdir)/../../dep/include -I$(top_builddir)/src/shared -I$(srcdir)/../shared -I$(srcdir)/../framework
+## Process this file with automake to produce Makefile.in
 
-noinst_LIBRARIES = libgame.a
+## Sub-directories to parse
 
-libgame_a_SOURCES = \
+## CPP flags for includes, defines, etc.
+AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../realmd
+
+## Build MaNGOS game library as convenience library.
+#  All libraries will be convenience libraries. Might be changed to shared
+#  later.
+noinst_LIBRARIES = libmangosgame.a
+
+#  libmangossgame library will later be reused by ...
+libmangosgame_a_SOURCES = \
 	AddonHandler.cpp \
+	AddonHandler.h \
 	AggressorAI.cpp \
+	AggressorAI.h \
+	AnimalRandomMovementGenerator.h \
 	AuctionHouse.cpp \
+	AuctionHouseObject.h \
 	Bag.cpp \
+	Bag.h \
 	BattleGround.cpp \
+	BattleGround.h \
 	BattleGroundHandler.cpp \
 	BattleGroundMgr.cpp \
+	BattleGroundMgr.h \
+	Cell.h \
+	CellImpl.h \
 	Channel.cpp \
+	Channel.h \
 	ChannelHandler.cpp \
+	ChannelMgr.h \
 	CharacterHandler.cpp \
 	Chat.cpp \
+	Chat.h \
 	ChatHandler.cpp \
 	CombatHandler.cpp \
+	CompositeAI.h \
 	ConfusedMovementGenerator.cpp \
+	ConfusedMovementGenerator.h \
 	Container.cpp \
+	Container.h \
 	Corpse.cpp \
+	Corpse.h \
 	CreatureAI.cpp \
+	CreatureAI.h \
+	CreatureAIImpl.h \
 	CreatureAIRegistry.cpp \
+	CreatureAIRegistry.h \
 	CreatureAISelector.cpp \
+	CreatureAISelector.h \
 	Creature.cpp \
+	Creature.h \
 	debugcmds.cpp \
 	DestinationHolder.cpp \
+	DestinationHolder.h \
+	DestinationHolderImp.h \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
+	DynamicObject.h \
 	FlightMaster.cpp \
+	FlightMaster.h \
+	Formulas.h \
 	GameObject.cpp \
+	GameObject.h \
 	GlobalEvents.cpp \
+	GlobalEvents.h \
 	GossipDef.cpp \
+	GossipDef.h \
+	GridDefines.h \
 	GridNotifiers.cpp \
+	GridNotifiers.h \
+	GridNotifiersImpl.h \
 	GridStates.cpp \
+	GridStates.h \
 	Group.cpp \
+	Group.h \
 	GroupHandler.cpp \
 	GuardAI.cpp \
+	GuardAI.h \
 	Guild.cpp \
+	Guild.h \
 	GuildHandler.cpp \
+	HateMatrix.h \
 	HomeMovementGenerator.cpp \
+	HomeMovementGenerator.h \
 	IdleMovementGenerator.cpp \
+	IdleMovementGenerator.h \
 	Item.cpp \
+	Item.h \
 	ItemHandler.cpp \
+	ItemPrototype.h \
+	Language.h \
 	Level0.cpp \
 	Level1.cpp \
 	Level2.cpp \
 	Level3.cpp \
 	LootHandler.cpp \
 	LootMgr.cpp \
-	Mail.cpp \
-	Map.cpp \
-	MapManager.cpp \
-	MiscHandler.cpp \
-	MotionMaster.cpp \
-	MovementGenerator.cpp \
-	MovementHandler.cpp \
-	NPCHandler.cpp \
-	NullCreatureAI.cpp \
-	ObjectAccessor.cpp \
-	Object.cpp \
-	ObjectGridLoader.cpp \
-	ObjectMgr.cpp \
-	Opcodes.cpp \
-	Pet.cpp \
-	Pet.h \
-	PetAI.cpp \
-	PetAI.h \
-	PetHandler.cpp \
-	Player.cpp \
-	QueryHandler.cpp \
-	QuestDef.cpp \
-	QuestHandler.cpp \
-	RandomMovementGenerator.cpp \
-	ReactorAI.cpp \
-	RedZoneDistrict.cpp \
-	ScriptCalls.cpp \
-	SkillHandler.cpp \
-	SpellAuras.cpp \
-	Spell.cpp \
-	SpellEffects.cpp \
-	SpellHandler.cpp \
-	TargetedMovementGenerator.cpp \
-	TaxiHandler.cpp \
-	TaxiMovementGenerator.cpp \
-	TemporarySummon.cpp \
-	tools.cpp \
-	Totem.cpp \
-	TotemAI.cpp \
-	TradeHandler.cpp \
-	Transports.cpp \
-	Unit.cpp \
-	UpdateData.cpp \
-	WaypointMovementGenerator.cpp \
-	Weather.cpp \
-	World.cpp \
-	WorldLog.cpp \
-	WorldSession.cpp \
-	WorldSocket.cpp \
-	WorldSocketMgr.cpp \
-	AggressorAI.h \
-	AnimalRandomMovementGenerator.h \
-	AuctionHouseObject.h \
-	Bag.h \
-	BattleGround.h \
-	BattleGroundMgr.h \
-	Cell.h \
-	CellImpl.h \
-	Channel.h \
-	ChannelMgr.h \
-	Chat.h \
-	CompositeAI.h \
-	ConfusedMovementGenerator.h \
-	Container.h \
-	Corpse.h \
-	CreatureAI.h \
-	CreatureAIImpl.h \
-	CreatureAIRegistry.h \
-	CreatureAISelector.h \
-	Creature.h \
-	DestinationHolder.h \
-	DestinationHolderImp.h \
-	DynamicObject.h \
-	FlightMaster.h \
-	Formulas.h \
-	GameObject.h \
-	GlobalEvents.h \
-	GossipDef.h \
-	GridDefines.h \
-	GridNotifiers.h \
-	GridNotifiersImpl.h \
-	GridStates.h \
-	Group.h \
-	GuardAI.h \
-	Guild.h \
-	HateMatrix.h \
-	HomeMovementGenerator.h \
-	IdleMovementGenerator.h \
-	Item.h \
-	ItemPrototype.h \
 	LootMgr.h \
+	Mail.cpp \
 	Mail.h \
+	Map.cpp \
 	Map.h \
+	MapManager.cpp \
 	MapManager.h \
+	MiscHandler.cpp \
 	MiscHandler.h \
+	MotionMaster.cpp \
 	MotionMaster.h \
+	MovementGenerator.cpp \
 	MovementGenerator.h \
 	MovementGeneratorImpl.h \
+	MovementHandler.cpp \
 	NameTables.h \
+	NPCHandler.cpp \
 	NPCHandler.h \
+	NullCreatureAI.cpp \
 	NullCreatureAI.h \
+	ObjectAccessor.cpp \
 	ObjectAccessor.h \
+	Object.cpp \
 	ObjectDefines.h \
+	ObjectGridLoader.cpp \
 	ObjectGridLoader.h \
 	Object.h \
+	ObjectMgr.cpp \
 	ObjectMgr.h \
+	Opcodes.cpp \
 	Opcodes.h \
 	Path.h \
+	PetAI.cpp \
+	PetAI.h \
+	Pet.cpp \
+	Pet.h \
+	PetHandler.cpp \
+	Player.cpp \
 	Player.h \
+	QueryHandler.cpp \
+	QuestDef.cpp \
 	QuestDef.h \
+	QuestHandler.cpp \
+	RandomMovementGenerator.cpp \
 	RandomMovementGenerator.h \
+	ReactorAI.cpp \
 	ReactorAI.h \
+	RedZoneDistrict.cpp \
 	RedZoneDistrict.h \
+	ScriptCalls.cpp \
 	ScriptCalls.h \
 	SharedDefines.h \
+	SkillHandler.cpp \
+	SpellAuraDefines.h \
+	SpellAuras.cpp \
 	SpellAuras.h \
+	Spell.cpp \
+	SpellEffects.cpp \
 	Spell.h \
+	SpellHandler.cpp \
+	TargetedMovementGenerator.cpp \
 	TargetedMovementGenerator.h \
+	TaxiHandler.cpp \
+	TaxiMovementGenerator.cpp \
 	TaxiMovementGenerator.h \
+	TemporarySummon.cpp \
 	TemporarySummon.h \
+	tools.cpp \
 	Tools.h \
-	Totem.h \
+	TotemAI.cpp \
 	TotemAI.h \
-	Traveller.h \
+	Totem.cpp \
+	Totem.h \
+	TradeHandler.cpp \
+	Transports.cpp \
 	Transports.h \
+	Traveller.h \
+	Unit.cpp \
 	Unit.h \
+	UpdateData.cpp \
 	UpdateData.h \
 	UpdateFields.h \
 	UpdateMask.h \
+	WaypointMovementGenerator.cpp \
 	WaypointMovementGenerator.h \
+	Weather.cpp \
 	Weather.h \
+	World.cpp \
 	World.h \
+	WorldLog.cpp \
 	WorldLog.h \
+	WorldSession.cpp \
 	WorldSession.h \
+	WorldSocket.cpp \
 	WorldSocket.h \
-	WorldSocketMgr.h \
-	BattleGround.h \
-	BattleGround.cpp \
-	BattleGroundMgr.h \
-	BattleGroundMgr.cpp \
-	BattleGroundHandler.cpp 
+	WorldSocketMgr.cpp \
+	WorldSocketMgr.h
+
+## Link against shared library
+libmangosgame_a_LIBADD = ../shared/libmangosshared.a
+
+## Additional files to include when running 'make dist'
+#  Nothing yet.

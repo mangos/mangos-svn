@@ -17,8 +17,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ## Sub-directories to parse
-## SUBDIRS = framework shared realmd game bindings mangosd
-SUBDIRS = framework shared 
+SUBDIRS = framework shared realmd game bindings mangosd
 
 ## Additional files to include when running 'make dist'
 #  Nothing yet.

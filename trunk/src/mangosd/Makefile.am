@@ -1,4 +1,4 @@
-# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,32 +14,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-INCLUDES += -I$(srcdir) -I$(srcdir)/../../dep/include
-INCLUDES += -I$(top_builddir)/src/shared -I$(srcdir)/../shared
-INCLUDES += -I$(srcdir)/../game -I$(srcdir)/../framework
+## Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = mangosd
+## CPP flags for includes, defines, etc.
+AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared  -I$(srcdir)/../game -I$(srcdir)
 
-mangosd_SOURCES = \
-    Main.cpp \
-    Master.cpp \
-    Master.h \
-    WorldRunnable.cpp \
-    WorldRunnable.h \
-    CliRunnable.cpp \
-    CliRunnable.h \
-    RASocket.cpp \
-    RASocket.h
+## Build world list daemon as standalone program
+bin_PROGRAMS = mangos-worldd
+mangos_worldd_SOURCES = \
+	CliRunnable.cpp \
+	CliRunnable.h \
+	Main.cpp \
+	Master.cpp \
+	Master.h \
+	RASocket.cpp \
+	RASocket.h \
+	WorldRunnable.cpp \
+	WorldRunnable.h
 
-mangosd_LDADD = $(top_builddir)/src/game/libgame.a $(top_builddir)/src/shared/libdatabase.a $(top_builddir)/src/shared/libconfig.a $(top_builddir)/src/shared/libauth.a $(top_builddir)/src/shared/libshared.a $(top_builddir)/src/framework/libframework.a $(top_builddir)/src/shared/libnetwork.a -lZThread -lMaNGOSScript -lzlib
+## Link world daemon against the shared library
+mangos_worldd_LDADD = ../bindings/universal/libmangosscript.la ../game/libmangosgame.a ../shared/libmangosdatabase.a ../shared/libmangosconfig.a ../shared/libmangosauth.a ../shared/libmangosshared.a ../shared/libmangosnetwork.a ../framework/libmangosframework.a ../../dep/src/zthread/libZThread.la
+mangos_worldd_LDFLAGS = -L../../dep/src/zthread -L../bindings/universal/ $(MYSQL_LIBS) -L$(libdir) $(ZLIB) $(COMPATLIB) $(SSLLIB) -export-dynamic
 
-mangosd_LDFLAGS = -L$(top_builddir)/dep/src/zthread \
-               -L$(top_builddir)/dep/src/zlib \
-	       -L$(top_builddir)/src/bindings/universal \
-	       -export-dynamic
+## Additional files to include when running 'make dist'
+#  Include world daemon configuration
+EXTRA_DIST = \
+	mangosd.conf
 
-# install mangosd.conf to $(sysconfdir)
+## Additional files to install
 sysconf_DATA = \
-    mangosd.conf
-
-
+	mangosd.conf
