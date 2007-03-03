@@ -68,7 +68,7 @@ then
     # MySQL v4 uses --include while v3 uses --cflags
     MYSQL_INCLUDES="`$MYSQL_CONFIG --include`" || \
         MYSQL_INCLUDES="`$MYSQL_CONFIG --cflags`"
-    MYSQL_LIBS="`$MYSQL_CONFIG --libs`"
+    MYSQL_LIBS="`$MYSQL_CONFIG --libs_r`"
 fi
 
 ## Check for options
@@ -175,6 +175,7 @@ AC_CONFIG_FILES([
    doc/Makefile
    Makefile
    sql/Makefile
+   sql/updates/Makefile
    src/Makefile
    src/framework/Makefile
    src/shared/Makefile
