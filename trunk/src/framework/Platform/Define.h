@@ -46,7 +46,7 @@
 #endif
 
 #define MANGOS_SCRIPT_EXT ".so"
-#define MANGOS_SCRIPT_NAME "libMaNGOSScript"
+#define MANGOS_SCRIPT_NAME "libmangosscript"
 #endif
 
 #ifdef WIN32
