@@ -254,9 +254,18 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
     if (fabs(_player->GetSpeed(move_type) - newspeed) > 0.01f)
     {
-        sLog.outError("%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
-            move_type_name[move_type], _player->GetName(), _player->GetSpeed(move_type), newspeed);
-        _player->SetSpeed(move_type,_player->GetSpeedRate(move_type),true);
+        if(_player->GetSpeed(move_type) > newspeed)         // must be greater - just correct
+        {
+            sLog.outError("%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
+                move_type_name[move_type], _player->GetName(), _player->GetSpeed(move_type), newspeed);
+            _player->SetSpeed(move_type,_player->GetSpeedRate(move_type),true);
+        }
+        else                                                // must be lesser - cheating
+        {
+            sLog.outBasic("Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
+                _player->GetName(),_player->GetSession()->GetAccountId(),_player->GetSpeed(move_type), newspeed);
+            _player->GetSession()->KickPlayer();
+        }
     }
 }
 
