@@ -448,6 +448,7 @@ void World::SetInitialWorldSettings()
     RedZone::Initialize();
     AIRegistry::Initialize();
     WaypointMovementGenerator::Initialize();
+    Player::InitVisibleBits();
 
     //Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString( "Loading Transports..." );
