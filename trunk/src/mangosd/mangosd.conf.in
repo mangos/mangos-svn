@@ -237,9 +237,8 @@ Ra.MinLevel = 3
 Ra.Secure = 1
 
 # Maximum overspeed ping count before player kick (minimum is 2, 0 used for disable check)
-# Default: 10
-MaxOverspeedPings = 10
-
+# Default: 2
+MaxOverspeedPings = 2
 
 # Unload grids (if you have lot memory you can disbale it to speed up player move to new grids second time)
 #          0 (not unload grids)
