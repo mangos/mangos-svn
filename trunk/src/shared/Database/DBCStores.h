@@ -70,6 +70,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
 bool IsSingleTarget(uint32 spellId);
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);
+uint32 GetAreaFlagByMapId(uint32 mapid);
 bool CanUsedWhileStealthed(uint32 spellId);
 
 template<class T>

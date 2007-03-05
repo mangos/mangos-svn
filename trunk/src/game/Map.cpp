@@ -1055,9 +1055,9 @@ uint16 Map::GetAreaFlag(float x, float y )
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->area_flag[(int)(lx)][(int)(ly)];
+    // this used while not all *.map files generated (instances)
     else
-        return 0;
-
+        return GetAreaFlagByMapId(i_id);
 }
 
 uint8 Map::GetTerrainType(float x, float y )
