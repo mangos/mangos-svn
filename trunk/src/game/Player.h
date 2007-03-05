@@ -40,6 +40,7 @@ class Creature;
 class Pet;
 class PlayerMenu;
 class Transport;
+class UpdateMask;
 
 enum SpellModType
 {
@@ -467,6 +468,9 @@ class MANGOS_DLL_SPEC Player : public Unit
     public:
         explicit Player (WorldSession *session);
         ~Player ( );
+
+        static UpdateMask updateVisualBits;
+        static void InitVisibleBits();
 
         void AddToWorld();
         void RemoveFromWorld();
@@ -1235,7 +1239,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
-        void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;
 
         FactionsList::iterator FindReputationListIdInFactionList(uint32 repListId);
 

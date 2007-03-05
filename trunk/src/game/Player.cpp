@@ -60,6 +60,8 @@ typedef struct
 
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
+UpdateMask Player::updateVisualBits;
+
 Player::Player (WorldSession *session): Unit()
 {
     m_transport = NULL;
@@ -2465,13 +2467,9 @@ void Player::_SetCreateBits(UpdateMask *updateMask, Player *target) const
     }
     else
     {
-        UpdateMask mask;
-        mask.SetCount(m_valuesCount);
-        _SetVisibleBits(&mask, target);
-
         for(uint16 index = 0; index < m_valuesCount; index++)
         {
-            if(GetUInt32Value(index) != 0 && mask.GetBit(index))
+            if(GetUInt32Value(index) != 0 && updateVisualBits.GetBit(index))
                 updateMask->SetBit(index);
         }
     }
@@ -2485,80 +2483,75 @@ void Player::_SetUpdateBits(UpdateMask *updateMask, Player *target) const
     }
     else
     {
-        UpdateMask mask;
-        mask.SetCount(m_valuesCount);
-        _SetVisibleBits(&mask, target);
-
         Object::_SetUpdateBits(updateMask, target);
-        *updateMask &= mask;
+        *updateMask &= updateVisualBits;
     }
 }
 
-void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
+void Player::InitVisibleBits()
 {
-    updateMask->SetBit(OBJECT_FIELD_GUID);
-    updateMask->SetBit(OBJECT_FIELD_TYPE);
-    updateMask->SetBit(OBJECT_FIELD_SCALE_X);
+    updateVisualBits.SetCount(PLAYER_END);
 
-    updateMask->SetBit(UNIT_FIELD_SUMMON);
-    updateMask->SetBit(UNIT_FIELD_SUMMON+1);
+    updateVisualBits.SetBit(OBJECT_FIELD_GUID);
+    updateVisualBits.SetBit(OBJECT_FIELD_TYPE);
+    updateVisualBits.SetBit(OBJECT_FIELD_SCALE_X);
 
-    updateMask->SetBit(UNIT_FIELD_TARGET);
-    updateMask->SetBit(UNIT_FIELD_TARGET+1);
+    updateVisualBits.SetBit(UNIT_FIELD_SUMMON);
+    updateVisualBits.SetBit(UNIT_FIELD_SUMMON+1);
 
-    updateMask->SetBit(UNIT_FIELD_HEALTH);
-    updateMask->SetBit(UNIT_FIELD_POWER1);
-    updateMask->SetBit(UNIT_FIELD_POWER2);
-    updateMask->SetBit(UNIT_FIELD_POWER3);
-    updateMask->SetBit(UNIT_FIELD_POWER4);
-    updateMask->SetBit(UNIT_FIELD_POWER5);
+    updateVisualBits.SetBit(UNIT_FIELD_TARGET);
+    updateVisualBits.SetBit(UNIT_FIELD_TARGET+1);
 
-    updateMask->SetBit(UNIT_FIELD_MAXHEALTH);
-    updateMask->SetBit(UNIT_FIELD_MAXPOWER1);
-    updateMask->SetBit(UNIT_FIELD_MAXPOWER2);
-    updateMask->SetBit(UNIT_FIELD_MAXPOWER3);
-    updateMask->SetBit(UNIT_FIELD_MAXPOWER4);
-    updateMask->SetBit(UNIT_FIELD_MAXPOWER5);
+    updateVisualBits.SetBit(UNIT_FIELD_HEALTH);
+    updateVisualBits.SetBit(UNIT_FIELD_POWER1);
+    updateVisualBits.SetBit(UNIT_FIELD_POWER2);
+    updateVisualBits.SetBit(UNIT_FIELD_POWER3);
+    updateVisualBits.SetBit(UNIT_FIELD_POWER4);
+    updateVisualBits.SetBit(UNIT_FIELD_POWER5);
 
-    updateMask->SetBit(UNIT_FIELD_LEVEL);
-    updateMask->SetBit(UNIT_FIELD_FACTIONTEMPLATE);
-    updateMask->SetBit(UNIT_FIELD_BYTES_0);
-    updateMask->SetBit(UNIT_FIELD_FLAGS);
+    updateVisualBits.SetBit(UNIT_FIELD_MAXHEALTH);
+    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER1);
+    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER2);
+    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER3);
+    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER4);
+    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER5);
+
+    updateVisualBits.SetBit(UNIT_FIELD_LEVEL);
+    updateVisualBits.SetBit(UNIT_FIELD_FACTIONTEMPLATE);
+    updateVisualBits.SetBit(UNIT_FIELD_BYTES_0);
+    updateVisualBits.SetBit(UNIT_FIELD_FLAGS);
     for(uint16 i = UNIT_FIELD_AURA; i < UNIT_FIELD_AURASTATE; i ++)
-        updateMask->SetBit(i);
-    updateMask->SetBit(UNIT_FIELD_BASEATTACKTIME);
+        updateVisualBits.SetBit(i);
+    updateVisualBits.SetBit(UNIT_FIELD_BASEATTACKTIME);
     // TODO CHECK THIS
-    //updateMask->SetBit(UNIT_FIELD_OFFHANDATTACKTIME); not exsisting in 1.12
-    updateMask->SetBit(UNIT_FIELD_RANGEDATTACKTIME);
-    updateMask->SetBit(UNIT_FIELD_BOUNDINGRADIUS);
-    updateMask->SetBit(UNIT_FIELD_COMBATREACH);
-    updateMask->SetBit(UNIT_FIELD_DISPLAYID);
-    updateMask->SetBit(UNIT_FIELD_NATIVEDISPLAYID);
-    updateMask->SetBit(UNIT_FIELD_MOUNTDISPLAYID);
-    updateMask->SetBit(UNIT_FIELD_BYTES_1);
-    updateMask->SetBit(UNIT_FIELD_MOUNTDISPLAYID);
-    updateMask->SetBit(UNIT_FIELD_PETNUMBER);
-    updateMask->SetBit(UNIT_FIELD_PET_NAME_TIMESTAMP);
-    updateMask->SetBit(UNIT_DYNAMIC_FLAGS);
+    //updateVisualBits.SetBit(UNIT_FIELD_OFFHANDATTACKTIME); not exsisting in 1.12
+    updateVisualBits.SetBit(UNIT_FIELD_RANGEDATTACKTIME);
+    updateVisualBits.SetBit(UNIT_FIELD_BOUNDINGRADIUS);
+    updateVisualBits.SetBit(UNIT_FIELD_COMBATREACH);
+    updateVisualBits.SetBit(UNIT_FIELD_DISPLAYID);
+    updateVisualBits.SetBit(UNIT_FIELD_NATIVEDISPLAYID);
+    updateVisualBits.SetBit(UNIT_FIELD_MOUNTDISPLAYID);
+    updateVisualBits.SetBit(UNIT_FIELD_BYTES_1);
+    updateVisualBits.SetBit(UNIT_FIELD_MOUNTDISPLAYID);
+    updateVisualBits.SetBit(UNIT_FIELD_PETNUMBER);
+    updateVisualBits.SetBit(UNIT_FIELD_PET_NAME_TIMESTAMP);
+    updateVisualBits.SetBit(UNIT_DYNAMIC_FLAGS);
 
-    updateMask->SetBit(PLAYER_FLAGS);
-    updateMask->SetBit(PLAYER_BYTES);
-    updateMask->SetBit(PLAYER_BYTES_2);
-    updateMask->SetBit(PLAYER_BYTES_3);
-    updateMask->SetBit(PLAYER_GUILDID);
-    updateMask->SetBit(PLAYER_GUILDRANK);
-    updateMask->SetBit(PLAYER_GUILD_TIMESTAMP);
-    updateMask->SetBit(PLAYER_DUEL_TEAM);
-    updateMask->SetBit(PLAYER_DUEL_ARBITER);
-    updateMask->SetBit(PLAYER_DUEL_ARBITER+1);
+    updateVisualBits.SetBit(PLAYER_FLAGS);
+    updateVisualBits.SetBit(PLAYER_BYTES);
+    updateVisualBits.SetBit(PLAYER_BYTES_2);
+    updateVisualBits.SetBit(PLAYER_BYTES_3);
+    updateVisualBits.SetBit(PLAYER_GUILDID);
+    updateVisualBits.SetBit(PLAYER_GUILDRANK);
+    updateVisualBits.SetBit(PLAYER_GUILD_TIMESTAMP);
+    updateVisualBits.SetBit(PLAYER_DUEL_TEAM);
+    updateVisualBits.SetBit(PLAYER_DUEL_ARBITER);
+    updateVisualBits.SetBit(PLAYER_DUEL_ARBITER+1);
 
     for(uint16 i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
-
-        updateMask->SetBit((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + i*2));
-
-        updateMask->SetBit((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (i*2) + 1));
-
+        updateVisualBits.SetBit((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + i*2));
+        updateVisualBits.SetBit((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (i*2) + 1));
     }
     //Players visible items are not inventory stuff
     //431) = 884 (0x374) = main weapon
@@ -2567,26 +2560,25 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
         uint16 visual_base = PLAYER_VISIBLE_ITEM_1_0 + (i*12);
 
         // item entry
-        updateMask->SetBit(visual_base + 0);
+        updateVisualBits.SetBit(visual_base + 0);
 
         // item enchantment IDs
         for(uint8 j = 0; j < 7; ++j)
-            updateMask->SetBit(visual_base +1 + j);
+            updateVisualBits.SetBit(visual_base +1 + j);
 
-        // rendom properties
-        updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*12)));
+        // random properties
+        updateVisualBits.SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*12)));
     }
 
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 2);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 1);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 2);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 3);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 4);
-    updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO + 5);
-
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1);
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 2);
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_INFO);
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_INFO + 1);
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_INFO + 2);
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_INFO + 3);
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_INFO + 4);
+    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_INFO + 5);
 }
 
 void Player::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const
