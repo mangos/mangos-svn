@@ -27,9 +27,11 @@
 #include <map>
 
 typedef std::map<uint16,uint32> AreaFlagByAreaID;
+typedef std::map<uint32,uint32> AreaFlagByMapID;
 
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 static AreaFlagByAreaID sAreaFlagByAreaID;
+static AreaFlagByMapID  sAreaFlagByMapID;                   // for instances without generated *.map files
 
 DBCStorage <BankBagSlotPricesEntry> sBankBagSlotPricesStore(BankBagSlotPricesEntryfmt);
 
@@ -139,11 +141,6 @@ void LoadDBCStores(std::string dataPath)
     StoreProblemList bad_dbc_files;
 
     LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
-
-    for(uint32 i = 1; i <= sAreaStore.nCount; ++i)
-        if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
-            sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
-
     LoadDBC(bar,bad_dbc_files,sBankBagSlotPricesStore,   dataPath+"dbc/BankBagSlotPrices.dbc");
     LoadDBC(bar,bad_dbc_files,sChrClassesStore,          dataPath+"dbc/ChrClasses.dbc");
     LoadDBC(bar,bad_dbc_files,sChrRacesStore,            dataPath+"dbc/ChrRaces.dbc");
@@ -156,6 +153,27 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sItemSetStore,             dataPath+"dbc/ItemSet.dbc");
     LoadDBC(bar,bad_dbc_files,sLockStore,                dataPath+"dbc/Lock.dbc");
     LoadDBC(bar,bad_dbc_files,sMapStore,                 dataPath+"dbc/Map.dbc");
+
+    // must be after sAreaStore and sMapStore loading
+    for(uint32 i = 1; i <= sAreaStore.nCount; ++i)
+    {
+        if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
+        {
+            // fill AreaId->DBC records
+            sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
+
+            // fill MapId->DBC records
+            if(area->zone==0)                               // not sub-zone
+            {
+                MapEntry const* mapEntry = sMapStore.LookupEntry(area->mapid);
+                if(mapEntry && mapEntry->map_type != 0 /*MAP_COMMON*/)
+                {
+                    sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->mapid,area->exploreFlag));
+                }
+            }
+        }
+    }
+
     LoadDBC(bar,bad_dbc_files,sSkillLineStore,           dataPath+"dbc/SkillLine.dbc");
     LoadDBC(bar,bad_dbc_files,sSkillLineAbilityStore,    dataPath+"dbc/SkillLineAbility.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellStore,               dataPath+"dbc/Spell.dbc");
@@ -573,6 +591,16 @@ AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag)
 {
     return sAreaStore.LookupEntry(area_flag);
 }
+
+uint32 GetAreaFlagByMapId(uint32 mapid)
+{
+    AreaFlagByMapID::iterator i = sAreaFlagByMapID.find(mapid);
+    if(i == sAreaFlagByMapID.end())
+        return 0;
+    else
+        return i->second;
+}
+
 
 bool CanUsedWhileStealthed(uint32 spellId)
 {
