@@ -59,7 +59,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModTaunt,                                  //SPELL_AURA_MOD_TAUNT = 11,
     &Aura::HandleAuraModStun,                               //SPELL_AURA_MOD_STUN = 12,
     &Aura::HandleModDamageDone,                             //SPELL_AURA_MOD_DAMAGE_DONE = 13,
-    &Aura::HandleModDamageTaken,                            //SPELL_AURA_MOD_DAMAGE_TAKEN = 14,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_DAMAGE_TAKEN = 14,
     &Aura::HandleAuraDamageShield,                          //SPELL_AURA_DAMAGE_SHIELD = 15,
     &Aura::HandleModStealth,                                //SPELL_AURA_MOD_STEALTH = 16,
     &Aura::HandleModDetect,                                 //SPELL_AURA_MOD_DETECT = 17,
@@ -73,7 +73,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PACIFY = 25,
     &Aura::HandleAuraModRoot,                               //SPELL_AURA_MOD_ROOT = 26,
     &Aura::HandleAuraModSilence,                            //SPELL_AURA_MOD_SILENCE = 27,
-    &Aura::HandleReflectSpells,                             //SPELL_AURA_REFLECT_SPELLS = 28,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_REFLECT_SPELLS = 28,
     &Aura::HandleAuraModStat,                               //SPELL_AURA_MOD_STAT = 29,
     &Aura::HandleAuraModSkill,                              //SPELL_AURA_MOD_SKILL = 30,
     &Aura::HandleAuraModIncreaseSpeed,                      //SPELL_AURA_MOD_INCREASE_SPEED = 31,
@@ -104,7 +104,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraTransform,                             //SPELL_AURA_TRANSFORM = 56,
     &Aura::HandleModSpellCritChance,                        //SPELL_AURA_MOD_SPELL_CRIT_CHANCE = 57,
     &Aura::HandleAuraModIncreaseSwimSpeed,                  //SPELL_AURA_MOD_INCREASE_SWIM_SPEED = 58,
-    &Aura::HandleModDamageDoneCreature,                     //SPELL_AURA_MOD_DAMAGE_DONE_CREATURE = 59,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_DAMAGE_DONE_CREATURE = 59,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PACIFY_SILENCE = 60,
     &Aura::HandleAuraModScale,                              //SPELL_AURA_MOD_SCALE = 61,
     &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_HEALTH_FUNNEL = 62,
@@ -116,10 +116,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STALKED = 68,
     &Aura::HandleAuraSchoolAbsorb,                          //SPELL_AURA_SCHOOL_ABSORB = 69,
     &Aura::HandleNULL,                                      //SPELL_AURA_EXTRA_ATTACKS = 70,// Useless
-    &Aura::HandleModSpellCritChanceShool,                   //SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL = 71,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL = 71,
     &Aura::HandleModPowerCost,                              //SPELL_AURA_MOD_POWER_COST = 72,
-    &Aura::HandleModPowerCostSchool,                        //SPELL_AURA_MOD_POWER_COST_SCHOOL = 73,
-    &Aura::HandleReflectSpellsSchool,                       //SPELL_AURA_REFLECT_SPELLS_SCHOOL = 74,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_POWER_COST_SCHOOL = 73,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_REFLECT_SPELLS_SCHOOL = 74,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_LANGUAGE = 75,
     &Aura::HandleFarSight,                                  //SPELL_AURA_FAR_SIGHT = 76,
     &Aura::HandleModMechanicImmunity,                       //SPELL_AURA_MECHANIC_IMMUNITY = 77,
@@ -132,11 +132,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModRegen,                                  //SPELL_AURA_MOD_REGEN = 84,
     &Aura::HandleModPowerRegen,                             //SPELL_AURA_MOD_POWER_REGEN = 85,
     &Aura::HandleChannelDeathItem,                          //SPELL_AURA_CHANNEL_DEATH_ITEM = 86,
-    &Aura::HandleModDamagePercentTaken,                     //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
-    &Aura::HandleModPCTRegen,                               //SPELL_AURA_MOD_HEALTH_REGEN_PERCENT = 88,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_HEALTH_REGEN_PERCENT = 88,
     &Aura::HandlePeriodicDamagePCT,                         //SPELL_AURA_PERIODIC_DAMAGE_PERCENT = 89,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RESIST_CHANCE = 90,// Useless
-    &Aura::HandleModDetectRange,                            //SPELL_AURA_MOD_DETECT_RANGE = 91,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_DETECT_RANGE = 91,
     &Aura::HandleNULL,                                      //SPELL_AURA_PREVENTS_FLEEING = 92,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_UNATTACKABLE = 93,
     &Aura::HandleInterruptRegen,                            //SPELL_AURA_INTERRUPT_REGEN = 94,
@@ -147,7 +147,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModAttackPower,                        //SPELL_AURA_MOD_ATTACK_POWER = 99,
     &Aura::HandleNULL,                                      //SPELL_AURA_AURAS_VISIBLE = 100,
     &Aura::HandleModResistancePercent,                      //SPELL_AURA_MOD_RESISTANCE_PCT = 101,
-    &Aura::HandleModCreatureAttackPower,                    //SPELL_AURA_MOD_CREATURE_ATTACK_POWER = 102,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_CREATURE_ATTACK_POWER = 102,
     &Aura::HandleAuraModTotalThreat,                        //SPELL_AURA_MOD_TOTAL_THREAT = 103,
     &Aura::HandleAuraWaterWalk,                             //SPELL_AURA_WATER_WALK = 104,
     &Aura::HandleAuraFeatherFall,                           //SPELL_AURA_FEATHER_FALL = 105,
@@ -158,8 +158,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_REGEN_PERCENT = 110,
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_CASTER_HIT_TRIGGER = 111,
     &Aura::HandleNULL,                                      //SPELL_AURA_OVERRIDE_CLASS_SCRIPTS = 112,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN = 113,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT = 114,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN = 113,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT = 114,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING = 115,
     &Aura::HandleNULL,                                      //SPELL_AURA_IGNORE_REGEN_INTERRUPT = 116,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MECHANIC_RESISTANCE = 117,
@@ -167,11 +167,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_SHARE_PET_TRACKING = 119,
     &Aura::HandleNULL,                                      //SPELL_AURA_UNTRACKABLE = 120,
     &Aura::HandleAuraEmpathy,                               //SPELL_AURA_EMPATHY = 121,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT = 122,
+    &Aura::HandleModOffhandDamagePercent,                   //SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT = 122,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_COST_PCT = 123,
     &Aura::HandleAuraModRangedAttackPower,                  //SPELL_AURA_MOD_RANGED_ATTACK_POWER = 124,
-    &Aura::HandleAuraModMeleeDamageTaken,                   //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN = 125,
-    &Aura::HandleAuraModMeleeDamageTakenPercent,            //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT = 126,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN = 125,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT = 126,
     &Aura::HandleNULL,                                      //SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS = 127,
     &Aura::HandleModPossessPet,                             //SPELL_AURA_MOD_POSSESS_PET = 128,
     &Aura::HandleAuraModIncreaseSpeedAlways,                //SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS = 129,
@@ -201,7 +201,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE_FLAT    =    153    ,//    Split Damage Flat
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STEALTH_LEVEL    =    154    ,//    Stealth Level Modifier
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_WATER_BREATHING    =    155    ,//    Mod Water Breathing
-    &Aura::HandleModReputationGain,                         //SPELL_AURA_MOD_REPUTATION_GAIN    =    156    ,//    Mod Reputation Gain
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_REPUTATION_GAIN    =    156    ,//    Mod Reputation Gain
     &Aura::HandleNULL,                                      //SPELL_AURA_PET_DAMAGE_MULTI       = 157   ,//    Mod Pet Damage
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SHIELD_BLOCK            = 158 ,//
     &Aura::HandleNULL,                                      //SPELL_AURA_NO_PVP_CREDIT               = 159 ,//
@@ -715,11 +715,6 @@ void Aura::_RemoveAura()
 /*********************************************************/
 /***               BASIC AURA FUNCTION                 ***/
 /*********************************************************/
-
-void Aura::HandleNULL(bool apply, bool Real)
-{
-}
-
 void Aura::HandleAddModifier(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -2153,20 +2148,6 @@ void Aura::HandleAuraSchoolAbsorb(bool apply, bool Real)
 }
 
 /*********************************************************/
-/***               REFLECT SPELLS                      ***/
-/*********************************************************/
-
-void Aura::HandleReflectSpells(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
-void Aura::HandleReflectSpellsSchool(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
-/*********************************************************/
 /***                 PROC TRIGGER                      ***/
 /*********************************************************/
 
@@ -2251,11 +2232,6 @@ void Aura::HandlePeriodicDamagePCT(bool apply, bool Real)
         m_periodicTimer += m_modifier.periodictime;
 
     m_isPeriodic = apply;
-}
-
-void Aura::HandleModDetectRange(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
 }
 
 void Aura::HandlePeriodicLeech(bool apply, bool Real)
@@ -2664,11 +2640,6 @@ void Aura::HandleModSpellCritChance(bool Apply, bool Real)
     m_target->m_baseSpellCritChance += Apply?m_modifier.m_amount:(-m_modifier.m_amount);
 }
 
-void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
 /********************************/
 /***         ATTACK SPEED     ***/
 /********************************/
@@ -2759,37 +2730,6 @@ void Aura::HandleAuraModRangedAttackPower(bool apply, bool Real)
 /********************************/
 /***        DAMAGE BONUS      ***/
 /********************************/
-
-void Aura::HandleAuraModMeleeDamageTaken(bool Apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
-void Aura::HandleAuraModMeleeDamageTakenPercent(bool Apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
-void Aura::HandleModDamagePercentTaken(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
-void Aura::HandleModPCTRegen(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
-void Aura::HandleModCreatureAttackPower(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
-void Aura::HandleModDamageDoneCreature(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
 void Aura::HandleModDamageDone(bool apply, bool Real)
 {
     // m_modifier.m_miscvalue is bitmask of spell schools
@@ -2858,11 +2798,6 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     // Magic damage modifiers implemented in Unit::SpellDamageBonus
 }
 
-void Aura::HandleModDamageTaken(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
 void Aura::HandleModDamagePercentDone(bool apply, bool Real)
 {
     sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
@@ -2924,6 +2859,17 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     // Magic damage percent modifiers implemented in Unit::SpellDamageBonus
 }
 
+void Aura::HandleModOffhandDamagePercent(bool apply, bool Real)
+{
+    sLog.outDebug("AURA MOD OFFHAND DAMAGE");
+
+    if (!m_target || !m_target->haveOffhandWeapon())
+        return;
+
+    m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
+    m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
+}
+
 /********************************/
 /***        POWER COST        ***/
 /********************************/
@@ -2933,19 +2879,9 @@ void Aura::HandleModPowerCost(bool apply, bool Real)
     m_target->ApplyModUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER, m_modifier.m_amount, apply);
 }
 
-void Aura::HandleModPowerCostSchool(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
-
 /*********************************************************/
 /***                    OTHERS                         ***/
 /*********************************************************/
-
-void Aura::HandleModReputationGain(bool apply, bool Real)
-{
-    // has no immediate effect when adding / removing
-}
 
 void Aura::SendCoolDownEvent()
 {
