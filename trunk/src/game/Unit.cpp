@@ -1135,7 +1135,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             break;
     }
 
-    MeleeDamageBonus(pVictim, damage);
+    MeleeDamageBonus(pVictim, damage,attType);
     CalcAbsorbResist(pVictim, *damageType, *damage-*blocked_amount, absorbDamage, resistDamage);
 
     if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
@@ -2320,6 +2320,17 @@ void Unit::ApplyStats(bool apply)
         }
     }
 
+    AuraList& mModOffhandDamagePct = GetAurasByType(SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT);
+    for(AuraList::iterator i = mModOffhandDamagePct.begin(); i != mModOffhandDamagePct.end(); ++i)
+    {
+        if(((*i)->GetModifier()->m_miscvalue & 1) == 0)
+            continue;
+
+        Item* pItem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        if (pItem && pItem->IsFitToSpellRequirements((*i)->GetSpellProto()))
+            totaldamgemods[OFF_ATTACK] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+    }
+
     for (uint8 i = 0; i < MAX_STATS; i++)
         totalstatmods[i] = totalstatmods[i] * 100.0f - 100.0f;
     for (uint8 i = 0; i < MAX_SPELL_SCHOOL; i++)
@@ -2514,6 +2525,7 @@ void Unit::_RemoveAllAuraMods()
             case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
             case SPELL_AURA_MOD_RESISTANCE_PCT:
             case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+            case SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT:
                 // these are already removed by applystats
                 break;
             default:
@@ -2530,15 +2542,21 @@ void Unit::_RemoveAllAuraMods()
     for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
         (*i)->ApplyModifier(false);
     AuraList& mModDamagePct = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for(AuraList::iterator i = mModDamagePct .begin(); i != mModDamagePct .end(); ++i)
+    for(AuraList::iterator i = mModDamagePct.begin(); i != mModDamagePct.end(); ++i)
+        (*i)->ApplyModifier(false);
+    AuraList& mModOffhandDamagePct = GetAurasByType(SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT);
+    for(AuraList::iterator i = mModOffhandDamagePct.begin(); i != mModOffhandDamagePct.end(); ++i)
         (*i)->ApplyModifier(false);
 }
 
 void Unit::_ApplyAllAuraMods()
 {
     // these must be applied before applystats
+    AuraList& mModOffhandDamagePct = GetAurasByType(SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT);
+    for(AuraList::iterator i = mModOffhandDamagePct.begin(); i != mModOffhandDamagePct.end(); ++i)
+        (*i)->ApplyModifier(true);
     AuraList& mModDamagePct = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for(AuraList::iterator i = mModDamagePct .begin(); i != mModDamagePct .end(); ++i)
+    for(AuraList::iterator i = mModDamagePct.begin(); i != mModDamagePct.end(); ++i)
         (*i)->ApplyModifier(true);
     AuraList& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
     for(AuraList::iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
@@ -2556,6 +2574,7 @@ void Unit::_ApplyAllAuraMods()
             case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
             case SPELL_AURA_MOD_RESISTANCE_PCT:
             case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+            case SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT:
                 // these are already applied by applystats
                 break;
             default:
@@ -3698,7 +3717,7 @@ bool Unit::IsDamageToThreatSpell(SpellEntry const * spellInfo) const
     return false;
 }
 
-void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
+void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attType)
 {
     if(!pVictim) return;
 
@@ -3740,9 +3759,18 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             TakenFlatBenefit += (*i)->GetModifier()->m_amount;
 
-    AuraList& mModMeleeDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN);
-    for(AuraList::iterator i = mModMeleeDamageTaken.begin(); i != mModMeleeDamageTaken.end(); ++i)
-        TakenFlatBenefit += (*i)->GetModifier()->m_amount;
+    if(attType!=RANGED_ATTACK)
+    {
+        AuraList& mModMeleeDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN);
+        for(AuraList::iterator i = mModMeleeDamageTaken.begin(); i != mModMeleeDamageTaken.end(); ++i)
+            TakenFlatBenefit += (*i)->GetModifier()->m_amount;
+    }
+    else
+    {
+        AuraList& mModRangedDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN);
+        for(AuraList::iterator i = mModRangedDamageTaken.begin(); i != mModRangedDamageTaken.end(); ++i)
+            TakenFlatBenefit += (*i)->GetModifier()->m_amount;
+    }
 
     // ..done (base at attack power and creature type)
     AuraList& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
@@ -3755,6 +3783,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
 
     // ..done
     // SPELL_AURA_MOD_DAMAGE_PERCENT_DONE included in weapon damage
+    // SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT  included in weapon damage
 
     // ..taken
     AuraList& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
@@ -3762,9 +3791,18 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
-    AuraList& mModMeleeDamageTakenPercent = pVictim->GetAurasByType(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT);
-    for(AuraList::iterator i = mModMeleeDamageTakenPercent.begin(); i != mModMeleeDamageTakenPercent.end(); ++i)
-        TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+    if(attType != RANGED_ATTACK)
+    {
+        AuraList& mModMeleeDamageTakenPercent = pVictim->GetAurasByType(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT);
+        for(AuraList::iterator i = mModMeleeDamageTakenPercent.begin(); i != mModMeleeDamageTakenPercent.end(); ++i)
+            TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+    }
+    else
+    {
+        AuraList& mModRangedDamageTakenPercent = pVictim->GetAurasByType(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT);
+        for(AuraList::iterator i = mModRangedDamageTakenPercent.begin(); i != mModRangedDamageTakenPercent.end(); ++i)
+            TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+    }
 
     float tmpDamage = (*pdamage + TakenFlatBenefit)*TakenTotalMod;
 
