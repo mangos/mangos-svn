@@ -1798,7 +1798,6 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
     uint32 damageType = NORMAL_DAMAGE;
     uint32 victimState = VICTIMSTATE_NORMAL;
-    uint32 eff_damage = 0;
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
@@ -1810,13 +1809,12 @@ void Spell::EffectWeaponDmg(uint32 i)
         return;
     }
 
+    //set base eff_damage, total normal hit damage after DoAttackDamage call will be bonus + weapon
+    //if miss/parry, no eff=0 automatically by func DoAttackDamage
+    //if crit eff = (bonus + weapon) * 2
+    //In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
+    uint32 eff_damage = bonus;
     m_caster->DoAttackDamage(unitTarget, &eff_damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
-
-    // not add bonus to 0 damage
-    if( eff_damage > 0 && eff_damage + bonus > 0 )
-        eff_damage += bonus;
-    else
-        eff_damage = 0;
 
     for (j = 0; j < 3; j++)
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)

@@ -983,6 +983,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     if (outcome == MELEE_HIT_MISS)
     {
         *hitInfo |= HITINFO_MISS;
+        *damage = 0;
         if(GetTypeId()== TYPEID_PLAYER)
             ((Player*)this)->UpdateWeaponSkill(attType);
         return;
@@ -1014,6 +1015,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             break;
 
         case MELEE_HIT_PARRY:
+            if(attType == RANGED_ATTACK)                    //range attack - no parry
+                break;
             // at parry warrior also recieve rage like from hit to enemy
             if(GetTypeId() == TYPEID_PLAYER && getPowerType() == POWER_RAGE)
                 ((Player*)this)->CalcRage(*damage,true);
@@ -1074,6 +1077,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             return;
 
         case MELEE_HIT_DODGE:
+            if(attType == RANGED_ATTACK)                    //range attack - no dodge
+                break;
             *damage = 0;
             *victimState = VICTIMSTATE_DODGE;
 
@@ -1087,6 +1092,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             return;
 
         case MELEE_HIT_BLOCK:
+            if(attType == RANGED_ATTACK)                    //range attack - no block
+                break;
             *blocked_amount = uint32(pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
 
             if (pVictim->GetUnitBlockChance())
