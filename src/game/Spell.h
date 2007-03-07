@@ -411,6 +411,7 @@ class Spell
         void EffectDispel(uint32 i);
         void EffectDualWield(uint32 i);
         void EffectPickPocket(uint32 i);
+        void EffectAddFarsight(uint32 i);
         void EffectSummonWild(uint32 i);
         void EffectTeleUnitsFaceCaster(uint32 i);
         void EffectLearnSkill(uint32 i);

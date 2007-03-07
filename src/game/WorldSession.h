@@ -455,6 +455,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
+        void HandleFarSightOpcode(WorldPacket& recv_data);
 
         OpcodeHandler* _GetOpcodeHandlerTable() const;
 
