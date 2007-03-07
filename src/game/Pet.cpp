@@ -298,19 +298,19 @@ void Pet::Update(uint32 diff)
                 return;
             }
 
-	    //regenerate Focus
-	    if(m_regenTimer > 0)
-	    {
-		if(m_regenTimer > diff)
-		    m_regenTimer = 0;
-		else
-		    m_regenTimer -= diff;
-	    }
-	    else
-	    {
-		RegenerateFocus();
-		m_regenTimer = 4000;
-	    }
+            //regenerate Focus
+            if(m_regenTimer > 0)
+            {
+                if(m_regenTimer > diff)
+                    m_regenTimer = 0;
+                else
+                    m_regenTimer -= diff;
+            }
+            else
+            {
+                RegenerateFocus();
+                m_regenTimer = 4000;
+            }
 
             break;
         }
@@ -325,7 +325,7 @@ void Pet::RegenerateFocus()
     uint32 curValue = GetPower(POWER_FOCUS);
     uint32 maxValue = GetMaxPower(POWER_FOCUS);
     if (curValue >= maxValue) return;
-	uint32 addvalue = 25;
+    uint32 addvalue = 25;
     ModifyPower(POWER_FOCUS, addvalue);
 }
 

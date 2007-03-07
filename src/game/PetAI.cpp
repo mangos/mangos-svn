@@ -183,11 +183,11 @@ void PetAI::UpdateAI(const uint32 diff)
             else if( i_pet.isAttackReady() && i_pet.canReachWithAttack(i_pet.getVictim()) )
             {
                 i_pet.AttackerStateUpdate(i_pet.getVictim());
-	    /* Need more tests
-		(i_pet.getVictim())->AddThreat(&i_pet,0.0f); //if pet misses its target, it will also be the first in threat list
-		if(i_owner)
-		    (i_pet.getVictim())->AddThreat(i_owner,0.0f); //threat link
-	    */
+                /* Need more tests
+                (i_pet.getVictim())->AddThreat(&i_pet,0.0f); //if pet misses its target, it will also be the first in threat list
+                if(i_owner)
+                    (i_pet.getVictim())->AddThreat(i_owner,0.0f); //threat link
+                */
                 i_pet.resetAttackTimer();
 
                 if ( !i_pet.getVictim() )
