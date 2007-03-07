@@ -621,6 +621,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_WORLD_TELEPORT,              STATUS_LOGGEDIN, &WorldSession::HandleWorldTeleportOpcode           },
         { MSG_MINIMAP_PING,                 STATUS_LOGGEDIN, &WorldSession::HandleMinimapPingOpcode             },
         { MSG_RANDOM_ROLL,                  STATUS_LOGGEDIN, &WorldSession::HandleRandomRollOpcode              },
+        { CMSG_FAR_SIGHT,                   STATUS_LOGGEDIN, &WorldSession::HandleFarSightOpcode                },
 
         { 0,                                0,               NULL                                               }
     };
@@ -634,4 +635,26 @@ void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )
 {
     uint32 spellid;
     recv_data >> spellid;
+}
+
+void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_FAR_SIGHT");
+    recv_data.hexlike();
+
+    uint8 unk;
+    recv_data >> unk;
+
+    switch(unk)
+    {
+        case 0:
+            //WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0)
+            //SendPacket(&data);
+            //_player->SetUInt64Value(PLAYER_FARSIGHT, 0);
+            sLog.outDebug("Removed FarSight from player %u", _player->GetGUIDLow());
+            break;
+        case 1:
+            sLog.outDebug("Added FarSight " I64FMTD " to player %u", _player->GetUInt64Value(PLAYER_FARSIGHT), _player->GetGUIDLow());
+            break;
+    }
 }

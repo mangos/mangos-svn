@@ -121,7 +121,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DISTRACT = 69
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PULL = 70
     &Spell::EffectPickPocket,                               //SPELL_EFFECT_PICKPOCKET = 71
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_FARSIGHT = 72
+    &Spell::EffectAddFarsight,                              //SPELL_EFFECT_ADD_FARSIGHT = 72
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_POSSESSED = 73
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74 //Useless
     &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75
@@ -504,19 +504,19 @@ void Spell::EffectApplyAura(uint32 i)
     {
         switch (Aur->GetModifier()->m_auraname)
         {
+            case SPELL_AURA_BIND_SIGHT:
+            case SPELL_AURA_MOD_CHARM:
+            case SPELL_AURA_FAR_SIGHT:
             case SPELL_AURA_MOD_DETECT_RANGE:
             case SPELL_AURA_AURAS_VISIBLE:
-            case SPELL_AURA_MOD_CHARM:
+            case SPELL_AURA_MOD_STALKED:
+            case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
                 break;
             default:
                 if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat())
                     ((Creature*)Aur->GetTarget())->AI().AttackStart(m_caster);
                 else
-                {
                     m_caster->Attack(Aur->GetTarget());
-                    m_caster->SetInCombat();
-                    Aur->GetTarget()->SetInCombat();
-                }
         }
     }
 
@@ -1258,6 +1258,24 @@ void Spell::EffectPickPocket(uint32 i)
             ((Creature*)unitTarget)->AI().AttackStart(m_caster);
         }
     }
+}
+
+void Spell::EffectAddFarsight(uint32 i)
+{
+    float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    int32 duration = GetDuration(m_spellInfo);
+    DynamicObject* dynObj = new DynamicObject();
+    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
+    {
+        delete dynObj;
+        return;
+    }
+    dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
+    dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x80000002);
+    m_caster->AddDynObject(dynObj);
+    dynObj->AddToWorld();
+    MapManager::Instance().GetMap(dynObj->GetMapId())->Add(dynObj);
+    m_caster->SetUInt64Value(PLAYER_FARSIGHT, dynObj->GetGUID());
 }
 
 void Spell::EffectSummonWild(uint32 i)

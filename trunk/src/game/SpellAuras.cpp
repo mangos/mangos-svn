@@ -46,7 +46,7 @@
 pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
     &Aura::HandleNULL,                                      //SPELL_AURA_NONE
-    &Aura::HandleBindSight,                                 //SPELL_AURA_BIND_SIGHT
+    &Aura::HandleBindSight,                                 //SPELL_AURA_BIND_SIGHT = 1
     &Aura::HandleModPossess,                                //SPELL_AURA_MOD_POSSESS = 2,
     &Aura::HandlePeriodicDamage,                            //SPELL_AURA_PERIODIC_DAMAGE = 3,
     &Aura::HandleAuraDummy,                                 //SPELL_AURA_DUMMY    //missing 4
@@ -848,6 +848,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_procCharges = -1;
     }
 
+    if( m_target->GetTypeId() == TYPEID_PLAYER && !apply && 
+        ( GetSpellProto()->Effect[0]==72 || GetSpellProto()->Effect[0]==6 && 
+            ( GetSpellProto()->EffectApplyAuraName[0]==1 || GetSpellProto()->EffectApplyAuraName[0]==128 ) ) )
+    {
+        // spells with SpellEffect=72 and aura=4: 6196, 6197, 21171, 21425
+        m_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
+        WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
+        ((Player*)m_target)->GetSession()->SendPacket(&data);
+    }
+
     if(GetSpellProto()->SpellVisual == 5622 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
@@ -869,7 +879,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             tAuraProcTriggerDamage.remove(this);
     }
 
-    // only at real add/remove
     if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
         caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
     {
