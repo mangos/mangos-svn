@@ -444,6 +444,11 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     _player->RemoveAurasDueToSpell(spellId);
 }
 
+void WorldSession::HandleCancelGrowthAuraOpcode( WorldPacket& recvPacket)
+{
+    // nothing do
+}
+
 void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
 {
     // cancel and preper for deleting

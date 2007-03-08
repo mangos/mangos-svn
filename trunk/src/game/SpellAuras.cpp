@@ -710,6 +710,11 @@ void Aura::_RemoveAura()
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
     if(GetSpellProto()->SpellVisual == 5622)
         m_target->RemoveFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
+
+    // reset cooldown state for spells infinity/long aura (it's all self applied (?))
+    int32 duration = GetDuration(GetSpellProto());
+    if(caster==m_target && (duration < 0 || duration > GetSpellProto()->RecoveryTime)) 
+        SendCoolDownEvent();
 }
 
 /*********************************************************/
@@ -1681,7 +1686,6 @@ void Aura::HandleModStealth(bool apply, bool Real)
         // only at real aura remove
         if(Real)
         {
-            SendCoolDownEvent();
             m_target->SetVisibility(VISIBILITY_ON);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
                 m_target->SendUpdateToPlayer((Player*)m_target);
@@ -1724,7 +1728,6 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
         // only at real aura remove
         if(Real)
         {
-            SendCoolDownEvent();
             m_target->SetVisibility(VISIBILITY_ON);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
                 m_target->SendUpdateToPlayer((Player*)m_target);

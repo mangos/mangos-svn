@@ -511,6 +511,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_CAST_SPELL,                  STATUS_LOGGEDIN, &WorldSession::HandleCastSpellOpcode               },
         { CMSG_CANCEL_CAST,                 STATUS_LOGGEDIN, &WorldSession::HandleCancelCastOpcode              },
         { CMSG_CANCEL_AURA,                 STATUS_LOGGEDIN, &WorldSession::HandleCancelAuraOpcode              },
+        { CMSG_CANCEL_GROWTH_AURA,          STATUS_LOGGEDIN, &WorldSession::HandleCancelGrowthAuraOpcode        },
         { CMSG_CANCEL_AUTO_REPEAT_SPELL,    STATUS_LOGGEDIN, &WorldSession::HandleCancelAutoRepeatSpellOpcode   },
 
         { CMSG_LEARN_TALENT,                STATUS_LOGGEDIN, &WorldSession::HandleLearnTalentOpcode             },
