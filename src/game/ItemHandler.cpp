@@ -463,6 +463,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
                 return;
             }
             uint16 dest;
+
             uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
             if( msg == EQUIP_ERR_OK )
             {

@@ -559,6 +559,9 @@ bool IsSingleTarget(uint32 spellId)
     // cheap shot is an exception
     if ( spellId == 1833 || spellId == 14902 ) return false;
 
+    // hunter's mark and similar
+    if(spellInfo->SpellVisual == 3239) return true;
+
     // cannot be cast on another target while not cooled down anyway
     int32 duration = GetDuration(spellInfo);
     if ( duration < int32(spellInfo->RecoveryTime)) return false;

@@ -765,6 +765,18 @@ void Spell::cast(bool skipCheck)
         }
     }
 
+    // remove spell from another target if need
+    Unit::AuraList& scAuras = m_caster->GetSingleCastAuras();
+    for(Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
+    {
+        // hunter's mark
+        if((*itr)->GetSpellProto()->SpellVisual == 3239)
+        {
+            (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
+            break;
+        }
+    }
+
     // CAST SPELL
     SendSpellCooldown();
 
@@ -2097,21 +2109,17 @@ uint8 Spell::CanCast()
             case SPELL_AURA_MOD_CHARM:
             {
                 if(m_caster->GetPetGUID())
-                {
-                    castResult = CAST_FAIL_ALREADY_HAVE_SUMMON;
-                    break;
-                }
+                    return CAST_FAIL_ALREADY_HAVE_SUMMON;
+
                 if(m_caster->GetCharmGUID())
-                {
-                    castResult = CAST_FAIL_ALREADY_HAVE_CHARMED;
-                    break;
-                }
+                    return CAST_FAIL_ALREADY_HAVE_CHARMED;
+
+                if(!unitTarget)
+                    return CAST_FAIL_NO_TARGET;
+
                 if(int32(unitTarget->getLevel()) > CalculateDamage(i))
-                {
-                    castResult = CAST_FAIL_TARGET_IS_TOO_HIGH;
-                    break;
-                }
-            }
+                    return CAST_FAIL_TARGET_IS_TOO_HIGH;
+            };break;
             case SPELL_AURA_MOD_STEALTH:
             case SPELL_AURA_MOD_INVISIBILITY:
             {
@@ -2133,10 +2141,17 @@ uint8 Spell::CanCast()
                 cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 
                 if(found_creature)
-                {
-                    castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
-                    break;
-                }
+                    return CAST_FAIL_TOO_CLOSE_TO_ENEMY;
+
+            };break;
+            case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
+            {
+                if(!unitTarget)
+                    return CAST_FAIL_NO_TARGET;
+
+                // can be casted at non-friendly unit or own pet/charm
+                if(m_caster->IsFriendlyTo(unitTarget) && unitTarget->GetOwnerGUID()!= m_caster->GetGUID())
+                    return CAST_FAIL_TARGET_IS_FRIENDLY;
             };break;
             default:break;
         }

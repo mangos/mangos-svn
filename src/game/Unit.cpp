@@ -1942,9 +1942,9 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     {
         if(Unit* caster = Aur->GetCaster())
         {
-            std::list<Aura *> *scAuras = caster->GetSingleCastAuras();
-            std::list<Aura *>::iterator itr, next;
-            for (itr = scAuras->begin(); itr != scAuras->end(); itr = next)
+            AuraList& scAuras = caster->GetSingleCastAuras();
+            AuraList::iterator itr, next;
+            for (itr = scAuras.begin(); itr != scAuras.end(); itr = next)
             {
                 next = itr;
                 next++;
@@ -1957,13 +1957,13 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
                     (*itr)->GetSpellProto()->AttributesExEx == Aur->GetSpellProto()->AttributesExEx)
                 {
                     (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
-                    if(scAuras->empty())
+                    if(scAuras.empty())
                         break;
                     else
-                        next = scAuras->begin();
+                        next = scAuras.begin();
                 }
             }
-            scAuras->push_back(Aur);
+            scAuras.push_back(Aur);
         }
     }
     return true;
@@ -2145,8 +2145,8 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     {
         if(Unit* caster = (*i).second->GetCaster())
         {
-            std::list<Aura *> *scAuras = caster->GetSingleCastAuras();
-            scAuras->remove((*i).second);
+            AuraList& scAuras = caster->GetSingleCastAuras();
+            scAuras.remove((*i).second);
         }
     }
     // remove aura from party members when the caster turns off the aura
