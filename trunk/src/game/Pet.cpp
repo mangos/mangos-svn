@@ -38,7 +38,12 @@ Pet::Pet(PetType type)
 {
     m_isPet = true;
     m_name = "Pet";
-    m_actState = STATE_RA_FOLLOW | STATE_RA_PASSIVE;
+    m_petType = type;
+
+    m_actState = STATE_RA_FOLLOW;
+    if(type != GUARDIAN_PET)                                // guardian can't be in passive mode (owner can't changed mode for it)
+        m_actState |= STATE_RA_PASSIVE;                     // hunter/summoned pet have this mode by default, minipets can only this mode always
+
     m_fealty = 0;
     m_petType = type;
     m_regenTimer = 4000;
