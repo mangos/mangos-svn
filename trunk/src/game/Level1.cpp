@@ -470,7 +470,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
 
     char* pfactionid = strtok((char*)args, " ");
 
-    Unit* chr = getSelectedCreature();
+    Creature* chr = getSelectedCreature();
     if(!chr)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
@@ -1158,6 +1158,9 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
 
 bool ChatHandler::HandleModifyBitCommand(const char* args)
 {
+    if( !*args ) 
+        return false;
+
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {

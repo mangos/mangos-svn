@@ -2383,7 +2383,12 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
         uint32 g_id = graveyard->ID;
 
         QueryResult *result = sDatabase.PQuery("SELECT `faction` FROM `game_graveyard_zone` WHERE `id` = %u",g_id);
-        assert(result);                                     // GetClosestGraveYard successful only if record exist;
+        if (!result)
+        {
+            PSendSysMessage("No faction in Graveyard with id= #%u , fix your DB",g_id);
+            return true;
+        }
+
         Field *fields = result->Fetch();
         g_team = fields[0].GetUInt32();
         delete result;
@@ -2429,7 +2434,7 @@ bool ChatHandler::HandleEmoteCommand(const char* args)
 {
     uint32 emote = atoi((char*)args);
 
-    Unit* target = getSelectedCreature();
+    Creature* target = getSelectedCreature();
     if(!target)
     {
         PSendSysMessage(LANG_SELECT_CREATURE);
@@ -2445,7 +2450,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 {
     uint32 faction = 0, npcflags = 0, skinid = 0, Entry = 0;
 
-    Unit* target = getSelectedCreature();
+    Creature* target = getSelectedCreature();
 
     if(!target)
     {
@@ -2481,7 +2486,7 @@ bool ChatHandler::HandleNpcInfoSetCommand(const char* args)
 {
     uint32 entry = 0, testvalue = 0;
 
-    Unit* target = getSelectedCreature();
+    Creature* target = getSelectedCreature();
     if(!target)
     {
         PSendSysMessage(LANG_SELECT_CREATURE);
@@ -2739,6 +2744,9 @@ bool ChatHandler::HandleHideAreaCommand(const char* args)
 
 bool ChatHandler::HandleUpdate(const char* args)
 {
+    if(!*args)
+        return false;
+
     uint32 updateIndex;
     uint32 value;
 
@@ -2793,9 +2801,10 @@ bool ChatHandler::HandleBankCommand(const char* args)
 
 bool ChatHandler::HandleChangeWeather(const char* args)
 {
-    //*Change the weather of a cell
-    WorldPacket data;
+    if(!*args)
+        return false;
 
+    //*Change the weather of a cell
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
 
@@ -2821,6 +2830,9 @@ bool ChatHandler::HandleChangeWeather(const char* args)
 
 bool ChatHandler::HandleSetValue(const char* args)
 {
+    if(!*args)
+        return false;
+
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
     char* pz = strtok(NULL, " ");
@@ -2868,6 +2880,9 @@ bool ChatHandler::HandleSetValue(const char* args)
 
 bool ChatHandler::HandleGetValue(const char* args)
 {
+    if(!*args)
+        return false;
+
     char* px = strtok((char*)args, " ");
     char* pz = strtok(NULL, " ");
 
@@ -2913,6 +2928,9 @@ bool ChatHandler::HandleGetValue(const char* args)
 
 bool ChatHandler::HandleSet32Bit(const char* args)
 {
+    if(!*args)
+        return false;
+
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
 
@@ -2934,6 +2952,9 @@ bool ChatHandler::HandleSet32Bit(const char* args)
 
 bool ChatHandler::HandleMod32Value(const char* args)
 {
+    if(!*args)
+        return false;
+
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
 
@@ -3053,9 +3074,12 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
 
 bool ChatHandler::HandleListAurasCommand (const char * args)
 {
-    Unit *unit = this->getSelectedUnit();
-    if (!unit)
-        unit = this->m_session->GetPlayer();
+    Unit *unit = getSelectedUnit();
+    if(!unit)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
 
     Unit::AuraMap& uAuras = unit->GetAuras();
     PSendSysMessage("Target unit has %d auras:", uAuras.size());
@@ -3233,6 +3257,9 @@ bool ChatHandler::HandleIdleShutDownCommand(const char* args)
 
 bool ChatHandler::HandleOutOfRange(const char* args)
 {
+    if(!*args)
+        return false;
+
     char* plowguid = strtok((char*)args, " ");
 
     if(!plowguid)
