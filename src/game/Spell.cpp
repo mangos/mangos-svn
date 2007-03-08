@@ -2150,7 +2150,7 @@ uint8 Spell::CanCast()
                     return CAST_FAIL_NO_TARGET;
 
                 // can be casted at non-friendly unit or own pet/charm
-                if(m_caster->IsFriendlyTo(unitTarget) && unitTarget->GetOwnerGUID()!= m_caster->GetGUID())
+                if(m_caster->IsFriendlyTo(unitTarget))
                     return CAST_FAIL_TARGET_IS_FRIENDLY;
             };break;
             default:break;
