@@ -113,7 +113,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModCastingSpeed,                           //SPELL_AURA_MOD_CASTING_SPEED = 65,
     &Aura::HandleFeignDeath,                                //SPELL_AURA_FEIGN_DEATH = 66,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DISARM = 67,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STALKED = 68,
+    &Aura::HandleAuraModStalked,                            //SPELL_AURA_MOD_STALKED = 68,
     &Aura::HandleAuraSchoolAbsorb,                          //SPELL_AURA_SCHOOL_ABSORB = 69,
     &Aura::HandleNULL,                                      //SPELL_AURA_EXTRA_ATTACKS = 70,// Useless
     &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL = 71,
@@ -2117,6 +2117,15 @@ void Aura::HandleAuraManaShield(bool apply, bool Real)
             }
         }
     }*/
+}
+
+void Aura::HandleAuraModStalked(bool apply, bool Real)
+{
+    // used by spells: Hunter's Mark, Mind Vision, Syndicate Tracker (MURP) DND
+    if(apply)
+        m_target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
+    else
+        m_target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
 }
 
 void Aura::HandleAuraSchoolAbsorb(bool apply, bool Real)

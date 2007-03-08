@@ -734,7 +734,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool m_silenced;
         bool waterbreath;
-        std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
+        AuraList      & GetSingleCastAuras()       { return m_scAuras; }
+        AuraList const& GetSingleCastAuras() const { return m_scAuras; }
         SpellImmuneList m_spellImmune[6];
 
         float GetThreat(uint64 guid) const;

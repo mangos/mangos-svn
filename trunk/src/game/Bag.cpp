@@ -205,7 +205,7 @@ bool Bag::IsEmpty() const
     return true;
 }
 
-uint32 Bag::GetItemCount( uint32 item ) const
+uint32 Bag::GetItemCount( uint32 item, Item* eItem ) const
 {
     uint32 ContainerSlots=GetProto()->ContainerSlots;
 
@@ -214,7 +214,7 @@ uint32 Bag::GetItemCount( uint32 item ) const
     for(uint32 i=0; i < ContainerSlots; i++)
     {
         pItem = m_bagslot[i];
-        if( pItem && pItem->GetEntry() == item )
+        if( pItem && pItem != eItem && pItem->GetEntry() == item )
             count += pItem->GetCount();
     }
     return count;

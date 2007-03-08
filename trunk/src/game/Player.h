@@ -589,8 +589,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetSheath( uint32 sheathed );
         uint8 FindEquipSlot( uint32 type, uint32 slot, bool swap ) const;
         Item* CreateItem( uint32 item, uint32 count ) const;
-        uint32 GetItemCount( uint32 item ) const;
-        uint32 GetBankItemCount( uint32 item ) const;
+        uint32 GetItemCount( uint32 item, Item* eItem = NULL ) const;
+        uint32 GetBankItemCount( uint32 item, Item* eItem = NULL ) const;
         uint16 GetPosByGuid( uint64 guid ) const;
         Item* GetItemByPos( uint16 pos ) const;
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
@@ -604,6 +604,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static bool IsBankPos( uint8 bag, uint8 slot );
         bool HasBankBagSlot( uint8 slot ) const;
         bool HasItemCount( uint32 item, uint32 count ) const;
+        uint8 CanTakeMoreSimilarItems(Item* pItem) const;
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
         uint8 CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
