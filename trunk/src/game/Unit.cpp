@@ -2493,9 +2493,19 @@ void Unit::ApplyStats(bool apply)
     ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val, apply);
 
     // critical
-    if(getClass() == CLASS_HUNTER) classrate = 53;
-    else if(getClass() == CLASS_ROGUE)  classrate = 29;
-    else classrate = 20;
+    switch(getClass())
+    {
+    case CLASS_PALADIN: classrate = 19.77; break;
+    case CLASS_SHAMAN:  classrate = 19.7;  break;
+    case CLASS_MAGE:    classrate = 19.44; break;
+    case CLASS_ROGUE:   classrate = 29.0;  break;
+    case CLASS_HUNTER:  classrate = 53.0;  break;           // in 2.0.x = 33
+    case CLASS_PRIEST:  
+    case CLASS_WARLOCK: 
+    case CLASS_DRUID:   
+    case CLASS_WARRIOR: 
+    default:            classrate = 20.0; break;
+    }
 
     val = GetStat(STAT_AGILITY)/classrate;
 

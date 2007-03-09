@@ -1770,8 +1770,22 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetNegStat(Stats(i), 0);
 
-    // Base crit/parry values
-    SetFloatValue(PLAYER_CRIT_PERCENTAGE, 5);
+    // Base crit values
+    switch(getClass())
+    {
+    case CLASS_PALADIN: SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.7 ); break;
+    case CLASS_PRIEST:  SetFloatValue(PLAYER_CRIT_PERCENTAGE, 3.0 ); break;
+    case CLASS_SHAMAN:  SetFloatValue(PLAYER_CRIT_PERCENTAGE, 1.7 ); break;
+    case CLASS_MAGE:    SetFloatValue(PLAYER_CRIT_PERCENTAGE, 3.2 ); break;
+    case CLASS_WARLOCK: SetFloatValue(PLAYER_CRIT_PERCENTAGE, 2.0 ); break;
+    case CLASS_DRUID:   SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.92); break;
+    case CLASS_ROGUE:
+    case CLASS_HUNTER:  
+    case CLASS_WARRIOR:
+    default:            SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.0 ); break;
+    }
+
+    // Base parry pecents
     SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
 
     // Base dodge values
