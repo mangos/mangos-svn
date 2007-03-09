@@ -235,6 +235,7 @@ class ObjectMgr
         void LoadRaidGroups();
         void LoadQuests();
         void LoadSpellChains();
+        void LoadSpellLearnSkills();
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();
         void LoadSpellProcEvents();
@@ -318,6 +319,27 @@ class ObjectMgr
             return itr->second.rank;
         }
         bool canStackSpellRank(SpellEntry const *spellInfo);
+
+        struct SpellLearnSkillNode
+        {
+            uint32 skill;
+            uint32 value;
+            uint32 maxvalue;                                // 0  - max skill value for player level
+                                                            
+            bool   unlearn;
+        };
+
+        typedef std::map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
+        SpellLearnSkillMap SpellLearnSkills;
+
+        SpellLearnSkillNode const* GetSpellLearnSkill(uint32 spell_id)
+        {
+            SpellLearnSkillMap::const_iterator itr = SpellLearnSkills.find(spell_id);
+            if(itr != SpellLearnSkills.end())
+                return &itr->second;
+            else
+                return NULL;
+        }
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;

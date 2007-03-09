@@ -349,11 +349,11 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Game Object Templates..." );
     objmgr.LoadGameobjectInfo();
 
-    sLog.outString( "Loading player Create Info & Level Stats..." );
-    objmgr.LoadPlayerInfo();
-
     sLog.outString( "Loading Spell Chain Data..." );
     objmgr.LoadSpellChains();
+
+    sLog.outString( "Loading Spell Learn Skills..." );
+    objmgr.LoadSpellLearnSkills();                          // must be after LoadSpellChains
 
     sLog.outString( "Loading Spell Proc Event conditions..." );
     objmgr.LoadSpellProcEvents();
@@ -384,6 +384,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
+
+    sLog.outString( "Loading player Create Info & Level Stats..." );
+    objmgr.LoadPlayerInfo();
 
     sLog.outString( "Loading Pet Name Parts..." );
     objmgr.LoadPetNames();

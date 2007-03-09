@@ -328,8 +328,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     uint32 titem_id;
     uint32 titem_amount;
-    uint16 tspell, tskill[3], taction[4];
-    std::list<uint16>::const_iterator skill_itr[3], action_itr[4];
+    uint16 tspell, tskill, taction[4];
+    std::list<uint16>::const_iterator skill_itr, action_itr[4];
     std::list<CreateSpellPair>::const_iterator spell_itr;
 
     spell_itr = info->spell.begin();
@@ -344,22 +344,19 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         }
     }
 
-    for(i=0 ; i<3; i++)
-        skill_itr[i] = info->skill[i].begin();
+    skill_itr = info->skill.begin();
 
-    for (; skill_itr[0]!=info->skill[0].end() && skill_itr[1]!=info->skill[1].end() && skill_itr[2]!=info->skill[2].end(); )
+    for (; skill_itr!=info->skill.end(); )
     {
-        for (i=0; i<3; i++)
-            tskill[i] = (*skill_itr[i]);
+            tskill = (*skill_itr);
 
-        if (tskill[0])
+        if (tskill)
         {
-            sLog.outDebug("PLAYER: Adding initial skill line, skillId = %u, value = %u, max = %u", tskill[0], tskill[1], tskill[2]);
-            SetSkill(tskill[0], tskill[1], tskill[2]);
+            sLog.outDebug("PLAYER: Adding initial skill line, skillId = %u, value = 5, max = 5", tskill);
+            SetSkill(tskill, 5, 5);                      // (5,5) is default values for skill pages
         }
 
-        for(i=0; i<3; i++)
-            skill_itr[i]++;
+        skill_itr++;
     }
 
     for(i=0; i<4; i++)
@@ -2034,9 +2031,25 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
 
     if (IsPassiveSpell(spell_id))
     {
-        // if spell doesnt require a stance or the player is in the required stance
+        // if spell doesn't require a stance or the player is in the required stance
         if ((!spellInfo->Stances && spell_id != 5419) || (spellInfo->Stances & (1<<(m_form-1)) || (spell_id == 5419 && m_form == FORM_TRAVEL)))
             CastSpell(this, spell_id, true);
+    }
+
+    // add dependent skills
+    uint16 maxskill     = GetMaxSkillValueForLevel();
+
+    ObjectMgr::SpellLearnSkillNode const* spellLearnSkill = objmgr.GetSpellLearnSkill(spell_id);
+
+    if(spellLearnSkill)
+    {
+        uint32 skill_value = GetPureSkillValue(spellLearnSkill->skill);
+        if(skill_value==0)
+            skill_value = spellLearnSkill->value;
+
+        uint32 skill_max_value = spellLearnSkill->maxvalue == 0 ? maxskill : spellLearnSkill->maxvalue;
+
+        SetSkill(spellLearnSkill->skill,skill_value,skill_max_value);
     }
 
     return true;
@@ -2051,99 +2064,6 @@ void Player::learnSpell(uint16 spell_id)
     WorldPacket data(SMSG_LEARNED_SPELL, 4);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
-
-    uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
-    uint16 maxskill     = GetMaxSkillValueForLevel();
-
-    switch(spell_id)
-    {
-        //Armor
-        case 9078:                                          //Cloth
-            SetSkill(415,1,1);
-            break;
-        case 9077:                                          //Leather
-            SetSkill(414,1,1);
-            break;
-        case 8737:                                          //Mail
-            SetSkill(413,1,1);
-            break;
-        case 750:                                           //Plate Mail
-            SetSkill(293,1,1);
-            break;
-        case 9116:                                          //Shield
-            SetSkill(433,1,1);
-            break;
-            //Melee Weapons
-        case 196:                                           //Axes
-            SetSkill(44,1,maxskill);
-            break;
-        case 197:                                           //Two-Handed Axes
-            SetSkill(172,1,maxskill);
-            break;
-        case 227:                                           //Staves
-            SetSkill(136,1,maxskill);
-            break;
-        case 198:                                           //Maces
-            SetSkill(54,1,maxskill);
-            break;
-        case 199:                                           //Two-Handed Maces
-            SetSkill(160,1,maxskill);
-            break;
-        case 201:                                           //Swords
-            SetSkill(43,1,maxskill);
-            break;
-        case 202:                                           //Two-Handed Swords
-            SetSkill(55,1,maxskill);
-            break;
-        case 1180:                                          //Daggers
-            SetSkill(173,1,maxskill);
-            break;
-        case 15590:                                         //Fist Weapons
-            SetSkill(473,1,maxskill);
-            break;
-        case 200:                                           //Polearms
-            SetSkill(229,1,maxskill);
-            break;
-        case 3386:                                          //Polearms
-            SetSkill(227,1,maxskill);
-            break;
-            //Range Weapons
-        case 264:                                           //Bows
-            SetSkill(45,1,maxskill);
-            break;
-        case 5011:                                          //Crossbows
-            SetSkill(226,1,maxskill);
-            break;
-        case 266:                                           //Guns
-            SetSkill(46,1,maxskill);
-            break;
-        case 2567:                                          //Thrown
-            SetSkill(176,1,maxskill);
-            break;
-        case 5009:                                          //Wands
-            SetSkill(228,1,maxskill);
-            break;
-            //Others
-        case 2842:                                          //poisons
-            SetSkill(40,1,maxskill);
-            break;
-        case 33388:                                         //Min riding
-            SetSkill(762,75,75);
-            break;
-        case 33391:                                         //Mid riding
-            SetSkill(762,150,150);
-            break;
-        case 1804:                                          //Pick Lock(Rogue)
-            SetSkill(633,1,maxskill);
-            break;
-            // Languages
-        case 668: case 669: case 670: case 671:  case 672:  case 813: case 814:
-        case 815: case 816: case 817: case 7340: case 7341: case 17737:
-            if(LanguageDesc const* lang = GetLanguageDescBySpell(spell_id))
-                SetSkill(lang->skill_id,1,maxconfskill);
-            break;
-        default:break;
-    }
 }
 
 void Player::removeSpell(uint16 spell_id)
@@ -2179,6 +2099,13 @@ PlayerSpellMap::iterator Player::removeSpell(PlayerSpellMap::iterator itr)
         itr->second->state = PLAYERSPELL_REMOVED;
 
     RemoveAurasDueToSpell(spell_id);
+
+    // remove dependent skill
+    ObjectMgr::SpellLearnSkillNode const* spellLearnSkill = objmgr.GetSpellLearnSkill(spell_id);
+
+    if(spellLearnSkill && spellLearnSkill->unlearn)
+        SetSkill(spellLearnSkill->skill,0,0);
+
     return next;
 }
 

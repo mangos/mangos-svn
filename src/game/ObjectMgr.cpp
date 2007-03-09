@@ -760,8 +760,8 @@ void ObjectMgr::LoadPlayerInfo()
 
     // Load playercreate skills
     {
-        //                                            0      1       2       3           4
-        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`Skill`,`SkillMin`, `SkillMax` FROM `playercreateinfo_skill`");
+        //                                            0      1       2
+        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`Skill` FROM `playercreateinfo_skill`");
 
         uint32 count = 0;
 
@@ -798,17 +798,10 @@ void ObjectMgr::LoadPlayerInfo()
                 }
 
                 PlayerInfo* pInfo = &playerInfo[current_race][current_class];
-                pInfo->skill[0].push_back(fields[2].GetUInt16());
 
-                int32 minskill = fields[3].GetInt32();
-                if(minskill < 0 || minskill > maxconfskill) // -1 - is special value for max in game skill
-                    minskill = maxconfskill;
-                pInfo->skill[1].push_back(minskill);
+                uint32 skill = fields[2].GetUInt16();
 
-                int32 maxskill = fields[4].GetInt32();
-                if(maxskill < 0 || maxskill > maxconfskill) // -1 - is special value for max in game skill
-                    maxskill = maxconfskill;
-                pInfo->skill[2].push_back(maxskill);
+                pInfo->skill.push_back(skill);
 
                 bar.step();
                 count++;
@@ -1508,6 +1501,100 @@ void ObjectMgr::LoadSpellChains()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u spell chain records", count );
+}
+
+void ObjectMgr::LoadSpellLearnSkills()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `SkillID`, `Value`, `MaxValue` FROM `spell_learn_skill`");
+    if(!result)
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded 0 spell learn skills" );
+        sLog.outErrorDb("`spell_learn_skill` table is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
+
+    barGoLink bar( result->GetRowCount() );
+    do
+    {
+        bar.step();
+        Field *fields = result->Fetch();
+
+        uint32 spell_id = fields[0].GetUInt32();
+        int32 skill_val = fields[2].GetInt32();
+        int32 skill_max = fields[3].GetInt32();
+
+        SpellLearnSkillNode node;
+        node.skill    = fields[1].GetUInt32();
+        node.value    = skill_val < 0 ? maxconfskill : skill_val;
+        node.maxvalue = skill_max < 0 ? maxconfskill : skill_max;
+        node.unlearn  = true;
+
+        if(!sSpellStore.LookupEntry(spell_id))
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_learn_skill` not exist",spell_id);
+            continue;
+        }
+
+        if(!sSkillLineStore.LookupEntry(node.skill))
+        {
+            sLog.outErrorDb("Skill %u listed in `spell_learn_skill` not exist",node.skill);
+            continue;
+        }
+
+        SpellLearnSkills[spell_id] = node;
+
+        ++count;
+    } while( result->NextRow() );
+
+    delete result;
+
+    // search auto-learned skills and add its to map also for use in unlearn spells/talents
+    uint32 dbc_count = 0;
+    for(uint32 spell = 0; spell < sSpellStore.nCount; ++spell)
+    {
+        SpellEntry const* entry = sSpellStore.LookupEntry(spell);
+
+        if(!entry) 
+            continue;
+        
+        for(int i = 0; i < 3; ++i)
+        {
+            if(entry->Effect[i]==SPELL_EFFECT_SKILL)
+            {
+                SpellLearnSkillNode dbc_node;
+                dbc_node.skill    = entry->EffectMiscValue[i];
+                dbc_node.value    = 1;
+                dbc_node.maxvalue = (entry->EffectBasePoints[i]+1)*75;
+                dbc_node.unlearn  = (GetFirstSpellInChain(spell)==spell);
+
+                SpellLearnSkillNode const* db_node = GetSpellLearnSkill(spell);
+
+                if(db_node)
+                {
+                    if(db_node->skill != dbc_node.skill)
+                        sLog.outErrorDb("Spell %u auto-learn skill %u in spell.dbc but learn skill %u in `spell_learn_skill`, fix DB.",
+                            spell,dbc_node.skill,db_node->skill);
+                    
+                    continue;                                       // skip already added spell-skill pair
+                }
+
+                SpellLearnSkills[spell] = dbc_node;
+                ++dbc_count;
+                break;
+            }
+        }
+    }
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u spell learn skills ( + found in DBC %u ", count, dbc_count );
 }
 
 void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)

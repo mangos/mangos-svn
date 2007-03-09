@@ -204,8 +204,6 @@ class ChatHandler
         bool HandleLearnCommand(const char* args);
         bool HandleCooldownCommand(const char* args);
         bool HandleUnLearnCommand(const char* args);
-        bool HandleLearnSkillCommand(const char* args);
-        bool HandleUnLearnSkillCommand(const char* args);
         bool HandleObjectCommand(const char* args);
         bool HandleGetDistanceCommand(const char* args);
         bool HandleGameObjectCommand(const char* args);
@@ -244,7 +242,6 @@ class ChatHandler
         bool HandleListAurasCommand (const char * args);
         bool HandleLookupTeleCommand(const char * args);
         bool HandleResetCommand (const char * args);
-        bool HandleFixUnlearnCommand (const char * args);
         bool HandleTicketCommand(const char* args);
         bool HandleDelTicketCommand(const char* args);
         bool HandleMaxSkillCommand(const char* args);

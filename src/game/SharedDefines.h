@@ -36,7 +36,7 @@ enum Races
     RACE_GNOME          = 7,
     RACE_TROLL          = 8,
     MAX_RACES           = 9,
-    // officialy, this exists but was never taken into use.. neutral faction which could
+    // officially, this exists but was never taken into use.. neutral faction which could
     // learn some skills/spells from horde/alliance. maybe it'll be of some use later on.
     RACE_GOBLIN = 9
 };
