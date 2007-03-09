@@ -248,106 +248,6 @@ bool ChatHandler::HandleGoCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleLearnSkillCommand (const char* args)
-{
-    if (!*args)
-        return false;
-
-    char *skill_p = strtok ((char*)args, " ");
-    char *level_p = strtok (NULL, " ");
-    char *max_p   = strtok (NULL, " ");
-
-    if( !skill_p )
-        return false;
-
-    int32 skill = atoi(skill_p);
-
-    if (skill <= 0)
-    {
-        PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
-        return true;
-    }
-
-    int32 level = level_p ? atoi (level_p) : 1;
-    int32 max   = max_p   ? atoi (max_p)   : level;
-
-    if( level <= 0 || level > max || max <= 0 )
-        return false;
-
-    Player * target = getSelectedPlayer();
-    if(!target)
-    {
-        PSendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
-    }
-
-    SkillLineEntry const* sl = sSkillLineStore.LookupEntry(skill);
-
-    if(!sl)
-    {
-        PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
-        return true;
-    }
-
-    target->SetSkill(skill, level, max);
-    PSendSysMessage(LANG_LEARNED_SKILL, target->GetName(), skill, sl->name[0]);
-
-    return true;
-}
-
-bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
-{
-    if (!*args)
-        return false;
-
-    char *skill_p = strtok ((char*)args, " ");
-
-    if( !skill_p )
-        return false;
-
-    int32 skill = atol (skill_p);
-
-    if (skill <= 0)
-    {
-        PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
-        return true;
-    }
-
-    Player * target = getSelectedPlayer();
-    if(!target)
-    {
-        PSendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
-    }
-
-    if (target->GetSkillValue(skill))
-    {
-        target->SetSkill(skill, 0, 0);
-        PSendSysMessage(LANG_UNLEARNED_SKILL, target->GetName(), skill);
-    }
-    else
-        PSendSysMessage(LANG_UNKNOWN_SKILL,target==m_session->GetPlayer() ? "You" : target->GetName());
-
-    return true;
-}
-
-bool ChatHandler::HandleFixUnlearnCommand(const char * args)
-{
-    Player *player = getSelectedPlayer();
-    if (!player)
-        player = m_session->GetPlayer();
-
-    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
-    {
-        uint32 id = player->GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
-        SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(id);
-        // enable unlearn button for professions only
-        if (pSkill && pSkill->categoryId == 11)
-            player->SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
-    }
-    return true;
-}
-
 bool ChatHandler::HandleMaxSkillCommand(const char* args)
 {
     Player* SelectedPlayer = getSelectedPlayer();
@@ -1099,10 +999,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
 
         // skiping UNIVERSAL language (0)
         for(int i = 1; i < LANGUAGES_COUNT; ++i)
-        {
             m_session->GetPlayer()->learnSpell(lang_description[i].spell_id);
-            m_session->GetPlayer()->SetSkill(lang_description[i].skill_id,maxconfskill,maxconfskill);
-        }
         return true;
     }
 
