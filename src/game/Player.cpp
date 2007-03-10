@@ -2058,10 +2058,15 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     if(spellLearnSkill)
     {
         uint32 skill_value = GetPureSkillValue(spellLearnSkill->skill);
-        if(skill_value==0)
+        uint32 skill_max_value = GetMaxSkillValue(spellLearnSkill->skill);
+
+        if(skill_value < spellLearnSkill->value)
             skill_value = spellLearnSkill->value;
 
-        uint32 skill_max_value = spellLearnSkill->maxvalue == 0 ? maxskill : spellLearnSkill->maxvalue;
+        uint32 new_skill_max_value = spellLearnSkill->maxvalue == 0 ? maxskill : spellLearnSkill->maxvalue;
+
+        if(skill_max_value < new_skill_max_value)
+            skill_max_value =  new_skill_max_value;
 
         SetSkill(spellLearnSkill->skill,skill_value,skill_max_value);
     }
@@ -2117,9 +2122,41 @@ PlayerSpellMap::iterator Player::removeSpell(PlayerSpellMap::iterator itr)
     // remove dependent skill
     ObjectMgr::SpellLearnSkillNode const* spellLearnSkill = objmgr.GetSpellLearnSkill(spell_id);
 
-    if(spellLearnSkill && spellLearnSkill->unlearn)
-        SetSkill(spellLearnSkill->skill,0,0);
+    if(spellLearnSkill)
+    {
+        uint32 prev_spell = objmgr.GetPrevSpellInChain(spell_id);
+        if(!prev_spell)                                     // first rank, remove skill
+            SetSkill(spellLearnSkill->skill,0,0);
+        else
+        {
+            // search prev. skill setting by spell ranks chain
+            ObjectMgr::SpellLearnSkillNode const* prevSkill = objmgr.GetSpellLearnSkill(prev_spell);
+            while(!prevSkill && prev_spell)
+            {
+                prev_spell = objmgr.GetPrevSpellInChain(prev_spell);
+                prevSkill = objmgr.GetSpellLearnSkill(objmgr.GetFirstSpellInChain(prev_spell));
+            }
 
+            if(!prevSkill)                                  // not found prev skill setting, remove skill
+                SetSkill(spellLearnSkill->skill,0,0);
+            else                                            // set to prev. skill setting values
+            {
+                uint32 skill_value = GetPureSkillValue(prevSkill->skill);
+                uint32 skill_max_value = GetMaxSkillValue(prevSkill->skill);
+
+                if(skill_value >  prevSkill->value)
+                    skill_value = prevSkill->value;
+
+                uint32 new_skill_max_value = prevSkill->maxvalue == 0 ? GetMaxSkillValueForLevel() : prevSkill->maxvalue;
+
+                if(skill_max_value > new_skill_max_value)
+                    skill_max_value =  new_skill_max_value;
+
+                SetSkill(prevSkill->skill,skill_value,skill_max_value);
+            }
+        }       
+
+    }
     return next;
 }
 
@@ -2617,7 +2654,7 @@ bool Player::CanLearnProSpell(uint32 spell)
 
     if (!spellInfo)
         return false;
-    if(spellInfo->Effect[0] != 36)
+    if(spellInfo->Effect[0] != SPELL_EFFECT_LEARN_SPELL)
         return true;
 
     uint32 skill = spellInfo->EffectMiscValue[1];
