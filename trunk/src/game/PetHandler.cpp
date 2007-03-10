@@ -234,6 +234,51 @@ void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
 void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 {
     sLog.outDetail( "HandlePetSetAction. CMSG_PET_SET_ACTION\n" );
+
+    uint64 petguid;
+    uint32 position;
+    uint16 spell_id;
+    uint16 act_state;
+
+    recv_data >> petguid;
+    recv_data >> position;
+    recv_data >> spell_id;
+    recv_data >> act_state;
+
+    // FIXME: charmed case 
+    Pet* pet = ObjectAccessor::Instance().GetPet(petguid);
+
+    if(!pet || pet->GetOwnerGUID() != _player->GetGUID() )
+    {
+        sLog.outError( "HandlePetSetAction: Unknown pet or pet owner.\n" );
+        return;
+    }
+
+    sLog.outDetail( "Player %s has changed pet spell action. Position: %u, Spell: %u, State: %u\n", _player->GetName(), position, spell_id, act_state);
+
+    if (act_state==0xC100) // enable
+    {
+        if (position==3)
+          pet->AddActState(STATE_RA_SPELL1);
+        if (position==4)
+          pet->AddActState(STATE_RA_SPELL2);
+        if (position==5)
+          pet->AddActState(STATE_RA_SPELL3);
+        if (position==6)
+          pet->AddActState(STATE_RA_SPELL4);
+    } else
+    if (act_state==0x8100) // disable
+    {
+        if (position==3)
+          pet->ClearActState(STATE_RA_SPELL1);
+        if (position==4)
+          pet->ClearActState(STATE_RA_SPELL2);
+        if (position==5)
+          pet->ClearActState(STATE_RA_SPELL3);
+        if (position==6)
+          pet->ClearActState(STATE_RA_SPELL4);
+    } else
+        sLog.outError( "Spell state %u is unknown.\n", act_state);
 }
 
 void WorldSession::HandlePetRename( WorldPacket & recv_data )
