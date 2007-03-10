@@ -748,7 +748,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if(step.source->isType(TYPE_UNIT))          // any Unit
+                if(!step.source->isType(TYPE_UNIT))         // must be any Unit (creature or player)
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-unit (TypeId: %u), skipping.",step.source->GetTypeId());
                     break;
