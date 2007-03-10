@@ -22,16 +22,19 @@
 #include "Common.h"
 
 // weather difines
-#define WEATHER_NOSOUND                 0
-#define WEATHER_RAINLIGHT               8533
-#define WEATHER_RAINMEDIUM              8534
-#define WEATHER_RAINHEAVY               8535
-#define WEATHER_SNOWLIGHT               8536
-#define WEATHER_SNOWMEDIUM              8537
-#define WEATHER_SNOWHEAVY               8538
-#define WEATHER_SANDSTORMLIGHT          8556
-#define WEATHER_SANDSTORMMEDIUM         8557
-#define WEATHER_SANDSTORMHEAVY          8558
+enum WeatherSounds
+{
+     WEATHER_NOSOUND                = 0,
+     WEATHER_RAINLIGHT              = 8533,
+     WEATHER_RAINMEDIUM             = 8534,
+     WEATHER_RAINHEAVY              = 8535,
+     WEATHER_SNOWLIGHT              = 8536,
+     WEATHER_SNOWMEDIUM             = 8537,
+     WEATHER_SNOWHEAVY              = 8538,
+     WEATHER_SANDSTORMLIGHT         = 8556,
+     WEATHER_SANDSTORMMEDIUM        = 8557,
+     WEATHER_SANDSTORMHEAVY         = 8558
+};
 
 class Player;
 

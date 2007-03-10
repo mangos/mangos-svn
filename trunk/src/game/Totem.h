@@ -23,8 +23,8 @@
 
 enum TotemType
 {
-    TOTEM_PASSIVE = 0,
-    TOTEM_ACTIVE = 1,
+    TOTEM_PASSIVE    = 0,
+    TOTEM_ACTIVE     = 1,
     TOTEM_LAST_BURST = 2,
 };
 

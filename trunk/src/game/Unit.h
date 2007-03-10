@@ -74,43 +74,60 @@ enum ShapeshiftForm
 
 #define CREATURE_MAX_SPELLS     4
 #define PLAYER_MAX_SKILLS       127
+
 #define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_1_1 + ((x)*3))
 // DWORD definitions gathered from windows api
 #define SKILL_VALUE(x)          uint16(x)
 #define SKILL_MAX(x)            uint16((uint32(x) >> 16))
 #define MAKE_SKILL_VALUE(v, m) ((uint32)(((uint16)(v)) | (((uint32)((uint16)(m))) << 16)))
 
-#define NOSWING                     0
-#define SINGLEHANDEDSWING           1
-#define TWOHANDEDSWING              2
+enum Swing
+{
+    NOSWING                    = 0,
+    SINGLEHANDEDSWING          = 1,
+    TWOHANDEDSWING             = 2
+};
 
-#define VICTIMSTATE_UNKNOWN1        0
-#define VICTIMSTATE_NORMAL          1
-#define VICTIMSTATE_DODGE           2
-#define VICTIMSTATE_PARRY           3
-#define VICTIMSTATE_UNKNOWN2        4
-#define VICTIMSTATE_BLOCKS          5
-#define VICTIMSTATE_EVADES          6
-#define VICTIMSTATE_IS_IMMUNE       7
-#define VICTIMSTATE_DEFLECTS        8
+enum VictimState
+{
+    VICTIMSTATE_UNKNOWN1       = 0,
+    VICTIMSTATE_NORMAL         = 1,
+    VICTIMSTATE_DODGE          = 2,
+    VICTIMSTATE_PARRY          = 3,
+    VICTIMSTATE_UNKNOWN2       = 4,
+    VICTIMSTATE_BLOCKS         = 5,
+    VICTIMSTATE_EVADES         = 6,
+    VICTIMSTATE_IS_IMMUNE      = 7,
+    VICTIMSTATE_DEFLECTS       = 8
+};
 
-#define HITINFO_NORMALSWING         0x00
-#define HITINFO_NORMALSWING2        0x02
-#define HITINFO_LEFTSWING           0x04
-#define HITINFO_MISS                0x10
-#define HITINFO_ABSORB              0x20                    // plays absorb sound
-#define HITINFO_RESIST              0x40                    // resisted atleast some damage
-#define HITINFO_CRITICALHIT         0x80
-#define HITINFO_GLANCING            0x4000
-#define HITINFO_CRUSHING            0x8000
-#define HITINFO_NOACTION            0x10000
-#define HITINFO_SWINGNOHITSOUND     0x80000
+enum HitInfo
+{
+    HITINFO_NORMALSWING        = 0x00,
+    HITINFO_NORMALSWING2       = 0x02,
+    HITINFO_LEFTSWING          = 0x04,
+    HITINFO_MISS               = 0x10,
+    HITINFO_ABSORB             = 0x20,                    // plays absorb sound
+    HITINFO_RESIST             = 0x40,                    // resisted atleast some damage
+    HITINFO_CRITICALHIT        = 0x80,
+    HITINFO_GLANCING           = 0x4000,
+    HITINFO_CRUSHING           = 0x8000,
+    HITINFO_NOACTION           = 0x10000,
+    HITINFO_SWINGNOHITSOUND    = 0x80000
+};
 
-#define NULL_BAG                    0
-#define NULL_SLOT                   255
+//i would like to remove this: (it is defined in item.h
+enum InventorySlot
+{
+    NULL_BAG                   = 0,
+    NULL_SLOT                  = 255
+};
 
-#define MAX_DIST_INVISIBLE_UNIT     20                      // Max distance to be able to detect an invisible unit
-#define ATTACK_DIST                 5
+enum Dist
+{
+    MAX_DIST_INVISIBLE_UNIT    = 20,                      // Max distance to be able to detect an invisible unit
+    ATTACK_DIST                = 5
+};
 
 struct FactionTemplateEntry;
 struct Modifier;
@@ -141,10 +158,10 @@ typedef std::list<SpellImmune> SpellImmuneList;
 
 enum DeathState
 {
-    ALIVE = 0,
-    JUST_DIED,
-    CORPSE,
-    DEAD
+    ALIVE       = 0,
+    JUST_DIED   = 1,
+    CORPSE      = 2,
+    DEAD        = 3
 };
 
 enum UnitState
@@ -170,12 +187,12 @@ enum UnitState
 
 enum UnitMoveType
 {
-    MOVE_WALK       =0,
-    MOVE_RUN        =1,
-    MOVE_WALKBACK   =2,
-    MOVE_SWIM       =3,
-    MOVE_SWIMBACK   =4,
-    MOVE_TURN       =5
+    MOVE_WALK       = 0,
+    MOVE_RUN        = 1,
+    MOVE_WALKBACK   = 2,
+    MOVE_SWIM       = 3,
+    MOVE_SWIMBACK   = 4,
+    MOVE_TURN       = 5
 };
 
 #define MAX_MOVE_TYPE 6
@@ -191,12 +208,12 @@ enum WeaponAttackType
 
 enum DamageEffectType
 {
-    DIRECT_DAMAGE = 0,
-    SPELL_DIRECT_DAMAGE = 1,
-    DOT = 2,
-    HEAL = 3,
-    NODAMAGE = 4,
-    SELF_DAMAGE = 5
+    DIRECT_DAMAGE           = 0,
+    SPELL_DIRECT_DAMAGE     = 1,
+    DOT                     = 2,
+    HEAL                    = 3,
+    NODAMAGE                = 4,
+    SELF_DAMAGE             = 5
 };
 
 enum UnitVisibilityUpdate
@@ -277,33 +294,33 @@ enum AuraState
 
 enum Mechanics
 {
-    MECHANIC_CHARM            =1,
-    MECHANIC_CONFUSED         =2,
-    MECHANIC_DISARM           =3,
-    MECHANIC_ATTRACT          =4,
-    MECHANIC_FEAR             =5,
-    MECHANIC_STUPID           =6,
-    MECHANIC_ROOT             =7,
-    MECHANIC_PEACE            =8,
-    MECHANIC_SILENCE          =9,
-    MECHANIC_SLEEP            =10,
-    MECHANIC_CHASE            =11,
-    MECHANIC_STUNDED          =12,
-    MECHANIC_FREEZE           =13,
-    MECHANIC_KNOCKOUT         =14,
-    MECHANIC_BLEED            =15,
-    MECHANIC_HEAL             =16,
-    MECHANIC_POLYMORPH        =17,
-    MECHANIC_BANISH           =18,
-    MECHANIC_SHIELDED         =19,
-    MECHANIC_DURANCED         =20,
-    MECHANIC_MOUNT            =21,
-    MECHANIC_PERSUADED        =22,
-    MECHANIC_TURNED           =23,
-    MECHANIC_HORROR           =24,
-    MECHANIC_INVULNERABILITY  =25,
-    MECHANIC_INTERRUPTED      =26,
-    MECHANIC_DAZED            =27
+    MECHANIC_CHARM            = 1,
+    MECHANIC_CONFUSED         = 2,
+    MECHANIC_DISARM           = 3,
+    MECHANIC_ATTRACT          = 4,
+    MECHANIC_FEAR             = 5,
+    MECHANIC_STUPID           = 6,
+    MECHANIC_ROOT             = 7,
+    MECHANIC_PEACE            = 8,
+    MECHANIC_SILENCE          = 9,
+    MECHANIC_SLEEP            = 10,
+    MECHANIC_CHASE            = 11,
+    MECHANIC_STUNDED          = 12,
+    MECHANIC_FREEZE           = 13,
+    MECHANIC_KNOCKOUT         = 14,
+    MECHANIC_BLEED            = 15,
+    MECHANIC_HEAL             = 16,
+    MECHANIC_POLYMORPH        = 17,
+    MECHANIC_BANISH           = 18,
+    MECHANIC_SHIELDED         = 19,
+    MECHANIC_DURANCED         = 20,
+    MECHANIC_MOUNT            = 21,
+    MECHANIC_PERSUADED        = 22,
+    MECHANIC_TURNED           = 23,
+    MECHANIC_HORROR           = 24,
+    MECHANIC_INVULNERABILITY  = 25,
+    MECHANIC_INTERRUPTED      = 26,
+    MECHANIC_DAZED            = 27
 };
 
 //To all Immune system,if target has immunes,
@@ -350,34 +367,34 @@ struct DiminishingReturn
 
 enum ImmuneToDispel
 {
-    IMMUNE_DISPEL_MAGIC        =1,
-    IMMUNE_DISPEL_CURSE        =2,
-    IMMUNE_DISPEL_DISEASE      =3,
-    IMMUNE_DISPEL_POISON       =4,
-    IMMUNE_DISPEL_STEALTH      =5,
-    IMMUNE_DISPEL_INVISIBILITY =6,
-    IMMUNE_DISPEL_ALL          =7,
-    IMMUNE_DISPEL_SPE_NPC_ONLY =8,
-    IMMUNE_DISPEL_CRAZY        =9,
-    IMMUNE_DISPEL_ZG_TICKET    =10
+    IMMUNE_DISPEL_MAGIC        = 1,
+    IMMUNE_DISPEL_CURSE        = 2,
+    IMMUNE_DISPEL_DISEASE      = 3,
+    IMMUNE_DISPEL_POISON       = 4,
+    IMMUNE_DISPEL_STEALTH      = 5,
+    IMMUNE_DISPEL_INVISIBILITY = 6,
+    IMMUNE_DISPEL_ALL          = 7,
+    IMMUNE_DISPEL_SPE_NPC_ONLY = 8,
+    IMMUNE_DISPEL_CRAZY        = 9,
+    IMMUNE_DISPEL_ZG_TICKET    = 10
 };
 
 enum ImmuneToDamage
 {
-    IMMUNE_DAMAGE_PHYSICAL     =1,
-    IMMUNE_DAMAGE_MAGIC        =126
+    IMMUNE_DAMAGE_PHYSICAL     = 1,
+    IMMUNE_DAMAGE_MAGIC        = 126
 };
 
 enum ImmuneToSchool
 {
-    IMMUNE_SCHOOL_PHYSICAL     =1,
-    IMMUNE_SCHOOL_HOLY         =2,
-    IMMUNE_SCHOOL_FIRE         =4,
-    IMMUNE_SCHOOL_NATURE       =8,
-    IMMUNE_SCHOOL_FROST        =16,
-    IMMUNE_SCHOOL_SHADOW       =32,
-    IMMUNE_SCHOOL_ARCANE       =64,
-    IMMUNE_SCHOOL_MAGIC        =126
+    IMMUNE_SCHOOL_PHYSICAL     = 1,
+    IMMUNE_SCHOOL_HOLY         = 2,
+    IMMUNE_SCHOOL_FIRE         = 4,
+    IMMUNE_SCHOOL_NATURE       = 8,
+    IMMUNE_SCHOOL_FROST        = 16,
+    IMMUNE_SCHOOL_SHADOW       = 32,
+    IMMUNE_SCHOOL_ARCANE       = 64,
+    IMMUNE_SCHOOL_MAGIC        = 126
 };
 
 inline SpellSchools immuneToSchool(ImmuneToSchool immune)
