@@ -10457,9 +10457,10 @@ void Player::_LoadTaxiMask(const char* data)
     vector<string>::iterator iter;
 
     for (iter = tokens.begin(), index = 0;
-        (index < 8) && (iter != tokens.end()); ++iter, ++index)
+        (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
     {
-        m_taximask[index] = atol((*iter).c_str());
+        // load and set bits only for existed taxi nodes
+        m_taximask[index] = sTaxiNodesMask[index] & uint32(atol((*iter).c_str()));
     }
 }
 

@@ -68,6 +68,7 @@ DBCStorage <StableSlotPricesEntry> sStableSlotPricesStore(StableSlotPricesfmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 DBCStorage <TalentTabEntry> sTalentTabStore(TalentTabEntryfmt);
 DBCStorage <TaxiNodesEntry> sTaxiNodesStore(TaxiNodesEntryfmt);
+TaxiMask sTaxiNodesMask;
 
 // DBC used only for initialization sTaxiPathSetBySource at startup.
 TaxiPathSetBySource sTaxiPathSetBySource;
@@ -194,6 +195,19 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sTalentStore,              dataPath+"dbc/Talent.dbc");
     LoadDBC(bar,bad_dbc_files,sTalentTabStore,           dataPath+"dbc/TalentTab.dbc");
     LoadDBC(bar,bad_dbc_files,sTaxiNodesStore,           dataPath+"dbc/TaxiNodes.dbc");
+
+    // Initialize global taxinodes mask
+    memset(sTaxiNodesMask,0,sizeof(sTaxiNodesMask));
+    for(uint32 i = 1; i <= sTaxiNodesStore.nCount; ++i)
+    {
+        if(TaxiNodesEntry const* entry = sTaxiNodesStore.LookupEntry(i))
+        {
+            uint8  field   = (uint8)((i - 1) / 32);
+            uint32 submask = 1<<((i-1)%32);
+            sTaxiNodesMask[field] |= submask;
+        }
+    }
+
 
     //## TaxiPath.dbc ## Loaded only for initialization different structures
     LoadDBC(bar,bad_dbc_files,sTaxiPathStore,            dataPath+"dbc/TaxiPath.dbc");
