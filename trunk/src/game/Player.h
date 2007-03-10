@@ -1333,7 +1333,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool m_dontMove;
 
-        uint32 m_taximask[8];
+        TaxiMask m_taximask;
         std::deque<uint32> m_TaxiDestinations;
 
         float m_total_honor_points;

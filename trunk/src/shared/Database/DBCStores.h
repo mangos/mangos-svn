@@ -150,6 +150,7 @@ extern DBCStorage <StableSlotPricesEntry>     sStableSlotPricesStore;
 extern DBCStorage <TalentEntry>               sTalentStore;
 extern DBCStorage <TalentTabEntry>            sTalentTabStore;
 extern DBCStorage <TaxiNodesEntry>            sTaxiNodesStore;
+extern TaxiMask                               sTaxiNodesMask;
 extern TaxiPathSetBySource                    sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;
 extern DBCStorage <WorldSafeLocsEntry>        sWorldSafeLocsStore;

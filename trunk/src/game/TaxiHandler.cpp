@@ -135,11 +135,11 @@ void WorldSession::SendTaxiMenu( uint64 guid )
     if(GetPlayer()->isTaxiCheater())
     {
         for (uint8 i=0; i<8; i++)
-            data << uint32(0xFFFF);                         // all nodes
+            data << sTaxiNodesMask[i];                      // all existed nodes
     }
     else
     {
-        for (uint8 i=0; i<8; i++)
+        for (uint8 i=0; i<TaxiMaskSize; i++)
             data << uint32(GetPlayer()->GetTaximask(i));    // known nodes
     }
     SendPacket( &data );
