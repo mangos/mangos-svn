@@ -56,6 +56,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);
+        Creature* GetNPCIfCanInteractWith(Player const &player, uint64 guid, uint32 npcflagmask);
         Creature* GetCreature(WorldObject const &, uint64);
         Creature* GetCreatureOrPet(WorldObject const &, uint64);
         Unit* GetUnit(WorldObject const &, uint64);

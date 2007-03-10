@@ -40,25 +40,12 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_TABARDVENDOR);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleTabardVendorActivateOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandleTabardVendorActivateOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if( !unit->isTabardVendor())                            // it's not tabard vendor
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     SendTabardVendorActivate(guid);
 }
@@ -80,25 +67,12 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_BANKER);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleBankerActivateOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandleBankerActivateOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if( !unit->isBanker())                                  // it's not banker
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     SendShowBank(guid);
 }
@@ -117,9 +91,6 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint64 guid;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
     recv_data >> guid;
     SendTrainerList( guid );
 }
@@ -134,19 +105,12 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 {
     sLog.outDebug( "WORLD: SendTrainerList" );
 
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_TRAINER);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: SendTrainerList - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: SendTrainerList - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     if(!unit->isCanTrainingOf(_player,true))
         return;
@@ -246,18 +210,12 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     recv_data >> guid >> spellId;
     sLog.outDebug( "WORLD: Received CMSG_TRAINER_BUY_SPELL NpcGUID=%u, learn spell id is: %u",uint32(GUID_LOPART(guid)), spellId );
 
-    if(!GetPlayer()->isAlive())
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_TRAINER);
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: HandleTrainerBuySpellOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
-    if(!unit) return;
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
+    }
 
     if(!unit->isCanTrainingOf(_player,true))
         return;
@@ -341,22 +299,12 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_NONE);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_GOSSIP_HELLO - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandleGossipHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
-
-    if(!GetPlayer()->isAlive())
-        return;
 
     if(!Script->GossipHello( _player, unit ))
     {
@@ -375,21 +323,13 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     uint64 guid;
 
     recv_data >> guid >> option;
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_NONE);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
-
-    if(!GetPlayer()->isAlive())
-        return;
 
     if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
         unit->OnGossipSelect( _player, option );
@@ -401,22 +341,16 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 
     sLog.outDetail("WORLD: CMSG_SPIRIT_HEALER_ACTIVATE");
 
-    if( !GetPlayer()->isDead() )
-        return;
-
     uint64 guid;
 
     recv_data >> guid;
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_SPIRITHEALER);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_SPIRIT_HEALER_ACTIVATE - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandleSpiritHealerActivateOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    // prevent cheating
-    if(!unit->isSpiritHealer() || !unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
-        return;
 
     SendSpiritResurrect();
 }
@@ -465,16 +399,12 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
     if(!GetPlayer()->isAlive())
         return;
 
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, npcGUID,UNIT_NPC_FLAG_INNKEEPER);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_BINDER_ACTIVATE - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)));
+        sLog.outDebug( "WORLD: HandleBinderActivateOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
-
-    // prevent cheating
-    if(!unit->isInnkeeper() || unit->IsHostileTo(GetPlayer()) || !unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
-        return;
 
     SendBindPoint(unit);
 }
@@ -553,18 +483,12 @@ void WorldSession::HandleListStabledPetsOpcode( WorldPacket & recv_data )
     if(!GetPlayer()->isAlive())
         return;
 
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, npcGUID,UNIT_NPC_FLAG_STABLE);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: MSG_LIST_STABLED_PETS - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
+        sLog.outDebug( "WORLD: HandleListStabledPetsOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     SendStablePet(npcGUID);
 }
@@ -655,18 +579,12 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
     if(!GetPlayer()->isAlive())
         return;
 
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, npcGUID,UNIT_NPC_FLAG_STABLE);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_STABLE_PET - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
+        sLog.outDebug( "WORLD: HandleStablePet - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     Pet *pet = _player->GetPet();
 
@@ -729,21 +647,12 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
 
     recv_data >> npcGUID >> petnumber;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, npcGUID,UNIT_NPC_FLAG_STABLE);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_UNSTABLE_PET - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
+        sLog.outDebug( "WORLD: HandleUnstablePet - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
@@ -803,21 +712,12 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
 
     recv_data >> npcGUID;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, npcGUID,UNIT_NPC_FLAG_STABLE);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_BUY_STABLE_SLOT - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
+        sLog.outDebug( "WORLD: HandleBuyStableSlot - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     WorldPacket data(SMSG_STABLE_RESULT, 200);
 
@@ -876,21 +776,12 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
 
     recv_data >> npcGUID >> pet_number;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, npcGUID,UNIT_NPC_FLAG_STABLE);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_STABLE_SWAP_PET - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
+        sLog.outDebug( "WORLD: HandleStableSwapPet - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
@@ -956,21 +847,12 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
 
     recv_data >> npcGUID >> itemGUID;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, npcGUID);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, npcGUID,UNIT_NPC_FLAG_ARMORER);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: CMSG_REPAIR_ITEM - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(npcGUID)) );
+        sLog.outDebug( "WORLD: HandleStableSwapPet - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
-        return;
 
     if (itemGUID)
     {

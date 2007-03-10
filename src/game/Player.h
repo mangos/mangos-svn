@@ -488,6 +488,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsInWater() const { return m_isInWater; }
         bool IsUnderWater() const;
 
+        bool CanInteractWithNPCs(bool alive = true) const;
+
         bool ToggleAFK();
         bool ToggleDND();
         bool isAFK() { return this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); };

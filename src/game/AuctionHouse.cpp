@@ -37,19 +37,12 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
     uint64 guid;                                            //NPC guid
     recv_data >> guid;
 
-    if (!guid)
-        return;                                             //check for cheaters
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_AUCTIONEER);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleAuctionHelloOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandleAuctionHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-    if( !unit->isAuctioner())                               // it's not auctioner
-        return;
 
     SendAuctionHello(guid, unit);
 }
@@ -208,12 +201,15 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     recv_data >> bid >> buyout >> etime;
     Player *pl = GetPlayer();
 
-    if (!auctioneer || !item || !bid || !etime)
+    if (!item || !bid || !etime)
         return;                                             //check for cheaters
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
-    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, auctioneer,UNIT_NPC_FLAG_AUCTIONEER);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleAuctionSellItem - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(auctioneer)) );
         return;
+    }
 
     uint16 pos = pl->GetPosByGuid(item);
     Item *it = pl->GetItemByPos( pos );
@@ -290,12 +286,15 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
     recv_data >> auctioneer;
     recv_data >> auctionId >> price;
 
-    if (!auctioneer || !auctionId || !price)
+    if (!auctionId || !price)
         return;                                             //check for cheaters
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
-    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, auctioneer,UNIT_NPC_FLAG_AUCTIONEER);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleAuctionPlaceBid - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(auctioneer)) );
         return;
+    }
 
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
@@ -400,9 +399,12 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     recv_data >> auctionId;
     //sLog.outDebug( "Cancel AUCTION AuctionID: %u", auctionId);
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, auctioneer);
-    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, auctioneer,UNIT_NPC_FLAG_AUCTIONEER);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleAuctionRemoveItem - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(auctioneer)) );
         return;
+    }
 
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
@@ -484,9 +486,12 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
         outbiddedCount = 0;
     }
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_AUCTIONEER);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleAuctionListBidderItems - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
+    }
 
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
@@ -536,9 +541,12 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
     recv_data >> guid;
     recv_data >> listfrom;                                  // page of auctions
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_AUCTIONEER);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleAuctionListOwnerItems - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
+    }
 
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
@@ -585,9 +593,12 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     recv_data >> auctionSlotID >> auctionMainCategory >> auctionSubCategory;
     recv_data >> quality >> usable;
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if( !pCreature || !pCreature->isAuctioner() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_AUCTIONEER);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleAuctionListItems - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
+    }
 
     location = AuctioneerFactionToLocation(pCreature->getFaction());
     AuctionHouseObject * mAuctions;

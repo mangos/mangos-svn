@@ -42,6 +42,41 @@
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 
+Creature* 
+ObjectAccessor::GetNPCIfCanInteractWith(Player const &player, uint64 guid, uint32 npcflagmask)
+{
+    // player check
+    if(!player.CanInteractWithNPCs(npcflagmask!=UNIT_NPC_FLAG_SPIRITHEALER))
+        return NULL;
+
+    // unit checks
+    if (!guid)
+        return NULL;
+
+    // exist
+    Creature *unit = GetCreature(player, guid);
+    if (!unit)
+        return NULL;
+
+    // appropriate npc type
+    if(npcflagmask && !unit->HasFlag( UNIT_NPC_FLAGS, npcflagmask ))
+        return NULL;
+
+    // alive or spirit healer
+    if(!unit->isAlive() && (!unit->isSpiritHealer() || player.isAlive() ))
+        return NULL;
+
+    // not enemy
+    if( unit->IsHostileTo(&player))
+        return NULL;
+
+    // not too far
+    if(!unit->IsWithinDistInMap(&player,OBJECT_ITERACTION_DISTANCE))
+        return NULL;
+
+    return unit;
+}
+
 Creature*
 ObjectAccessor::GetCreatureOrPet(WorldObject const &u, uint64 guid)
 {

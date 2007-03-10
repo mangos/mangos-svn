@@ -373,68 +373,71 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> itemguid >> count;
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
-    if( pCreature && !pCreature->IsHostileTo(GetPlayer()) && pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, vendorguid,UNIT_NPC_FLAG_VENDOR);
+    if (!pCreature)
     {
-        uint16 pos = _player->GetPosByGuid(itemguid);
-        Item *pItem = _player->GetItemByPos( pos );
-        if( pItem )
-        {
-            // prevent sell non empty bag by drag-and-drop at vendor's item list
-            if(pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
-            {
-                _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
-                return;
-            }
-
-            // special case at auto sell (sell all)
-            if(count==0)
-            {
-                count = pItem->GetCount();
-            }
-            else
-                // prevent sell more items that exist in stack (possable only not from client)
-            if(count > pItem->GetCount())
-            {
-                _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
-                return;
-            }
-
-            ItemPrototype const *pProto = pItem->GetProto();
-            if( pProto )
-            {
-                if( pProto->SellPrice > 0 )
-                {
-                    _player->ModifyMoney( pProto->SellPrice * count );
-
-                    if(count < pItem->GetCount())           // need split items
-                    {
-                        pItem->SetCount( pItem->GetCount() - count );
-                        if( _player->IsInWorld() )
-                            pItem->SendUpdateToPlayer( _player );
-                        pItem->SetState(ITEM_CHANGED, _player);
-
-                        Item *pNewItem = _player->CreateItem( pItem->GetEntry(), count );
-                        _player->AddItemToBuyBackSlot( pNewItem );
-                        if( _player->IsInWorld() )
-                            pNewItem->SendUpdateToPlayer( _player );
-                    }
-                    else
-                    {
-                        _player->RemoveItem( (pos >> 8), (pos & 255), true);
-                        pItem->RemoveFromUpdateQueueOf(_player);
-                        _player->AddItemToBuyBackSlot( pItem );
-                    }
-                }
-                else
-                    _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
-                return;
-            }
-        }
-        _player->SendSellError( SELL_ERR_CANT_FIND_ITEM, pCreature, itemguid, 0);
+        sLog.outDebug( "WORLD: HandleSellItemOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(vendorguid)) );
+        _player->SendSellError( SELL_ERR_CANT_FIND_VENDOR, NULL, itemguid, 0);
         return;
     }
-    _player->SendSellError( SELL_ERR_CANT_FIND_VENDOR, pCreature, itemguid, 0);
+
+    uint16 pos = _player->GetPosByGuid(itemguid);
+    Item *pItem = _player->GetItemByPos( pos );
+    if( pItem )
+    {
+        // prevent sell non empty bag by drag-and-drop at vendor's item list
+        if(pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
+        {
+            _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+            return;
+        }
+
+        // special case at auto sell (sell all)
+        if(count==0)
+        {
+            count = pItem->GetCount();
+        }
+        else
+            // prevent sell more items that exist in stack (possable only not from client)
+        if(count > pItem->GetCount())
+        {
+            _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+            return;
+        }
+
+        ItemPrototype const *pProto = pItem->GetProto();
+        if( pProto )
+        {
+            if( pProto->SellPrice > 0 )
+            {
+                _player->ModifyMoney( pProto->SellPrice * count );
+
+                if(count < pItem->GetCount())           // need split items
+                {
+                    pItem->SetCount( pItem->GetCount() - count );
+                    if( _player->IsInWorld() )
+                        pItem->SendUpdateToPlayer( _player );
+                    pItem->SetState(ITEM_CHANGED, _player);
+
+                    Item *pNewItem = _player->CreateItem( pItem->GetEntry(), count );
+                    _player->AddItemToBuyBackSlot( pNewItem );
+                    if( _player->IsInWorld() )
+                        pNewItem->SendUpdateToPlayer( _player );
+                }
+                else
+                {
+                    _player->RemoveItem( (pos >> 8), (pos & 255), true);
+                    pItem->RemoveFromUpdateQueueOf(_player);
+                    _player->AddItemToBuyBackSlot( pItem );
+                }
+            }
+            else
+                _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+            return;
+        }
+    }
+    _player->SendSellError( SELL_ERR_CANT_FIND_ITEM, pCreature, itemguid, 0);
+    return;
 }
 
 void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
@@ -447,36 +450,38 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
 
     recv_data >> vendorguid >> slot;
 
-    if(!GetPlayer()->isAlive())
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, vendorguid,UNIT_NPC_FLAG_VENDOR);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleBuybackItem - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(vendorguid)) );
+        _player->SendSellError( SELL_ERR_CANT_FIND_VENDOR, NULL, 0, 0);
         return;
+    }
 
     Item *pItem = _player->GetItemFromBuyBackSlot( slot );
     if( pItem )
     {
-        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
-        if( pCreature && !pCreature->IsHostileTo(GetPlayer()) && pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+        uint32 price = _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
+        if( _player->GetMoney() < price )
         {
-            uint32 price = _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
-            if( _player->GetMoney() < price )
-            {
-                _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
-                return;
-            }
-            uint16 dest;
-
-            uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
-            if( msg == EQUIP_ERR_OK )
-            {
-                _player->ModifyMoney( -(int32)price );
-                _player->RemoveItemFromBuyBackSlot( slot, false );
-                _player->StoreItem( dest, pItem, true );
-            }
-            else
-                _player->SendEquipError( msg, pItem, NULL );
+            _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
             return;
         }
-        _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, pItem->GetEntry(), 0);
+        uint16 dest;
+
+        uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
+        if( msg == EQUIP_ERR_OK )
+        {
+            _player->ModifyMoney( -(int32)price );
+            _player->RemoveItemFromBuyBackSlot( slot, false );
+            _player->StoreItem( dest, pItem, true );
+        }
+        else
+            _player->SendEquipError( msg, pItem, NULL );
+        return;
     }
+    else
+        _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, pItem->GetEntry(), 0);
 }
 
 void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
@@ -523,55 +528,61 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     SendListInventory( guid );
 }
 
-void WorldSession::SendListInventory( uint64 guid )
+void WorldSession::SendListInventory( uint64 vendorguid )
 {
     sLog.outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if( pCreature && !pCreature->IsHostileTo(GetPlayer()) && pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, vendorguid,UNIT_NPC_FLAG_VENDOR);
+    if (!pCreature)
     {
-        uint8 numitems = pCreature->GetItemCount();
-        uint8 count = 0;
-        uint32 ptime = time(NULL);
-        uint32 diff;
+        sLog.outDebug( "WORLD: SendListInventory - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(vendorguid)) );
+        _player->SendSellError( SELL_ERR_CANT_FIND_VENDOR, NULL, 0, 0);
+        return;
+    }
 
-        WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*7*4) );
-        data << guid;
-        data << numitems;
+    uint8 numitems = pCreature->GetItemCount();
+    uint8 count = 0;
+    uint32 ptime = time(NULL);
+    uint32 diff;
 
-        ItemPrototype const *pProto;
-        for(int i = 0; i < numitems; i++ )
+    WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*7*4) );
+    data << vendorguid;
+    data << numitems;
+
+    ItemPrototype const *pProto;
+    for(int i = 0; i < numitems; i++ )
+    {
+        if( pCreature->GetItemId(i) )
         {
-            if( pCreature->GetItemId(i) )
+            pProto = objmgr.GetItemPrototype(pCreature->GetItemId(i));
+            if( pProto )
             {
-                pProto = objmgr.GetItemPrototype(pCreature->GetItemId(i));
-                if( pProto )
+                count++;
+                if( pCreature->GetItemIncrTime(i) != 0 && (pCreature->GetItemLastIncr(i) + pCreature->GetItemIncrTime(i) <= ptime) )
                 {
-                    count++;
-                    if( pCreature->GetItemIncrTime(i) != 0 && (pCreature->GetItemLastIncr(i) + pCreature->GetItemIncrTime(i) <= ptime) )
-                    {
-                        diff = uint32((ptime - pCreature->GetItemLastIncr(i))/pCreature->GetItemIncrTime(i));
-                        if( (pCreature->GetItemCount(i) + diff * pProto->BuyCount) <= pCreature->GetMaxItemCount(i) )
-                            pCreature->SetItemCount(i, pCreature->GetItemCount(i) + diff * pProto->BuyCount);
-                        else
-                            pCreature->SetItemCount(i, pCreature->GetMaxItemCount(i));
-                        pCreature->SetItemLastIncr(i, ptime);
-                    }
-                    data << uint32(count);
-                    data << pCreature->GetItemId(i);
-                    data << pProto->DisplayInfoID;
-                    data << uint32(pCreature->GetMaxItemCount(i) <= 0 ? 0xFFFFFFFF : pCreature->GetItemCount(i));
-                    data << pProto->BuyPrice;
-                    data << uint32( 0xFFFFFFFF );
-                    data << pProto->BuyCount;
+                    diff = uint32((ptime - pCreature->GetItemLastIncr(i))/pCreature->GetItemIncrTime(i));
+                    if( (pCreature->GetItemCount(i) + diff * pProto->BuyCount) <= pCreature->GetMaxItemCount(i) )
+                        pCreature->SetItemCount(i, pCreature->GetItemCount(i) + diff * pProto->BuyCount);
+                    else
+                        pCreature->SetItemCount(i, pCreature->GetMaxItemCount(i));
+                    pCreature->SetItemLastIncr(i, ptime);
                 }
+                data << uint32(count);
+                data << pCreature->GetItemId(i);
+                data << pProto->DisplayInfoID;
+                data << uint32(pCreature->GetMaxItemCount(i) <= 0 ? 0xFFFFFFFF : pCreature->GetItemCount(i));
+                data << pProto->BuyPrice;
+                data << uint32( 0xFFFFFFFF );
+                data << pProto->BuyCount;
             }
         }
-
-        if ( count == 0 || data.size() != 8 + 1 + count * 7 * 4 )
-            return;
-        data.put<uint8>(8, count);
-        SendPacket( &data );
     }
+
+    if ( count == 0 || data.size() != 8 + 1 + count * 7 * 4 )
+        return;
+
+    data.put<uint8>(8, count);
+    SendPacket( &data );
 }
 
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
