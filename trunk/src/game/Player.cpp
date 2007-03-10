@@ -11430,6 +11430,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
         WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
         data << uint32( 1 );
         GetSession()->SendPacket( &data );
+        ClearTaxiDestinations();
         return false;
     }
 
@@ -11439,6 +11440,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
         WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
         data << uint32( 3 );
         GetSession()->SendPacket( &data );
+        ClearTaxiDestinations();
         return false;
     }
 
