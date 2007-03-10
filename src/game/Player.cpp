@@ -11128,29 +11128,43 @@ void Player::Uncharm()
 
 void Player::PetSpellInitialize()
 {
-    Creature* pet = GetPet();
-    if(!pet)
-        pet = GetCharm();
+    Pet* pet = GetPet();
+
+    // FIXME: charmed case 
+    //if(!pet)
+    // pet = GetCharm();
+
     if(pet)
     {
-
         uint16 Command = 7;
         uint16 State = 6;
         uint8 addlist = 0;
+        uint8 act_state = 0;
 
         sLog.outDebug("Pet Spells Groups");
 
+        if (pet->HasActState(STATE_RA_PASSIVE))
+            act_state = 0;
+        if (pet->HasActState(STATE_RA_REACTIVE))
+            act_state = 1;
+        if (pet->HasActState(STATE_RA_PROACTIVE))
+            act_state = 2;
+
         WorldPacket data(SMSG_PET_SPELLS, 100);             // we guess size
 
-        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x1010000);
+        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint8(act_state) << uint8(1) << uint16(0);
 
         data << uint16 (2) << uint16(Command << 8);         // 2 command from 0x700 group place to 1 slot
         data << uint16 (1) << uint16(Command << 8);         // 1 command from 0x700 group place to 2 slot
         data << uint16 (0) << uint16(Command << 8);         // 0 command from 0x700 group place to 3 slot
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-            data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
+        {
+            if (pet->HasActState(STATE_RA_SPELL1 << i))
+                data << uint16 (pet->m_spells[i]) << uint16 (0xC100); // Spell enabled
+            else
+                data << uint16 (pet->m_spells[i]) << uint16 (0x8100); // Spell disabled
+        }
 
         data << uint16 (2) << uint16(State << 8);           // 2 command from 0x600 group place to 8 slot
         data << uint16 (1) << uint16(State << 8);           // 1 command from 0x600 group place to 9 slot
@@ -11181,7 +11195,10 @@ void Player::PetSpellInitialize()
                     {
                         if(pet->m_spells[i] == spellInfo->EffectTriggerSpell[0])
                         {
-                            data << uint16(0xC1);
+                            if (pet->HasActState(STATE_RA_SPELL1 << i))
+                                data << uint16(0xC1); // Spell enabled
+                            else
+                                data << uint16(0x81); // Spell disabled
                             hasthisspell = true;
                             break;
                         }
