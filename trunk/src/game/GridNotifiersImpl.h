@@ -100,7 +100,6 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
     }
 }
 
-template<>
 inline void
 MaNGOS::ObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
