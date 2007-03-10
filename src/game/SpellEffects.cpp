@@ -745,7 +745,10 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         return;
     }
 
-    Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true);
+    // TODO: Maybe pProto->Extra store filter for possible random properties
+    uint32 randomPropId = pProto->Extra ? Item::GenerateItemRandomPropertyId(newitemid) : 0;
+
+    Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true,randomPropId);
 
     if(!pItem)
     {
@@ -1905,6 +1908,9 @@ void Spell::EffectHealMaxHealth(uint32 i)
         return;
 
     uint32 heal = m_caster->GetMaxHealth();
+
+    if(m_spellInfo->SpellVisual == 132)                     // drain all caster's mana
+        m_caster->SetPower(POWER_MANA, 0);
 
     unitTarget->ModifyHealth(heal);
 
