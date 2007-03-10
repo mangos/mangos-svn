@@ -748,7 +748,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if(step.source->GetTypeId()!=TYPEID_UNIT)
+                if(step.source->isType(TYPE_UNIT))          // any Unit
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-unit (TypeId: %u), skipping.",step.source->GetTypeId());
                     break;
