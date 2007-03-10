@@ -323,10 +323,8 @@ class ObjectMgr
         struct SpellLearnSkillNode
         {
             uint32 skill;
-            uint32 value;
+            uint32 value;                                   // 0  - max skill value for player level
             uint32 maxvalue;                                // 0  - max skill value for player level
-                                                            
-            bool   unlearn;
         };
 
         typedef std::map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;

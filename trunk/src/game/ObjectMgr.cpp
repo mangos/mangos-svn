@@ -1535,7 +1535,6 @@ void ObjectMgr::LoadSpellLearnSkills()
         node.skill    = fields[1].GetUInt32();
         node.value    = skill_val < 0 ? maxconfskill : skill_val;
         node.maxvalue = skill_max < 0 ? maxconfskill : skill_max;
-        node.unlearn  = true;
 
         if(!sSpellStore.LookupEntry(spell_id))
         {
@@ -1573,7 +1572,6 @@ void ObjectMgr::LoadSpellLearnSkills()
                 dbc_node.skill    = entry->EffectMiscValue[i];
                 dbc_node.value    = 1;
                 dbc_node.maxvalue = (entry->EffectBasePoints[i]+1)*75;
-                dbc_node.unlearn  = (GetFirstSpellInChain(spell)==spell);
 
                 SpellLearnSkillNode const* db_node = GetSpellLearnSkill(spell);
 

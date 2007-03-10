@@ -168,7 +168,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
             continue;
         //if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
         //    Tspells.push_back(*itr);
-        if((*itr)->spell)
+        if((*itr)->spell && sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]))
             Tspells.push_back(*itr);
     }
 
@@ -183,14 +183,15 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         bool LevelFlag = false;
         bool ReqspellFlag = false;
         SpellEntry const *spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
-        if(!spellInfo)
-            continue;
+        assert(spellInfo);                                  // Tested already in prev. for loop
+
         if((*itr)->reqskill)
         {
             if(_player->GetPureSkillValue((*itr)->reqskill) >= (*itr)->reqskillvalue)
                 ReqskillValueFlag = true;
         }
-        else ReqskillValueFlag = true;
+        else
+            ReqskillValueFlag = true;
 
         uint32 spellLevel = ( (*itr)->reqlevel ? (*itr)->reqlevel : spellInfo->spellLevel);
         if(_player->getLevel() >= spellLevel)
@@ -206,8 +207,12 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
         if(_player->HasSpell(spellInfo->Id))
             canlearnflag = 2;                               //gray, can't learn
+        else
+            if((*itr)->spell->Effect[0] == SPELL_EFFECT_LEARN_SPELL && 
+                _player->HasSpell((*itr)->spell->EffectTriggerSpell[0]))
+                canlearnflag = 2;                           //gray, can't learn
 
-        if((*itr)->spell->Effect[1] == 44)
+        if((*itr)->spell->Effect[1] == SPELL_EFFECT_SKILL_STEP)
             if(!_player->CanLearnProSpell((*itr)->spell->Id))
                 canlearnflag = 1;
 
