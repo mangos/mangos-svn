@@ -44,16 +44,16 @@ class UpdateMask;
 
 enum SpellModType
 {
-    SPELLMOD_FLAT = 107,
-    SPELLMOD_PCT = 108
+    SPELLMOD_FLAT         = 107,
+    SPELLMOD_PCT          = 108
 };
 
 enum PlayerSpellState
 {
     PLAYERSPELL_UNCHANGED = 0,
-    PLAYERSPELL_CHANGED = 1,
-    PLAYERSPELL_NEW = 2,
-    PLAYERSPELL_REMOVED = 3,
+    PLAYERSPELL_CHANGED   = 1,
+    PLAYERSPELL_NEW       = 2,
+    PLAYERSPELL_REMOVED   = 3
 };
 
 struct PlayerSpell
@@ -267,7 +267,7 @@ enum PlayerStateType
 
 enum TYPE_OF_KILL
 {
-    HONORABLE_KILL = 1,
+    HONORABLE_KILL    = 1,
     DISHONORABLE_KILL = 2,
 };
 
@@ -288,24 +288,24 @@ enum PlayerFlags
 
 enum LootType
 {
-    LOOT_CORPSE = 1,
-    LOOT_SKINNING = 2,
-    LOOT_FISHING = 3,
-    LOOT_PICKPOKETING = 4,                                  // unsupported by client, sending LOOT_SKINNING instead
-    LOOT_DISENCHANTING = 5                                  // unsupported by client, sending LOOT_SKINNING instead
+    LOOT_CORPSE                 = 1,
+    LOOT_SKINNING               = 2,
+    LOOT_FISHING                = 3,
+    LOOT_PICKPOKETING           = 4,                        // unsupported by client, sending LOOT_SKINNING instead
+    LOOT_DISENCHANTING          = 5                         // unsupported by client, sending LOOT_SKINNING instead
 };
 
 enum MirrorTimerType
 {
-    FATIGUE_TIMER = 0,
-    BREATH_TIMER,
-    FIRE_TIMER
+    FATIGUE_TIMER      = 0,
+    BREATH_TIMER       = 1,
+    FIRE_TIMER         = 2
 };
 
 // 2^n values
 enum GMFlags
 {
-    GM_ON = 1,
+    GM_ON              = 1,
     GM_ACCEPT_TICKETS  = 2,
     GM_ACCEPT_WHISPERS = 4,
     GM_TAXICHEAT       = 8,                                 // can be applied to non-gm players
@@ -323,123 +323,146 @@ class Spell;
 class Item;
 class WorldSession;
 
-// first slot for item stored (in any way in player m_items data)
-#define PLAYER_SLOT_START            0
+enum PlayerSlots
+{
+    // first slot for item stored (in any way in player m_items data)
+    PLAYER_SLOT_START           = 0,
+    // last+1 slot for item stored (in any way in player m_items data)
+    PLAYER_SLOT_END             = 97,
+    PLAYER_SLOTS_COUNT          = (PLAYER_SLOT_END - PLAYER_SLOT_START)
+};
 
-#define EQUIPMENT_SLOT_START         0
-#define EQUIPMENT_SLOT_HEAD          0
-#define EQUIPMENT_SLOT_NECK          1
-#define EQUIPMENT_SLOT_SHOULDERS     2
-#define EQUIPMENT_SLOT_BODY          3
-#define EQUIPMENT_SLOT_CHEST         4
-#define EQUIPMENT_SLOT_WAIST         5
-#define EQUIPMENT_SLOT_LEGS          6
-#define EQUIPMENT_SLOT_FEET          7
-#define EQUIPMENT_SLOT_WRISTS        8
-#define EQUIPMENT_SLOT_HANDS         9
-#define EQUIPMENT_SLOT_FINGER1       10
-#define EQUIPMENT_SLOT_FINGER2       11
-#define EQUIPMENT_SLOT_TRINKET1      12
-#define EQUIPMENT_SLOT_TRINKET2      13
-#define EQUIPMENT_SLOT_BACK          14
-#define EQUIPMENT_SLOT_MAINHAND      15
-#define EQUIPMENT_SLOT_OFFHAND       16
-#define EQUIPMENT_SLOT_RANGED        17
-#define EQUIPMENT_SLOT_TABARD        18
-#define EQUIPMENT_SLOT_END           19
+enum EquipmentSlots
+{
+    EQUIPMENT_SLOT_START        = 0,
+    EQUIPMENT_SLOT_HEAD         = 0,
+    EQUIPMENT_SLOT_NECK         = 1,
+    EQUIPMENT_SLOT_SHOULDERS    = 2,
+    EQUIPMENT_SLOT_BODY         = 3,
+    EQUIPMENT_SLOT_CHEST        = 4,
+    EQUIPMENT_SLOT_WAIST        = 5,
+    EQUIPMENT_SLOT_LEGS         = 6,
+    EQUIPMENT_SLOT_FEET         = 7,
+    EQUIPMENT_SLOT_WRISTS       = 8,
+    EQUIPMENT_SLOT_HANDS        = 9,
+    EQUIPMENT_SLOT_FINGER1      = 10,
+    EQUIPMENT_SLOT_FINGER2      = 11,
+    EQUIPMENT_SLOT_TRINKET1     = 12,
+    EQUIPMENT_SLOT_TRINKET2     = 13,
+    EQUIPMENT_SLOT_BACK         = 14,
+    EQUIPMENT_SLOT_MAINHAND     = 15,
+    EQUIPMENT_SLOT_OFFHAND      = 16,
+    EQUIPMENT_SLOT_RANGED       = 17,
+    EQUIPMENT_SLOT_TABARD       = 18,
+    EQUIPMENT_SLOT_END          = 19
+};
 
-#define INVENTORY_SLOT_BAG_0         255
-#define INVENTORY_SLOT_BAG_START     19
-#define INVENTORY_SLOT_BAG_1         19
-#define INVENTORY_SLOT_BAG_2         20
-#define INVENTORY_SLOT_BAG_3         21
-#define INVENTORY_SLOT_BAG_4         22
-#define INVENTORY_SLOT_BAG_END       23
+enum InventorySlots
+{
+    INVENTORY_SLOT_BAG_0        = 255,
+    INVENTORY_SLOT_BAG_START    = 19,
+    INVENTORY_SLOT_BAG_1        = 19,
+    INVENTORY_SLOT_BAG_2        = 20,
+    INVENTORY_SLOT_BAG_3        = 21,
+    INVENTORY_SLOT_BAG_4        = 22,
+    INVENTORY_SLOT_BAG_END      = 23,
 
-#define INVENTORY_SLOT_ITEM_START    23
-#define INVENTORY_SLOT_ITEM_1        23
-#define INVENTORY_SLOT_ITEM_2        24
-#define INVENTORY_SLOT_ITEM_3        25
-#define INVENTORY_SLOT_ITEM_4        26
-#define INVENTORY_SLOT_ITEM_5        27
-#define INVENTORY_SLOT_ITEM_6        28
-#define INVENTORY_SLOT_ITEM_7        29
-#define INVENTORY_SLOT_ITEM_8        30
-#define INVENTORY_SLOT_ITEM_9        31
-#define INVENTORY_SLOT_ITEM_10       32
-#define INVENTORY_SLOT_ITEM_11       33
-#define INVENTORY_SLOT_ITEM_12       34
-#define INVENTORY_SLOT_ITEM_13       35
-#define INVENTORY_SLOT_ITEM_14       36
-#define INVENTORY_SLOT_ITEM_15       37
-#define INVENTORY_SLOT_ITEM_16       38
-#define INVENTORY_SLOT_ITEM_END      39
+    INVENTORY_SLOT_ITEM_START   = 23,
+    INVENTORY_SLOT_ITEM_1       = 23,
+    INVENTORY_SLOT_ITEM_2       = 24,
+    INVENTORY_SLOT_ITEM_3       = 25,
+    INVENTORY_SLOT_ITEM_4       = 26,
+    INVENTORY_SLOT_ITEM_5       = 27,
+    INVENTORY_SLOT_ITEM_6       = 28,
+    INVENTORY_SLOT_ITEM_7       = 29,
+    INVENTORY_SLOT_ITEM_8       = 30,
+    INVENTORY_SLOT_ITEM_9       = 31,
+    INVENTORY_SLOT_ITEM_10      = 32,
+    INVENTORY_SLOT_ITEM_11      = 33,
+    INVENTORY_SLOT_ITEM_12      = 34,
+    INVENTORY_SLOT_ITEM_13      = 35,
+    INVENTORY_SLOT_ITEM_14      = 36,
+    INVENTORY_SLOT_ITEM_15      = 37,
+    INVENTORY_SLOT_ITEM_16      = 38,
+    INVENTORY_SLOT_ITEM_END     = 39
+};
 
-#define BANK_SLOT_ITEM_START         39
-#define BANK_SLOT_ITEM_1             39
-#define BANK_SLOT_ITEM_2             40
-#define BANK_SLOT_ITEM_3             41
-#define BANK_SLOT_ITEM_4             42
-#define BANK_SLOT_ITEM_5             43
-#define BANK_SLOT_ITEM_6             44
-#define BANK_SLOT_ITEM_7             45
-#define BANK_SLOT_ITEM_8             46
-#define BANK_SLOT_ITEM_9             47
-#define BANK_SLOT_ITEM_10            48
-#define BANK_SLOT_ITEM_11            49
-#define BANK_SLOT_ITEM_12            50
-#define BANK_SLOT_ITEM_13            51
-#define BANK_SLOT_ITEM_14            52
-#define BANK_SLOT_ITEM_15            53
-#define BANK_SLOT_ITEM_16            54
-#define BANK_SLOT_ITEM_17            55
-#define BANK_SLOT_ITEM_18            56
-#define BANK_SLOT_ITEM_19            57
-#define BANK_SLOT_ITEM_20            58
-#define BANK_SLOT_ITEM_21            59
-#define BANK_SLOT_ITEM_22            60
-#define BANK_SLOT_ITEM_23            61
-#define BANK_SLOT_ITEM_24            62
-#define BANK_SLOT_ITEM_END           63
+enum BankSlots
+{
+    BANK_SLOT_ITEM_START        = 39,
+    BANK_SLOT_ITEM_1            = 39,
+    BANK_SLOT_ITEM_2            = 40,
+    BANK_SLOT_ITEM_3            = 41,
+    BANK_SLOT_ITEM_4            = 42,
+    BANK_SLOT_ITEM_5            = 43,
+    BANK_SLOT_ITEM_6            = 44,
+    BANK_SLOT_ITEM_7            = 45,
+    BANK_SLOT_ITEM_8            = 46,
+    BANK_SLOT_ITEM_9            = 47,
+    BANK_SLOT_ITEM_10           = 48,
+    BANK_SLOT_ITEM_11           = 49,
+    BANK_SLOT_ITEM_12           = 50,
+    BANK_SLOT_ITEM_13           = 51,
+    BANK_SLOT_ITEM_14           = 52,
+    BANK_SLOT_ITEM_15           = 53,
+    BANK_SLOT_ITEM_16           = 54,
+    BANK_SLOT_ITEM_17           = 55,
+    BANK_SLOT_ITEM_18           = 56,
+    BANK_SLOT_ITEM_19           = 57,
+    BANK_SLOT_ITEM_20           = 58,
+    BANK_SLOT_ITEM_21           = 59,
+    BANK_SLOT_ITEM_22           = 60,
+    BANK_SLOT_ITEM_23           = 61,
+    BANK_SLOT_ITEM_24           = 62,
+    BANK_SLOT_ITEM_END          = 63,
 
-#define BANK_SLOT_BAG_START          63
-#define BANK_SLOT_BAG_1              63
-#define BANK_SLOT_BAG_2              64
-#define BANK_SLOT_BAG_3              65
-#define BANK_SLOT_BAG_4              66
-#define BANK_SLOT_BAG_5              67
-#define BANK_SLOT_BAG_6              68
-#define BANK_SLOT_BAG_END            69
+    BANK_SLOT_BAG_START         = 63,
+    BANK_SLOT_BAG_1             = 63,
+    BANK_SLOT_BAG_2             = 64,
+    BANK_SLOT_BAG_3             = 65,
+    BANK_SLOT_BAG_4             = 66,
+    BANK_SLOT_BAG_5             = 67,
+    BANK_SLOT_BAG_6             = 68,
+    BANK_SLOT_BAG_END           = 69
+};
 
+enum BuyBackSlots
+{
 // strored in m_buybackitems
-#define BUYBACK_SLOT_START           69
-#define BUYBACK_SLOT_1               69
-#define BUYBACK_SLOT_2               70
-#define BUYBACK_SLOT_3               71
-#define BUYBACK_SLOT_4               72
-#define BUYBACK_SLOT_5               73
-#define BUYBACK_SLOT_6               74
-#define BUYBACK_SLOT_7               75
-#define BUYBACK_SLOT_8               76
-#define BUYBACK_SLOT_9               77
-#define BUYBACK_SLOT_10              78
-#define BUYBACK_SLOT_11              79
-#define BUYBACK_SLOT_12              80
-#define BUYBACK_SLOT_END             81
+    BUYBACK_SLOT_START          = 69,
+    BUYBACK_SLOT_1              = 69,
+    BUYBACK_SLOT_2              = 70,
+    BUYBACK_SLOT_3              = 71,
+    BUYBACK_SLOT_4              = 72,
+    BUYBACK_SLOT_5              = 73,
+    BUYBACK_SLOT_6              = 74,
+    BUYBACK_SLOT_7              = 75,
+    BUYBACK_SLOT_8              = 76,
+    BUYBACK_SLOT_9              = 77,
+    BUYBACK_SLOT_10             = 78,
+    BUYBACK_SLOT_11             = 79,
+    BUYBACK_SLOT_12             = 80,
+    BUYBACK_SLOT_END            = 81
+};
 
-#define KEYRING_SLOT_START           81
-#define KEYRING_SLOT_END             97
+enum KeyRingSLots
+{
+    KEYRING_SLOT_START          = 81,
+    KEYRING_SLOT_END            = 97
+};
 
-// last+1 slot for item stored (in any way in player m_items data)
-#define PLAYER_SLOT_END              97
-#define PLAYER_SLOTS_COUNT           (PLAYER_SLOT_END - PLAYER_SLOT_START)
+enum SwitchWeapon
+{
+    DEFAULT_SWITCH_WEAPON       = 1500,                 //cooldown in ms
+    ROGUE_SWITCH_WEAPON         = 1000
+};
 
-#define DEFAULT_SWITCH_WEAPON        1500                   //cooldown in ms
-#define ROGUE_SWITCH_WEAPON          1000
-
-#define TRADE_SLOT_COUNT             7
-#define TRADE_SLOT_TRADED_COUNT      6
-#define TRADE_SLOT_NONTRADED         6
+enum TradeSlots
+{
+    TRADE_SLOT_COUNT            = 7,
+    TRADE_SLOT_TRADED_COUNT     = 6,
+    TRADE_SLOT_NONTRADED        = 6
+};
 
 enum MovementFlags
 {

@@ -27,9 +27,12 @@
 #include "ByteBuffer.h"
 #include "Util.h"
 
-#define ROLL_PASS  0
-#define ROLL_NEED  1
-#define ROLL_GREED 2
+enum RollType
+{
+    ROLL_PASS         = 0,
+    ROLL_NEED         = 1,
+    ROLL_GREED        = 2
+};
 
 #define MAX_NR_LOOT_ITEMS 16
 // note: the client cannot show more than 16 items total
@@ -47,9 +50,9 @@ enum LootMethod
 
 enum PermissionTypes
 {
-    ALL_PERMISSION        =0,
-    GROUP_PERMISSION      =1,
-    NONE_PERMISSION       =3
+    ALL_PERMISSION    = 0,
+    GROUP_PERMISSION  = 1,
+    NONE_PERMISSION   = 3
 };
 
 using std::vector;

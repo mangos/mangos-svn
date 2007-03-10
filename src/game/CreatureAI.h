@@ -72,12 +72,15 @@ struct CreatureAIFactory : public SelectableAI
     int Permit(const Creature *c) const { return REAL_AI::Permissible(c); }
 };
 
-#define PERMIT_BASE_NO                  -1
-#define PERMIT_BASE_IDLE                1
-#define PERMIT_BASE_REACTIVE            100
-#define PERMIT_BASE_PROACTIVE           200
-#define PERMIT_BASE_FACTION_SPECIFIC    400
-#define PERMIT_BASE_SPECIAL             800
+enum Permitions
+{
+    PERMIT_BASE_NO                 = -1,
+    PERMIT_BASE_IDLE               = 1,
+    PERMIT_BASE_REACTIVE           = 100,
+    PERMIT_BASE_PROACTIVE          = 200,
+    PERMIT_BASE_FACTION_SPECIFIC   = 400,
+    PERMIT_BASE_SPECIAL            = 800
+};
 
 typedef FactoryHolder<CreatureAI> CreatureAICreator;
 typedef FactoryHolder<CreatureAI>::FactoryHolderRegistry CreatureAIRegistry;

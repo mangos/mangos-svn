@@ -106,29 +106,29 @@ enum InventoryChangeFailure
 
 enum BuyFailure
 {
-    BUY_ERR_CANT_FIND_ITEM                    = 0,
-    BUY_ERR_ITEM_ALREADY_SOLD                 = 1,
-    BUY_ERR_NOT_ENOUGHT_MONEY                 = 2,
-    BUY_ERR_SELLER_DONT_LIKE_YOU              = 4,
-    BUY_ERR_DISTANCE_TOO_FAR                  = 5,
-    BUY_ERR_CANT_CARRY_MORE                   = 8,
-    BUY_ERR_LEVEL_REQUIRE                     = 11,
-    BUY_ERR_REPUTATION_REQUIRE                = 12
+    BUY_ERR_CANT_FIND_ITEM                       = 0,
+    BUY_ERR_ITEM_ALREADY_SOLD                    = 1,
+    BUY_ERR_NOT_ENOUGHT_MONEY                    = 2,
+    BUY_ERR_SELLER_DONT_LIKE_YOU                 = 4,
+    BUY_ERR_DISTANCE_TOO_FAR                     = 5,
+    BUY_ERR_CANT_CARRY_MORE                      = 8,
+    BUY_ERR_LEVEL_REQUIRE                        = 11,
+    BUY_ERR_REPUTATION_REQUIRE                   = 12
 };
 
 enum SellFailure
 {
-    SELL_ERR_CANT_FIND_ITEM                 = 1,
-    SELL_ERR_CANT_SELL_ITEM                 = 2,
-    SELL_ERR_CANT_FIND_VENDOR               = 3
+    SELL_ERR_CANT_FIND_ITEM                      = 1,
+    SELL_ERR_CANT_SELL_ITEM                      = 2,
+    SELL_ERR_CANT_FIND_VENDOR                    = 3
 };
 
 enum ItemUpdateState
 {
-    ITEM_UNCHANGED = 0,
-    ITEM_CHANGED = 1,
-    ITEM_NEW = 2,
-    ITEM_REMOVED = 3,
+    ITEM_UNCHANGED                               = 0,
+    ITEM_CHANGED                                 = 1,
+    ITEM_NEW                                     = 2,
+    ITEM_REMOVED                                 = 3
 };
 
 class MANGOS_DLL_SPEC Item : public Object

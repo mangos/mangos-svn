@@ -24,13 +24,12 @@
 
 enum PetType
 {
-    SUMMON_PET = 0,
-    HUNTER_PET,
-    GUARDIAN_PET,
-    MINI_PET
+    SUMMON_PET              = 0,
+    HUNTER_PET              = 1,
+    GUARDIAN_PET            = 2,
+    MINI_PET                = 3,
+    MAX_PET_TYPE            = 4
 };
-
-#define MAX_PET_TYPE 4
 
 extern char const* petTypeSuffix[MAX_PET_TYPE];
 
@@ -50,9 +49,9 @@ enum PetState
 
 enum PetSaveMode
 {
-    PET_SAVE_AS_CURRENT,
-    PET_SAVE_AS_STORED,
-    PET_SAVE_AS_DELETED
+    PET_SAVE_AS_CURRENT     = 0,
+    PET_SAVE_AS_STORED      = 1,
+    PET_SAVE_AS_DELETED     = 2
 };
 
 // Used for values in CreatureFamilyEntry.petDietMask
