@@ -26,6 +26,7 @@
 #include "ObjectMgr.h"
 #include "WorldSession.h"
 #include "UpdateData.h"
+#include "UpdateMask.h"
 #include "Util.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
@@ -40,6 +41,7 @@ Object::Object( )
     m_objectType        = TYPE_OBJECT;
 
     m_uint32Values      = 0;
+    m_uint32Values_mirror = 0;
     m_valuesCount       = 0;
 
     m_inWorld           = false;
@@ -56,9 +58,22 @@ Object::~Object( )
     {
         //DEBUG_LOG("Object desctr 1 check (%p)",(void*)this);
         delete [] m_uint32Values;
+        delete [] m_uint32Values_mirror;
         //DEBUG_LOG("Object desctr 2 check (%p)",(void*)this);
     }
 }
+
+void Object::_InitValues()
+{
+    m_uint32Values = new uint32[ m_valuesCount ];
+    memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
+
+    m_uint32Values_mirror = new uint32[ m_valuesCount ];
+    memset(m_uint32Values_mirror, 0, m_valuesCount*sizeof(uint32));
+
+    m_objectUpdated = false;
+}
+
 
 void Object::_Create( uint32 guidlow, uint32 guidhigh )
 {
@@ -169,6 +184,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
     UpdateMask updateMask;
     updateMask.SetCount( m_valuesCount );
+
     _SetUpdateBits( &updateMask, target );
     _BuildValuesUpdate( &buf, &updateMask );
 
@@ -356,7 +372,11 @@ bool Object::LoadValues(const char* data)
 
 void Object::_SetUpdateBits(UpdateMask *updateMask, Player *target) const
 {
-    *updateMask = m_updateMask;
+    for( uint16 index = 0; index < m_valuesCount; index ++ )
+    {
+        if(m_uint32Values_mirror[index]!= m_uint32Values[index])
+            updateMask->SetBit(index);
+    }
 }
 
 void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
@@ -377,8 +397,6 @@ void Object::SetUInt32Value( uint16 index, uint32 value )
 
         if(m_inWorld)
         {
-            m_updateMask.SetBit( index );
-
             if(!m_objectUpdated)
             {
                 ObjectAccessor::Instance().AddUpdateObject(this);
@@ -398,9 +416,6 @@ void Object::SetUInt64Value( uint16 index, const uint64 &value )
 
         if(m_inWorld)
         {
-            m_updateMask.SetBit( index );
-            m_updateMask.SetBit( index + 1 );
-
             if(!m_objectUpdated)
             {
                 ObjectAccessor::Instance().AddUpdateObject(this);
@@ -419,8 +434,6 @@ void Object::SetFloatValue( uint16 index, float value )
 
         if(m_inWorld)
         {
-            m_updateMask.SetBit( index );
-
             if(!m_objectUpdated)
             {
                 ObjectAccessor::Instance().AddUpdateObject(this);
@@ -460,8 +473,6 @@ void Object::SetFlag( uint16 index, uint32 newFlag )
 
         if(m_inWorld)
         {
-            m_updateMask.SetBit( index );
-
             if(!m_objectUpdated)
             {
                 ObjectAccessor::Instance().AddUpdateObject(this);
@@ -483,8 +494,6 @@ void Object::RemoveFlag( uint16 index, uint32 oldFlag )
 
         if(m_inWorld)
         {
-            m_updateMask.SetBit( index );
-
             if(!m_objectUpdated)
             {
                 ObjectAccessor::Instance().AddUpdateObject(this);

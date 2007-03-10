@@ -21,10 +21,9 @@
 
 #include "Common.h"
 #include "ByteBuffer.h"
-#include "UpdateMask.h"
 #include "World.h"
 #include "QuestDef.h"
-
+#include "UpdateFields.h"
 #include <set>
 
 #ifndef M_PI
@@ -68,6 +67,7 @@ class ByteBuffer;
 class WorldSession;
 class Player;
 class MapCell;
+class UpdateMask;
 
 class MANGOS_DLL_SPEC Object
 {
@@ -162,7 +162,11 @@ class MANGOS_DLL_SPEC Object
 
         void ClearUpdateMask( )
         {
-            m_updateMask.Clear();
+            for( uint16 index = 0; index < m_valuesCount; index ++ )
+            {
+                if(m_uint32Values_mirror[index]!= m_uint32Values[index])
+                    m_uint32Values_mirror[index] = m_uint32Values[index];
+            }
             m_objectUpdated = false;
         }
 
@@ -184,15 +188,7 @@ class MANGOS_DLL_SPEC Object
 
         Object ( );
 
-        void _InitValues()
-        {
-            m_uint32Values = new uint32[ m_valuesCount ];
-            memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
-
-            m_updateMask.SetCount(m_valuesCount);
-            ClearUpdateMask();
-        }
-
+        void _InitValues();
         void _Create (uint32 guidlow, uint32 guidhigh);
 
         virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
@@ -212,9 +208,9 @@ class MANGOS_DLL_SPEC Object
             float *m_floatValues;
         };
 
-        uint16 m_valuesCount;
+        uint32 *m_uint32Values_mirror;
 
-        UpdateMask m_updateMask;
+        uint16 m_valuesCount;
 
         bool m_inWorld;
 
