@@ -88,31 +88,18 @@ void WorldSession::HandleTaxiQueryAvailableNodesOpcode( WorldPacket & recv_data 
     recv_data >> guid;
 
     // cheating checks
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
-
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_TAXIVENDOR);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleTaxiQueryAviableNodesOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandleTaxiQueryAvailableNodesOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if(!unit->isTaxi())
-        return;
-
-    if(!unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
-        return;
 
     // unknown taxi node case
     if( SendLearnNewTaxiNode(guid) )
         return;
 
-    // known taxo node case
+    // known taxi node case
     SendTaxiMenu( guid );
 }
 

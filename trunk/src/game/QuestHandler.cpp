@@ -65,15 +65,12 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_HELLO npc = %u",guid );
 
-    if(!GetPlayer()->isAlive())
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_NONE);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleQuestgiverHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
-
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if(!pCreature)
-        return;
-
-    if(pCreature->IsHostileTo(_player))                     // do not talk with ememies
-        return;
+    }
 
     if(Script->GossipHello( _player, pCreature ) )
         return;

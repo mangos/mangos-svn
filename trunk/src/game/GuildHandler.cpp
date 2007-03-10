@@ -74,9 +74,12 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     //sLog.outDebug("Guildmaster with GUID %u tried sell petition: guildname %s", GUID_LOPART(guidNPC), guildname.c_str());
 
     // prevent cheating
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guidNPC);
-    if( !pCreature || !pCreature->isGuildMaster() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guidNPC,UNIT_NPC_FLAG_PETITIONER);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandlePetitionBuyOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guidNPC)) );
         return;
+    }
 
     if(objmgr.GetGuildByName(guildname))
     {
@@ -532,22 +535,12 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
     };
     recv_data >> guid;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
-    if (!unit)
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_PETITIONER);
+    if (!pCreature)
     {
-        sLog.outDebug( "WORLD: HandlePetitionShowListOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandlePetitionShowListOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if( !unit->isGuildMaster())                             // it's not guild master
-        return;
 
     data.Initialize( SMSG_PETITION_SHOWLIST, (8+sizeof(tdata)) );
     data << guid;
@@ -1400,9 +1393,12 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 
     recvPacket >> vendorGuid;
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorGuid);
-    if( !pCreature || !pCreature->isTabardVendor() || pCreature->IsHostileTo(GetPlayer()) || !pCreature->IsWithinDistInMap(GetPlayer(),OBJECT_ITERACTION_DISTANCE))
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, vendorGuid,UNIT_NPC_FLAG_TABARDVENDOR);
+    if (!pCreature)
+    {
+        sLog.outDebug( "WORLD: HandleGuildSaveEmblemOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(vendorGuid)) );
         return;
+    }
 
     recvPacket >> EmblemStyle;
     recvPacket >> EmblemColor;

@@ -166,22 +166,12 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    if(!GetPlayer()->isAlive())
-        return;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_TRAINER);
     if (!unit)
     {
-        sLog.outDebug( "WORLD: HandleTalentWipeOpcode - NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)) );
+        sLog.outDebug( "WORLD: HandleTalentWipeOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
-
-    if( unit->IsHostileTo(_player))                         // do not talk with enemies
-        return;
-
-    if( !unit->isTrainer())                                 // it's not trainer
-        return;
 
     if(!(_player->resetTalents()))
     {
