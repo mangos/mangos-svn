@@ -3038,7 +3038,6 @@ Corpse* Player::CreateCorpse()
     corpse->SaveToDB();
 
     // register for player, but not show
-    corpse->AddToWorld();
     ObjectAccessor::Instance().AddCorpse(corpse);
 
     return corpse;
@@ -10538,8 +10537,8 @@ void Player::SaveToDB()
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     bool inworld = IsInWorld();
-    if (inworld)
-        RemoveFromWorld();
+//    if (inworld)
+//        RemoveFromWorld();
 
     // remember base (exactly) power/health values before temporary set to saved currentPower/currentHealth data
     uint32 baseHealth = GetUInt32Value(UNIT_FIELD_HEALTH);
@@ -10672,8 +10671,8 @@ void Player::SaveToDB()
         _ApplyAllItemMods();
     }
 
-    if (inworld)
-        AddToWorld();
+//    if (inworld)
+//        AddToWorld();
 
     // save hunter pet level and expirience at owner save. spells and etc for summoned pets saved at learn and apply.
     Pet* pet = GetPet();
