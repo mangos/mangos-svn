@@ -383,10 +383,25 @@ void WorldSession::SendSpiritResurrect()
     _player->ApplyStats(true);
 
     _player->DurabilityLossAll(0.25);
-    _player->SpawnCorpseBones();
 
     // update world right away
     MapManager::Instance().GetMap(_player->GetMapId())->Add(GetPlayer());
+
+    Corpse* corpse = _player->GetCorpse();
+    _player->SpawnCorpseBones();
+
+    // teleport to nearest from corpse graveyard
+    if(corpse)
+    {
+        WorldSafeLocsEntry const *ghostGrave = objmgr.GetClosestGraveYard( 
+            _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetMapId(), _player->GetTeam() );
+
+        WorldSafeLocsEntry const *corpseGrave = objmgr.GetClosestGraveYard( 
+            corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam() );
+
+        if(corpseGrave && corpseGrave != ghostGrave)
+            _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
+    }
 }
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )

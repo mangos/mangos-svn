@@ -327,22 +327,37 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
     *data << (uint8)updateMask->GetBlockCount();
     data->append( updateMask->GetMask(), updateMask->GetLength() );
 
-    for( uint16 index = 0; index < m_valuesCount; index ++ )
+    // 2 specialized loops for speed optimization in non-unit case
+    if(isType(TYPE_UNIT))                                   // unit (creature/player) case
     {
-        if( updateMask->GetBit( index ) )
+        for( uint16 index = 0; index < m_valuesCount; index ++ )
         {
-            // Some values at server stored in float format but must be sended to client in uint32 format
-            if( isType(TYPE_UNIT) && (
-                index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
-                index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
-                index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES + 6 )
-                || isType(TYPE_PLAYER) &&
-                index >= PLAYER_FIELD_POSSTAT0 && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6 )
+            if( updateMask->GetBit( index ) )
             {
-                // convert from float to uint32 and send
-                *data << uint32(m_floatValues[ index ]);
+                // Some values at server stored in float format but must be sended to client in uint32 format
+                if( // unit fields
+                    index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
+                    index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
+                    index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES + 6 ||
+                    //player fields (2 comparison preferred instead redundant isType(TYPE_PLAYER) check
+                    index >= PLAYER_FIELD_POSSTAT0     && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6 )
+                {
+                    // convert from float to uint32 and send
+                    *data << uint32(m_floatValues[ index ]);
+                }
+                else
+                {
+                    // send in current format (float as float, uint32 as uint32)
+                    *data << m_uint32Values[ index ];
+                }
             }
-            else
+        }
+    }
+    else                                                    // other objects case (no special index checks)
+    {
+        for( uint16 index = 0; index < m_valuesCount; index ++ )
+        {
+            if( updateMask->GetBit( index ) )
             {
                 // send in current format (float as float, uint32 as uint32)
                 *data << m_uint32Values[ index ];
@@ -367,6 +382,7 @@ bool Object::LoadValues(const char* data)
     {
         m_uint32Values[index] = atol((*iter).c_str());
     }
+
     return true;
 }
 
