@@ -77,7 +77,13 @@ class MANGOS_DLL_SPEC Object
         virtual void Update ( float time ) { }
 
         const bool& IsInWorld() const { return m_inWorld; }
-        virtual void AddToWorld() { m_inWorld = true; }
+        virtual void AddToWorld()
+        {
+            m_inWorld = true;
+            
+            // synchronize values mirror with values array (changes will send in updatecreate opcode any way
+            ClearUpdateMask();
+        }
         virtual void RemoveFromWorld() { m_inWorld = false; }
 
         const uint64& GetGUID() const { return GetUInt64Value(0); }
