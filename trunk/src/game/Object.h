@@ -79,6 +79,9 @@ class MANGOS_DLL_SPEC Object
         const bool& IsInWorld() const { return m_inWorld; }
         virtual void AddToWorld()
         {
+            if(m_inWorld)
+                return;
+
             m_inWorld = true;
             
             // synchronize values mirror with values array (changes will send in updatecreate opcode any way
