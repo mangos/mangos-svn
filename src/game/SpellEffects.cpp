@@ -1803,6 +1803,12 @@ void Spell::EffectHealMaxHealth(uint32 i)
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         SendHealSpellOnPlayer((Player*)unitTarget, m_spellInfo->Id, heal);
+    
+    if(m_spellInfo->Category == 56 && m_spellInfo->SpellVisual == 132)
+    {
+        int32 mana = m_caster->GetPower(POWER_MANA);
+        m_caster->ModifyPower(POWER_MANA, -mana);
+    }
 }
 
 void Spell::EffectInterruptCast(uint32 i)
