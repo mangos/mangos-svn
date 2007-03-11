@@ -1592,7 +1592,107 @@ void ObjectMgr::LoadSpellLearnSkills()
     }
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %u spell learn skills ( + found in DBC %u ", count, dbc_count );
+    sLog.outString( ">> Loaded %u spell learn skills + found in DBC %u", count, dbc_count );
+}
+
+void ObjectMgr::LoadSpellLearnSpells()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `SpellID`,`IfNoSpell` FROM `spell_learn_spell`");
+    if(!result)
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded 0 spell learn spells" );
+        sLog.outErrorDb("`spell_learn_spell` table is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    barGoLink bar( result->GetRowCount() );
+    do
+    {
+        bar.step();
+        Field *fields = result->Fetch();
+
+        uint32 spell_id    = fields[0].GetUInt32();
+
+        SpellLearnSpellNode node;
+        node.spell      = fields[1].GetUInt32();
+        node.ifNoSpell  = fields[2].GetUInt32();
+        node.autoLearned= false;
+
+        if(!sSpellStore.LookupEntry(spell_id))
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_learn_spell` not exist",spell_id);
+            continue;
+        }
+
+        if(!sSpellStore.LookupEntry(node.spell))
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_learn_spell` not exist",node.spell);
+            continue;
+        }
+
+        if(node.ifNoSpell && !sSpellStore.LookupEntry(node.ifNoSpell))
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_learn_spell` not exist",node.ifNoSpell);
+            continue;
+        }
+
+        SpellLearnSpells.insert(SpellLearnSpellMap::value_type(spell_id,node));
+
+        ++count;
+    } while( result->NextRow() );
+
+    delete result;
+
+    // search auto-learned spells and add its to map also for use in unlearn spells/talents
+    uint32 dbc_count = 0;
+    for(uint32 spell = 0; spell < sSpellStore.nCount; ++spell)
+    {
+        SpellEntry const* entry = sSpellStore.LookupEntry(spell);
+
+        if(!entry) 
+            continue;
+
+        for(int i = 0; i < 3; ++i)
+        {
+            if(entry->Effect[i]==SPELL_EFFECT_LEARN_SPELL)
+            {
+                SpellLearnSpellNode dbc_node;
+                dbc_node.spell       = entry->EffectTriggerSpell[i];
+                dbc_node.ifNoSpell   = 0;
+                dbc_node.autoLearned = true;
+
+                SpellLearnSpellMap::const_iterator db_node_begin = GetBeginSpellLearnSpell(spell);
+                SpellLearnSpellMap::const_iterator db_node_end   = GetEndSpellLearnSpell(spell);
+
+                bool found = false;
+                for(SpellLearnSpellMap::const_iterator itr = db_node_begin; itr != db_node_end; ++itr)
+                {
+                    if(itr->second.spell == dbc_node.spell)
+                    {
+                        sLog.outErrorDb("Spell %u auto-learn spell %u in spell.dbc and record in `spell_learn_spell` redundant, fix DB.",
+                            spell,dbc_node.spell);
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if(!found)                                   // add new spell-spell pair if not found
+                {
+                    SpellLearnSpells.insert(SpellLearnSpellMap::value_type(spell,dbc_node));
+                    ++dbc_count;
+                }
+            }
+        }
+    }
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u spell learn spells + found in DBC %u", count, dbc_count );
 }
 
 void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)

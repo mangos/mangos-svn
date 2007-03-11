@@ -236,6 +236,7 @@ class ObjectMgr
         void LoadQuests();
         void LoadSpellChains();
         void LoadSpellLearnSkills();
+        void LoadSpellLearnSpells();
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();
         void LoadSpellProcEvents();
@@ -337,6 +338,25 @@ class ObjectMgr
                 return &itr->second;
             else
                 return NULL;
+        }
+
+        struct SpellLearnSpellNode
+        {
+            uint32 spell;
+            uint32 ifNoSpell;
+            uint32 autoLearned;
+        };
+
+        typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;
+        SpellLearnSpellMap SpellLearnSpells;
+
+        SpellLearnSpellMap::const_iterator GetBeginSpellLearnSpell(uint32 spell_id)
+        {
+            return SpellLearnSpells.lower_bound(spell_id);
+        }
+        SpellLearnSpellMap::const_iterator GetEndSpellLearnSpell(uint32 spell_id)
+        {
+            return SpellLearnSpells.upper_bound(spell_id);
         }
     protected:
         uint32 m_auctionid;

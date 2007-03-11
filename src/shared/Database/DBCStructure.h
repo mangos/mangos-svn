@@ -389,6 +389,7 @@ struct WorldSafeLocsEntry
 #endif
 
 // Structures not used for casting to loaded DBC data and not requred then packing
+typedef std::set<uint32> TalentSpellSet;
 
 struct TaxiPathBySourceAndDestination
 {

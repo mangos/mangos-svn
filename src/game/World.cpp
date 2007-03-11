@@ -355,6 +355,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Spell Learn Skills..." );
     objmgr.LoadSpellLearnSkills();                          // must be after LoadSpellChains
 
+    sLog.outString( "Loading Spell Learn Spells..." );
+    objmgr.LoadSpellLearnSpells();
+
     sLog.outString( "Loading Spell Proc Event conditions..." );
     objmgr.LoadSpellProcEvents();
 

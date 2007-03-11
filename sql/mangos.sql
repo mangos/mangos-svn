@@ -2387,6 +2387,29 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `spell_learn_skill` ENABLE KEYS */;
 
 --
+-- Table structure for table `spell_learn_spell`
+--
+
+DROP TABLE IF EXISTS `spell_learn_spell`;
+CREATE TABLE `spell_learn_spell` (
+  `entry` smallint(6) unsigned NOT NULL default '0',
+  `SpellID` smallint(6) unsigned NOT NULL default '0',
+  `IfNoSpell` smallint(6) unsigned NOT NULL default '0',
+  PRIMARY KEY (`entry`,`SpellID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
+
+--
+-- Dumping data for table `spell_learn_spell`
+--
+
+/*!40000 ALTER TABLE `spell_learn_spell` DISABLE KEYS */;
+LOCK TABLES `spell_learn_spell` WRITE;
+INSERT INTO `spell_learn_spell` VALUES 
+(4036,3918,0),(4036,3919,0),(4036,3920,0),(3908,2387,0),(3908,2963,0),(7411,7418,0),(7411,7421,0),(7411,13262,0),(2259,2329,0),(2259,7183,0),(2259,2330,0),(2018,2663,0),(2018,12260,0),(2018,2660,0),(2018,3115,0),(2108,2152,0),(2108,9058,0),(2108,9059,0),(2108,2149,0),(2108,7126,0),(2108,2881,0),(2550,818,0),(2550,2540,0),(2550,2538,0),(2550,8604,0),(3273,3275,0),(7620,7738,0),(2575,2580,0),(2575,2656,0),(2575,2657,0),(2366,2383,0),(264,2480,75),(266,7918,75),(5011,7919,75),(2567,2764,0),(2842,8681,0);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `spell_learn_spell` ENABLE KEYS */;
+
+--
 -- Table structure for table `spell_proc_event`
 --
 
