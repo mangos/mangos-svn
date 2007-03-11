@@ -66,6 +66,7 @@ DBCStorage <SpellRadiusEntry> sSpellRadiusStore(SpellRadiusfmt);
 DBCStorage <SpellRangeEntry> sSpellRangeStore(SpellRangefmt);
 DBCStorage <StableSlotPricesEntry> sStableSlotPricesStore(StableSlotPricesfmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
+TalentSpellSet sTalentSpellSet;
 DBCStorage <TalentTabEntry> sTalentTabStore(TalentTabEntryfmt);
 DBCStorage <TaxiNodesEntry> sTaxiNodesStore(TaxiNodesEntryfmt);
 TaxiMask sTaxiNodesMask;
@@ -193,6 +194,17 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sSpellRangeStore,          dataPath+"dbc/SpellRange.dbc");
     LoadDBC(bar,bad_dbc_files,sStableSlotPricesStore,    dataPath+"dbc/StableSlotPrices.dbc");
     LoadDBC(bar,bad_dbc_files,sTalentStore,              dataPath+"dbc/Talent.dbc");
+    
+    // create telent spells set
+    for (int i = 0; i < sTalentStore.GetNumRows(); ++i)
+    {
+        TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
+        if (!talentInfo) continue;
+        for (int j = 0; j < 5; j++)
+            if(talentInfo->RankID[j])
+                sTalentSpellSet.insert(talentInfo->RankID[j]);
+    }
+
     LoadDBC(bar,bad_dbc_files,sTalentTabStore,           dataPath+"dbc/TalentTab.dbc");
     LoadDBC(bar,bad_dbc_files,sTaxiNodesStore,           dataPath+"dbc/TaxiNodes.dbc");
 
@@ -333,7 +345,14 @@ bool IsPassiveSpell(uint32 spellId)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
         return false;
-    return ((spellInfo->Attributes & (1<<6)) != 0);
+    if((spellInfo->Attributes & (1<<6)) != 0)
+        return true;
+    return IsTalentSpell(spellId);
+}
+
+bool IsTalentSpell(uint32 spellId)
+{
+    return sTalentSpellSet.count(spellId)!=0;
 }
 
 bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2)

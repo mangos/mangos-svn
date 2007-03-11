@@ -3087,9 +3087,9 @@ bool ChatHandler::HandleResetCommand (const char * args)
     if (argstr == "spells")
     {
         PlayerSpellMap& pSpells = player->GetSpellMap();
-        for (PlayerSpellMap::iterator itr = pSpells.begin(); itr != pSpells.end();)
+        while(!pSpells.empty())
         {
-            itr = player->removeSpell(itr);
+            player->removeSpell(pSpells.begin()->first);
         }
 
         PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(),player->getClass());

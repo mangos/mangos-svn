@@ -2096,6 +2096,16 @@ void Player::learnSpell(uint16 spell_id)
     WorldPacket data(SMSG_LEARNED_SPELL, 4);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
+
+    // learn dependent spells
+    ObjectMgr::SpellLearnSpellMap::const_iterator spell_begin = objmgr.GetBeginSpellLearnSpell(spell_id);
+    ObjectMgr::SpellLearnSpellMap::const_iterator spell_end   = objmgr.GetEndSpellLearnSpell(spell_id);
+
+    for(ObjectMgr::SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
+    {
+        if(!itr->second.autoLearned && (!itr->second.ifNoSpell || !HasSpell(itr->second.ifNoSpell)))
+            learnSpell(itr->second.spell);
+    }
 }
 
 void Player::removeSpell(uint16 spell_id)
@@ -2104,18 +2114,8 @@ void Player::removeSpell(uint16 spell_id)
     if (itr == m_spells.end())
         return;
 
-    removeSpell(itr);
-}
-
-PlayerSpellMap::iterator Player::removeSpell(PlayerSpellMap::iterator itr)
-{
-    PlayerSpellMap::iterator next = itr;
-    ++next;
-
     if(itr->second->state == PLAYERSPELL_REMOVED)
-        return next;
-
-    uint32 spell_id = itr->first;
+        return;
 
     // removing
     WorldPacket data(SMSG_REMOVED_SPELL, 4);
@@ -2170,7 +2170,13 @@ PlayerSpellMap::iterator Player::removeSpell(PlayerSpellMap::iterator itr)
         }       
 
     }
-    return next;
+
+    // remove dependent spells
+    ObjectMgr::SpellLearnSpellMap::const_iterator spell_begin = objmgr.GetBeginSpellLearnSpell(spell_id);
+    ObjectMgr::SpellLearnSpellMap::const_iterator spell_end   = objmgr.GetEndSpellLearnSpell(spell_id);
+
+    for(ObjectMgr::SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
+        removeSpell(itr->second.spell);
 }
 
 void Player::RemoveAllSpellCooldown()
@@ -2404,7 +2410,8 @@ bool Player::resetTalents(bool no_cost)
                 if (itrFirstId == talentInfo->RankID[j])
                 {
                     RemoveAurasDueToSpell(itr->first);
-                    itr = removeSpell(itr);
+                    removeSpell(itr->first);
+                    itr = GetSpellMap().begin();
                     continue;
                 }
                 else

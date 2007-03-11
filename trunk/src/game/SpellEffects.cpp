@@ -1092,14 +1092,8 @@ void Spell::EffectLearnSpell(uint32 i)
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            Creature *pet = m_caster->GetPet();
-
-            if( !pet || !pet->isPet() || pet!=unitTarget || !pet->isAlive() )
-                return;
-
             EffectLearnPetSpell(i);
-        }
+
         return;
     }
 
@@ -1110,114 +1104,7 @@ void Spell::EffectLearnSpell(uint32 i)
     //data << spellToLearn;
     //player->GetSession()->SendPacket(&data);
     player->learnSpell((uint16)spellToLearn);
-    //some addspell isn't needed if you have a good DB,FISHING && MINING && HERBALISM have to be needed.
-    switch(spellToLearn)
-    {
-        case 4036:                                          //SKILL_ENGINERING
-        {
-            player->learnSpell(3918);
-            player->learnSpell(3919);
-            player->learnSpell(3920);
-            break;
-        }
-        case 3908:                                          //SKILL_TAILORING
-        {
-            player->learnSpell(2387);
-            player->learnSpell(2963);
-            break;
-        }
-        case 7411:                                          //SKILL_ENCHANTING
-        {
-            player->learnSpell(7418);
-            player->learnSpell(7421);
-            player->learnSpell(13262);
-            break;
-        }
-        case 2259:                                          //SKILL_ALCHEMY
-        {
-            player->learnSpell(2329);
-            player->learnSpell(7183);
-            player->learnSpell(2330);
-            break;
-        }
-        case 2018:                                          //SKILL_BLACKSMITHING
-        {
-            player->learnSpell(2663);
-            player->learnSpell(12260);
-            player->learnSpell(2660);
-            player->learnSpell(3115);
-            break;
-        }
-        case 2108:                                          //SKILL_LEATHERWORKING
-        {
-            player->learnSpell(2152);
-            player->learnSpell(9058);
-            player->learnSpell(9059);
-            player->learnSpell(2149);
-            player->learnSpell(7126);
-            player->learnSpell(2881);
-            break;
-        }
-        case 2550:                                          //SKILL_COOKING
-        {
-            player->learnSpell(818);
-            player->learnSpell(2540);
-            player->learnSpell(2538);
-            player->learnSpell(8604);
-            break;
-        }
-        case 3273:                                          //SKILL_FIRST_AID
-        {
-            player->learnSpell(3275);
-            break;
-        }
-        case 7620:                                          //SKILL_FISHING
-        {
-            player->learnSpell(7738);
-            break;
-        }
-        case 2575:                                          //SKILL_MINING
-        {
-            player->learnSpell(2580);
-            player->learnSpell(2656);
-            player->learnSpell(2657);
-            break;
-        }
-        case 2366:                                          //SKILL_HERBALISM
-        {
-            player->learnSpell(2383);
-            break;
-        }
-        case 264:                                           //SKILL_BOWS
-        {
-            if(!player->HasSpell(75))
-                player->learnSpell(2480);
-            break;
-        }
-        case 266:                                           //SKILL_GUNS
-        {
-            if(!player->HasSpell(75))
-                player->learnSpell(7918);
-            break;
-        }
-        case 5011:                                          //SKILL_CROSSBOWS
-        {
-            if(!player->HasSpell(75))
-                player->learnSpell(7919);
-            break;
-        }
-        case 2567:                                          //SKILL_THROWN
-        {
-            player->learnSpell(2764);
-            break;
-        }
-        case 2842:                                          //SKILL_POISONS
-        {
-            player->learnSpell(8681);
-            break;
-        }
-        default:break;
-    }
+
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
 }
 
