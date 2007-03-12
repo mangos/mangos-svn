@@ -580,6 +580,34 @@ bool Group::IsMember(uint64 guid)
     }
 }
 
+Player* Group::GetMemberForXPAtKill(uint8 id, Unit const* victim)
+{
+    Player* member = objmgr.GetPlayer(GetMemberGUID(id));
+    if(!member || !member->isAlive())
+        return NULL;
+    if(victim->GetDistanceSq(member) > sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+        return NULL;
+    if(uint32(abs((int)member->getLevel() - (int)victim->getLevel())) > sWorld.getConfig(CONFIG_GROUP_XP_LEVELDIFF))
+        return NULL;
+
+    return member;
+}
+
+
+uint32 Group::GetMemberCountForXPAtKill(Unit const* victim)
+{
+    uint32 count = 0;
+    for (uint32 i = 0; i < GetMembersCount(); i++)
+    {
+        Player* member = GetMemberForXPAtKill(i,victim);
+
+        if(member)
+            ++count;
+    }
+    return count;
+}
+
+
 void Group::SendInit(WorldSession *session)
 {
     if(!session)

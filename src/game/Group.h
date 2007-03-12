@@ -119,6 +119,8 @@ class MANGOS_DLL_SPEC Group
         }
 
         uint32 GetMembersCount() const { return m_members.size(); }
+        uint32 GetMemberCountForXPAtKill(Unit const* victim);
+        Player* GetMemberForXPAtKill(uint8 id, Unit const* victim);
         uint64 GetMemberGUID(uint8 id) { if(id>=m_members.size()) return 0; else return m_members[id].guid; }
         uint8  GetMemberGroup(uint64 guid)
         {
