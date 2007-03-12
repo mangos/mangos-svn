@@ -435,22 +435,23 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 if(pGroup)
                 {
                     DEBUG_LOG("Kill Enemy In Group");
-                    xp /= pGroup->GetMembersCount();
-                    for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
+                    uint32 count = pGroup->GetMemberCountForXPAtKill(pVictim);
+                    if(count)
                     {
-                        Player *pGroupGuy = objmgr.GetPlayer(pGroup->GetMemberGUID(i));
-                        if(!pGroupGuy)
-                            continue;
-                        if(pVictim->GetDistanceSq(pGroupGuy) > sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
-                            continue;
-                        if(uint32(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel())) > sWorld.getConfig(CONFIG_GROUP_XP_LEVELDIFF))
-                            continue;
-                        pGroupGuy->GiveXP(xp, pVictim);
-                        if(Pet* pet = player->GetPet())
+                        xp /= count;
+                        for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
                         {
-                            pet->GivePetXP(xp/2);
+                            Player *pGroupGuy = pGroup->GetMemberForXPAtKill(i,pVictim);
+                            if(!pGroupGuy)
+                                continue;
+
+                            pGroupGuy->GiveXP(xp, pVictim);
+                            if(Pet* pet = player->GetPet())
+                            {
+                                pet->GivePetXP(xp/2);
+                            }
+                            pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
                         }
-                        pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
                     }
                 }
                 else
