@@ -2056,7 +2056,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     newspell->slotId = tmpslot;
     m_spells[spell_id] = newspell;
 
-    if (IsPassiveSpell(spell_id))
+    if (IsPassiveSpell(spell_id) || IsTalentSpell(spell_id) && objmgr.IsSpellLearnSpell(spell_id))
     {
         // if spell doesn't require a stance or the player is in the required stance
         if ((!spellInfo->Stances && spell_id != 5419) || (spellInfo->Stances & (1<<(m_form-1)) || (spell_id == 5419 && m_form == FORM_TRAVEL)))
@@ -2084,6 +2084,16 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
         SetSkill(spellLearnSkill->skill,skill_value,skill_max_value);
     }
 
+    // learn dependent spells
+    ObjectMgr::SpellLearnSpellMap::const_iterator spell_begin = objmgr.GetBeginSpellLearnSpell(spell_id);
+    ObjectMgr::SpellLearnSpellMap::const_iterator spell_end   = objmgr.GetEndSpellLearnSpell(spell_id);
+
+    for(ObjectMgr::SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
+    {
+        if(!itr->second.autoLearned && (!itr->second.ifNoSpell || !HasSpell(itr->second.ifNoSpell)))
+            learnSpell(itr->second.spell);
+    }
+
     return true;
 }
 
@@ -2096,16 +2106,6 @@ void Player::learnSpell(uint16 spell_id)
     WorldPacket data(SMSG_LEARNED_SPELL, 4);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
-
-    // learn dependent spells
-    ObjectMgr::SpellLearnSpellMap::const_iterator spell_begin = objmgr.GetBeginSpellLearnSpell(spell_id);
-    ObjectMgr::SpellLearnSpellMap::const_iterator spell_end   = objmgr.GetEndSpellLearnSpell(spell_id);
-
-    for(ObjectMgr::SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
-    {
-        if(!itr->second.autoLearned && (!itr->second.ifNoSpell || !HasSpell(itr->second.ifNoSpell)))
-            learnSpell(itr->second.spell);
-    }
 }
 
 void Player::removeSpell(uint16 spell_id)

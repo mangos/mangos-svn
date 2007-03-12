@@ -350,6 +350,10 @@ class ObjectMgr
         typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;
         SpellLearnSpellMap SpellLearnSpells;
 
+        bool IsSpellLearnSpell(uint32 spell_id)
+        {
+            return SpellLearnSpells.count(spell_id)!=0;
+        }
         SpellLearnSpellMap::const_iterator GetBeginSpellLearnSpell(uint32 spell_id)
         {
             return SpellLearnSpells.lower_bound(spell_id);
