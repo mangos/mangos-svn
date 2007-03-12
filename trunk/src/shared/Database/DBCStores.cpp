@@ -345,9 +345,7 @@ bool IsPassiveSpell(uint32 spellId)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
         return false;
-    if((spellInfo->Attributes & (1<<6)) != 0)
-        return true;
-    return IsTalentSpell(spellId);
+    return (spellInfo->Attributes & (1<<6)) != 0;
 }
 
 bool IsTalentSpell(uint32 spellId)
