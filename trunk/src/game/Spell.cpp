@@ -766,14 +766,17 @@ void Spell::cast(bool skipCheck)
     }
 
     // remove spell from another target if need
-    Unit::AuraList& scAuras = m_caster->GetSingleCastAuras();
-    for(Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
+    // hunter's mark
+    if(m_spellInfo->SpellVisual == 3239)
     {
-        // hunter's mark
-        if((*itr)->GetSpellProto()->SpellVisual == 3239)
+        Unit::AuraList& scAuras = m_caster->GetSingleCastAuras();
+        for(Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
         {
-            (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
-            break;
+            if((*itr)->GetSpellProto()->SpellVisual == 3239)
+            {
+                (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
+                break;
+            }
         }
     }
 
