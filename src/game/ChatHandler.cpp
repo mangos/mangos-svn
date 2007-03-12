@@ -349,11 +349,21 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         uint32 emote_anim = em->textid;
 
         WorldPacket data;
-        data.Initialize(SMSG_EMOTE, 12);
-        data << (uint32)emote_anim;
-        data << GetPlayer()->GetGUID();
-        WPAssert(data.size() == 12);
-        GetPlayer()->SendMessageToSet( &data, true );
+
+        switch(emote_anim)
+        {
+            case EMOTE_STATE_SLEEP:
+            case EMOTE_STATE_SIT:
+            case EMOTE_STATE_KNEEL:
+                break;
+            default:
+                data.Initialize(SMSG_EMOTE, 12);
+                data << (uint32)emote_anim;
+                data << GetPlayer()->GetGUID();
+                WPAssert(data.size() == 12);
+                GetPlayer()->SendMessageToSet( &data, true );
+                break;
+        }
 
         data.Initialize(SMSG_TEXT_EMOTE, (20+namlen));
         data << GetPlayer()->GetGUID();
