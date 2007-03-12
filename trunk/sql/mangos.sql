@@ -2032,31 +2032,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `playercreateinfo_item` ENABLE KEYS */;
 
 --
--- Table structure for table `playercreateinfo_reputation`
---
-
-DROP TABLE IF EXISTS `playercreateinfo_reputation`;
-CREATE TABLE `playercreateinfo_reputation` (
-  `race` tinyint(3) unsigned NOT NULL default '0',
-  `class` tinyint(3) unsigned NOT NULL default '0',
-  `slot` smallint(2) unsigned NOT NULL default '0',
-  `faction` smallint(6) unsigned NOT NULL default '0',
-  `reputation` smallint(3) unsigned NOT NULL default '0',
-  KEY `playercreateinfo_race_class_index` (`race`,`class`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `playercreateinfo_reputation`
---
-
-
-/*!40000 ALTER TABLE `playercreateinfo_reputation` DISABLE KEYS */;
-LOCK TABLES `playercreateinfo_reputation` WRITE;
-INSERT INTO `playercreateinfo_reputation` VALUES (1,1,0,0,0),(1,2,0,0,0),(1,4,0,0,0),(1,5,0,0,0),(1,8,0,0,0),(1,9,0,0,0),(2,1,0,0,0),(2,3,0,0,0),(2,4,0,0,0),(2,7,0,0,0),(3,4,0,0,0),(2,9,0,0,0),(3,1,0,0,0),(3,5,0,0,0),(4,1,0,0,0),(4,3,0,0,0),(4,4,0,0,0),(4,5,0,0,0),(4,11,0,0,0),(5,1,0,0,0),(5,4,0,0,0),(5,5,0,0,0),(5,8,0,0,0),(5,9,0,0,0),(6,1,0,0,0),(6,3,0,0,0),(6,7,0,0,0),(6,11,0,0,0),(7,1,0,0,0),(7,4,0,0,0),(7,9,0,0,0),(8,1,0,0,0),(8,3,0,0,0),(8,4,0,0,0),(8,5,0,0,0),(8,7,0,0,0),(8,8,0,0,0);
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `playercreateinfo_reputation` ENABLE KEYS */;
-
---
 -- Table structure for table `playercreateinfo_skill`
 --
 
