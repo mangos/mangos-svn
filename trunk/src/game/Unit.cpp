@@ -1598,17 +1598,21 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         uint16  slot;
         switch (attType)
         {
-            case BASE_ATTACK: slot = EQUIPMENT_SLOT_MAINHAND; break;
-            case OFF_ATTACK: slot = EQUIPMENT_SLOT_OFFHAND; break;
-            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED; break;
+            case BASE_ATTACK:   slot = EQUIPMENT_SLOT_MAINHAND; break;
+            case OFF_ATTACK:    slot = EQUIPMENT_SLOT_OFFHAND;  break;
+            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED;   break;
+            default:
+                return 0;
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
+        if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() || 
+            item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
             return 0;
 
         // in range
-        uint32  skill = item && !item->IsBroken() ? item->GetSkill() : SKILL_UNARMED;
+        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon() 
+            ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetSkillValue (skill);
     }
     else
@@ -1622,17 +1626,21 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
         uint16  slot;
         switch (attType)
         {
-            case BASE_ATTACK: slot = EQUIPMENT_SLOT_MAINHAND; break;
-            case OFF_ATTACK: slot = EQUIPMENT_SLOT_OFFHAND; break;
-            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED; break;
+            case BASE_ATTACK:   slot = EQUIPMENT_SLOT_MAINHAND; break;
+            case OFF_ATTACK:    slot = EQUIPMENT_SLOT_OFFHAND;  break;
+            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED;   break;
+            default:
+                return 0;
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(attType != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
+        if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() || 
+            item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
             return 0;
 
         // in range
-        uint32  skill = item && !item->IsBroken() ? item->GetSkill() : SKILL_UNARMED;
+        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon() 
+            ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetPureSkillValue (skill);
     }
     else
@@ -3664,7 +3672,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
 
     //put m_AuraModifiers here
 
-    AdvertisedBenefit += float(m_AuraModifiers[SPELL_AURA_MOD_HEALING]);
+    AdvertisedBenefit += m_AuraModifiers[SPELL_AURA_MOD_HEALING];
     
     
     // TODO - fix PenaltyFactor and complete the formula from the wiki
@@ -3674,7 +3682,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
         LvlPenalty = (20.0f - (float)(spellProto->spellLevel)) * 3.75f;//3.75%
     float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * (100.0f - LvlPenalty) / 100.0f;
 
-    // use float as more appropriate for negative values and precent applying
+    // use float as more appropriate for negative values and percent applying
     float heal = healamount + ActualBenefit;
 
     // TODO: check for ALL/SPELLS type
