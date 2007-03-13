@@ -56,6 +56,7 @@ void Totem::Update( uint32 time )
 void Totem::Summon()
 {
     sLog.outDebug("AddObject at Totem.cpp line 49");
+    AddToWorld();
     MapManager::Instance().GetMap(GetMapId())->Add((Creature*)this);
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);

@@ -97,6 +97,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     if(cinfo->type == CREATURE_TYPE_CRITTER)
     {
         AIM_Initialize();
+        AddToWorld();
         MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
         return true;
     }

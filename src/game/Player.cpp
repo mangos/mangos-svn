@@ -2097,15 +2097,16 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     return true;
 }
 
-void Player::learnSpell(uint16 spell_id)
+bool Player::learnSpell(uint16 spell_id)
 {
     // prevent duplicated entires in spell book
     if (!addSpell(spell_id,1))
-        return;
+        return false;
 
     WorldPacket data(SMSG_LEARNED_SPELL, 4);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
+    return true;
 }
 
 void Player::removeSpell(uint16 spell_id)
@@ -2816,6 +2817,7 @@ void Player::BuildPlayerRepop()
         corpse = CreateCorpse();
 
     // now show corpse for all
+    AddToWorld();
     MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
 
     // convert player body to ghost

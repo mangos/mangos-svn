@@ -154,16 +154,17 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         }
 
         chr->SetRecallPosition(chr->GetMapId(),chr->GetPositionX(),chr->GetPositionY(),chr->GetPositionZ(),chr->GetOrientation());
-        chr->TeleportTo(m_session->GetPlayer()->GetMapId(),
-            m_session->GetPlayer()->GetPositionX(),
-            m_session->GetPlayer()->GetPositionY(),
-            m_session->GetPlayer()->GetPositionZ(),
-            chr->GetOrientation());
+
+        // before GM
+        float x,y,z;
+        m_session->GetPlayer()->GetClosePoint(NULL,x,y,z,chr->GetObjectSize());
+        chr->TeleportTo(m_session->GetPlayer()->GetMapId(),x,y,z,chr->GetOrientation());
     }
     else if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
     {
         PSendSysMessage(LANG_SUMMONING, name.c_str()," (offline)");
 
+        // in point where GM stay
         Player::SavePositionInDB(m_session->GetPlayer()->GetMapId(),
             m_session->GetPlayer()->GetPositionX(),
             m_session->GetPlayer()->GetPositionY(),
@@ -208,7 +209,12 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         }
 
         _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
-        _player->TeleportTo(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),_player->GetOrientation());
+
+        // to point to see at target with same orientation
+        float x,y,z;
+        chr->GetContactPoint(m_session->GetPlayer(),x,y,z);
+
+        _player->TeleportTo(chr->GetMapId(), x, y, z,_player->GetAngle( chr ));
         return true;
     }
 
@@ -216,6 +222,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     {
         PSendSysMessage(LANG_APPEARING_AT, name.c_str());
 
+        // to point where player stay (if loaded)
         float x,y,z,o;
         uint32 map;
         if(Player::LoadPositionFromDB(map,x,y,z,o,guid))

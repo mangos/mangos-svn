@@ -206,7 +206,7 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         else if(i_owner && ((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
         {
-            if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW) && i_pet.IsWithinDistInMap(i_owner,PET_FOLLOW_START_DIST))
+            if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
             {
                 i_pet.addUnitState(UNIT_STAT_FOLLOW);
                 i_pet->Clear();

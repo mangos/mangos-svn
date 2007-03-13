@@ -71,7 +71,6 @@ enum PetDietMask
 
 #define PET_FOLLOW_DIST  1
 #define PET_FOLLOW_ANGLE (M_PI/2)
-#define PET_FOLLOW_START_DIST  (PET_FOLLOW_DIST*2)
 
 class Pet : public Creature
 {

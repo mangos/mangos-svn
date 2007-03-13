@@ -683,31 +683,25 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     return (( angle >= lborder ) && ( angle <= rborder ));
 }
 
-void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, float &z ) const
+void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance ) const
 {
+    // angle to face `obj` to `this`
     float angle = GetAngle( obj );
-    x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + OBJECT_CONTACT_DISTANCE) * cos(angle);
-    y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + OBJECT_CONTACT_DISTANCE) * sin(angle);
+    x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + distance ) * cos(angle);
+    y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + distance ) * sin(angle);
+
+    // FIXME: must be real z coordinate at ground in point (x,y) when it will correctly can calculated
     z = GetPositionZ();
 }
 
-void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, float &z ) const
+void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, float &z, float distance, float angle ) const
 {
-    if( victim )
-        GetClosePoint( victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ(), x, y, z);
-    else
-        GetClosePoint( 0, 0, 0, x, y, z);
-}
+    angle += victim ? GetAngle( victim ) : GetOrientation();
 
-void WorldObject::GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const
-{
-    float angle;
-    if( ox == 0 && oy == 0 )
-        angle = GetOrientation();
-    else
-        angle = GetAngle( ox, oy );
-    x = GetPositionX() + GetObjectSize() * cos(angle);
-    y = GetPositionY() + GetObjectSize() * sin(angle);
+    x = GetPositionX() + (GetObjectSize() + distance) * cos(angle);
+    y = GetPositionY() + (GetObjectSize() + distance) * sin(angle);
+
+    // FIXME: must be real z coordinate at ground in point (x,y) when it will correctly can calculated
     z = GetPositionZ();
 
 }
