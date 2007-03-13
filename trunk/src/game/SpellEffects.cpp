@@ -1038,10 +1038,12 @@ void Spell::EffectSummon(uint32 i)
     uint32 level = m_caster->getLevel();
     Pet* spawnCreature = new Pet(SUMMON_PET);
 
+    // before caster
+    float x,y,z;
+    m_caster->GetClosePoint(NULL,x,y,z);
+
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-        m_caster->GetMapId(),
-        m_caster->GetPositionX(),m_caster->GetPositionY(),
-        m_caster->GetPositionZ(),m_caster->GetOrientation(),
+        m_caster->GetMapId(),x,y,z,-m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i]))
     {
         sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
@@ -1280,10 +1282,12 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
 
     uint32 mapid = m_caster->GetMapId();
     float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
-    float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
-    float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
+
+    float fx,fy,fz;
+    m_caster->GetClosePoint(NULL,fx,fy,fz,unitTarget->GetObjectSize() + dis);
+
     // teleport a bit above terrainlevel to avoid falling below it
-    float fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
+    fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation(), false);
@@ -1831,9 +1835,12 @@ void Spell::EffectSummonObjectWild(uint32 i)
     if( !target )
         target = m_caster;
 
+    // before caster
+    float x,y,z;
+    m_caster->GetClosePoint(NULL,x,y,z);
+
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, target->GetMapId(),
-        target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(),
-        target->GetOrientation(), 0, 0, 0, 0, 0, 0))
+        x, y, z, target->GetOrientation(), 0, 0, 0, 0, 0, 0))
     {
         delete pGameObj;
         return;
@@ -2233,7 +2240,10 @@ void Spell::EffectSummonObject(uint32 i)
     float rot2 = sin(m_caster->GetOrientation()/2);
     float rot3 = cos(m_caster->GetOrientation()/2);
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 0))
+    float x,y,z;
+    m_caster->GetClosePoint(NULL,x,y,z);
+
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 0))
     {
         delete pGameObj;
         return;
@@ -2294,10 +2304,13 @@ void Spell::EffectMomentMove(uint32 i)
     {
         uint32 mapid = m_caster->GetMapId();
         float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
-        float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
-        float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
+
+        // before caster
+        float fx,fy,fz;
+        m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
+
         // teleport a bit above terrainlevel to avoid falling below it
-        float fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
+        fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
 
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation(), false);
@@ -2398,7 +2411,7 @@ void Spell::EffectCharge(uint32 i)
         return;
 
     float x, y, z;
-    unitTarget->GetClosePoint(m_caster, x, y, z);
+    unitTarget->GetContactPoint(m_caster, x, y, z);
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature *)unitTarget)->StopMoving();
 
@@ -2437,11 +2450,12 @@ void Spell::EffectSummonCritter(uint32 i)
     {
         Pet* critter = new Pet(MINI_PET);
 
+        // before caster
+        float x,y,z;
+        m_caster->GetClosePoint(NULL,x,y,z);
+
         if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-            m_caster->GetMapId(),
-            m_caster->GetPositionX(),m_caster->GetPositionY(),
-            m_caster->GetPositionZ(),m_caster->GetOrientation(),
-            m_spellInfo->EffectMiscValue[i]))
+            m_caster->GetMapId(),x,y,z,m_caster->GetOrientation(),m_spellInfo->EffectMiscValue[i]))
         {
             sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
             delete critter;
@@ -2524,17 +2538,14 @@ void Spell::EffectSummonDeadPet(uint32 i)
 
 void Spell::EffectTransmitted(uint32 i)
 {
-    float fx,fy;
 
     float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float diff = max_dis - min_dis + 1;
     float dis = (float)(rand()%(uint32)diff + (uint32)min_dis);
 
-    fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
-    fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
-
-    float fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetHeight(fx,fy);
+    float fx,fy,fz;
+    m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
 
     if(m_spellInfo->EffectMiscValue[i] == 35591)
     {
@@ -2549,7 +2560,6 @@ void Spell::EffectTransmitted(uint32 i)
 
         // replace by water level in this case
         fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetWaterLevel(fx,fy);
-
     }
 
     GameObject* pGameObj = new GameObject();

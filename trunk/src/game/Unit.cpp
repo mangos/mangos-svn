@@ -3373,6 +3373,10 @@ bool Unit::Attack(Unit *victim)
     if(GetTypeId()==TYPEID_PLAYER && IsMounted())
         return false;
 
+    // anyone don't must attack GM in GM-mode
+    if(victim->GetTypeId()==TYPEID_PLAYER && ((Player*)victim)->isGameMaster())
+        return false;
+
     if (m_attacking)
     {
         if (m_attacking == victim)

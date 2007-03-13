@@ -264,8 +264,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void GetPosition( float &x, float &y, float &z ) const
             { x = m_positionX; y = m_positionY; z = m_positionZ; }
         float GetOrientation( ) const { return m_orientation; }
-        void GetClosePoint( const WorldObject* victim, float &x, float &y, float &z ) const;
-        void GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const;
+        void GetClosePoint( const WorldObject* victim, float &x, float &y, float &z, float distance = 0, float angle = 0 ) const;
+        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance = OBJECT_CONTACT_DISTANCE) const;
         const float GetObjectSize() const
         {
             return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
@@ -288,7 +288,6 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         float GetAngle( const WorldObject* obj ) const;
         float GetAngle( const float x, const float y ) const;
         bool HasInArc( const float arcangle, const WorldObject* obj ) const;
-        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z ) const;
 
         virtual void SendMessageToSet(WorldPacket *data, bool self);
         void BuildHeartBeatMsg( WorldPacket *data ) const;

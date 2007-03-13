@@ -40,7 +40,7 @@ struct StackCleaner
 };
 
 void
-TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
+TargetedMovementGenerator::_setTargetLocation(Creature &owner)
 {
     if( !&i_target || !&owner )
         return;
@@ -48,14 +48,24 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
     if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) )
         return;
 
+    // prevent redundant micro-movement for pets, other followers.
+    if(i_offset && i_target.IsWithinDist(&owner,2*i_offset))
+        return;
+
     float x, y, z;
-    i_target.GetContactPoint( &owner, x, y, z );
-    float angle = i_target.GetOrientation() + i_angle;
-    x += i_offset * cos(angle);
-    y += i_offset * sin(angle);
+    if(!i_offset)
+    {
+        // to nearest contact position
+        i_target.GetContactPoint( &owner, x, y, z );
+    }
+    else
+    {
+        // to at i_offset distance from target and i_angle from target facing
+        i_target.GetClosePoint(NULL,x,y,z,owner.GetObjectSize() + i_offset,i_angle);
+    }
 
     Traveller<Creature> traveller(owner);
-    i_destinationHolder.SetDestination(traveller, x, y, z, offset);
+    i_destinationHolder.SetDestination(traveller, x, y, z);
     owner.addUnitState(UNIT_STAT_CHASE);
 }
 
@@ -65,7 +75,7 @@ TargetedMovementGenerator::Initialize(Creature &owner)
     if(!&owner)
         return;
     owner.setMoveRunFlag(true);
-    _setTargetLocation(owner, 0);
+    _setTargetLocation(owner);
 }
 
 void
@@ -94,7 +104,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     Traveller<Creature> traveller(owner);
 
     if( !i_destinationHolder.HasDestination() )
-        _setTargetLocation(owner, 0);
+        _setTargetLocation(owner);
     if( owner.IsStopped() && !i_destinationHolder.HasArrived() )
     {
         owner.addUnitState(UNIT_STAT_CHASE);
@@ -111,15 +121,25 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 
         // try to counter precision differences
         if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.1)
-            _setTargetLocation(owner, 0);
-        else if ( !owner.HasInArc( 0.1f, &i_target ) )
+            _setTargetLocation(owner);
+        // set facing if this is non angle-used target movement (not following)
+        else if ( !i_angle && !owner.HasInArc( 0.1f, &i_target ))
         {
             owner.SetInFront(&i_target);
             if( i_target.GetTypeId() == TYPEID_PLAYER )
                 owner.SendUpdateToPlayer( (Player*)&i_target );
         }
+
         if( !owner.IsStopped() && i_destinationHolder.HasArrived())
         {
+            if( i_angle )                                   // for followers set orientation only at stop
+            {
+                // +0.01 is hack to pressure server send update orientation field.
+                owner.SetOrientation(owner.GetOrientation()+0.01);
+                if( i_target.GetTypeId() == TYPEID_PLAYER )
+                    owner.SendUpdateToPlayer( (Player*)&i_target );
+            }
+
             owner.StopMoving();
             if(owner.canReachWithAttack(&i_target) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
                 owner.Attack(&i_target);

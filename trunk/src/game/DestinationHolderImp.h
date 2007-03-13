@@ -63,7 +63,7 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(float x1, float y1, float x2, flo
 
 template<typename TRAVELLER>
 uint32
-DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, float offset)
+DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z)
 {
     if (i_destSet && i_destX == dest_x && i_destY == dest_y && i_destZ == dest_z)
         return 0;

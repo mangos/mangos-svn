@@ -121,7 +121,9 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 
         if(!(GetPlayer( )->HasSpell(spellid)))
         {
-            GetPlayer( )->learnSpell(spellid);
+            if(!GetPlayer( )->learnSpell(spellid))
+                return;
+
             sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
 
             if(requested_rank > 0 )
