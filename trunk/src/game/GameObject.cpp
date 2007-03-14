@@ -217,6 +217,11 @@ void GameObject::Update(uint32 p_time)
 
             SendDestroyObject(GetGUID());
             m_respawnTime = time(NULL) + m_respawnDelayTime;
+
+            // if option not set then object will be ssaved at grif unload
+            if(sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
+                SaveRespawnTime();
+
             break;
     }
 

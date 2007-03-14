@@ -1268,6 +1268,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 ResurrectPlayer();
                 SetHealth( GetMaxHealth()/2 );
                 SpawnCorpseBones();
+                SaveToDB();
             }
         }
         SetDontMove(true);

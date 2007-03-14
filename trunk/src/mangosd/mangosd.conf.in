@@ -211,6 +211,11 @@ Rate.Rest.Offline.InWilderness = 1
 # Damage after fall rate. (1 - standard, 2 - double damage, 0.5 - half damage, etc)
 Rate.Damage.Fall = 1
 
+# Save respawn time for creatures at death, for gameobjects at use/open
+#          0 (save creature/gameobject respawn time at grid unload)
+# Default: 1 (save creature/gameobject respawn time without waiting grid unload)
+SaveRespawnTimeImmediately = 1
+
 # Skill chance values (0..100) 
 # default: 100-75-25-0
 SkillChance.Orange = 100
