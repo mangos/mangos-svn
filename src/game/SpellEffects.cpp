@@ -2571,7 +2571,8 @@ void Spell::EffectTransmitted(uint32 i)
     if(m_spellInfo->EffectMiscValue[i] == 35591)
     {
         Map* map = MapManager::Instance().GetMap(m_caster->GetMapId());
-        if ( !map->IsUnderWater(fx,fy,fz) )
+
+        if ( !map->IsInWater(fx,fy) )
         {
             SendCastResult(CAST_FAIL_CANT_BE_CAST_HERE);
             up_skillvalue = 4;
@@ -2580,7 +2581,7 @@ void Spell::EffectTransmitted(uint32 i)
         }
 
         // replace by water level in this case
-        fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetWaterLevel(fx,fy);
+        fz = map->GetWaterLevel(fx,fy);
     }
 
     GameObject* pGameObj = new GameObject();
