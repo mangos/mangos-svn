@@ -1474,7 +1474,17 @@ void Spell::EffectTameCreature(uint32 i)
         pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);
                                                             // this enables popup window (pet detals, abandon, rename)
-        pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,1);
+
+        uint32 new_id = 1;
+        QueryResult* result = sDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
+        if(result)
+        {
+            Field *fields = result->Fetch();
+            new_id = fields[0].GetUInt32()+1;
+            delete result;
+        }
+
+        pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,new_id);
                                                             // this enables pet detals window (Shift+P)
         pet->AIM_Initialize();
 
@@ -1535,14 +1545,14 @@ void Spell::EffectSummonPet(uint32 i)
 
     // petentry==0 for hunter "call pet" (current pet summoned if any)
     if(NewSummon->LoadPetFromDB(m_caster,petentry))
-    {
-        NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
         return;
-    }
 
     // not error in case fail hunter call pet
     if(!petentry)
+    {
+        delete NewSummon;
         return;
+    }
 
     CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(petentry);
 
@@ -1566,7 +1576,18 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-        NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER,1);  // this enables pet detals window (Shift+P)
+
+        uint32 new_id = 1;
+        QueryResult* result = sDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
+        if(result)
+        {
+            Field *fields = result->Fetch();
+            new_id = fields[0].GetUInt32()+1;
+            delete result;
+        }
+
+        NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER,new_id);
+                                                            // this enables pet detals window (Shift+P)
 
         // this enables popup window (pet dismiss, cancel), hunter pet additinal flags set later
         NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1);

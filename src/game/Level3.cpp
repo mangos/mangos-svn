@@ -1943,7 +1943,6 @@ bool ChatHandler::HandleObjectCommand(const char* args)
         delete pGameObj;
         return false;
     }
-    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     sLog.outDebug(LANG_ADD_OBJ_LV3);
 
     pGameObj->AddToWorld();

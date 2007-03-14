@@ -177,6 +177,7 @@ CREATE TABLE `character` (
   `trans_o` float NOT NULL default '0',
   `transguid` bigint(20) unsigned NOT NULL default '0',
   `gmstate` tinyint(3) unsigned NOT NULL default '0',
+  `stable_slots` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`)
@@ -342,7 +343,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_pet`;
 CREATE TABLE `character_pet` (
-  `id` int(11) unsigned NOT NULL auto_increment,
+  `id` int(11) unsigned NOT NULL  default '0',
   `entry` int(11) unsigned NOT NULL default '0',
   `owner` int(11) unsigned NOT NULL default '0',
   `modelid` int(11) unsigned default '0',
@@ -359,7 +360,7 @@ CREATE TABLE `character_pet` (
   `trainpoint` int(11) unsigned NOT NULL default '0',
   `name` varchar(100) default 'Pet',
   `renamed` tinyint(1) unsigned NOT NULL default '0',
-  `current` tinyint(1) unsigned NOT NULL default '1',
+  `slot` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
@@ -498,32 +499,6 @@ CREATE TABLE `character_spell_cooldown` (
 LOCK TABLES `character_spell_cooldown` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `character_spell_cooldown` ENABLE KEYS */;
-
---
--- Table structure for table `character_stable`
---
-
-DROP TABLE IF EXISTS `character_stable`;
-CREATE TABLE `character_stable` (
-  `owner` int(11) unsigned NOT NULL default '0',
-  `slot` int(11) unsigned NOT NULL default '0',
-  `petnumber` int(11) unsigned NOT NULL default '0',
-  `entry` int(11) unsigned NOT NULL default '0',
-  `level` int(11) unsigned NOT NULL default '0',
-  `loyalty` int(11) unsigned NOT NULL default '1',
-  `trainpoint` int(11) unsigned NOT NULL default '0',
-  KEY `petnumber` (`petnumber`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
-
---
--- Dumping data for table `character_stable`
---
-
-
-/*!40000 ALTER TABLE `character_stable` DISABLE KEYS */;
-LOCK TABLES `character_stable` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `character_stable` ENABLE KEYS */;
 
 --
 -- Table structure for table `character_ticket`

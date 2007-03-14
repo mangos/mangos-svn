@@ -46,6 +46,7 @@ Pet::Pet(PetType type)
 
     m_fealty = 0;
     m_petType = type;
+    m_removed = false;
     m_regenTimer = 4000;
     for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
         m_spells[i]=0;
@@ -59,31 +60,35 @@ Pet::~Pet()
     }
 }
 
-bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
+bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber )
 {
     uint32 ownerid = owner->GetGUIDLow();
 
     QueryResult *result;
 
-    if(petentry)
-        // known entry                    0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`,`name`,`renamed` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry );
+    if(petnumber)
+        // known petnumber entry          0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
+    else if(petentry)
+        // known petentry entry (unique for summoned pet, but non unique for hunter pet
+        //                                0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry );
     else
-        // current pet                    0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`current`,`name`,`renamed` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'",ownerid );
+        // current pet (slot 0)           0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
 
     if(!result)
         return false;
 
     Field *fields = result->Fetch();
 
-    // update for case "current = 1"
+    // update for case of current pet "slot = 0"
     petentry = fields[1].GetUInt32();
     if(!petentry)
         return false;
 
     float px, py, pz;
-    owner->GetClosePoint(NULL, px, py, pz);
+    owner->GetClosePoint(NULL, px, py, pz,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), petentry))
     {
@@ -101,6 +106,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
         MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
         return true;
     }
+    SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
     SetUInt64Value(UNIT_FIELD_DISPLAYID,       fields[3].GetUInt32());
     SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, fields[3].GetUInt32());
@@ -117,7 +123,6 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
             SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
                                                             // this enables popup window (pet dismiss, cancel)
-            SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
             break;
         case HUNTER_PET:
             SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[13].GetUInt32()<<8));
@@ -130,7 +135,6 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
 
             SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[14].GetUInt32() );
             SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
-            SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
             SetMaxPower(POWER_HAPPINESS,1000000);
             SetPower(   POWER_HAPPINESS,fields[12].GetUInt32());
             setPowerType(POWER_FOCUS);
@@ -153,11 +157,11 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     m_actState  = fields[11].GetUInt32();
 
     // set current pet as current
-    if(fields[15].GetUInt32() != 1)
+    if(fields[15].GetUInt32() != 0)
     {
         sDatabase.BeginTransaction();
-        sDatabase.PExecute("UPDATE `character_pet` SET `current` = '0' WHERE `owner` = '%u' AND `current` <> '0' AND `entry` <> '%u'",ownerid, petentry);
-        sDatabase.PExecute("UPDATE `character_pet` SET `current` = '1' WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry);
+        sDatabase.PExecute("UPDATE `character_pet` SET `slot` = '3' WHERE `owner` = '%u' AND `slot` = '0' AND `id` <> '%u'",ownerid, GetPetNumber());
+        sDatabase.PExecute("UPDATE `character_pet` SET `slot` = '0' WHERE `owner` = '%u' AND `id` = '%u'",ownerid, GetPetNumber());
         sDatabase.CommitTransaction();
     }
 
@@ -171,15 +175,9 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry )
     owner->SetPet(this);                                    // in DB stored only full controlled creature
     sLog.outDebug("New Pet has guid %u", GetGUIDLow());
 
-    //summon imp Template ID is 416
     if(owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        /*        std::string name;
-                name = ((Player*)owner)->GetName();
-                name.append("'s Pet");
-                SetName( name );*/
         ((Player*)owner)->PetSpellInitialize();
-    }
+
     return true;
 }
 
@@ -195,7 +193,9 @@ void Pet::SavePetToDB(PetSaveMode mode)
     switch(mode)
     {
         case PET_SAVE_AS_CURRENT:
-        case PET_SAVE_AS_STORED:
+        case PET_SAVE_IN_STABLE_SLOT_1:
+        case PET_SAVE_IN_STABLE_SLOT_2:
+        case PET_SAVE_NOT_IN_SLOT:
         {
             uint32 loyalty =1;
             if(getPetType()!=HUNTER_PET)
@@ -205,23 +205,27 @@ void Pet::SavePetToDB(PetSaveMode mode)
             std::string name = m_name;
             sDatabase.escape_string(name);
             sDatabase.BeginTransaction();
-            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry() );
-            sDatabase.PExecute("UPDATE `character_pet` SET `current` = 0 WHERE `owner` = '%u' AND `current` = 1", owner );
-            sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`renamed`,`current`) "
-                "VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u','%u')",
-                GetEntry(), owner, GetUInt32Value(UNIT_FIELD_DISPLAYID), getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-                m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),uint32(HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME)?0:1),uint32(mode==PET_SAVE_AS_CURRENT?1:0));
+            // remove current data
+            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,GetPetNumber() );
+            // prevent duplicate using slot (except PET_SAVE_NOT_IN_SLOT)
+            if(mode!=PET_SAVE_NOT_IN_SLOT)
+                sDatabase.PExecute("UPDATE `character_pet` SET `slot` = 3 WHERE `owner` = '%u' AND `slot` = '%u'", owner, uint32(mode) );
+            // save pet
+            sDatabase.PExecute("INSERT INTO `character_pet` (`id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`renamed`,`slot`) "
+                "VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u','%u')",
+                GetPetNumber(),GetEntry(), owner, GetUInt32Value(UNIT_FIELD_DISPLAYID), getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+                m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),uint32(HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME)?0:1),uint32(mode));
             sDatabase.CommitTransaction();
             break;
         }
         case PET_SAVE_AS_DELETED:
         {
             uint32 owner = GUID_LOPART(GetOwnerGUID());
-            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'", owner,GetEntry());
+            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,GetPetNumber());
             break;
         }
         default:
-            sLog.outError("Unknown pet remove mode: %d",mode);
+            sLog.outError("Unknown pet save/remove mode: %d",mode);
     }
 }
 
@@ -263,7 +267,7 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
     {
         //remove summoned pet (no corpse)
         if(getPetType()==SUMMON_PET)
-            Remove(PET_SAVE_AS_STORED);
+            Remove(PET_SAVE_NOT_IN_SLOT);
         // other will despawn at corpse desppawning (Pet::Update code)
         else
         {
@@ -276,6 +280,9 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
 
 void Pet::Update(uint32 diff)
 {
+    if(m_removed)                                           // pet already removed, just wait in remove queue, no updates
+        return;
+
     switch( m_deathState )
     {
         case CORPSE:
@@ -300,7 +307,7 @@ void Pet::Update(uint32 diff)
 
             if(isControlled() && owner->GetPetGUID() != GetGUID())
             {
-                Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_AS_STORED);
+                Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
                 return;
             }
 
@@ -352,29 +359,16 @@ void Pet::Remove(PetSaveMode mode)
             owner->SetPet(0);
     }
 
-    /* pet attack of owner (if need,  must be implemented by faction changing without pet remove call
-    if(getPetType()==HUNTER_PET)
-    {
-        SetMaxPower(POWER_HAPPINESS,0);
-        SetPower(POWER_HAPPINESS,0);
-        SetMaxPower(POWER_FOCUS,0);
-        SetPower(POWER_FOCUS,0);
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,GetCreatureInfo()->faction);
-        SetUInt64Value(UNIT_FIELD_CREATEDBY, 0);
-        SetUInt32Value(UNIT_FIELD_PETNUMBER,0);
-        AIM_Initialize();
-    }
-    else
-    */
-
     CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    m_removed = true;
 }
 
 void Pet::GivePetXP(uint32 xp)
 {
-    if(getPetType()!=HUNTER_PET || !GetUInt32Value(UNIT_FIELD_PETNUMBER))
+    if(getPetType() != HUNTER_PET)
         return;
+
     if ( xp < 1 )
         return;
 
