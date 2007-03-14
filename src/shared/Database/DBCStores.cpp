@@ -194,7 +194,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sSpellRangeStore,          dataPath+"dbc/SpellRange.dbc");
     LoadDBC(bar,bad_dbc_files,sStableSlotPricesStore,    dataPath+"dbc/StableSlotPrices.dbc");
     LoadDBC(bar,bad_dbc_files,sTalentStore,              dataPath+"dbc/Talent.dbc");
-    
+
     // create telent spells set
     for (int i = 0; i < sTalentStore.GetNumRows(); ++i)
     {
@@ -219,7 +219,6 @@ void LoadDBCStores(std::string dataPath)
             sTaxiNodesMask[field] |= submask;
         }
     }
-
 
     //## TaxiPath.dbc ## Loaded only for initialization different structures
     LoadDBC(bar,bad_dbc_files,sTaxiPathStore,            dataPath+"dbc/TaxiPath.dbc");
@@ -634,7 +633,6 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
     else
         return i->second;
 }
-
 
 bool CanUsedWhileStealthed(uint32 spellId)
 {

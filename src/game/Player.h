@@ -428,7 +428,7 @@ enum BankSlots
 
 enum BuyBackSlots
 {
-// strored in m_buybackitems
+    // strored in m_buybackitems
     BUYBACK_SLOT_START          = 69,
     BUYBACK_SLOT_1              = 69,
     BUYBACK_SLOT_2              = 70,
@@ -453,7 +453,7 @@ enum KeyRingSLots
 
 enum SwitchWeapon
 {
-    DEFAULT_SWITCH_WEAPON       = 1500,                 //cooldown in ms
+    DEFAULT_SWITCH_WEAPON       = 1500,                     //cooldown in ms
     ROGUE_SWITCH_WEAPON         = 1000
 };
 

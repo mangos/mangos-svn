@@ -69,7 +69,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                 }
             }
             else
-            ///- or delete bones
+                ///- or delete bones
             {
                 ///- If the map where the bones is loaded
                 if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))

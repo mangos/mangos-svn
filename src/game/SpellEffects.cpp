@@ -206,7 +206,7 @@ void Spell::EffectSchoolDMG(uint32 i)
     {
         // Bloodthirst
         if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
-            return EffectWeaponDmg(i); 
+            return EffectWeaponDmg(i);
 
         if(damage >= 0)
             m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell);
@@ -248,7 +248,7 @@ void Spell::EffectDummy(uint32 i)
         ((Creature*)unitTarget)->AI().AttackStart(m_caster->getVictim());
         return;
     }
-    
+
     // Gift of Life (warrior bwl trinket)
     if(m_spellInfo->Id == 23725)
     {
@@ -274,7 +274,7 @@ void Spell::EffectDummy(uint32 i)
         CustomHealthModSpell.EffectBasePoints[0] = health_mod;
         m_caster->CastSpell(m_caster,&CustomHealthModSpell,true,NULL);
         return;
-    } 
+    }
 
     // Preparation Rogue - immediately finishes the cooldown on other Rogue abilities
     if(m_spellInfo->Id == 14185)
@@ -551,7 +551,7 @@ void Spell::EffectApplyAura(uint32 i)
 
     unitTarget->ApplyDiminishingToDuration(mech,auraDuration);
 
-    bool added = unitTarget->AddAura(Aur); 
+    bool added = unitTarget->AddAura(Aur);
 
     if (added)
     {
@@ -559,7 +559,7 @@ void Spell::EffectApplyAura(uint32 i)
             unitTarget->RemoveAura(m_spellInfo->Id,i);
         else
         if(auraDuration != Aur->GetAuraDuration())
-            unitTarget->SetAurDuration(m_spellInfo->Id,i,auraDuration); 
+            unitTarget->SetAurDuration(m_spellInfo->Id,i,auraDuration);
 
         // Check for Power Word: Shield
         // TODO Make a way so it works for every related spell!
@@ -1685,7 +1685,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
-        
+
     // Bloodthirst
     uint32 BTAura = 0;
     if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
@@ -1699,7 +1699,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             default: break;
         }
         damage = 0.45 * (m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS));
-    } 
+    }
 
     uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };
 
@@ -1760,10 +1760,10 @@ void Spell::EffectWeaponDmg(uint32 i)
         criticalhit = true;
 
     m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, m_spellInfo->School, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
-    
+
     // Bloodthirst
     if (BTAura)
-        m_caster->CastSpell(m_caster,BTAura,true); 
+        m_caster->CastSpell(m_caster,BTAura,true);
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
         eff_damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);

@@ -1561,9 +1561,9 @@ void ObjectMgr::LoadSpellLearnSkills()
     {
         SpellEntry const* entry = sSpellStore.LookupEntry(spell);
 
-        if(!entry) 
+        if(!entry)
             continue;
-        
+
         for(int i = 0; i < 3; ++i)
         {
             if(entry->Effect[i]==SPELL_EFFECT_SKILL)
@@ -1580,8 +1580,8 @@ void ObjectMgr::LoadSpellLearnSkills()
                     if(db_node->skill != dbc_node.skill)
                         sLog.outErrorDb("Spell %u auto-learn skill %u in spell.dbc but learn skill %u in `spell_learn_skill`, fix DB.",
                             spell,dbc_node.skill,db_node->skill);
-                    
-                    continue;                                       // skip already added spell-skill pair
+
+                    continue;                               // skip already added spell-skill pair
                 }
 
                 SpellLearnSkills[spell] = dbc_node;
@@ -1655,7 +1655,7 @@ void ObjectMgr::LoadSpellLearnSpells()
     {
         SpellEntry const* entry = sSpellStore.LookupEntry(spell);
 
-        if(!entry) 
+        if(!entry)
             continue;
 
         for(int i = 0; i < 3; ++i)
@@ -1681,8 +1681,8 @@ void ObjectMgr::LoadSpellLearnSpells()
                         break;
                     }
                 }
-                
-                if(!found)                                   // add new spell-spell pair if not found
+
+                if(!found)                                  // add new spell-spell pair if not found
                 {
                     SpellLearnSpells.insert(SpellLearnSpellMap::value_type(spell,dbc_node));
                     ++dbc_count;
@@ -1784,7 +1784,6 @@ void ObjectMgr::LoadItemTexts()
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u item texts", count );
 }
-
 
 void ObjectMgr::LoadPageTexts()
 {
@@ -2529,5 +2528,3 @@ void ObjectMgr::LoadCorpses()
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u corpses", count );
 }
-
-

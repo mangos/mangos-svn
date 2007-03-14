@@ -38,7 +38,7 @@ void TemporarySummon::Update( uint32 diff )
             else
                 m_timer -= diff;
         } else
-            m_timer = m_lifetime;
+        m_timer = m_lifetime;
     }
 
     Creature::Update( diff );

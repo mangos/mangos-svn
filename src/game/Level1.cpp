@@ -1165,7 +1165,7 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
 
 bool ChatHandler::HandleModifyBitCommand(const char* args)
 {
-    if( !*args ) 
+    if( !*args )
         return false;
 
     Player *chr = getSelectedPlayer();

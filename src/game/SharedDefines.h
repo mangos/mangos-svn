@@ -128,13 +128,13 @@ enum SpellSchools
 
 enum ItemQuelities
 {
-    ITEM_QUALITY_POOR                  = 0,              //GREY
-    ITEM_QUALITY_NORMAL                = 1,              //WHITE
-    ITEM_QUALITY_UNCOMMON              = 2,              //GREEN
-    ITEM_QUALITY_RARE                  = 3,              //BLUE
-    ITEM_QUALITY_EPIC                  = 4,              //PURPLE
-    ITEM_QUALITY_LEGENDARY             = 5,              //ORANGE
-    ITEM_QUALITY_ARTIFACT              = 6               //LIGHT YELLOW
+    ITEM_QUALITY_POOR                  = 0,                 //GREY
+    ITEM_QUALITY_NORMAL                = 1,                 //WHITE
+    ITEM_QUALITY_UNCOMMON              = 2,                 //GREEN
+    ITEM_QUALITY_RARE                  = 3,                 //BLUE
+    ITEM_QUALITY_EPIC                  = 4,                 //PURPLE
+    ITEM_QUALITY_LEGENDARY             = 5,                 //ORANGE
+    ITEM_QUALITY_ARTIFACT              = 6                  //LIGHT YELLOW
 };
 
 enum sheathTypes
@@ -253,7 +253,7 @@ enum SpellEffects
     SPELL_EFFECT_TRADE_SKILL               = 47,
     SPELL_EFFECT_STEALTH                   = 48,
     SPELL_EFFECT_DETECT                    = 49,
-//    SPELL_EFFECT_SUMMON_OBJECT             = 50,
+    //    SPELL_EFFECT_SUMMON_OBJECT             = 50,
     SPELL_EFFECT_TRANS_DOOR                = 50,
     SPELL_EFFECT_FORCE_CRITICAL_HIT        = 51,
     SPELL_EFFECT_GUARANTEE_HIT             = 52,
@@ -808,7 +808,7 @@ enum LockType
     LOCKTYPE_SLOW_CLOSE            = 18
 };
 
-enum TrainerType // this is important type for npcs!
+enum TrainerType                                            // this is important type for npcs!
 {
     TRAINER_TYPE_CLASS             = 0,
     TRAINER_TYPE_MOUNTS            = 1,
@@ -1042,7 +1042,7 @@ enum SkillType
     SKILL_RACIAL_GNOME             = 753,
     SKILL_RACIAL_HUMAN             = 754,
     SKILL_RIDING                   = 762
-}; 
+};
 
 #define UNIT_DYNFLAG_LOOTABLE           0x0001
 

@@ -575,7 +575,7 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
     CHECK_PACKET_SIZE(recvPacket,1);
 
     std::string gname;
-    
+
     //sLog.outDebug( "WORLD: Received CMSG_GUILD_CREATE"  );
 
     recvPacket >> gname;
@@ -1308,7 +1308,7 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if(guild->GetNrRanks() >= 10)                         // cleint not let create more 10 ranks
+    if(guild->GetNrRanks() >= 10)                           // cleint not let create more 10 ranks
         return;
 
     recvPacket >> rankname;

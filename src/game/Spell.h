@@ -238,7 +238,7 @@ enum SpellFailedReason
     CAST_FAIL_NO_TARGET                     = 9,
     CAST_FAIL_INVALID_TARGET                = 10,
     CAST_FAIL_CANT_BE_CHARMED               = 11,
-    CAST_FAIL_CANT_BE_DISENCHANTED          = 12,                   //decompose
+    CAST_FAIL_CANT_BE_DISENCHANTED          = 12,           //decompose
     // 13 SPELL_FAILED_CANT_BE_PROSPECTED
     CAST_FAIL_TARGET_IS_TAPPED              = 13+1,
     CAST_FAIL_CANT_START_DUEL_INVISIBLE     = 14+1,
@@ -246,26 +246,26 @@ enum SpellFailedReason
     CAST_FAIL_TOO_CLOSE_TO_ENEMY            = 16+1,
     CAST_FAIL_CANT_DO_THAT_YET              = 17+1,
     CAST_FAIL_YOU_ARE_DEAD                  = 18+1,
-    CAST_FAIL_CANT_DO_WHILE_XXXX            =19,                    //NONE
-    CAST_FAIL_CANT_DO_WHILE_CHARMED         =19+1,                  //SPELL_FAILED_CHARMED
-    CAST_FAIL_OBJECT_ALREADY_BEING_USED     = 20+1,                 //SPELL_FAILED_CHEST_IN_USE
-    CAST_FAIL_CANT_DO_WHILE_CONFUSED        = 21+1,                 //SPELL_FAILED_CONFUSED
+    CAST_FAIL_CANT_DO_WHILE_XXXX            =19,            //NONE
+    CAST_FAIL_CANT_DO_WHILE_CHARMED         =19+1,          //SPELL_FAILED_CHARMED
+    CAST_FAIL_OBJECT_ALREADY_BEING_USED     = 20+1,         //SPELL_FAILED_CHEST_IN_USE
+    CAST_FAIL_CANT_DO_WHILE_CONFUSED        = 21+1,         //SPELL_FAILED_CONFUSED
     //23 is gone.
     CAST_FAIL_MUST_HAVE_ITEM_EQUIPPED       = 22 + 1 + 1,
-    CAST_FAIL_MUST_HAVE_XXXX_EQUIPPED       = 23 + 1 + 1,           //SPELL_FAILED_EQUIPPED_ITEM_CLASS
-    CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND    = 24 + 1 + 1,           //SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND
-    CAST_FAIL_MUST_HAVE_XXXX_IN_OFFHAND     = 25 + 1 + 1,           //SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND
+    CAST_FAIL_MUST_HAVE_XXXX_EQUIPPED       = 23 + 1 + 1,   //SPELL_FAILED_EQUIPPED_ITEM_CLASS
+    CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND    = 24 + 1 + 1,   //SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND
+    CAST_FAIL_MUST_HAVE_XXXX_IN_OFFHAND     = 25 + 1 + 1,   //SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND
     CAST_FAIL_INTERNAL_ERROR                = 26 + 1 + 1,
-    CAST_FAIL_FAILED                        = 29,                   // Doesn't exist anymore? Used Fizzle value atm.
-    CAST_FAIL_FIZZLED                       = 27 + 1 + 1,           // changed (+2) 12.1.1
+    CAST_FAIL_FAILED                        = 29,           // Doesn't exist anymore? Used Fizzle value atm.
+    CAST_FAIL_FIZZLED                       = 27 + 1 + 1,   // changed (+2) 12.1.1
     CAST_FAIL_YOU_ARE_FLEEING               = 28 + 1 + 1,
     CAST_FAIL_FOOD_TOO_LOWLEVEL_FOR_PET     = 29 + 1 + 1,
     CAST_FAIL_TARGET_IS_TOO_HIGH            = 30 + 1 + 1,
     //32 + 1 is gone.
-    CAST_FAIL_IMMUNE                        = 32 + 1 + 1,           //SPELL_FAILED_IMMUNE
-    CAST_FAIL_INTERRUPTED                   = 33 + 1 + 1,           //SPELL_FAILED_INTERRUPTED
-    CAST_FAIL_INTERRUPTED1                  = 34 + 1 + 1,           //SPELL_FAILED_INTERRUPTED_COMBAT
-    CAST_FAIL_INTERRUPTED_COMBAT            = 36,                   //just 36 SPELL_FAILED_INTERRUPTED_COMBAT
+    CAST_FAIL_IMMUNE                        = 32 + 1 + 1,   //SPELL_FAILED_IMMUNE
+    CAST_FAIL_INTERRUPTED                   = 33 + 1 + 1,   //SPELL_FAILED_INTERRUPTED
+    CAST_FAIL_INTERRUPTED1                  = 34 + 1 + 1,   //SPELL_FAILED_INTERRUPTED_COMBAT
+    CAST_FAIL_INTERRUPTED_COMBAT            = 36,           //just 36 SPELL_FAILED_INTERRUPTED_COMBAT
     CAST_FAIL_ITEM_ALREADY_ENCHANTED        = 35 + 1 + 1,
     CAST_FAIL_ITEM_NOT_EXIST                = 36 + 1 + 1,
     CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM     = 37 + 1 + 1,
@@ -292,11 +292,11 @@ enum SpellFailedReason
     CAST_FAIL_SPELL_NOT_READY_YET           = 58 + 1 + 1,
     CAST_FAIL_CANT_DO_IN_SHAPESHIFT         = 59 + 1 + 1,
     CAST_FAIL_HAVE_TO_BE_STANDING           = 60 + 1 + 1,
-    CAST_FAIL_CAN_USE_ONLY_ON_OWN_OBJECT    = 61 + 1 + 1,           // rogues trying "enchant" other's weapon with poison
+    CAST_FAIL_CAN_USE_ONLY_ON_OWN_OBJECT    = 61 + 1 + 1,   // rogues trying "enchant" other's weapon with poison
     //CAST_FAIL_ALREADY_OPEN1               = 62,
 
     CAST_FAIL_CANT_ENCHANT_TRADE_ITEM       = 63 + 1,
-    CAST_FAIL_HAVE_TO_BE_UNSHEATHED         = 63 + 1 + 1,           // yellow text SPELL_FAILED_NOT_UNSHEATHED
+    CAST_FAIL_HAVE_TO_BE_UNSHEATHED         = 63 + 1 + 1,   // yellow text SPELL_FAILED_NOT_UNSHEATHED
     CAST_FAIL_CANT_CAST_AS_GHOST            = 64 + 1 + 1,
     CAST_FAIL_NO_AMMO                       = 65 + 1 + 1,
     CAST_FAIL_NO_CHARGES_REMAIN             = 66 + 1 + 1,

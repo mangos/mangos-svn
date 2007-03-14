@@ -625,6 +625,7 @@ void CliSetLogLevel(char*command,pPrintf zprintf)
     }
     sLog.SetLogLevel(NewLevel);
 }
+
 /// @}
 
 /// %Thread start
@@ -672,4 +673,3 @@ void CliRunnable::run()
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }
 #endif
-

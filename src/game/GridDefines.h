@@ -54,7 +54,7 @@ class Player;
 #define MAP_HALFSIZE            (MAP_SIZE/2)
 
 // Creature used instead pet to simplify *::Visit templates (not requared duplicate code for Creature->Pet case)
-typedef TYPELIST_3(Player, Creature/*pets*/, Corpse/*resurrectable*/)                   AllWorldObjectTypes; 
+typedef TYPELIST_3(Player, Creature/*pets*/, Corpse/*resurrectable*/)                   AllWorldObjectTypes;
 typedef TYPELIST_4(GameObject, Creature/*except pets*/, DynamicObject, Corpse/*Bones*/) AllGridObjectTypes;
 
 typedef std::map<OBJECT_HANDLE, Corpse* >        CorpseMapType;

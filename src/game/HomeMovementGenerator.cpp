@@ -58,7 +58,7 @@ HomeMovementGenerator::_setTargetLocation(Creature & owner)
 }
 
 void
-HomeMovementGenerator::_reLocate(Creature &owner) // resend clients the creature's actual position
+HomeMovementGenerator::_reLocate(Creature &owner)           // resend clients the creature's actual position
 {
 
     if (owner.GetTypeId() == TYPEID_UNIT)

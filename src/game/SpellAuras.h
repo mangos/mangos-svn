@@ -66,7 +66,7 @@ class Aura
             // NOT IMPLEMENTED
         }
         void HandleNoImmediateEffect(bool, bool)
-        { 
+        {
             // aura not have immediate effect at add/remove and handled by ID in other code place
         }
         void HandleBindSight(bool Apply, bool Real);

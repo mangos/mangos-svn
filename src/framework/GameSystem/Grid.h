@@ -75,7 +75,6 @@ class MANGOS_DLL_DECL Grid
         template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetWorldObject(OBJECT_HANDLE hdl) const { return i_objects.template find<SPECIFIC_OBJECT>(hdl); }
         template<class SPECIFIC_OBJECT>       SPECIFIC_OBJECT* GetWorldObject(OBJECT_HANDLE hdl)       { return i_objects.template find<SPECIFIC_OBJECT>(hdl); }
 
-
         /** Refreshes/update the grid. This required for remote grids.
          */
         void RefreshGrid(void) { /* TBI */}

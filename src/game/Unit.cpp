@@ -1606,12 +1606,12 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() || 
+        if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
             item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
             return 0;
 
         // in range
-        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon() 
+        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon()
             ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetSkillValue (skill);
     }
@@ -1634,12 +1634,12 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
         }
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() || 
+        if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
             item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
             return 0;
 
         // in range
-        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon() 
+        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon()
             ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetPureSkillValue (skill);
     }
@@ -2211,7 +2211,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
         mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
         if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER && mech != DIMINISHING_NONE)
             UpdateDiminishingTime(mech);
-    } 
+    }
 
     // must remove before removeing from list (its remove dependent auras and _i_ is only safe iterator value
     // remove the shapeshift aura's boosts
@@ -2504,16 +2504,16 @@ void Unit::ApplyStats(bool apply)
     // critical
     switch(getClass())
     {
-    case CLASS_PALADIN: classrate = 19.77; break;
-    case CLASS_SHAMAN:  classrate = 19.7;  break;
-    case CLASS_MAGE:    classrate = 19.44; break;
-    case CLASS_ROGUE:   classrate = 29.0;  break;
-    case CLASS_HUNTER:  classrate = 53.0;  break;           // in 2.0.x = 33
-    case CLASS_PRIEST:  
-    case CLASS_WARLOCK: 
-    case CLASS_DRUID:   
-    case CLASS_WARRIOR: 
-    default:            classrate = 20.0; break;
+        case CLASS_PALADIN: classrate = 19.77; break;
+        case CLASS_SHAMAN:  classrate = 19.7;  break;
+        case CLASS_MAGE:    classrate = 19.44; break;
+        case CLASS_ROGUE:   classrate = 29.0;  break;
+        case CLASS_HUNTER:  classrate = 53.0;  break;       // in 2.0.x = 33
+        case CLASS_PRIEST:
+        case CLASS_WARLOCK:
+        case CLASS_DRUID:
+        case CLASS_WARRIOR:
+        default:            classrate = 20.0; break;
     }
 
     val = GetStat(STAT_AGILITY)/classrate;
@@ -3624,7 +3624,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     //Penalty formula from wiki
     float LvlPenalty = 0.0f;
     if(spellProto->spellLevel < 20)
-        LvlPenalty = (20.0f - (float)(spellProto->spellLevel)) * 3.75f;//3.75%
+                                                            //3.75%
+        LvlPenalty = (20.0f - (float)(spellProto->spellLevel)) * 3.75f;
 
     float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) / 100.0f;
     float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) / 100.0f;
@@ -3677,13 +3678,13 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
     //put m_AuraModifiers here
 
     AdvertisedBenefit += m_AuraModifiers[SPELL_AURA_MOD_HEALING];
-    
-    
+
     // TODO - fix PenaltyFactor and complete the formula from the wiki
     //Penalty formula from wiki
     float LvlPenalty = 0.0f;
     if(spellProto->spellLevel < 20)
-        LvlPenalty = (20.0f - (float)(spellProto->spellLevel)) * 3.75f;//3.75%
+                                                            //3.75%
+        LvlPenalty = (20.0f - (float)(spellProto->spellLevel)) * 3.75f;
     float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * (100.0f - LvlPenalty) / 100.0f;
 
     // use float as more appropriate for negative values and percent applying
@@ -3967,10 +3968,10 @@ void Unit::SetInCombat()
 
 void Unit::ClearInCombat(bool force)
 {
-    // wait aura and combat timer expire  
+    // wait aura and combat timer expire
     if(!force && HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
         return;
-  
+
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 }
@@ -4795,7 +4796,7 @@ void Unit::IncrDiminishing(DiminishingMechanics mech, uint32 duration)
     bool IsExist = false;
     for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
     {
-        if(i->Mechanic != mech) 
+        if(i->Mechanic != mech)
             continue;
 
         IsExist = true;
@@ -4812,10 +4813,10 @@ void Unit::IncrDiminishing(DiminishingMechanics mech, uint32 duration)
         }
         break;
     }
-    
+
     if(!IsExist)
         AddDiminishing(mech,uint32(getMSTime() + duration),DIMINISHING_LEVEL_2);
-} 
+}
 
 void Unit::UpdateDiminishingTime(DiminishingMechanics mech)
 {
@@ -4830,7 +4831,7 @@ void Unit::UpdateDiminishingTime(DiminishingMechanics mech)
         i->hitTime = getMSTime();
         break;
     }
-    
+
     if(!IsExist)
         AddDiminishing(mech,getMSTime(),DIMINISHING_LEVEL_1);
 }

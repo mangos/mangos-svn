@@ -107,8 +107,8 @@ enum HitInfo
     HITINFO_NORMALSWING2       = 0x02,
     HITINFO_LEFTSWING          = 0x04,
     HITINFO_MISS               = 0x10,
-    HITINFO_ABSORB             = 0x20,                    // plays absorb sound
-    HITINFO_RESIST             = 0x40,                    // resisted atleast some damage
+    HITINFO_ABSORB             = 0x20,                      // plays absorb sound
+    HITINFO_RESIST             = 0x40,                      // resisted atleast some damage
     HITINFO_CRITICALHIT        = 0x80,
     HITINFO_GLANCING           = 0x4000,
     HITINFO_CRUSHING           = 0x8000,
@@ -125,7 +125,7 @@ enum InventorySlot
 
 enum Dist
 {
-    MAX_DIST_INVISIBLE_UNIT    = 20,                      // Max distance to be able to detect an invisible unit
+    MAX_DIST_INVISIBLE_UNIT    = 20,                        // Max distance to be able to detect an invisible unit
     ATTACK_DIST                = 5
 };
 
@@ -341,11 +341,11 @@ enum SpellImmunity
 enum DiminishingMechanics
 {
     DIMINISHING_NONE                = 0,
-    DIMINISHING_MECHANIC_CONFUSE    = 1,    // incapacitate, confuse
-    DIMINISHING_MECHANIC_CHARM      = 2,    // fear, mind control, sleep
-    DIMINISHING_MECHANIC_STUN       = 3,    // stun
-    DIMINISHING_MECHANIC_ROOT       = 4,    // roots, freeze
-    DIMINISHING_MECHANIC_SPEED      = 5     // speed reduction
+    DIMINISHING_MECHANIC_CONFUSE    = 1,                    // incapacitate, confuse
+    DIMINISHING_MECHANIC_CHARM      = 2,                    // fear, mind control, sleep
+    DIMINISHING_MECHANIC_STUN       = 3,                    // stun
+    DIMINISHING_MECHANIC_ROOT       = 4,                    // roots, freeze
+    DIMINISHING_MECHANIC_SPEED      = 5                     // speed reduction
 };
 
 enum DiminishingLevels
@@ -363,7 +363,7 @@ struct DiminishingReturn
     DiminishingMechanics    Mechanic;
     uint32                  hitTime;
     uint32                  hitCount;
-};  
+};
 
 enum ImmuneToDispel
 {

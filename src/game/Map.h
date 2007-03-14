@@ -212,16 +212,16 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         // Type specific code for add/remove to/from grid
         template<class T>
-        void AddToGrid(T*, NGridType *, Cell const&);
+            void AddToGrid(T*, NGridType *, Cell const&);
 
         template<class T>
-        void RemoveFromGrid(T*, NGridType *, Cell const&);
+            void RemoveFromGrid(T*, NGridType *, Cell const&);
 
         template<class T>
-        void DeleteFromWorld(T*);
+            void DeleteFromWorld(T*);
 
         template<class T>
-        T* FindInGrid(uint64 guid, NGridType *, Cell const&) const;
+            T* FindInGrid(uint64 guid, NGridType *, Cell const&) const;
 };
 
 inline

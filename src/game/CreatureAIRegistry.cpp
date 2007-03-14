@@ -47,4 +47,3 @@ namespace AIRegistry
         (new MovementGeneratorFactory<WaypointMovementGenerator>(WAYPOINT_MOTION_TYPE))->RegisterSelf();
     }
 }
-
