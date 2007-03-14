@@ -156,7 +156,6 @@ MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
     }
 }
 
-
 void
 NotVisibleNotifier::Notify()
 {

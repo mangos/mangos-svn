@@ -301,7 +301,7 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
     char *old_pass = strtok ((char*)args, " ");
     char *new_pass = strtok (NULL, " ");
     char *new_pass_c  = strtok (NULL, " ");
-        
+
     if( !old_pass || !new_pass || !new_pass_c )
         return false;
 
@@ -318,7 +318,7 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
     QueryResult *result = loginDatabase.PQuery("SELECT `password` FROM `account` WHERE `id` = '%d'",m_session->GetAccountId());
     if(result)
     {
-         // in result already encoded password
+        // in result already encoded password
         loginDatabase.escape_string(password_old);
 
         if( (*result)[0].GetCppString()==password_old && password_new == password_new_c)

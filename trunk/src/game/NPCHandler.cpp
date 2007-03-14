@@ -172,9 +172,9 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         if(_player->HasSpell(spellInfo->Id))
             canlearnflag = 2;                               //gray, can't learn
         else
-            if((*itr)->spell->Effect[0] == SPELL_EFFECT_LEARN_SPELL && 
-                _player->HasSpell((*itr)->spell->EffectTriggerSpell[0]))
-                canlearnflag = 2;                           //gray, can't learn
+        if((*itr)->spell->Effect[0] == SPELL_EFFECT_LEARN_SPELL &&
+            _player->HasSpell((*itr)->spell->EffectTriggerSpell[0]))
+            canlearnflag = 2;                               //gray, can't learn
 
         if((*itr)->spell->Effect[1] == SPELL_EFFECT_SKILL_STEP)
             if(!_player->CanLearnProSpell((*itr)->spell->Id))
@@ -390,7 +390,7 @@ void WorldSession::SendSpiritResurrect()
     // get corpse nearest graveyard
     WorldSafeLocsEntry const *corpseGrave = NULL;
     if(Corpse* corpse = _player->GetCorpse())
-        corpseGrave = objmgr.GetClosestGraveYard( 
+        corpseGrave = objmgr.GetClosestGraveYard(
             corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam() );
 
     // now can spawn bones
@@ -399,7 +399,7 @@ void WorldSession::SendSpiritResurrect()
     // teleport to nearest from corpse graveyard, if different from nearest to player ghost
     if(corpseGrave)
     {
-        WorldSafeLocsEntry const *ghostGrave = objmgr.GetClosestGraveYard( 
+        WorldSafeLocsEntry const *ghostGrave = objmgr.GetClosestGraveYard(
             _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetMapId(), _player->GetTeam() );
 
         if(corpseGrave != ghostGrave)
@@ -545,12 +545,12 @@ void WorldSession::SendStablePet(uint64 guid )
         {
             Field *fields = result->Fetch();
 
-            data << uint32(fields[2].GetUInt32());      // petnumber
+            data << uint32(fields[2].GetUInt32());          // petnumber
             data << uint32(fields[3].GetUInt32());
             data << uint32(fields[4].GetUInt32());
-            data << fields[6].GetString();              // name
-            data << uint32(fields[5].GetUInt32());      // loyalty
-            data << uint8(fields[1].GetUInt32()+1);     // slot
+            data << fields[6].GetString();                  // name
+            data << uint32(fields[5].GetUInt32());          // loyalty
+            data << uint8(fields[1].GetUInt32()+1);         // slot
 
             ++num;
         }while( result->NextRow() );
@@ -702,7 +702,7 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
         {
             ++GetPlayer()->m_stableSlots;
             _player->SetMoney(_player->GetMoney() - SlotPrice->Price);
-            data << uint8(0x0A);                        // success buy
+            data << uint8(0x0A);                            // success buy
         }
         else
             data << uint8(0x06);

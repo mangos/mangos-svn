@@ -182,7 +182,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 return;
 
             // FIXME: this is _wrong_ check not allow cast positive spells, but without it pet can cast negative spell at anyone
-            // do not spell attack of friends 
+            // do not spell attack of friends
             //if(_player->IsFriendlyTo(unit_target))
             //    return;
 
@@ -245,7 +245,7 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
     recv_data >> spell_id;
     recv_data >> act_state;
 
-    // FIXME: charmed case 
+    // FIXME: charmed case
     Pet* pet = ObjectAccessor::Instance().GetPet(petguid);
 
     if(!pet || pet->GetOwnerGUID() != _player->GetGUID() )
@@ -256,29 +256,29 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 
     sLog.outDetail( "Player %s has changed pet spell action. Position: %u, Spell: %u, State: %u\n", _player->GetName(), position, spell_id, act_state);
 
-    if (act_state==0xC100) // enable
+    if (act_state==0xC100)                                  // enable
     {
         if (position==3)
-          pet->AddActState(STATE_RA_SPELL1);
+            pet->AddActState(STATE_RA_SPELL1);
         if (position==4)
-          pet->AddActState(STATE_RA_SPELL2);
+            pet->AddActState(STATE_RA_SPELL2);
         if (position==5)
-          pet->AddActState(STATE_RA_SPELL3);
+            pet->AddActState(STATE_RA_SPELL3);
         if (position==6)
-          pet->AddActState(STATE_RA_SPELL4);
+            pet->AddActState(STATE_RA_SPELL4);
     } else
-    if (act_state==0x8100) // disable
+    if (act_state==0x8100)                                  // disable
     {
         if (position==3)
-          pet->ClearActState(STATE_RA_SPELL1);
+            pet->ClearActState(STATE_RA_SPELL1);
         if (position==4)
-          pet->ClearActState(STATE_RA_SPELL2);
+            pet->ClearActState(STATE_RA_SPELL2);
         if (position==5)
-          pet->ClearActState(STATE_RA_SPELL3);
+            pet->ClearActState(STATE_RA_SPELL3);
         if (position==6)
-          pet->ClearActState(STATE_RA_SPELL4);
+            pet->ClearActState(STATE_RA_SPELL4);
     } else
-        sLog.outError( "Spell state %u is unknown.\n", act_state);
+    sLog.outError( "Spell state %u is unknown.\n", act_state);
 }
 
 void WorldSession::HandlePetRename( WorldPacket & recv_data )

@@ -713,7 +713,7 @@ void Aura::_RemoveAura()
 
     // reset cooldown state for spells infinity/long aura (it's all self applied (?))
     int32 duration = GetDuration(GetSpellProto());
-    if(caster==m_target && (duration < 0 || duration > GetSpellProto()->RecoveryTime)) 
+    if(caster==m_target && (duration < 0 || duration > GetSpellProto()->RecoveryTime))
         SendCoolDownEvent();
 }
 
@@ -853,9 +853,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_procCharges = -1;
     }
 
-    if( m_target->GetTypeId() == TYPEID_PLAYER && !apply && 
-        ( GetSpellProto()->Effect[0]==72 || GetSpellProto()->Effect[0]==6 && 
-            ( GetSpellProto()->EffectApplyAuraName[0]==1 || GetSpellProto()->EffectApplyAuraName[0]==128 ) ) )
+    if( m_target->GetTypeId() == TYPEID_PLAYER && !apply &&
+        ( GetSpellProto()->Effect[0]==72 || GetSpellProto()->Effect[0]==6 &&
+        ( GetSpellProto()->EffectApplyAuraName[0]==1 || GetSpellProto()->EffectApplyAuraName[0]==128 ) ) )
     {
         // spells with SpellEffect=72 and aura=4: 6196, 6197, 21171, 21425
         m_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
@@ -2047,14 +2047,14 @@ void Aura::HandleAuraModDmgImmunity(bool apply, bool Real)
 }
 
 void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
-{    
+{
     Unit* m_caster = GetCaster();
     //Prevent Crash
     if (!m_caster)
         return;
 
     m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
-    
+
     if(((Player*)m_target)->GetTeam() != ((Player*)m_caster)->GetTeam() && !((Player*)m_target)->isGameMaster())
     {
         if (m_target->HasStealthAura() && m_modifier.m_miscvalue == 5)
@@ -2062,7 +2062,7 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 
         if (m_target->HasInvisibilityAura() && m_modifier.m_miscvalue == 6)
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
-        
+
         if(!((Player*)m_caster)->IsPvP() && ((Player*)m_target)->IsPvP())
             ((Player*)m_caster)->UpdatePvP(true, true);
     }

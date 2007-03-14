@@ -412,7 +412,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
             {
                 _player->ModifyMoney( pProto->SellPrice * count );
 
-                if(count < pItem->GetCount())           // need split items
+                if(count < pItem->GetCount())               // need split items
                 {
                     pItem->SetCount( pItem->GetCount() - count );
                     if( _player->IsInWorld() )

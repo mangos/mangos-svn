@@ -61,47 +61,48 @@ class TransportPath
         std::vector<PathNode> i_nodes;
 };
 
-class Transport : public GameObject {
-public:
-    bool Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
-    bool GenerateWaypoints(uint32 pathid, vector <uint32> &mapids);
-    void Update(uint32 p_time);
-    bool AddPassenger(Player* passenger);
-    bool RemovePassenger(Player* passenger);
-    string m_name;
+class Transport : public GameObject
+{
+    public:
+        bool Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
+        bool GenerateWaypoints(uint32 pathid, vector <uint32> &mapids);
+        void Update(uint32 p_time);
+        bool AddPassenger(Player* passenger);
+        bool RemovePassenger(Player* passenger);
+        string m_name;
 
-private:
-    struct WayPoint {
-        WayPoint() : mapid(0), x(0), y(0), z(0), teleport(0) {}
-        WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport) : 
-                mapid(_mapid), x(_x), y(_y), z(_z), teleport(_teleport) {}
-        uint32 mapid;
-        float x;
-        float y;
-        float z;
-        float o;
-        bool teleport;
-    };
+    private:
+        struct WayPoint
+        {
+            WayPoint() : mapid(0), x(0), y(0), z(0), teleport(0) {}
+            WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport) :
+            mapid(_mapid), x(_x), y(_y), z(_z), teleport(_teleport) {}
+            uint32 mapid;
+            float x;
+            float y;
+            float z;
+            float o;
+            bool teleport;
+        };
 
-    map<uint32, WayPoint>::iterator m_curr;
-    map<uint32, WayPoint>::iterator m_next;
-    uint32 m_pathTime;
-    uint32 m_timer;
+        map<uint32, WayPoint>::iterator m_curr;
+        map<uint32, WayPoint>::iterator m_next;
+        uint32 m_pathTime;
+        uint32 m_timer;
 
-    uint32 m_curMap;
+        uint32 m_curMap;
 
-    void TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, float y, float z);
+        void TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, float y, float z);
 
-    set< Player * > m_passengers;
+        set< Player * > m_passengers;
 
-public:
-    map< uint32, WayPoint> m_WayPoints;
-    uint32 m_lastMovement;
-    uint32 m_nextNodeTime;
-    uint32 m_period;
+    public:
+        map< uint32, WayPoint> m_WayPoints;
+        uint32 m_lastMovement;
+        uint32 m_nextNodeTime;
+        uint32 m_period;
 
-private:
-    map<uint32, WayPoint>::iterator GetNextWayPoint();
+    private:
+        map<uint32, WayPoint>::iterator GetNextWayPoint();
 };
-
 #endif

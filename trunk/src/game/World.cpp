@@ -86,6 +86,7 @@ World::World()
     m_gameTime=time(NULL);
     m_maxSessionsCount = 0;
 }
+
 /// World desctructor
 World::~World()
 {
@@ -314,8 +315,8 @@ void World::SetInitialWorldSettings()
         m_configs[CONFIG_MAX_OVERSPEED_PINGS] = 2;
     }
 
-    m_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY] = sConfig.GetIntDefault("SaveRespawnTimeImmediately",1);  
-    
+    m_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY] = sConfig.GetIntDefault("SaveRespawnTimeImmediately",1);
+
     ///- Read the "Data" directory from the config file
     m_dataPath = sConfig.GetStringDefault("DataDir","./");
     if((m_dataPath.at(m_dataPath.length()-1)!='/') && (m_dataPath.at(m_dataPath.length()-1)!='\\'))
@@ -426,7 +427,7 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Scripts..." );
     objmgr.LoadScripts(sScripts,      "scripts");           // quest scripts
     objmgr.LoadScripts(sSpellScripts, "spell_scripts");     // spell casting scripts
-    
+
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
         exit(1);
@@ -482,7 +483,7 @@ void World::Update(time_t diff)
     for(int i = 0; i < WUPDATE_COUNT; i++)
         if(m_timers[i].GetCurrent()>=0)
             m_timers[i].Update(diff);
-        else m_timers[i].SetCurrent(0);
+    else m_timers[i].SetCurrent(0);
 
     ///- Update the game time and check for shutdown time
     _UpdateGameTime();
@@ -650,7 +651,8 @@ void World::ScriptsProcess()
 
     ///- Process overdue queued scripts
     multimap<uint64, ScriptAction>::iterator iter = scriptSchedule.begin();
-    while (!scriptSchedule.empty() && (iter->first <= m_gameTime)) // ok as multimap is a *sorted* associative container
+                                                            // ok as multimap is a *sorted* associative container
+    while (!scriptSchedule.empty() && (iter->first <= m_gameTime))
     {
         ScriptAction const& step = iter->second;
         switch (step.script->command)
@@ -798,7 +800,7 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
     {
-        if (itr->second && 
+        if (itr->second &&
             itr->second->GetPlayer() &&
             itr->second->GetPlayer()->IsInWorld() &&
             itr->second != self)
@@ -822,7 +824,7 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
     {
-        if (itr->second && 
+        if (itr->second &&
             itr->second->GetPlayer() &&
             itr->second->GetPlayer()->IsInWorld() &&
             itr->second->GetPlayer()->GetZoneId() == zone &&
@@ -979,7 +981,7 @@ void World::ShutdownServ(uint32 time, bool idle)
         if(!idle || GetSessionCount()==0)
             m_stopEvent = true;
         else
-            m_ShutdownTimer = 1; //So that the session count is re-evaluated at next world tick
+            m_ShutdownTimer = 1;                            //So that the session count is re-evaluated at next world tick
     }
     ///- Else set the shutdown timer and warn users
     else

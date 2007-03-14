@@ -350,12 +350,12 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     for (; skill_itr!=info->skill.end(); )
     {
-            tskill = (*skill_itr);
+        tskill = (*skill_itr);
 
         if (tskill)
         {
             sLog.outDebug("PLAYER: Adding initial skill line, skillId = %u, value = 5, max = 5", tskill);
-            SetSkill(tskill, 5, 5);                      // (5,5) is default values for skill pages
+            SetSkill(tskill, 5, 5);                         // (5,5) is default values for skill pages
         }
 
         skill_itr++;
@@ -1198,7 +1198,6 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // preper zone change detect
     uint32 old_zone = GetZoneId();
 
-
     // if we were on a transport, leave
     if (ignore_transport && m_transport)
     {
@@ -1302,7 +1301,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     UpdateZone();
 
-    if(old_zone != GetZoneId() && pvpInfo.inHostileArea)        // only at zone change
+    if(old_zone != GetZoneId() && pvpInfo.inHostileArea)    // only at zone change
         CastSpell(this, 2479, false);
 }
 
@@ -1537,7 +1536,6 @@ bool Player::CanInteractWithNPCs(bool alive) const
 
     return true;
 }
-
 
 bool Player::IsUnderWater() const
 {
@@ -1789,16 +1787,16 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     // Base crit values
     switch(getClass())
     {
-    case CLASS_PALADIN: SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.7 ); break;
-    case CLASS_PRIEST:  SetFloatValue(PLAYER_CRIT_PERCENTAGE, 3.0 ); break;
-    case CLASS_SHAMAN:  SetFloatValue(PLAYER_CRIT_PERCENTAGE, 1.7 ); break;
-    case CLASS_MAGE:    SetFloatValue(PLAYER_CRIT_PERCENTAGE, 3.2 ); break;
-    case CLASS_WARLOCK: SetFloatValue(PLAYER_CRIT_PERCENTAGE, 2.0 ); break;
-    case CLASS_DRUID:   SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.92); break;
-    case CLASS_ROGUE:
-    case CLASS_HUNTER:  
-    case CLASS_WARRIOR:
-    default:            SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.0 ); break;
+        case CLASS_PALADIN: SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.7 ); break;
+        case CLASS_PRIEST:  SetFloatValue(PLAYER_CRIT_PERCENTAGE, 3.0 ); break;
+        case CLASS_SHAMAN:  SetFloatValue(PLAYER_CRIT_PERCENTAGE, 1.7 ); break;
+        case CLASS_MAGE:    SetFloatValue(PLAYER_CRIT_PERCENTAGE, 3.2 ); break;
+        case CLASS_WARLOCK: SetFloatValue(PLAYER_CRIT_PERCENTAGE, 2.0 ); break;
+        case CLASS_DRUID:   SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.92); break;
+        case CLASS_ROGUE:
+        case CLASS_HUNTER:
+        case CLASS_WARRIOR:
+        default:            SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.0 ); break;
     }
 
     // Base parry pecents
@@ -2177,7 +2175,7 @@ void Player::removeSpell(uint16 spell_id)
 
                 SetSkill(prevSkill->skill,skill_value,skill_max_value);
             }
-        }       
+        }
 
     }
 
@@ -10362,10 +10360,9 @@ void Player::_LoadQuestStatus()
                         mQuestStatus[quest_id].m_timer = 1;
                     else
                         mQuestStatus[quest_id].m_timer = (quest_time - sWorld.GetGameTime()) * 1000;
-                    }
+                }
                 else
                     quest_time = 0;
-
 
                 mQuestStatus[quest_id].m_creatureOrGOcount[0] = fields[5].GetUInt32();
                 mQuestStatus[quest_id].m_creatureOrGOcount[1] = fields[6].GetUInt32();
@@ -10379,9 +10376,9 @@ void Player::_LoadQuestStatus()
                 mQuestStatus[quest_id].uState = QUEST_UNCHANGED;
 
                 // add to quest log
-                if( slot < MAX_QUEST_LOG_SIZE && 
-                    ( mQuestStatus[quest_id].m_status==QUEST_STATUS_INCOMPLETE || 
-                      mQuestStatus[quest_id].m_status==QUEST_STATUS_COMPLETE && !mQuestStatus[quest_id].m_rewarded ) )
+                if( slot < MAX_QUEST_LOG_SIZE &&
+                    ( mQuestStatus[quest_id].m_status==QUEST_STATUS_INCOMPLETE ||
+                    mQuestStatus[quest_id].m_status==QUEST_STATUS_COMPLETE && !mQuestStatus[quest_id].m_rewarded ) )
                 {
                     uint32 state = 0;
                     if(mQuestStatus[quest_id].m_status == QUEST_STATUS_COMPLETE)
@@ -10554,8 +10551,8 @@ void Player::SaveToDB()
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     bool inworld = IsInWorld();
-//    if (inworld)
-//        RemoveFromWorld();
+    //    if (inworld)
+    //        RemoveFromWorld();
 
     // remember base (exactly) power/health values before temporary set to saved currentPower/currentHealth data
     uint32 baseHealth = GetUInt32Value(UNIT_FIELD_HEALTH);
@@ -10691,8 +10688,8 @@ void Player::SaveToDB()
         _ApplyAllItemMods();
     }
 
-//    if (inworld)
-//        AddToWorld();
+    //    if (inworld)
+    //        AddToWorld();
 
     // save hunter pet level and expirience at owner save. spells and etc for summoned pets saved at learn and apply.
     Pet* pet = GetPet();
@@ -11159,7 +11156,7 @@ void Player::PetSpellInitialize()
 {
     Pet* pet = GetPet();
 
-    // FIXME: charmed case 
+    // FIXME: charmed case
     //if(!pet)
     // pet = GetCharm();
 
@@ -11190,9 +11187,11 @@ void Player::PetSpellInitialize()
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
         {
             if (pet->HasActState(STATE_RA_SPELL1 << i))
-                data << uint16 (pet->m_spells[i]) << uint16 (0xC100); // Spell enabled
+                                                            // Spell enabled
+                data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
             else
-                data << uint16 (pet->m_spells[i]) << uint16 (0x8100); // Spell disabled
+                                                            // Spell disabled
+                data << uint16 (pet->m_spells[i]) << uint16 (0x8100);
         }
 
         data << uint16 (2) << uint16(State << 8);           // 2 command from 0x600 group place to 8 slot
@@ -11225,9 +11224,9 @@ void Player::PetSpellInitialize()
                         if(pet->m_spells[i] == spellInfo->EffectTriggerSpell[0])
                         {
                             if (pet->HasActState(STATE_RA_SPELL1 << i))
-                                data << uint16(0xC1); // Spell enabled
+                                data << uint16(0xC1);       // Spell enabled
                             else
-                                data << uint16(0x81); // Spell disabled
+                                data << uint16(0x81);       // Spell disabled
                             hasthisspell = true;
                             break;
                         }
@@ -11637,7 +11636,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                 break;
             }
         }
-        
+
         if( !vendorslot )
         {
             SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
@@ -11645,13 +11644,13 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         }
         else
             vendorslot -= 1;
-        
+
         if( pCreature->GetMaxItemCount( vendorslot ) != 0 && pCreature->GetItemCount( vendorslot ) < count )
         {
             SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
             return;
         }
-        
+
         // not check level requiremnt for normal items (PvP related bonus items is another case)
         if(pProto->RequiredHonorRank && (GetHonorHighestRank() < pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
         {
@@ -11666,12 +11665,12 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             return;
         }
 
-        uint8 bag = 0; // init for case invalid bagGUID
+        uint8 bag = 0;                                      // init for case invalid bagGUID
         uint16 dest = 0;
 
         if (bagguid != NULL_BAG && slot != NULL_SLOT)
         {
-            Bag *pBag;                                              
+            Bag *pBag;
             if( bagguid == GetGUID() )
             {
                 bag = INVENTORY_SLOT_BAG_0;

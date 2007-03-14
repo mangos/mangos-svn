@@ -1853,7 +1853,7 @@ uint8 Spell::CanCast()
                     }
                 }
                 break;
-            } 
+            }
             case SPELL_EFFECT_TAMECREATURE:
             {
                 if (!unitTarget || unitTarget->GetTypeId() == TYPEID_PLAYER)
@@ -2532,7 +2532,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
         ((Player*)Target)->TeleportTo(TC.mapId,TC.x,TC.y,TC.z,Target->GetOrientation());
     }
     else
-    if(m_spellInfo->Id == 7355)                             // Stuck
+    if(m_spellInfo->Id == 7355)                         // Stuck
     {
         PlayerInfo const *info = objmgr.GetPlayerInfo(Target->getRace(), Target->getClass());
 

@@ -364,7 +364,7 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
             ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()));
 
             grid->SetGridState(GRID_STATE_ACTIVE);
-    
+
             if( add_player && player != NULL )
                 (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(player, player->GetGUID());
             i_gridStatus[cell.GridX()] |= mask;
@@ -392,7 +392,6 @@ Map::LoadGrid(const Cell& cell, bool no_unload)
 
             // Add resurrectable corpses to world obect list in grid
             ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()));
-
 
             i_gridStatus[cell.GridX()] |= mask;
             if(no_unload)
@@ -430,7 +429,6 @@ void Map::Add(Player *player)
     cell.data.Part.reserved = ALL_DISTRICT;
     NotifyPlayerVisibility(cell, p, player);
 }
-
 
 template<class T>
 void
@@ -743,7 +741,7 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
     TypeContainerVisitor<MaNGOS::NotVisibleNotifier, GridTypeMapContainer >  grid_object_notifier2(notifier2);
 
     cell_lock = CellLock<ReadGuard>(old_cell, old_val);
-    
+
     cell_lock->Visit(cell_lock, world_object_notifier2, *this);
     cell_lock->Visit(cell_lock, grid_object_notifier2, *this);
 
@@ -1171,7 +1169,7 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
 {
     Cell const& cur_cell = c->GetCurrentCell();
 
-    if(!i_grids[cur_cell.GridX()][cur_cell.GridY()] || 
+    if(!i_grids[cur_cell.GridX()][cur_cell.GridY()] ||
         FindInGrid<Creature>(c->GetGUID(),i_grids[cur_cell.GridX()][cur_cell.GridY()],cur_cell)!=c)
     {
         sLog.outError("ERROR: %s (GUID: %u) not find in %s grid[%u,%u]cell[%u,%u]",

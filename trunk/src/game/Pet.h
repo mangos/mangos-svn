@@ -105,7 +105,7 @@ class Pet : public Creature
         void InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
 
-        bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved) 
+        bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
     protected:
         uint32  m_regenTimer;
         uint32  m_actState;

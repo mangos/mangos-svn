@@ -593,7 +593,6 @@ Player* Group::GetMemberForXPAtKill(uint8 id, Unit const* victim)
     return member;
 }
 
-
 uint32 Group::GetMemberCountForXPAtKill(Unit const* victim)
 {
     uint32 count = 0;
@@ -606,7 +605,6 @@ uint32 Group::GetMemberCountForXPAtKill(Unit const* victim)
     }
     return count;
 }
-
 
 void Group::SendInit(WorldSession *session)
 {

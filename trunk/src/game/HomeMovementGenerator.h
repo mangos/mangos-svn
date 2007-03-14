@@ -38,6 +38,6 @@ class MANGOS_DLL_SPEC HomeMovementGenerator : public MovementGenerator
         void _setTargetLocation(Creature &);
 
         uint32 i_travel_timer;
-        void _reLocate(Creature &); 
+        void _reLocate(Creature &);
 };
 #endif

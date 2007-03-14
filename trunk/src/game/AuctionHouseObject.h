@@ -19,14 +19,16 @@
 #ifndef AuctionHouse
 #define AuctionHouse
 
-enum AuctionError {
+enum AuctionError
+{
     AUCTION_OK = 0,
     AUCTION_INTERNAL_ERROR = 2,
     AUCTION_NOT_ENOUGHT_MONEY = 3,
     CANNOT_BID_YOUR_AUCTION_ERROR = 10
 };
 
-enum AuctionAction {
+enum AuctionAction
+{
     AUCTION_SELL_ITEM = 0,
     AUCTION_CANCEL = 1,
     AUCTION_PLACE_BID = 2
@@ -41,60 +43,58 @@ struct AuctionEntry
     uint32 owner;
     uint32 startbid;
     uint32 bid;
-    uint32 outBid;                          //used only when auction is in ram, it isn't saved to DB
+    uint32 outBid;                                          //used only when auction is in ram, it isn't saved to DB
     uint32 buyout;
     time_t time;
     uint32 bidder;
-    uint32 deposit;                         //deposit can be calculated only when creating auction
+    uint32 deposit;                                         //deposit can be calculated only when creating auction
     uint32 location;
 };
 
 //this class is used as auctionhouse instance
 class AuctionHouseObject
 {
-public:
-    AuctionHouseObject() {}
-    ~AuctionHouseObject()
-    {
-        for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
-            delete itr->second;
-    }
-
-    typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
-
-    uint32 Getcount() { return AuctionsMap.size(); }
-
-    AuctionEntryMap::iterator GetAuctionsBegin() {return AuctionsMap.begin();}
-    AuctionEntryMap::iterator GetAuctionsEnd() {return AuctionsMap.end();}
-
-
-    void AddAuction(AuctionEntry *ah)
-    {
-        ASSERT( ah );
-        AuctionsMap[ah->Id] = ah;
-    }
-    
-    AuctionEntry* GetAuction(uint32 id) const
-    {
-        AuctionEntryMap::const_iterator itr = AuctionsMap.find( id );
-        if( itr != AuctionsMap.end() )
-            return itr->second;
-        return NULL;
-    }
-
-    bool RemoveAuction(uint32 id)
-    {
-        AuctionEntryMap::iterator i = AuctionsMap.find(id);
-        if (i == AuctionsMap.end())
+    public:
+        AuctionHouseObject() {}
+        ~AuctionHouseObject()
         {
-            return false;
+            for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
+                delete itr->second;
         }
-        AuctionsMap.erase(i);
-        return true;
-    }
 
-private:
-    AuctionEntryMap AuctionsMap;
+        typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
+
+        uint32 Getcount() { return AuctionsMap.size(); }
+
+        AuctionEntryMap::iterator GetAuctionsBegin() {return AuctionsMap.begin();}
+        AuctionEntryMap::iterator GetAuctionsEnd() {return AuctionsMap.end();}
+
+        void AddAuction(AuctionEntry *ah)
+        {
+            ASSERT( ah );
+            AuctionsMap[ah->Id] = ah;
+        }
+
+        AuctionEntry* GetAuction(uint32 id) const
+        {
+            AuctionEntryMap::const_iterator itr = AuctionsMap.find( id );
+            if( itr != AuctionsMap.end() )
+                return itr->second;
+            return NULL;
+        }
+
+        bool RemoveAuction(uint32 id)
+        {
+            AuctionEntryMap::iterator i = AuctionsMap.find(id);
+            if (i == AuctionsMap.end())
+            {
+                return false;
+            }
+            AuctionsMap.erase(i);
+            return true;
+        }
+
+    private:
+        AuctionEntryMap AuctionsMap;
 };
-
 #endif

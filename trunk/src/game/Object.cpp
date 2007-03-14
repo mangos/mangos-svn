@@ -74,7 +74,6 @@ void Object::_InitValues()
     m_objectUpdated = false;
 }
 
-
 void Object::_Create( uint32 guidlow, uint32 guidhigh )
 {
     if(!m_uint32Values) _InitValues();
@@ -335,7 +334,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
             if( updateMask->GetBit( index ) )
             {
                 // Some values at server stored in float format but must be sended to client in uint32 format
-                if( // unit fields
+                if(                                         // unit fields
                     index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
                     index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
                     index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES + 6 ||

@@ -83,7 +83,7 @@ class MANGOS_DLL_SPEC Object
                 return;
 
             m_inWorld = true;
-            
+
             // synchronize values mirror with values array (changes will send in updatecreate opcode any way
             ClearUpdateMask();
         }
