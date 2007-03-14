@@ -314,6 +314,8 @@ void World::SetInitialWorldSettings()
         m_configs[CONFIG_MAX_OVERSPEED_PINGS] = 2;
     }
 
+    m_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY] = sConfig.GetIntDefault("SaveRespawnTimeImmediately",1);  
+    
     ///- Read the "Data" directory from the config file
     m_dataPath = sConfig.GetStringDefault("DataDir","./");
     if((m_dataPath.at(m_dataPath.length()-1)!='/') && (m_dataPath.at(m_dataPath.length()-1)!='\\'))

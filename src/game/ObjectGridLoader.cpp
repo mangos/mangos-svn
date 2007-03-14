@@ -232,7 +232,9 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
 
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        iter->second->SaveRespawnTime();
+        // if option set then object already saved at this moment
+        if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
+            iter->second->SaveRespawnTime();
         delete iter->second;
     }
 
@@ -252,7 +254,9 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
 
     for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        iter->second->SaveRespawnTime();
+        // if option set then object already saved at this moment
+        if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
+            iter->second->SaveRespawnTime();
         delete iter->second;
     }
 

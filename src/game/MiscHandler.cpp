@@ -701,6 +701,8 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
 
     // update world right away
     MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Add(GetPlayer());
+
+    GetPlayer()->SaveToDB();
 }
 
 void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
@@ -750,6 +752,8 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     GetPlayer()->m_resurrectGUID = 0;
     GetPlayer()->m_resurrectHealth = GetPlayer()->m_resurrectMana = 0;
     GetPlayer()->m_resurrectX = GetPlayer()->m_resurrectY = GetPlayer()->m_resurrectZ = 0;
+
+    GetPlayer()->SaveToDB();
 }
 
 void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)

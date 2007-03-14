@@ -1279,8 +1279,8 @@ void Creature::setDeathState(DeathState s)
     {
         m_deathTimer = m_corpseDelay*1000;
 
-        // save booss respawn time at death to prevent crash cheating
-        if(isWorldBoss())
+        // always save boss respawn time at death to prevent crash cheating
+        if(sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY) || isWorldBoss())
             SaveRespawnTime();
 
         if(!IsStopped()) StopMoving();

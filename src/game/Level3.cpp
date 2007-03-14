@@ -2141,6 +2141,7 @@ bool ChatHandler::HandleReviveCommand(const char* args)
     SelectedPlayer->ResurrectPlayer();
     SelectedPlayer->SetHealth( SelectedPlayer->GetMaxHealth()/2 );
     SelectedPlayer->SpawnCorpseBones();
+    SelectedPlayer->SaveToDB();
     return true;
 }
 

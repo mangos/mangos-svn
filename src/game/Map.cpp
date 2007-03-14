@@ -661,7 +661,9 @@ Map::Remove(T *obj, bool remove)
 
     if( remove )
     {
-        obj->SaveRespawnTime();
+        // if option set then object already saved at this moment
+        if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
+            obj->SaveRespawnTime();
         DeleteFromWorld(obj);
     }
 }

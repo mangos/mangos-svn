@@ -405,6 +405,8 @@ void WorldSession::SendSpiritResurrect()
         if(corpseGrave != ghostGrave)
             _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
     }
+
+    _player->SaveToDB();
 }
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
