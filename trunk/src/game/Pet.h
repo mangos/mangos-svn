@@ -49,9 +49,11 @@ enum PetState
 
 enum PetSaveMode
 {
-    PET_SAVE_AS_CURRENT     = 0,
-    PET_SAVE_AS_STORED      = 1,
-    PET_SAVE_AS_DELETED     = 2
+    PET_SAVE_AS_DELETED       =-1,
+    PET_SAVE_AS_CURRENT       = 0,
+    PET_SAVE_IN_STABLE_SLOT_1 = 1,
+    PET_SAVE_IN_STABLE_SLOT_2 = 2,
+    PET_SAVE_NOT_IN_SLOT      = 3
 };
 
 // Used for values in CreatureFamilyEntry.petDietMask
@@ -87,9 +89,10 @@ class Pet : public Creature
         void SetFealty(uint32 fealty) { m_fealty=fealty; }
         PetType getPetType() const { return m_petType; }
         bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
+        uint32 GetPetNumber() const { return GetUInt32Value(UNIT_FIELD_PETNUMBER); }
 
         bool CreateBaseAtCreature( Creature* creature );
-        bool LoadPetFromDB( Unit* owner,uint32 petentry = 0 );
+        bool LoadPetFromDB( Unit* owner,uint32 petentry = 0,uint32 petnumber = 0 );
         void SavePetToDB(PetSaveMode mode);
         void Remove(PetSaveMode mode);
 
@@ -101,10 +104,12 @@ class Pet : public Creature
         void GivePetLevel(uint32 level);
         void InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
+
+        bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved) 
     protected:
-        uint32 m_regenTimer;
-        uint32 m_actState;
-        uint32 m_fealty;
+        uint32  m_regenTimer;
+        uint32  m_actState;
+        uint32  m_fealty;
         PetType m_petType;
     private:
         void SaveToDB()                                     // overwrited of Creature::SaveToDB     - don't must be called

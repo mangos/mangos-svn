@@ -118,7 +118,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 }
                 case 3:                                     // abandon (hunter pet) or dismiss (summoned pet)
                     if(pet->isPet())
-                        _player->RemovePet((Pet*)pet,((Pet*)pet)->getPetType()==HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_AS_STORED);
+                        _player->RemovePet((Pet*)pet,((Pet*)pet)->getPetType()==HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT);
                     else                                    // charmed
                         _player->Uncharm();
                     break;
@@ -219,7 +219,7 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
 {
     Pet* pet=ObjectAccessor::Instance().GetPet(petguid);
-    if(!pet || !pet->GetEntry())
+    if(!pet || pet->GetPetNumber() != petnumber)
         return;
 
     std::string name = pet->GetName();
@@ -302,9 +302,9 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     pet->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME);
 
     sDatabase.escape_string(name);
-    sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s', `renamed` = '1' WHERE `owner` = '%u' AND `entry` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetEntry() );
+    sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s', `renamed` = '1' WHERE `owner` = '%u' AND `id` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetPetNumber() );
 
-    SendPetNameQuery(petguid,pet->GetUInt32Value(UNIT_FIELD_PETNUMBER));
+    SendPetNameQuery(petguid,pet->GetPetNumber());
 }
 
 void WorldSession::HandlePetAbandon( WorldPacket & recv_data )

@@ -174,6 +174,8 @@ Player::Player (WorldSession *session): Unit()
 
     for (int i = 0; i < MAX_MOVE_TYPE; ++i)
         m_forced_speed_changes[i] = 0;
+
+    m_stableSlots = 0;
 }
 
 Player::~Player ()
@@ -962,7 +964,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
         // show pet at selection character in character list  only for non-ghost character
         if(isAlive())
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `current` = '1'", GetGUIDLow() );
+            QueryResult *result = sDatabase.PQuery("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'", GetGUIDLow() );
             if(result)
             {
                 Field* fields = result->Fetch();
@@ -1995,6 +1997,12 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             m_spells.erase(itr);
             state = PLAYERSPELL_CHANGED;
         }
+        else if (state == PLAYERSPELL_UNCHANGED && itr->second->state != PLAYERSPELL_UNCHANGED)
+        {
+            // can be in case spell loading but learned at some previous spell loading
+            itr->second->state = PLAYERSPELL_UNCHANGED;
+            return false;
+        }
         else
             return false;
     }
@@ -2754,7 +2762,6 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_stable` WHERE `owner` = '%u'",guid);
 
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
     m_ignorelist.clear();
@@ -9815,8 +9822,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12             13         14       15          16          17          18           19            20                  21                  22                  23        24        25        26         27          28
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate` FROM `character` WHERE `guid` = '%u'",guid);
+    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12             13         14       15          16          17          18           19            20                  21                  22                  23        24        25        26         27          28        29
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`highest_rank`,`standing`,`rating`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots` FROM `character` WHERE `guid` = '%u'",guid);
 
     if(!result)
     {
@@ -9956,6 +9963,13 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadTaxiMask( fields[11].GetString() );
 
     uint32 gmstate = fields[28].GetUInt32();
+
+    m_stableSlots = fields[29].GetUInt32();
+    if(m_stableSlots > 2)
+    {
+        sLog.outError("Player can have not more 2 stable slots, but have in DB %u",uint32(m_stableSlots));
+        m_stableSlots = 2;
+    }
 
     delete result;
 
@@ -10562,7 +10576,7 @@ void Player::SaveToDB()
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
-        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate` ) VALUES ("
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots` ) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -10632,6 +10646,9 @@ void Player::SaveToDB()
 
     ss << ", ";
     ss << (isGameMaster()? 1 : 0);
+
+    ss << ", ";
+    ss << uint32(m_stableSlots);                            // to prevent save uint8 as char
 
     ss << " )";
 
@@ -10904,6 +10921,7 @@ void Player::_SaveSpells()
             sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u' and `spell` = '%u'", GetGUIDLow(), itr->first);
         if (itr->second->state == PLAYERSPELL_NEW || itr->second->state == PLAYERSPELL_CHANGED)
             sDatabase.PExecute("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), itr->first, itr->second->slotId,itr->second->active);
+
         if (itr->second->state == PLAYERSPELL_REMOVED)
             _removeSpell(itr->first);
         else
@@ -11109,6 +11127,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode)
 
     pet->CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(pet);
+    pet->m_removed = true;
 
     if(pet->isControlled())
     {
@@ -11179,7 +11198,7 @@ void Player::PetSpellInitialize()
         data << uint16 (1) << uint16(State << 8);           // 1 command from 0x600 group place to 9 slot
         data << uint16 (0) << uint16(State << 8);           // 0 command from 0x600 group place to 10 slot
 
-        if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        if(pet->isControlled())
         {
             for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
             {
@@ -11190,7 +11209,7 @@ void Player::PetSpellInitialize()
 
         data << uint8(addlist);
 
-        if(pet->GetUInt32Value(UNIT_FIELD_PETNUMBER))
+        if(pet->isControlled())
         {
             for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
             {
