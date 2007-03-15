@@ -50,7 +50,8 @@ class MANGOS_DLL_SPEC WorldSession
         WorldSession(uint32 id, WorldSocket *sock, uint32 sec);
         ~WorldSession();
 
-        inline bool PlayerLoading() { return m_playerLoading; }
+        bool PlayerLoading() { return m_playerLoading; }
+
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
         void SendPacket(WorldPacket* packet);
@@ -469,6 +470,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         time_t _logoutTime;
         bool m_playerLoading;
+        bool m_playerRecentlyLogout;
 
         ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> _recvQueue;
 };
