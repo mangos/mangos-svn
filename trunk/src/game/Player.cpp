@@ -8587,6 +8587,9 @@ bool Player::CanCompleteQuest( uint32 quest_id )
 
         Quest* qInfo = objmgr.QuestTemplates[quest_id];
 
+        if(!qInfo)
+            return false;
+
         // auto complete quest
         if (qInfo->IsAutoComplete() && CanTakeQuest(qInfo, false))
             return true;
