@@ -49,10 +49,10 @@ AC_CHECK_LIB( pthread, pthread_create, [],
          [], [AC_MSG_ERROR([Missing pthread])])
     ])
 AC_CHECK_LIB( z, compress, [ZLIB=-lz],[AC_MSG_ERROR([Missing zlib])] )
-#AC_CHECK_LIB( mysqlclient, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
 AC_CHECK_LIB( compat, ftime, [COMPATLIB=-lcompat] )
-AC_CHECK_LIB( ssl, SHA1_Init, [SSLLIB=-lssl], [AC_MSG_ERROR([Missing openssl])])
+AC_CHECK_LIB( crypto, SHA1_Init, [SSLLIB=-lssl], [AC_MSG_ERROR([Missing openssl])])
 
+#AC_CHECK_LIB( mysqlclient, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
 AC_ARG_WITH(mysql-libs,
 [  --with-mysql-libs=DIR     Look for mysql libs in this dir ],
     MYSQL_LIBS="-L$withval -lmysqlclient"
@@ -129,6 +129,11 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_CHECK_HEADERS([ arpa/inet.h fcntl.h limits.h locale.h malloc.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h strings.h sys/ioctl.h sys/param.h sys/socket.h sys/timeb.h sys/time.h termios.h unistd.h  ])
 
+AC_CHECK_HEADERS([pthread.h])
+AC_CHECK_HEADERS([openssl/md5.h openssl/rand.h openssl/ssl.h openssl/sha.h openssl/bn.h])
+AC_CHECK_HEADERS([mysql.h mysql/mysql.h])
+AC_CHECK_HEADERS([zlib.h])
+
 ## Check for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
@@ -163,7 +168,7 @@ AC_SUBST(MANGOSD_ENABLE_CLI)
 AC_SUBST(MANGOSD_ENABLE_RA)
 
 ## Set output files.
-AC_CONFIG_HEADERS( [config.h] )
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
    dep/include/Makefile
    dep/lib/Makefile
