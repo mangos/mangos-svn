@@ -73,7 +73,7 @@ MotionMaster::Clear(bool reset)
 }
 
 void
-MotionMaster::MovementExpired()
+MotionMaster::MovementExpired(bool reset)
 {
     if( empty() || size() == 1 )
         return;
@@ -85,7 +85,15 @@ MotionMaster::MovementExpired()
         delete curr;
 
     assert( !empty() );
-    top()->Reset(*i_owner);
+    while( !empty() && top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE ){
+        // Should check if target is still valid? If not valid it will crash.
+        curr = top();
+        pop();
+        delete curr;
+    } 
+    if( empty() )
+        Initialize();
+    if (reset) top()->Reset(*i_owner);
 }
 
 void
