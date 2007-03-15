@@ -45,7 +45,7 @@ enum SessionStatus
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec) : _player(NULL), _socket(sock),
-_security(sec), _accountId(id), _logoutTime(0), m_playerLoading(false)
+_security(sec), _accountId(id), _logoutTime(0), m_playerLoading(false), m_playerRecentlyLogout(false)
 {
 
 }
@@ -112,12 +112,20 @@ bool WorldSession::Update(uint32 diff)
         {
             if (table[i].opcode == packet->GetOpcode())
             {
-                if (table[i].status == STATUS_AUTHED ||
-                    (table[i].status == STATUS_LOGGEDIN && _player))
+                // more often case first
+                if (table[i].status == STATUS_LOGGEDIN && _player)
                 {
                     (this->*table[i].handler)(*packet);
                 }
                 else
+                if (table[i].status == STATUS_AUTHED)
+                {
+                    m_playerRecentlyLogout = false;
+                    (this->*table[i].handler)(*packet);
+                }
+                else
+                // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
+                if(!m_playerRecentlyLogout)
                 {
                     sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",
                         LookupName(packet->GetOpcode(), g_worldOpcodeNames),
@@ -273,6 +281,7 @@ void WorldSession::LogoutPlayer(bool Save)
         sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
 
+    m_playerRecentlyLogout = true;
     LogoutRequest(0);
 }
 
