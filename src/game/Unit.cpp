@@ -250,34 +250,25 @@ bool Unit::HasAuraType(uint32 auraType) const
     return (!m_modAuras[auraType].empty());
 }
 
-void Unit::RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype)
+
+/* Called by DealDamage for auras that have a chance to be dispelled on damage taken. */
+void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
 {
     if(!HasAuraType(auraType))
         return;
 
-    AuraList& damageaura = GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-
-    switch(damagetype)
-    {
-        case DIRECT_DAMAGE:
-        case SPELL_DIRECT_DAMAGE:
-            RemoveSpellsCausingAura(auraType);
-            return;
-        case DOT:
-            if(damageaura.size()==0)
-                return;
-            //if(auraType == SPELL_AURA_MOD_ROOT && damageaura.size() < 2) //sometimes Roots can break themselves - need to fix
-            //    return;
-            if(30.0f > urand(0,100))                        //30% chance to break a spell
-                RemoveSpellsCausingAura(auraType);
-            return;
-
-        default:
-            return;
-    }
+    /* Note: This formula is a first approximation attempt. It is probably wrong, but better than
+     * the all or nothing mechanism we had before.
+     *
+     * The chance to dispell an aura depends on the damage taken with respect to the maximum health.
+     * Damage of 75% or greater always dispells the aura. */
+    float rel_dmg = (float)damage / GetMaxHealth();
+    if (rand_chance() < rel_dmg / 0.75 * 100.0)
+        RemoveSpellsCausingAura(auraType);
 }
 
-void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint8 damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
+void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint8 damageSchool, 
+                      SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
 
@@ -291,8 +282,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
     if(hasUnitState(UNIT_STAT_DIED))
         RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damagetype);
-    pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damagetype);
+    pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage);
+    // root type spells do not dispell the root effect
+    if(!spellProto || spellProto->Mechanic != MECHANIC_ROOT)
+        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
@@ -312,7 +305,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
     DEBUG_LOG("DealDamageStart");
 
     uint32 health = pVictim->GetHealth();
-    sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
+    sLog.outDetail("deal dmg:%d to health:%d ",damage,health);
 
     // duel ends when player has 1 or less hp
     bool duel_hasEnded = false;
@@ -374,23 +367,23 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 pet->DeleteInHateListOf();
             }
         }
-        else
+        else // creature died
         {
+            DEBUG_LOG("DealDamageNotPlayer");
+
             if(((Creature*)pVictim)->isPet())
                 pVictim->DeleteInHateListOf();
-            else
+            else {
                 pVictim->DeleteThreatList();
-            DEBUG_LOG("DealDamageNotPlayer");
-            if(!((Creature*)pVictim)->isPet())
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-
+            }
             // Call creature just died function
             ((Creature*)pVictim)->AI().JustDied(this);
         }
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
         bool PvP = false;
-        Player *player = 0;
+        Player *player = NULL;
 
         if(GetTypeId() == TYPEID_PLAYER)
         {
@@ -408,6 +401,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             {
                 player = (Player*)owner;
                 player->ClearInCombat();
+                if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                    PvP = true;
             }
 
             if(pet->GetTypeId()==TYPEID_UNIT && ((Creature*)pet)->isPet())
@@ -454,7 +449,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                         }
                     }
                 }
-                else
+                else // if (pGroup)
                 {
                     DEBUG_LOG("Player kill enemy alone");
                     player->GiveXP(xp, pVictim);
@@ -463,13 +458,13 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                         pet->GivePetXP(xp);
                     }
                     player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
-                }
+                } // if-else (pGroup)
 
                 if(xp || honordiff < 0)
                     ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
-            }
+            } // if (!PvP)
         }
-        else
+        else // if (player)
         {
             DEBUG_LOG("Monster kill Monster");
         }
@@ -498,7 +493,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             he->DuelComplete(0);
         }
     }
-    else
+    else // if (health <= damage)
     {
         DEBUG_LOG("DealDamageAlive");
 
@@ -533,7 +528,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 damage *= 2;
             pVictim->AddThreat(this, damage, damageSchool, spellProto);
         }
-        else
+        else // victim is a player
         {
             // rage from received damage (from creatures and players)
             if( pVictim != this                             // not generate rage for self damage (falls, ...)
@@ -542,8 +537,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 ((Player*)pVictim)->CalcRage(damage,false);
 
             // random durability for items (HIT)
-            int randdurability = urand(0, 300);
-            if (randdurability == 10)
+            if (urand(0,300) == 10)
             {
                 DEBUG_LOG("HIT: We decrease durability with 5 percent");
                 ((Player*)pVictim)->DurabilityLossAll(0.05);
@@ -551,20 +545,22 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
         }
 
         // TODO: Store auras by interrupt flag to speed this up.
-        // TODO: Fix roots that should not break from its own damage.
         AuraMap& vAuras = pVictim->GetAuras();
         for (AuraMap::iterator i = vAuras.begin(), next; i != vAuras.end(); i = next)
         {
+            const SpellEntry *se = i->second->GetSpellProto();
             next = i; next++;
-            if (i->second->GetSpellProto()->AuraInterruptFlags & (1<<1))
+            if (se->AuraInterruptFlags & (1<<1))
             {
                 bool remove = true;
-                if (i->second->GetSpellProto()->procFlags & (1<<3))
-                    if (i->second->GetSpellProto()->procChance < rand_chance())
+                if (se->procFlags & (1<<3)) {
+                    if (se->procChance < rand_chance())
                         remove = false;
+                }
                 if (remove)
                 {
                     pVictim->RemoveAurasDueToSpell(i->second->GetId());
+                    // FIXME: this may cause the auras with proc chance to be rerolled several times
                     next = vAuras.begin();
                 }
             }
@@ -773,13 +769,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
 
-        // prevent breaking roots by roots periodic damage
-        for(uint8 i = 0; i < 3; i++)
-        {
-            //HasAuraType(SPELL_AURA_MOD_ROOT))
-            if(spellProto->EffectApplyAuraName[i] == SPELL_AURA_MOD_ROOT)
-                damagetype = SELF_DAMAGE;
-        }
         DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), damagetype, spellProto->School, spellProto, procFlag, true);
         ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
     }
@@ -791,7 +780,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         SendMessageToSet(&data,true);
 
         DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
-
         ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL || mod->m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
@@ -3010,7 +2998,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     sLog.outDebug("ProcDamageAndSpell: casting triggered by an attacker spell %u", i->first->Id);
                     if(IsPositiveSpell(i->first->Id) && !(i->second & PROC_FLAG_HEAL))
                         CastSpell(this,i->first->Id,true);
-                    else if(pVictim)
+                    else if(pVictim && pVictim->isAlive())
                         CastSpell(pVictim,i->first->Id,true);
                 }
                 else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
@@ -3020,14 +3008,17 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     // TODO: remove hack for Seal of Righteousness. That should not be there
                     if(i->first->SpellIconID == 25 && i->first->SpellVisual == 5622)
                         damage = (damage * GetAttackTime(BASE_ATTACK))/60/1000;
-                    if(pVictim)
+                    if(pVictim && pVictim->isAlive())
                         SpellNonMeleeDamageLog(pVictim, i->first->Id, damage, true);
                 }
                 else if(*aur == SPELL_AURA_DUMMY)
                 {
                     // TODO: write a DUMMY aura handle code
-                    sLog.outDebug("ProcDamageAndSpell: aura id %u with dummy effect (triggered by an attacker)", (*i).first->Id);
-                    HandleDummyAuraProc(pVictim, i->first, i->second, damage);
+                    if (pVictim->isAlive())
+                    {
+                        sLog.outDebug("ProcDamageAndSpell: aura id %u with dummy effect (triggered by an attacker)", (*i).first->Id);
+                        HandleDummyAuraProc(pVictim, i->first, i->second, damage);
+                    }
                 }
             }
 
@@ -3046,7 +3037,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
 
     // Now go on with a victim's events'n'auras
     // Not much to do if no flags are set or there is no victim
-    if(pVictim && procVictim)
+    if(pVictim && pVictim->isAlive() && procVictim)
     {
         // additinal auraTypes contains auras capable of proc'ing for victim
         auraTypes.push_back(SPELL_AURA_MOD_PARRY_PERCENT);
@@ -3638,24 +3629,53 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
 bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
 {
-    int32 critchance = m_baseSpellCritChance + int32(GetStat(STAT_INTELLECT)/100-1);
-    critchance = critchance > 0 ? critchance :0;
+    // Chance to crit is computed from INT and LEVEL as follows:
+    //   chance = base + INT / (rate0 + rate1 * LEVEL)
+    // The formula keeps the crit chance at %5 on every level unless the player
+    // increases his intelligence by other means (enchants, buffs, talents, ...)
+    static const struct {
+        float base;
+        float rate0, rate1;
+    } crit_data[MAX_CLASSES] = {
+        {0,0,10},             //  0: unused
+        {0,0,10},             //  1: warrior
+        {3.70, 14.77, 0.65},  //  2: paladin
+        {0,0,10},             //  3: hunter
+        {0,0,10},             //  4: rogue
+        {2.97, 10.03, 0.82},  //  5: priest
+        {0,0,10},             //  6: unused
+        {3.54, 11.51, 0.80},  //  7: shaman
+        {3.70, 14.77, 0.65},  //  8: mage
+        {3.18, 11.30, 0.82},  //  9: warlock
+        {0,0,10},             // 10: unused
+        {3.33, 12.41, 0.79}   // 11: druid
+    };
+    int32 crit_chance;
 
+    // only players use intelligence for critical chance computations
     if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, critchance);
+    {
+        int my_class = getClass();
+        float crit_ratio = crit_data[my_class].rate0 + crit_data[my_class].rate1*getLevel();
+        crit_chance = crit_data[my_class].base + GetStat(STAT_INTELLECT) / crit_ratio;
+        ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
+    }
+    else
+        crit_chance = m_baseSpellCritChance;
 
+    // TODO: can creatures have critical chance auras?
     AuraList& mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
     for(AuraList::iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
-            critchance += (*i)->GetModifier()->m_amount;
+            crit_chance += (*i)->GetModifier()->m_amount;
 
-    critchance = critchance > 0 ? critchance :0;
-    if(uint32(critchance) >= urand(0,100))
+    crit_chance = crit_chance > 0 ? crit_chance :0;
+    if(uint32(crit_chance) >= urand(0,100))
     {
-        int32 critbonus = *peffect / 2;
-        if (GetTypeId() == TYPEID_PLAYER)
-            ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, critbonus);
-        *peffect += critbonus;
+        int32 crit_bonus = *peffect / 2;
+        if (GetTypeId() == TYPEID_PLAYER)  // adds additional damage to crit_bonus (from talents)
+            ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+        *peffect += crit_bonus;
         return true;
     }
     return false;

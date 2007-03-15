@@ -661,7 +661,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         {
             return HasAuraType(SPELL_AURA_MOD_ROOT);
         }
-        void RemoveSpellbyDamageTaken(uint32 auraType, DamageEffectType damagetype);
+        void RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage);
 
         bool isTargetableForAttack();
         virtual bool IsInWater() const;
