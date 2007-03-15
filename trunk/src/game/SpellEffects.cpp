@@ -222,9 +222,28 @@ void Spell::EffectDummy(uint32 i)
         return;
 
     // More spell specific code in begining
+    if(m_spellInfo->Id == 13535)
+    {
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry( 13481 );
+
+        if(m_caster->GetTypeId() != TYPEID_PLAYER && !spellInfo)
+            return;
+
+        Spell spell(m_caster, spellInfo, true, m_triggeredByAura);
+        SpellCastTargets targets;
+
+        Unit* target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+        if(!target)
+            return;
+
+        targets.setUnitTarget(target);
+        spell.prepare(&targets);
+        return;
+    }
+
     if( m_spellInfo->Id == SPELL_ID_AGGRO )
     {
-        if( !unitTarget || !m_caster || !m_caster->getVictim() )
+        if( !m_caster || !m_caster->getVictim() )
             return;
 
         // only creature to creature
@@ -511,6 +530,7 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_AURAS_VISIBLE:
             case SPELL_AURA_MOD_STALKED:
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
+            case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
                 break;
             default:
                 if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat())

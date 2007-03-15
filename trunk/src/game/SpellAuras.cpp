@@ -803,8 +803,6 @@ void Aura::TriggerSpell()
         sLog.outError("Auras: unknown TriggerSpell:%i From spell: %i",  GetSpellProto()->EffectTriggerSpell[m_effIndex],GetSpellProto()->Id);
         return;
     }
-    if(GetSpellProto()->Id == 1515)
-        spellInfo = sSpellStore.LookupEntry( 13481 );
 
     Unit* caster = GetCaster();
 
@@ -1393,6 +1391,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
             if(caster->getVictim()==m_target)
                 caster->AttackStop();
             m_target->CombatStop();
+            m_target->DeleteThreatList();
         }
         else
         {
@@ -1466,6 +1465,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
             if(caster->getVictim()==m_target)
                 caster->AttackStop();
             m_target->CombatStop();
+            m_target->DeleteThreatList();
 
             if(caster->GetTypeId() == TYPEID_PLAYER)
             {
