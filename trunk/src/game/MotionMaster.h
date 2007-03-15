@@ -36,9 +36,9 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 
         void UpdateMotion(const uint32 &diff);
 
-        void Clear(bool clear = true);
+        void Clear(bool reset = true);
 
-        void MovementExpired(void);
+        void MovementExpired(bool reset = true);
 
         void Idle(void);
 
@@ -46,10 +46,9 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 
         void Mutate(MovementGenerator *m)
         {
-                                                            // HomeMovement is not that important, delete it if meanwhile a new comes
+            // HomeMovement is not that important, delete it if meanwhile a new comes
             if (!empty() && top()->GetMovementGeneratorType() == HOME_MOTION_TYPE)
-                MovementExpired();
-            //assert(m->GetMovementGeneratorType() != TARGETED_MOTION_TYPE || top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE);
+                MovementExpired(false);
             m->Initialize(*i_owner);
             push(m);
         }
