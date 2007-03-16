@@ -1494,7 +1494,8 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
     if(!pVictim)
         return 0;
 
-    int32 misschance = haveOffhandWeapon() ? 2400 : 500;    //base misschance for DW : melee attacks
+    int32 misschance = haveOffhandWeapon() && !m_currentMeleeSpell ? 
+        2400 : 500;    //base misschance for DW : melee attacks except special melee spell attacks 
 
     // PvP : PvE melee misschances per leveldif > 2
     int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 500 : 700;
