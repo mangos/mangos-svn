@@ -767,7 +767,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
         //pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
-        SendMessageToSet(&data,true);
 
         DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), damagetype, spellProto->School, spellProto, procFlag, true);
         ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
@@ -777,7 +776,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
         int32 pdamage = GetHealth()*(100+mod->m_amount)/100;
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
-        SendMessageToSet(&data,true);
 
         DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
         ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
@@ -804,7 +802,15 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         ThreatAssist(pVictim, float(gain) * 0.5f, spellProto->School, spellProto);
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayer(pVictim, spellProto->Id, pdamage);
+            SendHealSpellOnPlayer(pVictim, spellProto->Id, gain);
+        
+        // heal for caster damage
+        if(pVictim!=this && spellProto->SpellVisual==163)
+        {
+            SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
+            DealDamage(this, gain, DIRECT_DAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
+        }
+
         if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
             ProcDamageAndSpell(pVictim, PROC_FLAG_HEAL, PROC_FLAG_NONE, pdamage, spellProto);
     }
