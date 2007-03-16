@@ -161,7 +161,7 @@ Player::Player (WorldSession *session): Unit()
     inn_pos_x=0;
     inn_pos_y=0;
     inn_pos_z=0;
-    rest_bonus=0;
+    m_rest_bonus=0;
     rest_type=0;
     ////////////////////Rest System/////////////////////
 
@@ -2021,7 +2021,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             SpellEntry const *i_spellInfo = sSpellStore.LookupEntry(itr->first);
             if(!i_spellInfo) continue;
 
-            if(IsRankSpellDueToSpell(spellInfo,itr->first))
+            if(objmgr.IsRankSpellDueToSpell(spellInfo,itr->first))
             {
                 if(itr->second->active)
                 {
@@ -5622,19 +5622,15 @@ void Player::AddWeather()
 
 uint32 Player::GetXPRestBonus(uint32 xp)
 {
-    float rested_xp = 2 * GetRestBonus();                   //xp for each rested bonus
+    uint32 rested_bonus = (uint32)GetRestBonus();           //xp for each rested bonus
 
-    float rest_xp_percent = rested_xp / ((float)xp / 100);  //% rest bonuse from total rest bonus
-    if(rest_xp_percent>100)rest_xp_percent=100;
+    if(rested_bonus > xp)                                   // max rested_bonus == xp or (r+x) = 200% xp
+        rested_bonus = xp;
 
-    sLog.outDetail("XP_GAIN: %f, rest_xp_percent=%f",(float)xp,rest_xp_percent);
+    SetRestBonus( GetRestBonus() - rested_bonus);
 
-    rested_xp    = ((float)xp / 100 * rest_xp_percent);
-
-    SetRestBonus( GetRestBonus() - ( (float)(xp + rested_xp) / 2 ));
-
-    sLog.outDetail("Player gain %u xp (+ %u Rested Bonus). Rested bonus=%f",xp+(uint32)rested_xp,(uint32)rested_xp,GetRestBonus());
-    return (uint32)rested_xp;
+    sLog.outDetail("Player gain %u xp (+ %u Rested Bonus). Rested points=%f",xp+rested_bonus,rested_bonus,GetRestBonus());
+    return rested_bonus;
 }
 
 int32 Player::FishingMinSkillForCurrentZone() const
@@ -9920,7 +9916,7 @@ bool Player::LoadFromDB( uint32 guid )
     // since last logout (in seconds)
     uint32 time_diff = (time(NULL) - fields[19].GetUInt32());
 
-    rest_bonus = fields[18].GetFloat();
+    m_rest_bonus = fields[18].GetFloat();
     //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
     float bubble0 = 0.0416;
     //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
@@ -10621,7 +10617,7 @@ void Player::SaveToDB()
     ss << m_Played_time[1];
 
     ss << ", ";
-    ss << rest_bonus;
+    ss << m_rest_bonus;
     ss << ", ";
     ss << time(NULL);
     ss << ", ";
@@ -11350,24 +11346,24 @@ void Player::SetRestBonus (float rest_bonus_new)
     float rest_bonus_max = (float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/2;
 
     if(rest_bonus_new > rest_bonus_max)
-        rest_bonus = rest_bonus_max;
+        m_rest_bonus = rest_bonus_max;
     else
-        rest_bonus = rest_bonus_new;
+        m_rest_bonus = rest_bonus_new;
 
     // update data for client
-    if(rest_bonus>10)
+    if(m_rest_bonus>10)
     {
         SetFlag(PLAYER_BYTES_2, 0x1000000);                 // Set Reststate = Rested
         RemoveFlag(PLAYER_BYTES_2, 0x2000000);              // Remove Reststate = Normal
     }
-    else if(rest_bonus<=0)
+    else if(m_rest_bonus<=1)
     {
         SetFlag(PLAYER_BYTES_2, 0x2000000);                 // Set Reststate = Normal
         RemoveFlag(PLAYER_BYTES_2, 0x1000000);              // Remove Reststate = Rested
     }
 
     //RestTickUpdate
-    SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, uint32(rest_bonus));
+    SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, uint32(m_rest_bonus));
 }
 
 void Player::HandleInvisiblePjs()

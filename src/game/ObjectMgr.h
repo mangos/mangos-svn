@@ -319,7 +319,9 @@ class ObjectMgr
 
             return itr->second.rank;
         }
+        bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2);
         bool canStackSpellRank(SpellEntry const *spellInfo);
+        bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);
 
         struct SpellLearnSkillNode
         {

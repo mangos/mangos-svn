@@ -573,7 +573,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             time_inn_enter = time;
         };
 
-        float GetRestBonus() const { return rest_bonus; };
+        float GetRestBonus() const { return m_rest_bonus; };
         void SetRestBonus(float rest_bonus_new);
 
         int GetRestType() const { return rest_type; };
@@ -1374,7 +1374,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float inn_pos_x;
         float inn_pos_y;
         float inn_pos_z;
-        float rest_bonus;
+        float m_rest_bonus;
         int rest_type;
         ////////////////////Rest System/////////////////////
 

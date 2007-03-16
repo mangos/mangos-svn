@@ -248,6 +248,8 @@ class Aura
         uint32 m_PeriodicEventId;
         bool m_updated;
         bool m_removeOnDeath;
+    private:
+        void UpdateSlotCounter(uint8 slot,bool add);
 };
 
 class AreaAura : public Aura

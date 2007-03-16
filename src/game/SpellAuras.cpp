@@ -562,19 +562,16 @@ void Aura::_AddAura()
         return;
 
     bool samespell = false;
-    uint8 slot = 0xFF, i;
-    Aura* aura = NULL;
+    uint8 slot = 0xFF;
 
-    for(i = 0; i < 3; i++)
+    for(uint8 i = 0; i < 3; i++)
     {
-        aura = m_target->GetAura(m_spellId, i);
+        Aura* aura = m_target->GetAura(m_spellId, i);
         if(aura)
         {
-            //if (i != m_effIndex)
-            {
-                samespell = true;
-                slot = aura->GetAuraSlot();
-            }
+            samespell = true;
+            slot = aura->GetAuraSlot();
+            break;
         }
     }
 
@@ -600,7 +597,7 @@ void Aura::_AddAura()
         {
             if (IsPositive())
             {
-                for (i = 0; i < MAX_POSITIVE_AURAS; i++)
+                for (uint8 i = 0; i < MAX_POSITIVE_AURAS; i++)
                 {
                     if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
                     {
@@ -611,7 +608,7 @@ void Aura::_AddAura()
             }
             else
             {
-                for (i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
+                for (uint8 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
                 {
                     if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
                     {
@@ -632,9 +629,7 @@ void Aura::_AddAura()
             m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
         }
         else
-        {
-            /* TODO: increase count */
-        }
+            UpdateSlotCounter(slot,true);
 
         if(GetSpellProto()->SpellVisual == 5622)
             m_target->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
@@ -671,50 +666,78 @@ void Aura::_RemoveAura()
     //if(!aura)
     //    return;
 
+    if(slot >= MAX_AURAS)                                   // slot not set
+        return;
+
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
         return;
 
-    // count all auras from each effect of the spell
-    Unit::AuraMap& t_Auras = m_target->GetAuras();
-    uint8 count[3], totalcount = 0;
+    bool samespell = false;
+
     for(uint8 i = 0; i < 3; i++)
     {
-        count[i] = t_Auras.count(Unit::spellEffectPair(m_spellId, i));
-        totalcount += count[i];
+        Aura* aura = m_target->GetAura(m_spellId, i);
+        if(aura)
+        {
+            samespell = true;
+            break;
+        }
     }
 
-    /*
-    count[m_effIndex]--;
-    // all counts should be the same after the last effect of a spell was taken out
-    for(uint8 i = 0; i < 3; i++)
-        if (count[i] > count[m_effIndex])
-            break;
-    if (i == 3)
-        TODO: decrease count for spell
-    */
-
     // only remove icon when the last aura of the spell is removed (current aura already removed from list)
-    if (totalcount > 0)
+    if (!samespell)
+    {
+        m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
+
+        uint8 flagslot = slot >> 3;
+
+        uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
+
+        uint8 aurapos = (slot & 7) << 2;
+        uint32 value1 = ~( AFLAG_SET << aurapos );
+        value &= value1;
+
+        m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
+        if(GetSpellProto()->SpellVisual == 5622)
+            m_target->RemoveFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
+
+        // reset cooldown state for spells infinity/long aura (it's all self applied (?))
+        int32 duration = GetDuration(GetSpellProto());
+        if(caster==m_target && (duration < 0 || duration > GetSpellProto()->RecoveryTime))
+            SendCoolDownEvent();
+    }
+    else                                                    // decrease count for spell
+        UpdateSlotCounter(slot,false);
+}
+
+void Aura::UpdateSlotCounter(uint8 slot, bool add)
+{
+    if(slot >= MAX_AURAS)
         return;
 
-    m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
+    // calculate amount of similar auras by same effect index (similar different spells)
+    int8 count = 0;
 
-    uint8 flagslot = slot >> 3;
+    Unit::AuraList& aura_list = m_target->GetAurasByType(GetModifier()->m_auraname);
+    for(Unit::AuraList::iterator i = aura_list.begin();i != aura_list.end(); ++i)
+        if((*i)->m_spellId==m_spellId && (*i)->m_effIndex==m_effIndex)
+            ++count;
 
-    uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
+    // at aura add aura not added yet, at aura remove aura already removed
+    // in field stored (count-1)
+    if(!add)
+        --count;
 
-    uint8 aurapos = (slot & 7) << 2;
-    uint32 value1 = ~( AFLAG_SET << aurapos );
-    value &= value1;
+    uint32 index = slot / 4;
+    uint32 byte  = slot % 4;
+    uint32 val   = m_target->GetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+index);
 
-    m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
-    if(GetSpellProto()->SpellVisual == 5622)
-        m_target->RemoveFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
+    uint32 byte_bitpos  = byte * 8;
+    uint32 byte_mask = 0xFF << (byte * 8);
 
-    // reset cooldown state for spells infinity/long aura (it's all self applied (?))
-    int32 duration = GetDuration(GetSpellProto());
-    if(caster==m_target && (duration < 0 || duration > GetSpellProto()->RecoveryTime))
-        SendCoolDownEvent();
+    val = (val & ~byte_mask) | (count << byte_bitpos);
+
+    m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+index, val);
 }
 
 /*********************************************************/
