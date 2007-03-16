@@ -1980,7 +1980,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
         uint32 i_spellId = (*i).second->GetId();
         if((*i).second && i_spellId && i_spellId != spellId)
         {
-            if(IsRankSpellDueToSpell(spellInfo,i_spellId))
+            if(objmgr.IsRankSpellDueToSpell(spellInfo,i_spellId))
             {
                 RemoveAurasDueToSpell(i_spellId);
 
@@ -2020,10 +2020,10 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 if (Aur->GetCasterGUID() == (*i).second->GetCasterGUID())
                     if (GetSpellSpecific(spellId) == GetSpellSpecific(i_spellId))
                         sec_match = true;
-            if( sec_match || IsNoStackSpellDueToSpell(spellId, i_spellId) && !is_sec && !is_i_sec )
+            if( sec_match || objmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) && !is_sec && !is_i_sec )
             {
                 // if sec_match this isnt always true, needs to be rechecked
-                if (IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
+                if (objmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
                     if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
                         return false;                       // cannot remove higher rank
 

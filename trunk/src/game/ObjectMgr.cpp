@@ -2464,6 +2464,17 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
     return *(list0.begin()+urand(0, list0.size()-1)) + *(list1.begin()+urand(0, list1.size()-1));
 }
 
+bool ObjectMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2)
+{
+    SpellEntry const *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+    if(!spellInfo_1 || !spellInfo_2) return false;
+    if(spellInfo_1->Id == spellId_2) return false;
+
+    return GetFirstSpellInChain(spellInfo_1->Id)==GetFirstSpellInChain(spellId_2);
+}
+
+
+
 bool ObjectMgr::canStackSpellRank(SpellEntry const *spellInfo)
 {
     if(GetSpellRank(spellInfo->Id) == 0)
@@ -2527,4 +2538,53 @@ void ObjectMgr::LoadCorpses()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u corpses", count );
+}
+
+bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
+{
+    SpellEntry const *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
+    SpellEntry const *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+
+    if(!spellInfo_1 || !spellInfo_2)
+        return false;
+
+    if(spellInfo_1->Id == spellId_2)
+        return false;
+
+    //I think we don't check this correctly because i need a exception for spell:
+    //72,11327,18461...(called from 1856,1857...) Call Aura 16,31, after trigger another spell who call aura 77 and 77 remove 16 and 31, this should not happen.
+    if(spellInfo_2->SpellFamilyFlags == 2048)
+        return false;
+
+    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
+        spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
+    {
+        bool isModifier = false;
+        for (int i = 0; i < 3; i++)
+        {
+            if (spellInfo_1->EffectApplyAuraName[i] == 107 || spellInfo_1->EffectApplyAuraName[i] == 108 ||
+                spellInfo_2->EffectApplyAuraName[i] == 107 || spellInfo_2->EffectApplyAuraName[i] == 108)
+                isModifier = true;
+        }
+        if (!isModifier)
+            return true;
+    }
+
+    if (IsRankSpellDueToSpell(spellInfo_1, spellId_2))
+        return true;
+
+    if (spellInfo_1->SpellFamilyName == 0 || spellInfo_2->SpellFamilyName == 0)
+        return false;
+
+    if (spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
+        return false;
+
+    for (int i = 0; i < 3; ++i)
+        if (spellInfo_1->Effect[i] != spellInfo_2->Effect[i] ||
+        spellInfo_1->EffectItemType[i] != spellInfo_2->EffectItemType[i] ||
+        spellInfo_1->EffectMiscValue[i] != spellInfo_2->EffectMiscValue[i] ||
+        spellInfo_1->EffectApplyAuraName[i] != spellInfo_2->EffectApplyAuraName[i])
+            return false;
+
+    return true;
 }

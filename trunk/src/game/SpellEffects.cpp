@@ -408,6 +408,28 @@ void Spell::EffectDummy(uint32 i)
         return;
     }
 
+    if (m_spellInfo->Id == 16589)
+    {
+        if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+            return;
+
+        uint32 spell_id = 0;
+
+        switch(rand()%3+1)
+        {
+            case 1: spell_id = 16595; break;
+            case 2: spell_id = 16593; break;
+            case 3: spell_id = 16591; break;
+        }
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+        if(!spellInfo)
+            return;
+
+        m_caster->CastSpell(m_caster,spellInfo,true,NULL);
+        return;
+    }
+
     // More generic code later
 
     // starshards/curse of agony hack .. this applies to 1.10 only
