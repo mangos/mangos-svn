@@ -152,6 +152,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
             }
             break;
+        case 33024:                                         //0x8100    spell (disabled), ignore
+            break;
         case 49408:                                         //0xc100    spell
         {
             uint64 selectguid = _player->GetSelection();
