@@ -36,7 +36,7 @@ const char MAP_MAGIC[] = "MAP_1.01";
 
 static GridState* si_GridStates[MAX_GRID_STATE];
 
-bool Map::ExistMAP(uint32 mapid,int x,int y)
+bool Map::ExistMAP(uint32 mapid,int x,int y, bool output)
 {
     int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
     char* tmp = new char[len];
@@ -46,7 +46,8 @@ bool Map::ExistMAP(uint32 mapid,int x,int y)
 
     if(!pf)
     {
-        sLog.outError("Check existing of map file '%s': not exist!",tmp);
+        if(output)
+            sLog.outError("Check existing of map file '%s': not exist!",tmp);
         delete[] tmp;
         return false;
     }
@@ -69,8 +70,8 @@ bool Map::ExistMAP(uint32 mapid,int x,int y)
 
 GridMap * Map::LoadMAP(uint32 mapid,int x,int y)
 {
-    //check map file existance
-    if(!Map::ExistMAP(mapid,x,y))
+    //check map file existance (but not output error)
+    if(!Map::ExistMAP(mapid,x,y,false))
         return NULL;
 
     if(GridMaps[x][y])                                      //map already load, delete it before reloading
