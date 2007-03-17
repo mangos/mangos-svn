@@ -207,7 +207,36 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_NO_PVP_CREDIT               = 159 ,//
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_AOE_AVOIDANCE           = 160 ,//
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT  = 161 ,//
-    &Aura::HandleNULL                                       //SPELL_AURA_POWER_BURN_MANA             = 162 ,//
+    &Aura::HandleNULL,                                      //SPELL_AURA_POWER_BURN_MANA             = 162 ,//
+    &Aura::HandleNULL,                                      //SPELL_AURA = 163
+    &Aura::HandleNULL,                                      //SPELL_AURA = 164
+    &Aura::HandleNULL,                                      //SPELL_AURA = 165
+    &Aura::HandleNULL,                                      //SPELL_AURA = 166
+    &Aura::HandleNULL,                                      //SPELL_AURA = 167
+    &Aura::HandleNULL,                                      //SPELL_AURA = 168
+    &Aura::HandleNULL,                                      //SPELL_AURA = 169
+    &Aura::HandleNULL,                                      //SPELL_AURA = 170
+    &Aura::HandleNULL,                                      //SPELL_AURA = 171
+    &Aura::HandleNULL,                                      //SPELL_AURA = 172
+    &Aura::HandleNULL,                                      //SPELL_AURA = 173
+    &Aura::HandleNULL,                                      //SPELL_AURA = 174
+    &Aura::HandleNULL,                                      //SPELL_AURA = 175
+    &Aura::HandleNULL,                                      //SPELL_AURA = 176
+    &Aura::HandleNULL,                                      //SPELL_AURA = 177
+    &Aura::HandleNULL,                                      //SPELL_AURA = 178
+    &Aura::HandleNULL,                                      //SPELL_AURA = 179
+    &Aura::HandleNULL,                                      //SPELL_AURA = 180
+    &Aura::HandleNULL,                                      //SPELL_AURA = 181
+    &Aura::HandleNULL,                                      //SPELL_AURA = 182
+    &Aura::HandleNULL,                                      //SPELL_AURA = 183
+    &Aura::HandleNULL,                                      //SPELL_AURA = 184
+    &Aura::HandleNULL,                                      //SPELL_AURA = 185
+    &Aura::HandleNULL,                                      //SPELL_AURA = 186
+    &Aura::HandleNULL,                                      //SPELL_AURA = 187
+    &Aura::HandleNULL,                                      //SPELL_AURA = 188
+    &Aura::HandleNULL,                                      //SPELL_AURA = 189
+    &Aura::HandleNULL,                                      //SPELL_AURA = 190
+    &Aura::HandleNULL                                       //SPELL_AURA = 191
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :

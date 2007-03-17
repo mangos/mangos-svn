@@ -200,6 +200,8 @@ enum MOD_TYPES
     SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT = 161,
     SPELL_AURA_POWER_BURN_MANA   = 162,
 
-    TOTAL_AURAS=163
+    // aura 163-191 not implemented yet but some from its used in 1.12.1 spell.dbc
+
+    TOTAL_AURAS=192
 };
 #endif
