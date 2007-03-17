@@ -36,15 +36,6 @@ const char MAP_MAGIC[] = "MAP_1.01";
 
 static GridState* si_GridStates[MAX_GRID_STATE];
 
-inline
-bool FileExists(const char * fn)
-{
-    FILE *pf=fopen(fn,"rb");
-    if(!pf)return false;
-    fclose(pf);
-    return true;
-}
-
 bool Map::ExistMAP(uint32 mapid,int x,int y)
 {
     int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
@@ -66,6 +57,7 @@ bool Map::ExistMAP(uint32 mapid,int x,int y)
     {
         sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.",tmp);
         delete [] tmp;
+        fclose(pf);    //close file before return
         return false;
     }
 
@@ -77,61 +69,38 @@ bool Map::ExistMAP(uint32 mapid,int x,int y)
 
 GridMap * Map::LoadMAP(uint32 mapid,int x,int y)
 {
-    char *tmp;
-    static bool showcheckmapInfo=false;
-    static int oldx=0,oldy=0;
-
-    std::string dataPath="./";
-
-    if(sConfig.GetString("DataDir",&dataPath))
-    {
-        if(dataPath.at(dataPath.length()-1)!='/')
-            dataPath.append("/");
-    }
-
-    // Pihhan: dataPath length + "maps/" + 3+2+2+ ".map" length may be > 32 !
-    int len = dataPath.length()+strlen("maps/%03u%02u%02u.map")+1;
-    tmp = new char[len];
-    snprintf(tmp, len, (char *)(dataPath+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
-
-    if( (oldx!=x) || (oldy!=y) )
-    {
-        DEBUG_LOG("Loading map %s",tmp);
-        oldx =x;
-        oldy =y;
-        showcheckmapInfo = true;
-    }
-
-    FILE *pf=fopen(tmp,"rb");
-
-    if(!pf)
-    {
-        if( showcheckmapInfo )
-        {
-            DEBUG_LOG("Map file %s does not exist",tmp);
-            showcheckmapInfo = false;
-        }
-        delete [] tmp;
+    //check map file existance
+    if(!Map::ExistMAP(mapid,x,y))
         return NULL;
+
+    if(GridMaps[x][y])                                      //map already load, delete it before reloading
+    {
+        sLog.outDetail("Unloading already loaded map %u before reloading.",mapid);
+        delete (GridMaps[x][y]);
+        GridMaps[x][y]=NULL;
     }
+
+    // map file name 
+    char *tmp=NULL;
+    // Pihhan: dataPath length + "maps/" + 3+2+2+ ".map" length may be > 32 !
+    int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
+    tmp = new char[len];
+    snprintf(tmp, len, (char *)(sWorld.GetDataPath()+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
+    sLog.outBasic("Loading map %s",tmp);
+
+    // loading data
+    FILE *pf=fopen(tmp,"rb");
     char magic[8];
     fread(magic,1,8,pf);
-    if(strncmp(MAP_MAGIC,magic,8))
+    delete []  tmp; 
+    GridMap * buf= new GridMap;
+    if(!buf)                                                //unexpected error
     {
-        sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.",tmp);
-        delete [] tmp;
+        fclose(pf);
         return NULL;
     }
-
-    // fseek(pf,0,2);
-    // uint32 fs=ftell(pf);
-    // fseek(pf,0,0);
-    GridMap * buf= new GridMap;
     fread(buf,1,sizeof(GridMap),pf);
     fclose(pf);
-
-    delete [] tmp;
-
     return buf;
 }
 
@@ -371,7 +340,7 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
 
         }
     }
-    else if( add_player )
+    else if( player && add_player )
         AddToGrid(player,grid,cell);
 }
 
