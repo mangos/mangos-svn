@@ -321,12 +321,16 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);    SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, 0);
     */
 
-    InitStatsForLevel(1,false,false);
-
     // Played time
     m_Last_tick = time(NULL);
     m_Played_time[0] = 0;
     m_Played_time[1] = 0;
+
+    // base stats and related field values
+    InitStatsForLevel(1,false,false);
+
+    // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
+    _ApplyStatsMods();
 
     uint32 titem_id;
     uint32 titem_amount;
@@ -380,9 +384,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_standing = 0;
 
     UpdateBlockPercentage();
-
-    // apply original stats mods before item equipment that call before equip _RemoveStatsMods()
-    _ApplyStatsMods();
 
     uint16 dest;
     uint8 msg;
@@ -455,8 +456,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     }
     // all item positions resolved
 
-    // remove applied original stats mods before item equipment
-    _RemoveStatsMods();
     return true;
 }
 
@@ -9983,15 +9982,6 @@ bool Player::LoadFromDB( uint32 guid )
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY,0);
     SetUInt64Value(UNIT_FIELD_CREATEDBY,0);
 
-    // remember loaded power/health values to restore after stats initialization and modifier applying
-    uint32 savedHealth = GetHealth();
-    uint32 savedPower[MAX_POWERS];
-    for(uint32 i = 0; i < MAX_POWERS; ++i)
-        savedPower[i] = GetPower(Powers(i));
-
-    // reset stats before loading any modifiers
-    InitStatsForLevel(getLevel(),false,false);
-
     // reset skill modifiers
     for (uint32 i = 0; i < PLAYER_MAX_SKILLS; i++)
         SetUInt32Value(PLAYER_SKILL(i)+2,0);
@@ -10002,6 +9992,18 @@ bool Player::LoadFromDB( uint32 guid )
     // make sure the unit is considered not in duel for proper loading
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);
+
+    // remember loaded power/health values to restore after stats initialization and modifier applying
+    uint32 savedHealth = GetHealth();
+    uint32 savedPower[MAX_POWERS];
+    for(uint32 i = 0; i < MAX_POWERS; ++i)
+        savedPower[i] = GetPower(Powers(i));
+
+    // reset stats before loading any modifiers
+    InitStatsForLevel(getLevel(),false,false);
+
+    // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
+    _ApplyStatsMods();
 
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
@@ -10534,6 +10536,9 @@ void Player::SaveToDB()
         _RemoveAllAuraMods();
     }
 
+    // not required: all stats mods recalculated at load
+    //_RemoveStatsMods();
+
     // save state (after auras removing), if aura remove some flags then it must set it back by self)
     uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
     uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
@@ -10550,8 +10555,6 @@ void Player::SaveToDB()
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     bool inworld = IsInWorld();
-    //    if (inworld)
-    //        RemoveFromWorld();
 
     // remember base (exactly) power/health values before temporary set to saved currentPower/currentHealth data
     uint32 baseHealth = GetUInt32Value(UNIT_FIELD_HEALTH);
@@ -10681,14 +10684,14 @@ void Player::SaveToDB()
     SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
     SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
 
+    // not required: all stats mods recalculated at load and _RemoveStatsMods not called early in code
+    // _ApplyStatsMods();
+
     if(isAlive())
     {
         _ApplyAllAuraMods();
         _ApplyAllItemMods();
     }
-
-    //    if (inworld)
-    //        AddToWorld();
 
     // save hunter pet level and expirience at owner save. spells and etc for summoned pets saved at learn and apply.
     Pet* pet = GetPet();
