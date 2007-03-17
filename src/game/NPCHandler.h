@@ -19,6 +19,27 @@
 #ifndef __NPCHANDLER_H
 #define __NPCHANDLER_H
 
+// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
+struct PageText
+{
+    uint32 Page_ID;
+    char * Text;
+
+    uint32 Next_Page;
+};
+
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
+
 struct QEmote
 {
     uint32 _Emote;
@@ -38,14 +59,6 @@ struct GossipText
 {
     uint32 Text_ID;
     GossipTextOption Options[8];
-};
-
-struct PageText
-{
-    uint32 Page_ID;
-    char * Text;
-
-    uint32 Next_Page;
 };
 
 struct AreaTriggerPoint
