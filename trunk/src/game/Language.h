@@ -153,10 +153,13 @@
 #define LANG_ADD_OBJ                     "AddObject at Chat.cpp"
 #define LANG_DEMORPHED                   "Demorphed %s"     //log
 
-#define LANG_ITEM_ADDED_TO_LIST          "Item '%i' '%s' Added to list"
+#define LANG_ADDVENDORITEM_SYNTAX       "Syntax: .addvendoritem itemId <maxcount><incrtime> "
+#define LANG_DELVENDORITEM_SYNTAX       "Syntax: .delvendoritem itemId"
+#define LANG_ITEM_ADDED_TO_LIST          "Item '%i' '%s' Added to list with maxcount '%i' and incrtime '%i'"
 #define LANG_ITEM_NOT_FOUND              "Item '%i' Not Found in Database."
-#define LANG_ITEM_DELETED_FROM_LIST      "Item '%i' '%s' Deleted from list"
-#define LANG_ITEM_NOT_IN_LIST            "Item '%i' Not Found in List."
+#define LANG_ITEM_DELETED_FROM_LIST      "Item '%i' '%s' Deleted from Vendor list"
+#define LANG_ITEM_NOT_IN_LIST            "Item '%i' Not Found in Vendor List."
+#define LANG_ITEM_ALREADY_IN_LIST        "Item '%i' Already Found in Vendor List."
 
 #define LANG_WAYPOINT_ADDED              "Waypoint added."
 #define LANG_MOVE_TYPE_SET               "Creature movement type set to '%s', waypoints removed (if any)."

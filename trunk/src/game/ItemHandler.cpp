@@ -552,25 +552,26 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     ItemPrototype const *pProto;
     for(int i = 0; i < numitems; i++ )
     {
-        if( pCreature->GetItemId(i) )
+        CreatureItem* crItem = pCreature->GetItem(i);
+        if( crItem )
         {
-            pProto = objmgr.GetItemPrototype(pCreature->GetItemId(i));
+            pProto = objmgr.GetItemPrototype(crItem->id);
             if( pProto )
             {
                 count++;
-                if( pCreature->GetItemIncrTime(i) != 0 && (pCreature->GetItemLastIncr(i) + pCreature->GetItemIncrTime(i) <= ptime) )
+                if( crItem->incrtime != 0 && (crItem->lastincr + crItem->incrtime <= ptime) )
                 {
-                    diff = uint32((ptime - pCreature->GetItemLastIncr(i))/pCreature->GetItemIncrTime(i));
-                    if( (pCreature->GetItemCount(i) + diff * pProto->BuyCount) <= pCreature->GetMaxItemCount(i) )
-                        pCreature->SetItemCount(i, pCreature->GetItemCount(i) + diff * pProto->BuyCount);
+                    diff = uint32((ptime - crItem->lastincr)/crItem->incrtime);
+                    if( (crItem->count + diff * pProto->BuyCount) <= crItem->maxcount )
+                        crItem->count += diff * pProto->BuyCount;
                     else
-                        pCreature->SetItemCount(i, pCreature->GetMaxItemCount(i));
-                    pCreature->SetItemLastIncr(i, ptime);
+                        crItem->count = crItem->maxcount;
+                    crItem->lastincr = ptime;
                 }
                 data << uint32(count);
-                data << pCreature->GetItemId(i);
+                data << crItem->id;
                 data << pProto->DisplayInfoID;
-                data << uint32(pCreature->GetMaxItemCount(i) <= 0 ? 0xFFFFFFFF : pCreature->GetItemCount(i));
+                data << uint32(crItem->maxcount <= 0 ? 0xFFFFFFFF : crItem->count);
                 data << pProto->BuyPrice;
                 data << uint32( 0xFFFFFFFF );
                 data << pProto->BuyCount;
