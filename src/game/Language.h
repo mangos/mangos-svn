@@ -153,8 +153,6 @@
 #define LANG_ADD_OBJ                     "AddObject at Chat.cpp"
 #define LANG_DEMORPHED                   "Demorphed %s"     //log
 
-#define LANG_ADDVENDORITEM_SYNTAX       "Syntax: .addvendoritem itemId <maxcount><incrtime> "
-#define LANG_DELVENDORITEM_SYNTAX       "Syntax: .delvendoritem itemId"
 #define LANG_ITEM_ADDED_TO_LIST          "Item '%i' '%s' Added to list with maxcount '%i' and incrtime '%i'"
 #define LANG_ITEM_NOT_FOUND              "Item '%i' Not Found in Database."
 #define LANG_ITEM_DELETED_FROM_LIST      "Item '%i' '%s' Deleted from Vendor list"
@@ -191,8 +189,6 @@
 #define LANG_FORGET_SPELL                "You already forget that spell."
 #define LANG_REMOVEALL_COOLDOWN          "All spell cooldowns removed for %s."
 #define LANG_REMOVE_COOLDOWN             "Spell %u cooldown removed for %s."
-#define LANG_ADDITEM_SYNTAX              "Syntax: .additem itemId <amount>"
-#define LANG_ADDITEMSET_SYNTAX           "Syntax: .additemset itemsetId"
                                                             //log
 #define LANG_ADDITEM                     "Command : Additem, itemId = %i, amount = %i"
 #define LANG_ADDITEMSET                  "Command : Additemset, itemsetId = %i"
@@ -211,7 +207,6 @@
 #define LANG_ITEM_SLOT_NOT_EXIST         "Item '%i' doesn't exist."
 #define LANG_ITEM_ADDED_TO_SLOT          "Item '%i' '%s' Added to Slot %i"
 
-#define LANG_GAMEOBJECT_SYNTAX           "Usage: .gameobject <id>"
 #define LANG_GAMEOBJECT_NOT_EXIST        "Game Object '%i' doesn't exist."
                                                             //log
 #define LANG_GAMEOBJECT_CURRENT          ">> Game Object %s (GUID: %u) at %f %f %f. Orientation %f."

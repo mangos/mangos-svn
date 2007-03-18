@@ -92,7 +92,7 @@ class Pet : public Creature
         uint32 GetPetNumber() const { return GetUInt32Value(UNIT_FIELD_PETNUMBER); }
 
         bool CreateBaseAtCreature( Creature* creature );
-        bool LoadPetFromDB( Unit* owner,uint32 petentry = 0,uint32 petnumber = 0 );
+        bool LoadPetFromDB( Unit* owner,uint32 petentry = 0,uint32 petnumber = 0, bool current = false );
         void SavePetToDB(PetSaveMode mode);
         void Remove(PetSaveMode mode);
 
