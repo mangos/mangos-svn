@@ -753,7 +753,7 @@ void Player::Update( uint32 p_time )
 
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if(roll_chance(3) && GetTimeInnEter() > 0)         //freeze update
+        if(roll_chance_i(3) && GetTimeInnEter() > 0)         //freeze update
         {
             int time_inn = time(NULL)-GetTimeInnEter();
             if (time_inn >= 10)                             //freeze update
@@ -3447,7 +3447,7 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
 
     chance = chance < 1.0 ? 1.0 : chance;                   //minimum chance to increase skill is 1%
 
-    if(roll_chance(chance))
+    if(roll_chance_f(chance))
     {
         if(defence)
             UpdateDefense();
@@ -4867,7 +4867,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
 
         float chance = spellInfo->procChance <= 100 ? float(spellInfo->procChance) : GetWeaponProcChance();
-        if (roll_chance(chance))
+        if (roll_chance_f(chance))
             this->CastSpell(Target, spellInfo->Id, true, item);
     }
 
@@ -4883,7 +4883,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
         if(!enchantSpell_info) continue;
         if(enchant_display!=4 && enchant_display!=2 && IsItemSpellToCombat(enchantSpell_info))
-            if (roll_chance(chance))
+            if (roll_chance_f(chance))
                 this->CastSpell(Target, enchantSpell_info->Id, true);
     }
 }

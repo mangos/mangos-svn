@@ -2629,7 +2629,7 @@ void Spell::reflect(Unit *refunit)
         if((*i)->GetModifier()->m_miscvalue & int32(1 << m_spellInfo->School))
             reflectchance += (*i)->GetModifier()->m_amount;
 
-    if (reflectchance > 0 && roll_chance(reflectchance))
+    if (reflectchance > 0 && roll_chance_i(reflectchance))
     {
         Spell spell(refunit, refspell, true, 0);
 
