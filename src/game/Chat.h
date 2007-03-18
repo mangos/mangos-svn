@@ -167,8 +167,8 @@ class ChatHandler
         bool HandleSpawnCommand(const char* args);
         bool HandleDeleteCommand(const char* args);
         bool HandleDeMorphCommand(const char* args);
-        bool HandleItemCommand(const char* args);
-        bool HandleItemRemoveCommand(const char* args);
+        bool HandleAddVendorItemCommand(const char* args);
+        bool HandleDelVendorItemCommand(const char* args);
         bool HandleAddMoveCommand(const char* args);
         bool HandleSetMoveTypeCommand(const char* args);
         bool HandleRunCommand(const char* args);

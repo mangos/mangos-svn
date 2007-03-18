@@ -576,105 +576,98 @@ bool ChatHandler::HandleDeMorphCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleItemCommand(const char* args)
+bool ChatHandler::HandleAddVendorItemCommand(const char* args)
 {
-    /*
-        char* pitem = strtok((char*)args, " ");
-        if (!pitem)
-            return false;
+    if (!*args)
+    {
+        SendSysMessage(LANG_ADDVENDORITEM_SYNTAX);
+        return true;
+    }
 
-        uint64 guid = m_session->GetPlayer()->GetSelection();
-        if (guid == 0)
-        {
-            SendSysMessage(LANG_NO_SELECTION);
-            return true;
-        }
+    Creature* vendor = getSelectedCreature();
+    if (!vendor || !vendor->isVendor())
+    {
+        SendSysMessage("You must select vendor");
+        return true;
+    }
 
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    char* pitem = strtok((char*)args, " ");
+    uint32 itemId = atol(pitem);      
+    if (!pitem)
+    {
+        SendSysMessage("You must send id for item");
+        return true;
+    }
 
-        if(!pCreature)
-        {
-            SendSysMessage(LANG_SELECT_CREATURE);
-            return true;
-        }
+    char* fmaxcount = strtok(NULL, " ");                    //add maxcount, default: 0
+    uint32 maxcount = 0;
+    if (fmaxcount)
+        maxcount = atol(fmaxcount);
 
-        uint32 item = atoi(pitem);
-        int amount = -1;
+    char* fincrtime = strtok(NULL, " ");                    //add incrtime, default: 0
+    uint32 incrtime = 0;
+    if (fincrtime) 
+        incrtime = atol(fincrtime);
 
-        char* pamount = strtok(NULL, " ");
-        if (pamount)
-            amount = atoi(pamount);
+    ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
+    if(!pProto)
+    {
+        PSendSysMessage(LANG_ITEM_NOT_FOUND, itemId);
+        return true;
+    }
 
-        ItemPrototype* tmpItem = objmgr.GetItemPrototype(item);
+    if(vendor->FindItem(itemId))
+    {
+        PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST,itemId);
+        return true;
+    }
 
-        if(tmpItem)
-        {
-            QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`itemguid`,`amount`) VALUES('%u','%u','%d')",pCreature->GetEntry(), item, amount);
+    if (vendor->GetItemCount() >= MAX_CREATURE_ITEMS)
+    {
+        SendSysMessage("Vendor has too many items (max 128)");
+        return true;
+    }
 
-            uint8 itemscount = pCreature->GetItemCount();
-            pCreature->setItemId(itemscount , item);
-            pCreature->setItemAmount(itemscount , amount);
-            pCreature->IncrItemCount();
-            PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,item,tmpItem->Name1);
-            delete result;
-        }
-        else
-        {
-            PSendSysMessage(LANG_ITEM_NOT_FOUND,item);
-        }
-    */
-    return true;
+    // add to DB and to current ingame vendor
+    QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`item`,`maxcount`,`incrtime`) VALUES('%u','%u','%u','%u')",vendor->GetEntry(), itemId, maxcount,incrtime);
+    vendor->AddItem(itemId,maxcount,incrtime);
+    PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime);
+    return false;
 }
 
-bool ChatHandler::HandleItemRemoveCommand(const char* args)
+bool ChatHandler::HandleDelVendorItemCommand(const char* args)
 {
-    /*
-        char* iguid = strtok((char*)args, " ");
-        if (!iguid)
-            return false;
+    if (!*args)
+    {
+        SendSysMessage(LANG_DELVENDORITEM_SYNTAX);
+        return true;
+    }
+    
+    Creature* vendor = getSelectedCreature();
+    if (!vendor || !vendor->isVendor())
+    {
+        SendSysMessage("You must select vendor");
+        return true;
+    }
 
-        uint64 guid = m_session->GetPlayer()->GetSelection();
-        if (guid == 0)
-        {
-            SendSysMessage(LANG_NO_SELECTION);
-            return true;
-        }
+    char* pitem = strtok((char*)args, " ");
+    uint32 itemId = atol(pitem);      
 
-        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
+    if(!pProto)
+    {
+        PSendSysMessage(LANG_ITEM_NOT_FOUND, itemId);
+        return true;
+    }
 
-        if(!pCreature)
-        {
-            SendSysMessage(LANG_SELECT_CREATURE);
-            return true;
-        }
+    if (!vendor->RemoveItem(itemId))
+    {
+        PSendSysMessage(LANG_ITEM_NOT_IN_LIST,itemId);
+        return true;
+    }
 
-        uint32 itemguid = atoi(iguid);
-        int slot = pCreature->GetItemSlot(itemguid);
-
-        if(slot != -1)
-        {
-            uint32 guidlow = GUID_LOPART(guid);
-
-            sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry` = '%u' AND `itemguid` = '%u'",pCreature->GetEntry(),itemguid);
-
-            pCreature->setItemId(slot , 0);
-            pCreature->setItemAmount(slot , 0);
-            ItemPrototype* tmpItem = objmgr.GetItemPrototype(itemguid);
-            if(tmpItem)
-            {
-                PSendSysMessage(LANG_ITEM_DELETED_FROM_LIST,itemguid,tmpItem->Name1);
-            }
-            else
-            {
-                PSendSysMessage(LANG_ITEM_DELETED_FROM_LIST,itemguid,"<unknonwn>");
-            }
-
-        }
-        else
-        {
-            PSendSysMessage(LANG_ITEM_NOT_IN_LIST,itemguid);
-        }
-    */
+    sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry`='%u' AND `item`='%u'",vendor->GetEntry(), itemId);
+    PSendSysMessage(LANG_ITEM_DELETED_FROM_LIST,itemId,pProto->Name1);
     return true;
 }
 

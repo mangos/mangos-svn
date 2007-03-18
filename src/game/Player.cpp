@@ -11610,8 +11610,6 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
     if(!isAlive())
         return;
 
-    uint8 vendorslot;
-
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
@@ -11623,25 +11621,14 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             return;
         }
 
-        vendorslot = 0;
-        for(int i = 0; i < pCreature->GetItemCount(); i++)
-        {
-            if ( pCreature->GetItemId(i) == item )
-            {
-                vendorslot = i + 1;
-                break;
-            }
-        }
-
-        if( !vendorslot )
+        CreatureItem* crItem = pCreature->FindItem(item);
+        if(!crItem)
         {
             SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
             return;
         }
-        else
-            vendorslot -= 1;
 
-        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && pCreature->GetItemCount( vendorslot ) < count )
+        if( crItem->maxcount != 0 && crItem->count < count )
         {
             SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
             return;
@@ -11697,8 +11684,8 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             {
                 ModifyMoney( -(int32)price );
                 StoreNewItem( dest, item, pProto->BuyCount * count, true );
-                if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
-                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pProto->BuyCount );
+                if( crItem->maxcount != 0 )
+                    crItem->count -= pProto->BuyCount;
             }
             else
                 SendEquipError( msg, NULL, NULL );
@@ -11710,8 +11697,8 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             {
                 ModifyMoney( -(int32)price );
                 EquipNewItem( dest, item, pProto->BuyCount * count, true );
-                if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
-                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pProto->BuyCount );
+                if( crItem->maxcount != 0 )
+                    crItem->count -= pProto->BuyCount;
             }
             else
                 SendEquipError( msg, NULL, NULL );

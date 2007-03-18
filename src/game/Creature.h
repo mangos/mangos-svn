@@ -36,10 +36,6 @@ class Quest;
 class Player;
 class WorldSession;
 
-#define UNIT_MOVEMENT_INTERPOLATE_INTERVAL 300
-#define MAX_CREATURE_WAYPOINTS 16
-#define MAX_CREATURE_ITEMS 128
-
 enum Gossip_Option
 {
     GOSSIP_OPTION_NONE              = 0,                    //UNIT_NPC_FLAG_NONE              = 0,
@@ -119,6 +115,9 @@ struct GossipOption
 
 struct CreatureItem
 {
+    CreatureItem(uint32 _item, uint32 _maxcount, uint32 _incrtime) 
+        : id(_item),count(_maxcount), maxcount(_maxcount), incrtime(_incrtime),lastincr((uint32)time(NULL)) {}
+
     uint32 id;
     uint32 count;
     uint32 maxcount;
@@ -233,6 +232,8 @@ typedef std::list<GossipOption> GossipOptionList;
 #define CREATURE_Z_ATTACK_RANGE 3
 #define CREATURE_THREAT_RADIUS 10000.0f
 
+#define MAX_CREATURE_ITEMS 128
+
 class MANGOS_DLL_SPEC Creature : public Unit
 {
     CreatureAI *i_AI;
@@ -307,23 +308,34 @@ class MANGOS_DLL_SPEC Creature : public Unit
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/
         /*********************************************************/
-
-        uint8 GetItemCount() const { return itemcount; }
-        uint32 GetItemId( uint32 slot ) const { return item_list[slot].id; }
-        uint32 GetItemCount( uint32 slot ) const { return item_list[slot].count; }
-        uint32 GetMaxItemCount( uint32 slot ) const { return item_list[slot].maxcount; }
-        uint32 GetItemIncrTime( uint32 slot ) const { return item_list[slot].incrtime; }
-        uint32 GetItemLastIncr( uint32 slot ) const { return item_list[slot].lastincr; }
-        void SetItemCount( uint32 slot, uint32 count ) { item_list[slot].count = count; }
-        void SetItemLastIncr( uint32 slot, uint32 ptime ) { item_list[slot].lastincr = ptime; }
+        CreatureItem* GetItem(uint32 slot)
+        { 
+            if(slot>=m_item_list.size()) return NULL; 
+            return &m_item_list[slot];
+        }
+        uint8 GetItemCount() const { return m_item_list.size(); }
         void AddItem( uint32 item, uint32 maxcount, uint32 ptime)
         {
-            item_list[itemcount].id = item;
-            item_list[itemcount].count = maxcount;
-            item_list[itemcount].maxcount = maxcount;
-            item_list[itemcount].incrtime = ptime;
-            item_list[itemcount].lastincr = (uint32)time(NULL);
-            itemcount++;
+            m_item_list.push_back(CreatureItem(item,maxcount,ptime));
+        }
+        bool RemoveItem( uint32 item_id )
+        {
+            for(CreatureItems::iterator i = m_item_list.begin(); i != m_item_list.end(); ++i )
+            {
+                if(i->id==item_id)
+                {
+                    m_item_list.erase(i);
+                    return true;
+                }
+            }
+            return false;
+        }
+        CreatureItem* FindItem(uint32 item_id)
+        {
+            for(CreatureItems::iterator i = m_item_list.begin(); i != m_item_list.end(); ++i )
+                if(i->id==item_id)
+                    return &*i;
+            return NULL;
         }
 
         CreatureInfo const *GetCreatureInfo() const;
@@ -408,12 +420,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
         float m_respawnradius;
-        CreatureItem item_list[MAX_CREATURE_ITEMS];
-        int itemcount;
 
+        typedef std::vector<CreatureItem> CreatureItems;
+        CreatureItems m_item_list;
+        
         SpellsList m_tspells;
-
-        uint32 mTaxiNode;
 
         GossipOptionList m_goptions;
 

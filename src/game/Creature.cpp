@@ -52,12 +52,11 @@ uint32 CreatureInfo::randomDisplayID() const
 Creature::Creature() :
 Unit(), i_AI(NULL), i_motionMaster(this), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
-itemcount(0), mTaxiNode(0), m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
+m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
 {
     m_valuesCount = UNIT_END;
 
-    memset(item_list, 0, sizeof(CreatureItem)*MAX_CREATURE_ITEMS);
     for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;
 
     m_spells[0] = 0;
@@ -1144,8 +1143,6 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
 
 void Creature::_LoadGoods()
 {
-    itemcount = 0;
-
     QueryResult *result = sDatabase.PQuery("SELECT `item`, `maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
 
     if(!result) return;
@@ -1156,16 +1153,22 @@ void Creature::_LoadGoods()
 
         if (GetItemCount() >= MAX_CREATURE_ITEMS)
         {
-            sLog.outErrorDb( "Vendor %u has too many items (%u >= %i). Check the DB!", GetUInt32Value(OBJECT_FIELD_ENTRY), GetItemCount(), MAX_CREATURE_ITEMS );
+            sLog.outErrorDb( "Vendor %u has too many items (%u >= %i). Check the DB!", GetEntry(), GetItemCount(), MAX_CREATURE_ITEMS );
             break;
         }
 
-        AddItem( fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetUInt32());
+        uint32 item_id = fields[0].GetUInt32();
+        if(!sItemStorage.LookupEntry<ItemPrototype>(item_id))
+        {
+            sLog.outErrorDb("Vendor %u have in item list non-existed item %u",GetEntry(),item_id);
+            continue;
+        }
+
+        AddItem( item_id, fields[1].GetUInt32(), fields[2].GetUInt32());
     }
     while( result->NextRow() );
 
     delete result;
-
 }
 
 void Creature::_LoadQuests()
