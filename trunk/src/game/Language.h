@@ -103,7 +103,7 @@
 #define LANG_YOU_CHANGE_LVL              "You change the LVL to %i of %s."
 #define LANG_YOURS_LVL_CHANGED           "%s changed your LVL to %i."
 #define LANG_CURRENT_FACTION             "GUID %i,faction is %i,flags is %i,npcflag is %i,DY flag is %i"
-#define LANG_WRONG_FACTION               "Wrong faction: %u."
+#define LANG_WRONG_FACTION               "Wrong faction: %u (not found in factiontemplate.dbc)."
 #define LANG_YOU_CHANGE_FACTION          "You change GUID=%i 's Faction to %i ,flags to %i,npcflag to %i,dyflag to %i."
 #define LANG_YOU_CHANGE_SPELLFLATID      "You change the spellflatid=%i,val= %i ,mark =%i to %s."
 #define LANG_YOURS_SPELLFLATID_CHANGED   "%s changed your spellflatid=%i,val= %i ,mark =%i."

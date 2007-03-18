@@ -683,6 +683,12 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
         return true;
     }
 
+    if(chr->isInFlight())
+    {
+        PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
+        return true;
+    }
+
     PSendSysMessage(LANG_YOU_CHANGE_ASPEED, ASpeed*100, chr->GetName());
 
     char buf[256];
@@ -721,6 +727,12 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
         return true;
     }
 
+    if(chr->isInFlight())
+    {
+        PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
+        return true;
+    }
+
     PSendSysMessage(LANG_YOU_CHANGE_SPEED, Speed, chr->GetName());
 
     char buf[256];
@@ -756,6 +768,12 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
         return true;
     }
 
+    if(chr->isInFlight())
+    {
+        PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
+        return true;
+    }
+
     PSendSysMessage(LANG_YOU_CHANGE_SWIM_SPEED, Swim, chr->GetName());
 
     char buf[256];
@@ -788,6 +806,12 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    if(chr->isInFlight())
+    {
+        PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
         return true;
     }
 
