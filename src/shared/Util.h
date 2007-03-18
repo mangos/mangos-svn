@@ -23,16 +23,76 @@
 
 std::vector<std::string> StrSplit(const std::string &src, const std::string &sep);
 
-// return random float from 00.000000 to 99.999999 (100000000 variants)
-inline float rand_chance()
+
+/* Return a random number in the range min..max; (max-min) must be smaller than 32768. 
+ * Note: Not reentrant - if two threads call this simultaneously, they will likely 
+ * get the same random number. */
+extern int32 irand(int32 min, int32 max);
+
+/* Return a random number in the range min..max; (max-min) must be smaller than 32768. 
+ * Note: Not reentrant - if two threads call this simultaneously, they will likely 
+ * get the same random number. */
+inline uint32 urand(uint32 min, uint32 max)
 {
-    // rand() result range is 0..RAND_MAX where RAND_MAX is implementation define (at 32-bit OS in most case RAND_MAX = 32767)
-    // this is small number for chances writed like xx.xxxxxx (100000000 cases)
-    // using combined 2 call rand() instead: xx.xxyyyy
-    return float(rand() % 10000)/100.0 + float(rand() % 10000)/1000000.0;
+    return irand(int32(min), int32(max));
 }
 
-inline void ApplyModUInt32Var(uint32& var, int32 val, bool apply)
+/* maximum number that can come out of the rand32 generator */
+#define RAND32_MAX  2147483645
+
+/* Return a random number in the range 0 .. RAND32_MAX. 
+ * Note: Not reentrant - if two threads call this simultaneously, they will likely 
+ * get the same random number. */
+extern int32 rand32(void);
+
+/* Return a random double from 0.0 to 1.0 (exclusive). Floats support only 7 valid decimal digits.
+ * A double supports up to 15 valid decimal digits and is used internaly (RAND32_MAX has 10 digits).
+ * With an FPU, there is usually no difference in performance between float and double. */
+static inline double rand_norm(void)
+{
+    return double(rand32()) / double(RAND32_MAX+1);
+}
+
+/* Return a random number in the range min..max (inclusive). For reliable results, the difference 
+ * between max and min should be less than RAND32_MAX. */
+static inline uint32 rand32(const uint32 min, const uint32 max) 
+{
+    return (uint32)rand_norm() * (max-min+1) + min;
+}
+
+/* Return a random double from 0.0 to 99.9999999999999. Floats support only 7 valid decimal digits.
+ * A double supports up to 15 valid decimal digits and is used internaly (RAND32_MAX has 10 digits).
+ * With an FPU, there is usually no difference in performance between float and double. */
+static inline double rand_chance(void)
+{
+    return double(rand32()) / (double(RAND32_MAX+1) / 100.0);
+}
+
+/* Return true if a random roll fits in the specified chance (range 0-100). */
+static inline bool roll_chance(const float chance)
+{
+    return chance > rand_chance();
+}
+
+/* Return true if a random roll fits in the specified chance (range 0-100). */
+static inline bool roll_chance(const int32 chance)
+{
+    return chance > irand(0, 99);
+}
+
+/* Return true if a random roll fits in the specified chance (range 0-100). */
+static inline bool roll_chance(const uint32 chance)
+{
+    return chance > urand(0, 99);
+}
+
+/* Return true if a random roll fits in the specified chance (range 0-100). */
+static inline bool roll_chance(const int chance)
+{
+    return chance > irand(0, 99);
+}
+
+static inline void ApplyModUInt32Var(uint32& var, int32 val, bool apply)
 {
     int32 cur = var;
     cur += (apply ? val : -val);

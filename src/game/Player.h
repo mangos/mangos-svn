@@ -1392,12 +1392,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         IgnoreList m_ignorelist;
 };
 
-int32 irand(int32 min, int32 max);
-
-inline uint32 urand(uint32 min, uint32 max)
-{
-    return irand(int32(min), int32(max));
-}
 
 void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);

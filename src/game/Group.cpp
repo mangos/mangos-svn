@@ -457,7 +457,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                         if (itr2->second != NEED)
                             continue;
 
-                        uint8 randomN = rand() % 100;
+                        uint8 randomN = urand(0, 99);
                         SendLootRoll(0, itr2->first, randomN, 1, *i);
                         if (maxresul < randomN)
                         {
@@ -500,7 +500,7 @@ void Group::CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers,
                             if (itr2->second != GREED)
                                 continue;
 
-                            uint8 randomN = rand() % 100;
+                            uint8 randomN = urand(0, 99);
                             SendLootRoll(0, itr2->first, randomN, 2, *i);
                             if (maxresul < randomN)
                             {

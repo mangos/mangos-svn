@@ -257,13 +257,13 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
     if(!HasAuraType(auraType))
         return;
 
-    /* Note: This formula is a first approximation attempt. It is probably wrong, but better than
-     * the all or nothing mechanism we had before.
-     *
-     * The chance to dispell an aura depends on the damage taken with respect to the maximum health.
-     * Damage of 75% or greater always dispells the aura. */
+    // Note: This formula is a first approximation attempt. It is probably wrong, but better than
+    // the all or nothing mechanism we had before.
+    //
+    // The chance to dispell an aura depends on the damage taken with respect to the maximum health.
+    // Damage of 75% or greater always dispells the aura.
     float rel_dmg = (float)damage / GetMaxHealth();
-    if (rand_chance() < rel_dmg / 0.75 * 100.0)
+    if (roll_chance(float(rel_dmg / 0.75 * 100.0)))
         RemoveSpellsCausingAura(auraType);
 }
 
@@ -554,7 +554,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             {
                 bool remove = true;
                 if (se->procFlags & (1<<3)) {
-                    if (se->procChance < rand_chance())
+                    if (!roll_chance(se->procChance))
                         remove = false;
                 }
                 if (remove)
@@ -2977,7 +2977,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 if(spellProcEvent && spellProcEvent->ppmRate != 0)
                     chance = GetPPMProcChance(WeaponSpeed, spellProcEvent->ppmRate);
 
-                if(chance > rand_chance())
+                if(roll_chance(chance))
                 {
                     if((*i)->m_procCharges > 0)
                         (*i)->m_procCharges -= 1;
@@ -3070,7 +3070,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
 
                 // procChance is exact number in percents anyway
                 uint32 chance = spellProto->procChance;
-                if(chance > uint32(rand_chance()))
+                if(roll_chance(chance))
                 {
                     if((*i)->m_procCharges > 0)
                         (*i)->m_procCharges -= 1;
@@ -3657,7 +3657,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
         {0,0,10},             // 10: unused
         {3.33, 12.41, 0.79}   // 11: druid
     };
-    int32 crit_chance;
+    float crit_chance;
 
     // only players use intelligence for critical chance computations
     if (GetTypeId() == TYPEID_PLAYER)
@@ -3676,8 +3676,8 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
         if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             crit_chance += (*i)->GetModifier()->m_amount;
 
-    crit_chance = crit_chance > 0 ? crit_chance :0;
-    if(uint32(crit_chance) >= urand(0,100))
+    crit_chance = crit_chance > 0.0 ? crit_chance : 0.0;
+    if (roll_chance(crit_chance))
     {
         int32 crit_bonus = *peffect / 2;
         if (GetTypeId() == TYPEID_PLAYER)  // adds additional damage to crit_bonus (from talents)
@@ -4133,10 +4133,7 @@ bool Unit::isVisibleFor(Unit* u, bool detect)
     if (prob < 0.1)
         prob = 0.1;                                         //min prob of detect is 0.1
 
-    if (rand_chance() > prob)
-        IsVisible = false;
-    else
-        IsVisible = true;
+    IsVisible = roll_chance(prob);
 
     return IsVisible && ( Distance <= MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ;
 }
@@ -4762,7 +4759,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
 
     float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
     float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
-    int32 basePoints = int32(spellProto->EffectBasePoints[effect_index] + level * basePointsPerLevel);
+    int32 basePoints = int32(spellProto->EffectBasePoints[effect_index] +1 + level * basePointsPerLevel);
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
     uint8 comboPoints=0;
@@ -4773,7 +4770,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     if(randomPoints <= 1)
         value = basePoints+1;
     else
-        value = basePoints+rand()%randomPoints;
+        value = basePoints+rand32(1, randomPoints);
 
     if(comboDamage > 0)
     {
