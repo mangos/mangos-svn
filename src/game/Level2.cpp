@@ -938,6 +938,12 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
 
     uint32 factionId = (uint32) atoi((char*)args);
 
+    if (!sFactionTemplateStore.LookupEntry(factionId))
+    {
+        PSendSysMessage(LANG_WRONG_FACTION, factionId);
+        return true;
+    }
+
     Creature* pCreature = getSelectedCreature();
 
     if(!pCreature)
