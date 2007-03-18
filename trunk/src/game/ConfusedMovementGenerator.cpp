@@ -44,8 +44,8 @@ ConfusedMovementGenerator::Initialize(Creature &creature)
 
     for(unsigned int idx=0; idx < MAX_CONF_WAYPOINTS+1; ++idx)
     {
-        const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
-        const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
+        const float wanderX=wander_distance*rand_norm() - wander_distance/2;
+        const float wanderY=wander_distance*rand_norm() - wander_distance/2;
 
         i_waypoints[idx][0] = x + wanderX;
         i_waypoints[idx][1] = y + wanderY;
@@ -107,8 +107,8 @@ ConfusedMovementGenerator::Update(Creature &creature, const uint32 &diff)
             creature.StopMoving();
             creature.setMoveRunFlag(true);
 
-            i_nextMove = (rand() % MAX_CONF_WAYPOINTS) + 1;
-            i_nextMoveTime.Reset((rand() % 1500));
+            i_nextMove = urand(1,MAX_CONF_WAYPOINTS);
+            i_nextMoveTime.Reset(urand(0, 1500-1));  // TODO: check the minimum reset time, should be probably higher
         }
     }
     return true;

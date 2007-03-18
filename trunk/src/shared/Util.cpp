@@ -52,3 +52,49 @@ bool IsIPAddress(char const* ipaddress)
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
     return inet_addr(ipaddress) != INADDR_NONE;
 }
+
+// internal status if the irand() random number generator
+static uint32 holdrand = 0x89abcdef;
+
+// initialize the irand() random number generator
+void Rand_Init(uint32 seed)
+{
+    holdrand = seed;
+}
+
+/* Return a random number in the range min .. max.
+ * max-min must be smaller than 32768. */
+int32 irand(int32 min, int32 max)
+{
+    assert((max - min) < 32768);
+
+    ++max;
+    holdrand = (holdrand * 214013) + 2531011;
+
+    return (((holdrand >> 17) * (max - min)) >> 15) + min;
+}
+
+
+// current state of the random number generator
+static int32 rand32_state = 1;
+
+/* Return a pseudo-random number in the range 0 .. RAND32_MAX. 
+ * Note: Not reentrant - if two threads call this simultaneously, they will likely 
+ * get the same random number. */
+int32 rand32(void)
+{
+#   define m   2147483647
+#   define a   48271
+#   define q   (m / a)
+#   define r   (m % a)
+
+    const int32 hi = rand32_state / q;
+    const int32 lo = rand32_state % q;
+    const int32 test = a * lo - r * hi;
+
+    if (test > 0)
+        rand32_state = test;
+    else
+        rand32_state = test + m;
+    return rand32_state - 1;
+}

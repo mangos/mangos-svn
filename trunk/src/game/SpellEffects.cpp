@@ -415,7 +415,7 @@ void Spell::EffectDummy(uint32 i)
 
         uint32 spell_id = 0;
 
-        switch(rand()%3+1)
+        switch(urand(1,3))
         {
             case 1: spell_id = 16595; break;
             case 2: spell_id = 16593; break;
@@ -1177,9 +1177,9 @@ void Spell::EffectPickPocket(uint32 i)
         (((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID ||
         ((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_UNDEAD))
     {
-        int chance = 10 + m_caster->getLevel() - unitTarget->getLevel();
+        int32 chance = 10 + m_caster->getLevel() - unitTarget->getLevel();
 
-        if ( ( rand() % 20 ) <= chance )
+        if (chance > irand(0, 19))
         {
             //Stealing successfull
             //sLog.outDebug("Sending loot from pickpocket");
@@ -2558,8 +2558,8 @@ void Spell::EffectKnockBack(uint32 i)
     float value = 0;
     int32 basePoints = m_spellInfo->EffectBasePoints[i];
     int32 randomPoints = m_spellInfo->EffectDieSides[i];
-    if (randomPoints) value = basePoints + rand()%randomPoints;
-    else value = basePoints;
+    if (randomPoints) value = basePoints + irand(1, randomPoints);
+    else value = basePoints +1;
 
     //Only allowed to knock ourselves straight up to prevent exploiting
     if (unitTarget == m_caster)value = 0;
@@ -2604,8 +2604,7 @@ void Spell::EffectTransmitted(uint32 i)
 
     float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-    float diff = max_dis - min_dis + 1;
-    float dis = (float)(rand()%(uint32)diff + (uint32)min_dis);
+    float dis = rand_norm() * (max_dis - min_dis) + min_dis;
 
     float fx,fy,fz;
     m_caster->GetClosePoint(NULL,fx,fy,fz,dis);

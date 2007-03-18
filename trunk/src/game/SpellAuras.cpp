@@ -1158,8 +1158,20 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
             // energy in cat start with 0.
             //TODO: implement SPELL_AURA_ADD_TARGET_TRIGGER that used for receiving with some chance non-0 energy at transformation
-            if(m_modifier.m_miscvalue == FORM_CAT)
-                unit_target->SetPower(POWER_ENERGY,0);
+            switch(m_modifier.m_miscvalue)
+            {
+                case FORM_CAT:
+                    unit_target->SetPower(POWER_ENERGY,0);
+                    break;
+                case FORM_BATTLESTANCE:
+                case FORM_DEFENSIVESTANCE:
+                case FORM_BERSERKERSTANCE:
+                    // TODO: Implement tactical mastery effect
+                    unit_target->SetPower(POWER_RAGE,0);
+                    break;
+                default:
+                    break;
+            }
         }
 
         unit_target->m_ShapeShiftForm = m_spellId;

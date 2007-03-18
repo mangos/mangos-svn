@@ -548,7 +548,7 @@ void Player::HandleDrowning(uint32 UnderWaterTime)
         {
             //TODO: Check this formula
             uint64 guid = GetGUID();
-            uint32 damage = (GetMaxHealth() / 5) + rand()%getLevel();
+            uint32 damage = GetMaxHealth() / 5 + urand(0, getLevel()-1);
 
             EnvironmentalDamage(guid, DAMAGE_DROWNING,damage);
             m_breathTimer = 2000;
@@ -586,7 +586,7 @@ void Player::HandleLava()
         {
             uint64 guid;
             //uint32 damage = 10;
-            uint32 damage = (GetMaxHealth() / 3) + rand()%getLevel();
+            uint32 damage = GetMaxHealth() / 3 + urand(0, getLevel()-1);
 
             guid = GetGUID();
             EnvironmentalDamage(guid, DAMAGE_LAVA, damage);
@@ -753,7 +753,7 @@ void Player::Update( uint32 p_time )
 
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if(irand(0,100)<=3 && GetTimeInnEter() > 0)         //freeze update
+        if(roll_chance(3) && GetTimeInnEter() > 0)         //freeze update
         {
             int time_inn = time(NULL)-GetTimeInnEter();
             if (time_inn >= 10)                             //freeze update
@@ -3438,16 +3438,16 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
     if(skilldif <= 0)
         return;
 
-    float chance = 3 * lvldif * skilldif / plevel;
+    float chance = float(3 * lvldif * skilldif) / plevel;
     if(!defence)
     {
         if(getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE)
             chance *= 0.1 * GetStat(STAT_INTELLECT);
     }
 
-    chance = chance < 1 ? 1 : chance;                       //minimum chance to increase skill is 1%
+    chance = chance < 1.0 ? 1.0 : chance;                   //minimum chance to increase skill is 1%
 
-    if(chance > urand(0,100))
+    if(roll_chance(chance))
     {
         if(defence)
             UpdateDefense();
@@ -4545,22 +4545,6 @@ void Player::DuelComplete(uint8 type)
     duel = NULL;
 }
 
-static uint32 holdrand = 0x89abcdef;
-
-void Rand_Init(uint32 seed)
-{
-    holdrand = seed;
-}
-
-int32 irand(int32 min, int32 max)
-{
-    assert((max - min) < 32768);
-
-    max++;
-    holdrand = (holdrand * 214013) + 2531011;
-
-    return (((holdrand >> 17) * (max - min)) >> 15) + min;
-}
 
 //---------------------------------------------------------//
 //       Flight callback
@@ -4882,8 +4866,8 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
 
         if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
 
-        uint32 chance = uint32(spellInfo->procChance <= 100 ? spellInfo->procChance : GetWeaponProcChance());
-        if (chance > rand_chance())
+        float chance = spellInfo->procChance <= 100 ? float(spellInfo->procChance) : GetWeaponProcChance();
+        if (roll_chance(chance))
             this->CastSpell(Target, spellInfo->Id, true, item);
     }
 
@@ -4894,12 +4878,12 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
         uint32 enchant_display = pEnchant->display_type;
-        uint32 chance = uint32(pEnchant->value1 != 0 ? pEnchant->value1 : GetWeaponProcChance());
+        float chance = pEnchant->value1 != 0 ? float(pEnchant->value1) : GetWeaponProcChance();
         uint32 enchant_spell_id = pEnchant->spellid;
         SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
         if(!enchantSpell_info) continue;
         if(enchant_display!=4 && enchant_display!=2 && IsItemSpellToCombat(enchantSpell_info))
-            if (chance > rand_chance())
+            if (roll_chance(chance))
                 this->CastSpell(Target, enchantSpell_info->Id, true);
     }
 }
@@ -5229,7 +5213,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
                     FillLoot(loot, lootid, LootTemplates_Pickpocketing);
                 // Generate extra money for pick pocket loot
-                loot->gold = uint32((10* (rand() % ( (creature->getLevel() / 2) + 1) + rand() % ( (getLevel() / 2) + 1 )))*sWorld.getRate(RATE_DROP_MONEY));
+                const uint32 a = urand(0, creature->getLevel()/2 -1);
+                const uint32 b = urand(0, getLevel()/2 -1);
+                loot->gold = 10 * (a + b) * sWorld.getRate(RATE_DROP_MONEY);
             }
         }
         else

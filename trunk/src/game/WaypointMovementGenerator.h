@@ -68,7 +68,7 @@ class MANGOS_DLL_DECL WaypointMovementGenerator : public MovementGenerator, publ
         WaypointMovementGenerator(Creature &c) : i_creature(c), i_nextMoveTime(0) {}
         void Initialize(Creature &c)
         {
-            i_nextMoveTime.Reset(rand() % 10000);
+            i_nextMoveTime.Reset(urand(0, 10000-1));  // TODO: check the lower bound (0 is probably too small)
             i_creature.StopMoving();
             LoadPath(c);
         }

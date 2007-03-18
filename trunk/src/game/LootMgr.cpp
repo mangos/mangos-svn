@@ -156,7 +156,7 @@ struct HasChance
         // Non-grouped loot
         if (itm.questChanceOrGroup == 0)
         {
-            if ( itm.chance > 0 && (itm.chance * sWorld.getRate(RATE_DROP_ITEMS) >= rand_chance()) )
+            if ( itm.chance > 0 && roll_chance(itm.chance * sWorld.getRate(RATE_DROP_ITEMS)) )
                 return &itm;
             return NULL;
         }
@@ -206,7 +206,7 @@ struct HasChance
 struct HasQuestChance
 {
     // explicit HasQuestChanceFor() : {}
-    inline bool operator() ( LootStoreItem &itm )   { return itm.questChanceOrGroup > rand_chance(); }
+    inline bool operator() ( LootStoreItem &itm )   { return roll_chance(itm.questChanceOrGroup); }
 };
 
 void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
