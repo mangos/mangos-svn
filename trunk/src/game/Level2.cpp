@@ -579,10 +579,7 @@ bool ChatHandler::HandleDeMorphCommand(const char* args)
 bool ChatHandler::HandleAddVendorItemCommand(const char* args)
 {
     if (!*args)
-    {
-        SendSysMessage(LANG_ADDVENDORITEM_SYNTAX);
-        return true;
-    }
+        return false;
 
     Creature* vendor = getSelectedCreature();
     if (!vendor || !vendor->isVendor())
@@ -638,10 +635,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
 bool ChatHandler::HandleDelVendorItemCommand(const char* args)
 {
     if (!*args)
-    {
-        SendSysMessage(LANG_DELVENDORITEM_SYNTAX);
-        return true;
-    }
+        return false;
     
     Creature* vendor = getSelectedCreature();
     if (!vendor || !vendor->isVendor())

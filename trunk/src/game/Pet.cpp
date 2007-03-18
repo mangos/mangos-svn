@@ -60,22 +60,26 @@ Pet::~Pet()
     }
 }
 
-bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber )
+bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool current )
 {
     uint32 ownerid = owner->GetGUIDLow();
 
     QueryResult *result;
 
-    if(petnumber)
-        // known petnumber entry          0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
+    if(current)
+        // current pet (slot 0)           0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15     16     17        18          19
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
+    else if(petnumber)
+        // known petnumber entry          0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17     18          19
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
     else if(petentry)
-        // known petentry entry (unique for summoned pet, but non unique for hunter pet
-        //                                0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u'",ownerid, petentry );
+        // known petentry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
+        //                                0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15     16     17        18          19
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid, petentry );
     else
-        // current pet (slot 0)           0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
+        // any current or other non-stabled pet (for hunter "call pet")
+        //                                0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15     16     17        18          19
+        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid);
 
     if(!result)
         return false;
@@ -156,6 +160,22 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber )
     m_spells[3] = fields[10].GetUInt32();
     m_actState  = fields[11].GetUInt32();
 
+    uint32 health = fields[18].GetUInt32();
+    if(health > GetMaxHealth())
+    {
+        sLog.outError("Pet %u have health (%u) in DB greater his max health value (%).",petnumber,health,GetMaxHealth());
+    }
+    else
+        SetHealth(health);
+
+    uint32 mana = fields[19].GetUInt32();
+    if(mana > GetMaxPower(POWER_MANA))
+    {
+        sLog.outError("Pet %u have mana (%u) in DB greater his max mana value (%).",petnumber,mana,GetMaxPower(POWER_MANA));
+    }
+    else
+        SetPower(POWER_MANA,mana);
+
     // set current pet as current
     if(fields[15].GetUInt32() != 0)
     {
@@ -207,14 +227,20 @@ void Pet::SavePetToDB(PetSaveMode mode)
             sDatabase.BeginTransaction();
             // remove current data
             sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,GetPetNumber() );
+
             // prevent duplicate using slot (except PET_SAVE_NOT_IN_SLOT)
             if(mode!=PET_SAVE_NOT_IN_SLOT)
                 sDatabase.PExecute("UPDATE `character_pet` SET `slot` = 3 WHERE `owner` = '%u' AND `slot` = '%u'", owner, uint32(mode) );
+
+            // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
+            if(getPetType()==HUNTER_PET && (mode==PET_SAVE_AS_CURRENT||mode==PET_SAVE_NOT_IN_SLOT))
+                sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3')", owner );
             // save pet
-            sDatabase.PExecute("INSERT INTO `character_pet` (`id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`renamed`,`slot`) "
-                "VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u','%u')",
+            sDatabase.PExecute("INSERT INTO `character_pet` (`id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`renamed`,`slot`,`curhealth`,`curmana`) "
+                "VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u','%u','%u','%u')",
                 GetPetNumber(),GetEntry(), owner, GetUInt32Value(UNIT_FIELD_DISPLAYID), getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-                m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),uint32(HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME)?0:1),uint32(mode));
+                m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),
+                uint32(HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME)?0:1),uint32(mode),(GetHealth()<1?1:GetHealth()),GetPower(POWER_MANA));
             sDatabase.CommitTransaction();
             break;
         }
@@ -290,7 +316,7 @@ void Pet::Update(uint32 diff)
             if( m_deathTimer <= diff )
             {
                 assert(getPetType()!=SUMMON_PET && "Must be already removed.");
-                Remove(PET_SAVE_AS_CURRENT);                //hunters' pets never get removed because of death, NEVER!
+                Remove(PET_SAVE_NOT_IN_SLOT);               //hunters' pets never get removed because of death, NEVER!
                 return;
             }
             break;
@@ -301,7 +327,7 @@ void Pet::Update(uint32 diff)
             Unit* owner = GetOwner();
             if(!owner || !IsWithinDistInMap(owner, OWNER_MAX_DISTANCE) || isControlled() && !owner->GetPetGUID())
             {
-                Remove(PET_SAVE_AS_CURRENT);
+                Remove(PET_SAVE_NOT_IN_SLOT);
                 return;
             }
 

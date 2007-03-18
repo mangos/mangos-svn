@@ -1111,10 +1111,7 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
 bool ChatHandler::HandleAddItemCommand(const char* args)
 {
     if (!*args)
-    {
-        SendSysMessage(LANG_ADDITEM_SYNTAX);
-        return true;
-    }
+        return false;
 
     uint32 itemId = 0;
 
@@ -1271,10 +1268,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 bool ChatHandler::HandleAddItemSetCommand(const char* args)
 {
     if (!*args)
-    {
-        SendSysMessage(LANG_ADDITEMSET_SYNTAX);
-        return true;
-    }
+        return false;
 
     char* citemsetId = strtok((char*)args, " ");
     uint32 itemsetId = atol(citemsetId);
@@ -2032,10 +2026,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 
     uint32 id = atoi((char*)args);
     if(!id)
-    {
-        SendSysMessage(LANG_GAMEOBJECT_SYNTAX);
         return false;
-    }
 
     const GameObjectInfo *goI = objmgr.GetGameObjectInfo(id);
 

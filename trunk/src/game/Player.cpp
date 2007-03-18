@@ -1293,7 +1293,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         // unsommon pet if lost
         if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
-            RemovePet(pet,PET_SAVE_AS_CURRENT);
+            RemovePet(pet,PET_SAVE_NOT_IN_SLOT);
     }
 
     SetSemaphoreTeleport(false);
@@ -10309,7 +10309,7 @@ void Player::_LoadMail()
 void Player::LoadPet()
 {
     Pet *pet = new Pet(getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
-    if(!pet->LoadPetFromDB(this))
+    if(!pet->LoadPetFromDB(this,0,0,true))
         delete pet;
 }
 
@@ -11489,7 +11489,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
     SaveToDB();
 
     // unsommon pet, it will be lost anyway
-    RemovePet(NULL,PET_SAVE_AS_CURRENT);
+    RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
 
     //Checks and preparations done, DO FLIGHT
     setDismountCost( money - totalcost);

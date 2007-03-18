@@ -361,6 +361,8 @@ CREATE TABLE `character_pet` (
   `name` varchar(100) default 'Pet',
   `renamed` tinyint(1) unsigned NOT NULL default '0',
   `slot` int(11) unsigned NOT NULL default '0',
+  `curhealth` int(11) unsigned NOT NULL default '1',
+  `curmana` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
