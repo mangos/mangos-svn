@@ -263,7 +263,7 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
     // The chance to dispell an aura depends on the damage taken with respect to the maximum health.
     // Damage of 75% or greater always dispells the aura.
     float rel_dmg = (float)damage / GetMaxHealth();
-    if (roll_chance(float(rel_dmg / 0.75 * 100.0)))
+    if (roll_chance_f(rel_dmg / 0.75 * 100.0))
         RemoveSpellsCausingAura(auraType);
 }
 
@@ -554,7 +554,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             {
                 bool remove = true;
                 if (se->procFlags & (1<<3)) {
-                    if (!roll_chance(se->procChance))
+                    if (!roll_chance_i(se->procChance))
                         remove = false;
                 }
                 if (remove)
@@ -2977,7 +2977,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 if(spellProcEvent && spellProcEvent->ppmRate != 0)
                     chance = GetPPMProcChance(WeaponSpeed, spellProcEvent->ppmRate);
 
-                if(roll_chance(chance))
+                if(roll_chance_f(chance))
                 {
                     if((*i)->m_procCharges > 0)
                         (*i)->m_procCharges -= 1;
@@ -3070,7 +3070,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
 
                 // procChance is exact number in percents anyway
                 uint32 chance = spellProto->procChance;
-                if(roll_chance(chance))
+                if(roll_chance_i(chance))
                 {
                     if((*i)->m_procCharges > 0)
                         (*i)->m_procCharges -= 1;
@@ -3677,7 +3677,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
             crit_chance += (*i)->GetModifier()->m_amount;
 
     crit_chance = crit_chance > 0.0 ? crit_chance : 0.0;
-    if (roll_chance(crit_chance))
+    if (roll_chance_f(crit_chance))
     {
         int32 crit_bonus = *peffect / 2;
         if (GetTypeId() == TYPEID_PLAYER)  // adds additional damage to crit_bonus (from talents)
@@ -4133,7 +4133,7 @@ bool Unit::isVisibleFor(Unit* u, bool detect)
     if (prob < 0.1)
         prob = 0.1;                                         //min prob of detect is 0.1
 
-    IsVisible = roll_chance(prob);
+    IsVisible = roll_chance_f(prob);
 
     return IsVisible && ( Distance <= MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ;
 }
