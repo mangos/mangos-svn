@@ -3078,6 +3078,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             break;
         case FORM_BEAR:
             spellId = 1178;
+            spellId2 = 21178;
             break;
         case FORM_DIREBEAR:
             spellId = 9635;
