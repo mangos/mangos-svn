@@ -114,6 +114,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     Item *charter = _player->StoreNewItem( dest, GUILD_CHARTER_ITEM_ID, 1, true );
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
     charter->SetState(ITEM_CHANGED, _player);
+    _player->SendNewItem(charter, 1, true, false);
 
     sDatabase.escape_string(guildname);
     sDatabase.BeginTransaction();

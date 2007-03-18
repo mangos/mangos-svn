@@ -465,7 +465,8 @@ void WorldSession::SendBindPoint(Creature *npc)
         uint8 msg = _player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, hearthstone_itemid, 1, false );
         if( msg == EQUIP_ERR_OK )
         {
-            _player->StoreNewItem( dest, hearthstone_itemid, 1, true);
+            Item* newitem = _player->StoreNewItem( dest, hearthstone_itemid, 1, true);
+            _player->SendNewItem(newitem, 1, true, false);
         }
         else
         {
