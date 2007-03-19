@@ -50,10 +50,7 @@ BattleGround::BattleGround()
 
     m_TeamScores[0] = 0;
     m_TeamScores[1] = 0;
-    m_PlayerScores.clear();
 
-    m_Players.clear();
-    m_QueuedPlayers.clear();
     m_MaxPlayersPerTeam = 0;
     m_MaxPlayers = 0;
 
@@ -122,20 +119,26 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
         }
     }
 
-    if(!Removed)
+    for(std::list<Player*>::iterator itr3 = m_QueuedPlayers.begin();itr3!=m_QueuedPlayers.end();++itr3)
     {
-        for(std::list<Player*>::iterator itr3 = m_QueuedPlayers.begin();itr3!=m_QueuedPlayers.end();++itr3)
+        if((*itr3) == plr)
         {
-            if((*itr3) == plr)
-            {
-                m_QueuedPlayers.erase(itr3);
-                Removed = true;
-                break;
-            }
+            m_QueuedPlayers.erase(itr3);
+            Removed = true;
+            break;
         }
     }
 
-    if(!Removed) sLog.outError("BATTLEGROUND: Player could not be removed from battleground completely!");
+    if(!Removed) 
+        sLog.outError("BATTLEGROUND: Player could not be removed from battleground completely!");
+
+    if(!plr->GetBattleGroundId())
+        return;
+
+    // Do next only if found in battleground
+    // We're not in BG.
+    plr->SetBattleGroundId(0);
+
 
     // Let others know
     WorldPacket data;
@@ -144,9 +147,6 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
 
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s left the battle.", plr->GetName());
-
-    // We're not in BG.
-    plr->SetBattleGroundId(0);
 
     // Packets/Movement
     //WorldPacket data;

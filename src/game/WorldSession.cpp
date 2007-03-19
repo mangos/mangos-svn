@@ -35,6 +35,7 @@
 #include "NameTables.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
+#include "BattleGroundMgr.h"
 
 /// Player state
 enum SessionStatus
@@ -186,6 +187,14 @@ void WorldSession::LogoutPlayer(bool Save)
             // give honor to all attackers from set
             for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
                 (*itr)->CalculateHonor(_player);
+        }
+
+        ///- Remove player from battleground (teleport to entrance)
+        if(_player->InBattleGround())
+        {
+            BattleGround* bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+            if(bg)
+                bg->RemovePlayer(_player,true,true);
         }
 
         ///- Reset the online field in the account table

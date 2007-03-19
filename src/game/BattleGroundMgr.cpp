@@ -150,14 +150,6 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, uint64 guid
     }
 }
 
-void BattleGroundMgr::AddPlayerToBattleGround(Player *pl, uint32 bgId)
-{
-    sLog.outDetail("BATTLEGROUND: Added %s to BattleGround.", pl->GetName());
-    BattleGround *bg = GetBattleGround(bgId);
-    bg->AddPlayer(pl);
-
-}
-
 void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 bgId)
 {
     uint32 mapid = GetBattleGround(bgId)->GetMapId();
