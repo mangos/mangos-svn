@@ -80,7 +80,7 @@ RandomMovementGenerator::Initialize(Creature &creature)
             z = z2;
         i_waypoints[idx][2] =  z;
     }
-    i_nextMoveTime.Reset(urand(0, 10000-1));   // TODO: check the lower bound (it is probably too small)
+    i_nextMoveTime.Reset(urand(0, 10000-1));                // TODO: check the lower bound (it is probably too small)
     creature.StopMoving();
 }
 
@@ -88,7 +88,7 @@ void
 RandomMovementGenerator::Reset(Creature &creature)
 {
     i_nextMove = 1;
-    i_nextMoveTime.Reset(urand(0,10000-1));   // TODO: check the lower bound (it is probably too small)
+    i_nextMoveTime.Reset(urand(0,10000-1));                 // TODO: check the lower bound (it is probably too small)
     creature.StopMoving();
 }
 
@@ -129,11 +129,11 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
             if( i_nextMove == MAX_RAND_WAYPOINTS )
             {
                 i_nextMove = 0;
-                i_nextMoveTime.Reset(urand(0, 3000-1));   // TODO: check the lower bound (it is probably too small)
+                i_nextMoveTime.Reset(urand(0, 3000-1));     // TODO: check the lower bound (it is probably too small)
             }
             else
             {
-                i_nextMoveTime.Reset(urand(0, 7000-1));   // TODO: check the lower bound (it is probably too small)
+                i_nextMoveTime.Reset(urand(0, 7000-1));     // TODO: check the lower bound (it is probably too small)
             }
         }
     }

@@ -124,7 +124,7 @@ bool WorldSession::Update(uint32 diff)
                     (this->*table[i].handler)(*packet);
                 }
                 else
-                // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
+                    // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
                 if(!m_playerRecentlyLogout)
                 {
                     sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",

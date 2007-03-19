@@ -250,7 +250,6 @@ bool Unit::HasAuraType(uint32 auraType) const
     return (!m_modAuras[auraType].empty());
 }
 
-
 /* Called by DealDamage for auras that have a chance to be dispelled on damage taken. */
 void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
 {
@@ -267,8 +266,8 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
         RemoveSpellsCausingAura(auraType);
 }
 
-void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint8 damageSchool, 
-                      SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
+void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint8 damageSchool,
+SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
 
@@ -367,13 +366,14 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 pet->DeleteInHateListOf();
             }
         }
-        else // creature died
+        else                                                // creature died
         {
             DEBUG_LOG("DealDamageNotPlayer");
 
             if(((Creature*)pVictim)->isPet())
                 pVictim->DeleteInHateListOf();
-            else {
+            else
+            {
                 pVictim->DeleteThreatList();
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
@@ -449,7 +449,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                         }
                     }
                 }
-                else // if (pGroup)
+                else                                        // if (pGroup)
                 {
                     DEBUG_LOG("Player kill enemy alone");
                     player->GiveXP(xp, pVictim);
@@ -458,13 +458,13 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                         pet->GivePetXP(xp);
                     }
                     player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
-                } // if-else (pGroup)
+                }                                           // if-else (pGroup)
 
                 if(xp || honordiff < 0)
                     ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
-            } // if (!PvP)
+            }                                               // if (!PvP)
         }
-        else // if (player)
+        else                                                // if (player)
         {
             DEBUG_LOG("Monster kill Monster");
         }
@@ -493,7 +493,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             he->DuelComplete(0);
         }
     }
-    else // if (health <= damage)
+    else                                                    // if (health <= damage)
     {
         DEBUG_LOG("DealDamageAlive");
 
@@ -528,7 +528,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
                 damage *= 2;
             pVictim->AddThreat(this, damage, damageSchool, spellProto);
         }
-        else // victim is a player
+        else                                                // victim is a player
         {
             // rage from received damage (from creatures and players)
             if( pVictim != this                             // not generate rage for self damage (falls, ...)
@@ -553,7 +553,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype,
             if (se->AuraInterruptFlags & (1<<1))
             {
                 bool remove = true;
-                if (se->procFlags & (1<<3)) {
+                if (se->procFlags & (1<<3))
+                {
                     if (!roll_chance_i(se->procChance))
                         remove = false;
                 }
@@ -803,7 +804,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(pVictim, spellProto->Id, gain);
-        
+
         // heal for caster damage
         if(pVictim!=this && spellProto->SpellVisual==163)
         {
@@ -1500,8 +1501,8 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
     if(!pVictim)
         return 0;
 
-    int32 misschance = haveOffhandWeapon() && !m_currentMeleeSpell ? 
-        2400 : 500;    //base misschance for DW : melee attacks except special melee spell attacks 
+    int32 misschance = haveOffhandWeapon() && !m_currentMeleeSpell ?
+        2400 : 500;                                         //base misschance for DW : melee attacks except special melee spell attacks
 
     // PvP : PvE melee misschances per leveldif > 2
     int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 500 : 700;
@@ -3640,22 +3641,49 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
     //   chance = base + INT / (rate0 + rate1 * LEVEL)
     // The formula keeps the crit chance at %5 on every level unless the player
     // increases his intelligence by other means (enchants, buffs, talents, ...)
-    static const struct {
+    static const struct
+    {
         float base;
         float rate0, rate1;
-    } crit_data[MAX_CLASSES] = {
-        {0,0,10},             //  0: unused
-        {0,0,10},             //  1: warrior
-        {3.70, 14.77, 0.65},  //  2: paladin
-        {0,0,10},             //  3: hunter
-        {0,0,10},             //  4: rogue
-        {2.97, 10.03, 0.82},  //  5: priest
-        {0,0,10},             //  6: unused
-        {3.54, 11.51, 0.80},  //  7: shaman
-        {3.70, 14.77, 0.65},  //  8: mage
-        {3.18, 11.30, 0.82},  //  9: warlock
-        {0,0,10},             // 10: unused
-        {3.33, 12.41, 0.79}   // 11: druid
+    }
+    crit_data[MAX_CLASSES] =
+    {
+        {                                                   //  0: unused
+            0,0,10
+        },
+        {                                                   //  1: warrior
+            0,0,10
+        },
+        {                                                   //  2: paladin
+            3.70, 14.77, 0.65
+        },
+        {                                                   //  3: hunter
+            0,0,10
+        },
+        {                                                   //  4: rogue
+            0,0,10
+        },
+        {                                                   //  5: priest
+            2.97, 10.03, 0.82
+        },
+        {                                                   //  6: unused
+            0,0,10
+        },
+        {                                                   //  7: shaman
+            3.54, 11.51, 0.80
+        },
+        {                                                   //  8: mage
+            3.70, 14.77, 0.65
+        },
+        {                                                   //  9: warlock
+            3.18, 11.30, 0.82
+        },
+        {                                                   // 10: unused
+            0,0,10
+        },
+        {                                                   // 11: druid
+            3.33, 12.41, 0.79
+        }
     };
     float crit_chance;
 
@@ -3680,7 +3708,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
     if (roll_chance_f(crit_chance))
     {
         int32 crit_bonus = *peffect / 2;
-        if (GetTypeId() == TYPEID_PLAYER)  // adds additional damage to crit_bonus (from talents)
+        if (GetTypeId() == TYPEID_PLAYER)                   // adds additional damage to crit_bonus (from talents)
             ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
         *peffect += crit_bonus;
         return true;

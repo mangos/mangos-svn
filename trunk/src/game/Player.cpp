@@ -753,7 +753,7 @@ void Player::Update( uint32 p_time )
 
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if(roll_chance_i(3) && GetTimeInnEter() > 0)         //freeze update
+        if(roll_chance_i(3) && GetTimeInnEter() > 0)        //freeze update
         {
             int time_inn = time(NULL)-GetTimeInnEter();
             if (time_inn >= 10)                             //freeze update
@@ -2065,14 +2065,14 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     if (IsPassiveSpell(spell_id) || IsTalentSpell(spell_id) && objmgr.IsSpellLearnSpell(spell_id))
     {
         // if spell doesn't require a stance or the player is in the required stance
-        if( (!spellInfo->Stances && spell_id != 3122 && spell_id != 5419 && spell_id != 7376 && 
-            spell_id != 7381 && spell_id != 21156 && spell_id != 21009 && spell_id != 21178) || 
-            m_form != 0 && (spellInfo->Stances & (1<<(m_form-1))) || 
-            (spell_id ==  3122 && m_form == FORM_TREE) || 
-            (spell_id ==  5419 && m_form == FORM_TRAVEL) || 
-            (spell_id ==  7376 && m_form == FORM_DEFENSIVESTANCE) || 
-            (spell_id ==  7381 && m_form == FORM_BERSERKERSTANCE) || 
-            (spell_id == 21156 && m_form == FORM_BATTLESTANCE)|| 
+        if( (!spellInfo->Stances && spell_id != 3122 && spell_id != 5419 && spell_id != 7376 &&
+            spell_id != 7381 && spell_id != 21156 && spell_id != 21009 && spell_id != 21178) ||
+            m_form != 0 && (spellInfo->Stances & (1<<(m_form-1))) ||
+            (spell_id ==  3122 && m_form == FORM_TREE) ||
+            (spell_id ==  5419 && m_form == FORM_TRAVEL) ||
+            (spell_id ==  7376 && m_form == FORM_DEFENSIVESTANCE) ||
+            (spell_id ==  7381 && m_form == FORM_BERSERKERSTANCE) ||
+            (spell_id == 21156 && m_form == FORM_BATTLESTANCE)||
             (spell_id == 21178 && m_form == FORM_BEAR))
             CastSpell(this, spell_id, true);
     }
@@ -4546,7 +4546,6 @@ void Player::DuelComplete(uint8 type)
     delete duel;
     duel = NULL;
 }
-
 
 //---------------------------------------------------------//
 //       Flight callback
