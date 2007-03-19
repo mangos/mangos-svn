@@ -6887,7 +6887,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                     pItem2 = GetItemByPos( bag, slot );
                     if( pItem2 && !swap )
                     {
-                        if( pProto->Stackable > 1 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
+                        if( pProto->Stackable > 1 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() < pProto->Stackable )
                         {
                             dest = ( (bag << 8) | slot );
                             return EQUIP_ERR_OK;
