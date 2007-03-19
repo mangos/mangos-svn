@@ -5215,9 +5215,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
                     FillLoot(loot, lootid, LootTemplates_Pickpocketing);
                 // Generate extra money for pick pocket loot
-                const uint32 a = urand(0, creature->getLevel()/2 -1);
-                const uint32 b = urand(0, getLevel()/2 -1);
-                loot->gold = 10 * (a + b) * sWorld.getRate(RATE_DROP_MONEY);
+                const uint32 a = urand(0, creature->getLevel()/2);
+                const uint32 b = urand(0, getLevel()/2);
+                loot->gold = uint32(10 * (a + b) * sWorld.getRate(RATE_DROP_MONEY));
             }
         }
         else

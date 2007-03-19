@@ -4768,9 +4768,9 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
 
     value += spellProto->EffectBaseDice[effect_index];
     if(randomPoints <= 1)
-        value = basePoints+1;
+        value = basePoints;
     else
-        value = basePoints+rand32(1, randomPoints);
+        value = basePoints+rand32(0, randomPoints-1);
 
     if(comboDamage > 0)
     {
