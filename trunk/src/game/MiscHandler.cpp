@@ -51,9 +51,48 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 {
+    sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
+    recv_data.hexlike();
+
     uint32 clientcount = 0;
 
-    sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
+    uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
+    uint32 zoneids[10];                                     // 10 is client limit
+    std::string player_name, guild_name;
+    std::string str[4];                                     // 4 is client limit
+
+    recv_data >> level_min;                                 // maximal player level, default 0
+    recv_data >> level_max;                                 // minimal player level, default 100
+    recv_data >> player_name;                               // player name, case sensitive...
+    recv_data >> guild_name;                                // guild name, case sensitive...
+    recv_data >> racemask;                                  // race mask
+    recv_data >> classmask;                                 // class mask
+    recv_data >> zones_count;                               // zones count, client limit=10 (2.0.10)
+
+    if(zones_count > 10)
+        return;                                             // can't be received from real client or broken packet
+
+    for(uint32 i = 0; i < zones_count; i++)
+    {
+        uint32 temp;
+        recv_data >> temp;                                  // zone id, 0 if zone is unknown...
+        zoneids[i] = temp;
+        sLog.outDebug("Zone %u: %u", i, zoneids[i]);
+    }
+
+    recv_data >> str_count;                                 // user entered strings count, client limit=4 (checked on 2.0.10)
+
+    if(str_count > 4)
+        return;                                             // can't be received from real client or broken packet
+
+    sLog.outDebug("Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
+    for(uint32 i = 0; i < str_count; i++)
+    {
+        std::string temp;
+        recv_data >> temp;                                  // user entered string, it used as universal search pattern(guild+player name)?
+        str[i] = temp;
+        sLog.outDebug("String %u: %s", i, str[i].c_str());
+    }
 
     uint32 team = _player->GetTeam();
     uint32 security = GetSecurity();
@@ -61,30 +100,59 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
 
     WorldPacket data( SMSG_WHO, 50 );                       // guess size
-    data << uint32( 0 );                                    // clientcount place holder
-    data << uint32( 0 );                                    // clientcount place holder
+    data << clientcount;                                    // clientcount place holder
+    data << clientcount;                                    // clientcount place holder
 
-    ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
+    ObjectAccessor::PlayersMapType& m = ObjectAccessor::Instance().GetPlayers();
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
+        std::string gname = objmgr.GetGuildNameById(itr->second->GetGuildId());
+        const char *pname = itr->second->GetName();
+        uint32 lvl = itr->second->getLevel();
+        uint32 class_ = itr->second->getClass();
+        uint32 race = itr->second->getRace();
+        uint32 pzoneid = itr->second->GetZoneId();
+        bool z_show = true;
+        bool s_show = true;
+
+        for(uint32 i = 0; i < zones_count; i++)
+        {
+            if(zoneids[i] == pzoneid)
+                break;
+
+            z_show = false;
+        }
+
+        for(uint32 i = 0; i < str_count; i++)
+        {
+            s_show = str[i].length() ? strstr(gname.c_str(), str[i].c_str())!=0 : true;
+            if(s_show)
+                break;
+            s_show = str[i].length() ? strstr(pname, str[i].c_str())!=0 : true;
+            if(s_show)
+                break;
+        }
+
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-        if( itr->second->GetName() &&
+        if( pname &&
             ( security > 0 ||
             ( itr->second->GetTeam() == team || allowTwoSideWhoList ) &&
+            (classmask & (1 << class_) ) && (racemask & (1 << race) ) &&
+            (lvl >= level_min && lvl <= level_max) &&
+            (guild_name.length()?strstr(gname.c_str(), guild_name.c_str())!=0 : true) &&
+            (player_name.length()?strstr(pname, player_name.c_str())!=0 : true) &&
+            z_show && s_show &&
             (itr->second->GetSession()->GetSecurity() == 0 || gmInWhoList && itr->second->isVisibleFor(_player,false) )))
         {
             clientcount++;
 
-            data.append(itr->second->GetName() , strlen(itr->second->GetName()) + 1);
-            if(itr->second->GetGuildId())                   // in fact just could use objmgr.GetGuildNameById(itr->second->GetGuildId()) cause getguildid() returns 0 with no guild and getguildnamebyid "" which equals uint8(0)
-                data << objmgr.GetGuildNameById(itr->second->GetGuildId());
-            else
-                data << uint8( 0 );
-            data << uint32( itr->second->getLevel() );
-            data << uint32( itr->second->getClass() );
-            data << uint32( itr->second->getRace() );
-            data << uint32( itr->second->GetZoneId() );
+            data << pname;                                  // player name
+            data << gname;                                  // guild name
+            data << uint32( lvl );                          // player level
+            data << uint32( class_ );                       // player class
+            data << uint32( race );                         // player race
+            data << uint32( pzoneid );                      // player zone id
         }
     }
 
