@@ -1017,8 +1017,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildPlayerRepop();
         void DurabilityLossAll(double percent);
         void DurabilityLoss(uint8 equip_pos, double percent);
-        void DurabilityRepairAll(bool cost);
-        void DurabilityRepair(uint16 pos, bool cost);
+        void DurabilityRepairAll(bool cost, bool discount);
+        void DurabilityRepair(uint16 pos, bool cost, bool discount);
         void RepopAtGraveyard();
 
         void SetMovement(uint8 pType);

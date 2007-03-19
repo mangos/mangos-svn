@@ -572,7 +572,14 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                 data << crItem->id;
                 data << pProto->DisplayInfoID;
                 data << uint32(crItem->maxcount <= 0 ? 0xFFFFFFFF : crItem->count);
-                data << pProto->BuyPrice;
+
+                // 10% reputation discount 
+                uint32 price = pProto->BuyPrice;
+                FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
+                if (vendor_faction && _player->GetReputationRank(vendor_faction->faction) >= REP_HONORED)
+                    price = 9 * price / 10;
+
+                data << price;
                 data << uint32( 0xFFFFFFFF );
                 data << pProto->BuyCount;
             }
