@@ -91,8 +91,17 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     recv_data >> guid;                                      // >> MapID >> Instance;
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: " I64FMT, guid);
 
+    // ignore if we already in BG
+    if(GetPlayer()->InBattleGround())
+        return;
+
     // TODO: select bg ID base at bg map_id or use map id as bg ID
     uint8 bgID = 1;
+
+    // check existance
+    BattleGround *bg = sBattleGroundMgr.GetBattleGround(bgID);
+    if(!bg)
+        return;
 
     // We're in BG.
     GetPlayer()->SetBattleGroundId(bgID);
@@ -112,7 +121,8 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     sBattleGroundMgr.SendBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(bgID)->GetID(), 0x03, 0x00);
 
     // Adding Player to BattleGround id = 0
-    sBattleGroundMgr.AddPlayerToBattleGround(GetPlayer(),bgID);
+    sLog.outDetail("BATTLEGROUND: Added %s to BattleGround.", GetPlayer()->GetName());
+    bg->AddPlayer(GetPlayer());
 
     // Bur: Not sure if we would have to send a position/score update.. maybe the client requests this automatically we'll have to see
 }
