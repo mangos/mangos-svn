@@ -23,14 +23,13 @@
 
 std::vector<std::string> StrSplit(const std::string &src, const std::string &sep);
 
-
-/* Return a random number in the range min..max; (max-min) must be smaller than 32768. 
- * Note: Not reentrant - if two threads call this simultaneously, they will likely 
+/* Return a random number in the range min..max; (max-min) must be smaller than 32768.
+ * Note: Not reentrant - if two threads call this simultaneously, they will likely
  * get the same random number. */
 extern int32 irand(int32 min, int32 max);
 
-/* Return a random number in the range min..max; (max-min) must be smaller than 32768. 
- * Note: Not reentrant - if two threads call this simultaneously, they will likely 
+/* Return a random number in the range min..max; (max-min) must be smaller than 32768.
+ * Note: Not reentrant - if two threads call this simultaneously, they will likely
  * get the same random number. */
 inline uint32 urand(uint32 min, uint32 max)
 {
@@ -40,8 +39,8 @@ inline uint32 urand(uint32 min, uint32 max)
 /* maximum number that can come out of the rand32 generator */
 #define RAND32_MAX  2147483645
 
-/* Return a random number in the range 0 .. RAND32_MAX. 
- * Note: Not reentrant - if two threads call this simultaneously, they will likely 
+/* Return a random number in the range 0 .. RAND32_MAX.
+ * Note: Not reentrant - if two threads call this simultaneously, they will likely
  * get the same random number. */
 extern int32 rand32(void);
 
@@ -53,9 +52,9 @@ inline double rand_norm(void)
     return double(rand32()) / double(RAND32_MAX+1);
 }
 
-/* Return a random number in the range min..max (inclusive). For reliable results, the difference 
+/* Return a random number in the range min..max (inclusive). For reliable results, the difference
  * between max and min should be less than RAND32_MAX. */
-inline uint32 rand32(const uint32 min, const uint32 max) 
+inline uint32 rand32(const uint32 min, const uint32 max)
 {
     return (uint32)rand_norm() * (max-min+1) + min;
 }

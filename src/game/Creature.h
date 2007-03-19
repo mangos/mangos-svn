@@ -115,7 +115,7 @@ struct GossipOption
 
 struct CreatureItem
 {
-    CreatureItem(uint32 _item, uint32 _maxcount, uint32 _incrtime) 
+    CreatureItem(uint32 _item, uint32 _maxcount, uint32 _incrtime)
         : id(_item),count(_maxcount), maxcount(_maxcount), incrtime(_incrtime),lastincr((uint32)time(NULL)) {}
 
     uint32 id;
@@ -309,8 +309,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         /***                    VENDOR SYSTEM                  ***/
         /*********************************************************/
         CreatureItem* GetItem(uint32 slot)
-        { 
-            if(slot>=m_item_list.size()) return NULL; 
+        {
+            if(slot>=m_item_list.size()) return NULL;
             return &m_item_list[slot];
         }
         uint8 GetItemCount() const { return m_item_list.size(); }
@@ -423,7 +423,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         typedef std::vector<CreatureItem> CreatureItems;
         CreatureItems m_item_list;
-        
+
         SpellsList m_tspells;
 
         GossipOptionList m_goptions;

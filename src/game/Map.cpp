@@ -58,7 +58,7 @@ bool Map::ExistMAP(uint32 mapid,int x,int y, bool output)
     {
         sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.",tmp);
         delete [] tmp;
-        fclose(pf);    //close file before return
+        fclose(pf);                                         //close file before return
         return false;
     }
 
@@ -81,7 +81,7 @@ GridMap * Map::LoadMAP(uint32 mapid,int x,int y)
         GridMaps[x][y]=NULL;
     }
 
-    // map file name 
+    // map file name
     char *tmp=NULL;
     // Pihhan: dataPath length + "maps/" + 3+2+2+ ".map" length may be > 32 !
     int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
@@ -93,7 +93,7 @@ GridMap * Map::LoadMAP(uint32 mapid,int x,int y)
     FILE *pf=fopen(tmp,"rb");
     char magic[8];
     fread(magic,1,8,pf);
-    delete []  tmp; 
+    delete []  tmp;
     GridMap * buf= new GridMap;
     if(!buf)                                                //unexpected error
     {

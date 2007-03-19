@@ -2473,8 +2473,6 @@ bool ObjectMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spell
     return GetFirstSpellInChain(spellInfo_1->Id)==GetFirstSpellInChain(spellId_2);
 }
 
-
-
 bool ObjectMgr::canStackSpellRank(SpellEntry const *spellInfo)
 {
     if(GetSpellRank(spellInfo->Id) == 0)

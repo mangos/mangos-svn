@@ -267,6 +267,11 @@ pkgdata_DATA = \
 	3310_spell_learn_spell.sql \
 	3316_playercreateinfo_reputation.sql \
 	3323.sql \
+	3344_playercreateinfo_spell.sql \
+	3346_command.sql \
+	3348_playercreateinfo_spell.sql \
+	3350_command.sql \
+	3351_character_pet.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -514,4 +519,9 @@ EXTRA_DIST = \
 	3310_spell_learn_spell.sql \
 	3316_playercreateinfo_reputation.sql \
 	3323.sql \
+	3344_playercreateinfo_spell.sql \
+	3346_command.sql \
+	3348_playercreateinfo_spell.sql \
+	3350_command.sql \
+	3351_character_pet.sql \
 	README

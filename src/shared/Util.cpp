@@ -74,19 +74,18 @@ int32 irand(int32 min, int32 max)
     return (((holdrand >> 17) * (max - min)) >> 15) + min;
 }
 
-
 // current state of the random number generator
 static int32 rand32_state = 1;
 
-/* Return a pseudo-random number in the range 0 .. RAND32_MAX. 
- * Note: Not reentrant - if two threads call this simultaneously, they will likely 
+/* Return a pseudo-random number in the range 0 .. RAND32_MAX.
+ * Note: Not reentrant - if two threads call this simultaneously, they will likely
  * get the same random number. */
 int32 rand32(void)
 {
-#   define m   2147483647
-#   define a   48271
-#   define q   (m / a)
-#   define r   (m % a)
+    #   define m   2147483647
+    #   define a   48271
+    #   define q   (m / a)
+    #   define r   (m % a)
 
     const int32 hi = rand32_state / q;
     const int32 lo = rand32_state % q;

@@ -108,7 +108,7 @@ ConfusedMovementGenerator::Update(Creature &creature, const uint32 &diff)
             creature.setMoveRunFlag(true);
 
             i_nextMove = urand(1,MAX_CONF_WAYPOINTS);
-            i_nextMoveTime.Reset(urand(0, 1500-1));  // TODO: check the minimum reset time, should be probably higher
+            i_nextMoveTime.Reset(urand(0, 1500-1));         // TODO: check the minimum reset time, should be probably higher
         }
     }
     return true;

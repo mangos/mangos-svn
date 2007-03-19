@@ -1392,7 +1392,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         IgnoreList m_ignorelist;
 };
 
-
 void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);
 

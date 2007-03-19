@@ -1760,7 +1760,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
             m_target->SetVisibility(VISIBILITY_ON);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
                 m_target->SendUpdateToPlayer((Player*)m_target);
-            
+
             // for RACE_NIGHTELF stealth
             if(m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->HasSpell(21009))
                 m_target->RemoveAurasDueToSpell(21009);

@@ -589,7 +589,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     }
 
     char* pitem = strtok((char*)args, " ");
-    uint32 itemId = atol(pitem);      
+    uint32 itemId = atol(pitem);
     if (!pitem)
     {
         SendSysMessage("You must send id for item");
@@ -603,7 +603,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
 
     char* fincrtime = strtok(NULL, " ");                    //add incrtime, default: 0
     uint32 incrtime = 0;
-    if (fincrtime) 
+    if (fincrtime)
         incrtime = atol(fincrtime);
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
@@ -636,7 +636,7 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
 {
     if (!*args)
         return false;
-    
+
     Creature* vendor = getSelectedCreature();
     if (!vendor || !vendor->isVendor())
     {
@@ -645,7 +645,7 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
     }
 
     char* pitem = strtok((char*)args, " ");
-    uint32 itemId = atol(pitem);      
+    uint32 itemId = atol(pitem);
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
     if(!pProto)
