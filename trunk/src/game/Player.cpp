@@ -3108,13 +3108,13 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
     m_items[equip_pos]->SetState(ITEM_CHANGED, this);
 }
 
-void Player::DurabilityRepairAll(bool cost)
+void Player::DurabilityRepairAll(bool cost, bool discount)
 {
     for (uint16 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
-        DurabilityRepair(( (INVENTORY_SLOT_BAG_0 << 8) | i ),cost);
+        DurabilityRepair(( (INVENTORY_SLOT_BAG_0 << 8) | i ),cost,discount);
 }
 
-void Player::DurabilityRepair(uint16 pos, bool cost)
+void Player::DurabilityRepair(uint16 pos, bool cost, bool discount)
 {
     Item* item = GetItemByPos(pos);
 
@@ -3132,6 +3132,9 @@ void Player::DurabilityRepair(uint16 pos, bool cost)
     {
         uint32 costs = maxDurability - curDurability;
 
+        if(discount)
+            costs = 9 * costs / 10;
+
         if (GetMoney() < costs)
         {
             DEBUG_LOG("You do not have enough money");
@@ -3144,7 +3147,7 @@ void Player::DurabilityRepair(uint16 pos, bool cost)
     item->SetUInt32Value(ITEM_FIELD_DURABILITY, maxDurability);
     item->SetState(ITEM_CHANGED, this);
 
-    // reapply mods for total broken and repaired item if equiped
+    // reapply mods for total broken and repaired item if equipped
     if(IsEquipmentPos(pos) && !curDurability)
         _ApplyItemMods(item,pos & 255, true);
 }
@@ -11640,7 +11643,12 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             return;
         }
 
+        // 10% reputation discount 
         uint32 price  = pProto->BuyPrice * count;
+        FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
+        if (vendor_faction && GetReputationRank(vendor_faction->faction) >= REP_HONORED)
+            price = 9 * price / 10;
+
         if( GetMoney() < price )
         {
             SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
