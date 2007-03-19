@@ -1695,6 +1695,17 @@ uint8 Spell::CanCast()
 
     if(target)
     {
+        //TODO: after switch in Cast::preper (?) need implement auto-selecting appropriate cast level.
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && !IsPassiveSpell(m_spellInfo->Id) && !m_CastItem)
+        {
+            for(int i=0;i<3;i++)
+            {
+                if(IsPositiveEffect(m_spellInfo->Id, i) && m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA)
+                    if(target->getLevel() + 10 < m_spellInfo->spellLevel)
+                        return CAST_FAIL_TARGET_TOO_LOW;
+            }
+        }
+
         //check creaturetype
         uint32 SpellCreatureType = m_spellInfo->TargetCreatureType;
 
@@ -2440,6 +2451,23 @@ uint8 Spell::CheckItems()
 
                 if (!itemTarget->GetProto()->DisenchantID)
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
+
+                uint16 skill_val = p_caster->GetSkillValue(SKILL_ENCHANTING);
+                uint32 itemLevel = itemTarget->GetProto()->ItemLevel;
+                if ((skill_val <  25 && itemLevel > 15) ||
+                    (skill_val <  50 && itemLevel > 20) ||
+                    (skill_val <  75 && itemLevel > 29) ||
+                    (skill_val < 100 && itemLevel > 34) ||
+                    (skill_val < 125 && itemLevel > 39) ||
+                    (skill_val < 150 && itemLevel > 44) ||
+                    (skill_val < 175 && itemLevel > 49) ||
+                    (skill_val < 200 && itemLevel > 54) ||
+                    (skill_val < 225 && itemLevel > 59) ||
+                    (skill_val < 275 && itemLevel > 63))
+                {
+                    return CAST_FAIL_SKILL_NOT_HIGH_ENOUGH;
+                }
+                break;
             }
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
