@@ -263,6 +263,27 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
     m.clear();
 }
 
+void
+ObjectGridStoper::Stop(GridType &grid)
+{
+    TypeContainerVisitor<ObjectGridStoper, GridTypeMapContainer > stoper(*this);
+    grid.Visit(stoper);
+}
+
+void
+ObjectGridStoper::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
+{
+    if( m.size() == 0 )
+        return;
+
+    // stop any fights at grid de-activation
+    for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        iter->second->CombatStop(true);
+        iter->second->DeleteThreatList();
+    }
+}
+
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
