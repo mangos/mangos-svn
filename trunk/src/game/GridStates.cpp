@@ -31,7 +31,11 @@ void
 ActiveState::Update(Map &m, NGridType &grid, GridInfo & info, const uint32 &x, const uint32 &y, const uint32 &t_diff) const
 {
     if( grid.ActiveObjectsInGrid() == 0 && !ObjectAccessor::Instance().PlayersNearGrid(x, y, m.GetId()) )
+    {
+        ObjectGridStoper stoper(grid);
+        stoper.StopN();
         grid.SetGridState(GRID_STATE_IDLE);
+    }
 }
 
 void

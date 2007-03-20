@@ -54,6 +54,15 @@ class MANGOS_DLL_DECL GridLoader
             grid.UnlockGrid();
         }
 
+        /** Stop the grid
+        */
+        template<class STOPER>
+        void Stop(Grid<ACTIVE_OBJECT,WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES> &grid, STOPER &stoper)
+        {
+            grid.LockGrid();
+            stoper.Stop(grid);
+            grid.UnlockGrid();
+        }
         /** Unloads the grid
          */
         template<class UNLOADER>

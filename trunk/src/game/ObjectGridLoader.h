@@ -77,5 +77,32 @@ class MANGOS_DLL_DECL ObjectGridUnloader
         NGridType &i_grid;
 };
 
+class MANGOS_DLL_DECL ObjectGridStoper
+{
+public:
+    ObjectGridStoper(NGridType &grid) : i_grid(grid) {}
+
+    void MoveToRespawnN();
+    void StopN()
+    {
+        for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
+        {
+            for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
+            {
+                GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> loader;
+                loader.Stop(i_grid(x, y), *this);
+            }
+        }
+    }
+
+    void Stop(GridType &grid);
+    void Visit(std::map<OBJECT_HANDLE, Creature*> &m);
+
+    template<class NONACTIVE>
+    void Visit(std::map<OBJECT_HANDLE, NONACTIVE *> &m) {}
+private:
+    NGridType &i_grid;
+};
+
 typedef GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> GridLoaderType;
 #endif
