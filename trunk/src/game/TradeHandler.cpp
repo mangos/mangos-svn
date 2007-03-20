@@ -346,7 +346,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     Player* pOther = ObjectAccessor::Instance().FindPlayer( ID );
 
-    if(!pOther)
+    if(!pOther || pOther == GetPlayer())
     {
         SendTradeStatus(TRADE_STATUS_NO_TARGET);
         return;
