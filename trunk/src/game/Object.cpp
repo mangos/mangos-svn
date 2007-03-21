@@ -647,7 +647,7 @@ float WorldObject::GetAngle(const WorldObject* obj) const
     return GetAngle( obj->GetPositionX(), obj->GetPositionY() );
 }
 
-// Retirn angle in range 0..2*pi
+// Return angle in range 0..2*pi
 float WorldObject::GetAngle( const float x, const float y ) const
 {
     float dx = x - GetPositionX();

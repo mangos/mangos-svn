@@ -1648,8 +1648,6 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
     uint32 apply_stat = UNIT_STAT_DIED;
     if( Apply )
     {
-        // m_target->AttackStop();
-
         //m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real add aura
@@ -1665,19 +1663,9 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_DEAD);
         m_target->CombatStop();
         m_target->DeleteInHateListOf();
-
-        /* THis is totally wrong explicitly call setDeathState(CORPSE)
-        // this will broke stats (aura/item mods not removed)
-        m_target->setDeathState(CORPSE);
-        m_target->SetHealth(0);
-        */
     }
     else
     {
-        /*
-        m_target->SetHealth(m_target->GetMaxHealth()/2);
-        m_target->setDeathState(ALIVE);
-        */
         //m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real remove aura
@@ -1706,6 +1694,10 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         // only at real add aura
         if(Real)
         {
+            //Save last orientation
+            if (Unit* caster = GetCaster())
+                m_target->SetOrientation(m_target->GetAngle(caster));
+
             if(m_target->GetTypeId() != TYPEID_PLAYER)
                 ((Creature *)m_target)->StopMoving();
 
@@ -1834,6 +1826,10 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         // only at real add aura
         if(Real)
         {
+            //Save last orientation
+            if (Unit* caster = GetCaster())
+                m_target->SetOrientation(m_target->GetAngle(caster));
+
             if(m_target->GetTypeId() == TYPEID_PLAYER)
             {
                 WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
