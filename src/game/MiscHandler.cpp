@@ -175,7 +175,6 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     //instant logout for admins, gm's, mod's
     if (security > 0)
     {
-        LogoutRequest(0);
         LogoutPlayer(true);
         return;
     }
@@ -198,7 +197,6 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     //instant logout in taverns/cities
     if(Target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        LogoutRequest(0);
         LogoutPlayer(true);
         return;
     }
@@ -239,7 +237,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_LOGOUT_CANCEL_ACK, 0 );
     SendPacket( &data );
 
-    // not remove flags if flight - its not setted in Logout request code.
+    // not remove flags if flight - its not set in Logout request code.
     if(!GetPlayer()->isInFlight())
     {
         //!we can move again
