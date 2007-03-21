@@ -320,7 +320,7 @@ void ObjectMgr::LoadSpellThreats()
     sLog.outString( "" );
 }
 
-// name must be checked to correctness (if recived) before call this function
+// name must be checked to correctness (if received) before call this function
 uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 {
 
