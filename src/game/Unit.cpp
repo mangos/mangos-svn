@@ -290,11 +290,12 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
     {
         //pVictim->SetInFront(this);
         // no loot,xp,health if type 8 /critters/
-        if ( ((Creature*)pVictim)->GetCreatureInfo()->type == 8)
+        if ( ((Creature*)pVictim)->GetCreatureInfo()->type == CREATURE_TYPE_CRITTER)
         {
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
             pVictim->CombatStop(true);
+            pVictim->DeleteThreatList();
             return;
         }
         if(!pVictim->isInCombat())
@@ -1022,7 +1023,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     if (*damageType == SPELL_SCHOOL_NORMAL)
         *damage = CalcArmorReducedDamage(pVictim, *damage);
 
-    if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
+    if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
         ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
     if(GetTypeId() != TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
         ((Player*)pVictim)->UpdateCombatSkills(this, attType, outcome, true);
@@ -1035,7 +1036,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;
             *damage *= 2;
 
-            if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
+            if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
                 ((Player*)this)->UpdateWeaponSkill(attType);
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);

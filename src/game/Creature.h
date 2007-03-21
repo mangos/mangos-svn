@@ -212,20 +212,6 @@ struct CreatureInfo
 #pragma pack(pop)
 #endif
 
-enum UNIT_TYPE
-{
-    NOUNITTYPE = 0,
-    BEAST      = 1,
-    DRAGONSKIN = 2,
-    DEMON      = 3,
-    ELEMENTAL  = 4,
-    GIANT      = 5,
-    UNDEAD     = 6,
-    HUMANOID   = 7,
-    CRITTER    = 8,
-    MECHANICAL = 9,
-};
-
 typedef std::list<GossipOption> GossipOptionList;
 
 // max different by z coordinate for creature aggro reaction
