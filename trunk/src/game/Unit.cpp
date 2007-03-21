@@ -3023,7 +3023,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 else if(*aur == SPELL_AURA_DUMMY)
                 {
                     // TODO: write a DUMMY aura handle code
-                    if (pVictim->isAlive())
+                    if (pVictim && pVictim->isAlive())
                     {
                         sLog.outDebug("ProcDamageAndSpell: aura id %u with dummy effect (triggered by an attacker)", (*i).first->Id);
                         HandleDummyAuraProc(pVictim, i->first, i->second, damage);
