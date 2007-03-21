@@ -542,7 +542,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
         }
     }
 
-    if(pm->GetGossipMenu()->MenuItemCount()==0 && HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER))
+    if(pm->GetGossipMenu()->MenuItemCount()==0 && HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER) && !pm->GetQuestMenu()->MenuItemCount())
         isCanTrainingOf(pPlayer,true);
 
     /*
