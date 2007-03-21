@@ -181,6 +181,7 @@ void WorldSocket::OnRead()
                     _session->QueuePacket(packet);
                 else
                     sLog.outDetail("Received out of place packet with cmdid 0x%.4X", _cmd);
+                break;
             }
         }
     }

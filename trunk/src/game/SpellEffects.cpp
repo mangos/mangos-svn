@@ -553,6 +553,7 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_MOD_STALKED:
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
             case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+            case SPELL_AURA_EMPATHY:
                 break;
             default:
                 if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat())

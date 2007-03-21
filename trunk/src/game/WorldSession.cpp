@@ -300,9 +300,7 @@ void WorldSession::KickPlayer()
     if(!_socket)
         return;
 
-    LogoutPlayer(true);
-
-    // session will removed in next update tick
+    // player will be  logout and session will removed in next update tick
     _socket->SetCloseAndDelete(true);
     _socket = NULL;
 }
