@@ -54,12 +54,14 @@ _security(sec), _accountId(id), _logoutTime(0), m_playerLoading(false), m_player
 /// WorldSession destructor
 WorldSession::~WorldSession()
 {
-    ///- empty incoming packet queue
-    WorldPacket *packet;
+    ///- unload player if not unloaded
+    if(_player)
+        LogoutPlayer(true);
 
+    ///- empty incoming packet queue
     while(!_recvQueue.empty())
     {
-        packet = _recvQueue.next();
+        WorldPacket *packet = _recvQueue.next();
         delete packet;
     }
 }
