@@ -10689,9 +10689,8 @@ void Player::SaveToDB()
         _ApplyAllItemMods();
     }
 
-    // save hunter pet level and expirience at owner save. spells and etc for summoned pets saved at learn and apply.
-    Pet* pet = GetPet();
-    if(pet && pet->getPetType()==HUNTER_PET)
+    // save pet (hunter pet level and experience and all type pets health/mana.
+    if(Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
