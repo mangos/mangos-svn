@@ -810,7 +810,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         if(pVictim!=this && spellProto->SpellVisual==163)
         {
             SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
-            DealDamage(this, gain, DIRECT_DAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
+            DealDamage(this, gain, SELF_DAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
         }
 
         if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
