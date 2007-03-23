@@ -55,7 +55,30 @@ void PetAI::MoveInLineOfSight(Unit *u)
 
 void PetAI::AttackStart(Unit *u)
 {
-    _taggedToKill(u);
+    if( i_pet.getVictim() || !u || i_pet.isPet() && ((Pet&)i_pet).getPetType()==MINI_PET )
+        return;
+
+    DEBUG_LOG("Start to attack");
+    if(i_pet.Attack(u))
+    {
+        i_pet.clearUnitState(UNIT_STAT_FOLLOW);
+        i_pet->Clear();
+        i_victimGuid = u->GetGUID();
+        i_pet->Mutate(new TargetedMovementGenerator(*u));
+    }
+
+    /*SpellEntry *spellInfo;
+    if( ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack( u )))
+    {
+    Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
+    spell->SetAutoRepeat(true);
+    SpellCastTargets targets;
+    targets.setUnitTarget( u );
+    spell->prepare(&targets);
+    i_pet.m_canMove = false;
+    DEBUG_LOG("Spell Attack.");
+    }
+    else*/
 }
 
 void PetAI::EnterEvadeMode()
@@ -219,32 +242,4 @@ void PetAI::UpdateAI(const uint32 diff)
 bool PetAI::_isVisible(Unit *u) const
 {
     return false;                                           //( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !u->m_stealth && u->isAlive());
-}
-
-void PetAI::_taggedToKill(Unit *u)
-{
-    if( i_pet.getVictim() || !u || i_pet.isPet() && ((Pet&)i_pet).getPetType()==MINI_PET )
-        return;
-
-    DEBUG_LOG("Start to attack");
-    if(i_pet.Attack(u))
-    {
-        i_pet.clearUnitState(UNIT_STAT_FOLLOW);
-        i_pet->Clear();
-        i_victimGuid = u->GetGUID();
-        i_pet->Mutate(new TargetedMovementGenerator(*u));
-    }
-
-    /*SpellEntry *spellInfo;
-    if( ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack( u )))
-    {
-        Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-        spell->SetAutoRepeat(true);
-        SpellCastTargets targets;
-        targets.setUnitTarget( u );
-        spell->prepare(&targets);
-        i_pet.m_canMove = false;
-        DEBUG_LOG("Spell Attack.");
-    }
-    else*/
 }

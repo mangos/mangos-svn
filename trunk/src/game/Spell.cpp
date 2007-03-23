@@ -1277,26 +1277,32 @@ void Spell::writeAmmoToPacket( WorldPacket * data )
 {
     uint32 ammoInventoryType = 0;
     uint32 ammoDisplayID = 0;
-    Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
-    if(pItem)
+
+    if (m_caster->GetTypeId() == TYPE_PLAYER)
     {
-        ammoInventoryType = pItem->GetProto()->InventoryType;
-        if( ammoInventoryType == INVTYPE_THROWN )
-            ammoDisplayID = pItem->GetProto()->DisplayInfoID;
-        else
-        {
-            uint32 ammoID = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
-            if(ammoID)
-            {
-                ItemPrototype const *pProto = objmgr.GetItemPrototype( ammoID );
-                if(pProto)
-                {
-                    ammoDisplayID = pProto->DisplayInfoID;
-                    ammoInventoryType = pProto->InventoryType;
-                }
-            }
-        }
+       Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+       if(pItem)
+       {
+           ammoInventoryType = pItem->GetProto()->InventoryType;
+           if( ammoInventoryType == INVTYPE_THROWN )
+               ammoDisplayID = pItem->GetProto()->DisplayInfoID;
+           else
+           {
+               uint32 ammoID = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
+               if(ammoID)
+               {
+                   ItemPrototype const *pProto = objmgr.GetItemPrototype( ammoID );
+                   if(pProto)
+                   {
+                       ammoDisplayID = pProto->DisplayInfoID;
+                       ammoInventoryType = pProto->InventoryType;
+                   }
+               }
+           }
+       }
     }
+    // TODO: implement selection ammo data based at ranged weapon stored in equipmodel/equipinfo/equipslot fields
+
     *data << ammoDisplayID;
     *data << ammoInventoryType;
 }
