@@ -506,7 +506,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
             uint32 procVictim = PROC_FLAG_NONE;
 
             // if just dropped below 20% (for CheatDeath)
-            if((pVictim->GetMaxHealth()+damage)*5 > pVictim->GetMaxHealth())
+            if((pVictim->GetHealth()+damage)*5 > pVictim->GetMaxHealth())
                 procVictim = PROC_FLAG_LOW_HEALTH;
 
             ProcDamageAndSpell(pVictim,PROC_FLAG_TARGET_LOW_HEALTH,procVictim);
