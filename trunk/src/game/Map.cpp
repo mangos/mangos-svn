@@ -141,7 +141,7 @@ Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
     }
 }
 
-// Template specuialization of utility methods
+// Template specialization of utility methods
 template<class T>
 void Map::AddToGrid(T* obj, NGridType *grid, Cell const& cell)
 {

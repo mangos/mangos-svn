@@ -210,7 +210,13 @@ void Corpse::UpdateForPlayer(Player* player, bool first)
 
 void Corpse::ConvertCorpseToBones()
 {
-    assert(GetType()==CORPSE_RESURRECTABLE);
+    // prevent multiply corpse conversion from different threads
+    static ZThread::FastMutex i_c2bGuard;
+    MaNGOS::GeneralLock<ZThread::FastMutex> guard(i_c2bGuard);
+
+    // corpse can be converted in another thread already
+    if(GetType()!=CORPSE_RESURRECTABLE)
+        return;
 
     Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID());
 
@@ -218,17 +224,13 @@ void Corpse::ConvertCorpseToBones()
     if(player && player->GetMapId() == GetMapId())
         player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 0, 30, "" );
 
-    DEBUG_LOG("Deleting Corpse and swpaning bones.\n");
-
-    // check if grid loaded where corpse placed
-    bool loaded = !MapManager::Instance().GetMap(GetMapId())->IsRemovalGrid(GetPositionX(),GetPositionY());
-
-    // remove resurrectable corpse from grid object registry
-    if(loaded)
-        MapManager::Instance().GetMap(GetMapId())->Remove(this,false);
+    DEBUG_LOG("Deleting Corpse and spawning bones.\n");
 
     // remove corpse from player_guid -> corpse map
     ObjectAccessor::Instance().RemoveCorpse(this);
+
+    // remove resurrectble corpse from grid object registry (loaded state checked into call)
+    MapManager::Instance().GetMap(GetMapId())->Remove(this,false);
 
     // remove corpse from DB
     DeleteFromDB();
@@ -248,7 +250,12 @@ void Corpse::ConvertCorpseToBones()
     // add bones to DB
     SaveToDB();
 
-    // add bones in grid store
-    if(loaded)
+    // add bones in grid store if grid loaded where corpse placed
+    if(!MapManager::Instance().GetMap(GetMapId())->IsRemovalGrid(GetPositionX(),GetPositionY()))
+    {
         MapManager::Instance().GetMap(GetMapId())->Add(this);
+    }
+    // or prepare to delete at next tick if grid not loaded
+    else
+        DeleteBonnesFromWorld();
 }
