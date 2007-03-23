@@ -1133,12 +1133,14 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 modelid = 15375;
             break;
         case FORM_AMBIENT:
-        case FORM_BATTLESTANCE:
-        case FORM_BERSERKERSTANCE:
-        case FORM_DEFENSIVESTANCE:
         case FORM_SHADOW:
         case FORM_STEALTH:
         case FORM_TREE:
+            break;
+        case FORM_BATTLESTANCE:
+        case FORM_BERSERKERSTANCE:
+        case FORM_DEFENSIVESTANCE:
+            PowerType = POWER_RAGE;
             break;
         default:
             sLog.outError("Auras: Unknown Shapeshift Type: %u", m_modifier.m_miscvalue);
@@ -1154,13 +1156,15 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
         if(PowerType != POWER_MANA)
         {
-            unit_target->setPowerType(PowerType);
+            // reset power to default values only at power change
+            if(unit_target->getPowerType()!=PowerType)
+                unit_target->setPowerType(PowerType);
 
-            // energy in cat start with 0.
-            //TODO: implement SPELL_AURA_ADD_TARGET_TRIGGER that used for receiving with some chance non-0 energy at transformation
             switch(m_modifier.m_miscvalue)
             {
                 case FORM_CAT:
+                    // energy in cat start with 0.
+                    //TODO: implement SPELL_AURA_ADD_TARGET_TRIGGER that used for receiving with some chance non-0 energy at transformation
                     unit_target->SetPower(POWER_ENERGY,0);
                     break;
                 case FORM_BATTLESTANCE:
