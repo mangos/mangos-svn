@@ -2988,7 +2988,16 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     int32 i_spell_param = (*i)->GetModifier()->m_amount;
                     if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
                     {
-                        spellProto = sSpellStore.LookupEntry(spellProto->EffectTriggerSpell[i_spell_eff]);
+                        // special case with random selection for druid melee attack event effect
+                        if((*i)->GetId()==16864)
+                        {
+                            static uint32 spells[3] = { 12536, 16246, 16870 };
+                            spellProto = sSpellStore.LookupEntry(spells[rand32(0,2)]);
+                        }
+                        // normal case
+                        else
+                            spellProto = sSpellStore.LookupEntry(spellProto->EffectTriggerSpell[i_spell_eff]);
+
                         i_spell_param = procFlag;
                     }
                     if(*aur == SPELL_AURA_DUMMY)

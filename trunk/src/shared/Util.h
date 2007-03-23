@@ -56,7 +56,7 @@ inline double rand_norm(void)
  * between max and min should be less than RAND32_MAX. */
 inline uint32 rand32(const uint32 min, const uint32 max)
 {
-    return (uint32)rand_norm() * (max-min+1) + min;
+    return uint32(rand_norm() * (max-min+1)) + min;
 }
 
 /* Return a random double from 0.0 to 99.9999999999999. Floats support only 7 valid decimal digits.
