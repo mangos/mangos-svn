@@ -498,16 +498,19 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
     {
         DEBUG_LOG("DealDamageAlive");
 
-        // Check if health is below 20%
-        if((health-damage)*5 < pVictim->GetMaxHealth())
+        pVictim->ModifyHealth(- (int32)damage);
+
+        // Check if health is below 20% (apply damage before to prevent case when after ProcDamageAndSpell health < damage
+        if(pVictim->GetHealth()*5 < pVictim->GetMaxHealth())
         {
             uint32 procVictim = PROC_FLAG_NONE;
-            if(health*5 > pVictim->GetMaxHealth())          // if just dropped below 20% (for CheatDeath)
+
+            // if just dropped below 20% (for CheatDeath)
+            if((pVictim->GetMaxHealth()+damage)*5 > pVictim->GetMaxHealth())
                 procVictim = PROC_FLAG_LOW_HEALTH;
+
             ProcDamageAndSpell(pVictim,PROC_FLAG_TARGET_LOW_HEALTH,procVictim);
         }
-
-        pVictim->ModifyHealth(- (int32)damage);
 
         if(damagetype != DOT)
         {

@@ -405,20 +405,42 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
         {
-            Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? ((Player*)m_caster)->groupInfo.group : NULL;
+            Unit* owner = m_caster->GetOwner();
+            Group  *pGroup = NULL;
+            Player *groupMember = NULL;
+
+            if(owner)
+            {
+                if(owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    groupMember = (Player*)owner;
+                    pGroup = ((Player*)owner)->groupInfo.group;
+                }
+            }
+            else if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                groupMember = (Player*)m_caster;
+                pGroup = groupMember->groupInfo.group;
+            }
+
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
+                    if(!pGroup->SameSubGroup(groupMember->GetGUID(), pGroup->GetMemberGUID(p)))
                         continue;
 
                     Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
                     if(!Target)
                         continue;
-                    if(m_caster->IsWithinDist(Target, radius))
+                    if(m_caster->IsWithinDistInMap(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
+            }
+            else if (owner)
+            {
+                if(m_caster->IsWithinDistInMap(owner, radius))
+                    TagUnitMap.push_back(owner);
             }
             else
                 TagUnitMap.push_back(m_caster);

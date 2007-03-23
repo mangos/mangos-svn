@@ -104,7 +104,7 @@ void Corpse::SaveToDB()
     sDatabase.CommitTransaction();
 }
 
-void Corpse::DeleteBonnesFromWorld()
+void Corpse::DeleteBonesFromWorld()
 {
     assert(GetType()==CORPSE_BONES);
     ObjectAccessor::Instance().RemoveBonesFromPlayerView(this);
@@ -257,5 +257,5 @@ void Corpse::ConvertCorpseToBones()
     }
     // or prepare to delete at next tick if grid not loaded
     else
-        DeleteBonnesFromWorld();
+        DeleteBonesFromWorld();
 }
