@@ -652,12 +652,16 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 /// \todo Complete HandleCancelChanneling function
 void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4);
+
     uint32 spellid;
     recv_data >> spellid;
 }
 
 void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     sLog.outDebug("WORLD: CMSG_FAR_SIGHT");
     recv_data.hexlike();
 

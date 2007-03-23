@@ -235,6 +235,8 @@ void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
 
 void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+4+2+2);
+
     sLog.outDetail( "HandlePetSetAction. CMSG_PET_SET_ACTION\n" );
 
     uint64 petguid;

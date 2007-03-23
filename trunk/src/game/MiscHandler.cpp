@@ -51,6 +51,8 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+4+1+1+4+4+4+4);
+
     sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
     recv_data.hexlike();
 
@@ -64,13 +66,24 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     recv_data >> level_min;                                 // maximal player level, default 0
     recv_data >> level_max;                                 // minimal player level, default 100
     recv_data >> player_name;                               // player name, case sensitive...
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,4+4+(player_name.size()+1)+1+4+4+4+4);
+
     recv_data >> guild_name;                                // guild name, case sensitive...
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,4+4+(player_name.size()+1)+(guild_name.size()+1)+4+4+4+4);
+
     recv_data >> racemask;                                  // race mask
     recv_data >> classmask;                                 // class mask
     recv_data >> zones_count;                               // zones count, client limit=10 (2.0.10)
 
     if(zones_count > 10)
         return;                                             // can't be received from real client or broken packet
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,4+4+(player_name.size()+1)+(guild_name.size()+1)+4+4+4+(4*zones_count)+4);
 
     for(uint32 i = 0; i < zones_count; i++)
     {
@@ -85,9 +98,15 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     if(str_count > 4)
         return;                                             // can't be received from real client or broken packet
 
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,4+4+(player_name.size()+1)+(guild_name.size()+1)+4+4+4+(4*zones_count)+4+(1*str_count));
+
     sLog.outDebug("Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
     for(uint32 i = 0; i < str_count; i++)
     {
+        // recheck (have one more byte)
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos());
+
         std::string temp;
         recv_data >> temp;                                  // user entered string, it used as universal search pattern(guild+player name)?
         str[i] = temp;

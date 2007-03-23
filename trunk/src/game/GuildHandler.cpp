@@ -1380,7 +1380,7 @@ void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,4+4+4+4+4+4+4);
+    CHECK_PACKET_SIZE(recvPacket,8+4+4+4+4+4);
 
     //sLog.outDebug( "WORLD: Received MSG_SAVE_GUILD_EMBLEM"  );
 
