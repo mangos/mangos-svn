@@ -1583,7 +1583,6 @@ void Player::SetGameMaster(bool on)
     {
         m_GMFlags |= GM_ON;
         setFaction(35);
-        SetFlag(PLAYER_BYTES_2, 0x8);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
         MoveToHateOfflineList();
         CombatStop(true);
@@ -1592,7 +1591,6 @@ void Player::SetGameMaster(bool on)
     {
         m_GMFlags &= ~GM_ON;
         setFactionForRace(getRace());
-        RemoveFlag(PLAYER_BYTES_2, 0x8);
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
         MoveToThreatList();
     }
