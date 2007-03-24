@@ -221,7 +221,7 @@ void Spell::EffectDummy(uint32 i)
     if(!unitTarget)
         return;
 
-    // More spell specific code in begining
+    // More spell specific code in beginning
     if(m_spellInfo->Id == 13535)
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry( 13481 );
@@ -250,7 +250,7 @@ void Spell::EffectDummy(uint32 i)
         if( unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT )
             return;
 
-        // if creature not figthing currently
+        // if creature not fighting currently
         if( unitTarget->isInCombat() )
             return;
 
@@ -391,7 +391,7 @@ void Spell::EffectDummy(uint32 i)
 
         // ok, main function spell can be casted
 
-        finish();                                           // prepere to replacing this cpell cast to main function spell
+        finish();                                           // prepare to replacing this spell cast to main function spell
 
         // casting
         SpellEntry const *spellInfo = sSpellStore.LookupEntry( 20578 );
@@ -615,7 +615,7 @@ void Spell::EffectApplyAura(uint32 i)
                 SpellEntry const *WeakenedSoulSpellInfo = sSpellStore.LookupEntry( 6788 );
                 Aura* WeakenedSoulAura = new Aura(WeakenedSoulSpellInfo, 0, unitTarget,m_caster, 0);
                 unitTarget->AddAura(WeakenedSoulAura, 0);
-                sLog.outDebug("Spell: Additinal Aura is: %u", WeakenedSoulSpellInfo->EffectApplyAuraName[i]);
+                sLog.outDebug("Spell: Additional Aura is: %u", WeakenedSoulSpellInfo->EffectApplyAuraName[i]);
             }
         }
 
@@ -1182,7 +1182,7 @@ void Spell::EffectPickPocket(uint32 i)
 
         if (chance > irand(0, 19))
         {
-            //Stealing successfull
+            //Stealing successful
             //sLog.outDebug("Sending loot from pickpocket");
             ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_PICKPOKETING);
         }
@@ -1304,7 +1304,7 @@ void Spell::EffectSummonWild(uint32 i)
         spawnCreature->AddToWorld();
         MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
         /*
-                guardians and wilds can't be controled
+                guardians and wilds can't be controlled
                 if(m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     m_caster->SetPet(spawnCreature);
@@ -1329,7 +1329,7 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     float fx,fy,fz;
     m_caster->GetClosePoint(NULL,fx,fy,fz,unitTarget->GetObjectSize() + dis);
 
-    // teleport a bit above terrainlevel to avoid falling below it
+    // teleport a bit above terrain level to avoid falling below it
     fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
@@ -1389,7 +1389,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
                 p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
                 item_owner->GetName(),item_owner->GetSession()->GetAccountId());
 
-        // remove old enchanting before appling new if equiped
+        // remove old enchanting before applying new if equipped
         if(itemTarget->IsEquipped())
             if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT))
                 item_owner->AddItemEnchant(itemTarget,old_enchant_id,0,false);
@@ -1399,7 +1399,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, enchant_id);
 
-        // add new enchanting if equiped
+        // add new enchanting if equipped
         if(itemTarget->IsEquipped())
             item_owner->AddItemEnchant(itemTarget,enchant_id,0,true);
 
@@ -1494,7 +1494,7 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->CombatStop(true);
         creatureTarget->StopMoving();
 
-        // cast finish succesfully
+        // cast finish successfully
         SendChannelUpdate(0);
         finish();
 
@@ -1516,7 +1516,7 @@ void Spell::EffectTameCreature(uint32 i)
         pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);
-                                                            // this enables popup window (pet detals, abandon, rename)
+                                                            // this enables popup window (pet details, abandon, rename)
 
         uint32 new_id = 1;
         QueryResult* result = sDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
@@ -1528,7 +1528,7 @@ void Spell::EffectTameCreature(uint32 i)
         }
 
         pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,new_id);
-                                                            // this enables pet detals window (Shift+P)
+                                                            // this enables pet details window (Shift+P)
         pet->AIM_Initialize();
 
         ObjectAccessor::Instance().AddPet(pet);
@@ -1630,9 +1630,9 @@ void Spell::EffectSummonPet(uint32 i)
         }
 
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER,new_id);
-                                                            // this enables pet detals window (Shift+P)
+                                                            // this enables pet details window (Shift+P)
 
-        // this enables popup window (pet dismiss, cancel), hunter pet additinal flags set later
+        // this enables popup window (pet dismiss, cancel), hunter pet additional flags set later
         NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1);
 
         NewSummon->InitStatsForLevel( petlevel);
@@ -1655,7 +1655,7 @@ void Spell::EffectSummonPet(uint32 i)
         }
         else if(NewSummon->getPetType()==HUNTER_PET)
         {
-            // this enables popup window (pet detals, abandon, rename)
+            // this enables popup window (pet details, abandon, rename)
             NewSummon->SetFlag(UNIT_FIELD_FLAGS,(UNIT_FLAG_RESTING | UNIT_FLAG_RENAME));
         }
 
@@ -1881,7 +1881,7 @@ void Spell::EffectInterruptCast(uint32 i)
         return;
 
     // TODO: not all spells that used this effect apply cooldown at school spells
-    // also exist case: apply cooldown to interupted cast only and to all spells
+    // also exist case: apply cooldown to interrupted cast only and to all spells
     if (unitTarget->m_currentSpell && unitTarget->m_currentSpell->m_spellInfo)
     {
         unitTarget->ProhibitSpellScholl(unitTarget->m_currentSpell->m_spellInfo->School, GetDuration(m_spellInfo));
@@ -2182,7 +2182,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         if(!pEnchant)
             return;
 
-        // remove old enchanting before appling new
+        // remove old enchanting before applying new
         if(uint32 old_enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3))
             item_owner->AddItemEnchant(item,old_enchant_id,pEnchant->display_type,false);
 
@@ -2373,7 +2373,7 @@ void Spell::EffectMomentMove(uint32 i)
         float fx,fy,fz;
         m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
 
-        // teleport a bit above terrainlevel to avoid falling below it
+        // teleport a bit above terrain level to avoid falling below it
         fz = MapManager::Instance ().GetMap(mapid)->GetHeight(fx,fy) + 1.5;
 
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
@@ -2480,7 +2480,8 @@ void Spell::EffectCharge(uint32 i)
         ((Creature *)unitTarget)->StopMoving();
 
     m_caster->SendMonsterMove(x, y, z, false,true,1);
-    m_caster->Attack(unitTarget);
+    
+    m_caster->Attack(unitTarget,true);
 }
 
 void Spell::EffectSummonCritter(uint32 i)
@@ -2647,7 +2648,7 @@ void Spell::EffectTransmitted(uint32 i)
         pGameObj->SetLootState(GO_NOT_READY);               // bobber not move
         m_caster->AddGameObject(pGameObj);                  // will removed at spell cancel
 
-        // end time of range when posable catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
+        // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
         // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
         uint32 fish = urand(FISHING_BOBBER_READY_TIME,GetDuration(m_spellInfo)/1000);
         pGameObj->SetRespawnTime(fish);

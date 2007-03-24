@@ -514,9 +514,8 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
 
         if(damagetype != DOT)
         {
-            Attack(pVictim);
-            if(damagetype == DIRECT_DAMAGE)                 //start melee attacks only after melee hit
-                SendAttackStart(pVictim);
+            //start melee attacks only after melee hit
+            Attack(pVictim,(damagetype == DIRECT_DAMAGE));
         }
 
         if(pVictim->getTransForm())
@@ -574,16 +573,19 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
         if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && damage
             && pVictim->m_currentSpell->getState() == SPELL_STATE_CASTING)
         {
-            uint32 channelInterruptFlags = pVictim->m_currentSpell->m_spellInfo->ChannelInterruptFlags;
-            if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
+            if (damagetype != NODAMAGE)
             {
-                sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpell->m_spellInfo->Id,(int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
-                pVictim->m_currentSpell->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
-            }
-            else if( (channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
-            {
-                sLog.outDetail("Spell %u canceled at damage!",pVictim->m_currentSpell->m_spellInfo->Id);
-                pVictim->m_currentSpell->cancel();
+                uint32 channelInterruptFlags = pVictim->m_currentSpell->m_spellInfo->ChannelInterruptFlags;
+                if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
+                {
+                    sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpell->m_spellInfo->Id,(int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
+                    pVictim->m_currentSpell->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
+                }
+                else if( (channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
+                {
+                    sLog.outDetail("Spell %u canceled at damage!",pVictim->m_currentSpell->m_spellInfo->Id);
+                    pVictim->m_currentSpell->cancel();
+                }
             }
         }
 
@@ -756,7 +758,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
     {
-        DamageEffectType damagetype = DOT;
         //DOT Bonus
         float newBonus = (float)SpellDamageBonus(pVictim, spellProto, 0);
         float DT = (float)GetDuration(spellProto);
@@ -773,7 +774,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         //pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
 
-        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), damagetype, spellProto->School, spellProto, procFlag, true);
+        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
         ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
@@ -813,7 +814,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         if(pVictim!=this && spellProto->SpellVisual==163)
         {
             SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
-            DealDamage(this, gain, SELF_DAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
+            DealDamage(this, gain, NODAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
         }
 
         if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
@@ -3376,7 +3377,7 @@ bool Unit::IsNeutralToAll() const
     return my_faction->IsNeutralToAll();
 }
 
-bool Unit::Attack(Unit *victim)
+bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
 {
     if(!victim || victim == this)
         return false;
@@ -3414,6 +3415,9 @@ bool Unit::Attack(Unit *victim)
     // delay offhand weapon attack to next attack time
     if(haveOffhandWeapon())
         resetAttackTimer(OFF_ATTACK);
+
+    if(playerMeleeAttack)
+        SendAttackStart(victim);
 
     return true;
 }

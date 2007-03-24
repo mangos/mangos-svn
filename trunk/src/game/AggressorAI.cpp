@@ -183,7 +183,6 @@ AggressorAI::AttackStart(Unit *u)
     sLog.outDetail("Start to attack");
     if(i_creature.Attack(u))
     {
-
         i_creature.AddThreat(u, 0.0f);
         //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
         i_victimGuid = u->GetGUID();
