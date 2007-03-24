@@ -39,7 +39,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
     if(pEnemy && !_player->IsFriendlyTo(pEnemy))
     {
-        _player->Attack(pEnemy);
+        _player->Attack(pEnemy,true);
         return;
     }
 

@@ -1722,6 +1722,33 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8);
             data.append(m_target->GetPackGUID());
             m_target->SendMessageToSet(&data,true);
+
+            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
+            {
+                Unit* m_caster = GetCaster();
+                if( !m_caster || m_caster->GetTypeId()!=TYPEID_PLAYER )
+                    return;
+
+                uint32 spell_id = 0;
+
+                switch(GetSpellProto()->Id)
+                {
+                case 19386: spell_id = 24131; break;
+                case 24132: spell_id = 24134; break;
+                case 24133: spell_id = 24135; break;
+                default:
+                    sLog.outError("Spell selection called for unexpected original spell %u, new spell for this spell family?",GetSpellProto()->Id);
+                    return;
+                }
+
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+
+                if(!spellInfo)
+                    return;
+
+                m_caster->CastSpell(m_target,spellInfo,true,NULL);
+                return;
+            }
         }
     }
 }
@@ -2641,7 +2668,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
         if(int32(pt) != m_modifier.m_miscvalue)
             return;
 
-        // Prevent rage regeneration in combat with rage loss slowdown warrior talant and 0<->1 switching range out combat.
+        // Prevent rage regeneration in combat with rage loss slowdown warrior talent and 0<->1 switching range out combat.
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
             int32 gain = m_target->ModifyPower(pt, m_modifier.m_amount);
@@ -2850,7 +2877,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_PHYSICAL)
     // 127 - full bitmask any damages
     //
-    // mods must be applied base at equiped weapon class and subclass comparison
+    // mods must be applied base at equipped weapon class and subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
     if (!m_target)
@@ -2920,7 +2947,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_PHYSICAL)
     // 127 - full bitmask any damages
     //
-    // mods must be applied base at equiped weapon class and subclass comparison
+    // mods must be applied base at equipped weapon class and subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
     if (!m_target)

@@ -212,7 +212,7 @@ enum DamageEffectType
     SPELL_DIRECT_DAMAGE     = 1,
     DOT                     = 2,
     HEAL                    = 3,
-    NODAMAGE                = 4,
+    NODAMAGE                = 4,                            // used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
     SELF_DAMAGE             = 5
 };
 
@@ -504,7 +504,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
             return NULL;
         }
-        bool Attack(Unit *victim);
+        bool Attack(Unit *victim, bool playerMeleeAttack = false);
         bool AttackStop();
         void RemoveAllAttackers();
         AttackerSet const& getAttackers() const { return m_attackers; }
