@@ -121,7 +121,7 @@ typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
 
 struct Loot
 {
-    std::set<Player*> PlayersLooting;
+    std::set<uint64> PlayersLooting;
     QuestItemMap PlayerQuestItems;
     std::vector<LootItem> items;
     std::vector<LootItem> quest_items;
@@ -146,8 +146,8 @@ struct Loot
     void NotifyItemRemoved(uint8 lootIndex);
     void NotifyQuestItemRemoved(uint8 questIndex);
     void NotifyMoneyRemoved();
-    void AddLooter(Player *player) { PlayersLooting.insert(player); }
-    void RemoveLooter(Player *player) { PlayersLooting.erase(player); }
+    inline void AddLooter(uint64 GUID) { PlayersLooting.insert(GUID); }
+    inline void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
 };
 
 struct LootView

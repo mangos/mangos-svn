@@ -269,5 +269,5 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     }
 
     //Player is not looking at loot list, he doesn't need to see updates on the loot list
-    loot->RemoveLooter(player);
+    loot->RemoveLooter(player->GetGUID());
 }

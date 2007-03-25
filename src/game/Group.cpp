@@ -409,7 +409,7 @@ void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers
     vector<Roll>::iterator roll = GetRoll(Guid);
     if (roll == RollId.end())
         return;
-        
+
     map<uint64, RollVote>::iterator itr = roll->playerVote.find(playerGUID);
     // this condition means that player joins to the party after roll begins
     if (itr == roll->playerVote.end())

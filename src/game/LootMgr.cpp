@@ -26,6 +26,7 @@
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
+#include "ObjectAccessor.h"
 
 #ifndef min
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
@@ -278,15 +279,27 @@ void Loot::NotifyItemRemoved(uint8 lootIndex)
 {
     // notifiy all players that are looting this that the item was removed
     // convert the index to the slot the player sees
-    for(std::set<Player*>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
-        (*i)->SendNotifyLootItemRemoved(lootIndex);
+    Player* pl;
+    for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
+    {
+        if (pl = ObjectAccessor::Instance().FindPlayer(*i))
+            pl->SendNotifyLootItemRemoved(lootIndex);
+        else
+            PlayersLooting.erase(i);
+    }
 }
 
 void Loot::NotifyMoneyRemoved()
 {
     // notifiy all players that are looting this that the money was removed
-    for(std::set<Player*>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
-        (*i)->SendNotifyLootMoneyRemoved();
+    Player* pl;
+    for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
+    {
+        if (pl = ObjectAccessor::Instance().FindPlayer(*i))
+            pl->SendNotifyLootMoneyRemoved();
+        else
+            PlayersLooting.erase(i);
+    }
 }
 
 void Loot::NotifyQuestItemRemoved(uint8 questIndex)
@@ -297,20 +310,26 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
     // bit inefficient but isnt called often
 
     uint8 i;
-    for(std::set<Player*>::iterator itr = PlayersLooting.begin(); itr != PlayersLooting.end(); ++itr)
+    Player* pl;
+    for(std::set<uint64>::iterator itr = PlayersLooting.begin(); itr != PlayersLooting.end(); ++itr)
     {
-        QuestItemMap::iterator pq = PlayerQuestItems.find(*itr);
-        if (pq != PlayerQuestItems.end() && pq->second)
+        if (pl = ObjectAccessor::Instance().FindPlayer(*itr))
         {
-            // find where/if the player has the given item in it's vector
-            QuestItemList& pql = *pq->second;
-            for (i = 0; i < pql.size(); i++)
-                if (pql[i].index == questIndex)
-                    break;
+            QuestItemMap::iterator pq = PlayerQuestItems.find(pl);
+            if (pq != PlayerQuestItems.end() && pq->second)
+            {
+                // find where/if the player has the given item in it's vector
+                QuestItemList& pql = *pq->second;
+                for (i = 0; i < pql.size(); i++)
+                    if (pql[i].index == questIndex)
+                        break;
 
-            if (i < pql.size())
-                (*itr)->SendNotifyLootItemRemoved(items.size()+i);
+                if (i < pql.size())
+                    pl->SendNotifyLootItemRemoved(items.size()+i);
+            }
         }
+        else
+            PlayersLooting.erase(i);
     }
 }
 
