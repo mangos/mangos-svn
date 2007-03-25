@@ -27,6 +27,7 @@
 #include "UpdateData.h"
 
 #include "GridDefines.h"
+#include "Object.h"
 
 #include <set>
 
@@ -52,7 +53,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         typedef HM_NAMESPACE::hash_map<uint64, Pet* >    PetsMapType;
         typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayersMapType;
         typedef HM_NAMESPACE::hash_map<uint64, Corpse* > Player2CorpsesMapType;
-        typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);
@@ -82,9 +82,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         void RemoveCreatureCorpseFromPlayerView(Creature *);
         void RemoveBonesFromPlayerView(Corpse *);
-        void RemovePlayerFromPlayerView(Player *, Player *);
-        void RemoveInvisiblePlayerFromPlayerView(Player *, Player *);
-        void RemoveCreatureFromPlayerView(Player *pl, Creature *c);
 
         void Update(const uint32 &diff);
 
@@ -99,6 +96,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
+        static void UpdateObject(Object* obj, Player* exceptPlayer);
+        static void _buildUpdateObject(Object *, UpdateDataMapType &);
     private:
         void RemoveAllObjectsInRemoveList();
 
@@ -106,8 +105,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         {
             UpdateDataMapType &i_updateDatas;
             Object &i_object;
-            ObjectAccessor &i_accessor;
-            ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d, ObjectAccessor &a) : i_updateDatas(d), i_object(obj), i_accessor(a) {}
+            ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
             void Visit(std::map<OBJECT_HANDLE, Player *> &);
             template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
         };
@@ -120,9 +118,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         typedef ZThread::FastMutex LockType;
         typedef MaNGOS::GeneralLock<LockType > Guard;
 
-        void _buildChangeObjectForPlayer(WorldObject *, UpdateDataMapType &);
-        void _buildUpdateObject(Object *, UpdateDataMapType &);
-        void _buildPacket(Player *, Object *, UpdateDataMapType &);
+        static void _buildChangeObjectForPlayer(WorldObject *, UpdateDataMapType &);
+        static void _buildPacket(Player *, Object *, UpdateDataMapType &);
         void _update(void);
         std::set<Object *> i_objects;
         std::set<WorldObject *> i_objectsToRemove;
@@ -139,8 +136,8 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL BuildUpdateForPlayer
     {
         Player &i_player;
-        ObjectAccessor::UpdateDataMapType &i_updatePlayers;
-        BuildUpdateForPlayer(Player &player, ObjectAccessor::UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
+        UpdateDataMapType &i_updatePlayers;
+        BuildUpdateForPlayer(Player &player, UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
         void Visit(std::map<OBJECT_HANDLE, Player *> &);
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };
@@ -157,33 +154,6 @@ namespace MaNGOS
     {
         Object &i_objects;
         BonesViewRemover(Object &o) : i_objects(o) {}
-        void Visit(std::map<OBJECT_HANDLE, Player *>  &);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-    };
-
-    struct MANGOS_DLL_DECL PlayerDeadViewRemover
-    {
-        Player &i_player;
-        Player &i_player2;
-        PlayerDeadViewRemover(Player &pl, Player &pl2) : i_player(pl), i_player2(pl2) {}
-        void Visit(std::map<OBJECT_HANDLE, Player *>  &);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-    };
-
-    struct MANGOS_DLL_DECL PlayerInvisibilityRemover
-    {
-        Player &i_player;
-        Player &i_player2;
-        PlayerInvisibilityRemover(Player &pl, Player &pl2) : i_player(pl), i_player2(pl2) {}
-        void Visit(std::map<OBJECT_HANDLE, Player *>  &);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-    };
-
-    struct MANGOS_DLL_DECL CreatureViewRemover
-    {
-        Player &i_player;
-        Creature &i_creature;
-        CreatureViewRemover(Player &pl, Creature &c) : i_player(pl), i_creature(c) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
     };

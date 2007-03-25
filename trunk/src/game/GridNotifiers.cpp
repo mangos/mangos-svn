@@ -46,7 +46,8 @@ void PlayerNotifier::Visit(PlayerMapType &m)
         }
         else
         {
-            ObjectAccessor::Instance().RemovePlayerFromPlayerView(&i_player, iter->second);
+            i_player.DestroyForPlayer(iter->second);
+            iter->second->DestroyForPlayer(&i_player);
         }
     }
 }
@@ -92,9 +93,23 @@ VisibleNotifier::Notify()
 {
     if( i_data.HasData() )
     {
+        // send update to other players (except player updates that already sent using SendUpdateToPlayer)
+        for(UpdateDataMapType::iterator iter = i_updateDatas.begin(); iter != i_updateDatas.end(); ++iter)
+        {
+            if(iter->first==&i_player)
+                continue;
+
+            WorldPacket packet;
+            iter->second.BuildPacket(&packet);
+            iter->first->GetSession()->SendPacket(&packet);
+        }
+
+        // send create packet to player (except player create updates that already sent using SendUpdateToPlayer)
         WorldPacket packet;
         i_data.BuildPacket(&packet);
         i_player.GetSession()->SendPacket(&packet);
+
+        // all object visible to i_player is updated/(create updated)
     }
 }
 
@@ -103,15 +118,23 @@ void
 VisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
 {
     for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        iter->second->BuildUpdate(i_updateDatas);
         iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+    }
 }
 
 void
 VisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
     for(std::map<OBJECT_HANDLE, GameObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
         if(iter->second->isSpawned())                       // show only respawned GO
+        {
+            iter->second->BuildUpdate(i_updateDatas);
             iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+        }
+    }
 }
 
 void
@@ -126,14 +149,14 @@ MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
             {
                 case VISIBLE_SET_INVISIBLE:
                 {
-                    ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
+                    i_player.DestroyForPlayer(iter->second);
                     iter->second->m_DetectInvTimer = 1;
                 }
                 break;
                 case VISIBLE_SET_INVISIBLE_FOR_GROUP:
                     if (!iter->second->IsGroupVisibleFor(&i_player))
                     {
-                        ObjectAccessor::Instance().RemoveInvisiblePlayerFromPlayerView(&i_player, iter->second);
+                        i_player.DestroyForPlayer(iter->second);
                         iter->second->m_DetectInvTimer = 1;
                     }
                     break;
@@ -182,6 +205,27 @@ NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
         // ignore transport gameobjects at same map
         if(i_player.GetMapId()!=iter->second->GetMapId() || !iter->second->IsTransport())
             iter->second->BuildOutOfRangeUpdateBlock(&i_data);
+}
+
+void
+MaNGOS::NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        if( iter->second == &i_player )
+            continue;
+        if( (i_player.isAlive() && iter->second->isAlive()) ||
+            (i_player.isDead() && iter->second->isDead()) )
+        {
+            iter->second->BuildOutOfRangeUpdateBlock(&i_data);
+
+            UpdateData his_data;
+            WorldPacket his_pk;
+            i_player.BuildOutOfRangeUpdateBlock(&his_data);
+            his_data.BuildPacket(&his_pk);
+            iter->second->GetSession()->SendPacket(&his_pk);
+        }
+    }
 }
 
 void

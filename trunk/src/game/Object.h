@@ -24,6 +24,7 @@
 #include "World.h"
 #include "QuestDef.h"
 #include "UpdateFields.h"
+#include "UpdateData.h"
 #include <set>
 
 #ifndef M_PI
@@ -69,6 +70,8 @@ class Player;
 class MapCell;
 class UpdateMask;
 
+typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;
+
 class MANGOS_DLL_SPEC Object
 {
     public:
@@ -85,7 +88,7 @@ class MANGOS_DLL_SPEC Object
             m_inWorld = true;
 
             // synchronize values mirror with values array (changes will send in updatecreate opcode any way
-            ClearUpdateMask();
+            ClearUpdateMask(true);
         }
         virtual void RemoveFromWorld() { m_inWorld = false; }
 
@@ -106,11 +109,12 @@ class MANGOS_DLL_SPEC Object
         }
 
         virtual void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
-        void SendUpdateToPlayer(Player* player) const;
+        void SendUpdateToPlayer(Player* player);
 
         void BuildValuesUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void BuildOutOfRangeUpdateBlock( UpdateData *data ) const;
         void BuildMovementUpdateBlock( UpdateData * data, uint32 flags = 0 ) const;
+        void BuildUpdate(UpdateDataMapType &);
 
         virtual void DestroyForPlayer( Player *target ) const;
 
@@ -169,15 +173,8 @@ class MANGOS_DLL_SPEC Object
             if(apply) SetFlag(index,flag); else RemoveFlag(index,flag);
         }
 
-        void ClearUpdateMask( )
-        {
-            for( uint16 index = 0; index < m_valuesCount; index ++ )
-            {
-                if(m_uint32Values_mirror[index]!= m_uint32Values[index])
-                    m_uint32Values_mirror[index] = m_uint32Values[index];
-            }
-            m_objectUpdated = false;
-        }
+        void ClearUpdateMask(bool remove);
+        void SendUpdateObjectToAllExcept(Player* exceptPlayer);
 
         bool LoadValues(const char* data);
 

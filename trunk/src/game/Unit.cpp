@@ -4122,6 +4122,10 @@ bool Unit::isVisibleFor(Unit* u, bool detect)
     if (m_Visibility == VISIBILITY_ON)
         return true;
 
+    // Always can see self
+    if (u==this)
+        return true;
+
     // GMs are visible for higher gms (or players are visible for gms)
     if (u->GetTypeId() == TYPEID_PLAYER && ((Player *)u)->isGameMaster())
         return (GetTypeId() == TYPEID_PLAYER && ((Player *)this)->GetSession()->GetSecurity() <= ((Player *)u)->GetSession()->GetSecurity());
@@ -4196,7 +4200,7 @@ void Unit::SetVisibility(UnitVisibility x)
             m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_GROUP;
             break;
     }
-    if(GetTypeId() == TYPEID_PLAYER)
+    if(GetTypeId() == TYPEID_PLAYER && IsInWorld())
     {
         Map *m = MapManager::Instance().GetMap(GetMapId());
         m->PlayerRelocation((Player *)this,GetPositionX(),GetPositionY(),

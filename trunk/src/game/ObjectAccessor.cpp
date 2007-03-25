@@ -205,13 +205,30 @@ ObjectAccessor::_update()
         for(std::set<Object *>::iterator iter=i_objects.begin(); iter != i_objects.end(); ++iter)
         {
             _buildUpdateObject(*iter, update_players);
-            (*iter)->ClearUpdateMask();
+            (*iter)->ClearUpdateMask(false);
         }
         i_objects.clear();
     }
 
     for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
     {
+        WorldPacket packet;
+        iter->second.BuildPacket(&packet);
+        iter->first->GetSession()->SendPacket(&packet);
+    }
+}
+
+void
+ObjectAccessor::UpdateObject(Object* obj, Player* exceptPlayer)
+{
+    UpdateDataMapType update_players;
+    obj->BuildUpdate(update_players);
+
+    for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
+    {
+        if(iter->first==exceptPlayer)
+            continue;
+
         WorldPacket packet;
         iter->second.BuildPacket(&packet);
         iter->first->GetSession()->SendPacket(&packet);
@@ -314,6 +331,9 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
 void
 ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_players)
 {
+    if(obj->isType(TYPE_UNIT) && !((Unit*)obj)->isVisibleFor(pl,false))
+        return;
+
     UpdateDataMapType::iterator iter = update_players.find(pl);
 
     if( iter == update_players.end() )
@@ -334,7 +354,7 @@ ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType 
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
-    ObjectChangeAccumulator notifier(*obj, update_players, *this);
+    ObjectChangeAccumulator notifier(*obj, update_players);
     TypeContainerVisitor<ObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(obj->GetMapId()));
@@ -505,7 +525,7 @@ void
 ObjectAccessor::ObjectChangeAccumulator::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter = m.begin(); iter != m.end(); ++iter)
-        i_accessor._buildPacket(iter->second, &i_object, i_updateDatas);
+        ObjectAccessor::_buildPacket(iter->second, &i_object, i_updateDatas);
 }
 
 void
@@ -534,45 +554,6 @@ ObjectAccessor::RemoveBonesFromPlayerView(Corpse *o)
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(o->GetMapId()));
 }
 
-void
-ObjectAccessor::RemovePlayerFromPlayerView(Player *pl, Player *pl2)
-{
-    MaNGOS::PlayerDeadViewRemover remover(*pl,*pl2);
-    TypeContainerVisitor<MaNGOS::PlayerDeadViewRemover, WorldTypeMapContainer > player_notifier(remover);
-    CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
-    Cell cell = RedZone::GetZone(p);
-    cell.SetNoCreate();
-    cell.data.Part.reserved = ALL_DISTRICT;
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(pl->GetMapId()));
-}
-
-void
-ObjectAccessor::RemoveInvisiblePlayerFromPlayerView(Player *pl, Player *pl2)
-{
-    MaNGOS::PlayerInvisibilityRemover remover(*pl,*pl2);
-    TypeContainerVisitor<MaNGOS::PlayerInvisibilityRemover, WorldTypeMapContainer > player_notifier(remover);
-    CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
-    Cell cell = RedZone::GetZone(p);
-    cell.SetNoCreate();
-    cell.data.Part.reserved = ALL_DISTRICT;
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(pl->GetMapId()));
-}
-
-void
-ObjectAccessor::RemoveCreatureFromPlayerView(Player *pl, Creature *c)
-{
-    MaNGOS::CreatureViewRemover remover(*pl,*c);
-    TypeContainerVisitor<MaNGOS::CreatureViewRemover, WorldTypeMapContainer > player_notifier(remover);
-    CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
-    Cell cell = RedZone::GetZone(p);
-    cell.SetNoCreate();
-    cell.data.Part.reserved = ALL_DISTRICT;
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(pl->GetMapId()));
-}
-
 namespace MaNGOS
 {
 
@@ -583,10 +564,10 @@ namespace MaNGOS
             if( iter->second == &i_player )
                 continue;
 
-            ObjectAccessor::UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
+            UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
             if( iter2 == i_updatePlayers.end() )
             {
-                std::pair<ObjectAccessor::UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
+                std::pair<UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
                 assert(p.second);
                 iter2 = p.first;
             }
@@ -605,21 +586,5 @@ namespace MaNGOS
     {
         for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
             i_objects.DestroyForPlayer(iter->second);
-    }
-
-    void PlayerInvisibilityRemover::Visit(PlayerMapType &m)
-    {
-        i_player.DestroyForPlayer(&i_player2);
-    }
-
-    void PlayerDeadViewRemover::Visit(PlayerMapType &m)
-    {
-        i_player.DestroyForPlayer(&i_player2);
-        i_player2.DestroyForPlayer(&i_player);
-    }
-
-    void CreatureViewRemover::Visit(PlayerMapType &m)
-    {
-        i_creature.DestroyForPlayer(&i_player);
     }
 }
