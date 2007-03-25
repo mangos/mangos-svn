@@ -5323,7 +5323,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
     // add 'this' player as one of the players that are looting 'loot'
     if (permission != NONE_PERMISSION)
-        loot->AddLooter(this);
+        loot->AddLooter(GetGUID());
 }
 
 void Player::SendNotifyLootMoneyRemoved()
