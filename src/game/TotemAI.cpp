@@ -22,6 +22,7 @@
 #include "Player.h"
 #include "Database/DBCStores.h"
 #include "MapManager.h"
+#include "ObjectAccessor.h"
 
 int
 TotemAI::Permissible(const Creature *creature)

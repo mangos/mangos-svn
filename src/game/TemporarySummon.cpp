@@ -21,6 +21,7 @@
 #include "MapManager.h"
 #include "Database/DBCStores.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 
 TemporarySummon::TemporarySummon() :
 m_type(TEMPSUMMON_REMOVE_DEAD), m_timer(0), m_lifetime(0)

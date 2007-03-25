@@ -447,6 +447,24 @@ void Spell::EffectDummy(uint32 i)
         }
     }
 
+    // Berserking (troll racial traits)
+    if (m_spellInfo->SpellIconID == 1661)
+    {
+        uint32 healthPerc = uint32((float(m_caster->GetHealth())/m_caster->GetMaxHealth())*100);
+        uint32 melee_mod = 10;
+        if (healthPerc <= 40)
+            melee_mod = 30;
+        if (healthPerc < 100 && healthPerc > 40)
+            melee_mod = 10+(100-healthPerc)/3;
+        SpellEntry const *OriginalHasteModSpell = sSpellStore.LookupEntry(26635);
+        SpellEntry CustomHasteModSpell = *OriginalHasteModSpell;
+        CustomHasteModSpell.EffectBasePoints[0] = melee_mod-1;
+        CustomHasteModSpell.EffectBasePoints[1] = (5-melee_mod)-1; // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
+        CustomHasteModSpell.EffectBasePoints[2] = 5-1;
+        m_caster->CastSpell(m_caster,&CustomHasteModSpell,true,NULL);
+        return;
+    }
+
     //Holy Shock For Paladins
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellIconID == 156)
     {

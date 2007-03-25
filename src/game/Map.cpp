@@ -27,6 +27,7 @@
 #include "GridNotifiersImpl.h"
 #include "Config/ConfigEnv.h"
 #include "Transports.h"
+#include "ObjectAccessor.h"
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
