@@ -39,39 +39,18 @@ MaNGOS::NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 
 template<>
 inline void
-MaNGOS::NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
-{
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        if( iter->second == &i_player )
-            continue;
-        if( (i_player.isAlive() && iter->second->isAlive()) ||
-            (i_player.isDead() && iter->second->isDead()) )
-        {
-            iter->second->BuildOutOfRangeUpdateBlock(&i_data);
-
-            UpdateData his_data;
-            WorldPacket his_pk;
-            i_player.BuildOutOfRangeUpdateBlock(&his_data);
-            his_data.BuildPacket(&his_pk);
-            iter->second->GetSession()->SendPacket(&his_pk);
-        }
-    }
-}
-
-template<>
-inline void
 MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
     for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         if( iter->second->IsVisibleInGridForPlayer(&i_player) )
         {
+            iter->second->BuildUpdate(i_updateDatas);
             iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
         }
         else
         {
-            ObjectAccessor::Instance().RemoveCreatureFromPlayerView(&i_player, iter->second);
+            iter->second->DestroyForPlayer(&i_player);
         }
     }
 }
@@ -95,7 +74,8 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         }
         else
         {
-            ObjectAccessor::Instance().RemovePlayerFromPlayerView(&i_player, iter->second);
+            i_player.DestroyForPlayer(iter->second);
+            iter->second->DestroyForPlayer(&i_player);
         }
     }
 }

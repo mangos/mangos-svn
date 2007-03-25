@@ -160,10 +160,19 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
 }
 
-void Object::SendUpdateToPlayer(Player* player) const
+void
+Object::BuildUpdate(UpdateDataMapType &update_players)
 {
-    //if (!player->IsInWorld()) return;
+    ObjectAccessor::_buildUpdateObject(this,update_players);
+    ClearUpdateMask(true);
+}
 
+void Object::SendUpdateToPlayer(Player* player)
+{
+    // send update to another players
+    SendUpdateObjectToAllExcept(player);
+
+    // send create update to player
     UpdateData upd;
     WorldPacket packet;
 
@@ -171,6 +180,8 @@ void Object::SendUpdateToPlayer(Player* player) const
     BuildCreateUpdateBlockForPlayer(&upd, player);
     upd.BuildPacket(&packet);
     player->GetSession()->SendPacket(&packet);
+
+    // now object updated/(create updated)
 }
 
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) const
@@ -333,7 +344,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
         {
             if( updateMask->GetBit( index ) )
             {
-                // Some values at server stored in float format but must be sended to client in uint32 format
+                // Some values at server stored in float format but must be send to client in uint32 format
                 if(                                         // unit fields
                     index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
                     index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
@@ -364,6 +375,36 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
         }
     }
 }
+
+void Object::ClearUpdateMask(bool remove)
+{
+    for( uint16 index = 0; index < m_valuesCount; index ++ )
+    {
+        if(m_uint32Values_mirror[index]!= m_uint32Values[index])
+            m_uint32Values_mirror[index] = m_uint32Values[index];
+    }
+    if(m_objectUpdated)
+    {
+        if(remove)
+            ObjectAccessor::Instance().RemoveUpdateObject(this);
+        m_objectUpdated = false;
+    }
+}
+
+// Send current value fields changes to all viewers
+void Object::SendUpdateObjectToAllExcept(Player* exceptPlayer)
+{
+    // changes will be send in create packet
+    if(!IsInWorld())
+        return;
+
+    // nothing do
+    if(!m_objectUpdated)
+        return;
+
+    ObjectAccessor::UpdateObject(this,exceptPlayer);
+}
+
 
 bool Object::LoadValues(const char* data)
 {
