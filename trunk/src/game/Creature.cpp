@@ -53,7 +53,7 @@ Creature::Creature() :
 Unit(), i_AI(NULL), i_motionMaster(this), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
-m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
+m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_groupLootTimer(0), lootingGroupLeaderGUID(0)
 {
     m_valuesCount = UNIT_END;
 
@@ -194,7 +194,24 @@ void Creature::Update(uint32 diff)
                 MapManager::Instance().GetMap(GetMapId())->CreatureRelocation(this,x,y,z,GetOrientation());
             }
             else
+            {
                 m_deathTimer -= diff;
+                if (m_groupLootTimer && lootingGroupLeaderGUID)
+                {
+                    if(diff <= m_groupLootTimer)
+                    {
+                        m_groupLootTimer -= diff;
+                    }
+                    else
+                    {
+                        Group* group = objmgr.GetGroupByLeader(lootingGroupLeaderGUID);
+                        if (group)
+                            group->EndRoll();
+                        m_groupLootTimer = 0;
+                        lootingGroupLeaderGUID = 0;
+                    }
+                }
+            }
 
             break;
         }
@@ -1296,7 +1313,10 @@ void Creature::Respawn()
         Update(0);                                          // despawn corpse
     }
     if(getDeathState()==DEAD)
+    {
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE guid = %u", GetGUIDLow());
         m_respawnTime = time(NULL);                         // respawn at next tick
+    }
 }
 
 void Creature::Say(char const* message, uint32 language)
