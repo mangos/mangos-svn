@@ -344,7 +344,7 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     /********************/
 
     // everything's fine, do it
-    GetPlayer()->groupInfo.group->CountTheRoll(GetPlayer()->GetGUID(), Guid, NumberOfPlayers, Choise);
+    GetPlayer()->groupInfo.group->CountRollVote(GetPlayer()->GetGUID(), Guid, NumberOfPlayers, Choise);
 }
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)

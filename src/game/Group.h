@@ -161,14 +161,32 @@ class MANGOS_DLL_SPEC Group
                                                             // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket *packet, int group=-1, uint64 ignore=0);
 
-        // roll system
+        
+        /*********************************************************/
+        /***                   LOOT SYSTEM                     ***/
+        /*********************************************************/
+
         void SendLootStartRoll(uint64 Guid, uint32 CountDown, const Roll &r);
         void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
         void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
         void SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r);
         void GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature);
         void NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature);
-        void CountTheRoll(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise);
+        vector<Roll>::iterator GetRoll(uint64 Guid)
+        {
+            vector<Roll>::iterator iter;
+            for (iter=RollId.begin(); iter != RollId.end(); ++iter)
+            {
+                if (iter->itemGUID == Guid)
+                {
+                    return iter;
+                }
+            }
+            return RollId.end();
+        }
+        void CountTheRoll(vector<Roll>::iterator roll, uint32 NumberOfPlayers);
+        void CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise);
+        void EndRoll();
 
     protected:
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);

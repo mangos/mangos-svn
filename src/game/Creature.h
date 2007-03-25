@@ -388,6 +388,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetRespawnTime(uint32 respawn) { m_respawnTime = respawn ? time(NULL) + respawn : 0; }
         void Respawn();
         void SaveRespawnTime();
+
+        uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
+        uint64 lootingGroupLeaderGUID;                      // used to find group which is looting corpse
+
     protected:
         void _LoadGoods();
         void _LoadQuests();
