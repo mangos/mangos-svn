@@ -22,6 +22,7 @@
 #include "Creature.h"
 #include "TargetedMovementGenerator.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 
 #define REACTOR_VISIBLE_RANGE (26.46f)
 

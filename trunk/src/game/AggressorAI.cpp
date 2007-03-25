@@ -22,6 +22,7 @@
 #include "Player.h"
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
+#include "ObjectAccessor.h"
 #include <list>
 
 int

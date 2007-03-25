@@ -23,6 +23,7 @@
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 #include "Spell.h"
+#include "ObjectAccessor.h"
 
 int PetAI::Permissible(const Creature *creature)
 {

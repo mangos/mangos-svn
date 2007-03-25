@@ -21,7 +21,6 @@
 
 #include "Common.h"
 #include "Object.h"
-#include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "Mthread.h"
 #include "SpellAuraDefines.h"
@@ -138,6 +137,7 @@ class Aura;
 class Creature;
 class Spell;
 class DynamicObject;
+class GameObject;
 class Item;
 class Pet;
 
