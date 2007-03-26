@@ -331,7 +331,7 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
             ObjectGridLoader loader(*grid, i_id, cell);
             loader.LoadN();
 
-            // Add resurrectable corpses to world obect list in grid
+            // Add resurrectable corpses to world object list in grid
             ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()));
 
             grid->SetGridState(GRID_STATE_ACTIVE);
