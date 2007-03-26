@@ -2828,8 +2828,11 @@ void Player::BuildPlayerRepop()
         corpse = CreateCorpse();
 
     // now show corpse for all
-    AddToWorld();
-    MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
+    if(corpse)
+    {
+        corpse->AddToWorld();
+        MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
+    }
 
     // convert player body to ghost
     SetHealth( 1 );
@@ -2855,7 +2858,8 @@ void Player::BuildPlayerRepop()
     GetSession()->SendPacket( &data );
 
     // to prevent cheating
-    corpse->ResetGhostTime();
+    if(corpse)
+        corpse->ResetGhostTime();
 
     //TODO: Check/research this
     data.Initialize(SMSG_SPELL_START, (GetPackGUID().size()*2 + 12));
