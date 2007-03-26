@@ -41,6 +41,7 @@
 #include "Totem.h"
 #include "Creature.h"
 #include "ConfusedMovementGenerator.h"
+#include "TargetedMovementGenerator.h"
 #include "Formulas.h"
 
 pAuraHandler AuraHandler[TOTAL_AURAS]=
@@ -1598,7 +1599,14 @@ void Aura::HandleModConfuse(bool apply, bool Real)
         if(Real)
         {
             if (m_target->GetTypeId() == TYPEID_UNIT)
-                (*((Creature*)m_target))->MovementExpired();
+            {
+                Creature* c = (Creature*)m_target;
+                (*c)->MovementExpired(false);
+
+                // if in combat restore movement generator
+                if(c->getVictim())
+                    (*c)->Mutate(new TargetedMovementGenerator(*c->getVictim()));
+            }
         }
     }
 }
