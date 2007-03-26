@@ -1658,10 +1658,25 @@ void Spell::EffectSummonPet(uint32 i)
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
             NewSummon->m_spells[i] = 0;
 
-        if(petentry == 416)                                 //imp
+        // starting spells
+        switch(petentry)
         {
-            NewSummon->m_spells[0] = 3110;                  //3110---fire bolt 1
-            NewSummon->AddActState(STATE_RA_SPELL1);
+            case 416:
+                NewSummon->m_spells[0] = 3110;
+                NewSummon->AddActState(STATE_RA_SPELL1);
+                break;
+            case 417:
+                NewSummon->m_spells[0] = 19505;
+                NewSummon->AddActState(STATE_RA_SPELL1);
+                break;
+            case 1860:
+                NewSummon->m_spells[0] = 3716;
+                NewSummon->AddActState(STATE_RA_SPELL1);
+                break;
+            case 1863:
+                NewSummon->m_spells[0] = 7814;
+                NewSummon->AddActState(STATE_RA_SPELL1);
+                break;
         }
 
         // generate new name for summon pet
