@@ -8553,7 +8553,7 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
             uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, srcitem, count, false );
 
             // player already have max number (in most case 1) source item, no additional item needed and quest can be added.
-            if( msg = EQUIP_ERR_CANT_CARRY_MORE_OF_THIS )
+            if( msg == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS )
                 return true;
             else if( msg != EQUIP_ERR_OK )
             {
