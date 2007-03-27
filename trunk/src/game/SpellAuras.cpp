@@ -1741,12 +1741,12 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
                 switch(GetSpellProto()->Id)
                 {
-                case 19386: spell_id = 24131; break;
-                case 24132: spell_id = 24134; break;
-                case 24133: spell_id = 24135; break;
-                default:
-                    sLog.outError("Spell selection called for unexpected original spell %u, new spell for this spell family?",GetSpellProto()->Id);
-                    return;
+                    case 19386: spell_id = 24131; break;
+                    case 24132: spell_id = 24134; break;
+                    case 24133: spell_id = 24135; break;
+                    default:
+                        sLog.outError("Spell selection called for unexpected original spell %u, new spell for this spell family?",GetSpellProto()->Id);
+                        return;
                 }
 
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);

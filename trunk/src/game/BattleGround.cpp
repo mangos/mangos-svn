@@ -129,7 +129,7 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
         }
     }
 
-    if(!Removed) 
+    if(!Removed)
         sLog.outError("BATTLEGROUND: Player could not be removed from battleground completely!");
 
     if(!plr->GetBattleGroundId())
@@ -138,7 +138,6 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     // Do next only if found in battleground
     // We're not in BG.
     plr->SetBattleGroundId(0);
-
 
     // Let others know
     WorldPacket data;

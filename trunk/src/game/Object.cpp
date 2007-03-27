@@ -405,7 +405,6 @@ void Object::SendUpdateObjectToAllExcept(Player* exceptPlayer)
     ObjectAccessor::UpdateObject(this,exceptPlayer);
 }
 
-
 bool Object::LoadValues(const char* data)
 {
     if(!m_uint32Values) _InitValues();

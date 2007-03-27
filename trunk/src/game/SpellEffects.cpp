@@ -459,7 +459,8 @@ void Spell::EffectDummy(uint32 i)
         SpellEntry const *OriginalHasteModSpell = sSpellStore.LookupEntry(26635);
         SpellEntry CustomHasteModSpell = *OriginalHasteModSpell;
         CustomHasteModSpell.EffectBasePoints[0] = melee_mod-1;
-        CustomHasteModSpell.EffectBasePoints[1] = (5-melee_mod)-1; // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
+                                                            // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
+        CustomHasteModSpell.EffectBasePoints[1] = (5-melee_mod)-1;
         CustomHasteModSpell.EffectBasePoints[2] = 5-1;
         m_caster->CastSpell(m_caster,&CustomHasteModSpell,true,NULL);
         return;
@@ -2513,7 +2514,7 @@ void Spell::EffectCharge(uint32 i)
         ((Creature *)unitTarget)->StopMoving();
 
     m_caster->SendMonsterMove(x, y, z, false,true,1);
-    
+
     m_caster->Attack(unitTarget,true);
 }
 

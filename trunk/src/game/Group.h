@@ -161,7 +161,6 @@ class MANGOS_DLL_SPEC Group
                                                             // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket *packet, int group=-1, uint64 ignore=0);
 
-
         /*********************************************************/
         /***                   LOOT SYSTEM                     ***/
         /*********************************************************/

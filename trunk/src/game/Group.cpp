@@ -421,21 +421,21 @@ void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers
 
     switch (Choise)
     {
-        case 0:                                     //Player choose pass
+        case 0:                                             //Player choose pass
         {
             SendLootRoll(0, playerGUID, 128, 128, *roll);
             roll->totalPass++;
             itr->second = PASS;
         }
         break;
-        case 1:                                     //player choose Need
+        case 1:                                             //player choose Need
         {
             SendLootRoll(0, playerGUID, 1, 1, *roll);
             roll->totalNeed++;
             itr->second = NEED;
         }
         break;
-        case 2:                                     //player choose Greed
+        case 2:                                             //player choose Greed
         {
             SendLootRoll(0, playerGUID, 2, 2, *roll);
             roll->totalGreed++;
@@ -457,7 +457,7 @@ void Group::EndRoll()
     {
         //need more testing here, if rolls disappear
         itr = RollId.begin();
-        CountTheRoll(itr, m_members.size());                          //i don't have to edit player votes, who didn't vote ... he will pass
+        CountTheRoll(itr, m_members.size());                //i don't have to edit player votes, who didn't vote ... he will pass
     }
 }
 

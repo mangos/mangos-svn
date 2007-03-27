@@ -11644,7 +11644,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             return;
         }
 
-        // 10% reputation discount 
+        // 10% reputation discount
         uint32 price  = pProto->BuyPrice * count;
         FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
         if (vendor_faction && GetReputationRank(vendor_faction->faction) >= REP_HONORED)
