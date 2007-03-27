@@ -55,9 +55,9 @@ class MANGOS_DLL_DECL GridLoader
         }
 
         /** Stop the grid
-        */
+         */
         template<class STOPER>
-        void Stop(Grid<ACTIVE_OBJECT,WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES> &grid, STOPER &stoper)
+            void Stop(Grid<ACTIVE_OBJECT,WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES> &grid, STOPER &stoper)
         {
             grid.LockGrid();
             stoper.Stop(grid);

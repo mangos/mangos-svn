@@ -786,7 +786,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // 10% reputation discount 
+    // 10% reputation discount
     FactionTemplateEntry const* vendor_faction = unit->getFactionTemplateEntry();
     bool discount = vendor_faction && _player->GetReputationRank(vendor_faction->faction) >= REP_HONORED;
 
