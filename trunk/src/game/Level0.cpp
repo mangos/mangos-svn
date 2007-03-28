@@ -214,7 +214,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
 {
     uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
     uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-    uint32 highest_rank             = (m_session->GetPlayer()->GetHonorHighestRank() < 16)? m_session->GetPlayer()->GetHonorHighestRank() : 0;
+    uint32 highest_rank             = (m_session->GetPlayer()->GetHonorHighestRank() < HONOR_RANK_COUNT)? m_session->GetPlayer()->GetHonorHighestRank() : 0;
     uint32 today_honorable_kills    = (uint16)m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
     uint32 today_dishonorable_kills = (uint16)(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS)>>16);
     uint32 yesterday_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
@@ -225,7 +225,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
     uint32 last_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
     uint32 last_week_standing       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
 
-    std::string alliance_ranks[] =
+    static char const* alliance_ranks[HONOR_RANK_COUNT] =
     {
         "",
         LANG_ALI_PRIVATE,
@@ -244,7 +244,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
         LANG_ALI_GRAND_MARSHAL,
         LANG_ALI_GAME_MASTER
     };
-    std::string horde_ranks[] =
+    static char const* horde_ranks[HONOR_RANK_COUNT] =
     {
         "",
         LANG_HRD_SCOUT,
@@ -263,31 +263,34 @@ bool ChatHandler::HandleShowHonor(const char* args)
         LANG_HRD_HIGH_WARLORD,
         LANG_HRD_GAME_MASTER
     };
-    std::string rank_name;
-    std::string hrank_name;
+    char const* rank_name = NULL;
+    char const* hrank_name = NULL;
+
+    uint32 honor_rank = m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() );
 
     if ( m_session->GetPlayer()->GetTeam() == ALLIANCE )
     {
-        rank_name = alliance_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
+        rank_name = alliance_ranks[ honor_rank ];
         hrank_name = alliance_ranks[ highest_rank ];
     }
     else
     if ( m_session->GetPlayer()->GetTeam() == HORDE )
     {
-        rank_name = horde_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
+        rank_name = horde_ranks[ honor_rank ];
         hrank_name = horde_ranks[ highest_rank ];
     }
     else
     {
         rank_name = LANG_NO_RANK;
+        hrank_name = LANG_NO_RANK;
     }
 
-    PSendSysMessage(LANG_RANK, rank_name.c_str(), m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
+    PSendSysMessage(LANG_RANK, rank_name, honor_rank);
     PSendSysMessage(LANG_HONOR_TODAY, today_honorable_kills, today_dishonorable_kills);
     PSendSysMessage(LANG_HONOR_YESTERDAY, yesterday_kills, yesterday_honor);
     PSendSysMessage(LANG_HONOR_THIS_WEEK, this_week_kills, this_week_honor);
     PSendSysMessage(LANG_HONOR_LAST_WEEK, last_week_kills, last_week_honor, last_week_standing);
-    PSendSysMessage(LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank, hrank_name.c_str());
+    PSendSysMessage(LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank, hrank_name);
 
     return true;
 }
