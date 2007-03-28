@@ -271,6 +271,8 @@ enum TYPE_OF_KILL
     DISHONORABLE_KILL = 2,
 };
 
+#define HONOR_RANK_COUNT 16
+
 enum PlayerFlags
 {
     PLAYER_FLAGS_GROUP_LEADER   = 0x00000001,

@@ -4248,9 +4248,10 @@ void Player::UpdateHonor(void)
 
     //RIGHEST RANK
     //If the new rank is highest then the old one, then m_highest_rank is updated
-    if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
+    uint32 new_honor_rank = CalculateHonorRank(total_honor);
+    if( new_honor_rank > GetHonorHighestRank() )
     {
-        SetHonorHighestRank( CalculateHonorRank(total_honor) );
+        SetHonorHighestRank( new_honor_rank );
     }
 
     //RATING
@@ -4306,7 +4307,7 @@ uint32 Player::CalculateHonorRank(float honor_points) const
     else
         rank = ( (int)(honor_points / 5000) + 1);
 
-    return rank;
+    return rank < HONOR_RANK_COUNT ? rank : HONOR_RANK_COUNT-1 ;
 }
 
 //How many times Player kill pVictim...
@@ -9930,13 +9931,19 @@ bool Player::LoadFromDB( uint32 guid )
 
     if(!IsPositionValid())
     {
-        sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %d Y: ^%d). Teleport to default race/class locations.",guid,GetPositionX(),GetPositionY());
+        sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %f Y: %f). Teleport to default race/class locations.",guid,GetPositionX(),GetPositionY());
 
         SetMapId(info->mapId);
         Relocate(info->positionX,info->positionY,info->positionZ);
     }
 
     m_highest_rank = fields[12].GetUInt32();
+    if(m_highest_rank >= HONOR_RANK_COUNT)
+    {
+        sLog.outError("ERROR: Player (guidlow %d) have invalid honor rank (%d). Reset to no rank.",guid,m_highest_rank);
+        m_highest_rank = 0;
+    }
+
     m_standing = fields[13].GetUInt32();
     m_rating = fields[14].GetFloat();
     m_cinematic = fields[15].GetUInt32();
