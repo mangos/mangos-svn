@@ -631,6 +631,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static bool IsBankPos( uint8 bag, uint8 slot );
         bool HasBankBagSlot( uint8 slot ) const;
         bool HasItemCount( uint32 item, uint32 count ) const;
+        uint32 GetFreeSlots() const;
         uint8 CanTakeMoreSimilarItems(Item* pItem) const;
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
@@ -751,7 +752,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetInGameTime( uint32 time ) { m_ingametime = time; };
 
-        void AddTimedQuest( uint32 quest_id ) { m_timedquests.push_back(quest_id); }
+        void AddTimedQuest( uint32 quest_id ) { m_timedquests.insert(quest_id); }
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
@@ -1232,7 +1233,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
 
-        list<uint32> m_timedquests;
+        std::set<uint32> m_timedquests;
 
         uint64 m_divider;
         uint32 m_ingametime;
