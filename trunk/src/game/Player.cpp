@@ -653,21 +653,22 @@ void Player::Update( uint32 p_time )
 
     if (m_timedquests.size() > 0)
     {
-        list<uint32>::iterator iter = m_timedquests.begin();
+        std::set<uint32>::iterator iter = m_timedquests.begin();
         while (iter != m_timedquests.end())
         {
             //if( mQuestStatus[*iter].m_timer > 0 )
             //{
             if( mQuestStatus[*iter].m_timer <= p_time )
             {
-                FailTimedQuest( *iter );
-                iter = m_timedquests.begin();
+                uint32 quest_id  = *iter;
+                ++iter;                                     // current iter will be removed in FailTimedQuest
+                FailTimedQuest( quest_id );
             }
             else
             {
                 mQuestStatus[*iter].m_timer -= p_time;
                 if (mQuestStatus[*iter].uState != QUEST_NEW) mQuestStatus[*iter].uState = QUEST_CHANGED;
-                iter++;
+                ++iter;
             }
             //}
         }
@@ -5947,6 +5948,26 @@ Item* Player::CreateItem( uint32 item, uint32 count ) const
     return NULL;
 }
 
+uint32 Player::GetFreeSlots() const
+{
+    uint32 count = 0;
+    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( !pItem )
+            ++count;
+    }
+
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+            count += pBag->GetFreeSlots();
+    }
+
+    return count;
+}
+
 uint32 Player::GetItemCount( uint32 item, Item* eItem ) const
 {
     Item *pItem;
@@ -6243,7 +6264,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
             if(res != EQUIP_ERR_OK)
                 return res;
 
-            if( bag == 0 )
+            if( bag == NULL_BAG )
             {
                 // search stack for merge to (ignore keyring - keys not merged)
                 if( pProto->Stackable > 1 )
@@ -6682,7 +6703,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
             if(res != EQUIP_ERR_OK)
                 return res;
 
-            if( bag == 0 )
+            if( bag == NULL_BAG )
             {
                 if( pProto->Stackable > 1 )
                 {
@@ -8542,9 +8563,6 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
     {
-        if(!GetQuestSlot( 0 ))
-            return false;
-
         if( !SatisfyQuestLog( msg ) )
             return false;
 
@@ -8818,8 +8836,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
 
         //if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
         //    SetTimedQuest( 0 );
-        if (find(m_timedquests.begin(), m_timedquests.end(), pQuest->GetQuestId()) != m_timedquests.end())
-            m_timedquests.remove(pQuest->GetQuestId());
+        m_timedquests.erase(pQuest->GetQuestId());
 
         Item * item;
         if ( pQuest->GetRewChoiceItemsCount() > 0 )
@@ -9262,11 +9279,10 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
     Quest * qInfo = objmgr.QuestTemplates[quest_id];
     if( qInfo )
     {
-        if ((status == QUEST_STATUS_NONE) || (status == QUEST_STATUS_INCOMPLETE))
+        if( status == QUEST_STATUS_NONE || status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_COMPLETE )
         {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
-                if (find(m_timedquests.begin(), m_timedquests.end(), quest_id) != m_timedquests.end())
-                    m_timedquests.remove(qInfo->GetQuestId());
+                m_timedquests.erase(qInfo->GetQuestId());
         }
 
         mQuestStatus[quest_id].m_status = status;

@@ -148,15 +148,17 @@ void Bag::DeleteFromDB()
     Item::DeleteFromDB();
 }
 
-uint8 Bag::FindFreeBagSlot() const
+uint32 Bag::GetFreeSlots() const
 {
     uint32 ContainerSlots=GetProto()->ContainerSlots;
+    uint32 slots = 0;
     for (uint8 i=0; i <ContainerSlots; i++)
         if (!m_bagslot[i])
-            return i;
+            ++slots;
 
-    return NULL_SLOT;
+    return slots;
 }
+
 
 void Bag::RemoveItem( uint8 slot, bool update )
 {
