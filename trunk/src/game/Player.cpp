@@ -3063,14 +3063,8 @@ Corpse* Player::CreateCorpse()
 
 void Player::SpawnCorpseBones()
 {
-    Corpse* corpse =  GetCorpse();
-    if(!corpse) return;
-
-    if( corpse->GetType() == CORPSE_RESURRECTABLE )
-    {
-        corpse->ConvertCorpseToBones();
+    if(ObjectAccessor::Instance().ConvertCorpseForPlayer(GetGUID()))
         SaveToDB();                                         // prevent loading as ghost without corpse
-    }
 }
 
 Corpse* Player::GetCorpse() const
@@ -10160,26 +10154,24 @@ void Player::_LoadAuras(uint32 timediff)
 
 void Player::LoadCorpse()
 {
-    if(Corpse* corpse = GetCorpse())
+    if( isAlive() )
     {
-        if( isAlive() )
-        {
-            if( corpse->GetType() == CORPSE_RESURRECTABLE )
-                corpse->ConvertCorpseToBones();
-        }
-        else
+        ObjectAccessor::Instance().ConvertCorpseForPlayer(GetGUID());
+    }
+    else
+    {
+        if(Corpse* corpse = GetCorpse())
         {
             corpse->UpdateForPlayer(this,true);
 
             if( corpse->GetType() == CORPSE_RESURRECTABLE && IsWithinDistInMap(corpse,0.0))
                 RepopAtGraveyard();
         }
-    }
-    else
-    {
-        //Prevent Dead Player login without corpse
-        if(!isAlive())
+        else
+        {
+            //Prevent Dead Player login without corpse
             ResurrectPlayer();
+        }
     }
 }
 

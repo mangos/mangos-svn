@@ -55,11 +55,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             /// Resurrectable - convert corpses to bones
             if(type==CORPSE_RESURRECTABLE)
             {
-                // must be in world object list
-                Corpse *corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(player_guid);
-                if(corpse)
-                    corpse->ConvertCorpseToBones();
-                else
+                if(!ObjectAccessor::Instance().ConvertCorpseForPlayer(player_guid))
                 {
                     sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
                     sDatabase.BeginTransaction();

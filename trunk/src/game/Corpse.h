@@ -58,9 +58,10 @@ class Corpse : public WorldObject
         time_t const& GetGhostTime() const { return m_time; }
         void ResetGhostTime() { m_time = time(NULL); }
         CorpseType GetType() const { return m_type; }
-        void ConvertCorpseToBones();
 
         GridPair const& GetGrid() const { return m_grid; }
+
+        void _ConvertCorpseToBones();                       // only call from ObjectAccessor::ConvertCorpseForPlayer
     private:
         CorpseType m_type;
         time_t m_time;
