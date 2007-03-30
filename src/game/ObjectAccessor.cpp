@@ -431,6 +431,27 @@ ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid)
             grid.AddWorldObject(iter->second,iter->second->GetGUID());
 }
 
+bool
+ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
+{
+    Guard guard(i_corpseGuard);
+
+    Player2CorpsesMapType::iterator iter = i_player2corpse.find(player_guid);
+
+    // corpse can be converted in another thread already
+    if( iter == i_player2corpse.end() )
+        return false;
+
+    Corpse* corpse = iter->second;
+
+    // remove corpse from player_guid -> corpse map
+    i_player2corpse.erase(iter);
+
+    corpse->_ConvertCorpseToBones();
+
+    return true;
+}
+
 void
 ObjectAccessor::Update(const uint32  &diff)
 {

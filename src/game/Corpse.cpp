@@ -208,12 +208,8 @@ void Corpse::UpdateForPlayer(Player* player, bool first)
     }
 }
 
-void Corpse::ConvertCorpseToBones()
+void Corpse::_ConvertCorpseToBones()
 {
-    // prevent multiply corpse conversion from different threads
-    static ZThread::FastMutex i_c2bGuard;
-    MaNGOS::GeneralLock<ZThread::FastMutex> guard(i_c2bGuard);
-
     // corpse can be converted in another thread already
     if(GetType()!=CORPSE_RESURRECTABLE)
         return;
@@ -225,9 +221,6 @@ void Corpse::ConvertCorpseToBones()
         player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 0, 30, "" );
 
     DEBUG_LOG("Deleting Corpse and spawning bones.\n");
-
-    // remove corpse from player_guid -> corpse map
-    ObjectAccessor::Instance().RemoveCorpse(this);
 
     // remove resurrectble corpse from grid object registry (loaded state checked into call)
     MapManager::Instance().GetMap(GetMapId())->Remove(this,false);

@@ -89,6 +89,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void RemoveCorpse(Corpse *corpse);
         void AddCorpse(Corpse *corpse);
         void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid);
+        bool ConvertCorpseForPlayer(uint64 player_guid);
+
 
         void AddPet(Pet *pet);
         void RemovePet(Pet *pet);
