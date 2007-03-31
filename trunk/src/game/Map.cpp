@@ -622,6 +622,7 @@ Map::Remove(T *obj, bool remove)
     {
         Cell cell = RedZone::GetZone(p);
         cell.data.Part.reserved = ALL_DISTRICT;
+        cell.SetNoCreate();                                 // not create cells at object remove
         MaNGOS::ObjectNotVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
         TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
         CellLock<ReadGuard> cell_lock(cell, p);
