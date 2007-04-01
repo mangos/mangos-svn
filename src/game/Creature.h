@@ -201,10 +201,19 @@ struct CreatureInfo
     uint32  maxgold;
     char const* AIName;
     uint32  MovementType;
+    uint32 InhabitType;
     char const* ScriptName;
 
     uint32 randomDisplayID() const;
 };
+
+enum InhabitTypeValues
+{
+    INHAVIT_GROUND = 1,
+    INHAVIT_WATER  = 2,
+    INHAVIT_ANYWHERE = INHAVIT_GROUND | INHAVIT_WATER
+};
+
 
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
 #pragma pack()
@@ -247,8 +256,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isPet() const { return m_isPet; }
         bool isTotem() const { return m_isTotem; }
         bool isCivilian() const { return GetCreatureInfo()->civilian != 0; }
-        bool isCanSwimOrFly() const;
-        bool isCanWalkOrFly() const;
+        bool isCanSwimOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_WATER; }
+        bool isCanWalkOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_GROUND; }
         bool isCanTrainingOf(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;
         bool IsOutOfThreatArea(Unit* pVictim) const;
