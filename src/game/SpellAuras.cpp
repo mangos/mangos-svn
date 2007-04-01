@@ -158,7 +158,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_TARGET_TRIGGER = 109,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_REGEN_PERCENT = 110,
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_CASTER_HIT_TRIGGER = 111,
-    &Aura::HandleNULL,                                      //SPELL_AURA_OVERRIDE_CLASS_SCRIPTS = 112,
+    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_OVERRIDE_CLASS_SCRIPTS = 112,
     &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN = 113,
     &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT = 114,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING = 115,
@@ -1171,9 +1171,28 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 case FORM_BATTLESTANCE:
                 case FORM_DEFENSIVESTANCE:
                 case FORM_BERSERKERSTANCE:
-                    // TODO: Implement tactical mastery effect
-                    unit_target->SetPower(POWER_RAGE,0);
-                    break;
+                {
+                    // Tactical mastery effect
+                    uint32 Rage_val = 0;
+
+                    Unit::AuraList const& aurasOverrideClassScripts = unit_target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                    for(Unit::AuraList::const_iterator iter = aurasOverrideClassScripts.begin(); iter != aurasOverrideClassScripts.end(); ++iter)
+                    {
+                        // select by script id
+                        switch((*iter)->GetModifier()->m_miscvalue)
+                        {
+                            case 831: Rage_val =  50; break;
+                            case 832: Rage_val = 100; break;
+                            case 833: Rage_val = 150; break;
+                            case 834: Rage_val = 200; break;
+                            case 835: Rage_val = 250; break;
+                        }
+                        if(Rage_val!=0)
+                            break;
+                    }
+                    if (unit_target->GetPower(POWER_RAGE)>Rage_val) 
+                        unit_target->SetPower(POWER_RAGE,Rage_val);
+                }   break;
                 default:
                     break;
             }
