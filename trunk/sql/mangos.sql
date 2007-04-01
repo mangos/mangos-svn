@@ -884,6 +884,7 @@ CREATE TABLE `creature_template` (
   `maxgold` int(30) unsigned NOT NULL default '0',
   `AIName` varchar(128) NOT NULL default '',
   `MovementType` tinyint(3) unsigned NOT NULL default '0',
+  `InhabitType` tinyint(1) unsigned NOT NULL default '3',
   `ScriptName` varchar(128) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
