@@ -4821,6 +4821,9 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     if(comboDamage > 0)
     {
         value += (int32)(comboDamage * comboPoints);
+        // Eviscerate
+        if( spellProto->SpellIconID == 514 && spellProto->SpellFamilyName == SPELLFAMILY_ROGUE)
+            value += (int32)(GetUInt32Value(UNIT_FIELD_ATTACK_POWER) * comboPoints * 0.03);
         if(GetTypeId() == TYPEID_PLAYER)
             SetUInt32Value(PLAYER_FIELD_BYTES,((GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
