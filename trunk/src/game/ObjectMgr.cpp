@@ -90,6 +90,7 @@ ObjectMgr::~ObjectMgr()
     }
     delete[] playerInfo;
 
+    mRepOnKill.clear();
 }
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
@@ -2585,6 +2586,70 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
             return false;
 
     return true;
+}
+void ObjectMgr::LoadReputationOnKill()
+{
+    uint32 count = 0; 
+
+    //                                             1             2                      3
+    QueryResult *result = sDatabase.Query("SELECT `creature_id`,`RewOnKillRepFaction1`,`RewOnKillRepFaction2`,"
+        //4              5              6                    7              8              9         
+        "`IsTeamAward1`,`MaxStanding1`,`RewOnKillRepValue1`,`IsTeamAward2`,`MaxStanding2`,`RewOnKillRepValue2`"
+        "FROM `creature_onkill_reputation`");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 creature award reputation definitions. DB table `creature_onkill_reputation` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 creature_id = fields[0].GetUInt32();
+
+        ReputationOnKillEntry repOnKill;
+        repOnKill.repfaction1          = fields[1].GetUInt32();
+        repOnKill.repfaction2          = fields[2].GetUInt32();
+        repOnKill.is_teamaward1        = fields[3].GetUInt32();
+        repOnKill.reputration_max_cap1 = fields[4].GetUInt32();
+        repOnKill.repvalue1            = fields[5].GetInt32();
+        repOnKill.is_teamaward2        = fields[6].GetUInt32();
+        repOnKill.reputration_max_cap2 = fields[7].GetUInt32();
+        repOnKill.repvalue2            = fields[8].GetInt32();
+
+        FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(repOnKill.repfaction1); 
+        if(!factionEntry1)
+        {
+            sLog.outErrorDb("Faction (faction.dbc) %u not existed but used in `creature_onkill_reputation`",repOnKill.repfaction1);
+            continue;
+        }
+
+        FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(repOnKill.repfaction2); 
+        if(!factionEntry2)
+        {
+            sLog.outErrorDb("Faction (faction.dbc) %u not existed but used in `creature_onkill_reputation`",repOnKill.repfaction2);
+            continue;
+        }
+
+        mRepOnKill[creature_id] = repOnKill;
+
+        count++;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString("");
+    sLog.outString(">> Loaded %u creature award reputation definitions", count);
 }
 
 void ObjectMgr::CleanupInstances()

@@ -82,6 +82,18 @@ struct PetLevelInfo
     uint16 mana;
 };
 
+struct ReputationOnKillEntry 
+{
+    uint32 repfaction1;
+    uint32 repfaction2;
+    bool is_teamaward1;
+    uint32 reputration_max_cap1;
+    int32 repvalue1;
+    bool is_teamaward2;
+    uint32 reputration_max_cap2;
+    int32 repvalue2;
+};
+
 class ObjectMgr
 {
     public:
@@ -94,6 +106,8 @@ class ObjectMgr
         typedef std::set< Guild * > GuildSet;
 
         typedef HM_NAMESPACE::hash_map<uint32, TeleportCoords*> TeleportMap;
+
+        typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
 
         template <class T>
             typename HM_NAMESPACE::hash_map<uint32, T*>::iterator
@@ -231,6 +245,13 @@ class ObjectMgr
 
         AreaTrigger * GetAreaTrigger(uint32 trigger);
 
+        ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
+        {
+            RepOnKillMap::const_iterator itr = mRepOnKill.find(id);
+            if(itr != mRepOnKill.end())
+                return &itr->second;
+            return NULL;
+        }
         void LoadGuilds();
         void LoadRaidGroups();
         void LoadQuests();
@@ -262,6 +283,8 @@ class ObjectMgr
         void LoadPetLevelInfo();
         void LoadPetNames();
         void LoadCorpses();
+
+        void LoadReputationOnKill();
 
         std::string GeneratePetName(uint32 entry);
 
@@ -402,6 +425,8 @@ class ObjectMgr
         AreaTriggerMap      mAreaTriggerMap;
         GossipTextMap       mGossipText;
         TeleportMap         mTeleports;
+
+        RepOnKillMap        mRepOnKill;
 
     private:
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;
