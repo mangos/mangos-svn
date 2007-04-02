@@ -392,6 +392,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Creature Templates..." );
     objmgr.LoadCreatureTemplates();
 
+    sLog.outString( "Loading Creature Reputation OnKill Data..." );
+    objmgr.LoadReputationOnKill();
+
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables
 

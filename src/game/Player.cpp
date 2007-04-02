@@ -4113,58 +4113,91 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
     return false;
 }
 
+//Calculate total reputation percent player gain with quest/creature level
+uint32 Player::CalculateReputationPercent(uint32 creatureOrQuestLevel) const
+{
+    uint32 Factor;
+    int32 dif = int32(getLevel()) - creatureOrQuestLevel;
+
+    // This part is before_2.01_like
+    if (dif <= 5)
+        Factor = 5;                                         // 100%
+    else if (dif >= 10)
+        Factor = 1;                                         // 20%
+    else
+        Factor = (10-dif);                                  // 20%...100% with step 20%
+
+    // apply factor to (base reputation percent + racial bonuses+ etc)
+    return Factor*(100 + (m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1))/5;
+
+    // Uncomment the next line to be 2.01_like or maybe not (see Wiki)
+    // return 100 + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1;
+}
+
 //Calculates how many reputation points player gains in wich victim's enemy factions
 void Player::CalculateReputation(Unit *pVictim)
 {
-    if( !pVictim ) return;
+    if(!pVictim || pVictim->GetTypeId() == TYPEID_PLAYER)
+        return;
 
-    if( pVictim->GetTypeId() != TYPEID_PLAYER )
+    ReputationOnKillEntry const* Rep = objmgr.GetReputationOnKilEntry(pVictim->GetEntry());
+
+    if(!Rep)
+        return;
+
+    uint32 RepPercent = CalculateReputationPercent(pVictim->getLevel());
+
+    int32 donerep1 = Rep->repvalue1*RepPercent/100; 
+    int32 donerep2 = Rep->repvalue2*RepPercent/100;
+
+    FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1); 
+    FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2); 
+
+    uint32 current_reputation_rank1 = GetReputationRank(factionEntry1);
+    uint32 current_reputation_rank2 = GetReputationRank(factionEntry2);
+
+    if(factionEntry1 && current_reputation_rank1 <= Rep->reputration_max_cap1)
+        ModifyFactionReputation(factionEntry1, donerep1);
+
+    if(factionEntry2 && current_reputation_rank2 <= Rep->reputration_max_cap2)
+        ModifyFactionReputation(factionEntry2, donerep2);
+
+    // Wiki: Team factions value divided by 2
+    if(Rep->is_teamaward1 != 0)
     {
-        ModifyFactionReputation( pVictim->getFaction(), (-100) );
+        FactionEntry const *team1_factionEntry = sFactionStore.LookupEntry(factionEntry1->team);
+        if(team1_factionEntry)
+            ModifyFactionReputation(team1_factionEntry, donerep1 / 2); 
     }
+    if(Rep->is_teamaward2 != 0)
+    {
+        FactionEntry const *team2_factionEntry = sFactionStore.LookupEntry(factionEntry2->team);
+        if(team2_factionEntry)
+            ModifyFactionReputation(team2_factionEntry, donerep2 / 2);
+    }    
 }
 
 //Calculate how many reputation points player gain with the quest
 void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 {
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
-    if( pCreature )
-    {
-        int Factor;
-        int dif = getLevel() - pQuest->GetQuestLevel();
+    if( !pCreature )
+        return;
 
-        // This part is before_2.01_like
-        if (dif <= 5)
-            Factor = 5;
-        else if (dif >= 10)
-            Factor = 1;
-        else
-            Factor = (10-dif);
+    uint32 RepPercent = CalculateReputationPercent(pQuest->GetQuestLevel());
 
-        // TODO: check if "100" in next line is a wrong replacement for pQuest->GetRewRepValue1 (huh, it's even an addition...)
-        int RepPoints = Factor*(100 + max(m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN], long(0))) / 5;
-        // correct would be multiplicative but currently only one such aura in game
-        // max(m_AuraModifiers[], 0) may be need to be commented ATM - m_AuraModifiers[] is -1...
-
-        // Uncomment the next line to be 2.01_like (see comment for "100" above also)
-        // int RepPoints = 100 + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN];
-
-        // TODO: check if next line requires removing GetRewRepFaction1
-        ModifyFactionReputation(pCreature->getFaction(), RepPoints);
-
-        // TODO: implement reputation spillover
-    }
-
-    // special quest reputation reward/losts
+    // quest reputation reward/losts
     for(int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
     {
         if(pQuest->RewRepFaction[i] && pQuest->RewRepValue[i] )
         {
             FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]);
             if(factionEntry)
-                ModifyFactionReputation(factionEntry, pQuest->RewRepValue[i]);
+                ModifyFactionReputation(factionEntry, (pQuest->RewRepValue[i]*RepPercent/100));
         }
     }
+
+    // TODO: implement reputation spillover
 }
 
 //Update honor fields
