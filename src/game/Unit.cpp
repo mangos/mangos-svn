@@ -50,7 +50,7 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     3.141594f                                               // MOVE_TURN
 };
 
-Unit::Unit() : WorldObject()
+Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
 {
     m_objectType |= TYPE_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -1162,8 +1162,12 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             break;
     }
 
-    MeleeDamageBonus(pVictim, damage,attType);
-    CalcAbsorbResist(pVictim, *damageType, *damage-*blocked_amount, absorbDamage, resistDamage);
+    // apply melee damage bonus and absorb only if base damage not fully blocked to prevent negative damage or damage with full block
+    if(*victimState != VICTIMSTATE_BLOCKS)
+    {
+        MeleeDamageBonus(pVictim, damage,attType);
+        CalcAbsorbResist(pVictim, *damageType, *damage-*blocked_amount, absorbDamage, resistDamage);
+    }
 
     if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
     if (*resistDamage) *hitInfo |= HITINFO_RESIST;
@@ -1855,12 +1859,12 @@ bool Unit::isInAccessablePlaceFor(Creature* c) const
 
 bool Unit::IsInWater() const
 {
-    return MapManager::Instance().GetMap(GetMapId())->IsInWater(GetPositionX(),GetPositionY());
+    return MapManager::Instance().GetMap(GetMapId(), this)->IsInWater(GetPositionX(),GetPositionY());
 }
 
 bool Unit::IsUnderWater() const
 {
-    return MapManager::Instance().GetMap(GetMapId())->IsUnderWater(GetPositionX(),GetPositionY(),GetPositionZ());
+    return MapManager::Instance().GetMap(GetMapId(), this)->IsUnderWater(GetPositionX(),GetPositionY(),GetPositionZ());
 }
 
 void Unit::DeMorph()
@@ -4202,7 +4206,7 @@ void Unit::SetVisibility(UnitVisibility x)
     }
     if(GetTypeId() == TYPEID_PLAYER && IsInWorld())
     {
-        Map *m = MapManager::Instance().GetMap(GetMapId());
+        Map *m = MapManager::Instance().GetMap(GetMapId(), this);
         m->PlayerRelocation((Player *)this,GetPositionX(),GetPositionY(),
             GetPositionZ(),GetOrientation(), true);
     }

@@ -71,7 +71,7 @@ HomeMovementGenerator::_reLocate(Creature &owner)           // resend clients th
         MaNGOS::CreatureVisibleMovementNotifier notifier(owner);
         TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, WorldTypeMapContainer > player_notifier(notifier);
         CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(owner.GetMapId()));
+        cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(owner.GetMapId(), &owner));
     }
 }
 

@@ -31,7 +31,7 @@ enum TotemType
 class Totem : public Creature
 {
     public:
-        Totem();
+        Totem( WorldObject *instantiator );
         virtual ~Totem(){};
         void Update( uint32 time );
         void Summon();

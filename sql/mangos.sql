@@ -289,6 +289,34 @@ LOCK TABLES `character_homebind` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `character_homebind` ENABLE KEYS */;
 
+
+--
+-- Table structure for table `character_instance`
+--
+
+DROP TABLE IF EXISTS `character_instance`;
+CREATE TABLE `character_instance` (
+  `guid` int(11) unsigned NOT NULL default '0',
+  `map` int(11) unsigned NOT NULL default '0',
+  `instance` bigint(40) NOT NULL default '0',
+  `leader` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`map`),
+  KEY `instance` (`instance`),
+  KEY `leader` (`leader`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- Dumping data for table `character_instance`
+--
+
+
+/*!40000 ALTER TABLE `character_instance` DISABLE KEYS */;
+LOCK TABLES `character_instance` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `character_instance` ENABLE KEYS */;
+
+
 --
 -- Table structure for table `character_inventory`
 --
@@ -593,6 +621,7 @@ CREATE TABLE `corpse` (
   `data` longtext,
   `time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `bones_flag` tinyint(3) NOT NULL default '0',
+  `instance` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_bones_flag` (`bones_flag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
@@ -801,7 +830,8 @@ DROP TABLE IF EXISTS `creature_respawn`;
 CREATE TABLE `creature_respawn` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `respawntime` bigint(40) NOT NULL default '0',
-  PRIMARY KEY  (`guid`)
+  `instance` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`, `instance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
 
 --
@@ -1168,7 +1198,8 @@ DROP TABLE IF EXISTS `gameobject_respawn`;
 CREATE TABLE `gameobject_respawn` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `respawntime` bigint(40) NOT NULL default '0',
-  PRIMARY KEY  (`guid`)
+  `instance` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`, `instance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
 
 --
@@ -1338,6 +1369,60 @@ CREATE TABLE `guild_rank` (
 LOCK TABLES `guild_rank` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `guild_rank` ENABLE KEYS */;
+
+
+--
+-- Table structure for table `instance`
+--
+
+DROP TABLE IF EXISTS `instance`;
+CREATE TABLE `instance` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `map` int(11) unsigned NOT NULL default '0',
+  `resettime` bigint(40) NOT NULL default '0',
+  PRIMARY KEY  (`id`),
+  KEY `map` (`map`),
+  KEY `resettime` (`resettime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `instance`
+--
+
+/*!40000 ALTER TABLE `instance` DISABLE KEYS */;
+LOCK TABLES `instance` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `instance` ENABLE KEYS */;
+
+
+--
+-- Table structure for table `instance_template`
+--
+
+DROP TABLE IF EXISTS `instance_template`;
+CREATE TABLE `instance_template` (
+  `map` int(11) unsigned NOT NULL,
+  `levelMin` int(11) unsigned NOT NULL default '0',
+  `levelMax` int(11) unsigned NOT NULL default '0',
+  `maxPlayers` int(11) unsigned NOT NULL default '0',
+  `reset_delay` int(20) unsigned NOT NULL default '0',
+  `startLocX` float default NULL,
+  `startLocY` float default NULL,
+  `startLocZ` float default NULL,
+  `startLocO` float default NULL,
+  PRIMARY KEY  (`map`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `instance_template`
+--
+
+/*!40000 ALTER TABLE `instance_template` DISABLE KEYS */;
+LOCK TABLES `instance_template` WRITE;
+INSERT INTO `instance_template` VALUES (33, 22, 30, 10, 7200, NULL, NULL, NULL, NULL),(34, 24, 32, 10, 7200, NULL, NULL, NULL, NULL),(36, 15, 20, 10, 7200, NULL, NULL, NULL, NULL),(43, 15, 21, 10, 7200, NULL, NULL, NULL, NULL),(47, 29, 38, 10, 7200, NULL, NULL, NULL, NULL),(48, 24, 32, 10, 7200, NULL, NULL, NULL, NULL),(70, 35, 47, 10, 7200, NULL, NULL, NULL, NULL),(90, 29, 38, 10, 7200, NULL, NULL, NULL, NULL),(109, 45, 55, 10, 7200, NULL, NULL, NULL, NULL),(129, 37, 46, 10, 7200, NULL, NULL, NULL, NULL),(189, 34, 45, 10, 7200, NULL, NULL, NULL, NULL),(209, 44, 54, 10, 7200, NULL, NULL, NULL, NULL),(229, 58, 0, 10, 120000, 78.5083, -225.044, 49.839, 5.1),(230, 52, 0, 5, 7200, NULL, NULL, NULL, NULL),(249, 60, 0, 40, 432000, NULL, NULL, NULL, NULL),(289, 57, 0, 5, 7200, NULL, NULL, NULL, NULL),(309, 60, 0, 20, 259200, NULL, NULL, NULL, NULL),(329, 58, 60, 5, 7200, NULL, NULL, NULL, NULL),(349, 46, 55, 10, 7200, NULL, NULL, NULL, NULL),(389, 13, 18, 10, 7200, NULL, NULL, NULL, NULL),(409, 60, 0, 40, 604800, NULL, NULL, NULL, NULL),(429, 55, 60, 5, 7200, NULL, NULL, NULL, NULL),(469, 60, 0, 40, 604800, NULL, NULL, NULL, NULL),(509, 60, 0, 20, 259200, NULL, NULL, NULL, NULL),(531, 60, 0, 40, 604800, NULL, NULL, NULL, NULL),(533, 60, 0, 40, 604800, NULL, NULL, NULL, NULL);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `instance_template` ENABLE KEYS */;
+
 
 --
 -- Table structure for table `item_instance`

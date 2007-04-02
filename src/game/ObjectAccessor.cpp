@@ -89,7 +89,7 @@ ObjectAccessor::GetCreatureOrPet(WorldObject const &u, uint64 guid)
 Creature*
 ObjectAccessor::GetCreature(WorldObject const &u, uint64 guid)
 {
-    return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<Creature>(u, guid);
+    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<Creature>(u, guid);
 }
 
 Unit*
@@ -141,13 +141,13 @@ Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32
 GameObject*
 ObjectAccessor::GetGameObject(Unit const &u, uint64 guid)
 {
-    return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<GameObject>(u, guid);
+    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<GameObject>(u, guid);
 }
 
 DynamicObject*
 ObjectAccessor::GetDynamicObject(Unit const &u, uint64 guid)
 {
-    return MapManager::Instance().GetMap(u.GetMapId())->GetObjectNear<DynamicObject>(u, guid);
+    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<DynamicObject>(u, guid);
 }
 
 Player*
@@ -280,16 +280,16 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
         switch(obj->GetTypeId())
         {
             case TYPEID_CORPSE:
-                MapManager::Instance().GetMap(obj->GetMapId())->Remove((Corpse*)obj,true);
+                MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((Corpse*)obj,true);
                 break;
             case TYPEID_DYNAMICOBJECT:
-                MapManager::Instance().GetMap(obj->GetMapId())->Remove((DynamicObject*)obj,true);
+                MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((DynamicObject*)obj,true);
                 break;
             case TYPEID_GAMEOBJECT:
-                MapManager::Instance().GetMap(obj->GetMapId())->Remove((GameObject*)obj,true);
+                MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((GameObject*)obj,true);
                 break;
             case TYPEID_UNIT:
-                MapManager::Instance().GetMap(obj->GetMapId())->Remove((Creature*)obj,true);
+                MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((Creature*)obj,true);
                 break;
             default:
                 sLog.outError("Non-grid object (TypeId: %u) in grid object removing list, ignored.",obj->GetTypeId());
@@ -357,7 +357,7 @@ ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType 
     ObjectChangeAccumulator notifier(*obj, update_players);
     TypeContainerVisitor<ObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(obj->GetMapId()));
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(obj->GetMapId(), obj));
 }
 
 Pet*
@@ -423,12 +423,25 @@ ObjectAccessor::AddCorpse(Corpse *corpse)
 }
 
 void
-ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid)
+ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* map)
 {
     Guard guard(i_corpseGuard);
     for(Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
         if(iter->second->GetGrid()==gridpair)
-            grid.AddWorldObject(iter->second,iter->second->GetGUID());
+        {
+            // verify, if the corpse in our instance (add only corpses which are)
+            if (map->Instanceable())
+            {
+                if (iter->second->GetInstanceId() == map->GetInstanceId())
+                {
+                    grid.AddWorldObject(iter->second,iter->second->GetGUID());
+                }
+            }
+            else
+            {
+                grid.AddWorldObject(iter->second,iter->second->GetGUID());
+            }
+        }
 }
 
 bool
@@ -466,6 +479,7 @@ ObjectAccessor::Update(const uint32  &diff)
         }
 
         uint32 map_id = 0;
+        uint32 instance_id = 0;
         MaNGOS::ObjectUpdater updater(diff);
         // for creature
         TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer  > grid_object_update(updater);
@@ -475,9 +489,10 @@ ObjectAccessor::Update(const uint32  &diff)
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cell(0);
         for(CreatureLocationHolderType::iterator iter=creature_locations.begin(); iter != creature_locations.end(); ++iter)
         {
-            if( map_id != (*iter).first )
+            if( map_id != (*iter).first || instance_id != (*iter).second->GetInstanceId())
             {
                 map_id = (*iter).first;
+                instance_id = (*iter).second->GetInstanceId();
                 marked_cell.reset();
             }
 
@@ -499,8 +514,8 @@ ObjectAccessor::Update(const uint32  &diff)
                         cell.data.Part.reserved = CENTER_DISTRICT;
                         cell.SetNoCreate();
                         CellLock<NullGuard> cell_lock(cell, cell_iter);
-                        cell_lock->Visit(cell_lock, grid_object_update,  *MapManager::Instance().GetMap(map_id));
-                        cell_lock->Visit(cell_lock, world_object_update, *MapManager::Instance().GetMap(map_id));
+                        cell_lock->Visit(cell_lock, grid_object_update,  *MapManager::Instance().GetMap(map_id, player));
+                        cell_lock->Visit(cell_lock, world_object_update, *MapManager::Instance().GetMap(map_id, player));
                     }
 
                     if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
@@ -559,7 +574,7 @@ ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
     cell.SetNoCreate();
     cell.data.Part.reserved = ALL_DISTRICT;
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(c->GetMapId()));
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(c->GetMapId(), c));
 }
 
 void
@@ -572,7 +587,7 @@ ObjectAccessor::RemoveBonesFromPlayerView(Corpse *o)
     cell.SetNoCreate();
     cell.data.Part.reserved = ALL_DISTRICT;
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(o->GetMapId()));
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(o->GetMapId(), o));
 }
 
 namespace MaNGOS

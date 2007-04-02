@@ -348,6 +348,13 @@ void World::SetInitialWorldSettings()
     sLog.outString("Initialize data stores...");
     LoadDBCStores(m_dataPath);
 
+    ///- Clean up and pack instances
+    sLog.outString( "Cleaning up instances..." );
+    objmgr.CleanupInstances();
+
+    sLog.outString( "Packing instances..." );
+    objmgr.PackInstances();
+
     ///- Load static data tables from the database
     sLog.outString( "Loading Game Object Templates..." );
     objmgr.LoadGameobjectInfo();
@@ -715,7 +722,7 @@ void World::ScriptsProcess()
                     break;
                 }
                 ((Unit *)step.source)->SendMoveToPacket(step.script->x, step.script->y, step.script->z, false, step.script->datalong2 );
-                MapManager::Instance().GetMap(((Unit *)step.source)->GetMapId())->CreatureRelocation(((Creature *)step.source), step.script->x, step.script->y, step.script->z, 0);
+                MapManager::Instance().GetMap(((Unit *)step.source)->GetMapId(), ((Unit *)step.source))->CreatureRelocation(((Creature *)step.source), step.script->x, step.script->y, step.script->z, 0);
                 break;
             case SCRIPT_COMMAND_FLAG_SET:
                 if(!step.source)
@@ -766,7 +773,7 @@ void World::ScriptsProcess()
                 float z = step.script->z;
                 float o = step.script->o;
 
-                TemporarySummon* pCreature = new TemporarySummon;
+                TemporarySummon* pCreature = new TemporarySummon( (Unit*)step.source );
                 if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), ((Unit*)step.source)->GetMapId(), x, y, z, o, step.script->datalong))
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON failed for creature (entry: %u).",step.script->datalong);

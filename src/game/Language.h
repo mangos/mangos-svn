@@ -79,8 +79,12 @@
 #define LANG_HONOR_LIFE                  "Life Time: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank %u: %s]"
 
 // level 1 chat
-#define LANG_MAP_POSITION                "Map: %u Zone: %u\nX: %f Y: %f Z: %f Orientation: %f grid[%u,%u]cell[%u,%u]"
+#define LANG_MAP_POSITION                "Map: %u Zone: %u\nX: %f Y: %f Z: %f Orientation: %f grid[%u,%u]cell[%u,%u]\nInstanceID: %u"
 #define LANG_IS_TELEPORTED               "%s is already being teleported."
+#define LANG_CANNOT_SUMMON_TO_INST       "You can summon player to your instance only if he is in your party with you as leader."
+#define LANG_CANNOT_GO_TO_INST_PARTY     "You can not go to the player instance because you are in party now."
+#define LANG_CANNOT_GO_TO_INST_GM        "You can go to the player instance while not being in his party only if your GM mode is on."
+#define LANG_CANNOT_INST_INST            "You cannot go to players or summon players from instance to instance."
 #define LANG_SUMMONING                   "You are summoning %s%s."
 #define LANG_SUMMONED_BY                 "You are being summoned by %s."
 #define LANG_NO_PLAYER                   "Player (%s) does not exist or is not logged in."
@@ -219,6 +223,7 @@
 #define LANG_NPCINFO_POSITION            "Position: %f %f %f."
 #define LANG_NPCINFO_VENDOR              "*** Is a vendor!"
 #define LANG_NPCINFO_TRAINER             "*** Is a trainer!"
+#define LANG_NPCINFO_DUNGEON_ID          "InstanceID: %u"
 
 #define LANG_PINFO_ACCOUNT               "Player %s (guid: %u) Account: %s (id: %u) GMLevel: %u Last IP: %s"
 #define LANG_PINFO_LEVEL                 "Played time: %ud%uh Level: %u Money: %ug%us%uc"

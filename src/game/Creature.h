@@ -236,7 +236,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
     public:
 
-        Creature();
+        Creature( WorldObject *instantiator );
         virtual ~Creature();
 
         void CleanupCrossRefsBeforeDelete();                // used in ~Creature (or before mass creature delete to remove cross-references to already deleted creature)
@@ -362,7 +362,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void Say(char const* text, uint32 language);
         void MonsterSay(char const *text, uint32 language, uint64 targetGUID);
 
-        bool LoadFromDB(uint32 guid, QueryResult *result = NULL);
+        bool LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId);
         virtual void SaveToDB();                            // overwrited in Pet
         virtual void DeleteFromDB();                        // overwrited in Pet
 
@@ -439,5 +439,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         MovementGeneratorType m_defaultMovementType;
         Cell m_currentCell;                                 // store current cell where creature listed
         bool m_AlreadyCallAssistence;
+
+        uint32 m_DBTableGuid;
 };
 #endif

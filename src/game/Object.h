@@ -297,8 +297,11 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         virtual void SaveRespawnTime() {}
 
+        uint32 GetInstanceId() const { return m_InstanceId; }
+        void SetInstanceId(uint32 val) { m_InstanceId = val; }
+
     protected:
-        WorldObject( );
+        WorldObject( WorldObject *instantiator );
 
     private:
         uint32 m_mapId;
@@ -309,5 +312,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         float m_orientation;
 
         bool mSemaphoreTeleport;
+
+        uint32 m_InstanceId;
 };
 #endif

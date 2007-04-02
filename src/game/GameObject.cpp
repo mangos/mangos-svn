@@ -33,7 +33,7 @@
 #include "CellImpl.h"
 #include "Transports.h"
 
-GameObject::GameObject() : WorldObject()
+GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator )
 {
     m_objectType |= TYPE_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -76,6 +76,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     }
 
     Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
+
+    m_DBTableGuid = guidlow;
 
     GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
 
@@ -196,7 +198,7 @@ void GameObject::Update(uint32 p_time)
                                 return;
                             }
                                                             // respawn timer
-                            MapManager::Instance().GetMap(GetMapId())->Add(this);
+                            MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
                             break;
                     }
                 }
@@ -258,14 +260,14 @@ void GameObject::Update(uint32 p_time)
         // search unfriedly creature
         {
             TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
-            cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId()));
+            cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
         }
 
         // or unfriendly player/pet
         if(!ok)
         {
             TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
-            cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId()));
+            cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
         }
 
         if (ok)
@@ -292,7 +294,7 @@ void GameObject::Refresh()
 
     SendDestroyObject(GetGUID());
 
-    MapManager::Instance().GetMap(GetMapId())->Add(this);
+    MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
 }
 
 void GameObject::CountUseTimes()
@@ -353,13 +355,13 @@ void GameObject::SaveToDB()
     sDatabase.CommitTransaction();
 }
 
-bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
+bool GameObject::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
         //                                0    1     2            3            4            5             6           7           8           9           10     11              12             13         14            15
         result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`respawntime`,`guid` "
-            "FROM `gameobject` LEFT JOIN `gameobject_respawn` ON `gameobject`.`guid`=`gameobject_respawn`.`guid` WHERE `gameobject`.`guid` = '%u'", guid);
+            "FROM `gameobject` LEFT JOIN `gameobject_respawn` ON ((`gameobject`.`guid`=`gameobject_respawn`.`guid`) AND (`gameobject_respawn`.`instance` = '%u')) WHERE `gameobject`.`guid` = '%u'", InstanceId, guid);
 
     if( !result )
     {
@@ -383,6 +385,10 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
     uint32 animprogress = fields[12].GetUInt32();
     uint32 dynflags = fields[13].GetUInt32();
 
+    m_DBTableGuid = guid;
+    if (InstanceId) guid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
+    SetInstanceId(InstanceId);
+
     if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, dynflags) )
     {
         if (!external) delete result;
@@ -395,7 +401,7 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
     if(m_respawnTime && m_respawnTime <= time(NULL))        // ready to respawn
     {
         m_respawnTime = 0;
-        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
     }
 
     if (!external) delete result;
@@ -407,7 +413,7 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result)
 void GameObject::DeleteFromDB()
 {
     sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
 }
 
 GameObjectInfo const *GameObject::GetGOInfo() const
@@ -478,7 +484,7 @@ void GameObject::SaveRespawnTime()
 {
     if(m_respawnTime > time(NULL) && !GetOwnerGUID())
     {
-        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u'", GetGUIDLow());
-        sDatabase.PExecute("INSERT INTO `gameobject_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(m_respawnTime));
+        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+        sDatabase.PExecute("INSERT INTO `gameobject_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", m_DBTableGuid, uint64(m_respawnTime), GetInstanceId());
     }
 }

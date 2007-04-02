@@ -39,7 +39,7 @@ RandomMovementGenerator::Initialize(Creature &creature)
     creature.GetRespawnDist(wander_distance);
     uint32 mapid=creature.GetMapId();
 
-    Map* map = MapManager::Instance().GetMap(mapid);
+    Map* map = MapManager::Instance().GetMap(mapid, &creature);
     z2 = map->GetHeight(x,y);
     if( abs( z2 - z ) < 5 )
         z = z2;

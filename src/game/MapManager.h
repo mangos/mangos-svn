@@ -35,7 +35,17 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
     public:
 
-        Map* GetMap(uint32);
+        Map* GetMap(uint32, const WorldObject* obj);
+        Map* GetBaseMap(uint32 id);
+
+        inline uint16 GetAreaFlag(uint32 mapid, float x, float y)
+        {
+            Map* m = GetBaseMap(mapid);
+            return m->GetAreaFlag(x, y);
+        }
+        inline uint32 GetAreaId(uint32 mapid, float x, float y) { return Map::GetAreaId(GetAreaFlag(mapid, x, y)); }
+        inline uint32 GetZoneId(uint32 mapid, float x, float y) { return Map::GetZoneId(GetAreaFlag(mapid, x, y)); }
+
         void Initialize(void);
         void Update(time_t);
 
@@ -57,7 +67,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
             }
         }
 
-        void LoadGrid(int mapid, float x, float y, bool no_unload = false);
+        void LoadGrid(int mapid, float x, float y, const WorldObject* obj, bool no_unload = false);
         void UnloadAll();
 
         static bool ExistMAP(uint32 mapid, float x, float y);
@@ -71,6 +81,11 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         vector<Transport *> m_Transports;
         map<uint32, vector< Transport * > > m_TransportsByMap;
 
+        bool CanPlayerEnter(uint32 mapid, Player* player);
+        void RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y);
+        inline uint32 GenerateInstanceId() { return ++i_MaxInstanceId; }
+        void InitMaxInstanceId();
+
     private:
         MapManager();
         ~MapManager();
@@ -78,7 +93,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         MapManager(const MapManager &);
         MapManager& operator=(const MapManager &);
 
-        inline Map* _getMap(uint32 id)
+        Map* _findMap(uint32 id)
         {
             MapMapType::iterator iter = i_maps.find(id);
             return (iter == i_maps.end() ? NULL : iter->second);
@@ -88,5 +103,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;
+
+        uint32 i_MaxInstanceId;
 };
 #endif

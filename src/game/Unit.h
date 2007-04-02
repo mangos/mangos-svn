@@ -835,7 +835,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         int32 CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index);
     protected:
-        Unit ( );
+        Unit ( WorldObject *instantiator );
 
         void _UpdateSpells(uint32 time);
         //void _UpdateAura();

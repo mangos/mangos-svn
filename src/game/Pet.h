@@ -77,7 +77,7 @@ enum PetDietMask
 class Pet : public Creature
 {
     public:
-        explicit Pet(PetType type);
+        explicit Pet(WorldObject *instantiator, PetType type);
         virtual ~Pet();
 
         uint32 GetActState() { return m_actState; }

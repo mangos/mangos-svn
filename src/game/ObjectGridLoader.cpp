@@ -70,7 +70,7 @@ ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 
         if(cur_cell.DiffGrid(resp_cell))
         {
-            MapManager::Instance().GetMap(c->GetMapId())->CreatureRespawnRelocation(c);
+            MapManager::Instance().GetMap(c->GetMapId(), c)->CreatureRespawnRelocation(c);
             // false result ignored: will be unload with other creatures at grid
         }
     }
@@ -90,17 +90,19 @@ template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
 }
 
 template <class T>
-void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count)
+void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count, Map* map)
 {
     if( result )
     {
+        bool generateGuid = map->Instanceable();
+
         do
         {
             Field *fields = result->Fetch();
-            T *obj = new T;
+            T *obj = new T( NULL );
             uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
             //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
-            if(!obj->LoadFromDB(guid, result))
+            if(!obj->LoadFromDB(guid, result, map->GetInstanceId()))
             {
                 delete obj;
                 continue;
@@ -121,6 +123,7 @@ void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, T*>
                 }
             }
 
+            obj->SetInstanceId(map->GetInstanceId());
             m[obj->GetGUID()] = obj;
 
             addUnitState(obj,cell);
@@ -143,9 +146,9 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
     //      0    1                  2                         3                         4            5             6           7           8           9           10     11              12             13         14            15
         "SELECT `id`,`gameobject`.`map`,`gameobject`.`position_x`,`gameobject`.`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`respawntime`,`gameobject`.`guid` "
         "FROM `gameobject` LEFT JOIN `gameobject_grid` ON `gameobject`.`guid` = `gameobject_grid`.`guid` "
-        "LEFT JOIN `gameobject_respawn` ON `gameobject`.`guid`=`gameobject_respawn`.`guid` "
-        "WHERE `grid` = '%u' AND `cell` = '%u' AND `gameobject_grid`.`map` = '%u'", i_grid.GetGridId(), cell_id, i_mapId);
-    LoadHelper(result, cell_pair, m, i_gameObjects);
+        "LEFT JOIN `gameobject_respawn` ON ((`gameobject`.`guid`=`gameobject_respawn`.`guid`) AND (`gameobject_respawn`.`instance` = '%u')) "
+        "WHERE `grid` = '%u' AND `cell` = '%u' AND `gameobject_grid`.`map` = '%u'", i_map->GetInstanceId(), i_grid.GetGridId(), cell_id, i_map->GetId());
+    LoadHelper(result, cell_pair, m, i_gameObjects, i_map);
 }
 
 void
@@ -159,9 +162,9 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
     //          0    1                2                       3                       4            5             6               7           8                  9                  10                 11          12        13            14      15             16      17
         "SELECT `id`,`creature`.`map`,`creature`.`position_x`,`creature`.`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`state`,`MovementType`,`auras`,`creature`.`guid`"
         "FROM `creature` LEFT JOIN `creature_grid` ON `creature`.`guid` = `creature_grid`.`guid` "
-        "LEFT JOIN `creature_respawn` ON `creature`.`guid`=`creature_respawn`.`guid`"
-        "WHERE `grid` = '%u' AND `cell` = '%u' AND `creature_grid`.`map` = '%u'", i_grid.GetGridId(), cell_id, i_mapId);
-    LoadHelper(result, cell_pair, m, i_creatures);
+        "LEFT JOIN `creature_respawn` ON ((`creature`.`guid`=`creature_respawn`.`guid`) AND (`creature_respawn`.`instance` = '%u'))"
+        "WHERE `grid` = '%u' AND `cell` = '%u' AND `creature_grid`.`map` = '%u' ", i_map->GetInstanceId(), i_grid.GetGridId(), cell_id, i_map->GetId());
+    LoadHelper(result, cell_pair, m, i_creatures, i_map);
 }
 
 void
@@ -174,10 +177,10 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
 
     // Load bones to grid store
     QueryResult *result = sDatabase.PQuery(
-        "SELECT `corpse`.`position_x`,`corpse`.`position_y`,`position_z`,`orientation`,`corpse`.`map`,`data`,`bones_flag`,`corpse`.`guid` "
+        "SELECT `corpse`.`position_x`,`corpse`.`position_y`,`position_z`,`orientation`,`corpse`.`map`,`data`,`bones_flag`,`instance`,`corpse`.`guid` "
         "FROM `corpse` LEFT JOIN `corpse_grid` ON `corpse`.`guid` = `corpse_grid`.`guid` "
-        "WHERE `grid` = '%u' AND `cell` = '%u' AND `corpse_grid`.`map` = '%u' AND `bones_flag` = 1", i_grid.GetGridId(), cell_id, i_mapId);
-    LoadHelper(result, cell_pair, m, i_corpses);
+        "WHERE `grid` = '%u' AND `cell` = '%u' AND `corpse_grid`.`map` = '%u' AND `bones_flag` = 1 AND `instance` = '%u'", i_grid.GetGridId(), cell_id, i_map->GetId(), i_map->GetInstanceId());
+    LoadHelper(result, cell_pair, m, i_corpses, i_map);
 }
 
 void
@@ -201,7 +204,7 @@ void ObjectGridLoader::LoadN(void)
             loader.Load(i_grid(x, y), *this);
         }
     }
-    sLog.outDebug("%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses,i_grid.GetGridId(), i_mapId);
+    sLog.outDebug("%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses,i_grid.GetGridId(), i_map->GetId());
 }
 
 void ObjectGridUnloader::MoveToRespawnN()

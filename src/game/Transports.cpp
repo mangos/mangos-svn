@@ -51,7 +51,7 @@ void MapManager::LoadTransports()
     {
         bar.step();
 
-        Transport *t = new Transport;
+        Transport *t = new Transport( NULL );
 
         Field *fields = result->Fetch();
 
@@ -106,6 +106,10 @@ void MapManager::LoadTransports()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u transports", count );
+}
+
+Transport::Transport( WorldObject *instantiator ) : GameObject( instantiator )
+{
 }
 
 bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)

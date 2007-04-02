@@ -28,6 +28,7 @@
 #include "Cell.h"
 #include "Object.h"
 #include "Timer.h"
+#include "SharedDefines.h"
 
 class Unit;
 class WorldPacket;
@@ -88,10 +89,12 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 {
     public:
 
-        Map(uint32 id, time_t);
+        Map(uint32 id, time_t, uint32 aInstanceId);
 
         void Add(Player *);
+        bool AddInstanced(Player *);
         void Remove(Player *, bool);
+        void RemoveInstanced(Player *);
         template<class T> void Add(T *);
         template<class T> void Remove(T *, bool);
         template<class T> bool Find(T *) const;
@@ -99,8 +102,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         template<class T> T* GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
         template<class T> T* GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
 
-        void Update(const uint32&);
-        uint64 CalculateGridMask(const uint32 &y) const;
+        virtual void Update(const uint32&);
 
         void MessageBoardcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
 
@@ -112,12 +114,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
-        void SetTimer(uint32 t)
-        {
-            i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
-        }
-
-        inline bool IsActiveGrid(WorldObject *obj) const
+/*        inline bool IsActiveGrid(WorldObject *obj) const
         {
             return IsActiveGrid(obj->GetPositionX(),obj->GetPositionY());
         }
@@ -127,6 +124,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
             GridPair p = MaNGOS::ComputeGridPair(x, y);
             return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
         }
+*/
 
         inline bool IsRemovalGrid(float x, float y) const
         {
@@ -138,7 +136,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         void SetUnloadFlag(const GridPair &p, bool unload) { i_info[p.x_coord][p.y_coord]->i_unloadflag = unload; }
         void LoadGrid(const Cell& cell, bool no_unload = false);
         bool UnloadGrid(const uint32 &x, const uint32 &y);
-        void UnloadAll();
+        virtual void UnloadAll();
 
         void ResetGridExpiry(GridInfo &info) const
         {
@@ -149,7 +147,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         uint32 GetId(void) const { return i_id; }
 
         static bool ExistMAP(uint32 mapid, int x, int y, bool output = true);
-        GridMap * LoadMAP(uint32 mapid, int x, int y);
+        GridMap * LoadMAP(uint32 mapid, uint32 instanceid, int x, int y);
 
         static void InitStateMachine();
         static void DeleteStateMachine();
@@ -161,8 +159,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         bool IsInWater(float x, float y);
         bool IsUnderWater(float x, float y, float z);
 
-        uint32 GetAreaId(uint16 areaflag);
-        uint32 GetZoneId(uint16 areaflag);
+        static uint32 GetAreaId(uint16 areaflag);
+        static uint32 GetZoneId(uint16 areaflag);
 
         uint32 GetAreaId(float x, float y)
         {
@@ -174,13 +172,30 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
             return GetZoneId(GetAreaFlag(x,y));
         }
 
-        void MoveAllCreaturesInMoveList();
+        virtual void MoveAllCreaturesInMoveList();
 
         bool CreatureRespawnRelocation(Creature *c);        // used only in MoveAllCreaturesInMoveList and ObjectGridUnloader
 
         // assert print helper
         bool CheckGridIntegrity(Creature* c, bool moved) const;
+
+        uint32 GetInstanceId() { return(i_InstanceId); }
+        bool NeedsReset() { return(Instanceable() && ((i_resetTime == 0) || (i_resetTime <= time(NULL)))); }
+        uint32 GetPlayersCount() {return(i_Players.size()); }
+        void Reset();
+        bool CanEnter(Player* player);
+        const char* GetMapName() { return(i_mapEntry ? i_mapEntry->name : "UNNAMEDMAP\x0"); }
+        bool Instanceable() { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
+        bool IsRaid() { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
+        virtual bool RemoveBones(uint64 guid, float x, float y);
+        void InitResetTime();
+
+        GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+
     private:
+        void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
+        uint64 CalculateGridMask(const uint32 &y) const;
+
         bool CreatureCellRelocation(Creature *creature, Cell new_cell);
         void CreatureRelocationNotifying(Creature *creature, Cell newcell, CellPair newval);
 
@@ -197,11 +212,13 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         uint32 i_id;
 
-        GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
         volatile uint64 i_gridMask[MAX_NUMBER_OF_GRIDS];
         volatile uint64 i_gridStatus[MAX_NUMBER_OF_GRIDS];
 
+    protected:
         typedef MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>::Lock Guard;
+
+    private:
         typedef GridReadGuard ReadGuard;
         typedef GridWriteGuard WriteGuard;
 
@@ -209,6 +226,13 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 
         time_t i_gridExpiry;
+
+        MapEntry const* i_mapEntry;
+        time_t i_resetTime;
+        uint32 i_resetDelayTime;
+        uint32 i_InstanceId;
+        uint32 i_maxPlayers;
+        list< Player * > i_Players;
 
         // Type specific code for add/remove to/from grid
         template<class T>

@@ -28,8 +28,8 @@
 class MANGOS_DLL_DECL ObjectGridLoader
 {
     public:
-        ObjectGridLoader(NGridType &grid, uint32 id, const Cell &cell)
-            : i_cell(cell), i_grid(grid), i_mapId(id), i_gameObjects(0), i_creatures(0), i_corpses (0)
+        ObjectGridLoader(NGridType &grid, Map* map, const Cell &cell)
+            : i_cell(cell), i_grid(grid), i_map(map), i_gameObjects(0), i_creatures(0), i_corpses (0)
             {}
 
         void Load(GridType &grid);
@@ -47,7 +47,7 @@ class MANGOS_DLL_DECL ObjectGridLoader
     private:
         Cell i_cell;
         NGridType &i_grid;
-        uint32 i_mapId;
+        Map* i_map;
         uint32 i_gameObjects;
         uint32 i_creatures;
         uint32 i_corpses;

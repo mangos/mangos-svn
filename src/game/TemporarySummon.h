@@ -30,7 +30,7 @@ enum TempSummonType
 class TemporarySummon : public Creature
 {
     public:
-        TemporarySummon();
+        TemporarySummon( WorldObject *instantiator );
         virtual ~TemporarySummon(){};
         void Update(uint32 time);
         void Summon(TempSummonType type, uint32 lifetime);

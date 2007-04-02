@@ -25,7 +25,7 @@
 #include "Player.h"
 #include "ObjectMgr.h"
 
-Totem::Totem()
+Totem::Totem( WorldObject *instantiator ) : Creature( instantiator )
 {
     m_isTotem = true;
     m_spell = 0;
@@ -57,7 +57,8 @@ void Totem::Summon()
 {
     sLog.outDebug("AddObject at Totem.cpp line 49");
     AddToWorld();
-    MapManager::Instance().GetMap(GetMapId())->Add((Creature*)this);
+    SetInstanceId(GetOwner()->GetInstanceId());
+    MapManager::Instance().GetMap(GetMapId(), GetOwner())->Add((Creature*)this);
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << GetGUID();

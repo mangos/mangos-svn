@@ -442,7 +442,19 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         pCurrChar->SetRank(0);
     }
 
-    MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
+    // this remained from raid group load (raid group load was moved to player code)
+    if(pCurrChar->groupInfo.group)
+    {
+        pCurrChar->groupInfo.group->SendInit(this);
+        pCurrChar->groupInfo.group->SendUpdate();
+    }
+
+    if (!MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->AddInstanced(pCurrChar))
+    {
+        // TODO : Teleport to zone-in area
+    }
+
+    MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->Add(pCurrChar);
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
     //sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
 
@@ -495,20 +507,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // show time before shutdown if shudown planned.
     if(sWorld.IsShutdowning())
         sWorld.ShutdownMsg(true,pCurrChar);
-
-    result = sDatabase.PQuery("SELECT `leaderGuid` FROM `raidgroup_member` WHERE `memberGuid`='%u'", GUID_LOPART(pCurrChar->GetGUID()));
-    if(result)
-    {
-        uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
-        delete result;
-
-        pCurrChar->groupInfo.group = objmgr.GetGroupByLeader(leaderGuid);
-        if(pCurrChar->groupInfo.group)
-        {
-            pCurrChar->groupInfo.group->SendInit(this);
-            pCurrChar->groupInfo.group->SendUpdate();
-        }
-    }
 
     if(pCurrChar->isGameMaster())
         SendNotification("GM mode is ON");

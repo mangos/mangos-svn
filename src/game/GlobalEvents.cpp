@@ -67,17 +67,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             else
                 ///- or delete bones
             {
-                ///- If the map where the bones is loaded
-                if(!MapManager::Instance().GetMap(mapid)->IsRemovalGrid(positionX,positionY))
-                {
-                    ///- delete bones from world
-                    Corpse *corpse = MapManager::Instance().GetMap(mapid)->GetObjectNear<Corpse>(positionX,positionY,guid);
-                    if(corpse)
-                        corpse->DeleteBonesFromWorld();
-                    else
-                        sLog.outDebug("Bones %u not found in world. Delete from DB also.",guidlow);
-
-                }
+                MapManager::Instance().RemoveBonesFromMap(mapid, guid, positionX, positionY);
 
                 ///- remove bones from the database
                 sDatabase.BeginTransaction();

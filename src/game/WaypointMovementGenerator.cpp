@@ -55,7 +55,7 @@ WaypointMovementGenerator::_load(Creature &c)
                 // prevent invalid coordinates using
                 MaNGOS::NormalizeMapCoord(i_path[count].x);
                 MaNGOS::NormalizeMapCoord(i_path[count].y);
-                i_path[count].z = MapManager::Instance ().GetMap(c.GetMapId())->GetHeight(i_path[count].x,i_path[count].y);
+                i_path[count].z = MapManager::Instance ().GetMap(c.GetMapId(), &c)->GetHeight(i_path[count].x,i_path[count].y);
             }
 
             if( i_delays[count] < 30 /* millisecond */ )

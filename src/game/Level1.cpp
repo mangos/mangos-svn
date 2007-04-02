@@ -143,6 +143,28 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             return true;
         }
 
+        if (MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->Instanceable())
+        {
+            if ( (MapManager::Instance().GetMap(chr->GetMapId(), chr)->Instanceable()) &&
+                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() != 
+                  MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->GetInstanceId()) )
+            {
+                // cannot summon from instance to instance
+                PSendSysMessage(LANG_CANNOT_INST_INST);
+                return true;
+            }
+
+            // we are in instance, and can summon only player in our group with us as lead
+            if ( !m_session->GetPlayer()->groupInfo.group || !chr->groupInfo.group || 
+                (chr->groupInfo.group->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
+                (m_session->GetPlayer()->groupInfo.group->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) )
+                // the last check is a bit excessive, but let it be, just in case
+            {
+                PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,chr->GetName());
+                return true;
+            }
+        }
+
         PSendSysMessage(LANG_SUMMONING, chr->GetName(),"");
 
         if (m_session->GetPlayer()->isVisibleFor(chr,false))
@@ -196,6 +218,46 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
     {
+        if (MapManager::Instance().GetMap(chr->GetMapId(), chr)->Instanceable())
+        {
+            if ( (MapManager::Instance().GetMap(_player->GetMapId(), _player)->Instanceable()) &&
+                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() != 
+                  MapManager::Instance().GetMap(_player->GetMapId(), _player)->GetInstanceId()) )
+            {
+                // cannot go from instance to instance
+                PSendSysMessage(LANG_CANNOT_INST_INST);
+                return true;
+            }
+
+            // we have to go to instance, and can go to player only if:
+            //   1) we are in his group (either as leader or as member)
+            //   2) we are not bound to any group and have GM mode on
+            if (_player->groupInfo.group)
+            {
+                // we are in group, we can go only if we are in the player group
+                if (_player->groupInfo.group != chr->groupInfo.group)
+                {
+                    PSendSysMessage(LANG_CANNOT_GO_TO_INST_PARTY,chr->GetName());
+                    return true;
+                }
+            }
+            else
+            {
+                // we are not in group, let's verify our GM mode
+                if (!_player->isGameMaster())
+                {
+                    PSendSysMessage(LANG_CANNOT_GO_TO_INST_GM,chr->GetName());
+                    return true;
+                }
+            }
+
+            // bind us to the players instance
+            BoundInstancesMap::iterator i = chr->m_BoundInstances.find(chr->GetMapId());
+            if (i == chr->m_BoundInstances.end()) return true; // error, the player has no instance bound!!!
+            _player->m_BoundInstances[chr->GetMapId()] = std::pair < uint32, uint32 >(i->second.first, i->second.second);
+            _player->SetInstanceId(chr->GetInstanceId());
+        }
+
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());
 
         if (_player->isVisibleFor(chr,false))
@@ -214,7 +276,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         float x,y,z;
         chr->GetContactPoint(m_session->GetPlayer(),x,y,z);
 
-        _player->TeleportTo(chr->GetMapId(), x, y, z,_player->GetAngle( chr ));
+        _player->TeleportTo(chr->GetMapId(), x, y, z, _player->GetAngle( chr ), true, true, true);
         return true;
     }
 

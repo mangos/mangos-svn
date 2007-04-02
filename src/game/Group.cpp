@@ -811,6 +811,87 @@ void Group::_setLeader(const uint64 &guid)
     if(id < 0)
         return;
 
+    // instance system leader change process
+    if (m_leaderGuid != m_members[id].guid)
+    {
+        // here we must unbind all instances bound to that leader on group members from the
+        // leader, and rebind them on the players
+        uint32 old_guid = m_leaderGuid;
+        uint32 new_guid = m_members[id].guid;
+        std::set< uint32 > changed_bindings;
+        Player* player;
+        BoundInstancesMap::iterator i_BoundInstances;
+
+        // 1) rebind current associations in memory for group members
+        // 2) get current group associations from database (for unbind)
+        // combined because of query building in the iteration
+        if (m_members.size() > 0)
+        {
+            std::ostringstream ss;
+            ss << "SELECT DISTINCT(`map`) FROM `character_instance` WHERE (`guid` IN (";
+            vector<MemberSlot>::const_iterator citr = m_members.begin(); 
+            while (citr != m_members.end())
+            {
+                ss << GUID_LOPART(citr->guid);
+                player = objmgr.GetPlayer(citr->guid);
+                if(player && (citr->guid != old_guid))
+                {
+                    for(i_BoundInstances = player->m_BoundInstances.begin(); i_BoundInstances != player->m_BoundInstances.end(); i_BoundInstances++)
+                    {
+                        if (i_BoundInstances->second.second == GUID_LOPART(old_guid))
+                        {
+                            
+                            i_BoundInstances->second.second = GUID_LOPART(new_guid);
+                            changed_bindings.insert(i_BoundInstances->first);
+                        }
+                    }
+                }
+                citr++;
+                if (citr != m_members.end()) ss << ", ";
+            }
+            ss << ")) AND (`leader` = '" << GUID_LOPART(old_guid) << "')";
+            QueryResult* result = sDatabase.Query(ss.str().c_str());
+            if (result)
+            {
+                do
+                {
+                    Field* fields = result->Fetch();
+                    changed_bindings.insert(fields[0].GetUInt32());
+                } while(result->NextRow());
+                delete result;
+            }
+        }
+
+        // rebind changed associations in memory for old leader
+        player = objmgr.GetPlayer(old_guid);
+        if(player)
+        {
+            for (std::set< uint32 >::iterator i = changed_bindings.begin(); i != changed_bindings.end(); i++)
+            {
+                i_BoundInstances = player->m_BoundInstances.find(*i);
+                if (i_BoundInstances != player->m_BoundInstances.end()) i_BoundInstances->second.second = GUID_LOPART(new_guid);
+            }
+        }
+
+        // rebind changed associations in database
+        if (changed_bindings.size() > 0)
+        {
+            std::ostringstream ss;
+            ss << "UPDATE `character_instance` SET `leader` = '" << GUID_LOPART(new_guid) << "' WHERE (`map` IN (";
+            {
+                std::set< uint32 >::iterator i = changed_bindings.begin();
+                while (i != changed_bindings.end())
+                {
+                    ss << "'" << *i << "'";
+                    i++;
+                    if (i != changed_bindings.end()) ss << ", ";
+                }
+            }
+            ss << ")) AND (`leader` = '" << GUID_LOPART(old_guid) << "')";
+            sDatabase.Execute(ss.str().c_str());
+        }
+    }
+    
     if(isRaidGroup())
     {
         sDatabase.BeginTransaction();

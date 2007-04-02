@@ -34,7 +34,7 @@ char const* petTypeSuffix[MAX_PET_TYPE] =
     "'s Pet"                                                // MINI_PET
 };
 
-Pet::Pet(PetType type)
+Pet::Pet(WorldObject *instantiator, PetType type) : Creature( instantiator )
 {
     m_isPet = true;
     m_name = "Pet";
@@ -107,7 +107,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     {
         AIM_Initialize();
         AddToWorld();
-        MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
+        MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
         return true;
     }
     SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
@@ -191,7 +191,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
 
     AIM_Initialize();
     AddToWorld();
-    MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
+    MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
     owner->SetPet(this);                                    // in DB stored only full controlled creature
     sLog.outDebug("New Pet has guid %u", GetGUIDLow());
 
@@ -461,6 +461,8 @@ void Pet::GivePetLevel(uint32 level)
 bool Pet::CreateBaseAtCreature(Creature* creature)
 {
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
+
+    SetInstanceId(creature->GetInstanceId());
 
     Create(guid, creature->GetMapId(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), creature->GetEntry());
 

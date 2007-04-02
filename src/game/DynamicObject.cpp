@@ -33,7 +33,7 @@
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 
-DynamicObject::DynamicObject() : WorldObject()
+DynamicObject::DynamicObject( WorldObject *instantiator ) : WorldObject( instantiator )
 {
     m_objectType |= TYPE_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;
@@ -87,8 +87,8 @@ void DynamicObject::Update(uint32 p_time)
     TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, GridTypeMapContainer > grid_object_notifier(notifier);
 
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-    cell_lock->Visit(cell_lock, grid_object_notifier,  *MapManager::Instance().GetMap(m_caster->GetMapId()));
+    cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+    cell_lock->Visit(cell_lock, grid_object_notifier,  *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
 }
 
 void DynamicObject::Delete()
