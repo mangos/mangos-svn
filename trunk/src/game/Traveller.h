@@ -65,7 +65,7 @@ inline float Traveller<Creature>::Speed()
 template<>
 inline void Traveller<Creature>::Relocation(float x, float y, float z, float orientation)
 {
-    MapManager::Instance().GetMap(i_traveller.GetMapId())->CreatureRelocation(&i_traveller, x, y, z, orientation);
+    MapManager::Instance().GetMap(i_traveller.GetMapId(), &i_traveller)->CreatureRelocation(&i_traveller, x, y, z, orientation);
 }
 
 template<>
@@ -84,7 +84,7 @@ inline float Traveller<Player>::Speed()
 template<>
 inline void Traveller<Player>::Relocation(float x, float y, float z, float orientation)
 {
-    MapManager::Instance().GetMap(i_traveller.GetMapId())->PlayerRelocation(&i_traveller, x, y, z, orientation);
+    MapManager::Instance().GetMap(i_traveller.GetMapId(), &i_traveller)->PlayerRelocation(&i_traveller, x, y, z, orientation);
 }
 
 typedef Traveller<Creature> CreatureTraveller;

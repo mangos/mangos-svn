@@ -251,6 +251,10 @@ class ObjectMgr
 
         void LoadTeleportCoords();
 
+        // instance system
+        void CleanupInstances();
+        void PackInstances();
+
         //load first auction items, because of check if item exists, when loading
         void LoadAuctionItems();
         void LoadAuctions();

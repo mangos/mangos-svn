@@ -39,6 +39,7 @@ class GameObject;
 class DynamicObject;
 class Object;
 class WorldObject;
+class Map;
 
 class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex> >
 {
@@ -88,7 +89,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         Corpse* GetCorpseForPlayerGUID(uint64 guid);
         void RemoveCorpse(Corpse *corpse);
         void AddCorpse(Corpse *corpse);
-        void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid);
+        void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* map);
         bool ConvertCorpseForPlayer(uint64 player_guid);
 
 

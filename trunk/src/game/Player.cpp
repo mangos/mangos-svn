@@ -33,6 +33,7 @@
 #include "Channel.h"
 #include "Chat.h"
 #include "MapManager.h"
+#include "MapInstanced.h"
 #include "ObjectMgr.h"
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
@@ -62,7 +63,7 @@ const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3
 
 UpdateMask Player::updateVisualBits;
 
-Player::Player (WorldSession *session): Unit()
+Player::Player (WorldSession *session): Unit( NULL )
 {
     m_transport = NULL;
     m_transX = 0.0f;
@@ -176,6 +177,12 @@ Player::Player (WorldSession *session): Unit()
         m_forced_speed_changes[i] = 0;
 
     m_stableSlots = 0;
+
+    /////////////////// Instance System /////////////////////
+    
+    m_Loaded = false;
+    m_HomebindTimer = 0;
+    m_InstanceValid = true;
 }
 
 Player::~Player ()
@@ -880,6 +887,7 @@ void Player::Update( uint32 p_time )
             m_deathTimer -= p_time;
     }
     UpdateEnchantTime(p_time);
+    UpdateHomebindTime(p_time);
 }
 
 void Player::setDeathState(DeathState s)
@@ -936,7 +944,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << uint8(bytes);
 
     *p_data << uint8(getLevel());                           //1
-    uint32 zoneId = MapManager::Instance ().GetMap(GetMapId())->GetZoneId(GetPositionX(),GetPositionY());
+    uint32 zoneId = MapManager::Instance ().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
 
     *p_data << zoneId;
     *p_data << GetMapId();
@@ -977,7 +985,6 @@ void Player::BuildEnumData( WorldPacket * p_data )
                     petLevel     = fields[2].GetUInt32();
                     petFamily    = cInfo->family;
                 }
-
                 delete result;
             }
         }
@@ -1190,7 +1197,7 @@ void Player::SendIgnorelist()
     sLog.outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
 }
 
-void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange, bool ignore_transport)
+void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange, bool ignore_transport, bool is_gm_command)
 {
     // prepering unsommon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
@@ -1223,61 +1230,85 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     }
     else
     {
-        MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
-        WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
-        data << uint32(mapid);
-        if (m_transport)
+        Map* oldmap = MapManager::Instance().GetMap(GetMapId(), this);
+        
+        // now we must check if we are going to be homebind after teleport, if it is so,
+        // we must re-instantiate again (entering instance to be homebind is not very good idea)
+        // this only affects entering instances, not re-logging in (teleport is not used on login)
+        Map* map = MapManager::Instance().GetMap(mapid, this);
+        // verify, if it does want to homebind us (but only if we are not in GM state, 
+        // GMs are allowed to teleport everywhere they want to be)
+        if (!m_InstanceValid && (!isGameMaster() || !is_gm_command))
         {
-            data << m_transport->GetEntry() << GetMapId();
-        }
-        GetSession()->SendPacket(&data);
-
-        data.Initialize(SMSG_NEW_WORLD, (20));
-        if (m_transport)
-        {
-            data << (uint32)mapid << m_transX << m_transY << m_transZ << m_transO;
-        }
-        else
-        {
-            data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
-        }
-        GetSession()->SendPacket( &data );
-
-        SetMapId(mapid);
-
-        // orientation+0.1 used to pressure SetPosition send notifiers at teleportaion like in normal move case
-        if(m_transport)
-        {
-            Relocate(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO+0.1);
-            SetPosition(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
-        }
-        else
-        {
-            Relocate(x, y, z, orientation+0.1);
-            SetPosition(x, y, z, orientation);
+            // yes, we are going to be homebind, avoid this action :)
+            SetInstanceId(0); // reset instance id
+            m_BoundInstances.erase(mapid); // unbind our instance binding
+            map = MapManager::Instance().GetMap(mapid, this); // obtain new map
         }
 
-        // resurrect character at enter into instance where his corpse exist
-        Corpse* corpse = GetCorpse();
-        if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == mapid)
+        if (map && MapManager::Instance().CanPlayerEnter(mapid, this) &&  map->AddInstanced(this))
         {
-            MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
-            if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
+            if (oldmap) oldmap->Remove(this, false);
+
+            WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
+            data << uint32(mapid);
+            if (m_transport)
             {
-                ResurrectPlayer();
-                SetHealth( GetMaxHealth()/2 );
-                SpawnCorpseBones();
-                SaveToDB();
+                data << m_transport->GetEntry() << GetMapId();
             }
+            GetSession()->SendPacket(&data);
+    
+            data.Initialize(SMSG_NEW_WORLD, (20));
+            if (m_transport)
+            {
+                data << (uint32)mapid << m_transX << m_transY << m_transZ << m_transO;
+            }
+            else
+            {
+                data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
+            }
+            GetSession()->SendPacket( &data );
+
+            SetMapId(mapid);
+
+            // orientation+0.1 used to pressure SetPosition send notifiers at teleportaion like in normal move case
+            if(m_transport)
+            {
+                Relocate(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO+0.1);
+                SetPosition(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
+            }
+            else
+            {
+                Relocate(x, y, z, orientation+0.1);
+                SetPosition(x, y, z, orientation);
+            }
+
+            // resurrect character at enter into instance where his corpse exist
+            Corpse* corpse = GetCorpse();
+            if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == mapid)
+            {
+                MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
+                if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
+                {
+                    ResurrectPlayer();
+                    SetHealth( GetMaxHealth()/2 );
+                    SpawnCorpseBones();
+                    SaveToDB();
+                }
+            }
+            SetDontMove(true);
+            //SaveToDB();
+
+            // Client reset some data at NEW_WORLD teleport, resending its to client.
+            SendInitialSpells();
+            SendInitialActionButtons();
+
+            // reset instance validity
+            m_InstanceValid = true;
+
+            // re-add us to the map here
+            MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
         }
-        SetDontMove(true);
-        //SaveToDB();
-
-        //MapManager::Instance().GetMap(GetMapId())->Add(this);
-
-        // Client reset some data at NEW_WORLD teleport, resending its to client.
-        SendInitialSpells();
-        SendInitialActionButtons();
     }
 
     if (outofrange)
@@ -1294,7 +1325,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         // unsommon pet if lost
         if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
-            RemovePet(pet,PET_SAVE_NOT_IN_SLOT);
+            RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
     }
 
     SetSemaphoreTeleport(false);
@@ -1540,7 +1571,7 @@ bool Player::CanInteractWithNPCs(bool alive) const
 bool Player::IsUnderWater() const
 {
     return IsInWater() &&
-        GetPositionZ() < (MapManager::Instance().GetMap(GetMapId())->GetWaterLevel(GetPositionX(),GetPositionY())-2);
+        GetPositionZ() < (MapManager::Instance().GetMap(GetMapId(), this)->GetWaterLevel(GetPositionX(),GetPositionY())-2);
 }
 
 void Player::SetInWater(bool apply)
@@ -2831,8 +2862,9 @@ void Player::BuildPlayerRepop()
     // now show corpse for all
     if(corpse)
     {
+        corpse->SetInstanceId(this->GetInstanceId());
         corpse->AddToWorld();
-        MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
+        MapManager::Instance().GetMap(corpse->GetMapId(), this)->Add(corpse);
     }
 
     // convert player body to ghost
@@ -3011,7 +3043,8 @@ Corpse* Player::CreateCorpse()
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    Corpse* corpse = new Corpse(CORPSE_RESURRECTABLE);
+    Corpse* corpse = new Corpse(this, CORPSE_RESURRECTABLE);
+
     if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
     {
@@ -3713,7 +3746,7 @@ void Player::SetDontMove(bool dontMove)
 
 bool Player::SetPosition(float x, float y, float z, float orientation)
 {
-    Map *m = MapManager::Instance().GetMap(GetMapId());
+    Map *m = MapManager::Instance().GetMap(GetMapId(), this);
 
     const float old_x = GetPositionX();
     const float old_y = GetPositionY();
@@ -3733,7 +3766,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     }
 
     // reread after Ma::Relocation
-    m = MapManager::Instance().GetMap(GetMapId());
+    m = MapManager::Instance().GetMap(GetMapId(), this);
     x = GetPositionX();
     y = GetPositionY();
     z = GetPositionZ();
@@ -3767,12 +3800,12 @@ void Player::SetRecallPosition(uint32 map, float x, float y, float z, float o)
 
 void Player::SendMessageToSet(WorldPacket *data, bool self)
 {
-    MapManager::Instance().GetMap(GetMapId())->MessageBoardcast(this, data, self);
+    MapManager::Instance().GetMap(GetMapId(), this)->MessageBoardcast(this, data, self);
 }
 
 void Player::SendMessageToOwnTeamSet(WorldPacket *data, bool self)
 {
-    MapManager::Instance().GetMap(GetMapId())->MessageBoardcast(this, data, self,true);
+    MapManager::Instance().GetMap(GetMapId(), this)->MessageBoardcast(this, data, self,true);
 }
 
 void Player::SendDirectMessage(WorldPacket *data)
@@ -3789,7 +3822,7 @@ void Player::CheckExploreSystem()
     if (isInFlight())
         return;
 
-    uint16 areaFlag=MapManager::Instance().GetMap(GetMapId())->GetAreaFlag(GetPositionX(),GetPositionY());
+    uint16 areaFlag=MapManager::Instance().GetMap(GetMapId(), this)->GetAreaFlag(GetPositionX(),GetPositionY());
     if(areaFlag==0xffff)return;
     int offset = areaFlag / 32;
 
@@ -4403,7 +4436,7 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
     if( !result )
         return 0;
 
-    return MapManager::Instance().GetMap((*result)[0].GetUInt32())->GetZoneId((*result)[0].GetFloat(),(*result)[0].GetFloat());
+    return MapManager::Instance().GetZoneId((*result)[0].GetUInt32(), (*result)[0].GetFloat(),(*result)[0].GetFloat());
 }
 
 void Player::UpdateZone()
@@ -9745,8 +9778,13 @@ bool Player::MinimalLoadFromDB( uint32 guid )
     }
 
     m_name = fields[1].GetCppString();
+
     Relocate(fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
     SetMapId(fields[5].GetUInt32());
+
+    _LoadRaidGroup();
+
+    _LoadBoundInstances();
 
     delete result;
 
@@ -9899,8 +9937,14 @@ bool Player::LoadFromDB( uint32 guid )
     }
 
     uint32 transGUID = fields[27].GetUInt32();
+
     Relocate(fields[6].GetFloat(),fields[7].GetFloat(),fields[8].GetFloat(),fields[10].GetFloat());
     SetMapId(fields[9].GetUInt32());
+
+    _LoadRaidGroup();
+
+    _LoadBoundInstances();
+
     SetRecallPosition(GetMapId(),GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
 
     if (transGUID != 0)
@@ -10066,6 +10110,8 @@ bool Player::LoadFromDB( uint32 guid )
                 break;
         }
     }
+
+    m_Loaded = true;
 
     return true;
 }
@@ -10327,7 +10373,7 @@ void Player::_LoadMail()
 
 void Player::LoadPet()
 {
-    Pet *pet = new Pet(getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
+    Pet *pet = new Pet(this, getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
     if(!pet->LoadPetFromDB(this,0,0,true))
         delete pet;
 }
@@ -10680,6 +10726,7 @@ void Player::SaveToDB()
     _SaveActions();
     _SaveAuras();
     _SaveReputation();
+    _SaveBoundInstances();
 
     sDatabase.CommitTransaction();
 
@@ -11383,7 +11430,7 @@ void Player::SetRestBonus (float rest_bonus_new)
 
 void Player::HandleInvisiblePjs()
 {
-    Map *m = MapManager::Instance().GetMap(GetMapId());
+    Map *m = MapManager::Instance().GetMap(GetMapId(), this);
 
     //this is to be sure that InvisiblePjsNear vector has active pjs only.
     m->PlayerRelocation(this, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), true);
@@ -11731,4 +11778,102 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
     }
     else
         SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+}
+
+void Player::TeleportToHomebind()
+{
+    Field *fields;
+
+    QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GetGUIDLow());
+
+    if(!result)
+    {
+        sLog.outError("PLAYER: No homebind location set for '%s'\n", GetName());
+        return;
+    }
+
+    fields = result->Fetch();
+    TeleportTo(fields[0].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), GetOrientation());
+    delete result;
+}
+
+void Player::_LoadRaidGroup()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `raidgroup_member` WHERE `memberGuid`='%u'", GetGUIDLow());
+    if(result)
+    {
+        uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
+        delete result;
+        groupInfo.group = objmgr.GetGroupByLeader(leaderGuid);
+    }
+}
+
+void Player::_LoadBoundInstances()
+{
+    m_BoundInstances.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GetGUIDLow());
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            m_BoundInstances[fields[0].GetUInt32()] = std::pair< uint32, uint32 >(fields[1].GetUInt32(), fields[2].GetUInt32());
+        } while(result->NextRow());
+        delete result;
+    }
+
+    // correctly set current instance (if needed)
+    BoundInstancesMap::iterator i = m_BoundInstances.find(GetMapId());
+    if (i != m_BoundInstances.end()) SetInstanceId(i->second.first); else SetInstanceId(0);
+}
+
+void Player::_SaveBoundInstances()
+{
+    sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u')", GetGUIDLow());
+    for(BoundInstancesMap::iterator i = m_BoundInstances.begin(); i != m_BoundInstances.end(); i++)
+    {
+        sDatabase.PExecute("INSERT INTO `character_instance` (`guid`,`map`,`instance`,`leader`) VALUES ('%u', '%u', '%u', '%u')", GetGUIDLow(), i->first, i->second.first, i->second.second);
+    }
+}
+
+void Player::UpdateHomebindTime(uint32 time)
+{
+    // GMs never get homebind timer online
+    if (m_InstanceValid || isGameMaster())
+    {
+        // instance is valid, reset homebind timer
+        m_HomebindTimer = 0;
+    }
+    else if (m_HomebindTimer > 0)
+    {
+        if (time >= m_HomebindTimer)
+        {
+            // go to homebind location
+            TeleportToHomebind();
+        }
+        else
+        {
+            uint32 oldTimer = m_HomebindTimer;
+            m_HomebindTimer -= time;
+
+            // re-warn user if the time stepped over 30 sec or over 10 sec
+            if (m_HomebindTimer < 10000)
+            {
+                if (oldTimer >= 10000) GetSession()->SendAreaTriggerMessage("You must join your old group or you will be teleported to your home location in 10 seconds");
+            }
+            else if (m_HomebindTimer < 30000)
+            {
+                if (oldTimer >= 30000) GetSession()->SendAreaTriggerMessage("You must join your old group or you will be teleported to your home location in 30 seconds");
+            }
+        }
+    }
+    else
+    {
+        // instance is invalid, start homebind timer
+        m_HomebindTimer = 60000;
+        // send message to player
+        GetSession()->SendAreaTriggerMessage("You must join your old group or you will be teleported to your home location in 60 seconds");
+        sLog.outDebug("PLAYER: Player '%s' will be teleported to homebind in 60 seconds", GetName());
+    }
 }

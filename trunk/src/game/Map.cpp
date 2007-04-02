@@ -29,6 +29,9 @@
 #include "Transports.h"
 #include "ObjectAccessor.h"
 
+#include "MapManager.h"
+#include "MapInstanced.h"
+
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
 
@@ -69,11 +72,25 @@ bool Map::ExistMAP(uint32 mapid,int x,int y, bool output)
     return true;
 }
 
-GridMap * Map::LoadMAP(uint32 mapid,int x,int y)
+GridMap * Map::LoadMAP(uint32 mapid, uint32 instanceid, int x,int y)
 {
     //check map file existance (but not output error)
     if(!Map::ExistMAP(mapid,x,y,false))
         return NULL;
+
+    if (instanceid != 0)
+    {
+        // load from base map
+        if (GridMaps[x][y]) GridMaps[x][y]=NULL;
+
+        if (!MapManager::Instance().GetBaseMap(mapid)->GridMaps[x][y])
+        {
+            // load grids for base map
+            MapManager::Instance().GetBaseMap(mapid)->GridMaps[x][y] = Map::LoadMAP(mapid, 0, x, y);
+        }
+
+        return(MapManager::Instance().GetBaseMap(mapid)->GridMaps[x][y]);
+    }
 
     if(GridMaps[x][y])                                      //map already load, delete it before reloading
     {
@@ -122,7 +139,7 @@ void Map::DeleteStateMachine()
     delete si_GridStates[GRID_STATE_REMOVAL];
 }
 
-Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
+Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), i_InstanceId(ainstanceId)
 {
     //    char tmp[32];
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
@@ -140,6 +157,23 @@ Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
             i_info[idx][j] = NULL;
         }
     }
+
+    if (Instanceable())
+    {
+        sLog.outDetail("INSTANCEMAP: Loading instance template");
+        QueryResult* result = sDatabase.PQuery("SELECT `instance_template`.`maxplayers`, `instance_template`.`reset_delay`, `instance`.`resettime` FROM `instance_template` LEFT JOIN `instance` ON ((`instance_template`.`map` = `instance`.`map`) AND (`instance`.`id` = '%u')) WHERE `instance_template`.`map` = '%u'", i_InstanceId, id);
+        if (result)
+        {
+            Field* fields = result->Fetch();
+            i_maxPlayers = fields[0].GetUInt32();
+            i_resetDelayTime = fields[1].GetUInt32();
+            i_resetTime = (time_t) fields[2].GetUInt64();
+            if (i_resetTime == 0) InitResetTime();
+        }
+        delete result;
+    }
+
+    i_Players.clear();
 }
 
 // Template specialization of utility methods
@@ -298,7 +332,7 @@ Map::EnsureGridCreated(const GridPair &p)
             int gy=63-p.y_coord;
 
             if(!GridMaps[gx][gy])
-                GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
+                GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
 
         }
     }
@@ -328,11 +362,11 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
                 DEBUG_LOG("Player nearby triggers of loading grid [%u,%u] on map %u", cell.GridX(), cell.GridY(), i_id);
             }
 
-            ObjectGridLoader loader(*grid, i_id, cell);
+            ObjectGridLoader loader(*grid, this, cell);
             loader.LoadN();
 
             // Add resurrectable corpses to world object list in grid
-            ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()));
+            ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
 
             grid->SetGridState(GRID_STATE_ACTIVE);
 
@@ -358,11 +392,11 @@ Map::LoadGrid(const Cell& cell, bool no_unload)
         WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         if( !(i_gridStatus[cell.GridX()] & mask) )
         {
-            ObjectGridLoader loader(*grid, i_id, cell);
+            ObjectGridLoader loader(*grid, this, cell);
             loader.LoadN();
 
             // Add resurrectable corpses to world obect list in grid
-            ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()));
+            ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
 
             i_gridStatus[cell.GridX()] |= mask;
             if(no_unload)
@@ -388,6 +422,119 @@ Map::NotifyPlayerVisibility(const Cell &cell, const CellPair &cell_pair, Player 
     obj_notifier.Notify();
 }
 
+bool Map::AddInstanced(Player *player)
+{
+    if (!Instanceable())
+    {
+        sLog.outDetail("MAP: Player '%s' entered the non-instanceable map '%s'", player->GetName(), GetMapName());
+        if (player->GetPet()) player->GetPet()->SetInstanceId(0);
+        player->SetInstanceId(0);
+        return(true);
+    }
+
+    for (list< Player* >::iterator i = i_Players.begin(); i != i_Players.end(); i++)
+    {
+        if (*i == player)
+        {
+            sLog.outDetail("MAP: Player '%s' already in instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
+            return(true);
+        }
+    }
+
+    // TODO: Not sure about checking player level: already done in HandleAreaTriggerOpcode
+    // GM's still can teleport player in instance. 
+    // Is it needed?
+
+    {
+        Guard guard(*this);
+
+        // GMs can avoid player limits
+        if ((i_Players.size() >= i_maxPlayers) && (!player->isGameMaster()))
+        {
+            sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), i_maxPlayers, player->GetName() );
+            player->GetSession()->SendAreaTriggerMessage("Sorry, the instance is full (%u players maximum)", i_maxPlayers);
+            return(false);
+        }
+
+        i_Players.push_back(player);
+    }
+
+    if (player->GetPet()) player->GetPet()->SetInstanceId(this->GetInstanceId());
+    player->SetInstanceId(this->GetInstanceId());
+
+    player->SendInitWorldStates(player->GetMapId());
+
+    sLog.outDetail("MAP: Player '%s' entered the instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
+
+    // reinitialize reset time
+    InitResetTime();
+
+    return(true);
+}
+
+void Map::RemoveInstanced(Player *player)
+{
+    i_Players.remove(player);
+
+    // reinitialize reset time
+    InitResetTime();
+}
+
+void Map::InitResetTime()
+{
+    i_resetTime = time(NULL) + i_resetDelayTime;
+
+    if (Instanceable() && GetInstanceId())
+    {
+        sDatabase.BeginTransaction();
+        sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", GetInstanceId());
+        sDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "')", GetInstanceId(), i_id, (uint64)this->i_resetTime);
+        sDatabase.CommitTransaction();
+    }
+}
+
+void Map::Reset()
+{
+    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", GetInstanceId());
+    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", GetInstanceId());
+
+    UnloadAll();
+
+    // reinitialize reset time
+    InitResetTime();
+}
+
+bool Map::CanEnter(Player* player)
+{
+    if (!Instanceable()) return(true);
+    
+    // GMs can avoid raid limitations
+    if (IsRaid() && (!player->isGameMaster()))
+    {
+        Group* group = player->groupInfo.group;
+        if (!group || !group->isRaidGroup())
+        {
+            player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", GetMapName());
+            sLog.outDebug("MAP: Player '%s' must be in a raid group to enter instance of '%s'", GetMapName());
+            return(false);
+        }
+    }
+    
+    if (!player->isAlive())
+    {
+        player->GetCorpse()->GetMapId();
+        if (player->GetCorpse()->GetMapId() != GetId())
+        {
+            player->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode", GetMapName());
+            sLog.outDebug("MAP: Player '%s' doesn't has a corpse in instance '%s' and can't enter", player->GetName(), GetMapName());
+            return(false);
+        }
+        sLog.outDebug("MAP: Player '%s' has corpse in instance '%s' and can enter", player->GetName(), GetMapName());
+    }
+
+    return(true);
+}
+
 void Map::Add(Player *player)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
@@ -395,10 +542,16 @@ void Map::Add(Player *player)
     assert( player && p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
         p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
 
+    if (player->GetPet()) player->GetPet()->SetInstanceId(this->GetInstanceId());
+    player->SetInstanceId(this->GetInstanceId());
+
     Cell cell = RedZone::GetZone(p);
     EnsureGridLoadedForPlayer(cell, player, true);
     cell.data.Part.reserved = ALL_DISTRICT;
     NotifyPlayerVisibility(cell, p, player);
+
+    // reinitialize reset time
+    InitResetTime();
 }
 
 template<class T>
@@ -424,6 +577,7 @@ Map::Add(T *obj)
 
     DEBUG_LOG("Object %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
     cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();                                 // not create cells at object add notifier (if player near then cell will already loaded)
 
     MaNGOS::ObjectVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
     TypeContainerVisitor<MaNGOS::ObjectVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
@@ -567,6 +721,12 @@ void Map::Update(const uint32 &t_diff)
 
 void Map::Remove(Player *player, bool remove)
 {
+    if (Instanceable())
+    {
+        sLog.outDetail("MAP: Removing player '%s' from instance '%u' of map '%s' before relocating to other map", player->GetName(), GetInstanceId(), GetMapName());
+        RemoveInstanced(player); // remove from instance player list, etc.
+    }
+
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
         p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
@@ -576,7 +736,7 @@ void Map::Remove(Player *player, bool remove)
 
     if( !(i_gridMask[cell.data.Part.grid_x] & mask) )
     {
-        assert( false );
+        // assert( false );
         return;
     }
 
@@ -596,6 +756,22 @@ void Map::Remove(Player *player, bool remove)
 
     if( remove )
         DeleteFromWorld(player);
+
+    // reinitialize reset time
+    InitResetTime();
+}
+
+bool Map::RemoveBones(uint64 guid, float x, float y)
+{
+    if (IsRemovalGrid(x, y))
+    {
+        Corpse *corpse = GetObjectNear<Corpse>(x, y, guid);
+        if(corpse)
+            corpse->DeleteBonesFromWorld();
+        else
+            return false;
+    }
+    return true;
 }
 
 template<class T>
@@ -934,11 +1110,13 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
 
     int gx=63-x;
     int gy=63-y;
+
+    // delete grid map, but don't delete grid map if it is from parent map
+    // FIXME: we must delete also in case single loaded instance or none loaded instances
     if(GridMaps[gx][gy])
     {
-        delete (GridMaps[gx][gy]);
+        if (i_InstanceId == 0) delete (GridMaps[gx][gy]);
         GridMaps[gx][gy]=NULL;
-
     }
 
     //z coordinate
@@ -988,7 +1166,7 @@ float Map::GetHeight(float x, float y )
     //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
+        GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
@@ -1023,7 +1201,7 @@ uint16 Map::GetAreaFlag(float x, float y )
     //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
+        GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->area_flag[(int)(lx)][(int)(ly)];
@@ -1058,7 +1236,7 @@ uint8 Map::GetTerrainType(float x, float y )
     ly=16*(32 -y/SIZE_OF_GRIDS - gy);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
+        GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->terrain_type[(int)(lx)][(int)(ly)];
@@ -1093,7 +1271,7 @@ float Map::GetWaterLevel(float x, float y )
     ly=128*(32 -y/SIZE_OF_GRIDS - gy);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
+        GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->liquid_level[(int)(lx)][(int)(ly)];

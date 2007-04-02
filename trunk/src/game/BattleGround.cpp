@@ -23,24 +23,6 @@
 #include "Chat.h"
 #include "Spell.h"
 
-// TODO: Make a warper for all this type of opcodes, and add this one to it
-// becouse this is a relative universal opcode
-void SendAreaTriggerMessage(Player* Target, const char* Text, ...)
-{
-    va_list ap;                                             //
-    char str [1024];                                        //1024 seems to be rather large
-    va_start(ap, Text);
-    vsnprintf(str,1024,Text, ap );
-    va_end(ap);
-
-    WorldPacket data;
-    data.Initialize(SMSG_AREA_TRIGGER_MESSAGE);
-    data << uint32(0);
-    data << str;
-    data << uint8(0);
-    Target->GetSession()->SendPacket(&data);
-}
-
 BattleGround::BattleGround()
 {
     m_ID = 0;
@@ -285,7 +267,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
         default:
         {
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %d", Trigger);
-            SendAreaTriggerMessage(Source, "Warning: Unhandled AreaTrigger in Battleground: %d", Trigger);
+            Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %d", Trigger);
         }break;
     }
 

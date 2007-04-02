@@ -2131,7 +2131,7 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
 {
 
     // search for zone associated closest graveyard
-    uint32 zoneId = MapManager::Instance().GetMap(MapId)->GetZoneId(x,y);
+    uint32 zoneId = MapManager::Instance().GetZoneId(MapId,x,y);
 
     // Simulate std. algorithm:
     //   found some graveyard associated to (ghost_zone,ghost_map)
@@ -2497,7 +2497,7 @@ bool ObjectMgr::canStackSpellRank(SpellEntry const *spellInfo)
 void ObjectMgr::LoadCorpses()
 {
     uint32 count = 0;
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`guid` FROM `corpse` WHERE `bones_flag` = 0");
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance`,`guid` FROM `corpse` WHERE `bones_flag` = 0");
 
     if( !result )
     {
@@ -2520,7 +2520,7 @@ void ObjectMgr::LoadCorpses()
 
         uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
 
-        Corpse* corpse = new Corpse();
+        Corpse* corpse = new Corpse(NULL);
         if(!corpse->LoadFromDB(guid,fields))
         {
             delete corpse;
@@ -2585,4 +2585,152 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
             return false;
 
     return true;
+}
+
+void ObjectMgr::CleanupInstances()
+{
+    // this routine cleans up old instances from all the tables before server start
+
+    uint32 okcount = 0;
+    uint32 delcount = 0;
+
+    QueryResult *result;
+
+    // first, obtain total instance set
+    std::set< uint32 > InstanceSet;
+
+    // creature_respawn
+    result = sDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `creature_respawn` WHERE `instance` <> 0");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            InstanceSet.insert(fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    // gameobject_respawn
+    result = sDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `gameobject_respawn` WHERE `instance` <> 0");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            InstanceSet.insert(fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    // character_instance
+    result = sDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `character_instance`");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            InstanceSet.insert(fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    // instance
+    result = sDatabase.PQuery("SELECT `id` FROM `instance`");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            InstanceSet.insert(fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    // now remove all valid instances from instance list (it will become list of instances to delete)
+    // instances considered valid:
+    //   1) reset time > current time
+    //   2) bound to at least one character (id is found in `character_instance` table)
+    result = sDatabase.PQuery("SELECT DISTINCT(`instance`.`id`) AS `id` FROM `instance` LEFT JOIN `character_instance` ON (`character_instance`.`instance` = `instance`.`id`) WHERE (`instance`.`id` = `character_instance`.`instance`) AND (`instance`.`resettime` > " I64FMTD ")", (uint64)time(NULL));
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            if (InstanceSet.find(fields[0].GetUInt32()) != InstanceSet.end())
+            {
+                InstanceSet.erase(fields[0].GetUInt32());
+                okcount++;
+            }
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    delcount = InstanceSet.size();
+
+    barGoLink bar( delcount + 1 );
+    bar.step();
+
+    // remove all old instances from tables
+    for (std::set< uint32 >::iterator i = InstanceSet.begin(); i != InstanceSet.end(); i++)
+    {
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", *i);
+        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", *i);
+        sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", *i);
+
+        bar.step();
+    }
+
+    sLog.outString( "" );
+    sLog.outString( ">> Initialized %u instances, deleted %u old instances", okcount, delcount );
+}
+
+void ObjectMgr::PackInstances()
+{
+    // this routine renumbers player instance associations in such a way so they start from 1 and go up
+
+    // obtain set of all associations
+    std::set< uint32 > InstanceSet;
+
+    // the check in query allows us to prevent table destruction in case of a bug we must never encounter
+    QueryResult *result = sDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `character_instance` WHERE `instance` <> 0");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            InstanceSet.insert(fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    barGoLink bar( InstanceSet.size() + 1);
+    bar.step();
+
+    uint32 InstanceNumber = 1;
+
+    // we do assume std::set is sorted properly on integer value
+    for (std::set< uint32 >::iterator i = InstanceSet.begin(); i != InstanceSet.end(); i++)
+    {
+        if (*i != InstanceNumber)
+        {
+            // remap instance id
+            sDatabase.PExecute("UPDATE `creature_respawn` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
+            sDatabase.PExecute("UPDATE `gameobject_respawn` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
+            sDatabase.PExecute("UPDATE `character_instance` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
+            sDatabase.PExecute("UPDATE `instance` SET `id` = '%u' WHERE `id` = '%u'", InstanceNumber, *i);
+        }
+
+        InstanceNumber++;
+        bar.step();
+    }
+
+    sLog.outString( "" );
+    sLog.outString( ">> Instance numbers remapped, next instance id is %u", InstanceNumber );
 }

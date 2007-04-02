@@ -23,8 +23,8 @@
 #include "Log.h"
 #include "ObjectAccessor.h"
 
-TemporarySummon::TemporarySummon() :
-m_type(TEMPSUMMON_REMOVE_DEAD), m_timer(0), m_lifetime(0)
+TemporarySummon::TemporarySummon( WorldObject *instantiator ) : 
+Creature(instantiator), m_type(TEMPSUMMON_REMOVE_DEAD), m_timer(0), m_lifetime(0)
 {
 }
 
@@ -52,7 +52,7 @@ void TemporarySummon::Summon(TempSummonType type, uint32 lifetime)
     m_lifetime = lifetime;
 
     AddToWorld();
-    MapManager::Instance().GetMap(GetMapId())->Add((Creature*)this);
+    MapManager::Instance().GetMap(GetMapId(), this)->Add((Creature*)this);
 
     AIM_Initialize();
 }

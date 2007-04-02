@@ -25,6 +25,7 @@
 #include "RedZoneDistrict.h"
 #include "Transports.h"
 #include "GridDefines.h"
+#include "MapInstanced.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
@@ -79,25 +80,58 @@ MapManager::Initialize()
     grid_compression("gameobject", "gameobject_grid");
     sLog.outDebug("Grid compression apply on corpse(s)/bone(s) ...");
     grid_compression("corpse", "corpse_grid");
+
+    InitMaxInstanceId();
 }
 
 Map*
-MapManager::GetMap(uint32 id)
+MapManager::GetBaseMap(uint32 id)
 {
-    Map *m = NULL;
-    if( ( m=_getMap(id) ) == NULL )
+    Map *m = _findMap(id);
+
+    if( m == NULL )
     {
         Guard guard(*this);
-        if( (m = _getMap(id)) == NULL )
-        {
-            m = new Map(id, i_gridCleanUpDelay);
-            i_maps[id] = m;
-        }
 
+        const MapEntry* entry = sMapStore.LookupEntry(id);
+        if (entry && ((entry->map_type == MAP_INSTANCE) || (entry->map_type == MAP_RAID)))
+        {
+            m = new MapInstanced(id, i_gridCleanUpDelay, 0);
+        }
+        else
+        {
+            m = new Map(id, i_gridCleanUpDelay, 0);
+        }
+        i_maps[id] = m;
     }
 
     assert(m != NULL);
     return m;
+}
+
+Map* MapManager::GetMap(uint32 id, const WorldObject* obj)
+{
+    Map *m = NULL;
+    m = GetBaseMap(id);
+
+    if (m && obj && m->Instanceable()) m = ((MapInstanced*)m)->GetInstance(obj);
+
+    return m;
+}
+
+bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
+{
+    return GetBaseMap(mapid)->CanEnter(player);
+}
+
+void MapManager::RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y)
+{
+    bool remove_result = GetBaseMap(mapid)->RemoveBones(guid, x, y);
+    
+    if (!remove_result)
+    {
+        sLog.outDebug("Bones %u not found in world. Delete from DB also.", GUID_LOPART(guid));
+    }
 }
 
 void
@@ -144,11 +178,11 @@ bool MapManager::IsValidMapCoord(uint32 mapid, float x,float y)
     return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y);
 }
 
-void MapManager::LoadGrid(int mapid, float x, float y, bool no_unload)
+void MapManager::LoadGrid(int mapid, float x, float y, const WorldObject* obj, bool no_unload)
 {
     CellPair p = MaNGOS::ComputeCellPair(x,y);
     Cell cell = RedZone::GetZone(p);
-    GetMap(mapid)->LoadGrid(cell,no_unload);
+    GetMap(mapid, obj)->LoadGrid(cell,no_unload);
 }
 
 void MapManager::UnloadAll()
@@ -156,3 +190,16 @@ void MapManager::UnloadAll()
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
         iter->second->UnloadAll();
 }
+
+void MapManager::InitMaxInstanceId()
+{
+    i_MaxInstanceId = 0;
+
+    QueryResult *result = sDatabase.Query( "SELECT MAX(`id`) FROM `instance`" );
+    if( result )
+    {
+        i_MaxInstanceId = result->Fetch()[0].GetUInt32();
+        delete result;
+    }
+}
+

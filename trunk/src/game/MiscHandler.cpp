@@ -785,7 +785,7 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     GetPlayer()->ApplyStats(true);
 
     // update world right away
-    MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Add(GetPlayer());
+    MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
 
     GetPlayer()->SaveToDB();
 }

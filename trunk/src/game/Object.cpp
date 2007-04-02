@@ -590,7 +590,7 @@ void Object::_SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const
     }
 }
 
-WorldObject::WorldObject( )
+WorldObject::WorldObject( WorldObject *instantiator )
 {
     m_positionX         = 0.0f;
     m_positionY         = 0.0f;
@@ -598,8 +598,14 @@ WorldObject::WorldObject( )
     m_orientation       = 0.0f;
 
     m_mapId             = 0;
+    m_InstanceId        = 0;
 
     mSemaphoreTeleport  = false;
+
+    if (instantiator)
+    {
+        m_InstanceId = instantiator->GetInstanceId();
+    }
 }
 
 void WorldObject::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId )
@@ -617,12 +623,12 @@ void WorldObject::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float 
 
 uint32 WorldObject::GetZoneId() const
 {
-    return MapManager::Instance().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
+    return MapManager::Instance().GetMap(m_mapId, this)->GetZoneId(m_positionX,m_positionY);
 }
 
 uint32 WorldObject::GetAreaId() const
 {
-    return MapManager::Instance().GetMap(m_mapId)->GetAreaId(m_positionX,m_positionY);
+    return MapManager::Instance().GetMap(m_mapId, this)->GetAreaId(m_positionX,m_positionY);
 }
 
                                                             //slow
@@ -783,7 +789,7 @@ void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float
 
 void WorldObject::SendMessageToSet(WorldPacket *data, bool bToSelf)
 {
-    MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data);
+    MapManager::Instance().GetMap(m_mapId, this)->MessageBoardcast(this, data);
 }
 
 void WorldObject::SendDestroyObject(uint64 guid)

@@ -49,8 +49,8 @@ uint32 CreatureInfo::randomDisplayID() const
         return urand(0,1) ? DisplayID_m : DisplayID_f;
 }
 
-Creature::Creature() :
-Unit(), i_AI(NULL), i_motionMaster(this), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
+Creature::Creature( WorldObject *instantiator ) :
+Unit( instantiator ), i_AI(NULL), i_motionMaster(this), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_groupLootTimer(0), lootingGroupLeaderGUID(0)
@@ -155,7 +155,7 @@ void Creature::Update(uint32 diff)
                 setDeathState( ALIVE );
                 clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
-                MapManager::Instance().GetMap(GetMapId())->Add(this);
+                MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
             }
             break;
         }
@@ -174,7 +174,7 @@ void Creature::Update(uint32 diff)
 
                 float x,y,z;
                 GetRespawnCoord(x, y, z);
-                MapManager::Instance().GetMap(GetMapId())->CreatureRelocation(this,x,y,z,GetOrientation());
+                MapManager::Instance().GetMap(GetMapId(), this)->CreatureRelocation(this,x,y,z,GetOrientation());
             }
             else
             {
@@ -299,7 +299,6 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
     SetOrientation(ang);
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
     return  CreateFromProto(guidlow, Entry);
-
 }
 
 uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
@@ -668,7 +667,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
         QueryResult *result;
         Field *fields;
         uint32 mapid=GetMapId();
-        Map* map=MapManager::Instance().GetMap( mapid );
+        Map* map=MapManager::Instance().GetMap( mapid, this );
         uint16 areaflag=map->GetAreaFlag(GetPositionX(),GetPositionY());
         uint32 zoneid=map->GetZoneId(areaflag);
         std::string areaname= gossip->Option;
@@ -749,7 +748,7 @@ uint32 Creature::GetGossipCount( uint32 gossipid )
 
 uint32 Creature::GetNpcTextId()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `textid` FROM `npc_gossip` WHERE `npc_guid`= '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `textid` FROM `npc_gossip` WHERE `npc_guid`= '%u'", m_DBTableGuid);
     if(result)
     {
         Field *fields = result->Fetch();
@@ -961,6 +960,9 @@ float Creature::_GetDamageMod(int32 Rank)
 bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 {
     Object::_Create(guidlow, HIGHGUID_UNIT);
+
+    m_DBTableGuid = guidlow;
+
     SetUInt32Value(OBJECT_FIELD_ENTRY,Entry);
     CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
     if(!cinfo)
@@ -1058,13 +1060,13 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     return true;
 }
 
-bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
+bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
         //                                0    1     2            3            4            5             6               7           8                  9                  10                 11          12        13            14      15             16
         result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`state`,`MovementType`,`auras` "
-            "FROM `creature` LEFT JOIN `creature_respawn` ON `creature`.`guid`=`creature_respawn`.`guid` WHERE `creature`.`guid` = '%u'", guid);
+            "FROM `creature` LEFT JOIN `creature_respawn` ON ((`creature`.`guid`=`creature_respawn`.`guid`) AND (`creature_respawn`.`instance` = '%u')) WHERE `creature`.`guid` = '%u'", InstanceId, guid);
 
     if(!result)
     {
@@ -1073,6 +1075,10 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
     }
 
     Field *fields = result->Fetch();
+
+    m_DBTableGuid = guid;
+    if (InstanceId) guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
+    SetInstanceId(InstanceId);
 
     if(!Create(guid,fields[1].GetUInt32(),fields[2].GetFloat(),fields[3].GetFloat(),
         fields[4].GetFloat(),fields[5].GetFloat(),fields[0].GetUInt32()))
@@ -1112,7 +1118,7 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result)
     else                                                    // ready to respawn
     {
         m_respawnTime = 0;
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
     }
 
     {
@@ -1218,7 +1224,7 @@ void Creature::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM `creature_grid` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM `creature_movement` WHERE `id` = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
     sDatabase.CommitTransaction();
 }
 
@@ -1297,7 +1303,7 @@ void Creature::Respawn()
     }
     if(getDeathState()==DEAD)
     {
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE guid = %u", GetGUIDLow());
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
         m_respawnTime = time(NULL);                         // respawn at next tick
     }
 }
@@ -1473,13 +1479,13 @@ void Creature::SaveRespawnTime()
 
     if(m_respawnTime > time(NULL))                          // dead (no corpse)
     {
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
-        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(m_respawnTime));
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", m_DBTableGuid, uint64(m_respawnTime), GetInstanceId());
     }
     else if(m_deathTimer > 0)                               // dead (corpse)
     {
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u'", GetGUIDLow());
-        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "' )", GetGUIDLow(),uint64(time(NULL)+m_respawnDelay+m_deathTimer/1000));
+        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", m_DBTableGuid, uint64(time(NULL)+m_respawnDelay+m_deathTimer/1000), GetInstanceId());
     }
 }
 

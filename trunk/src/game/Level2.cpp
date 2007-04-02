@@ -378,7 +378,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     float z = chr->GetPositionZ();
     float o = chr->GetOrientation();
 
-    Creature* pCreature = new Creature;
+    Creature* pCreature = new Creature(chr);
     if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
     {
         delete pCreature;
@@ -386,9 +386,12 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     }
 
     pCreature->SaveToDB();
-    pCreature->LoadFromDB(pCreature->GetGUIDLow());         // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+
+    // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+    pCreature->LoadFromDB(pCreature->GetGUIDLow(), NULL, chr->GetInstanceId());
+
     pCreature->AddToWorld();
-    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
+    MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
 
     sLog.outDebug(LANG_ADD_OBJ);
 

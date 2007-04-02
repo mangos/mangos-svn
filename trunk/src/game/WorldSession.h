@@ -57,6 +57,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendPacket(WorldPacket* packet);
         void SendNotification(char const* msg);
         void SendPartyResult(uint32 unk, std::string member, uint32 state);
+        void SendAreaTriggerMessage(const char* Text, ...);
 
         uint32 GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }

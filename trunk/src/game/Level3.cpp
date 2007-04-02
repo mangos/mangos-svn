@@ -149,7 +149,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
         return true;
     }
 
-    Map *map = MapManager::Instance().GetMap(mapid);
+    Map *map = MapManager::Instance().GetMap(mapid, _player);
     float z = max(map->GetHeight(x, y), map->GetWaterLevel(x, y));
 
     _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
@@ -1931,7 +1931,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     float z = chr->GetPositionZ();
     float o = chr->GetOrientation();
 
-    GameObject* pGameObj = new GameObject();
+    GameObject* pGameObj = new GameObject(chr);
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0, 0, 0))
     {
         delete pGameObj;
@@ -1939,11 +1939,11 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     }
     sLog.outDebug(LANG_ADD_OBJ_LV3);
 
-    pGameObj->AddToWorld();
-    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
-
     if(strcmp(safe,"true") == 0)
         pGameObj->SaveToDB();
+
+    pGameObj->AddToWorld();
+    MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 
     return true;
 }
@@ -2045,7 +2045,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     float rot2 = sin(o/2);
     float rot3 = cos(o/2);
 
-    GameObject* pGameObj = new GameObject();
+    GameObject* pGameObj = new GameObject(chr);
     uint32 lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
     if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, rot2, rot3, 0, 0))
@@ -2060,7 +2060,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 
     pGameObj->SaveToDB();
     pGameObj->AddToWorld();
-    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
+    MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 
     PSendSysMessage(LANG_GAMEOBJECT_ADD,id,goI->name,x,y,z);
 
@@ -2077,7 +2077,7 @@ bool ChatHandler::HandleAnimCommand(const char* args)
     WorldPacket data( SMSG_EMOTE, (8+4) );
     data << anim_id << m_session->GetPlayer( )->GetGUID();
     WPAssert(data.size() == 12);
-    MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId())->MessageBoardcast(m_session->GetPlayer(), &data, true);
+    MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->MessageBoardcast(m_session->GetPlayer(), &data, true);
     return true;
 }
 
@@ -2355,6 +2355,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
     PSendSysMessage(LANG_NPCINFO_HEALTH,target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
+    PSendSysMessage(LANG_NPCINFO_DUNGEON_ID, target->GetInstanceId());
 
     PSendSysMessage(LANG_NPCINFO_POSITION,float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));
 
@@ -3341,7 +3342,7 @@ bool ChatHandler::HandleRespawnCommand(const char* args)
 
     TypeContainerVisitor<MaNGOS::WorldObjectWorker<MaNGOS::RespawnDo>, GridTypeMapContainer > obj_worker(worker);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, obj_worker, *MapManager::Instance().GetMap(pl->GetMapId()));
+    cell_lock->Visit(cell_lock, obj_worker, *MapManager::Instance().GetMap(pl->GetMapId(), pl));
 
     return true;
 }

@@ -266,7 +266,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- Remove the player from the world
         ObjectAccessor::Instance().RemovePlayer(_player);
-        MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
+        MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
 
         ///- Send update to raid group
         if(_player->groupInfo.group && _player->groupInfo.group->isRaidGroup())
@@ -681,3 +681,22 @@ void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
             break;
     }
 }
+
+// TODO: Make a warper for all this type of opcodes, and add this one to it
+// because this is a relative universal opcode
+void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
+{
+    va_list ap;                                             //
+    char str [1024];                                        //1024 seems to be rather large
+    va_start(ap, Text);
+    vsnprintf(str,1024,Text, ap );
+    va_end(ap);
+
+    WorldPacket data;
+    data.Initialize(SMSG_AREA_TRIGGER_MESSAGE);
+    data << uint32(0);
+    data << str;
+    data << uint8(0);
+    SendPacket(&data);
+}
+

@@ -29,7 +29,7 @@
 #include "GossipDef.h"
 #include "RedZoneDistrict.h"
 
-Corpse::Corpse( CorpseType type ) : WorldObject()
+Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( instantiator )
 {
     m_objectType |= TYPE_CORPSE;
     m_objectTypeId = TYPEID_CORPSE;
@@ -58,6 +58,8 @@ bool Corpse::Create( uint32 guidlow )
 
 bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang )
 {
+    SetInstanceId(owner->GetInstanceId());
+
     WorldObject::_Create(guidlow, HIGHGUID_CORPSE, mapid, x, y, z, ang, (uint8)-1);
 
     if(!IsPositionValid())
@@ -85,12 +87,12 @@ void Corpse::SaveToDB()
     DeleteFromDB(false);
 
     std::ostringstream ss;
-    ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`) VALUES ("
+    ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`,`instance`) VALUES ("
         << GetGUIDLow() << ", " << GUID_LOPART(GetOwnerGUID()) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", "
         << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
-    ss << "', NOW(), " << int(GetType()) << ")";
+    ss << "', NOW(), " << int(GetType()) << ", " << int(GetInstanceId()) << ")";
     sDatabase.Execute( ss.str().c_str() );
 
     // update grid table
@@ -133,11 +135,11 @@ void Corpse::DeleteFromDB(bool inner_transaction)
         sDatabase.CommitTransaction();
 }
 
-bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
+bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
-        result = sDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse` WHERE `guid` = '%u'",guid);
+        result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance` FROM `corpse` WHERE `guid` = '%u'",guid);
 
     if( ! result )
     {
@@ -159,7 +161,7 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
 
 bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 {
-    // SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag` FROM `corpse`
+    // SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance` FROM `corpse`
     float positionX = fields[0].GetFloat();
     float positionY = fields[1].GetFloat();
     float positionZ = fields[2].GetFloat();
@@ -167,6 +169,7 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
     //uint32 zoneid   = fields[6].GetUInt32();
     uint32 mapid    = fields[4].GetUInt32();
     uint32 bones   = fields[6].GetUInt32();
+    uint32 instanceid   = fields[7].GetUInt32();
 
     if(!LoadValues( fields[5].GetString() ))
     {
@@ -175,6 +178,7 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
     }
 
     // place
+    SetInstanceId(instanceid);
     SetMapId(mapid);
     Relocate(positionX,positionY,positionZ,ort);
 
@@ -223,7 +227,7 @@ void Corpse::_ConvertCorpseToBones()
     DEBUG_LOG("Deleting Corpse and spawning bones.\n");
 
     // remove resurrectble corpse from grid object registry (loaded state checked into call)
-    MapManager::Instance().GetMap(GetMapId())->Remove(this,false);
+    MapManager::Instance().GetMap(GetMapId(), this)->Remove(this,false);
 
     // remove corpse from DB
     DeleteFromDB();
@@ -244,9 +248,9 @@ void Corpse::_ConvertCorpseToBones()
     SaveToDB();
 
     // add bones in grid store if grid loaded where corpse placed
-    if(!MapManager::Instance().GetMap(GetMapId())->IsRemovalGrid(GetPositionX(),GetPositionY()))
+    if(!MapManager::Instance().GetMap(GetMapId(), this)->IsRemovalGrid(GetPositionX(),GetPositionY()))
     {
-        MapManager::Instance().GetMap(GetMapId())->Add(this);
+        MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
     }
     // or prepare to delete at next tick if grid not loaded
     else

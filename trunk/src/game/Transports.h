@@ -64,6 +64,8 @@ class TransportPath
 class Transport : public GameObject
 {
     public:
+        Transport( WorldObject *instantiator );
+
         bool Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
         bool GenerateWaypoints(uint32 pathid, vector <uint32> &mapids);
         void Update(uint32 p_time);

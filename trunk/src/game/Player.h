@@ -485,6 +485,8 @@ enum MovementFlags
     MOVEMENTFLAG_SPLINE         = 0x4000000
 };
 
+typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -500,7 +502,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true, bool ignore_transport = true);
+        void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true, bool ignore_transport = true, bool is_gm_command = false);
 
         bool Create ( uint32 guidlow, WorldPacket &data );
 
@@ -1178,6 +1180,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
         /*********************************************************/
+
         uint32 GetMovementFlags() const { return m_movement_flags; }
         bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
         void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
@@ -1216,6 +1219,19 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply);
                                                             // overwrite Unit version
         uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
+
+        /*********************************************************/
+        /***                 INSTANCE SYSTEM                   ***/
+        /*********************************************************/
+
+        void UpdateHomebindTime(uint32 time);
+        void TeleportToHomebind();
+
+        bool m_Loaded;
+        uint32 m_HomebindTimer;
+        bool m_InstanceValid;
+        BoundInstancesMap m_BoundInstances;
+
     protected:
 
         /*********************************************************/
@@ -1244,10 +1260,12 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void _LoadActions();
         void _LoadAuras(uint32 timediff);
+        void _LoadBoundInstances();
         void _LoadInventory(uint32 timediff);
         void _LoadMail();
         void _LoadMailedItems();
         void _LoadQuestStatus();
+        void _LoadRaidGroup();
         void _LoadReputation();
         void _LoadSpells(uint32 timediff);
         void _LoadTaxiMask(const char* data);
@@ -1260,6 +1278,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void _SaveActions();
         void _SaveAuras();
+        void _SaveBoundInstances();
         void _SaveInventory();
         void _SaveMail();
         void _SaveQuestStatus();
