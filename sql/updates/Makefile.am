@@ -272,6 +272,9 @@ pkgdata_DATA = \
 	3348_playercreateinfo_spell.sql \
 	3350_command.sql \
 	3351_character_pet.sql \
+	3397_creature_template.sql \
+	3400.sql \
+	3402_creature_onkill_reputation.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -524,4 +527,7 @@ EXTRA_DIST = \
 	3348_playercreateinfo_spell.sql \
 	3350_command.sql \
 	3351_character_pet.sql \
+	3397_creature_template.sql \
+	3400.sql \
+	3402_creature_onkill_reputation.sql \
 	README
