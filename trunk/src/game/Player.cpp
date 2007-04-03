@@ -4114,9 +4114,9 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
 }
 
 //Calculate total reputation percent player gain with quest/creature level
-uint32 Player::CalculateReputationPercent(uint32 creatureOrQuestLevel) const
+int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) const
 {
-    uint32 Factor;
+    int32 Factor;
     int32 dif = int32(getLevel()) - creatureOrQuestLevel;
 
     // This part is before_2.01_like
@@ -4127,11 +4127,19 @@ uint32 Player::CalculateReputationPercent(uint32 creatureOrQuestLevel) const
     else
         Factor = (10-dif);                                  // 20%...100% with step 20%
 
-    // apply factor to (base reputation percent + racial bonuses+ etc)
-    return Factor*(100 + (m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1))/5;
+    int32 percent = Factor*20;
+
+    if(rep > 0)
+        percent += m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1;
+    else
+        percent -= m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1;
+
+    if(percent <=0)
+        return 0;
 
     // Uncomment the next line to be 2.01_like or maybe not (see Wiki)
-    // return 100 + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1;
+    // percent = 100 + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1;
+    return rep*percent/100;
 }
 
 //Calculates how many reputation points player gains in wich victim's enemy factions
@@ -4145,10 +4153,8 @@ void Player::CalculateReputation(Unit *pVictim)
     if(!Rep)
         return;
 
-    uint32 RepPercent = CalculateReputationPercent(pVictim->getLevel());
-
-    int32 donerep1 = Rep->repvalue1*RepPercent/100; 
-    int32 donerep2 = Rep->repvalue2*RepPercent/100;
+    int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1); 
+    int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2); 
 
     FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1); 
     FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2); 
@@ -4184,16 +4190,15 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
     if( !pCreature )
         return;
 
-    uint32 RepPercent = CalculateReputationPercent(pQuest->GetQuestLevel());
-
     // quest reputation reward/losts
     for(int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
     {
         if(pQuest->RewRepFaction[i] && pQuest->RewRepValue[i] )
         {
+            int32 rep = CalculateReputationGain(pQuest->GetQuestLevel(),pQuest->RewRepValue[i]);
             FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]);
             if(factionEntry)
-                ModifyFactionReputation(factionEntry, (pQuest->RewRepValue[i]*RepPercent/100));
+                ModifyFactionReputation(factionEntry, rep);
         }
     }
 

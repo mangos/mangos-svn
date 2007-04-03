@@ -2591,9 +2591,9 @@ void ObjectMgr::LoadReputationOnKill()
 {
     uint32 count = 0; 
 
-    //                                             1             2                      3
+    //                                             0             1                      2
     QueryResult *result = sDatabase.Query("SELECT `creature_id`,`RewOnKillRepFaction1`,`RewOnKillRepFaction2`,"
-        //4              5              6                    7              8              9         
+        //3              4              5                    6              7              8         
         "`IsTeamAward1`,`MaxStanding1`,`RewOnKillRepValue1`,`IsTeamAward2`,`MaxStanding2`,`RewOnKillRepValue2`"
         "FROM `creature_onkill_reputation`");
 

@@ -430,6 +430,28 @@ void Spell::EffectDummy(uint32 i)
         return;
     }
 
+    // net-o-matic
+    if (m_spellInfo->Id == 13120)
+    {
+        uint32 spell_id = 0;
+
+        uint32 roll = urand(0, 99);
+
+        if(roll < 2)                                        // 2% for 30 sec self root (off-like chance unknown)
+            spell_id = 16566;
+        else if(roll < 4)                                   // 2% for 20 sec root, charge to target (off-like chance unknown)
+            spell_id = 13119;
+        else                                                // normal root
+            spell_id = 13099;
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+        if(!spellInfo)
+            return;
+
+        m_caster->CastSpell(unitTarget,spellInfo,true,NULL);
+        return;
+    }
+
     // More generic code later
 
     // starshards/curse of agony hack .. this applies to 1.10 only

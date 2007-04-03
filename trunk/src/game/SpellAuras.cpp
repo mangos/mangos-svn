@@ -893,7 +893,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 {
     Unit* caster = GetCaster();
 
-    // currently all dummy auras applyed/un-applied only at real add/remove
+    // currently all dummy auras applied/un-applied only at real add/remove
     if(!Real)
         return;
 
@@ -912,6 +912,28 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         m_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
         WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
         ((Player*)m_target)->GetSession()->SendPacket(&data);
+    }
+
+    // net-o-matic
+    if (GetId() == 13139 && caster)
+    {
+        if(apply)
+        {
+            // root to self part of (root_target->charge->root_self sequence
+            {
+                SpellEntry const *spell_proto = sSpellStore.LookupEntry(13138);
+                if(!spell_proto)
+                    return;
+
+                Spell spell(caster, spell_proto, true, 0);
+                SpellCastTargets targets;
+                targets.setUnitTarget(caster);
+                // prevent double stat apply for triggered auras
+                caster->ApplyStats(true);
+                spell.prepare(&targets);
+                caster->ApplyStats(false);
+            }
+        }
     }
 
     if(GetSpellProto()->SpellVisual == 5622 && caster && caster->GetTypeId() == TYPEID_PLAYER)
