@@ -2752,6 +2752,7 @@ void ObjectMgr::CleanupInstances()
     {
         sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", *i);
         sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", *i);
+        sDatabase.PExecute("DELETE FROM `corpse` WHERE `instance` = '%u'", *i);
         sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", *i);
 
         bar.step();
@@ -2794,6 +2795,7 @@ void ObjectMgr::PackInstances()
             // remap instance id
             sDatabase.PExecute("UPDATE `creature_respawn` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
             sDatabase.PExecute("UPDATE `gameobject_respawn` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
+            sDatabase.PExecute("UPDATE `corpse` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
             sDatabase.PExecute("UPDATE `character_instance` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
             sDatabase.PExecute("UPDATE `instance` SET `id` = '%u' WHERE `id` = '%u'", InstanceNumber, *i);
         }
