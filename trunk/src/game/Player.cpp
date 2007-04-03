@@ -4153,34 +4153,39 @@ void Player::CalculateReputation(Unit *pVictim)
     if(!Rep)
         return;
 
-    int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1); 
-    int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2); 
-
-    FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1); 
-    FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2); 
-
-    uint32 current_reputation_rank1 = GetReputationRank(factionEntry1);
-    uint32 current_reputation_rank2 = GetReputationRank(factionEntry2);
-
-    if(factionEntry1 && current_reputation_rank1 <= Rep->reputration_max_cap1)
-        ModifyFactionReputation(factionEntry1, donerep1);
-
-    if(factionEntry2 && current_reputation_rank2 <= Rep->reputration_max_cap2)
-        ModifyFactionReputation(factionEntry2, donerep2);
-
-    // Wiki: Team factions value divided by 2
-    if(Rep->is_teamaward1 != 0)
+    if(Rep->repfaction1)
     {
-        FactionEntry const *team1_factionEntry = sFactionStore.LookupEntry(factionEntry1->team);
-        if(team1_factionEntry)
-            ModifyFactionReputation(team1_factionEntry, donerep1 / 2); 
+        int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1); 
+        FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1); 
+        uint32 current_reputation_rank1 = GetReputationRank(factionEntry1);
+        if(factionEntry1 && current_reputation_rank1 <= Rep->reputration_max_cap1)
+            ModifyFactionReputation(factionEntry1, donerep1);
+
+        // Wiki: Team factions value divided by 2
+        if(Rep->is_teamaward1 != 0)
+        {
+            FactionEntry const *team1_factionEntry = sFactionStore.LookupEntry(factionEntry1->team);
+            if(team1_factionEntry)
+                ModifyFactionReputation(team1_factionEntry, donerep1 / 2); 
+        }
     }
-    if(Rep->is_teamaward2 != 0)
+
+    if(Rep->repfaction2)
     {
-        FactionEntry const *team2_factionEntry = sFactionStore.LookupEntry(factionEntry2->team);
-        if(team2_factionEntry)
-            ModifyFactionReputation(team2_factionEntry, donerep2 / 2);
-    }    
+        int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2); 
+        FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2); 
+        uint32 current_reputation_rank2 = GetReputationRank(factionEntry2);
+        if(factionEntry2 && current_reputation_rank2 <= Rep->reputration_max_cap2)
+            ModifyFactionReputation(factionEntry2, donerep2);
+
+        // Wiki: Team factions value divided by 2
+        if(Rep->is_teamaward2 != 0)
+        {
+            FactionEntry const *team2_factionEntry = sFactionStore.LookupEntry(factionEntry2->team);
+            if(team2_factionEntry)
+                ModifyFactionReputation(team2_factionEntry, donerep2 / 2);
+        }    
+    }
 }
 
 //Calculate how many reputation points player gain with the quest
@@ -4366,14 +4371,18 @@ uint32 Player::GetHonorRank() const
 //What is Player's rank... private, scout...
 uint32 Player::CalculateHonorRank(float honor_points) const
 {
-    int rank = 0;
+    uint32 rank = 0;
 
-    if(honor_points <=    0.00) rank = 0; else
-        if(honor_points <  2000.00) rank = 1;
+    if(honor_points <=    0.00)
+        rank = 0;
+    else if(honor_points <  2000.00)
+        rank = 1;
+    else if(honor_points > ((HONOR_RANK_COUNT-1)-1)*5000)
+        rank = HONOR_RANK_COUNT-1;
     else
-        rank = ( (int)(honor_points / 5000) + 1);
+        rank = uint32(honor_points / 5000) + 1;
 
-    return rank < HONOR_RANK_COUNT ? rank : HONOR_RANK_COUNT-1 ;
+    return rank;
 }
 
 //How many times Player kill pVictim...
