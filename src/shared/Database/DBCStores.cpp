@@ -484,6 +484,19 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     {
         switch(spellproto->EffectApplyAuraName[effIndex])
         {
+            case  4 /*SPELL_AURA_DUMMY             */:
+            {
+                // dummy aura can be positive or negative dependent from casted spell
+                switch(spellproto->Id)
+                {
+                    case 13139: // net-o-matic special effect
+                        return false;
+                    default:
+                        break;
+                }
+            }   break;
+            case 26 /*SPELL_AURA_MOD_ROOT          */:
+            case 27 /*SPELL_AURA_MOD_SILENCE       */:
             case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:
                 return false;
             case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:

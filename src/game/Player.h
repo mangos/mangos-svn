@@ -1068,7 +1068,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         const static int32 Reputation_Bottom = -42000;
         bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);
         bool ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing);
-        uint32 CalculateReputationPercent(uint32 creatureOrQuestLevel) const;
+        int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) const;
         void CalculateReputation(Unit *pVictim);
         void CalculateReputation(Quest *pQuest, uint64 guid);
         void SetInitialFactions();

@@ -40,10 +40,10 @@ void MapInstanced::Update(const uint32& t)
                 i->second->Reset();
                 // avoid doing ++ on invalid data
                 HM_NAMESPACE::hash_map< uint32, Map* >::iterator i_old = i;
-                i++;
+                ++i;
                 // erase map
-                InstancedMaps.erase(i_old);
                 delete i_old->second;
+                InstancedMaps.erase(i_old);
             }
             else
             {
@@ -56,7 +56,7 @@ void MapInstanced::Update(const uint32& t)
             // update only here, because it may schedule some bad things before delete
             // in the other case
             i->second->Update(t);
-            i++;
+            ++i;
         }
     }
 }
