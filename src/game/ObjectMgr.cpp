@@ -2627,18 +2627,24 @@ void ObjectMgr::LoadReputationOnKill()
         repOnKill.reputration_max_cap2 = fields[7].GetUInt32();
         repOnKill.repvalue2            = fields[8].GetInt32();
 
-        FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(repOnKill.repfaction1); 
-        if(!factionEntry1)
+        if(repOnKill.repfaction1)
         {
-            sLog.outErrorDb("Faction (faction.dbc) %u not existed but used in `creature_onkill_reputation`",repOnKill.repfaction1);
-            continue;
+            FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(repOnKill.repfaction1); 
+            if(!factionEntry1)
+            {
+                sLog.outErrorDb("Faction (faction.dbc) %u not existed but used in `creature_onkill_reputation`",repOnKill.repfaction1);
+                continue;
+            }
         }
 
-        FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(repOnKill.repfaction2); 
-        if(!factionEntry2)
+        if(repOnKill.repfaction2)
         {
-            sLog.outErrorDb("Faction (faction.dbc) %u not existed but used in `creature_onkill_reputation`",repOnKill.repfaction2);
-            continue;
+            FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(repOnKill.repfaction2); 
+            if(!factionEntry2)
+            {
+                sLog.outErrorDb("Faction (faction.dbc) %u not existed but used in `creature_onkill_reputation`",repOnKill.repfaction2);
+                continue;
+            }
         }
 
         mRepOnKill[creature_id] = repOnKill;
