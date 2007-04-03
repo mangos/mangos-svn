@@ -331,10 +331,26 @@ void Pet::Update(uint32 diff)
                 return;
             }
 
-            if(isControlled() && owner->GetPetGUID() != GetGUID())
+            if(isControlled())
             {
-                Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
-                return;
+                if( owner->GetPetGUID() != GetGUID() )
+                {
+                    Remove(getPetType()==HUNTER_PET?PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
+                    return;
+                }
+            }
+            else
+            {
+                if(m_duration > 0)
+                {
+                    if(m_duration > diff)
+                        m_duration -= diff;
+                    else
+                    {
+                        Remove(PET_SAVE_AS_DELETED);
+                        return;
+                    }
+                }
             }
 
             //regenerate Focus

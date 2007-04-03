@@ -248,7 +248,8 @@ void Spell::FillTargetMap()
         SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap,tmpItemMap,tmpGOMap);
         SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap,tmpItemMap,tmpGOMap);
 
-        if(!m_spellInfo->EffectImplicitTargetA[i] && !m_spellInfo->EffectImplicitTargetB[i] )
+        if( (m_spellInfo->EffectImplicitTargetA[i]==0 || m_spellInfo->EffectImplicitTargetA[i]==18) && 
+            (m_spellInfo->EffectImplicitTargetB[i]==0 || m_spellInfo->EffectImplicitTargetB[i]==18) )
         {
             // add here custom effects that need default target.
             // FOR EVERY TARGET TYPE THERE IS A DIFFERENT FILL!!
@@ -273,6 +274,7 @@ void Spell::FillTargetMap()
                     break;
                 case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
+                case SPELL_EFFECT_SUMMON_GUARDIAN:
                 case SPELL_EFFECT_STUCK:
                 case SPELL_EFFECT_ADD_FARSIGHT:
                     tmpUnitMap.push_back(m_caster);
