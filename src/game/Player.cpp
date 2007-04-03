@@ -1530,7 +1530,7 @@ void Player::RegenerateHealth()
         for(AuraList::iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
             addvalue *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
     }
-    else
+    else if(HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
         addvalue *= m_AuraModifiers[SPELL_AURA_MOD_REGEN_DURING_COMBAT] / 100.0f;
 
     switch (getStandState())
@@ -4130,15 +4130,15 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) co
     int32 percent = Factor*20;
 
     if(rep > 0)
-        percent += m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1;
+        percent += m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN];
     else
-        percent -= m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1;
+        percent -= m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN];
 
     if(percent <=0)
         return 0;
 
     // Uncomment the next line to be 2.01_like or maybe not (see Wiki)
-    // percent = 100 + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN]+1;
+    // percent = 100 + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN];
     return rep*percent/100;
 }
 

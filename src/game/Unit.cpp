@@ -86,7 +86,7 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     m_ShapeShiftForm = 0;
 
     for (int i = 0; i < TOTAL_AURAS; i++)
-        m_AuraModifiers[i] = -1;
+        m_AuraModifiers[i] = 0;
     for (int i = 0; i < IMMUNITY_MECHANIC; i++)
         m_spellImmune[i].clear();
 

@@ -104,6 +104,7 @@ class Pet : public Creature
         void GivePetLevel(uint32 level);
         void InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
+        void SetDuration(uint32 dur) { m_duration = dur; }
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
     protected:
@@ -111,6 +112,7 @@ class Pet : public Creature
         uint32  m_actState;
         uint32  m_fealty;
         PetType m_petType;
+        uint32  m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
     private:
         void SaveToDB()                                     // overwrited of Creature::SaveToDB     - don't must be called
         {

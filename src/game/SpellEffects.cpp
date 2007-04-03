@@ -408,6 +408,17 @@ void Spell::EffectDummy(uint32 i)
         return;
     }
 
+    // Mechanical Dragonling
+    if (m_spellInfo->Id == 23076 )
+    {
+        // TODO: why dummy effect required? some animation or other...
+        SpellEntry const *spell_proto = sSpellStore.LookupEntry(4073);
+        if(!spell_proto)
+            return;
+
+        m_caster->CastSpell(m_caster,spell_proto,true,NULL);
+    }
+
     if (m_spellInfo->Id == 16589)
     {
         if(m_caster->GetTypeId()!=TYPEID_PLAYER)
@@ -1314,6 +1325,11 @@ void Spell::EffectSummonWild(uint32 i)
             return;
         }
 
+        // set timer for unsummon
+        int32 duration = GetDuration(m_spellInfo);
+        if(duration > 0)
+            spawnCreature->SetDuration(duration);
+
         spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
         spawnCreature->setPowerType(POWER_MANA);
         spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
@@ -1333,6 +1349,7 @@ void Spell::EffectSummonWild(uint32 i)
         spawnCreature->SetArmor(level*50);
         spawnCreature->AIM_Initialize();
 
+        /* not set name for guardians/minpets
         std::string name;
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
             name = ((Player*)m_caster)->GetName();
@@ -1340,6 +1357,7 @@ void Spell::EffectSummonWild(uint32 i)
             name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
         name.append(petTypeSuffix[spawnCreature->getPetType()]);
         spawnCreature->SetName( name );
+        */
 
         ObjectAccessor::Instance().AddPet(spawnCreature);
         spawnCreature->AddToWorld();
