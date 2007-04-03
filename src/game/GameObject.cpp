@@ -385,8 +385,8 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
     uint32 animprogress = fields[12].GetUInt32();
     uint32 dynflags = fields[13].GetUInt32();
 
-    m_DBTableGuid = guid;
-    if (InstanceId) guid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
+    uint32 stored_guid = guid;
+    if (InstanceId != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
     SetInstanceId(InstanceId);
 
     if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, dynflags) )
@@ -394,6 +394,8 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
         if (!external) delete result;
         return false;
     }
+
+    m_DBTableGuid = stored_guid;
 
     lootid=fields[10].GetUInt32();
     m_respawnDelayTime=fields[11].GetUInt32();

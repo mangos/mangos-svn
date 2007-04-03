@@ -126,7 +126,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         // well, we have an instance bound, really, verify self or group leader
         if (!((player->GetGUIDLow() == i->second.second) || 
             (player->groupInfo.group && 
-             GUID_LOPART(player->groupInfo.group->GetLeaderGUID()) == i->second.second)))
+             (GUID_LOPART(player->groupInfo.group->GetLeaderGUID()) == i->second.second))))
         {
             // well, we are bound to instance, but are not a leader and are not in the correct group
             // we must not rebind us or the instantiator (which can surely be the same)

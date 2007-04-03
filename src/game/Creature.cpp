@@ -1076,8 +1076,8 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 
     Field *fields = result->Fetch();
 
-    m_DBTableGuid = guid;
-    if (InstanceId) guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
+    uint32 stored_guid = guid;
+    if (InstanceId != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     SetInstanceId(InstanceId);
 
     if(!Create(guid,fields[1].GetUInt32(),fields[2].GetFloat(),fields[3].GetFloat(),
@@ -1086,6 +1086,8 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
         if (!external) delete result;
         return false;
     }
+
+    m_DBTableGuid = stored_guid;
 
     if(GetCreatureInfo()->rank > 0)
         this->m_corpseDelay *= 3;                           //if creature is elite, then remove corpse later
