@@ -4499,6 +4499,19 @@ void Player::UpdateZone()
     AreaTableEntry const* zone = GetAreaEntryByAreaID(GetZoneId());
     if(!zone)
         return;
+			
+	
+	Weather *wth = sWorld.FindWeather(zone->ID);
+    if(wth)
+    {
+        wth->SendWeatherUpdateToPlayer(this);
+    }
+	else
+    {
+        wth = new Weather(this);
+        sWorld.AddWeather(wth);
+		wth->SendWeatherUpdateToPlayer(this);
+    }
 
     pvpInfo.inHostileArea =
         (GetTeam() == ALLIANCE && zone->team == AREATEAM_HORDE ||

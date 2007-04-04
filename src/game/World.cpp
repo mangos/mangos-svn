@@ -602,7 +602,7 @@ void World::Update(time_t diff)
             next++;
 
             ///- and remove Weather objects for zones with no player
-            if(!itr->second->Update(diff))
+            if(!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval()))
             {
                 delete itr->second;
                 m_weathers.erase(itr);

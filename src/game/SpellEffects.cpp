@@ -1815,7 +1815,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             case 23894: BTAura = 23888; break;
             default: break;
         }
-        damage = 0.45 * (m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS));
+        damage = uint32(0.45 * (m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS)));
     }
 
     uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };

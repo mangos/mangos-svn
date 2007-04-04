@@ -68,7 +68,7 @@ Weather::Weather(Player *player) : m_zone( player->GetZoneId()), m_player(player
     m_type = 0;
     m_grade = 0;
     ReGenerate();
-    sLog.outString( "WORLD: Starting weather system(change per %u minutes).", (uint32)(m_interval / 60000) );
+    sLog.outString( "WORLD: Starting weather system for zone %u (change per %u minutes).",m_zone, (uint32)(m_interval / 60000) );
     m_timer = m_interval;
 }
 
@@ -93,6 +93,20 @@ bool Weather::Update(uint32 diff)
 
 void Weather::ReGenerate()
 {
+
+    //Only zones that are listed in DB can get weather that is worse than fine
+    QueryResult *result;
+    result = sDatabase.PQuery("SELECT `zone` FROM `game_weather` WHERE `zone` = '%u'", m_zone);
+    if (!result)
+    {
+    m_type = 0;
+    m_grade = 0.0;
+    UpdateWeather();
+    return;
+    }
+        
+    delete result;
+
     // Weather statistics:
     // 30% - no change
     // 30% - weather worsens
@@ -128,7 +142,12 @@ void Weather::ReGenerate()
     {
         m_type = 0;
     }
-
+    
+    if (m_type == 0)
+    {
+    m_grade = 0.0;
+    }
+    
     if ((u < 60) && (m_type != 0))                          // Get better
     {
         m_grade -= 0.33333334f;
@@ -171,12 +190,7 @@ void Weather::ReGenerate()
     }
 
     // At this point, only weather that isn't doing anything remains
-    QueryResult *result;
     result = sDatabase.PQuery("SELECT `zone`,`spring_rain_chance`,`spring_snow_chance`,`spring_storm_chance`,`summer_rain_chance`,`summer_snow_chance`,`summer_storm_chance`,`fall_rain_chance`,`fall_snow_chance`,`fall_storm_chance`,`winter_rain_chance`,`winter_snow_chance`,`winter_storm_chance` FROM `game_weather` WHERE `zone` = '%u'", m_zone);
-
-    // ignore weather changes for zone without weather record in DB.
-    if (!result)
-        return;
 
     uint32 chance1, chance2, chance3;
     Field *fields = result->Fetch();
@@ -184,6 +198,14 @@ void Weather::ReGenerate()
     chance2 = fields[season * 3 + 2].GetUInt32();
     chance3 = fields[season * 3 + 3].GetUInt32();
     delete result;
+    
+    // ignore weather changes for zone without weather record in DB.
+    if ((chance1 == 0) && (chance2 == 0) && (chance3 == 0))
+    {
+    UpdateWeather();
+    return;
+    }
+    
     if(chance1 > 100)
         chance1 =25;
     if(chance2 > 100)
@@ -204,7 +226,11 @@ void Weather::ReGenerate()
     else
         m_type = 0;
 
-    if (u < 90)
+    if (m_type == 0)
+    {
+    m_grade = 0.0;
+    }
+    else if (u < 90)
     {
         m_grade = rand_norm() * 0.3333;
     }
@@ -219,6 +245,18 @@ void Weather::ReGenerate()
     }
 
     UpdateWeather();
+}
+
+void Weather::SendWeatherUpdateToPlayer(Player *player)
+{
+	Player *m_player = player;
+	
+    uint32 sound = GetSound();
+	WorldPacket data( SMSG_WEATHER, (4+4+4) );
+		
+    data << (uint32)m_type << (float)m_grade << (uint32)sound;
+	m_player->GetSession()->SendPacket( &data );
+
 }
 
 void Weather::UpdateWeather()
