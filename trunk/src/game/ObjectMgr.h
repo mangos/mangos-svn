@@ -253,7 +253,7 @@ class ObjectMgr
             return NULL;
         }
         void LoadGuilds();
-        void LoadRaidGroups();
+        void LoadGroups();
         void LoadQuests();
         void LoadSpellChains();
         void LoadSpellLearnSkills();

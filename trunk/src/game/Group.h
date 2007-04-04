@@ -79,7 +79,7 @@ class MANGOS_DLL_SPEC Group
 
         // group manipulation methods
         void   Create(const uint64 &guid, const char * name);
-        void   LoadRaidGroupFromDB(const uint64 &leaderGuid);
+        void   LoadGroupFromDB(const uint64 &leaderGuid);
         bool   AddInvite(Player *player);
         uint32 RemoveInvite(Player *player);
         bool   AddMember(const uint64 &guid, const char* name);

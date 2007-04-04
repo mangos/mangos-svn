@@ -158,22 +158,13 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         // determine the instantiator which designates the instance id
         if (player->groupInfo.group)
         {
-            if (player->groupInfo.group->isRaidGroup())
+            // instantiate map for group leader (possibly got from the database)
+            sLog.outDebug("MAPINSTANCED: Player '%s' is in group, instantiating map for group leader", player->GetName());
+            instantiator = objmgr.GetPlayer(player->groupInfo.group->GetLeaderGUID());
+            if (!instantiator)
             {
-                // instantiate map for raid group leader (possibly got from the database)
-                sLog.outDebug("MAPINSTANCED: Player '%s' is in raid group, instantiating map for raid group leader", player->GetName());
-                instantiator = objmgr.GetPlayer(player->groupInfo.group->GetLeaderGUID());
-                if (!instantiator)
-                {
-                    // the very special case: raid leader is not online, read instance map from DB
-                    instantiator_online = false;
-                }
-            }
-            else
-            {
-                // instantiate map for group leader
-                sLog.outDebug("MAPINSTANCED: Player '%s' is in group, instantiating map for group leader", player->GetName());
-                instantiator = objmgr.GetPlayer(player->groupInfo.group->GetLeaderGUID());
+                // the very special case: leader is not online, read instance map from DB
+                instantiator_online = false;
             }
         }
 
@@ -206,8 +197,8 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         }
         else
         {
-            // the aforementioned "very special" case of raid leader being not online
-            sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (raid leader is not online, querying DB)", player->GetName());
+            // the aforementioned "very special" case of leader being not online
+            sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (group leader is not online, querying DB)", player->GetName());
             instantiator_id = GUID_LOPART(player->groupInfo.group->GetLeaderGUID());
             QueryResult* result = sDatabase.PQuery("SELECT `instance` FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u') AND (`leader` = '%u')", instantiator_id, GetId(), instantiator_id);
             if (result)
@@ -251,7 +242,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
             }
             else
             {
-                // the aforementioned "very special" case of raid leader being not online
+                // the aforementioned "very special" case of leader being not online
                 sDatabase.BeginTransaction();
                 sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", GUID_LOPART(player->groupInfo.group->GetLeaderGUID()), GetId());
                 sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(player->groupInfo.group->GetLeaderGUID()), GetId(), InstanceId, GUID_LOPART(player->groupInfo.group->GetLeaderGUID()));
@@ -271,7 +262,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
             }
             else
             {
-                // the aforementioned "very special" case of raid leader being not online
+                // the aforementioned "very special" case of leader being not online
                 player->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, GUID_LOPART(player->groupInfo.group->GetLeaderGUID()));
                 sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", player->GetGUIDLow(), GetId());
                 sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, GUID_LOPART(player->groupInfo.group->GetLeaderGUID()));

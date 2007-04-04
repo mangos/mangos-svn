@@ -1280,6 +1280,60 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `gameobject_template` ENABLE KEYS */;
 
 --
+-- Table structure for table `group`
+--
+
+DROP TABLE IF EXISTS `group`;
+CREATE TABLE `group` (
+  `leaderGuid` int(11) NOT NULL,
+  `lootMethod` tinyint(4) NOT NULL,
+  `looterGuid` int(11) NOT NULL,
+  `icon1` bigint(20) NOT NULL,
+  `icon2` bigint(20) NOT NULL,
+  `icon3` bigint(20) NOT NULL,
+  `icon4` bigint(20) NOT NULL,
+  `icon5` bigint(20) NOT NULL,
+  `icon6` bigint(20) NOT NULL,
+  `icon7` bigint(20) NOT NULL,
+  `icon8` bigint(20) NOT NULL,
+  `isRaid` TINYINT( 1 ) NOT NULL,
+  PRIMARY KEY  (`leaderGuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
+
+--
+-- Dumping data for table `group`
+--
+
+
+/*!40000 ALTER TABLE `group` DISABLE KEYS */;
+LOCK TABLES `group` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `group` ENABLE KEYS */;
+
+--
+-- Table structure for table `group_member`
+--
+
+DROP TABLE IF EXISTS `group_member`;
+CREATE TABLE `group_member` (
+  `leaderGuid` int(11) NOT NULL,
+  `memberGuid` int(11) NOT NULL,
+  `assistant` tinyint(1) NOT NULL,
+  `subgroup` smallint(6) NOT NULL,
+  PRIMARY KEY  (`leaderGuid`,`memberGuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
+
+--
+-- Dumping data for table `group_member`
+--
+
+
+/*!40000 ALTER TABLE `group_member` DISABLE KEYS */;
+LOCK TABLES `group_member` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `group_member` ENABLE KEYS */;
+
+--
 -- Table structure for table `guild`
 --
 
@@ -2297,59 +2351,6 @@ CREATE TABLE `quest_template` (
 LOCK TABLES `quest_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `quest_template` ENABLE KEYS */;
-
---
--- Table structure for table `raidgroup`
---
-
-DROP TABLE IF EXISTS `raidgroup`;
-CREATE TABLE `raidgroup` (
-  `leaderGuid` int(11) NOT NULL,
-  `lootMethod` tinyint(4) NOT NULL,
-  `looterGuid` int(11) NOT NULL,
-  `icon1` bigint(20) NOT NULL,
-  `icon2` bigint(20) NOT NULL,
-  `icon3` bigint(20) NOT NULL,
-  `icon4` bigint(20) NOT NULL,
-  `icon5` bigint(20) NOT NULL,
-  `icon6` bigint(20) NOT NULL,
-  `icon7` bigint(20) NOT NULL,
-  `icon8` bigint(20) NOT NULL,
-  PRIMARY KEY  (`leaderGuid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='RaidGroups';
-
---
--- Dumping data for table `raidgroup`
---
-
-
-/*!40000 ALTER TABLE `raidgroup` DISABLE KEYS */;
-LOCK TABLES `raidgroup` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `raidgroup` ENABLE KEYS */;
-
---
--- Table structure for table `raidgroup_member`
---
-
-DROP TABLE IF EXISTS `raidgroup_member`;
-CREATE TABLE `raidgroup_member` (
-  `leaderGuid` int(11) NOT NULL,
-  `memberGuid` int(11) NOT NULL,
-  `assistant` tinyint(1) NOT NULL,
-  `subgroup` smallint(6) NOT NULL,
-  PRIMARY KEY  (`leaderGuid`,`memberGuid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='RaidGroups';
-
---
--- Dumping data for table `raidgroup_member`
---
-
-
-/*!40000 ALTER TABLE `raidgroup_member` DISABLE KEYS */;
-LOCK TABLES `raidgroup_member` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `raidgroup_member` ENABLE KEYS */;
 
 --
 -- Table structure for table `scripts`

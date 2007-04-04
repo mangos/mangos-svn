@@ -7249,7 +7249,7 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
                 pItem->DestroyForPlayer( this );
             }
 
-            pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case traid/mail/buy from vendor
+            pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case trade/mail/buy from vendor
             pItem->SetState(ITEM_REMOVED, this);
             pItem2->SetState(ITEM_CHANGED, this);
 
@@ -7325,7 +7325,7 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
                 pItem->DestroyForPlayer( this );
             }
 
-            pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case traid/mail/buy from vendor
+            pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case trade/mail/buy from vendor
             pItem->SetState(ITEM_REMOVED, this);
             pItem2->SetState(ITEM_CHANGED, this);
 
@@ -9837,7 +9837,7 @@ bool Player::MinimalLoadFromDB( uint32 guid )
     Relocate(fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
     SetMapId(fields[5].GetUInt32());
 
-    _LoadRaidGroup();
+    _LoadGroup();
 
     _LoadBoundInstances();
 
@@ -9996,7 +9996,7 @@ bool Player::LoadFromDB( uint32 guid )
     Relocate(fields[6].GetFloat(),fields[7].GetFloat(),fields[8].GetFloat(),fields[10].GetFloat());
     SetMapId(fields[9].GetUInt32());
 
-    _LoadRaidGroup();
+    _LoadGroup();
 
     _LoadBoundInstances();
 
@@ -11852,9 +11852,9 @@ void Player::TeleportToHomebind()
     delete result;
 }
 
-void Player::_LoadRaidGroup()
+void Player::_LoadGroup()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `raidgroup_member` WHERE `memberGuid`='%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
     if(result)
     {
         uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
