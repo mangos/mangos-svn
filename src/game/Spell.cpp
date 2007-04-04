@@ -1887,6 +1887,12 @@ uint8 Spell::CanCast()
                 // Hammer of Wrath
                 if(m_spellInfo->SpellVisual == 7250)
                 {
+                    if (!unitTarget)
+                    {
+                        castResult = CAST_FAIL_NO_TARGET;
+                        break;
+                    }
+
                     if(unitTarget->GetHealth() > unitTarget->GetMaxHealth()*0.2)
                     {
                         castResult = CAST_FAIL_INVALID_TARGET;
