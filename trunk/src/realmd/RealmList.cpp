@@ -24,7 +24,6 @@
 #include "RealmList.h"
 #include "Policies/SingletonImp.h"
 #include "Database/DatabaseEnv.h"
-#include "SystemConfig.h"
 
 INSTANTIATE_SINGLETON_1( RealmList );
 
