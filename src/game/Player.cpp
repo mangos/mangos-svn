@@ -1589,6 +1589,10 @@ void Player::SetInWater(bool apply)
         // remove travel forms
         if(m_form == FORM_TRAVEL || m_form == FORM_GHOSTWOLF)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
+
+        // remove mounts
+        if(IsMounted())
+            RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     }
     else
     {

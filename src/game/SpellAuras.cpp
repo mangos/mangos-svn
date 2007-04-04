@@ -1330,6 +1330,7 @@ void Aura::HandleForceReaction(bool Apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    //FIXME: correct solution must send SMSG_SET_FORCED_REACTIONS instead setting faction
     if(Apply)
     {
         uint32 faction_id = m_modifier.m_miscvalue;
