@@ -1869,9 +1869,7 @@ bool Unit::IsUnderWater() const
 
 void Unit::DeMorph()
 {
-
-    uint32 displayid = GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
-    SetUInt32Value(UNIT_FIELD_DISPLAYID, displayid);
+    SetUInt32Value(UNIT_FIELD_DISPLAYID, GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
 }
 
 long Unit::GetTotalAuraModifier(uint32 ModifierID)
@@ -3312,13 +3310,36 @@ bool Unit::IsHostileTo(Unit const* unit) const
         return ((Player*)tester)->IsPvP() && ((Player*)target)->IsPvP();
     }
 
-    // common case (CvC,PvC, CvP)
+    // faction base cases
     FactionTemplateEntry const*tester_faction = tester->getFactionTemplateEntry();
     FactionTemplateEntry const*target_faction = target->getFactionTemplateEntry();
-
     if(!tester_faction || !target_faction)
         return false;
 
+    // PvC forced reaction case
+    if(tester->GetTypeId()==TYPEID_PLAYER)
+    {
+        // apply forced faction only in target with identical faction in other case provided original faction
+        if(tester->HasAuraType(SPELL_AURA_FORCE_REACTION) && tester->getFaction()!= target_faction->ID)
+        {
+            FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(tester->getRace()));
+            if(entry)
+                tester_faction = entry;
+        }
+    }
+    // CvP forced reaction case
+    else if(target->GetTypeId()==TYPEID_PLAYER)
+    {
+        // apply forced faction only in target with identical faction in other case provided original faction
+        if(target->HasAuraType(SPELL_AURA_FORCE_REACTION) && target->getFaction()!= tester_faction->ID)
+        {
+            FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(target->getRace()));
+            if(entry)
+                target_faction = entry;
+        }
+    }     
+
+    // common faction based case (CvC,PvC,CvP)
     return tester_faction->IsHostileTo(*target_faction);
 }
 
@@ -3350,13 +3371,36 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
         return !((Player*)target)->IsPvP();
     }
 
-    // common case (CvC, PvC, CvP)
+    // faction base cases
     FactionTemplateEntry const*tester_faction = tester->getFactionTemplateEntry();
     FactionTemplateEntry const*target_faction = target->getFactionTemplateEntry();
-
     if(!tester_faction || !target_faction)
         return false;
 
+    // PvC forced reaction case
+    if(tester->GetTypeId()==TYPEID_PLAYER)
+    {
+        // apply forced faction only in target with identical faction in other case provided original faction
+        if(tester->HasAuraType(SPELL_AURA_FORCE_REACTION) && tester->getFaction()!= target_faction->ID)
+        {
+            FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(tester->getRace()));
+            if(entry)
+                tester_faction = entry;
+        }
+    }
+    // CvP forced reaction case
+    else if(target->GetTypeId()==TYPEID_PLAYER)
+    {
+        // apply forced faction only in target with identical faction in other case provided original faction
+        if(target->HasAuraType(SPELL_AURA_FORCE_REACTION) && target->getFaction()!= tester_faction->ID)
+        {
+            FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(target->getRace()));
+            if(entry)
+                target_faction = entry;
+        }
+    }     
+
+    // common faction based case (CvC,PvC,CvP)
     return tester_faction->IsFriendlyTo(*target_faction);
 }
 

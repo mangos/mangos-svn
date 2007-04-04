@@ -1051,6 +1051,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         static uint32 TeamForRace(uint8 race);
         uint32 GetTeam() const { return m_team; }
+        static uint32 getFactionForRace(uint8 race);
         void setFactionForRace(uint8 race);
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
