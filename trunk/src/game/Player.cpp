@@ -3882,18 +3882,22 @@ uint32 Player::TeamForRace(uint8 race)
     return ALLIANCE;
 }
 
-void Player::setFactionForRace(uint8 race)
+uint32 Player::getFactionForRace(uint8 race)
 {
-    m_team = TeamForRace(race);
-
     ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
     if(!rEntry)
     {
         sLog.outError("Race %u not found in DBC: wrong DBC files?",uint32(race));
-        return;
+        return 0;
     }
 
-    setFaction( rEntry->FactionID );
+    return rEntry->FactionID;
+}
+
+void Player::setFactionForRace(uint8 race)
+{
+    m_team = TeamForRace(race);
+    setFaction( getFactionForRace(race) );
 }
 
 void Player::UpdateReputation() const
