@@ -424,8 +424,8 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Guilds..." );
     objmgr.LoadGuilds();
 
-    sLog.outString( "Loading RaidGroups.." );
-    objmgr.LoadRaidGroups();
+    sLog.outString( "Loading Groups.." );
+    objmgr.LoadGroups();
 
     objmgr.SetHighestGuids();
 

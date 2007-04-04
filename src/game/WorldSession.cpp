@@ -253,7 +253,10 @@ void WorldSession::LogoutPlayer(bool Save)
                 delete group;
             }
         }
-        if(_player->groupInfo.group && !_player->groupInfo.group->isRaidGroup())
+
+        // remove player from the group if he is:
+        // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
+        if(_player->groupInfo.group && !_player->groupInfo.group->isRaidGroup() && _socket)
         {
             Group *group = _player->groupInfo.group;
             if (group->RemoveMember(_player->GetGUID(), 0) <= 1)
@@ -268,8 +271,8 @@ void WorldSession::LogoutPlayer(bool Save)
         ObjectAccessor::Instance().RemovePlayer(_player);
         MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
 
-        ///- Send update to raid group
-        if(_player->groupInfo.group && _player->groupInfo.group->isRaidGroup())
+        ///- Send update to group
+        if(_player->groupInfo.group)
             _player->groupInfo.group->SendUpdate();
 
         ///- Broadcast a logout message to the player's friends
@@ -699,4 +702,5 @@ void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
     data << uint8(0);
     SendPacket(&data);
 }
+
 

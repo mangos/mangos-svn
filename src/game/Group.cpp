@@ -36,17 +36,28 @@ void Group::Create(const uint64 &guid, const char * name)
     m_lootMethod = GROUP_LOOT;
 
     AddMember(guid, name);
+
+    // store group in database
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("INSERT INTO `group`(`leaderGuid`,`lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u',0)", GUID_LOPART(m_leaderGuid), m_lootMethod, GUID_LOPART(m_looterGuid), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
+
+    for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
+        sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(citr->guid), (citr->assistant==1)?1:0, citr->group);
+    sDatabase.CommitTransaction();
 }
 
-void Group::LoadRaidGroupFromDB(const uint64 &leaderGuid)
+void Group::LoadGroupFromDB(const uint64 &leaderGuid)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8` FROM `raidgroup` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    //                                             0            1            2       3       4       5       6       7       8       9       10
+    QueryResult *result = sDatabase.PQuery("SELECT `lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid` FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
     if(!result)
         return;
 
     m_leaderGuid = leaderGuid;
     objmgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName);
-    m_groupType  = GROUPTYPE_RAID;
+    m_groupType  = (*result)[10].GetBool() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
     m_lootMethod = (LootMethod)(*result)[0].GetUInt8();
     m_looterGuid = MAKE_GUID((*result)[1].GetUInt32(),HIGHGUID_PLAYER);
 
@@ -54,7 +65,7 @@ void Group::LoadRaidGroupFromDB(const uint64 &leaderGuid)
         m_targetIcons[i] = (*result)[2+i].GetUInt8();
     delete result;
 
-    result = sDatabase.PQuery("SELECT `memberGuid`,`assistant`,`subgroup` FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    result = sDatabase.PQuery("SELECT `memberGuid`,`assistant`,`subgroup` FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
     if(!result)
         return;
 
@@ -191,13 +202,10 @@ void Group::Disband(bool hideDestroy)
     }
     m_invitees.clear();
 
-    if(isRaidGroup())
-    {
-        sDatabase.BeginTransaction();
-        sDatabase.PExecute("DELETE FROM `raidgroup` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-        sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-        sDatabase.CommitTransaction();
-    }
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.CommitTransaction();
 
     m_leaderGuid = 0;
     m_leaderName = "";
@@ -577,10 +585,7 @@ bool Group::IsMember(uint64 guid)
         return (player->groupInfo.group == this);
     else
     {
-        if(!isRaidGroup())
-            return false;
-
-        QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `raidgroup_member` WHERE `memberGuid`='%u' AND `leaderGuid`='%u'", GUID_LOPART(guid), GUID_LOPART(GetLeaderGUID()));
+        QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u' AND `leaderGuid`='%u'", GUID_LOPART(guid), GUID_LOPART(GetLeaderGUID()));
         if(result)
         {
             delete result;
@@ -774,8 +779,9 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant, u
         for(int i=0; i<TARGETICONCOUNT; i++)
             m_targetIcons[i] = 0;
     }
-    else                                                    // insert into raid table..
-        sDatabase.PExecute("INSERT INTO `raidgroup_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(member.guid), ((member.assistant==1)?1:0), member.group);
+
+    // insert into group table
+    sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(member.guid), ((member.assistant==1)?1:0), member.group);
 
     return true;
 }
@@ -792,8 +798,8 @@ bool Group::_removeMember(const uint64 &guid)
 
     _removeRolls(guid);
     m_members.erase(m_members.begin()+_getMemberIndex(guid));
-    if(isRaidGroup())
-        sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `memberGuid`='%u'", GUID_LOPART(guid));
+
+    sDatabase.PExecute("DELETE FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(guid));
 
     if(m_leaderGuid == guid)                                // leader was removed
     {
@@ -892,13 +898,11 @@ void Group::_setLeader(const uint64 &guid)
         }
     }
     
-    if(isRaidGroup())
-    {
-        sDatabase.BeginTransaction();
-        sDatabase.PExecute("UPDATE `raidgroup` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
-        sDatabase.PExecute("UPDATE `raidgroup_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
-        sDatabase.CommitTransaction();
-    }
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("UPDATE `group` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("UPDATE `group_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_members[id].guid), GUID_LOPART(m_leaderGuid));
+    sDatabase.CommitTransaction();
+
     m_leaderGuid = m_members[id].guid;
     m_leaderName = m_members[id].name;
 }
@@ -927,14 +931,7 @@ void Group::_convertToRaid()
 {
     m_groupType = GROUPTYPE_RAID;
 
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `raidgroup` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    sDatabase.PExecute("DELETE FROM `raidgroup_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    sDatabase.PExecute("INSERT INTO `raidgroup`(`leaderGuid`,`lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), m_lootMethod, GUID_LOPART(m_looterGuid), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
-
-    for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
-        sDatabase.PExecute("INSERT INTO `raidgroup_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(citr->guid), (citr->assistant==1)?1:0, citr->group);
-    sDatabase.CommitTransaction();
+    sDatabase.PExecute("UPDATE `group` SET `isRaid` = 1 WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
 }
 
 bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
@@ -944,7 +941,7 @@ bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
         return false;
 
     m_members[i].group = group;
-    sDatabase.PExecute("UPDATE `raidgroup_member` SET `subgroup`='%u' WHERE `memberGuid`='%u'", group, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `group_member` SET `subgroup`='%u' WHERE `memberGuid`='%u'", group, GUID_LOPART(guid));
     return true;
 }
 
@@ -955,7 +952,7 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
         return false;
 
     m_members[i].assistant = state;
-    sDatabase.PExecute("UPDATE `raidgroup_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `group_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));
     return true;
 }
 

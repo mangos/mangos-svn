@@ -1115,12 +1115,12 @@ void ObjectMgr::LoadGuilds()
     sLog.outString( ">> Loaded %u guild definitions", count );
 }
 
-void ObjectMgr::LoadRaidGroups()
+void ObjectMgr::LoadGroups()
 {
     Group *group;
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query( "SELECT `leaderGuid` FROM `raidgroup`" );
+    QueryResult *result = sDatabase.Query( "SELECT `leaderGuid` FROM `group`" );
 
     if( !result )
     {
@@ -1130,7 +1130,7 @@ void ObjectMgr::LoadRaidGroups()
         bar.step();
 
         sLog.outString( "" );
-        sLog.outString( ">> Loaded %u raidgroup definitions", count );
+        sLog.outString( ">> Loaded %u group definitions", count );
         return;
     }
 
@@ -1142,7 +1142,7 @@ void ObjectMgr::LoadRaidGroups()
         count++;
 
         group = new Group;
-        group->LoadRaidGroupFromDB(MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER));
+        group->LoadGroupFromDB(MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER));
         AddGroup(group);
 
     }while( result->NextRow() );
@@ -1150,7 +1150,7 @@ void ObjectMgr::LoadRaidGroups()
     delete result;
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %u raidgroup definitions", count );
+    sLog.outString( ">> Loaded %u group definitions", count );
 }
 
 void ObjectMgr::LoadQuests()

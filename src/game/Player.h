@@ -1267,7 +1267,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadMail();
         void _LoadMailedItems();
         void _LoadQuestStatus();
-        void _LoadRaidGroup();
+        void _LoadGroup();
         void _LoadReputation();
         void _LoadSpells(uint32 timediff);
         void _LoadTaxiMask(const char* data);
