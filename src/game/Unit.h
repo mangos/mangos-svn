@@ -583,6 +583,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint16 GetMaxSkillValueForLevel() const { return getLevel()*5; }
         void DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint8 damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss);
+        void DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, bool *crit = false, bool isTriggeredSpell = false);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
         void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage = 0, SpellEntry const *procSpell = NULL, bool isTriggeredSpell = false, WeaponAttackType attType = BASE_ATTACK);
         void CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
@@ -605,7 +606,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint16 GetPureWeaponSkillValue(WeaponAttackType attType) const;
         float GetWeaponProcChance() const;
         float GetPPMProcChance(uint32 WeaponSpeed, float PPM) const;
+        MeleeHitOutcome RollPhysicalOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo);
         MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const;
+        MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance) const;
 
         bool isVendor()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
         bool isTrainer()      const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ); }

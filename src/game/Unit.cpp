@@ -657,64 +657,223 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
     if (triggered) delete spell;                            // triggered spell not self deleted
 }
 
+void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, bool *crit, bool isTriggeredSpell)
+{
+
+    // TODO this in only generic way, check for exceptions
+    DEBUG_LOG("DealDamageBySchool (BEFORE) SCHOOL %u >> DMG:%u", spellInfo->School, *damage);
+
+    // Per-school calc
+    switch (spellInfo->School)
+    {
+        // Physical damage school
+        case SPELL_SCHOOL_NORMAL:
+
+            // Calculate physical outcome
+            MeleeHitOutcome outcome;
+            outcome = RollPhysicalOutcomeAgainst(pVictim, BASE_ATTACK, spellInfo);
+
+            // Return miss first (sends miss message)
+            if(outcome == MELEE_HIT_MISS)
+            {
+                SendAttackStateUpdate(HITINFO_MISS, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
+                *damage = 0;
+                if(GetTypeId()== TYPEID_PLAYER)
+                    ((Player*)this)->UpdateWeaponSkill(BASE_ATTACK);
+                return;
+            }
+
+            //  Hitinfo, Victimstate
+            uint32 hitInfo, victimState;
+            hitInfo = HITINFO_NORMALSWING;
+
+            //Calculate armor mitigation
+            *damage = CalcArmorReducedDamage(pVictim, *damage);
+
+            // Classify outcome
+            switch (outcome)
+            {
+                case MELEE_HIT_CRIT:
+                {
+                    *damage *= 2;
+                    *crit = true;
+                    hitInfo |= HITINFO_CRITICALHIT;
+                    break;
+                }
+                case MELEE_HIT_PARRY:
+                {
+                    *damage = 0;
+                    victimState = VICTIMSTATE_PARRY;
+
+                    // Counter-attack ( explained in Unit::DoAttackDamage() )
+                    {
+                        // Get attack timers
+                        float offtime  = float(pVictim->getAttackTimer(OFF_ATTACK));
+                        float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
+
+                        // Reduce attack time
+                        if (pVictim->haveOffhandWeapon() && offtime < basetime)
+                        {
+                            float percent20 = pVictim->GetAttackTime(OFF_ATTACK) * 0.20;
+                            float percent60 = 3 * percent20;
+                            if(offtime > percent20 && offtime <= percent60)
+                            {
+                                pVictim->setAttackTimer(OFF_ATTACK, uint32(percent20));
+                            }
+                            else if(offtime > percent60)
+                            {
+                                offtime -= 2 * percent20;
+                                pVictim->setAttackTimer(OFF_ATTACK, uint32(offtime));
+                            }
+                        }
+                        else
+                        {
+                            float percent20 = pVictim->GetAttackTime(BASE_ATTACK) * 0.20;
+                            float percent60 = 3 * percent20;
+                            if(basetime > percent20 && basetime <= percent60)
+                            {
+                                pVictim->setAttackTimer(BASE_ATTACK, uint32(percent20));
+                            }
+                            else if(basetime > percent60)
+                            {
+                                basetime -= 2 * percent20;
+                                pVictim->setAttackTimer(BASE_ATTACK, uint32(basetime));
+                            }
+                        }
+                    }
+
+                    // Update victim defense ?
+                    if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                        ((Player*)pVictim)->UpdateDefense();
+
+                    // Set parry flags
+                    pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+                    pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_PARRY-1)));
+                    break;
+                }
+                case MELEE_HIT_DODGE:
+                {
+                    if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                        ((Player*)pVictim)->UpdateDefense();
+
+                    *damage = 0;
+                    hitInfo |= HITINFO_SWINGNOHITSOUND;
+                    victimState = VICTIMSTATE_DODGE;
+                    break;
+                }
+                case MELEE_HIT_BLOCK:
+                {
+                    uint32 blocked_amount;
+                    blocked_amount = uint32(pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
+                    if (blocked_amount >= *damage)
+                    {
+                        hitInfo |= HITINFO_SWINGNOHITSOUND;
+                        victimState = VICTIMSTATE_BLOCKS;
+                        *damage = 0;
+                    }
+                    else
+                        *damage = *damage - blocked_amount;
+                    break;
+
+                }
+            }
+
+            // Update attack state
+            SendAttackStateUpdate(victimState ? hitInfo|victimState : hitInfo, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
+
+            break;
+
+        // Other schools
+        case SPELL_SCHOOL_HOLY:
+        case SPELL_SCHOOL_FIRE:
+        case SPELL_SCHOOL_NATURE:
+        case SPELL_SCHOOL_FROST:
+        case SPELL_SCHOOL_SHADOW:
+        case SPELL_SCHOOL_ARCANE:
+
+            //Spell miss (sends resist message)
+            if(SpellMissChanceCalc(pVictim) > urand(0,10000))
+            {
+                *damage = 0;
+                ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
+                SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
+                return;
+            }
+
+            // Calculate damage bonus
+            *damage = SpellDamageBonus(pVictim, spellInfo, *damage);
+
+            // Calculate critical bonus
+            *crit = SpellCriticalBonus(spellInfo, (int32*)damage);
+            break;
+    }
+
+    // TODO this in only generic way, check for exceptions
+    DEBUG_LOG("DealDamageBySchool (AFTER) SCHOOL %u >> DMG:%u", spellInfo->School, *damage);
+
+}
+
 void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool isTriggeredSpell)
 {
     if(!this || !pVictim)
         return;
     if(!this->isAlive() || !pVictim->isAlive())
         return;
+
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellID);
     if(!spellInfo)
         return;
 
-    uint32 absorb=0;
-    uint32 resist=0;
+    bool crit = false;
 
-    //Spell miss (sends resist message)
-    if(SpellMissChanceCalc(pVictim) > urand(0,10000))
+    DealDamageBySchool(pVictim, spellInfo, &damage, &crit, isTriggeredSpell);
+
+    // If we actually dealt some damage
+    if(damage > 0)
     {
-        ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo, isTriggeredSpell);
-        SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
-        return;
+        // Calculate absorb & resists
+        uint32 absorb = 0;
+        uint32 resist = 0;
+
+        CalcAbsorbResist(pVictim,spellInfo->School,damage, &absorb, &resist);
+
+        // Only send absorbed message if we actually absorbed some damage
+        if(damage > 0)
+        {
+            // Handle absorb & resists
+            if(damage <= absorb + resist && absorb)
+            {
+                SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School,damage, absorb,resist,1,0);
+                return;
+            }
+            else if(damage <= resist)   // If we didn't fully absorb check if we fully resisted
+            {
+                ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
+                SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, damage, absorb,resist,1,0);
+                return;
+            }
+        }
+
+        // Send damage log
+        sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,absorb is %u,resist is %u",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID, absorb,resist);
+        SendSpellNonMeleeDamageLog(pVictim, spellID, damage, spellInfo->School, absorb, resist, false, 0, crit);
+
+        // Deal damage done
+        DealDamage(pVictim, (damage-absorb-resist), SPELL_DIRECT_DAMAGE, spellInfo->School, spellInfo, 0, true);
+
+        // Procflags
+        uint32 procAttacker = PROC_FLAG_HIT_SPELL;
+        uint32 procVictim   = (PROC_FLAG_STRUCK_SPELL|PROC_FLAG_TAKE_DAMAGE);
+
+        if (crit)
+        {
+            procAttacker |= PROC_FLAG_CRIT_SPELL;
+            procVictim   |= PROC_FLAG_STRUCK_CRIT_SPELL;
+        }
+
+        ProcDamageAndSpell(pVictim, procAttacker, procVictim, (damage-absorb-resist), spellInfo, isTriggeredSpell);
     }
-
-    uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
-    bool crit = SpellCriticalBonus(spellInfo, (int32*)&pdamage);
-
-    //Calculate armor mitigation if it is a physical spell
-    if (spellInfo->School == 0)
-        pdamage = CalcArmorReducedDamage(pVictim, damage);
-    CalcAbsorbResist(pVictim,spellInfo->School,pdamage, &absorb, &resist);
-
-    // Only send absorbed message if we actually absorbed some damage
-    if( pdamage <= absorb+resist && absorb)
-    {
-        SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
-        return;
-    }else                                                   // If we didn't fully absorb check if we fully resisted
-    if( pdamage <= resist)
-    {
-        ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo, isTriggeredSpell);
-        SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, pdamage, absorb,resist,1,0);
-        return;
-    }
-
-    sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
-
-    SendSpellNonMeleeDamageLog(pVictim, spellID, pdamage, spellInfo->School, absorb, resist, false, 0, crit);
-    DealDamage(pVictim, (pdamage-absorb-resist), SPELL_DIRECT_DAMAGE, spellInfo->School, spellInfo, 0, true);
-
-    uint32 procAttacker = PROC_FLAG_HIT_SPELL;
-    uint32 procVictim   = (PROC_FLAG_STRUCK_SPELL|PROC_FLAG_TAKE_DAMAGE);
-
-    if (crit)
-    {
-        procAttacker |= PROC_FLAG_CRIT_SPELL;
-        procVictim   |= PROC_FLAG_STRUCK_CRIT_SPELL;
-    }
-
-    ProcDamageAndSpell(pVictim, procAttacker, procVictim, (pdamage-absorb-resist), spellInfo, isTriggeredSpell);
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod)
@@ -1008,7 +1167,15 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
     pVictim->RemoveFlag(UNIT_FIELD_AURASTATE, uint32((1<<(AURA_STATE_PARRY-1)) | 1<<(AURA_STATE_DODGE-1)));
-    MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim, attType);
+
+    MeleeHitOutcome outcome;
+
+    // If is casted Melee spell, calculate like physical
+    if(!spellCasted)
+        outcome = RollMeleeOutcomeAgainst (pVictim, attType);
+    else
+        outcome = RollPhysicalOutcomeAgainst (pVictim, attType, spellCasted);
+
     if (outcome == MELEE_HIT_MISS)
     {
         *hitInfo |= HITINFO_MISS;
@@ -1035,7 +1202,18 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             //*hitInfo = 0xEA;
             // 0xEA
             *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;
-            *damage *= 2;
+
+            // Crit bonus calc
+            uint32 crit_bonus;
+            crit_bonus = *damage;
+
+            // Apply crit_damage bonus for melee spells
+            if (GetTypeId() == TYPEID_PLAYER && spellCasted)
+            {
+                ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+            }
+
+            *damage += crit_bonus;
 
             if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
                 ((Player*)this)->UpdateWeaponSkill(attType);
@@ -1292,7 +1470,49 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
             GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
 }
 
+
+MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo)
+{
+    // Miss chance based on melee
+    int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
+
+    // Critical hit chance
+    float crit_chance = GetUnitCriticalChance();
+
+    // Only players can have Talent&Spell bonuses
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        // Talents
+        AuraList& mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
+        for(AuraList::iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
+            if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellInfo->School)) != 0)
+                crit_chance += (*i)->GetModifier()->m_amount;
+
+        // Spellmods
+        ((Player*)this)->ApplySpellMod(spellInfo->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
+    }
+
+    DEBUG_LOG("PHYSICAL OUTCOME: hit %u crit %f miss %u",m_modHitChance,crit_chance,miss_chance);
+
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, m_modHitChance);
+}
+
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const
+{
+    // This is only wrapper
+
+    // Miss chance based on melee
+    int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
+
+    // Critical hit chance
+    int32 crit_chance = (int32)(GetUnitCriticalChance()*100);
+
+    // Useful if want to specify crit & miss chances for melee, else it could be removed
+    DEBUG_LOG("MELEE OUTCOME: hit %u crit %u miss %u", m_modHitChance,crit_chance,miss_chance);
+    return RollMeleeOutcomeAgainst(pVictim, attType, crit_chance, miss_chance, m_modHitChance);
+}
+
+MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance) const
 {
     int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenceSkillValue();
     // bonus from skills is 0.04%
@@ -1303,12 +1523,14 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     DEBUG_LOG ("RollMeleeOutcomeAgainst: skill bonus of %d for attacker", skillBonus);
     DEBUG_LOG ("RollMeleeOutcomeAgainst: rolled %d, +hit %d, dodge %u, parry %u, block %u, crit %u",
-        roll, m_modHitChance, (uint32)(pVictim->GetUnitDodgeChance()*100), (uint32)(pVictim->GetUnitParryChance()*100),
-        (uint32)(pVictim->GetUnitBlockChance()*100), (uint32)(GetUnitCriticalChance()*100));
+        roll, hit_chance, (uint32)(pVictim->GetUnitDodgeChance()*100), (uint32)(pVictim->GetUnitParryChance()*100),
+        (uint32)(pVictim->GetUnitBlockChance()*100), crit_chance);
 
     // dual wield has 24% base chance to miss instead of 5%, also
     // base miss rate is 5% and can't get higher than 60%
-    tmp = MeleeMissChanceCalc(pVictim) - skillBonus;
+
+    // Inherit if passed
+    tmp = miss_chance - skillBonus;
 
     if(tmp > 6000)
         tmp = 6000;
@@ -1370,6 +1592,15 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         }
     }
 
+    // Critical chance
+    tmp = crit_chance + skillBonus + modCrit;
+
+    if (tmp > 0 && roll < (sum += tmp))
+    {
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum-tmp, sum);
+        return MELEE_HIT_CRIT;
+    }
+
     // Max 40% chance to score a glancing blow against mobs that are higher level
     if (   (GetTypeId() == TYPEID_PLAYER)
         && (pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -1385,14 +1616,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
             DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum);
             return MELEE_HIT_GLANCING;
         }
-    }
-
-    // FIXME: +skill and +defense has no effect on crit chance in PvP combat
-    tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
-    if (tmp > 0 && roll < (sum += tmp))
-    {
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum-tmp, sum);
-        return MELEE_HIT_CRIT;
     }
 
     // mobs can score crushing blows if they're 3 or more levels above victim
