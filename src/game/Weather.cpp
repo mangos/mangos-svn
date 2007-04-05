@@ -62,12 +62,14 @@ uint32 Weather::GetSound()
     return sound;
 }
 
-Weather::Weather(Player *player) : m_zone( player->GetZoneId()), m_player(player)
+Weather::Weather(uint32 zone) : m_zone(zone)
 {
     m_interval = sWorld.getConfig(CONFIG_INTERVAL_CHANGEWEATHER);
     m_type = 0;
     m_grade = 0;
     ReGenerate();
+    UpdateWeather();
+
     sLog.outString( "WORLD: Starting weather system for zone %u (change per %u minutes).",m_zone, (uint32)(m_interval / 60000) );
     m_timer = m_interval;
 }
@@ -81,30 +83,33 @@ bool Weather::Update(uint32 diff)
         else
             m_timer -= diff;
     }
-    if(m_timer == 0 )
-    {
-        ReGenerate();
-        m_timer = m_interval;
-    }
-    if(!m_player)
+
+    // not required update
+    if(m_timer != 0 )
+        return true;
+
+    ReGenerate();
+
+    // will be removed if not updated (no players)
+    if(!UpdateWeather())
         return false;
+
+    m_timer = m_interval;
     return true;
 }
 
 void Weather::ReGenerate()
 {
-
     //Only zones that are listed in DB can get weather that is worse than fine
     QueryResult *result;
     result = sDatabase.PQuery("SELECT `zone` FROM `game_weather` WHERE `zone` = '%u'", m_zone);
     if (!result)
     {
-    m_type = 0;
-    m_grade = 0.0;
-    UpdateWeather();
-    return;
+        m_type = 0;
+        m_grade = 0.0;
+        return;
     }
-        
+   
     delete result;
 
     // Weather statistics:
@@ -142,23 +147,21 @@ void Weather::ReGenerate()
     {
         m_type = 0;
     }
-    
+
     if (m_type == 0)
     {
-    m_grade = 0.0;
+        m_grade = 0.0;
     }
-    
+
     if ((u < 60) && (m_type != 0))                          // Get better
     {
         m_grade -= 0.33333334f;
-        UpdateWeather();
         return;
     }
 
     if ((u < 90) && (m_type != 0))                          // Get worse
     {
         m_grade += 0.33333334f;
-        UpdateWeather();
         return;
     }
 
@@ -168,7 +171,6 @@ void Weather::ReGenerate()
         if (m_grade < 0.33333334f)
         {
             m_grade = 0.9999;                               // go nuts
-            UpdateWeather();
             return;
         }
         else
@@ -180,7 +182,6 @@ void Weather::ReGenerate()
                 if (rnd < 50)
                 {
                     m_grade -= 0.6666667;
-                    UpdateWeather();
                     return;
                 }
             }
@@ -198,14 +199,11 @@ void Weather::ReGenerate()
     chance2 = fields[season * 3 + 2].GetUInt32();
     chance3 = fields[season * 3 + 3].GetUInt32();
     delete result;
-    
+
     // ignore weather changes for zone without weather record in DB.
     if ((chance1 == 0) && (chance2 == 0) && (chance3 == 0))
-    {
-    UpdateWeather();
-    return;
-    }
-    
+        return;
+
     if(chance1 > 100)
         chance1 =25;
     if(chance2 > 100)
@@ -228,7 +226,7 @@ void Weather::ReGenerate()
 
     if (m_type == 0)
     {
-    m_grade = 0.0;
+        m_grade = 0.0;
     }
     else if (u < 90)
     {
@@ -243,40 +241,33 @@ void Weather::ReGenerate()
         else
             m_grade = rand_norm() * 0.3333 + 0.6667;
     }
-
-    UpdateWeather();
 }
 
 void Weather::SendWeatherUpdateToPlayer(Player *player)
 {
-	Player *m_player = player;
-	
-    uint32 sound = GetSound();
-	WorldPacket data( SMSG_WEATHER, (4+4+4) );
-		
-    data << (uint32)m_type << (float)m_grade << (uint32)sound;
-	m_player->GetSession()->SendPacket( &data );
-
-}
-
-void Weather::UpdateWeather()
-{
-    //if(!m_player || !m_player->IsInWorld() || m_player->GetZoneId() != m_zone)
-    //{
-    m_player = sWorld.FindPlayerInZone(m_zone);
-    if(!m_player)
-        return;
-    //}
-
     uint32 sound = GetSound();
     WorldPacket data( SMSG_WEATHER, (4+4+4) );
+
+    data << (uint32)m_type << (float)m_grade << (uint32)sound;
+    player->GetSession()->SendPacket( &data );
+}
+
+bool Weather::UpdateWeather()
+{
+    Player* player = sWorld.FindPlayerInZone(m_zone);
+    if(!player)
+        return false;
+
+    uint32 sound = GetSound();
     if (m_grade >= 1)
         m_grade = 0.9999;
     else if (m_grade < 0)
         m_grade = 0.0001;
 
+    WorldPacket data( SMSG_WEATHER, (4+4+4) );
     data << (uint32)m_type << (float)m_grade << (uint32)sound;
-    m_player->SendMessageToSet( &data, true );
+    player->SendMessageToSet( &data, true );
+
     char const* wthstr;
     switch(sound)
     {
@@ -315,7 +306,10 @@ void Weather::UpdateWeather()
     char buf[256];
     sprintf((char*)buf, "Change the weather of zone %u to %s.", m_zone, wthstr);
     sLog.outDetail(buf);
-    sWorld.SendZoneText(m_zone, buf);
+
+    // send only GMs
+    sWorld.SendZoneText(m_zone, buf,NULL,1);
+    return true;
 }
 
 void Weather::SetWeather(uint32 type, float grade)

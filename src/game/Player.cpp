@@ -44,6 +44,7 @@
 #include "SpellAuras.h"
 #include "Util.h"
 #include "Transports.h"
+#include "Weather.h"
 
 #include <cmath>
 
@@ -4499,24 +4500,23 @@ void Player::UpdateZone()
     AreaTableEntry const* zone = GetAreaEntryByAreaID(GetZoneId());
     if(!zone)
         return;
-			
-	
-	Weather *wth = sWorld.FindWeather(zone->ID);
+
+    Weather *wth = sWorld.FindWeather(GetZoneId());
     if(wth)
     {
         wth->SendWeatherUpdateToPlayer(this);
     }
 	else
     {
-        wth = new Weather(this);
+        wth = new Weather(GetZoneId());
         sWorld.AddWeather(wth);
 		wth->SendWeatherUpdateToPlayer(this);
     }
 
     pvpInfo.inHostileArea =
-        (GetTeam() == ALLIANCE && zone->team == AREATEAM_HORDE ||
+        GetTeam() == ALLIANCE && zone->team == AREATEAM_HORDE ||
         GetTeam() == HORDE    && zone->team == AREATEAM_ALLY  ||
-        (sWorld.IsPvPRealm()  && zone->team == AREATEAM_NONE));
+        sWorld.IsPvPRealm()   && zone->team == AREATEAM_NONE;
 
     if(pvpInfo.inHostileArea)                               // in hostile area
     {
@@ -5709,7 +5709,7 @@ void Player::AddWeather()
     uint32 zoneid = GetZoneId();
     if(!sWorld.FindWeather(zoneid))
     {
-        Weather *wth = new Weather(this);
+        Weather *wth = new Weather(zoneid);
         sWorld.AddWeather(wth);
     }
 }

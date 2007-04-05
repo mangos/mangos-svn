@@ -29,7 +29,6 @@
 #include "QuestDef.h"
 #include "Group.h"
 #include "Bag.h"
-#include "Weather.h"
 #include "WorldSession.h"
 #include "Pet.h"
 
