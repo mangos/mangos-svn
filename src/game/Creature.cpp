@@ -1136,15 +1136,8 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 
     if(!external) delete result;
 
-    if (HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ) )
-        CreateTrainerSpells();
-
-    if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ) )
-        _LoadGoods();
-
-    if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER ) )
-        _LoadQuests();
-
+    LoadFlagRelatedData();
+    
     AIM_Initialize();
     return true;
 }
@@ -1503,4 +1496,17 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     GetRespawnCoord(rx, ry, rz);
     float length = pVictim->GetDistanceSq(rx,ry,rz);
     return ( length > CREATURE_THREAT_RADIUS );
+}
+
+//previously in LoadFromDB but also needed for summoned creatures
+void Creature::LoadFlagRelatedData()
+{
+    if (HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ) )
+        CreateTrainerSpells();
+
+    if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ) )
+        _LoadGoods();
+
+    if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER ) )
+        _LoadQuests();
 }

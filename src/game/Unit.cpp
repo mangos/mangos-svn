@@ -37,6 +37,7 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Totem.h"
+#include "TemporarySummon.h"
 
 #include <math.h>
 
@@ -5221,4 +5222,23 @@ void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32& duratio
             }
         }
     }
+}
+
+Creature* Unit::SummonCreature(uint32 id, uint32 mapid, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
+{
+    TemporarySummon* pCreature = new TemporarySummon(this,this);
+
+    pCreature->SetInstanceId(GetInstanceId());
+
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), mapid, x, y, z, ang, id))
+    {
+        delete pCreature;
+        return NULL;
+    }
+
+    pCreature->Summon(spwtype, despwtime);
+    pCreature->LoadFlagRelatedData();
+    
+    //return the creature therewith the summoner has access to it
+    return pCreature;
 }

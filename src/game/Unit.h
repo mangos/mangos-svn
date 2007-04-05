@@ -247,6 +247,18 @@ enum UnitFlags
     UNIT_FLAG_SHEATHE        = 0x40000000
 };
 
+enum TempSummonType
+{
+    TEMPSUMMON_TIMED_OR_DEAD_DESPAWN       = 1,             // despawns after a specified time OR when the creature disappears
+    TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN     = 2,             // despawns after a specified time OR when the creature dies
+    TEMPSUMMON_TIMED_DESPAWN               = 3,             // despawns after a specified time
+    TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT = 4,             // despawns after a specified time after the creature is out of combat
+    TEMPSUMMON_CORPSE_DESPAWN              = 5,             // despawns instantly after death
+    TEMPSUMMON_CORPSE_TIMED_DESPAWN        = 6,             // despawns after a specified time after death
+    TEMPSUMMON_DEAD_DESPAWN                = 7,             // despawns when the creature disappears
+    TEMPSUMMON_MANUAL_DESPAWN              = 8              // despawns when UnSummon() is called        
+};
+
 enum ProcFlags
 {
     PROC_FLAG_NONE               = 0x00000000,              // None
@@ -837,6 +849,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void _ApplyAllAuraMods();
 
         int32 CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index);
+        
+        Creature* SummonCreature(uint32 id, uint32 mapid, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
     protected:
         Unit ( WorldObject *instantiator );
 
