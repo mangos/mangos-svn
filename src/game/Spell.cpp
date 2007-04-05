@@ -1968,6 +1968,15 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_SPELL_NOT_LEARNED;
                 break;
             }
+            case SPELL_AURA_MOUNTED:
+            {
+                if (m_caster->IsInWater())
+                {
+                    castResult = CAST_FAIL_CANT_USE_WHILE_SWIMMING;
+                    break;
+                }
+                break;
+            }
             case SPELL_EFFECT_FEED_PET:
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !itemTarget )
