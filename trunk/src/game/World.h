@@ -190,8 +190,8 @@ class World
 
         void SendWorldText(const char *text, WorldSession *self = 0);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
-        void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0);
-        void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0);
+        void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0, uint32 security = 0);
+        void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0, uint32 security = 0);
         void SendServerMessage(uint32 type, const char *text = "", Player* player = NULL);
 
         /// Are we in the middle of a shutdown?

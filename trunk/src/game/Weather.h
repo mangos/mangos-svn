@@ -41,11 +41,11 @@ class Player;
 class Weather
 {
     public:
-        Weather(Player *player);
-        ~Weather() { m_player = NULL;};
+        explicit Weather(uint32 zone);
+        ~Weather() { };
         void ReGenerate();
-        void UpdateWeather();
-		void SendWeatherUpdateToPlayer(Player *player);
+        bool UpdateWeather();
+        void SendWeatherUpdateToPlayer(Player *player);
         void SetWeather(uint32 type, float grade);
         uint32 GetZone() { return m_zone; };
         bool Update(uint32 diff);
@@ -54,7 +54,6 @@ class Weather
         uint32 m_zone;
         uint32 m_type;
         float m_grade;
-        Player *m_player;
         uint32 m_interval;
         uint32 m_timer;
 };

@@ -829,7 +829,7 @@ void World::SendWorldText(const char* text, WorldSession *self)
 }
 
 /// Send a packet to all players in the zone (except self if mentionned)
-void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self)
+void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self, uint32 security)
 {
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
@@ -838,7 +838,8 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
             itr->second->GetPlayer() &&
             itr->second->GetPlayer()->IsInWorld() &&
             itr->second->GetPlayer()->GetZoneId() == zone &&
-            itr->second != self)
+            itr->second != self &&
+            itr->second->GetSecurity() >= security)
         {
             itr->second->SendPacket(packet);
         }
@@ -846,11 +847,11 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
 }
 
 /// Send a System Message to all players in the zone (except self if mentionned)
-void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
+void World::SendZoneText(uint32 zone, const char* text, WorldSession *self, uint32 security) 
 {
     WorldPacket data;
     sChatHandler.FillSystemMessageData(&data, 0, text);
-    SendZoneMessage(zone, &data, self);
+    SendZoneMessage(zone, &data, self,security);
 }
 
 /// Kick (and save) all players

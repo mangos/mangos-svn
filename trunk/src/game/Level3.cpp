@@ -36,6 +36,7 @@
 #include "RedZoneDistrict.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "Weather.h"
 
 bool ChatHandler::HandleReloadCommand(const char* args)
 {
@@ -2708,7 +2709,7 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     Weather *wth = sWorld.FindWeather(zoneid);
     if(!wth)
     {
-        wth = new Weather(player);
+        wth = new Weather(player->GetZoneId());
         sWorld.AddWeather(wth);
     }
 
