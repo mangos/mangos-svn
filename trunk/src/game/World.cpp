@@ -776,15 +776,12 @@ void World::ScriptsProcess()
                 float z = step.script->z;
                 float o = step.script->o;
 
-                TemporarySummon* pCreature = new TemporarySummon( (Unit*)step.source );
-                if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), ((Unit*)step.source)->GetMapId(), x, y, z, o, step.script->datalong))
+                Creature* pCreature = ((Unit*)step.source)->SummonCreature(step.script->datalong,((Unit*)step.source)->GetMapId(), x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,step.script->datalong2);
+                if (!pCreature)
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON failed for creature (entry: %u).",step.script->datalong);
-                    delete pCreature;
                     break;
                 }
-
-                pCreature->Summon(TEMPSUMMON_REMOVE_DEAD, step.script->datalong2);
 
                 if( pCreature->Attack((Unit *)step.source) )
                 {

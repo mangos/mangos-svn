@@ -54,6 +54,8 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual void JustDied(Unit *) {};
 
         virtual void KilledUnit(Unit *) {};
+        
+        virtual void SummonedCreatureDespawn(Creature* unit) {};
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>

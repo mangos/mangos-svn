@@ -22,24 +22,132 @@
 #include "Database/DBCStores.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
+#include "CreatureAI.h"
 
-TemporarySummon::TemporarySummon( WorldObject *instantiator ) : 
-Creature(instantiator), m_type(TEMPSUMMON_REMOVE_DEAD), m_timer(0), m_lifetime(0)
+TemporarySummon::TemporarySummon( WorldObject *instantiator, Unit* summoner ) : 
+Creature(instantiator), m_type(TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner)
 {
 }
 
 void TemporarySummon::Update( uint32 diff )
 {
-    if(isAlive())
+    switch(m_type)
     {
-        if (!isInCombat())
+        case TEMPSUMMON_MANUAL_DESPAWN:
+            break;
+        case TEMPSUMMON_TIMED_DESPAWN:
         {
-            if(m_timer <= diff )
+            if (m_timer <= diff)
+            {
                 UnSummon();
-            else
+                return;
+            }
+
+            m_timer -= diff;
+            break;
+        }
+        case TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT:
+        {
+            if (!isInCombat())
+            {
+                if (m_timer <= diff)
+                {
+                    UnSummon();
+                    return;
+                }
+
                 m_timer -= diff;
-        } else
-        m_timer = m_lifetime;
+            }
+            else if (m_timer != m_lifetime)
+                m_timer = m_lifetime;
+            
+            break;
+        }
+
+        case TEMPSUMMON_CORPSE_TIMED_DESPAWN:
+        {
+            if ( m_deathState == CORPSE)
+            {
+                if (m_timer <= diff)
+                {
+                    UnSummon();
+                    return;
+                }
+
+                m_timer -= diff;
+            }
+            break;
+        }
+        case TEMPSUMMON_CORPSE_DESPAWN:
+        {
+            // if m_deathState is DEAD, CORPSE was skipped
+            if ( m_deathState == CORPSE || m_deathState == DEAD)
+            {
+                UnSummon();
+                return;
+            }
+            
+            break;
+        }
+        case TEMPSUMMON_DEAD_DESPAWN:
+        {
+            if ( m_deathState == DEAD )
+            {
+                UnSummon();
+                return;
+            }
+            break;            
+        }
+        case TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN:
+        {
+            // if m_deathState is DEAD, CORPSE was skipped
+            if ( m_deathState == CORPSE || m_deathState == DEAD)
+            {
+                UnSummon();
+                return;
+            }
+            
+            if (!isInCombat())
+            {
+                if (m_timer <= diff)
+                {
+                    UnSummon();
+                    return;
+                }
+                else
+                    m_timer -= diff;
+            }
+            else if (m_timer != m_lifetime)
+                m_timer = m_lifetime;
+            break;
+        }
+        case TEMPSUMMON_TIMED_OR_DEAD_DESPAWN:
+        {
+            // if m_deathState is DEAD, CORPSE was skipped
+            if (m_deathState == DEAD)
+            {
+                UnSummon();
+                return;
+            }
+            
+            if (!isInCombat())
+            {
+                if (m_timer <= diff)
+                {
+                    UnSummon();
+                    return;
+                }
+                else
+                    m_timer -= diff;
+            }
+            else if (m_timer != m_lifetime)
+                m_timer = m_lifetime;
+            break;
+        }
+        default:
+            UnSummon();
+            sLog.outError("Temporary summoned creature (entry: %u) have unknown type %u of ",GetEntry(),m_type);
+            break;
     }
 
     Creature::Update( diff );
@@ -63,18 +171,9 @@ void TemporarySummon::UnSummon()
 
     CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
-}
 
-void TemporarySummon::setDeathState(DeathState s)
-{
-    Creature::setDeathState( s );
-
-    if( ( m_deathState == DEAD   && m_type == TEMPSUMMON_REMOVE_DEAD ) ||
-        ( m_deathState == CORPSE && m_type == TEMPSUMMON_REMOVE_CORPSE ) )
-    {
-        CleanupCrossRefsBeforeDelete();
-        ObjectAccessor::Instance().AddObjectToRemoveList(this);
-    }
+    if(m_summoner && m_summoner->GetTypeId()==TYPEID_UNIT)
+        ((Creature*)m_summoner)->AI().SummonedCreatureDespawn(this);
 }
 
 void TemporarySummon::SaveToDB()

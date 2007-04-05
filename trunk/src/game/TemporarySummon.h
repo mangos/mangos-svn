@@ -21,25 +21,20 @@
 
 #include "Creature.h"
 
-enum TempSummonType
-{
-    TEMPSUMMON_REMOVE_DEAD   = 1,
-    TEMPSUMMON_REMOVE_CORPSE = 2,
-};
-
 class TemporarySummon : public Creature
 {
     public:
-        TemporarySummon( WorldObject *instantiator );
+        TemporarySummon( WorldObject *instantiator, Unit* summoner = NULL);
         virtual ~TemporarySummon(){};
         void Update(uint32 time);
         void Summon(TempSummonType type, uint32 lifetime);
         void UnSummon();
-        void setDeathState(DeathState s);
         void SaveToDB();
+        Unit* GetSummoner() const { return m_summoner; }
     private:
         TempSummonType m_type;
         uint32 m_timer;
         uint32 m_lifetime;
+        Unit* m_summoner;
 };
 #endif
