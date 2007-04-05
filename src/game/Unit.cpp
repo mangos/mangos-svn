@@ -1731,8 +1731,18 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
     if(!pVictim)
         return 0;
 
-    int32 misschance = haveOffhandWeapon() && !m_currentMeleeSpell ?
-        2400 : 500;                                         //base misschance for DW : melee attacks except special melee spell attacks
+    // Base misschance 5%
+    int32 misschance = 500;
+
+    // DualWield - Melee spells and physical dmg spells - 5% , white damage 24%
+    if (haveOffhandWeapon())
+    {
+        if ((m_currentMeleeSpell) ||
+           (m_currentSpell && m_currentSpell->m_spellInfo->School == SPELL_SCHOOL_NORMAL))
+            misschance = 500;
+        else
+            misschance = 2400;
+    }
 
     // PvP : PvE melee misschances per leveldif > 2
     int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 500 : 700;
