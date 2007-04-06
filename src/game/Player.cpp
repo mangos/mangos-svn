@@ -1652,18 +1652,21 @@ void Player::SetGMVisible(bool on)
     }
 }
 
-bool Player::IsGroupVisibleFor(Player* p)
+bool Player::IsGroupVisibleFor(Player* p) const
 {
     switch(sWorld.getConfig(CONFIG_GROUP_VISIBILITY))
     {
-        default:
-            return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group
-                && groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID());
-        case 1:
-            return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group;
-        case 2:
-            return GetTeam()==p->GetTeam();
+        default: return IsInSameGroupWith(p);
+        case 1:  return IsInSameRaidWith(p);
+        case 2:  return GetTeam()==p->GetTeam();
     }
+}
+
+bool Player::IsInSameGroupWith(Player* p) const
+{
+    return  groupInfo.group != NULL && 
+            groupInfo.group == p->groupInfo.group &&
+            groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID());
 }
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)

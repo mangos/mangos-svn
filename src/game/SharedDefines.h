@@ -361,7 +361,7 @@ enum GameobjectTypes
     GAMEOBJECT_TYPE_MO_TRANSPORT           = 15,
     GAMEOBJECT_TYPE_DUEL_ARBITER           = 16,
     GAMEOBJECT_TYPE_FISHINGNODE            = 17,
-    GAMEOBJECT_TYPE_RITUAL                 = 18,
+    GAMEOBJECT_TYPE_SUMMONING_RITUAL       = 18,
     GAMEOBJECT_TYPE_MAILBOX                = 19,
     GAMEOBJECT_TYPE_AUCTIONHOUSE           = 20,
     GAMEOBJECT_TYPE_GUARDPOST              = 21,

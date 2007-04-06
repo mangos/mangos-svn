@@ -134,7 +134,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND_SIGHT = 82
     &Spell::EffectDuel,                                     //SPELL_EFFECT_DUEL = 83
     &Spell::EffectStuck,                                    //SPELL_EFFECT_STUCK = 84
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PLAYER = 85
+    &Spell::EffectSummonPlayer,                             //SPELL_EFFECT_SUMMON_PLAYER = 85
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ACTIVATE_OBJECT = 86
     &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT1 = 87
     &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT2 = 88
@@ -2034,8 +2034,7 @@ void Spell::EffectScriptEffect(uint32 i)
             Spell spell(m_caster,spellInfo,true,0);
 
             SpellCastTargets targets;
-            Unit *ptarget = unitTarget;
-            targets.setUnitTarget(ptarget);
+            targets.setUnitTarget(unitTarget);
             spell.prepare(&targets);
         }
     }
@@ -2176,6 +2175,23 @@ void Spell::EffectStuck(uint32 i)
 
     sLog.outDebug("Spell Effect: Stuck");
     HandleTeleport(m_spellInfo->Id, m_caster);
+}
+
+void Spell::EffectSummonPlayer(uint32 i)
+{
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if(unitTarget->isInFlight())
+        return;
+
+    //FIXME: must send accepting request for summon to target instead explicit teleportation
+
+    // before caster
+    float x,y,z;
+    m_caster->GetClosePoint(NULL,x,y,z);
+
+    ((Player*)unitTarget)->TeleportTo(m_caster->GetMapId(), x, y, z,unitTarget->GetOrientation());
 }
 
 void Spell::EffectSummonTotem(uint32 i)
@@ -2692,7 +2708,6 @@ void Spell::EffectTransmitted(uint32 i)
         if ( !map->IsInWater(fx,fy) )
         {
             SendCastResult(CAST_FAIL_CANT_BE_CAST_HERE);
-            up_skillvalue = 4;
             SendChannelUpdate(0);
             return;
         }

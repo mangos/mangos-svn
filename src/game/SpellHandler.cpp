@@ -221,6 +221,12 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     // uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
+
+    // default spell caster is player that use GO
+    Unit* spellCaster = GetPlayer();
+    // default spell target is player that use GO
+    Unit* spellTarget = GetPlayer();
+
     uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
     switch(t)
     {
@@ -335,8 +341,57 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             return;
         }
 
-        obj->CountUseTimes();
+        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
+        {
+            Unit* caster = obj->GetOwner();
 
+            if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
+                return;
+
+            // accept only use by player from same group for caster except caster itself
+            if(((Player*)caster)==GetPlayer() || !((Player*)caster)->IsInSameGroupWith(GetPlayer()))
+                return;
+
+            obj->AddUse(GetPlayer());
+
+            // must 2 group members use GO
+            if(obj->GetUniqueUseCount() < 2)
+                return;
+            
+            // in case summoning ritual caster is GO creatores
+            spellCaster = caster;
+
+            if(!caster->m_currentSpell)
+                return;
+
+            // update target pointer by guid
+
+            // in case summoning ritual target is caster current selection
+            //TODO: maybe GO creating spell must set target different from caster
+            spellTarget = ObjectAccessor::Instance().FindPlayer(((Player*)caster)->GetSelection());
+
+            // recheck that target is group member
+            if(!spellTarget || spellTarget->GetTypeId()!=TYPEID_PLAYER || !((Player*)spellTarget)->IsInSameGroupWith((Player*)caster))
+            {
+                caster->m_currentSpell->cancel();
+                return;
+            }
+
+
+            // prepere data for final summoning (before current spell finish to prevetn access to deleted GO)
+            info = obj->GetGOInfo();
+            spellId = info->sound1;
+
+            // finish spell
+            caster->m_currentSpell->SendChannelUpdate(0);
+            caster->m_currentSpell->finish();
+
+            // can be deleted now
+            obj->SetLootState(GO_LOOTED);
+
+            // go to end function to spell casting
+            break;
+        }
         case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
             //GB flag
             info = obj->GetGOInfo();
@@ -386,11 +441,11 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Spell *spell = new Spell(_player, spellInfo, false, 0);
+    Spell *spell = new Spell(spellCaster, spellInfo, false, 0);
 
     SpellCastTargets targets;
-    targets.setUnitTarget( _player );
-    targets.m_GOTarget = obj;
+    targets.setUnitTarget( spellTarget );
+    targets.setGOTarget( obj );
     spell->prepare(&targets);
 
 }

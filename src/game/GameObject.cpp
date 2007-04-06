@@ -113,6 +113,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
     SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
     SetUInt32Value (GAMEOBJECT_DYN_FLAGS, dynflags);
+
     return true;
 }
 
@@ -297,9 +298,10 @@ void GameObject::Refresh()
     MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
 }
 
-void GameObject::CountUseTimes()
+void GameObject::AddUse(Player* player)
 {
-    m_usetimes += 1;
+    ++m_usetimes;
+    m_unique_users.insert(player->GetGUIDLow());
 }
 
 void GameObject::Delete()
