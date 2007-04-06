@@ -2200,14 +2200,13 @@ void Aura::HandleAuraModDmgImmunity(bool apply, bool Real)
 
 void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 {
-    Unit* m_caster = GetCaster();
-    //Prevent Crash
-    if (!m_caster)
+    Unit* caster = GetCaster();
+    if (!caster)
         return;
 
     m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
 
-    if(((Player*)m_target)->GetTeam() != ((Player*)m_caster)->GetTeam() && !((Player*)m_target)->isGameMaster())
+    if(m_target->IsHostileTo(caster) && (m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->isGameMaster()))
     {
         if (m_target->HasStealthAura() && m_modifier.m_miscvalue == 5)
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -2215,8 +2214,8 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
         if (m_target->HasInvisibilityAura() && m_modifier.m_miscvalue == 6)
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
 
-        if(!((Player*)m_caster)->IsPvP() && ((Player*)m_target)->IsPvP())
-            ((Player*)m_caster)->UpdatePvP(true, true);
+        if( caster->GetTypeId()==TYPEID_PLAYER && !caster->IsPvP() && m_target->IsPvP())
+            ((Player*)caster)->UpdatePvP(true, true);
     }
 }
 
