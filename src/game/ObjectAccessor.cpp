@@ -533,7 +533,7 @@ ObjectAccessor::Update(const uint32  &diff)
 }
 
 bool
-ObjectAccessor::PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &m_id) const
+ObjectAccessor::PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &m_id, const uint32 &i_id) const
 {
     CellPair cell_min(x*MAX_NUMBER_OF_CELLS, y*MAX_NUMBER_OF_CELLS);
     CellPair cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
@@ -545,7 +545,7 @@ ObjectAccessor::PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &
     Guard guard(const_cast<ObjectAccessor *>(this)->i_playerGuard);
     for(PlayersMapType::const_iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
     {
-        if( m_id != iter->second->GetMapId() )
+        if( m_id != iter->second->GetMapId() || i_id != iter->second->GetInstanceId() )
             continue;
 
         CellPair p = MaNGOS::ComputeCellPair(iter->second->GetPositionX(), iter->second->GetPositionY());

@@ -99,7 +99,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
             return;
         }
 
-        if( i_creature.IsWithinDist(i_creature.getVictim(), ATTACK_DIST))
+        if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DIST))
         {
             if( i_creature.isAttackReady() )
             {

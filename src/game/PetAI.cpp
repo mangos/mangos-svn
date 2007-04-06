@@ -45,7 +45,7 @@ void PetAI::MoveInLineOfSight(Unit *u)
         u->isInAccessablePlaceFor(&i_pet))
     {
         float attackRadius = i_pet.GetAttackDistance(u);
-        if(i_pet.IsWithinDist(u, attackRadius) && i_pet.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
+        if(i_pet.IsWithinDistInMap(u, attackRadius) && i_pet.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
             AttackStart(u);
             if(u->HasStealthAura())
@@ -181,7 +181,7 @@ void PetAI::UpdateAI(const uint32 diff)
             _stopAttack();                                  // i_victimGuid == 0 && i_pet.getVictim() == NULL now
             return;
         }
-        else if( i_pet.IsStopped() || i_pet.IsWithinDist(i_pet.getVictim(), ATTACK_DIST))
+        else if( i_pet.IsStopped() || i_pet.IsWithinDistInMap(i_pet.getVictim(), ATTACK_DIST))
         {
             SpellEntry const* spellInfo;
             // required to be stopped cases

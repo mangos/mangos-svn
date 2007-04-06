@@ -54,7 +54,7 @@ TotemAI::MoveInLineOfSight(Unit *u)
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
     float attackRadius = GetMaxRange(srange);
 
-    if(i_totem.IsWithinDist(u, attackRadius))
+    if(i_totem.IsWithinDistInMap(u, attackRadius))
     {
         AttackStart(u);
         if(u->HasStealthAura())
@@ -91,7 +91,7 @@ TotemAI::UpdateAI(const uint32 diff)
 
     Unit *victim = ObjectAccessor::Instance().GetUnit(*(Unit*)&i_totem, i_victimGuid);
     // stop attacking dead or out of range victims
-    if (victim && victim->isAlive() && i_totem.IsWithinDist(victim, max_range))
+    if (victim && victim->isAlive() && i_totem.IsWithinDistInMap(victim, max_range))
     {
         // if totem is not casting and it has a victim .. cast again
         AttackStart(victim);

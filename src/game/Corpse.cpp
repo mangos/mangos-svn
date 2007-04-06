@@ -197,7 +197,7 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 
 void Corpse::UpdateForPlayer(Player* player, bool first)
 {
-    if(player && player->GetGUID() == GetOwnerGUID() && player->GetMapId() == GetMapId())
+    if(player && player->GetGUID() == GetOwnerGUID() && IsInMap(player))
     {
         bool POI_range = (GetDistance2dSq(player) > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS);
 
@@ -221,7 +221,7 @@ void Corpse::_ConvertCorpseToBones()
     Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID());
 
     // Removing outdated POI if at same map
-    if(player && player->GetMapId() == GetMapId())
+    if(player && IsInMap(player))
         player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 0, 30, "" );
 
     DEBUG_LOG("Deleting Corpse and spawning bones.\n");

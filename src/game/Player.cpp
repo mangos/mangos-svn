@@ -695,7 +695,7 @@ void Player::Update( uint32 p_time )
 
             if (isAttackReady(BASE_ATTACK))
             {
-                if(!IsWithinDist(pVictim, pldistance))
+                if(!IsWithinDistInMap(pVictim, pldistance))
                 {
                     setAttackTimer(BASE_ATTACK,1000);
                     SendAttackSwingNotInRange();
@@ -722,7 +722,7 @@ void Player::Update( uint32 p_time )
 
             if ( haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
-                if(! IsWithinDist(pVictim, pldistance))
+                if(!IsWithinDistInMap(pVictim, pldistance))
                 {
                     setAttackTimer(OFF_ATTACK,1000);
                 }
@@ -4559,7 +4559,7 @@ void Player::CheckDuelDistance(time_t currTime)
 
     if(duel->outOfBound == 0)
     {
-        if(!IsWithinDist(obj, 50))
+        if(!IsWithinDistInMap(obj, 50))
         {
             duel->outOfBound = currTime;
 
@@ -4569,7 +4569,7 @@ void Player::CheckDuelDistance(time_t currTime)
     }
     else
     {
-        if(IsWithinDist(obj, 40))
+        if(IsWithinDistInMap(obj, 40))
         {
             duel->outOfBound = 0;
 

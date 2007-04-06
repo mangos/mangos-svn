@@ -168,7 +168,7 @@ MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
             // Detect invisible pjs
             if (i_player.m_enableDetect && iter->second->GetVisibility() == VISIBILITY_GROUP && !iter->second->IsGroupVisibleFor(&i_player))
             {
-                if(i_player.IsWithinDist(iter->second, 20))
+                if(i_player.IsWithinDistInMap(iter->second, 20))
                     i_player.InvisiblePjsNear.push_back(iter->second);
             }
 
@@ -203,7 +203,7 @@ NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
     for(std::map<OBJECT_HANDLE, GameObject*>::iterator iter=m.begin(); iter != m.end(); ++iter)
         // ignore transport gameobjects at same map
-        if(i_player.GetMapId()!=iter->second->GetMapId() || !iter->second->IsTransport())
+        if(!i_player.IsInMap(iter->second) || !iter->second->IsTransport())
             iter->second->BuildOutOfRangeUpdateBlock(&i_data);
 }
 
@@ -252,7 +252,7 @@ ObjectNotVisibleNotifier::Visit(PlayerMapType &m)
     bool transport = (i_object.GetTypeId() == TYPEID_GAMEOBJECT && ((GameObject&)i_object).IsTransport());
 
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if(i_object.GetMapId()!=iter->second->GetMapId() || !transport)
+        if(!i_object.IsInMap(iter->second) || !transport)
             iter->second->SendOutOfRange(&i_object);
 }
 

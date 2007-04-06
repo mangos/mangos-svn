@@ -578,7 +578,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                         continue;
 
                     Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
-                    if(m_targets.getUnitTarget() && Target && m_targets.getUnitTarget()->IsWithinDist(Target, radius) )
+                    if(m_targets.getUnitTarget() && Target && m_targets.getUnitTarget()->IsWithinDistInMap(Target, radius) )
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -606,7 +606,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
                     if(!Target || Target->GetGUID() == m_caster->GetGUID())
                         continue;
-                    if(m_caster->IsWithinDist(Target, radius))
+                    if(m_caster->IsWithinDistInMap(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -641,7 +641,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                         continue;
 
                     Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
-                    if(Target && targetPlayer->IsWithinDist(Target, radius) &&
+                    if(Target && targetPlayer->IsWithinDistInMap(Target, radius) &&
                         targetPlayer->getClass() == Target->getClass())
                         TagUnitMap.push_back(Target);
                 }
