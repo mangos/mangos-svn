@@ -624,7 +624,7 @@ namespace MaNGOS
                             i_data.push_back(itr->second);
                         break;
                     case PUSH_SELF_CENTER:
-                        if(i_spell.m_caster->IsWithinDist((Unit*)(itr->second), radius))
+                        if(i_spell.m_caster->IsWithinDistInMap((Unit*)(itr->second), radius))
                             i_data.push_back(itr->second);
                         break;
                     case PUSH_DEST_CENTER:

@@ -672,18 +672,15 @@ float WorldObject::GetDistanceZ(const WorldObject* obj) const
 
 bool WorldObject::IsWithinDistInMap(const WorldObject* obj, const float dist2compare) const
 {
-    if (GetMapId()!=obj->GetMapId()) return false;
-    return IsWithinDist(obj, dist2compare);
-}
+    if (!IsInMap(obj)) return false;
 
-bool WorldObject::IsWithinDist(const WorldObject* obj, const float dist2compare) const
-{
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
     float dz = GetPositionZ() - obj->GetPositionZ();
     float distsq = dx*dx + dy*dy + dz*dz;
     float sizefactor = GetObjectSize() + obj->GetObjectSize();
     float maxdist = dist2compare + sizefactor;
+
     return distsq < maxdist * maxdist;
 }
 

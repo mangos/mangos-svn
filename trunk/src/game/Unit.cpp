@@ -223,7 +223,7 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
     float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
     if( reach <= 0.0f )
         reach = 1.0f;
-    return IsWithinDist(pVictim, reach);
+    return IsWithinDistInMap(pVictim, reach);
 }
 
 void Unit::RemoveSpellsCausingAura(uint32 auraType)
@@ -2075,7 +2075,7 @@ void Unit::InterruptSpell()
 
 bool Unit::isInFront(Unit const* target, float radius)
 {
-    return IsWithinDist(target, radius) && HasInArc( M_PI, target );
+    return IsWithinDistInMap(target, radius) && HasInArc( M_PI, target );
 }
 
 void Unit::SetInFront(Unit const* target)
@@ -4416,8 +4416,8 @@ bool Unit::isVisibleFor(Unit* u, bool detect)
     if (m_Visibility == VISIBILITY_OFF)
         return false;
 
-    // Units far than MAX_DIST_INVISIBLE, that are not gms and are stealth, are not visibles too
-    if (!this->IsWithinDist(u,MAX_DIST_INVISIBLE_UNIT))
+    // Units far than MAX_DIST_INVISIBLE or not in our map, that are not gms and are stealth, are not visibles too
+    if (!this->IsWithinDistInMap(u,MAX_DIST_INVISIBLE_UNIT))
         return false;
 
     // Stealth not hostile units, not visibles (except Player-with-Player case)

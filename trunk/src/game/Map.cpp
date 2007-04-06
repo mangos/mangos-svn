@@ -1077,7 +1077,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
     assert( grid != NULL && i_info[x][y] != NULL );
 
     {
-        if( ObjectAccessor::Instance().PlayersNearGrid(x, y, i_id) )
+        if( ObjectAccessor::Instance().PlayersNearGrid(x, y, i_id, i_InstanceId) )
             return false;
 
         DEBUG_LOG("Unloading grid[%u,%u] for map %u", x,y, i_id);

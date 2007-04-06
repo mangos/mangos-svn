@@ -97,7 +97,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void RemovePet(Pet *pet);
         Pet* GetPet(uint64 guid);
 
-        bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
+        bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &m_id, const uint32 &i_id) const;
 
         static void UpdateObject(Object* obj, Player* exceptPlayer);
         static void _buildUpdateObject(Object *, UpdateDataMapType &);

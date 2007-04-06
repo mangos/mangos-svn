@@ -49,7 +49,7 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
         return;
 
     // prevent redundant micro-movement for pets, other followers.
-    if(i_offset && i_target.IsWithinDist(&owner,2*i_offset))
+    if(i_offset && i_target.IsWithinDistInMap(&owner,2*i_offset))
         return;
 
     float x, y, z;

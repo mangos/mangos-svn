@@ -397,7 +397,7 @@ void Aura::Update(uint32 diff)
             uint32 mapid = m_target->GetMapId();
             pos_z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(pos_x,pos_y);
             // Control the max Distance; 20 for temp.
-            if(m_target->IsWithinDist(caster, 20))
+            if(m_target->IsWithinDistInMap(caster, 20))
             {
                 if( m_target->GetPositionX() < caster->GetPositionX() || m_target->GetPositionY() > caster->GetPositionY() )
                     x = m_target->GetPositionX() + speed*diff * sin(angle)/1000;
@@ -489,7 +489,7 @@ void AreaAura::Update(uint32 diff)
 
                 Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
 
-                if(caster->IsWithinDist(Target, radius) )
+                if(caster->IsWithinDistInMap(Target, radius) )
                 {
                     // apply aura to players in range that dont have it yet
                     if (!t_aura)
@@ -514,7 +514,7 @@ void AreaAura::Update(uint32 diff)
             if (owner)
             {
                 Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
-                if(caster->IsWithinDist(owner, radius))
+                if(caster->IsWithinDistInMap(owner, radius))
                 {
                     if (!o_aura)
                     {
@@ -547,7 +547,7 @@ void PersistentAreaAura::Update(uint32 diff)
         DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex());
         if (dynObj)
         {
-            if (!m_target->IsWithinDist(dynObj, dynObj->GetRadius()))
+            if (!m_target->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
                 remove = true;
         }
         else

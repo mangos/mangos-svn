@@ -416,7 +416,7 @@ namespace MaNGOS
 
                 float dist = go->GetGOInfo()->sound1;
 
-                return go->IsWithinDist(i_unit, dist);
+                return go->IsWithinDistInMap(i_unit, dist);
             }
         private:
             Unit* i_unit;
@@ -432,7 +432,7 @@ namespace MaNGOS
             AnyUnfriendlyUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
             bool operator()(Unit* u)
             {
-                if(u->isAlive() && !i_funit->IsFriendlyTo(u) && i_obj->IsWithinDist(u, i_range))
+                if(u->isAlive() && !i_funit->IsFriendlyTo(u) && i_obj->IsWithinDistInMap(u, i_range))
                     return true;
 
                 return false;
@@ -465,7 +465,7 @@ namespace MaNGOS
                 if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() )
                     return false;
 
-                if(i_funit->IsWithinDist(u, i_range) )
+                if(i_funit->IsWithinDistInMap(u, i_range) )
                     return true;
 
                 return false;
@@ -477,7 +477,7 @@ namespace MaNGOS
                     ((Creature*)u)->GetCreatureInfo()->type != CREATURE_TYPE_UNDEAD)
                     return false;
 
-                if(i_funit->IsWithinDist(u, i_range) )
+                if(i_funit->IsWithinDistInMap(u, i_range) )
                     return true;
 
                 return false;
@@ -495,7 +495,7 @@ namespace MaNGOS
             explicit InAttackDistanceFromAnyHostileCreatureCheck(Unit* funit) : i_funit(funit) {}
             bool operator()(Creature* u)
             {
-                if(u->isAlive() && u->IsHostileTo(i_funit) && i_funit->IsWithinDist(u, u->GetAttackDistance(i_funit)))
+                if(u->isAlive() && u->IsHostileTo(i_funit) && i_funit->IsWithinDistInMap(u, u->GetAttackDistance(i_funit)))
                     return true;
 
                 return false;

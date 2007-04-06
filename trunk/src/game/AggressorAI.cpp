@@ -47,7 +47,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
         u->isInAccessablePlaceFor(&i_creature))
     {
         float attackRadius = i_creature.GetAttackDistance(u);
-        if(i_creature.IsWithinDist(u, attackRadius) && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
+        if(i_creature.IsWithinDistInMap(u, attackRadius) && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
             AttackStart(u);
             if(u->HasStealthAura())
@@ -157,7 +157,7 @@ AggressorAI::UpdateAI(const uint32 diff)
 
         assert((i_victimGuid != 0) == (i_creature.getVictim() != NULL) && "i_victimGuid and i_creature.getVictim() not synchronized.");
 
-        if( i_creature.IsWithinDist(i_creature.getVictim(), ATTACK_DIST))
+        if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DIST))
         {
             if( i_creature.isAttackReady() )
             {
