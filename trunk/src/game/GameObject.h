@@ -118,14 +118,17 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
             return false;
         }
 
-        void CountUseTimes();
+        void AddUse(Player* player);
+        uint32 GetUseCount() const { return m_usetimes; }
+        uint32 GetUniqueUseCount() const { return m_unique_users.size(); }
 
         void SaveRespawnTime();
 
         Loot        loot;
         uint32      lootid;
 
-        uint32      m_usetimes;
+        std::set<uint32> m_unique_users;
+        uint32 m_usetimes;
 
     protected:
 

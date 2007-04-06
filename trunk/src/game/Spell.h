@@ -148,6 +148,9 @@ class SpellCastTargets
             m_itemTarget = target.m_itemTarget;
             m_GOTarget   = target.m_GOTarget;
 
+            m_unitTargetGUID = target.m_unitTargetGUID;
+            m_GOTargetGUID   = target.m_GOTargetGUID;
+
             m_srcX = target.m_srcX;
             m_srcY = target.m_srcY;
             m_srcZ = target.m_srcZ;
@@ -162,25 +165,31 @@ class SpellCastTargets
 
             return *this;
         }
-        Unit *getUnitTarget() { return m_unitTarget;};
-        void setUnitTarget(Unit *target)
-        {
-            m_destX = target->GetPositionX();
-            m_destY = target->GetPositionY();
-            m_destZ = target->GetPositionZ();
-            m_unitTarget = target;
-            m_targetMask |= TARGET_FLAG_UNIT | TARGET_FLAG_DEST_LOCATION;
-        }
+
+        uint64 getUnitTargetGUID() const { return m_unitTargetGUID; }
+        Unit *getUnitTarget() { return m_unitTarget; }
+        void setUnitTarget(Unit *target);
+
+        uint64 getGOTargetGUID() const { return m_GOTargetGUID; }
+        GameObject *getGOTarget() const { return m_GOTarget; }
+        void setGOTarget(GameObject *target);
+
+        void Update(Unit* caster);
 
         Item *m_itemTarget;
-        GameObject *m_GOTarget;
         float m_srcX, m_srcY, m_srcZ;
         float m_destX, m_destY, m_destZ;
         std::string m_strTarget;
 
         uint16 m_targetMask;
     private:
+        // objects (can be used at spell creating and after Update at casting
         Unit *m_unitTarget;
+        GameObject *m_GOTarget;
+
+        // object GUID, can be used always
+        uint64 m_unitTargetGUID;
+        uint64 m_GOTargetGUID;
 };
 
 enum SpellState
@@ -432,6 +441,7 @@ class Spell
         void EffectAddComboPoints(uint32 i);
         void EffectDuel(uint32 i);
         void EffectStuck(uint32 i);
+        void EffectSummonPlayer(uint32 i);
         void EffectSummonTotem(uint32 i);
         void EffectEnchantHeldItem(uint32 i);
         void EffectSummonObject(uint32 i);
@@ -522,10 +532,7 @@ class Spell
         bool m_rangedShoot;
         bool m_needAliveTarget[3];
 
-        // used to re-find unitTarget at delayed Spell calls (in start Spell::cast and Spell::update)
-        // to prevent crash at lost target (logout/deleted) after preper/prev cast()/update() calls
-        uint64 unitTargetGUID;
-        // Current targets, to be used in SpellEffects
+        // Current targets, to be used in SpellEffects (MUST BE USED ONLY IN SPELL EFFECTS)
         Unit* unitTarget;
         Item* itemTarget;
         GameObject* gameObjTarget;
@@ -537,13 +544,7 @@ class Spell
         // List of all Spell targets
         std::list<uint64> m_targetUnitGUIDs[3];
         std::list<Item*> m_targetItems[3];
-        std::list<GameObject*> m_targetGOs[3];
-        // -------------------------------------------
-
-        // List of all targets that arent repeated. (Unique)
-        uint8 m_targetCount;
-        std::list<Unit*> UniqueTargets;
-        std::list<GameObject*> UniqueGOsTargets;
+        std::list<uint64> m_targetGameobjectGUIDs[3];
         // -------------------------------------------
 
         //List For Triggered Spells
@@ -559,13 +560,6 @@ class Spell
         float m_castOrientation;
         bool m_IsTriggeredSpell;
         Aura* m_triggeredByAura;
-        //bool m_AreaAura;
-
-        // List of all Objects to be Deleted in spell Finish
-        //std::vector<DynamicObject*> m_dynObjToDel;
-        //std::list<GameObject*> m_ObjToDel;
-        // -------------------------------------------
-        uint8 up_skillvalue;
 };
 
 enum ReplenishType
