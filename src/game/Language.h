@@ -216,10 +216,11 @@
 #define LANG_GAMEOBJECT_CURRENT          ">> Game Object %s (GUID: %u) at %f %f %f. Orientation %f."
 #define LANG_GAMEOBJECT_ADD              ">> Add Game Object '%i' (%s) added at '%f %f %f'."
 
-#define LANG_NPCINFO_CHAR                "Player selected NPC\nGUID: %u.\nFaction: %u.\nnpcFlags: %u.\nNameID: %u.\nSkinID: %u."
+#define LANG_NPCINFO_CHAR                "Player selected NPC\nGUID: %u.\nFaction: %u.\nnpcFlags: %u.\nEntry: %u.\nSkinID: %u..\nSkinID: %u."
 #define LANG_NPCINFO_LEVEL               "Level: %u."
 #define LANG_NPCINFO_HEALTH              "Health (base): %u. (max): %u. (current): %u."
 #define LANG_NPCINFO_FLAGS               "Field Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u."
+#define LANG_NPCINFO_LOOT                "Loot: %u Pickpoket: %u Skinning: %u"
 #define LANG_NPCINFO_POSITION            "Position: %f %f %f."
 #define LANG_NPCINFO_VENDOR              "*** Is a vendor!"
 #define LANG_NPCINFO_TRAINER             "*** Is a trainer!"
