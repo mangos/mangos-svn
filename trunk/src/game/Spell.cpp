@@ -88,7 +88,7 @@ void SpellCastTargets::setGOTarget(GameObject *target)
 {
     m_GOTarget = target;
     m_GOTargetGUID = target->GetGUID();
-    m_targetMask |= TARGET_FLAG_OBJECT;
+//    m_targetMask |= TARGET_FLAG_OBJECT;
 }
 
 void SpellCastTargets::Update(Unit* caster)
@@ -107,6 +107,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_destX = caster->GetPositionX();
         m_destY = caster->GetPositionY();
         m_destZ = caster->GetPositionZ();
+        m_unitTarget = caster;
         m_unitTargetGUID = caster->GetGUID();
         return;
     }
@@ -150,7 +151,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
 {
     uint32 len = data->size();
 
-    // dont append targets when spell's for your own..
+    // don't append targets when spell's for your own..
     /*if(m_targetMask == TARGET_FLAG_SELF)
      *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);*/
 
