@@ -94,7 +94,9 @@ void SpellCastTargets::setGOTarget(GameObject *target)
 void SpellCastTargets::Update(Unit* caster)
 {
     m_GOTarget   = m_GOTargetGUID ? ObjectAccessor::Instance().GetGameObject(*caster,m_GOTargetGUID) : NULL;
-    m_unitTarget = m_unitTargetGUID ? ObjectAccessor::Instance().GetUnit(*caster,m_unitTargetGUID) : NULL;
+    m_unitTarget = m_unitTargetGUID ? 
+        ( m_unitTargetGUID==caster->GetGUID() ? caster : ObjectAccessor::Instance().GetUnit(*caster, m_unitTargetGUID) ) : 
+        NULL;
 }
 
 void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
@@ -1426,8 +1428,8 @@ void Spell::writeSpellGoTargets( WorldPacket * data )
         }
     }
 
-    uint32 targetCount = UniqueTargets.size() + UniqueGOsTargets.size();
-    *data << targetCount;
+    uint8 targetCount = UniqueTargets.size() + UniqueGOsTargets.size();
+    *data << (uint8)targetCount;
 
     for ( std::list<Unit*>::iterator ui = UniqueTargets.begin(); ui != UniqueTargets.end(); ui++ )
         *data << (*ui)->GetGUID();
