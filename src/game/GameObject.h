@@ -127,11 +127,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         Loot        loot;
         uint32      lootid;
 
-        std::set<uint32> m_unique_users;
-        uint32 m_usetimes;
-
     protected:
-
         void _LoadQuests();
 
         uint32      m_spellId;
@@ -140,6 +136,9 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32      m_flags;
         LootState   m_lootState;
         std::list<uint32> m_SkillupList;
+
+        std::set<uint32> m_unique_users;
+        uint32 m_usetimes;
 
         uint32 m_DBTableGuid;
 };
