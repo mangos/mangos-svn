@@ -2155,6 +2155,13 @@ bool ChatHandler::HandleAuraCommand(const char* args)
     if (!px)
         return false;
 
+    Unit *target = getSelectedUnit();
+    if(!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
     uint32 spellID = (uint32)atoi(px);
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellID );
     if(spellInfo)
@@ -2166,8 +2173,8 @@ bool ChatHandler::HandleAuraCommand(const char* args)
                 continue;
             if (eff == SPELL_EFFECT_APPLY_AURA || eff == SPELL_EFFECT_APPLY_AREA_AURA || eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
             {
-                Aura *Aur = new Aura(spellInfo, i, m_session->GetPlayer());
-                m_session->GetPlayer()->AddAura(Aur);
+                Aura *Aur = new Aura(spellInfo, i, target);
+                target->AddAura(Aur);
             }
         }
     }
@@ -2181,15 +2188,22 @@ bool ChatHandler::HandleUnAuraCommand(const char* args)
     if (!px)
         return false;
 
+    Unit *target = getSelectedUnit();
+    if(!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
     std::string argstr = args;
     if (argstr == "all")
     {
-        m_session->GetPlayer()->RemoveAllAuras();
+        target->RemoveAllAuras();
         return true;
     }
 
     uint32 spellID = (uint32)atoi(px);
-    m_session->GetPlayer()->RemoveAurasDueToSpell(spellID);
+    target->RemoveAurasDueToSpell(spellID);
 
     return true;
 }
