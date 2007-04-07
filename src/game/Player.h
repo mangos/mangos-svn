@@ -1297,7 +1297,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***              ENVIROMENTAL SYSTEM                  ***/
         /*********************************************************/
-        void AddWeather();
         void HandleDrowning (uint32 UnderWaterTime);
         void HandleLava();
         void HandleSobering();

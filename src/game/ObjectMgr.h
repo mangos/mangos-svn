@@ -94,6 +94,17 @@ struct ReputationOnKillEntry
     int32 repvalue2;
 };
 
+#define WEATHER_SEASONS 4
+struct WeatherSeasonChances {
+    uint32 rainChance;
+    uint32 snowChance;
+    uint32 stormChance;
+};
+struct WeatherZoneChances
+{
+    WeatherSeasonChances data[WEATHER_SEASONS];
+};
+
 class ObjectMgr
 {
     public:
@@ -108,6 +119,8 @@ class ObjectMgr
         typedef HM_NAMESPACE::hash_map<uint32, TeleportCoords*> TeleportMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
+
+        typedef HM_NAMESPACE::hash_map<uint32, WeatherZoneChances> WeatherZoneMap;
 
         template <class T>
             typename HM_NAMESPACE::hash_map<uint32, T*>::iterator
@@ -286,6 +299,8 @@ class ObjectMgr
 
         void LoadReputationOnKill();
 
+        void LoadWeatherZoneChances();
+
         std::string GeneratePetName(uint32 entry);
 
         void ReturnOrDeleteOldMails(bool serverUp);
@@ -391,6 +406,15 @@ class ObjectMgr
         {
             return SpellLearnSpells.upper_bound(spell_id);
         }
+
+        WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
+        {
+            WeatherZoneMap::const_iterator itr = mWeatherZoneMap.find(zone_id);
+            if(itr != mWeatherZoneMap.end())
+                return &itr->second;
+            else
+                return NULL;
+        }
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -427,6 +451,8 @@ class ObjectMgr
         TeleportMap         mTeleports;
 
         RepOnKillMap        mRepOnKill;
+
+        WeatherZoneMap      mWeatherZoneMap;
 
     private:
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;

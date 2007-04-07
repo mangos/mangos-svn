@@ -20,8 +20,9 @@
 #define __WEATHER_H
 
 #include "Common.h"
+#include "ObjectMgr.h"
 
-// weather difines
+// weather defines
 enum WeatherSounds
 {
     WEATHER_NOSOUND                = 0,
@@ -43,7 +44,7 @@ class Weather
     public:
         explicit Weather(uint32 zone);
         ~Weather() { };
-        void ReGenerate();
+        bool ReGenerate();
         bool UpdateWeather();
         void SendWeatherUpdateToPlayer(Player *player);
         void SetWeather(uint32 type, float grade);
@@ -56,5 +57,6 @@ class Weather
         float m_grade;
         uint32 m_interval;
         uint32 m_timer;
+        WeatherZoneChances const* m_weatherChances;
 };
 #endif

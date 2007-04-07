@@ -1068,4 +1068,15 @@ enum SkillType
 #define UNIT_FLAG_WAR_PLAYER            0x1000
 
 #define SPELL_ID_AGGRO                    22764
+
+enum WeatherTypes
+{
+    WEATHER_TYPE_FINE = 0,
+    WEATHER_TYPE_RAIN = 1,
+    WEATHER_TYPE_SNOW = 2,
+    WEATHER_TYPE_STORM= 3
+};
+
+#define MAX_WEATHER_TYPE 4
+
 #endif
