@@ -251,6 +251,8 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                     break;
             }
         }
+        else
+            _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, guid, true, NULL, 0);
     }
 }
 
