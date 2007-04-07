@@ -187,6 +187,8 @@ void World::AddWeather(Weather* w)
 {
     ASSERT(w);
     m_weathers[w->GetZone()] = w;
+    w->ReGenerate();
+    w->UpdateWeather();
 }
 
 /// Initialize the World
@@ -394,6 +396,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
     objmgr.LoadReputationOnKill();
+
+    sLog.outString( "Loading Weather Data..." );
+    objmgr.LoadWeatherZoneChances();
 
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables

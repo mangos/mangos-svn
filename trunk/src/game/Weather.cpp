@@ -64,11 +64,10 @@ uint32 Weather::GetSound()
 
 Weather::Weather(uint32 zone) : m_zone(zone)
 {
+    m_weatherChances = objmgr.GetWeatherChances(zone);
     m_interval = sWorld.getConfig(CONFIG_INTERVAL_CHANGEWEATHER);
     m_type = 0;
     m_grade = 0;
-    ReGenerate();
-    UpdateWeather();
 
     sLog.outString( "WORLD: Starting weather system for zone %u (change per %u minutes).",m_zone, (uint32)(m_interval / 60000) );
     m_timer = m_interval;
@@ -88,29 +87,26 @@ bool Weather::Update(uint32 diff)
     if(m_timer != 0 )
         return true;
 
-    ReGenerate();
-
-    // will be removed if not updated (no players)
-    if(!UpdateWeather())
-        return false;
+    // update only if Regenerate change weather
+    if(ReGenerate())
+    {
+        // will be removed if not updated (no players)
+        if(!UpdateWeather())
+            return false;
+    }
 
     m_timer = m_interval;
     return true;
 }
 
-void Weather::ReGenerate()
+bool Weather::ReGenerate()
 {
-    //Only zones that are listed in DB can get weather that is worse than fine
-    QueryResult *result;
-    result = sDatabase.PQuery("SELECT `zone` FROM `game_weather` WHERE `zone` = '%u'", m_zone);
-    if (!result)
+    if (!m_weatherChances)
     {
         m_type = 0;
         m_grade = 0.0;
-        return;
+        return false;
     }
-   
-    delete result;
 
     // Weather statistics:
     // 30% - no change
@@ -120,28 +116,19 @@ void Weather::ReGenerate()
     uint32 u = urand(0, 99);
 
     if (u < 30)
-        return;
+        return false;
+
+    // remember old values
+    uint32 old_type = m_type;
+    uint32 old_grade = m_grade;
 
     m_grade = rand_norm();
     time_t gtime = sWorld.GetGameTime();
     uint32 season = (gtime / (91 * 360)) % 4;
-    char seasonName[7];
-    switch (season)
-    {
-        case 0:
-            strcpy(seasonName, "spring");
-            break;
-        case 1:
-            strcpy(seasonName, "summer");
-            break;
-        case 2:
-            strcpy(seasonName, "fall");
-            break;
-        default:
-            strcpy(seasonName, "winter");
-    }
+    
+    static char const* seasonName[WEATHER_SEASONS] = { "spring", "summer", "fall", "winter" };
 
-    sLog.outDebug("Generating a change in %s weather for zone %u.", seasonName, m_zone);
+    sLog.outDebug("Generating a change in %s weather for zone %u.", seasonName[season], m_zone);
 
     if ((u < 60) && (m_grade < 0.33333334f))                // Get fair
     {
@@ -156,13 +143,13 @@ void Weather::ReGenerate()
     if ((u < 60) && (m_type != 0))                          // Get better
     {
         m_grade -= 0.33333334f;
-        return;
+        return true;
     }
 
     if ((u < 90) && (m_type != 0))                          // Get worse
     {
         m_grade += 0.33333334f;
-        return;
+        return true;
     }
 
     if (m_type != 0)
@@ -171,7 +158,7 @@ void Weather::ReGenerate()
         if (m_grade < 0.33333334f)
         {
             m_grade = 0.9999;                               // go nuts
-            return;
+            return true;
         }
         else
         {
@@ -182,7 +169,7 @@ void Weather::ReGenerate()
                 if (rnd < 50)
                 {
                     m_grade -= 0.6666667;
-                    return;
+                    return true;
                 }
             }
             m_type = 0;                                     // clear up
@@ -190,29 +177,10 @@ void Weather::ReGenerate()
         }
     }
 
-    // At this point, only weather that isn't doing anything remains
-    result = sDatabase.PQuery("SELECT `zone`,`spring_rain_chance`,`spring_snow_chance`,`spring_storm_chance`,`summer_rain_chance`,`summer_snow_chance`,`summer_storm_chance`,`fall_rain_chance`,`fall_snow_chance`,`fall_storm_chance`,`winter_rain_chance`,`winter_snow_chance`,`winter_storm_chance` FROM `game_weather` WHERE `zone` = '%u'", m_zone);
-
-    uint32 chance1, chance2, chance3;
-    Field *fields = result->Fetch();
-    chance1 = fields[season * 3 + 1].GetUInt32();
-    chance2 = fields[season * 3 + 2].GetUInt32();
-    chance3 = fields[season * 3 + 3].GetUInt32();
-    delete result;
-
-    // ignore weather changes for zone without weather record in DB.
-    if ((chance1 == 0) && (chance2 == 0) && (chance3 == 0))
-        return;
-
-    if(chance1 > 100)
-        chance1 =25;
-    if(chance2 > 100)
-        chance2 =25;
-    if(chance3 > 100)
-        chance3 =25;
-
-    chance2 = chance1 + chance2;
-    chance3 = chance2 + chance3;
+    // At this point, only weather that isn't doing anything remains but that have weather data
+    uint32 chance1 =          m_weatherChances->data[season].rainChance;
+    uint32 chance2 = chance1+ m_weatherChances->data[season].snowChance;
+    uint32 chance3 = chance2+ m_weatherChances->data[season].stormChance;
 
     uint32 rnd = urand(0, 99);
     if(rnd <= chance1)
@@ -241,6 +209,9 @@ void Weather::ReGenerate()
         else
             m_grade = rand_norm() * 0.3333 + 0.6667;
     }
+
+    // return true only in case weather changes
+    return m_type != old_type || m_grade != old_grade;
 }
 
 void Weather::SendWeatherUpdateToPlayer(Player *player)
@@ -303,17 +274,16 @@ bool Weather::UpdateWeather()
             wthstr = "fine";
             break;
     }
-    char buf[256];
-    sprintf((char*)buf, "Change the weather of zone %u to %s.", m_zone, wthstr);
-    sLog.outDetail(buf);
+    sLog.outDetail("Change the weather of zone %u to %s.", m_zone, wthstr);
 
-    // send only GMs
-    sWorld.SendZoneText(m_zone, buf,NULL,1);
     return true;
 }
 
 void Weather::SetWeather(uint32 type, float grade)
 {
+    if(m_type == type && m_grade == grade)
+        return;
+
     m_type = type;
     m_grade = grade;
     UpdateWeather();

@@ -1351,7 +1351,6 @@ void Player::AddToWorld()
         if(m_items[i])
             m_items[i]->AddToWorld();
     }
-    AddWeather();
 
     if(Corpse* corpse = GetCorpse())
         corpse->UpdateForPlayer(this,true);
@@ -4513,7 +4512,6 @@ void Player::UpdateZone()
     {
         wth = new Weather(GetZoneId());
         sWorld.AddWeather(wth);
-		wth->SendWeatherUpdateToPlayer(this);
     }
 
     pvpInfo.inHostileArea =
@@ -5704,16 +5702,6 @@ void Player::SendInitWorldStates(uint32 MapID)
             (uint16)0x0517<< (uint16)0x00<<
             (uint16)0x0703<< (uint16)0x00;
         GetSession()->SendPacket(&data);
-    }
-}
-
-void Player::AddWeather()
-{
-    uint32 zoneid = GetZoneId();
-    if(!sWorld.FindWeather(zoneid))
-    {
-        Weather *wth = new Weather(zoneid);
-        sWorld.AddWeather(wth);
     }
 }
 
