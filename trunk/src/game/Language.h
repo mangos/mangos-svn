@@ -26,6 +26,7 @@
 #define LANG_AVIABLE_CMD                 "Commands aviable to you:"
 #define LANG_ACCOUNT_LEVEL               "Your account level is: %i"
 #define LANG_CONNECTED_USERS             "Number of users connected: %u (max from last restart: %u)"
+#define LANG_UPTIME                      "Server uptime: %s"
 #define LANG_PLAYER_SAVED                "Player saved."
 #define LANG_PLAYERS_SAVED               "All players saved."
 #define LANG_GMS_ON_SRV                  "There are following active GMs on this server:"
@@ -227,7 +228,7 @@
 #define LANG_NPCINFO_DUNGEON_ID          "InstanceID: %u"
 
 #define LANG_PINFO_ACCOUNT               "Player %s (guid: %u) Account: %s (id: %u) GMLevel: %u Last IP: %s"
-#define LANG_PINFO_LEVEL                 "Played time: %ud%uh Level: %u Money: %ug%us%uc"
+#define LANG_PINFO_LEVEL                 "Played time: %s Level: %u Money: %ug%us%uc"
 
 #define LANG_YOU_SET_EXPLORE_ALL         "%s has explored all zones now."
 #define LANG_YOU_SET_EXPLORE_NOTHING     "%s has no more explored zones."

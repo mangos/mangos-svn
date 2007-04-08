@@ -59,7 +59,7 @@ enum Targets
 {
     TARGET_SELF                        = 1,
     TARGET_PET                         = 5,
-    TARGET_SINGLE_ENEMY                = 6,
+    TARGET_CHAIN_DAMAGE                = 6,
     TARGET_ALL_ENEMY_IN_AREA           = 15,
     TARGET_ALL_ENEMY_IN_AREA_INSTANT   = 16,
     TARGET_ALL_PARTY_AROUND_CASTER     = 20,
@@ -78,7 +78,7 @@ enum Targets
     TARGET_TOTEM_WATER                 = 42,
     TARGET_TOTEM_AIR                   = 43,
     TARGET_TOTEM_FIRE                  = 44,
-    TARGET_CHAIN                       = 45,
+    TARGET_CHAIN_HEAL                  = 45,
     TARGET_DYNAMIC_OBJECT              = 47,
     TARGET_CURRENT_SELECTED_ENEMY      = 53,
     TARGET_SINGLE_FRIEND_2             = 57,
@@ -508,7 +508,7 @@ class Spell
         void SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal = false);
         void SendPlaySpellVisual(uint32 SpellID);
 
-        void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);
+        void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i, float DamageMultiplier = 1.0);
         void HandleThreatSpells(uint32 spellId);
         //void HandleAddAura(Unit* Target);
 
@@ -570,6 +570,14 @@ enum ReplenishType
     REPLENISH_RAGE      = 22
 };
 
+enum SpellTargets
+{
+    SPELL_TARGETS_HOSTILE,
+    SPELL_TARGETS_NOT_FRIENDLY,
+    SPELL_TARGETS_NOT_HOSTILE,
+    SPELL_TARGETS_FRIENDLY
+};
+
 namespace MaNGOS
 {
     struct MANGOS_DLL_DECL SpellNotifierPlayer
@@ -601,21 +609,47 @@ namespace MaNGOS
     {
         std::list<Unit*> &i_data;
         Spell &i_spell;
-        const uint32& i_index;
         const uint32& i_push_type;
-        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i,const uint32 &type)
-            : i_data(data), i_spell(spell), i_index(i), i_push_type(type){}
+        float radius;
+        SpellTargets i_TargetType;
+
+        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, const uint32 &type,
+            SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY)
+            : i_data(data), i_spell(spell), i_push_type(type), i_TargetType(TargetType)
+        {
+            if (i_spell.m_spellInfo->EffectRadiusIndex[i])
+                radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i]));
+            else
+                radius = GetMaxRange(sSpellRangeStore.LookupEntry(i_spell.m_spellInfo->rangeIndex));
+        }
 
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
         {
-            float radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
             for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
                 if( !itr->second->isAlive() )
                     continue;
 
-                if (i_spell.m_caster->IsFriendlyTo( itr->second ))
-                    continue;
+                switch (i_TargetType)
+                {
+                    case SPELL_TARGETS_HOSTILE:
+                        if (!i_spell.m_caster->IsHostileTo( itr->second ))
+                            continue;
+                        break;
+                    case SPELL_TARGETS_NOT_FRIENDLY:
+                        if (i_spell.m_caster->IsFriendlyTo( itr->second ))
+                            continue;
+                        break;
+                    case SPELL_TARGETS_NOT_HOSTILE:
+                        if (i_spell.m_caster->IsHostileTo( itr->second ))
+                            continue;
+                        break;
+                    case SPELL_TARGETS_FRIENDLY:
+                        if (!i_spell.m_caster->IsFriendlyTo( itr->second ))
+                            continue;
+                        break;
+                    default: continue;
+                }
 
                 switch(i_push_type)
                 {

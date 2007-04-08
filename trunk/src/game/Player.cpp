@@ -1661,7 +1661,7 @@ bool Player::IsGroupVisibleFor(Player* p) const
     }
 }
 
-bool Player::IsInSameGroupWith(Player* p) const
+bool Player::IsInSameGroupWith(Player const* p) const
 {
     return  groupInfo.group != NULL && 
             groupInfo.group == p->groupInfo.group &&

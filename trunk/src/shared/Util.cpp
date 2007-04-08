@@ -42,6 +42,30 @@ vector<string> StrSplit(const string &src, const string &sep)
     return r;
 }
 
+std::string secsToTimeString(uint32 timeInSecs, bool shortText, bool hoursOnly)
+{
+    uint32 secs    = timeInSecs % MINUTE;
+    uint32 minutes = timeInSecs % HOUR / MINUTE;
+    uint32 hours   = timeInSecs % DAY  / HOUR;
+    uint32 days    = timeInSecs / DAY;
+
+    std::ostringstream ss;
+    if(days)
+        ss << days << (shortText ? "d" : " Day(s) ");
+    if(hours)
+        ss << hours << (shortText ? "h" : " Hour(s) ");
+    if(!hoursOnly)
+    {
+        if(minutes)
+            ss << minutes << (shortText ? "m" : " Minute(s) ");
+        if(secs)
+            ss << secs << (shortText ? "s" : " Second(s).");
+    }
+
+    return ss.str();
+}
+
+
 /// Check if the string is a valid ip address representation
 bool IsIPAddress(char const* ipaddress)
 {

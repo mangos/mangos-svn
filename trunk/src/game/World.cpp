@@ -84,6 +84,7 @@ World::World()
     m_ShutdownIdleMode = false;
     m_ShutdownTimer = 0;
     m_gameTime=time(NULL);
+    m_startTime=m_gameTime;
     m_maxSessionsCount = 0;
 }
 
@@ -449,6 +450,7 @@ void World::SetInitialWorldSettings()
 
     ///- Initialize game time and timers
     m_gameTime = time(NULL);
+    m_startTime=m_gameTime;
 
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
@@ -1025,23 +1027,9 @@ void World::ShutdownMsg(bool show, Player* player)
                                                             // > 12 h ; every 12 h
         (m_ShutdownTimer>12*HOUR   && (m_ShutdownTimer % (12*HOUR) )==0))
     {
-        uint32 secs    = m_ShutdownTimer % MINUTE;
-        uint32 minutes = m_ShutdownTimer % HOUR / MINUTE;
-        uint32 hours   = m_ShutdownTimer % DAY  / HOUR;
-        uint32 days    = m_ShutdownTimer / DAY;
-
-        std::ostringstream ss;
-        if(days)
-            ss << days << " Day(s) ";
-        if(hours)
-            ss << hours << " Hour(s) ";
-        if(minutes)
-            ss << minutes << " Minute(s) ";
-        if(secs)
-            ss << secs << " Second(s).";
-
-        SendServerMessage(SERVER_MSG_SHUTDOWN_TIME,ss.str().c_str(),player);
-        DEBUG_LOG("Server is shuttingdown in %s",ss.str().c_str());
+        std::string str = secsToTimeString(m_ShutdownTimer);
+        SendServerMessage(SERVER_MSG_SHUTDOWN_TIME,str.c_str(),player);
+        DEBUG_LOG("Server is shuttingdown in %s",str.c_str());
     }
 }
 

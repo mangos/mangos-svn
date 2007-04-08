@@ -98,9 +98,9 @@ class MANGOS_DLL_SPEC Group
         const uint64& GetLooterGuid() const { return m_looterGuid; }
 
         // member manipulation methods
-        bool IsMember(uint64 guid);
-        bool IsLeader(uint64 guid) { return (GetLeaderGUID() == guid); }
-        bool IsAssistant(uint64 guid)
+        bool IsMember(uint64 guid) const;
+        bool IsLeader(uint64 guid) const { return (GetLeaderGUID() == guid); }
+        bool IsAssistant(uint64 guid) const
         {
             int8 id = _getMemberIndex(guid);
             if(id<0)
@@ -108,7 +108,7 @@ class MANGOS_DLL_SPEC Group
 
             return m_members[id].assistant;
         }
-        bool SameSubGroup(uint64 guid1, uint64 guid2)
+        bool SameSubGroup(uint64 guid1, uint64 guid2) const
         {
             int8 id1 = _getMemberIndex(guid1);
             int8 id2 = _getMemberIndex(guid2);
@@ -121,8 +121,8 @@ class MANGOS_DLL_SPEC Group
         uint32 GetMembersCount() const { return m_members.size(); }
         uint32 GetMemberCountForXPAtKill(Unit const* victim);
         Player* GetMemberForXPAtKill(uint8 id, Unit const* victim);
-        uint64 GetMemberGUID(uint8 id) { if(id>=m_members.size()) return 0; else return m_members[id].guid; }
-        uint8  GetMemberGroup(uint64 guid)
+        uint64 GetMemberGUID(uint8 id) const { if(id>=m_members.size()) return 0; else return m_members[id].guid; }
+        uint8  GetMemberGroup(uint64 guid) const
         {
             int8 id = _getMemberIndex(guid);
             if(id<0)
@@ -199,7 +199,7 @@ class MANGOS_DLL_SPEC Group
         bool _setMembersGroup(const uint64 &guid, const uint8 &group);
         bool _setAssistantFlag(const uint64 &guid, const bool &state);
 
-        int8 _getMemberIndex(uint64 Guid);
+        int8 _getMemberIndex(uint64 Guid) const;
 
         vector<MemberSlot> m_members;
         vector<uint64> m_invitees;

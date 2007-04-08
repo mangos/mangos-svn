@@ -137,8 +137,10 @@ bool ChatHandler::HandleInfoCommand(const char* args)
 {
     uint32 clientsNum = sWorld.GetSessionCount();
     uint32 maxClientsNum = sWorld.GetMaxSessionCount();
+    std::string str = secsToTimeString(sWorld.GetUptime());
 
     PSendSysMessage(LANG_CONNECTED_USERS, clientsNum, maxClientsNum);
+    PSendSysMessage(LANG_UPTIME, str.c_str());
 
     return true;
 }
