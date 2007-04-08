@@ -936,6 +936,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
     }
 
+    // seal
     if(GetSpellProto()->SpellVisual == 5622 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
         if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
