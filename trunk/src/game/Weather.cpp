@@ -120,7 +120,7 @@ bool Weather::ReGenerate()
 
     // remember old values
     uint32 old_type = m_type;
-    uint32 old_grade = m_grade;
+    float old_grade = m_grade;
 
     m_grade = rand_norm();
     time_t gtime = sWorld.GetGameTime();
