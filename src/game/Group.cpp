@@ -577,7 +577,7 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
     BroadcastPacket(&data);
 }
 
-bool Group::IsMember(uint64 guid)
+bool Group::IsMember(uint64 guid) const
 {
     Player *player = objmgr.GetPlayer(guid);
 
@@ -956,7 +956,7 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
     return true;
 }
 
-int8 Group::_getMemberIndex(uint64 Guid)
+int8 Group::_getMemberIndex(uint64 Guid) const
 {
     for (int i=0; i<m_members.size(); i++)
     {

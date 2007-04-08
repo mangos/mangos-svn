@@ -374,9 +374,71 @@ void Spell::FillTargetMap()
     }
 }
 
+// Helper for Chain Healing
+// Spell target first
+// Raidmates then descending by injury suffered (MaxHealth - Health)
+// Other players/mobs then descending by injury suffered (MaxHealth - Health)
+struct ChainHealingOrder : public binary_function<const Unit*, const Unit*, bool>
+{    
+    const Unit* MainTarget;
+    ChainHealingOrder(const Unit* Target) : MainTarget(Target) {};
+    // functor for operator ">"
+    bool operator()(const Unit* _Left, const Unit* _Right) const
+    {    
+        return (ChainHealingHash(_Left) < ChainHealingHash(_Right));
+    }
+    int32 ChainHealingHash(const Unit* Target) const
+    {
+        if (Target == MainTarget)
+            return 0;
+        else if (Target->GetTypeId() == TYPEID_PLAYER && MainTarget->GetTypeId() == TYPEID_PLAYER &&             
+            ((Player const*)Target)->IsInSameRaidWith((Player const*)MainTarget))
+        {
+            if (Target->GetHealth() == Target->GetMaxHealth())
+                return 40000;
+            else
+                return 20000 - Target->GetMaxHealth() + Target->GetHealth();
+        }
+        else
+            return 40000 - Target->GetMaxHealth() + Target->GetHealth();
+    }
+};
+
+class ChainHealingFullHealth: unary_function<const Unit*, bool>
+{
+public:
+    const Unit* MainTarget;
+    ChainHealingFullHealth(const Unit* Target) : MainTarget(Target) {};
+
+    bool operator()(const Unit* Target)
+    {
+        return (Target != MainTarget && Target->GetHealth() == Target->GetMaxHealth());
+    }
+};
+
+
+// Helper for targets nearest to the spell target
+// The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
+struct TargetDistanceOrder : public binary_function<const Unit, const Unit, bool>
+{    
+    const Unit* MainTarget;
+    TargetDistanceOrder(const Unit* Target) : MainTarget(Target) {};
+    // functor for operator ">"
+    bool operator()(const Unit* _Left, const Unit* _Right) const
+    {    
+        return (MainTarget->GetDistanceSq(_Left) < MainTarget->GetDistanceSq(_Right));
+    }
+};
+
 void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::list<Item*> &TagItemMap,std::list<GameObject*> &TagGOMap)
 {
-    float radius =  GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float radius;
+    if (m_spellInfo->EffectRadiusIndex[i])
+        radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    else
+        radius = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+
+    uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;
     switch(cur)
     {
         case TARGET_TOTEM_EARTH:
@@ -394,14 +456,16 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             if (!tmpUnit) break;
             TagUnitMap.push_back(tmpUnit);
         }break;
-        case TARGET_SINGLE_ENEMY:
+        case TARGET_CHAIN_DAMAGE:
         {
             Unit* pUnitTarget = m_targets.getUnitTarget();
             if(!pUnitTarget)
                 break;
-            TagUnitMap.push_back(pUnitTarget);
-            if (m_spellInfo->EffectChainTarget[i])
+            if (m_spellInfo->EffectChainTarget[i] <= 1)
+                TagUnitMap.push_back(pUnitTarget);
+            else
             {
+                unMaxTargets = m_spellInfo->EffectChainTarget[i];
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                 Cell cell = RedZone::GetZone(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
@@ -416,6 +480,11 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 CellLock<GridReadGuard> cell_lock(cell, p);
                 cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
                 cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+                // sort TagUnitMap  and then cut down to size
+                TagUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+                if (TagUnitMap.size() > unMaxTargets)
+                    TagUnitMap.resize(unMaxTargets);
             }
         }break;
         case TARGET_ALL_ENEMY_IN_AREA:
@@ -465,13 +534,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    if(!pGroup->SameSubGroup(groupMember->GetGUID(), pGroup->GetMemberGUID(p)))
-                        continue;
-
                     Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
-                    if(!Target)
-                        continue;
-                    if(m_caster->IsWithinDistInMap(Target, radius))
+                    if(Target && m_caster->IsWithinDistInMap(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -569,52 +633,64 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_AREAEFFECT_PARTY:
         {
-            Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER
-                ? (Player*)m_targets.getUnitTarget() : NULL;
+            if (!m_targets.getUnitTarget())
+                break;
+            if (m_targets.getUnitTarget()->GetTypeId() != TYPEID_PLAYER)
+            {
+                TagUnitMap.push_back(m_targets.getUnitTarget());
+                break;
+            }
 
-            Group* pGroup = targetPlayer ? targetPlayer->groupInfo.group : NULL;
+            Player* targetPlayer = (Player*)m_targets.getUnitTarget();
+            Group* pGroup = targetPlayer->groupInfo.group;
+
             if(pGroup)
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
-                        continue;
-
                     Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
-                    if(m_targets.getUnitTarget() && Target && m_targets.getUnitTarget()->IsWithinDistInMap(Target, radius) )
+                    if(Target && targetPlayer->IsWithinDistInMap(Target, radius) )
                         TagUnitMap.push_back(Target);
                 }
             }
-            else if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
+            else 
+                TagUnitMap.push_back(targetPlayer);
         }break;
         case TARGET_SELF_FISHING:
         {
             TagUnitMap.push_back(m_caster);
         }break;
-        case TARGET_CHAIN:
+        case TARGET_CHAIN_HEAL:
         {
-            if(!m_targets.getUnitTarget())
+            Unit* pUnitTarget = m_targets.getUnitTarget();
+            if(!pUnitTarget)
                 break;
 
-            Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? ((Player*)m_caster)->groupInfo.group : NULL;
-            if(pGroup)
+            if (m_spellInfo->EffectChainTarget[i] <= 1)
+                TagUnitMap.push_back(pUnitTarget);
+            else
             {
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
-                {
-                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
-                        continue;
+                unMaxTargets = m_spellInfo->EffectChainTarget[i];
+                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
 
-                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
 
-                    if(!Target || Target->GetGUID() == m_caster->GetGUID())
-                        continue;
-                    if(m_caster->IsWithinDistInMap(Target, radius))
-                        TagUnitMap.push_back(Target);
-                }
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
+
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+                // sort TagUnitMap  and then cut down to size
+                TagUnitMap.sort(ChainHealingOrder(pUnitTarget));
+                if (TagUnitMap.size() > unMaxTargets)
+                    TagUnitMap.resize(unMaxTargets);
+                TagUnitMap.remove_if(ChainHealingFullHealth(pUnitTarget));
             }
-            else if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_CURRENT_SELECTED_ENEMY:
         {
@@ -640,12 +716,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             {
                 for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    if(!pGroup->SameSubGroup(m_caster->GetGUID(), pGroup->GetMemberGUID(p)))
-                        continue;
-
                     Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
-                    if(Target && targetPlayer->IsWithinDistInMap(Target, radius) &&
-                        targetPlayer->getClass() == Target->getClass())
+                    if(Target && targetPlayer->IsWithinDistInMap(Target, radius) && targetPlayer->getClass() == Target->getClass())
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -654,16 +726,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
     }
 
-    uint32 unMaxTargets = 0;
-    if(m_spellInfo->MaxAffectedTargets == 0 && m_spellInfo->EffectChainTarget[i] == 0)
-        unMaxTargets = 0;                                   //no limits
-    else if(m_spellInfo->MaxAffectedTargets == 0 && m_spellInfo->EffectChainTarget[i] != 0)
-                                                            //selected enemy also
-        unMaxTargets = m_spellInfo->EffectChainTarget[i] + 1;
-    else if (m_spellInfo->MaxAffectedTargets != 0 && m_spellInfo->EffectChainTarget[i] != 0)
-        unMaxTargets = m_spellInfo->MaxAffectedTargets;     //Unknown such spells;
-
-    if (m_spellInfo->EffectChainTarget[i] != 0 || (unMaxTargets != 0 && TagUnitMap.size() > unMaxTargets))
+    if (unMaxTargets && TagUnitMap.size() > unMaxTargets)
     {
         // make sure one unit is always removed per iteration
         uint32 removed_utarget = 0;
@@ -860,8 +923,12 @@ void Spell::cast(bool skipCheck)
             continue;
         }
                                                             // Dont do spell log, if is school damage spell
-        if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)
+        if(m_spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE || m_spellInfo->Effect[j] == 0)
             needspelllog = false;
+        float DamageMultiplier = 1.0;
+        bool ApplyDamageMultiplier = 
+            (m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_HEAL)
+            && (m_spellInfo->EffectChainTarget[j] > 1);
         for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
         {
             // let the client worry about this
@@ -874,7 +941,11 @@ void Spell::cast(bool skipCheck)
             // check m_caster->GetGUID() let load auras at login and speedup most often case
             Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
             if(unit)
-                HandleEffects(unit,NULL,NULL,j);
+            {
+                HandleEffects(unit,NULL,NULL,j, DamageMultiplier);
+                if ( ApplyDamageMultiplier )
+                    DamageMultiplier *= m_spellInfo->DmgMultiplier[j];
+            }
         }
 
         for(std::list<Item*>::iterator iitem = m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
@@ -900,7 +971,7 @@ void Spell::cast(bool skipCheck)
     {
         switch(m_spellInfo->EffectImplicitTargetA[j])
         {
-            case TARGET_SINGLE_ENEMY:
+            case TARGET_CHAIN_DAMAGE:
             case TARGET_ALL_ENEMY_IN_AREA:
             case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
             case TARGET_ALL_ENEMIES_AROUND_CASTER:
@@ -1703,13 +1774,13 @@ void Spell::HandleThreatSpells(uint32 spellId)
     DEBUG_LOG("Spell %u, rank %u, added an additional %i threat", spellId, objmgr.GetSpellRank(spellId), threatSpell->threat);
 }
 
-void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
+void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i, float DamageMultiplier)
 {
     unitTarget = pUnitTarget;
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
 
-    damage = CalculateDamage((uint8)i);
+    damage = CalculateDamage((uint8)i)*DamageMultiplier;
     uint8 eff = m_spellInfo->Effect[i];
 
     sLog.outDebug( "Spell: Effect : %u", eff);

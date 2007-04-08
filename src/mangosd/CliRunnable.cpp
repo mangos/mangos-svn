@@ -273,7 +273,8 @@ void CliInfo(char*,pPrintf zprintf)
     if (!resultDB)
     {
         int maxUsers = sWorld.GetMaxSessionCount();
-        zprintf("Online users: 0 (max: %d)\r\n",maxUsers);
+        std::string timeStr = secsToTimeString(sWorld.GetUptime(),true);
+        zprintf("Online users: 0 (max: %d) Uptime: %s\r\n",maxUsers,timeStr.c_str());
         return;
     }
 
@@ -309,8 +310,9 @@ void CliInfo(char*,pPrintf zprintf)
     *bufPos = '\0';
 
     ///- Display the list of account/characters online
+    std::string timeStr = secsToTimeString(sWorld.GetUptime(),true);
     uint32 maxUsers = sWorld.GetMaxSessionCount();
-    zprintf("Online users: %u (max: %u)\r\n",uint32(resultDB->GetRowCount()),maxUsers);
+    zprintf("Online users: %u (max: %u) Uptime: %s\r\n",uint32(resultDB->GetRowCount()),maxUsers,timeStr.c_str());
     zprintf("=================================================================\r\n");
     zprintf("|    Account    |       Character      |       IP        |  GM  |\r\n");
     zprintf("=================================================================\r\n");

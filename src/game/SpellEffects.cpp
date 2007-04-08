@@ -531,8 +531,8 @@ void Spell::EffectDummy(uint32 i)
 
     if(m_spellInfo->SpellIconID == 1648)
     {
-        int32 dmg = damage;
-        dmg += int32(m_caster->GetPower(POWER_RAGE)/10 * objmgr.GetSpellRank(m_spellInfo->Id)*3);
+        int32 dmg = damage-1;
+        dmg += int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i]);
         SpellEntry const *tspellInfo = sSpellStore.LookupEntry(20647);
         SpellEntry sInfo = *tspellInfo;
         sInfo.EffectBasePoints[0] = dmg;
@@ -676,7 +676,7 @@ void Spell::EffectApplyAura(uint32 i)
             // arcane missiles
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
             if (!spellInfo) return;
-            if (spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY && m_caster->GetTypeId() == TYPEID_PLAYER)
+            if (spellInfo->EffectImplicitTargetA[0] == TARGET_CHAIN_DAMAGE && m_caster->GetTypeId() == TYPEID_PLAYER)
             {
                 Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
                 if (target)

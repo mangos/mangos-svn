@@ -970,8 +970,23 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         // heal for caster damage
         if(pVictim!=this && spellProto->SpellVisual==163)
         {
-            SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
-            DealDamage(this, gain, NODAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
+            // FIXME: must be calculated base at spell data
+            int32 dmg = gain;
+            if(GetHealth() <= dmg && GetTypeId()==TYPEID_PLAYER)
+            {
+                RemoveAurasDueToSpell(spellProto->Id);
+                if(m_currentSpell)
+                {
+                    if(m_currentSpell->IsChanneledSpell())
+                        m_currentSpell->SendChannelUpdate(0);
+                    m_currentSpell->finish();
+                }
+            }
+            else
+            {
+                SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
+                DealDamage(this, gain, NODAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
+            }
         }
 
         if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
@@ -2309,7 +2324,7 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
                 bool positive = true;
                 switch((*i).second->GetSpellProto()->EffectImplicitTargetA[(*i).second->GetEffIndex()])
                 {
-                    case TARGET_SINGLE_ENEMY:
+                    case TARGET_CHAIN_DAMAGE:
                     case TARGET_ALL_ENEMY_IN_AREA:
                     case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
                     case TARGET_ALL_ENEMIES_AROUND_CASTER:

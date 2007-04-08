@@ -180,8 +180,12 @@ class World
         /// Get the path where data (dbc, maps) are stored on disk
         std::string GetDataPath() const { return m_dataPath; }
 
+        /// When server started?
+        time_t const& GetStartTime() const { return m_startTime; }
         /// What time is it?
-        time_t GetGameTime() const { return m_gameTime; }
+        time_t const& GetGameTime() const { return m_gameTime; }
+        /// Uptime (in secs)
+        uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
 
         /// Get the maximum skill level a player can reach
         uint16 GetConfigMaxSkillValue() const { return getConfig(CONFIG_MAX_PLAYER_LEVEL)*5; }
@@ -240,6 +244,7 @@ class World
 
     private:
 
+        time_t m_startTime;
         time_t m_gameTime;
         IntervalTimer m_timers[WUPDATE_COUNT];
         uint32 mail_timer;
