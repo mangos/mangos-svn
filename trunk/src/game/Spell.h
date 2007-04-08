@@ -536,10 +536,10 @@ class Spell
         Unit* unitTarget;
         Item* itemTarget;
         GameObject* gameObjTarget;
+        int32 damage;
+
         // -------------------------------------------
         GameObject* focusObject;
-
-        int32 damage;
 
         // List of all Spell targets
         std::list<uint64> m_targetUnitGUIDs[3];

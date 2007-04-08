@@ -553,6 +553,22 @@ void Spell::EffectDummy(uint32 i)
             }
         }
     }
+
+    // Judgement of command
+    if (m_spellInfo->Attributes == 0x50800 && m_spellInfo->AttributesEx == 128)
+    {
+        // if the target is stunned or incapacitated(also stun state).
+        if( !unitTarget->hasUnitState(UNIT_STAT_STUNDED) )
+            return;
+
+        uint32 spell_id = m_spellInfo->EffectBasePoints[i]+1;
+
+        SpellEntry const *spell_proto = sSpellStore.LookupEntry(spell_id);
+        if(!spell_proto)
+            return;
+
+        m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
+    }
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
@@ -1815,6 +1831,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             case 23894: BTAura = 23888; break;
             default: break;
         }
+        // FIX_ME: Where this value used???
         damage = uint32(0.45 * (m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS)));
     }
 
@@ -2007,25 +2024,25 @@ void Spell::EffectScriptEffect(uint32 i)
             if(!unitTarget || !unitTarget->isAlive())
                 return;
             uint32 spellId2 = 0;
-            Unit::AuraMap& m_auras = m_caster->GetAuras();
-            Unit::AuraMap::iterator itr,next;
 
-            for(itr = m_auras.begin(); itr != m_auras.end(); itr = next)
+            // all seals have aura dummy 
+            Unit::AuraList& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+
+            for(Unit::AuraList::iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
             {
-                next = itr;
-                next++;
-                if (itr->second)
-                {
-                    SpellEntry const *spellInfo = itr->second->GetSpellProto();
-                    if (!spellInfo) continue;
-                    if (spellInfo->SpellVisual != 5622 || spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN) continue;
-                    spellId2 = spellInfo->EffectBasePoints[2]+1;
-                    if(spellId2 <= 1)
-                        continue;
-                    m_caster->RemoveAurasDueToSpell(spellInfo->Id);
-                    next = m_auras.begin();
-                    break;
-                }
+                SpellEntry const *spellInfo = (*itr)->GetSpellProto();
+
+                // search seal
+                if (!spellInfo || spellInfo->SpellVisual != 5622 || spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN) 
+                    continue;
+
+                spellId2 = spellInfo->EffectBasePoints[(*itr)->GetEffIndex()]+1;
+                if(spellId2 <= 1)
+                    continue;
+
+                // found, remove seal
+                m_caster->RemoveAurasDueToSpell(spellInfo->Id);
+                break;
             }
 
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId2);
