@@ -78,6 +78,15 @@ AggressorAI::_needToStop() const
     //1) victim is dead (check is in SelectHostilTarget() func)
     //2) victim is out of threat radius
 
+    // chaise only at same map
+    if(!i_creature.IsInMap(i_creature.getVictim()))
+        return true;
+
+    // instance not have threat radius for stop
+    Map* map = MapManager::Instance().GetMap(i_creature.GetMapId(),&i_creature);
+    if(map->Instanceable())
+        return false;
+
     float rx,ry,rz;
     i_creature.GetRespawnCoord(rx, ry, rz);
     float length = i_creature.getVictim()->GetDistanceSq(rx,ry,rz);
