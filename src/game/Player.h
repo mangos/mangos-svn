@@ -882,6 +882,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void removeSpell(uint16 spell_id);
         bool resetTalents(bool no_cost = false);
         uint32 resetTalentsCost() const;
+        void InitTalentForLevel();
 
         PlayerSpellMap const& GetSpellMap() const { return m_spells; }
         PlayerSpellMap      & GetSpellMap()       { return m_spells; }
@@ -1312,14 +1313,11 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint64 m_lootGuid;
 
-        std::string m_rank_name;
-
         float m_createStats[5];
 
         uint32 m_race;
         uint32 m_class;
         uint32 m_team;
-        uint8  m_outfitId;
         uint32 m_dismountCost;
         uint32 m_nextSave;
 
@@ -1412,6 +1410,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_resetTalentsCost;
         time_t m_resetTalentsTime;
+        uint32 m_usedTalentCount;
 
         IgnoreList m_ignorelist;
 };

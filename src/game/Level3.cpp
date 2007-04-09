@@ -2550,6 +2550,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
     if(chr)
     {
         chr->InitStatsForLevel(newlevel);
+        chr->InitTalentForLevel();
         chr->SetUInt32Value(PLAYER_XP,0);
 
         WorldPacket data;
@@ -3076,6 +3077,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         if(argstr == "level")
         {
             player->InitStatsForLevel(1,false);
+            player->InitTalentForLevel();
             player->SetUInt32Value(PLAYER_XP,0);
 
             // reset level to summoned pet
@@ -3084,7 +3086,10 @@ bool ChatHandler::HandleResetCommand (const char * args)
                 pet->InitStatsForLevel(1);
         }
         else
+        {
             player->InitStatsForLevel(player->getLevel(),false);
+            player->InitTalentForLevel();
+        }
 
         return true;
     }
