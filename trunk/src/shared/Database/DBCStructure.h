@@ -388,8 +388,8 @@ struct WorldSafeLocsEntry
 #pragma pack(pop)
 #endif
 
-// Structures not used for casting to loaded DBC data and not requred then packing
-typedef std::set<uint32> TalentSpellSet;
+// Structures not used for casting to loaded DBC data and not required then packing
+typedef std::map<uint32,uint32> TalentSpellCosts;
 
 struct TaxiPathBySourceAndDestination
 {

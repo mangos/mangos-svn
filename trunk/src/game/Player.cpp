@@ -91,6 +91,8 @@ Player::Player (WorldSession *session): Unit( NULL )
     m_curSelection = 0;
     m_lootGuid = 0;
 
+    m_usedTalentCount = 0;
+
     m_regenTimer = 0;
     m_weaponChangeTimer = 0;
     m_dismountCost = 0;
@@ -336,6 +338,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     // base stats and related field values
     InitStatsForLevel(1,false,false);
+    InitTalentForLevel();
 
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
     _ApplyStatsMods();
@@ -1727,11 +1730,36 @@ void Player::GiveLevel()
     level += 1;
 
     InitStatsForLevel(level);
+    InitTalentForLevel();
 
     // give level to summoned pet
     Pet* pet = GetPet();
     if(pet && pet->getPetType()==SUMMON_PET)
         pet->GivePetLevel(level);
+}
+
+void Player::InitTalentForLevel()
+{
+    uint32 level = getLevel();
+    // talents base at level diff ( talents = level - 9 but some can be used already)
+    if(level < 10)
+    {
+        // Remove all talent points
+        if(m_usedTalentCount > 0)                           // Free any used talents
+        {
+            resetTalents(true);
+            SetUInt32Value(PLAYER_CHARACTER_POINTS1,0);
+        }
+    }
+    else
+    {
+        // if used more that have then reset
+        if(m_usedTalentCount > level-9)
+            resetTalents(true);
+        // else update amount of free points
+        else
+            SetUInt32Value(PLAYER_CHARACTER_POINTS1,level-9-m_usedTalentCount);
+    }
 }
 
 void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
@@ -1767,30 +1795,6 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     }
 
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
-
-    // talentes base at level diff ( talentes = level - 9 but some can be used already)
-    if(level < 10)
-    {
-        // Remove all talent points
-        if(getLevel() >= 10)                                // Free any used talentes
-        {
-            resetTalents(true);
-            SetUInt32Value(PLAYER_CHARACTER_POINTS1,0);
-        }
-    }
-    else
-    {
-        // Update talent points amount
-        if(level > getLevel())                              // Add new talent points
-            SetUInt32Value(PLAYER_CHARACTER_POINTS1,GetUInt32Value(PLAYER_CHARACTER_POINTS1)+min(level-getLevel(),level-9));
-        else
-        if(level < getLevel())                          // Free if need talentes, remove some amount talent points
-        {
-            if(GetUInt32Value(PLAYER_CHARACTER_POINTS1) < (getLevel() - level))
-                resetTalents(true);
-            SetUInt32Value(PLAYER_CHARACTER_POINTS1,GetUInt32Value(PLAYER_CHARACTER_POINTS1)-(getLevel() - level));
-        }
-    }
 
     // update level, max level of skills
     SetLevel( level);
@@ -2099,7 +2103,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     newspell->slotId = tmpslot;
     m_spells[spell_id] = newspell;
 
-    if (IsPassiveSpell(spell_id) || IsTalentSpell(spell_id) && objmgr.IsSpellLearnSpell(spell_id))
+    if (IsPassiveSpell(spell_id) || GetTalentSpellCost(spell_id) != 0 && objmgr.IsSpellLearnSpell(spell_id))
     {
         // if spell doesn't require a stance or the player is in the required stance
         if( (!spellInfo->Stances && spell_id != 3122 && spell_id != 5419 && spell_id != 7376 &&
@@ -2113,6 +2117,9 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             (spell_id == 21178 && m_form == FORM_BEAR))
             CastSpell(this, spell_id, true);
     }
+
+    // update used talent points count
+    m_usedTalentCount += GetTalentSpellCost(spell_id);
 
     // add dependent skills
     uint16 maxskill     = GetMaxSkillValueForLevel();
@@ -2183,6 +2190,16 @@ void Player::removeSpell(uint16 spell_id)
         itr->second->state = PLAYERSPELL_REMOVED;
 
     RemoveAurasDueToSpell(spell_id);
+
+    // free talent points
+    uint32 talentCosts = GetTalentSpellCost(spell_id);
+    if(talentCosts > 0)
+    {
+        if(talentCosts < m_usedTalentCount)
+            m_usedTalentCount -= talentCosts;
+        else
+            m_usedTalentCount = 0;
+    }
 
     // remove dependent skill
     ObjectMgr::SpellLearnSkillNode const* spellLearnSkill = objmgr.GetSpellLearnSkill(spell_id);
@@ -2427,8 +2444,11 @@ uint32 Player::resetTalentsCost() const
 bool Player::resetTalents(bool no_cost)
 {
     uint32 level = getLevel();
-    if (level < 10 || (GetUInt32Value(PLAYER_CHARACTER_POINTS1) >= level - 9))
+    if (m_usedTalentCount == 0)
+    {
+        SetUInt32Value(PLAYER_CHARACTER_POINTS1,(level < 10 ? 0 : level-9));
         return false;
+    }
 
     uint32 cost = 0;
 
@@ -2472,7 +2492,7 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
-    SetUInt32Value(PLAYER_CHARACTER_POINTS1, level - 9);
+    SetUInt32Value(PLAYER_CHARACTER_POINTS1,(level < 10 ? 0 : level-9));
 
     if(!no_cost)
     {
@@ -10129,6 +10149,9 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadAuras(time_diff);
 
     _LoadSpells(time_diff);
+
+    // after spell load
+    InitTalentForLevel();
 
     _LoadQuestStatus();
 

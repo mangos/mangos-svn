@@ -66,7 +66,7 @@ DBCStorage <SpellRadiusEntry> sSpellRadiusStore(SpellRadiusfmt);
 DBCStorage <SpellRangeEntry> sSpellRangeStore(SpellRangefmt);
 DBCStorage <StableSlotPricesEntry> sStableSlotPricesStore(StableSlotPricesfmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
-TalentSpellSet sTalentSpellSet;
+TalentSpellCosts sTalentSpellCosts;
 DBCStorage <TalentTabEntry> sTalentTabStore(TalentTabEntryfmt);
 DBCStorage <TaxiNodesEntry> sTaxiNodesStore(TaxiNodesEntryfmt);
 TaxiMask sTaxiNodesMask;
@@ -202,7 +202,7 @@ void LoadDBCStores(std::string dataPath)
         if (!talentInfo) continue;
         for (int j = 0; j < 5; j++)
             if(talentInfo->RankID[j])
-                sTalentSpellSet.insert(talentInfo->RankID[j]);
+                sTalentSpellCosts[talentInfo->RankID[j]] = j+1;
     }
 
     LoadDBC(bar,bad_dbc_files,sTalentTabStore,           dataPath+"dbc/TalentTab.dbc");
@@ -347,9 +347,13 @@ bool IsPassiveSpell(uint32 spellId)
     return (spellInfo->Attributes & (1<<6)) != 0;
 }
 
-bool IsTalentSpell(uint32 spellId)
+uint32 GetTalentSpellCost(uint32 spellId)
 {
-    return sTalentSpellSet.count(spellId)!=0;
+    TalentSpellCosts::const_iterator itr = sTalentSpellCosts.find(spellId);
+    if(itr==sTalentSpellCosts.end())
+        return 0;
+
+    return itr->second;
 }
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2)
