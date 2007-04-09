@@ -189,6 +189,10 @@ void GameObject::Update(uint32 p_time)
                             m_lootState = GO_LOOTED;        // can be delete
                             return;
                         }
+                        case GAMEOBJECT_TYPE_DOOR:
+                            SetUInt32Value (GAMEOBJECT_FLAGS, m_flags);
+                            SetUInt32Value (GAMEOBJECT_STATE, 1);
+                            break;
                         case GAMEOBJECT_TYPE_TRAP:
                             break;
                         default:
