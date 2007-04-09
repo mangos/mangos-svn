@@ -211,15 +211,15 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 i_pet.AttackerStateUpdate(i_pet.getVictim());
 
-                i_pet.getVictim()->AddThreat(&i_pet,0.0f); //if pet misses its target, it will also be the first in threat list
-
-                if(owner)
-                    i_pet.getVictim()->AddThreat(owner,0.0f); //threat link
-
                 i_pet.resetAttackTimer();
 
                 if ( !i_pet.getVictim() )
                     return;
+
+                i_pet.getVictim()->AddThreat(&i_pet,0.0f); //if pet misses its target, it will also be the first in threat list
+
+                if(owner)
+                    i_pet.getVictim()->AddThreat(owner,0.0f); //threat link
 
                 if( _needToStop() )
                     _stopAttack();
