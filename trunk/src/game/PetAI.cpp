@@ -35,7 +35,6 @@ int PetAI::Permissible(const Creature *creature)
 
 PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_LOOK)
 {
-    i_owner = ObjectAccessor::Instance().GetUnit(c, c.GetOwnerGUID());
 }
 
 void PetAI::MoveInLineOfSight(Unit *u)
@@ -149,11 +148,13 @@ void PetAI::_stopAttack()
         DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", i_pet.GetGUIDLow());
     }
 
-    if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
+    Unit* owner = i_pet.GetOwner();
+
+    if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW) && owner)
     {
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
         i_pet->Clear();
-        i_pet->Mutate(new TargetedMovementGenerator(*i_owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
+        i_pet->Mutate(new TargetedMovementGenerator(*owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
     }
     else
     {
@@ -171,6 +172,8 @@ void PetAI::UpdateAI(const uint32 diff)
     // update i_victimGuid if i_pet.getVictim() !=0 and changed
     if(i_pet.getVictim())
         i_victimGuid = i_pet.getVictim()->GetGUID();
+
+    Unit* owner = i_pet.GetOwner();
 
     // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clearóâ at Unit death etc.
     if( i_victimGuid )
@@ -207,11 +210,12 @@ void PetAI::UpdateAI(const uint32 diff)
             else if( i_pet.isAttackReady() && i_pet.canReachWithAttack(i_pet.getVictim()) )
             {
                 i_pet.AttackerStateUpdate(i_pet.getVictim());
-                /* Need more tests
-                (i_pet.getVictim())->AddThreat(&i_pet,0.0f); //if pet misses its target, it will also be the first in threat list
-                if(i_owner)
-                    (i_pet.getVictim())->AddThreat(i_owner,0.0f); //threat link
-                */
+
+                i_pet.getVictim()->AddThreat(&i_pet,0.0f); //if pet misses its target, it will also be the first in threat list
+
+                if(owner)
+                    i_pet.getVictim()->AddThreat(owner,0.0f); //threat link
+
                 i_pet.resetAttackTimer();
 
                 if ( !i_pet.getVictim() )
@@ -222,19 +226,19 @@ void PetAI::UpdateAI(const uint32 diff)
             }
         }
     }
-    else
+    else if(owner)
     {
-        if(i_owner && i_owner->isInCombat() && (!((Pet*)&i_pet)->HasActState(STATE_RA_PASSIVE)))
+        if(owner->isInCombat() && (!((Pet*)&i_pet)->HasActState(STATE_RA_PASSIVE)))
         {
-            AttackStart(i_owner->getAttackerForHelper());
+            AttackStart(owner->getAttackerForHelper());
         }
-        else if(i_owner && ((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
+        else if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
         {
             if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
             {
                 i_pet.addUnitState(UNIT_STAT_FOLLOW);
                 i_pet->Clear();
-                i_pet->Mutate(new TargetedMovementGenerator(*i_owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
+                i_pet->Mutate(new TargetedMovementGenerator(*owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
             }
         }
     }
