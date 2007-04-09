@@ -557,17 +557,24 @@ void Spell::EffectDummy(uint32 i)
     // Judgement of command
     if (m_spellInfo->Attributes == 0x50800 && m_spellInfo->AttributesEx == 128)
     {
-        // if the target is stunned or incapacitated(also stun state).
-        if( !unitTarget->hasUnitState(UNIT_STAT_STUNDED) )
-            return;
-
         uint32 spell_id = m_spellInfo->EffectBasePoints[i]+1;
-
-        SpellEntry const *spell_proto = sSpellStore.LookupEntry(spell_id);
+        SpellEntry const* spell_proto = sSpellStore.LookupEntry(spell_id);
         if(!spell_proto)
             return;
 
-        m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
+        if( !unitTarget->hasUnitState(UNIT_STAT_STUNDED) )
+        {
+            m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
+        }
+        else
+        {
+            // copy to increase damage (2x) for stunned target.
+            SpellEntry spell_proto_copy = *spell_proto;
+            assert(spell_proto_copy.Effect[0]==SPELL_EFFECT_SCHOOL_DAMAGE);
+            spell_proto_copy.EffectBasePoints[0] *= 2;
+
+            m_caster->CastSpell(unitTarget,&spell_proto_copy,true,NULL);
+        }
     }
 }
 
