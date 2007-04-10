@@ -6656,6 +6656,211 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
     return 0;
 }
 
+
+//////////////////////////////////////////////////////////////////////////
+uint8 Player::CanStoreItems( Item **pItems,int count) const
+{
+    Item    *pItem2;
+
+    // fill space table
+    int inv_slot_items[INVENTORY_SLOT_ITEM_END-INVENTORY_SLOT_ITEM_START];
+    int inv_bags[INVENTORY_SLOT_BAG_END-INVENTORY_SLOT_BAG_START][MAX_BAG_SIZE];
+
+    memset(inv_slot_items,0,sizeof(int)*(INVENTORY_SLOT_ITEM_END-INVENTORY_SLOT_ITEM_START));
+    memset(inv_bags,0,sizeof(int)*(INVENTORY_SLOT_BAG_END-INVENTORY_SLOT_BAG_START)*MAX_BAG_SIZE);
+
+    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        
+        if (pItem2 && !pItem2->IsInTrade())
+        {
+            inv_slot_items[i-INVENTORY_SLOT_ITEM_START] = pItem2->GetCount();
+        }
+    }
+
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        Bag     *pBag;
+        ItemPrototype const *pBagProto;
+
+        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    pItem2 = GetItemByPos( i, j );
+                    if (pItem2 && !pItem2->IsInTrade())
+                    {
+                        inv_bags[i-INVENTORY_SLOT_BAG_START][j] = pItem2->GetCount();
+                    }
+                }
+            }
+        }
+    }
+
+
+    // check free space for all items
+    for (int k=0;k<count;k++)
+    {
+        Item  *pItem = pItems[k];
+
+        // no item
+        if (!pItem)  continue;
+
+        sLog.outDebug( "STORAGE: CanStoreItems %i. item = %u, count = %u", k+1, pItem->GetEntry(), pItem->GetCount());
+        ItemPrototype const *pProto = pItem->GetProto();
+
+        // strange item
+        if( !pProto ) 
+            return EQUIP_ERR_ITEM_NOT_FOUND;
+
+        // item it 'bind'
+        if(pItem->IsBindedNotWith(GetGUID()))
+            return EQUIP_ERR_DONT_OWN_THAT_ITEM;
+
+        Bag *pBag;
+        ItemPrototype const *pBagProto;
+
+        // item is 'one item only'
+        uint8 res = CanTakeMoreSimilarItems(pItem);
+        if(res != EQUIP_ERR_OK)
+            return res;
+
+        // search stack for merge to (ignore keyring - keys not merged)
+        if( pProto->Stackable > 1 )
+        {
+            bool b_found = false;
+            for(int t = INVENTORY_SLOT_ITEM_START; t < INVENTORY_SLOT_ITEM_END; t++)
+            {
+                pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, t );
+                if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && inv_slot_items[t-INVENTORY_SLOT_ITEM_START] + pItem->GetCount() <= pProto->Stackable )
+                {
+                    inv_slot_items[t-INVENTORY_SLOT_ITEM_START] += pItem->GetCount();
+                    b_found = true;
+                    break;
+                }
+            }
+            if (b_found) continue;
+
+            for(int t = INVENTORY_SLOT_BAG_START; !b_found && t < INVENTORY_SLOT_BAG_END; t++)
+            {
+                pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, t );
+                if( pBag )
+                {
+                    pBagProto = pBag->GetProto();
+                    if( pBagProto )
+                    {
+                        for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                        {
+                            pItem2 = GetItemByPos( t, j );
+                            if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && inv_bags[t-INVENTORY_SLOT_BAG_START][j] + pItem->GetCount() <= pProto->Stackable )
+                            {
+                                inv_bags[t-INVENTORY_SLOT_BAG_START][j] += pItem->GetCount();
+                                b_found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (b_found) continue;
+        }
+
+        // special bag case
+        if( pProto->BagFamily != BAG_FAMILY_NONE )
+        {
+            /* not active until keyring show at key add implementation
+            if(pProto->BagFamily == BAG_FAMILY_KEYS)
+            {
+                uint32 keyringSize = GetMaxKeyringSize();
+                for(uint32 j = KEYRING_SLOT_START; j < KEYRING_SLOT_START+keyringSize; j++)
+                {
+                    pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, j );
+                    if( !pItem2 )
+                    {
+                        dest = ( (INVENTORY_SLOT_BAG_0 << 8) | j );
+                        return EQUIP_ERR_OK;
+                    }
+                }
+            }
+            */
+
+            bool b_found = false;
+            for(int t = INVENTORY_SLOT_BAG_START; !b_found && t < INVENTORY_SLOT_BAG_END; t++)
+            {
+                pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, t );
+                if( pBag )
+                {
+                    pBagProto = pBag->GetProto();
+
+                    // not plain container check
+                    if( pBagProto && (pBagProto->Class != ITEM_CLASS_CONTAINER || pBagProto->SubClass != ITEM_SUBCLASS_CONTAINER) && pItem->CanGoIntoBag(pBagProto) )
+                    {
+                        for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                        {
+                            if( inv_bags[t-INVENTORY_SLOT_BAG_START][j] == 0 )
+                            {
+                                inv_bags[t-INVENTORY_SLOT_BAG_START][j] = 1;
+                                b_found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (b_found) continue;
+        }
+
+        // search free slot
+        bool b_found = false;
+        for(int t = INVENTORY_SLOT_ITEM_START; t < INVENTORY_SLOT_ITEM_END; t++)
+        {
+            if( inv_slot_items[t-INVENTORY_SLOT_ITEM_START] == 0 )
+            {
+                inv_slot_items[t-INVENTORY_SLOT_ITEM_START] = 1;
+                b_found = true;
+                break;
+            }
+        }
+        if (b_found) continue;
+
+        // search free slot in bags
+        for(int t = INVENTORY_SLOT_BAG_START; !b_found && t < INVENTORY_SLOT_BAG_END; t++)
+        {
+            pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, t );
+            if( pBag )
+            {
+                pBagProto = pBag->GetProto();
+                if( pBagProto && pItem->CanGoIntoBag(pBagProto))
+                {
+                    for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                    {
+                        if( inv_bags[t-INVENTORY_SLOT_BAG_START][j] == 0 )
+                        {
+                            inv_bags[t-INVENTORY_SLOT_BAG_START][j] = 1;
+                            b_found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // no free slot found?
+        if (!b_found) 
+            return EQUIP_ERR_INVENTORY_FULL;
+    } 
+
+    return EQUIP_ERR_OK;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
 uint8 Player::CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const
 {
     dest = 0;

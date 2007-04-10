@@ -157,6 +157,9 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded() const;
+        void SetInTrade(bool b = true) { mb_in_trade = b; }
+        bool IsInTrade() const { return mb_in_trade; }
+
         bool IsFitToSpellRequirements(SpellEntry const* spellInfo) const;
 
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
@@ -203,5 +206,6 @@ class MANGOS_DLL_SPEC Item : public Object
         Bag *m_container;
         ItemUpdateState uState;
         int16 uQueuePos;
+        bool mb_in_trade;    // true if item is currently in trade-window
 };
 #endif
