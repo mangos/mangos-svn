@@ -184,12 +184,25 @@ void World::RemoveWeather(uint32 id)
 }
 
 /// Add a Weather object to the list
-void World::AddWeather(Weather* w)
+Weather* World::AddWeather(uint32 zone_id)
 {
-    ASSERT(w);
+    Weather *wth = sWorld.FindWeather(zone_id);
+
+    // weather already added
+    if(wth)
+        return wth;
+
+    WeatherZoneChances const* weatherChances = objmgr.GetWeatherChances(zone_id);
+
+    // zone not have weather, ignore
+    if(!weatherChances)
+        return NULL;
+
+    Weather* w = new Weather(zone_id,weatherChances);
     m_weathers[w->GetZone()] = w;
     w->ReGenerate();
     w->UpdateWeather();
+    return w;
 }
 
 /// Initialize the World
@@ -319,6 +332,7 @@ void World::SetInitialWorldSettings()
     }
 
     m_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY] = sConfig.GetIntDefault("SaveRespawnTimeImmediately",1);
+    m_configs[CONFIG_WEATHER] = sConfig.GetIntDefault("ActivateWeather",1);
 
     ///- Read the "Data" directory from the config file
     m_dataPath = sConfig.GetStringDefault("DataDir","./");
@@ -588,7 +602,7 @@ void World::Update(time_t diff)
                 continue;
 
             ///- and remove not active sessions from the list
-            if(!itr->second->Update(diff))
+            if(!itr->second->Update(diff))  // As interval = 0
             {
                 delete itr->second;
                 m_sessions.erase(itr);
@@ -609,7 +623,7 @@ void World::Update(time_t diff)
             next++;
 
             ///- and remove Weather objects for zones with no player
-            if(!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval()))
+            if(!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval())) //As interval > WorldTick
             {
                 delete itr->second;
                 m_weathers.erase(itr);
@@ -622,7 +636,7 @@ void World::Update(time_t diff)
     {
         m_timers[WUPDATE_OBJECTS].Reset();
         ///- Update objects when the timer has passed (maps, transport, creatures,...)
-        MapManager::Instance().Update(diff);
+        MapManager::Instance().Update(diff); // As interval = 0
 
         ///- Process necessary scripts
         if (!scriptSchedule.empty())

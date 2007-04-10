@@ -17,7 +17,7 @@
  */
 
 /** \file
-    \ingroup u2w
+    \ingroup world
 */
 
 #include "Log.h"

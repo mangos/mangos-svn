@@ -178,6 +178,8 @@
 #define LANG_YOURS_SECURITY_CHANGED      "%s changed your security level to %i."
 #define LANG_CREATURE_MOVE_DISABLED      "Creature Movement Disabled."
 #define LANG_CREATURE_MOVE_ENABLED       "Creature Movement Enabled."
+#define LANG_NO_WEATHER                  "Weather can't be changed for this zone."
+#define LANG_WEATHER_DISABLED            "Weather system disabled at server."
 
                                                             //log
 #define LANG_SPAWNING_SPIRIT_HEAL        "Spawning Spirit Healers\n"

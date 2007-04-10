@@ -85,6 +85,7 @@ enum WorldConfigs
     CONFIG_SKILL_CHANCE_GREY,
     CONFIG_MAX_OVERSPEED_PINGS,
     CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY,
+    CONFIG_WEATHER,
     CONFIG_VALUE_COUNT
 };
 
@@ -158,8 +159,8 @@ class World
         Player* FindPlayerInZone(uint32 zone);
 
         Weather* FindWeather(uint32 id) const;
-        void AddWeather(Weather *w);
-        void RemoveWeather(uint32 id);
+        Weather* AddWeather(uint32 zone_id);
+        void RemoveWeather(uint32 zone_id);
 
         /// Get the active session server limit
         uint32 GetPlayerLimit() const { return m_playerLimit; }

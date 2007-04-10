@@ -951,7 +951,7 @@ class MANGOS_DLL_SPEC Player : public Unit
                     SetPvP(state);
             }
         }
-        void UpdateZone();
+        void UpdateZone(uint32 newZone);
         void UpdatePvPFlag(time_t currTime);
 
         /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/

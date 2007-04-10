@@ -1336,7 +1336,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     SetSemaphoreTeleport(false);
 
-    UpdateZone();
+    UpdateZone(GetZoneId());
 
     if(old_zone != GetZoneId() && pvpInfo.inHostileArea)    // only at zone change
         CastSpell(this, 2479, false);
@@ -4519,21 +4519,27 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
     return MapManager::Instance().GetZoneId((*result)[0].GetUInt32(), (*result)[0].GetFloat(),(*result)[0].GetFloat());
 }
 
-void Player::UpdateZone()
+void Player::UpdateZone(uint32 newZone)
 {
-    AreaTableEntry const* zone = GetAreaEntryByAreaID(GetZoneId());
+    /// \todo Fix me: We might receive zoneupdate for a new entered zone, but the player coordinates are still in the old zone
+    if (newZone != GetZoneId())
+        sLog.outDebug("Zone update problem: received zone = %u, current zone = %u",newZone,GetZoneId());
+
+    AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
     if(!zone)
         return;
 
-    Weather *wth = sWorld.FindWeather(GetZoneId());
-    if(wth)
+    if (sWorld.getConfig(CONFIG_WEATHER))
     {
-        wth->SendWeatherUpdateToPlayer(this);
-    }
-	else
-    {
-        wth = new Weather(GetZoneId());
-        sWorld.AddWeather(wth);
+        Weather *wth = sWorld.FindWeather(zone->ID);
+        if(wth)
+        {
+            wth->SendWeatherUpdateToPlayer(this);
+        }
+        else
+        {
+            sWorld.AddWeather(zone->ID);
+        }
     }
 
     pvpInfo.inHostileArea =
