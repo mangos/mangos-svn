@@ -439,7 +439,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
 
-    GetPlayer()->UpdateZone();
+    GetPlayer()->UpdateZone(newZone);
 }
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )

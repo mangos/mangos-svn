@@ -16,47 +16,38 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \addtogroup world
+/// @{
+/// \file
+
 #ifndef __WEATHER_H
 #define __WEATHER_H
 
 #include "Common.h"
 #include "ObjectMgr.h"
-
-// weather defines
-enum WeatherSounds
-{
-    WEATHER_NOSOUND                = 0,
-    WEATHER_RAINLIGHT              = 8533,
-    WEATHER_RAINMEDIUM             = 8534,
-    WEATHER_RAINHEAVY              = 8535,
-    WEATHER_SNOWLIGHT              = 8536,
-    WEATHER_SNOWMEDIUM             = 8537,
-    WEATHER_SNOWHEAVY              = 8538,
-    WEATHER_SANDSTORMLIGHT         = 8556,
-    WEATHER_SANDSTORMMEDIUM        = 8557,
-    WEATHER_SANDSTORMHEAVY         = 8558
-};
+#include "Timer.h"
 
 class Player;
 
+/// Weather for one zone
 class Weather
 {
     public:
-        explicit Weather(uint32 zone);
+        Weather(uint32 zone, WeatherZoneChances const* weatherChances);
         ~Weather() { };
         bool ReGenerate();
         bool UpdateWeather();
         void SendWeatherUpdateToPlayer(Player *player);
         void SetWeather(uint32 type, float grade);
+        /// For which zone is this weather?
         uint32 GetZone() { return m_zone; };
-        bool Update(uint32 diff);
+        bool Update(time_t diff);
     private:
         uint32 GetSound();
         uint32 m_zone;
         uint32 m_type;
         float m_grade;
-        uint32 m_interval;
-        uint32 m_timer;
+        IntervalTimer m_timer;
         WeatherZoneChances const* m_weatherChances;
 };
 #endif

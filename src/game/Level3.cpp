@@ -2709,6 +2709,13 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     if(!*args)
         return false;
 
+    //Weather is OFF
+    if (sWorld.getConfig(CONFIG_WEATHER) == 0)
+    {
+        SendSysMessage(LANG_WEATHER_DISABLED);
+        return true;
+    }
+
     //*Change the weather of a cell
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
@@ -2721,11 +2728,16 @@ bool ChatHandler::HandleChangeWeather(const char* args)
 
     Player *player = m_session->GetPlayer();
     uint32 zoneid = player->GetZoneId();
-    Weather *wth = sWorld.FindWeather(zoneid);
+
+    Weather* wth = sWorld.FindWeather(zoneid);
+
+    if(!wth)
+        wth = sWorld.AddWeather(zoneid);
+
     if(!wth)
     {
-        wth = new Weather(player->GetZoneId());
-        sWorld.AddWeather(wth);
+        SendSysMessage(LANG_NO_WEATHER);
+        return true;
     }
 
     wth->SetWeather(type, grade);
