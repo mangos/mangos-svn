@@ -25,7 +25,7 @@
 #include "WorldSession.h"
 #include "Player.h"
 #include "World.h"
-#include "log.h"
+#include "Log.h"
 
 /// Weather defines
 enum WeatherSounds
