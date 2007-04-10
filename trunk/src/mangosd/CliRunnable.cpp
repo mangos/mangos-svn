@@ -33,8 +33,6 @@
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
-//Uptime CLI counter
-int start = GetCurrentTime();
 
 typedef int(* pPrintf)(const char*,...);
 typedef void(* pCliFunc)(char *,pPrintf);
