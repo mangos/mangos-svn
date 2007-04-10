@@ -228,12 +228,23 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             return;
 
         loot = &go->loot;
-        if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
+
+        if (go->GetGoType() == GAMEOBJECT_TYPE_DOOR)
         {
+            // locked doors are opened with spelleffect openlock, prevent remove its as looted
+            go->SetUInt32Value(GAMEOBJECT_FLAGS,33);
+            go->SetUInt32Value(GAMEOBJECT_STATE,0);        //open
+            go->SetLootState(GO_CLOSED);
+            go->SetRespawnTime(5);                         //close door in 5 seconds                
+        }
+        else if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
+        {
+            // normal looted GO case
             go->SetLootState(GO_LOOTED);
             loot->clear();
         }
         else
+            // not fully looted object
             go->SetLootState(GO_OPEN);
     }
     else if (IS_ITEM_GUID(lguid))
