@@ -533,5 +533,5 @@ EXTRA_DIST = \
 	3400.sql \
 	3402_creature_onkill_reputation.sql \
 	3410_group.sql \
-	3410_command.sql \
+	3424_command.sql \
 	README
