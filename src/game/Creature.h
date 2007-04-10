@@ -247,6 +247,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool CreateFromProto(uint32 guidlow,uint32 Entry);
         void SelectLevel(const CreatureInfo *cinfo);
 
+        uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
         void Update( uint32 time );                         // overwrited Unit::Update

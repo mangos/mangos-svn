@@ -90,6 +90,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint64 GetOwnerGUID() const { return GetUInt64Value(OBJECT_FIELD_CREATED_BY); }
         Unit* GetOwner() const;
 
+        uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
+
         void SaveToDB();
         bool LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId);
         void DeleteFromDB();

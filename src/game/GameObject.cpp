@@ -333,14 +333,14 @@ void GameObject::SaveToDB()
     std::ostringstream ss;
 
     sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
 
     const GameObjectInfo *goI = GetGOInfo();
 
     if (goI)
     {
         ss << "INSERT INTO `gameobject` VALUES ( "
-            << GetGUIDLow() << ", "
+            << m_DBTableGuid << ", "
             << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
             << GetMapId() << ", "
             << GetFloatValue(GAMEOBJECT_POS_X) << ", "
@@ -420,7 +420,7 @@ bool GameObject::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 
 void GameObject::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
     sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
 }
 

@@ -694,6 +694,11 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
         }
         delete result;
     }
+    else
+    {
+        // obtain real GUID for DB operations
+        lowguid = pCreature->GetDBTableGUIDLow();
+    }
 
     int wait = wait_str ? atoi(wait_str) : 0;
 
@@ -755,7 +760,7 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
         pCreature = getSelectedCreature();
         if(!pCreature)
             return false;
-        lowguid = pCreature->GetGUIDLow();
+        lowguid = pCreature->GetDBTableGUIDLow();
     }
     else                                                    // case .setmovetype #creature_guid $move_type (with selected creature)
     {
@@ -773,6 +778,10 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
                 return true;
             }
             delete result;
+        }
+        else
+        {
+            lowguid = pCreature->GetDBTableGUIDLow();
         }
     }
 
@@ -836,7 +845,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     // fix me : 'running' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creatures ?
     // perhaps it should be 'state'?
-    sDatabase.PExecute("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, pCreature->GetGUIDLow());
+    sDatabase.PExecute("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, pCreature->GetDBTableGUIDLow());
 
     pCreature->setMoveRunFlag(option > 0);
 
@@ -1288,7 +1297,7 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
     uint64 u_guid = 0;
 
     if (pCreature)
-        u_guid = pCreature->GetGUID();
+        u_guid = pCreature->GetDBTableGUIDLow();
     else
         return false;
 
@@ -1319,7 +1328,7 @@ bool ChatHandler::HandleSpawnTimeCommand(const char* args)
     uint64 u_guid = 0;
 
     if (pCreature)
-        u_guid = pCreature->GetGUID();
+        u_guid = pCreature->GetDBTableGUIDLow();
     else
         return false;
 
