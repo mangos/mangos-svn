@@ -33,6 +33,8 @@
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
+//Uptime CLI counter
+int start = GetCurrentTime();
 
 typedef int(* pPrintf)(const char*,...);
 typedef void(* pCliFunc)(char *,pPrintf);
@@ -66,6 +68,7 @@ void CliKick(char*,pPrintf);
 void CliMotd(char*,pPrintf);
 void CliCorpses(char*,pPrintf);
 void CliSetLogLevel(char*,pPrintf);
+void CliUpTime(char*,pPrintf);
 
 /// Table of known commands
 const CliCommand Commands[]=
@@ -75,6 +78,7 @@ const CliCommand Commands[]=
     {"create", & CliCreate,"Create account"},
     {"delete", & CliDelete,"Delete account and characters"},
     {"info", & CliInfo,"Display Server infomation"},
+    {"uptime", & CliUpTime, "Displays the server uptime"},
     {"motd", & CliMotd,"Change or display motd"},
     {"kick", & CliKick,"Kick user"},
     {"ban", & CliBan,"Ban account|ip"},
@@ -626,6 +630,13 @@ void CliSetLogLevel(char*command,pPrintf zprintf)
         return;
     }
     sLog.SetLogLevel(NewLevel);
+}
+
+void CliUpTime(char*,pPrintf zprintf)
+{    
+    uint32 uptime = sWorld.GetUptime();
+    std::string suptime = secsToTimeString(uptime,true,(uptime > 86400));
+    sLog.outBasic("Server has been up for : %s",suptime.c_str());
 }
 
 /// @}
