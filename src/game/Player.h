@@ -636,6 +636,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 CanTakeMoreSimilarItems(Item* pItem) const;
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
+        uint8 CanStoreItems( Item **pItem,int count) const;
         uint8 CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
         uint8 CanUnequipItem( uint16 src, bool swap ) const;

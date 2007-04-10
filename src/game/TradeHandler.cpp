@@ -115,246 +115,178 @@ void WorldSession::SendUpdateTrade()
 
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
+    Item *myItems[TRADE_SLOT_TRADED_COUNT]  = { NULL, NULL, NULL, NULL, NULL, NULL };
+    Item *hisItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
+    bool myCanCompleteTrade=true,hisCanCompleteTrade=true;
+    uint16 dst;
+
+    if ( !GetPlayer()->pTrader )
+        return;
+
+    // not accept case incorrect money amount
+    if( _player->tradeGold > _player->GetMoney() )
     {
-        Item *myItems[TRADE_SLOT_TRADED_COUNT]  = { NULL, NULL, NULL, NULL, NULL, NULL };
-        Item *hisItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
-        bool myCanStoreItem=false,hisCanStoreItem=false,myCanCompleteTrade=true,hisCanCompleteTrade=true;
+        SendNotification( "You do not have enough gold" );
+        _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+        _player->acceptTrade = false;
+        return;
+    }
 
-        if ( !GetPlayer()->pTrader )
-            return;
+    // not accept case incorrect money amount
+    if( _player->pTrader->tradeGold > _player->pTrader->GetMoney() )
+    {
+        _player->pTrader->GetSession( )->SendNotification( "You do not have enough gold" );
+        SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+        _player->pTrader->acceptTrade = false;
+        return;
+    }
 
-        // not accept case incorrect money amount
-        if( _player->tradeGold > _player->GetMoney() )
+    _player->acceptTrade = true;
+    if (_player->pTrader->acceptTrade )
+    {
+        // inform partner client
+        _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_ACCEPT);
+
+        // store items in local list and set 'in-trade' flag
+        for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
         {
-            SendNotification( "You do not have enough gold" );
-            _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
-            _player->acceptTrade = false;
-            return;
+            if(_player->tradeItems[i] != NULL_SLOT )
+            {
+                sLog.outDebug("player trade item bag: %u slot: %u",_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255 );
+                myItems[i]=_player->GetItemByPos( _player->tradeItems[i] );
+                myItems[i]->SetInTrade();
+            }
+            if(_player->pTrader->tradeItems[i] != NULL_SLOT)
+            {
+                sLog.outDebug("partner trade item bag: %u slot: %u",_player->pTrader->tradeItems[i] >> 8,_player->pTrader->tradeItems[i] & 255);
+                hisItems[i]=_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]);
+                hisItems[i]->SetInTrade();
+            }
         }
 
-        // not accept case incorrect money amount
-        if( _player->pTrader->tradeGold > _player->pTrader->GetMoney() )
+        // test if item will fit in each inventory
+        hisCanCompleteTrade =  (_player->pTrader->CanStoreItems( myItems,TRADE_SLOT_TRADED_COUNT )== EQUIP_ERR_OK);
+        myCanCompleteTrade = (_player->CanStoreItems( hisItems,TRADE_SLOT_TRADED_COUNT ) == EQUIP_ERR_OK);
+
+        // clear 'in-trade' flag
+        for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
         {
-            _player->pTrader->GetSession( )->SendNotification( "You do not have enough gold" );
+            if(myItems[i])  myItems[i]->SetInTrade(false);
+            if(hisItems[i]) hisItems[i]->SetInTrade(false);
+        }
+
+        // in case of missing space report error
+        if(!myCanCompleteTrade)
+        {
+            SendNotification("You do not have enough free slots");
+            GetPlayer( )->pTrader->GetSession( )->SendNotification("Your partner does not have enough free bag slots");
             SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
-            _player->pTrader->acceptTrade = false;
+            _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            return;
+        }
+        else if (!hisCanCompleteTrade)
+        {
+            SendNotification("Your partner does not have enough free bag slots");
+            GetPlayer()->pTrader->GetSession()->SendNotification("You do not have enough free slots");
+            SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
             return;
         }
 
-        _player->acceptTrade = true;
-        if (_player->pTrader->acceptTrade )
+        // execute trade: 1. remove
+        for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
         {
-
-            _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_ACCEPT);
-
-            // store traded items to myItems/hisItems in compacted state (in first slots)
-            int m_i = 0;
-            int h_i = 0;
-            for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
-            {
-                if(_player->tradeItems[i] != NULL_SLOT )
-                {
-                    sLog.outDebug("player trade item bag: %u slot: %u",_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255 );
-                    myItems[m_i++]=_player->GetItemByPos( _player->tradeItems[i] );
-                }
-                if(_player->pTrader->tradeItems[i] != NULL_SLOT)
-                {
-                    sLog.outDebug("partner trade item bag: %u slot: %u",_player->pTrader->tradeItems[i] >> 8,_player->pTrader->tradeItems[i] & 255);
-                    hisItems[h_i++]=_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]);
-                }
-            }
-            // m_i/h_i is item count in myItems/hisItems
-
-            // check possibility store each item from item list 
-            // FIXME: code required one free slot in receiver inventory including case when m_i==h_i
-            for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
-            {
-                if(myItems[i])
-                {
-                    uint16 dst;
-                    myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
-                    if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, dst, myItems[i], false )== EQUIP_ERR_OK)
-                    {
-                        hisCanStoreItem = true;
-                        sLog.outDebug("partner can accept item: %u",myItems[i]->GetGUIDLow());
-                    }
-                }
-                else
-                {
-                    hisCanStoreItem = true;
-                }
-                sLog.outDebug("hisCanStoreItem: %u",hisCanStoreItem);
-                if(hisItems[i])
-                {
-                    uint16 dst;
-                    hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
-                    if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
-                    {
-                        myCanStoreItem = true;
-                        sLog.outDebug("you can accept item %u ",hisItems[i]->GetGUIDLow());
-                    }
-                }
-                else
-                {
-                    myCanStoreItem = true;
-                }
-                sLog.outDebug("myCanStoreItem: %u",myCanStoreItem);
-                if (!myCanStoreItem || !hisCanStoreItem)
-                {
-                    myCanCompleteTrade = myCanStoreItem;
-                    hisCanCompleteTrade = hisCanStoreItem;
-                    break;
-                }
-            }
-
-            // first min_i items not NULL can be swapped (myItems[i]!=NULL and hisItems[i]!=NULL)
-            // others all myItems[i]==NULL or all hisItems[i]==NULL and must have free slots in receiver inventory
-            int min_i = min(m_i,h_i);
-            if(hisCanCompleteTrade && m_i > min_i)
-            {
-                if(_player->pTrader->GetFreeSlots() < m_i - min_i)
-                    hisCanCompleteTrade = false;
-            }
-            else
-            if(myCanCompleteTrade && h_i > min_i)
-            {
-                if(_player->GetFreeSlots() < h_i - min_i)
-                    myCanCompleteTrade = false;
-            }
-
-            if(!myCanCompleteTrade)
-            {
-                SendNotification("You do not have enough free slots");
-                GetPlayer( )->pTrader->GetSession( )->SendNotification("Your partner does not have enough free bag slots");
-                SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
-                _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
-                return;
-            }
-            else if (!hisCanCompleteTrade)
-            {
-                SendNotification("Your partner does not have enough free bag slots");
-                GetPlayer()->pTrader->GetSession()->SendNotification("You do not have enough free slots");
-                SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
-                _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
-                return;
-            }
-
-            // OK, items can be stored. DO IT NOW.
-
-            // first min_i item can be swapped (myItems[i]!=NULL and hisItems[i]!=NULL
-            for(int i=0; i<min_i; i++)
+            if(myItems[i])
             {
                 myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
-                hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
-
-                // remove items
                 _player->ItemRemovedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                _player->RemoveItem(myItems[i]->GetBagSlot(), myItems[i]->GetSlot(), true);
+                _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
                 myItems[i]->RemoveFromUpdateQueueOf(_player);
-
-                _player->pTrader->ItemRemovedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                _player->pTrader->RemoveItem(hisItems[i]->GetBagSlot(), hisItems[i]->GetSlot(), true);
-                hisItems[i]->RemoveFromUpdateQueueOf(_player->pTrader);
-
-                // find new item slots
-                uint16 m_dst;
-                uint16 h_dst;
-                _player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, m_dst, myItems[i], false );
-                _player->CanStoreItem( NULL_BAG, NULL_SLOT, h_dst, hisItems[i], false );
-
-                // log operatiom
-                 sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
-                 sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
-
-                 if( _player->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-                    sLog.outCommand("GM Trade: %s (Entry: %d Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
-                        myItems[i]->GetProto()->Name1,myItems[i]->GetEntry(),myItems[i]->GetCount(),
-                        _player->GetName(),_player->GetSession()->GetAccountId(),
-                        _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
-
-                 if( _player->pTrader->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-                     sLog.outCommand("GM Trade: %s (Entry: %u Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
-                        hisItems[i]->GetProto()->Name1,hisItems[i]->GetEntry(),hisItems[i]->GetCount(),
-                        _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
-                        _player->GetName(),_player->GetSession()->GetAccountId());
-
-                 // add items
-                _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                _player->pTrader->StoreItem(m_dst, myItems[i], true);
-
-                _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                _player->StoreItem( h_dst, hisItems[i], true);
             }
-
-            // i >= min_i (all myItems[i]==NULL or all hisItems[i]==NULL)
-            for(int i=min_i; i<TRADE_SLOT_TRADED_COUNT; i++)
+            if(hisItems[i])
             {
-                if(myItems[i])
+                hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
+                _player->pTrader->ItemRemovedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
+                _player->pTrader->RemoveItem(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);
+                hisItems[i]->RemoveFromUpdateQueueOf(_player->pTrader);
+            }
+        }
+
+        // execute trade: 2. store
+        for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
+        {
+            if(myItems[i])
+            {
+                if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, dst, myItems[i], false ) == EQUIP_ERR_OK)
                 {
-                    uint16 dst;
-                    myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
-                    if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, dst, myItems[i], false ) == EQUIP_ERR_OK)
-                    {
-                        sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
-                        if( _player->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+                    // logging
+                    sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
+                    if( _player->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
                             sLog.outCommand("GM Trade: %s (Entry: %d Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
-                                myItems[i]->GetProto()->Name1,myItems[i]->GetEntry(),myItems[i]->GetCount(),
-                                _player->GetName(),_player->GetSession()->GetAccountId(),
-                                _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
+                            myItems[i]->GetProto()->Name1,myItems[i]->GetEntry(),myItems[i]->GetCount(),
+                            _player->GetName(),_player->GetSession()->GetAccountId(),
+                            _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
 
-                        _player->ItemRemovedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                        _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
-                        myItems[i]->RemoveFromUpdateQueueOf(_player);
-                        _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                        _player->pTrader->StoreItem( dst, myItems[i], true);
-                    }
+                    // store
+                    _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
+                    _player->pTrader->StoreItem( dst, myItems[i], true);
                 }
-                if(hisItems[i])
+                else 
                 {
-                    uint16 dst;
-                    hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
-                    if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
-                    {
-                        sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
-                        if( _player->pTrader->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-                            sLog.outCommand("GM Trade: %s (Entry: %u Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
-                                hisItems[i]->GetProto()->Name1,hisItems[i]->GetEntry(),hisItems[i]->GetCount(),
-                                _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
-                                _player->GetName(),_player->GetSession()->GetAccountId());
-
-                        _player->pTrader->ItemRemovedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                        _player->pTrader->RemoveItem(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);
-                        hisItems[i]->RemoveFromUpdateQueueOf(_player->pTrader);
-                        _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                        _player->StoreItem( dst, hisItems[i], true);
-                    }
+                    // in case of fatal error move items back
+                    sLog.outError("player can't store item: %u",hisItems[i]->GetGUIDLow());
+                    _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
+                    _player->StoreItem( dst, hisItems[i], true);
                 }
             }
+            if(hisItems[i])
+            {
+                if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
+                {
+                    // logging
+                    sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
+                    if( _player->pTrader->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+                            sLog.outCommand("GM Trade: %s (Entry: %u Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
+                            hisItems[i]->GetProto()->Name1,hisItems[i]->GetEntry(),hisItems[i]->GetCount(),
+                            _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
+                            _player->GetName(),_player->GetSession()->GetAccountId());
 
-            // update money
-            _player->ModifyMoney( -((int32)_player->tradeGold) );
-            _player->ModifyMoney(_player->pTrader->tradeGold );
-            _player->pTrader->ModifyMoney( -((int32)_player->pTrader->tradeGold) );
-            _player->pTrader->ModifyMoney(_player->tradeGold );
-            _player->ClearTrade();
-            _player->pTrader->ClearTrade();
+                    // store
+                    _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
+                    _player->StoreItem( dst, hisItems[i], true);
+                }
+                else
+                {
+                    // in case of fatal error move items back
+                    sLog.outError("player can't store item: %u",hisItems[i]->GetGUIDLow());
+                    _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
+                    _player->pTrader->StoreItem( dst, myItems[i], true);
 
-            // desynced with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
-            sDatabase.BeginTransaction();
-            _player->SaveInventoryAndGoldToDB();
-            _player->pTrader->SaveInventoryAndGoldToDB();
-            sDatabase.CommitTransaction();
-
-            _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_COMPLETE);
-            SendTradeStatus(TRADE_STATUS_TRADE_COMPLETE);
-
-            _player->pTrader->pTrader = NULL;
-            _player->pTrader = NULL;
+                }
+            }
         }
-        else
-        {
-            _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_ACCEPT);
-        }
+        _player->ModifyMoney( -((int32)_player->tradeGold) );
+        _player->ModifyMoney(_player->pTrader->tradeGold );
+        _player->pTrader->ModifyMoney( -((int32)_player->pTrader->tradeGold) );
+        _player->pTrader->ModifyMoney(_player->tradeGold );
+        _player->ClearTrade();
+        _player->pTrader->ClearTrade();
+
+        // desynced with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
+        sDatabase.BeginTransaction();
+        _player->SaveInventoryAndGoldToDB();
+        _player->pTrader->SaveInventoryAndGoldToDB();
+        sDatabase.CommitTransaction();
+
+        _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_COMPLETE);
+        SendTradeStatus(TRADE_STATUS_TRADE_COMPLETE);
+
+        _player->pTrader->pTrader = NULL;
+        _player->pTrader = NULL;
+    }
+    else
+    {
+        _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_ACCEPT);
     }
 }
 

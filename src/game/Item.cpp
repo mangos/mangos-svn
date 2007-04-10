@@ -167,6 +167,7 @@ Item::Item( )
     uQueuePos = -1;
     m_container = NULL;
     m_lootGenerated = false;
+    mb_in_trade = false;
 }
 
 uint32 GetRandPropertiesSeedfromDisplayInfoDBC(uint32 DisplayID)
