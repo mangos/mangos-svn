@@ -1799,6 +1799,8 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
 
     // update level, max level of skills
+    if(getLevel()!=level)
+        m_Played_time[1] = 0;                               // Level Played Time reset
     SetLevel( level);
     UpdateMaxSkills ();
 
@@ -1906,9 +1908,6 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
     SetPower(POWER_FOCUS, 0);
     SetPower(POWER_HAPPINESS, 0);
-
-    // Level Played Time reset
-    m_Played_time[1] = 0;
 }
 
 void Player::SendInitialSpells()
@@ -10056,7 +10055,7 @@ void Player::SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 cr
 
 bool Player::MinimalLoadFromDB( uint32 guid )
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map` FROM `character` WHERE `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime` FROM `character` WHERE `guid` = '%u'",guid);
     if(!result)
         return false;
 
@@ -10073,6 +10072,9 @@ bool Player::MinimalLoadFromDB( uint32 guid )
 
     Relocate(fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
     SetMapId(fields[5].GetUInt32());
+
+    m_Played_time[0] = fields[6].GetUInt32();
+    m_Played_time[1] = fields[7].GetUInt32();
 
     _LoadGroup();
 

@@ -229,8 +229,9 @@
 #define LANG_NPCINFO_TRAINER             "*** Is a trainer!"
 #define LANG_NPCINFO_DUNGEON_ID          "InstanceID: %u"
 
-#define LANG_PINFO_ACCOUNT               "Player %s (guid: %u) Account: %s (id: %u) GMLevel: %u Last IP: %s"
+#define LANG_PINFO_ACCOUNT               "Player%s %s (guid: %u) Account: %s (id: %u) GMLevel: %u Last IP: %s"
 #define LANG_PINFO_LEVEL                 "Played time: %s Level: %u Money: %ug%us%uc"
+#define LANG_PINFO_NO_REP                "Command .pinfo not support 'rep' option for offline players."
 
 #define LANG_YOU_SET_EXPLORE_ALL         "%s has explored all zones now."
 #define LANG_YOU_SET_EXPLORE_NOTHING     "%s has no more explored zones."

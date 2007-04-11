@@ -1004,57 +1004,102 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
 bool ChatHandler::HandlePInfoCommand(const char* args)
 {
     Player* target = NULL;
+    uint64 targetGUID = 0;
 
     char* px = strtok((char*)args, " ");
     char* py = NULL;
 
+    std::string name;
+
     if (px)
     {
-        std::string name = px;
+        name = px;
         normalizePlayerName(name);
         target = objmgr.GetPlayer(name.c_str());
         if (target)
             py = strtok(NULL, " ");
         else
-            py = px;
+        {
+            targetGUID = objmgr.GetPlayerGUIDByName(name.c_str());
+            if(targetGUID)
+                py = strtok(NULL, " ");
+            else
+                py = px;
+        }
     }
-    if(!target)
+
+    if(!target && !targetGUID)
     {
         target = getSelectedPlayer();
     }
 
-    if(!target)
+    if(!target && !targetGUID)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
         return true;
     }
 
+    uint32 accId = 0;
+    uint32 money = 0;
+    uint32 total_player_time = 0;
+    uint32 level = 0;
+
+    // get additional information from Player object
+    if(target)
+    {
+        targetGUID = target->GetGUID();
+        name = target->GetName();                           // re-read for case getSelectedPlayer() target
+        accId = target->GetSession()->GetAccountId();
+        money = target->GetMoney();
+        total_player_time = target->GetTotalPlayedTime();
+        level = target->getLevel();
+    }
+    // get additional information from DB
+    else
+    {
+        accId = objmgr.GetPlayerAccountIdByGUID(targetGUID);
+        Player plr(m_session);                              // use current session for temporary load
+        plr.MinimalLoadFromDB(targetGUID);
+        money = plr.GetMoney();
+        total_player_time = plr.GetTotalPlayedTime();
+        level = plr.getLevel();
+    }
+
     std::string username = "<error>";
     std::string last_ip = "<error>";
+    uint32 security = 0;
 
-    QueryResult* result = loginDatabase.PQuery("SELECT `username`, `last_ip` FROM `account` WHERE `id` = '%u'",target->GetSession()->GetAccountId());
+    QueryResult* result = loginDatabase.PQuery("SELECT `username`,`gmlevel`,`last_ip` FROM `account` WHERE `id` = '%u'",accId);
     if(result)
     {
         Field* fields = result->Fetch();
         username = fields[0].GetCppString();
-        if(m_session->GetSecurity() >= target->GetSession()->GetSecurity())
-            last_ip = fields[1].GetCppString();
+        security = fields[1].GetUInt32();
+        if(m_session->GetSecurity() >= security)
+            last_ip = fields[2].GetCppString();
         else
             last_ip = "-";
 
         delete result;
     }
 
-    PSendSysMessage(LANG_PINFO_ACCOUNT,  target->GetName(), target->GetGUIDLow(), username.c_str(), target->GetSession()->GetAccountId(), target->GetSession()->GetSecurity(), last_ip.c_str());
+    PSendSysMessage(LANG_PINFO_ACCOUNT, (target?"":"(offline)"), name.c_str(), GUID_LOPART(targetGUID), username.c_str(), accId, security, last_ip.c_str());
 
-    std::string timeStr = secsToTimeString(target->GetTotalPlayedTime(),true,true);
-    uint32 gold = target->GetMoney() /(100*100);
-    uint32 silv = (target->GetMoney() % (100*100)) / 100;
-    uint32 copp = (target->GetMoney() % (100*100)) % 100;
-    PSendSysMessage(LANG_PINFO_LEVEL,  timeStr.c_str(), target->getLevel(), gold,silv,copp );
+    std::string timeStr = secsToTimeString(total_player_time,true,true);
+    uint32 gold = money /GOLD;
+    uint32 silv = (money % GOLD) / SILVER;
+    uint32 copp = (money % GOLD) % SILVER;
+    PSendSysMessage(LANG_PINFO_LEVEL,  timeStr.c_str(), level, gold,silv,copp );
 
     if ( py && strncmp(py, "rep", 3) == 0 )
     {
+        if(!target)
+        {
+            // rep option not implemented for offline case
+            SendSysMessage(LANG_PINFO_NO_REP);
+            return true;
+        }
+
         static const char* ReputationRankStr[MAX_REPUTATION_RANK] = {"Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Reverted", "Exalted"};
         char* FactionName;
         for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
