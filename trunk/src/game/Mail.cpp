@@ -318,6 +318,25 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
                 newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, m->COD);
 
             pl->ModifyMoney( -int32(m->COD) );
+
+            if( GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+            {
+                uint32 sender_accId = 0;
+                std::string sender_name;
+                if(receive)
+                {
+                    sender_accId = receive->GetSession()->GetAccountId();
+                    sender_name = receive->GetName();
+                }
+                else
+                {
+                    uint64 sender_guid = MAKE_GUID(m->sender,HIGHGUID_PLAYER);
+                    sender_accId = objmgr.GetPlayerAccountIdByGUID(sender_guid);
+                    objmgr.GetPlayerNameByGUID(sender_guid,sender_name);
+                }
+                sLog.outCommand("GM get mail item: %s (Entry: %u Count: %u) and send COD money: %u GM: %s (Account: %u) to player: %s (Account: %u)",
+                    it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,GetPlayerName(),GetAccountId(),sender_name.c_str(),sender_accId);
+            }
         }
         m->COD = 0;
         m->state = CHANGED;
