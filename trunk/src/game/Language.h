@@ -72,7 +72,7 @@
 #define LANG_HRD_GAME_MASTER             "Game Master "
 
 #define LANG_NO_RANK                     "No Rank "
-#define LANG_RANK                        "%s%s (Rank %u)"
+#define LANG_RANK                        "%s (Rank %u)"
 #define LANG_HONOR_TODAY                 "Today: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r]"
 #define LANG_HONOR_YESTERDAY             "Yesterday: [Kills: |c0000ff00%u|r] [Honor: %u]"
 #define LANG_HONOR_THIS_WEEK             "This Week: [Kills: |c0000ff00%u|r] [Honor: %u]"
