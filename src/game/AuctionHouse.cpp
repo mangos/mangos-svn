@@ -157,7 +157,8 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
     std::ostringstream msgAuctionOutbiddedSubject;
     msgAuctionOutbiddedSubject << auction->item_template << ":0:" << AUCTION_OUTBIDDED;
 
-    Player *oldBidder = objmgr.GetPlayer((uint64) auction->bidder);
+    uint64 oldBidder_guid = MAKE_GUID(auction->bidder,HIGHGUID_PLAYER);
+    Player *oldBidder = objmgr.GetPlayer(oldBidder_guid);
     if (oldBidder)
     {
         oldBidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, auction->outBid, auction->item_template);
@@ -178,7 +179,8 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
     std::ostringstream msgAuctionCancelledSubject;
     msgAuctionCancelledSubject << auction->item_template << ":0:" << AUCTION_CANCELLED_TO_BIDDER;
 
-    Player *bidder = objmgr.GetPlayer((uint64) auction->bidder);
+    uint64 bidder_guid = MAKE_GUID(auction->bidder,HIGHGUID_PLAYER);
+    Player *bidder = objmgr.GetPlayer(bidder_guid);
     if (bidder)
     {
         // unknown : bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, newPrice - auction->bid, auction->item_template);

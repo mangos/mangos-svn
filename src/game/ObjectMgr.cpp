@@ -203,10 +203,40 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     uint32 itemTextId = this->CreateItemText( msgAuctionWonBody.str() );
     time_t etime = time(NULL) + (30 * DAY);
 
-    Player *bidder = objmgr.GetPlayer((uint64) auction->bidder);
+    uint64 bidder_guid = MAKE_GUID(auction->bidder,HIGHGUID_PLAYER);
+    Player *bidder = objmgr.GetPlayer(bidder_guid);
+
+    // data for gm.log
+    if( sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+    {
+        uint32 accid = 0;
+        uint32 security = 0;
+        std::string name;
+        if (bidder)
+        {
+            accid = bidder->GetSession()->GetAccountId();
+            security = bidder->GetSession()->GetSecurity();
+            name = bidder->GetName();
+        }
+        else
+        {
+            security = GetPlayerAccountIdByGUID(bidder_guid);
+            
+            if(security > 0)                                // not do redundant DB requests
+            {
+                GetPlayerNameByGUID(bidder_guid,name);
+                accid = GetPlayerAccountIdByGUID(bidder_guid);
+            }
+        }
+
+        if( security > 0 )
+            sLog.outCommand("GM auction, won item: %s (Entry: %u Count: %u) and pay money: %u GM: %s (Account: %u)",
+                pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),auction->bid,name.c_str(),accid);
+    }
+
     if (bidder)
     {
-        bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, (uint64) auction->bidder, 0, 0, auction->item_template);
+        bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, bidder_guid, 0, 0, auction->item_template);
 
         bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, 0, 0, AUCTION_CHECKED, pItem);
     }
