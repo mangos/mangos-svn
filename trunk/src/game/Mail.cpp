@@ -141,6 +141,19 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     if (pItem)
     {
+        if( GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+        {
+            uint32 accId = 0;
+            if(receive)
+                accId = receive->GetSession()->GetAccountId();
+            else
+            {
+                accId = objmgr.GetPlayerAccountIdByGUID(rc);
+            }
+            sLog.outCommand("GM mail: %s (Entry: %u Count: %u) GM: %s (Account: %u) to player: %s (Account: %u)",
+            pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),GetPlayerName(),GetAccountId(),receiver.c_str(),accId);
+        }
+
         //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
         pItem->RemoveFromUpdateQueueOf( pl );

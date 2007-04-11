@@ -369,6 +369,19 @@ uint32 ObjectMgr::GetPlayerTeamByGUID(const uint64 &guid) const
     return 0;
 }
 
+uint32 ObjectMgr::GetPlayerAccountIdByGUID(const uint64 &guid) const
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    if(result)
+    {
+        uint32 acc = (*result)[0].GetUInt32();
+        delete result;
+        return acc;
+    }
+
+    return 0;
+}
+
 void ObjectMgr::LoadAuctions()
 {
 

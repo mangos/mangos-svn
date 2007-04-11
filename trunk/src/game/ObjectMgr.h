@@ -228,6 +228,7 @@ class ObjectMgr
         uint64 GetPlayerGUIDByName(const char *name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
         uint32 GetPlayerTeamByGUID(const uint64 &guid) const;
+        uint32 GetPlayerAccountIdByGUID(const uint64 &guid) const;
 
         uint32 GetNearestTaxiNode( float x, float y, float z, uint32 mapid );
         void GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost);

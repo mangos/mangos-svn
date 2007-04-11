@@ -238,6 +238,11 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
         SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_NOT_ENOUGHT_MONEY);
         return;
     }
+
+    if( GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+        sLog.outCommand("GM auction: %s (Entry: %u Count: %u) GM: %s (Account: %u)",
+        it->GetProto()->Name1,it->GetEntry(),it->GetCount(),GetPlayerName(),GetAccountId());
+
     pl->ModifyMoney( ((int32) deposit) * -1 );
 
     AuctionEntry *AH = new AuctionEntry;
