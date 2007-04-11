@@ -220,8 +220,8 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // not set flags if flight - must continue move until exit, not saved anyway.
-    if(!GetPlayer()->isInFlight())
+    // not set flags if player can't free move to prevent lost state at logout cancel
+    if(GetPlayer()->CanFreeMove())
     {
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
@@ -256,8 +256,8 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_LOGOUT_CANCEL_ACK, 0 );
     SendPacket( &data );
 
-    // not remove flags if flight - its not set in Logout request code.
-    if(!GetPlayer()->isInFlight())
+    // not remove flags if can't free move - its not set in Logout request code.
+    if(GetPlayer()->CanFreeMove())
     {
         //!we can move again
         data.Initialize( SMSG_FORCE_MOVE_UNROOT, 8 );       // guess size

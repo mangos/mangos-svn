@@ -527,6 +527,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void addUnitState(uint32 f) { m_state |= f; };
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
         void clearUnitState(uint32 f) { m_state &= ~f; };
+        bool CanFreeMove() const
+        {
+            return !hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_IN_FLIGHT | 
+                UNIT_STAT_ROOT | UNIT_STAT_STUNDED ) && GetOwnerGUID()==0;
+        }
 
         uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); };
         void SetLevel(uint32 lvl) { SetUInt32Value(UNIT_FIELD_LEVEL,lvl); }

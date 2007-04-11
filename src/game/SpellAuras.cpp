@@ -1744,7 +1744,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
-        m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
+        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
         // only at real add aura
         if(Real)
@@ -1764,7 +1764,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     else
     {
         m_target->clearUnitState(UNIT_STAT_STUNDED);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
 
         // only at real remove aura
