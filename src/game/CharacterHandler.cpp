@@ -468,6 +468,19 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
     plr->SetInGameTime( getMSTime() );
 
+    // set some aura effects after add player to map
+    if(pCurrChar->HasAuraType(SPELL_AURA_MOD_STUN))
+        pCurrChar->SetMovement(MOVE_ROOT);
+
+    if(pCurrChar->HasAuraType(SPELL_AURA_MOD_ROOT))
+    {
+        WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
+        data.append(pCurrChar->GetPackGUID());
+        data << (uint32)2;
+        pCurrChar->SendMessageToSet(&data,true);
+    }
+
+    // friend status
     data.Initialize(SMSG_FRIEND_STATUS, 19);
     data<<uint8(FRIEND_ONLINE);
     data<<pCurrChar->GetGUID();
