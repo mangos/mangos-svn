@@ -150,8 +150,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             {
                 accId = objmgr.GetPlayerAccountIdByGUID(rc);
             }
-            sLog.outCommand("GM mail: %s (Entry: %u Count: %u) GM: %s (Account: %u) to player: %s (Account: %u)",
-            pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),GetPlayerName(),GetAccountId(),receiver.c_str(),accId);
+            sLog.outCommand("GM mail item: %s (Entry: %u Count: %u) and money: %u GM: %s (Account: %u) to player: %s (Account: %u)",
+            pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),money,GetPlayerName(),GetAccountId(),receiver.c_str(),accId);
         }
 
         //item reminds in item_instance table already, used it in mail now
