@@ -564,16 +564,17 @@ void Spell::EffectDummy(uint32 i)
 
         if( !unitTarget->hasUnitState(UNIT_STAT_STUNDED) )
         {
-            m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
+            // copy to decreased damage (/2) for non-stunned target.
+            SpellEntry spell_proto_copy = *spell_proto;
+            assert(spell_proto_copy.Effect[0]==SPELL_EFFECT_SCHOOL_DAMAGE);
+            spell_proto_copy.EffectBasePoints[0] /= 2;
+            spell_proto_copy.EffectBaseDice[0] /= 2;
+
+            m_caster->CastSpell(unitTarget,&spell_proto_copy,true,NULL);
         }
         else
         {
-            // copy to increase damage (2x) for stunned target.
-            SpellEntry spell_proto_copy = *spell_proto;
-            assert(spell_proto_copy.Effect[0]==SPELL_EFFECT_SCHOOL_DAMAGE);
-            spell_proto_copy.EffectBasePoints[0] *= 2;
-
-            m_caster->CastSpell(unitTarget,&spell_proto_copy,true,NULL);
+            m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
         }
     }
 }
@@ -2039,8 +2040,8 @@ void Spell::EffectScriptEffect(uint32 i)
             {
                 SpellEntry const *spellInfo = (*itr)->GetSpellProto();
 
-                // search seal
-                if (!spellInfo || spellInfo->SpellVisual != 5622 || spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN) 
+                // search seal (all seals have judgement's aura dummy spell id in 2 effect
+                if (!spellInfo || spellInfo->SpellVisual != 5622 || spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN || (*itr)->GetEffIndex() != 2 ) 
                     continue;
 
                 spellId2 = spellInfo->EffectBasePoints[(*itr)->GetEffIndex()]+1;
