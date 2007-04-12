@@ -401,7 +401,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 bool ChatHandler::HandleDeleteCommand(const char* args)
 {
     Creature *unit = getSelectedCreature();
-    if(!unit)
+    if(!unit || unit->isPet() || unit->isTotem())
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         return true;
