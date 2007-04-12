@@ -1496,7 +1496,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
     {
         if( apply )
         {
-            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
+            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
             caster->SetCharm((Creature*)m_target);
             if(caster->GetTypeId() == TYPEID_PLAYER)
@@ -1573,7 +1573,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
     {
         if( apply )
         {
-            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,caster->GetGUID());
+            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
             caster->SetCharm((Creature*)m_target);
 
@@ -1740,6 +1740,8 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
 
 void Aura::HandleAuraModStun(bool apply, bool Real)
 {
+    Unit* caster = GetCaster();
+
     if (apply)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
@@ -1750,7 +1752,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if(Real)
         {
             //Save last orientation
-            if (Unit* caster = GetCaster())
+            if (caster)
                 m_target->SetOrientation(m_target->GetAngle(caster));
 
             if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -1765,7 +1767,8 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     {
         m_target->clearUnitState(UNIT_STAT_STUNDED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-        m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
+        if(caster && m_target->isAlive())
+            m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
 
         // only at real remove aura
         if(Real)
@@ -1776,8 +1779,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
             {
-                Unit* m_caster = GetCaster();
-                if( !m_caster || m_caster->GetTypeId()!=TYPEID_PLAYER )
+                if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
                     return;
 
                 uint32 spell_id = 0;
@@ -1797,7 +1799,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 if(!spellInfo)
                     return;
 
-                m_caster->CastSpell(m_target,spellInfo,true,NULL);
+                caster->CastSpell(m_target,spellInfo,true,NULL);
                 return;
             }
         }
@@ -1898,6 +1900,7 @@ void Aura::HandleInvisibilityDetect(bool Apply, bool Real)
 
 void Aura::HandleAuraModRoot(bool apply, bool Real)
 {
+    Unit* caster = GetCaster();
     uint32 apply_stat = UNIT_STAT_ROOT;
     if (apply)
     {
@@ -1909,7 +1912,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         if(Real)
         {
             //Save last orientation
-            if (Unit* caster = GetCaster())
+            if (caster)
                 m_target->SetOrientation(m_target->GetAngle(caster));
 
             if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -1927,11 +1930,8 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     {
         m_target->clearUnitState(UNIT_STAT_ROOT);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        Unit* caster = GetCaster();
-        if(caster)                                          // set creature facing on root effect
-        {
-            m_target->SetUInt64Value (UNIT_FIELD_TARGET,caster->GetGUID());
-        }
+        if(caster && m_target->isAlive())                   // set creature facing on root effect if alive
+            m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
 
         // only at real remove aura
         if(Real)
