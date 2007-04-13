@@ -12174,3 +12174,31 @@ void Player::UpdateHomebindTime(uint32 time)
         sLog.outDebug("PLAYER: Player '%s' will be teleported to homebind in 60 seconds", GetName());
     }
 }
+
+void Player::UpdatePvP(bool state, bool ovrride)
+{
+    if(!state || ovrride)
+    {
+        SetPvP(state);
+        if(Pet* pet = GetPet())
+            pet->SetPvP(state);
+        if(Creature* charmed = GetCharm())
+            charmed->SetPvP(state);
+
+        pvpInfo.endTimer = 0;
+    }
+    else
+    {
+        if(pvpInfo.endTimer != 0)
+            pvpInfo.endTimer = time(NULL);
+        else
+        {
+            SetPvP(state);
+
+            if(Pet* pet = GetPet())
+                pet->SetPvP(state);
+            if(Creature* charmed = GetCharm())
+                charmed->SetPvP(state);
+        }
+    }
+}

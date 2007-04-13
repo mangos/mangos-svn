@@ -936,21 +936,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendInitialActionButtons();
 
         PvPInfo pvpInfo;
-        void UpdatePvP(bool state, bool ovrride=false)
-        {
-            if(!state || ovrride)
-            {
-                SetPvP(state);
-                pvpInfo.endTimer = 0;
-            }
-            else
-            {
-                if(pvpInfo.endTimer != 0)
-                    pvpInfo.endTimer = time(NULL);
-                else
-                    SetPvP(state);
-            }
-        }
+        void UpdatePvP(bool state, bool ovrride=false);
         void UpdateZone(uint32 newZone);
         void UpdatePvPFlag(time_t currTime);
 

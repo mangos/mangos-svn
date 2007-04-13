@@ -520,7 +520,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool AttackStop();
         void RemoveAllAttackers();
         AttackerSet const& getAttackers() const { return m_attackers; }
-        bool isInCombatWithPlayer() const;
+        bool isAttackingPlayer() const;
         Unit* getVictim() const { return m_attacking; }
         void CombatStop(bool force = false) { AttackStop(); RemoveAllAttackers(); ClearInCombat(force); }
 

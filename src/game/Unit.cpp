@@ -3744,15 +3744,35 @@ bool Unit::AttackStop()
     return true;
 }
 
-bool Unit::isInCombatWithPlayer() const
+bool Unit::isAttackingPlayer() const
 {
-    if(getVictim() && getVictim()->GetTypeId() == TYPEID_PLAYER)
+    if(getVictim())
+    {
+        if(getVictim()->GetTypeId() == TYPEID_PLAYER)
+            return true;
+
+        if(getVictim()->GetOwnerGUID() && GUID_HIPART(getVictim()->GetOwnerGUID())==HIGHGUID_PLAYER)
+            return true;
+    }
+
+    Pet* pet = GetPet();
+    if(pet && pet->isAttackingPlayer())
         return true;
 
-    for(AttackerSet::const_iterator i = m_attackers.begin(); i != m_attackers.end(); ++i)
+    Creature* charmed = GetCharm();
+    if(charmed && charmed->isAttackingPlayer())
+        return true;
+
+    for (int8 i = 0; i < 4; i++)
     {
-        if((*i)->GetTypeId() == TYPEID_PLAYER) return true;
+        if(m_TotemSlot[i])
+        {
+            Creature *totem = ObjectAccessor::Instance().GetCreature(*this, m_TotemSlot[i]);
+            if(totem && totem->isAttackingPlayer())
+                return true;
+        }
     }
+
     return false;
 }
 
