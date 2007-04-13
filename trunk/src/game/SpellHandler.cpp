@@ -26,6 +26,7 @@
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "BattleGroundMgr.h"
+#include "MapManager.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
@@ -358,7 +359,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(obj->GetUniqueUseCount() < 2)
                 return;
             
-            // in case summoning ritual caster is GO creatores
+            // in case summoning ritual caster is GO creator
             spellCaster = caster;
 
             if(!caster->m_currentSpell)
@@ -368,17 +369,20 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             // in case summoning ritual target is caster current selection
             //TODO: maybe GO creating spell must set target different from caster
-            spellTarget = ObjectAccessor::Instance().FindPlayer(((Player*)caster)->GetSelection());
+            Player* targetPlayer = ObjectAccessor::Instance().FindPlayer(((Player*)caster)->GetSelection());
 
-            // recheck that target is group member
-            if(!spellTarget || spellTarget->GetTypeId()!=TYPEID_PLAYER || !((Player*)spellTarget)->IsInSameGroupWith((Player*)caster))
+            // recheck that target is group member and can enter to GO map
+            if( !targetPlayer || !targetPlayer->IsInSameGroupWith((Player*)caster) ||
+                !MapManager::Instance().GetMap(obj->GetMapId(),obj)->CanEnter(targetPlayer) )
             {
                 caster->m_currentSpell->cancel();
                 return;
             }
 
+            // target is correct
+            spellTarget = targetPlayer;
 
-            // prepere data for final summoning (before current spell finish to prevetn access to deleted GO)
+            // prepare data for final summoning (before current spell finish to prevent access to deleted GO)
             info = obj->GetGOInfo();
             spellId = info->sound1;
 
