@@ -1205,10 +1205,10 @@ void Player::SendIgnorelist()
 
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange, bool ignore_transport, bool is_gm_command)
 {
-    // prepering unsommon pet if lost (we must get pet before teleportation or will not find it later)
+    // preparing unsommon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
-    // preper zone change detect
+    // prepare zone change detect
     uint32 old_zone = GetZoneId();
 
     // if we were on a transport, leave
@@ -10361,12 +10361,12 @@ bool Player::LoadFromDB( uint32 guid )
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
-    _LoadAuras(time_diff);
-
     _LoadSpells(time_diff);
 
     // after spell load
     InitTalentForLevel();
+
+    _LoadAuras(time_diff);
 
     _LoadQuestStatus();
 
@@ -12139,6 +12139,14 @@ void Player::UpdateHomebindTime(uint32 time)
     // GMs never get homebind timer online
     if (m_InstanceValid || isGameMaster())
     {
+        if(m_HomebindTimer) // instance valid, but timer not reset
+        {
+            // hide reminder
+            WorldPacket data(SMSG_RAID_GROUP_ONLY, 4+4);
+            data << uint32(0);
+            data << uint32(0);
+            GetSession()->SendPacket(&data);
+        }
         // instance is valid, reset homebind timer
         m_HomebindTimer = 0;
     }
@@ -12153,16 +12161,6 @@ void Player::UpdateHomebindTime(uint32 time)
         {
             uint32 oldTimer = m_HomebindTimer;
             m_HomebindTimer -= time;
-
-            // re-warn user if the time stepped over 30 sec or over 10 sec
-            if (m_HomebindTimer < 10000)
-            {
-                if (oldTimer >= 10000) GetSession()->SendAreaTriggerMessage("You must join your old group or you will be teleported to your home location in 10 seconds");
-            }
-            else if (m_HomebindTimer < 30000)
-            {
-                if (oldTimer >= 30000) GetSession()->SendAreaTriggerMessage("You must join your old group or you will be teleported to your home location in 30 seconds");
-            }
         }
     }
     else
@@ -12170,7 +12168,10 @@ void Player::UpdateHomebindTime(uint32 time)
         // instance is invalid, start homebind timer
         m_HomebindTimer = 60000;
         // send message to player
-        GetSession()->SendAreaTriggerMessage("You must join your old group or you will be teleported to your home location in 60 seconds");
+        WorldPacket data(SMSG_RAID_GROUP_ONLY, 4+4);
+        data << m_HomebindTimer;
+        data << uint32(1);
+        GetSession()->SendPacket(&data);
         sLog.outDebug("PLAYER: Player '%s' will be teleported to homebind in 60 seconds", GetName());
     }
 }
