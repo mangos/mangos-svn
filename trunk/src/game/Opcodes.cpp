@@ -684,6 +684,7 @@ NameTableEntry g_worldOpcodeNames[] =
     {  SMSG_AUCTION_REMOVED_NOTIFICATION,                   "SMSG_AUCTION_REMOVED_NOTIFICATION"},
     {  CMSG_GROUP_RAID_CONVERT,                             "CMSG_GROUP_RAID_CONVERT"},
     {  CMSG_GROUP_ASSISTANT,                                "CMSG_GROUP_ASSISTANT"},
+    {  CMSG_GROUP_PROMOTE,                                  "CMSG_GROUP_PROMOTE"},
     {  MSG_RAID_ICON_TARGET,                                "MSG_RAID_ICON_TARGET"},
     {  MSG_RAID_READY_CHECK,                                "MSG_RAID_READY_CHECK"},
     {  CMSG_BUYBACK_ITEM,                                   "CMSG_BUYBACK_ITEM"},
@@ -771,8 +772,8 @@ NameTableEntry g_worldOpcodeNames[] =
     {  CMSG_AREA_SPIRIT_HEALER_QUERY,                       "CMSG_AREA_SPIRIT_HEALER_QUERY"},
     {  CMSG_AREA_SPIRIT_HEALER_QUEUE,                       "CMSG_AREA_SPIRIT_HEALER_QUEUE"},
     {  SMSG_AREA_SPIRIT_HEALER_TIME,                        "SMSG_AREA_SPIRIT_HEALER_TIME"},
-    {  CMSG_GM_UNTEACH,                                     "CMSG_GM_UNTEACH"},
-    {  SMSG_HARDWARE_SURVEY_REQUEST,                        "SMSG_HARDWARE_SURVEY_REQUEST"},
+    //{  CMSG_GM_UNTEACH,                                     "CMSG_GM_UNTEACH"},
+    //{  SMSG_HARDWARE_SURVEY_REQUEST,                        "SMSG_HARDWARE_SURVEY_REQUEST"},
     {  CMSG_HARDWARE_SURVEY_RESULTS,                        "CMSG_HARDWARE_SURVEY_RESULTS"},
     {  SMSG_WARDEN_DATA,                                    "SMSG_WARDEN_DATA"},
     {  CMSG_WARDEN_DATA,                                    "CMSG_WARDEN_DATA"},
@@ -795,7 +796,7 @@ NameTableEntry g_worldOpcodeNames[] =
     {  CMSG_MINIGAME_MOVE,                                  "CMSG_MINIGAME_MOVE"},
     {  SMSG_MINIGAME_MOVE_FAILED,                           "SMSG_MINIGAME_MOVE_FAILED"},
     {  CMSG_GUILD_CHANGEINFO,                               "CMSG_GUILD_CHANGEINFO"},
-    {  SMSG_UNKNOWN_INFO,                                   "SMSG_UNKNOWN_INFO"},
+    {  CMSG_SOCKET_ITEM,                                    "CMSG_SOCKET_ITEM"},
     {                                                       // unofficial - first appeared in 1.12
         SMSG_OUTDOORPVP_NOTIFY,                              "SMSG_OUTDOORPVP_NOTIFY"
     },

@@ -160,7 +160,7 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
     QueryResult *result = sDatabase.PQuery(
     //          0    1                2                       3                       4            5             6               7           8                  9                  10                 11          12        13            14      15             16      17
-        "SELECT `id`,`creature`.`map`,`creature`.`position_x`,`creature`.`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`state`,`MovementType`,`auras`,`creature`.`guid`"
+        "SELECT `id`,`creature`.`map`,`creature`.`position_x`,`creature`.`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`DeathState`,`MovementType`,`auras`,`creature`.`guid`"
         "FROM `creature` LEFT JOIN `creature_grid` ON `creature`.`guid` = `creature_grid`.`guid` "
         "LEFT JOIN `creature_respawn` ON ((`creature`.`guid`=`creature_respawn`.`guid`) AND (`creature_respawn`.`instance` = '%u'))"
         "WHERE `grid` = '%u' AND `cell` = '%u' AND `creature_grid`.`map` = '%u' ", i_map->GetInstanceId(), i_grid.GetGridId(), cell_id, i_map->GetId());

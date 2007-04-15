@@ -128,7 +128,7 @@ struct PlayerLevelInfo
 
 struct PlayerInfo
 {
-    PlayerInfo() : displayId(0),levelInfo(NULL)             // existance checked by displayId != 0
+    PlayerInfo() : displayId_m(0),displayId_f(0),levelInfo(NULL)             // existence checked by displayId != 0             // existance checked by displayId != 0
     {
     }
 
@@ -137,7 +137,8 @@ struct PlayerInfo
     float positionX;
     float positionY;
     float positionZ;
-    uint16 displayId;
+    uint16 displayId_m;
+    uint16 displayId_f;
     PlayerCreateInfoItems item;
     std::list<CreateSpellPair> spell;
     std::list<uint16> skill;
@@ -651,23 +652,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void TextEmote(const std::string text);
         void Whisper(const uint64 receiver, const std::string text, const uint32 language);
 
-        float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
-        void SetResistanceBuffMods(SpellSchools school, bool positive, float val) { SetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school,val); }
-        void ApplyResistanceBuffModsMod(SpellSchools school, bool positive, float val, bool apply) { ApplyModFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
-        void ApplyResistanceBuffModsPercentMod(SpellSchools school, bool positive, float val, bool apply) { ApplyPercentModFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
-        void SetPosStat(Stats stat, float val) { SetFloatValue(PLAYER_FIELD_POSSTAT0+stat, val); }
-        void ApplyPosStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(PLAYER_FIELD_POSSTAT0+stat, val, apply); }
-        void ApplyPosStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(PLAYER_FIELD_POSSTAT0+stat, val, apply); }
-        void SetNegStat(Stats stat, float val) { SetFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val); }
-        void ApplyNegStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val, apply); }
-        void ApplyNegStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(PLAYER_FIELD_NEGSTAT0+stat, val, apply); }
-        void SetCreateStat(Stats stat, float val) { m_createStats[stat] = val; }
-        void ApplyCreateStatMod(Stats stat, float val, bool apply) { m_createStats[stat] += (apply ? val : -val); }
-        void ApplyCreateStatPercentMod(Stats stat, float val, bool apply) { m_createStats[stat] *= (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val)); }
-        float GetPosStat(Stats stat) const { return GetFloatValue(PLAYER_FIELD_POSSTAT0+stat); }
-        float GetNegStat(Stats stat) const { return GetFloatValue(PLAYER_FIELD_NEGSTAT0+stat); }
-        float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
-
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/
@@ -1020,6 +1004,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid);
 
+        void SetDungeonDifficulty(uint32 difficulty) { m_dungeonDifficulty = difficulty; }
+        uint32 GetDungeonDifficulty() { return m_dungeonDifficulty; }
+
         bool UpdateSkill(uint32 skill_id);
 
         bool UpdateSkillPro(uint16 SkillId, int32 Chance);
@@ -1054,6 +1041,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendAttackSwingNotInRange();
         void SendAttackSwingBadFacingAttack();
         void SendExplorationExperience(uint32 Area, uint32 Experience);
+
+        void SendDungeonDifficulty();
+        void SendAllowMove();
 
         bool SetPosition(float x, float y, float z, float orientation);
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
@@ -1126,6 +1116,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendInitialReputations();
         void SetFactionAtWar(uint32 repListID, bool atWar);
 
+        void SendSetFactionVisible(const Faction* faction) const;
         void UpdateMaxSkills();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
         void ModifySkillBonus(uint32 skillid,int32 val);
@@ -1168,8 +1159,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsItemSpellToEquip(SpellEntry const *spellInfo);
         bool IsItemSpellToCombat(SpellEntry const *spellInfo);
 
-        void SendInitWorldStates(uint32 MapID);
-        void SendUpdateWorldState(uint16 Field, uint16 Value);
+        void SendInitWorldStates();
+        void SendUpdateWorldState(uint32 Field, uint32 Value);
         void SendDirectMessage(WorldPacket *data);
 
         PlayerMenu* PlayerTalkClass;
@@ -1224,6 +1215,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetMovementFlags() const { return m_movement_flags; }
         bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
         void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
+
+        bool CanFly() const { return m_canFly; }
+        void SetCanFly(bool value) { m_canFly = value; }
+        bool IsFlying() const { return m_Flying; }
+        void SetFlying(bool value) { m_Flying = value; }
 
         // Transports
         Transport * GetTransport() { return m_transport; }
@@ -1349,13 +1345,12 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint64 m_lootGuid;
 
-        float m_createStats[5];
-
         uint32 m_race;
         uint32 m_class;
         uint32 m_team;
         uint32 m_dismountCost;
         uint32 m_nextSave;
+        uint32 m_dungeonDifficulty;
 
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
@@ -1364,6 +1359,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_itemUpdateQueueBlocked;
 
         uint32 m_movement_flags;
+
+        bool m_canFly;
+        bool m_Flying;
 
         uint32 m_GMFlags;
         uint64 m_curTarget;
@@ -1394,11 +1392,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         TaxiMask m_taximask;
         std::deque<uint32> m_TaxiDestinations;
-
-        float m_total_honor_points;
-        float m_rating;
-        uint32 m_highest_rank;
-        int32 m_standing;
 
         int m_cinematic;
 

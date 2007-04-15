@@ -220,7 +220,7 @@ class ObjectMgr
             if(race   >= MAX_RACES)   return NULL;
             if(class_ >= MAX_CLASSES) return NULL;
             PlayerInfo const* info = &playerInfo[race][class_];
-            if(info->displayId==0) return NULL;
+            if(info->displayId_m==0 || info->displayId_f==0) return NULL;
             return info;
         }
         void GetPlayerLevelInfo(uint32 race, uint32 class_,uint32 level, PlayerLevelInfo* info) const;

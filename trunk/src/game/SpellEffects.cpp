@@ -46,6 +46,7 @@
 #include "CreatureAI.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "BattleGround.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -53,7 +54,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectInstaKill,                                //SPELL_EFFECT_INSTAKILL = 1
     &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_SCHOOL_DAMAGE = 2
     &Spell::EffectDummy,                                    //SPELL_EFFECT_DUMMY = 3
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL_TELEPORT = 4
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL_TELEPORT = 4, unused
     &Spell::EffectTeleportUnits,                            //SPELL_EFFECT_TELEPORT_UNITS = 5
     &Spell::EffectApplyAura,                                //SPELL_EFFECT_APPLY_AURA = 6
     &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_ENVIRONMENTAL_DAMAGE =7
@@ -62,31 +63,31 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectHeal,                                     //SPELL_EFFECT_HEAL = 10
     &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND = 11
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL = 12
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_BASE = 13
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_SPECIALIZE = 14
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL = 15
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_BASE = 13, unused
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_SPECIALIZE = 14, unused
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL = 15, unused
     &Spell::EffectQuestComplete,                            //SPELL_EFFECT_QUEST_COMPLETE = 16
     &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL = 17
     &Spell::EffectResurrect,                                //SPELL_EFFECT_RESURRECT = 18
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_EXTRA_ATTACKS = 19
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DODGE = 20
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_EVADE = 21
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DODGE = 20, one spell: Dodge
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_EVADE = 21, one spell: Evade (DND)
     &Spell::EffectParry,                                    //SPELL_EFFECT_PARRY = 22
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_BLOCK = 23
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_BLOCK = 23, one spell: Block
     &Spell::EffectCreateItem,                               //SPELL_EFFECT_CREATE_ITEM = 24
     &Spell::EffectNULL,                                     //SPELL_EFFECT_WEAPON = 25
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DEFENSE = 26
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DEFENSE = 26, one spell: Defence
     &Spell::EffectPersistentAA,                             //SPELL_EFFECT_PERSISTENT_AREA_AURA = 27
     &Spell::EffectSummon,                                   //SPELL_EFFECT_SUMMON = 28
     &Spell::EffectMomentMove,                               //SPELL_EFFECT_LEAP = 29
     &Spell::EffectEnergize,                                 //SPELL_EFFECT_ENERGIZE = 30
     &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_PERCENT_DAMAGE = 31
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE = 32 //Useless
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE = 32
     &Spell::EffectOpenLock,                                 //SPELL_EFFECT_OPEN_LOCK = 33
     &Spell::EffectSummonChangeItem,                         //SPELL_EFFECT_SUMMON_CHANGE_ITEM = 34
     &Spell::EffectApplyAA,                                  //SPELL_EFFECT_APPLY_AREA_AURA = 35
     &Spell::EffectLearnSpell,                               //SPELL_EFFECT_LEARN_SPELL = 36
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE = 37 //Useless
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE = 37, one spell: SPELLDEFENSE (DND)
     &Spell::EffectDispel,                                   //SPELL_EFFECT_DISPEL = 38
     &Spell::EffectNULL,                                     //SPELL_EFFECT_LANGUAGE = 39
     &Spell::EffectDualWield,                                //SPELL_EFFECT_DUAL_WIELD = 40
@@ -94,14 +95,14 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_GUARDIAN = 42
     &Spell::EffectTeleUnitsFaceCaster,                      //SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER = 43
     &Spell::EffectLearnSkill,                               //SPELL_EFFECT_SKILL_STEP = 44
-    &Spell::EffectNULL,                                     //unknown45 = 45
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPAWN = 46
+    &Spell::EffectNULL,                                     //unknown45 = 45, honor/pvp related
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPAWN = 46, we must spawn pet there
     &Spell::EffectTradeSkill,                               //SPELL_EFFECT_TRADE_SKILL = 47
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH = 48 //Useless
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DETECT = 49
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH = 48, one spell: Base Stealth
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DETECT = 49, one spell: Detect
     &Spell::EffectTransmitted,                              //SPELL_EFFECT_TRANS_DOOR = 50
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_FORCE_CRITICAL_HIT = 51 //Useless
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_GUARANTEE_HIT = 52
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_FORCE_CRITICAL_HIT = 51, unused
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_GUARANTEE_HIT = 52, one spell: zzOLDCritical Shot
     &Spell::EffectEnchantItemPerm,                          //SPELL_EFFECT_ENCHANT_ITEM = 53
     &Spell::EffectEnchantItemTmp,                           //SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY = 54
     &Spell::EffectTameCreature,                             //SPELL_EFFECT_TAMECREATURE = 55
@@ -114,23 +115,23 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectPowerDrain,                               //SPELL_EFFECT_POWER_BURN = 62
     &Spell::EffectThreat,                                   //SPELL_EFFECT_THREAT = 63
     &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_TRIGGER_SPELL = 64
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEALTH_FUNNEL = 65 //Useless
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_POWER_FUNNEL = 66 //Useless
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEALTH_FUNNEL = 65, unused
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_POWER_FUNNEL = 66, unused
     &Spell::EffectHealMaxHealth,                            //SPELL_EFFECT_HEAL_MAX_HEALTH = 67
     &Spell::EffectInterruptCast,                            //SPELL_EFFECT_INTERRUPT_CAST = 68
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DISTRACT = 69
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PULL = 70
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_PULL = 70, one spell: Distract Move
     &Spell::EffectPickPocket,                               //SPELL_EFFECT_PICKPOCKET = 71
     &Spell::EffectAddFarsight,                              //SPELL_EFFECT_ADD_FARSIGHT = 72
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_POSSESSED = 73
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74 //Useless
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75, one spell: Mechanical Patch Kit
     &Spell::EffectSummonObjectWild,                         //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
     &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT = 77
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK = 78 //Useless
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK = 78
     &Spell::EffectSanctuary,                                //SPELL_EFFECT_SANCTUARY = 79
     &Spell::EffectAddComboPoints,                           //SPELL_EFFECT_ADD_COMBO_POINTS = 80
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_CREATE_HOUSE = 81
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_CREATE_HOUSE = 81: one spell: Create House (TEST)
     &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND_SIGHT = 82
     &Spell::EffectDuel,                                     //SPELL_EFFECT_DUEL = 83
     &Spell::EffectStuck,                                    //SPELL_EFFECT_STUCK = 84
@@ -140,7 +141,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT2 = 88
     &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT3 = 89
     &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT4 = 90
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_THREAT_ALL = 91
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_THREAT_ALL = 91, one spell: zzOLDBrainwash
     &Spell::EffectEnchantHeldItem,                          //SPELL_EFFECT_ENCHANT_HELD_ITEM = 92
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PHANTASM = 93
     &Spell::EffectSelfResurrect,                            //SPELL_EFFECT_SELF_RESURRECT = 94
@@ -165,12 +166,26 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectResurrectNew,                             //SPELL_EFFECT_RESURRECT_NEW = 113
     &Spell::EffectAttackMe,                                 //SPELL_EFFECT_ATTACK_ME = 114
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE_PCT = 115
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SKIN_PLAYER_CORPSE = 116
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPIRIT_HEAL = 117
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SKIN_PLAYER_CORPSE = 116, one spell: Remove Insignia, bg usage, required special corpse flags...
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPIRIT_HEAL = 117, one spell: Spirit Heal
     &Spell::EffectSkill,                                    //SPELL_EFFECT_SKILL = 118 -- professions and more
     &Spell::EffectNULL,                                     //SPELL_EFFECT_APPLY_AURA_NEW = 119
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TELEPORT_GRAVEYARD = 120
-    &Spell::EffectWeaponDmg                                 //SPELL_EFFECT_NORMALIZED_WEAPON_DMG = 121
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_TELEPORT_GRAVEYARD = 120, two spells: Graveyard Teleport and Graveyard Teleport Test
+    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_NORMALIZED_WEAPON_DMG = 121
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_122 = 122 -- silithist cap reward spell
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_123 = 123 -- taxi/fligth related
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_124 = 124 -- aggro redirect?
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_125 = 125 -- invis?
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_126 = 126 -- spell steal effect?
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_127 = 127 -- Prospecting spell
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_128 = 128
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_129 = 129
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_130 = 130 -- threat redirect
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_131 = 131 -- unused
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_132 = 132 -- taxi related, one spell: Brazen Taxi
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_133 = 133 -- one spell: Forget
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_134 = 134
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_135 = 135 -- pet related
 };
 
 void Spell::EffectNULL(uint32 i)
@@ -603,7 +618,7 @@ void Spell::EffectApplyAura(uint32 i)
 {
     if(!unitTarget)
         return;
-    if(!unitTarget->isAlive())
+    if(!unitTarget->isAlive() && !(m_spellInfo->Id == 20584 || m_spellInfo->Id == 8326)) // ghost spell check
         return;
 
     //If m_immuneToState type contain this aura type, IMMUNE aura.
@@ -616,6 +631,9 @@ void Spell::EffectApplyAura(uint32 i)
     sLog.outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, unitTarget,m_caster, m_CastItem);
+
+    if(!Aur) // is it useless?
+        return;
 
     if (!Aur->IsPositive() && Aur->GetCasterGUID() != Aur->GetTarget()->GetGUID())
     {
@@ -630,6 +648,7 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
             case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
             case SPELL_AURA_EMPATHY:
+            case SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS:
                 break;
             default:
                 if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat())
@@ -671,6 +690,11 @@ void Spell::EffectApplyAura(uint32 i)
     unitTarget->ApplyDiminishingToDuration(mech,auraDuration);
 
     bool added = unitTarget->AddAura(Aur);
+
+    // found crash at character loading, broken pointer to Aur...
+    // Aur was deleted in AddAura()...
+    if(!Aur)
+        return;
 
     if (added)
     {
@@ -1595,10 +1619,10 @@ void Spell::EffectTameCreature(uint32 i)
         pet->SetPower(   POWER_HAPPINESS,600000);
         pet->setPowerType(POWER_FOCUS);
         pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-        pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
+        pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,time(NULL));
         pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING + UNIT_FLAG_RENAME);
+        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);// + UNIT_FLAG_RENAME + UNIT_FLAG_RESTING); 
                                                             // this enables popup window (pet details, abandon, rename)
 
         uint32 new_id = 1;
@@ -1698,7 +1722,7 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
+        NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,time(NULL));
         NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
@@ -1752,9 +1776,10 @@ void Spell::EffectSummonPet(uint32 i)
                 NewSummon->SetName(new_name);
         }
         else if(NewSummon->getPetType()==HUNTER_PET)
-        {
+        {            
             // this enables popup window (pet details, abandon, rename)
-            NewSummon->SetFlag(UNIT_FIELD_FLAGS,(UNIT_FLAG_RESTING | UNIT_FLAG_RENAME));
+            //NewSummon->SetFlag(UNIT_FIELD_FLAGS,(UNIT_FLAG_RESTING | UNIT_FLAG_RENAME)); // changed in 2.0.8?
+            NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16)); // check it!
         }
 
         NewSummon->AIM_Initialize();
@@ -2003,7 +2028,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
     m_caster->GetClosePoint(NULL,x,y,z);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, target->GetMapId(),
-        x, y, z, target->GetOrientation(), 0, 0, 0, 0, 0, 0))
+        x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 0))
     {
         delete pGameObj;
         return;
@@ -2019,6 +2044,8 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
 void Spell::EffectScriptEffect(uint32 i)
 {
+    // we must implement hunter pet summon at login there (spell 6962)
+
     if(!m_spellInfo->Reagent[0])
     {
         // paladin's holy light / flash of light
@@ -2155,7 +2182,7 @@ void Spell::EffectDuel(uint32 i)
 
     pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->getFaction() );
-    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
+    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, GAMEOBJECT_TYPE_DUEL_ARBITER );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
     int32 duration = GetDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
@@ -2199,7 +2226,16 @@ void Spell::EffectStuck(uint32 i)
         return;
 
     sLog.outDebug("Spell Effect: Stuck");
+    sLog.outCommand("Player %s (guid %u) used auto-unstuck future at map %u (%f, %f, %f)", m_caster->GetName(), m_caster->GetGUIDLow(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
     HandleTeleport(m_spellInfo->Id, m_caster);
+
+    // from patch 2.0.12 Stuck spell trigger Hearthstone cooldown
+    //((Player*)m_caster)->AddSpellCooldown(8690, time(NULL) + 3600); // add 1 hour cooldown to Hearthstone
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(8690);
+    if(!spellInfo)
+        return;
+    Spell spell(m_caster,spellInfo,true,0);
+    spell.SendSpellCooldown();
 }
 
 void Spell::EffectSummonPlayer(uint32 i)
@@ -2211,6 +2247,11 @@ void Spell::EffectSummonPlayer(uint32 i)
         return;
 
     //FIXME: must send accepting request for summon to target instead explicit teleportation
+    // SMSG_SUMMON_REQUEST (683)
+    // uint64 summoner_guid
+    // uint32 summon_zoneid
+    // uint32 ms_time (auto decline?)
+    // CMSG_SUMMON_RESPONSE - empty
 
     // before caster
     float x,y,z;
@@ -2297,22 +2338,25 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         if(!pEnchant)
             return;
 
-        // remove old enchanting before applying new
-        if(uint32 old_enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3))
-            item_owner->AddItemEnchant(item,old_enchant_id,pEnchant->display_type,false);
+        // remove old enchanting before appling new
+        for (int s=0;s<3;s++)
+        {
+            if(uint32 old_enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type[s]*3))
+                item_owner->AddItemEnchant(item,old_enchant_id,pEnchant->display_type[s],false);
 
-        for(int x=0;x<3;x++)
-            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);
+            for(int x=0;x<3;x++)
+                item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type[s]*3+x,0);
 
-        item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3, enchant_id);
-        item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+1, duration*1000);
-        item->SetState(ITEM_CHANGED);
+            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type[s]*3, enchant_id);
+            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type[s]*3+1, duration*1000);
+            item->SetState(ITEM_CHANGED);
 
-        // add new enchanting
-        item_owner->AddItemEnchant(item,enchant_id,pEnchant->display_type,true);
+            // add new enchanting
+            item_owner->AddItemEnchant(item,enchant_id,pEnchant->display_type[s],true);
 
-        // set duration
-        item_owner->AddEnchantDuration(item,1,duration*1000);
+            // set duration
+            item_owner->AddEnchantDuration(item,1,duration*1000);
+        }
     }
 }
 
@@ -2774,8 +2818,8 @@ void Spell::EffectTransmitted(uint32 i)
         pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
     }
 
-    pGameObj->SetUInt32Value(12, 0x3F63BB3C );
-    pGameObj->SetUInt32Value(13, 0xBEE9E017 );
+    //pGameObj->SetUInt32Value(12, 0x3F63BB3C ); // useless rotation
+    //pGameObj->SetUInt32Value(13, 0xBEE9E017 ); // useless rotation
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
     pGameObj->SetSpellId(m_spellInfo->Id);
 

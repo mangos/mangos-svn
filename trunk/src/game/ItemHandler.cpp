@@ -199,16 +199,21 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     sLog.outDetail("STORAGE: Item Query = %u", item);
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
+
+    uint16 itempos = _player->GetPosByGuid(guidLow);
+    Item *pItem = _player->GetItemByPos( itempos );
+
     if( pProto )
     {
         data << pProto->ItemId;
         data << pProto->Class;
         // client known only 0 subclass (and 1-2 obsolute subclasses)
-        data << (pProto->Class==ITEM_CLASS_CONSUMABLE ? uint32(0) : pProto->SubClass);
+        data << (pProto->Class==ITEM_CLASS_CONSUMABLE ? uint32(0) : pProto->SubClass); // probably wrong
+        data << uint32(-1);    // new 2.0.3, not exist in wdb cache?
         data << pProto->Name1;
-        data << pProto->Name2;
-        data << pProto->Name3;
-        data << pProto->Name4;
+        data << pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
+        data << pProto->Name3; // blizz not send name there, just uint8(0x00);
+        data << pProto->Name4; // blizz not send name there, just uint8(0x00);
         data << pProto->DisplayInfoID;
         data << pProto->Quality;
         data << pProto->Flags;
@@ -259,7 +264,22 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
             if(!spell)
             {
                 data << uint32(0);
-                data << uint32(0);
+                if (pItem)
+                {
+                    if ((s < 3) && (pItem->GetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+s*3)))
+                    {
+                        data << uint32(1);
+                    }
+                    else
+                    {
+                        data <<uint32(0);
+                    }
+                }
+                else
+                {
+                    data << uint32(0);
+                }
+                //data << uint32(0);
                 data << uint32(0);
                 data << uint32(-1);
                 data << uint32(0);
@@ -297,17 +317,30 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->Material;
         data << pProto->Sheath;
         data << pProto->Extra;
+        data << pProto->Unk4; // new 2.0.3
         data << pProto->Block;
         data << pProto->ItemSet;
         data << pProto->MaxDurability;
         data << pProto->Area;
-        data << pProto->Unknown1;
-        data << pProto->Unknown1;                           // Added in 1.12.x client branch
+        data << pProto->Map;              // Added in 1.12.x & 2.0.1 client branch
+        data << pProto->BagFamily;
+        data << pProto->TotemCategory;
+        for(int s = 0; s < 3; s++)
+        {
+            data << pProto->Socket[s].Color;
+            data << pProto->Socket[s].Content;
+        }
+        data << pProto->socketBonus;
+        data << pProto->GemProperties;
+        data << pProto->ExtendedCost;
+        data << pProto->RequiredDisenchantSkill;
     }
     else
     {
+        // this is not blizz like responce
+        // blizz responce: item | 0x80000000
         data << item;
-        for(int a = 0; a < 11; a++)
+        for(int a = 0; a < 18; a++)
             data << uint64(0);
         data << uint32(0);                                  // Added in 1.12.x client branch
         SendPacket( &data );
@@ -580,7 +613,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                     price = 9 * price / 10;
 
                 data << price;
-                data << uint32( 0xFFFFFFFF );
+                data << pProto->MaxDurability;
                 data << pProto->BuyCount;
             }
         }
@@ -733,7 +766,7 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
 
 void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID)
 {
-    WorldPacket data(SMSG_ENCHANTMENTLOG, (8+8+4+4+1));
+    WorldPacket data(SMSG_ENCHANTMENTLOG, (8+8+4+4+1)); // last check 2.0.10
     data << Target;
     data << Caster;
     data << ItemID;
@@ -742,12 +775,13 @@ void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID
     SendPacket(&data);
 }
 
-void WorldSession::SendItemEnchantTimeUpdate(uint64 Itemguid,uint32 slot,uint32 Duration)
+void WorldSession::SendItemEnchantTimeUpdate(uint64 Playerguid, uint64 Itemguid,uint32 slot,uint32 Duration)
 {
-    WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, (8+4+4));
+    WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, (8+4+4+8)); // last check 2.0.10
     data << Itemguid;
     data << slot;
     data << Duration;
+    data << Playerguid;
     SendPacket(&data);
 }
 
@@ -867,4 +901,65 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
 
     uint32 count = 1;
     _player->DestroyItemCount(gift, count, true);
+}
+
+void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
+{
+    sLog.outDebug("Received opcode CMSG_SOCKET_ITEM");
+    uint64 itemguid;
+    uint64 gemguid[3];
+    uint32 gemProperty[3];
+
+    recv_data >> itemguid >> gemguid[0] >> gemguid[1] >> gemguid[2];
+
+    bool propercolor[3],full[3];
+    uint16 itempos = _player->GetPosByGuid(itemguid);
+    Item *pItem = _player->GetItemByPos( itempos );
+    if( pItem )
+    {
+        ItemPrototype const *pItemProto = objmgr.GetItemPrototype( pItem->GetEntry() );
+        bool HasBonus=1;
+        for (int s=0; s<3; s++)
+        {
+            if (gemguid[s])
+            {
+                uint16 gempos = _player->GetPosByGuid(gemguid[s]);
+                Item *pGem = _player->GetItemByPos( gempos );
+                ItemPrototype const *pGemProto = objmgr.GetItemPrototype( pGem->GetEntry() );
+                gemProperty[s] = pGemProto->GemProperties;
+                GemPropertiesEntry const *gemInfo = sGemPropertiesStore.LookupEntry(gemProperty[s]);
+                propercolor[s] = (gemInfo->color & pItemProto->Socket[s].Color);
+                if ((gemInfo->color & SOCKET_COLOR_META) & !propercolor[s])
+                {
+                    // ToDo : Error message
+                    continue;
+                }
+                pItem->SetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+s*3, gemInfo->spellitemenchantement);
+                _player->DestroyItem((gempos >> 8), (gempos & 255), true);
+                full[s] = 1;
+            }
+            else
+            {
+                gemProperty[s] = 0;
+                propercolor[s] = 1;
+                if (pItemProto->Socket[s].Color)
+                {
+                    full[s]=0;
+                }
+                else
+                {
+                    full[s]=1;
+                };
+            };
+            HasBonus &= full[s] & propercolor[s];
+        }
+
+        // Now if all full[s] are true and all propercolor[s] are true, also apply the bonus pItemProto->socketBonus
+        if (HasBonus)
+        {
+            pItem->SetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+3*3, pItemProto->socketBonus);
+        }
+
+        _player->_ApplyItemMods(pItem, pItem->GetSlot(), true);
+    }
 }

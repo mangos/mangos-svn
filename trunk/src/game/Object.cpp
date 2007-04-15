@@ -815,31 +815,31 @@ bool WorldObject::IsPositionValid() const
 
 void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
 {
-    data->Initialize(MSG_MOVE_HEARTBEAT, 32);               //2
+    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
 
-    *data << GetGUID();                                     //8
-    *data << uint32(0);                                     //4
-    *data << uint32(0);                                     //4
+    data->append(GetPackGUID());
+    *data << uint32(0);
+    *data << uint32(0);
 
-    *data << m_positionX;                                   //4
-    *data << m_positionY;                                   //4
-    *data << m_positionZ;                                   //4
+    *data << m_positionX;
+    *data << m_positionY;
+    *data << m_positionZ;
 
-    *data << m_orientation;                                 //4
+    *data << m_orientation;
+    *data << uint32(0x0);
 }
 
 void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
 {
     data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
-    *data << uint8(0xFF);
-    *data << GetGUID();
-    *data << uint32(0x800000);
-    *data << uint16(0x67EE);
-    *data << uint16(0xD1EB);
-    *data << m_orientation;                                 // instead of *data << z;
+    data->append(GetPackGUID());
+    *data << uint32(0x0);
+    *data << uint32(0x0);
+    *data << getMSTime();
+
     *data << x;
     *data << y;
-    *data << z;                                             // instead of *data << ang;
+    *data << z;
     *data << ang;
     *data << uint32(0x0);
 }

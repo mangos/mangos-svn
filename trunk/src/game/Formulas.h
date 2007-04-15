@@ -28,8 +28,7 @@ namespace MaNGOS
     namespace Honor
     {
         //TODO: Implement this function
-        // NOTE: DO NOT IMPLEMENT A FUNCTION THAT USES A QUERY, SAVE THE DATA
-        inline int32 CalculeStanding(Player *plr)
+        /*inline int CalculeStanding(Player *plr)
         {
             uint64 guid = 0;
             int standing = 0;
@@ -43,9 +42,9 @@ namespace MaNGOS
                 delete result;
             }
             return standing;
-        }
+        }*/
         //TODO: Fix this formula, for now the weekly rating is how many honor player gain all life time
-        inline float CalculeRating(Player *plr)
+        /*inline float CalculeRating(Player *plr)
         {
             return plr->GetTotalHonor();
         }
@@ -83,7 +82,7 @@ namespace MaNGOS
             int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
             int honor_points = int(((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level)));
             return (honor_points <= 400 ? honor_points : 400);
-        }
+        }*/
 
     }
 

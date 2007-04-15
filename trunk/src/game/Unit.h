@@ -556,10 +556,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 getClassMask() const { return 1 << (getClass()-1); };
         uint8 getGender() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 16) & 0xFF); };
 
-        float GetStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_STR+stat); }
-        void SetStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_STR+stat, val); }
-        void ApplyStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_STR+stat, val, apply); }
-        void ApplyStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_STR+stat, val, apply); }
+        float GetStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_STAT0+stat); }
+        void SetStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_STAT0+stat, val); }
+        void ApplyStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_STAT0+stat, val, apply); }
+        void ApplyStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_STAT0+stat, val, apply); }
 
         float GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL) ; }
         void SetArmor(float val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
@@ -753,6 +753,23 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool SetAurDuration(uint32 spellId, uint32 effindex, uint32 duration);
         uint32 GetAurDuration(uint32 spellId, uint32 effindex);
 
+        float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
+        void SetResistanceBuffMods(SpellSchools school, bool positive, float val) { SetFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school,val); }
+        void ApplyResistanceBuffModsMod(SpellSchools school, bool positive, float val, bool apply) { ApplyModFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
+        void ApplyResistanceBuffModsPercentMod(SpellSchools school, bool positive, float val, bool apply) { ApplyPercentModFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
+        void SetPosStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_POSSTAT0+stat, val); }
+        void ApplyPosStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_POSSTAT0+stat, val, apply); }
+        void ApplyPosStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_POSSTAT0+stat, val, apply); }
+        void SetNegStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_NEGSTAT0+stat, val); }
+        void ApplyNegStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
+        void ApplyNegStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
+        void SetCreateStat(Stats stat, float val) { m_createStats[stat] = val; }
+        void ApplyCreateStatMod(Stats stat, float val, bool apply) { m_createStats[stat] += (apply ? val : -val); }
+        void ApplyCreateStatPercentMod(Stats stat, float val, bool apply) { m_createStats[stat] *= (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val)); }
+        float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0+stat); }
+        float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0+stat); }
+        float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
+
         void castSpell(Spell * pSpell);
         virtual void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs ) { }
         void InterruptSpell();
@@ -857,7 +874,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
         void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
-        virtual void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool aplly);
+        virtual void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply);
 
         void SetHover(bool on);
         bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
@@ -882,6 +899,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 m_attackTimer[3];
 
+        float m_createStats[5];
         AttackerSet m_attackers;
         Unit* m_attacking;
 

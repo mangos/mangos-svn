@@ -132,6 +132,9 @@
 				RelativePath="..\..\src\game\AddonHandler.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\ArenaTeamHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\AuctionHouse.cpp">
 			</File>
 			<File
@@ -223,6 +226,9 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\ItemHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\LFGHandler.cpp">
 			</File>
 			<File
 				RelativePath="..\..\src\game\LootHandler.cpp">

@@ -158,5 +158,5 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 bgId)
 
     sLog.outDetail("BATTLEGROUND: Sending %s to %f,%f,%f,%f", pl->GetName(), x,y,z,O);
     pl->TeleportTo(mapid, x, y, z, O);
-    pl->SendInitWorldStates(mapid);
+    pl->SendInitWorldStates();
 }

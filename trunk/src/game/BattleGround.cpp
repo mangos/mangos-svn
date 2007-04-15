@@ -137,7 +137,7 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
         // Needs vars added to player class and I'm too lazy to rebuild..
 
         plr->TeleportTo(plr->GetBattleGroundEntryPointMap(), plr->GetBattleGroundEntryPointX(), plr->GetBattleGroundEntryPointY(), plr->GetBattleGroundEntryPointZ(), plr->GetBattleGroundEntryPointO());
-        plr->SendInitWorldStates(plr->GetBattleGroundEntryPointMap());
+        plr->SendInitWorldStates();
         //sLog.outDetail("BATTLEGROUND: Sending %s to %f,%f,%f,%f", pl->GetName(), x,y,z,O);
     }
 
@@ -170,7 +170,7 @@ void BattleGround::AddPlayer(Player *plr)
 
     m_PlayerScores[guid] = sc;
 
-    plr->SendInitWorldStates(plr->GetMapId());
+    plr->SendInitWorldStates();
 
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data,plr);

@@ -462,7 +462,7 @@ bool Map::AddInstanced(Player *player)
     if (player->GetPet()) player->GetPet()->SetInstanceId(this->GetInstanceId());
     player->SetInstanceId(this->GetInstanceId());
 
-    player->SendInitWorldStates(player->GetMapId());
+    player->SendInitWorldStates();
 
     sLog.outDetail("MAP: Player '%s' entered the instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
 

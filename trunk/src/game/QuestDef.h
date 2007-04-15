@@ -166,8 +166,8 @@ class Quest
         float  GetPointX() { return PointX; }
         float  GetPointY (){ return PointY; }
         uint32 GetPointOpt() { return PointOpt; }
-        uint32 GetOfferRewardEmote() { return OfferRewardEmote; }
-        uint32 GetRequestItemsEmote() { return RequestItemsEmote; }
+        uint32 GetIncompleteEmote() { return IncompleteEmote; }
+        uint32 GetCompleteEmote() { return CompleteEmote; }
         uint32 GetQuestCompleteScript() { return QuestCompleteScript; }
         bool   IsRepeatable() { return bool(Repeatable); }
         bool   IsAutoComplete() { return strlen(GetObjectives()) == 0; }
@@ -189,6 +189,8 @@ class Quest
         uint32 RewItemCount[QUEST_REWARDS_COUNT];
         uint32 RewRepFaction[QUEST_REPUTATIONS_COUNT];
         int32  RewRepValue[QUEST_REPUTATIONS_COUNT];
+        uint32 DetailsEmote[QUEST_EMOTE_COUNT];
+        uint32 OfferRewardEmote[QUEST_EMOTE_COUNT];
 
         uint32 GetReqItemsCount() { return m_reqitemscount; }
         uint32 GetReqCreatureOrGOcount() { return m_reqCreatureOrGOcount; }
@@ -240,9 +242,9 @@ class Quest
         uint32 PointMapId;
         float  PointX;
         float  PointY;
-        uint32 PointOpt;
-        uint32 OfferRewardEmote;
-        uint32 RequestItemsEmote;
+        uint32 PointOpt;  
+        uint32 IncompleteEmote;
+        uint32 CompleteEmote;
         uint32 QuestCompleteScript;
         uint32 Repeatable;
 };

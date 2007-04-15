@@ -265,7 +265,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         _player->ModifyMoney( -int32(proto->spellcost) );
         if(spellInfo->powerType == 2)
         {
-            _player->addSpell(spellId,4);                   // ative = 4 for spell book of hunter's pet
+            _player->addSpell(spellId,4);                   // active = 4 for spell book of hunter's pet
             return;
         }
 
@@ -299,7 +299,16 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_NONE);
+    // fix for spirit healers (temp?)
+    Creature *temp = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    if (!temp)
+        return;
+
+    uint32 npcflags = UNIT_NPC_FLAG_NONE;
+    if(temp->isSpiritHealer())
+        npcflags = UNIT_NPC_FLAG_SPIRITHEALER;
+
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, npcflags);
     if (!unit)
     {
         sLog.outDebug( "WORLD: HandleGossipHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
@@ -324,7 +333,16 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     recv_data >> guid >> option;
 
-    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_NONE);
+    // fix for spirit healers (temp?)
+    Creature *temp = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    if (!temp)
+        return;
+
+    uint32 npcflags = UNIT_NPC_FLAG_NONE;
+    if(temp->isSpiritHealer())
+        npcflags = UNIT_NPC_FLAG_SPIRITHEALER;
+
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, npcflags);
     if (!unit)
     {
         sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
@@ -345,7 +363,7 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
-    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_SPIRITHEALER);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, UNIT_NPC_FLAG_SPIRITHEALER);
     if (!unit)
     {
         sLog.outDebug( "WORLD: HandleSpiritHealerActivateOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
@@ -432,6 +450,54 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 void WorldSession::SendBindPoint(Creature *npc)
 {
     WorldPacket data;
+    uint32 bindspell = 3286, hearthstone_itemid = 6948;
+
+    // update sql homebind
+    sDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%u', `zone` = '%u', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%u'", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetGUIDLow());
+
+    // if a player lost/dropped hist hearthstone, he will get a new one
+    if ( !_player->HasItemCount(hearthstone_itemid, 1) && _player->GetBankItemCount(hearthstone_itemid) <1)
+    {
+        uint16 dest;
+        uint8 msg = _player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, hearthstone_itemid, 1, false );
+        if( msg == EQUIP_ERR_OK )
+        {
+            Item* newitem = _player->StoreNewItem( dest, hearthstone_itemid, 1, true);
+            _player->SendNewItem(newitem, 1, true, false);
+        }
+        else
+        {
+            _player->SendEquipError( msg, NULL, NULL );
+        }
+    }
+
+    // send spell for bind 3286 bind magic
+    data.Initialize(SMSG_SPELL_START, (8+8+4+2+4+2+8) );
+    data.append(npc->GetPackGUID());
+    data.append(npc->GetPackGUID());
+    data << bindspell;      // spell id
+    data << uint16(0);      // cast flags
+    data << uint32(0);      // time
+    data << uint16(0x0002); // target mask
+    data.append(_player->GetPackGUID()); // target's packed guid
+    SendPacket( &data );
+
+    data.Initialize(SMSG_SPELL_GO, (8+8+4+2+1+8+1+2+8));
+    data.append(npc->GetPackGUID());
+    data.append(npc->GetPackGUID());
+    data << bindspell;          // spell id
+    data << uint16(0x0100);     // cast flags
+    data << uint8(0x01);        // targets count
+    data << _player->GetGUID(); // target's full guid
+    data << uint8(0x00);        // ?
+    data << uint16(0x0002);     // target mask
+    data.append(_player->GetPackGUID()); // target's packed guid
+    SendPacket( &data );
+
+    data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED, (8+4));
+    data << npc->GetGUID();
+    data << bindspell;
+    SendPacket( &data );
 
     // binding
     data.Initialize( SMSG_BINDPOINTUPDATE, (4+4+4+4+4) );
@@ -449,44 +515,11 @@ void WorldSession::SendBindPoint(Creature *npc)
     DEBUG_LOG("New Home ZoneId is %u",_player->GetZoneId());
 
     // zone update
-    data.Initialize( SMSG_PLAYERBOUND, 12 );
+    data.Initialize( SMSG_PLAYERBOUND, 8+4 );
     data << uint64(_player->GetGUID());
     data << uint32(_player->GetZoneId());
     SendPacket( &data );
 
-    // update sql homebind
-    sDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%u', `zone` = '%u', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%u'", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetGUIDLow());
-
-    // if a player lost/dropped hist hearthstone, he will get a new one
-    uint32 hearthstone_itemid = 6948;
-    if ( !_player->HasItemCount(hearthstone_itemid, 1) && _player->GetBankItemCount(hearthstone_itemid) <1)
-    {
-        uint16 dest;
-        uint8 msg = _player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, hearthstone_itemid, 1, false );
-        if( msg == EQUIP_ERR_OK )
-        {
-            Item* newitem = _player->StoreNewItem( dest, hearthstone_itemid, 1, true);
-            _player->SendNewItem(newitem, 1, true, false);
-        }
-        else
-        {
-            _player->SendEquipError( msg, NULL, NULL );
-        }
-    }
-
-    // send spell for bind 3286 bind magic
-    data.Initialize(SMSG_SPELL_START, (8+8+2+2+2+4+2) );
-    data.append(_player->GetPackGUID());
-    data.append(npc->GetPackGUID());
-    data << uint16(3286) << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
-    SendPacket( &data );
-
-    data.Initialize(SMSG_SPELL_GO, (8+8+2+2+1+1+1+8+4+2+2));
-    data.append(_player->GetPackGUID());
-    data.append(npc->GetPackGUID());
-    data << uint16(3286) << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
-    data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
-    SendPacket( &data );
     _player->PlayerTalkClass->CloseGossip();
 }
 

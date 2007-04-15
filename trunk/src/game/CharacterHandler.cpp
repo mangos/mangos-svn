@@ -33,6 +33,7 @@
 #include "ObjectAccessor.h"
 #include "Transports.h"
 #include "Group.h"
+#include "../realmd/AuthCodes.h" 
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
@@ -97,7 +98,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     if(name.size() == 0)
     {
         data.Initialize( SMSG_CHAR_CREATE, 1 );
-        data << (uint8)0x33;
+        data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
         return;
     }
@@ -110,7 +111,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     if(name.find_first_of(notAllowedChars)!=name.npos)
     {
         data.Initialize( SMSG_CHAR_CREATE, 1 );
-        data << (uint8)0x33;
+        data << (uint8)CHAR_NAME_INVALID_CHARACTER;;
         SendPacket( &data );
         return;
     }
@@ -123,7 +124,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         delete result;
 
         data.Initialize(SMSG_CHAR_CREATE, 1);
-        data << (uint8)0x31;
+        data << (uint8)CHAR_LOGIN_DUPLICATE_CHARACTER;
         SendPacket( &data );
 
         return;
@@ -136,7 +137,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         if (result->GetRowCount() >= 10)
         {
             data.Initialize(SMSG_CHAR_CREATE, 1);
-            data << (uint8)0x2F;
+            data << (uint8)CHAR_CREATE_ACCOUNT_LIMIT;
             SendPacket( &data );
             delete result;
             return;
@@ -164,7 +165,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
             if(team != team_ && GetSecurity() < 2 && !AllowTwoSideAccounts)
             {
                 data.Initialize( SMSG_CHAR_CREATE, 1 );
-                data << (uint8)0x33;
+                data << (uint8)CHAR_CREATE_PVP_TEAMS_VIOLATION;
                 SendPacket( &data );
                 return;
             }
@@ -196,22 +197,14 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         delete pNewChar;
 
         data.Initialize(SMSG_CHAR_CREATE, 1);
-        data << (uint8)0x2F;
+        data << (uint8)CHAR_CREATE_ERROR;
         SendPacket( &data );
 
         return;
     }
 
-    // we have successfull creation
-    // note all error codes moved + 1
-    // 0x2E - Character created
-    // 0x30 - Char create failed
-    // 0x31 - Char name is in use
-    // 0x35 - Char delete Okay
-    // 0x36 - Char delete failed
-
     data.Initialize( SMSG_CHAR_CREATE, 1 );
-    data << (uint8)0x2E;
+    data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket( &data );
 
     sLog.outBasic("Account: %d Create New Character:[%s]",GetAccountId(),name.c_str());
@@ -238,10 +231,8 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
         plr.DeleteFromDB();
     }
 
-    //data.Initialize(SMSG_CHAR_CREATE);
-    //data << (uint8)0x34;
-    WorldPacket data(SMSG_CHAR_DELETE, 1);                  // Changed in 1.12.x client branch
-    data << (uint8)0x39;                                    // Changed in 1.12.x client branch
+    WorldPacket data(SMSG_CHAR_DELETE, 1);
+    data << (uint8)CHAR_DELETE_SUCCESS;
     SendPacket( &data );
 }
 
@@ -281,23 +272,42 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     SetPlayer(plr);
 
-    WorldPacket data( SMSG_ACCOUNT_DATA_MD5, (80) );
+    Player *pCurrChar = GetPlayer();
 
-    for(int i = 0; i < 80; i++)
-        data << uint8(0);
+    pCurrChar->SendDungeonDifficulty();
 
+    WorldPacket data( SMSG_LOGIN_VERIFY_WORLD, 20 );
+    data << plr->GetMapId();
+    data << plr->GetPositionX();
+    data << plr->GetPositionY();
+    data << plr->GetPositionZ();
+    data << plr->GetOrientation();
     SendPacket(&data);
 
-    Player *pCurrChar = GetPlayer();
+    data.Initialize( SMSG_ACCOUNT_DATA_MD5, 128 );
+    for(int i = 0; i < 128; i++)
+        data << uint8(0);
+    SendPacket(&data);
 
     pCurrChar->LoadIgnoreList();
     pCurrChar->SendFriendlist();
     pCurrChar->SendIgnorelist();
 
-    sChatHandler.FillSystemMessageData(&data, this, sWorld.GetMotd());
-    SendPacket( &data );
+    data.Initialize(SMSG_MOTD, 50); // new in 2.0.1
+    data << (uint32)0;
 
-    DEBUG_LOG( "WORLD: Sent motd (SMSG_MESSAGECHAT)" );
+    uint32 linecount=0;
+    char* line = strtok((char*)sWorld.GetMotd(), "@");
+    while(line != NULL)
+    {
+        data << line;
+        linecount++;
+        line = strtok(NULL, "@");
+    }
+
+    data.put(0, linecount);
+    SendPacket( &data );
+    DEBUG_LOG( "WORLD: Sent motd (SMSG_MOTD)" );
 
     if(pCurrChar->GetGuildId() != 0)
     {
@@ -315,7 +325,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             data<<(uint8)GE_SIGNED_ON;
             data<<(uint8)1;
             data<<pCurrChar->GetName();
-            data<<(uint8)0<<(uint8)0<<(uint8)0;
+            data<<pCurrChar->GetGUID();
             guild->BroadcastPacket(&data);
             DEBUG_LOG( "WORLD: Sent guild-signed-on (SMSG_GUILD_EVENT)" );
         }
@@ -327,6 +337,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             pCurrChar->SetUInt32ValueInDB(PLAYER_GUILDID,0,pCurrChar->GetGUID());
         }
     }
+
+    // rest_start
 
     // home bind stuff
     Field *fields;
@@ -371,15 +383,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
 
     data.Initialize( SMSG_TUTORIAL_FLAGS, 8*32 );
-
     for (int i = 0; i < 8; i++)
         data << uint32( GetPlayer()->GetTutorialInt(i) );
-
     SendPacket(&data);
     //sLog.outDebug( "WORLD: Sent tutorial flags." );
 
     GetPlayer()->SendInitialSpells();
     GetPlayer()->SendInitialActionButtons();
+    GetPlayer()->SendInitialReputations();
 
     /*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
     {
@@ -399,20 +410,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }*/
 
-    GetPlayer()->SendInitialReputations();
-
-    GetPlayer()->UpdateHonor();
-
-    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
-    time_t gameTime = sWorld.GetGameTime();
-    struct tm *lt = localtime(&gameTime);
-    uint32 xmitTime = (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 |
-        (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
-        lt->tm_hour << 6 | lt->tm_min;
-    data << xmitTime;
-    data << (uint32)0x3C888889;                             //(float)0.017f;
-    SendPacket( &data );
-
     //Show cinematic at the first time that player login
     if( !GetPlayer()->getCinematic() )
     {
@@ -426,6 +423,22 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             SendPacket( &data );
         }
     }
+
+    pCurrChar->SendInitWorldStates();
+
+    pCurrChar->CastSpell(pCurrChar, 836, false); // LOGINEFFECT
+
+    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
+    time_t gameTime = sWorld.GetGameTime();
+    struct tm *lt = localtime(&gameTime);
+    uint32 xmitTime = (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 |
+        (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
+        lt->tm_hour << 6 | lt->tm_min;
+    data << xmitTime;
+    data << (uint32)0x3C888889;                             //(float)0.017f;
+    SendPacket( &data );
+
+    GetPlayer()->UpdateHonorFields();
 
     QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
 
@@ -445,7 +458,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // this remained from raid group load (raid group load was moved to player code)
     if(pCurrChar->groupInfo.group)
     {
-        pCurrChar->groupInfo.group->SendInit(this);
+        //pCurrChar->groupInfo.group->SendInit(this); // useless
         pCurrChar->groupInfo.group->SendUpdate();
     }
 
@@ -490,40 +503,50 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     data<<pCurrChar->getClass();
     pCurrChar->BroadcastPacketToFriendListers(&data);
 
-    // setting new speed if dead
-    if ( pCurrChar->m_deathState == DEAD )
-    {
-        pCurrChar->SetMovement(MOVE_WATER_WALK);
-
-        if (pCurrChar->getRace() == RACE_NIGHTELF)
-        {
-            pCurrChar->SetSpeed(MOVE_RUN,  1.5f*1.2f, true);
-            pCurrChar->SetSpeed(MOVE_SWIM, 1.5f*1.2f, true);
-        }
-        else
-        {
-            pCurrChar->SetSpeed(MOVE_RUN,  1.5f, true);
-            pCurrChar->SetSpeed(MOVE_SWIM, 1.5f, true);
-        }
-    }
-
     pCurrChar->LoadEnchant();
     pCurrChar->_LoadSpellCooldowns();
 
-    // Place charcter in world (and load zone) before some object loading
+    // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();
+
+    // setting Ghost+speed if dead
+    //if ( pCurrChar->m_deathState == DEAD )
+    if ( pCurrChar->m_deathState != ALIVE )
+    {
+        // not blizz like, we must correctly save and load player instead...
+        pCurrChar->CastSpell(pCurrChar, 20584, true, 0); // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
+        pCurrChar->CastSpell(pCurrChar, 8326, true, 0); // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+        //pCurrChar->SetUInt32Value(UNIT_FIELD_AURA+41, 8326);
+        //pCurrChar->SetUInt32Value(UNIT_FIELD_AURA+42, 20584);
+        //pCurrChar->SetUInt32Value(UNIT_FIELD_AURAFLAGS+6, 238);
+        //pCurrChar->SetUInt32Value(UNIT_FIELD_AURALEVELS+11, 514);
+        //pCurrChar->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+11, 65535);
+        //pCurrChar->SetUInt32Value(UNIT_FIELD_DISPLAYID, 1825);
+        //if (pCurrChar->getRace() == RACE_NIGHTELF)
+        //{
+        //    pCurrChar->SetSpeed(MOVE_RUN,  1.5f*1.2f, true);
+        //    pCurrChar->SetSpeed(MOVE_SWIM, 1.5f*1.2f, true);
+        //}
+        //else
+        //{
+        //    pCurrChar->SetSpeed(MOVE_RUN,  1.5f, true);
+        //    pCurrChar->SetSpeed(MOVE_SWIM, 1.5f, true);
+        //}
+        pCurrChar->SetMovement(MOVE_WATER_WALK);
+    }
 
     // Load pet if any and player is alive
     if(pCurrChar->isAlive())
         pCurrChar->LoadPet();
 
-    // show time before shutdown if shudown planned.
+    // show time before shutdown if shutdown planned.
     if(sWorld.IsShutdowning())
         sWorld.ShutdownMsg(true,pCurrChar);
 
     if(pCurrChar->isGameMaster())
         SendNotification("GM mode is ON");
     m_playerLoading = false;
+    pCurrChar->SendAllowMove(); // may be add it to CMSG_SET_ACTIVE_MOVER handler?
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

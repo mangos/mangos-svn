@@ -55,7 +55,8 @@ class MANGOS_DLL_SPEC WorldSession
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
         void SendPacket(WorldPacket* packet);
-        void SendNotification(char const* msg);
+        void SendNotification(const char *format,...);
+        void SendLfgResult(uint32 type, uint32 entry);
         void SendPartyResult(uint32 unk, std::string member, uint32 state);
         void SendAreaTriggerMessage(const char* Text, ...);
 
@@ -92,7 +93,7 @@ class MANGOS_DLL_SPEC WorldSession
         void QueuePacket(WorldPacket& packet);
         bool Update(uint32 diff);
 
-        void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
+        //void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
         void SendNameQueryOpcode(Player* p);
         void SendNameQueryOpcodeFromDB(uint64 guid);
 
@@ -130,7 +131,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
-        void SendItemEnchantTimeUpdate(uint64 Itemguid,uint32 slot,uint32 Duration);
+        void SendItemEnchantTimeUpdate(uint64 Playerguid, uint64 Itemguid,uint32 slot,uint32 Duration);
 
         //Taxi
         void SendTaxiStatus( uint64 guid );
@@ -159,6 +160,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleInspectHonorStatsOpcode(WorldPacket& recvPacket);
 
         void HandleMoveWaterWalkAck(WorldPacket& recvPacket);
+        void HandleFeatherFallAck(WorldPacket &recv_data);
+
         void HandleMoveHoverAck( WorldPacket & recv_data );
 
         void HandleMountSpecialAnimOpcode(WorldPacket &recvdata);
@@ -257,7 +260,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleRaidReadyCheckOpcode( WorldPacket & recv_data );
         void HandleRaidConvertOpcode( WorldPacket & recv_data );
         void HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data );
-        void HandleAssistantOpcode( WorldPacket & recv_data );
+        void HandleGroupAssistantOpcode( WorldPacket & recv_data );
+        void HandleGroupPromoteOpcode( WorldPacket & recv_data );
 
         void HandlePetitionBuyOpcode(WorldPacket& recv_data);
         void HandlePetitionShowSignOpcode(WorldPacket& recv_data);
@@ -459,6 +463,40 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
         void HandleFarSightOpcode(WorldPacket& recv_data);
+        void HandleSetLfgOpcode(WorldPacket& recv_data);
+        void HandleDungeonDifficultyOpcode(WorldPacket& recv_data);
+        void HandleMoveFlyModeChangeAckOpcode(WorldPacket& recv_data);
+        void HandleLfgAutoJoinOpcode(WorldPacket& recv_data);
+        void HandleLfgCancelAutoJoinOpcode(WorldPacket& recv_data);
+        void HandleLfmAutoAddMembersOpcode(WorldPacket& recv_data);
+        void HandleLfmCancelAutoAddmembersOpcode(WorldPacket& recv_data);
+        void HandleLfgClearOpcode(WorldPacket& recv_data);
+        void HandleLfmSetNoneOpcode(WorldPacket& recv_data);
+        void HandleLfmSetOpcode(WorldPacket& recv_data);
+        void HandleLfgSetCommentOpcode(WorldPacket& recv_data);
+        void HandleNewUnknownOpcode(WorldPacket& recv_data);
+        void HandleInspectArenaStatsOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamQueryOpcode(WorldPacket& recv_data);
+        void HandleChooseTitleOpcode(WorldPacket& recv_data);
+        void HandleRealmStateRequestOpcode(WorldPacket& recv_data);
+        void HandleAllowMoveAckOpcode(WorldPacket& recv_data);
+        void HandleWhoisOpcode(WorldPacket& recv_data);
+        void HandleResetInstancesOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamRosterOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamAddMemberOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamInviteAcceptOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamInviteDeclineOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamLeaveOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamDisbandOpcode(WorldPacket& recv_data);
+        void HandleAreaSpiritHealerQueryOpcode(WorldPacket& recv_data);
+        void HandleDismountOpcode(WorldPacket& recv_data);
+
+        // testing...
+        void HandleMoveShipOpcode(WorldPacket& recv_data);
+        void HandleMoveFlyStateChangeOpcode(WorldPacket& recv_data);
+
+        // Socket gem
+        void HandleSocketOpcode(WorldPacket& recv_data);
 
         OpcodeHandler* _GetOpcodeHandlerTable() const;
 

@@ -39,7 +39,7 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) );
     data << p->GetGUID();
     data << p->GetName();
-    data << uint8(0);
+    data << uint8(0); // it's realm name, for BG usage :)
     data << uint32(p->getRace());
     data << uint32(p->getGender());
     data << uint32(p->getClass());
@@ -102,82 +102,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     recv_data >> entry;
     recv_data >> guid;
 
-    Creature *unit = ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
-
-    if (unit == NULL)
-    {
-        sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-        /*    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint32)0;
-            data << (uint16)0;
-            SendPacket( &data );
-            return;*/
-    }
-
-    //CreatureInfo const *ci = unit->GetCreatureInfo();
-    CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
-    if (!ci)
-    {
-        sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO CREATUREINFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-        data.Initialize( SMSG_CREATURE_QUERY_RESPONSE, (11*4+2) );
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint16)0;
-        SendPacket( &data );
-        return;
-    }
-
-    sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
-    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE, (100) ); // guess size
-    data << (uint32)entry;
-    data << (unit ? unit->GetName() : ci->Name);
-
-    data << uint8(0) << uint8(0) << uint8(0);
-    //if (unit)
-    //    data << ((unit->isPet()) ? "Pet" : ci->SubName);
-    //else
-    data << ci->SubName;
-
-    uint32 wdbFeild11=0,wdbFeild12=0;
-
-    data << ci->flag1;                                      //flag1          wdbFeild7=wad flags1
-    if (unit)
-        data << (uint32)((unit->isPet()) ? 0 : ci->type);   //creatureType   wdbFeild8
-    else
-        data << (uint32)ci->type;
-
-    data << (uint32)ci->family;                             //family         wdbFeild9
-    data << (uint32)ci->rank;                               //rank           wdbFeild10
-    data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
-    data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    if (unit)
-        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
-    else
-        data << (uint32)ci->randomDisplayID();
-
-    data << (uint16)ci->civilian;                           //wdbFeild14
-
-    SendPacket( &data );
-
+    SendCreatureQuery(entry, guid);
 }
 
 void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
@@ -203,17 +128,15 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
 
     WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 );  // guess size
-    data << (uint32)entry;
-    data << (unit ? unit->GetName() : ci->Name);
+    data << (uint32)entry;                                  // creature entry
+    data << (unit ? unit->GetName() : ci->Name);            // creature name
 
-    data << uint8(0) << uint8(0) << uint8(0);
+    data << uint8(0) << uint8(0) << uint8(0);               // unk 3 x uint8
 
     if (unit)
-        data << ((unit->isPet()) ? "Pet" : ci->SubName);
+        data << ((unit->isPet()) ? "Pet" : ci->SubName);    // subname
     else
         data << ci->Name;
-
-    uint32 wdbFeild11=0,wdbFeild12=0;
 
     data << ci->flag1;                                      //flags          wdbFeild7=wad flags1
 
@@ -224,151 +147,19 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
     data << (uint32)ci->family;                             //family         wdbFeild9
     data << (uint32)(unit && unit->isPet() ? 0 : ci->rank); //rank           wdbFeild10
-    data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
-    data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
+    data << uint32(0);                                      //unknow         wdbFeild11
+    data << uint32(0);                                      //unknow         wdbFeild12
+
     if (unit)
         data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
     else
         data << (uint32)ci->randomDisplayID();
 
-    data << (uint16)ci->civilian;                           //wdbFeild14
-
+    data << (float)1;                                       // unk
+    data << (float)1;                                       // unk
+    data << uint8(0);                                       // unk
+    data << uint8(0);                                       // boss flag?
     SendPacket( &data );
-    /*
-        uint32 npcflags = unit->GetUInt32Value(UNIT_NPC_FLAGS);
-
-        data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
-        data << (uint32)entry;
-        data << ci->Name.c_str();
-        data << uint8(0) << uint8(0) << uint8(0);
-        data << ci->SubName.c_str();
-
-        data << (uint32)npcflags;
-
-        if ((ci->Type & 2) > 0)
-        {
-            data << uint32(7);
-        }
-        else
-        {
-            data << uint32(0);
-        }
-
-        data << ci->Type;
-
-        if (ci->level >= 16 && ci->level < 32)
-            data << (uint32)CREATURE_ELITE_ELITE;
-        else if (ci->level >= 32 && ci->level < 48)
-            data << (uint32)CREATURE_ELITE_RAREELITE;
-        else if (ci->level >= 48 && ci->level < 59)
-            data << (uint32)CREATURE_ELITE_WORLDBOSS;
-        else if (ci->level >= 60)
-            data << (uint32)CREATURE_ELITE_RARE;
-        else
-            data << (uint32)CREATURE_ELITE_NORMAL;
-
-        data << (uint32)ci->family;
-
-        data << (uint32)0;
-        data << ci->DisplayID;
-
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-
-        SendPacket( &data );
-    */
-}
-
-void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue )
-{
-    Creature *unit = ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
-
-    if (unit == NULL)
-    {
-        sLog.outDebug( "WORLD: SendTestCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-        //return;
-    }
-
-    //CreatureInfo const *ci = unit->GetCreatureInfo();
-    CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
-    if (!ci)
-    {
-        sLog.outDebug( "WORLD: SendTestCreatureQueryOpcode - (%u) NO CREATUREINFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-        return;
-    }
-
-    sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
-
-    uint8 u8unk1=0,u8unk2=0,u8unk3=0;
-    //------------------------------------------------------------------------
-    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 );  // guess size
-    data << (uint32)entry;
-    data << ci->Name;
-    data << uint8(u8unk1) << uint8(u8unk2) << uint8(u8unk3);
-    data << ci->SubName;
-
-    uint32 wdbFeild11=0,wdbFeild12=0;
-
-    data << ci->flag1;                                      //flags          wdbFeild7=wad flags1
-    data << uint32(ci->type);                               //creatureType   wdbFeild8
-    data << (uint32)ci->family;                             //family         wdbFeild9
-    data << (uint32)ci->rank;                               //unknow         wdbFeild10
-    data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
-    data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    if (unit)
-        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
-    else
-        data << (uint32)ci->randomDisplayID();
-
-    data << (uint16)ci->civilian;                           //wdbFeild14
-
-    SendPacket( &data );
-    //-----------------------------------------------------------------------
-    /*
-        data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
-        data << (uint32)entry;
-        data << ci->Name.c_str();
-        data << uint8(0) << uint8(0) << uint8(0);
-        data << ci->SubName.c_str();
-
-        data << (uint32)npcflags;
-
-        if ((ci->Type & 2) > 0)
-        {
-            data << uint32(7);
-        }
-        else
-        {
-            data << uint32(0);
-        }
-
-        data << ci->Type;
-
-        if (ci->level >= 16 && ci->level < 32)
-            data << (uint32)CREATURE_ELITE_ELITE;
-        else if (ci->level >= 32 && ci->level < 48)
-            data << (uint32)CREATURE_ELITE_RAREELITE;
-        else if (ci->level >= 48 && ci->level < 59)
-            data << (uint32)CREATURE_ELITE_WORLDBOSS;
-        else if (ci->level >= 60)
-            data << (uint32)CREATURE_ELITE_RARE;
-        else
-            data << (uint32)CREATURE_ELITE_NORMAL;
-
-        data << (uint32)ci->family;
-
-        data << (uint32)0;
-        data << ci->DisplayID;
-
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-        data << (uint32)0;
-
-        SendPacket( &data );
-    */
 }
 
 void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
@@ -417,9 +208,8 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     data << (uint32)info->type;
     data << (uint32)info->displayId;
     data << info->name;
-    data << uint16(0);                                      //unknown
-    data << uint8(0);                                       //unknown
-    data << uint8(0);                                       // Added in 1.12.x client branch
+    data << uint32(0); // 2.0.3
+    data << uint16(0); // 2.0.3
     data << uint32(info->sound0);
     data << uint32(info->sound1);
     data << uint32(info->sound2);
@@ -452,13 +242,12 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 
     WorldPacket data(MSG_CORPSE_QUERY, (5*4+1));
     data << uint8(0x01);
-    data << uint32(0x01);
+    data << corpse->GetMapId();
     data << corpse->GetPositionX();
     data << corpse->GetPositionY();
     data << corpse->GetPositionZ();
-    data << uint32(0x01);
+    data << _player->GetMapId();
     SendPacket(&data);
-
 }
 
 void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )

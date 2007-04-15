@@ -1024,6 +1024,7 @@ void Spell::SendSpellCooldown()
         return;
 
     Player* _player = (Player*)m_caster;
+    bool send = false;
 
     // init cooldown values
     uint32 cat   = 0;
@@ -1082,8 +1083,9 @@ void Spell::SendSpellCooldown()
     time_t recTime    = curTime+rec/1000;                   // in secs
     time_t catrecTime = curTime+catrec/1000;                // in secs
 
-    WorldPacket data(SMSG_SPELL_COOLDOWN, (8+4+4+4+4));
+    WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4+4+4));
     data << m_caster->GetGUID();
+    data << uint8(0x0);
 
     // self spell cooldown
     if (rec > 0)
@@ -1093,6 +1095,7 @@ void Spell::SendSpellCooldown()
         {
             data << uint32(m_spellInfo->Id);
             data << uint32(rec);
+            send = true;
         }
         _player->AddSpellCooldown(m_spellInfo->Id,recTime);
     }
@@ -1103,9 +1106,21 @@ void Spell::SendSpellCooldown()
         {
             data << uint32(m_spellInfo->Id);
             data << uint32(catrec);
+            send = true;
         }
         _player->AddSpellCooldown(m_spellInfo->Id,catrecTime);
     }
+
+    if(send) // prevent send wrong (not complete packet)
+    {
+        _player->GetSession()->SendPacket(&data);
+        send = false;
+    }
+    data.clear();
+
+    data.Initialize(SMSG_SPELL_COOLDOWN, (8+1+4+4+4+4));
+    data << m_caster->GetGUID();
+    data << uint8(0x0);
 
     if (catrec)
     {
@@ -1122,6 +1137,7 @@ void Spell::SendSpellCooldown()
                 {
                     data << uint32(*i_scset);
                     data << uint32(catrec);
+                    send = true;
                 }
                 _player->AddSpellCooldown(*i_scset,catrecTime);
             }
@@ -1129,6 +1145,9 @@ void Spell::SendSpellCooldown()
     }
 
     _player->GetSession()->SendPacket(&data);
+
+    if(send) // prevent send wrong (not complete packet)
+        _player->GetSession()->SendPacket(&data);
 
     // show cooldown for item
     if(m_CastItem)
@@ -1323,6 +1342,9 @@ void Spell::SendCastResult(uint8 result)
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    if(((Player*)m_caster)->GetSession()->PlayerLoading()) // don't send cast results at loading time
+        return;
+
     WorldPacket data(SMSG_CAST_RESULT, (4+2));
     data << m_spellInfo->Id;
     if(result != 0)
@@ -1333,6 +1355,9 @@ void Spell::SendCastResult(uint8 result)
         {
             case CAST_FAIL_REQUIRES_XXX:
                 data << uint32(m_spellInfo->RequiresSpellFocus);
+                break;
+            case CAST_FAIL_YOU_NEED_TO_BE_IN_XXX:
+                data << uint32(m_spellInfo->AreaId);
                 break;
         }
     }
@@ -1545,13 +1570,13 @@ void Spell::SendInterrupted(uint8 result)
     WorldPacket data;
 
     data.Initialize(SMSG_SPELL_FAILURE, (8+4+1));
-    data.append(m_caster->GetGUID());
+    data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
     data << result;
     m_caster->SendMessageToSet(&data, true);
 
     data.Initialize(SMSG_SPELL_FAILED_OTHER, (8+4));
-    data.append(m_caster->GetGUID());
+    data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
     m_caster->SendMessageToSet(&data, true);
 }
@@ -1561,15 +1586,16 @@ void Spell::SendChannelUpdate(uint32 time)
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data( MSG_CHANNEL_UPDATE, 4 );
+    WorldPacket data( MSG_CHANNEL_UPDATE, 8+4 );
+    data.append(m_caster->GetPackGUID());
     data << time;
 
     ((Player*)m_caster)->GetSession()->SendPacket( &data );
 
     if(time == 0)
     {
-        m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT,0);
-        m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1,0);
+        m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT,0);
+
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL,0);
     }
 }
@@ -1583,7 +1609,8 @@ void Spell::SendChannelStart(uint32 duration)
 
         target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
 
-        WorldPacket data( MSG_CHANNEL_START, (4+4) );
+        WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
+        data.append(m_caster->GetPackGUID());
         data << m_spellInfo->Id;
         data << duration;
 
@@ -1601,9 +1628,9 @@ void Spell::SendChannelStart(uint32 duration)
 
 void Spell::SendResurrectRequest(Player* target)
 {
-    WorldPacket data(SMSG_RESURRECT_REQUEST, (8+4+1));
+    WorldPacket data(SMSG_RESURRECT_REQUEST, (8+4+2+4));
     data << m_caster->GetGUID();
-    data << uint32(0) << uint8(0);
+    data << uint32(1) << uint16(0) << uint32(1);
 
     target->GetSession()->SendPacket(&data);
 }
@@ -1780,7 +1807,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
 
-    damage = CalculateDamage((uint8)i)*DamageMultiplier;
+    damage = uint32(CalculateDamage((uint8)i)*DamageMultiplier);
     uint8 eff = m_spellInfo->Effect[i];
 
     sLog.outDebug( "Spell: Effect : %u", eff);
@@ -1947,6 +1974,12 @@ uint8 Spell::CanCast()
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
 
+        if((m_spellInfo->AttributesEx3 & 0x800) != 0) // need check...
+            castResult = CAST_FAIL_CAN_ONLY_USE_IN_BATTLEGROUNDS;
+
+        if(m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetAreaId())
+            castResult = CAST_FAIL_YOU_NEED_TO_BE_IN_XXX;
+
         if(castResult!=0)
             return castResult;
     }
@@ -1984,7 +2017,7 @@ uint8 Spell::CanCast()
             {
                 if (!m_targets.getUnitTarget())
                 {
-                    castResult = CAST_FAIL_FAILED;
+                    castResult = CAST_FAIL_NO_TARGET;
                     break;
                 }
                 // Execute
@@ -2021,7 +2054,7 @@ uint8 Spell::CanCast()
             {
                 if (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER)
                 {
-                    castResult = CAST_FAIL_FAILED;
+                    castResult = CAST_FAIL_NO_TARGET;
                     break;
                 }
 
@@ -2063,7 +2096,7 @@ uint8 Spell::CanCast()
 
                 if(!learn_spellproto)
                 {
-                    castResult = CAST_FAIL_FAILED;
+                    castResult = CAST_FAIL_SPELL_NOT_LEARNED;
                     break;
                 }
 
@@ -2097,7 +2130,7 @@ uint8 Spell::CanCast()
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.m_itemTarget )
                 {
-                    castResult = CAST_FAIL_FAILED;
+                    castResult = CAST_FAIL_INVALID_TARGET;
                     break;
                 }
 
@@ -2121,7 +2154,7 @@ uint8 Spell::CanCast()
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetTypeId() != TYPEID_UNIT)
                 {
-                    castResult = CAST_FAIL_FAILED;
+                    castResult = CAST_FAIL_INVALID_TARGET;
                     break;
                 }
 
@@ -2157,7 +2190,7 @@ uint8 Spell::CanCast()
                 if (m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT)
                     break;
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.getGOTarget())
-                    return CAST_FAIL_FAILED;
+                    return CAST_FAIL_INVALID_TARGET;
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
                 if (m_targets.getGOTarget()->GetGoType() == GAMEOBJECT_TYPE_CHEST && m_caster->m_currentSpell == this)
@@ -2206,7 +2239,7 @@ uint8 Spell::CanCast()
 
                 if(pet->isAlive())
                 {
-                    castResult = CAST_FAIL_FAILED;
+                    castResult = CAST_FAIL_ALREADY_HAVE_SUMMON;
                     break;
                 }
                 break;
@@ -2591,7 +2624,7 @@ uint8 Spell::CheckItems()
                     if (msg != EQUIP_ERR_OK )
                     {
                         p_caster->SendEquipError( msg, NULL, NULL );
-                        return uint8(CAST_FAIL_FAILED);     // TODO: don't show two errors
+                        return uint8(CAST_FAIL_DONT_REPORT);     // TODO: don't show two errors
                     }
                 }
                 break;
@@ -2601,6 +2634,14 @@ uint8 Spell::CheckItems()
                 if(!m_targets.m_itemTarget)
                     return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
                 break;
+            case SPELL_EFFECT_ENCHANT_HELD_ITEM:
+            {
+                if(!m_targets.m_itemTarget)
+                    return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
+                if (!m_targets.m_itemTarget->IsEquipped())
+                    return CAST_FAIL_MUST_HAVE_ITEM_EQUIPPED;
+                break;
+            }
             case SPELL_EFFECT_DISENCHANT:
             {
                 if(!m_targets.m_itemTarget)
@@ -2609,31 +2650,23 @@ uint8 Spell::CheckItems()
                 // prevent disenchanting in trade slot
                 if( m_targets.m_itemTarget->GetOwnerGUID() != m_caster->GetGUID() )
                     return (uint8)CAST_FAIL_CANT_BE_DISENCHANTED;
-
+                uint32 item_quality = m_targets.m_itemTarget->GetProto()->Quality;
+                // 2.0.x addon: Check player enchanting level agains the item desenchanting requirements
+                uint32 item_disenchantskilllevel = m_targets.m_itemTarget->GetProto()->RequiredDisenchantSkill;
+                if (item_disenchantskilllevel > p_caster->GetSkillValue(SKILL_ENCHANTING))
+                    return CAST_FAIL_SKILL_NOT_HIGH_ENOUGH;
+                if(item_quality > 4 || item_quality < 2)
+                    return CAST_FAIL_CANT_BE_DISENCHANTED;
+                if(m_targets.m_itemTarget->GetProto()->Class != ITEM_CLASS_WEAPON && m_targets.m_itemTarget->GetProto()->Class != ITEM_CLASS_ARMOR)
+                    return CAST_FAIL_CANT_BE_DISENCHANTED;
                 if (!m_targets.m_itemTarget->GetProto()->DisenchantID)
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
-
-                uint16 skill_val = p_caster->GetSkillValue(SKILL_ENCHANTING);
-                uint32 itemLevel = m_targets.m_itemTarget->GetProto()->ItemLevel;
-                if ((skill_val <  25 && itemLevel > 15) ||
-                    (skill_val <  50 && itemLevel > 20) ||
-                    (skill_val <  75 && itemLevel > 29) ||
-                    (skill_val < 100 && itemLevel > 34) ||
-                    (skill_val < 125 && itemLevel > 39) ||
-                    (skill_val < 150 && itemLevel > 44) ||
-                    (skill_val < 175 && itemLevel > 49) ||
-                    (skill_val < 200 && itemLevel > 54) ||
-                    (skill_val < 225 && itemLevel > 59) ||
-                    (skill_val < 275 && itemLevel > 63))
-                {
-                    return CAST_FAIL_SKILL_NOT_HIGH_ENOUGH;
-                }
                 break;
             }
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
             {
-                if(m_caster->GetTypeId() != TYPEID_PLAYER) return CAST_FAIL_FAILED;
+                if(m_caster->GetTypeId() != TYPEID_PLAYER) return CAST_FAIL_TARGET_IS_NOT_PLAYER;
                 if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
                     break;
                 Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
@@ -2699,7 +2732,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     if(Target->isInFlight())
         return;
 
-    if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556)
+    if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556 || m_spellInfo->Id == 7355)
     {
         Field *fields;
         QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
@@ -2719,16 +2752,6 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
         delete result;
 
         ((Player*)Target)->TeleportTo(TC.mapId,TC.x,TC.y,TC.z,Target->GetOrientation());
-    }
-    else
-    if(m_spellInfo->Id == 7355)                         // Stuck
-    {
-        PlayerInfo const *info = objmgr.GetPlayerInfo(Target->getRace(), Target->getClass());
-
-        Target->SetUInt32Value(PLAYER_FARSIGHT, 0x01);
-        ((Player*)Target)->SetRecallPosition(Target->GetMapId(),Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),Target->GetOrientation());
-        ((Player*)Target)->TeleportTo(info->mapId, info->positionX, info->positionY,info->positionZ,Target->GetOrientation());
-        Target->SetUInt32Value(PLAYER_FARSIGHT, 0x00);
     }
     else
     {
@@ -2752,8 +2775,8 @@ void Spell::Delayed(int32 delaytime)
     if(m_timer > casttime)
         m_timer = (casttime > 0 ? casttime : 0);
 
-    WorldPacket data(SMSG_SPELL_DELAYED, 12);
-    data << m_caster->GetGUID();
+    WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
+    data.append(m_caster->GetPackGUID());
     data << uint32(delaytime);
 
     ((Player*)m_caster)->GetSession()->SendPacket(&data);
