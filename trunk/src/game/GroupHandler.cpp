@@ -308,8 +308,9 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
         return;
 
     uint32 lootMethod;
+    uint32 lootThreshold;
     uint64 lootMaster;
-    recv_data >> lootMethod >> lootMaster;
+    recv_data >> lootMethod >> lootMaster >> lootThreshold;
 
     Group *group = GetPlayer()->groupInfo.group;
 
@@ -321,6 +322,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
     // everything's fine, do it
     group->SetLootMethod((LootMethod)lootMethod);
     group->SetLooterGuid(lootMaster);
+    group->SetLootThreshold((LootThreshold)lootThreshold);
     group->SendUpdate();
 }
 
@@ -477,7 +479,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data )
     group->ChangeMembersGroup(guid, groupNr);
 }
 
-void WorldSession::HandleAssistantOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGroupAssistantOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+1);
 
@@ -497,7 +499,31 @@ void WorldSession::HandleAssistantOpcode( WorldPacket & recv_data )
     /********************/
 
     // everything's fine, do it
-    group->ChangeAssistantFlag(guid, (flag==0?false:true));
+    group->SetAssistant(guid, (flag==0?false:true));
+}
+
+void WorldSession::HandleGroupPromoteOpcode( WorldPacket & recv_data )
+{
+    if(!GetPlayer()->groupInfo.group)
+        return;
+
+    uint8 flag;
+    uint64 guid;
+    recv_data >> flag;
+    recv_data >> guid;
+
+    Group *group = GetPlayer()->groupInfo.group;
+
+    /** error handling **/
+    if(!group->IsLeader(GetPlayer()->GetGUID()))
+        return;
+    /********************/
+
+    // everything's fine, do it
+    if(flag == 0)
+        group->SetMainTank(guid);
+    else if(flag == 1)
+        group->SetMainAssistant(guid);
 }
 
 void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )

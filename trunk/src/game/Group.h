@@ -31,6 +31,7 @@ enum RollVote
     NOT_EMITED_YET    = 3,
     NOT_VALID         = 4
 };
+
 enum GroupType
 {
     GROUPTYPE_NORMAL = 0,
@@ -49,6 +50,7 @@ class MANGOS_DLL_SPEC Group
             uint8       group;
             bool        assistant;
         };
+
         struct Roll
         {
             Roll(): itemGUID(0), itemid(0), itemRandomPropId(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), loot(NULL), itemSlot(0) {}
@@ -69,9 +71,13 @@ class MANGOS_DLL_SPEC Group
         Group()
         {
             m_leaderGuid = 0;
+            m_mainTank   = 0;
+            m_mainAssistant =0;
             m_groupType  = (GroupType)0;
+            m_bgGroup    = false;
             m_lootMethod = (LootMethod)0;
             m_looterGuid = 0;
+            m_lootThreshold = (LootThreshold)2;
             for(int i=0; i<TARGETICONCOUNT; i++)
                 m_targetIcons[i] = 0;
         }
@@ -88,14 +94,17 @@ class MANGOS_DLL_SPEC Group
         void   ChangeLeader(const uint64 &guid);
         void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void   SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
+        void   SetLootThreshold(LootThreshold threshold) { m_lootThreshold = threshold; }
         void   Disband(bool hideDestroy=false);
 
         // properties accessories
         bool IsFull() const { return (m_groupType==GROUPTYPE_NORMAL) ? (m_members.size()>=MAXGROUPSIZE) : (m_members.size()>=MAXRAIDSIZE); }
         bool isRaidGroup() { return (m_groupType==GROUPTYPE_RAID); }
+        bool isBGGroup() { return m_bgGroup; }
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
         LootMethod    GetLootMethod() const { return m_lootMethod; }
         const uint64& GetLooterGuid() const { return m_looterGuid; }
+        LootThreshold GetLootThreshold() const { return m_lootThreshold; }
 
         // member manipulation methods
         bool IsMember(uint64 guid) const;
@@ -137,6 +146,7 @@ class MANGOS_DLL_SPEC Group
             _convertToRaid();
             SendUpdate();
         }
+        void SetBattlegroundGroup(const bool &state) { m_bgGroup = state; }
         void ChangeMembersGroup(const uint64 &guid, const uint8 &group)
         {
             if(!isRaidGroup())
@@ -144,18 +154,34 @@ class MANGOS_DLL_SPEC Group
             if(_setMembersGroup(guid, group))
                 SendUpdate();
         }
-        void ChangeAssistantFlag(const uint64 &guid, const bool &state)
+        void SetAssistant(const uint64 &guid, const bool &state)
         {
             if(!isRaidGroup())
                 return;
             if(_setAssistantFlag(guid, state))
                 SendUpdate();
         }
+        void SetMainTank(const uint64 &guid)
+        {
+            if(!isRaidGroup())
+                return;
+            
+            if(_setMainTank(guid))
+                SendUpdate();
+        }
+        void SetMainAssistant(const uint64 &guid)
+        {
+            if(!isRaidGroup())
+                return;
+            
+            if(_setMainAssistant(guid))
+                SendUpdate();
+        }
 
         void SetTargetIcon(uint8 id, uint64 guid);
 
         // -no description-
-        void SendInit(WorldSession *session);
+        //void SendInit(WorldSession *session);
         void SendTargetIconList(WorldSession *session);
         void SendUpdate();
                                                             // ignore: GUID of player that will be ignored
@@ -198,6 +224,8 @@ class MANGOS_DLL_SPEC Group
         void _convertToRaid();
         bool _setMembersGroup(const uint64 &guid, const uint8 &group);
         bool _setAssistantFlag(const uint64 &guid, const bool &state);
+        bool _setMainTank(const uint64 &guid);
+        bool _setMainAssistant(const uint64 &guid);
 
         int8 _getMemberIndex(uint64 Guid) const;
 
@@ -205,9 +233,13 @@ class MANGOS_DLL_SPEC Group
         vector<uint64> m_invitees;
         uint64       m_leaderGuid;
         std::string  m_leaderName;
+        uint64       m_mainTank;
+        uint64       m_mainAssistant;
         GroupType    m_groupType;
+        bool         m_bgGroup;
         uint64       m_targetIcons[TARGETICONCOUNT];
         LootMethod   m_lootMethod;
+        LootThreshold m_lootThreshold;
         uint64       m_looterGuid;
         vector<Roll> RollId;
 };

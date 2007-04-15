@@ -34,6 +34,7 @@ void Group::Create(const uint64 &guid, const char * name)
 
     m_groupType  = GROUPTYPE_NORMAL;
     m_lootMethod = GROUP_LOOT;
+    m_lootThreshold = UNCOMMON;
 
     AddMember(guid, name);
 
@@ -41,7 +42,7 @@ void Group::Create(const uint64 &guid, const char * name)
     sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
     sDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    sDatabase.PExecute("INSERT INTO `group`(`leaderGuid`,`lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u',0)", GUID_LOPART(m_leaderGuid), m_lootMethod, GUID_LOPART(m_looterGuid), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
+    sDatabase.PExecute("INSERT INTO `group`(`leaderGuid`,`mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u',0)", GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), m_lootMethod, GUID_LOPART(m_looterGuid), m_lootThreshold, m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
 
     for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
         sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(citr->guid), (citr->assistant==1)?1:0, citr->group);
@@ -50,19 +51,22 @@ void Group::Create(const uint64 &guid, const char * name)
 
 void Group::LoadGroupFromDB(const uint64 &leaderGuid)
 {
-    //                                             0            1            2       3       4       5       6       7       8       9       10
-    QueryResult *result = sDatabase.PQuery("SELECT `lootMethod`,`looterGuid`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid` FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    //                                             0          1               2            3            4               5       6       7       8       9       10      11      12      13
+    QueryResult *result = sDatabase.PQuery("SELECT `mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid` FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
     if(!result)
         return;
 
     m_leaderGuid = leaderGuid;
     objmgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName);
-    m_groupType  = (*result)[10].GetBool() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
-    m_lootMethod = (LootMethod)(*result)[0].GetUInt8();
-    m_looterGuid = MAKE_GUID((*result)[1].GetUInt32(),HIGHGUID_PLAYER);
+    m_groupType  = (*result)[13].GetBool() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
+    m_mainTank = (*result)[0].GetUInt64();
+    m_mainAssistant = (*result)[1].GetUInt64();
+    m_lootMethod = (LootMethod)(*result)[2].GetUInt8();
+    m_looterGuid = MAKE_GUID((*result)[3].GetUInt32(),HIGHGUID_PLAYER);
+    m_lootThreshold = (LootThreshold)(*result)[4].GetUInt16();
 
     for(int i=0; i<TARGETICONCOUNT; i++)
-        m_targetIcons[i] = (*result)[2+i].GetUInt8();
+        m_targetIcons[i] = (*result)[5+i].GetUInt8();
     delete result;
 
     result = sDatabase.PQuery("SELECT `memberGuid`,`assistant`,`subgroup` FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
@@ -137,7 +141,7 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
             }
 
             data.Initialize(SMSG_GROUP_LIST, 14);
-            data<<(uint16)0<<(uint32)0<<(uint64)0;
+            data<<(uint16)0<<(uint8)0<<(uint32)0<<(uint64)0;
             player->GetSession()->SendPacket(&data);
         }
 
@@ -188,7 +192,7 @@ void Group::Disband(bool hideDestroy)
         }
 
         data.Initialize(SMSG_GROUP_LIST, 14);
-        data<<(uint16)0<<(uint32)0<<(uint64)0;
+        data<<(uint16)0<<(uint8)0<<(uint32)0<<(uint64)0;
         player->GetSession()->SendPacket(&data);
     }
     RollId.clear();
@@ -308,7 +312,6 @@ void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r
 
 void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
 {
-
     vector<LootItem>::iterator i;
     ItemPrototype const *item;
     uint8 itemSlot = 0;
@@ -323,7 +326,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             //sLog.outDebug("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
             continue;
         }
-        if (item->Quality > ITEM_QUALITY_NORMAL)
+        if (item->Quality >= m_lootThreshold)
         {
             Roll r;
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
@@ -370,7 +373,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
     for (i=loot->items.begin(); i != loot->items.end(); i++)
     {
         item = objmgr.GetItemPrototype(i->itemid);
-        if (item->Quality > ITEM_QUALITY_NORMAL)
+        if (item->Quality >= m_lootThreshold)
         {
             Roll r;
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
@@ -622,7 +625,7 @@ uint32 Group::GetMemberCountForXPAtKill(Unit const* victim)
     return count;
 }
 
-void Group::SendInit(WorldSession *session)
+/*void Group::SendInit(WorldSession *session)
 {
     if(!session)
         return;
@@ -639,6 +642,7 @@ void Group::SendInit(WorldSession *session)
                                                             // guess size
         WorldPacket data(SMSG_GROUP_LIST, (2+4+8+8+1+2+m_members.size()*20));
         data << (uint8)m_groupType;
+        data << (uint8)0;// 2.0.x, may be wrong position
         data << (uint8)myFlag;
 
         int count = 0;
@@ -662,10 +666,11 @@ void Group::SendInit(WorldSession *session)
         data << (uint8)m_lootMethod;
         data << m_looterGuid;
         data << (uint16)2;
-
+        data << m_mainTank;//2.0.x
+        data << m_mainAssistant;//2.0.x
         session->SendPacket( &data );
     }
-}
+}*/
 
 void Group::SendTargetIconList(WorldSession *session)
 {
@@ -690,7 +695,6 @@ void Group::SendTargetIconList(WorldSession *session)
 void Group::SendUpdate()
 {
     Player *player;
-    WorldPacket data;
 
     for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
     {
@@ -699,8 +703,9 @@ void Group::SendUpdate()
             continue;
 
                                                             // guess size
-        data.Initialize(SMSG_GROUP_LIST, (6+8+8+1+2+m_members.size()*20));
+        WorldPacket data(SMSG_GROUP_LIST, (6+8+8+1+2+m_members.size()*20));
         data << (uint8)m_groupType;
+        data << (uint8)((m_bgGroup==true) ? 1 : 0);//2.0.x
                                                             // own flags (groupid | (assistant?0x80:0))
         data << (uint8)(citr->group | (citr->assistant?0x80:0));
 
@@ -721,7 +726,9 @@ void Group::SendUpdate()
         data << m_leaderGuid;
         data << (uint8)m_lootMethod;
         data << m_looterGuid;
-        data << (uint16)2;
+        data << (uint16)m_lootThreshold; // loot threshold
+        data << m_mainTank;//2.0.x
+        data << m_mainAssistant;//2.0.x
 
         player->GetSession()->SendPacket( &data );
     }
@@ -953,6 +960,30 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
 
     m_members[i].assistant = state;
     sDatabase.PExecute("UPDATE `group_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));
+    return true;
+}
+
+bool Group::_setMainTank(const uint64 &guid)
+{
+    if(guid != 0 && _getMemberIndex(guid) < 0)
+        return false;
+
+    if(m_mainAssistant == guid)
+        _setMainAssistant(0);
+    m_mainTank = guid;
+    sDatabase.PExecute("UPDATE `group` SET `mainTank`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_mainTank), GUID_LOPART(m_leaderGuid));
+    return true;
+}
+
+bool Group::_setMainAssistant(const uint64 &guid)
+{
+    if(guid != 0 && _getMemberIndex(guid) < 0)
+        return false;
+
+    if(m_mainTank == guid)
+        _setMainTank(0);
+    m_mainAssistant = guid;
+    sDatabase.PExecute("UPDATE `group` SET `mainAssistant`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_mainAssistant), GUID_LOPART(m_leaderGuid));
     return true;
 }
 
