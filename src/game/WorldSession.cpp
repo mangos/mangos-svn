@@ -36,6 +36,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "BattleGroundMgr.h"
+#include "Language.h"                                       // for CMSG_DISMOUNT handler
 
 /// Player state
 enum SessionStatus
@@ -110,6 +111,12 @@ bool WorldSession::Update(uint32 diff)
     while (!_recvQueue.empty())
     {
         packet = _recvQueue.next();
+
+        /*#if 1
+        sLog.outError( "MOEP: %s (0x%.4X)",
+                        LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                        packet->GetOpcode());
+        #endif*/
 
         for (i = 0; table[i].handler != NULL; i++)
         {
@@ -238,6 +245,9 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->SaveToDB();
         }
 
+        ///- Leave all channels before player delete...
+        _player->CleanupChannels();
+
         ///- Remove the player's pet from the world
         _player->RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
@@ -276,7 +286,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->groupInfo.group->SendUpdate();
 
         ///- Broadcast a logout message to the player's friends
-        WorldPacket data(SMSG_FRIEND_STATUS, (9));
+        WorldPacket data(SMSG_FRIEND_STATUS, 9);
         data<<uint8(FRIEND_OFFLINE);
         data<<_player->GetGUID();
         _player->BroadcastPacketToFriendListers(&data);
@@ -348,29 +358,12 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         // new inspect stats
         { MSG_INSPECT_HONOR_STATS,          STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode       },
 
-        // new
-        { CMSG_FORCE_MOVE_UNROOT_ACK,       STATUS_LOGGEDIN, &WorldSession::HandleMoveUnRootAck                 },
-        { CMSG_FORCE_MOVE_ROOT_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveRootAck                   },
-        { CMSG_MOVE_WATER_WALK_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveWaterWalkAck              },
-
         // charater view
         { CMSG_TOGGLE_HELM,                 STATUS_LOGGEDIN, &WorldSession::HandleToggleHelmOpcode              },
         { CMSG_TOGGLE_CLOAK,                STATUS_LOGGEDIN, &WorldSession::HandleToggleCloakOpcode             },
 
         // repair item
         { CMSG_REPAIR_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleRepairItemOpcode              },
-
-        // movements
-        { CMSG_MOVE_KNOCK_BACK_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveKnockBackAck              },
-        { CMSG_MOVE_HOVER_ACK,              STATUS_LOGGEDIN, &WorldSession::HandleMoveHoverAck                  },
-        { CMSG_SET_ACTIVE_MOVER,            STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode          },
-        { MSG_MOVE_TELEPORT_ACK,            STATUS_LOGGEDIN, &WorldSession::HandleMoveTeleportAck               },
-        { CMSG_FORCE_WALK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
-        { CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck      },
-        { CMSG_FORCE_TURN_RATE_CHANGE_ACK,  STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
-        { CMSG_FORCE_RUN_SPEED_CHANGE_ACK,  STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
-        { CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       },
-        { CMSG_FORCE_SWIM_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
 
         { MSG_LOOKING_FOR_GROUP,            STATUS_LOGGEDIN, &WorldSession::HandleLookingForGroup               },
         { CMSG_SET_FACTION_ATWAR,           STATUS_LOGGEDIN, &WorldSession::HandleSetFactionAtWar               },
@@ -397,16 +390,14 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_CREATURE_QUERY,              STATUS_LOGGEDIN, &WorldSession::HandleCreatureQueryOpcode           },
         { CMSG_GAMEOBJECT_QUERY,            STATUS_LOGGEDIN, &WorldSession::HandleGameObjectQueryOpcode         },
 
-        { MSG_MOVE_WORLDPORT_ACK,           STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        },
-        { MSG_MOVE_HEARTBEAT,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
-        { MSG_MOVE_JUMP,                    STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        // movements
         { MSG_MOVE_START_FORWARD,           STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_BACKWARD,          STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
-        { MSG_MOVE_SET_FACING,              STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_STOP,                    STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_STRAFE_LEFT,       STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_STRAFE_RIGHT,      STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_STOP_STRAFE,             STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { MSG_MOVE_JUMP,                    STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_TURN_LEFT,         STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_TURN_RIGHT,        STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_STOP_TURN,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
@@ -415,10 +406,30 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { MSG_MOVE_STOP_PITCH,              STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_SET_RUN_MODE,            STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_SET_WALK_MODE,           STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
-        { MSG_MOVE_SET_PITCH,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { MSG_MOVE_TELEPORT_ACK,            STATUS_LOGGEDIN, &WorldSession::HandleMoveTeleportAck               },
+        { MSG_MOVE_FALL_LAND,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_SWIM,              STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_STOP_SWIM,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
-        { MSG_MOVE_FALL_LAND,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { MSG_MOVE_SET_FACING,              STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { MSG_MOVE_SET_PITCH,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { MSG_MOVE_WORLDPORT_ACK,           STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        },
+        { CMSG_FORCE_RUN_SPEED_CHANGE_ACK,  STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
+        { CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       },
+        { CMSG_FORCE_SWIM_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
+        { CMSG_FORCE_MOVE_ROOT_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveRootAck                   },
+        { CMSG_FORCE_MOVE_UNROOT_ACK,       STATUS_LOGGEDIN, &WorldSession::HandleMoveUnRootAck                 },
+        { MSG_MOVE_HEARTBEAT,               STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { CMSG_MOVE_KNOCK_BACK_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveKnockBackAck              },
+        { CMSG_MOVE_HOVER_ACK,              STATUS_LOGGEDIN, &WorldSession::HandleMoveHoverAck                  },
+        { CMSG_SET_ACTIVE_MOVER,            STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode          },
+        { CMSG_MOVE_FALL_RESET,             STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { CMSG_MOVE_FEATHER_FALL_ACK,       STATUS_LOGGEDIN, &WorldSession::HandleFeatherFallAck                },
+        { CMSG_MOVE_WATER_WALK_ACK,         STATUS_LOGGEDIN, &WorldSession::HandleMoveWaterWalkAck              },
+        { CMSG_FORCE_WALK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
+        { CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK, STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck      },
+        { CMSG_FORCE_TURN_RATE_CHANGE_ACK,  STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
+        { CMSG_FORCE_FLY_SPEED_CHANGE_ACK,  STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           },
+
         { CMSG_MOUNTSPECIAL_ANIM,           STATUS_LOGGEDIN, &WorldSession::HandleMountSpecialAnimOpcode        },
 
         { CMSG_GROUP_INVITE,                STATUS_LOGGEDIN, &WorldSession::HandleGroupInviteOpcode             },
@@ -437,7 +448,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GROUP_RAID_CONVERT,          STATUS_LOGGEDIN, &WorldSession::HandleRaidConvertOpcode             },
         { MSG_RAID_READY_CHECK,             STATUS_LOGGEDIN, &WorldSession::HandleRaidReadyCheckOpcode          },
         { CMSG_GROUP_CHANGE_SUB_GROUP,      STATUS_LOGGEDIN, &WorldSession::HandleGroupChangeSubGroupOpcode     },
-        { CMSG_GROUP_ASSISTANT,      STATUS_LOGGEDIN, &WorldSession::HandleAssistantOpcode    },
+        { CMSG_GROUP_ASSISTANT,             STATUS_LOGGEDIN, &WorldSession::HandleGroupAssistantOpcode          },
+        { CMSG_GROUP_PROMOTE,               STATUS_LOGGEDIN, &WorldSession::HandleGroupPromoteOpcode            },
 
         { CMSG_PETITION_SHOWLIST,           STATUS_LOGGEDIN, &WorldSession::HandlePetitionShowListOpcode        },
         { CMSG_PETITION_BUY,                STATUS_LOGGEDIN, &WorldSession::HandlePetitionBuyOpcode             },
@@ -448,7 +460,6 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { MSG_PETITION_DECLINE,             STATUS_LOGGEDIN, &WorldSession::HandlePetitionDeclineOpcode         },
         { CMSG_OFFER_PETITION,              STATUS_LOGGEDIN, &WorldSession::HandleOfferPetitionOpcode           },
         { CMSG_TURN_IN_PETITION,            STATUS_LOGGEDIN, &WorldSession::HandleTurnInPetitionOpcode          },
-        { CMSG_MOVE_FALL_RESET,             STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
 
         { CMSG_GUILD_QUERY,                 STATUS_AUTHED,   &WorldSession::HandleGuildQueryOpcode              },
         { CMSG_GUILD_CREATE,                STATUS_LOGGEDIN, &WorldSession::HandleGuildCreateOpcode             },
@@ -489,7 +500,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_SPIRIT_HEALER_ACTIVATE,      STATUS_LOGGEDIN, &WorldSession::HandleSpiritHealerActivateOpcode    },
         { CMSG_NPC_TEXT_QUERY,              STATUS_LOGGEDIN, &WorldSession::HandleNpcTextQueryOpcode            },
         { CMSG_BINDER_ACTIVATE,             STATUS_LOGGEDIN, &WorldSession::HandleBinderActivateOpcode          },
-        { MSG_LIST_STABLED_PETS ,           STATUS_LOGGEDIN, &WorldSession::HandleListStabledPetsOpcode         },
+        { MSG_LIST_STABLED_PETS,            STATUS_LOGGEDIN, &WorldSession::HandleListStabledPetsOpcode         },
 
         { CMSG_DUEL_ACCEPTED,               STATUS_LOGGEDIN, &WorldSession::HandleDuelAcceptedOpcode            },
         { CMSG_DUEL_CANCELLED,              STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           },
@@ -625,8 +636,6 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 
         //BattleGround
 
-        { CMSG_BATTLEFIELD_STATUS,          STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
-        //{ CMSG_BATTLEMASTER_HELLO,          STATUS_LOGGEDIN, &WorldSession::HandleBattleMasterHelloOpcode     },
         { CMSG_BATTLEMASTER_HELLO,          STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundHelloOpcode       },
         { CMSG_BATTLEMASTER_JOIN,           STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundJoinOpcode        },
         { MSG_BATTLEGROUND_PLAYER_POSITIONS,STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPlayerPositionsOpcode },
@@ -638,12 +647,47 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_SET_ACTIONBAR_TOGGLES,       STATUS_LOGGEDIN, &WorldSession::HandleSetActionBar                  },
         { CMSG_FIELD_WATCHED_FACTION_SHOW_BAR, STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionIndexOpcode },
 
-        { CMSG_LOOT_ROLL,                   STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      },
+        { CMSG_LOOT_ROLL,                   STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      }, // WTF, why it 2 times there?
         { CMSG_WARDEN_DATA,                 STATUS_LOGGEDIN, &WorldSession::HandleWardenDataOpcode              },
         { CMSG_WORLD_TELEPORT,              STATUS_LOGGEDIN, &WorldSession::HandleWorldTeleportOpcode           },
         { MSG_MINIMAP_PING,                 STATUS_LOGGEDIN, &WorldSession::HandleMinimapPingOpcode             },
         { MSG_RANDOM_ROLL,                  STATUS_LOGGEDIN, &WorldSession::HandleRandomRollOpcode              },
         { CMSG_FAR_SIGHT,                   STATUS_LOGGEDIN, &WorldSession::HandleFarSightOpcode                },
+
+        { MSG_LOOKING_FOR_GROUP,            STATUS_LOGGEDIN, &WorldSession::HandleLookingForGroup               },
+        { CMSG_SET_LOOKING_FOR_GROUP,       STATUS_LOGGEDIN, &WorldSession::HandleSetLfgOpcode                  },
+        { MSG_SET_DUNGEON_DIFFICULTY,       STATUS_LOGGEDIN, &WorldSession::HandleDungeonDifficultyOpcode       },
+        { CMSG_MOVE_FLY_MODE_CHANGE_ACK,    STATUS_LOGGEDIN, &WorldSession::HandleMoveFlyModeChangeAckOpcode    },
+        { CMSG_ARENA_TEAM_QUERY,            STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamQueryOpcode          },
+        { MSG_MOVE_START_FLY_UP,            STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { MSG_MOVE_STOP_FLY_UP,             STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
+        { CMSG_LFG_SET_AUTOJOIN,            STATUS_AUTHED,   &WorldSession::HandleLfgAutoJoinOpcode             },
+        { CMSG_LFG_UNSET_AUTOJOIN,          STATUS_LOGGEDIN, &WorldSession::HandleLfgCancelAutoJoinOpcode       },
+        { CMSG_LFM_SET_AUTOADD,             STATUS_AUTHED,   &WorldSession::HandleLfmAutoAddMembersOpcode       },
+        { CMSG_LFM_UNSET_AUTOADD,           STATUS_LOGGEDIN, &WorldSession::HandleLfmCancelAutoAddmembersOpcode },
+        { CMSG_LOOKING_FOR_GROUP_CLEAR,     STATUS_LOGGEDIN, &WorldSession::HandleLfgClearOpcode                },
+        { CMSG_SET_LOOKING_FOR_NONE,        STATUS_LOGGEDIN, &WorldSession::HandleLfmSetNoneOpcode              },
+        { CMSG_SET_LOOKING_FOR_MORE,        STATUS_LOGGEDIN, &WorldSession::HandleLfmSetOpcode                  },
+        { CMSG_SET_COMMENTARY,              STATUS_LOGGEDIN, &WorldSession::HandleLfgSetCommentOpcode           },
+        { CMSG_CHOOSE_TITLE,                STATUS_LOGGEDIN, &WorldSession::HandleChooseTitleOpcode             },
+        { MSG_INSPECT_ARENA_STATS,          STATUS_LOGGEDIN, &WorldSession::HandleInspectArenaStatsOpcode       },
+        { CMSG_REALM_STATE_REQUEST,         STATUS_AUTHED,   &WorldSession::HandleRealmStateRequestOpcode       },
+        { CMSG_ALLOW_MOVE_ACK,              STATUS_LOGGEDIN, &WorldSession::HandleAllowMoveAckOpcode            },
+        { CMSG_WHOIS,                       STATUS_LOGGEDIN, &WorldSession::HandleWhoisOpcode                   },
+        { CMSG_RESET_INSTANCES,             STATUS_LOGGEDIN, &WorldSession::HandleResetInstancesOpcode          },
+        { CMSG_ARENA_TEAM_ROSTER,           STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamRosterOpcode         },
+        { CMSG_ARENA_TEAM_ADD_MEMBER,       STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamAddMemberOpcode      },
+        { CMSG_ARENA_TEAM_INVITE_ACCEPT,    STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteAcceptOpcode   },
+        { CMSG_ARENA_TEAM_INVITE_DECLINE,   STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteDeclineOpcode  },
+        { CMSG_ARENA_TEAM_LEAVE,            STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamLeaveOpcode          },
+        { CMSG_ARENA_TEAM_DISBAND,          STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamDisbandOpcode        },
+        { CMSG_AREA_SPIRIT_HEALER_QUERY,    STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode   },
+        { CMSG_MOVE_SHIP_909,               STATUS_LOGGEDIN, &WorldSession::HandleMoveShipOpcode                },
+        { CMSG_MOVE_FLY_STATE_CHANGE,       STATUS_LOGGEDIN, &WorldSession::HandleMoveFlyStateChangeOpcode      },
+        { CMSG_DISMOUNT,                    STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                },
+
+        // Socket gem
+        { CMSG_SOCKET_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  },
 
         { 0,                                0,               NULL                                               }
     };
@@ -685,22 +729,317 @@ void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
     }
 }
 
-// TODO: Make a warper for all this type of opcodes, and add this one to it
-// because this is a relative universal opcode
 void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
 {
-    va_list ap;                                             //
-    char str [1024];                                        //1024 seems to be rather large
-    va_start(ap, Text);
-    vsnprintf(str,1024,Text, ap );
-    va_end(ap);
-
-    WorldPacket data;
-    data.Initialize(SMSG_AREA_TRIGGER_MESSAGE);
-    data << uint32(0);
-    data << str;
-    data << uint8(0);
+    uint32 lenght = strlen(Text)+1;
+    WorldPacket data(SMSG_AREA_TRIGGER_MESSAGE, 4+lenght);
+    data << lenght;
+    data << Text;
     SendPacket(&data);
+}
+
+void WorldSession::HandleDungeonDifficultyOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("MSG_SET_DUNGEON_DIFFICULTY");
+
+    uint32 difficulty;
+    recv_data >> difficulty;
+
+    GetPlayer()->SetDungeonDifficulty(difficulty);
+    GetPlayer()->SendDungeonDifficulty();
+}
+
+void WorldSession::HandleChooseTitleOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("CMSG_CHOOSE_TITLE");
+
+    uint32 title;
+    recv_data >> title;    
+
+    uint32 available = GetPlayer()->GetUInt32Value(PLAYER_FIELD_KNOWN_TITLES);
+    if(!(available & (1<<title)))
+        return;
+
+    GetPlayer()->SetUInt32Value(PLAYER_CHOSEN_TITLE, title);
+/*
+PLAYER_FIELD_KNOWN_TITLES:
+1 << title# (0=none)
+*/
+}
+
+void WorldSession::HandleNewUnknownOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("New Unknown Opcode %u", recv_data.GetOpcode());
+    recv_data.hexlike();
+/*
+New Unknown Opcode 837
+STORAGE_SIZE: 60
+02 00 00 00 00 00 00 00 | 00 00 00 00 01 20 00 00
+89 EB 33 01 71 5C 24 C4 | 15 03 35 45 74 47 8B 42
+BA B8 1B 40 00 00 00 00 | 00 00 00 00 77 66 42 BF
+23 91 26 3F 00 00 60 41 | 00 00 00 00
+
+New Unknown Opcode 837
+STORAGE_SIZE: 44
+02 00 00 00 00 00 00 00 | 00 00 00 00 00 00 80 00
+7B 80 34 01 84 EA 2B C4 | 5F A1 36 45 C9 39 1C 42
+BA B8 1B 40 CE 06 00 00 | 00 00 80 3F
+*/
+}
+
+void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("CMSG_REALM_STATE_REQUEST");
+
+    uint32 unk;
+    recv_data >> unk;
+
+    WorldPacket data(SMSG_REALM_STATE_RESPONSE, 17);
+    data << unk;
+    data << uint32(0x00000000); // reamd split state...
+    // 0x0 realm normal
+    // 0x1 realm split
+    // 0x2 realm split pending
+    data << uint16(0x3130) << uint8(0x2F);
+    data << uint16(0x3130) << uint8(0x2F);
+    data << uint16(0x3130) << uint8(0x00);
+    SendPacket(&data);
+    sLog.outDebug("response sent %u", unk);
+}
+
+void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("CMSG_ALLOW_MOVE_ACK");
+
+    uint32 unk, time;
+    recv_data >> unk >> time;
+    sLog.outDebug("response sent %u %u", unk, time/1000);
+}
+
+void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
+{
+    sLog.outDebug("Received opcode CMSG_WHOIS");
+    std::string charname, acc, email, lastip, msg;
+    WorldPacket data;
+    recv_data >> charname;
+
+    if (GetSecurity() < 3)
+    {
+        SendNotification("You do not have permission to perform that function");
+        return;
+    }
+
+    if(charname.size())
+    {
+        SendNotification("Please provide character name");
+        return;
+    }
+
+    uint32 accid;
+    Field *fields;
+
+    Player *plr = objmgr.GetPlayer(charname.c_str());
+
+    if(plr)
+        accid = plr->GetSession()->GetAccountId();
+    else
+    {
+        SendNotification("Player %s not found or offline", charname.c_str());
+        return;
+    }
+
+    if(!accid)
+    {
+        SendNotification("Account for character %s not found", charname.c_str());
+        return;
+    }
+
+    QueryResult *result = loginDatabase.PQuery("SELECT `username`,`email`,`last_ip` FROM `account` WHERE `id`=%u", accid);
+    if(result)
+    {
+        fields = result->Fetch();
+        acc = fields[0].GetCppString();
+        if(!acc.size())
+            acc = "Unknown";
+        email = fields[1].GetCppString();
+        if(!email.size())
+            email = "Unknown";
+        lastip = fields[2].GetCppString();
+        if(!lastip.size())
+            lastip = "Unknown";
+        msg = charname + "'s " + "account is " + acc + ", e-mail " + email + ", last ip: " + lastip;
+        data.Initialize(SMSG_WHOIS);
+        data << msg;
+        _player->GetSession()->SendPacket(&data);
+    }
+    else
+        SendNotification("Account for character %s not found", charname.c_str());
+
+    delete result;
+    sLog.outDebug("Received whois command from player %s for character %s", GetPlayer()->GetName(), charname.c_str());
+}
+
+void WorldSession::HandleResetInstancesOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_RESET_INSTANCES");
+/*
+    WorldPacket data(SMSG_RESET_INSTANCES_RESULT, 4); // todo: find packet structure
+    _player->GetSession()->SendPacket(&data);
+*/
+}
+
+void WorldSession::HandleMoveShipOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_MOVE_SHIP_909");
+    recv_data.hexlike();
+/*
+WORLD: CMSG_MOVE_SHIP_909
+STORAGE_SIZE: 56
+01 02 80 00 7A 48 DF 00 | BA 8A 05 46 19 9D 7E 44
+42 10 BA 40 5C 90 77 40 | 74 B0 02 00 00 00 00 80
+42 D4 0B C0 65 FD 50 C1 | 42 10 BA 40 20 7F 13 40
+5E 49 DF 00 C0 00 00 00
+
+WORLD: CMSG_MOVE_SHIP_909
+STORAGE_SIZE: 60
+01 02 80 04 F0 D6 E0 00 | 3A B2 CD 45 C3 5B 3F 44
+E4 4F B8 40 58 E7 4B 40 | 00 00 00 00 00 00 00 00
+3A B2 CD 45 C3 5B 3F 44 | E4 4F B8 40 58 E7 4B 40
+D4 D7 E0 00 CF 00 00 00 | E4 4F B8 40
+*/
+}
+
+void WorldSession::HandleAreaSpiritHealerQueryOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_AREA_SPIRIT_HEALER_QUERY");
+    recv_data.hexlike();
+}
+
+void WorldSession::HandleDismountOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_DISMOUNT");
+    recv_data.hexlike();
+
+    //If player is not mounted, so go out :)
+    if (!_player->IsMounted()) // not blizz like; no any messages on blizz
+    {
+        sChatHandler.SendSysMessage(this, LANG_CHAR_NON_MOUNTED);
+        return;
+    }
+
+    if(_player->isInFlight()) // not blizz like; no any messages on blizz
+    {
+        sChatHandler.SendSysMessage(this, LANG_YOU_IN_FLIGHT);
+        return;
+    }
+
+    _player->Unmount();
+    _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+}
+
+void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
+{
+    // fly mode on/off
+    sLog.outDebug("WORLD: CMSG_MOVE_FLY_MODE_CHANGE_ACK");
+    recv_data.hexlike();
+
+    uint64 guid;
+    uint32 unk;
+    uint32 flags;
+
+    recv_data >> guid >> unk >> flags;
+
+    // set field for checking if player able to flight
+    if((flags & MOVEMENTFLAG_CAN_FLY) != 0) // 0x800000
+        _player->SetCanFly(true);
+    else
+        _player->SetCanFly(false);
+
+/*
+on:
+25 00 00 00 00 00 00 00 | 00 00 00 00 00 00 80 00
+85 4E A9 01 19 BA 7A C3 | 42 0D 70 44 44 B0 A8 42
+78 15 94 40 39 03 00 00 | 00 00 80 3F
+off:
+25 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00
+10 FD A9 01 19 BA 7A C3 | 42 0D 70 44 44 B0 A8 42
+78 15 94 40 39 03 00 00 | 00 00 00 00
+*/
+}
+
+void WorldSession::HandleMoveFlyStateChangeOpcode( WorldPacket & recv_data )
+{
+    /*
+    00 08 A0 01 4C AE DC 01 | F8 18 56 45 03 97 BD 44
+    A2 8D 33 43 1C B3 29 40 | 00 00 00 00 45 00 00 00
+    00 00 80 3F
+
+    01 20 80 00 5F D3 DC 01 | 8B B3 55 45 4C 77 BD 44
+    F 65 33 43 DC AB 53 40 | 00 00 00 00 00 00 00 00
+    96 7D 7C BF 54 F9 28 BE | 00 00 60 41 00 00 00 00
+    */
+
+    // fly state: start flying/landing
+    sLog.outDebug("WORLD: CMSG_MOVE_FLY_STATE_CHANGE");
+    recv_data.hexlike();
+    CHECK_PACKET_SIZE(recv_data,4+4+4+4+4+4);
+
+    /* extract packet */
+    uint32 flags, time, fallTime;
+    float x, y, z, orientation;
+
+    uint32 t_GUIDl, t_GUIDh;
+    float  t_x, t_y, t_z, t_o;
+    float  s_angle;
+    float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
+    float f_speed;
+
+    recv_data >> flags >> time;
+    recv_data >> x >> y >> z >> orientation;
+
+    // set field that determine if player flying or walking on terrain (able to flight)
+    if(flags & MOVEMENTFLAG_FLYING) // 0x1000000
+        _player->SetFlying(true);
+    else
+        _player->SetFlying(false);
+
+    if (flags & MOVEMENTFLAG_ONTRANSPORT) // and if opcode 909?
+    {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4+4+4);
+
+        recv_data >> t_GUIDl >> t_GUIDh;
+        recv_data >> t_x >> t_y >> t_z >> t_o;
+    }
+    if (flags & MOVEMENTFLAG_SWIMMING)
+    {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+
+        recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
+    }
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+
+    recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
+
+    if ( (flags & MOVEMENTFLAG_JUMPING) || (flags & MOVEMENTFLAG_FALLING) )
+    {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4);
+
+        recv_data >> j_unk1;                                // constant, but different when jumping in water and on land?
+        recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
+        recv_data >> j_xyspeed;                             // speed of xy movement
+    }
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+
+    recv_data >> f_speed; // this is difference from standart movement opcodes...
+    sLog.outDebug("f_speed %f", f_speed);
+    /*----------------*/
 }
 
 

@@ -72,7 +72,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
         uint8 trade_goods = proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass != ITEM_SUBCLASS_EXPLOSIVES;
         if (consumable || trade_goods ||
-            proto->Class == ITEM_CLASS_KEY || proto->Class == ITEM_CLASS_JUNK)
+            proto->Class == ITEM_CLASS_KEY || proto->Class == ITEM_CLASS_MISC)
         {
             pUser->SendEquipError(EQUIP_ERR_CANT_DO_IN_COMBAT,pItem,NULL);
             return;
@@ -276,10 +276,24 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 if (spellId == 0)
                     spellId = info->sound3;
 
-                guid=_player->GetGUID();
+                //guid=_player->GetGUID();
 
             }
 
+            break;
+       case GAMEOBJECT_TYPE_CAMERA:                        //13
+            info = obj->GetGOInfo();
+            if(info)
+            {
+                uint32 cinematic_id = info->sound1;
+                if(cinematic_id)
+                {
+                    WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);
+                    data << cinematic_id;
+                    _player->GetSession()->SendPacket(&data);
+                }
+                return;
+            }
             break;
             //fishing bobber
         case GAMEOBJECT_TYPE_FISHINGNODE:                   //17
@@ -510,6 +524,7 @@ void WorldSession::HandleCancelGrowthAuraOpcode( WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
 {
+    // may be better send SMSG_CANCEL_AUTO_REPEAT?
     // cancel and prepare for deleting
     _player->castSpell(NULL);
 }

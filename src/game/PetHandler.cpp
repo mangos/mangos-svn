@@ -299,11 +299,12 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     recv_data >> name;
 
     Pet* pet = ObjectAccessor::Instance().GetPet(petguid);
-    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || !pet->HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME) || pet->GetOwnerGUID() != _player->GetGUID() )
+    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || (pet->GetUInt32Value(UNIT_FIELD_BYTES_2) >> 16) != 3 || pet->GetOwnerGUID() != _player->GetGUID() ) // check it!
         return;
 
     pet->SetName(name);
-    pet->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME);
+    //pet->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME);
+    pet->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16)); // check it!
 
     sDatabase.escape_string(name);
     sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s', `renamed` = '1' WHERE `owner` = '%u' AND `id` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetPetNumber() );

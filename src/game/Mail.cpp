@@ -394,6 +394,10 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     uint64 mailbox;
     recv_data >> mailbox;
 
+    //GameObject* obj = ObjectAccessor::Instance().GetGameObject(_player, mailbox);
+    //if(!obj || !obj->IsMailBox())
+    //    return;
+
     Player* pl = _player;
 
     //load players mails, and mailed items
@@ -401,7 +405,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         pl ->_LoadMail();
 
     WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
-    data << uint8(0);
+    data << uint8(0);                                       // mail's count
     uint8 mails_count = 0;
     std::deque<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
@@ -409,16 +413,16 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         if ((*itr)->state == DELETED)
             continue;
         mails_count++;
-        data << (uint32) (*itr)->messageID;
-        data << (uint8)  (*itr)->messageType;               // Message Type, once = 3
-        data << (uint32) (*itr)->sender;                    // SenderID
+        data << (*itr)->messageID;
+        data << (*itr)->messageType;                        // Message Type, once = 3
+        data << (*itr)->sender;                             // SenderID
         if ((*itr)->messageType == 0)
             data << (uint32) 0;                             // HIGHGUID_PLAYER
         data << (*itr)->subject.c_str();                    // Subject string - once 00, when mail type = 3
         data << (uint32) (*itr)->itemTextId;                // sure about this
         data << (uint32) 0;                                 // Constant
         if ((*itr)->messageType == 0)
-            data << (uint32) 0x29;                          // Constant
+            data << (uint32) 0x29;                          // Constant, messageType == 0 and 0x3D - message from gm...
         else
             data << (uint32) 0x3E;
         uint8 icount = 1;
@@ -428,7 +432,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
             if(it = pl->GetMItem((*itr)->item_guid))
             {
                                                             //item prototype
-                data << (uint32) it->GetUInt32Value(OBJECT_FIELD_ENTRY);
+                data << it->GetUInt32Value(OBJECT_FIELD_ENTRY);
                 icount = it->GetCount();
             }
             else
@@ -440,22 +444,35 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         else
             data << (uint32) 0;                             // Any item attached
 
-        data << (uint32) (it ? it->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0) : 0);
-                                                            // Permanent enchantment id
-        data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
-                                                            // Item random property Id
+        data << (uint32) 0;                                 // items count?
+
+        for(uint8 i = 0; i < 6; i++)                        // new 2.0.1
+        {
+            data << getMSTime();                            // probably time
+            if(i == 5)
+            {
+                data << (uint32) (it ? it->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0) : 0);
+                data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
+            }
+            else
+            {
+                data << (uint32) 0;
+                data << (uint32) 0;
+            }
+        }
+
         data << (uint32) 0;                                 // not item->creator, it is enchating?
         data << (uint8)  icount;                            // Attached item stack count
                                                             //sometimes more than zero, not sure when
         int32 charges = (it) ? int32(it->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES)) : 0;
         data << (uint32) charges;                           // item -> charges sure
-        uint32 maxDurability = (it)? it->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0;
-        uint32 curDurability = (it)? it->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0;
-        data << (uint32) maxDurability;                     // MaxDurability
-        data << (uint32) curDurability;                     // Durability
-        data << (uint32) (*itr)->money;                     // Gold
-        data << (uint32) (*itr)->COD;                       // COD
-        data << (uint32) (*itr)->checked;                   // checked
+        uint32 maxDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0;
+        uint32 curDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0;
+        data << maxDurability;                              // MaxDurability
+        data << curDurability;                              // Durability
+        data << (*itr)->money;                              // Gold
+        data << (*itr)->COD;                                // COD
+        data << (*itr)->checked;                            // checked
         data << (float)  ((*itr)->time - time(NULL)) / DAY; // Time
         data << (uint32) 0;                                 // Constant, something like end..
     }

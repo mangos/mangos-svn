@@ -642,8 +642,8 @@ void ObjectMgr::LoadPlayerInfo()
 
     // Load playercreate
     {
-        //                                            0      1       2     3      4            5            6            7
-        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`,`displayID` FROM `playercreateinfo`");
+        //                                              0      1       2     3      4            5            6
+        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo`");
 
         uint32 count = 0;
 
@@ -684,7 +684,13 @@ void ObjectMgr::LoadPlayerInfo()
             pInfo->positionX = fields[4].GetFloat();
             pInfo->positionY = fields[5].GetFloat();
             pInfo->positionZ = fields[6].GetFloat();
-            pInfo->displayId = fields[7].GetUInt16();
+
+            ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(fields[0].GetUInt32());
+            if(rEntry)
+            {
+                pInfo->displayId_m = rEntry->model_m;
+                pInfo->displayId_f = rEntry->model_f;
+            }
 
             bar.step();
             count++;
@@ -1003,7 +1009,7 @@ void ObjectMgr::LoadPlayerInfo()
             PlayerInfo* pInfo = &playerInfo[race][class_];
 
             // skip non loaded combinations
-            if(!pInfo->displayId)
+            if(!pInfo->displayId_m || !pInfo->displayId_f)
                 continue;
 
             // fatal error if no level 1 data
@@ -1032,7 +1038,7 @@ void ObjectMgr::GetPlayerLevelInfo(uint32 race, uint32 class_, uint32 level, Pla
     if(race   >= MAX_RACES)   return;
     if(class_ >= MAX_CLASSES) return;
     PlayerInfo const* pInfo = &playerInfo[race][class_];
-    if(pInfo->displayId==0) return;
+    if(pInfo->displayId_m==0 || pInfo->displayId_f==0) return;
 
     if(level <= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
         *info = pInfo->levelInfo[level-1];
@@ -1223,7 +1229,9 @@ void ObjectMgr::LoadQuests()
     //   83               84               85               86               87               88             89             90             91             92
         "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
     //   93              94      95         96           97       98       99         100                101                 102              103
-        "`RewOrReqMoney`,`RewXP`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`OfferRewardEmote`,`RequestItemsEmote`,`CompleteScript`,`Repeatable`"
+        "`RewOrReqMoney`,`RewXP`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`DetailsEmote1`,`DetailsEmote2`,`DetailsEmote3`,`DetailsEmote4`,"
+    //   104                105             106                 107                 108                 109                 110              111
+        "`IncompleteEmote`,`CompleteEmote`,`OfferRewardEmote1`,`OfferRewardEmote2`,`OfferRewardEmote3`,`OfferRewardEmote4`,`CompleteScript`,`Repeatable`"
         " FROM `quest_template`");
     if(result == NULL)
     {
@@ -2097,7 +2105,7 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
     path = dest_i->second.ID;
 }
 
-uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team  )
+uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team )
 {
     uint16 mount_id = 0;
 
@@ -2105,29 +2113,29 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team  )
     if(node)
     {
         if (team == ALLIANCE)
-            switch(node->alliance_mount_type)
-            {
-                case 541:
-                    mount_id = 1147;                        // alliance
-                    break;
-                case 3837:
-                    mount_id = 479;                         // nightelf
-                    break;
-                //case 17760:
-                //  unknown outer bg mount?
-            }
-            else if (team == HORDE)
-                switch(node->horde_mount_type)
-                {
-                    case 2224:
-                        mount_id = 295;                     // horde
-                        break;
-                    case 3574:
-                        mount_id = 1566;                    // undead
-                        break;
-                //case 17760:
-                //  unknown outer bg mount?
-                }
+        {
+            CreatureInfo const *ci = objmgr.GetCreatureTemplate(node->alliance_mount_type);
+            if(ci)
+                mount_id = ci->randomDisplayID();
+        }
+        if (team == HORDE)
+        {
+            CreatureInfo const *ci = objmgr.GetCreatureTemplate(node->horde_mount_type);
+            if(ci)
+                mount_id = ci->randomDisplayID();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
     }
 

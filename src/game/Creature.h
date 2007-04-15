@@ -244,6 +244,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
         bool CreateFromProto(uint32 guidlow,uint32 Entry);
+        bool LoadCreaturesAddon(uint32 guidlow);
         void SelectLevel(const CreatureInfo *cinfo);
 
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
@@ -358,9 +359,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
 
         void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
-
-        void Say(char const* text, uint32 language);
-        void MonsterSay(char const *text, uint32 language, uint64 targetGUID);
 
         bool LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId);
         virtual void SaveToDB();                            // overwrited in Pet

@@ -129,13 +129,19 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
                                                             // this enables popup window (pet dismiss, cancel)
             break;
         case HUNTER_PET:
+            SetUInt32Value(UNIT_FIELD_BYTES_0, 0x2020100); //??
             SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[13].GetUInt32()<<8));
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 + UNIT_FLAG_RESTING);
+            SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00022801); // can't be renamed (byte (0x02))
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);// + UNIT_FLAG_RESTING);
                                                             // this enables popup window (pet abandon, cancel)
 
             // pet not renamed yet, let rename if wont
             if(!fields[17].GetBool())
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
+            {
+                //SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(0x03 << 16)); // check it...
+                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801); // 0x03
+                //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME); // old, not working...
+            }
 
             SetUInt32Value(UNIT_MOD_CAST_SPEED, fields[14].GetUInt32() );
             SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );
@@ -147,7 +153,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
             sLog.outError("Pet have incorrect type (%u) for pet loading.",getPetType());
     }
     InitStatsForLevel( petlevel);
-    SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
+    SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[6].GetUInt32());
     SetUInt64Value(UNIT_FIELD_CREATEDBY, owner->GetGUID());
@@ -240,7 +246,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 "VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u','%u','%u','%u')",
                 GetPetNumber(),GetEntry(), owner, GetUInt32Value(UNIT_FIELD_DISPLAYID), getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
                 m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),
-                uint32(HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME)?0:1),uint32(mode),(GetHealth()<1?1:GetHealth()),GetPower(POWER_MANA));
+                uint32(((GetUInt32Value(UNIT_FIELD_BYTES_2) >> 16) == 3)?0:1),uint32(mode),(GetHealth()<1?1:GetHealth()),GetPower(POWER_MANA));
             sDatabase.CommitTransaction();
             break;
         }
@@ -495,7 +501,11 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetName(creature->GetName());
     if(cinfo->type == CREATURE_TYPE_BEAST)
     {
-        SetUInt32Value(UNIT_FIELD_BYTES_1,creature->GetUInt32Value(UNIT_FIELD_BYTES_1));
+        SetUInt32Value(UNIT_FIELD_BYTES_0, 0x2020100);
+        SetUInt32Value(UNIT_FIELD_BYTES_1, 0x100);
+        SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801); // can be renamed (byte 0x03)...
+
+        //SetUInt32Value(UNIT_FIELD_BYTES_1,creature->GetUInt32Value(UNIT_FIELD_BYTES_1));
 
         SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED) );
         SetUInt32Value(UNIT_TRAINING_POINTS, (getLevel()<<16) + getUsedTrainPoint() );

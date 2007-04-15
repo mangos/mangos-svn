@@ -137,7 +137,10 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         for(uint32 i = 0; i < zones_count; i++)
         {
             if(zoneids[i] == pzoneid)
+            {
+                z_show = true;
                 break;
+            }
 
             z_show = false;
         }
@@ -262,6 +265,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
         //!we can move again
         data.Initialize( SMSG_FORCE_MOVE_UNROOT, 8 );       // guess size
         data.append(GetPlayer()->GetPackGUID());
+        data << uint32(0);
         SendPacket( &data );
 
         //! Stand Up
@@ -278,13 +282,17 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 {
     int len = text ? strlen(text) : 0;
-    WorldPacket data;
-    data.Initialize( SMSG_GMTICKET_GETTICKET, (4+len+4) );
-    data << uint32(6);
-    if(len > 0)
-        data.append((uint8 *)text,len+1);
-    else
-        data << uint32(0);
+    WorldPacket data( SMSG_GMTICKET_GETTICKET, (4+len+1+4+2+4+4) );
+    data << status;             // standart 0x0A, 0x06 if text present
+    if(status == 6)
+    {
+        data << text;           // ticket text
+        data << uint8(0x7);     // ticket category
+        data << uint32(0);      // time from ticket creation?
+        data << uint16(0);      // const
+        data << uint32(49024);  // const
+        data << uint32(49024);  // const
+    }
     SendPacket( &data );
 }
 
@@ -314,26 +322,23 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
             assert(result2);
             Field *fields2 = result2->Fetch();
 
-            SendGMTicketGetTicket(6,fields2[0].GetString());
+            SendGMTicketGetTicket(0x06,fields2[0].GetString());
             delete result2;
         }
         else
-            SendGMTicketGetTicket(1,0);
+            SendGMTicketGetTicket(0x0A,0);
     }
 }
 
 void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
-    uint32 guid = GetPlayer()->GetGUIDLow();
-    std::string ticketText = "";
-    uint8 buf[516];
-    memcpy( buf, recv_data.contents(), sizeof buf <recv_data.size() ? sizeof buf : recv_data.size() );
+    uint8 unk;
+    std::string ticketText;
+    recv_data >> unk;
+    recv_data >> ticketText;
 
-    ticketText = (char *)buf + 1;
     sDatabase.escape_string(ticketText);
-    sDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), guid);
-
+    sDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), _player->GetGUIDLow());
 }
 
 void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
@@ -347,31 +352,32 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
     data << uint32(0);
     SendPacket( &data );
 
-    SendGMTicketGetTicket(1,0);
+    SendGMTicketGetTicket(0x0A,0);
 }
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 {
-
     WorldPacket data;
-    uint32 guid;
-    guid = GetPlayer()->GetGUIDLow();
-    std::string ticketText = "";
-    Field *fields;
-    uint8 buf[516];
-    uint32   cat[] = { 0,5,1,2,0,6,4,7,0,8,3 };
-    memcpy( buf, recv_data.contents(), sizeof buf < recv_data.size() ? sizeof buf : recv_data.size() );
-    buf[272] = 0;
 
-    ticketText = (char *)buf + 17;
+    uint32 unk1, time1, time2, time3;
+    uint8 category;
+    std::string ticketText = "";
+    std::string unk_text; // reserved for future use text
+
+    recv_data >> category >> unk1 >> time1 >> time2 >> time3; // last check 2.0.10
+    recv_data >> ticketText;
+    recv_data >> unk_text;
+
+    sLog.outDebug("TicketCreate: category %u, unk1 %u, time1 %u, time2 %u, time3 %u, text %s, unk_text %s", category, unk1, time1/1000, time2/1000, time3/1000, ticketText.c_str(), unk_text.c_str());
+
     sDatabase.escape_string(ticketText);
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'", _player->GetGUIDLow());
 
     if (result)
     {
         int cnt;
-        fields = result->Fetch();
+        Field *fields = result->Fetch();
         cnt = fields[0].GetUInt32();
         delete result;
 
@@ -383,11 +389,9 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         }
         else
         {
-
-            sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", guid, ticketText.c_str(), cat[buf[0]]);
+            sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
 
             data.Initialize( SMSG_QUERY_TIME_RESPONSE, 4 );
-            //data << (uint32)20;
             data << (uint32)getMSTime();
             SendPacket( &data );
 
@@ -409,7 +413,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 {
     WorldPacket data( SMSG_GMTICKET_SYSTEMSTATUS,4 );
-    data << uint32(1);
+    data << uint32(1); // we can also disable ticket system by sending 0 value
 
     SendPacket( &data );
 }
@@ -438,6 +442,9 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     recv_data >> newZone;
 
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
+
+    if(newZone != _player->GetZoneId())
+        GetPlayer()->SendInitWorldStates(); // only if really enters to new zone, not just area change, works strange...
 
     GetPlayer()->UpdateZone(newZone);
 }
@@ -891,29 +898,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     {
         if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) || GetPlayer()->isGameMaster())
         {
-            if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->InBattleGround() )
+            if(GetPlayer()->InBattleGround())
             {
-                WorldPacket movedata;
-                _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
-                _player->SendMessageToSet(&movedata,true);
-                //_player->SetPosition( at->X, at->Y, at->Z, _player->GetOrientation());
-                //_player->BuildHeartBeatMsg(&data);
-                //_player->SendMessageToSet(&data, true);
-            }
-            else if (GetPlayer()->InBattleGround())         //if player is playing in a BattleGround
-            {
-                //! AreaTrigger BattleGround
-
-                //Get current BattleGround the player is in
                 BattleGround* TempBattlegrounds = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
-                //Run the areatrigger code
                 if(TempBattlegrounds)
                     TempBattlegrounds->HandleAreaTrigger(GetPlayer(),Trigger_ID);
             }
             else
-            {
                 GetPlayer()->TeleportTo(at->mapId,at->X,at->Y,at->Z,at->Orientation,true,false);
-            }
         }
         else
         {
@@ -921,10 +913,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             msgstr << "You must be at least level " << (uint32)at->requiredLevel << " to enter.";
             std::string msg = msgstr.str();
 
-            WorldPacket data(SMSG_AREA_TRIGGER_MESSAGE, (4+msg.length()+1));
-            data << (uint32)(msg.length()+1);
-            data << msg;
-            SendPacket(&data);
+            SendAreaTriggerMessage(msg.c_str());
         }
         delete at;
     }
@@ -934,11 +923,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 {
+    sLog.outDetail("WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
+    recv_data.hexlike();
 }
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 {
     sLog.outDetail("WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
+    recv_data.hexlike();
 }
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
@@ -988,17 +980,15 @@ void WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )
     DEBUG_LOG( "WORLD: Which movie to play" );
 }
 
-void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
-{
-
-    DEBUG_LOG( "WORLD: Battleground status - not yet" );
-}
-
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
     WorldSession::Update( getMSTime() );
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
+}
 
+void WorldSession::HandleFeatherFallAck(WorldPacket &recv_data)
+{
+    sLog.outString("WORLD: CMSG_MOVE_FEATHER_FALL_ACK");
 }
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
@@ -1006,7 +996,8 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
     CHECK_PACKET_SIZE(recv_data,8+8+4+4+4+4+4);
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
-    WorldPacket data;
+    recv_data.hexlike();
+/*    WorldPacket data;
     uint64 guid;
     uint64 unknown1;
     uint32 unknown2;
@@ -1030,21 +1021,17 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
     //    DEBUG_LOG("X %f",PositionX);
     //    DEBUG_LOG("Y %f",PositionY);
     //    DEBUG_LOG("Z %f",PositionZ);
-    //    DEBUG_LOG("O %f",Orientation);
+    //    DEBUG_LOG("O %f",Orientation);*/
 }
 
-void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
-{
-    // TODO send groups need data
-    sLog.outDebug( "WORLD: MSG_LOOKING_FOR_GROUP" );
-}
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 {
     CHECK_PACKET_SIZE(recv_data,8+8+4+4+4+4+4);
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
-    WorldPacket data;
+    recv_data.hexlike();
+/*    WorldPacket data;
     uint64 guid;
     uint64 unknown1;
     uint32 unknown2;
@@ -1068,21 +1055,22 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
     //    DEBUG_LOG("X %f",PositionX);
     //    DEBUG_LOG("Y %f",PositionY);
     //    DEBUG_LOG("Z %f",PositionZ);
-    //    DEBUG_LOG("O %f",Orientation);
+    //    DEBUG_LOG("O %f",Orientation);*/
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 {
     CHECK_PACKET_SIZE(recv_data,8+4);
 
+    sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
     WorldPacket data;
     uint64 guid;
-    uint32 value1;
+    uint32 flags, time;
 
     recv_data >> guid;
-    recv_data >> value1;                                    // ms time ?
+    recv_data >> flags >> time;
     DEBUG_LOG("Guid " I64FMTD,guid);
-    DEBUG_LOG("Value 1 %u",value1);
+    DEBUG_LOG("Flags %u, time %u",flags, time/1000);
 }
 
 void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
@@ -1153,43 +1141,25 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
     CHECK_PACKET_SIZE(recv_data,8);
 
-    Player *pl;
     uint64 guid;
     recv_data >> guid;
-    DEBUG_LOG("Party Stats guid is " I64FMTD,guid);
 
-    pl = objmgr.GetPlayer(guid);
-    if(pl)
+    Player *player = objmgr.GetPlayer(guid);
+
+    if(!player)
     {
-        WorldPacket data( MSG_INSPECT_HONOR_STATS, (8+1+4+4+4+4+4+4+4+4+4+4+1) );
-        data << guid;                                       // player guid
-                                                            // Rank, filling bar, PLAYER_BYTES_3, ??
-        data << (uint8)pl->GetUInt32Value(PLAYER_FIELD_BYTES2);
-                                                            // Today Honorable and Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
-                                                            // Yesterday Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
-                                                            // Last Week Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
-                                                            // This Week Honorable kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
-                                                            // Lifetime Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-                                                            // Lifetime Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
-                                                            // Yesterday Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
-                                                            // Last Week Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
-                                                            // This Week Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
-                                                            // Last Week Standing
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
-        data << (uint8)pl->GetHonorHighestRank();           // Highest Rank, ??
-        SendPacket(&data);
+        sLog.outError("InspectHonorStats: WFT, player not found...");
+        return;
     }
-    else
-        sLog.outDebug("Player %u not found!", guid);
+
+    WorldPacket data( MSG_INSPECT_HONOR_STATS, 13 );
+    data << player->GetGUID();
+    data << (uint8)player->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY);
+    data << player->GetUInt32Value(PLAYER_FIELD_KILLS);
+    data << player->GetUInt32Value(PLAYER_FIELD_HONOR_TODAY);
+    data << player->GetUInt32Value(PLAYER_FIELD_HONOR_YESTERDAY);
+    data << player->GetUInt32Value(PLAYER_FIELD_KILLS_LIFETIME);
+    SendPacket(&data);
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
@@ -1231,12 +1201,12 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     sLog.outDebug("Received worldport command from player %s", GetPlayer()->GetName());
 }
 
-void WorldSession::SendNotification(char const* msg)
+void WorldSession::SendNotification(const char *format,...)
 {
-    if(msg)
+    if(format)
     {
-        WorldPacket data(SMSG_NOTIFICATION, (strlen(msg)+1));
-        data << msg;
+        WorldPacket data(SMSG_NOTIFICATION, (strlen(format)+1));
+        data << format;
         SendPacket(&data);
     }
 }

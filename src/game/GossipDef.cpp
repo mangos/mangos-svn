@@ -119,8 +119,16 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
     {
         data << uint32( iI );
         data << uint8( pGossipMenu->GetItem(iI).m_gIcon );
-        data << uint8( pGossipMenu->GetItem(iI).m_gCoded);
+        // icons:
+        // 0 unlearn talents/misc
+        // 1 trader
+        // 2 taxi
+        // 3 trainer
+        // 9 BG/arena
+        data << uint8( pGossipMenu->GetItem(iI).m_gCoded );
+        data << uint32(0); // req money to open menu, 2.0.3
         data << pGossipMenu->GetItem(iI).m_gMessage;
+        data << uint8(0); // 2.0.3
     }
 
     data << uint32( pQuestMenu->MenuItemCount() );
@@ -296,12 +304,16 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
 
     data << npcGUID;
     data << pQuest->GetQuestId() << pQuest->GetTitle() << pQuest->GetDetails();
-    data << pQuest->GetObjectives() << uint32( ActivateAccept );
+    data << pQuest->GetObjectives();
+    data << (uint32)ActivateAccept;
     ItemPrototype const* IProto;
+
+    data << uint32(0); // suggested players
 
     data << pQuest->GetRewChoiceItemsCount();
     for (uint32 i=0; i < QUEST_REWARD_CHOICES_COUNT; i++)
     {
+        if ( !pQuest->RewChoiceItemId[i] ) continue;
         data << uint32(pQuest->RewChoiceItemId[i]);
         data << uint32(pQuest->RewChoiceItemCount[i]);
         IProto = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
@@ -314,6 +326,7 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
     data << pQuest->GetRewItemsCount();
     for (uint32 i=0; i < QUEST_REWARDS_COUNT; i++)
     {
+        if ( !pQuest->RewItemId[i] ) continue;
         data << pQuest->RewItemId[i];
         data << pQuest->RewItemCount[i];
         IProto = objmgr.GetItemPrototype(pQuest->RewItemId[i]);
@@ -325,20 +338,34 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
 
     data << uint32(pQuest->GetRewOrReqMoney());
 
-    data << pQuest->GetReqItemsCount();
-    for (uint32 i=0; i <  QUEST_OBJECTIVES_COUNT; i++)
+    // check if RewSpell is teaching another spell
+    if(pQuest->GetRewSpell())
     {
-        data << pQuest->ReqItemId[i];
-        data << pQuest->ReqItemCount[i];
+        SpellEntry const *rewspell = sSpellStore.LookupEntry(pQuest->GetRewSpell());
+        if(rewspell)
+        {
+            if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
+                data << uint32(rewspell->EffectTriggerSpell[0]);
+            else
+                data << uint32(0);
+        }
+        else
+        {
+            sLog.outErrorDb("Quest %u have non-existed RewSpell %u, ignored.",pQuest->GetQuestId(),pQuest->GetRewSpell());
+            data << uint32(0);
+        }
     }
+    else
+        data << uint32(0); // reward spell
 
-    data << pQuest->GetReqCreatureOrGOcount();
-    for (uint32 i=0; i <QUEST_OBJECTIVES_COUNT; i++)
+    data << uint32(pQuest->GetRewSpell()); // cast spell
+
+    data << uint32(QUEST_EMOTE_COUNT);
+    for (uint32 i=0; i < QUEST_EMOTE_COUNT; i++)
     {
-        data << uint32(pQuest->ReqCreatureOrGOId[i]);
-        data << pQuest->ReqCreatureOrGOCount[i];
+        data << pQuest->DetailsEmote[i];
+        data << uint32(0); // DetailsEmoteDelay
     }
-
     pSession->SendPacket( &data );
 
     //sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestId());
@@ -349,7 +376,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     WorldPacket data( SMSG_QUEST_QUERY_RESPONSE, 100 );     // guess size
 
     data << uint32(pQuest->GetQuestId());
-    data << uint32(pQuest->GetMinLevel());
+    data << uint32(pQuest->GetMinLevel()); // it's not min lvl in 2.0.x
     data << uint32(pQuest->GetQuestLevel());
 
     if(pQuest->GetQuestSort() > 0)
@@ -358,6 +385,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
         data << uint32(pQuest->GetZoneId());
 
     data << uint32(pQuest->GetType());
+    data << uint32(0);//SuggestedPlayers
     data << uint32(pQuest->GetRequiredRepFaction());
     data << uint32(pQuest->GetRequiredRepValue());
     data << uint32(0);
@@ -376,7 +404,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
             if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
                 data << uint32(rewspell->EffectTriggerSpell[0]);
             else
-                data << uint32(pQuest->GetRewSpell());
+                data << uint32(0);
         }
         else
         {
@@ -387,6 +415,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     else
         data << uint32(0);
 
+    data << uint32(pQuest->GetRewSpell()); // spellid, The following spell will be casted on you spell_name
     data << uint32(pQuest->GetSrcItemId());
     data << uint32(pQuest->GetSpecialFlags());
 
@@ -415,8 +444,10 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
     {
-        data << uint32(pQuest->ReqCreatureOrGOId[iI])  << uint32(pQuest->ReqCreatureOrGOCount[iI]);
-        data << uint32(pQuest->ReqItemId[iI]) << uint32(pQuest->ReqItemCount[iI]);
+        data << uint32(pQuest->ReqCreatureOrGOId[iI]);
+        data << uint32(pQuest->ReqCreatureOrGOCount[iI]);
+        data << uint32(pQuest->ReqItemId[iI]);
+        data << uint32(pQuest->ReqItemCount[iI]);
     }
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
@@ -441,26 +472,21 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
 
     data << uint32( EnbleNext );
 
-    /*if ( EmoteCnt > 0 )
-    {
-        data << uint32( EmoteCnt );
+    data << uint32(0); //unk
 
-        for (unsigned int iI = 0; iI < EmoteCnt; iI++ )
-        {
-            data << Emotes[iI]._Delay;
-            data << Emotes[iI]._Emote;
-        }
-    } else data << uint32( 0x00 ); */
-    // Must be extended later, but for now:
-    if (qInfo->GetOfferRewardEmote() == 0)
+    uint32 EmoteCount = 0;
+    for (uint32 i = 0; i < QUEST_EMOTE_COUNT; i++)
     {
-        data << uint32(0x00);
+        if(qInfo->OfferRewardEmote[i] <= 0)
+            break;
+        EmoteCount++;
     }
-    else
+
+    data << EmoteCount; //Emote Count
+    for (uint32 i = 0; i < EmoteCount; i++)
     {
-        data << uint32(0x1);
-        data << uint32(0x0);
-        data << qInfo->GetOfferRewardEmote();
+        data << uint32(0); //Delay Emote
+        data << qInfo->OfferRewardEmote[i];
     }
 
     ItemPrototype const *pItem;
@@ -483,7 +509,8 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     for (uint16 i=0; i < qInfo->GetRewItemsCount(); i++)
     {
         pItem = objmgr.GetItemPrototype(qInfo->RewItemId[i]);
-        data << uint32(qInfo->RewItemId[i]) << uint32(qInfo->RewItemCount[i]);
+        data << uint32(qInfo->RewItemId[i]);
+        data << uint32(qInfo->RewItemCount[i]);
 
         if ( pItem )
             data << uint32(pItem->DisplayInfoID);
@@ -492,7 +519,7 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     }
 
     data << uint32(qInfo->GetRewOrReqMoney());
-    data << uint32(0x00);
+    data << uint32(0x08);
 
     // check if RewSpell is teaching another spell
     if(qInfo->GetRewSpell())
@@ -514,7 +541,8 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     else
         data << uint32(0);
 
-    // more data here--zoneid uint32 + 0x00000000?
+    uint32(0x00); // new 2.0.3
+
     pSession->SendPacket( &data );
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),quest_id );
 }
@@ -538,8 +566,12 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
 
     data << pQuest->GetRequestItemsText();
 
-    data << uint32(0x00);
-    data << pQuest->GetRequestItemsEmote();
+    data << uint32(0x00); // unk
+
+    if(Completable)
+        data << pQuest->GetCompleteEmote();
+    else
+        data << pQuest->GetIncompleteEmote();
 
     // Close Window after cancel
     if (CloseOnCancel)
@@ -550,13 +582,13 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
     // Req Money
     data << uint32(pQuest->GetRewOrReqMoney() < 0 ? -pQuest->GetRewOrReqMoney() : 0);
 
-    data << uint32( pQuest->GetReqItemsCount() );
+    data << uint32(0x00); // unk
 
+    data << uint32( pQuest->GetReqItemsCount() );
     ItemPrototype const *pItem;
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
     {
         if ( !pQuest->ReqItemId[i] ) continue;
-
         pItem = objmgr.GetItemPrototype(pQuest->ReqItemId[i]);
         data << uint32(pQuest->ReqItemId[i]);
         data << uint32(pQuest->ReqItemCount[i]);
@@ -566,12 +598,14 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
         else
             data << uint32(0);
     }
+    else
+        uint32(0x0);
 
-    data << uint32(0x02);
     if ( !Completable )
         data << uint32(0x00);
     else
         data << uint32(0x03);
+
     data << uint32(0x04) << uint32(0x08) << uint32(0x10);
 
     pSession->SendPacket( &data );

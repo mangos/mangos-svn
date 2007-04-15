@@ -81,6 +81,7 @@ class Aura
         void HandleModThreat(bool Apply, bool Real);
         void HandleModTaunt(bool Apply, bool Real);
         void HandleFeignDeath(bool Apply, bool Real);
+        void HandleAuraModDisarm(bool Apply, bool Real);
         void HandleAuraModStalked(bool Apply, bool Real);
         void HandleAuraWaterWalk(bool Apply, bool Real);
         void HandleAuraFeatherFall(bool Apply, bool Real);
@@ -89,6 +90,7 @@ class Aura
         void HandleAuraModStun(bool Apply, bool Real);
         void HandleModDamageDone(bool Apply, bool Real);
         void HandleModHealingPercent(bool Apply, bool Real);
+        void HandleAuraUntrackable(bool Apply, bool Real);
         void HandleAuraEmpathy(bool Apply, bool Real);
         void HandleModOffhandDamagePercent(bool apply, bool Real);
         void HandleAuraModRangedAttackPower(bool Apply, bool Real);
@@ -168,6 +170,10 @@ class Aura
         void HandleModTotalPercentStat(bool Apply, bool Real);
         void HandleAuraModTotalThreat(bool Apply, bool Real);
         void HandleInterruptRegen(bool Apply, bool Real);
+        void HandleAuraModPacify(bool Apply, bool Real);
+        void HandleAuraGhost(bool Apply, bool Real);
+        void HandleAuraAllowFlight(bool Apply, bool Real);
+        void HandleAuraModSpeedMountedFlight(bool Apply, bool Real);
 
         Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();

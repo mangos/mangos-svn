@@ -583,7 +583,7 @@ uint32 Item::GetSkill()
     {
         SKILL_AXES, SKILL_2H_AXES,SKILL_BOWS, SKILL_GUNS,SKILL_MACES, SKILL_2H_MACES,
         SKILL_POLEARMS, SKILL_SWORDS,SKILL_2H_SWORDS,0, SKILL_STAVES,0,0,0,0, SKILL_DAGGERS,
-        SKILL_THROWN, SKILL_SPEARS, SKILL_CROSSBOWS, SKILL_WANDS, SKILL_FISHING
+        SKILL_THROWN, SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS, SKILL_FISHING
     };
 
     const static uint32 item_armor_skills[]=
@@ -814,205 +814,208 @@ float Item::GetEnchantMod(uint32 enchant_id, ItemPrototype const * itemProto)
         weapon_subclass = -1;
     int32 inv_type = itemProto->InventoryType;
     float tempmod, mod = 0;
-    uint32 en_display = entry->display_type;
-    uint32 en_value1 = entry->value1;
-    uint32 en_spellid = entry->spellid;
-    if(en_display == 4)
+    for (int s=0;s<3;s++)
     {
-        mod += pow((float)(en_value1 * ITEM_STAT_ARMOR_MOD), 1.50f);
-    }
-    else if(en_display == 2)
-    {
-        mod += pow((float)(en_value1 * ITEM_STAT_ATTACK_POWER_MOD * 3), 1.50f);
-    }
-    else if(en_display == 3 && en_spellid)
-    {
-        SpellEntry const *en_spellinfo = sSpellStore.LookupEntry(en_spellid);
-        if(!en_spellinfo)
-            return 0;
-        for(uint8 i = 0; i<3; i++)
+        uint32 en_display = entry->display_type[s];
+        uint32 en_value1 = entry->amount[s];
+        uint32 en_spellid = entry->spellid[s];
+        if(en_display == 4)
         {
-            if(!en_spellinfo->EffectApplyAuraName[i])
-                break;
-            int32 points = en_spellinfo->EffectBasePoints[i]+1;
-            int32 misc = en_spellinfo->EffectMiscValue[i];
-            switch(en_spellinfo->EffectApplyAuraName[i])
+            mod += pow((float)(en_value1 * ITEM_STAT_ARMOR_MOD), 1.50f);
+        }
+        else if(en_display == 2)
+        {
+            mod += pow((float)(en_value1 * ITEM_STAT_ATTACK_POWER_MOD * 3), 1.50f);
+        }
+        else if(en_display == 3 && en_spellid)
+        {
+            SpellEntry const *en_spellinfo = sSpellStore.LookupEntry(en_spellid);
+            if(!en_spellinfo)
+                return 0;
+            for(uint8 i = 0; i<3; i++)
             {
-                case SPELL_AURA_MOD_CREATURE_ATTACK_POWER:
-                    switch(misc)
-                    {
-                        case (0x0001 << (CREATURE_TYPE_BEAST-1)):
-                        case (0x0001 << (CREATURE_TYPE_DEMON-1)):
-                        case (0x0001 << (CREATURE_TYPE_UNDEAD-1)):
-                            mod += pow((float)(points * ITEM_STAT_DBU_ATTACK_POWER_MOD), 1.50f); break;
-                    }
+                if(!en_spellinfo->EffectApplyAuraName[i])
                     break;
-                case SPELL_AURA_MOD_DAMAGE_DONE_CREATURE:
-                    switch(misc)
-                    {
-                        case (0x0001 << (CREATURE_TYPE_BEAST-1)):
-                        case (0x0001 << (CREATURE_TYPE_DEMON-1)):
-                        case (0x0001 << (CREATURE_TYPE_UNDEAD-1)):
-                            mod += pow((float)(points * ITEM_STAT_DBU_SPELL_DAMAGE_MOD), 1.50f); break;
-                    }
-                    break;
-                case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
-                    mod += pow((float)(points * ITEM_STAT_RANGED_ATTACK_POWER_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_HEALING_DONE:
-                    mod += pow((float)(points * ITEM_STAT_HEALING_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_ATTACK_POWER:
-                    mod += pow((float)(points * ITEM_STAT_ATTACK_POWER_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_SHIELD_BLOCK_PCT:
-                    if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                    if(inv_type == INVTYPE_SHIELD)
-                        mod += pow((float)(points * ITEM_STAT_BLOCK_SHIELD_MOD), 1.50f);
-                    else
-                        mod += pow((float)(points * ITEM_STAT_BLOCK_MOD), 1.50f);
-                    break;
-                case SPELL_AURA_MOD_DAMAGE_DONE:
-                    if(misc == 126)
-                    {
-                        mod += pow((float)(points * ITEM_STAT_ALL_SPELL_DAMAGE_MOD), 1.50f);
-                    }
-                    else
-                    {
-                        if(misc & (0x0001 << SPELL_SCHOOL_HOLY))
+                int32 points = en_spellinfo->EffectBasePoints[i]+1;
+                int32 misc = en_spellinfo->EffectMiscValue[i];
+                switch(en_spellinfo->EffectApplyAuraName[i])
+                {
+                    case SPELL_AURA_MOD_CREATURE_ATTACK_POWER:
+                        switch(misc)
                         {
-                            if(itemProto->Class == ITEM_CLASS_WEAPON)
-                                if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
-                                    return 0;
-                            mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
+                            case (0x0001 << (CREATURE_TYPE_BEAST-1)):
+                            case (0x0001 << (CREATURE_TYPE_DEMON-1)):
+                            case (0x0001 << (CREATURE_TYPE_UNDEAD-1)):
+                                mod += pow((float)(points * ITEM_STAT_DBU_ATTACK_POWER_MOD), 1.50f); break;
                         }
-                        if(misc & (0x0001 << SPELL_SCHOOL_FIRE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                        if(misc & (0x0001 << SPELL_SCHOOL_NATURE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                        if(misc & (0x0001 << SPELL_SCHOOL_FROST) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                        if(misc & (0x0001 << SPELL_SCHOOL_SHADOW) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE))
+                        break;
+                    case SPELL_AURA_MOD_DAMAGE_DONE_CREATURE:
+                        switch(misc)
                         {
-                            if(itemProto->Class == ITEM_CLASS_WEAPON)
-                                if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
-                                    return 0;
-                            if(inv_type == INVTYPE_SHIELD)
-                                return 0;
-                            mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
+                            case (0x0001 << (CREATURE_TYPE_BEAST-1)):
+                            case (0x0001 << (CREATURE_TYPE_DEMON-1)):
+                            case (0x0001 << (CREATURE_TYPE_UNDEAD-1)):
+                                mod += pow((float)(points * ITEM_STAT_DBU_SPELL_DAMAGE_MOD), 1.50f); break;
                         }
-                        if(misc & (0x0001 << SPELL_SCHOOL_ARCANE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE))
-                        {
-                            if(itemProto->Class == ITEM_CLASS_WEAPON)
-                                if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
-                                    return 0;
-                            if(inv_type == INVTYPE_SHIELD)
-                                return 0;
-                            mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                        }
-                    }
-                    break;
-                case SPELL_AURA_MOD_RESISTANCE:
-                    if(misc == 126)
-                    {
-                        if(inv_type == INVTYPE_FINGER)
-                            mod += pow((float)(points * ITEM_STAT_ALL_SPELL_RESIST_RING_MOD), 1.50f);
+                        break;
+                    case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
+                        mod += pow((float)(points * ITEM_STAT_RANGED_ATTACK_POWER_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_HEALING_DONE:
+                        mod += pow((float)(points * ITEM_STAT_HEALING_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_ATTACK_POWER:
+                        mod += pow((float)(points * ITEM_STAT_ATTACK_POWER_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_SHIELD_BLOCK_PCT:
+                        if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                        if(inv_type == INVTYPE_SHIELD)
+                            mod += pow((float)(points * ITEM_STAT_BLOCK_SHIELD_MOD), 1.50f);
                         else
-                            mod += pow((float)(points * ITEM_STAT_ALL_SPELL_RESIST_MOD), 1.50f);
-                    }
-                    else
-                    {
-                        if(inv_type == INVTYPE_FINGER)
-                            tempmod = ITEM_STAT_SCHOOL_RESIST_RING_MOD;
+                            mod += pow((float)(points * ITEM_STAT_BLOCK_MOD), 1.50f);
+                        break;
+                    case SPELL_AURA_MOD_DAMAGE_DONE:
+                        if(misc == 126)
+                        {
+                            mod += pow((float)(points * ITEM_STAT_ALL_SPELL_DAMAGE_MOD), 1.50f);
+                        }
                         else
-                            tempmod = ITEM_STAT_SCHOOL_RESIST_MOD;
-                        if(misc & (0x0001 << SPELL_SCHOOL_FIRE))   mod += pow((float)(points * tempmod), 1.50f);
-                        if(misc & (0x0001 << SPELL_SCHOOL_NATURE)) mod += pow((float)(points * tempmod), 1.50f);
-                        if(misc & (0x0001 << SPELL_SCHOOL_FROST))  mod += pow((float)(points * tempmod), 1.50f);
-                        if(misc & (0x0001 << SPELL_SCHOOL_SHADOW)) mod += pow((float)(points * tempmod), 1.50f);
-                        if(misc & (0x0001 << SPELL_SCHOOL_ARCANE)) mod += pow((float)(points * tempmod), 1.50f);
-                    }
-                    break;
-                case SPELL_AURA_MOD_STAT:
-                    mod += pow((float)(points * ITEM_STAT_ATTRIBUTE_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_SKILL:
-                    switch(misc)
-                    {
-                        case SKILL_DEFENSE:
-                            if(inv_type == INVTYPE_SHIELD)
-                                mod += pow((float)(points * ITEM_STAT_DEFENSE_SHIELD_MOD), 1.50f);
+                        {
+                            if(misc & (0x0001 << SPELL_SCHOOL_HOLY))
+                            {
+                                if(itemProto->Class == ITEM_CLASS_WEAPON)
+                                    if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
+                                        return 0;
+                                mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
+                            }
+                            if(misc & (0x0001 << SPELL_SCHOOL_FIRE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
+                            if(misc & (0x0001 << SPELL_SCHOOL_NATURE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
+                            if(misc & (0x0001 << SPELL_SCHOOL_FROST) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
+                            if(misc & (0x0001 << SPELL_SCHOOL_SHADOW) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE))
+                            {
+                                if(itemProto->Class == ITEM_CLASS_WEAPON)
+                                    if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
+                                        return 0;
+                                if(inv_type == INVTYPE_SHIELD)
+                                    return 0;
+                                mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
+                            }
+                            if(misc & (0x0001 << SPELL_SCHOOL_ARCANE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE))
+                            {
+                                if(itemProto->Class == ITEM_CLASS_WEAPON)
+                                    if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
+                                        return 0;
+                                if(inv_type == INVTYPE_SHIELD)
+                                    return 0;
+                                mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
+                            }
+                        }
+                        break;
+                    case SPELL_AURA_MOD_RESISTANCE:
+                        if(misc == 126)
+                        {
+                            if(inv_type == INVTYPE_FINGER)
+                                mod += pow((float)(points * ITEM_STAT_ALL_SPELL_RESIST_RING_MOD), 1.50f);
                             else
-                                mod += pow((float)(points * ITEM_STAT_DEFENSE_MOD), 1.50f);
-                            break;
-                        case SKILL_DAGGERS:
-                            if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
-                            mod += pow((float)(points * ITEM_STAT_DAGGER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_SWORDS:
-                            if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_AXES:
-                            if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_BOWS:
-                            if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_BOW && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_GUNS:
-                            if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_GUN && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_MACES:
-                            if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_2H_SWORDS:
-                            if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_SWORD2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_STAVES:
-                            if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_STAFF && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_2H_MACES:
-                            if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_MACE2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_2H_AXES:
-                            if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_AXE2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_CROSSBOWS:
-                            if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_CROSSBOW && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_SPEARS:
-                            if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_SPEAR && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_WANDS:
-                            if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD) && weapon_subclass != ITEM_SUBCLASS_WEAPON_WAND && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        case SKILL_POLEARMS:
-                            if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_POLEARM && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                            mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                    }
-                    break;
-                case SPELL_AURA_MOD_POWER_REGEN:
-                    mod += pow((float)(points * ITEM_STAT_REGEN_IN_5_SEC_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_REGEN:
-                case SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT:
-                    if(inv_type == INVTYPE_FINGER)
-                        mod += pow((float)(points * ITEM_STAT_HP_REGEN_IN_5_SEC_RING_MOD), 1.50f);
-                    else if(inv_type == INVTYPE_NECK)
-                        mod += pow((float)(points * ITEM_STAT_HP_REGEN_IN_5_SEC_NECK_MOD), 1.50f);
-                    else
-                        mod += pow((float)(points * ITEM_STAT_REGEN_IN_5_SEC_MOD), 1.50f);
-                    break;
-                case SPELL_AURA_PROC_TRIGGER_DAMAGE:
-                    mod += pow((float)(points * ITEM_STAT_MAGIC_PENETRATION_MOD), 1.50f); break;
-                case SPELL_AURA_DAMAGE_SHIELD:
-                    if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                    mod += pow((float)(points * ITEM_STAT_DAMAGE_SHIELD_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_BLOCK_PERCENT:
-                    if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                    mod += pow((float)(points * ITEM_STAT_BLOCK_PCT_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_HIT_CHANCE:
-                    mod += pow((float)(points * ITEM_STAT_HIT_PCT_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_SPELL_HIT_CHANCE:
-                    mod += pow((float)(points * ITEM_STAT_SPELL_HIT_PCT_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_DODGE_PERCENT:
-                    mod += pow((float)(points * ITEM_STAT_DODGE_PCT_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL:
-                    mod += pow((float)(points * ITEM_STAT_SPELL_CRIT_PCT_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_CRIT_PERCENT:
-                    mod += pow((float)(points * ITEM_STAT_CRIT_PCT_MOD), 1.50f); break;
-                case SPELL_AURA_MOD_PARRY_PERCENT:
-                    mod += pow((float)(points * ITEM_STAT_PARRY_PCT_MOD), 1.50f); break;
+                                mod += pow((float)(points * ITEM_STAT_ALL_SPELL_RESIST_MOD), 1.50f);
+                        }
+                        else
+                        {
+                            if(inv_type == INVTYPE_FINGER)
+                                tempmod = ITEM_STAT_SCHOOL_RESIST_RING_MOD;
+                            else
+                                tempmod = ITEM_STAT_SCHOOL_RESIST_MOD;
+                            if(misc & (0x0001 << SPELL_SCHOOL_FIRE))   mod += pow((float)(points * tempmod), 1.50f);
+                            if(misc & (0x0001 << SPELL_SCHOOL_NATURE)) mod += pow((float)(points * tempmod), 1.50f);
+                            if(misc & (0x0001 << SPELL_SCHOOL_FROST))  mod += pow((float)(points * tempmod), 1.50f);
+                            if(misc & (0x0001 << SPELL_SCHOOL_SHADOW)) mod += pow((float)(points * tempmod), 1.50f);
+                            if(misc & (0x0001 << SPELL_SCHOOL_ARCANE)) mod += pow((float)(points * tempmod), 1.50f);
+                        }
+                        break;
+                    case SPELL_AURA_MOD_STAT:
+                        mod += pow((float)(points * ITEM_STAT_ATTRIBUTE_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_SKILL:
+                        switch(misc)
+                        {
+                            case SKILL_DEFENSE:
+                                if(inv_type == INVTYPE_SHIELD)
+                                    mod += pow((float)(points * ITEM_STAT_DEFENSE_SHIELD_MOD), 1.50f);
+                                else
+                                    mod += pow((float)(points * ITEM_STAT_DEFENSE_MOD), 1.50f);
+                                break;
+                            case SKILL_DAGGERS:
+                                if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
+                                mod += pow((float)(points * ITEM_STAT_DAGGER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_SWORDS:
+                                if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_AXES:
+                                if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_BOWS:
+                                if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_BOW && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_GUNS:
+                                if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_GUN && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_MACES:
+                                if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_2H_SWORDS:
+                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_SWORD2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_STAVES:
+                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_STAFF && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_2H_MACES:
+                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_MACE2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_2H_AXES:
+                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_AXE2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_CROSSBOWS:
+                                if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_CROSSBOW && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_SPEARS:
+                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_SPEAR && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_WANDS:
+                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD) && weapon_subclass != ITEM_SUBCLASS_WEAPON_WAND && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                            case SKILL_POLEARMS:
+                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_POLEARM && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
+                        }
+                        break;
+                    case SPELL_AURA_MOD_POWER_REGEN:
+                        mod += pow((float)(points * ITEM_STAT_REGEN_IN_5_SEC_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_REGEN:
+                    case SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT:
+                        if(inv_type == INVTYPE_FINGER)
+                            mod += pow((float)(points * ITEM_STAT_HP_REGEN_IN_5_SEC_RING_MOD), 1.50f);
+                        else if(inv_type == INVTYPE_NECK)
+                            mod += pow((float)(points * ITEM_STAT_HP_REGEN_IN_5_SEC_NECK_MOD), 1.50f);
+                        else
+                            mod += pow((float)(points * ITEM_STAT_REGEN_IN_5_SEC_MOD), 1.50f);
+                        break;
+                    case SPELL_AURA_PROC_TRIGGER_DAMAGE:
+                        mod += pow((float)(points * ITEM_STAT_MAGIC_PENETRATION_MOD), 1.50f); break;
+                    case SPELL_AURA_DAMAGE_SHIELD:
+                        if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                        mod += pow((float)(points * ITEM_STAT_DAMAGE_SHIELD_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_BLOCK_PERCENT:
+                        if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                        mod += pow((float)(points * ITEM_STAT_BLOCK_PCT_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_HIT_CHANCE:
+                        mod += pow((float)(points * ITEM_STAT_HIT_PCT_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_SPELL_HIT_CHANCE:
+                        mod += pow((float)(points * ITEM_STAT_SPELL_HIT_PCT_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_DODGE_PERCENT:
+                        mod += pow((float)(points * ITEM_STAT_DODGE_PCT_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL:
+                        mod += pow((float)(points * ITEM_STAT_SPELL_CRIT_PCT_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_CRIT_PERCENT:
+                        mod += pow((float)(points * ITEM_STAT_CRIT_PCT_MOD), 1.50f); break;
+                    case SPELL_AURA_MOD_PARRY_PERCENT:
+                        mod += pow((float)(points * ITEM_STAT_PARRY_PCT_MOD), 1.50f); break;
+                }
             }
         }
     }

@@ -35,9 +35,12 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     GetPlayer()->RemoveFromWorld();
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     WorldPacket data(SMSG_SET_REST_START, 4);
-    data << uint32(8129);
+    data << uint32(time(NULL));//getMSTime();
     SendPacket(&data);
+
     GetPlayer()->SetDontMove(false);
+
+    _player->SendAllowMove();   // resend after worldport complete
 }
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
@@ -58,7 +61,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
-    if (flags & MOVEMENTFLAG_ONTRANSPORT)
+    if (flags & MOVEMENTFLAG_ONTRANSPORT) // and if opcode 909?
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4+4+4);
@@ -79,7 +82,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
 
-    if (flags & MOVEMENTFLAG_JUMPING)
+    if ( (flags & MOVEMENTFLAG_JUMPING) || (flags & MOVEMENTFLAG_FALLING) )
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4);
@@ -228,7 +231,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
     UnitMoveType move_type;
 
-    static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "Walkback", "Swim", "Swimback", "Turn" };
+    static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "Walkback", "Swim", "Swimback", "Turn", "Fly", "Flyback" };
 
     uint16 opcode = recv_data.GetOpcode();
     switch(opcode)
@@ -239,6 +242,8 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
         case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:      move_type = MOVE_SWIM;     break;
         case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK: move_type = MOVE_SWIMBACK; break;
         case CMSG_FORCE_TURN_RATE_CHANGE_ACK:       move_type = MOVE_TURN;     break;
+        case CMSG_FORCE_FLY_SPEED_CHANGE_ACK:       move_type = MOVE_FLY;      break;
+        case CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_FLYBACK;  break;
         default:
             sLog.outError("WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u",opcode);
             return;
@@ -271,13 +276,12 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 {
-    //CMSG_SET_ACTIVE_MOVER
     sLog.outDebug("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
 
-    CHECK_PACKET_SIZE(recv_data,4+4);
+    CHECK_PACKET_SIZE(recv_data,8);
 
-    uint32 guild, time;
-    recv_data >> guild >> time;
+    uint64 guid;
+    recv_data >> guid;
 }
 
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
@@ -293,7 +297,7 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
 void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 {
     // CHECK_PACKET_SIZE(recv_data,?);
-
+    sLog.outDebug("CMSG_MOVE_KNOCK_BACK_ACK");
     // Currently not used but maybe use later for recheck final player position
     // (must be at call same as into "recv_data >> x >> y >> z >> orientation;"
 
@@ -322,10 +326,10 @@ void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 
 void WorldSession::HandleMoveHoverAck( WorldPacket & recv_data )
 {
+    sLog.outDebug("CMSG_MOVE_HOVER_ACK");
 }
 
 void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
-    // TODO
-    // we receive guid,x,y,z
+    sLog.outDebug("CMSG_MOVE_WATER_WALK_ACK");
 }

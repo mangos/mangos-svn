@@ -101,10 +101,18 @@ Quest::Quest(Field * questRecord)
     PointX = questRecord[97].GetFloat();
     PointY = questRecord[98].GetFloat();
     PointOpt = questRecord[99].GetUInt32();
-    OfferRewardEmote = questRecord[100].GetUInt32();
-    RequestItemsEmote = questRecord[101].GetUInt32();
-    QuestCompleteScript = questRecord[102].GetUInt32();
-    Repeatable = questRecord[103].GetUInt32();
+
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        DetailsEmote[i] = questRecord[100+i].GetUInt32();
+
+    IncompleteEmote = questRecord[104].GetUInt32();
+    CompleteEmote = questRecord[105].GetUInt32();
+
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        OfferRewardEmote[i] = questRecord[106+i].GetInt32();
+
+    QuestCompleteScript = questRecord[110].GetUInt32();
+    Repeatable = questRecord[111].GetUInt32();
 
     m_reqitemscount = 0;
     m_reqCreatureOrGOcount = 0;

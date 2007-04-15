@@ -417,9 +417,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
         // self or owner of pet
         if(player)
         {
-            float honordiff = player->GetTotalHonor();
             player->CalculateHonor(pVictim);
-            honordiff -= player->GetTotalHonor();
 
             player->CalculateReputation(pVictim);
 
@@ -462,7 +460,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
                     player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
                 }                                           // if-else (pGroup)
 
-                if(xp || honordiff < 0)
+                if(xp) //  || honordiff < 0)
                     ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
             }                                               // if (!PvP)
         }
@@ -904,16 +902,50 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb);
 
+    // this packet has random structure, probably based on auraid...
     WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
     data.append(pVictim->GetPackGUID());
-    data.append(this->GetPackGUID());
+    data.append(GetPackGUID());
     data << spellProto->Id;
     data << uint32(1);
 
     data << mod->m_auraname;
-    data << (uint32)(mod->m_amount);
-    data << spellProto->School;
-    data << uint32(0);
+    switch(mod->m_auraname)
+    {
+        case SPELL_AURA_PERIODIC_DAMAGE:
+            data << (uint32)mod->m_amount;  // ?
+            data << spellProto->School;     // ?
+            data << (uint32)0;              // ?
+            data << (uint32)0;              // ?
+            break;
+        case SPELL_AURA_PERIODIC_HEAL:
+            data << (uint32)mod->m_amount;  // ?
+            break;
+        case SPELL_AURA_OBS_MOD_HEALTH:
+            data << (uint32)mod->m_amount;  // ?
+            break;
+        //case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+        //    break;
+        case SPELL_AURA_PERIODIC_ENERGIZE:
+            data << (uint32)mod->m_amount;  // ?
+            data << (uint32)0;              // ?
+            break;
+        //case SPELL_AURA_PERIODIC_LEECH:
+        //    break;
+        //case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
+        //    break;
+        //case SPELL_AURA_PERIODIC_MANA_FUNNEL:
+        //    break;
+        //case SPELL_AURA_PERIODIC_MANA_LEECH:
+        //    break;
+        //case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+        //    break;
+        default:
+            sLog.outError("PeriodicAuraLog: unhandled aura %u", mod->m_auraname);
+            break;
+    }
+    //data << (uint32)mod->m_amount;
+    //data << spellProto->School;
     SendMessageToSet(&data,true);
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
@@ -1712,9 +1744,9 @@ void Unit::SendAttackStop(Unit* victim)
 
     WorldPacket data( SMSG_ATTACKSTOP, (4+16) );            // we guess size
     data.append(GetPackGUID());
-    data.append(victim->GetPackGUID());
-    data << uint32( 0 );
-    data << (uint32)0;
+    data.append(victim->GetPackGUID()); // can be 0x00...
+    data << uint32( 0 ); // can be 0x1
+    //data << (uint32)0; // removed in 2.0.8
 
     SendMessageToSet(&data, true);
     sLog.outDetail("%s %u stopped attacking %s %u", (GetTypeId()==TYPEID_PLAYER ? "player" : "creature"), GetGUIDLow(), (victim->GetTypeId()==TYPEID_PLAYER ? "player" : "creature"),victim->GetGUIDLow());
@@ -2146,7 +2178,7 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID)
 
 bool Unit::AddAura(Aura *Aur, bool uniq)
 {
-    if (!isAlive())
+    if (!isAlive() && !(Aur->GetSpellProto()->Id == 20584 || Aur->GetSpellProto()->Id == 8326)) // ghost spell check
     {
         delete Aur;
         return false;
@@ -2177,7 +2209,8 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
             RemoveAura(i);
     }
 
-    if (!Aur->IsPassive())                                  // passive auras stack with all
+    // passive auras stack with all
+    if (!Aur->IsPassive() && !(Aur->GetSpellProto()->Id == 20584 || Aur->GetSpellProto()->Id == 8326)) // ghost spell check
     {
         if (!RemoveNoStackAurasDueToAura(Aur))
         {
@@ -2956,49 +2989,153 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,uint8 enchant_slot,bool a
     if(!item->IsEquipped())
         return;
 
-    if(enchant_slot > 7)
+    if(enchant_slot > 11)
         return;
 
     SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if(!pEnchant)
         return;
-    uint32 enchant_display = pEnchant->display_type;
-    uint32 enchant_value1 = pEnchant->value1;
-    uint32 enchant_spell_id = pEnchant->spellid;
-
-    SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-
-    if(enchant_display ==4)
+    for (int s=0; s<3; s++)
     {
-        ApplyArmorMod(enchant_value1,apply);
-    }
-    else if(enchant_display ==2)
-    {
-        if(getClass() == CLASS_HUNTER)
+        uint32 enchant_display_type = pEnchant->display_type[s];
+        uint32 enchant_amount = pEnchant->amount[s];
+        uint32 enchant_spell_id = pEnchant->spellid[s];
+
+        SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+ 
+        if (enchant_display_type == 0)
         {
-            ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,enchant_value1,apply);
-            ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_value1,apply);
+            // Nothing
+        }
+        else if(enchant_display_type ==4)
+        {
+            ApplyArmorMod(enchant_amount,apply);
+        }
+        else if(enchant_display_type == 6) // Shaman Rockbiter Weapon
+        {
+            // enchant_amount is then containing the number of damage per second to add to the weapon
+            if(getClass() == CLASS_SHAMAN)
+            {
+                ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
+                //ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
+            }
+        }
+        else if(enchant_display_type == 5) // 
+        {
+            sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
+            switch (enchant_spell_id)
+            {
+                case ITEM_STAT_AGILITY:
+                    sLog.outDebug("+ %u AGILITY",enchant_amount);
+                    ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
+                    ApplyStatMod(STAT_AGILITY, enchant_amount, apply);
+                    break;
+                case ITEM_STAT_STRENGTH:
+                    sLog.outDebug("+ %u STRENGTH",enchant_amount);
+                    ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
+                    ApplyStatMod(STAT_STRENGTH, enchant_amount, apply);
+                    break;
+                case ITEM_STAT_INTELLECT:
+                    sLog.outDebug("+ %u INTELLECT",enchant_amount);
+                    ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
+                    ApplyStatMod(STAT_INTELLECT, enchant_amount, apply);
+                    break;
+                case ITEM_STAT_SPIRIT:
+                    sLog.outDebug("+ %u SPIRIT",enchant_amount);
+                    ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
+                    ApplyStatMod(STAT_SPIRIT, enchant_amount, apply);
+                    break;
+                case ITEM_STAT_STAMINA:
+                    sLog.outDebug("+ %u STAMINA",enchant_amount);
+                    ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
+                    ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
+                    break;
+                case ITEM_STAT_DEFENCE_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u DEFENCE", enchant_amount);
+                    break;
+                case ITEM_STAT_DODGE_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u DODGE", enchant_amount);
+                    break;
+                case ITEM_STAT_PARRY_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u PARRY", enchant_amount);
+                    break;
+                case ITEM_STAT_SHIELD_BLOCK_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
+                    break;
+                case ITEM_STAT_MELEE_HIT_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
+                    break;
+                case ITEM_STAT_RANGED_HIT_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
+                    break;
+                case ITEM_STAT_SPELL_HIT_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
+                    break;
+                case ITEM_STAT_MELEE_CS_RATING: // CS = Critical Strike
+                    ApplyModUInt32Value(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
+                    break;
+                case ITEM_STAT_RANGED_CS_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
+                    break;
+                case ITEM_STAT_SPELL_CS_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
+                    break;
+                // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
+                // in Enchantments
+                case ITEM_STAT_HIT_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u HIT", enchant_amount);
+                    break;
+                case ITEM_STAT_CS_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u CRITICAL", enchant_amount);
+                    break;
+                // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
+                case ITEM_STAT_RESILIENCE_RATING:
+                    ApplyModUInt32Value(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u RESILIENCE", enchant_amount);
+                    break;
+                // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
+            }
+        }
+        else if(enchant_display_type ==2)
+        {
+            if(getClass() == CLASS_HUNTER)
+            {
+                ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,enchant_amount,apply);
+                ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_amount,apply);
+            }
+            else
+            {
+                ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
+                ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
+            }
         }
         else
         {
-            ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_value1,apply);
-            ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_value1,apply);
+           if(apply && enchant_display_type == 3)
+           {
+                Spell spell(this, enchantSpell_info, true, 0);
+                SpellCastTargets targets;
+                targets.setUnitTarget(this);
+                spell.prepare(&targets);
+            }
+            else RemoveAurasDueToSpell(enchant_spell_id);
         }
-    }
-    else
-    {
-        if(apply && enchant_display == 3)
-        {
-            Spell spell(this, enchantSpell_info, true, 0);
-            SpellCastTargets targets;
-            targets.setUnitTarget(this);
-            spell.prepare(&targets);
-        }
-        else RemoveAurasDueToSpell(enchant_spell_id);
     }
 
     // visualize enchantment at player and equipped items
-    int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 12);
+    int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
     SetUInt32Value(VisibleBase+1 + enchant_slot, apply? item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3) : 0);
 }
 
@@ -3088,7 +3225,7 @@ void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage,
     data << (uint8)PhysicalDamage;
     data << uint8(0);
     data << Blocked;                                        //blocked
-    data << uint8(CriticalHit ? 2 : 0);
+    data << uint8(CriticalHit ? 2 : 0);                     //seen 0x05 also...
     data << uint32(0);
     SendMessageToSet( &data, true );
 }
@@ -4438,6 +4575,9 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 
 bool Unit::isVisibleFor(Unit* u, bool detect)
 {
+    if(!u)
+        return false;
+
     // Visible units, always are visible for all pjs
     if (m_Visibility == VISIBILITY_ON)
         return true;
@@ -4569,10 +4709,19 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
             else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED, 16); }
             break;
         case MOVE_SWIMBACK:
-            data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED, 16);
+            if(forced) { data.Initialize(SMSG_FORCE_SWIM_BACK_SPEED_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED, 16); }
             break;
         case MOVE_TURN:
-            return;                                         // ignore
+            if(forced) { data.Initialize(SMSG_FORCE_TURN_RATE_CHANGE, 16); }
+            else { data.Initialize(MSG_MOVE_SET_TURN_RATE, 16); }
+            break;
+        case MOVE_FLY:
+            if(forced) { data.Initialize(SMSG_FORCE_FLY_SPEED_CHANGE, 16); }
+            else { data.Initialize(SMSG_MOVE_SET_FLY_SPEED, 16); }
+            break;
+        case MOVE_FLYBACK:
+            break;
         default:
             sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
             return;

@@ -429,6 +429,8 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
                         case RACE_TAUREN:       pPlayer->PlayerTalkClass->SendGossipMenu(5864,GetGUID()); break;
                         case RACE_TROLL:        pPlayer->PlayerTalkClass->SendGossipMenu(5816,GetGUID()); break;
                         case RACE_UNDEAD_PLAYER:pPlayer->PlayerTalkClass->SendGossipMenu( 624,GetGUID()); break;
+                        case RACE_BLOODELF:     pPlayer->PlayerTalkClass->SendGossipMenu(5862,GetGUID()); break;
+                        case RACE_DRAENEI:      pPlayer->PlayerTalkClass->SendGossipMenu(5864,GetGUID()); break;
                     }
                 }
                 return false;
@@ -607,7 +609,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         case GOSSIP_OPTION_SPIRITHEALER:
             if( player->isDead() )
-                player->GetSession()->SendSpiritResurrect();
+                CastSpell(player,17251,true); // effect implemented in void Spell::EffectDummy(uint32 i)
             break;
         case GOSSIP_OPTION_QUESTGIVER:
             player->PrepareQuestMenu( guid );
@@ -880,11 +882,7 @@ void Creature::SaveToDB()
         << (float)(0) << ","                                //spawn_orientation
         << GetHealth() << ","                               //curhealth
         << GetPower(POWER_MANA) << ","                      //curmana
-
-        << (uint32)(m_deathState) << ","                    // is it really death state or just state?
-    //or
-    //<< (uint32)(m_state) << ","                     // is it really death state or just state?
-
+        << (uint32)(m_deathState) << ","                    //DeathState (0 or 65)
         << GetDefaultMovementType() << ","                  // default movement generator type
         << "'')";                                           // should save auras
 
@@ -1035,9 +1033,6 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     } else
     sLog.outErrorDb("Error: invalid faction (%u) for creature (GUIDLow: %u Entry: %u)", cinfo->faction, GetGUIDLow(),Entry);
 
-    if (cinfo->mount != 0)
-        Mount(cinfo->mount);
-
     m_spells[0] = cinfo->spell1;
     m_spells[1] = cinfo->spell2;
     m_spells[2] = cinfo->spell3;
@@ -1064,8 +1059,8 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
-        //                                0    1     2            3            4            5             6               7           8                  9                  10                 11          12        13            14      15             16
-        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`state`,`MovementType`,`auras` "
+        //                                  0    1        2            3            4            5             6               7           8                  9                  10                 11          12        13            14           15          16
+        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`DeathState`,`MovementType`,`auras` "
             "FROM `creature` LEFT JOIN `creature_respawn` ON ((`creature`.`guid`=`creature_respawn`.`guid`) AND (`creature_respawn`.`instance` = '%u')) WHERE `creature`.`guid` = '%u'", InstanceId, guid);
 
     if(!result)
@@ -1137,7 +1132,7 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
     if(!external) delete result;
 
     LoadFlagRelatedData();
-    
+
     AIM_Initialize();
     return true;
 }
@@ -1493,4 +1488,51 @@ void Creature::LoadFlagRelatedData()
 
     if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER ) )
         _LoadQuests();
+}
+
+//creature_addon table
+bool Creature::LoadCreaturesAddon(uint32 guidlow)
+{
+    //                                               0        1         2        3       4       5        6           7                8              9
+    QueryResult *result = sDatabase.PQuery("SELECT `mount`,`bytes0`,`bytes1`,`bytes2`,`emote`,`aura`,`auraflags`,`auralevels`,`auraapplications`,`aurastate` FROM `creature_addon` WHERE `guid` = '%u'", guidlow);
+    if(!result)
+	{
+		return false;
+	}
+   
+	Field *fields = result->Fetch();
+    
+	if (fields[0].GetUInt32() != 0)
+        Mount(fields[0].GetUInt32());
+    
+	if (fields[1].GetUInt32() != 0)
+	SetUInt32Value(UNIT_FIELD_BYTES_0, fields[1].GetUInt32());
+    
+	if (fields[2].GetUInt32() != 0)
+	SetUInt32Value(UNIT_FIELD_BYTES_1, fields[2].GetUInt32());
+
+	if (fields[3].GetUInt32() != 0)
+	SetUInt32Value(UNIT_FIELD_BYTES_2, fields[3].GetUInt32());
+
+    if (fields[4].GetUInt32() != 0)
+	SetUInt32Value(UNIT_NPC_EMOTESTATE, fields[4].GetUInt32());
+
+	if (fields[5].GetUInt32() != 0)
+	SetUInt32Value(UNIT_FIELD_AURA, fields[5].GetUInt32());
+
+	if (fields[6].GetUInt32() != 0)
+	SetUInt32Value(UNIT_FIELD_AURAFLAGS, fields[6].GetUInt32());
+
+	if (fields[7].GetUInt32() != 0)
+	SetUInt32Value(UNIT_FIELD_AURALEVELS, fields[7].GetUInt32());
+
+	if (fields[8].GetUInt32() != 0)
+	SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, fields[8].GetUInt32());
+  
+	if (fields[9].GetUInt32() != 0)
+	SetUInt32Value(UNIT_FIELD_AURASTATE, fields[9].GetUInt32());
+  
+    delete result;
+
+    return true;
 }

@@ -33,6 +33,7 @@ libmangosgame_a_SOURCES = \
 	AggressorAI.cpp \
 	AggressorAI.h \
 	AnimalRandomMovementGenerator.h \
+	ArenaTeamHandler.cpp \
 	AuctionHouse.cpp \
 	AuctionHouseObject.h \
 	Bag.cpp \
@@ -113,6 +114,7 @@ libmangosgame_a_SOURCES = \
 	Level1.cpp \
 	Level2.cpp \
 	Level3.cpp \
+	LFGHandler.cpp \
 	LootHandler.cpp \
 	LootMgr.cpp \
 	LootMgr.h \
