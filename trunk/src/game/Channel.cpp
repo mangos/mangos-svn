@@ -18,8 +18,9 @@
 
 #include "Channel.h"
 #include "ObjectMgr.h"
+#include "Chat.h"
 
-void Channel::Join(Player *p, const char *pass)
+void Channel::Join(uint64 p, const char *pass, uint32 unk1)
 {
     WorldPacket data;
     if(IsOn(p))
@@ -27,7 +28,7 @@ void Channel::Join(Player *p, const char *pass)
         MakeAlreadyOn(&data,p);
         SendToOne(&data,p);
     }
-    else if(IsBanned(p->GetGUID()))
+    else if(IsBanned(p))
     {
         MakeYouAreBanned(&data);
         SendToOne(&data,p);
@@ -45,67 +46,86 @@ void Channel::Join(Player *p, const char *pass)
         pinfo.owner = false;
         pinfo.moderator = false;
 
-        //MakeJoined(&data,p);
-        p->JoinedChannel(this);
-        /*if(announce)
-            SendToAll(&data);*/
+        Player *plr = objmgr.GetPlayer(p);
+        if(plr)
+            plr->JoinedChannel(this);
+
+        if(announce)
+        {
+            MakeJoined(&data,p);
+            SendToAll(&data);
+        }
 
         data.clear();
         players[p] = pinfo;
 
-        MakeYouJoined(&data,p);
+        MakeYouJoined(&data,p,unk1);
         SendToOne(&data,p);
 
         // if no owner first logged will become
-        //        if(!constant && owner == NULL)
-        //        {
-        //            SetOwner(p);
-        //            players[p].moderator = true;
-        //        }
-
+        if(!constant && owner == false)
+        {
+            SetOwner(p, (players.size()>1?true:false));
+            players[p].moderator = true;
+        }
     }
 }
 
-void Channel::Leave(Player *p, bool send)
+void Channel::Leave(uint64 p, bool send, uint32 unk1)
 {
     WorldPacket data;
     if(!IsOn(p))
     {
-        MakeNotOn(&data);
-        if(send) SendToOne(&data,p);
+        if(send)
+        {
+            MakeNotOn(&data);
+            SendToOne(&data,p);
+        }
     }
     else
     {
-        MakeYouLeft(&data);
         if(send)
         {
+            MakeYouLeft(&data, unk1);
             SendToOne(&data,p);
-            p->LeftChannel(this);
+            Player *plr = objmgr.GetPlayer(p);
+            if(plr)
+                plr->LeftChannel(this);
+            data.clear();
         }
-        data.clear();
+
+        bool changeowner = players[p].owner;
 
         players.erase(p);
-        /*MakeLeft(&data,p);
         if(announce)
+        {
+            MakeLeft(&data,p);
             SendToAll(&data);
+        }
 
         if(changeowner)
         {
-            Player *newowner = players.size() > 0 ? players.begin()->second.player : NULL;
+            uint64 newowner = players.size() > 0 ? players.begin()->second.player : false;
             SetOwner(newowner);
-        }*/
+        }
     }
 }
 
-void Channel::KickOrBan(Player *good, const char *badname, bool ban)
+void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
 {
     WorldPacket data;
+
+    uint32 sec = 0;
+    Player *gplr = objmgr.GetPlayer(good);
+    if(gplr)
+        sec = gplr->GetSession()->GetSecurity();
+
     if(!IsOn(good))
     {
         MakeNotOn(&data);
         SendToOne(&data,good);
     }
-    else if(!players[good].moderator && good->GetSession()->GetSecurity() < 2)
+    else if(!players[good].moderator && sec < 2)
     {
         MakeNotModerator(&data);
         SendToOne(&data,good);
@@ -113,49 +133,55 @@ void Channel::KickOrBan(Player *good, const char *badname, bool ban)
     else
     {
         Player *bad = objmgr.GetPlayer(badname);
-        if(bad == NULL || !IsOn(bad))
+        if(bad == NULL || !IsOn(bad->GetGUID()))
         {
             MakeNotOn(&data,badname);
             SendToOne(&data,good);
         }
-        else if(good->GetSession()->GetSecurity() < 2 && bad == owner && good != owner)
+        else if(sec < 2 && bad->GetGUID() == owner && good != owner)
         {
             MakeNotOwner(&data);
             SendToOne(&data,good);
         }
         else
         {
-            bool changeowner = (owner == bad);
+            bool changeowner = (owner == bad->GetGUID());
 
             if(ban && !IsBanned(bad->GetGUID()))
             {
                 banned.push_back(bad->GetGUID());
-                MakeBanned(&data,good,bad);
+                MakeBanned(&data,good,bad->GetGUID());
             }
             else
-                MakeKicked(&data,good,bad);
+                MakeKicked(&data,good,bad->GetGUID());
 
             SendToAll(&data);
-            players.erase(bad);
+            players.erase(bad->GetGUID());
 
             if(changeowner)
             {
-                Player *newowner = players.size() > 0 ? good : NULL;
+                uint64 newowner = players.size() > 0 ? good : false;
                 SetOwner(newowner);
             }
         }
     }
 }
 
-void Channel::UnBan(Player *good, const char *badname)
+void Channel::UnBan(uint64 good, const char *badname)
 {
     WorldPacket data;
+
+    uint32 sec = 0;
+    Player *gplr = objmgr.GetPlayer(good);
+    if(gplr)
+        sec = gplr->GetSession()->GetSecurity();
+
     if(!IsOn(good))
     {
         MakeNotOn(&data);
         SendToOne(&data,good);
     }
-    else if(!players[good].moderator && good->GetSession()->GetSecurity() < 2)
+    else if(!players[good].moderator && sec < 2)
     {
         MakeNotModerator(&data);
         SendToOne(&data,good);
@@ -171,21 +197,27 @@ void Channel::UnBan(Player *good, const char *badname)
         else
         {
             banned.remove(bad->GetGUID());
-            MakeUnbanned(&data,good,bad);
+            MakeUnbanned(&data,good,bad->GetGUID());
             SendToAll(&data);
         }
     }
 }
 
-void Channel::Password(Player *p, const char *pass)
+void Channel::Password(uint64 p, const char *pass)
 {
     WorldPacket data;
+
+    uint32 sec = 0;
+    Player *plr = objmgr.GetPlayer(p);
+    if(plr)
+        sec = plr->GetSession()->GetSecurity();
+
     if(!IsOn(p))
     {
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(!players[p].moderator && p->GetSession()->GetSecurity() < 2)
+    else if(!players[p].moderator && sec < 2)
     {
         MakeNotModerator(&data);
         SendToOne(&data,p);
@@ -198,15 +230,21 @@ void Channel::Password(Player *p, const char *pass)
     }
 }
 
-void Channel::SetMode(Player *p, const char *p2n, bool mod, bool set)
+void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
 {
     WorldPacket data;
+
+    uint32 sec = 0;
+    Player *plr = objmgr.GetPlayer(p);
+    if(plr)
+        sec = plr->GetSession()->GetSecurity();
+
     if(!IsOn(p))
     {
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(!players[p].moderator && p->GetSession()->GetSecurity() < 2)
+    else if(!players[p].moderator && sec < 2)
     {
         MakeNotModerator(&data);
         SendToOne(&data,p);
@@ -214,15 +252,18 @@ void Channel::SetMode(Player *p, const char *p2n, bool mod, bool set)
     else
     {
         Player *newp = objmgr.GetPlayer(p2n);
-        PlayerInfo inf = players[newp];
-        if(p == owner && newp == owner && mod)
+        if(!newp)
             return;
-        if(newp == NULL || !IsOn(newp))
+
+        PlayerInfo inf = players[newp->GetGUID()];
+        if(p == owner && newp->GetGUID() == owner && mod)
+            return;
+        if(newp == NULL || !IsOn(newp->GetGUID()))
         {
             MakeNotOn(&data,p2n);
             SendToOne(&data,p);
         }
-        else if(owner == newp && owner != p)
+        else if(owner == newp->GetGUID() && owner != p)
         {
             MakeNotOwner(&data);
             SendToOne(&data,p);
@@ -230,22 +271,28 @@ void Channel::SetMode(Player *p, const char *p2n, bool mod, bool set)
         else
         {
             if(mod)
-                SetModerator(newp,set);
+                SetModerator(newp->GetGUID(),set);
             else
-                SetMute(newp,set);
+                SetMute(newp->GetGUID(),set);
         }
     }
 }
 
-void Channel::SetOwner(Player *p, const char *newname)
+void Channel::SetOwner(uint64 p, const char *newname)
 {
     WorldPacket data;
+
+    uint32 sec = 0;
+    Player *plr = objmgr.GetPlayer(p);
+    if(plr)
+        sec = plr->GetSession()->GetSecurity();
+
     if(!IsOn(p))
     {
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(p->GetSession()->GetSecurity() < 2 && p != owner)
+    else if(sec < 2 && p != owner)
     {
         MakeNotOwner(&data);
         SendToOne(&data,p);
@@ -253,23 +300,20 @@ void Channel::SetOwner(Player *p, const char *newname)
     else
     {
         Player *newp = objmgr.GetPlayer(newname);
-        if(newp == NULL || !IsOn(newp))
+        if(newp == NULL || !IsOn(newp->GetGUID()))
         {
             MakeNotOn(&data,newname);
             SendToOne(&data,p);
         }
         else
         {
-            MakeChangeOwner(&data,newp);
-            SendToAll(&data);
-
-            SetModerator(newp,true);
-            owner = newp;
+            players[newp->GetGUID()].moderator = true;
+            SetOwner(newp->GetGUID());
         }
     }
 }
 
-void Channel::GetOwner(Player *p)
+void Channel::GetOwner(uint64 p)
 {
     WorldPacket data;
     if(!IsOn(p))
@@ -284,7 +328,7 @@ void Channel::GetOwner(Player *p)
     }
 }
 
-void Channel::List(Player *p)
+void Channel::List(uint64 p)
 {
     WorldPacket data;
     if(!IsOn(p))
@@ -301,7 +345,7 @@ void Channel::List(Player *p)
         uint8 mode;
         for(i = players.begin(); i!=players.end(); i++)
         {
-            data << i->first->GetGUID();
+            data << i->first;
             mode = 0x00;
             if(i->second.muted)
                 mode |= 0x04;
@@ -313,15 +357,21 @@ void Channel::List(Player *p)
     }
 }
 
-void Channel::Announce(Player *p)
+void Channel::Announce(uint64 p)
 {
     WorldPacket data;
+
+    uint32 sec = 0;
+    Player *plr = objmgr.GetPlayer(p);
+    if(plr)
+        sec = plr->GetSession()->GetSecurity();
+
     if(!IsOn(p))
     {
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(!players[p].moderator && p->GetSession()->GetSecurity() < 2)
+    else if(!players[p].moderator && sec < 2)
     {
         MakeNotModerator(&data);
         SendToOne(&data,p);
@@ -334,15 +384,21 @@ void Channel::Announce(Player *p)
     }
 }
 
-void Channel::Moderate(Player *p)
+void Channel::Moderate(uint64 p)
 {
     WorldPacket data;
+
+    uint32 sec = 0;
+    Player *plr = objmgr.GetPlayer(p);
+    if(plr)
+        sec = plr->GetSession()->GetSecurity();
+
     if(!IsOn(p))
     {
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(!players[p].moderator && p->GetSession()->GetSecurity() < 2)
+    else if(!players[p].moderator && sec < 2)
     {
         MakeNotModerator(&data);
         SendToOne(&data,p);
@@ -355,7 +411,7 @@ void Channel::Moderate(Player *p)
     }
 }
 
-void Channel::Say(Player *p, const char *what, uint32 lang)
+void Channel::Say(uint64 p, const char *what, uint32 lang)
 {
     if(!what)
         return;
@@ -363,6 +419,12 @@ void Channel::Say(Player *p, const char *what, uint32 lang)
         lang = LANG_UNIVERSAL;
 
     WorldPacket data;
+
+    uint32 sec = 0;
+    Player *plr = objmgr.GetPlayer(p);
+    if(plr)
+        sec = plr->GetSession()->GetSecurity();
+
     if(!IsOn(p))
     {
         MakeNotOn(&data);
@@ -373,7 +435,7 @@ void Channel::Say(Player *p, const char *what, uint32 lang)
         MakeYouCantSpeak(&data);
         SendToOne(&data,p);
     }
-    else if(moderate && !players[p].moderator && p->GetSession()->GetSecurity() < 2)
+    else if(moderate && !players[p].moderator && sec < 2)
     {
         MakeNotModerator(&data);
         SendToOne(&data,p);
@@ -383,20 +445,19 @@ void Channel::Say(Player *p, const char *what, uint32 lang)
         uint32 messageLength = strlen(what) + 1;
 
         data.Initialize(SMSG_MESSAGECHAT);
-        data << (uint8)14;
-        data << (uint32)lang;                               //language
-        data << name.c_str();
-        data << (uint32)0;
-        data << p->GetGUID();
+        data << (uint8)CHAT_MSG_CHANNEL;
+        data << (uint32)lang;
+        data << name;
+        data << p;
         data << messageLength;
         data << what;
-        data << p->chatTag();
+        data << uint8(plr ? plr->chatTag() : 0);
 
-        SendToAll(&data,!players[p].moderator ? p : NULL);
+        SendToAll(&data,!players[p].moderator ? p : false);
     }
 }
 
-void Channel::Invite(Player *p, const char *newname)
+void Channel::Invite(uint64 p, const char *newname)
 {
     WorldPacket data;
     if(!IsOn(p))
@@ -407,26 +468,82 @@ void Channel::Invite(Player *p, const char *newname)
     else
     {
         Player *newp = objmgr.GetPlayer(newname);
-        if(newp == NULL)
+        if(!newp)
         {
             MakeNotOn(&data,newname);
             SendToOne(&data,p);
         }
-        else if(IsOn(newp))
+        else if(IsOn(newp->GetGUID()))
         {
-            MakeAlreadyOn(&data,newp);
+            MakeAlreadyOn(&data,newp->GetGUID());
             SendToOne(&data,p);
         }
         else
         {
-            if(!newp->HasInIgnoreList(p->GetGUID()))
+            if(!newp->HasInIgnoreList(p))
             {
                 MakeInvited(&data,p);
-                SendToOne(&data,newp);
+                SendToOne(&data,newp->GetGUID());
                 data.clear();
             }
-            MakeYouInvited(&data,newp);
+            MakeYouInvited(&data,newp->GetGUID());
             SendToOne(&data,p);
         }
     }
+}
+
+void Channel::MakeYouInvited(WorldPacket *data, uint64 who)
+{
+    Player *plr = objmgr.GetPlayer(who);
+    if(plr)
+    {
+        *MakeNotifyPacket(data,YOUINVITED);
+        *data << plr->GetName();
+    }
+}
+
+void Channel::SendToAll(WorldPacket *data, uint64 p)
+{
+    for(PlayerList::iterator i = players.begin(); i != players.end(); i++)
+    {
+        Player *plr = objmgr.GetPlayer(i->first);
+        if(plr)
+        {
+            if(!p || !plr->HasInIgnoreList(p))
+                plr->GetSession()->SendPacket(data);
+        }
+    }
+}
+
+void Channel::SendToAllButOne(WorldPacket *data, uint64 who)
+{
+    for(PlayerList::iterator i = players.begin(); i!=players.end(); i++)
+    {
+        if(i->first != who)
+        {
+            Player *plr = objmgr.GetPlayer(i->first);
+            if(plr)
+                plr->GetSession()->SendPacket(data);
+        }
+    }
+}
+
+void Channel::SendToOne(WorldPacket *data, uint64 who)
+{
+    Player *plr = objmgr.GetPlayer(who);
+    if(plr)
+        plr->GetSession()->SendPacket(data);
+}
+
+void Channel::MakeWhoOwner(WorldPacket *data)
+{
+    const char *name = "";
+    Player *plr = objmgr.GetPlayer(owner);
+    if(plr)
+        name = plr->GetName();
+    else
+        name = "PLAYER_NOT_FOUND";
+
+    *MakeNotifyPacket(data,WHOOWNER);
+    *data << ((constant || owner == false) ? "Nobody" : name);
 }

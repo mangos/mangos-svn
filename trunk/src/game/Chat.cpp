@@ -32,9 +32,7 @@
 
 LanguageDesc lang_description[LANGUAGES_COUNT] =
 {
-    {                                                       // LANG_GLOBAL/LANG_UNIVERSAL = 0
-        LANG_UNIVERSAL,       0, 0
-    },
+    { LANG_UNIVERSAL,       0, 0                       },
     { LANG_ORCISH,        669, SKILL_LANG_ORCISH       },
     { LANG_DARNASSIAN,    671, SKILL_LANG_DARNASSIAN   },
     { LANG_TAURAHE,       670, SKILL_LANG_TAURAHE      },
@@ -42,12 +40,13 @@ LanguageDesc lang_description[LANGUAGES_COUNT] =
     { LANG_COMMON,        668, SKILL_LANG_COMMON       },
     { LANG_DEMONIC,       815, SKILL_LANG_DEMON_TONGUE },
     { LANG_TITAN,         816, SKILL_LANG_TITAN        },
-    { LANG_THELASSIAN,    813, SKILL_LANG_THALASSIAN   },
+    { LANG_THALASSIAN,    813, SKILL_LANG_THALASSIAN   },
     { LANG_DRACONIC,      814, SKILL_LANG_DRACONIC     },
     { LANG_KALIMAG,       817, SKILL_LANG_OLD_TONGUE   },
     { LANG_GNOMISH,      7340, SKILL_LANG_GNOMISH      },
     { LANG_TROLL,        7341, SKILL_LANG_TROLL        },
-    { LANG_GUTTERSPEAK, 17737, SKILL_LANG_GUTTERSPEAK  }
+    { LANG_GUTTERSPEAK, 17737, SKILL_LANG_GUTTERSPEAK  },
+    { LANG_DRAENEI,     29932, SKILL_LANG_DRAENEI      }
 };
 
 LanguageDesc const* GetLanguageDescByID(uint32 lang)
@@ -489,18 +488,19 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 
     data->Initialize(SMSG_MESSAGECHAT, 100);                // guess size
     *data << (uint8)type;
-    *data << language;
+    *data << uint32((type != CHAT_MSG_CHANNEL) && (type != CHAT_MSG_WHISPER) ? language : 0);
 
     if (type == CHAT_MSG_CHANNEL)
     {
         ASSERT(channelName);
         *data << channelName;
+        *data << (uint32)6;     // unk
     }
 
     // in CHAT_MSG_WHISPER_INFORM mode used original target_guid
     if (type == CHAT_MSG_SAY  || type == CHAT_MSG_CHANNEL || type == CHAT_MSG_WHISPER ||
         type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY  || type == CHAT_MSG_RAID  || type == CHAT_MSG_RAID_LEADER || type == CHAT_MSG_RAID_WARN ||
-        type == CHAT_MSG_GUILD || type == CHAT_MSG_OFFICER)
+        type == CHAT_MSG_GUILD || type == CHAT_MSG_OFFICER || type == CHAT_MSG_BATTLEGROUND_ALLIANCE || type == CHAT_MSG_BATTLEGROUND_HORDE)
     {
         target_guid = session ? session->GetPlayer()->GetGUID() : 0;
     }
