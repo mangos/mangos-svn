@@ -1018,6 +1018,8 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4, cinfo->equipinfo[2]);
     SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4 + 1, cinfo->equipslot[2]);
 
+    LoadCreaturesAddon();
+
     SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->size);
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
@@ -1491,48 +1493,41 @@ void Creature::LoadFlagRelatedData()
 }
 
 //creature_addon table
-bool Creature::LoadCreaturesAddon(uint32 guidlow)
+bool Creature::LoadCreaturesAddon()
 {
-    //                                               0        1         2        3       4       5        6           7                8              9
-    QueryResult *result = sDatabase.PQuery("SELECT `mount`,`bytes0`,`bytes1`,`bytes2`,`emote`,`aura`,`auraflags`,`auralevels`,`auraapplications`,`aurastate` FROM `creature_addon` WHERE `guid` = '%u'", guidlow);
-    if(!result)
-	{
-		return false;
-	}
-   
-	Field *fields = result->Fetch();
+	CreatureAddInfo const *cainfo = objmgr.GetCreatureAddon(GetGUIDLow());
+    if(!cainfo)
+        return false;
+
+	if (cainfo->mount != 0)
+        Mount(cainfo->mount);
     
-	if (fields[0].GetUInt32() != 0)
-        Mount(fields[0].GetUInt32());
+	if (cainfo->bytes0 != 0)
+	SetUInt32Value(UNIT_FIELD_BYTES_0, cainfo->bytes0);
     
-	if (fields[1].GetUInt32() != 0)
-	SetUInt32Value(UNIT_FIELD_BYTES_0, fields[1].GetUInt32());
-    
-	if (fields[2].GetUInt32() != 0)
-	SetUInt32Value(UNIT_FIELD_BYTES_1, fields[2].GetUInt32());
+	if (cainfo->bytes1 != 0)
+	SetUInt32Value(UNIT_FIELD_BYTES_1, cainfo->bytes1);
 
-	if (fields[3].GetUInt32() != 0)
-	SetUInt32Value(UNIT_FIELD_BYTES_2, fields[3].GetUInt32());
+	if (cainfo->bytes2 != 0)
+	SetUInt32Value(UNIT_FIELD_BYTES_2, cainfo->bytes2);
 
-    if (fields[4].GetUInt32() != 0)
-	SetUInt32Value(UNIT_NPC_EMOTESTATE, fields[4].GetUInt32());
+    if (cainfo->emote != 0)
+	SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
 
-	if (fields[5].GetUInt32() != 0)
-	SetUInt32Value(UNIT_FIELD_AURA, fields[5].GetUInt32());
+	if (cainfo->aura != 0)
+	SetUInt32Value(UNIT_FIELD_AURA, cainfo->aura);
 
-	if (fields[6].GetUInt32() != 0)
-	SetUInt32Value(UNIT_FIELD_AURAFLAGS, fields[6].GetUInt32());
+	if (cainfo->auraflags != 0)
+	SetUInt32Value(UNIT_FIELD_AURAFLAGS, cainfo->auraflags);
 
-	if (fields[7].GetUInt32() != 0)
-	SetUInt32Value(UNIT_FIELD_AURALEVELS, fields[7].GetUInt32());
+	if (cainfo->auralevels != 0)
+	SetUInt32Value(UNIT_FIELD_AURALEVELS, cainfo->auralevels);
 
-	if (fields[8].GetUInt32() != 0)
-	SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, fields[8].GetUInt32());
+	if (cainfo->auraapplications != 0)
+	SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, cainfo->auraapplications);
   
-	if (fields[9].GetUInt32() != 0)
-	SetUInt32Value(UNIT_FIELD_AURASTATE, fields[9].GetUInt32());
+	if (cainfo->aurastate != 0)
+	SetUInt32Value(UNIT_FIELD_AURASTATE, cainfo->aurastate);
   
-    delete result;
-
     return true;
 }

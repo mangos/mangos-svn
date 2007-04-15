@@ -206,6 +206,22 @@ struct CreatureInfo
     uint32 randomDisplayID() const;
 };
 
+struct CreatureAddInfo
+{
+	uint32 guid;
+	uint32 RefId;
+	uint32 mount;
+	uint32 bytes0;
+	uint32 bytes1;
+	uint32 bytes2;
+	uint32 emote;
+	uint32 aura;
+	uint32 auraflags;
+	uint32 auralevels;
+	uint32 auraapplications;
+	uint32 aurastate;
+};
+
 enum InhabitTypeValues
 {
     INHAVIT_GROUND = 1,
@@ -244,7 +260,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
         bool CreateFromProto(uint32 guidlow,uint32 Entry);
-        bool LoadCreaturesAddon(uint32 guidlow);
+        bool LoadCreaturesAddon();
         void SelectLevel(const CreatureInfo *cinfo);
 
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
