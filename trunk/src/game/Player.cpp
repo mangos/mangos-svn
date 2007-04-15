@@ -10361,12 +10361,12 @@ bool Player::LoadFromDB( uint32 guid )
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
+    _LoadAuras(time_diff);
+
     _LoadSpells(time_diff);
 
     // after spell load
     InitTalentForLevel();
-
-    _LoadAuras(time_diff);
 
     _LoadQuestStatus();
 
