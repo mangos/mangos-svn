@@ -124,6 +124,7 @@ class DBCStorage
 
 //extern DBCStorage <AreaTableEntry>            sAreaStore; -- accessed using 2 functions
 extern DBCStorage <BankBagSlotPricesEntry>    sBankBagSlotPricesStore;
+extern DBCStorage <BattlemasterListEntry>     sBattlemasterListStore;
 extern DBCStorage <ChrClassesEntry>           sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>             sChrRacesStore;
 extern DBCStorage <CreatureFamilyEntry>       sCreatureFamilyStore;
@@ -131,7 +132,9 @@ extern DBCStorage <SpellCastTimesEntry>       sCastTimesStore;
 extern DBCStorage <EmotesTextEntry>           sEmotesTextStore;
 extern DBCStorage <FactionEntry>              sFactionStore;
 extern DBCStorage <FactionTemplateEntry>      sFactionTemplateStore;
+extern DBCStorage <GemPropertiesEntry>        sGemPropertiesStore;
 extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore;
+extern DBCStorage <ItemExtendedCostEntry>     sItemExtendedCostStore;
 extern DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore;
 extern DBCStorage <ItemSetEntry>              sItemSetStore;
 extern DBCStorage <LockEntry>                 sLockStore;
