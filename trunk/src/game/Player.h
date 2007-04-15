@@ -1131,26 +1131,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ModifySkillBonus(uint32 skillid,int32 val);
 
         /*********************************************************/
-        /***                  HONOR SYSTEM                     ***/
+        /***                  PVP SYSTEM                       ***/
         /*********************************************************/
-        void UpdateHonor();
+        void UpdateArenaFields();
+        void UpdateHonorFields();
         void CalculateHonor(Unit *pVictim);
-        uint32 CalculateHonorRank(float honor) const;
-        uint32 GetHonorRank() const;
-        int  CalculateTotalKills(Player *pVictim) const;
-        //Acessors of total honor points
-        void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
-        float GetTotalHonor(void) const { return m_total_honor_points; };
-        //Acessors of righest rank
-        uint32 GetHonorHighestRank() const { return m_highest_rank; }
-        void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
-        //Acessors of rating
-        float GetHonorRating() const { return m_rating; }
-        void SetHonorRating(float rating) { m_rating = rating; }
-        //Acessors of last week standing
-        int32 GetHonorLastWeekStanding() const { return m_standing; }
-        void SetHonorLastWeekStanding(int32 standing){ m_standing = standing; }
-        //End of Honor System
+        uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
+        uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
+        void SetHonorPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, val); }
+        void SetArenaPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, val); }
+        //End of PvP System
 
         void SetDrunkValue(uint16 newDrunkValue);
         uint16 GetDrunkValue() const { return m_drunk; }
