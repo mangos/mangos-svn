@@ -183,7 +183,11 @@ int libmpq_conf_get_value(FILE *fp, char *search_value, void *return_value, int 
 				break;
 		}
 	}
-	fseek(fp, 0L, SEEK_SET);
+	#ifdef WIN32
+		_lseeki64((int)fp, 0L, SEEK_SET);
+	#else
+		lseek64((int)fp, 0L, SEEK_SET);
+	#endif
 
 	return result;
 }
@@ -286,7 +290,11 @@ int libmpq_conf_get_array(FILE *fp, char *search_value, char ***filelist, int *e
 	}
 
 	/* we got all files, so rewind stream */
-	fseek(fp, 0L, SEEK_SET);
+	#ifdef WIN32
+		_lseeki64((int)fp, 0L, SEEK_SET);
+	#else
+		lseek64((int)fp, 0L, SEEK_SET);
+	#endif	
 
 	(*filelist)[fl_count] = NULL;
 
