@@ -53,22 +53,25 @@
 
 enum ShapeshiftForm
 {
-    FORM_CAT              = 1,
-    FORM_TREE             = 2,
-    FORM_TRAVEL           = 3,
-    FORM_AQUA             = 4,
-    FORM_BEAR             = 5,
-    FORM_AMBIENT          = 6,
-    FORM_GHOUL            = 7,
-    FORM_DIREBEAR         = 8,
-    FORM_CREATUREBEAR     = 14,
-    FORM_GHOSTWOLF        = 16,
-    FORM_BATTLESTANCE     = 17,
-    FORM_DEFENSIVESTANCE  = 18,
-    FORM_BERSERKERSTANCE  = 19,
-    FORM_SHADOW           = 28,
-    FORM_STEALTH          = 30,
-    FORM_MOONKIN          = 31
+    FORM_CAT                = 1,
+    FORM_TREE               = 2,
+    FORM_TRAVEL             = 3,
+    FORM_AQUA               = 4,
+    FORM_BEAR               = 5,
+    FORM_AMBIENT            = 6,
+    FORM_GHOUL              = 7,
+    FORM_DIREBEAR           = 8,
+    FORM_CREATUREBEAR       = 14,
+    FORM_CREATURECAT        = 15,
+    FORM_GHOSTWOLF          = 16,
+    FORM_BATTLESTANCE       = 17,
+    FORM_DEFENSIVESTANCE    = 18,
+    FORM_BERSERKERSTANCE    = 19,
+    FORM_SHADOW             = 28,
+    FORM_FLIGHT             = 29,
+    FORM_STEALTH            = 30,
+    FORM_MOONKIN            = 31,
+    FORM_SPIRITOFREDEMPTION = 32
 };
 
 #define CREATURE_MAX_SPELLS     4
@@ -178,7 +181,7 @@ enum UnitState
     UNIT_STAT_SEARCHING     = 64,
     UNIT_STAT_FLEEING       = 128,
     UNIT_STAT_MOVING        = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
-    UNIT_STAT_IN_FLIGHT     = 256,                          // player is i n flight mode
+    UNIT_STAT_IN_FLIGHT     = 256,                          // player is in flight mode
     UNIT_STAT_FOLLOW        = 512,
     UNIT_STAT_ROOT          = 1024,
     UNIT_STAT_CONFUSED      = 2048,
@@ -192,10 +195,12 @@ enum UnitMoveType
     MOVE_WALKBACK   = 2,
     MOVE_SWIM       = 3,
     MOVE_SWIMBACK   = 4,
-    MOVE_TURN       = 5
+    MOVE_TURN       = 5,
+    MOVE_FLY        = 6,
+    MOVE_FLYBACK    = 7
 };
 
-#define MAX_MOVE_TYPE 6
+#define MAX_MOVE_TYPE 8
 
 extern float baseMoveSpeed[MAX_MOVE_TYPE];
 
@@ -237,13 +242,23 @@ enum UnitFlags
     UNIT_FLAG_NONE           = 0x00000000,
     UNIT_FLAG_DISABLE_MOVE   = 0x00000004,
     UNIT_FLAG_UNKNOWN1       = 0x00000008,                  // essential for all units..
-    UNIT_FLAG_RENAME         = 0x00000010,                  // rename creature
+    UNIT_FLAG_RENAME         = 0x00000010,                  // rename creature, not working in 2.0.8
     UNIT_FLAG_RESTING        = 0x00000020,
+    UNIT_FLAG_UNKNOWN2       = 0x00000100,                  // 2.0.8
+    UNIT_FLAG_UNKNOWN3       = 0x00000800,                  // in combat ?2.0.8
     UNIT_FLAG_PVP            = 0x00001000,
     UNIT_FLAG_MOUNT          = 0x00002000,
-    UNIT_FLAG_DISABLE_ROTATE = 0x00040000,
+    UNIT_FLAG_UNKNOWN4       = 0x00004000,                  // 2.0.8
+    UNIT_FLAG_PACIFIED       = 0x00020000,
+    UNIT_FLAG_DISABLE_ROTATE = 0x00040000,                  // may be it's stunned flag?
     UNIT_FLAG_IN_COMBAT      = 0x00080000,
+    UNIT_FLAG_DISARMED       = 0x00200000,                  // disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
+    UNIT_FLAG_CONFUSED       = 0x00400000,
+    UNIT_FLAG_FLEEING        = 0x00800000,
+    UNIT_FLAG_UNKNOWN5       = 0x01000000,					// used in spell Eyes of the Beast for pet...
+    UNIT_FLAG_NOT_SELECTABLE = 0x02000000,
     UNIT_FLAG_SKINNABLE      = 0x04000000,
+    UNIT_FLAG_UNKNOWN6       = 0x20000000,                  // used in Feing Death spell
     UNIT_FLAG_SHEATHE        = 0x40000000
 };
 

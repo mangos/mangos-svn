@@ -76,7 +76,7 @@ enum InventoryChangeFailure
     EQUIP_ERR_YOU_ARE_STUNNED                    = 37,
     EQUIP_ERR_YOU_ARE_DEAD                       = 38,
     EQUIP_ERR_CANT_DO_RIGHT_NOW                  = 39,
-    EQUIP_ERR_BAG_FULL2                          = 40,
+    EQUIP_ERR_INT_BAG_ERROR                      = 40,
     EQUIP_ERR_CAN_EQUIP_ONLY1_QUIVER2            = 41,
     EQUIP_ERR_CAN_EQUIP_ONLY1_AMMOPOUCH          = 42,
     EQUIP_ERR_STACKABLE_CANT_BE_WRAPPED          = 43,
@@ -101,7 +101,14 @@ enum InventoryChangeFailure
     EQUIP_ERR_BAG_FULL6                          = 62,
     EQUIP_ITEM_RANK_NOT_ENOUGH                   = 63,
     EQUIP_ITEM_REPUTATION_NOT_ENOUGH             = 64,
-    EQUIP_MORE_THAN1_SPECIAL_BAG                 = 65
+    EQUIP_MORE_THAN1_SPECIAL_BAG                 = 65,
+    EQUIP_CANT_LOOT_NOW                          = 66,
+    EQUIP_CANT_EQUIP_MORE_THAN_ONE_OF_THAT       = 67,
+    EQUIP_DONT_HAVE_REQITEMS_FOR_THAT_PURCHASE   = 68,
+    EQUIP_DONT_HAVE_ENOUGHT_HONOR_POINTS         = 69,
+    EQUIP_DONT_HAVE_ENOUGHT_ARENA_POINTS         = 70,
+    EQUIP_MAX_GEMS_IN_INVENTORY                  = 71,
+    EQUIP_CANT_MAIL_SOULBOUND                    = 72
 };
 
 enum BuyFailure
@@ -112,15 +119,18 @@ enum BuyFailure
     BUY_ERR_SELLER_DONT_LIKE_YOU                 = 4,
     BUY_ERR_DISTANCE_TOO_FAR                     = 5,
     BUY_ERR_CANT_CARRY_MORE                      = 8,
-    BUY_ERR_LEVEL_REQUIRE                        = 11,
+    BUY_ERR_LEVEL_REQUIRE                        = 11, // 2.0.1 - rank
     BUY_ERR_REPUTATION_REQUIRE                   = 12
 };
 
 enum SellFailure
 {
     SELL_ERR_CANT_FIND_ITEM                      = 1,
-    SELL_ERR_CANT_SELL_ITEM                      = 2,
-    SELL_ERR_CANT_FIND_VENDOR                    = 3
+    SELL_ERR_CANT_SELL_ITEM                      = 2, // merchant doesn't like that item
+    SELL_ERR_CANT_FIND_VENDOR                    = 3, // merchant doesn't like you
+    SELL_ERR_YOU_DONT_OWN_THAT_ITEM              = 4, // you don't own that item
+    SELL_ERR_UNK                                 = 5, // nothing appears...
+    SELL_ERR_ONLY_EMPTY_BAG                      = 6  // can only do with empty bags
 };
 
 enum ItemUpdateState

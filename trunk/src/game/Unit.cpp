@@ -48,7 +48,9 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     1.25f,                                                  // MOVE_WALKBACK
     4.722222f,                                              // MOVE_SWIM
     4.5f,                                                   // MOVE_SWIMBACK
-    3.141594f                                               // MOVE_TURN
+    3.141594f,                                              // MOVE_TURN
+    7.0f,                                                   // MOVE_FLY
+    4.5f                                                    // MOVE_FLYBACK
 };
 
 Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
