@@ -348,7 +348,9 @@ void World::SetInitialWorldSettings()
         ||!MapManager::ExistMAP(1,-618.518,-4251.67)
         ||!MapManager::ExistMAP(0, 1676.35, 1677.45)
         ||!MapManager::ExistMAP(1, 10311.3, 832.463)
-        ||!MapManager::ExistMAP(1,-2917.58,-257.98))
+        ||!MapManager::ExistMAP(1,-2917.58,-257.98)
+        ||!MapManager::ExistMAP(530,10349.6,-6357.29)
+        ||!MapManager::ExistMAP(530,-3961.64,-13931.2))
     {
         sLog.outError("Correct *.map files not found in path '%smaps'. Please place *.map files in the directory pointed by this path or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str());
         exit(1);
@@ -406,7 +408,7 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Item Texts..." );
     objmgr.LoadItemTexts();
 
-    sLog.outString( "Loading Creature Templates..." );
+    sLog.outString( "Loading Creature templates..." );
     objmgr.LoadCreatureTemplates();
 
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
@@ -701,7 +703,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                ((Creature *)step.source)->MonsterSay(step.script->datatext.c_str(), 0, step.target->GetGUID());
+                ((Creature *)step.source)->Say(step.script->datatext.c_str(), 0);
                 break;
             case SCRIPT_COMMAND_EMOTE:
                 if(!step.source)

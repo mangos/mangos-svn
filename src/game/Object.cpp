@@ -591,6 +591,8 @@ WorldObject::WorldObject( WorldObject *instantiator )
     m_mapId             = 0;
     m_InstanceId        = 0;
 
+    m_name = "";
+
     mSemaphoreTeleport  = false;
 
     if (instantiator)
@@ -603,7 +605,8 @@ void WorldObject::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float 
 {
     Object::_Create(guidlow, guidhigh);
 
-    SetUInt32Value( OBJECT_FIELD_ENTRY,nameId);
+    // nameId not required, it set in other place...
+    //SetUInt32Value( OBJECT_FIELD_ENTRY,nameId);
 
     m_mapId = mapid;
     m_positionX = x;
@@ -725,6 +728,72 @@ void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, f
 
     // FIXME: must be real z coordinate at ground in point (x,y) when it will correctly can calculated
     z = GetPositionZ();
+}
+
+void WorldObject::Say(const std::string text, const uint32 language)
+{
+    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    data << (uint8)CHAT_MSG_MONSTER_SAY;
+    data << (uint32)language;
+    data << (uint64)GetGUID();
+    data << (uint32)(strlen(GetName())+1);
+    data << GetName();
+    data << (uint64)0;
+    data << (uint32)(text.length()+1);
+    data << text;
+    data << (uint8)0;                       // ChatTag
+
+    SendMessageToSet(&data, true);
+}
+
+void WorldObject::Yell(const std::string text, const uint32 language)
+{
+    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    data << (uint8)CHAT_MSG_MONSTER_YELL;
+    data << (uint32)language;
+    data << (uint64)GetGUID();
+    data << (uint32)(strlen(GetName())+1);
+    data << GetName();
+    data << (uint64)0;
+    data << (uint32)(text.length()+1);
+    data << text;
+    data << (uint8)0;                       // ChatTag
+
+    SendMessageToSet(&data, true);
+}
+
+void WorldObject::TextEmote(const std::string text)
+{
+    std::string rightText = "%s " + text;
+
+    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    data << (uint8)CHAT_MSG_MONSTER_EMOTE;
+    data << (uint32)LANG_UNIVERSAL;
+    data << (uint32)(strlen(GetName())+1);
+    data << GetName();
+    data << (uint64)0;
+    data << (uint32)(rightText.length()+1);
+    data << rightText;
+    data << (uint8)0;                       // ChatTag
+
+    SendMessageToSet(&data, true);          // SendMessageToOwnTeamSet()?
+}
+
+void WorldObject::Whisper(const uint64 receiver, const std::string text)
+{
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
+    data << (uint8)CHAT_MSG_MONSTER_WHISPER;
+    data << (uint32)LANG_UNIVERSAL;
+    data << (uint32)1;
+    data << GetName();
+    data << (uint64)receiver;
+    data << (uint32)(text.length()+1);
+    data << text;
+    data << (uint8)0;                       // ChatTag
+
+    Player *player = objmgr.GetPlayer(receiver);
+    if(player && player->GetSession())
+        player->GetSession()->SendPacket(&data);
 }
 
 void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, float &z, float distance, float angle ) const

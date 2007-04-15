@@ -275,7 +275,10 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         uint32 GetMapId() const { return m_mapId; }
 
         uint32 GetZoneId() const;
-        uint32 GetAreaId() const;
+        uint32 GetAreaId() const;        
+        
+        const char* GetName() const { return m_name.c_str(); }
+        void SetName(std::string newname) { m_name=newname; }
 
         float GetDistanceSq( const WorldObject* obj ) const;
         float GetDistance2dSq( const WorldObject* obj ) const;
@@ -293,6 +296,11 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool IsBeingTeleported() { return mSemaphoreTeleport; }
         void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
 
+        virtual void Say(const std::string text, const uint32 language);
+        virtual void Yell(const std::string text, const uint32 language);
+        virtual void TextEmote(const std::string text);
+        virtual void Whisper(const uint64 receiver, const std::string text);
+
         void SendDestroyObject(uint64 guid);
         void SendObjectDeSpawnAnim(uint64 guid);
 
@@ -303,6 +311,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
     protected:
         WorldObject( WorldObject *instantiator );
+
+        std::string m_name;
 
     private:
         uint32 m_mapId;

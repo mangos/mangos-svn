@@ -59,8 +59,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
     switch(type)
     {
-        case CHAT_MSG_SAY:
-        case CHAT_MSG_EMOTE:                                // "/me text" emote type
+        case CHAT_MSG_SAY:  
+        case CHAT_MSG_EMOTE:
+        case CHAT_MSG_YELL:
         {
             std::string msg = "";
             recv_data >> msg;
@@ -68,18 +69,52 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            if(type==CHAT_MSG_SAY)
+            if(type == CHAT_MSG_SAY)
+                GetPlayer()->Say(msg, lang);
+            else if(type == CHAT_MSG_EMOTE)
+                GetPlayer()->TextEmote(msg);
+            else if(type == CHAT_MSG_YELL)
+                GetPlayer()->Yell(msg, lang);
+        } break;        
+
+        case CHAT_MSG_WHISPER:
+        {
+            std::string to, msg;
+            recv_data >> to;
+            CHECK_PACKET_SIZE(recv_data,4+4+(to.size()+1)+1);
+            recv_data >> msg;
+
+            if(to.size() == 0)
             {
-                sChatHandler.FillMessageData( &data, this, type, lang, NULL, 0, msg.c_str() );
-                GetPlayer()->SendMessageToSet( &data, true );
+                WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
+                data<<to;
+                SendPacket(&data);
+                break;
             }
-            else
+
+            normalizePlayerName(to);
+            Player *player = objmgr.GetPlayer(to.c_str());
+            if(!player || GetSecurity() == 0 && player->GetSession()->GetSecurity() > 0 && !player->isAcceptWhispers())
             {
-                std::ostringstream msg2;
-                msg2 << GetPlayer()->GetName() << " " << msg;
-                sChatHandler.FillMessageData( &data, this, type, lang, NULL, 0, msg2.str().c_str() );
-                GetPlayer()->SendMessageToOwnTeamSet( &data, true );
+                WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
+                data<<to;
+                SendPacket(&data);
+                return;
             }
+            if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
+            {
+                uint32 sidea = GetPlayer()->GetTeam();
+                uint32 sideb = player->GetTeam();
+                if( sidea != sideb )
+                {
+                    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
+                    data<<to;
+                    SendPacket(&data);
+                    return;
+                }
+            }
+
+            GetPlayer()->Whisper(player->GetGUID(), msg, lang);
         } break;
 
         case CHAT_MSG_PARTY:
@@ -99,7 +134,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             group->BroadcastPacket(&data, group->GetMemberGroup(GetPlayer()->GetGUID()));
         }
         break;
-
         case CHAT_MSG_GUILD:
         {
             std::string msg = "";
@@ -133,88 +167,50 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
             break;
         }
-
-        case CHAT_MSG_YELL:
+        case CHAT_MSG_RAID:
         {
-            std::string msg = "";
+            std::string msg="";
             recv_data >> msg;
 
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            sChatHandler.FillMessageData(&data, this, type, lang, NULL, 0, msg.c_str() );
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group || !group->isRaidGroup())
+                return;
 
-            //please test this, its important that this is correct. I leave the previouse code becouse of this.
-            GetPlayer()->SendMessageToSet( &data, true );
-            //SendPacket(&data);
-            //sWorld.SendGlobalMessage(&data, this);
-
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID, lang, "", 0, msg.c_str());
+            group->BroadcastPacket(&data);
         } break;
-
-        case CHAT_MSG_WHISPER:
+        case CHAT_MSG_RAID_LEADER:
         {
-            std::string to, msg;
-            recv_data >> to;
-
-            // recheck
-            CHECK_PACKET_SIZE(recv_data,4+4+(to.size()+1)+1);
-
+            std::string msg="";
             recv_data >> msg;
 
-            if(to.size() == 0)
-            {
-                WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
-                data<<to;
-                SendPacket(&data);
+            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
-            }
 
-            normalizePlayerName(to);
-            Player *player = objmgr.GetPlayer(to.c_str());
-            // send whispers from player to GM only if GM accept its (not show online state GM in other case)
-            if(!player || GetSecurity() == 0 && player->GetSession()->GetSecurity() > 0 && !player->isAcceptWhispers())
-            {
-                WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
-                data<<to;
-                SendPacket(&data);
-                break;
-            }
-            if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) && GetSecurity() == 0 && player->GetSession()->GetSecurity() == 0 )
-            {
-                uint32 sidea = GetPlayer()->GetTeam();
-                uint32 sideb = player->GetTeam();
-                if( sidea != sideb )
-                {
-                    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
-                    data<<to;
-                    SendPacket(&data);
-                    break;
-                }
-            }
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
+                return;
 
-            sChatHandler.FillMessageData(&data, this, type, lang, NULL, 0, msg.c_str() );
-            player->GetSession()->SendPacket(&data);
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str());
+            group->BroadcastPacket(&data);
+        } break;
+        case CHAT_MSG_RAID_WARN:
+        {
+            std::string msg="";
+            recv_data >> msg;
 
-            sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,lang,NULL,player->GetGUID(),msg.c_str() );
-            SendPacket(&data);
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
+                return;
 
-            if(player->isAFK())
-            {
-                sChatHandler.FillMessageData(&data, this, CHAT_MSG_AFK, LANG_UNIVERSAL, NULL, player->GetGUID(), player->afkMsg.c_str());
-                SendPacket(&data);
-            }
-            if(player->isDND())
-            {
-                sChatHandler.FillMessageData(&data, this, CHAT_MSG_DND, LANG_UNIVERSAL, NULL, player->GetGUID(), player->dndMsg.c_str());
-                SendPacket(&data);
-            }
-
-            // Auto enable whispers accepting at sending whispers
-            if(!GetPlayer()->isAcceptWhispers())
-            {
-                GetPlayer()->SetAcceptWhispers(true);
-                sChatHandler.SendSysMessage(this ,"Whispers accepting now: ON");
-            }
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_WARN, lang, "", 0, msg.c_str());
+            group->BroadcastPacket(&data);
         } break;
 
         case CHAT_MSG_CHANNEL:
@@ -227,9 +223,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             recv_data >> msg;
 
-            if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
-                if(Channel *chn = cMgr->GetChannel(channel,GetPlayer()))
-                    chn->Say(GetPlayer(),msg.c_str(),lang);
+            if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+                if(Channel *chn = cMgr->GetChannel(channel,_player))
+                    chn->Say(_player->GetGUID(),msg.c_str(),lang);
         } break;
 
         case CHAT_MSG_AFK:
@@ -237,12 +233,12 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg;
             recv_data >> msg;
 
-            GetPlayer()->afkMsg = msg;
-            if((msg.size() == 0 || !GetPlayer()->isAFK()) && !GetPlayer()->isInCombat() )
+            _player->afkMsg = msg;
+            if((msg.size() == 0 || !_player->isAFK()) && !_player->isInCombat() )
             {
-                GetPlayer()->ToggleAFK();
-                if(GetPlayer()->isAFK() && GetPlayer()->isDND())
-                    GetPlayer()->ToggleDND();
+                _player->ToggleAFK();
+                if(_player->isAFK() && _player->isDND())
+                    _player->ToggleDND();
             }
         } break;
 
@@ -260,53 +256,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
         } break;
 
-        case CHAT_MSG_RAID:
-        {
-            std::string msg="";
-            recv_data >> msg;
 
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
-                break;
-
-            Group *group = GetPlayer()->groupInfo.group;
-            if(!group || !group->isRaidGroup())
-                return;
-
-            WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID, lang, "", 0, msg.c_str());
-            group->BroadcastPacket(&data);
-        } break;
-
-        case CHAT_MSG_RAID_LEADER:
-        {
-            std::string msg="";
-            recv_data >> msg;
-
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
-                break;
-
-            Group *group = GetPlayer()->groupInfo.group;
-            if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
-                return;
-
-            WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str());
-            group->BroadcastPacket(&data);
-        } break;
-
-        case CHAT_MSG_RAID_WARN:
-        {
-            std::string msg="";
-            recv_data >> msg;
-
-            Group *group = GetPlayer()->groupInfo.group;
-            if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
-                return;
-
-            WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_WARN, lang, "", 0, msg.c_str());
-            group->BroadcastPacket(&data);
-        } break;
 
         default:
             sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
