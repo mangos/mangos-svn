@@ -32,6 +32,74 @@
 #include "RedZoneDistrict.h"
 #include "Transports.h"
 
+
+bool ChatHandler::HandleSayCommand(const char* args)
+{
+    uint64 guid = m_session->GetPlayer()->GetSelection();    
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+
+    if(!pCreature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
+
+    pCreature->Say(args, LANG_UNIVERSAL);
+
+    return true;
+}
+
+bool ChatHandler::HandleYellCommand(const char* args)
+{
+    uint64 guid = m_session->GetPlayer()->GetSelection();    
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+
+    if(!pCreature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
+
+    pCreature->Yell(args, LANG_UNIVERSAL);
+
+    return true;
+}
+
+bool ChatHandler::HandleEmote2Command(const char* args)
+{
+    uint64 guid = m_session->GetPlayer()->GetSelection();        
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+
+    if(!pCreature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
+
+    pCreature->TextEmote(args);
+
+    return true;
+}
+
+bool ChatHandler::HandleWhisperCommand(const char* args)
+{
+    char* receiver = strtok((char*)args, " ");
+    char* text = strtok(NULL, "");
+
+    uint64 guid = m_session->GetPlayer()->GetSelection();  
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+
+    if(!pCreature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
+
+    pCreature->Whisper(atol(receiver), text);
+    
+    return true;
+}
+
 bool ChatHandler::HandleAnnounceCommand(const char* args)
 {
     if(!*args)
@@ -99,12 +167,12 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     Cell cell = RedZone::GetZone(cell_val);
 
     PSendSysMultilineMessage(LANG_MAP_POSITION,
-        obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
+        obj->GetMapId(), obj->GetZoneId(), obj->GetAreaId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
 
     sLog.outDebug("Player %s GPS call %s %u " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetGUIDLow(),
-        obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
+        obj->GetMapId(), obj->GetZoneId(), obj->GetAreaId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
 
     return true;
@@ -347,6 +415,23 @@ bool ChatHandler::HandleRecallCommand(const char* args)
     }
 
     chr->TeleportTo(chr->m_recallMap, chr->m_recallX, chr->m_recallY, chr->m_recallZ, chr->m_recallO);
+    return true;
+}
+
+bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
+{
+    uint32 titles = atoi((char*)args);
+
+    Player *chr = getSelectedPlayer();
+    if (chr == NULL)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    chr->SetUInt32Value(PLAYER_FIELD_KNOWN_TITLES, titles);
+    SendSysMessage("done");
+
     return true;
 }
 
@@ -764,6 +849,8 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
     chr->SetSpeed(MOVE_WALKBACK,ASpeed,true);
     chr->SetSpeed(MOVE_SWIM,    ASpeed,true);
     chr->SetSpeed(MOVE_SWIMBACK,ASpeed,true);
+    //chr->SetSpeed(MOVE_TURN,    ASpeed,true);
+    chr->SetSpeed(MOVE_FLY,     ASpeed,true);
     return true;
 }
 
@@ -886,6 +973,41 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
     chr->GetSession()->SendPacket(&data);
 
     chr->SetSpeed(MOVE_WALKBACK,BSpeed,true);
+
+    return true;
+}
+
+bool ChatHandler::HandleModifyFlyCommand(const char* args)
+{
+    WorldPacket data;
+
+    if (!*args)
+        return false;
+
+    float FSpeed = (float)atof((char*)args);
+
+    if (FSpeed > 10 || FSpeed < 0.1)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        return true;
+    }
+
+    Player *chr = getSelectedPlayer();
+    if (chr == NULL)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    PSendSysMessage(LANG_YOU_CHANGE_FLY_SPEED, FSpeed, chr->GetName());
+
+    char buf[256];
+    sprintf((char*)buf,LANG_YOURS_FLY_SPEED_CHANGED, m_session->GetPlayer()->GetName(), FSpeed);
+    FillSystemMessageData(&data, m_session, buf);
+
+    chr->GetSession()->SendPacket(&data);
+
+    chr->SetSpeed(MOVE_FLY,FSpeed,true);
 
     return true;
 }
@@ -1314,7 +1436,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         result = sDatabase.Query("SELECT `name` FROM `game_tele`");
         if (!result)
         {
-            SendSysMessage("Teleport location table is empty!");
+            SendSysMessage(LANG_COMMAND_TELE_TABLEEMPTY);
             return true;
         }
         std::string reply="Valid locations are:";
@@ -1334,7 +1456,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
     if (!result)
     {
-        SendSysMessage("Teleport location not found!");
+        SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
         return true;
     }
     Field *fields = result->Fetch();
@@ -1362,7 +1484,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
     QueryResult *result;
     if(!*args)
     {
-        SendSysMessage("Requires search parameter.");
+        SendSysMessage(LANG_COMMAND_TELE_PARAMETER);
         return true;
     }
     char const* str = strtok((char*)args, " ");
@@ -1374,7 +1496,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
     result = sDatabase.PQuery("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",namepart.c_str());
     if (!result)
     {
-        SendSysMessage("There are no teleport locations matching your request.");
+        SendSysMessage(LANG_COMMAND_TELE_NOREQUEST);
         return true;
     }
     std::string reply;
@@ -1389,7 +1511,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
     delete result;
 
     if(reply.empty())
-        SendSysMessage("None locations found.");
+        SendSysMessage(LANG_COMMAND_TELE_NOLOCATION);
     else
     {
         reply = "Locations found are:\n" + reply;
@@ -1405,7 +1527,7 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
     // ticket<end>
     if (!px)
     {
-        PSendSysMessage("Whispers accepting: %s", m_session->GetPlayer()->isAcceptWhispers() ?  "on" : "off");
+        PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, m_session->GetPlayer()->isAcceptWhispers() ?  "on" : "off");
         return true;
     }
 
@@ -1413,7 +1535,7 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
     if(strncmp(px,"on",3) == 0)
     {
         m_session->GetPlayer()->SetAcceptWhispers(true);
-        SendSysMessage("Whispers accepting: on");
+        SendSysMessage(LANG_COMMAND_WHISPERON);
         return true;
     }
 
@@ -1421,7 +1543,7 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
     if(strncmp(px,"off",4) == 0)
     {
         m_session->GetPlayer()->SetAcceptWhispers(false);
-        SendSysMessage("Whispers accepting: off");
+        SendSysMessage(LANG_COMMAND_WHISPEROFF);
         return true;
     }
 
