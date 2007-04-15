@@ -814,7 +814,7 @@ void Creature::generateMoneyLoot()
         if (maxgold <= mingold)
             loot.gold = uint32(maxgold * sWorld.getRate(RATE_DROP_MONEY));
         else
-            loot.gold = rand32(mingold, maxgold) * sWorld.getRate(RATE_DROP_MONEY);
+            loot.gold = uint32(rand32(mingold, maxgold) * sWorld.getRate(RATE_DROP_MONEY));
     }
 }
 
