@@ -32,6 +32,7 @@
 #include "ObjectAccessor.h"
 #include "Log.h"
 #include "Transports.h"
+#include "Chat.h"
 
 using namespace std;
 
@@ -46,11 +47,13 @@ Object::Object( )
 
     m_inWorld           = false;
     m_objectUpdated     = false;
+
+    m_PackGUID.clear();
+    _SetPackGUID(&m_PackGUID,0);
 }
 
 Object::~Object( )
 {
-
     if(m_objectUpdated)
         ObjectAccessor::Instance().RemoveUpdateObject(this);
 
@@ -99,69 +102,76 @@ void Object::BuildMovementUpdateBlock(UpdateData * data, uint32 flags ) const
 
 void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const
 {
-    if(!target) return;
+    if(!target)
+    {
+        return;
+    }
+
+    uint8  updatetype = UPDATETYPE_CREATE_OBJECT;
+    uint8  flags      = m_updateFlag;
+    uint32 flags2     = 0;
+
+    /** lower flag1 **/
+    if(target == this) // building packet for oneself
+        flags |= UPDATEFLAG_SELF;
+
+    if(flags & UPDATEFLAG_HASPOSITION)
+    {
+        // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
+        if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE) || isType(TYPE_PLAYER))
+            updatetype = UPDATETYPE_CREATE_OBJECT2;
+
+        // UPDATETYPE_CREATE_OBJECT2 for pets...
+        if(target->GetPetGUID() == GetGUID())
+            updatetype = UPDATETYPE_CREATE_OBJECT2; 
+
+        // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
+        if(isType(TYPE_GAMEOBJECT))
+        {
+            switch(m_uint32Values[GAMEOBJECT_TYPE_ID])
+            {
+                case GAMEOBJECT_TYPE_TRAP:
+                case GAMEOBJECT_TYPE_DUEL_ARBITER:
+                case GAMEOBJECT_TYPE_FLAGSTAND:
+                case GAMEOBJECT_TYPE_FLAGDROP:
+                    // Duel flag will only animate if it's updatetype = UPDATETYPE_CREATE_OBJECT2.
+                    updatetype = UPDATETYPE_CREATE_OBJECT2;
+                    break;
+            }
+        }
+    }
+
+    // flags2 only used at LIVING objects
+    if(flags & UPDATEFLAG_LIVING)
+    {
+        if(m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport() != 0)
+            flags2 |= 0x0200;
+
+        /*if(m_objectTypeId == TYPEID_PLAYER)
+        {
+            updatetype = UPDATETYPE_CREATE_OBJECT2; // dunno when exactly this's used
+            //flags2 |= 0x00002000;
+        }*/
+    }
+
+    sLog.outDebug("BuildCreateUpdate: update-type: %u, object-type: %u got flags: %X, flags2: %X", updatetype, m_objectTypeId, flags, flags2);
 
     ByteBuffer buf(500);
-    buf << uint8( UPDATETYPE_CREATE_OBJECT );
-    buf << uint8( 0xFF );
-    buf << GetGUID() ;
+    buf << updatetype;
+    //buf.append(GetPackGUID());    //client crashes when using this
+    buf << (uint8)0xFF << GetGUID();
     buf << m_objectTypeId;
 
-    switch(m_objectTypeId)
-    {
-        case TYPEID_OBJECT:                                 //do nothing
-            break;
-        case TYPEID_ITEM:
-        case TYPEID_CONTAINER:
-            _BuildMovementUpdate( &buf, 0x10, 0x0 );
-            break;
-        case TYPEID_UNIT:
-            _BuildMovementUpdate( &buf, 0x70, 0x800000 );
-            break;
-        case TYPEID_PLAYER:
-        {
-            if( target == this )                            //build for self
-            {
-                buf.clear();
-                buf << uint8( UPDATETYPE_CREATE_OBJECT2 );
-                buf << uint8( 0xFF );                       // must be packet GUID ?
-                buf << GetGUID() ;
-                buf << m_objectTypeId;
-                _BuildMovementUpdate( &buf, 0x71, 0x2000 );
-            }
-            //build for other player
-            else
-            {
-                _BuildMovementUpdate( &buf, 0x70, 0x0 );
-            }
-        }break;
-        case TYPEID_CORPSE:
-        case TYPEID_GAMEOBJECT:
-        case TYPEID_DYNAMICOBJECT:
-        {
-            if ((GUID_HIPART(GetGUID())==HIGHGUID_PLAYER_CORPSE) || (GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT))
-                _BuildMovementUpdate( &buf, 0x52, 0x0 );
-            else
-                _BuildMovementUpdate( &buf, 0x50, 0x0 );
-        }break;
-        //case TYPEID_AIGROUP:
-        //case TYPEID_AREATRIGGER:
-        //break;
-        default:                                            //know type
-            sLog.outDetail("Unknown Object Type %u Create Update Block.\n", m_objectTypeId);
-            break;
-    }
+    _BuildMovementUpdate(&buf, flags, flags2);
 
     UpdateMask updateMask;
     updateMask.SetCount( m_valuesCount );
     _SetCreateBits( &updateMask, target );
-    _BuildValuesUpdate( &buf, &updateMask );
+    _BuildValuesUpdate( &buf, &updateMask, target );
     data->AddUpdateBlock(buf);
-
 }
 
-void
-Object::BuildUpdate(UpdateDataMapType &update_players)
+void Object::BuildUpdate(UpdateDataMapType &update_players)
 {
     ObjectAccessor::_buildUpdateObject(this,update_players);
     ClearUpdateMask(true);
@@ -189,14 +199,15 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     ByteBuffer buf(500);
 
     buf << (uint8) UPDATETYPE_VALUES;
-    buf << (uint8) 0xFF;                                    // must be packed GUID  ?
+    //buf.append(GetPackGUID());    client crashes when using this
+    buf << (uint8)0xFF;
     buf << GetGUID();
 
     UpdateMask updateMask;
     updateMask.SetCount( m_valuesCount );
 
     _SetUpdateBits( &updateMask, target );
-    _BuildValuesUpdate( &buf, &updateMask );
+    _BuildValuesUpdate( &buf, &updateMask, target );
 
     data->AddUpdateBlock(buf);
 }
@@ -219,118 +230,97 @@ void Object::DestroyForPlayer(Player *target) const
 void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const
 {
     *data << (uint8)flags;
-    if( m_objectTypeId==TYPEID_PLAYER )
+
+    if (flags & UPDATEFLAG_LIVING)          // 0x20
     {
-        if(((Player*)this)->GetTransport())
+        if(m_objectTypeId == TYPEID_UNIT)
         {
-            flags2 |= 0x02000000;
-        }
-        *data << (uint32)flags2;
-
-        *data << (uint32)getMSTime();
-
-        if (!((Player *)this)->GetTransport())
-        {
-            *data << ((Player *)this)->GetPositionX();
-            *data << ((Player *)this)->GetPositionY();
-            *data << ((Player *)this)->GetPositionZ();
-            *data << ((Player *)this)->GetOrientation();
-        }
-        else
-        {
-            //*data << ((Player *)this)->m_transport->GetPositionX() + (float)((Player *)this)->m_transX;
-            //*data << ((Player *)this)->m_transport->GetPositionY() + (float)((Player *)this)->m_transY;
-            //*data << ((Player *)this)->m_transport->GetPositionZ() + (float)((Player *)this)->m_transZ;
-
-            *data << ((Player *)this)->GetTransport()->GetPositionX();
-            *data << ((Player *)this)->GetTransport()->GetPositionY();
-            *data << ((Player *)this)->GetTransport()->GetPositionZ();
-            *data << ((Player *)this)->GetTransport()->GetOrientation();
-
-            *data << (uint64)(((Player *)this)->GetTransport()->GetGUID());
-            *data << ((Player *)this)->GetTransOffsetX();
-            *data << ((Player *)this)->GetTransOffsetY();
-            *data << ((Player *)this)->GetTransOffsetZ();
-            *data << ((Player *)this)->GetTransOffsetO();
-        }
-
-        *data << (float)0;
-
-        if(flags2 & 0x2000)                                 //update self
-        {
-            *data << (float)0;
-            *data << (float)1.0;
-            *data << (float)0;
-            *data << (float)0;
-        }
-        *data << ((Player*)this)->GetSpeed( MOVE_WALK );
-        *data << ((Player*)this)->GetSpeed( MOVE_RUN );
-        *data << ((Player*)this)->GetSpeed( MOVE_SWIMBACK );
-        *data << ((Player*)this)->GetSpeed( MOVE_SWIM );
-        *data << ((Player*)this)->GetSpeed( MOVE_WALKBACK );
-        *data << ((Player*)this)->GetSpeed( MOVE_TURN );
-    }
-    if( m_objectTypeId==TYPEID_UNIT )
-    {
-        *data << (uint32)flags2;
-        *data << (uint32)0xB5771D7F;
-        *data << ((Unit *)this)->GetPositionX();
-        *data << ((Unit *)this)->GetPositionY();
-        *data << ((Unit *)this)->GetPositionZ();
-        *data << ((Unit *)this)->GetOrientation();
-        *data << (float)0;
-        *data << ((Creature*)this)->GetSpeed( MOVE_WALK );
-        *data << ((Creature*)this)->GetSpeed( MOVE_RUN );
-        *data << ((Creature*)this)->GetSpeed( MOVE_SWIMBACK );
-        *data << ((Creature*)this)->GetSpeed( MOVE_SWIM );
-        *data << ((Creature*)this)->GetSpeed( MOVE_WALKBACK );
-        *data << ((Creature*)this)->GetSpeed( MOVE_TURN );
-        uint8 PosCount=0;
-        if(flags2 & 0x400000)
-        {
-            *data << (uint32)0x0;
-            *data << (uint32)0x659;
-            *data << (uint32)0xB7B;
-            *data << (uint32)0xFDA0B4;
-            *data << (uint32)PosCount;
-            for(int i=0;i<PosCount+1;i++)
+            switch(GetEntry())
             {
-                *data << (float)0;                          //x
-                *data << (float)0;                          //y
-                *data << (float)0;                          //z
+                case 6491:                  // Spirit Healer
+                case 13116:                 // Alliance Spirit Guide
+                case 13117:                 // Horde Spirit Guide
+                    flags2 |= 0x10000000;
+                    break;
             }
         }
+
+        *data << flags2;
+        *data << getMSTime();               // this appears to be time in ms but can be any thing
     }
-    if( (m_objectTypeId==TYPEID_CORPSE) || (m_objectTypeId==TYPEID_GAMEOBJECT) || (m_objectTypeId==TYPEID_DYNAMICOBJECT))
+
+    if (flags & UPDATEFLAG_HASPOSITION)     // 0x40
     {
-        if(GUID_HIPART(GetGUID()) != HIGHGUID_TRANSPORT)
+        if(flags & UPDATEFLAG_TRANSPORT)    // 0x2
+        {
+            *data << (float)0;
+            *data << (float)0;
+            *data << (float)0;
+            *data << ((WorldObject *)this)->GetOrientation();
+        }
+        else
         {
             *data << ((WorldObject *)this)->GetPositionX();
             *data << ((WorldObject *)this)->GetPositionY();
             *data << ((WorldObject *)this)->GetPositionZ();
+            *data << ((WorldObject *)this)->GetOrientation();
         }
-        else
+
+        if(flags2 & 0x0200)
         {
-            *data << (uint32)0;
-            *data << (uint32)0;
-            *data << (uint32)0;
+            *data << (uint64)((Player*)this)->GetTransport()->GetGUID();
+            *data << (float)((Player*)this)->GetTransOffsetX();
+            *data << (float)((Player*)this)->GetTransOffsetY();
+            *data << (float)((Player*)this)->GetTransOffsetZ();
+            *data << (float)((Player*)this)->GetTransOffsetO();
+            *data << uint32(0x11);          //unk, was added in 2.0.3
         }
-        *data << ((WorldObject *)this)->GetOrientation();
     }
 
-    *data << (uint32)0x1;
-
-    if ((GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT))
+    if (flags & UPDATEFLAG_LIVING)          // 0x20
     {
-        uint32 updT = (uint32)getMSTime();
-        *data << (uint32)updT;
+        *data << (uint32)0;                 // unknown
+
+        if(flags2 & 0x2000)                 // unknown, unused now
+        {
+            *data << (float)0;
+            *data << (float)1.0;
+            *data << (float)0.0;
+            *data << (float)0;
+        }
+
+        *data << ((Unit*)this)->GetSpeed( MOVE_WALK );
+        *data << ((Unit*)this)->GetSpeed( MOVE_RUN );
+        *data << ((Unit*)this)->GetSpeed( MOVE_SWIMBACK );
+        *data << ((Unit*)this)->GetSpeed( MOVE_SWIM );
+        *data << ((Unit*)this)->GetSpeed( MOVE_WALKBACK );
+        *data << ((Unit*)this)->GetSpeed( MOVE_FLY );
+        *data << ((Unit*)this)->GetSpeed( MOVE_FLYBACK );
+        *data << ((Unit*)this)->GetSpeed( MOVE_TURN );
     }
 
-    if(  GUID_HIPART(GetGUID()) == HIGHGUID_PLAYER_CORPSE)
-        *data << (uint32)0xBD38BA14;                        //fix me
+    if(flags & UPDATEFLAG_ALL)              // 0x10
+    {
+        *data << uint32(1);                 // looks like flags (0x0, 0x1, 0x100, 0x20000, 0x40000)
+    }
+
+    if(flags & UPDATEFLAG_HIGHGUID)         // 0x8
+    {
+        *data << GetGUIDHigh();             // 2.0.6 - high guid was there, unk for 2.0.12
+    }
+
+    if(flags & UPDATEFLAG_FULLGUID)         // 0x4
+    {
+        // unused in mangos
+    }
+
+    if(flags & UPDATEFLAG_TRANSPORT)        // 0x2
+    {
+        *data << getMSTime();
+    }
 }
 
-void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
+void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Player *target) const
 {
     WPAssert(updateMask && updateMask->GetCount() == m_valuesCount);
 
@@ -344,13 +334,14 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
         {
             if( updateMask->GetBit( index ) )
             {
-                // Some values at server stored in float format but must be send to client in uint32 format
-                if(                                         // unit fields
-                    index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
-                    index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
-                    index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES + 6 ||
+                // Some values at server stored in float format but must be sended to client in uint32 format
+                if( // unit fields
+                    (index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
+                    index >= UNIT_FIELD_BASEATTACKTIME  && index <= UNIT_FIELD_RANGEDATTACKTIME ||
+                    index >= UNIT_FIELD_STAT0           && index <= (UNIT_FIELD_RESISTANCES + 6) ||
+                    index >= UNIT_FIELD_POSSTAT0        && index <= (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6) ) &&
                     //player fields (2 comparison preferred instead redundant isType(TYPE_PLAYER) check
-                    index >= PLAYER_FIELD_POSSTAT0     && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6 )
+                    (m_objectTypeId == TYPEID_UNIT || m_objectTypeId == TYPEID_PLAYER) )
                 {
                     // convert from float to uint32 and send
                     *data << uint32(m_floatValues[ index ]);

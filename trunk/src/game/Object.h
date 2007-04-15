@@ -201,12 +201,13 @@ class MANGOS_DLL_SPEC Object
 
         virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const;
-        void _BuildValuesUpdate( ByteBuffer *data, UpdateMask *updateMask  ) const;
+        void _BuildValuesUpdate( ByteBuffer *data, UpdateMask *updateMask, Player *target ) const;
         void _SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const;
 
         uint16 m_objectType;
 
         uint8 m_objectTypeId;
+        uint8 m_updateFlag;
 
         union
         {

@@ -97,7 +97,7 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
     ByteBuffer buf(m_data.size() + 10 + m_outOfRangeGUIDs.size()*8);
 
     buf << (uint32) (m_outOfRangeGUIDs.size() > 0 ? m_blockCount + 1 : m_blockCount);
-    buf << (uint8) 1;
+    buf << (uint8) 0;
 
     if(m_outOfRangeGUIDs.size())
     {
@@ -118,7 +118,6 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 
     if (m_data.size() > 50 )
     {
-
         uint32 destsize = buf.size() + buf.size()/10 + 16;
         packet->resize( destsize );
 
