@@ -1958,7 +1958,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             if (m->checked < 4)
             {
                 //mail will be returned:
-                sDatabase.PExecute("UPDATE `mail` SET `sender` = '%u', `receiver` = '%u', `time` = '" I64FMTD "', `checked` = '16' WHERE `id` = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), m->messageID);
+                sDatabase.PExecute("UPDATE `mail` SET `sender` = '%u', `receiver` = '%u', `time` = '" I64FMTD "', `cod` = '0', `checked` = '16' WHERE `id` = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), m->messageID);
                 delete m;
                 continue;
             }
