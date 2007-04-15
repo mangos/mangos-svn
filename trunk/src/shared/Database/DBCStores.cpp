@@ -34,7 +34,7 @@ static AreaFlagByAreaID sAreaFlagByAreaID;
 static AreaFlagByMapID  sAreaFlagByMapID;                   // for instances without generated *.map files
 
 DBCStorage <BankBagSlotPricesEntry> sBankBagSlotPricesStore(BankBagSlotPricesEntryfmt);
-
+DBCStorage <BattlemasterListEntry> sBattlemasterListStore(BattlemasterListEntryfmt);
 DBCStorage <ChrClassesEntry> sChrClassesStore(ChrClassesEntryfmt);
 DBCStorage <ChrRacesEntry> sChrRacesStore(ChrRacesEntryfmt);
 DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
@@ -44,8 +44,10 @@ DBCStorage <EmotesTextEntry> sEmotesTextStore(EmoteEntryfmt);
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
 DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
 
+DBCStorage <GemPropertiesEntry> sGemPropertiesStore(GemPropertiesEntryfmt);
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt);
+DBCStorage <ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
 
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
@@ -136,7 +138,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 28;
+    const uint32 DBCFilesCount = 31;
 
     barGoLink bar( DBCFilesCount );
 
@@ -144,13 +146,16 @@ void LoadDBCStores(std::string dataPath)
 
     LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
     LoadDBC(bar,bad_dbc_files,sBankBagSlotPricesStore,   dataPath+"dbc/BankBagSlotPrices.dbc");
+    LoadDBC(bar,bad_dbc_files,sBattlemasterListStore,    dataPath+"dbc/BattlemasterList.dbc");
     LoadDBC(bar,bad_dbc_files,sChrClassesStore,          dataPath+"dbc/ChrClasses.dbc");
     LoadDBC(bar,bad_dbc_files,sChrRacesStore,            dataPath+"dbc/ChrRaces.dbc");
     LoadDBC(bar,bad_dbc_files,sCreatureFamilyStore,      dataPath+"dbc/CreatureFamily.dbc");
     LoadDBC(bar,bad_dbc_files,sEmotesTextStore,          dataPath+"dbc/EmotesText.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionStore,             dataPath+"dbc/Faction.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionTemplateStore,     dataPath+"dbc/FactionTemplate.dbc");
+    LoadDBC(bar,bad_dbc_files,sGemPropertiesStore,       dataPath+"dbc/GemProperties.dbc");
     LoadDBC(bar,bad_dbc_files,sItemDisplayInfoStore,     dataPath+"dbc/ItemDisplayInfo.dbc");
+    LoadDBC(bar,bad_dbc_files,sItemExtendedCostStore,    dataPath+"dbc/ItemExtendedCost.dbc");
     LoadDBC(bar,bad_dbc_files,sItemRandomPropertiesStore,dataPath+"dbc/ItemRandomProperties.dbc");
     LoadDBC(bar,bad_dbc_files,sItemSetStore,             dataPath+"dbc/ItemSet.dbc");
     LoadDBC(bar,bad_dbc_files,sLockStore,                dataPath+"dbc/Lock.dbc");
@@ -502,6 +507,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             case 26 /*SPELL_AURA_MOD_ROOT          */:
             case 27 /*SPELL_AURA_MOD_SILENCE       */:
             case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:
+            case 95 /*SPELL_AURA_GHOST*/:
                 return false;
             case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:
                 if(spellId != spellproto->EffectTriggerSpell[effIndex])

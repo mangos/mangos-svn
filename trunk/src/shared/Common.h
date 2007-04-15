@@ -43,9 +43,9 @@
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// will only support 1.12.1 client (build 5875) and 1.12.2 client (build 6005)...
+// will only support WoW and WoW:TBC 2.0.12 client build 6546...
 
-#define EXPECTED_MANGOS_CLIENT_BUILD        {5875,6005,0}
+#define EXPECTED_MANGOS_CLIENT_BUILD        {6546, 0}
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>

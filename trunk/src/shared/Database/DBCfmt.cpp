@@ -16,26 +16,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-const char AreaTableEntryfmt[]="iiinixxxxxixxxxxxxxxixxxx";
+const char AreaTableEntryfmt[]="iiinixxxxxixxxxxxxxxixxxxxx";
 const char BankBagSlotPricesEntryfmt[]="ni";
-const char ChrClassesEntryfmt[]="nxxixsxxxxxxxxxxx";
-const char ChrRacesEntryfmt[]="nxixxxxxixxxxxixisxxxxxxxxxxx";
+const char BattlemasterListEntryfmt[]="niixxxxxxiiiiixsxxxxxxxx";
+const char ChrClassesEntryfmt[]="nxxixsxxxxxxxxxxxx";
+const char ChrRacesEntryfmt[]="nxixiixxixxxxisxxxxxxxxxxxx";
 const char CreatureFamilyfmt[]="nxxxxxiisxxxxxxxxx";
 const char EmoteEntryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="niiiiixxxxiiiixxxxisxxxxxxxxxxxxxxxxx";
 const char FactionTemplateEntryfmt[]="nixiiiiixxiiii";
+const char GemPropertiesEntryfmt[]="nixxi";
 const char ItemDisplayTemplateEntryfmt[]="ixxxxxxxxxxixxxxxxxxxxx";
+const char ItemExtendedCostEntryfmt[]="iiiiiixxiiixx";
 const char ItemRandomPropertiesfmt[]="nxiiixxxxxxxxxxx";
 const char ItemSetEntryfmt[]="dsxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LockEntryfmt[]="nxxxxxxxxixxxxxxxiixxxxxxxxxxxxxx";
-const char MapEntryfmt[]="nsixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const char MapEntryfmt[]="nsixxxxxxxxxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char SkillLinefmt[]="nixssssssssxssssssssxi";
 const char SkillLineAbilityfmt[]="iinxxxxiixiixxx";
 const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
-const char SpellEntryfmt[]="niixiiiiixiixiiixiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiixxxiiiiiiiiiiiiiiifffiiiiiiiiiiiifffixiiissssssssissssssssixxxxxxxxxxxxxxxxxxiiiiiixiixxfffxxx";
+const char SpellEntryfmt[]="niixiiiiiiixixiiixixxiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiixxxiiiiiiiiiiiiiiifffiiiiiiiiiiiifffixiiissssssssissssssssixxxxxxxxxxxxxxxxxxiiiiiiixixxfffxxxiii";
 const char SpellFocusObjectfmt[]="nsxxxxxxxx";
-const char SpellItemEnchantmentfmt[]="nixxixxixxixxsxxxxxxxxii";
+const char SpellItemEnchantmentfmt[]="niiiiiiixxiiisxxxxxxxxiixx";
 const char SpellRadiusfmt[]="nfxf";
 const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxx";
 const char StableSlotPricesfmt[] = "ni";

@@ -23,9 +23,9 @@
 
 extern DatabaseMysql  sDatabase;
 
-const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiiiisi";
+const char ItemPrototypefmt[]="iiiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiiiiiiiiiiiiiiiisi";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
-const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisiis";
+const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisiis";
 const char PageTextfmt[]="isi";
 const char SpellProcEventfmt[]="iiiiiif";
 const char SpellThreatfmt[]="ii";
