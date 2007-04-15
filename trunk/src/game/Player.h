@@ -646,6 +646,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemovePet(Pet* pet, PetSaveMode mode);
         void Uncharm();
 
+        void Say(const std::string text, const uint32 language);
+        void Yell(const std::string text, const uint32 language);
+        void TextEmote(const std::string text);
+        void Whisper(const uint64 receiver, const std::string text, const uint32 language);
+
         float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
         void SetResistanceBuffMods(SpellSchools school, bool positive, float val) { SetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school,val); }
         void ApplyResistanceBuffModsMod(SpellSchools school, bool positive, float val, bool apply) { ApplyModFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }

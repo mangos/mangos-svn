@@ -11510,6 +11510,99 @@ void Player::Uncharm()
     GetSession()->SendPacket(&data);
 }
 
+void Player::Say(const std::string text, const uint32 language)
+{
+    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    data << (uint8)CHAT_MSG_SAY;
+    data << (uint32)language;
+    data << (uint64)GetGUID();
+    data << (uint64)GetGUID();
+    data << (uint32)(text.length()+1);
+    data << text;
+    data << (uint8)chatTag();
+
+    SendMessageToSet(&data, true);
+}
+
+void Player::Yell(const std::string text, const uint32 language)
+{
+    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    data << (uint8)CHAT_MSG_YELL;
+    data << (uint32)language;
+    data << (uint64)GetGUID();
+    data << (uint64)GetGUID();
+    data << (uint32)(text.length()+1);
+    data << text;
+    data << (uint8)chatTag();
+
+    SendMessageToSet(&data, true);
+}
+
+void Player::TextEmote(const std::string text)
+{
+    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    data << (uint8)CHAT_MSG_EMOTE;
+    data << (uint32)LANG_UNIVERSAL;
+    data << (uint64)GetGUID();
+    data << (uint32)(text.length()+1);
+    data << text;
+    data << (uint8)chatTag();
+
+    SendMessageToSet(&data, true);
+}
+
+void Player::Whisper(const uint64 receiver, const std::string text, const uint32 language)
+{
+    Player *player = objmgr.GetPlayer(receiver);
+
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
+    data << (uint8)CHAT_MSG_WHISPER;
+    data << (uint32)LANG_UNIVERSAL;
+    data << (uint64)GetGUID();
+    data << (uint32)(text.length()+1);
+    data << text;
+    data << (uint8)chatTag();
+    player->GetSession()->SendPacket(&data);
+
+    data.Initialize(SMSG_MESSAGECHAT, 200);
+    data << (uint8)CHAT_MSG_WHISPER_INFORM;
+    data << (uint32)language;
+    data << (uint64)player->GetGUID();
+    data << (uint32)(text.length()+1);
+    data << text;
+    data << (uint8)chatTag();
+    GetSession()->SendPacket(&data);   
+
+    if(player->isAFK())
+    {
+        data.Initialize(SMSG_MESSAGECHAT, 200);
+        data << (uint8)CHAT_MSG_AFK;
+        data << (uint32)language;
+        data << (uint64)player->GetGUID();
+        data << (uint32)(player->afkMsg.length()+1);
+        data << player->afkMsg;
+        data << (uint8)0;
+        GetSession()->SendPacket(&data);
+    }
+    if(player->isDND())
+    {
+        data.Initialize(SMSG_MESSAGECHAT, 200);
+        data << (uint8)CHAT_MSG_DND;
+        data << (uint32)language;
+        data << (uint64)player->GetGUID();
+        data << (uint32)(player->dndMsg.length()+1);
+        data << player->dndMsg;
+        data << (uint8)0;
+        GetSession()->SendPacket(&data);
+    }
+
+    if(!isAcceptWhispers())
+    {
+        SetAcceptWhispers(true);
+        sChatHandler.SendSysMessage(GetSession() ,"Whispers accepting now: ON");
+    }
+}
+
 void Player::PetSpellInitialize()
 {
     Pet* pet = GetPet();

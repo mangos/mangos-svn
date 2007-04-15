@@ -1303,22 +1303,6 @@ void Creature::Respawn()
     }
 }
 
-void Creature::Say(char const* message, uint32 language)
-{
-    WorldPacket data;
-
-    sChatHandler.FillMessageData( &data, NULL, CHAT_MSG_SAY, language, NULL, 0, message );
-    SendMessageToSet( &data, false );
-}
-
-void Creature::MonsterSay(char const* message, uint32 language, uint64 targetGUID)
-{
-    WorldPacket data;
-
-    sChatHandler.FillMessageData( &data, NULL, CHAT_MSG_MONSTER_SAY, language, NULL, targetGUID, message, this );
-    SendMessageToSet( &data, false );
-}
-
 bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
 {
     if (!spellInfo)
