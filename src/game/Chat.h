@@ -147,7 +147,12 @@ class ChatHandler
         bool HandleGPSCommand(const char* args);
         bool HandleTaxiCheatCommand(const char* args);
         bool HandleWhispersCommand(const char* args);
+        bool HandleSayCommand(const char* args);
+        bool HandleYellCommand(const char* args);
+        bool HandleEmoteCommand(const char* args);
+        bool HandleWhisperCommand(const char* args);
 
+        bool HandleModifyKnownTitlesCommand(const char* args);
         bool HandleModifyHPCommand(const char* args);
         bool HandleModifyManaCommand(const char* args);
         bool HandleModifyRageCommand(const char* args);
@@ -156,6 +161,7 @@ class ChatHandler
         bool HandleModifyASpeedCommand(const char* args);
         bool HandleModifySpeedCommand(const char* args);
         bool HandleModifyBWalkCommand(const char* args);
+        bool HandleModifyFlyCommand(const char* args);
         bool HandleModifySwimCommand(const char* args);
         bool HandleModifyScaleCommand(const char* args);
         bool HandleModifyMountCommand(const char* args);
@@ -231,7 +237,7 @@ class ChatHandler
         bool HandleNearGraveCommand(const char* args);
         bool HandleSpawnTransportCommand(const char* args);
         bool HandleExploreCheatCommand(const char* args);
-        bool HandleEmoteCommand(const char* args);
+        bool HandleEmote2Command(const char* args);
         bool HandleNpcInfoCommand(const char* args);
         bool HandleNpcInfoSetCommand(const char* args);
         bool HandleHoverCommand(const char* args);
@@ -269,6 +275,15 @@ class ChatHandler
         bool HandlePasswordCommand(const char* args);
         bool HandleLockAccountCommand(const char* args);
         bool HandleRespawnCommand(const char* args);
+        bool HandleFlyModeCommand(const char* args);
+        bool HandleSendOpcodeCommand(const char* args);
+        bool HandleSellErrorCommand(const char* args);
+        bool HandleBuyErrorCommand(const char* args);
+        bool HandleUpdateWorldStateCommand(const char* args);
+        bool HandlePlaySound2Command(const char* args);
+        bool HandleSendChannelNotifyCommand(const char* args);
+        bool HandleSendChatMsgCommand(const char* args);
+
         //! Development Commands
         bool HandleSetValue(const char* args);
         bool HandleGetValue(const char* args);

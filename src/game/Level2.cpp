@@ -59,7 +59,7 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
 
     if (!result)
     {
-        SendSysMessage("Nothing found!");
+        SendSysMessage(LANG_COMMAND_TARGETOBJNOTFOUND);
         return true;
     }
 
@@ -106,7 +106,7 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
     QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `gameobject` WHERE `guid` = '%i'",guid);
     if (!result)
     {
-        SendSysMessage("Object not found!");
+        SendSysMessage(LANG_COMMAND_GOOBJNOTFOUND);
         return true;
     }
 
@@ -150,7 +150,7 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `creature` WHERE `guid` = '%i'",guid);
     if (!result)
     {
-        SendSysMessage("Creature not found!");
+        SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
         return true;
     }
 
@@ -414,7 +414,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
     unit->CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(unit);
 
-    SendSysMessage("Creature Removed");
+    SendSysMessage(LANG_COMMAND_DELCREATMESSAGE);
 
     return true;
 }
@@ -432,7 +432,7 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
 
     if(!obj)
     {
-        PSendSysMessage("Game Object (GUID: %u) not found", lowguid);
+        PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
         return true;
     }
 
@@ -442,7 +442,7 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
         Unit* owner = ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(),owner_guid);
         if(!owner && GUID_HIPART(owner_guid)!=HIGHGUID_PLAYER)
         {
-            PSendSysMessage("Game Object (GUID: %u) have references in not found creature %u GO list, can't be deleted.", GUID_LOPART(owner_guid), obj->GetGUIDLow());
+            PSendSysMessage(LANG_COMMAND_DELOBJREFERCREATURE, GUID_LOPART(owner_guid), obj->GetGUIDLow());
             return true;
         }
 
@@ -453,7 +453,7 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
     obj->Delete();
     obj->DeleteFromDB();
 
-    PSendSysMessage("Game Object (GUID: %u) removed", obj->GetGUIDLow());
+    PSendSysMessage(LANG_COMMAND_DELOBJMESSAGE, obj->GetGUIDLow());
 
     return true;
 }
@@ -474,7 +474,7 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
 
     if(!obj)
     {
-        PSendSysMessage("Game Object (GUID: %u) not found", lowguid);
+        PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
         return true;
     }
 
@@ -503,7 +503,7 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
     obj->SaveToDB();
     obj->Refresh();
 
-    PSendSysMessage("Game Object (GUID: %u) turned", obj->GetGUIDLow(), o);
+    PSendSysMessage(LANG_COMMAND_TURNOBJMESSAGE, obj->GetGUIDLow(), o);
 
     return true;
 }
@@ -524,7 +524,7 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
 
     if(!obj)
     {
-        PSendSysMessage("Game Object (GUID: %u) not found", lowguid);
+        PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
         return true;
     }
 
@@ -567,7 +567,7 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
     obj->SaveToDB();
     obj->Refresh();
 
-    PSendSysMessage("Game Object (GUID: %u) moved", obj->GetGUIDLow());
+    PSendSysMessage(LANG_COMMAND_MOVEOBJMESSAGE, obj->GetGUIDLow());
 
     return true;
 }
@@ -587,7 +587,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     Creature* vendor = getSelectedCreature();
     if (!vendor || !vendor->isVendor())
     {
-        SendSysMessage("You must select vendor");
+        SendSysMessage(LANG_COMMAND_VENDORSELECTION);
         return true;
     }
 
@@ -595,7 +595,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     uint32 itemId = atol(pitem);
     if (!pitem)
     {
-        SendSysMessage("You must send id for item");
+        SendSysMessage(LANG_COMMAND_ADDVENDORITEMSEND);
         return true;
     }
 
@@ -624,7 +624,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
 
     if (vendor->GetItemCount() >= MAX_CREATURE_ITEMS)
     {
-        SendSysMessage("Vendor has too many items (max 128)");
+        SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
         return true;
     }
 
@@ -643,7 +643,7 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
     Creature* vendor = getSelectedCreature();
     if (!vendor || !vendor->isVendor())
     {
-        SendSysMessage("You must select vendor");
+        SendSysMessage(LANG_COMMAND_VENDORSELECTION);
         return true;
     }
 
@@ -689,7 +689,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
         QueryResult *result = sDatabase.PQuery( "SELECT `guid` FROM `creature` WHERE `guid` = '%u'",lowguid);
         if(!result)
         {
-            PSendSysMessage("Creature (GUID: %u) not found", lowguid);
+            PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
             return true;
         }
         delete result;
@@ -774,7 +774,7 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
             QueryResult *result = sDatabase.PQuery( "SELECT `guid` FROM `creature` WHERE `guid` = '%u'",lowguid);
             if(!result)
             {
-                PSendSysMessage("Creature (GUID: %u) not found", lowguid);
+                PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
                 return true;
             }
             delete result;
@@ -973,7 +973,7 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
 
         if(player==m_session->GetPlayer())
         {
-            SendSysMessage("You can't kick self, logout instead");
+            SendSysMessage(LANG_COMMAND_KICKSELF);
             return true;
         }
 
@@ -986,16 +986,16 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
 
         if(name==m_session->GetPlayer()->GetName())
         {
-            SendSysMessage("You can't kick self, logout instead");
+            SendSysMessage(LANG_COMMAND_KICKSELF);
             return true;
         }
 
         if(sWorld.KickPlayer(name))
         {
-            PSendSysMessage("Player %s kicked.",name.c_str());
+            PSendSysMessage(LANG_COMMAND_KICKMESSAGE,name.c_str());
         }
         else
-            PSendSysMessage("Player %s not found.",name.c_str());
+            PSendSysMessage(LANG_COMMAND_KICKNOTFOUNDPLAYER,name.c_str());
     }
 
     return true;
@@ -1137,7 +1137,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
         QueryResult *result = sDatabase.Query("SELECT `ticket_id` FROM `character_ticket`");
         size_t count = result ? result->GetRowCount() : 0;
 
-        PSendSysMessage("Tickets count: %i show new tickets: %s\n", count,m_session->GetPlayer()->isAcceptTickets() ?  "on" : "off");
+        PSendSysMessage(LANG_COMMAND_TICKETCOUNT, count,m_session->GetPlayer()->isAcceptTickets() ?  "on" : "off");
         delete result;
         return true;
     }
@@ -1146,7 +1146,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     if(strncmp(px,"on",3) == 0)
     {
         m_session->GetPlayer()->SetAcceptTicket(true);
-        SendSysMessage("New ticket show: on");
+        SendSysMessage(LANG_COMMAND_TICKETON);
         return true;
     }
 
@@ -1154,7 +1154,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     if(strncmp(px,"off",4) == 0)
     {
         m_session->GetPlayer()->SetAcceptTicket(false);
-        SendSysMessage("New ticket show: off");
+        SendSysMessage(LANG_COMMAND_TICKETOFF);
         return true;
     }
 
@@ -1166,7 +1166,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
 
         if(!result || uint64(num) > result->GetRowCount())
         {
-            PSendSysMessage("Ticket %i doesn't exist", num);
+            PSendSysMessage(LANG_COMMAND_TICKENOTEXIST, num);
             delete result;
             return true;
         }
@@ -1217,7 +1217,7 @@ uint32 ChatHandler::GetTicketIDByNum(uint32 num)
 
     if(!result || num > result->GetRowCount())
     {
-        PSendSysMessage("Ticket %i doesn't exist", num);
+        PSendSysMessage(LANG_COMMAND_TICKENOTEXIST, num);
         delete result;
         return 0;
     }
@@ -1254,14 +1254,14 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
             uint64 guid = fields[0].GetUInt64();
 
             if(Player* sender = objmgr.GetPlayer(guid))
-                sender->GetSession()->SendGMTicketGetTicket(1,0);
+                sender->GetSession()->SendGMTicketGetTicket(0x0A,0);
 
         }while(result->NextRow());
 
         delete result;
 
         sDatabase.PExecute("DELETE FROM `character_ticket`");
-        SendSysMessage("All tickets deleted.");
+        SendSysMessage(LANG_COMMAND_ALLTICKETDELETED);
         return true;
     }
 
@@ -1274,7 +1274,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
 
         if(!result || uint64(num) > result->GetRowCount())
         {
-            PSendSysMessage("Ticket %i doesn't exist", num);
+            PSendSysMessage(LANG_COMMAND_TICKENOTEXIST, num);
             delete result;
             return true;
         }
@@ -1293,11 +1293,11 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
         // notify players about ticket deleting
         if(Player* sender = objmgr.GetPlayer(guid))
         {
-            sender->GetSession()->SendGMTicketGetTicket(1,0);
-            PSendSysMessage("Character %s ticket deleted.",sender->GetName());
+            sender->GetSession()->SendGMTicketGetTicket(0x0A,0);
+            PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL,sender->GetName());
         }
         else
-            SendSysMessage("Ticket deleted.");
+            SendSysMessage(LANG_COMMAND_TICKETDEL);
 
         return true;
     }
@@ -1316,9 +1316,9 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
 
     // notify players about ticket deleting
     if(Player* sender = objmgr.GetPlayer(guid))
-        sender->GetSession()->SendGMTicketGetTicket(1,0);
+        sender->GetSession()->SendGMTicketGetTicket(0x0A,0);
 
-    PSendSysMessage("Character %s ticket deleted.",px);
+    PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL,px);
     return true;
 }
 
@@ -1347,7 +1347,7 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
         return false;
 
     sDatabase.PQuery("UPDATE `creature` SET `spawndist`=%i, `MovementType`=%i WHERE `guid`=%u",option,mtype,u_guid);
-    PSendSysMessage("Spawn distance changed to: %i",option);
+    PSendSysMessage(LANG_COMMAND_SPAWNDIST,option);
     return true;
 }
 
@@ -1378,7 +1378,7 @@ bool ChatHandler::HandleSpawnTimeCommand(const char* args)
         return false;
 
     sDatabase.PQuery("UPDATE `creature` SET `spawntimesecs`=%i WHERE `guid`=%u",i_stime,u_guid);
-    PSendSysMessage("Spawn time changed to: %i",i_stime);
+    PSendSysMessage(LANG_COMMAND_SPAWNTIME,i_stime);
 
     return true;
 }
