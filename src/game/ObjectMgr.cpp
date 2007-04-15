@@ -335,6 +335,19 @@ void ObjectMgr::LoadCreatureTemplates()
     sLog.outString( "" );
 }
 
+CreatureAddInfo const* ObjectMgr::GetCreatureAddon(uint32 lowguid)
+{
+    return sCreatureAddStorage.LookupEntry<CreatureAddInfo>(lowguid);
+}
+
+void ObjectMgr::LoadCreatureAddons()
+{
+    sCreatureAddStorage.Load();
+
+    sLog.outString( ">> Loaded %u creature addons", sCreatureAddStorage.RecordCount );
+    sLog.outString( "" );
+}
+
 void ObjectMgr::LoadSpellProcEvents()
 {
     sSpellProcEventStore.Load();

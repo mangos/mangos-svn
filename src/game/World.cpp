@@ -414,6 +414,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
     objmgr.LoadReputationOnKill();
 
+    sLog.outString( "Loading Creature Addon Data..." );
+    objmgr.LoadCreatureAddons();
+
     sLog.outString( "Loading Weather Data..." );
     objmgr.LoadWeatherZoneChances();
 

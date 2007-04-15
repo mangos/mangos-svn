@@ -43,6 +43,7 @@
 #include "Database/SQLStorage.h"
 
 extern SQLStorage sCreatureStorage;
+extern SQLStorage sCreatureAddStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
@@ -176,6 +177,7 @@ class ObjectMgr
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
         CreatureInfo const *GetCreatureTemplate( uint32 id );
+        CreatureAddInfo const *GetCreatureAddon( uint32 lowguid );
 
         static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
 
@@ -274,6 +276,7 @@ class ObjectMgr
         void LoadSpellLearnSpells();
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();
+        void LoadCreatureAddons();
         void LoadSpellProcEvents();
         void LoadSpellThreats();
         void LoadItemPrototypes();
