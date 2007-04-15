@@ -502,6 +502,9 @@ void Guild::BroadcastPacket(WorldPacket *packet)
 
 void Guild::CreateRank(std::string name,uint32 rights)
 {
+    if(m_ranks.size() >= GUILD_MAXRANKS)
+        return;
+
     uint32 rank;
 
     QueryResult *result = sDatabase.PQuery( "SELECT MAX(`rid`) FROM `guild_rank` WHERE `guildid`='%u'",Id);
@@ -649,10 +652,6 @@ void Guild::Roster(WorldSession *session)
             data << itr->Class;
             data << itr->zoneId;
             data << (float(time(NULL)-logout_time) / DAY);
-            /*data << (uint8)0;
-            data << (uint8)1;
-            data << (uint8)1;
-            data << (uint8)1;*/
             data << itr->Pnote;
             data << itr->OFFnote;
         }

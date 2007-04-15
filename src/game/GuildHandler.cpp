@@ -112,6 +112,8 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 
     _player->ModifyMoney( -(int32)price );
     Item *charter = _player->StoreNewItem( dest, GUILD_CHARTER_ITEM_ID, 1, true );
+    if(!charter)
+        return;
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
     charter->SetState(ITEM_CHANGED, _player);
     _player->SendNewItem(charter, 1, true, false);
@@ -127,6 +129,7 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
 void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
+    recv_data.hexlike();
 
     //sLog.outDebug("Received opcode CMSG_PETITION_SHOW_SIGNATURES");
     if(_player->GetGuildId())
@@ -178,6 +181,7 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 void WorldSession::HandlePetitionQueryOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+8);
+    recv_data.hexlike();
 
     sLog.outDebug("Received opcode CMSG_PETITION_QUERY");
     uint32 guildguid;
@@ -195,9 +199,10 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
     std::string guildname = "NO_GUILD_NAME_FOR_GUID";
     uint8 signs = 0;
 
+    // todo: check this packet
     unsigned char tdata[51] =
     {
-        0x00, 0x01, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        0x00, 0x09, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
 
     QueryResult *result = sDatabase.PQuery(
@@ -230,6 +235,7 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
 void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+1);
+    recv_data.hexlike();
 
     //sLog.outDebug("Received opcode MSG_PETITION_RENAME");
 
@@ -265,6 +271,7 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
+    recv_data.hexlike();
 
     //sLog.outDebug("Received opcode CMSG_PETITION_SIGN");
     Field *fields;
@@ -325,6 +332,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
+    recv_data.hexlike();
 
     //sLog.outDebug("Received opcode MSG_PETITION_DECLINE");
 
@@ -352,13 +360,16 @@ void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8+8);
+    CHECK_PACKET_SIZE(recv_data,4+8+8);
+    recv_data.hexlike(); // todo: check this packet...
 
     //sLog.outDebug("Received opcode CMSG_OFFER_PETITION");
 
     uint8 signs = 0;
     uint64 petitionguid, plguid;
+    uint32 petitiontype = 0; // 0 - guild, 1 - arena?
     Player *player;
+    recv_data >> petitiontype;                              // 2.0.8 - petition type?
     recv_data >> petitionguid;                              // petition guid
     recv_data >> plguid;                                    // player guid
     sLog.outDebug("OFFER PETITION: GUID1 %u, to player id: %u", GUID_LOPART(petitionguid), GUID_LOPART(plguid));
@@ -409,11 +420,8 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
 void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
+    recv_data.hexlike();
 
-    /*
-    don't know how to cause this opcode, it is possible that charter-party has wrong properties \flags (are not present even names)...
-    Here it is necessary to receive number of signatures, to compare with 9 and if it is equal - if guild, to add the players who have signed charter in guild, to remove charter-party and to send the answer...
-    Still is any interesting opcode UMSG_DELETE_GUILD_CHARTER:)*/
     //sLog.outDebug("Received opcode CMSG_TURN_IN_PETITION");
     WorldPacket data;
     uint64 petitionguid;
@@ -525,14 +533,14 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
+    recv_data.hexlike();
 
-    WorldPacket data;
     uint64 guid;
 
     // TODO: WHY STATIC??????????????
-    unsigned char tdata[21] =
+    unsigned char tdata[25] =
     {
-        0x01, 0x01, 0x00, 0x00, 0x00, 0xe7, 0x16, 0x00, 0x00, 0xef, 0x23, 0x00, 0x00, 0xe8, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
+        0x01, 0x01, 0x00, 0x00, 0x00, 0xe7, 0x16, 0x00, 0x00, 0x21, 0x3f, 0x00, 0x00, 0x08, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00
     };
     recv_data >> guid;
 
@@ -543,7 +551,7 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
         return;
     }
 
-    data.Initialize( SMSG_PETITION_SHOWLIST, (8+sizeof(tdata)) );
+    WorldPacket data( SMSG_PETITION_SHOWLIST, (8+sizeof(tdata)) );
     data << guid;
     data.append( tdata, sizeof(tdata) );
     SendPacket( &data );
@@ -1309,7 +1317,7 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if(guild->GetNrRanks() >= 10)                           // cleint not let create more 10 ranks
+    if(guild->GetNrRanks() >= 10)                           // client not let create more 10 ranks
         return;
 
     recvPacket >> rankname;
