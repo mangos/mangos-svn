@@ -33,15 +33,18 @@ enum Races
     RACE_ORC            = 2,
     RACE_DWARF          = 3,
     RACE_NIGHTELF       = 4,
-    // if it needs be to official, it's actually SCOURGE acording to the story/.dbc
     RACE_UNDEAD_PLAYER  = 5,
     RACE_TAUREN         = 6,
     RACE_GNOME          = 7,
     RACE_TROLL          = 8,
-    MAX_RACES           = 9,
-    // officially, this exists but was never taken into use.. neutral faction which could
-    // learn some skills/spells from horde/alliance. maybe it'll be of some use later on.
-    RACE_GOBLIN = 9
+    RACE_GOBLIN         = 9,
+    RACE_BLOODELF       = 10,
+    RACE_DRAENEI        = 11,
+    RACE_FEL_ORC        = 12,
+    RACE_NAGA           = 13,
+    RACE_BROKEN         = 14,
+    RACE_SKELETON       = 15,
+    MAX_RACES           = 16
 };
 
 // Class value is index in ChrClasses.dbc
@@ -69,7 +72,7 @@ enum ReputationRank
     REP_NEUTRAL     = 3,
     REP_FRIENDLY    = 4,
     REP_HONORED     = 5,
-    REP_REVERTED    = 6,
+    REP_REVERED     = 6,
     REP_EXALTED     = 7
 };
 
@@ -82,6 +85,7 @@ enum MapTypes
     MAP_INSTANCE        = 1,
     MAP_RAID            = 2,
     MAP_BATTLEGROUND    = 3,
+    MAP_ARENA           = 4
 };
 
 enum MoneyConstants
@@ -175,7 +179,8 @@ enum CharacterSlot
 
 enum Language
 {
-    LANG_GLOBAL         = 0, LANG_UNIVERSAL      = 0,
+    LANG_GLOBAL         = 0,
+    LANG_UNIVERSAL      = 0,
     LANG_ORCISH         = 1,
     LANG_DARNASSIAN     = 2,
     LANG_TAURAHE        = 3,
@@ -183,15 +188,16 @@ enum Language
     LANG_COMMON         = 7,
     LANG_DEMONIC        = 8,
     LANG_TITAN          = 9,
-    LANG_THELASSIAN     = 10,
+    LANG_THALASSIAN     = 10,
     LANG_DRACONIC       = 11,
     LANG_KALIMAG        = 12,
     LANG_GNOMISH        = 13,
     LANG_TROLL          = 14,
-    LANG_GUTTERSPEAK    = 33
+    LANG_GUTTERSPEAK    = 33,
+    LANG_DRAENEI        = 35
 };
 
-#define LANGUAGES_COUNT 15
+#define LANGUAGES_COUNT 17
 
 enum Team
 {
@@ -326,7 +332,21 @@ enum SpellEffects
     SPELL_EFFECT_APPLY_AURA_NEW            = 119,
     SPELL_EFFECT_TELEPORT_GRAVEYARD        = 120,
     SPELL_EFFECT_NORMALIZED_WEAPON_DMG     = 121,
-    TOTAL_SPELL_EFFECTS                    = 122
+    SPELL_EFFECT_122                       = 122,
+    SPELL_EFFECT_123                       = 123,
+    SPELL_EFFECT_124                       = 124,
+    SPELL_EFFECT_125                       = 125,
+    SPELL_EFFECT_126                       = 126,
+    SPELL_EFFECT_127                       = 127,
+    SPELL_EFFECT_128                       = 128,
+    SPELL_EFFECT_129                       = 129,
+    SPELL_EFFECT_130                       = 130,
+    SPELL_EFFECT_131                       = 131,
+    SPELL_EFFECT_132                       = 132,
+    SPELL_EFFECT_133                       = 133,
+    SPELL_EFFECT_134                       = 134,
+    SPELL_EFFECT_135                       = 135,
+    TOTAL_SPELL_EFFECTS                    = 136
 };
 
 enum CharacterStates
@@ -371,7 +391,11 @@ enum GameobjectTypes
     GAMEOBJECT_TYPE_FISHINGHOLE            = 25,
     GAMEOBJECT_TYPE_FLAGDROP               = 26,
     // Custom gametypes, can create problems at sending to client,
-    GAMEOBJECT_TYPE_CUSTOM_TELEPORTER      = 27
+    GAMEOBJECT_TYPE_CUSTOM_TELEPORTER      = 27,
+    GAMEOBJECT_TYPE_LOTTERY_KIOSK          = 28,
+    GAMEOBJECT_TYPE_CAPTURE_POINT          = 29,
+    GAMEOBJECT_TYPE_AURA_GENERATOR         = 30,
+    GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY     = 31
 };
 
 enum TextEmote
@@ -528,8 +552,14 @@ enum TextEmote
     TEXTEMOTE_FLOP                 = 224,
     TEXTEMOTE_LOVE                 = 225,
     TEXTEMOTE_MOO                  = 226,
+    TEXTEMOTE_OPENFIRE             = 327,
+    TEXTEMOTE_FLIRT                = 328,
+    TEXTEMOTE_JOKE                 = 329,
     TEXTEMOTE_COMMEND              = 243,
-    TEXTEMOTE_JOKE                 = 329
+    TEXTEMOTE_WINK                 = 363,
+    TEXTEMOTE_PAT                  = 364,
+    TEXTEMOTE_SERIOUS              = 365,
+    TEXTEMOTE_MOUNTSPECIAL         = 366
 };
 
 enum Emote
@@ -605,11 +635,30 @@ enum Emote
     EMOTE_ONESHOT_NO                   = 274,
     EMOTE_ONESHOT_TRAIN                = 275,
     EMOTE_ONESHOT_LAND                 = 293,
-    EMOTE_STATE_READY1H                = 333,
     EMOTE_STATE_AT_EASE                = 313,
+    EMOTE_STATE_READY1H                = 333,
     EMOTE_STATE_SPELLKNEELSTART        = 353,
     EMOTE_STATE_SUBMERGED              = 373,
-    EMOTE_ONESHOT_SUBMERGE             = 374
+    EMOTE_ONESHOT_SUBMERGE             = 374,
+    EMOTE_STATE_READY2H                = 375,
+    EMOTE_STATE_READYBOW               = 376,
+    EMOTE_ONESHOT_MOUNTSPECIAL         = 377,
+    EMOTE_STATE_TALK                   = 378,
+    EMOTE_STATE_FISHING                = 379,
+    EMOTE_ONESHOT_FISHING              = 380,
+    EMOTE_ONESHOT_LOOT                 = 381,
+    EMOTE_STATE_WHIRLWIND              = 382,
+    EMOTE_STATE_DROWNED                = 383,
+    EMOTE_STATE_HOLD_BOW               = 384,
+    EMOTE_STATE_HOLD_RIFLE             = 385,
+    EMOTE_STATE_HOLD_THROWN            = 386,
+    EMOTE_ONESHOT_DROWN                = 387,
+    EMOTE_ONESHOT_STOMP                = 388,
+    EMOTE_ONESHOT_ATTACKOFF            = 389,
+    EMOTE_ONESHOT_ATTACKOFFPIERCE      = 390,
+    EMOTE_STATE_ROAR                   = 391,
+    EMOTE_STATE_LAUGH                  = 392,
+    EMOTE_ONESHOT_CREATURE_SPECIAL     = 393
 };
 
 enum Anim
@@ -760,30 +809,69 @@ enum Anim
     ANIM_SPRINT                    = 0x8F,
     ANIM_IN_FIGHT                  = 0x90,
 
-    FIRST_GAMEOBJECTANIMATION      = 0x91,
-    ANIM_GAMEOBJ_SPAWN             = 0,
-    ANIM_GAMEOBJ_CLOSED            = 1,
-    ANIM_GAMEOBJ_OPEN              = 2,
-    ANIM_GAMEOBJ_OPENED            = 3,
-    ANIM_GAMEOBJ_CLOSE             = 4,
-    ANIM_GAMEOBJ_DESTROY           = 5,
-    ANIM_GAMEOBJ_DESTROYED         = 6,
-    ANIM_GAMEOBJ_REBUILD           = 7,
-    ANIM_GAMEOBJ_CUSTOM0           = 8,
-    ANIM_GAMEOBJ_CUSTOM1           = 9,
-    ANIM_GAMEOBJ_CUSTOM2           = 10,
-    ANIM_GAMEOBJ_CUSTOM3           = 11,
-
-    FIRST_EFFECTANIMATION          = 0x93,
-    ANIM_EFFECT_STAND              = 0,
-    ANIM_EFFECT_HOLD               = 1,
-    ANIM_EFFECT_DECAY              = 2,
-
-    FIRST_ITEMANIMATION            = 0x96,
-    ANIM_ITEM_STAND                = 0,
-    ANIM_ITEM_INFLIGHT             = 1,
-    ANIM_ITEM_BOWPULL              = 2,
-    ANIM_ITEM_BOWRELEASE           = 3
+    ANIM_GAMEOBJ_SPAWN             = 145,
+    ANIM_GAMEOBJ_CLOSE             = 146,
+    ANIM_GAMEOBJ_CLOSED            = 147,
+    ANIM_GAMEOBJ_OPEN              = 148,
+    ANIM_GAMEOBJ_OPENED            = 149,
+    ANIM_GAMEOBJ_DESTROY           = 150,
+    ANIM_GAMEOBJ_DESTROYED         = 151,
+    ANIM_GAMEOBJ_REBUILD           = 152,
+    ANIM_GAMEOBJ_CUSTOM0           = 153,
+    ANIM_GAMEOBJ_CUSTOM1           = 154,
+    ANIM_GAMEOBJ_CUSTOM2           = 155,
+    ANIM_GAMEOBJ_CUSTOM3           = 156,
+    ANIM_GAMEOBJ_DESPAWN           = 157,
+    ANIM_HOLD                      = 158,
+    ANIM_DECAY                     = 159,
+    ANIM_BOWPULL                   = 160,
+    ANIM_BOWRELEASE                = 161,
+    ANIM_SHIPSTART                 = 162,
+    ANIM_SHIPMOVEING               = 163,
+    ANIM_SHIPSTOP                  = 164,
+    ANIM_GROUPARROW                = 165,
+    ANIM_ARROW                     = 166,
+    ANIM_CORPSEARROW               = 167,
+    ANIM_GUIDEARROW                = 168,
+    ANIM_SWAY                      = 169,
+    ANIM_DRUIDCATPOUNCE            = 170,
+    ANIM_DRUIDCATRIP               = 171,
+    ANIM_DRUIDCATRAKE              = 172,
+    ANIM_DRUIDCATRAVAGE            = 173,
+    ANIM_DRUIDCATCLAW              = 174,
+    ANIM_DRUIDCATCOWER             = 175,
+    ANIM_DRUIDBEARSWIPE            = 176,
+    ANIM_DRUIDBEARBITE             = 177,
+    ANIM_DRUIDBEARMAUL             = 178,
+    ANIM_DRUIDBEARBASH             = 179,
+    ANIM_DRAGONTAIL                = 180,
+    ANIM_DRAGONSTOMP               = 181,
+    ANIM_DRAGONSPIT                = 182,
+    ANIM_DRAGONSPITHOVER           = 183,
+    ANIM_DRAGONSPITFLY             = 184,
+    ANIM_EMOTEYES                  = 185,
+    ANIM_EMOTENO                   = 186,
+    ANIM_JUMPLANDRUN               = 187,
+    ANIM_LOOTHOLD                  = 188,
+    ANIM_LOOTUP                    = 189,
+    ANIM_STANDHIGH                 = 190,
+    ANIM_IMPACT                    = 191,
+    ANIM_LIFTOFF                   = 192,
+    ANIM_HOVER                     = 193,
+    ANIM_SUCCUBUSENTICE            = 194,
+    ANIM_EMOTETRAIN                = 195,
+    ANIM_EMOTEDEAD                 = 196,
+    ANIM_EMOTEDANCEONCE            = 197,
+    ANIM_DEFLECT                   = 198,
+    ANIM_EMOTEEATNOSHEATHE         = 199,
+    ANIM_LAND                      = 200,
+    ANIM_SUBMERGE                  = 201,
+    ANIM_SUBMERGED                 = 202,
+    ANIM_CANNIBALIZE               = 203,
+    ANIM_ARROWBIRTH                = 204,
+    ANIM_GROURARROWBIRTH           = 205,
+    ANIM_CORPSEARROWBIRTH          = 206,
+    ANIM_GUIDEARROWBIRTH           = 207
 };
 
 enum LockType
@@ -805,7 +893,8 @@ enum LockType
     LOCKTYPE_GAHZRIDIAN            = 15,
     LOCKTYPE_BLASTING              = 16,
     LOCKTYPE_SLOW_OPEN             = 17,
-    LOCKTYPE_SLOW_CLOSE            = 18
+    LOCKTYPE_SLOW_CLOSE            = 18,
+    LOCKTYPE_FISHING               = 19
 };
 
 enum TrainerType                                            // this is important type for npcs!
@@ -827,7 +916,8 @@ enum CreatureType
     CREATURE_TYPE_HUMANOID         = 7,
     CREATURE_TYPE_CRITTER          = 8,
     CREATURE_TYPE_MECHANICAL       = 9,
-    CREATURE_TYPE_UNKNOWN          = 10
+    CREATURE_TYPE_NOTSPECIFIED     = 10,
+    CREATURE_TYPE_TOTEM            = 11
 };
 
 enum CreatureFamily
@@ -853,7 +943,15 @@ enum CreatureFamily
     CREATURE_FAMILY_BAT            = 24,
     CREATURE_FAMILY_HYENA          = 25,
     CREATURE_FAMILY_OWL            = 26,
-    CREATURE_FAMILY_WIND_SERPENT   = 27
+    CREATURE_FAMILY_WIND_SERPENT   = 27,
+    CREATURE_FAMILY_REMOTE_CONTROL = 28,
+    CREATURE_FAMILY_FELGUARD       = 29,
+    CREATURE_FAMILY_DRAGONHAWK     = 30,
+    CREATURE_FAMILY_RAVAGER        = 31,
+    CREATURE_FAMILY_WARP_STALKER   = 32,
+    CREATURE_FAMILY_SPOREBAT       = 33,
+    CREATURE_FAMILY_NETHER_RAY     = 34,
+    CREATURE_FAMILY_SERPENT        = 35
 };
 
 enum CreatureEliteType
@@ -871,7 +969,10 @@ enum QuestTypes
     QUEST_TYPE_LIFE                = 21,
     QUEST_TYPE_PVP                 = 41,
     QUEST_TYPE_RAID                = 62,
-    QUEST_TYPE_DUNGEON             = 81
+    QUEST_TYPE_DUNGEON             = 81,
+    QUEST_TYPE_WORLD_EVENT         = 82,
+    QUEST_TYPE_LEGENDARY           = 83,
+    QUEST_TYPE_ESCORT              = 84
 };
 
 enum QuestSort
@@ -902,7 +1003,14 @@ enum QuestSort
     QUEST_SORT_TAILORING           = 264,
     QUEST_SORT_SPECIAL             = 284,
     QUEST_SORT_COOKING             = 304,
-    QUEST_SORT_FIRST_AID           = 324
+    QUEST_SORT_FIRST_AID           = 324,
+    QUEST_SORT_LEGENDARY           = 344,
+    QUEST_SORT_DARKMOON_FAIRE      = 364,
+    QUEST_SORT_AHN_QIRAJ_WAR       = 365,
+    QUEST_SORT_LUNAR_FESTIVAL      = 366,
+    QUEST_SORT_REPUTATION          = 367,
+    QUEST_SORT_INVASION            = 368,
+    QUEST_SORT_MIDSUMMER           = 369
 };
 
 enum SkillType
@@ -987,21 +1095,17 @@ enum SkillType
     SKILL_SPEARS                   = 227,
     SKILL_WANDS                    = 228,
     SKILL_POLEARMS                 = 229,
-    SKILL_ATTRIBUTE_ENCHANCEMENTS  = 230,
-    SKILL_SLAYER_TALENTS           = 231,
-    SKILL_MAGIC_TALENTS            = 233,
-    SKILL_DEFENSIVE_TALENTS        = 234,
     SKILL_PET_SCORPID              = 236,
     SKILL_ARCANE                   = 237,
     SKILL_OPEN_LOCK                = 242,
     SKILL_PET_TURTLE               = 251,
+    SKILL_ASSASSINATION            = 253,
     SKILL_FURY                     = 256,
     SKILL_PROTECTION               = 257,
     SKILL_BEAST_TRAINING           = 261,
     SKILL_PROTECTION2              = 267,
     SKILL_PET_TALENTS              = 270,
     SKILL_PLATE_MAIL               = 293,
-    SKILL_ASSASSINATION            = 253,
     SKILL_LANG_GNOMISH             = 313,
     SKILL_LANG_TROLL               = 315,
     SKILL_ENCHANTING               = 333,
@@ -1012,17 +1116,11 @@ enum SkillType
     SKILL_RESTORATION              = 374,
     SKILL_ELEMENTAL_COMBAT         = 375,
     SKILL_SKINNING                 = 393,
+    SKILL_MAIL                     = 413,
     SKILL_LEATHER                  = 414,
     SKILL_CLOTH                    = 415,
-    SKILL_MAIL                     = 413,
     SKILL_SHIELD                   = 433,
     SKILL_FIST_WEAPONS             = 473,
-    SKILL_TRACKING_BEAST           = 513,
-    SKILL_TRACKING_HUMANOID        = 514,
-    SKILL_TRACKING_DEMON           = 516,
-    SKILL_TRACKING_UNDEAD          = 517,
-    SKILL_TRACKING_DRAGON          = 518,
-    SKILL_TRACKING_ELEMENTAL       = 519,
     SKILL_RIDING_RAPTOR            = 533,
     SKILL_RIDING_MECHANOSTRIDER    = 553,
     SKILL_RIDING_UNDEAD_HORSE      = 554,
@@ -1041,31 +1139,63 @@ enum SkillType
     SKILL_RACIAL_TROLL             = 733,
     SKILL_RACIAL_GNOME             = 753,
     SKILL_RACIAL_HUMAN             = 754,
-    SKILL_RIDING                   = 762
+    SKILL_JEWELCRAFTING            = 755,
+    SKILL_RACIAL_BLOODELF          = 756,
+    SKILL_PET_EVENT_RC             = 758,
+    SKILL_LANG_DRAENEI             = 759,
+    SKILL_RACIAL_DRAENEI           = 760,
+    SKILL_PET_FELGUARD             = 761,
+    SKILL_RIDING                   = 762,
+    SKILL_PET_DRAGONHAWK           = 763,
+    SKILL_PET_NETHER_RAY           = 764,
+    SKILL_PET_SPOREBAT             = 765,
+    SKILL_PET_WARP_STALKER         = 766,
+    SKILL_PET_RAVAGER              = 767,
+    SKILL_PET_SERPENT              = 768
 };
 
-#define UNIT_DYNFLAG_LOOTABLE           0x0001
+enum TotemCategory
+{
+    TC_SKINNING_SKIFE              = 1,
+    TC_EARTH_TOTEM                 = 2,
+    TC_AIR_TOTEM                   = 3,
+    TC_FIRE_TOTEM                  = 4,
+    TC_WATER_TOTEM                 = 5,
+    TC_COPPER_ROD                  = 6,
+    TC_SILVER_ROD                  = 7,
+    TC_GOLDEN_ROD                  = 8,
+    TC_TRUESILVER_ROD              = 9,
+    TC_ARCANITE_ROD                = 10,
+    TC_MINING_PICK                 = 11,
+    TC_PHILOSOPHERS_STONE          = 12,
+    TC_BLACKSMITH_HAMMER           = 13,
+    TC_ARCLIGHT_SPANNER            = 14,
+    TC_GYROMATIC_MA                = 15,
+    TC_MASTER_TOTEM                = 21,
+    TC_FEL_IRON_ROD                = 41,
+    TC_ADAMANTITE_ROD              = 62,
+    TC_ETERNIUM_ROD                = 63
+};
 
-#define UNIT_DYNFLAG_TRACK_UNIT         0x0002
+enum UnitDynFlags
+{
+    UNIT_DYNFLAG_LOOTABLE          = 0x0001,
+    UNIT_DYNFLAG_TRACK_UNIT        = 0x0002,
+    UNIT_DYNFLAG_OTHER_TAGGER      = 0x0004,
+    UNIT_DYNFLAG_ROOTED            = 0x0008,
+    UNIT_DYNFLAG_SPECIALINFO       = 0x0010,
+    UNIT_DYNFLAG_DEAD              = 0x0020
+};
 
-#define UNIT_DYNFLAG_OTHER_TAGGER       0x0004
-
-#define UNIT_DYNFLAG_ROOTED             0x0008
-
-#define UNIT_DYNFLAG_SPECIALINFO        0x0010
-
-#define UNIT_DYNFLAG_DEAD               0x0020
-
-#define UNIT_FLAG_NOT_ATTACKABLE        0x0002
-
-#define UNIT_FLAG_ATTACKABLE            0x0008
-
-#define UNIT_FLAG_NOT_ATTACKABLE_1      0x0080
-
-#define UNIT_FLAG_NON_PVP_PLAYER        (UNIT_FLAG_ATTACKABLE + UNIT_FLAG_NOT_ATTACKABLE_1)
-
-#define UNIT_FLAG_ANIMATION_FROZEN      0x0400
-#define UNIT_FLAG_WAR_PLAYER            0x1000
+enum UnitFlags1
+{
+    UNIT_FLAG_NOT_ATTACKABLE       = 0x0002,
+    UNIT_FLAG_ATTACKABLE           = 0x0008,
+    UNIT_FLAG_NOT_ATTACKABLE_1     = 0x0080,
+    UNIT_FLAG_NON_PVP_PLAYER       = (UNIT_FLAG_ATTACKABLE + UNIT_FLAG_NOT_ATTACKABLE_1),
+    UNIT_FLAG_ANIMATION_FROZEN     = 0x0400,
+    UNIT_FLAG_WAR_PLAYER           = 0x1000
+};
 
 #define SPELL_ID_AGGRO                    22764
 

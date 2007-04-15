@@ -19,7 +19,7 @@
 #ifndef MANGOSSERVER_GUILD_H
 #define MANGOSSERVER_GUILD_H
 
-#define MAXRANKS 10
+#define GUILD_MAXRANKS 10
 
 enum GuildDefaultRanks
 {

@@ -264,14 +264,6 @@ enum PlayerStateType
     PLAYER_STATE_FLAG_ALL          = 0xFF000000,
 };
 
-enum TYPE_OF_KILL
-{
-    HONORABLE_KILL    = 1,
-    DISHONORABLE_KILL = 2,
-};
-
-#define HONOR_RANK_COUNT 16
-
 enum PlayerFlags
 {
     PLAYER_FLAGS_GROUP_LEADER   = 0x00000001,
@@ -280,11 +272,58 @@ enum PlayerFlags
     PLAYER_FLAGS_GM             = 0x00000008,
     PLAYER_FLAGS_GHOST          = 0x00000010,
     PLAYER_FLAGS_RESTING        = 0x00000020,
+    PLAYER_FLAGS_FFA_PVP        = 0x00000080,
+    PLAYER_FLAGS_UNK            = 0x00000100,                   // 2.0.8, bg related?
     PLAYER_FLAGS_IN_PVP         = 0x00000200,
     PLAYER_FLAGS_HIDE_HELM      = 0x00000400,
     PLAYER_FLAGS_HIDE_CLOAK     = 0x00000800,
-    PLAYER_FLAGS_UNK            = 0x00001000,               //played long time
-    PLAYER_FLAGS_UNK2           = 0x00002000,               //played too long time
+    PLAYER_FLAGS_UNK1           = 0x00001000,                   //played long time
+    PLAYER_FLAGS_UNK2           = 0x00002000,                   //played too long time
+    PLAYER_FLAGS_UNK3           = 0x00008000,                   //strange visual effect (2.0.1)
+    PLAYER_FLAGS_UNK4           = 0x00020000,                   //taxi benchmark mode (on/off) (2.0.1)
+    PLAYER_UNK                  = 0x00040000,                   //2.0.8...
+};
+
+enum PlayerKnownTitles
+{
+    PLAYER_TITLE_DISABLED             = 0x00000000,
+    PLAYER_TITLE_NONE                 = 0x00000001,
+    PLAYER_TITLE_PRIVATE              = 0x00000002,
+    PLAYER_TITLE_CORPORAL             = 0x00000004,
+    PLAYER_TITLE_SERGEANT_A           = 0x00000008,
+    PLAYER_TITLE_MASTER_SERGEANT      = 0x00000010,
+    PLAYER_TITLE_SERGEANT_MAJOR       = 0x00000020,
+    PLAYER_TITLE_KNIGHT               = 0x00000040,
+    PLAYER_TITLE_KNIGHT_LIEUTENANT    = 0x00000080,
+    PLAYER_TITLE_KNIGHT_CAPTAIN       = 0x00000100,
+    PLAYER_TITLE_KNIGHT_CHAMPION      = 0x00000200,
+    PLAYER_TITLE_LIEUTENANT_COMMANDER = 0x00000400,
+    PLAYER_TITLE_COMMANDER            = 0x00000800,
+    PLAYER_TITLE_MARSHAL              = 0x00001000,
+    PLAYER_TITLE_FIELD_MARSHAL        = 0x00002000,
+    PLAYER_TITLE_GRAND_MARSHAL        = 0x00004000,
+    PLAYER_TITLE_SCOUT                = 0x00008000,
+    PLAYER_TITLE_GRUNT                = 0x00010000,
+    PLAYER_TITLE_SERGEANT_H           = 0x00020000,
+    PLAYER_TITLE_SENIOR_SERGEANT      = 0x00040000,
+    PLAYER_TITLE_FIRST_SERGEANT       = 0x00080000,
+    PLAYER_TITLE_STONE_GUARD          = 0x00100000,
+    PLAYER_TITLE_BLOOD_GUARD          = 0x00200000,
+    PLAYER_TITLE_LEGIONNAIRE          = 0x00400000,
+    PLAYER_TITLE_CENTURION            = 0x00800000,
+    PLAYER_TITLE_CHAMPION             = 0x01000000,
+    PLAYER_TITLE_LIEUTENANT_GENERAL   = 0x02000000,
+    PLAYER_TITLE_GENERAL              = 0x04000000,
+    PLAYER_TITLE_WARLORD              = 0x08000000,
+    PLAYER_TITLE_HIGH_WARLORD         = 0x10000000,
+    PLAYER_TITLE_UNUSED1              = 0x20000000,
+    PLAYER_TITLE_UNUSED2              = 0x40000000
+};
+
+enum DungeonDifficulties
+{
+    DUNGEONDIFFICULTY_NORMAL = 0,
+    DUNGEONDIFFICULTY_HEROIC = 1
 };
 
 enum LootType
@@ -329,7 +368,7 @@ enum PlayerSlots
     // first slot for item stored (in any way in player m_items data)
     PLAYER_SLOT_START           = 0,
     // last+1 slot for item stored (in any way in player m_items data)
-    PLAYER_SLOT_END             = 97,
+    PLAYER_SLOT_END             = 118,
     PLAYER_SLOTS_COUNT          = (PLAYER_SLOT_END - PLAYER_SLOT_START)
 };
 
@@ -415,41 +454,45 @@ enum BankSlots
     BANK_SLOT_ITEM_22           = 60,
     BANK_SLOT_ITEM_23           = 61,
     BANK_SLOT_ITEM_24           = 62,
-    BANK_SLOT_ITEM_END          = 63,
+    BANK_SLOT_ITEM_25           = 63,
+    BANK_SLOT_ITEM_26           = 64,
+    BANK_SLOT_ITEM_27           = 65,
+    BANK_SLOT_ITEM_28           = 66,
+    BANK_SLOT_ITEM_END          = 67,
 
-    BANK_SLOT_BAG_START         = 63,
-    BANK_SLOT_BAG_1             = 63,
-    BANK_SLOT_BAG_2             = 64,
-    BANK_SLOT_BAG_3             = 65,
-    BANK_SLOT_BAG_4             = 66,
-    BANK_SLOT_BAG_5             = 67,
-    BANK_SLOT_BAG_6             = 68,
-    BANK_SLOT_BAG_END           = 69
+    BANK_SLOT_BAG_START         = 67,
+    BANK_SLOT_BAG_1             = 67,
+    BANK_SLOT_BAG_2             = 68,
+    BANK_SLOT_BAG_3             = 69,
+    BANK_SLOT_BAG_4             = 70,
+    BANK_SLOT_BAG_5             = 71,
+    BANK_SLOT_BAG_6             = 72,
+    BANK_SLOT_BAG_7             = 73,
+    BANK_SLOT_BAG_END           = 74
 };
 
 enum BuyBackSlots
 {
     // strored in m_buybackitems
-    BUYBACK_SLOT_START          = 69,
-    BUYBACK_SLOT_1              = 69,
-    BUYBACK_SLOT_2              = 70,
-    BUYBACK_SLOT_3              = 71,
-    BUYBACK_SLOT_4              = 72,
-    BUYBACK_SLOT_5              = 73,
-    BUYBACK_SLOT_6              = 74,
-    BUYBACK_SLOT_7              = 75,
-    BUYBACK_SLOT_8              = 76,
-    BUYBACK_SLOT_9              = 77,
-    BUYBACK_SLOT_10             = 78,
-    BUYBACK_SLOT_11             = 79,
-    BUYBACK_SLOT_12             = 80,
-    BUYBACK_SLOT_END            = 81
+    BUYBACK_SLOT_START          = 74,
+    BUYBACK_SLOT_1              = 74,
+    BUYBACK_SLOT_2              = 75,
+    BUYBACK_SLOT_3              = 76,
+    BUYBACK_SLOT_4              = 77,
+    BUYBACK_SLOT_5              = 78,
+    BUYBACK_SLOT_6              = 79,
+    BUYBACK_SLOT_7              = 80,
+    BUYBACK_SLOT_8              = 81,
+    BUYBACK_SLOT_9              = 82,
+    BUYBACK_SLOT_10             = 83,
+    BUYBACK_SLOT_11             = 84,
+    BUYBACK_SLOT_12             = 85,
+    BUYBACK_SLOT_END            = 86
 };
-
 enum KeyRingSLots
 {
-    KEYRING_SLOT_START          = 81,
-    KEYRING_SLOT_END            = 97
+    KEYRING_SLOT_START          = 86,
+    KEYRING_SLOT_END            = 118
 };
 
 enum SwitchWeapon
@@ -475,13 +518,24 @@ enum MovementFlags
     MOVEMENTFLAG_RIGHT          = 0x20,
     MOVEMENTFLAG_PITCH_UP       = 0x40,
     MOVEMENTFLAG_PITCH_DOWN     = 0x80,
-
     MOVEMENTFLAG_WALK           = 0x100,
+    MOVEMENTFLAG_ONTRANSPORT    = 0x200,
+    // 0x400
+    MOVEMENTFLAG_FLY_UNK1       = 0x800,
+    MOVEMENTFLAG_UNK4           = 0x1000,
     MOVEMENTFLAG_JUMPING        = 0x2000,
     MOVEMENTFLAG_FALLING        = 0x4000,
-    MOVEMENTFLAG_SWIMMING       = 0x200000,
-    MOVEMENTFLAG_ONTRANSPORT    = 0x2000000,
-    MOVEMENTFLAG_SPLINE         = 0x4000000
+    // 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000
+    MOVEMENTFLAG_SWIMMING       = 0x200000, // appears with fly also, swim in air LOL
+    MOVEMENTFLAG_FLY_UP         = 0x400000,
+    MOVEMENTFLAG_CAN_FLY        = 0x800000,
+    MOVEMENTFLAG_FLYING         = 0x1000000,
+    // 0x2000000
+    MOVEMENTFLAG_SPLINE         = 0x4000000,
+    // 0x8000000
+    MOVEMENTFLAG_WATERWALKING   = 0x10000000,
+    MOVEMENTFLAG_UNK2           = 0x20000000,
+    MOVEMENTFLAG_UNK3           = 0x40000000
 };
 
 typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
@@ -1120,7 +1174,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsItemSpellToCombat(SpellEntry const *spellInfo);
 
         void SendInitWorldStates(uint32 MapID);
-        void SendUpdateWordState(uint16 Field, uint16 Value);
+        void SendUpdateWorldState(uint16 Field, uint16 Value);
         void SendDirectMessage(WorldPacket *data);
 
         PlayerMenu* PlayerTalkClass;

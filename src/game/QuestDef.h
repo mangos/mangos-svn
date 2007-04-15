@@ -29,7 +29,7 @@ class Player;
 class ObjectMgr;
 
 // (PLAYER_VISIBLE_ITEM_1_CREATOR - PLAYER_QUEST_LOG_1_1)/3
-#define MAX_QUEST_LOG_SIZE 20
+#define MAX_QUEST_LOG_SIZE 25
 
 #define QUEST_OBJECTIVES_COUNT 4
 #define QUEST_SOURCE_ITEM_IDS_COUNT 4
@@ -37,8 +37,9 @@ class ObjectMgr;
 #define QUEST_REWARDS_COUNT 4
 #define QUEST_DEPLINK_COUNT 10
 #define QUEST_REPUTATIONS_COUNT 5
+#define QUEST_EMOTE_COUNT 4
 
-enum
+enum QuestFailedReasons
 {
     INVALIDREASON_DONT_HAVE_REQ        = 0,
     INVALIDREASON_DONT_HAVE_REQLEVEL   = 1,
@@ -49,7 +50,7 @@ enum
     INVALIDREASON_DONT_HAVE_REQ_MONEY  = 21+1,              //1.12.1
 };
 
-enum
+enum QuestShareMessages
 {
     QUEST_PARTY_MSG_SHARING_QUEST   = 0,
     QUEST_PARTY_MSG_CANT_TAKE_QUEST = 1,
@@ -113,6 +114,11 @@ enum __QuestSpecialFlags                                    //according to mango
     QUEST_SPECIAL_FLAGS_TIMED         = 16,
     //QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,               // meaning of flag 32 unknown
     QUEST_SPECIAL_FLAGS_REPUTATION    = 64,
+    //QUEST_SPECIAL_FLAGS_UNK1          = 128,              // unknown tbc
+    //QUEST_SPECIAL_FLAGS_UNK2          = 256,              // unknown tbc, bring items?
+    //QUEST_SPECIAL_FLAGS_UNK3          = 512,              // unknown tbc
+    //QUEST_SPECIAL_FLAGS_UNK4          = 1024,             // unknown tbc
+    //QUEST_SPECIAL_FLAGS_UNK5          = 2048,             // unknown tbc
 };
 
 // This Quest class provides a convenient way to access a few pretotaled (cached) quest details,

@@ -5468,7 +5468,7 @@ void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
     GetSession()->SendPacket( &data );
 }
 
-void Player::SendUpdateWordState(uint16 Field, uint16 Value)
+void Player::SendUpdateWorldState(uint16 Field, uint16 Value)
 {
     WorldPacket data(SMSG_UPDATE_WORLD_STATE, 8);           //0x2D4
     data << uint32(Field);

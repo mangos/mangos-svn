@@ -165,7 +165,6 @@ struct CreatureInfo
     uint32  baseattacktime;
     uint32  rangeattacktime;
     uint32  Flags;
-    uint32  mount;
     uint32  dynamicflags;
     float   size;
     uint32  family;
