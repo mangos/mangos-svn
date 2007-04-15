@@ -37,140 +37,174 @@ void Usage(char* prg)
 
 void ExtractMapsFromMpq()
 {
-	char mpq_filename[128];
-	char output_filename[256];
-//	char tmp[256];
-//	sprintf(tmp,"%s/Data/%s",input_path,filename);
+    char mpq_filename[128];
+    char output_filename[256];
+    //  char tmp[256];
+    //  sprintf(tmp,"%s/Data/%s",input_path,filename);
 
-	//MPQArchive* p=new MPQArchive(tmp);
-//	map_count=1;
-	unsigned int total=map_count*64*64;
-	unsigned int done=0;
+    //MPQArchive* p=new MPQArchive(tmp);
+    //	map_count=1;
+    unsigned int total=map_count*64*64;
+    unsigned int done=0;
 
-		for(unsigned int x=0;x<64;x++)
-		{
-	for(unsigned int z=0;z<map_count;z++)
-	{	
-
-
-			for(unsigned int y=0;y<64;y++)
-			{
-				
-						sprintf(mpq_filename,"World\\Maps\\%s\\%s_%u_%u.adt",map_ids[z].name,map_ids[z].name,x,y);
-					//	maps_extr[z][x][y]=true;
-						sprintf(output_filename,"%s/maps/%03u%02u%02u.map",output_path,map_ids[z].id,y,x);
-						//maps_extr[z][x][y]=
-						ConvertADT(mpq_filename,output_filename);
-			
-				done++;
-
-			}
-			//draw progess bar
-			printf("Processing........................%d%%\r",(100*done)/total);
-
-		}
-	}
-
-
+    for(unsigned int x=0;x<64;x++)
+    {
+        for(unsigned int z=0;z<map_count;z++)
+        {	
+            for(unsigned int y=0;y<64;y++)
+            {
+                sprintf(mpq_filename,"World\\Maps\\%s\\%s_%u_%u.adt",map_ids[z].name,map_ids[z].name,x,y);
+                //	maps_extr[z][x][y]=true;
+                sprintf(output_filename,"%s/maps/%03u%02u%02u.map",output_path,map_ids[z].id,y,x);
+                //maps_extr[z][x][y]=
+                ConvertADT(mpq_filename,output_filename);
+                done++;
+            }
+            //draw progess bar
+            printf("Processing........................%d%%\r",(100*done)/total);
+        }
+    }
 }
 
-bool WMO(char* filename);
+//bool WMO(char* filename);
+
 int main(int argc, char * arg[])
 {
-	
-	char tmp[512];
-	for(int c=1;c<argc;c++)
-	{
-	//i - input path
-	//o - output path
-	//r - resolution, array of (r * r) heights will be created 
-		if(arg[c][0]!='-')
+    FILE* pDatei;
+    char tmp[512];
+    char tmp1[512];
+    //char tmp2[512];
+    char tmp3[512];
+    char tmp4[512];
+    for(int c=1;c<argc;c++)
+    {
+        //i - input path
+        //o - output path
+        //r - resolution, array of (r * r) heights will be created 
+        if(arg[c][0]!='-')
 		
-		Usage(arg[0]);
+        Usage(arg[0]);
 		
-		switch(arg[c][1])
-		{
-		case 'i':
-			if(c+1<argc)//all ok
-				strcpy(input_path,arg[(c++) +1]);
-			else Usage(arg[0]);
-			break;
-		case 'o':
-			if(c+1<argc)//all ok
-				strcpy(output_path,arg[(c++) +1]);
-			else Usage(arg[0]);
-			break;
-
-		case 'r':
-		if(c+1<argc)//all ok
-			iRes=atoi(arg[(c++) +1]);
-		else Usage(arg[0]);
-		break;	
-		
-		
-		
+        switch(arg[c][1])
+        {
+        case 'i':
+            if(c+1<argc)//all ok
+                strcpy(input_path,arg[(c++) +1]);
+            else Usage(arg[0]);
+            break;
+        case 'o':
+            if(c+1<argc)//all ok
+                strcpy(output_path,arg[(c++) +1]);
+            else Usage(arg[0]);
+            break;
+        case 'r':
+            if(c+1<argc)//all ok
+                iRes=atoi(arg[(c++) +1]);
+            else Usage(arg[0]);
+            break;	
 		}
-
-
 	}
-	
- 
 
-	std::vector<MPQArchive*> archives;
-	const char* archiveNames[] = {"patch-2.MPQ", "patch.MPQ", "terrain.MPQ","dbc.MPQ"};
-		//, "wmo.MPQ"};
+    std::vector<MPQArchive*> archives;
 
-	for (size_t i=0; i<4; i++)
-	{
-		sprintf(tmp,"%s/Data/%s",input_path,archiveNames[i]);
-		archives.push_back(new MPQArchive(tmp));
+    char LANG[5];
+    LANG[0]='e'; LANG[1]='n'; LANG[2]='G'; LANG[3]='B'; LANG[4]='\0'; // enGB by default...
+
+    pDatei=fopen("./Data/deDE/locale-deDE.MPQ", "rb"); 
+    if (pDatei!=NULL)
+    {
+        LANG[0]='d'; LANG[1]='e'; LANG[2]='D'; LANG[3]='E';
+        fclose(pDatei);
     }
-	
 
+    pDatei=fopen("./Data/enUS/locale-enUS.MPQ", "rb");
+    if (pDatei!=NULL)
+    {
+        LANG[0]='e'; LANG[1]='n'; LANG[2]='U'; LANG[3]='S';
+        fclose(pDatei);
+    }
 
+    pDatei=fopen("./Data/enGB/locale-enGB.MPQ", "rb");
+    if (pDatei!=NULL)
+    {
+        LANG[0]='e'; LANG[1]='n'; LANG[2]='G'; LANG[3]='B';
+        fclose(pDatei);
+    }
 
-	//map.dbc
-	DBCFile * dbc= new DBCFile("DBFilesClient\\Map.dbc");
-	dbc->open();
+    pDatei=fopen("./Data/frFR/locale-frFR.MPQ", "rb");
+    if (pDatei!=NULL)
+    {
+        LANG[0]='f'; LANG[1]='r'; LANG[2]='F'; LANG[3]='R';
+        fclose(pDatei);
+    }
 
-	map_count=dbc->getRecordCount ();
-	map_ids=new map_id[map_count];
-	//maps_extr = new extr_map [map_count];
-	//memset(maps_extr,false, sizeof(extr_map) *map_count);
-	for(unsigned int x=0;x<map_count;x++)
-	{
-		map_ids[x].id=dbc->getRecord (x).getUInt(0);
-		strcpy(map_ids[x].name,dbc->getRecord(x).getString(1));
-	}
-	delete dbc;
-	//map.dbc
-	
-	//areatable.dbc
-	dbc = new DBCFile("DBFilesClient\\AreaTable.dbc");
-	dbc->open();
+    pDatei=fopen("./Data/esES/locale-esES.MPQ", "rb");
+    if (pDatei!=NULL)
+    {
+        LANG[0]='e'; LANG[1]='s'; LANG[2]='E'; LANG[3]='S';
+        fclose(pDatei);
+    }
 
-	unsigned int area_count=dbc->getRecordCount ();
-	uint32 maxi=0;
-	for(unsigned int x=0;x<area_count;x++)
-	{
-	if(maxi<dbc->getRecord(x).getUInt(0))
-		maxi=dbc->getRecord(x).getUInt(0);
-//	printf("\n%d %d",dbc->getRecord(x).getUInt(0),dbc->getRecord(x).getUInt(3));
-	}
-	maxi++;//not needed actually
-	areas=new uint16[maxi];
-	memset(areas,0xff,maxi*2);
-	for(unsigned int x=0;x<area_count;x++)
-	areas[dbc->getRecord(x).getUInt(0)]  =dbc->getRecord(x).getUInt(3);
+    sprintf(tmp1,"%s/locale-%s.MPQ",LANG,LANG);
+    //sprintf(tmp2,"%s/expansion-locale-%s.MPQ",LANG,LANG);
+    sprintf(tmp3,"%s/patch-%s.MPQ",LANG,LANG);
+    sprintf(tmp4,"%s/patch-%s-2.MPQ",LANG,LANG);
 
-	delete dbc;
+    //char* archiveNames[]={"expansion.MPQ", "common.MPQ", "patch-2.MPQ", "patch.MPQ", tmp4, tmp3, tmp2, tmp1};
+    char* archiveNames[]={"patch-2.MPQ", "patch.MPQ", "common.MPQ", "expansion.MPQ", tmp4, tmp3, tmp1};
 
-	//areatable.dbc
+    //for (size_t i=0; i<8; i++)
+    for (size_t i=0; i<7; i++)
+    {
+        sprintf(tmp,"%s/Data/%s",input_path,archiveNames[i]);
+        archives.push_back(new MPQArchive(tmp));
+    }
 
-	ExtractMapsFromMpq();
+    //map.dbc
+    DBCFile * dbc= new DBCFile("DBFilesClient\\Map.dbc");
+    if(dbc)
+        dbc->open();
+    else
+        return (1);
 
-	delete [] areas;
-	delete [] map_ids;
+    map_count=dbc->getRecordCount();
+    map_ids=new map_id[map_count];
+    //maps_extr = new extr_map [map_count];
+    //memset(maps_extr,false, sizeof(extr_map) *map_count);
+    for(unsigned int x=0;x<map_count;x++)
+    {
+        map_ids[x].id=dbc->getRecord (x).getUInt(0);
+        strcpy(map_ids[x].name,dbc->getRecord(x).getString(1));
+    }
+    delete dbc;
+    //map.dbc
+
+    //areatable.dbc
+    dbc = new DBCFile("DBFilesClient\\AreaTable.dbc");
+    dbc->open();
+
+    unsigned int area_count=dbc->getRecordCount ();
+    uint32 maxi=0;
+    for(unsigned int x=0;x<area_count;x++)
+    {
+        if(maxi<dbc->getRecord(x).getUInt(0))
+            maxi=dbc->getRecord(x).getUInt(0);
+            //	printf("\n%d %d",dbc->getRecord(x).getUInt(0),dbc->getRecord(x).getUInt(3));
+    }
+    maxi++;//not needed actually
+    areas=new uint16[maxi];
+    memset(areas,0xff,maxi*2);
+    for(unsigned int x=0;x<area_count;x++)
+        areas[dbc->getRecord(x).getUInt(0)]  =dbc->getRecord(x).getUInt(3);
+
+    delete dbc;
+
+    //areatable.dbc
+
+    ExtractMapsFromMpq();
+
+    delete [] areas;
+    delete [] map_ids;
 
 /*  // This would be nice someday (don't have time to get it to work right now):
     cout << "Extracting dbc files..." << endl;
@@ -197,5 +231,5 @@ int main(int argc, char * arg[])
         }
     }
 */	
-	return (0); // Exit The Program
+    return (0); // Exit The Program
 }
