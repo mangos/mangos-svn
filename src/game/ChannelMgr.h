@@ -30,7 +30,7 @@ class ChannelMgr
                 delete itr->second;
             channels.clear();
         }
-        Channel *GetJoinChannel(std::string name, Player *p)
+        Channel *GetJoinChannel(std::string name)
         {
             if(channels.count(name) == 0)
             {
