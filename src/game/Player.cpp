@@ -4242,247 +4242,58 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
     // TODO: implement reputation spillover
 }
 
-//Update honor fields
-void Player::UpdateHonor(void)
+void Player::UpdateArenaFields(void)
+{ 
+    /* arena calcs go here */
+}
+
+void Player::UpdateHonorFields()
 {
-    time_t rawtime;
-    struct tm * now;
-    uint32 today = 0;
-    uint32 date = 0;
+    uint32 today = uint32(time(NULL) / DAY) * DAY;    
+    uint32 yesterday = today - DAY; 
 
-    uint32 Yesterday = 0;
-    uint32 ThisWeekBegin = 0;
-    uint32 ThisWeekEnd = 0;
-    uint32 LastWeekBegin = 0;
-    uint32 LastWeekEnd = 0;
+    QueryResult *result = sDatabase.PQuery("SELECT sum(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u'", GUID_LOPART(GetGUID()), today);
+    if(result && (*result)[0].GetFloat() != 0)
+    {        
+        float honor=0.0, honor_yesterday=0.0;
+        uint32 kills_yesterday=0;
 
-    uint32 lifetime_honorableKills = 0;
-    uint32 lifetime_dishonorableKills = 0;
-    uint32 today_honorableKills = 0;
-    uint32 today_dishonorableKills = 0;
-
-    uint32 yesterdayKills = 0;
-    uint32 thisWeekKills = 0;
-    uint32 lastWeekKills = 0;
-
-    float total_honor = 0;
-    float yesterdayHonor = 0;
-    float thisWeekHonor = 0;
-    float lastWeekHonor = 0;
-
-    time( &rawtime );
-    now = localtime( &rawtime );
-
-    today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
-
-    Yesterday     = today - 1;
-    ThisWeekBegin = today - now->tm_wday;
-    ThisWeekEnd   = ThisWeekBegin + 7;
-    LastWeekBegin = ThisWeekBegin - 7;
-    LastWeekEnd   = LastWeekBegin + 7;
-
-    sLog.outDetail("PLAYER: UpdateHonor");
-
-    QueryResult *result = sDatabase.PQuery("SELECT `type`,`honor`,`date` FROM `character_kill` WHERE `guid` = '%u'", GetGUIDLow());
-
-    if(result)
-    {
-        do
+        honor = (*result)[0].GetFloat();
+        delete result;
+        result = sDatabase.PQuery("SELECT sum(`honor`),count(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u' AND `date`>='%u'", GUID_LOPART(GetGUID()), today, yesterday);
+        if(result)
         {
-            Field *fields = result->Fetch();
-            date = fields[2].GetUInt32();
-
-            if(fields[0].GetUInt32() == HONORABLE_KILL)
-            {
-                lifetime_honorableKills++;
-                //total_honor += fields[1].GetFloat();
-
-                if( date == today)
-                {
-                    today_honorableKills++;
-                }
-                if( date == Yesterday)
-                {
-                    yesterdayKills++;
-                    yesterdayHonor += fields[1].GetFloat();
-                }
-                if( (date >= ThisWeekBegin) && (date < ThisWeekEnd) )
-                {
-                    thisWeekKills++;
-                    thisWeekHonor += fields[1].GetFloat();
-                }
-                if( (date >= LastWeekBegin) && (date < LastWeekEnd) )
-                {
-                    lastWeekKills++;
-                    lastWeekHonor += fields[1].GetFloat();
-                }
-
-                //All honor points until last week
-                if( date < LastWeekEnd )
-                {
-                    total_honor += fields[1].GetFloat();
-                }
-
-            }
-            else if(fields[0].GetUInt32() == DISHONORABLE_KILL)
-            {
-                lifetime_dishonorableKills++;
-                //total_honor -= fields[1].GetFloat();
-
-                if( date == today)
-                {
-                    today_dishonorableKills++;
-                }
-
-                //All honor points until last week
-                if( date < LastWeekEnd )
-                {
-                    total_honor -= fields[1].GetFloat();
-                }
-            }
+            honor_yesterday = (*result)[0].GetFloat();
+            kills_yesterday = (*result)[1].GetUInt32();
+            delete result;
         }
-        while( result->NextRow() );
 
-        delete result;
+        SetHonorPoints(GetHonorPoints()+uint32(honor));
+        SetUInt32Value(PLAYER_FIELD_HONOR_TODAY, 0);
+        SetUInt32Value(PLAYER_FIELD_HONOR_YESTERDAY, (uint32)(honor_yesterday*10));
+        SetUInt32Value(PLAYER_FIELD_KILLS, (kills_yesterday<<16));
+
+        sDatabase.PQuery("DELETE FROM `character_kill` WHERE `date`<'%u'", today);
     }
-
-    //Store Total Honor points...
-    SetTotalHonor(total_honor);
-
-    //RIGHEST RANK
-    //If the new rank is highest then the old one, then m_highest_rank is updated
-    uint32 new_honor_rank = CalculateHonorRank(total_honor);
-    if( new_honor_rank > GetHonorHighestRank() )
-    {
-        SetHonorHighestRank( new_honor_rank );
-    }
-
-    //RATING
-    SetHonorRating( MaNGOS::Honor::CalculeRating(this) );
-
-    //STANDING
-    SetHonorLastWeekStanding( MaNGOS::Honor::CalculeStanding(this) );
-
-    //TODO Fix next rank bar... it is not working fine! For while it be set with the total honor points...
-    //NEXT RANK BAR
-    //PLAYER_FIELD_HONOR_BAR
-    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)( (total_honor < 0) ? 0: total_honor) );
-
-    //RANK (Patent)
-    if( CalculateHonorRank(total_honor) )
-        SetUInt32Value(PLAYER_BYTES_3, (( CalculateHonorRank(total_honor) << 24) + 0x04000000) + (m_drunk & 0xFFFE) + getGender());
-    else
-        SetUInt32Value(PLAYER_BYTES_3, (m_drunk & 0xFFFE) + getGender());
-
-    //TODAY
-    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
-    //YESTERDAY
-    SetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS, yesterdayKills);
-    SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)yesterdayHonor);
-    //THIS WEEK
-    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS, thisWeekKills);
-    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION, (uint32)thisWeekHonor);
-    //LAST WEEK
-    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS, lastWeekKills);
-    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, (uint32)lastWeekHonor);
-    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK, GetHonorLastWeekStanding());
-
-    //LIFE TIME
-    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
-    //TODO: Into what field we need to set it? Fix it!
-    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? ((GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 }
 
-uint32 Player::GetHonorRank() const
-{
-    return CalculateHonorRank(m_total_honor_points);
-}
-
-//What is Player's rank... private, scout...
-uint32 Player::CalculateHonorRank(float honor_points) const
-{
-    uint32 rank = 0;
-
-    if(honor_points <=    0.00)
-        rank = 0;
-    else if(honor_points <  2000.00)
-        rank = 1;
-    else if(honor_points > ((HONOR_RANK_COUNT-1)-1)*5000)
-        rank = HONOR_RANK_COUNT-1;
-    else
-        rank = uint32(honor_points / 5000) + 1;
-
-    return rank;
-}
-
-//How many times Player kill pVictim...
-int Player::CalculateTotalKills(Player *pVictim) const
-{
-    int total_kills = 0;
-
-    QueryResult *result = sDatabase.PQuery("SELECT count(*) as cnt FROM `character_kill` WHERE `guid` = '%u' AND `creature_template` = '%u'", GetGUIDLow(), pVictim->GetEntry());
-
-    if(result)
-    {
-        Field *fields = result->Fetch();
-        total_kills = fields[0].GetUInt32();
-        delete result;
-    }
-    return total_kills;
-}
-
-//How much honor Player gains/loses killing uVictim
+//How much honor Player gains from uVictim
 void Player::CalculateHonor(Unit *uVictim)
 {
-    float parcial_honor_points = 0;
-    int kill_type = 0;
-    bool savekill = false;
+    if(!uVictim || uVictim->GetTypeId() == TYPEID_UNIT)
+        return;
+    if(uVictim->GetAura(2479, 0))
+        return;
 
-    sLog.outDetail("PLAYER: CalculateHonor");
+    UpdateHonorFields(); // to prevent CalcluateHonor() on a new day before old honor was UpdateHonorFields()
 
-    if( !uVictim ) return;
-    if( uVictim->GetAura(2479,0) ) return;                  // is honorless target
+    float honor = ((float)urand(1,80))/10;                      // honor between: 0.1 - 8.0
+    float approx_honor = honor * (((float)urand(8,12))/10);     // approx honor: 80% - 120% of real honor
+    sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`) VALUES (%u, %u, %f, %u)", GUID_LOPART(GetGUID()), uVictim->GetEntry(), honor, time(0));
 
-    if( uVictim->GetTypeId() == TYPEID_UNIT )
-    {
-        Creature *cVictim = (Creature *)uVictim;
-        if( cVictim->isCivilian() )
-        {
-            parcial_honor_points = MaNGOS::Honor::DishonorableKillPoints( getLevel() );
-            kill_type = DISHONORABLE_KILL;
-            savekill = true;
-        }
-    }
-    else
-    if( uVictim->GetTypeId() == TYPEID_PLAYER )
-    {
-        Player *pVictim = (Player *)uVictim;
-
-        if( GetTeam() == pVictim->GetTeam() ) return;
-
-        if( getLevel() < (pVictim->getLevel()+5) )
-        {
-            parcial_honor_points = MaNGOS::Honor::HonorableKillPoints( this, pVictim );
-            kill_type = HONORABLE_KILL;
-            savekill = true;
-        }
-    }
-
-    if (savekill)
-    {
-        time_t rawtime;
-        struct tm * now;
-        uint32 today = 0;
-        time( &rawtime );
-        now = localtime( &rawtime );
-        today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
-
-        sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`,`type`) VALUES (%u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(), (float)parcial_honor_points, (uint32)today, (uint8)kill_type);
-
-        UpdateHonor();
-    }
+    ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);           // add 1 today_kill
+    ApplyModUInt32Value(PLAYER_FIELD_KILLS_LIFETIME, 1, true);  // add 1 lifetime_kill
+    ApplyModUInt32Value(PLAYER_FIELD_HONOR_TODAY, (uint32)(approx_honor*10), true);
 }
 
 uint32 Player::GetGuildIdFromDB(uint64 guid)
