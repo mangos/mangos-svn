@@ -2012,10 +2012,10 @@ CREATE TABLE `looking_for_group` (
 --
 
 
-/*!40000 ALTER TABLE `lfg` DISABLE KEYS */;
-LOCK TABLES `lfg` WRITE;
+/*!40000 ALTER TABLE `looking_for_group` DISABLE KEYS */;
+LOCK TABLES `looking_for_group` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `lfg` ENABLE KEYS */;
+/*!40000 ALTER TABLE `looking_for_group` ENABLE KEYS */;
 
 
 --
