@@ -478,7 +478,7 @@ void Transport::Update(uint32 p_time)
         {
             set<Player *>::iterator it2 = itr;
             ++itr;
-            //(*it2)->SetPosition( m_curr->second.x + (*it2)->m_transX, m_curr->second.y + (*it2)->m_transY, m_curr->second.z + (*it2)->m_transZ, (*it2)->GetOrientation() );
+            //(*it2)->SetPosition( m_curr->second.x + (*it2)->GetTransOffsetX(), m_curr->second.y + (*it2)->GetTransOffsetY(), m_curr->second.z + (*it2)->GetTransOffsetZ(), (*it2)->GetTransOffsetO() );
         }
 
         m_nextNodeTime = m_curr->first;

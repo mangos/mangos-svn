@@ -277,11 +277,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     spellId = info->sound3;
 
                 //guid=_player->GetGUID();
-
             }
 
             break;
-       case GAMEOBJECT_TYPE_CAMERA:                        //13
+        case GAMEOBJECT_TYPE_CAMERA:                        //13
             info = obj->GetGOInfo();
             if(info)
             {
@@ -336,7 +335,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     }
                     break;
                 }
-                case GO_LOOTED:                             // nothing to do, wiil be deleted at next update
+                case GO_LOOTED:                             // nothing to do, will be deleted at next update
                     break;
                 default:
                 {
@@ -411,22 +410,31 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             break;
         }
         case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
-            //GB flag
+            //BG flag click
             info = obj->GetGOInfo();
             if(info)
-            {
-                spellId = info->sound0;
-                guid=_player->GetGUID();
-            }
+                spellId = info->sound1;
             break;
-
         case GAMEOBJECT_TYPE_FLAGDROP:                      //26
-            //GB flag dropped
-            info = obj->GetGOInfo();
-            if(info)
+            //BG flag dropped
+            if(_player->InBattleGround())
             {
-                spellId = info->sound0;
-                guid=_player->GetGUID();
+                info = obj->GetGOInfo();
+                if(info->id == 179785) // Silverwing Flag
+                {
+                    if(_player->GetTeam() == ALLIANCE)
+                        spellId = 23385; // Alliance Flag Returns
+                    if(_player->GetTeam() == HORDE)
+                        spellId = 23335; // Silverwing Flag
+                }
+                if(info->id == 179786) // Warsong Flag
+                {
+                    if(_player->GetTeam() == HORDE)
+                        spellId = 23386; // Horde Flag Returns
+                    if(_player->GetTeam() == ALLIANCE)
+                        spellId = 23333; // Warsong Flag
+                }
+                obj->Delete();
             }
             break;
         case GAMEOBJECT_TYPE_CUSTOM_TELEPORTER:

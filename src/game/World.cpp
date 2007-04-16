@@ -646,6 +646,8 @@ void World::Update(time_t diff)
         ///- Process necessary scripts
         if (!scriptSchedule.empty())
             ScriptsProcess();
+
+        sBattleGroundMgr.Update(diff);
     }
 
     /// </ul>

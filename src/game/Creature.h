@@ -229,7 +229,6 @@ enum InhabitTypeValues
     INHAVIT_ANYWHERE = INHAVIT_GROUND | INHAVIT_WATER
 };
 
-
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
 #pragma pack()
 #else
@@ -411,7 +410,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetRespawnTime(uint32 respawn) { m_respawnTime = respawn ? time(NULL) + respawn : 0; }
         void Respawn();
         void SaveRespawnTime();
-        
+
         void LoadFlagRelatedData();
 
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot

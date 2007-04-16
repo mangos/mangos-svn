@@ -416,7 +416,6 @@ public:
     }
 };
 
-
 // Helper for targets nearest to the spell target
 // The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
 struct TargetDistanceOrder : public binary_function<const Unit, const Unit, bool>
@@ -624,7 +623,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_MINION:
         {
-            if(m_spellInfo->Effect[i] != 83) TagUnitMap.push_back(m_caster);
+            if(m_spellInfo->Effect[i] != 83) TagUnitMap.push_back(m_caster); // TODO: replace this const
         }break;
         case TARGET_SINGLE_PARTY:
         {
@@ -791,7 +790,7 @@ void Spell::prepare(SpellCastTargets * targets)
     if ( !m_IsTriggeredSpell && !CanUsedWhileStealthed(m_spellInfo->Id) )
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
-    // do first cast of autorepeat spell with recovery time delay (like after any authocast)
+    // do first cast of autorepeat spell with recovery time delay (like after any autocast)
     if(IsAutoRepeat())
         m_spellState = SPELL_STATE_FINISHED;
 
@@ -1143,8 +1142,6 @@ void Spell::SendSpellCooldown()
             }
         }
     }
-
-    _player->GetSession()->SendPacket(&data);
 
     if(send) // prevent send wrong (not complete packet)
         _player->GetSession()->SendPacket(&data);
@@ -1595,7 +1592,6 @@ void Spell::SendChannelUpdate(uint32 time)
     if(time == 0)
     {
         m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT,0);
-
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL,0);
     }
 }
@@ -2609,7 +2605,7 @@ uint8 Spell::CheckItems()
         totems -= 1;
     }
     if(totems != 0)
-        return uint8(0x70);
+        return uint8(0x70); // TODO: replace this const
 
     for(int i = 0; i < 3; i++)
     {

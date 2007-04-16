@@ -635,6 +635,9 @@ void Aura::_AddAura()
         }
     }
 
+    if(m_spellId == 23333 || m_spellId == 23335)    // for BG
+        m_positive = true;
+
     // not call total regen auras at adding
     if( m_modifier.m_auraname==SPELL_AURA_OBS_MOD_HEALTH || m_modifier.m_auraname==SPELL_AURA_OBS_MOD_MANA )
         m_periodicTimer = m_modifier.periodictime;
@@ -697,7 +700,6 @@ void Aura::_AddAura()
         if( m_target->GetTypeId() == TYPEID_PLAYER )
             UpdateAuraDuration();
     }
-
 }
 
 void Aura::_RemoveAura()
@@ -1296,7 +1298,6 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
     if(m_target->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->Id == 20584 && m_target->getRace() != RACE_NIGHTELF) // required creature_template=12861 with modelid=1825 in database for ghost spell
         return;
 
-
     if (apply)
     {
         // special case
@@ -1678,7 +1679,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if( apply )
     {
         m_target->addUnitState(UNIT_STAT_CONFUSED);
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)); // probably wrong
 
         // only at real add aura
         if(Real)
@@ -1690,7 +1691,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     else
     {
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)); // probably wrong
 
         // only at real remove aura
         if(Real)
@@ -1716,7 +1717,7 @@ void Aura::HandleModFear(bool Apply, bool Real)
         m_target->addUnitState(UNIT_STAT_FLEEING);
         // m_target->AttackStop();
 
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)); // probably wrong
 
         // only at real add aura
         if(Real)
@@ -1730,7 +1731,7 @@ void Aura::HandleModFear(bool Apply, bool Real)
     else
     {
         m_target->clearUnitState(UNIT_STAT_FLEEING);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)); // probably wrong
 
         // only at real remove aura
         if(Real)
@@ -1754,13 +1755,8 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
     if(!m_target || m_target->GetTypeId() == TYPEID_UNIT)
         return;
 
-
     if( Apply )
     {
-
-
-
-
         /*
         WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
         data<<m_target->GetGUID();
@@ -1772,15 +1768,11 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         m_target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);       // blizz like 2.0.x
 
         m_target->addUnitState(UNIT_STAT_DIED);
-
         m_target->CombatStop();
         m_target->DeleteInHateListOf();
     }
     else
     {
-
-
-
         /*
         WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
         data<<m_target->GetGUID();
@@ -1792,10 +1784,6 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         m_target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);    // blizz like 2.0.x
 
         m_target->clearUnitState(UNIT_STAT_DIED);
-
-
-
-
     }
 }
 
@@ -1847,7 +1835,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         // only at real remove aura
         if(Real)
         {
-            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8+4);
+            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
             data.append(m_target->GetPackGUID());
             data << uint32(0);
             m_target->SendMessageToSet(&data,true);
@@ -2192,7 +2180,6 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
     sLog.outDebug("HandleAuraModDecreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount <= 0)
     {                                                       //for new spell dbc
-
         if(apply)                                           // at first real apply
         {
             Unit* caster = GetCaster();
@@ -2206,7 +2193,6 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
     }
     else
     {                                                       //for old spell dbc
-
         if(apply)                                           // at first real apply
         {
             Unit* caster = GetCaster();
@@ -2256,6 +2242,26 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
 
 void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
 {
+    if(!apply)
+    {
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(((Player*)m_target)->InBattleGround())
+            {
+                BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId());
+                if(bg)
+                {
+                    if(bg->GetHordeFlagState())
+                        if(GetSpellProto()->Id == 23333)    // Warsong Flag, horde
+                            m_target->CastSpell(m_target, 23334, false, 0); // Horde Flag Drop
+                    if(bg->GetAllianceFlagState())
+                        if(GetSpellProto()->Id == 23335)    // Silverwing Flag, alliance
+                            m_target->CastSpell(m_target, 23336, false, 0); // Alliance Flag Drop
+                }
+            }
+        }
+    }
+
     m_target->ApplySpellImmune(GetId(),IMMUNITY_EFFECT,m_modifier.m_miscvalue,apply);
 }
 

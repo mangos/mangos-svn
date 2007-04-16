@@ -362,7 +362,6 @@ enum SpellImmunity
     IMMUNITY_DAMAGE                = 3,
     IMMUNITY_DISPEL                = 4,
     IMMUNITY_MECHANIC              = 5
-
 };
 
 enum DiminishingMechanics
@@ -886,7 +885,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void _ApplyAllAuraMods();
 
         int32 CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index);
-        
         Creature* SummonCreature(uint32 id, uint32 mapid, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
     protected:
         Unit ( WorldObject *instantiator );

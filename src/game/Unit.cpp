@@ -260,7 +260,7 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
     if(!HasAuraType(auraType))
         return;
 
-    // The chance to disspell an aura depends on the damage taken with respect to the casters level.
+    // The chance to dispell an aura depends on the damage taken with respect to the casters level.
     uint32 max_dmg = getLevel() > 8 ? 25 * getLevel() - 150 : 50;
     float chance = float(damage) / max_dmg * 100.0;
     if (roll_chance_f(chance))
@@ -1520,7 +1520,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
         DEBUG_LOG("AttackerStateUpdate: (NPC)    %u %X attacked %u %X for %u dmg, absorbed %u, blocked %u, resisted %u.",
             GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
 }
-
 
 MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo)
 {
