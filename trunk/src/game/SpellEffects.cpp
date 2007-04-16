@@ -592,6 +592,56 @@ void Spell::EffectDummy(uint32 i)
             m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
         }
     }
+
+    //BattleGround spells
+    if(m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
+    {
+        BattleGround* bg = sBattleGroundMgr.GetBattleGround(((Player*)m_caster)->GetBattleGroundId());
+        if(bg)
+        {
+            if(bg->GetStatus() == STATUS_INPROGRESS)
+            {
+                switch(m_spellInfo->Id)
+                {
+                    case 23383: // Alliance Flag Click
+                        sLog.outDebug("Alliance Flag Click");
+                        if(((Player*)m_caster)->GetTeam() == ALLIANCE)
+                            m_caster->CastSpell(m_caster, 23385, true, 0); // Alliance Flag Returns (Event)
+                        if(((Player*)m_caster)->GetTeam() == HORDE)
+                            m_caster->CastSpell(m_caster, 23335, true, 0); // Silverwing Flag
+                        break;
+                    case 23384: // Horde Flag Click
+                        sLog.outDebug("Horde Flag Click");
+                        if(((Player*)m_caster)->GetTeam() == HORDE)
+                            m_caster->CastSpell(m_caster, 23386, true, 0); // Horde Flag Returns (Event)
+                        if(((Player*)m_caster)->GetTeam() == ALLIANCE)
+                            m_caster->CastSpell(m_caster, 23333, true, 0); // Warsong Flag
+                        break;
+                    case 23389: // Alliance Flag Capture
+                        sLog.outDebug("Alliance Flag Capture");
+                        bg->EventPlayerCapturedFlag((Player*)m_caster);
+                        break;
+                    case 23390: // Horde Flag Capture
+                        sLog.outDebug("Horde Flag Capture");
+                        bg->EventPlayerCapturedFlag((Player*)m_caster);
+                        break;
+                    default:
+                        sLog.outDebug("Unknown spellid %u at BG dummy", m_spellInfo->Id);
+                        break;
+                }
+            }
+        }
+    }
+
+    if(m_spellInfo->Id == 17251) // Spirit Healer Res
+    {
+        if(m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER) // probably useless check
+        {
+            WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
+            data << m_caster->GetGUID();
+            ((Player*)m_targets.getUnitTarget())->GetSession()->SendPacket( &data ); // for this spell we have wrong unitTarget, but correct m_targets.getUnitTarget()...
+        }
+    }
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
@@ -776,6 +826,47 @@ void Spell::EffectManaDrain(uint32 i)
 
 void Spell::EffectSendEvent(uint32 i)
 {
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
+    {
+        BattleGround* bg = sBattleGroundMgr.GetBattleGround(((Player *)m_caster)->GetBattleGroundId());
+        if(bg)
+        {
+            if(bg->GetStatus() == STATUS_INPROGRESS)
+            {
+                switch(m_spellInfo->Id)
+                {
+                    case 23333: // Pickup Horde Flag
+                        bg->EventPlayerPickedUpFlag(((Player*)m_caster));
+                        sLog.outDebug("Send Event Horde Flag Picked Up");
+                        break;
+                    case 23334: // Drop Horde Flag
+                        bg->EventPlayerDroppedFlag(((Player*)m_caster));
+                        sLog.outDebug("Drop Horde Flag");
+                        break;
+                    case 23335: // Pickup Alliance Flag
+                        bg->EventPlayerPickedUpFlag(((Player*)m_caster));
+                        sLog.outDebug("Send Event Alliance Flag Picked Up");
+                        break;
+                    case 23336: // Drop Alliance Flag
+                        bg->EventPlayerDroppedFlag(((Player*)m_caster));
+                        sLog.outDebug("Drop Alliance Flag");
+                        break;
+                    case 23385: // Alliance Flag Returns
+                        bg->EventPlayerReturnedFlag(((Player*)m_caster));
+                        sLog.outDebug("Alliance Flag Returned");
+                        break;
+                    case 23386: // Horde Flag Returns
+                        bg->EventPlayerReturnedFlag(((Player*)m_caster));
+                        sLog.outDebug("Horde Flag Returned");
+                        break;
+                    default:
+                        sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
+                        break;
+                }
+            }
+        }
+    }
+
     sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, focusObject);
 }
 
@@ -804,7 +895,6 @@ void Spell::EffectPowerDrain(uint32 i)
 
     m_caster->ModifyPower(POWER_MANA,tmpvalue);
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage/2, m_IsTriggeredSpell);
-
 }
 
 void Spell::EffectHeal( uint32 i )
@@ -927,7 +1017,6 @@ void Spell::EffectPersistentAA(uint32 i)
     m_caster->AddDynObject(dynObj);
     dynObj->AddToWorld();
     MapManager::Instance().GetMap(dynObj->GetMapId(), dynObj)->Add(dynObj);
-
 }
 
 void Spell::EffectEnergize(uint32 i)
@@ -1776,7 +1865,7 @@ void Spell::EffectSummonPet(uint32 i)
                 NewSummon->SetName(new_name);
         }
         else if(NewSummon->getPetType()==HUNTER_PET)
-        {            
+        {
             // this enables popup window (pet details, abandon, rename)
             //NewSummon->SetFlag(UNIT_FIELD_FLAGS,(UNIT_FLAG_RESTING | UNIT_FLAG_RENAME)); // changed in 2.0.8?
             NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16)); // check it!
@@ -2037,7 +2126,8 @@ void Spell::EffectSummonObjectWild(uint32 i)
     int32 duration = GetDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
 
-    m_caster->AddGameObject(pGameObj);
+    if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP) // make dropped flag clickable for other players (not set owner guid (created by) for this)...
+        m_caster->AddGameObject(pGameObj);
     pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 }
@@ -2217,7 +2307,6 @@ void Spell::EffectDuel(uint32 i)
 
     caster->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
     target->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
-
 }
 
 void Spell::EffectStuck(uint32 i)
@@ -2762,7 +2851,6 @@ void Spell::EffectSummonDeadPet(uint32 i)
 
 void Spell::EffectTransmitted(uint32 i)
 {
-
     float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float dis = rand_norm() * (max_dis - min_dis) + min_dis;

@@ -35,6 +35,7 @@ int PetAI::Permissible(const Creature *creature)
 
 PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_LOOK)
 {
+
 }
 
 void PetAI::MoveInLineOfSight(Unit *u)

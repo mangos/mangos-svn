@@ -203,7 +203,7 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             BattleGround* bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
             if(bg)
-                bg->RemovePlayer(_player,true,true);
+                bg->RemovePlayer(_player->GetGUID(), true, true);
         }
 
         ///- Reset the online field in the account table
@@ -636,6 +636,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 
         //BattleGround
 
+        { CMSG_BATTLEFIELD_STATUS,          STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
         { CMSG_BATTLEMASTER_HELLO,          STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundHelloOpcode       },
         { CMSG_BATTLEMASTER_JOIN,           STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundJoinOpcode        },
         { MSG_BATTLEGROUND_PLAYER_POSITIONS,STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPlayerPositionsOpcode },
@@ -1041,5 +1042,4 @@ void WorldSession::HandleMoveFlyStateChangeOpcode( WorldPacket & recv_data )
     sLog.outDebug("f_speed %f", f_speed);
     /*----------------*/
 }
-
 

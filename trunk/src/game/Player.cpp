@@ -149,6 +149,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_enableDetect = true;
 
     m_bgBattleGroundID = 0;
+    m_bgBattleGroundQueueID = 0;
 
     m_movement_flags = 0;
 
@@ -212,12 +213,12 @@ Player::~Player ()
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
         delete itr->second;
 
-    //all mailed items should be deleted, also all mail should be dealocated
+    //all mailed items should be deleted, also all mail should be deallocated
     for (std::deque<Mail*>::iterator itr =  m_mail.begin(); itr != m_mail.end();++itr)
         delete *itr;
 
     for (ItemMap::iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
-        delete iter->second;                                //if item is duplicated... then server may crash ... but that item should be dealocated
+        delete iter->second;                                //if item is duplicated... then server may crash ... but that item should be deallocated
 
     delete PlayerTalkClass;
 
@@ -280,7 +281,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     m_taximask[0] = rEntry->startingTaxiMask;
 */
-    
     switch(race)
     {
         case 1:         m_taximask[0]= 1 << ( 2-1); break; // Human
@@ -298,7 +298,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(class_);
     if(!cEntry)
     {
-        sLog.outError("Class %u not found in DBÑ (Wrong DBC files?)",class_);
+        sLog.outError("Class %u not found in DBC (Wrong DBC files?)",class_);
         return false;
     }
 
@@ -353,7 +353,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER_GUILDID, 0 );
     SetUInt32Value( PLAYER_GUILDRANK, 0 );
     SetUInt32Value( PLAYER_GUILD_TIMESTAMP, 0 );
-
 
     SetUInt32Value( PLAYER_FIELD_KNOWN_TITLES, 0 ); // 0=disabled
     SetUInt32Value( PLAYER_CHOSEN_TITLE, 0 );
@@ -460,9 +459,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         }
     }
 
-    // bags and main-hand weapon must equiped at this moment
-    // now second pass for not equiped (offhand weapon/shield if it attempt equiped before main-hand weapon)
-    // or ammo not equiped in special bag
+    // bags and main-hand weapon must equipped at this moment
+    // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
+    // or ammo not equipped in special bag
     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         int16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
@@ -470,14 +469,14 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
         if(pItem)
         {
-            // equip offhand weapon/shield if it attempt equiped before main-hand weapon
+            // equip offhand weapon/shield if it attempt equipped before main-hand weapon
             msg = CanEquipItem( NULL_SLOT, dest, pItem, false );
             if( msg == EQUIP_ERR_OK )
             {
                 RemoveItem(INVENTORY_SLOT_BAG_0, i,true);
                 EquipItem( dest, pItem, true);
             }else
-            // move other items to more appropriate slots (ammo not equiped in special bag)
+            // move other items to more appropriate slots (ammo not equipped in special bag)
             {
                 msg = CanStoreItem( NULL_BAG, NULL_SLOT, dest, pItem, false );
                 if( msg == EQUIP_ERR_OK )
@@ -507,7 +506,7 @@ void Player::StartMirrorTimer(MirrorTimerType Type, uint32 MaxValue)
     data << MaxValue;
     data << MaxValue;
     data << BreathRegen;
-    data << (uint8)0;    
+    data << (uint8)0;
     data << (uint32)0; // spell id
     GetSession()->SendPacket(&data);
 }
@@ -731,7 +730,7 @@ void Player::Update( uint32 p_time )
                     setAttackTimer(BASE_ATTACK,1000);
                     SendAttackSwingNotInRange();
                 }
-                //120 degreas of radiant range
+                //120 degrees of radiant range
                 else if( !HasInArc( 2*M_PI/3, pVictim ))
                 {
                     setAttackTimer(BASE_ATTACK,1000);
@@ -985,7 +984,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << GetPositionY();
     *p_data << GetPositionZ();
 
-    *p_data << GetUInt32Value(PLAYER_GUILDID);              //probebly wrong
+    *p_data << GetUInt32Value(PLAYER_GUILDID);              //probably wrong
 
     //*p_data << GetUInt32Value(PLAYER_GUILDRANK);    //this was
     *p_data << uint8(0x0);
@@ -1162,7 +1161,6 @@ void Player::SendFriendlist()
 
     for (int j=0; j < i; j++)
     {
-
         sLog.outDetail( "WORLD: Adding Friend Guid: %u, Status:%u, Area:%u, Level:%u Class:%u",GUID_LOPART(friendstr[j].PlayerGUID), friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
 
         data << friendstr[j].PlayerGUID << friendstr[j].Status ;
@@ -1213,7 +1211,6 @@ void Player::LoadIgnoreList()
 
 void Player::SendIgnorelist()
 {
-
     if(m_ignorelist.empty())
         return;
 
@@ -1231,7 +1228,7 @@ void Player::SendIgnorelist()
 
 void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange, bool ignore_transport, bool is_gm_command)
 {
-    // preparing unsommon pet if lost (we must get pet before teleportation or will not find it later)
+    // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
@@ -1444,7 +1441,6 @@ void Player::AddToWorld()
 
 void Player::RemoveFromWorld()
 {
-
     for(int i = 0; i < BANK_SLOT_BAG_END; i++)
     {
         if(m_items[i])
@@ -1475,7 +1471,6 @@ void Player::CalcRage( uint32 damage,bool attacker )
 
 void Player::RegenerateAll()
 {
-
     if (m_regenTimer != 0)
         return;
     uint32 regenDelay = 2000;
@@ -1492,7 +1487,6 @@ void Player::RegenerateAll()
     Regenerate( POWER_MANA );
 
     m_regenTimer = regenDelay;
-
 }
 
 void Player::Regenerate(Powers power)
@@ -1802,7 +1796,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 }
 
 // Update player to next level
-// Current player expirience not update (must be update by caller)
+// Current player experience not update (must be update by caller)
 void Player::GiveLevel()
 {
     uint32 level = getLevel();
@@ -1924,7 +1918,7 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
         default:            SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.0 ); break;
     }
 
-    // Base parry pecents
+    // Base parry percents
     SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
 
     // Base dodge values
@@ -1942,11 +1936,11 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
         default:            SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.0 ); break;
     }
 
-    // set armor (resistence 0) to original value (create_agility*2)
+    // set armor (resistance 0) to original value (create_agility*2)
     SetArmor(m_createStats[STAT_AGILITY]*2);
     SetResistanceBuffMods(SpellSchools(0), true, 0);
     SetResistanceBuffMods(SpellSchools(0), false, 0);
-    // set other resistence to original value (0)
+    // set other resistance to original value (0)
     for (int i = 1; i < MAX_SPELL_SCHOOL; i++)
     {
         SetResistance(SpellSchools(i), 0);
@@ -2051,7 +2045,7 @@ void Player::RemoveMail(uint32 id)
     {
         if ((*itr)->messageID == id)
         {
-            //do not delete item. beacuse Player::removeMail() is called when returning mail to sender.
+            //do not delete item. because Player::removeMail() is called when returning mail to sender.
             m_mail.erase(itr);
             return;
         }
@@ -2348,7 +2342,6 @@ void Player::RemoveAllSpellCooldown()
 {
     if(m_spellCooldowns.size() > 0)
     {
-
         for(SpellCooldowns::const_iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); ++itr)
         {
             sLog.outError("SpellID:%u",uint32(itr->first));
@@ -2361,6 +2354,7 @@ void Player::RemoveAllSpellCooldown()
         m_spellCooldowns.clear();
     }
 }
+
 void Player::_LoadSpellCooldowns()
 {
     m_spellCooldowns.clear();
@@ -2481,7 +2475,7 @@ void Player::_SaveSpellCooldowns()
 
     time_t curTime = time(NULL);
 
-    // remove oudated and save active
+    // remove outdated and save active
     for(SpellCooldowns::iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end();)
     {
         if(itr->second <= curTime)
@@ -2744,7 +2738,6 @@ void Player::InitVisibleBits()
 
 void Player::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const
 {
-
     for(int i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
         if(m_items[i] == NULL)
@@ -3141,6 +3134,31 @@ void Player::ResurrectPlayer()
 
 void Player::KillPlayer()
 {
+    if(InBattleGround())
+    {
+        BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
+        if(bg)
+        {
+            if(GetTeam() == HORDE && bg->GetAllianceFlagState())
+            {
+                if(bg->GetAllianceFlagPicker() == GetGUID())
+                {
+                    bg->SetAllianceFlag(0, false);
+                    CastSpell(this, 23336, true);   // Alliance Flag Drop
+                }
+            }
+            if(GetTeam() == ALLIANCE && bg->GetHordeFlagState())
+            {
+                if(bg->GetHordeFlagPicker() == GetGUID())
+                {
+                    bg->SetHordeFlag(0, false);
+                    CastSpell(this, 23334, true);   // Horde Flag Drop
+                }
+            }
+            bg->UpdatePlayerScore(this, 4, 1); // add +1 deaths
+        }
+    }
+
     SetMovement(MOVE_ROOT);
 
     StopMirrorTimer(FATIGUE_TIMER);                         //disable timers(bars)
@@ -3155,13 +3173,13 @@ void Player::KillPlayer()
     // 6 minutes until repop at graveyard
     m_deathTimer = 360000;
 
-    // dead player body showed at this moment, corpse wiil be show at Player ghost repop
+    // dead player body showed at this moment, corpse will be show at Player ghost repop
     CreateCorpse();
 }
 
 Corpse* Player::CreateCorpse()
 {
-    // prevent existance 2 corpse for player
+    // prevent existence 2 corpse for player
     SpawnCorpseBones();
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
@@ -3418,7 +3436,6 @@ void Player::UpdateBlockPercentage()
         for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
             (*i)->ApplyModifier(true);
     }
-
 }
 
 //skill+1, checking for max value
@@ -3747,9 +3764,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
                     (*i)->ApplyModifier(true);
             return;
         }
-
     }
-
 }
 
 bool Player::HasSkill(uint32 skill) const
@@ -3898,7 +3913,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
             RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
 
-    // reread after Ma::Relocation
+    // reread after Map::Relocation
     m = MapManager::Instance().GetMap(GetMapId(), this);
     x = GetPositionX();
     y = GetPositionY();
@@ -3948,7 +3963,6 @@ void Player::SendDirectMessage(WorldPacket *data)
 
 void Player::CheckExploreSystem()
 {
-
     if (!isAlive())
         return;
 
@@ -3993,7 +4007,6 @@ void Player::CheckExploreSystem()
             sLog.outDetail("PLAYER: Player %u discovered a new area: %u", GetGUIDLow(), area);
         }
     }
-
 }
 
 uint32 Player::TeamForRace(uint8 race)
@@ -4208,7 +4221,6 @@ int32 Player::GetReputation(const FactionEntry *factionEntry) const
             return GetBaseReputation(factionEntry) + itr->Standing;
     }
     return 0;
-
 }
 
 ReputationRank Player::GetReputationRank(uint32 faction) const
@@ -4522,7 +4534,7 @@ void Player::UpdateZone(uint32 newZone)
     // flags & 0x00000040   (64)    - many zones have this flag
     // flags & 0x00000080   (128)   - arena
     // flags & 0x00000100   (256)   - main capital city flag
-    // flags & 0x00000200   (512)   - only for one area named "City" (where it located?)
+    // flags & 0x00000200   (512)   - only for one zone named "City" (where it located?)
     // flags & 0x00000400   (1024)  - outland zones? (only Eye of the Storm not have this flag, but have 0x00004000 flag)
     // flags & 0x00000800   (2048)  - sanctuary area (PvP disabled)
     // flags & 0x00001000   (4096)  - only Netherwing Ledge, Socrethar's Seat, Tempest Keep, The Arcatraz, The Botanica, The Mechanar
@@ -5364,7 +5376,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 if (recipient->groupInfo.group)
                 {
                     // round robin style looting applies for all low
-                    // quality items in each loot metho except free for all
+                    // quality items in each loot method except free for all
                     Group *group = recipient->groupInfo.group;
                     uint32 siz = group->GetMembersCount();
                     uint32 pos = 0;

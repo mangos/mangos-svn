@@ -123,7 +123,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
         // UPDATETYPE_CREATE_OBJECT2 for pets...
         if(target->GetPetGUID() == GetGUID())
-            updatetype = UPDATETYPE_CREATE_OBJECT2; 
+            updatetype = UPDATETYPE_CREATE_OBJECT2;
 
         // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
         if(isType(TYPE_GAMEOBJECT))
@@ -134,7 +134,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
                 case GAMEOBJECT_TYPE_DUEL_ARBITER:
                 case GAMEOBJECT_TYPE_FLAGSTAND:
                 case GAMEOBJECT_TYPE_FLAGDROP:
-                    // Duel flag will only animate if it's updatetype = UPDATETYPE_CREATE_OBJECT2.
                     updatetype = UPDATETYPE_CREATE_OBJECT2;
                     break;
             }
@@ -836,7 +835,6 @@ void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float
     *data << uint32(0x0);
     *data << uint32(0x0);
     *data << getMSTime();
-
     *data << x;
     *data << y;
     *data << z;

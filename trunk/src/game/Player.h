@@ -217,7 +217,7 @@ enum PlayerMovementType
     MOVE_ROOT       = 1,
     MOVE_UNROOT     = 2,
     MOVE_WATER_WALK = 3,
-    MOVE_LAND_WALK  = 4,
+    MOVE_LAND_WALK  = 4
 };
 
 enum PlayerStateType
@@ -490,6 +490,7 @@ enum BuyBackSlots
     BUYBACK_SLOT_12             = 85,
     BUYBACK_SLOT_END            = 86
 };
+
 enum KeyRingSLots
 {
     KEYRING_SLOT_START          = 86,
@@ -1115,7 +1116,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendSetFactionStanding(const Faction* faction) const;
         void SendInitialReputations();
         void SetFactionAtWar(uint32 repListID, bool atWar);
-
         void SendSetFactionVisible(const Faction* faction) const;
         void UpdateMaxSkills();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
@@ -1178,8 +1178,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         inline bool InBattleGround() const { return m_bgBattleGroundID != 0; }
+        inline bool InBattleGroundQueue() const { return m_bgBattleGroundQueueID != 0; }
         inline uint32 GetBattleGroundId() const { return m_bgBattleGroundID; }
+        inline uint32 GetBattleGroundQueueId() const { return m_bgBattleGroundQueueID; }
         inline void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; }
+        inline void SetBattleGroundQueueId(uint8 val) { m_bgBattleGroundQueueID = val; }
         inline uint32 GetBattleGroundEntryPointMap() const { return m_bgEntryPointMap; }
         inline void SetBattleGroundEntryPointMap(uint32 Map) { m_bgEntryPointMap = Map;}
 
@@ -1211,7 +1214,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
         /*********************************************************/
-
         uint32 GetMovementFlags() const { return m_movement_flags; }
         bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
         void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
@@ -1275,6 +1277,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         uint8 m_bgBattleGroundID;
+        uint8 m_bgBattleGroundQueueID;
         uint32 m_bgEntryPointMap;
         float m_bgEntryPointX;
         float m_bgEntryPointY;

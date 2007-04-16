@@ -275,8 +275,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         uint32 GetMapId() const { return m_mapId; }
 
         uint32 GetZoneId() const;
-        uint32 GetAreaId() const;        
-        
+        uint32 GetAreaId() const;
+
         const char* GetName() const { return m_name.c_str(); }
         void SetName(std::string newname) { m_name=newname; }
 

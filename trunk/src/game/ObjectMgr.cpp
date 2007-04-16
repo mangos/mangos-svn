@@ -328,7 +328,6 @@ CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
 
 void ObjectMgr::LoadCreatureTemplates()
 {
-
     sCreatureStorage.Load();
 
     sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
@@ -367,7 +366,6 @@ void ObjectMgr::LoadSpellThreats()
 // name must be checked to correctness (if received) before call this function
 uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 {
-
     uint64 guid = 0;
 
     // Player name safe to sending to DB (checked at login) and this function using
@@ -385,7 +383,6 @@ uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 
 bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 {
-
     QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
 
     if(result)
@@ -427,7 +424,6 @@ uint32 ObjectMgr::GetPlayerAccountIdByGUID(const uint64 &guid) const
 
 void ObjectMgr::LoadAuctions()
 {
-
     QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `auctionhouse`");
 
     Field *fields = result->Fetch();
@@ -1186,7 +1182,6 @@ void ObjectMgr::LoadGroups()
 
     if( !result )
     {
-
         barGoLink bar( 1 );
 
         bar.step();
@@ -2095,7 +2090,6 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 
 void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost)
 {
-
     TaxiPathSetBySource::iterator src_i = sTaxiPathSetBySource.find(source);
     if(src_i==sTaxiPathSetBySource.end())
     {
@@ -2137,19 +2131,6 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team )
             if(ci)
                 mount_id = ci->randomDisplayID();
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     return mount_id;
@@ -2194,7 +2175,6 @@ void ObjectMgr::GetTransportPathNodes( uint32 path, TransportPath &pathnodes )
 
 WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
 {
-
     // search for zone associated closest graveyard
     uint32 zoneId = MapManager::Instance().GetZoneId(MapId,x,y);
 
@@ -2344,7 +2324,6 @@ void ObjectMgr::LoadTeleportCoords()
 
 void ObjectMgr::SetHighestGuids()
 {
-
     QueryResult *result = sDatabase.Query( "SELECT MAX(`guid`) FROM `character`" );
     if( result )
     {
@@ -2416,7 +2395,6 @@ void ObjectMgr::SetHighestGuids()
 
         delete result;
     }
-
 }
 
 uint32 ObjectMgr::GenerateAuctionID()
@@ -2450,7 +2428,6 @@ uint32 ObjectMgr::CreateItemText(std::string text)
 
 uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
 {
-
     switch(guidhigh)
     {
         case HIGHGUID_ITEM          : return ++m_hiItemGuid;
@@ -2651,6 +2628,7 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
 
     return true;
 }
+
 void ObjectMgr::LoadReputationOnKill()
 {
     uint32 count = 0; 

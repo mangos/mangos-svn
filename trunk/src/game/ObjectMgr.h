@@ -101,6 +101,7 @@ struct WeatherSeasonChances {
     uint32 snowChance;
     uint32 stormChance;
 };
+
 struct WeatherZoneChances
 {
     WeatherSeasonChances data[WEATHER_SEASONS];

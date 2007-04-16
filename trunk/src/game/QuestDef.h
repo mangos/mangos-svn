@@ -242,7 +242,7 @@ class Quest
         uint32 PointMapId;
         float  PointX;
         float  PointY;
-        uint32 PointOpt;  
+        uint32 PointOpt;
         uint32 IncompleteEmote;
         uint32 CompleteEmote;
         uint32 QuestCompleteScript;
