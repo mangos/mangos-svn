@@ -966,6 +966,8 @@ enum OpCodes
     SMSG_UNKNOWN_919                                = 919, // uint8(0)+uint32(0/1)+uint64(unk/guid)
     SMSG_UNKNOWN_920                                = 920, // notify message: This system is currently disabled.
 };
+//if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp
+#define MAX_OPCODE_ID 920
 
 /// Results of friend related commands
 enum FriendsResult

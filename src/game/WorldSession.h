@@ -34,13 +34,6 @@ class WorldPacket;
 class WorldSocket;
 class WorldSession;
 
-struct OpcodeHandler
-{
-    uint16 opcode;
-    uint16 status;
-    void (WorldSession::*handler)(WorldPacket& recvPacket);
-};
-
 #define CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
 
 /// Player session in the World
@@ -498,8 +491,6 @@ class MANGOS_DLL_SPEC WorldSession
         // Socket gem
         void HandleSocketOpcode(WorldPacket& recv_data);
 
-        OpcodeHandler* _GetOpcodeHandlerTable() const;
-
     private:
         Player *_player;
         WorldSocket *_socket;
@@ -510,6 +501,8 @@ class MANGOS_DLL_SPEC WorldSession
         time_t _logoutTime;
         bool m_playerLoading;
         bool m_playerRecentlyLogout;
+
+        void FillOpcodeHandlerHashTable();
 
         ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> _recvQueue;
 };
