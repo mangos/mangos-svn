@@ -469,11 +469,10 @@ void WorldSession::QueuePacket(WorldPacket& packet)
 bool WorldSession::Update(uint32 diff)
 {
     WorldPacket *packet;
-    //OpcodeHandler *table = _GetOpcodeHandlerTable();
-    //uint32 i;
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// \todo Is there a way to consolidate the OpcondeHandlerTable and the g_worldOpcodeNames to only maintain 1 list?
+    /// answer : there is a way, but this is better, because it would use redundand RAM
     while (!_recvQueue.empty())
     {
         packet = _recvQueue.next();
@@ -483,67 +482,33 @@ bool WorldSession::Update(uint32 diff)
                         LookupName(packet->GetOpcode(), g_worldOpcodeNames),
                         packet->GetOpcode());
         #endif*/
-        //oldcode ... slow
-        /*for (i = 0; table[i].handler != NULL; i++)
-        {
-            if (table[i].opcode == packet->GetOpcode())
-            {
-                // more often case first
-                if (table[i].status == STATUS_LOGGEDIN && _player)
-                {
-                    (this->*table[i].handler)(*packet);
-                }
-                else
-                if (table[i].status == STATUS_AUTHED)
-                {
-                    m_playerRecentlyLogout = false;
-                    (this->*table[i].handler)(*packet);
-                }
-                else
-                    // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
-                if(!m_playerRecentlyLogout)
-                {
-                    sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",
-                        LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-                        packet->GetOpcode());
-                }
-
-                break;
-            }
-        }
-
-        if (table[i].handler == NULL)
-            sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
-                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-                packet->GetOpcode());*/
-
-        //new code FAST:
         OpcodeTableMap::const_iterator iter = objmgr.opcodeTable.find( packet->GetOpcode() );
+
         if (iter == objmgr.opcodeTable.end())
         {
             sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
                 LookupName(packet->GetOpcode(), g_worldOpcodeNames),
                 packet->GetOpcode());
-            delete packet;
-            continue;
-        }
-
-        if (iter->second.status == STATUS_LOGGEDIN && _player)
-        {
-            (this->*iter->second.handler)(*packet);
-        }
-        else if (iter->second.status == STATUS_AUTHED)
-        {
-            m_playerRecentlyLogout = false;
-            (this->*iter->second.handler)(*packet);
         }
         else
-            // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
-        if(!m_playerRecentlyLogout)
         {
-            sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",
-                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-                packet->GetOpcode());
+            if (iter->second.status == STATUS_LOGGEDIN && _player)
+            {
+                (this->*iter->second.handler)(*packet);
+            }
+            else if (iter->second.status == STATUS_AUTHED)
+            {
+                m_playerRecentlyLogout = false;
+                (this->*iter->second.handler)(*packet);
+            }
+            else
+                // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
+            if(!m_playerRecentlyLogout)
+            {
+                sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",
+                    LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                    packet->GetOpcode());
+            }
         }
 
         delete packet;
