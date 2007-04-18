@@ -524,6 +524,7 @@ bool WorldSession::Update(uint32 diff)
             sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
                 LookupName(packet->GetOpcode(), g_worldOpcodeNames),
                 packet->GetOpcode());
+            delete packet;
             continue;
         }
 
