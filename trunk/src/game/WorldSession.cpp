@@ -38,18 +38,11 @@
 #include "BattleGroundMgr.h"
 #include "Language.h"                                       // for CMSG_DISMOUNT handler
 
-/// Player state
-enum SessionStatus
-{
-    STATUS_AUTHED = 0,                                      ///< Player authenticated
-    STATUS_LOGGEDIN                                         ///< Player in game
-};
-
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec) : _player(NULL), _socket(sock),
 _security(sec), _accountId(id), _logoutTime(0), m_playerLoading(false), m_playerRecentlyLogout(false)
 {
-
+    FillOpcodeHandlerHashTable();
 }
 
 /// WorldSession destructor
@@ -65,6 +58,379 @@ WorldSession::~WorldSession()
         WorldPacket *packet = _recvQueue.next();
         delete packet;
     }
+}
+
+void WorldSession::FillOpcodeHandlerHashTable()
+{
+    //if table is already filled
+    if (!objmgr.opcodeTable.empty())
+        return;
+
+    //fill table if empty
+    objmgr.opcodeTable[ CMSG_CHAR_ENUM ]                        = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleCharEnumOpcode                );
+    objmgr.opcodeTable[ CMSG_CHAR_CREATE ]                      = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleCharCreateOpcode              );
+    objmgr.opcodeTable[ CMSG_CHAR_DELETE ]                      = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleCharDeleteOpcode              );
+    objmgr.opcodeTable[ CMSG_PLAYER_LOGIN ]                     = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandlePlayerLoginOpcode             );
+    objmgr.opcodeTable[ CMSG_CHAR_RENAME ]                      = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleChangePlayerNameOpcode        );
+
+    objmgr.opcodeTable[ CMSG_SET_ACTION_BUTTON ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetActionButtonOpcode         );
+    objmgr.opcodeTable[ CMSG_REPOP_REQUEST ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRepopRequestOpcode            );
+    objmgr.opcodeTable[ CMSG_AUTOSTORE_LOOT_ITEM ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAutostoreLootItemOpcode       );
+    objmgr.opcodeTable[ CMSG_LOOT_MONEY ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootMoneyOpcode               );
+    objmgr.opcodeTable[ CMSG_LOOT ]                             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootOpcode                    );
+    objmgr.opcodeTable[ CMSG_LOOT_RELEASE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootReleaseOpcode             );
+    objmgr.opcodeTable[ CMSG_WHO ]                              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleWhoOpcode                     );
+    objmgr.opcodeTable[ CMSG_LOGOUT_REQUEST ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLogoutRequestOpcode           );
+    objmgr.opcodeTable[ CMSG_PLAYER_LOGOUT ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePlayerLogoutOpcode            );
+    objmgr.opcodeTable[ CMSG_LOGOUT_CANCEL ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLogoutCancelOpcode            );
+    objmgr.opcodeTable[ CMSG_GMTICKET_GETTICKET ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMTicketGetTicketOpcode       );
+    objmgr.opcodeTable[ CMSG_GMTICKET_CREATE ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMTicketCreateOpcode          );
+    objmgr.opcodeTable[ CMSG_GMTICKET_SYSTEMSTATUS ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMTicketSystemStatusOpcode    );
+    objmgr.opcodeTable[ CMSG_GMTICKET_DELETETICKET ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode          );
+    objmgr.opcodeTable[ CMSG_GMTICKET_UPDATETEXT ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode      );
+    objmgr.opcodeTable[ CMSG_TOGGLE_PVP ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTogglePvP                     );
+
+        // played time
+    objmgr.opcodeTable[ CMSG_PLAYED_TIME ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePlayedTime                    );
+
+        // new inspect
+    objmgr.opcodeTable[ CMSG_INSPECT ]                          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleInspectOpcode                 );
+
+        // new inspect stats
+    objmgr.opcodeTable[ MSG_INSPECT_HONOR_STATS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode       );
+
+        // charater view
+    objmgr.opcodeTable[ CMSG_TOGGLE_HELM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleToggleHelmOpcode              );
+    objmgr.opcodeTable[ CMSG_TOGGLE_CLOAK ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleToggleCloakOpcode             );
+
+        // repair item
+    objmgr.opcodeTable[ CMSG_REPAIR_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRepairItemOpcode              );
+
+    objmgr.opcodeTable[ MSG_LOOKING_FOR_GROUP ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLookingForGroup               );
+    objmgr.opcodeTable[ CMSG_SET_FACTION_ATWAR ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetFactionAtWar               );
+    objmgr.opcodeTable[ CMSG_SET_FACTION_CHEAT ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetFactionCheat               );
+    objmgr.opcodeTable[ CMSG_ZONEUPDATE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode              );
+    objmgr.opcodeTable[ CMSG_SET_TARGET_OBSOLETE ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetTargetOpcode               );
+    objmgr.opcodeTable[ CMSG_SET_SELECTION ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetSelectionOpcode            );
+    objmgr.opcodeTable[ CMSG_STANDSTATECHANGE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStandStateChangeOpcode        );
+    objmgr.opcodeTable[ CMSG_FRIEND_LIST ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleFriendListOpcode              );
+    objmgr.opcodeTable[ CMSG_ADD_FRIEND ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddFriendOpcode               );
+    objmgr.opcodeTable[ CMSG_DEL_FRIEND ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDelFriendOpcode               );
+    objmgr.opcodeTable[ CMSG_ADD_IGNORE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddIgnoreOpcode               );
+    objmgr.opcodeTable[ CMSG_DEL_IGNORE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDelIgnoreOpcode               );
+    objmgr.opcodeTable[ CMSG_BUG ]                              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBugOpcode                     );
+    objmgr.opcodeTable[ CMSG_SET_AMMO ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetAmmoOpcode                 );
+    objmgr.opcodeTable[ CMSG_AREATRIGGER ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode             );
+    objmgr.opcodeTable[ CMSG_UPDATE_ACCOUNT_DATA ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleUpdateAccountData             );
+    objmgr.opcodeTable[ CMSG_REQUEST_ACCOUNT_DATA ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRequestAccountData            );
+    objmgr.opcodeTable[ CMSG_MEETINGSTONE_INFO ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMeetingStoneInfo              );
+    objmgr.opcodeTable[ CMSG_GAMEOBJ_USE ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGameObjectUseOpcode           );
+    objmgr.opcodeTable[ MSG_CORPSE_QUERY ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCorpseQueryOpcode             );
+    objmgr.opcodeTable[ CMSG_NAME_QUERY ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleNameQueryOpcode               );
+    objmgr.opcodeTable[ CMSG_QUERY_TIME ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQueryTimeOpcode               );
+    objmgr.opcodeTable[ CMSG_CREATURE_QUERY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCreatureQueryOpcode           );
+    objmgr.opcodeTable[ CMSG_GAMEOBJECT_QUERY ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGameObjectQueryOpcode         );
+
+        // movements
+    objmgr.opcodeTable[ MSG_MOVE_START_FORWARD ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_START_BACKWARD ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_STOP ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_START_STRAFE_LEFT ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_START_STRAFE_RIGHT ]           = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_STOP_STRAFE ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_JUMP ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_START_TURN_LEFT ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_START_TURN_RIGHT ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_STOP_TURN ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_START_PITCH_UP ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_START_PITCH_DOWN ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_STOP_PITCH ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_SET_RUN_MODE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_SET_WALK_MODE ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_TELEPORT_ACK ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveTeleportAck               );
+    objmgr.opcodeTable[ MSG_MOVE_FALL_LAND ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_START_SWIM ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_STOP_SWIM ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_SET_FACING ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_SET_PITCH ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_WORLDPORT_ACK ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        );
+    objmgr.opcodeTable[ CMSG_FORCE_RUN_SPEED_CHANGE_ACK ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
+    objmgr.opcodeTable[ CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK ]  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
+    objmgr.opcodeTable[ CMSG_FORCE_SWIM_SPEED_CHANGE_ACK ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
+    objmgr.opcodeTable[ CMSG_FORCE_MOVE_ROOT_ACK ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveRootAck                   );
+    objmgr.opcodeTable[ CMSG_FORCE_MOVE_UNROOT_ACK ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveUnRootAck                 );
+    objmgr.opcodeTable[ MSG_MOVE_HEARTBEAT ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ CMSG_MOVE_KNOCK_BACK_ACK ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveKnockBackAck              );
+    objmgr.opcodeTable[ CMSG_MOVE_HOVER_ACK ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveHoverAck                  );
+    objmgr.opcodeTable[ CMSG_SET_ACTIVE_MOVER ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode          );
+    objmgr.opcodeTable[ CMSG_MOVE_FALL_RESET ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ CMSG_MOVE_FEATHER_FALL_ACK ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleFeatherFallAck                );
+    objmgr.opcodeTable[ CMSG_MOVE_WATER_WALK_ACK ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveWaterWalkAck              );
+    objmgr.opcodeTable[ CMSG_FORCE_WALK_SPEED_CHANGE_ACK ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
+    objmgr.opcodeTable[ CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK ] = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck      );
+    objmgr.opcodeTable[ CMSG_FORCE_TURN_RATE_CHANGE_ACK ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
+    objmgr.opcodeTable[ CMSG_FORCE_FLY_SPEED_CHANGE_ACK ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
+
+    objmgr.opcodeTable[ CMSG_MOUNTSPECIAL_ANIM ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMountSpecialAnimOpcode        );
+
+    objmgr.opcodeTable[ CMSG_GROUP_INVITE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupInviteOpcode             );
+    //objmgr._opcodeTable[ CMSG_GROUP_CANCEL ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupCancelOpcode             );
+    objmgr.opcodeTable[ CMSG_GROUP_ACCEPT ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupAcceptOpcode             );
+    objmgr.opcodeTable[ CMSG_GROUP_DECLINE ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupDeclineOpcode            );
+    objmgr.opcodeTable[ CMSG_GROUP_UNINVITE ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteNameOpcode       );
+    objmgr.opcodeTable[ CMSG_GROUP_UNINVITE_GUID ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteGuidOpcode       );
+    objmgr.opcodeTable[ CMSG_GROUP_SET_LEADER ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupSetLeaderOpcode          );
+    objmgr.opcodeTable[ CMSG_GROUP_DISBAND ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupDisbandOpcode            );
+    objmgr.opcodeTable[ CMSG_LOOT_METHOD ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              );
+    objmgr.opcodeTable[ CMSG_LOOT_ROLL ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      );
+    objmgr.opcodeTable[ CMSG_REQUEST_PARTY_MEMBER_STATS ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRequestPartyMemberStatsOpcode );
+    objmgr.opcodeTable[ CMSG_REQUEST_RAID_INFO ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRequestRaidInfoOpcode         );
+    objmgr.opcodeTable[ MSG_RAID_ICON_TARGET ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRaidIconTargetOpcode          );
+    objmgr.opcodeTable[ CMSG_GROUP_RAID_CONVERT ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRaidConvertOpcode             );
+    objmgr.opcodeTable[ MSG_RAID_READY_CHECK ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRaidReadyCheckOpcode          );
+    objmgr.opcodeTable[ CMSG_GROUP_CHANGE_SUB_GROUP ]           = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupChangeSubGroupOpcode     );
+    objmgr.opcodeTable[ CMSG_GROUP_ASSISTANT ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupAssistantOpcode          );
+    objmgr.opcodeTable[ CMSG_GROUP_PROMOTE ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupPromoteOpcode            );
+
+    objmgr.opcodeTable[ CMSG_PETITION_SHOWLIST ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetitionShowListOpcode        );
+    objmgr.opcodeTable[ CMSG_PETITION_BUY ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetitionBuyOpcode             );
+    objmgr.opcodeTable[ CMSG_PETITION_SHOW_SIGNATURES ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetitionShowSignOpcode        );
+    objmgr.opcodeTable[ CMSG_PETITION_QUERY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetitionQueryOpcode           );
+    objmgr.opcodeTable[ MSG_PETITION_RENAME ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetitionRenameOpcode          );
+    objmgr.opcodeTable[ CMSG_PETITION_SIGN ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetitionSignOpcode            );
+    objmgr.opcodeTable[ MSG_PETITION_DECLINE ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetitionDeclineOpcode         );
+    objmgr.opcodeTable[ CMSG_OFFER_PETITION ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleOfferPetitionOpcode           );
+    objmgr.opcodeTable[ CMSG_TURN_IN_PETITION ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTurnInPetitionOpcode          );
+
+    objmgr.opcodeTable[ CMSG_GUILD_QUERY ]                      = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleGuildQueryOpcode              );
+    objmgr.opcodeTable[ CMSG_GUILD_CREATE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildCreateOpcode             );
+    objmgr.opcodeTable[ CMSG_GUILD_INVITE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildInviteOpcode             );
+    objmgr.opcodeTable[ CMSG_GUILD_REMOVE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildRemoveOpcode             );
+    objmgr.opcodeTable[ CMSG_GUILD_ACCEPT ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildAcceptOpcode             );
+    objmgr.opcodeTable[ CMSG_GUILD_DECLINE ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildDeclineOpcode            );
+    objmgr.opcodeTable[ CMSG_GUILD_INFO ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildInfoOpcode               );
+    objmgr.opcodeTable[ CMSG_GUILD_ROSTER ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildRosterOpcode             );
+    objmgr.opcodeTable[ CMSG_GUILD_PROMOTE ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildPromoteOpcode            );
+    objmgr.opcodeTable[ CMSG_GUILD_DEMOTE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildDemoteOpcode             );
+    objmgr.opcodeTable[ CMSG_GUILD_LEAVE ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildLeaveOpcode              );
+    objmgr.opcodeTable[ CMSG_GUILD_DISBAND ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildDisbandOpcode            );
+    objmgr.opcodeTable[ CMSG_GUILD_LEADER ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildLeaderOpcode             );
+    objmgr.opcodeTable[ CMSG_GUILD_MOTD ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildMOTDOpcode               );
+    objmgr.opcodeTable[ CMSG_GUILD_SET_PUBLIC_NOTE ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildSetPublicNoteOpcode      );
+    objmgr.opcodeTable[ CMSG_GUILD_SET_OFFICER_NOTE ]           = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildSetOfficerNoteOpcode     );
+    objmgr.opcodeTable[ CMSG_GUILD_RANK ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildRankOpcode               );
+    objmgr.opcodeTable[ CMSG_GUILD_ADD_RANK ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildAddRankOpcode            );
+    objmgr.opcodeTable[ CMSG_GUILD_DEL_RANK ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildDelRankOpcode            );
+    objmgr.opcodeTable[ CMSG_GUILD_CHANGEINFO ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildChangeInfoOpcode         );
+    objmgr.opcodeTable[ MSG_SAVE_GUILD_EMBLEM ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildSaveEmblemOpcode         );
+
+    objmgr.opcodeTable[ CMSG_TAXINODE_STATUS_QUERY ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode     );
+    objmgr.opcodeTable[ CMSG_TAXIQUERYAVAILABLENODES ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAvailableNodesOpcode );
+    objmgr.opcodeTable[ CMSG_ACTIVATETAXI ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleActivateTaxiOpcode            );
+    objmgr.opcodeTable[ CMSG_ACTIVATETAXI_FAR ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleActivateTaxiFarOpcode         );
+    objmgr.opcodeTable[ CMSG_MOVE_SPLINE_DONE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTaxiNextDestinationOpcode     );
+
+    objmgr.opcodeTable[ MSG_TABARDVENDOR_ACTIVATE ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTabardVendorActivateOpcode    );
+    objmgr.opcodeTable[ CMSG_BANKER_ACTIVATE ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBankerActivateOpcode          );
+    objmgr.opcodeTable[ CMSG_BUY_BANK_SLOT ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuyBankSlotOpcode             );
+    objmgr.opcodeTable[ CMSG_TRAINER_LIST ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTrainerListOpcode             );
+    objmgr.opcodeTable[ CMSG_TRAINER_BUY_SPELL ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTrainerBuySpellOpcode         );
+    objmgr.opcodeTable[ MSG_AUCTION_HELLO ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionHelloOpcode            );
+    objmgr.opcodeTable[ CMSG_GOSSIP_HELLO ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGossipHelloOpcode             );
+    objmgr.opcodeTable[ CMSG_GOSSIP_SELECT_OPTION ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGossipSelectOptionOpcode      );
+    objmgr.opcodeTable[ CMSG_SPIRIT_HEALER_ACTIVATE ]           = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSpiritHealerActivateOpcode    );
+    objmgr.opcodeTable[ CMSG_NPC_TEXT_QUERY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleNpcTextQueryOpcode            );
+    objmgr.opcodeTable[ CMSG_BINDER_ACTIVATE ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBinderActivateOpcode          );
+    objmgr.opcodeTable[ MSG_LIST_STABLED_PETS ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleListStabledPetsOpcode         );
+
+    objmgr.opcodeTable[ CMSG_DUEL_ACCEPTED ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDuelAcceptedOpcode            );
+    objmgr.opcodeTable[ CMSG_DUEL_CANCELLED ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           );
+
+    objmgr.opcodeTable[ CMSG_ACCEPT_TRADE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAcceptTradeOpcode             );
+    objmgr.opcodeTable[ CMSG_BEGIN_TRADE ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBeginTradeOpcode              );
+    objmgr.opcodeTable[ CMSG_BUSY_TRADE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBusyTradeOpcode               );
+                                                            // sended after loguot complete
+    objmgr.opcodeTable[ CMSG_CANCEL_TRADE ]                     = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleCancelTradeOpcode             );
+    objmgr.opcodeTable[ CMSG_CLEAR_TRADE_ITEM ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleClearTradeItemOpcode          );
+    objmgr.opcodeTable[ CMSG_IGNORE_TRADE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleIgnoreTradeOpcode             );
+    objmgr.opcodeTable[ CMSG_INITIATE_TRADE ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleInitiateTradeOpcode           );
+    objmgr.opcodeTable[ CMSG_SET_TRADE_GOLD ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetTradeGoldOpcode            );
+    objmgr.opcodeTable[ CMSG_SET_TRADE_ITEM ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetTradeItemOpcode            );
+    objmgr.opcodeTable[ CMSG_UNACCEPT_TRADE ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleUnacceptTradeOpcode           );
+
+    objmgr.opcodeTable[ CMSG_SPLIT_ITEM ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSplitItemOpcode               );
+    objmgr.opcodeTable[ CMSG_SWAP_INV_ITEM ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSwapInvItemOpcode             );
+    objmgr.opcodeTable[ CMSG_DESTROYITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDestroyItemOpcode             );
+    objmgr.opcodeTable[ CMSG_AUTOEQUIP_ITEM ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAutoEquipItemOpcode           );
+    objmgr.opcodeTable[ CMSG_ITEM_QUERY_SINGLE ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleItemQuerySingleOpcode         );
+    objmgr.opcodeTable[ CMSG_SELL_ITEM ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSellItemOpcode                );
+    objmgr.opcodeTable[ CMSG_BUY_ITEM_IN_SLOT ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuyItemInSlotOpcode           );
+    objmgr.opcodeTable[ CMSG_BUY_ITEM ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuyItemOpcode                 );
+    objmgr.opcodeTable[ CMSG_LIST_INVENTORY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleListInventoryOpcode           );
+    objmgr.opcodeTable[ CMSG_SWAP_ITEM ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSwapItem                      );
+    objmgr.opcodeTable[ CMSG_BUYBACK_ITEM ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuybackItem                   );
+    objmgr.opcodeTable[ CMSG_AUTOSTORE_BAG_ITEM ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBagItemOpcode        );
+    objmgr.opcodeTable[ CMSG_AUTOBANK_ITEM ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAutoBankItemOpcode            );
+    objmgr.opcodeTable[ CMSG_AUTOSTORE_BANK_ITEM ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBankItemOpcode       );
+    objmgr.opcodeTable[ CMSG_ITEM_NAME_QUERY ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleItemNameQueryOpcode           );
+    objmgr.opcodeTable[ CMSG_WRAP_ITEM ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleWrapItemOpcode                );
+
+    objmgr.opcodeTable[ CMSG_ATTACKSWING ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAttackSwingOpcode             );
+    objmgr.opcodeTable[ CMSG_ATTACKSTOP ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAttackStopOpcode              );
+    objmgr.opcodeTable[ CMSG_SETSHEATHED ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetSheathedOpcode             );
+
+    objmgr.opcodeTable[ CMSG_USE_ITEM ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleUseItemOpcode                 );
+    objmgr.opcodeTable[ CMSG_OPEN_ITEM ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleOpenItemOpcode                );
+    objmgr.opcodeTable[ CMSG_CAST_SPELL ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCastSpellOpcode               );
+    objmgr.opcodeTable[ CMSG_CANCEL_CAST ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelCastOpcode              );
+    objmgr.opcodeTable[ CMSG_CANCEL_AURA ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelAuraOpcode              );
+    objmgr.opcodeTable[ CMSG_CANCEL_GROWTH_AURA ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelGrowthAuraOpcode        );
+    objmgr.opcodeTable[ CMSG_CANCEL_AUTO_REPEAT_SPELL ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelAutoRepeatSpellOpcode   );
+
+    objmgr.opcodeTable[ CMSG_LEARN_TALENT ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLearnTalentOpcode             );
+    objmgr.opcodeTable[ MSG_TALENT_WIPE_CONFIRM ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTalentWipeOpcode              );
+    objmgr.opcodeTable[ CMSG_UNLEARN_SKILL ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleUnlearnSkillOpcode            );
+
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_STATUS_QUERY ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverStatusQueryOpcode   );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_HELLO ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverHelloOpcode         );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_ACCEPT_QUEST ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverAcceptQuestOpcode   );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_CHOOSE_REWARD ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverChooseRewardOpcode  );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_REQUEST_REWARD ]        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverRequestRewardOpcode );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_QUERY_QUEST ]           = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverQuestQueryOpcode    );
+    objmgr.opcodeTable[ CMSG_QUEST_QUERY ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestQueryOpcode              );
+
+    objmgr.opcodeTable[ CMSG_QUEST_CONFIRM_ACCEPT ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestConfirmAccept            );
+    objmgr.opcodeTable[ CMSG_QUESTLOG_REMOVE_QUEST ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestLogRemoveQuest           );
+    objmgr.opcodeTable[ CMSG_QUESTLOG_SWAP_QUEST ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestLogSwapQuest             );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_CANCEL ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverCancel              );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_COMPLETE_QUEST ]        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestComplete                 );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_QUEST_AUTOLAUNCH ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestAutoLaunch               );
+    objmgr.opcodeTable[ CMSG_PUSHQUESTTOPARTY ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestPushToParty              );
+    objmgr.opcodeTable[ MSG_QUEST_PUSH_RESULT ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestPushResult               );
+
+    objmgr.opcodeTable[ CMSG_TUTORIAL_FLAG ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTutorialFlag                  );
+    objmgr.opcodeTable[ CMSG_TUTORIAL_CLEAR ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTutorialClear                 );
+    objmgr.opcodeTable[ CMSG_TUTORIAL_RESET ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTutorialReset                 );
+
+    objmgr.opcodeTable[ CMSG_MESSAGECHAT ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode             );
+    objmgr.opcodeTable[ CMSG_TEXT_EMOTE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTextEmoteOpcode               );
+    objmgr.opcodeTable[ CMSG_CHAT_IGNORED ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChatIgnoredOpcode             );
+
+    objmgr.opcodeTable[ CMSG_RECLAIM_CORPSE ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCorpseReclaimOpcode           );
+    objmgr.opcodeTable[ CMSG_RESURRECT_RESPONSE ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleResurrectResponseOpcode       );
+    objmgr.opcodeTable[ CMSG_AUCTION_LIST_ITEMS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionListItems              );
+    objmgr.opcodeTable[ CMSG_AUCTION_LIST_BIDDER_ITEMS ]        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionListBidderItems        );
+    objmgr.opcodeTable[ CMSG_AUCTION_SELL_ITEM ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionSellItem               );
+    objmgr.opcodeTable[ CMSG_AUCTION_REMOVE_ITEM ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionRemoveItem             );
+    objmgr.opcodeTable[ CMSG_AUCTION_LIST_OWNER_ITEMS ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionListOwnerItems         );
+    objmgr.opcodeTable[ CMSG_AUCTION_PLACE_BID ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionPlaceBid               );
+
+    objmgr.opcodeTable[ CMSG_JOIN_CHANNEL ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelJoin                   );
+    objmgr.opcodeTable[ CMSG_LEAVE_CHANNEL ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelLeave                  );
+    objmgr.opcodeTable[ CMSG_CHANNEL_LIST ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelList                   );
+    objmgr.opcodeTable[ CMSG_CHANNEL_PASSWORD ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelPassword               );
+    objmgr.opcodeTable[ CMSG_CHANNEL_SET_OWNER ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelSetOwner               );
+    objmgr.opcodeTable[ CMSG_CHANNEL_OWNER ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelOwner                  );
+    objmgr.opcodeTable[ CMSG_CHANNEL_MODERATOR ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelModerator              );
+    objmgr.opcodeTable[ CMSG_CHANNEL_UNMODERATOR ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelUnmoderator            );
+    objmgr.opcodeTable[ CMSG_CHANNEL_MUTE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelMute                   );
+    objmgr.opcodeTable[ CMSG_CHANNEL_UNMUTE ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelUnmute                 );
+    objmgr.opcodeTable[ CMSG_CHANNEL_INVITE ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelInvite                 );
+    objmgr.opcodeTable[ CMSG_CHANNEL_KICK ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelKick                   );
+    objmgr.opcodeTable[ CMSG_CHANNEL_BAN ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelBan                    );
+    objmgr.opcodeTable[ CMSG_CHANNEL_UNBAN ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelUnban                  );
+    objmgr.opcodeTable[ CMSG_CHANNEL_ANNOUNCEMENTS ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelAnnounce               );
+    objmgr.opcodeTable[ CMSG_CHANNEL_MODERATE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelModerate               );
+
+    objmgr.opcodeTable[ CMSG_GET_MAIL_LIST ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGetMail                       );
+    objmgr.opcodeTable[ CMSG_ITEM_TEXT_QUERY ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleItemTextQuery                 );
+    objmgr.opcodeTable[ CMSG_SEND_MAIL ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSendMail                      );
+    objmgr.opcodeTable[ CMSG_MAIL_TAKE_MONEY ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTakeMoney                     );
+    objmgr.opcodeTable[ CMSG_MAIL_TAKE_ITEM ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTakeItem                      );
+    objmgr.opcodeTable[ CMSG_MAIL_MARK_AS_READ ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMarkAsRead                    );
+    objmgr.opcodeTable[ CMSG_MAIL_RETURN_TO_SENDER ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleReturnToSender                );
+    objmgr.opcodeTable[ CMSG_MAIL_DELETE ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMailDelete                    );
+    objmgr.opcodeTable[ CMSG_MAIL_CREATE_TEXT_ITEM ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMailCreateTextItem            );
+    objmgr.opcodeTable[ MSG_QUERY_NEXT_MAIL_TIME ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMsgQueryNextMailtime          );
+
+    objmgr.opcodeTable[ CMSG_COMPLETE_CINEMATIC ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCompleteCinema                );
+    objmgr.opcodeTable[ CMSG_NEXT_CINEMATIC_CAMERA ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera           );
+
+    objmgr.opcodeTable[ CMSG_MOVE_TIME_SKIPPED ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode         );
+
+    objmgr.opcodeTable[ CMSG_PAGE_TEXT_QUERY ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePageQueryOpcode               );
+    objmgr.opcodeTable[ CMSG_READ_ITEM ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleReadItem                      );
+
+    objmgr.opcodeTable[ CMSG_PET_ACTION ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetAction                     );
+    objmgr.opcodeTable[ CMSG_PET_NAME_QUERY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetNameQuery                  );
+
+    objmgr.opcodeTable[ CMSG_PET_ABANDON ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetAbandon                    );
+    objmgr.opcodeTable[ CMSG_PET_SET_ACTION ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetSetAction                  );
+    objmgr.opcodeTable[ CMSG_PET_RENAME ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetRename                     );
+    objmgr.opcodeTable[ CMSG_STABLE_PET ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStablePet                     );
+    objmgr.opcodeTable[ CMSG_UNSTABLE_PET ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleUnstablePet                   );
+    objmgr.opcodeTable[ CMSG_BUY_STABLE_SLOT ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuyStableSlot                 );
+    objmgr.opcodeTable[ CMSG_STABLE_REVIVE_PET ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStableRevivePet               );
+    objmgr.opcodeTable[ CMSG_STABLE_SWAP_PET ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStableSwapPet                 );
+
+    objmgr.opcodeTable[ CMSG_CANCEL_CHANNELLING  ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              );
+
+        //BattleGround
+
+    objmgr.opcodeTable[ CMSG_BATTLEFIELD_STATUS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       );
+    objmgr.opcodeTable[ CMSG_BATTLEMASTER_HELLO ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundHelloOpcode       );
+    objmgr.opcodeTable[ CMSG_BATTLEMASTER_JOIN ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundJoinOpcode        );
+    objmgr.opcodeTable[ MSG_BATTLEGROUND_PLAYER_POSITIONS ]     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPlayerPositionsOpcode );
+    objmgr.opcodeTable[ MSG_PVP_LOG_DATA ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPVPlogdataOpcode  );
+    objmgr.opcodeTable[ CMSG_BATTLEFIELD_PORT ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPlayerPortOpcode  );
+    objmgr.opcodeTable[ CMSG_BATTLEFIELD_LIST ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundListOpcode        );
+    objmgr.opcodeTable[ CMSG_LEAVE_BATTLEFIELD ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundLeaveOpcode       );
+
+    objmgr.opcodeTable[ CMSG_SET_ACTIONBAR_TOGGLES ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetActionBar                  );
+    objmgr.opcodeTable[ CMSG_FIELD_WATCHED_FACTION_SHOW_BAR ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionIndexOpcode );
+
+    objmgr.opcodeTable[ CMSG_LOOT_ROLL ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      );
+    objmgr.opcodeTable[ CMSG_WARDEN_DATA ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleWardenDataOpcode              );
+    objmgr.opcodeTable[ CMSG_WORLD_TELEPORT ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleWorldTeleportOpcode           );
+    objmgr.opcodeTable[ MSG_MINIMAP_PING ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMinimapPingOpcode             );
+    objmgr.opcodeTable[ MSG_RANDOM_ROLL ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRandomRollOpcode              );
+    objmgr.opcodeTable[ CMSG_FAR_SIGHT ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleFarSightOpcode                );
+
+    objmgr.opcodeTable[ MSG_LOOKING_FOR_GROUP ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLookingForGroup               );
+    objmgr.opcodeTable[ CMSG_SET_LOOKING_FOR_GROUP ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetLfgOpcode                  );
+    objmgr.opcodeTable[ MSG_SET_DUNGEON_DIFFICULTY ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDungeonDifficultyOpcode       );
+    objmgr.opcodeTable[ CMSG_MOVE_FLY_MODE_CHANGE_ACK ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveFlyModeChangeAckOpcode    );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_QUERY ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamQueryOpcode          );
+    objmgr.opcodeTable[ MSG_MOVE_START_FLY_UP ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_STOP_FLY_UP ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ CMSG_LFG_SET_AUTOJOIN ]                 = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleLfgAutoJoinOpcode             );
+    objmgr.opcodeTable[ CMSG_LFG_UNSET_AUTOJOIN ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLfgCancelAutoJoinOpcode       );
+    objmgr.opcodeTable[ CMSG_LFM_SET_AUTOADD ]                  = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleLfmAutoAddMembersOpcode       );
+    objmgr.opcodeTable[ CMSG_LFM_UNSET_AUTOADD ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLfmCancelAutoAddmembersOpcode );
+    objmgr.opcodeTable[ CMSG_LOOKING_FOR_GROUP_CLEAR ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLfgClearOpcode                );
+    objmgr.opcodeTable[ CMSG_SET_LOOKING_FOR_NONE ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLfmSetNoneOpcode              );
+    objmgr.opcodeTable[ CMSG_SET_LOOKING_FOR_MORE ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLfmSetOpcode                  );
+    objmgr.opcodeTable[ CMSG_SET_COMMENTARY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLfgSetCommentOpcode           );
+    objmgr.opcodeTable[ CMSG_CHOOSE_TITLE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChooseTitleOpcode             );
+    objmgr.opcodeTable[ MSG_INSPECT_ARENA_STATS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleInspectArenaStatsOpcode       );
+    objmgr.opcodeTable[ CMSG_REALM_STATE_REQUEST ]              = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleRealmStateRequestOpcode       );
+    objmgr.opcodeTable[ CMSG_ALLOW_MOVE_ACK ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAllowMoveAckOpcode            );
+    objmgr.opcodeTable[ CMSG_WHOIS ]                            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleWhoisOpcode                   );
+    objmgr.opcodeTable[ CMSG_RESET_INSTANCES ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleResetInstancesOpcode          );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_ROSTER ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamRosterOpcode         );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_ADD_MEMBER ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamAddMemberOpcode      );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_INVITE_ACCEPT ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteAcceptOpcode   );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_INVITE_DECLINE ]        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteDeclineOpcode  );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_LEAVE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamLeaveOpcode          );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_DISBAND ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamDisbandOpcode        );
+    objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUERY ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode   );
+    objmgr.opcodeTable[ CMSG_MOVE_SHIP_909 ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveShipOpcode                );
+    objmgr.opcodeTable[ CMSG_MOVE_FLY_STATE_CHANGE ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveFlyStateChangeOpcode      );
+    objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
+
+        // Socket gem
+    objmgr.opcodeTable[ CMSG_SOCKET_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  );
+
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -103,8 +469,8 @@ void WorldSession::QueuePacket(WorldPacket& packet)
 bool WorldSession::Update(uint32 diff)
 {
     WorldPacket *packet;
-    OpcodeHandler *table = _GetOpcodeHandlerTable();
-    uint32 i;
+    //OpcodeHandler *table = _GetOpcodeHandlerTable();
+    //uint32 i;
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// \todo Is there a way to consolidate the OpcondeHandlerTable and the g_worldOpcodeNames to only maintain 1 list?
@@ -117,8 +483,8 @@ bool WorldSession::Update(uint32 diff)
                         LookupName(packet->GetOpcode(), g_worldOpcodeNames),
                         packet->GetOpcode());
         #endif*/
-
-        for (i = 0; table[i].handler != NULL; i++)
+        //oldcode ... slow
+        /*for (i = 0; table[i].handler != NULL; i++)
         {
             if (table[i].opcode == packet->GetOpcode())
             {
@@ -149,7 +515,32 @@ bool WorldSession::Update(uint32 diff)
         if (table[i].handler == NULL)
             sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
                 LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                packet->GetOpcode());*/
+
+        //new code FAST:
+        OpcodeTableMap::const_iterator iter = objmgr.opcodeTable.find( packet->GetOpcode() );
+        if (iter == objmgr.opcodeTable.end())
+            sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
+                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
                 packet->GetOpcode());
+
+        if (iter->second.status == STATUS_LOGGEDIN && _player)
+        {
+            (this->*iter->second.handler)(*packet);
+        }
+        else if (iter->second.status == STATUS_AUTHED)
+        {
+            m_playerRecentlyLogout = false;
+            (this->*iter->second.handler)(*packet);
+        }
+        else
+            // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
+        if(!m_playerRecentlyLogout)
+        {
+            sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",
+                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                packet->GetOpcode());
+        }
 
         delete packet;
     }
@@ -319,7 +710,7 @@ void WorldSession::KickPlayer()
     _socket->SetCloseAndDelete(true);
     _socket = NULL;
 }
-
+/*
 /// Return the Opcode handler table
 OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 {
@@ -694,7 +1085,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
     };
 
     return table;
-}
+}*/
 
 /// Cancel channeling handler
 /// \todo Complete HandleCancelChanneling function

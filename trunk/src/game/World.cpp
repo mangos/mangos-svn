@@ -208,7 +208,7 @@ Weather* World::AddWeather(uint32 zone_id)
 /// Initialize the World
 void World::SetInitialWorldSettings()
 {
-    ///- Initialize the random number genrator
+    ///- Initialize the random number generator
     srand((unsigned int)time(NULL));
 
     ///- Read the version of the configuration file and warn the user in case of emptiness or mismatch
