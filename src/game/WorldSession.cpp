@@ -520,9 +520,12 @@ bool WorldSession::Update(uint32 diff)
         //new code FAST:
         OpcodeTableMap::const_iterator iter = objmgr.opcodeTable.find( packet->GetOpcode() );
         if (iter == objmgr.opcodeTable.end())
+        {
             sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
                 LookupName(packet->GetOpcode(), g_worldOpcodeNames),
                 packet->GetOpcode());
+            continue;
+        }
 
         if (iter->second.status == STATUS_LOGGEDIN && _player)
         {
