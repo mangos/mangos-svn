@@ -1,21 +1,24 @@
 = MaNGOS -- History of visible changes =
 
-Copyright (c) 2005-2007 MaNGOS <http://www.mangosproject.org/>
+Copyright (c) 2005-2007 MaNGOS project <http://www.mangosproject.org/>
 
 See the COPYING file for copying conditions.
 
-Please submit bug reports at:
-https://svn.mangosproject.org/trac/MaNGOS/
+Visit our project website for documentation, and more:
+http://www.mangosproject.org/
 
 Visit our forums for support:
-http://www.mangosproject.org/
+http://www.mangosproject.org/community/
+
+Please submit bug reports at:
+https://svn.mangosproject.org/trac/MaNGOS/
 
 Version 0.7, Codename "Eye of the Storm"
  * Full rewrite of the GNU autotools based build system, in order to
    smooth and clean up the build process.
  * Full rewrite of the Windows build system, allowing MaNGOS to be built
    from Visual C++ 2003 Toolkit, Visual C++ 2003, Visual C++ 2005.
- * Under discussion.
+ * Upgrade to client version 2.0.12 (build 6546).
 
 Version 0.6, Codename "Black Dragonflight"
  * MaNGOS development moved to http://sourceforge.net/projects/mangos/
