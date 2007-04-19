@@ -89,19 +89,39 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     }
     data << auction->Id;
     data << pItem->GetUInt32Value(OBJECT_FIELD_ENTRY);
-    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0);
+    //data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0);
                                                             // Permanent enchantment id
-    data << (uint32) pItem->GetItemRandomPropertyId();      //random item properity id
+    //data << (uint32) pItem->GetItemRandomPropertyId();      //random item properity id
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //unknown
     data << (uint32) 0;                                     //not pItem->GetCreator();// 4a d0 64 02, 0, unknown, maybe enchating
     data << (uint32) pItem->GetCount();                     //item->count
                                                             //item->charge FFFFFFF
     data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES);
+    data << (uint32) 0;                                     //unknown
     data << (uint32) auction->owner;                        //Auction->owner
     data << (uint32) 0;                                     //player_high_guid
     data << (uint32) auction->startbid;                     //Auction->startbid
     data << (uint32) auction->outBid;                       //minimal outbid...
     data << (uint32) auction->buyout;                       //auction->buyout
-    data << (uint32) (auction->time - time(NULL)) * 1000;   //time
+    data << (uint32) (auction->time - time(NULL)) * 1000;   //time ---- has changed!
     data << (uint32) auction->bidder;                       //auction->bidder current
     data << (uint32) 0;                                     //player highguid
     data << (uint32) auction->bid;                          //current bid
