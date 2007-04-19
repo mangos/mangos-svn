@@ -1,8 +1,8 @@
--- MySQL dump 10.10
+-- MySQL dump 10.11
 --
 -- Host: localhost    Database: realmd
 -- ------------------------------------------------------
--- Server version	5.0.24a-Debian_9-log
+-- Server version	5.0.38-Ubuntu_0ubuntu1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -47,12 +47,15 @@ CREATE TABLE `account` (
 -- Dumping data for table `account`
 --
 
-
-/*!40000 ALTER TABLE `account` DISABLE KEYS */;
 LOCK TABLES `account` WRITE;
-INSERT INTO `account` VALUES (1,'administrator','administrator',3,'','0','0','','2006-04-25 10:18:56',0,'127.0.0.1',0,0,'0000-00-00 00:00:00',0,1),(2,'gamemaster','gamemaster',2,'','0','0','','2006-04-25 10:18:56',0,'127.0.0.1',0,0,'0000-00-00 00:00:00',0,1),(3,'moderator','moderator',1,'','0','0','','2006-04-25 10:19:35',0,'127.0.0.1',0,0,'0000-00-00 00:00:00',0,1),(4,'player','player',0,'','0','0','','2006-04-25 10:19:35',0,'127.0.0.1',0,0,'0000-00-00 00:00:00',0,1);
-UNLOCK TABLES;
+/*!40000 ALTER TABLE `account` DISABLE KEYS */;
+INSERT INTO `account` VALUES 
+(1,'administrator','administrator',3,'','0','0','','2006-04-25 10:18:56',0,'127.0.0.1',0,0,'0000-00-00 00:00:00',0,0),
+(2,'gamemaster','gamemaster',2,'','0','0','','2006-04-25 10:18:56',0,'127.0.0.1',0,0,'0000-00-00 00:00:00',0,0),
+(3,'moderator','moderator',1,'','0','0','','2006-04-25 10:19:35',0,'127.0.0.1',0,0,'0000-00-00 00:00:00',0,0),
+(4,'player','player',0,'','0','0','','2006-04-25 10:19:35',0,'127.0.0.1',0,0,'0000-00-00 00:00:00',0,0);
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `ip_banned`
@@ -68,11 +71,10 @@ CREATE TABLE `ip_banned` (
 -- Dumping data for table `ip_banned`
 --
 
-
-/*!40000 ALTER TABLE `ip_banned` DISABLE KEYS */;
 LOCK TABLES `ip_banned` WRITE;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE `ip_banned` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ip_banned` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `realmcharacters`
@@ -90,11 +92,10 @@ CREATE TABLE `realmcharacters` (
 -- Dumping data for table `realmcharacters`
 --
 
-
-/*!40000 ALTER TABLE `realmcharacters` DISABLE KEYS */;
 LOCK TABLES `realmcharacters` WRITE;
-UNLOCK TABLES;
+/*!40000 ALTER TABLE `realmcharacters` DISABLE KEYS */;
 /*!40000 ALTER TABLE `realmcharacters` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `realmlist`
@@ -117,12 +118,12 @@ CREATE TABLE `realmlist` (
 -- Dumping data for table `realmlist`
 --
 
-
-/*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
 LOCK TABLES `realmlist` WRITE;
-INSERT INTO `realmlist` VALUES (1,'MaNGOS','127.0.0.1',8085,1,0,1);
-UNLOCK TABLES;
+/*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
+INSERT INTO `realmlist` VALUES 
+(1,'MaNGOS','127.0.0.1',8085,1,0,1);
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -133,5 +134,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-
-
+-- Dump completed on 2007-04-19 19:11:40
