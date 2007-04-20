@@ -89,28 +89,39 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     }
     data << auction->Id;
     data << pItem->GetUInt32Value(OBJECT_FIELD_ENTRY);
-    //data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0);
-                                                            // Permanent enchantment id
-    //data << (uint32) pItem->GetItemRandomPropertyId();      //random item properity id
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
-    data << (uint32) 0;                                     //unknown
+    
+    // Permanent enchantment
+    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0);
+                                                            //Enchanting 0 (green)
+    data << (uint32) 0;                                     //(duration, but not show?)
+    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+2);
+                                                            //(charges)
+
+    // Temporary enchantment
+    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+0);
+                                                            //Enchanting 1 (green)
+    data << (uint32) 0;                                     //(duration, but not show?)
+    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+2);
+                                                            //(charges)
+
+    data << (uint32) 0;                                     //Socket 0? (white)
+    data << (uint32) 0;                                     //(field of Socket 0?)
+    data << (uint32) 0;                                     //(charges)
+
+    data << (uint32) 0;                                     //Socket 1? (white)
+    data << (uint32) 0;                                     //(field of Socket 1?)
+    data << (uint32) 0;                                     //(charges)
+
+    data << (uint32) 0;                                     //Socket 2? (white)
+    data << (uint32) 0;                                     //(field of Socket 2?)
+    data << (uint32) 0;                                     //(charges)
+
+    data << (uint32) 0;                                     //Bonus ? (green)
+    data << (uint32) 0;                                     //(field of Bonus?)
+    data << (uint32) 0;                                     //(charges)
+
+    data << (uint32) pItem->GetItemRandomPropertyId();      //random item property id
+
     data << (uint32) 0;                                     //not pItem->GetCreator();// 4a d0 64 02, 0, unknown, maybe enchating
     data << (uint32) pItem->GetCount();                     //item->count
                                                             //item->charge FFFFFFF
@@ -262,8 +273,10 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     }
 
     if( GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-        sLog.outCommand("GM auction: %s (Entry: %u Count: %u) GM: %s (Account: %u)",
-        it->GetProto()->Name1,it->GetEntry(),it->GetCount(),GetPlayerName(),GetAccountId());
+    {
+        sLog.outCommand("GM %s (Account: %u) create auction: %s (Entry: %u Count: %u)",
+            GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount());
+    }
 
     pl->ModifyMoney( ((int32) deposit) * -1 );
 
