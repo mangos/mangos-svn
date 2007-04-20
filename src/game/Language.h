@@ -250,7 +250,6 @@
 #define LANG_COMMAND_TP_ADDEDERR         "Teleport location NOT added: db error."
 #define LANG_COMMAND_TP_DELETED          "Teleport location deleted."
 #define LANG_COMMAND_TP_DELETEERR        "Teleport location NOT deleted: DB error."
-
                                                             //log
 #define LANG_SPAWNING_SPIRIT_HEAL        "Spawning Spirit Healers\n"
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in db, exiting."

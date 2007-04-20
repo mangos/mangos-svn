@@ -157,7 +157,6 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;
-    m_soulStoneSpell = 0;
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
     m_canParry = false;
@@ -836,15 +835,6 @@ void Player::Update( uint32 p_time )
     if (m_deathState == JUST_DIED)
     {
         KillPlayer();
-
-        if( GetSoulStoneSpell() )
-        {
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(GetSoulStoneSpell());
-            if(spellInfo)
-                CastSpell(this,spellInfo,false,0);
-
-            SetSoulStoneSpell(0);
-        }
     }
 
     if(m_nextSave > 0)
@@ -938,13 +928,13 @@ void Player::setDeathState(DeathState s)
         RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
         // save value before aura remove in Unit::setDeathState
-        soulstoneSpellId = GetSoulStoneSpell();
+        soulstoneSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
     }
     Unit::setDeathState(s);
 
     // restore soulstone spell id for player after aura remove
     if(s == JUST_DIED && cur)
-        SetSoulStoneSpell(soulstoneSpellId);
+        SetUInt32Value(PLAYER_SELF_RES_SPELL, soulstoneSpellId);
 
     if(isAlive() && !cur)
     {
@@ -1417,7 +1407,7 @@ normal+TBC maps
     UpdateZone(GetZoneId());
 
     if(old_zone != GetZoneId() && pvpInfo.inHostileArea)    // only at zone change
-        CastSpell(this, 2479, false);
+        CastSpell(this, 2479, true);
 }
 
 void Player::AddToWorld()
@@ -3077,6 +3067,14 @@ void Player::ResurrectPlayer()
     SetMovement(MOVE_LAND_WALK);
     SetMovement(MOVE_UNROOT);
 
+    if(InBattleGround())    // special case for battleground resurrection
+    {
+        SetHealth(GetMaxHealth());
+        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+        SetPower(POWER_RAGE, 0);
+        SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+    }
+
     //SetSpeed(MOVE_RUN,  1.0f, true);
     //SetSpeed(MOVE_SWIM, 1.0f, true);
 
@@ -4681,7 +4679,7 @@ void Player::FlightComplete()
     Unmount();
     MoveToThreatList();
     if(pvpInfo.inHostileArea)
-        CastSpell(this, 2479, false);
+        CastSpell(this, 2479, true);
 }
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)

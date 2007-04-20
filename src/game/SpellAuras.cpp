@@ -1004,14 +1004,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 20763:spellid = 20759;break;
                 case 20764:spellid = 20760;break;
                 case 20765:spellid = 20761;break;
+                case 27239:spellid = 27240;break;
                 default:break;
             }
             if(!spellid)
                 return;
-            player->SetSoulStoneSpell(spellid);
+            player->SetUInt32Value(PLAYER_SELF_RES_SPELL, spellid);
         }
         else
-            player->SetSoulStoneSpell(0);
+            player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
     }
 
     if(!apply)
@@ -2253,10 +2254,10 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                 {
                     if(bg->GetHordeFlagState())
                         if(GetSpellProto()->Id == 23333)    // Warsong Flag, horde
-                            m_target->CastSpell(m_target, 23334, false, 0); // Horde Flag Drop
+                            m_target->CastSpell(m_target, 23334, true, 0); // Horde Flag Drop
                     if(bg->GetAllianceFlagState())
                         if(GetSpellProto()->Id == 23335)    // Silverwing Flag, alliance
-                            m_target->CastSpell(m_target, 23336, false, 0); // Alliance Flag Drop
+                            m_target->CastSpell(m_target, 23336, true, 0); // Alliance Flag Drop
                 }
             }
         }

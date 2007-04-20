@@ -782,13 +782,23 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     // resurrect
     GetPlayer()->ResurrectPlayer();
 
-    // spawnbones
+    // spawn bones
     GetPlayer()->SpawnCorpseBones();
 
     // set health, mana
     GetPlayer()->ApplyStats(false);
-    GetPlayer()->SetHealth(GetPlayer()->GetMaxHealth()/2);
-    GetPlayer()->SetPower(POWER_MANA,GetPlayer()->GetMaxPower(POWER_MANA)/2);
+    if(GetPlayer()->InBattleGround())   // special case for battleground resurrection
+    {
+        GetPlayer()->SetHealth(GetPlayer()->GetMaxHealth());
+        GetPlayer()->SetPower(POWER_MANA, GetPlayer()->GetMaxPower(POWER_MANA));
+        GetPlayer()->SetPower(POWER_RAGE, 0);
+        GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->GetMaxPower(POWER_ENERGY));
+    }
+    else
+    {
+        GetPlayer()->SetHealth(GetPlayer()->GetMaxHealth()/2);
+        GetPlayer()->SetPower(POWER_MANA, GetPlayer()->GetMaxPower(POWER_MANA)/2);
+    }
     GetPlayer()->ApplyStats(true);
 
     // update world right away

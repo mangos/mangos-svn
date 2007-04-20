@@ -427,6 +427,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_MOVE_SHIP_909 ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveShipOpcode                );
     objmgr.opcodeTable[ CMSG_MOVE_FLY_STATE_CHANGE ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveFlyStateChangeOpcode      );
     objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
+    objmgr.opcodeTable[ CMSG_SELF_RES ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode                 );
 
         // Socket gem
     objmgr.opcodeTable[ CMSG_SOCKET_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  );
@@ -1244,7 +1245,9 @@ void WorldSession::HandleResetInstancesOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_RESET_INSTANCES");
 /*
-    WorldPacket data(SMSG_RESET_INSTANCES_RESULT, 4); // todo: find packet structure
+    uint32 mapid = 0;
+    WorldPacket data(SMSG_RESET_INSTANCES_RESULT, 4);
+    data << mapid;
     _player->GetSession()->SendPacket(&data);
 */
 }
@@ -1310,12 +1313,7 @@ void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
 
     recv_data >> guid >> unk >> flags;
 
-    // set field for checking if player able to flight
-    if((flags & MOVEMENTFLAG_CAN_FLY) != 0) // 0x800000
-        _player->SetCanFly(true);
-    else
-        _player->SetCanFly(false);
-
+    _player->SetMovementFlags(flags);
 /*
 on:
 25 00 00 00 00 00 00 00 | 00 00 00 00 00 00 80 00
@@ -1358,11 +1356,7 @@ void WorldSession::HandleMoveFlyStateChangeOpcode( WorldPacket & recv_data )
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
 
-    // set field that determine if player flying or walking on terrain (able to flight)
-    if(flags & MOVEMENTFLAG_FLYING) // 0x1000000
-        _player->SetFlying(true);
-    else
-        _player->SetFlying(false);
+    _player->SetMovementFlags(flags);
 
     if (flags & MOVEMENTFLAG_ONTRANSPORT) // and if opcode 909?
     {
@@ -1401,5 +1395,19 @@ void WorldSession::HandleMoveFlyStateChangeOpcode( WorldPacket & recv_data )
     recv_data >> f_speed; // this is difference from standart movement opcodes...
     sLog.outDebug("f_speed %f", f_speed);
     /*----------------*/
+}
+
+void WorldSession::HandleSelfResOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_SELF_RES");  // empty opcode
+
+    if(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
+    {
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
+        if(spellInfo)
+        _player->CastSpell(_player,spellInfo,false,0);
+
+        _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+    }
 }
 

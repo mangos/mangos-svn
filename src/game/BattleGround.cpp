@@ -182,7 +182,7 @@ void BattleGround::Update(time_t diff)
                 uint32 t = getMSTime() - itr->second.LastOnlineTime;
                 if(t >= 300000)                 // 5 minutes
                 {
-                    m_RemovedPlayers[itr->first] = true;
+                    m_RemovedPlayers[itr->first] = true;    // add to remove list (queue)
                 }
             }
         }
@@ -203,7 +203,7 @@ void BattleGround::Update(time_t diff)
                 uint32 t = getMSTime() - itr->second.LastOnlineTime;
                 if(t >= 300000) // 5 minutes
                 {
-                    m_RemovedPlayers[itr->first] = false; // add to remove list
+                    m_RemovedPlayers[itr->first] = false;   // add to remove list (BG)
                 }
             }
         }
@@ -217,7 +217,7 @@ void BattleGround::Update(time_t diff)
         {
             for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             {
-                m_RemovedPlayers[itr->first] = false;
+                m_RemovedPlayers[itr->first] = false;       // add to remove list (BG)
             }
             SetStatus(STATUS_WAIT_QUEUE);
         }
@@ -462,6 +462,9 @@ void BattleGround::EndBattleGround(uint32 winner)
             continue;
         }
 
+        if(!plr->isAlive())
+            plr->ResurrectPlayer();
+
         BlockMovement(plr);
 
         uint32 time1 = getMSTime() - GetStartTime();
@@ -574,15 +577,18 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
     if(itr != m_PlayerScores.end())
         m_PlayerScores.erase(itr);
 
+    if(plr && !plr->isAlive())      // resurrect on exit
+        plr->ResurrectPlayer();
+
     if(plr)
     {
         if(GetAllianceFlagState() || GetHordeFlagState())
         {
             // drop flag...
             if(AllianceFlagPicker == guid)
-                plr->CastSpell(plr, 23336, true, 0);
+                plr->RemoveAurasDueToSpell(23335);
             if(HordeFlagPicker == guid)
-                plr->CastSpell(plr, 23334, true, 0);
+                plr->RemoveAurasDueToSpell(23333);
         }
     }
     else
@@ -614,7 +620,8 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
 
         // remove from raid group if exist
         if(GetBgRaid(plr->GetTeam()))
-            GetBgRaid(plr->GetTeam())->RemoveMember(guid, 0);
+            if(!GetBgRaid(plr->GetTeam())->RemoveMember(guid, 0))   // group was disbanded
+                SetBgRaid(plr->GetTeam(), NULL);
 
         // Do next only if found in battleground
         plr->SetBattleGroundId(0);      // We're not in BG.
@@ -967,7 +974,7 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
         type = CHAT_MSG_BATTLEGROUND_HORDE;
         PlaySoundToAll(8212);
         MapManager::Instance().GetMap(hf->GetMapId(), hf)->Remove(hf, false);
-        SetHordeFlag(Source->GetGUID(), true);      // pick up Horde Flag
+        SetHordeFlag(Source->GetGUID(), true);              // pick up Horde Flag
     }
     if(Source->GetTeam() == HORDE)
     {
@@ -975,7 +982,7 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
         PlaySoundToAll(8174);
         MapManager::Instance().GetMap(af->GetMapId(), af)->Remove(af, false);
-        SetAllianceFlag(Source->GetGUID(), true);   // pick up Alliance Flag
+        SetAllianceFlag(Source->GetGUID(), true);           // pick up Alliance Flag
     }
 
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);

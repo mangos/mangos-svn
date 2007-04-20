@@ -27,25 +27,32 @@
 #include "Item.h"
 #include "Chat.h"
 
-#define TRADE_STATUS_BUSY           0
-#define TRADE_STATUS_BEGIN_TRADE    1
-#define TRADE_STATUS_OPEN_WINDOW    2
-#define TRADE_STATUS_TRADE_CANCELED 3
-#define TRADE_STATUS_TRADE_ACCEPT   4
-#define TRADE_STATUS_BUSY_2         5
-#define TRADE_STATUS_NO_TARGET      6
-#define TRADE_STATUS_BACK_TO_TRADE  7
-#define TRADE_STATUS_TRADE_COMPLETE 8
-#define TRADE_STATUS_TARGET_TO_FAR  10
-#define TRADE_STATUS_WRONG_FACTION  11
-#define TRADE_STATUS_CLOSE_WINDOW   12
-#define TRADE_STATUS_IGNORE_YOU     14
-#define TRADE_STATUS_YOU_STUNNED    15
-#define TRADE_STATUS_TARGET_STUNNED 16
-#define TRADE_STATUS_YOU_DEAD       17
-#define TRADE_STATUS_TARGET_DEAD    18
-#define TRADE_STATUS_YOU_LOGOUT     19
-#define TRADE_STATUS_TARGET_LOGOUT  20
+enum TradeStatus
+{
+    TRADE_STATUS_BUSY           = 0,
+    TRADE_STATUS_BEGIN_TRADE    = 1,
+    TRADE_STATUS_OPEN_WINDOW    = 2,
+    TRADE_STATUS_TRADE_CANCELED = 3,
+    TRADE_STATUS_TRADE_ACCEPT   = 4,
+    TRADE_STATUS_BUSY_2         = 5,
+    TRADE_STATUS_NO_TARGET      = 6,
+    TRADE_STATUS_BACK_TO_TRADE  = 7,
+    TRADE_STATUS_TRADE_COMPLETE = 8,
+    // 9?
+    TRADE_STATUS_TARGET_TO_FAR  = 10,
+    TRADE_STATUS_WRONG_FACTION  = 11,
+    TRADE_STATUS_CLOSE_WINDOW   = 12,
+    // 13?
+    TRADE_STATUS_IGNORE_YOU     = 14,
+    TRADE_STATUS_YOU_STUNNED    = 15,
+    TRADE_STATUS_TARGET_STUNNED = 16,
+    TRADE_STATUS_YOU_DEAD       = 17,
+    TRADE_STATUS_TARGET_DEAD    = 18,
+    TRADE_STATUS_YOU_LOGOUT     = 19,
+    TRADE_STATUS_TARGET_LOGOUT  = 20,
+    TRADE_STATUS_TRIAL_ACCOUNT  = 21,   // Trial accounts can not perform that action
+    TRADE_STATUS_ONLY_CONJURED  = 22    // You can only trade conjured items... (cross realm BG related).
+};
 
 void WorldSession::SendTradeStatus(uint32 status)
 {
@@ -94,14 +101,14 @@ void WorldSession::SendUpdateTrade()
             data << (uint32) 0;                                                     // probably gift=1, created_by=0?
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_GIFTCREATOR);          // gift creator
             data << (uint32) 0;                                                     // unknown
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT);          // enchantment
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1);        // permanent enchantment?
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+2);        // permanent enchantment?
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);        // permanent enchantment?
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT);          // enchantment id
+            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1);        // enchantment id (permanent?)
+            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+2);        // enchantment id (permanent?)
+            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);        // enchantment id (permanent?)
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_CREATOR);              // creator
             data << (uint32) 0;                                                     // unknown
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES);        // charges
-            data << (uint32) 0;                                                     // timestamp?
+            data << (uint32) 0;                                                     // strange big value (timestamp?)
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); // random properties id
             data << (uint32) item->GetProto()->LockID;                              // lock id
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);        // max durability
@@ -113,7 +120,6 @@ void WorldSession::SendUpdateTrade()
                 data << uint32(0);
         }
     }
-
     SendPacket(&data);
 }
 

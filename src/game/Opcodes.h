@@ -340,7 +340,7 @@ enum OpCodes
     SMSG_COOLDOWN_EVENT                             = 309,
     CMSG_CANCEL_AURA                                = 310,
     SMSG_UPDATE_AURA_DURATION                       = 311,
-    SMSG_PET_CAST_FAILED                            = 312,
+    SMSG_PET_CAST_FAILED                            = 312, // Your pet is in combat
     MSG_CHANNEL_START                               = 313,
     MSG_CHANNEL_UPDATE                              = 314,
     CMSG_CANCEL_CHANNELLING                         = 315,
@@ -396,12 +396,12 @@ enum OpCodes
     SMSG_DUEL_WINNER                                = 363,
     CMSG_DUEL_ACCEPTED                              = 364,
     CMSG_DUEL_CANCELLED                             = 365,
-    SMSG_MOUNTRESULT                                = 366,
-    SMSG_DISMOUNTRESULT                             = 367,
+    SMSG_MOUNTRESULT                                = 366, // 0 - can't mount that unit, 1 - mount too far away, 2 - already mounted, 3 - that unit can't be mounted, 4 - that mount is not our pet, 5 - unknown mount error, 6 - can't mount while looting, 7 - cant mount because your race, 8 - shapeshifted, 9 - you dismount before continuing
+    SMSG_DISMOUNTRESULT                             = 367, // 0 - int err, don't have pet to dismount, 1 - not mounted, 2 - int err, dismounting a non-pet
     SMSG_PUREMOUNT_CANCELLED_OBSOLETE               = 368,
     CMSG_MOUNTSPECIAL_ANIM                          = 369,
     SMSG_MOUNTSPECIAL_ANIM                          = 370,
-    SMSG_PET_TAME_FAILURE                           = 371, // Creature not found.
+    SMSG_PET_TAME_FAILURE                           = 371, // uint32: 0 - Unknown taming error, 1 - Creature not found, 2 - too many pets, 3 - creature already controlled, 4 - creature not tameable, 5 - have active summon, 6 - can't tame, 7 - don't have pet to summon, 8 - internal pet error, 9 - high level, 10 - your pet is dead, 11 - your pet is not dead
     CMSG_PET_SET_ACTION                             = 372,
     CMSG_PET_ACTION                                 = 373,
     CMSG_PET_ABANDON                                = 374,
@@ -573,7 +573,7 @@ enum OpCodes
     MSG_CORPSE_QUERY                                = 534,
     CMSG_GMTICKET_DELETETICKET                      = 535,
     SMSG_GMTICKET_DELETETICKET                      = 536,
-    SMSG_CHAT_WRONG_FACTION                         = 537,
+    SMSG_CHAT_WRONG_FACTION                         = 537, // You can only whisper to the members of your alliance.
     CMSG_GMTICKET_SYSTEMSTATUS                      = 538,
     SMSG_GMTICKET_SYSTEMSTATUS                      = 539,
     CMSG_SPIRIT_HEALER_ACTIVATE                     = 540,
@@ -701,7 +701,7 @@ enum OpCodes
     CMSG_MEETINGSTONE_JOIN                          = 658,
     CMSG_MEETINGSTONE_LEAVE                         = 659,
     CMSG_MEETINGSTONE_CHEAT                         = 660,
-    SMSG_MEETINGSTONE_SETQUEUE                      = 661,
+    SMSG_MEETINGSTONE_SETQUEUE                      = 661, // You have left the queue to join a party for %s. 
     CMSG_MEETINGSTONE_INFO                          = 662,
     SMSG_MEETINGSTONE_COMPLETE                      = 663, // Your group is complete, you have left the LFG matchmaking system.
     SMSG_MEETINGSTONE_IN_PROGRESS                   = 664, // You still seeking more members through LFG matchmaking system., empty?
@@ -727,12 +727,12 @@ enum OpCodes
     CMSG_SUMMON_RESPONSE                            = 684,
     MSG_MOVE_TOGGLE_GRAVITY_CHEAT                   = 685,
     SMSG_MONSTER_MOVE_TRANSPORT                     = 686,
-    SMSG_PET_BROKEN                                 = 687,
+    SMSG_PET_BROKEN                                 = 687, // Your pet has run away (:D)
     MSG_MOVE_FEATHER_FALL                           = 688,
     MSG_MOVE_WATER_WALK                             = 689,
     CMSG_SERVER_BROADCAST                           = 690,
-    CMSG_SELF_RES                                   = 691,
-    SMSG_FEIGN_DEATH_RESISTED                       = 692,
+    CMSG_SELF_RES                                   = 691, // only if PLAYER_SELF_RES_SPELL field != 0
+    SMSG_FEIGN_DEATH_RESISTED                       = 692, // Resisted
     CMSG_RUN_SCRIPT                                 = 693,
     SMSG_SCRIPT_MESSAGE                             = 694,
     SMSG_DUEL_COUNTDOWN                             = 695,
@@ -741,8 +741,8 @@ enum OpCodes
     CMSG_TOGGLE_CLOAK                               = 698,
 
     //SMSG_SPELL_REFLECTED                            = 699, //OBSOLETE
-    SMSG_MEETINGSTONE_JOINFAILED                    = 699,
-    SMSG_PLAYER_SKINNED                             = 700, // uint8 0x00
+    SMSG_MEETINGSTONE_JOINFAILED                    = 699, // 1 - must be party leader, 3 - can't use while in raid
+    SMSG_PLAYER_SKINNED                             = 700, // uint8 0x00 Insignia taken - You can only resurrect at the graveyard
     SMSG_DURABILITY_DAMAGE_DEATH                    = 701,
     CMSG_SET_EXPLORATION                            = 702,
     CMSG_SET_ACTIONBAR_TOGGLES                      = 703,
@@ -752,12 +752,12 @@ enum OpCodes
     SMSG_UPDATE_WORLD_STATE                         = 707,
     CMSG_ITEM_NAME_QUERY                            = 708,
     SMSG_ITEM_NAME_QUERY_RESPONSE                   = 709,
-    SMSG_PET_ACTION_FEEDBACK                        = 710, // uint8 0x04, 0x01
+    SMSG_PET_ACTION_FEEDBACK                        = 710, // uint8 0x04 - unk, 0x01 - pet dead, 0x2 - no target, 0x3 can't attack
     CMSG_CHAR_RENAME                                = 711,
     SMSG_CHAR_RENAME                                = 712,
     CMSG_MOVE_SPLINE_DONE                           = 713,
     CMSG_MOVE_FALL_RESET                            = 714,
-    SMSG_INSTANCE_SAVE_CREATED                      = 715,
+    SMSG_INSTANCE_SAVE_CREATED                      = 715, // You are now saved to this instance
     SMSG_RAID_INSTANCE_INFO                         = 716,
     CMSG_REQUEST_RAID_INFO                          = 717,
     CMSG_MOVE_TIME_SKIPPED                          = 718,
@@ -782,7 +782,7 @@ enum OpCodes
     CMSG_LEAVE_BATTLEFIELD                          = 737,
     CMSG_AREA_SPIRIT_HEALER_QUERY                   = 738,
     CMSG_AREA_SPIRIT_HEALER_QUEUE                   = 739, // WTF?
-    SMSG_AREA_SPIRIT_HEALER_TIME                    = 740, // WTF?, uint64 guid+uint32 time?
+    SMSG_AREA_SPIRIT_HEALER_TIME                    = 740, // uint64 guid+uint32 time?
     //CMSG_GM_UNTEACH                                 = 739, // WTF?
     //SMSG_HARDWARE_SURVEY_REQUEST                    = 740, // WTF?
     CMSG_HARDWARE_SURVEY_RESULTS                    = 741,
@@ -806,7 +806,7 @@ enum OpCodes
     SMSG_MINIGAME_STATE                             = 759,
     CMSG_MINIGAME_MOVE                              = 760,
     SMSG_MINIGAME_MOVE_FAILED                       = 761,
-    // 762
+    SMSG_INSTANCE_RESET_SCHEDULED                   = 762, // WARNING! %s is scheduled to reset in %u minutes! and other messages...
     SMSG_COMPRESSED_MOVE                            = 763,
     CMSG_GUILD_CHANGEINFO                           = 764,
     SMSG_UNKNOWN_765                                = 765, // Trial accounts can not send unlimited tells, you must wait before you can send tells to more players.
@@ -842,7 +842,7 @@ enum OpCodes
     // 795
     SMSG_UNKNOWN_796                                = 796, // uint64, guid?
     CMSG_RESET_INSTANCES                            = 797, // reset instances, empty
-    SMSG_RESET_INSTANCES_RESULT                     = 798, // chat message: %u (number) has been reset.
+    SMSG_RESET_INSTANCES_RESULT                     = 798, // uint32 mapid, chat message: %s has been reset.
     // 799
     SMSG_UNKNOWN_800                                = 800, // uint32 mapid, instance related
     MSG_RAID_ICON_TARGET                            = 801, // uint8+uint8+uint64 guid
@@ -852,9 +852,9 @@ enum OpCodes
     SMSG_UNKNOWN_805                                = 805, // uint32 unk + x, y, z
     // 806
     // 807
-    SMSG_UNKNOWN_808                                = 808, // uint32, probably gm ticket related
+    SMSG_GM_SURVEY_REQUEST                          = 808, // uint32, 1 - causes client get ticket request, 2 - hide, 3 - show
     MSG_SET_DUNGEON_DIFFICULTY                      = 809, // uint32+uint32+uint32
-    // 810
+    CMSG_GM_SURVEY_RESULTS                          = 810,
     SMSG_UNKNOWN_811                                = 811, // uint32, 0x0, SMSG_INSTANCE_RESET_ACTIVATE ?
     // 812
     // 813
@@ -927,10 +927,10 @@ enum OpCodes
     SMSG_LFG_INVITE                                 = 880, // show invite dialog: The LFG system has matched you to a group for %s. 
     SMSG_LFG_881                                    = 881, // The LFG system is waiting to complete match for %s.
     // 882
-    // 883
-    CMSG_CHOOSE_TITLE                               = 884,
+    SMSG_CHANGE_TITLE                               = 883, // uint32 title_id, causes message and visual effect
+    CMSG_CHOOSE_TITLE                               = 884, // uint32 title_id
     CMSG_DISMOUNT                                   = 885, // /dismount command
-    // 886
+    SMSG_ARENA_TEAM_UNK                             = 886,
     MSG_INSPECT_ARENA_STATS                         = 887,
     SMSG_SH_POSITION                                = 888, // spirit healer position, map/x/y/z, at player death...
     CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT               = 889, // cancel temporary item enchantment
@@ -951,13 +951,13 @@ enum OpCodes
     // 904 SMSG_FLIGHT_SPLINE_SYNC?
     // 905
     // 906
-    SMSG_REALM_STATE_RESPONSE                       = 907, // responce to 908 opcode, 4 x uint32 + uint8
+    SMSG_REALM_STATE_RESPONSE                       = 907, // response to 908 opcode, 4 x uint32 + uint8
     CMSG_REALM_STATE_REQUEST                        = 908, // realm related, uint32+uint32+3*(uint16+uint8), appears at select character screen, uint32 0xFFFFFFFF
     CMSG_MOVE_SHIP_909                              = 909, // movement related, transport related(ships)
     CMSG_GROUP_PROMOTE                              = 910, // make main-tank / main-assistant
     // 911
     SMSG_ALLOW_MOVE                                 = 912, // uint32, allow player movement, value increments every time and reset to 0 after far teleport, used for client-server synchronization
-    CMSG_ALLOW_MOVE_ACK                             = 913, // client responce to SMSG_ALLOW_MOVE
+    CMSG_ALLOW_MOVE_ACK                             = 913, // client response to SMSG_ALLOW_MOVE
     // 914
     // 915
     // 916
@@ -966,6 +966,7 @@ enum OpCodes
     SMSG_UNKNOWN_919                                = 919, // uint8(0)+uint32(0/1)+uint64(unk/guid)
     SMSG_UNKNOWN_920                                = 920, // notify message: This system is currently disabled.
 };
+
 //if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp
 #define MAX_OPCODE_ID 920
 
