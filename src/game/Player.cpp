@@ -8506,7 +8506,7 @@ void Player::ClearTrade()
 {
     tradeGold = 0;
     acceptTrade = false;
-    for(int i=0; i<7; i++)
+    for(int i = 0; i < TRADE_SLOT_COUNT; i++)
         tradeItems[i] = NULL_SLOT;
 }
 
