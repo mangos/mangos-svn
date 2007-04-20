@@ -173,7 +173,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_TELEPORT_GRAVEYARD = 120, two spells: Graveyard Teleport and Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_NORMALIZED_WEAPON_DMG = 121
     &Spell::EffectNULL,                                     //SPELL_EFFECT_122 = 122 -- silithist cap reward spell
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_123 = 123 -- taxi/fligth related
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_123 = 123 -- taxi/flight related
     &Spell::EffectNULL,                                     //SPELL_EFFECT_124 = 124 -- aggro redirect?
     &Spell::EffectNULL,                                     //SPELL_EFFECT_125 = 125 -- invis?
     &Spell::EffectNULL,                                     //SPELL_EFFECT_126 = 126 -- spell steal effect?
@@ -330,7 +330,6 @@ void Spell::EffectDummy(uint32 i)
                 WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
                 data << classspell;
                 data << m_caster->GetGUID();
-                data << uint32(0);
                 ((Player*)m_caster)->GetSession()->SendPacket(&data);
             }
         }
@@ -358,7 +357,6 @@ void Spell::EffectDummy(uint32 i)
                 WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
                 data << classspell;
                 data << m_caster->GetGUID();
-                data << uint32(0);
                 ((Player*)m_caster)->GetSession()->SendPacket(&data);
             }
         }
@@ -396,7 +394,6 @@ void Spell::EffectDummy(uint32 i)
                 WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
                 data << uint32(20577);                      // spell id
                 data << m_caster->GetGUID();
-                data << uint32(0);
                 ((Player*)m_caster)->GetSession()->SendPacket(&data);
             }
 
