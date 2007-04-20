@@ -2576,7 +2576,6 @@ void Spell::EffectSummonObject(uint32 i)
 
 void Spell::EffectResurrect(uint32 i)
 {
-
     if(!unitTarget)
         return;
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -2690,8 +2689,34 @@ void Spell::EffectSelfResurrect(uint32 i)
         if(unitTarget->getPowerType() == POWER_MANA)
             mana = uint32(damage/100*unitTarget->GetMaxPower(unitTarget->getPowerType()));
     }
-    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
-    SendResurrectRequest((Player*)unitTarget);
+
+    Player *plr = ((Player*)unitTarget);
+    plr->ResurrectPlayer();
+
+    if(plr->GetMaxHealth() > health)
+        plr->SetHealth( health );
+    else
+        plr->SetHealth( plr->GetMaxHealth() );
+
+    if(plr->GetMaxPower(POWER_MANA) > mana)
+        plr->SetPower(POWER_MANA, mana );
+    else
+        plr->SetPower(POWER_MANA, plr->GetMaxPower(POWER_MANA) );
+
+    plr->SetPower(POWER_RAGE, 0 );
+
+    plr->SetPower(POWER_ENERGY, plr->GetMaxPower(POWER_ENERGY) );
+
+    plr->SpawnCorpseBones();
+
+    // we really need this teleport?
+    WorldPacket data;
+    plr->BuildTeleportAckMsg(&data, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), plr->GetOrientation());
+    plr->GetSession()->SendPacket(&data);
+
+    plr->SetPosition(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), plr->GetOrientation());
+
+    plr->SaveToDB();
 }
 
 void Spell::EffectSkinning(uint32 i)

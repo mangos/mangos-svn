@@ -122,6 +122,7 @@ struct OpcodeHandler
     SessionStatus status;
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
+
 typedef HM_NAMESPACE::hash_map< uint16 , OpcodeHandler > OpcodeTableMap;
 
 class ObjectMgr

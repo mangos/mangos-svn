@@ -1170,8 +1170,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendNotifyLootItemRemoved(uint8 lootSlot);
         void SendNotifyLootMoneyRemoved();
         int32 FishingMinSkillForCurrentZone() const;
-        void SetSoulStoneSpell(uint32 spellid) { m_soulStoneSpell = spellid; }
-        uint32 GetSoulStoneSpell()const { return m_soulStoneSpell;}
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -1218,10 +1216,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
         void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
 
-        bool CanFly() const { return m_canFly; }
-        void SetCanFly(bool value) { m_canFly = value; }
-        bool IsFlying() const { return m_Flying; }
-        void SetFlying(bool value) { m_Flying = value; }
+        bool CanFly() const { return HasMovementFlags(MOVEMENTFLAG_CAN_FLY); }
+        bool IsFlying() const { return HasMovementFlags(MOVEMENTFLAG_FLYING); }
 
         // Transports
         Transport * GetTransport() { return m_transport; }
@@ -1363,9 +1359,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_movement_flags;
 
-        bool m_canFly;
-        bool m_Flying;
-
         uint32 m_GMFlags;
         uint64 m_curTarget;
         uint64 m_curSelection;
@@ -1418,7 +1411,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_restTime;
 
         uint32 m_BlockValue;
-        uint32 m_soulStoneSpell;
         uint32 m_WeaponProficiency;
         uint32 m_ArmorProficiency;
         bool m_canParry;

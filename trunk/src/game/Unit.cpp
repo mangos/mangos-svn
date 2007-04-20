@@ -602,7 +602,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
                 he->duel->opponent->CombatStop();
             he->CombatStop();
 
-            he->CastSpell(he, 7267, false);                 // beg
+            he->CastSpell(he, 7267, true);                  // beg
             he->DuelComplete(1);
         }
     }

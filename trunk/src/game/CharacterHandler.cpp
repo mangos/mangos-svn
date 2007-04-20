@@ -426,7 +426,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     pCurrChar->SendInitWorldStates();
 
-    pCurrChar->CastSpell(pCurrChar, 836, false); // LOGINEFFECT
+    pCurrChar->CastSpell(pCurrChar, 836, true); // LOGINEFFECT
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
     time_t gameTime = sWorld.GetGameTime();
