@@ -150,8 +150,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             {
                 accId = objmgr.GetPlayerAccountIdByGUID(rc);
             }
-            sLog.outCommand("GM mail item: %s (Entry: %u Count: %u) and money: %u GM: %s (Account: %u) to player: %s (Account: %u)",
-            pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),money,GetPlayerName(),GetAccountId(),receiver.c_str(),accId);
+            sLog.outCommand("GM %s (Account: %u) mail item: %s (Entry: %u Count: %u) and money: %u to player: %s (Account: %u)",
+                GetPlayerName(),GetAccountId(),pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),money,receiver.c_str(),accId);
         }
 
         //item reminds in item_instance table already, used it in mail now
@@ -334,8 +334,8 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
                     sender_accId = objmgr.GetPlayerAccountIdByGUID(sender_guid);
                     objmgr.GetPlayerNameByGUID(sender_guid,sender_name);
                 }
-                sLog.outCommand("GM get mail item: %s (Entry: %u Count: %u) and send COD money: %u GM: %s (Account: %u) to player: %s (Account: %u)",
-                    it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,GetPlayerName(),GetAccountId(),sender_name.c_str(),sender_accId);
+                sLog.outCommand("GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
+                    GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,sender_name.c_str(),sender_accId);
             }
         }
         m->COD = 0;

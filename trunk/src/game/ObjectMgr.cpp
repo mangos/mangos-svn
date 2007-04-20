@@ -45,6 +45,8 @@ ObjectMgr::ObjectMgr()
     m_hiGoGuid = 1;
     m_hiDoGuid = 1;
     m_hiCorpseGuid=1;
+
+    playerInfo = NULL;
 }
 
 ObjectMgr::~ObjectMgr()
@@ -80,15 +82,19 @@ ObjectMgr::~ObjectMgr()
     }
     petInfo.clear();
 
-    for (int race = 0; race < MAX_RACES; ++race)
+    // free only if loaded
+    if(playerInfo)
     {
-        for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
+        for (int race = 0; race < MAX_RACES; ++race)
         {
-            delete[] playerInfo[race][class_].levelInfo;
+            for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
+            {
+                delete[] playerInfo[race][class_].levelInfo;
+            }
+            delete[] playerInfo[race];
         }
-        delete[] playerInfo[race];
+        delete[] playerInfo;
     }
-    delete[] playerInfo;
 
     mRepOnKill.clear();
 }
@@ -209,29 +215,33 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     // data for gm.log
     if( sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
     {
-        uint32 accid = 0;
-        uint32 security = 0;
-        std::string name;
+        uint32 gm_accid = 0;
+        uint32 gm_security = 0;
+        std::string gm_name;
         if (bidder)
         {
-            accid = bidder->GetSession()->GetAccountId();
-            security = bidder->GetSession()->GetSecurity();
-            name = bidder->GetName();
+            gm_accid = bidder->GetSession()->GetAccountId();
+            gm_security = bidder->GetSession()->GetSecurity();
+            gm_name = bidder->GetName();
         }
         else
         {
-            security = GetPlayerAccountIdByGUID(bidder_guid);
+            gm_accid = GetPlayerAccountIdByGUID(bidder_guid);
+            gm_security = GetSecurityByAccount(gm_accid);
             
-            if(security > 0)                                // not do redundant DB requests
-            {
-                GetPlayerNameByGUID(bidder_guid,name);
-                accid = GetPlayerAccountIdByGUID(bidder_guid);
-            }
+            if(gm_security > 0)                                // not do redundant DB requests
+                GetPlayerNameByGUID(bidder_guid,gm_name);
         }
 
-        if( security > 0 )
-            sLog.outCommand("GM auction, won item: %s (Entry: %u Count: %u) and pay money: %u GM: %s (Account: %u)",
-                pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),auction->bid,name.c_str(),accid);
+        if( gm_security > 0 )
+        {
+            std::string owner_name;
+            GetPlayerNameByGUID(auction->owner,owner_name);
+            uint32 owner_accid = GetPlayerAccountIdByGUID(auction->owner);
+
+            sLog.outCommand("GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
+                gm_name.c_str(),gm_accid,pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),auction->bid,owner_name,owner_accid);
+        }
     }
 
     if (bidder)
@@ -417,6 +427,19 @@ uint32 ObjectMgr::GetPlayerAccountIdByGUID(const uint64 &guid) const
         uint32 acc = (*result)[0].GetUInt32();
         delete result;
         return acc;
+    }
+
+    return 0;
+}
+
+uint32 ObjectMgr::GetSecurityByAccount(uint32 acc_id) const
+{
+    QueryResult *result = loginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `id` = '%u'", acc_id);
+    if(result)
+    {
+        uint32 sec = (*result)[0].GetUInt32();
+        delete result;
+        return sec;
     }
 
     return 0;

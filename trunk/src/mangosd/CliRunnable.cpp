@@ -67,6 +67,7 @@ void CliMotd(char*,pPrintf);
 void CliCorpses(char*,pPrintf);
 void CliSetLogLevel(char*,pPrintf);
 void CliUpTime(char*,pPrintf);
+void CliSetTBC(char*,pPrintf); 
 
 /// Table of known commands
 const CliCommand Commands[]=
@@ -83,6 +84,7 @@ const CliCommand Commands[]=
     {"listbans", & CliBanList,"List bans"},
     {"unban", & CliRemoveBan,"Remove ban from account|ip"},
     {"setgm", & CliSetGM,"Edit user privileges"},
+    {"setbc", & CliSetTBC,"Set user expansion allowed"},  
     {"listgm", & CliListGM,"Display user privileges"},
     {"loadscripts", & CliLoadScripts,"Load script library"},
     {"setloglevel", & CliSetLogLevel,"Set Log Level"},
@@ -637,6 +639,54 @@ void CliUpTime(char*,pPrintf zprintf)
     sLog.outBasic("Server has been up for : %s",suptime.c_str());
 }
 
+void CliSetTBC(char *command,pPrintf zprintf)
+{
+    ///- Get the command line arguments
+    char *szAcc = strtok(command," ");
+
+    if(!szAcc)                                              
+    {
+        zprintf("Syntax is: setbc <account> <number (0 - normal, 1 - tbc)>\r\n");
+        return;
+    }
+
+    char *szTBC =  strtok(NULL," ");
+
+    if(!szTBC)                                            
+    {
+        zprintf("Syntax is: setbc <account> <number (0 - normal, 1 - tbc)>\r\n");
+        return;
+    }
+
+    int lev=atoi(szTBC);                                  //get int anyway (0 if error)
+
+    if((lev > 1)|| (lev < 0))
+    {
+        zprintf("Syntax is: setbc <account> <number (0 - normal, 1 - tbc)>\r\n");
+        return;    
+    }
+
+    ///- Escape the account name to allow quotes in names
+    std::string safe_account_name=szAcc;
+    loginDatabase.escape_string(safe_account_name);
+
+    // No SQL injection (account name is escaped)
+    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
+
+    if (result)
+    {
+        // No SQL injection (account name is escaped)
+        loginDatabase.PExecute("UPDATE `account` SET `tbc` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
+        zprintf("We added %s to expansion allowed %d\r\n",szAcc,lev);
+
+        delete result;
+    }
+    else
+    {
+        zprintf("No account %s found\r\n",szAcc);
+    }
+}
+  
 /// @}
 
 /// %Thread start

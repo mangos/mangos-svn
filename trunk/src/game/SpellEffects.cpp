@@ -1580,9 +1580,9 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             return;
 
         if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-            sLog.outCommand("GM Enchanting: %s (Entry: %d) GM: %s (Account: %u) Player: %s (Account: %u)",
-                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+            sLog.outCommand("GM %s (Account: %u) enchanting: %s (Entry: %d) for player: %s (Account: %u)",
                 p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
+                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
                 item_owner->GetName(),item_owner->GetSession()->GetAccountId());
 
         // remove old enchanting before applying new if equipped
@@ -1631,9 +1631,9 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             return;
 
         if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-            sLog.outCommand("GM Enchanting: %s (Entry: %d) GM: %s (Account: %u) Player: %s (Account: %u)",
-                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+            sLog.outCommand("GM %s (Account: %u) enchanting: %s (Entry: %d) for player: %s (Account: %u)",
                 p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
+                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
                 item_owner->GetName(),item_owner->GetSession()->GetAccountId());
 
         // remove old enchanting before applying new if equipped

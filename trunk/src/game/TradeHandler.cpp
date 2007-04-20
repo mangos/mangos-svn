@@ -222,9 +222,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     // logging
                     sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
                     if( _player->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-                            sLog.outCommand("GM Trade: %s (Entry: %d Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
-                            myItems[i]->GetProto()->Name1,myItems[i]->GetEntry(),myItems[i]->GetCount(),
+                        sLog.outCommand("GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
                             _player->GetName(),_player->GetSession()->GetAccountId(),
+                            myItems[i]->GetProto()->Name1,myItems[i]->GetEntry(),myItems[i]->GetCount(),
                             _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
 
                     // store
@@ -246,9 +246,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     // logging
                     sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
                     if( _player->pTrader->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-                            sLog.outCommand("GM Trade: %s (Entry: %u Count: %u) GM: %s (Account: %u) Player: %s (Account: %u)",
-                            hisItems[i]->GetProto()->Name1,hisItems[i]->GetEntry(),hisItems[i]->GetCount(),
+                        sLog.outCommand("GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
                             _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
+                            hisItems[i]->GetProto()->Name1,hisItems[i]->GetEntry(),hisItems[i]->GetCount(),
                             _player->GetName(),_player->GetSession()->GetAccountId());
 
                     // store
