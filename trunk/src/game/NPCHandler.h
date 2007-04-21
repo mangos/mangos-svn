@@ -61,9 +61,4 @@ struct GossipText
     GossipTextOption Options[8];
 };
 
-struct AreaTriggerPoint
-{
-    uint32 Trigger_ID;
-    uint32 Quest_ID;
-};
 #endif

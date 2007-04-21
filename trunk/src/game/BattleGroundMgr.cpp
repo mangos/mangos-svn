@@ -217,8 +217,8 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MinPlayersPerTea
         HordeFlag->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179831, bg->GetMapId(), 915.809, 1433.73, 346.172, 3.244, 0, 0, sin(3.244/2), cos(3.244/2), 0, 0);
         SpeedBonus1->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179871, bg->GetMapId(), 1449.98, 1468.86, 342.66, 4.866, 0, 0, sin(4.866/2), cos(4.866/2), 0, 0);
         SpeedBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179871, bg->GetMapId(), 1006.22, 1445.98, 335.77, 1.683, 0, 0, sin(1.683/2), cos(1.683/2), 0, 0);
-        RegenBonus1->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, bg->GetMapId(), 1110.1, 1353.24, 316.513, 5.68, 0, 0, sin(5.68/2), cos(5.68/2), 0, 0);
-        RegenBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, bg->GetMapId(), 1316.94, 1551.99, 313.234, 5.869, 0, 0, sin(5.869/2), cos(5.869/2), 0, 0);
+        RegenBonus1->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, bg->GetMapId(), 1316.94, 1551.99, 313.234, 5.869, 0, 0, sin(5.869/2), cos(5.869/2), 0, 0);
+        RegenBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, bg->GetMapId(), 1110.1, 1353.24, 316.513, 5.68, 0, 0, sin(5.68/2), cos(5.68/2), 0, 0);
         BerserkBonus1->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, bg->GetMapId(), 1318.68, 1378.03, 314.753, 1.001, 0, 0, sin(1.001/2), cos(1.001/2), 0, 0);
         BerserkBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, bg->GetMapId(), 1141.36, 1560.99, 306.791, 3.858, 0, 0, sin(3.858/2), cos(3.858/2), 0, 0);
 
