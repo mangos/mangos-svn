@@ -134,7 +134,7 @@ void BattleGroundMgr::SendPvpLogData(Player *Source, uint8 winner, bool to_all)
     }
     data << uint32(bg->GetPlayerScoresSize());
 
-    for(std::map<uint64, BattleGroundScore>::iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
+    for(std::map<uint64, BattleGroundScore>::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
         data << (uint64)itr->first;
         data << (uint32)itr->second.KillingBlows;

@@ -161,11 +161,11 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_da
 
     uint32 count = 0;
 
-    Player *ap = objmgr.GetPlayer(bg->GetAllianceFlagPicker());
+    Player *ap = objmgr.GetPlayer(bg->GetAllianceFlagPickerGUID());
     if(ap)
         count++;
 
-    Player *hp = objmgr.GetPlayer(bg->GetHordeFlagPicker());
+    Player *hp = objmgr.GetPlayer(bg->GetHordeFlagPickerGUID());
     if(hp)
         count++;
 
