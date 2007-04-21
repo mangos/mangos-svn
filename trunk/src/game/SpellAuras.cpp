@@ -47,227 +47,227 @@
 
 pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
-    &Aura::HandleNULL,                                      //SPELL_AURA_NONE = 0,
-    &Aura::HandleBindSight,                                 //SPELL_AURA_BIND_SIGHT = 1,
-    &Aura::HandleModPossess,                                //SPELL_AURA_MOD_POSSESS = 2,
-    &Aura::HandlePeriodicDamage,                            //SPELL_AURA_PERIODIC_DAMAGE = 3,
-    &Aura::HandleAuraDummy,                                 //SPELL_AURA_DUMMY = 4,
-    &Aura::HandleModConfuse,                                //SPELL_AURA_MOD_CONFUSE = 5,
-    &Aura::HandleModCharm,                                  //SPELL_AURA_MOD_CHARM = 6,
-    &Aura::HandleModFear,                                   //SPELL_AURA_MOD_FEAR = 7,
-    &Aura::HandlePeriodicHeal,                              //SPELL_AURA_PERIODIC_HEAL = 8,
-    &Aura::HandleModAttackSpeed,                            //SPELL_AURA_MOD_ATTACKSPEED = 9,
-    &Aura::HandleModThreat,                                 //SPELL_AURA_MOD_THREAT = 10,
-    &Aura::HandleModTaunt,                                  //SPELL_AURA_MOD_TAUNT = 11,
-    &Aura::HandleAuraModStun,                               //SPELL_AURA_MOD_STUN = 12,
-    &Aura::HandleModDamageDone,                             //SPELL_AURA_MOD_DAMAGE_DONE = 13,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_DAMAGE_TAKEN = 14,
-    &Aura::HandleAuraDamageShield,                          //SPELL_AURA_DAMAGE_SHIELD = 15,
-    &Aura::HandleModStealth,                                //SPELL_AURA_MOD_STEALTH = 16,
-    &Aura::HandleModDetect,                                 //SPELL_AURA_MOD_DETECT = 17,
-    &Aura::HandleInvisibility,                              //SPELL_AURA_MOD_INVISIBILITY = 18,
-    &Aura::HandleInvisibilityDetect,                        //SPELL_AURA_MOD_INVISIBILITY_DETECTION = 19,
-    &Aura::HandleAuraModTotalHealthPercentRegen,            //SPELL_AURA_OBS_MOD_HEALTH = 20
-    &Aura::HandleAuraModTotalManaPercentRegen,              //SPELL_AURA_OBS_MOD_MANA = 21
-    &Aura::HandleAuraModResistance,                         //SPELL_AURA_MOD_RESISTANCE = 22,
-    &Aura::HandlePeriodicTriggerSpell,                      //SPELL_AURA_PERIODIC_TRIGGER_SPELL = 23,
-    &Aura::HandlePeriodicEnergize,                          //SPELL_AURA_PERIODIC_ENERGIZE = 24,
-    &Aura::HandleAuraModPacify,                             //SPELL_AURA_MOD_PACIFY = 25,
-    &Aura::HandleAuraModRoot,                               //SPELL_AURA_MOD_ROOT = 26,
-    &Aura::HandleAuraModSilence,                            //SPELL_AURA_MOD_SILENCE = 27,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_REFLECT_SPELLS = 28,
-    &Aura::HandleAuraModStat,                               //SPELL_AURA_MOD_STAT = 29,
-    &Aura::HandleAuraModSkill,                              //SPELL_AURA_MOD_SKILL = 30,
-    &Aura::HandleAuraModIncreaseSpeed,                      //SPELL_AURA_MOD_INCREASE_SPEED = 31,
-    &Aura::HandleAuraModIncreaseMountedSpeed,               //SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED = 32,
-    &Aura::HandleAuraModDecreaseSpeed,                      //SPELL_AURA_MOD_DECREASE_SPEED = 33,
-    &Aura::HandleAuraModIncreaseHealth,                     //SPELL_AURA_MOD_INCREASE_HEALTH = 34,
-    &Aura::HandleAuraModIncreaseEnergy,                     //SPELL_AURA_MOD_INCREASE_ENERGY = 35,
-    &Aura::HandleAuraModShapeshift,                         //SPELL_AURA_MOD_SHAPESHIFT = 36,
-    &Aura::HandleAuraModEffectImmunity,                     //SPELL_AURA_EFFECT_IMMUNITY = 37,
-    &Aura::HandleAuraModStateImmunity,                      //SPELL_AURA_STATE_IMMUNITY = 38,
-    &Aura::HandleAuraModSchoolImmunity,                     //SPELL_AURA_SCHOOL_IMMUNITY = 39,
-    &Aura::HandleAuraModDmgImmunity,                        //SPELL_AURA_DAMAGE_IMMUNITY = 40,
-    &Aura::HandleAuraModDispelImmunity,                     //SPELL_AURA_DISPEL_IMMUNITY = 41,
-    &Aura::HandleAuraProcTriggerSpell,                      //SPELL_AURA_PROC_TRIGGER_SPELL = 42,
-    &Aura::HandleAuraProcTriggerDamage,                     //SPELL_AURA_PROC_TRIGGER_DAMAGE = 43,
-    &Aura::HandleAuraTrackCreatures,                        //SPELL_AURA_TRACK_CREATURES = 44,
-    &Aura::HandleAuraTrackResources,                        //SPELL_AURA_TRACK_RESOURCES = 45,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PARRY_SKILL = 46, obsolete?
-    &Aura::HandleAuraModParryPercent,                       //SPELL_AURA_MOD_PARRY_PERCENT = 47,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DODGE_SKILL = 48, obsolete?
-    &Aura::HandleAuraModDodgePercent,                       //SPELL_AURA_MOD_DODGE_PERCENT = 49,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_BLOCK_SKILL = 50, obsolete?
-    &Aura::HandleAuraModBlockPercent,                       //SPELL_AURA_MOD_BLOCK_PERCENT = 51,
-    &Aura::HandleAuraModCritPercent,                        //SPELL_AURA_MOD_CRIT_PERCENT = 52,
-    &Aura::HandlePeriodicLeech,                             //SPELL_AURA_PERIODIC_LEECH = 53,
-    &Aura::HandleModHitChance,                              //SPELL_AURA_MOD_HIT_CHANCE = 54,
-    &Aura::HandleModSpellHitChance,                         //SPELL_AURA_MOD_SPELL_HIT_CHANCE = 55,
-    &Aura::HandleAuraTransform,                             //SPELL_AURA_TRANSFORM = 56,
-    &Aura::HandleModSpellCritChance,                        //SPELL_AURA_MOD_SPELL_CRIT_CHANCE = 57,
-    &Aura::HandleAuraModIncreaseSwimSpeed,                  //SPELL_AURA_MOD_INCREASE_SWIM_SPEED = 58,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_DAMAGE_DONE_CREATURE = 59,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PACIFY_SILENCE = 60,
-    &Aura::HandleAuraModScale,                              //SPELL_AURA_MOD_SCALE = 61,
-    &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_HEALTH_FUNNEL = 62,
-    &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_MANA_FUNNEL = 63,
-    &Aura::HandlePeriodicManaLeech,                         //SPELL_AURA_PERIODIC_MANA_LEECH = 64,
-    &Aura::HandleModCastingSpeed,                           //SPELL_AURA_MOD_CASTING_SPEED = 65,
-    &Aura::HandleFeignDeath,                                //SPELL_AURA_FEIGN_DEATH = 66,
-    &Aura::HandleAuraModDisarm,                             //SPELL_AURA_MOD_DISARM = 67,
-    &Aura::HandleAuraModStalked,                            //SPELL_AURA_MOD_STALKED = 68,
-    &Aura::HandleAuraSchoolAbsorb,                          //SPELL_AURA_SCHOOL_ABSORB = 69,
-    &Aura::HandleNULL,                                      //SPELL_AURA_EXTRA_ATTACKS = 70,// Useless
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL = 71,
-    &Aura::HandleModPowerCost,                              //SPELL_AURA_MOD_POWER_COST = 72,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_POWER_COST_SCHOOL = 73,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_REFLECT_SPELLS_SCHOOL = 74,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_LANGUAGE = 75,
-    &Aura::HandleFarSight,                                  //SPELL_AURA_FAR_SIGHT = 76,
-    &Aura::HandleModMechanicImmunity,                       //SPELL_AURA_MECHANIC_IMMUNITY = 77,
-    &Aura::HandleAuraMounted,                               //SPELL_AURA_MOUNTED = 78,
-    &Aura::HandleModDamagePercentDone,                      //SPELL_AURA_MOD_DAMAGE_PERCENT_DONE = 79,
-    &Aura::HandleModPercentStat,                            //SPELL_AURA_MOD_PERCENT_STAT = 80,
-    &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE = 81,
-    &Aura::HandleWaterBreathing,                            //SPELL_AURA_WATER_BREATHING = 82,
-    &Aura::HandleModBaseResistance,                         //SPELL_AURA_MOD_BASE_RESISTANCE = 83,
-    &Aura::HandleModRegen,                                  //SPELL_AURA_MOD_REGEN = 84,
-    &Aura::HandleModPowerRegen,                             //SPELL_AURA_MOD_POWER_REGEN = 85,
-    &Aura::HandleChannelDeathItem,                          //SPELL_AURA_CHANNEL_DEATH_ITEM = 86,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_HEALTH_REGEN_PERCENT = 88,
-    &Aura::HandlePeriodicDamagePCT,                         //SPELL_AURA_PERIODIC_DAMAGE_PERCENT = 89,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RESIST_CHANCE = 90,// Useless
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_DETECT_RANGE = 91,
-    &Aura::HandleNULL,                                      //SPELL_AURA_PREVENTS_FLEEING = 92,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_UNATTACKABLE = 93,
-    &Aura::HandleInterruptRegen,                            //SPELL_AURA_INTERRUPT_REGEN = 94,
-    &Aura::HandleAuraGhost,                                 //SPELL_AURA_GHOST = 95,
-    &Aura::HandleNULL,                                      //SPELL_AURA_SPELL_MAGNET = 96,
-    &Aura::HandleAuraManaShield,                            //SPELL_AURA_MANA_SHIELD = 97,
-    &Aura::HandleAuraModSkill,                              //SPELL_AURA_MOD_SKILL_TALENT = 98,
-    &Aura::HandleAuraModAttackPower,                        //SPELL_AURA_MOD_ATTACK_POWER = 99,
-    &Aura::HandleNULL,                                      //SPELL_AURA_AURAS_VISIBLE = 100,
-    &Aura::HandleModResistancePercent,                      //SPELL_AURA_MOD_RESISTANCE_PCT = 101,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_CREATURE_ATTACK_POWER = 102,
-    &Aura::HandleAuraModTotalThreat,                        //SPELL_AURA_MOD_TOTAL_THREAT = 103,
-    &Aura::HandleAuraWaterWalk,                             //SPELL_AURA_WATER_WALK = 104,
-    &Aura::HandleAuraFeatherFall,                           //SPELL_AURA_FEATHER_FALL = 105,
-    &Aura::HandleAuraHover,                                 //SPELL_AURA_HOVER = 106,
-    &Aura::HandleAddModifier,                               //SPELL_AURA_ADD_FLAT_MODIFIER = 107,
-    &Aura::HandleAddModifier,                               //SPELL_AURA_ADD_PCT_MODIFIER = 108,
-    &Aura::HandleNULL,                                      //SPELL_AURA_ADD_TARGET_TRIGGER = 109,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_REGEN_PERCENT = 110,
-    &Aura::HandleNULL,                                      //SPELL_AURA_ADD_CASTER_HIT_TRIGGER = 111,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_OVERRIDE_CLASS_SCRIPTS = 112,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN = 113,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT = 114,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING = 115,
-    &Aura::HandleNULL,                                      //SPELL_AURA_IGNORE_REGEN_INTERRUPT = 116,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MECHANIC_RESISTANCE = 117,
-    &Aura::HandleModHealingPercent,                         //SPELL_AURA_MOD_HEALING_PCT = 118,
-    &Aura::HandleNULL,                                      //SPELL_AURA_SHARE_PET_TRACKING = 119, useless
-    &Aura::HandleAuraUntrackable,                           //SPELL_AURA_UNTRACKABLE = 120,
-    &Aura::HandleAuraEmpathy,                               //SPELL_AURA_EMPATHY = 121,
-    &Aura::HandleModOffhandDamagePercent,                   //SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT = 122,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_COST_PCT = 123,
-    &Aura::HandleAuraModRangedAttackPower,                  //SPELL_AURA_MOD_RANGED_ATTACK_POWER = 124,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN = 125,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT = 126,
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS = 127,
-    &Aura::HandleModPossessPet,                             //SPELL_AURA_MOD_POSSESS_PET = 128,
-    &Aura::HandleAuraModIncreaseSpeedAlways,                //SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS = 129,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS = 130,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER = 131,
-    &Aura::HandleAuraModIncreaseEnergyPercent,              //SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT = 132,
-    &Aura::HandleAuraModIncreaseHealthPercent,              //SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT = 133,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MANA_REGEN_INTERRUPT = 134,
-    &Aura::HandleModHealingDone,                            //SPELL_AURA_MOD_HEALING_DONE = 135,
-    &Aura::HandleModHealingDonePercent,                     //SPELL_AURA_MOD_HEALING_DONE_PERCENT = 136,
-    &Aura::HandleModTotalPercentStat,                       //SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE = 137,
-    &Aura::HandleHaste,                                     //SPELL_AURA_MOD_HASTE = 138,
-    &Aura::HandleForceReaction,                             //SPELL_AURA_FORCE_REACTION = 139,
-    &Aura::HandleAuraModRangedHaste,                        //SPELL_AURA_MOD_RANGED_HASTE = 140,
-    &Aura::HandleRangedAmmoHaste,                           //SPELL_AURA_MOD_RANGED_AMMO_HASTE = 141,
-    &Aura::HandleAuraModBaseResistancePCT,                  //SPELL_AURA_MOD_BASE_RESISTANCE_PCT = 142,
-    &Aura::HandleAuraModResistanceExclusive,                //SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE = 143,
-    &Aura::HandleAuraSafeFall,                              //SPELL_AURA_SAFE_FALL = 144,
-    &Aura::HandleNULL,                                      //SPELL_AURA_CHARISMA = 145,
-    &Aura::HandleNULL,                                      //SPELL_AURA_PERSUADED = 146,
-    &Aura::HandleNULL,                                      //SPELL_AURA_ADD_CREATURE_IMMUNITY = 147,
-    &Aura::HandleNULL,                                      //SPELL_AURA_RETAIN_COMBO_POINTS = 148,
-    &Aura::HandleNULL,                                      //SPELL_AURA_RESIST_PUSHBACK    =    149    ,//    Resist Pushback
-    &Aura::HandleModShieldBlock,                            //SPELL_AURA_MOD_SHIELD_BLOCK_PCT   = 150   ,//    Mod Shield Block %
-    &Aura::HandleAuraTrackStealthed,                        //SPELL_AURA_TRACK_STEALTHED    =    151    ,//    Track Stealthed
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECTED_RANGE    =    152    ,//    Mod Detected Range
-    &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE_FLAT    =    153    ,//    Split Damage Flat
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STEALTH_LEVEL    =    154    ,//    Stealth Level Modifier
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_WATER_BREATHING    =    155    ,//    Mod Water Breathing
-    &Aura::HandleNoImmediateEffect,                         //SPELL_AURA_MOD_REPUTATION_GAIN    =    156    ,//    Mod Reputation Gain
-    &Aura::HandleNULL,                                      //SPELL_AURA_PET_DAMAGE_MULTI       = 157   ,//    Mod Pet Damage
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SHIELD_BLOCK  = 158,
-    &Aura::HandleNULL,                                      //SPELL_AURA_NO_PVP_CREDIT           = 159, // only for Honorless Target spell
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_AOE_AVOIDANCE = 160,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT = 161,
-    &Aura::HandleNULL,                                      //SPELL_AURA_POWER_BURN_MANA = 162,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CRIT_DAMAGE_BONUS_MELEE = 163,
-    &Aura::HandleNULL,                                      //                                   = 164,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS = 165,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACK_POWER_PCT   = 166,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT = 167,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_DONE_VERSUS= 168,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CRIT_PERCENT_VERSUS   = 169,
-    &Aura::HandleNULL,                                      //SPELL_AURA_DETECT_AMORE           = 170, // only for Detect Amore spell
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PARTY_SPEED        = 171, unused
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PARTY_SPEED_MOUNTED = 172,
-    &Aura::HandleNULL,                                      //SPELL_AURA_ALLOW_CHAMPION_SPELLS  = 173, // only for Proclaim Champion spell
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT = 174,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT  = 175,
-    &Aura::HandleNULL,                                      //SPELL_AURA_SPIRIT_OF_REDEMPTION   = 176, // only for Spirit of Redemption spell
-    &Aura::HandleNULL,                                      //SPELL_AURA_AOE_CHARM              = 177,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DEBUFF_RESISTANCE  = 178,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE = 179,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_DAMAGE_VS_UNDEAD = 180,
-    &Aura::HandleNULL,                                      //                                  = 181,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ARMOR_OF_INTELLECT = 182,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CRITICAL_THREAT = 183,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE = 184,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE = 185,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE = 186,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE = 187,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE  = 188,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RATING           = 189,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_FACTION_REPUTATION_GAIN = 190,
-    &Aura::HandleNULL,                                      //                                  = 191,
-    &Aura::HandleNULL,                                      //SPELL_AURA_HASTE_MELEE            = 192,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MELEE_SLOW             = 193,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT = 194,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT = 195,
-    &Aura::HandleNULL,                                      //                                  = 196,unused
-    &Aura::HandleNULL,                                      //                                  = 197, = 179
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ALL_WEAPON_SKILLS = 198,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_HIT_CHANCE = 199,
-    &Aura::HandleNULL,                                      //                                  = 200,
-    &Aura::HandleAuraAllowFlight,                           //                                  = 201, // this aura brobably must enable flight mode...
-    &Aura::HandleNULL,                                      //SPELL_AURA_CANNOT_BE_DODGED = 202,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE = 203,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE = 204,
-    &Aura::HandleNULL,                                      //                                  = 205,unused
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPEED_MOUNTED        = 206,
-    &Aura::HandleAuraModSpeedMountedFlight,                 //SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT = 207,
-    &Aura::HandleAuraAllowFlight,                           //                                  = 208, // flight related, used only in spell: Flight Form (Passive)
-    &Aura::HandleNULL,                                      //                                  = 209,unused
-    &Aura::HandleNULL,                                      //                                  = 210,unused
-    &Aura::HandleNULL,                                      //                                  = 211, = 207 unused
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_INTELLECT  = 212,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGE_FROM_DAMAGE_DEALT = 213,
-    &Aura::HandleNULL,                                      //                                  = 214,
-    &Aura::HandleNULL,                                      //                                  = 215,
-    &Aura::HandleNULL,                                      //SPELL_AURA_HASTE_SPELLS = 216,
-    &Aura::HandleNULL,                                      //                                  = 217,
-    &Aura::HandleNULL,                                      //                                  = 218,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_MANA_REGEN = 219,
-    &Aura::HandleNULL,                                      //                                  = 220,
+    &Aura::HandleNULL,                                      //  0 SPELL_AURA_NONE
+    &Aura::HandleBindSight,                                 //  1 SPELL_AURA_BIND_SIGHT
+    &Aura::HandleModPossess,                                //  2 SPELL_AURA_MOD_POSSESS
+    &Aura::HandlePeriodicDamage,                            //  3 SPELL_AURA_PERIODIC_DAMAGE
+    &Aura::HandleAuraDummy,                                 //  4 SPELL_AURA_DUMMY
+    &Aura::HandleModConfuse,                                //  5 SPELL_AURA_MOD_CONFUSE
+    &Aura::HandleModCharm,                                  //  6 SPELL_AURA_MOD_CHARM
+    &Aura::HandleModFear,                                   //  7 SPELL_AURA_MOD_FEAR
+    &Aura::HandlePeriodicHeal,                              //  8 SPELL_AURA_PERIODIC_HEAL
+    &Aura::HandleModAttackSpeed,                            //  9 SPELL_AURA_MOD_ATTACKSPEED
+    &Aura::HandleModThreat,                                 // 10 SPELL_AURA_MOD_THREAT
+    &Aura::HandleModTaunt,                                  // 11 SPELL_AURA_MOD_TAUNT
+    &Aura::HandleAuraModStun,                               // 12 SPELL_AURA_MOD_STUN
+    &Aura::HandleModDamageDone,                             // 13 SPELL_AURA_MOD_DAMAGE_DONE
+    &Aura::HandleNoImmediateEffect,                         // 14 SPELL_AURA_MOD_DAMAGE_TAKEN
+    &Aura::HandleAuraDamageShield,                          // 15 SPELL_AURA_DAMAGE_SHIELD
+    &Aura::HandleModStealth,                                // 16 SPELL_AURA_MOD_STEALTH
+    &Aura::HandleModDetect,                                 // 17 SPELL_AURA_MOD_DETECT
+    &Aura::HandleInvisibility,                              // 18 SPELL_AURA_MOD_INVISIBILITY
+    &Aura::HandleInvisibilityDetect,                        // 19 SPELL_AURA_MOD_INVISIBILITY_DETECTION
+    &Aura::HandleAuraModTotalHealthPercentRegen,            // 20 SPELL_AURA_OBS_MOD_HEALTH
+    &Aura::HandleAuraModTotalManaPercentRegen,              // 21 SPELL_AURA_OBS_MOD_MANA
+    &Aura::HandleAuraModResistance,                         // 22 SPELL_AURA_MOD_RESISTANCE
+    &Aura::HandlePeriodicTriggerSpell,                      // 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL
+    &Aura::HandlePeriodicEnergize,                          // 24 SPELL_AURA_PERIODIC_ENERGIZE
+    &Aura::HandleAuraModPacify,                             // 25 SPELL_AURA_MOD_PACIFY
+    &Aura::HandleAuraModRoot,                               // 26 SPELL_AURA_MOD_ROOT
+    &Aura::HandleAuraModSilence,                            // 27 SPELL_AURA_MOD_SILENCE
+    &Aura::HandleNoImmediateEffect,                         // 28 SPELL_AURA_REFLECT_SPELLS
+    &Aura::HandleAuraModStat,                               // 29 SPELL_AURA_MOD_STAT
+    &Aura::HandleAuraModSkill,                              // 30 SPELL_AURA_MOD_SKILL
+    &Aura::HandleAuraModIncreaseSpeed,                      // 31 SPELL_AURA_MOD_INCREASE_SPEED
+    &Aura::HandleAuraModIncreaseMountedSpeed,               // 32 SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED
+    &Aura::HandleAuraModDecreaseSpeed,                      // 33 SPELL_AURA_MOD_DECREASE_SPEED
+    &Aura::HandleAuraModIncreaseHealth,                     // 34 SPELL_AURA_MOD_INCREASE_HEALTH
+    &Aura::HandleAuraModIncreaseEnergy,                     // 35 SPELL_AURA_MOD_INCREASE_ENERGY
+    &Aura::HandleAuraModShapeshift,                         // 36 SPELL_AURA_MOD_SHAPESHIFT
+    &Aura::HandleAuraModEffectImmunity,                     // 37 SPELL_AURA_EFFECT_IMMUNITY
+    &Aura::HandleAuraModStateImmunity,                      // 38 SPELL_AURA_STATE_IMMUNITY
+    &Aura::HandleAuraModSchoolImmunity,                     // 39 SPELL_AURA_SCHOOL_IMMUNITY
+    &Aura::HandleAuraModDmgImmunity,                        // 40 SPELL_AURA_DAMAGE_IMMUNITY
+    &Aura::HandleAuraModDispelImmunity,                     // 41 SPELL_AURA_DISPEL_IMMUNITY
+    &Aura::HandleAuraProcTriggerSpell,                      // 42 SPELL_AURA_PROC_TRIGGER_SPELL
+    &Aura::HandleAuraProcTriggerDamage,                     // 43 SPELL_AURA_PROC_TRIGGER_DAMAGE
+    &Aura::HandleAuraTrackCreatures,                        // 44 SPELL_AURA_TRACK_CREATURES
+    &Aura::HandleAuraTrackResources,                        // 45 SPELL_AURA_TRACK_RESOURCES
+    &Aura::HandleNULL,                                      // 46 SPELL_AURA_MOD_PARRY_SKILL    obsolete?
+    &Aura::HandleAuraModParryPercent,                       // 47 SPELL_AURA_MOD_PARRY_PERCENT
+    &Aura::HandleNULL,                                      // 48 SPELL_AURA_MOD_DODGE_SKILL    obsolete?
+    &Aura::HandleAuraModDodgePercent,                       // 49 SPELL_AURA_MOD_DODGE_PERCENT
+    &Aura::HandleNULL,                                      // 50 SPELL_AURA_MOD_BLOCK_SKILL    obsolete?
+    &Aura::HandleAuraModBlockPercent,                       // 51 SPELL_AURA_MOD_BLOCK_PERCENT
+    &Aura::HandleAuraModCritPercent,                        // 52 SPELL_AURA_MOD_CRIT_PERCENT
+    &Aura::HandlePeriodicLeech,                             // 53 SPELL_AURA_PERIODIC_LEECH
+    &Aura::HandleModHitChance,                              // 54 SPELL_AURA_MOD_HIT_CHANCE
+    &Aura::HandleModSpellHitChance,                         // 55 SPELL_AURA_MOD_SPELL_HIT_CHANCE
+    &Aura::HandleAuraTransform,                             // 56 SPELL_AURA_TRANSFORM
+    &Aura::HandleModSpellCritChance,                        // 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE
+    &Aura::HandleAuraModIncreaseSwimSpeed,                  // 58 SPELL_AURA_MOD_INCREASE_SWIM_SPEED
+    &Aura::HandleNoImmediateEffect,                         // 59 SPELL_AURA_MOD_DAMAGE_DONE_CREATURE
+    &Aura::HandleNULL,                                      // 60 SPELL_AURA_MOD_PACIFY_SILENCE
+    &Aura::HandleAuraModScale,                              // 61 SPELL_AURA_MOD_SCALE
+    &Aura::HandleNULL,                                      // 62 SPELL_AURA_PERIODIC_HEALTH_FUNNEL
+    &Aura::HandleNULL,                                      // 63 SPELL_AURA_PERIODIC_MANA_FUNNEL
+    &Aura::HandlePeriodicManaLeech,                         // 64 SPELL_AURA_PERIODIC_MANA_LEECH
+    &Aura::HandleModCastingSpeed,                           // 65 SPELL_AURA_MOD_CASTING_SPEED
+    &Aura::HandleFeignDeath,                                // 66 SPELL_AURA_FEIGN_DEATH
+    &Aura::HandleAuraModDisarm,                             // 67 SPELL_AURA_MOD_DISARM
+    &Aura::HandleAuraModStalked,                            // 68 SPELL_AURA_MOD_STALKED
+    &Aura::HandleAuraSchoolAbsorb,                          // 69 SPELL_AURA_SCHOOL_ABSORB
+    &Aura::HandleNULL,                                      // 70 SPELL_AURA_EXTRA_ATTACKS      Useless
+    &Aura::HandleNoImmediateEffect,                         // 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
+    &Aura::HandleModPowerCost,                              // 72 SPELL_AURA_MOD_POWER_COST
+    &Aura::HandleNoImmediateEffect,                         // 73 SPELL_AURA_MOD_POWER_COST_SCHOOL
+    &Aura::HandleNoImmediateEffect,                         // 74 SPELL_AURA_REFLECT_SPELLS_SCHOOL
+    &Aura::HandleNULL,                                      // 75 SPELL_AURA_MOD_LANGUAGE
+    &Aura::HandleFarSight,                                  // 76 SPELL_AURA_FAR_SIGHT
+    &Aura::HandleModMechanicImmunity,                       // 77 SPELL_AURA_MECHANIC_IMMUNITY
+    &Aura::HandleAuraMounted,                               // 78 SPELL_AURA_MOUNTED
+    &Aura::HandleModDamagePercentDone,                      // 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE
+    &Aura::HandleModPercentStat,                            // 80 SPELL_AURA_MOD_PERCENT_STAT
+    &Aura::HandleNULL,                                      // 81 SPELL_AURA_SPLIT_DAMAGE
+    &Aura::HandleWaterBreathing,                            // 82 SPELL_AURA_WATER_BREATHING
+    &Aura::HandleModBaseResistance,                         // 83 SPELL_AURA_MOD_BASE_RESISTANCE
+    &Aura::HandleModRegen,                                  // 84 SPELL_AURA_MOD_REGEN
+    &Aura::HandleModPowerRegen,                             // 85 SPELL_AURA_MOD_POWER_REGEN
+    &Aura::HandleChannelDeathItem,                          // 86 SPELL_AURA_CHANNEL_DEATH_ITEM
+    &Aura::HandleNoImmediateEffect,                         // 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN
+    &Aura::HandleNoImmediateEffect,                         // 88 SPELL_AURA_MOD_HEALTH_REGEN_PERCENT
+    &Aura::HandlePeriodicDamagePCT,                         // 89 SPELL_AURA_PERIODIC_DAMAGE_PERCENT
+    &Aura::HandleNULL,                                      // 90 SPELL_AURA_MOD_RESIST_CHANCE  Useless
+    &Aura::HandleNoImmediateEffect,                         // 91 SPELL_AURA_MOD_DETECT_RANGE
+    &Aura::HandleNULL,                                      // 92 SPELL_AURA_PREVENTS_FLEEING
+    &Aura::HandleNULL,                                      // 93 SPELL_AURA_MOD_UNATTACKABLE
+    &Aura::HandleInterruptRegen,                            // 94 SPELL_AURA_INTERRUPT_REGEN
+    &Aura::HandleAuraGhost,                                 // 95 SPELL_AURA_GHOST
+    &Aura::HandleNULL,                                      // 96 SPELL_AURA_SPELL_MAGNET
+    &Aura::HandleAuraManaShield,                            // 97 SPELL_AURA_MANA_SHIELD
+    &Aura::HandleAuraModSkill,                              // 98 SPELL_AURA_MOD_SKILL_TALENT
+    &Aura::HandleAuraModAttackPower,                        // 99 SPELL_AURA_MOD_ATTACK_POWER
+    &Aura::HandleNULL,                                      //100 SPELL_AURA_AURAS_VISIBLE
+    &Aura::HandleModResistancePercent,                      //101 SPELL_AURA_MOD_RESISTANCE_PCT
+    &Aura::HandleNoImmediateEffect,                         //102 SPELL_AURA_MOD_CREATURE_ATTACK_POWER
+    &Aura::HandleAuraModTotalThreat,                        //103 SPELL_AURA_MOD_TOTAL_THREAT
+    &Aura::HandleAuraWaterWalk,                             //104 SPELL_AURA_WATER_WALK
+    &Aura::HandleAuraFeatherFall,                           //105 SPELL_AURA_FEATHER_FALL
+    &Aura::HandleAuraHover,                                 //106 SPELL_AURA_HOVER
+    &Aura::HandleAddModifier,                               //107 SPELL_AURA_ADD_FLAT_MODIFIER
+    &Aura::HandleAddModifier,                               //108 SPELL_AURA_ADD_PCT_MODIFIER
+    &Aura::HandleNULL,                                      //109 SPELL_AURA_ADD_TARGET_TRIGGER
+    &Aura::HandleNULL,                                      //110 SPELL_AURA_MOD_POWER_REGEN_PERCENT
+    &Aura::HandleNULL,                                      //111 SPELL_AURA_ADD_CASTER_HIT_TRIGGER
+    &Aura::HandleNoImmediateEffect,                         //112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS
+    &Aura::HandleNoImmediateEffect,                         //113 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN
+    &Aura::HandleNoImmediateEffect,                         //114 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT
+    &Aura::HandleNULL,                                      //115 SPELL_AURA_MOD_HEALING
+    &Aura::HandleNULL,                                      //116 SPELL_AURA_IGNORE_REGEN_INTERRUPT
+    &Aura::HandleNULL,                                      //117 SPELL_AURA_MOD_MECHANIC_RESISTANCE
+    &Aura::HandleModHealingPercent,                         //118 SPELL_AURA_MOD_HEALING_PCT
+    &Aura::HandleNULL,                                      //119 SPELL_AURA_SHARE_PET_TRACKING useless
+    &Aura::HandleAuraUntrackable,                           //120 SPELL_AURA_UNTRACKABLE
+    &Aura::HandleAuraEmpathy,                               //121 SPELL_AURA_EMPATHY
+    &Aura::HandleModOffhandDamagePercent,                   //122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT
+    &Aura::HandleNULL,                                      //123 SPELL_AURA_MOD_POWER_COST_PCT
+    &Aura::HandleAuraModRangedAttackPower,                  //124 SPELL_AURA_MOD_RANGED_ATTACK_POWER
+    &Aura::HandleNoImmediateEffect,                         //125 SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN
+    &Aura::HandleNoImmediateEffect,                         //126 SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT
+    &Aura::HandleNoImmediateEffect,                         //127 SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS
+    &Aura::HandleModPossessPet,                             //128 SPELL_AURA_MOD_POSSESS_PET
+    &Aura::HandleAuraModIncreaseSpeedAlways,                //129 SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS
+    &Aura::HandleNULL,                                      //130 SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS
+    &Aura::HandleNULL,                                      //131 SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER
+    &Aura::HandleAuraModIncreaseEnergyPercent,              //132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT
+    &Aura::HandleAuraModIncreaseHealthPercent,              //133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT
+    &Aura::HandleNULL,                                      //134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT
+    &Aura::HandleModHealingDone,                            //135 SPELL_AURA_MOD_HEALING_DONE
+    &Aura::HandleModHealingDonePercent,                     //136 SPELL_AURA_MOD_HEALING_DONE_PERCENT
+    &Aura::HandleModTotalPercentStat,                       //137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE
+    &Aura::HandleHaste,                                     //138 SPELL_AURA_MOD_HASTE
+    &Aura::HandleForceReaction,                             //139 SPELL_AURA_FORCE_REACTION
+    &Aura::HandleAuraModRangedHaste,                        //140 SPELL_AURA_MOD_RANGED_HASTE
+    &Aura::HandleRangedAmmoHaste,                           //141 SPELL_AURA_MOD_RANGED_AMMO_HASTE
+    &Aura::HandleAuraModBaseResistancePCT,                  //142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT
+    &Aura::HandleAuraModResistanceExclusive,                //143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE
+    &Aura::HandleAuraSafeFall,                              //144 SPELL_AURA_SAFE_FALL
+    &Aura::HandleNULL,                                      //145 SPELL_AURA_CHARISMA
+    &Aura::HandleNULL,                                      //146 SPELL_AURA_PERSUADED
+    &Aura::HandleNULL,                                      //147 SPELL_AURA_ADD_CREATURE_IMMUNITY
+    &Aura::HandleNULL,                                      //148 SPELL_AURA_RETAIN_COMBO_POINTS
+    &Aura::HandleNULL,                                      //149 SPELL_AURA_RESIST_PUSHBACK
+    &Aura::HandleModShieldBlock,                            //150 SPELL_AURA_MOD_SHIELD_BLOCK_PCT
+    &Aura::HandleAuraTrackStealthed,                        //151 SPELL_AURA_TRACK_STEALTHED
+    &Aura::HandleNULL,                                      //152 SPELL_AURA_MOD_DETECTED_RANGE
+    &Aura::HandleNULL,                                      //153 SPELL_AURA_SPLIT_DAMAGE_FLAT
+    &Aura::HandleNULL,                                      //154 SPELL_AURA_MOD_STEALTH_LEVEL
+    &Aura::HandleNULL,                                      //155 SPELL_AURA_MOD_WATER_BREATHING
+    &Aura::HandleNoImmediateEffect,                         //156 SPELL_AURA_MOD_REPUTATION_GAIN
+    &Aura::HandleNULL,                                      //157 SPELL_AURA_PET_DAMAGE_MULTI
+    &Aura::HandleNULL,                                      //158 SPELL_AURA_MOD_SHIELD_BLOCK
+    &Aura::HandleNULL,                                      //159 SPELL_AURA_NO_PVP_CREDIT      only for Honorless Target spell
+    &Aura::HandleNULL,                                      //160 SPELL_AURA_MOD_AOE_AVOIDANCE
+    &Aura::HandleNULL,                                      //161 SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT
+    &Aura::HandleNULL,                                      //162 SPELL_AURA_POWER_BURN_MANA
+    &Aura::HandleNULL,                                      //163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS_MELEE
+    &Aura::HandleNULL,                                      //164
+    &Aura::HandleNULL,                                      //165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS
+    &Aura::HandleNULL,                                      //166 SPELL_AURA_MOD_ATTACK_POWER_PCT
+    &Aura::HandleNULL,                                      //167 SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT
+    &Aura::HandleNULL,                                      //168 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS
+    &Aura::HandleNULL,                                      //169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS
+    &Aura::HandleNULL,                                      //170 SPELL_AURA_DETECT_AMORE       only for Detect Amore spell
+    &Aura::HandleNULL,                                      //171 SPELL_AURA_MOD_PARTY_SPEED    unused
+    &Aura::HandleNULL,                                      //172 SPELL_AURA_MOD_PARTY_SPEED_MOUNTED
+    &Aura::HandleNULL,                                      //173 SPELL_AURA_ALLOW_CHAMPION_SPELLS  only for Proclaim Champion spell
+    &Aura::HandleNULL,                                      //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT
+    &Aura::HandleNULL,                                      //175 SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT
+    &Aura::HandleNULL,                                      //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell
+    &Aura::HandleNULL,                                      //177 SPELL_AURA_AOE_CHARM
+    &Aura::HandleNULL,                                      //178 SPELL_AURA_MOD_DEBUFF_RESISTANCE
+    &Aura::HandleNULL,                                      //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
+    &Aura::HandleNULL,                                      //180 SPELL_AURA_MOD_SPELL_DAMAGE_VS_UNDEAD,
+    &Aura::HandleNULL,                                      //181
+    &Aura::HandleNULL,                                      //182 SPELL_AURA_MOD_ARMOR_OF_INTELLECT
+    &Aura::HandleNULL,                                      //183 SPELL_AURA_MOD_CRITICAL_THREAT
+    &Aura::HandleNULL,                                      //184 SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE
+    &Aura::HandleNULL,                                      //185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE
+    &Aura::HandleNULL,                                      //186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE
+    &Aura::HandleNULL,                                      //187 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE
+    &Aura::HandleNULL,                                      //188 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE
+    &Aura::HandleNULL,                                      //189 SPELL_AURA_MOD_RATING
+    &Aura::HandleNULL,                                      //190 SPELL_AURA_MOD_FACTION_REPUTATION_GAIN
+    &Aura::HandleNULL,                                      //191
+    &Aura::HandleNULL,                                      //192 SPELL_AURA_HASTE_MELEE
+    &Aura::HandleNULL,                                      //193 SPELL_AURA_MELEE_SLOW
+    &Aura::HandleNULL,                                      //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT
+    &Aura::HandleNULL,                                      //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT
+    &Aura::HandleNULL,                                      //196                                   unused
+    &Aura::HandleNULL,                                      //197
+    &Aura::HandleNULL,                                      //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
+    &Aura::HandleNULL,                                      //199 SPELL_AURA_MOD_SPELL_HIT_CHANCE
+    &Aura::HandleNULL,                                      //200
+    &Aura::HandleAuraAllowFlight,                           //201                                   this aura probably must enable flight mode...
+    &Aura::HandleNULL,                                      //202 SPELL_AURA_CANNOT_BE_DODGED
+    &Aura::HandleNULL,                                      //203 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE
+    &Aura::HandleNULL,                                      //204 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE
+    &Aura::HandleNULL,                                      //205                                   unused
+    &Aura::HandleNULL,                                      //206 SPELL_AURA_MOD_SPEED_MOUNTED
+    &Aura::HandleAuraModSpeedMountedFlight,                 //207 SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT
+    &Aura::HandleAuraAllowFlight,                           //208                                   flight related, used only in spell: Flight Form (Passive)
+    &Aura::HandleNULL,                                      //209                                   unused
+    &Aura::HandleNULL,                                      //210                                   unused
+    &Aura::HandleNULL,                                      //211                                   unused
+    &Aura::HandleNULL,                                      //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_INTELLECT
+    &Aura::HandleNULL,                                      //213 SPELL_AURA_MOD_RANGE_FROM_DAMAGE_DEALT
+    &Aura::HandleNULL,                                      //214
+    &Aura::HandleNULL,                                      //215
+    &Aura::HandleNULL,                                      //216 SPELL_AURA_HASTE_SPELLS
+    &Aura::HandleNULL,                                      //217
+    &Aura::HandleNULL,                                      //218
+    &Aura::HandleNULL,                                      //219 SPELL_AURA_MOD_MANA_REGEN
+    &Aura::HandleNULL,                                      //220
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
