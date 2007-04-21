@@ -917,7 +917,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             SendAreaTriggerMessage(msg.c_str());
         }
     }
-    
+
     if(GetPlayer()->InBattleGround())
     {
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
@@ -925,7 +925,6 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             if(bg->GetStatus()==STATUS_INPROGRESS)
                 bg->HandleAreaTrigger(GetPlayer(),Trigger_ID);
     }
-    
 }
 
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)

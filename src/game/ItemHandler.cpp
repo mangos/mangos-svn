@@ -912,54 +912,56 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     recv_data >> itemguid >> gemguid[0] >> gemguid[1] >> gemguid[2];
 
-    bool propercolor[3],full[3];
-    uint16 itempos = _player->GetPosByGuid(itemguid);
-    Item *pItem = _player->GetItemByPos( itempos );
-    if( pItem )
+    bool propercolor[3], full[3];
+    Item *pItem = _player->GetItemByPos(_player->GetPosByGuid(itemguid));
+    if(pItem)
     {
-        ItemPrototype const *pItemProto = objmgr.GetItemPrototype( pItem->GetEntry() );
-        bool HasBonus=1;
-        for (int s=0; s<3; s++)
+        bool HasBonus = 1;
+        for(int s = 0; s < 3; s++)
         {
-            if (gemguid[s])
+            if(gemguid[s])
             {
-                uint16 gempos = _player->GetPosByGuid(gemguid[s]);
-                Item *pGem = _player->GetItemByPos( gempos );
-                ItemPrototype const *pGemProto = objmgr.GetItemPrototype( pGem->GetEntry() );
-                gemProperty[s] = pGemProto->GemProperties;
-                GemPropertiesEntry const *gemInfo = sGemPropertiesStore.LookupEntry(gemProperty[s]);
-                propercolor[s] = (gemInfo->color & pItemProto->Socket[s].Color);
-                if ((gemInfo->color & SOCKET_COLOR_META) & !propercolor[s])
+                Item *pGem = _player->GetItemByPos(_player->GetPosByGuid(gemguid[s]));
+                if(pGem)
                 {
-                    // ToDo : Error message
-                    continue;
+                    gemProperty[s] = pGem->GetProto()->GemProperties;
+                    GemPropertiesEntry const *gemInfo = sGemPropertiesStore.LookupEntry(gemProperty[s]);
+                    if(gemInfo)
+                    {
+                        propercolor[s] = (gemInfo->color & pItem->GetProto()->Socket[s].Color);
+                        if ((gemInfo->color & SOCKET_COLOR_META) & !propercolor[s])
+                        {
+                            // ToDo : Error message
+                            continue;
+                        }
+                        pItem->SetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+s*3, gemInfo->spellitemenchantement);
+                        _player->DestroyItem(pGem->GetBagSlot(), pGem->GetSlot(), true);
+                        full[s] = 1;
+                    }
                 }
-                pItem->SetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+s*3, gemInfo->spellitemenchantement);
-                _player->DestroyItem((gempos >> 8), (gempos & 255), true);
-                full[s] = 1;
             }
             else
             {
                 gemProperty[s] = 0;
                 propercolor[s] = 1;
-                if (pItemProto->Socket[s].Color)
+                if(pItem->GetProto()->Socket[s].Color)
                 {
                     full[s]=0;
                 }
                 else
                 {
                     full[s]=1;
-                };
-            };
-            HasBonus &= full[s] & propercolor[s];
-        }
+                }
+                HasBonus &= full[s] & propercolor[s];
+            }
 
-        // Now if all full[s] are true and all propercolor[s] are true, also apply the bonus pItemProto->socketBonus
-        if (HasBonus)
-        {
-            pItem->SetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+3*3, pItemProto->socketBonus);
-        }
+            // Now if all full[s] are true and all propercolor[s] are true, also apply the bonus pItemProto->socketBonus
+            if(HasBonus)
+            {
+                pItem->SetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+3*3, pItem->GetProto()->socketBonus);
+            }
 
-        _player->_ApplyItemMods(pItem, pItem->GetSlot(), true);
+            _player->_ApplyItemMods(pItem, pItem->GetSlot(), true);
+        }
     }
 }

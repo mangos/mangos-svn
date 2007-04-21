@@ -38,7 +38,7 @@ class BattleGroundMgr
         void BuildPlayerLeftBattleGroundPacket(WorldPacket* data, Player* plr);
         void BuildPlayerJoinedBattleGroundPacket(WorldPacket* data, Player* plr);
 
-        void BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr);
+        void BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr, uint32 bgId);
 
         /* Battlegrounds */
         BattleGroundSet::iterator GetBattleGroundsBegin() { return m_BattleGrounds.begin(); };
@@ -61,6 +61,7 @@ class BattleGroundMgr
         void SendToBattleGround(Player *pl, uint32 bgId);
         void SendBattleGroundStatusPacket(Player *pl, BattleGround* bg, uint8 StatusID, uint32 Time1, uint32 Time2);
         void SendPvpLogData(Player *pl, uint8 winner, bool to_all);
+        void SendGroupJoinedBattlegroundPacket(Player *Source, uint32 bgid);
 
     private:
 
