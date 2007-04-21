@@ -127,7 +127,6 @@ libmangosgame_a_SOURCES = \
 	MapManager.cpp \
 	MapManager.h \
 	MiscHandler.cpp \
-	MiscHandler.h \
 	MotionMaster.cpp \
 	MotionMaster.h \
 	MovementGenerator.cpp \

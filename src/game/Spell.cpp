@@ -2739,25 +2739,24 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
         }
         fields = result->Fetch();
 
-        TeleportCoords TC;
-        TC.mapId = fields[0].GetUInt32();
-        TC.x = fields[2].GetFloat();
-        TC.y = fields[3].GetFloat();
-        TC.z = fields[4].GetFloat();
+        uint32 TC_mapId = fields[0].GetUInt32();
+        float  TC_x = fields[2].GetFloat();
+        float  TC_y = fields[3].GetFloat();
+        float  TC_z = fields[4].GetFloat();
 
         delete result;
 
-        ((Player*)Target)->TeleportTo(TC.mapId,TC.x,TC.y,TC.z,Target->GetOrientation());
+        ((Player*)Target)->TeleportTo(TC_mapId,TC_x,TC_y,TC_z,Target->GetOrientation());
     }
     else
     {
-        TeleportCoords const* TC = objmgr.GetTeleportCoords(id);
-        if(!TC)
+        AreaTrigger const* at = objmgr.GetAreaTrigger(id);
+        if(!at || !at->IsTeleport())
         {
             sLog.outError( "SPELL: unknown Teleport Coords ID %i\n", id );
             return;
         }
-        ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,Target->GetOrientation());
+        ((Player*)Target)->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation);
     }
 }
 

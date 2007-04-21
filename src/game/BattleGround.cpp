@@ -224,7 +224,7 @@ void BattleGround::Update(time_t diff)
     }
 
     //If Queue is empty and BG-Status = WAIT_JOIN, we must start BG
-    if(GetStatus() == STATUS_WAIT_JOIN)
+    if(GetStatus() == STATUS_WAIT_JOIN && !GetQueuedPlayersSize())
     {
         // AV
         if(GetID() == 1)
@@ -694,12 +694,6 @@ bool BattleGround::CanStartBattleGround()
     if(GetStatus() >= STATUS_WAIT_JOIN)     // already started or ended
         return false;
 
-    if(GetQueuedPlayersSize() >= 2)         // for testing only
-    {
-        SetStatus(STATUS_WAIT_JOIN);
-        return true;
-    }
-
     if(GetQueuedPlayersSize() < GetMaxPlayers())
         return false;
 
@@ -1073,7 +1067,6 @@ void BattleGround::RespawnFlag(uint32 Team, bool captured)
 
 void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
 {
-    // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
@@ -1166,6 +1159,9 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
                     EventPlayerCapturedFlag(Source);
                 }
             }
+            break;
+        case 4631:                                          //Unk1
+        case 4633:                                          //Unk2
             break;
         //AB
         case 3866:                                          //Stables

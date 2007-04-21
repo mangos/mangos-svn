@@ -64,17 +64,11 @@ ObjectMgr::~ObjectMgr()
     }
     mGossipText.clear( );
 
-    for( AreaTriggerMap::iterator i = mAreaTriggerMap.begin( ); i != mAreaTriggerMap.end( ); ++ i )
+    for( AreaTriggerMap::iterator i = mAreaTriggers.begin( ); i != mAreaTriggers.end( ); ++ i )
     {
         delete i->second;
     }
-    mAreaTriggerMap.clear( );
-
-    for( TeleportMap::iterator i = mTeleports.begin( ); i != mTeleports.end( ); ++ i )
-    {
-        delete i->second;
-    }
-    mTeleports.clear();
+    mAreaTriggers.clear();
 
     for(PetLevelInfoMap::iterator i = petInfo.begin( ); i != petInfo.end( ); ++ i )
     {
@@ -95,8 +89,6 @@ ObjectMgr::~ObjectMgr()
         }
         delete[] playerInfo;
     }
-
-    mRepOnKill.clear();
 }
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
@@ -2020,29 +2012,9 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     delete result;
 }
 
-void ObjectMgr::AddAreaTriggerPoint(AreaTriggerPoint *pArea)
-{
-    ASSERT( pArea->Trigger_ID );
-    ASSERT( mAreaTriggerMap.find(pArea->Trigger_ID) == mAreaTriggerMap.end() );
-
-    mAreaTriggerMap[pArea->Trigger_ID] = pArea;
-}
-
-AreaTriggerPoint *ObjectMgr::GetAreaTriggerQuestPoint(uint32 Trigger_ID)
-{
-    AreaTriggerMap::const_iterator itr;
-    for (itr = mAreaTriggerMap.begin(); itr != mAreaTriggerMap.end(); itr++)
-    {
-        if(itr->second->Trigger_ID == Trigger_ID)
-            return itr->second;
-    }
-    return NULL;
-}
-
-void ObjectMgr::LoadAreaTriggerPoints()
+void ObjectMgr::LoadQuestAreaTriggers()
 {
     QueryResult *result = sDatabase.Query( "SELECT `id`,`quest` FROM `areatrigger_involvedrelation`" );
-    AreaTriggerPoint *pArea;
 
     uint32 count = 0;
 
@@ -2063,14 +2035,18 @@ void ObjectMgr::LoadAreaTriggerPoints()
         ++count;
         bar.step();
 
-        pArea = new AreaTriggerPoint;
-
         Field *fields = result->Fetch();
 
-        pArea->Trigger_ID      = fields[0].GetUInt32();
-        pArea->Quest_ID        = fields[1].GetUInt32();
+        uint32 Trigger_ID = fields[0].GetUInt32();
+        uint32 Quest_ID   = fields[1].GetUInt32();
 
-        AddAreaTriggerPoint( pArea );
+        if(!QuestTemplates[Quest_ID])
+        {
+            sLog.outErrorDb("Table `areatrigger_involvedrelation` have record (id: %u) for non-existed quest %u",Trigger_ID,Quest_ID);
+            continue;
+        }
+
+        mQuestAreaTriggerMap[Trigger_ID] = Quest_ID;
 
     } while( result->NextRow() );
 
@@ -2078,6 +2054,48 @@ void ObjectMgr::LoadAreaTriggerPoints()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u quest trigger points", count );
+}
+
+void ObjectMgr::LoadTavernAreaTriggers()
+{
+    QueryResult *result = sDatabase.Query("SELECT `id` FROM `areatrigger_tavern`");
+
+    uint32 count = 0;
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u tavern triggers", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        ++count;
+        bar.step();
+
+        Field *fields = result->Fetch();
+
+        uint32 Trigger_ID      = fields[0].GetUInt32();
+
+        if(!GetAreaTrigger(Trigger_ID))
+        {
+            sLog.outErrorDb("Table `areatrigger_tavern` have record for non-existed area trigger %u",Trigger_ID);
+            continue;
+        }
+
+        mTavernAreaTriggerSet.insert(Trigger_ID);
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u tavern triggers", count );
 }
 
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
@@ -2272,37 +2290,12 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
     return entryFar;
 }
 
-AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
-{
-    if( !Trigger_ID )
-        return NULL;
-    QueryResult *result = sDatabase.PQuery("SELECT `required_level`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_template` WHERE `id` = '%u'", Trigger_ID);
-    if ( !result )
-        return NULL;
-    Field *fields = result->Fetch();
-    AreaTrigger *at = new AreaTrigger;
-
-    at->requiredLevel = fields[0].GetUInt8();
-    at->mapId = fields[1].GetUInt32();
-    at->X = fields[2].GetFloat();
-    at->Y = fields[3].GetFloat();
-    at->Z = fields[4].GetFloat();
-    at->Orientation = fields[5].GetFloat();
-
-    delete result;
-
-    if(at->X==0&&at->Y==0&&at->Z==0)
-        return NULL;
-
-    return at;
-}
-
-void ObjectMgr::LoadTeleportCoords()
+void ObjectMgr::LoadAreaTriggers()
 {
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query( "SELECT `id`,`target_position_x`,`target_position_y`,`target_position_z`,`target_map` FROM `areatrigger_template`" );
-
+    //                                            0    1                2             3                    4                    5                    6            7                   8                   9                   10
+    QueryResult *result = sDatabase.Query("SELECT `id`,`required_level`,`trigger_map`,`trigger_position_x`,`trigger_position_y`,`trigger_position_z`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_template`");
     if( !result )
     {
 
@@ -2311,13 +2304,11 @@ void ObjectMgr::LoadTeleportCoords()
         bar.step();
 
         sLog.outString( "" );
-        sLog.outString( ">> Loaded %u teleport definitions", count );
+        sLog.outString( ">> Loaded %u area trigger definitions", count );
         return;
     }
 
     barGoLink bar( result->GetRowCount() );
-
-    TeleportCoords *pTC;
 
     do
     {
@@ -2327,22 +2318,29 @@ void ObjectMgr::LoadTeleportCoords()
 
         count++;
 
-        pTC = new TeleportCoords;
-        pTC->id = fields[0].GetUInt32();
-        //pTC->Name = fields[6].GetString();
-        pTC->mapId = fields[4].GetUInt32();
-        pTC->x = fields[1].GetFloat();
-        pTC->y = fields[2].GetFloat();
-        pTC->z = fields[3].GetFloat();
+        uint32 Trigger_ID = fields[0].GetUInt32();
 
-        AddTeleportCoords(pTC);
+        AreaTrigger *at = new AreaTrigger;
+
+        at->requiredLevel      = fields[1].GetUInt8();
+        at->trigger_mapId      = fields[2].GetUInt32();
+        at->trigger_X          = fields[3].GetFloat();
+        at->trigger_Y          = fields[4].GetFloat();
+        at->trigger_Z          = fields[5].GetFloat();
+        at->target_mapId       = fields[6].GetUInt32();
+        at->target_X           = fields[7].GetFloat();
+        at->target_Y           = fields[8].GetFloat();
+        at->target_Z           = fields[9].GetFloat();
+        at->target_Orientation = fields[10].GetFloat();
+
+        mAreaTriggers[Trigger_ID] = at;
 
     } while( result->NextRow() );
 
     delete result;
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %u teleport definitions", count );
+    sLog.outString( ">> Loaded %u area trigger definitions", count );
 }
 
 void ObjectMgr::SetHighestGuids()

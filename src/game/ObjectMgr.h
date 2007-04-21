@@ -32,7 +32,6 @@
 #include "Path.h"
 #include "ItemPrototype.h"
 #include "NPCHandler.h"
-#include "MiscHandler.h"
 #include "Database/DatabaseEnv.h"
 #include "AuctionHouseObject.h"
 #include "Mail.h"
@@ -73,6 +72,22 @@ typedef multimap<uint32, ScriptInfo> ScriptMap;
 typedef map<uint32, ScriptMap > ScriptMapMap;
 extern ScriptMapMap sScripts;
 extern ScriptMapMap sSpellScripts;
+
+struct AreaTrigger
+{
+    uint8  requiredLevel;
+    uint32 trigger_mapId;
+    float  trigger_X;
+    float  trigger_Y;
+    float  trigger_Z;
+    uint32 target_mapId;
+    float  target_X;
+    float  target_Y;
+    float  target_Z;
+    float  target_Orientation;
+
+    bool IsTeleport() const { return target_X != 0 || target_Y !=0 || target_Z !=0; }
+};
 
 struct PetLevelInfo
 {
@@ -136,7 +151,7 @@ class ObjectMgr
         typedef std::set< Group * > GroupSet;
         typedef std::set< Guild * > GuildSet;
 
-        typedef HM_NAMESPACE::hash_map<uint32, TeleportCoords*> TeleportMap;
+        typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger*> AreaTriggerMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
 
@@ -258,28 +273,27 @@ class ObjectMgr
         void GetTaxiPathNodes( uint32 path, Path &pathnodes );
         void GetTransportPathNodes( uint32 path, TransportPath &pathnodes );
 
-        void AddAreaTriggerPoint(AreaTriggerPoint *pArea);
-        AreaTriggerPoint *GetAreaTriggerQuestPoint(uint32 Trigger_ID);
+        uint32 GetQuestForAreaTrigger(uint32 Trigger_ID) const
+        {
+            QuestAreaTriggerMap::const_iterator itr = mQuestAreaTriggerMap.find(Trigger_ID);
+            if(itr != mQuestAreaTriggerMap.end())
+                return itr->second;
+            return 0;
+        }
+        bool IsTavernAreaTrigger(uint32 Trigger_ID) const { return mTavernAreaTriggerSet.count(Trigger_ID) != 0; }
 
         void AddGossipText(GossipText *pGText);
         GossipText *GetGossipText(uint32 Text_ID);
 
         WorldSafeLocsEntry const *GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team);
 
-        void AddTeleportCoords(TeleportCoords* TC)
+        AreaTrigger const* GetAreaTrigger(uint32 trigger) const
         {
-            ASSERT( TC );
-            mTeleports[TC->id] = TC;
-        }
-        TeleportCoords const* GetTeleportCoords(uint32 id) const
-        {
-            TeleportMap::const_iterator itr = mTeleports.find( id );
-            if( itr != mTeleports.end( ) )
+            AreaTriggerMap::const_iterator itr = mAreaTriggers.find( trigger );
+            if( itr != mAreaTriggers.end( ) )
                 return itr->second;
             return NULL;
         }
-
-        AreaTrigger * GetAreaTrigger(uint32 trigger);
 
         ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
         {
@@ -302,12 +316,13 @@ class ObjectMgr
         void LoadItemPrototypes();
 
         void LoadGossipText();
-        void LoadAreaTriggerPoints();
+
+        void LoadAreaTriggers();
+        void LoadQuestAreaTriggers();
+        void LoadTavernAreaTriggers();
 
         void LoadItemTexts();
         void LoadPageTexts();
-
-        void LoadTeleportCoords();
 
         // instance system
         void CleanupInstances();
@@ -457,8 +472,9 @@ class ObjectMgr
         template<class T> TYPEID _GetTypeId() const;
 
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
-        typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
+        typedef HM_NAMESPACE::hash_map<uint32, uint32> QuestAreaTriggerMap;
         typedef HM_NAMESPACE::hash_map<uint32, std::string> ItemTextMap;
+        typedef std::set<uint32> TavernAreaTriggerSet;
 
         GroupSet            mGroupSet;
         GuildSet            mGuildSet;
@@ -472,9 +488,10 @@ class ObjectMgr
         AuctionHouseObject  mAllianceAuctions;
         AuctionHouseObject  mNeutralAuctions;
 
-        AreaTriggerMap      mAreaTriggerMap;
+        QuestAreaTriggerMap mQuestAreaTriggerMap;
+        TavernAreaTriggerSet mTavernAreaTriggerSet;
         GossipTextMap       mGossipText;
-        TeleportMap         mTeleports;
+        AreaTriggerMap      mAreaTriggers;
 
         RepOnKillMap        mRepOnKill;
 

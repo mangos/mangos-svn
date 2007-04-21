@@ -115,14 +115,6 @@ enum SpellNotifyPushType
     PUSH_SELF_CENTER  = 1,
     PUSH_DEST_CENTER  = 2
 };
-struct TeleportCoords
-{
-    uint32 id;
-    uint32 mapId;
-    float x;
-    float y;
-    float z;
-};
 
 bool IsQuestTameSpell(uint32 spellId);
 

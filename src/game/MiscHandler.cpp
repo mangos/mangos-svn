@@ -876,10 +876,9 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         return;
     }
 
-    AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( Trigger_ID );
-    if( pArea && GetPlayer()->isAlive())
+    uint32 quest_id = objmgr.GetQuestForAreaTrigger( Trigger_ID );
+    if( quest_id && GetPlayer()->isAlive())
     {
-        uint32 quest_id = pArea->Quest_ID;
         Quest* pQuest = GetPlayer()->GetActiveQuest(quest_id);
         if( pQuest )
         {
@@ -891,31 +890,23 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `areatrigger_tavern` WHERE `id` = '%u'", Trigger_ID);
-    if(result)
+    AreaTrigger const* at = objmgr.GetAreaTrigger(Trigger_ID);
+
+    if(objmgr.IsTavernAreaTrigger(Trigger_ID))
     {
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-        result = sDatabase.PQuery("SELECT `trigger_map`,`trigger_position_x`,`trigger_position_y`,`trigger_position_z` FROM `areatrigger_template` WHERE `id` = '%u'", Trigger_ID);
-        if(result)
+
+        if(at)
         {
-            Field *fields = result->Fetch();
-            GetPlayer()->InnEnter(time(NULL),fields[1].GetFloat(),fields[2].GetFloat(),fields[3].GetFloat());
+            GetPlayer()->InnEnter(time(NULL),at->trigger_X,at->trigger_Y,at->trigger_Z);
             GetPlayer()->SetRestType(1);
-            delete result;
         }
     }
-    else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
+    else if(at && at->IsTeleport())
     {
         if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) || GetPlayer()->isGameMaster())
         {
-            if(GetPlayer()->InBattleGround())
-            {
-                BattleGround* TempBattlegrounds = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
-                if(TempBattlegrounds)
-                    TempBattlegrounds->HandleAreaTrigger(GetPlayer(),Trigger_ID);
-            }
-            else
-                GetPlayer()->TeleportTo(at->mapId,at->X,at->Y,at->Z,at->Orientation,true,false);
+            GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
         }
         else
         {
@@ -925,10 +916,16 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
             SendAreaTriggerMessage(msg.c_str());
         }
-        delete at;
     }
-
-    // set resting flag we are in the inn
+    
+    if(GetPlayer()->InBattleGround())
+    {
+        BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
+        if(bg)
+            if(bg->GetStatus()==STATUS_INPROGRESS)
+                bg->HandleAreaTrigger(GetPlayer(),Trigger_ID);
+    }
+    
 }
 
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)

@@ -396,9 +396,6 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading NPC Texts..." );
     objmgr.LoadGossipText();
 
-    sLog.outString( "Loading Quest Area Triggers..." );
-    objmgr.LoadAreaTriggerPoints();
-
     sLog.outString( "Loading Items..." );
     objmgr.LoadItemPrototypes();
 
@@ -423,8 +420,14 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables
 
-    sLog.outString( "Loading Teleport Coords..." );
-    objmgr.LoadTeleportCoords();
+    sLog.outString( "Loading AreaTrigger definitions..." );
+    objmgr.LoadAreaTriggers();
+
+    sLog.outString( "Loading Quest Area Triggers..." );
+    objmgr.LoadQuestAreaTriggers();                         // must be after LoadQuests
+
+    sLog.outString( "Loading Tavern Area Triggers..." );    // must be after LoadAreaTriggers
+    objmgr.LoadTavernAreaTriggers();
 
     sLog.outString( "Loading player Create Info & Level Stats..." );
     objmgr.LoadPlayerInfo();

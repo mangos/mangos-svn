@@ -564,7 +564,17 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             BattleGround* bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
             if(bg)
+            {
                 bg->RemovePlayer(_player->GetGUID(), true, true);
+                _player->RemoveAurasDueToSpell(23333); // Drop Horde Flag from Player
+                _player->RemoveAurasDueToSpell(23335); // Drop Alliance Flag from Player
+            }
+        }
+        if(_player->InBattleGroundQueue())
+        {
+            BattleGround* bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundQueueId());
+            if(bg)
+                bg->RemovePlayerFromQueue(_player->GetGUID());
         }
 
         ///- Reset the online field in the account table
