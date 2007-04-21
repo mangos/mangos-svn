@@ -341,12 +341,12 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, uint64 guid
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
     *data << guid;
-    *data << bgid;
+    *data << bgId;
     *data << uint8(0x00);
 
     std::list<uint32> SendList;
     for(std::map<uint32, BattleGround*>::iterator itr = m_BattleGrounds.begin(); itr != m_BattleGrounds.end(); ++itr)
-        if(itr->second->GetID() == bgid && (PlayerLevel >= itr->second->GetMinLevel()) && (PlayerLevel <= itr->second->GetMaxLevel()))
+        if(itr->second->GetID() == bgId && (PlayerLevel >= itr->second->GetMinLevel()) && (PlayerLevel <= itr->second->GetMaxLevel()))
             SendList.push_back(itr->second->GetInstanceID());
 
     *data << uint32(SendList.size());
