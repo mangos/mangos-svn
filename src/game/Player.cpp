@@ -3137,19 +3137,19 @@ void Player::KillPlayer()
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
         if(bg)
         {
-            if(GetTeam() == HORDE && bg->GetAllianceFlagState())
+            if(GetTeam() == HORDE && bg->IsAllianceFlagPickedup())
             {
-                if(bg->GetAllianceFlagPicker() == GetGUID())
+                if(bg->GetAllianceFlagPickerGUID() == GetGUID())
                 {
-                    bg->SetAllianceFlag(0, false);
+                    bg->SetAllianceFlagPicker(0);
                     CastSpell(this, 23336, true);   // Alliance Flag Drop
                 }
             }
-            if(GetTeam() == ALLIANCE && bg->GetHordeFlagState())
+            if(GetTeam() == ALLIANCE && bg->IsHordeFlagPickedup())
             {
-                if(bg->GetHordeFlagPicker() == GetGUID())
+                if(bg->GetHordeFlagPickerGUID() == GetGUID())
                 {
-                    bg->SetHordeFlag(0, false);
+                    bg->SetHordeFlagPicker(0);
                     CastSpell(this, 23334, true);   // Horde Flag Drop
                 }
             }

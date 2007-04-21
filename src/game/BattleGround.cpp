@@ -58,10 +58,8 @@ BattleGround::BattleGround()
     m_TeamStartLocO[0] = 0;
     m_TeamStartLocO[1] = 0;
 
-    AllianceFlagPickedUp = false;
-    HordeFlagPickedUp = false;
-    AllianceFlagPicker = NULL;
-    HordeFlagPicker = NULL;
+    m_AllianceFlagPickerGUID = 0;
+    m_HordeFlagPickerGUID = 0;
 
     hf = NULL;
     af = NULL;
@@ -531,7 +529,7 @@ void BattleGround::EndBattleGround(uint32 winner)
     GetBgRaid(HORDE)->Disband();
 }
 
-Group *BattleGround::GetBgRaid(uint32 TeamId)
+Group *BattleGround::GetBgRaid(uint32 TeamId) const
 {
     switch(TeamId)
     {
@@ -582,26 +580,26 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
 
     if(plr)
     {
-        if(GetAllianceFlagState() || GetHordeFlagState())
+        if(IsAllianceFlagPickedup() || IsHordeFlagPickedup())
         {
             // drop flag...
-            if(AllianceFlagPicker == guid)
+            if(m_AllianceFlagPickerGUID == guid)
                 plr->RemoveAurasDueToSpell(23335);
-            if(HordeFlagPicker == guid)
+            if(m_HordeFlagPickerGUID == guid)
                 plr->RemoveAurasDueToSpell(23333);
         }
     }
     else
     {
         // check this case...
-        if(AllianceFlagPicker == guid)
+        if(m_AllianceFlagPickerGUID == guid)
         {
-            SetAllianceFlag(0, false);
+            SetAllianceFlagPicker(0);
             RespawnFlag(ALLIANCE, false);
         }
-        if(HordeFlagPicker == guid)
+        if(m_HordeFlagPickerGUID == guid)
         {
-            SetHordeFlag(0, false);
+            SetHordeFlagPicker(0);
             RespawnFlag(HORDE, false);
         }
     }
@@ -811,7 +809,7 @@ void BattleGround::EventPlayerCapturedFlag(Player *Source)
 
     if(Source->GetTeam() == ALLIANCE)
     {
-        SetHordeFlag(NULL, false);              // must be before aura remove to prevent 2 events (drop+capture) at the same time
+        SetHordeFlagPicker(0);                  // must be before aura remove to prevent 2 events (drop+capture) at the same time
         Source->RemoveAurasDueToSpell(23333);   // Drop Horde Flag from Player
         message = LANG_BG_CAPTURED_HF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
@@ -826,7 +824,7 @@ void BattleGround::EventPlayerCapturedFlag(Player *Source)
     }
     if(Source->GetTeam() == HORDE)
     {
-        SetAllianceFlag(NULL, false);           // must be before aura remove to prevent 2 events (drop+capture) at the same time
+        SetAllianceFlagPicker(0);               // must be before aura remove to prevent 2 events (drop+capture) at the same time
         Source->RemoveAurasDueToSpell(23335);   // Drop Alliance Flag from Player
         message = LANG_BG_CAPTURED_AF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
@@ -900,13 +898,13 @@ void BattleGround::EventPlayerDroppedFlag(Player *Source)
 
     if(Source->GetTeam() == ALLIANCE)
     {
-        SetHordeFlag(NULL, false);
+        SetHordeFlagPicker(0);
         message = LANG_BG_DROPPED_HF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
     }
     if(Source->GetTeam() == HORDE)
     {
-        SetAllianceFlag(NULL, false);
+        SetAllianceFlagPicker(0);
         message = LANG_BG_DROPPED_AF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
     }
@@ -917,9 +915,9 @@ void BattleGround::EventPlayerDroppedFlag(Player *Source)
     SendPacketToAll(&data);
 
     if(Source->GetTeam() == ALLIANCE)
-        UpdateWorldState(1546, -1);
+        UpdateWorldState(1546, uint32(-1));
     if(Source->GetTeam() == HORDE)
-        UpdateWorldState(1545, -1);
+        UpdateWorldState(1545, uint32(-1));
 }
 
 void BattleGround::EventPlayerReturnedFlag(Player *Source)
@@ -968,7 +966,7 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
         type = CHAT_MSG_BATTLEGROUND_HORDE;
         PlaySoundToAll(8212);
         MapManager::Instance().GetMap(hf->GetMapId(), hf)->Remove(hf, false);
-        SetHordeFlag(Source->GetGUID(), true);              // pick up Horde Flag
+        SetHordeFlagPicker(Source->GetGUID());              // pick up Horde Flag
     }
     if(Source->GetTeam() == HORDE)
     {
@@ -976,7 +974,7 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
         PlaySoundToAll(8174);
         MapManager::Instance().GetMap(af->GetMapId(), af)->Remove(af, false);
-        SetAllianceFlag(Source->GetGUID(), true);           // pick up Alliance Flag
+        SetAllianceFlagPicker(Source->GetGUID());           // pick up Alliance Flag
     }
 
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
@@ -990,11 +988,11 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
         UpdateWorldState(1545, 1);
 }
 
-bool BattleGround::HasFreeSlots(uint32 Team)
+bool BattleGround::HasFreeSlots(uint32 Team) const
 {
     // queue is unlimited, so we can check free slots only if bg is started...
     uint8 free = 0;
-    for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    for(std::map<uint64, BattleGroundPlayer>::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         Player *plr = objmgr.GetPlayer(itr->first);
         if(plr && plr->GetTeam() == Team)
@@ -1074,25 +1072,25 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
     switch(Trigger)
     {
         //WSG
-        case 3686:                                          //Alliance elexir of speed spawn. Trigger not working, bacause located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-            sLog.outError("SpeedBonus1SpawnState = %u, SpeedBonus1SpawnTimer = %u", SpeedBonus1Spawn[1], SpeedBonus1Spawn[0]);
+        case 3686:                                          //Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
+            sLog.outError("SpeedBonus1SpawnState = %i, SpeedBonus1SpawnTimer = %i", SpeedBonus1Spawn[1], SpeedBonus1Spawn[0]);
             if(SpeedBonus1Spawn[1] == 0)
             {
                 break;
             }
             MapManager::Instance().GetMap(SpeedBonus1->GetMapId(), SpeedBonus1)->Remove(SpeedBonus1, false);
-            SpeedBonus1Spawn[0] = 3*60*1000; // 3 minutes
+            SpeedBonus1Spawn[0] = 3*60*1000;                // 3 minutes
             SpeedBonus1Spawn[1] = 0;
             SpellId = 23451;
             break;
-        case 3687:                                          //Horde elexir of speed spawn. Trigger not working, bacause located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-            sLog.outError("SpeedBonus2SpawnState = %u, SpeedBonus2SpawnTimer = %u", SpeedBonus2Spawn[1], SpeedBonus2Spawn[0]);
+        case 3687:                                          //Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
+            sLog.outError("SpeedBonus2SpawnState = %i, SpeedBonus2SpawnTimer = %i", SpeedBonus2Spawn[1], SpeedBonus2Spawn[0]);
             if(SpeedBonus2Spawn[1] == 0)
             {
                 break;
             }
             MapManager::Instance().GetMap(SpeedBonus2->GetMapId(), SpeedBonus2)->Remove(SpeedBonus2, false);
-            SpeedBonus2Spawn[0] = 3*60*1000; // 3 minutes
+            SpeedBonus2Spawn[0] = 3*60*1000;                // 3 minutes
             SpeedBonus2Spawn[1] = 0;
             SpellId = 23451;
             break;
@@ -1141,9 +1139,9 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
             SpellId = 23505;
             break;
         case 3646:                                          //Alliance Flag spawn
-            if(GetHordeFlagState() && !GetAllianceFlagState())
+            if(IsHordeFlagPickedup() && !IsAllianceFlagPickedup())
             {
-                if(GetHordeFlagPicker() == Source->GetGUID())
+                if(GetHordeFlagPickerGUID() == Source->GetGUID())
                 {
                     //SpellId = 23389; // strange, not working...
                     EventPlayerCapturedFlag(Source);
@@ -1151,9 +1149,9 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
             }
             break;
         case 3647:                                          //Horde Flag spawn
-            if(GetAllianceFlagState() && !GetHordeFlagState())
+            if(IsAllianceFlagPickedup() && !IsHordeFlagPickedup())
             {
-                if(GetAllianceFlagPicker() == Source->GetGUID())
+                if(GetAllianceFlagPickerGUID() == Source->GetGUID())
                 {
                     //SpellId = 23390; // strange, not working...
                     EventPlayerCapturedFlag(Source);

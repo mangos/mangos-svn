@@ -74,53 +74,46 @@ class BattleGround
         void Update(time_t diff);
 
         /* Battleground */
-        inline void SetName(char* Name) { m_Name = Name; };
-        inline char* GetName() { return m_Name; };
-        inline void SetID(uint32 ID) { m_ID = ID; };
-        inline uint32 GetID() { return m_ID; };
-        inline void SetInstanceID(uint32 InstanceID) { m_InstanceID = InstanceID; };
-        inline uint32 GetInstanceID() { return m_InstanceID; };
-        inline void SetStatus(uint32 Status) { m_Status = Status; };
-        inline uint32 GetStatus() { return m_Status; };
-        inline void SetStartTime(uint32 Time) { m_StartTime = Time; };
-        inline uint32 GetStartTime() { return m_StartTime; };
-        inline void SetEndTime(uint32 Time) { m_EndTime = Time; };
-        inline uint32 GetEndTime() { return m_EndTime; };
-        inline void SetMaxPlayers(uint32 MaxPlayers) { m_MaxPlayers = MaxPlayers; };
-        inline uint32 GetMaxPlayers() { return m_MaxPlayers; };
-        inline void SetMinPlayers(uint32 MinPlayers) { m_MinPlayers = MinPlayers; };
-        inline uint32 GetMinPlayers() { return m_MinPlayers; };
-        inline void SetLevelRange(uint32 min, uint32 max)
+        void SetName(char const* Name) { m_Name = Name; };
+        char const* GetName() const { return m_Name; };
+        void SetID(uint32 ID) { m_ID = ID; };
+        uint32 GetID() const { return m_ID; };
+        void SetInstanceID(uint32 InstanceID) { m_InstanceID = InstanceID; };
+        uint32 GetInstanceID() const { return m_InstanceID; };
+        void SetStatus(uint32 Status) { m_Status = Status; };
+        uint32 GetStatus() const { return m_Status; };
+        void SetStartTime(uint32 Time) { m_StartTime = Time; };
+        uint32 GetStartTime() const { return m_StartTime; };
+        void SetEndTime(uint32 Time) { m_EndTime = Time; };
+        uint32 GetEndTime() const { return m_EndTime; };
+        void SetMaxPlayers(uint32 MaxPlayers) { m_MaxPlayers = MaxPlayers; };
+        uint32 GetMaxPlayers() const { return m_MaxPlayers; };
+        void SetMinPlayers(uint32 MinPlayers) { m_MinPlayers = MinPlayers; };
+        uint32 GetMinPlayers() const { return m_MinPlayers; };
+        void SetLevelRange(uint32 min, uint32 max)
         {
             m_LevelMin = min;
             m_LevelMax = max;
         }
-        inline uint32 GetMinLevel() { return m_LevelMin; };
-        inline uint32 GetMaxLevel() { return m_LevelMax; };
+        uint32 GetMinLevel() const { return m_LevelMin; };
+        uint32 GetMaxLevel() const { return m_LevelMax; };
 
-        inline void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; };
-        inline uint32 GetMaxPlayersPerTeam() { return m_MaxPlayersPerTeam; };
-        inline void SetMinPlayersPerTeam(uint32 MinPlayers) { m_MinPlayersPerTeam = MinPlayers; };
-        inline uint32 GetMinPlayersPerTeam() { return m_MinPlayersPerTeam; };
+        void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; };
+        uint32 GetMaxPlayersPerTeam() const { return m_MaxPlayersPerTeam; };
+        void SetMinPlayersPerTeam(uint32 MinPlayers) { m_MinPlayersPerTeam = MinPlayers; };
+        uint32 GetMinPlayersPerTeam() const { return m_MinPlayersPerTeam; };
 
-        bool HasFreeSlots(uint32 Team);
+        bool HasFreeSlots(uint32 Team) const;
 
         void HandleAreaTrigger(Player* Source, uint32 Trigger);
 
-        /* Player lists */
-        inline std::map<uint64, BattleGroundPlayer>::iterator GetPlayersBegin() { return m_Players.begin(); };
-        inline std::map<uint64, BattleGroundPlayer>::iterator GetPlayersEnd() { return m_Players.end(); };
-        inline uint32 GetPlayersSize() { return m_Players.size(); };
+        uint32 GetPlayersSize() const { return m_Players.size(); };
+        uint32 GetQueuedPlayersSize() const { return m_QueuedPlayers.size(); };
+        uint32 GetRemovedPlayersSize() const { return m_RemovedPlayers.size(); };
 
-        inline std::map<uint64, BattleGroundQueue>::iterator GetQueuedPlayersBegin() { return m_QueuedPlayers.begin(); };
-        inline std::map<uint64, BattleGroundQueue>::iterator GetQueuedPlayersEnd() { return m_QueuedPlayers.end(); };
-        inline uint32 GetQueuedPlayersSize() { return m_QueuedPlayers.size(); };
-
-        inline uint32 GetRemovedPlayersSize() { return m_RemovedPlayers.size(); };
-
-        inline std::map<uint64, BattleGroundScore>::iterator GetPlayerScoresBegin() { return m_PlayerScores.begin(); };
-        inline std::map<uint64, BattleGroundScore>::iterator GetPlayerScoresEnd() { return m_PlayerScores.end(); };
-        inline uint32 GetPlayerScoresSize() { return m_PlayerScores.size(); };
+        std::map<uint64, BattleGroundScore>::const_iterator GetPlayerScoresBegin() const { return m_PlayerScores.begin(); };
+        std::map<uint64, BattleGroundScore>::const_iterator GetPlayerScoresEnd() const { return m_PlayerScores.end(); };
+        uint32 GetPlayerScoresSize() { return m_PlayerScores.size(); };
 
         void AddPlayer(Player* plr);
         void AddPlayerToQueue(Player* plr);
@@ -136,11 +129,11 @@ class BattleGround
         void EventPlayerPickedUpFlag(Player* Source);
 
         /* Location */
-        inline void SetMapId(uint32 MapID) { m_MapId = MapID; };
-        inline uint32 GetMapId() { return m_MapId; };
+        void SetMapId(uint32 MapID) { m_MapId = MapID; };
+        uint32 GetMapId() const { return m_MapId; };
 
         void SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O);
-        void GetTeamStartLoc(uint32 TeamID, float &X, float &Y, float &Z, float &O)
+        void GetTeamStartLoc(uint32 TeamID, float &X, float &Y, float &Z, float &O) const
         {
             uint8 idx = GetTeamIndexByTeamId(TeamID);
             X = m_TeamStartLocX[idx];
@@ -160,35 +153,32 @@ class BattleGround
         void BlockMovement(Player *plr);
 
         /* Raid Group */
-        Group *GetBgRaid(uint32 TeamID);
+        Group *GetBgRaid(uint32 TeamID) const;
         void SetBgRaid(uint32 TeamID, Group *bg_raid);
 
         /* BG Flags */
-        uint64 GetAllianceFlagPicker() {return AllianceFlagPicker;}
-        uint64 GetHordeFlagPicker() {return HordeFlagPicker;}
-        void SetAllianceFlag(uint64 guid, bool state) { AllianceFlagPickedUp = state; AllianceFlagPicker = guid; }
-        void SetHordeFlag(uint64 guid, bool state) { HordeFlagPickedUp = state; HordeFlagPicker = guid; }
-        bool GetAllianceFlagState() {return AllianceFlagPickedUp;}
-        bool GetHordeFlagState() {return HordeFlagPickedUp;}
+        uint64 GetAllianceFlagPickerGUID() const { return m_AllianceFlagPickerGUID; }
+        uint64 GetHordeFlagPickerGUID() const { return m_HordeFlagPickerGUID; }
+        void SetAllianceFlagPicker(uint64 guid) { m_AllianceFlagPickerGUID = guid; }
+        void SetHordeFlagPicker(uint64 guid) { m_HordeFlagPickerGUID = guid; }
+        bool IsAllianceFlagPickedup() const { return m_AllianceFlagPickerGUID != 0; }
+        bool IsHordeFlagPickedup() const { return m_HordeFlagPickerGUID != 0; }
         void RespawnFlag(uint32 Team, bool captured);
 
         /* Scorekeeping */
-        inline uint32 GetTeamScore(uint32 TeamID)
-        {
-            return m_TeamScores[GetTeamIndexByTeamId(TeamID)];
-        }
+        uint32 GetTeamScore(uint32 TeamID) const { return m_TeamScores[GetTeamIndexByTeamId(TeamID)]; }
 
-        inline void AddPoint(uint32 TeamID, uint32 Points = 1)
+        void AddPoint(uint32 TeamID, uint32 Points = 1)
         {
             m_TeamScores[GetTeamIndexByTeamId(TeamID)] += Points;
         }
 
-        inline void SetTeamPoint(uint32 TeamID, uint32 Points = 0)
+        void SetTeamPoint(uint32 TeamID, uint32 Points = 0)
         {
             m_TeamScores[GetTeamIndexByTeamId(TeamID)] = Points;
         }
 
-        inline void RemovePoint(uint32 TeamID, uint32 Points = 1)
+        void RemovePoint(uint32 TeamID, uint32 Points = 1)
         {
             m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points;
         }
@@ -198,7 +188,7 @@ class BattleGround
         void UpdateFlagState(uint32 team, uint32 value);
 
     private:
-        inline uint8 GetTeamIndexByTeamId(uint32 Team) { return Team==HORDE ? 0 : 1; }
+        uint8 GetTeamIndexByTeamId(uint32 Team) const { return Team==HORDE ? 0 : 1; }
 
         /* Battleground */
         uint32 m_ID;
@@ -206,7 +196,7 @@ class BattleGround
         uint32 m_Status;
         uint32 m_StartTime;
         uint32 m_EndTime;
-        char* m_Name;
+        char const* m_Name;
 
         /* Scorekeeping */
         uint32 m_TeamScores[2];                             // Usually Alliance/Horde
@@ -237,10 +227,8 @@ class BattleGround
         float m_TeamStartLocO[2];
 
         /* Flags */
-        bool AllianceFlagPickedUp;
-        bool HordeFlagPickedUp;
-        uint64 AllianceFlagPicker;
-        uint64 HordeFlagPicker;
+        uint64 m_AllianceFlagPickerGUID;
+        uint64 m_HordeFlagPickerGUID;
         GameObject *hf;
         GameObject *af;
         GameObject *SpeedBonus1;
