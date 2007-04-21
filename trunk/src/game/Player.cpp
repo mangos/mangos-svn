@@ -5685,7 +5685,7 @@ void Player::SendInitWorldStates()
             data << uint32(0x9b2) << uint32(0x0); // 15
             data << uint32(0x9b1) << uint32(0x1); // 16
             data << uint32(0x9b0) << uint32(0x0); // 17
-            data << uint32(0x9ae) << uint32(0x3); // 18
+            data << uint32(0x9ae) << uint32(0x0); // 18 horde pvp objectives captured
             data << uint32(0x9ac) << uint32(0x0); // 19
             data << uint32(0x9a8) << uint32(0x0); // 20
             data << uint32(0x9a7) << uint32(0x0); // 21

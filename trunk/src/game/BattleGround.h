@@ -45,7 +45,7 @@ struct BattleGroundScore
     uint32 HealingDone;
     uint32 FlagCaptures;
     uint32 FlagReturns;
-    uint32 Unk1;
+    uint32 BonusHonor;
     uint32 Unk2;
 };
 

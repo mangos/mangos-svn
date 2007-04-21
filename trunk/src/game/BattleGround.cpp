@@ -525,8 +525,6 @@ void BattleGround::EndBattleGround(uint32 winner)
     }
     SetTeamPoint(ALLIANCE, 0);
     SetTeamPoint(HORDE, 0);
-    GetBgRaid(ALLIANCE)->Disband();
-    GetBgRaid(HORDE)->Disband();
 }
 
 Group *BattleGround::GetBgRaid(uint32 TeamId) const
@@ -757,7 +755,7 @@ void BattleGround::AddPlayer(Player *plr)
     sc.DamageDone       = 0;    // damage done
     sc.FlagCaptures     = 0;    // flag captures
     sc.FlagReturns      = 0;    // flag returns
-    sc.Unk1             = 0;    // unk
+    sc.BonusHonor       = 0;    // unk
     sc.Unk2             = 0;    // unk
 
     uint64 guid = plr->GetGUID();
@@ -779,7 +777,6 @@ void BattleGround::AddPlayer(Player *plr)
         group->ConvertToRaid();
         group->AddMember(guid, plr->GetName());
         group->ChangeLeader(plr->GetGUID());
-        objmgr.AddGroup(group);
         SetBgRaid(plr->GetTeam(), group);
     }
     else                                // raid already exist
@@ -1018,14 +1015,24 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 
     if(itr != m_PlayerScores.end())     // player found...
     {
-        if(type == 1)                   // kills
-            itr->second.KillingBlows += value;
-        if(type == 2)                   // flag captures
-            itr->second.FlagCaptures += value;
-        if(type == 3)                   // flag returned
-            itr->second.FlagReturns += value;
-        if(type == 4)                   // deaths
-            itr->second.Deaths += value;
+        switch(type)
+        {
+            case 1: // kills
+                itr->second.KillingBlows += value;
+                break;
+            case 2: // flags captured
+                itr->second.FlagCaptures += value;
+                break;
+            case 3: // flags returned
+                itr->second.FlagReturns += value;
+                break;
+            case 4: // deaths
+                itr->second.Deaths += value;
+                break;
+            default:
+                sLog.outDebug("Unknown player score type %u", type);
+                break;
+        }
     }
 }
 
@@ -1065,6 +1072,7 @@ void BattleGround::RespawnFlag(uint32 Team, bool captured)
 
 void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
 {
+    // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 

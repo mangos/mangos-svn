@@ -140,7 +140,7 @@ void BattleGroundMgr::SendPvpLogData(Player *Source, uint8 winner, bool to_all)
         data << (uint32)itr->second.KillingBlows;
         data << (uint32)itr->second.HonorableKills;
         data << (uint32)itr->second.Deaths;
-        data << (uint32)itr->second.Unk1;
+        data << (uint32)itr->second.BonusHonor;
         data << (uint32)itr->second.HealingDone;
         data << (uint32)itr->second.DamageDone;
         switch(bg->GetID())
@@ -174,6 +174,24 @@ void BattleGroundMgr::SendPvpLogData(Player *Source, uint8 winner, bool to_all)
         Source->GetSession()->SendPacket(&data);
 }
 
+void BattleGroundMgr::SendGroupJoinedBattlegroundPacket(Player *Source, uint32 bgid)
+{
+    /*
+    bgid is:
+    0 - Your group has joined a battleground queue, but you are not iligible
+    1 - Your group has joined the queue for AV
+    2 - Your group has joined the queue for WSG
+    3 - Your group has joined the queue for AB
+    4 - Your group has joined the queue for NA
+    5 - Your group has joined the queue for BE Arena
+    6 - Your group has joined the queue for All Arenas
+    7 - Your group has joined the queue for EotS
+    */
+    WorldPacket data(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
+    data << bgid;
+    Source->GetSession()->SendPacket(&data);
+}
+
 void BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(WorldPacket *data, Player *plr)
 {
     // "player" Has left the battle.
@@ -193,6 +211,7 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MinPlayersPerTea
     // Create the BG
     BattleGround *bg = new BattleGround;
 
+    bg->SetInstanceID(bg_ID);   // temporary
     bg->SetMapId(MapID);
     bg->SetMinPlayersPerTeam(MinPlayersPerTeam);
     bg->SetMaxPlayersPerTeam(MaxPlayersPerTeam);
@@ -313,32 +332,28 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     sLog.outDetail("Created initial battlegrounds.");
 }
 
-void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr)
+void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr, uint32 bgId)
 {
-    uint32 bgid = 2;
     uint32 PlayerLevel = 10;
 
     if(plr)
         PlayerLevel = plr->getLevel();
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
-    (*data) << guid;
-    (*data) << bgid;
-    (*data) << uint8(0x00);
+    *data << guid;
+    *data << bgid;
+    *data << uint8(0x00);
 
     std::list<uint32> SendList;
     for(std::map<uint32, BattleGround*>::iterator itr = m_BattleGrounds.begin(); itr != m_BattleGrounds.end(); ++itr)
-        if(itr->second->GetMapId() == bgid && (PlayerLevel >= itr->second->GetMinLevel()) && (PlayerLevel <= itr->second->GetMaxLevel()))
-            SendList.push_back(itr->second->GetID());
+        if(itr->second->GetID() == bgid && (PlayerLevel >= itr->second->GetMinLevel()) && (PlayerLevel <= itr->second->GetMaxLevel()))
+            SendList.push_back(itr->second->GetInstanceID());
 
-    (*data) << uint32(SendList.size());
-
-    uint32 count = 1;
+    *data << uint32(SendList.size());
 
     for(std::list<uint32>::iterator i = SendList.begin(); i != SendList.end(); ++i)
     {
-        (*data) << count;
-        count++;
+        *data << uint32(*i);
     }
     SendList.clear();
 }
