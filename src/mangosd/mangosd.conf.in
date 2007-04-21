@@ -216,6 +216,11 @@ Rate.Rest.Offline.InWilderness = 1
 # Damage after fall rate. (1 - standard, 2 - double damage, 0.5 - half damage, etc)
 Rate.Damage.Fall = 1
 
+# Auction rates (auction time, deposit get at auction start, auction cut from price at auction end)
+Rate.Auction.Time = 1
+Rate.Auction.Deposit = 1
+Rate.Auction.Cut = 1
+
 # Save respawn time for creatures at death, for gameobjects at use/open
 #          0 (save creature/gameobject respawn time at grid unload)
 # Default: 1 (save creature/gameobject respawn time without waiting grid unload)

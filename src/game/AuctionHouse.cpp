@@ -292,7 +292,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->outBid = 0;
     AH->buyout = buyout;
     time_t base = time(NULL);
-    AH->time = ((time_t)(etime * 60)) + base;
+    AH->time = ((time_t)(etime * 60 * sWorld.getRate(RATE_AUCTION_TIME))) + base;
     AH->deposit = deposit;
     AH->location = location;
 
