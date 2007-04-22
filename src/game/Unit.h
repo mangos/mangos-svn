@@ -856,8 +856,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveStateFlag(uint32 index, uint32 oldFlag );
         void ApplyStats(bool apply);
         void UnsummonTotem(int8 slot = -1);
-        uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage);
-        uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount);
+        uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage, DamageEffectType damagetype);
+        uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype);
         bool SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect);
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage,WeaponAttackType attType);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);

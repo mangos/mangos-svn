@@ -803,7 +803,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             }
 
             // Calculate damage bonus
-            *damage = SpellDamageBonus(pVictim, spellInfo, *damage);
+            *damage = SpellDamageBonus(pVictim, spellInfo, *damage, SPELL_DIRECT_DAMAGE);
 
             // Calculate critical bonus
             *crit = SpellCriticalBonus(spellInfo, (int32*)damage);
@@ -950,18 +950,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
     {
-        //DOT Bonus
-        float newBonus = (float)SpellDamageBonus(pVictim, spellProto, 0);
-        float DT = (float)GetDuration(spellProto);
-        if (DT < 15000.0f) DT=15000.0f;
-        float CT = (float)GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
-        if (CT > 3500.0f) CT = 3500.0f;
-        if (CT < 1500.0f) CT = 1500.0f;
-        float PT = (float)(mod->periodictime);
-
-        newBonus = newBonus * 3500.0f * PT / CT / 15000.0f;
-        pdamage += (uint32)newBonus;
-        //end of DOT Bonus
+        pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
 
         //pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
@@ -971,7 +960,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
     {
-        pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
+        pdamage = SpellDamageBonus(pVictim, spellProto, pdamage, DOT);
         int32 pdamage = GetHealth()*(100+mod->m_amount)/100;
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
 
@@ -980,21 +969,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL || mod->m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
     {
-        //pdamage = SpellHealingBonus(spellProto, pdamage);
-        //HOT Bouns
-        //float newBonus = (float)SpellDamageBonus(pVictim, spellProto, 0);
-        float newBonus = (float)SpellHealingBonus(spellProto, 0);
-        float DT = (float)GetDuration(spellProto);
-        if (DT < 15000.0f) DT=15000.0f;
-        float CT =
-            (float)GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
-        if (CT > 3500.0f) CT = 3500.0f;
-        if (CT < 1500.0f) CT = 1500.0f;
-        float PT = (float)(mod->periodictime);
-
-        newBonus = newBonus * 3500.0f * PT / CT / 15000.0f;
-        pdamage += (uint32)newBonus;
-        //end of HOT Bonus
+        pdamage = SpellHealingBonus(spellProto, pdamage, DOT);
 
         int32 gain = pVictim->ModifyHealth(pdamage);
         ThreatAssist(pVictim, float(gain) * 0.5f, spellProto->School, spellProto);
@@ -1031,6 +1006,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     {
         uint32 tmpvalue = 0;
         float tmpvalue2 = 0;
+        uint32 pdamage = mod->m_amount;
         for(int x=0;x<3;x++)
         {
             if(mod->m_auraname != spellProto->EffectApplyAuraName[x])
@@ -1044,8 +1020,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 tmpvalue = uint32(pVictim->GetHealth()*tmpvalue2);
 
             SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, tmpvalue, spellProto->School, absorb, resist, false, 0);
-            DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), DOT, spellProto->School, spellProto, procFlag, false);
-            ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), spellProto);
+            pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
+            DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, false);
+            ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             if (!pVictim->isAlive() && m_currentSpell)
                 if (m_currentSpell->m_spellInfo)
                     if (m_currentSpell->m_spellInfo->Id == spellProto->Id)
@@ -4034,9 +4011,10 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
     SendMessageToSet(&data, true);
 }
 
-uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 pdamage)
+uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 pdamage, DamageEffectType damagetype)
 {
-    if(!spellProto || !pVictim) return pdamage;
+    if(!spellProto || !pVictim || damagetype==DIRECT_DAMAGE )
+        return pdamage;
 
     if(pVictim->IsImmunedToSpellDamage(spellProto))
         return 0;
@@ -4048,7 +4026,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // Damage Done
     uint32 PenaltyFactor = 0;
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
-    if (CastingTime > 3500) CastingTime = 3500;
+    if (CastingTime > 7000) CastingTime = 7000;             // Plus Damage efficient maximum 200% ( 7.0 seconds )
     if (CastingTime < 1500) CastingTime = 1500;
 
     // Taken/Done fixed damage bonus auras
@@ -4073,6 +4051,28 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
+    // Damage over Time spells bonus calculation
+    float DotFactor = 1.0f;
+    if(damagetype == DOT)
+    {
+        CastingTime = 3500;
+        uint32 DotDuration = GetDuration(spellProto);
+        // 200% limit
+        if(DotDuration > 0)
+        {
+            if(DotDuration > 30000) DotDuration = 30000;
+            DotFactor = DotDuration / 15000.0f;
+            int x = 0;
+            for(int j = 0; j < 3; j++)
+                if(spellProto->Effect[j] == 6) x = j;
+            int DotTicks = 6;
+            if(spellProto->EffectAmplitude[x] != 0)
+                DotTicks = DotDuration / spellProto->EffectAmplitude[x];
+            if(DotTicks)
+                DoneAdvertisedBenefit /= DotTicks;
+        }
+    }
+
     // Taken/Done total percent damage auras
     float DoneTotalMod = 1;
     float TakenTotalMod = 1;
@@ -4089,15 +4089,32 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if( spellProto->School != 0 && ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 )
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
-    // TODO - fix PenaltyFactor and complete the formula from the wiki
-    //Penalty formula from wiki
+    // Exceptions
+    // Lifetap
+    if(spellProto->SpellVisual == 1225 && spellProto->SpellIconID == 208)
+    {
+        CastingTime = 2800; // 80% from +shadow damage
+        DoneTotalMod = 1;
+        TakenTotalMod = 1;
+    }
+    // Dark Pact
+    if(spellProto->SpellVisual == 827 && spellProto->SpellIconID == 154 && GetPet())
+    {
+        CastingTime = 3360; // 96% from +shadow damage
+        DoneTotalMod = 1;
+        TakenTotalMod = 1;
+    }
+
+    // Level Factor
     float LvlPenalty = 0.0f;
     if(spellProto->spellLevel < 20)
-                                                            //3.75%
         LvlPenalty = (20.0f - (float)(spellProto->spellLevel)) * 3.75f;
+    float LvlFactor = ((float)(spellProto->spellLevel) + 6.0f) / (float)(getLevel());
+    if(LvlFactor > 1.0f)
+        LvlFactor = 1.0f;
 
-    float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) / 100.0f;
-    float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) / 100.0f;
+    float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f;
+    float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor / 100.0f;
 
     float tmpDamage = (pdamage+DoneActualBenefit)*DoneTotalMod;
     tmpDamage = (tmpDamage+TakenActualBenefit)*TakenTotalMod;
@@ -4111,6 +4128,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
     //   chance = base + INT / (rate0 + rate1 * LEVEL)
     // The formula keeps the crit chance at %5 on every level unless the player
     // increases his intelligence by other means (enchants, buffs, talents, ...)
+    if(spellProto->Id == 15290 || spellProto->Id == 39373) return false;
     static const struct
     {
         float base;
@@ -4186,14 +4204,19 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
     return false;
 }
 
-uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
+uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype)
 {
     // Healing Done
+
+    // Vampiric Embrace, Shadowmend - cannot critically heal
+    if(spellProto->Id == 15290 || spellProto->Id == 39373) return healamount;
+
     int32 AdvertisedBenefit = 0;
     uint32 PenaltyFactor = 0;
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
-    if (CastingTime > 3500) CastingTime = 3500;
+    if (CastingTime > 7000) CastingTime = 7000;
     if (CastingTime < 1500) CastingTime = 1500;
+    if (spellProto->Effect[0] == SPELL_EFFECT_APPLY_AURA) CastingTime = 3500;
 
     AuraList& mHealingDone = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE);
     for(AuraList::iterator i = mHealingDone.begin();i != mHealingDone.end(); ++i)
@@ -4204,13 +4227,34 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount)
 
     AdvertisedBenefit += m_AuraModifiers[SPELL_AURA_MOD_HEALING];
 
-    // TODO - fix PenaltyFactor and complete the formula from the wiki
-    //Penalty formula from wiki
+    // Healing over Time spells
+    float DotFactor = 1.0f;
+    if(damagetype == DOT)
+    {
+        CastingTime = 3500;
+        uint32 DotDuration = GetDuration(spellProto);
+        // 200% limit
+        if(DotDuration > 30000) DotDuration = 30000;
+        DotFactor = DotDuration / 15000.0f;
+        int x = 0;
+        for(int j = 0; j < 3; j++)
+            if(spellProto->Effect[j] == 6) x = j;
+        int DotTicks = 6;
+        if(spellProto->EffectAmplitude[x] != 0)
+            DotTicks = DotDuration / spellProto->EffectAmplitude[x];
+        if(DotTicks)
+            AdvertisedBenefit /= DotTicks;
+    }
+
+    // Level Factor
     float LvlPenalty = 0.0f;
     if(spellProto->spellLevel < 20)
-                                                            //3.75%
         LvlPenalty = (20.0f - (float)(spellProto->spellLevel)) * 3.75f;
-    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * (100.0f - LvlPenalty) / 100.0f;
+    float LvlFactor = ((float)(spellProto->spellLevel) + 6.0f) / (float)(getLevel());
+    if(LvlFactor > 1.0f)
+        LvlFactor = 1.0f;
+
+    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f;
 
     // use float as more appropriate for negative values and percent applying
     float heal = healamount + ActualBenefit;
