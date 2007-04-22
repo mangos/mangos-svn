@@ -4160,7 +4160,7 @@ void Player::SetInitialFactions()
     Faction newFaction;
     FactionEntry const *factionEntry = NULL;
 
-    for(unsigned int i = 1; i <= sFactionStore.GetNumRows(); i++)
+    for(unsigned int i = 1; i < sFactionStore.GetNumRows(); i++)
     {
         factionEntry = sFactionStore.LookupEntry(i);
 

@@ -43,11 +43,11 @@ struct WaypointBehavior
 {
     uint32 emote;
     uint32 spell;
-    string *text[5];
+    std::string text[5];
     float orientation;
     uint32 model1;
     uint32 model2;
-    string *aiscript;
+    std::string aiscript;
     bool HasDone;
 };
 
@@ -81,7 +81,8 @@ class MANGOS_DLL_DECL WaypointMovementGenerator : public MovementGenerator, publ
     std::vector<WaypointBehavior *> i_wpBehaviour;
     public:
         WaypointMovementGenerator(Creature &c) : i_creature(c), i_nextMoveTime(0) {}
-        void WPAIScript(Creature &pCreature, string * pAiscript);
+        ~WaypointMovementGenerator() {}
+        void WPAIScript(Creature &pCreature, std::string pAiscript);
         void Initialize(Creature &c)
         {
             i_nextMoveTime.Reset(0);                        // TODO: check the lower bound (0 is probably too small)

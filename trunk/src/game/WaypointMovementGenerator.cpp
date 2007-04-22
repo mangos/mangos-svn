@@ -38,33 +38,13 @@ alter table creature_movement add `wpguid` int(11) default '0';
 #include "Creature.h"
 #include "FlightMaster.h"
 
-#include "wpAI.h"
-
 #include <cassert>
 
 //-----------------------------------------------//
-
 void
 WaypointMovementGenerator::_load(Creature &c)
 {
     i_path.Clear();
-    // Free memory for wpBehaviour
-    for(int i = 0; i < i_wpBehaviour.size(); i++)
-    {
-        if( i_wpBehaviour[i]->aiscript != NULL )
-        {
-            delete i_wpBehaviour[i]->aiscript;
-            i_wpBehaviour[i]->aiscript = NULL;
-        }
-        for( int j = 0; j<5; j++ )
-        {
-            if( i_wpBehaviour[i]->text[j] != NULL )
-            {
-                delete i_wpBehaviour[i]->text[j];
-                i_wpBehaviour[i]->text[j] = NULL;
-            }
-        }
-    }
     i_wpBehaviour.clear();
 
     QueryResult *result = NULL;
@@ -100,28 +80,28 @@ WaypointMovementGenerator::_load(Creature &c)
             i_delays[count]         = fields[6].GetUInt16();
             uint32 emote            = fields[7].GetUInt32();
             uint32 spell            = fields[8].GetUInt32();
-            const char * text1      = fields[9].GetString();
-            const char * text2      = fields[10].GetString();
-            const char * text3      = fields[11].GetString();
-            const char * text4      = fields[12].GetString();
-            const char * text5      = fields[13].GetString();
-            const char * aiscript   = fields[14].GetString();
+            std::string text1       = fields[9].GetCppString();
+            std::string text2       = fields[10].GetCppString();
+            std::string text3       = fields[11].GetCppString();
+            std::string text4       = fields[12].GetCppString();
+            std::string text5       = fields[13].GetCppString();
+            std::string aiscript    = fields[14].GetCppString();
 
             if( (emote != 0) || (spell != 0)
-                || (text1 != NULL) || (text2 != NULL) || (text3 != NULL) || (text4 != NULL) || (text5 != NULL)
-                || (aiscript != NULL)
+                || (text1 != "") || (text2 != "") || (text3 != "") || (text4 != "") || (text5 != "")
+                || (aiscript != "")
                 || (model1 != 0)  || (model2 != 0) || (orientation != 100))
             {
                 WaypointBehavior *tmpWPB = new WaypointBehavior;
 
                 sLog.outDebug("DEBUG: _load  ---  Adding WaypointBehavior");
 
-                tmpWPB->text[0] = ( (text1!=NULL) ? (new string(text1)) : (NULL) );
-                tmpWPB->text[1] = ( (text2!=NULL) ? (new string(text2)) : (NULL) );
-                tmpWPB->text[2] = ( (text3!=NULL) ? (new string(text3)) : (NULL) );
-                tmpWPB->text[3] = ( (text4!=NULL) ? (new string(text4)) : (NULL) );
-                tmpWPB->text[4] = ( (text5!=NULL) ? (new string(text5)) : (NULL) );
-                tmpWPB->aiscript = ( (aiscript!=NULL) ? (new string(aiscript)) : (NULL) );
+                tmpWPB->text[0] = text1;
+                tmpWPB->text[1] = text2;
+                tmpWPB->text[2] = text3;
+                tmpWPB->text[3] = text4;
+                tmpWPB->text[4] = text5;
+                tmpWPB->aiscript = aiscript;
                 tmpWPB->orientation = orientation;
                 tmpWPB->emote = emote;
                 tmpWPB->spell = spell;
@@ -241,19 +221,19 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
                 {
                     creature.SetUInt32Value(UNIT_NPC_EMOTESTATE,tmpBehavior->emote);
                 }
-                if(tmpBehavior->aiscript != NULL)
+                if(tmpBehavior->aiscript != "")
                 {
                     WPAIScript(creature, tmpBehavior->aiscript);
                 }
                 //sLog.outDebug("DEBUG: tmpBehavior->text[0] TEST");
-                if(tmpBehavior->text[0] != NULL)
+                if(tmpBehavior->text[0] != "")
                 {
-                    //sLog.outDebug("DEBUG: tmpBehavior->text[0] != NULL");
+                    //sLog.outDebug("DEBUG: tmpBehavior->text[0] != \"\"");
                     // Only one text is set
-                    if( tmpBehavior->text[1] == NULL )
+                    if( tmpBehavior->text[1] == "" )
                     {
                         //sLog.outDebug("DEBUG: tmpBehavior->text[1] == NULL");
-                        creature.Say(tmpBehavior->text[0]->c_str(), 0);
+                        creature.Say(tmpBehavior->text[0].c_str(), 0);
                     }
                     else
                     {
@@ -261,12 +241,12 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
                         int maxText = 4;
                         for( int i=0; i<4; i++ )
                         {
-                            if( tmpBehavior->text[i] == NULL )
+                            if( tmpBehavior->text[i] == "" )
                             {
-                                //sLog.outDebug("DEBUG: tmpBehavior->text[i] == NULL: %d", i);
+                                //sLog.outDebug("DEBUG: tmpBehavior->text[i] == \"\": %d", i);
                                 //sLog.outDebug("DEBUG: rand() % (i): %d", rand() % (i));
 
-                                creature.Say(tmpBehavior->text[rand() % i]->c_str(), 0);
+                                creature.Say(tmpBehavior->text[rand() % i].c_str(), 0);
                                 break;
                             }
                         }
@@ -328,6 +308,47 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
         }
     }
     return true;
+}
+
+void
+WaypointMovementGenerator::WPAIScript(Creature &pCreature, std::string pAiscript)
+{
+    time_t curr;
+    tm local;
+    time(&curr);                                            // get current time_t value
+    local=*(localtime(&curr));                              //
+    int cT = ((local.tm_hour*100)+local.tm_min);
+
+    sLog.outDebug("WPAIScript: %s", pAiscript.c_str());
+
+    if( pAiscript == "guard-sw")                            //demo script for WP-AI System
+    {
+        if(pCreature.GetEntry() == 68 || 1423)
+        {
+            if(!( (cT < 1800) && (cT > 800) ))              //If time not smaler than 1800 and not bigger than 800 (24 hour format)
+            {                                               //try to set model of Off-hand (shield) to 0 (imo it doesn't work...)
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 0);
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 234948100);
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, 4);
+
+                //set new Off-Hand Item as lamp
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 7557);
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 385941508);
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, 7);
+            }                                               //else do it in other direction...
+            else
+            {
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 0);
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 385941508);
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, 7);
+
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 2080);
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 234948100);
+                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, 4);
+            }
+        }
+        sLog.outDebug("guard-sw");
+    }
 }
 
 std::set<uint32> WaypointMovementGenerator::si_waypointHolders;
