@@ -20,9 +20,9 @@ ADD COLUMN `wpguid` int(11) default '0' AFTER `spell`;
 -- The visual waypoint
 DELETE FROM creature_template WHERE entry='1';
 INSERT INTO creature_template
-  (entry, modelid_m, modelid_f, name, subname, minlevel, maxlevel, minhealth, maxhealth, minmana, maxmana, armor, faction, npcflag, speed, rank, mindmg, maxdmg, attackpower, baseattacktime, rangeattacktime, flags, mount, dynamicflags, size, family, bounding_radius, trainer_type, trainer_spell, class, race, minrangedmg, maxrangedmg, rangedattackpower, combat_reach, type, civilian, flag1, equipmodel1, equipmodel2, equipmodel3, equipinfo1, equipinfo2, equipinfo3, equipslot1, equipslot2, equipslot3, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, spell1, spell2, spell3, spell4, mingold, maxgold, AIName, MovementType, ScriptName)
+  (entry, modelid_m, modelid_f, name, subname, minlevel, maxlevel, minhealth, maxhealth, minmana, maxmana, armor, faction, npcflag, speed, rank, mindmg, maxdmg, attackpower, baseattacktime, rangeattacktime, flags, dynamicflags, size, family, bounding_radius, trainer_type, trainer_spell, class, race, minrangedmg, maxrangedmg, rangedattackpower, combat_reach, type, civilian, flag1, equipmodel1, equipmodel2, equipmodel3, equipinfo1, equipinfo2, equipinfo3, equipslot1, equipslot2, equipslot3, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, spell1, spell2, spell3, spell4, mingold, maxgold, AIName, MovementType, ScriptName)
 VALUES
-  (1, 10045, 0, "Waypoint (Only GM can see it)", "Visual", 1, 1, 64, 64, 0, 0, 0, 35, 0, "0,91", 0, 14, 15, 100, 2000, 2200, 4096, 0, 0, "0,5", 8, 2, 0, 0, 0, 0, "1,76", "2,42", 100, "2,56", 8, 1, 5242886, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", 0, "");
+  (1, 10045, 0, 'Waypoint (Only GM can see it)', 'Visual', 1, 1, 64, 64, 0, 0, 0, 35, 0, '0.91', 0, 14, 15, 100, 2000, 2200, 4096, 0, '0.5', 8, 2, 0, 0, 0, 0, '1.76', '2.42', 100, '2.56', 8, 1, 5242886, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, '');
 
 -- New commands
 DELETE FROM `command` where `name` = 'wp' and `security` = '2';
