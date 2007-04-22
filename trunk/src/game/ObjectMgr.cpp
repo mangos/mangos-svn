@@ -2103,7 +2103,7 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
     bool found = false;
     float dist;
     uint32 id = 0;
-    for(uint32 i = 1; i <= sTaxiNodesStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiNodesStore.nCount; ++i)
     {
         TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
         if(node && node->map_id == mapid)
