@@ -16,20 +16,68 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/*
+creature_movement Table
+
+alter table creature_movement add `text1` varchar(255) default NULL;
+alter table creature_movement add `text2` varchar(255) default NULL;
+alter table creature_movement add `text3` varchar(255) default NULL;
+alter table creature_movement add `text4` varchar(255) default NULL;
+alter table creature_movement add `text5` varchar(255) default NULL;
+alter table creature_movement add `aiscript` varchar(255) default NULL;
+alter table creature_movement add `emote` int(10) unsigned default '0';
+alter table creature_movement add `spell` int(5) unsigned default '0';
+alter table creature_movement add `wpguid` int(11) default '0';
+
+*/
+
+#include <ctime>
+
 #include "WaypointMovementGenerator.h"
 #include "ObjectMgr.h"
 #include "Creature.h"
 #include "FlightMaster.h"
 
+#include "wpAI.h"
+
 #include <cassert>
 
 //-----------------------------------------------//
+
 void
 WaypointMovementGenerator::_load(Creature &c)
 {
     i_path.Clear();
+    // Free memory for wpBehaviour
+    for(int i = 0; i < i_wpBehaviour.size(); i++)
+    {
+        if( i_wpBehaviour[i]->aiscript != NULL )
+        {
+            delete i_wpBehaviour[i]->aiscript;
+            i_wpBehaviour[i]->aiscript = NULL;
+        }
+        for( int j = 0; j<5; j++ )
+        {
+            if( i_wpBehaviour[i]->text[j] != NULL )
+            {
+                delete i_wpBehaviour[i]->text[j];
+                i_wpBehaviour[i]->text[j] = NULL;
+            }
+        }
+    }
+    i_wpBehaviour.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`, `position_y`, `position_z`, `waittime` FROM `creature_movement` WHERE `id` = '%u' ORDER BY `point`", c.GetDBTableGUIDLow());
+    QueryResult *result = NULL;
+    sLog.outDebug("DEBUG: WaypointMovementGenerator::_load: GUID - %d", c.GetGUIDLow());
+    // Identify by GUID
+    result = sDatabase.PQuery("SELECT `position_x`, `position_y`, `position_z`, `orientation`, `model1`, `model2`, `waittime`, `emote`, `spell`, `text1`, `text2`, `text3`, `text4`, `text5`, `aiscript` FROM `creature_movement` WHERE `id` = '%u' ORDER BY `point`", c.GetDBTableGUIDLow());
+    /*
+    if( result ) {
+    sLog.outDebug("DEBUG: Number of hits: %d", result->GetRowCount());
+    } else {
+    sLog.outDebug("DEBUG: Nothing found");
+    }
+    */
 
     if( result )
     {
@@ -37,14 +85,55 @@ WaypointMovementGenerator::_load(Creature &c)
         const unsigned int sz = result->GetRowCount();
         i_path.Resize( sz );
         i_delays.resize( sz );
+        i_wpBehaviour.resize( sz );
 
         do
         {
+            //sLog.outDebug("DEBUG: _load");
             Field *fields = result->Fetch();
-            i_path[count].x = fields[0].GetFloat();
-            i_path[count].y = fields[1].GetFloat();
-            i_path[count].z = fields[2].GetFloat();
-            i_delays[count] = fields[3].GetUInt16();
+            i_path[count].x         = fields[0].GetFloat();
+            i_path[count].y         = fields[1].GetFloat();
+            i_path[count].z         = fields[2].GetFloat();
+            float orientation       = fields[3].GetFloat();
+            uint32 model1           = fields[4].GetUInt32();
+            uint32 model2           = fields[5].GetUInt32();
+            i_delays[count]         = fields[6].GetUInt16();
+            uint32 emote            = fields[7].GetUInt32();
+            uint32 spell            = fields[8].GetUInt32();
+            const char * text1      = fields[9].GetString();
+            const char * text2      = fields[10].GetString();
+            const char * text3      = fields[11].GetString();
+            const char * text4      = fields[12].GetString();
+            const char * text5      = fields[13].GetString();
+            const char * aiscript   = fields[14].GetString();
+
+            if( (emote != 0) || (spell != 0)
+                || (text1 != NULL) || (text2 != NULL) || (text3 != NULL) || (text4 != NULL) || (text5 != NULL)
+                || (aiscript != NULL)
+                || (model1 != 0)  || (model2 != 0) || (orientation != 100))
+            {
+                WaypointBehavior *tmpWPB = new WaypointBehavior;
+
+                sLog.outDebug("DEBUG: _load  ---  Adding WaypointBehavior");
+
+                tmpWPB->text[0] = ( (text1!=NULL) ? (new string(text1)) : (NULL) );
+                tmpWPB->text[1] = ( (text2!=NULL) ? (new string(text2)) : (NULL) );
+                tmpWPB->text[2] = ( (text3!=NULL) ? (new string(text3)) : (NULL) );
+                tmpWPB->text[3] = ( (text4!=NULL) ? (new string(text4)) : (NULL) );
+                tmpWPB->text[4] = ( (text5!=NULL) ? (new string(text5)) : (NULL) );
+                tmpWPB->aiscript = ( (aiscript!=NULL) ? (new string(aiscript)) : (NULL) );
+                tmpWPB->orientation = orientation;
+                tmpWPB->emote = emote;
+                tmpWPB->spell = spell;
+                tmpWPB->model1 = model1;
+                tmpWPB->model2 = model2;
+                tmpWPB->HasDone = false;
+                i_wpBehaviour[count] = tmpWPB;
+            }
+            else
+            {
+                i_wpBehaviour[count] = NULL;
+            }
 
             if(!MaNGOS::IsValidMapCoord(i_path[count].x,i_path[count].y))
             {
@@ -57,9 +146,19 @@ WaypointMovementGenerator::_load(Creature &c)
                 MaNGOS::NormalizeMapCoord(i_path[count].y);
                 i_path[count].z = MapManager::Instance ().GetMap(c.GetMapId(), &c)->GetHeight(i_path[count].x,i_path[count].y);
             }
-
-            if( i_delays[count] < 30 /* millisecond */ )
-                i_delays[count] = (urand(0, 5000-1));       // TODO: check the lower bound (0 is probably too small)
+            // to prevent a misbehaviour inside "update"
+            // update is alway called with the next wp - but the wpSys needs the current
+            // so when the routine is called the first time, wpSys gets the last waypoint
+            // and this prevents the system from performing text/emote, etc
+            if( count == (sz-1) )
+            {
+                if( i_wpBehaviour[count] != NULL )
+                {
+                    i_wpBehaviour[count]->HasDone = true;
+                }
+            }
+            //if( i_delays[count] < 30 /* millisecond */ )
+            //	i_delays[count] = (rand() % 5000);
             ++count;
 
         } while( result->NextRow() );
@@ -110,11 +209,89 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
 
     // prevent crash at empty waypoint path.
     if(i_path.Size()==0)
+    {
         return true;
+    }
 
-    i_nextMoveTime.Update(diff);
     CreatureTraveller traveller(creature);
+
+    /*
+    if( npcIsStopped[creature.GetGUID()] )
+    {
+        i_nextMoveTime.Update(40000);
+        i_destinationHolder.UpdateTraveller(traveller, ((diff)-40000), false);
+        npcIsStopped[creature.GetGUID()] = false;
+        return true;
+    }
+    */
+    i_nextMoveTime.Update(diff);
     i_destinationHolder.UpdateTraveller(traveller, diff, false);
+
+    if( i_creature.IsStopped() )
+    {
+        uint32 wpB = i_currentNode > 0 ? i_currentNode-1 : i_wpBehaviour.size()-1;
+
+        if( i_wpBehaviour[wpB] != NULL )
+        {
+            struct WaypointBehavior *tmpBehavior = i_wpBehaviour[wpB];
+
+            if (!tmpBehavior->HasDone)
+            {
+                if(tmpBehavior->emote != 0)
+                {
+                    creature.SetUInt32Value(UNIT_NPC_EMOTESTATE,tmpBehavior->emote);
+                }
+                if(tmpBehavior->aiscript != NULL)
+                {
+                    WPAIScript(creature, tmpBehavior->aiscript);
+                }
+                //sLog.outDebug("DEBUG: tmpBehavior->text[0] TEST");
+                if(tmpBehavior->text[0] != NULL)
+                {
+                    //sLog.outDebug("DEBUG: tmpBehavior->text[0] != NULL");
+                    // Only one text is set
+                    if( tmpBehavior->text[1] == NULL )
+                    {
+                        //sLog.outDebug("DEBUG: tmpBehavior->text[1] == NULL");
+                        creature.Say(tmpBehavior->text[0]->c_str(), 0);
+                    }
+                    else
+                    {
+                        // Select one from max 5 texts
+                        int maxText = 4;
+                        for( int i=0; i<4; i++ )
+                        {
+                            if( tmpBehavior->text[i] == NULL )
+                            {
+                                //sLog.outDebug("DEBUG: tmpBehavior->text[i] == NULL: %d", i);
+                                //sLog.outDebug("DEBUG: rand() % (i): %d", rand() % (i));
+
+                                creature.Say(tmpBehavior->text[rand() % i]->c_str(), 0);
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(tmpBehavior->spell != 0)
+                {
+                    //sLog.outDebug("DEBUG: wpSys - spell");
+                    creature.CastSpell(&creature,tmpBehavior->spell, false);
+                }
+                if (tmpBehavior->orientation !=100)
+                {
+                    //sLog.outDebug("DEBUG: wpSys - orientation");
+                    creature.SetOrientation(tmpBehavior->orientation);
+                }
+                if(tmpBehavior->model1 != 0)
+                {
+                    //sLog.outDebug("DEBUG: wpSys - model1");
+                    creature.SetUInt32Value(UNIT_FIELD_DISPLAYID, tmpBehavior->model1);
+                }
+                tmpBehavior->HasDone = true;
+            }                                               // HasDone == false
+        }                                                   // wpBehaviour found
+    }                                                       // i_creature.IsStopped()
+
     if( i_nextMoveTime.Passed() )
     {
         if( i_creature.IsStopped() )
@@ -124,6 +301,22 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
             const Path::PathNode &node(i_path(i_currentNode));
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
+            uint32 wpB = i_currentNode > 0 ? i_currentNode-1 : i_wpBehaviour.size()-1;
+
+            if( i_wpBehaviour[wpB] != NULL )
+            {
+                struct WaypointBehavior *tmpBehavior = i_wpBehaviour[wpB];
+                tmpBehavior->HasDone = false;
+                if(tmpBehavior->model2 != 0)
+                {
+                    creature.SetUInt32Value(UNIT_FIELD_DISPLAYID, tmpBehavior->model2);
+                }
+                if (tmpBehavior->orientation !=100)
+                {
+                    creature.SetOrientation(tmpBehavior->orientation);
+                }
+                creature.SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+            }
         }
         else
         {
@@ -225,7 +418,7 @@ int ShortenASTARRoute(short int *pathlist, int number)
         upto--;
     }
 
-    G_Printf("ShortenASTARRoute: Path size reduced from %i to %i nodes...\n", number, count);
+    G_Printf("ShortenASTARRoute: Path size reduced from %i to %i nodes...n", number, count);
     return count;
 }
 
@@ -320,10 +513,10 @@ int CreatePathAStar(gentity_t *bot, int from, int to, short int *pathlist)
             {
                 newnode = nodes[atNode].links[i].targetNode;
 
-                                                            //if this path is blocked, skip it
+                //if this path is blocked, skip it
                 if (nodes[atNode].links[i].flags & PATH_BLOCKED)
                     continue;
-                                                            //if this path is blocked, skip it
+                //if this path is blocked, skip it
                 if (bot->client && (bot->client->ps.eFlags & EF_TANK) && nodes[atNode].links[i].flags & PATH_NOTANKS)
                     continue;
                 //skip any unreachable nodes
@@ -344,14 +537,14 @@ int CreatePathAStar(gentity_t *bot, int from, int to, short int *pathlist)
                     if (newnode == to)                      //if we've found the goal, don't keep computing paths!
                         break;                              //this will break the 'for' and go all the way to 'if (list[to] == 1)'
 
-                                                            //store it's f cost value
+                    //store it's f cost value
                     fcost[newnode] = GetFCost(to, newnode, parent[newnode], gcost);
 
                     //this loop re-orders the heap so that the lowest fcost is at the top
                     m = numOpen;
                     while (m != 1)                          //while this item isn't at the top of the heap already
                     {
-                                                            //if it has a lower fcost than its parent
+                        //if it has a lower fcost than its parent
                         if (fcost[openlist[m]] <= fcost[openlist[m/2]])
                         {
                             temp = openlist[m/2];
@@ -385,7 +578,7 @@ int CreatePathAStar(gentity_t *bot, int from, int to, short int *pathlist)
                                 m = i;
                                 while (m != 1)
                                 {
-                                                            //if the item has a lower fcost than it's parent
+                                    //if the item has a lower fcost than it's parent
                                     if (fcost[openlist[m]] < fcost[openlist[m/2]])
                                     {
                                         temp = openlist[m/2];
@@ -418,7 +611,7 @@ int CreatePathAStar(gentity_t *bot, int from, int to, short int *pathlist)
 
     if (found == qtrue)                                     //if we found a path
     {
-        //G_Printf("%s - path found!\n", bot->client->pers.netname);
+        //G_Printf("%s - path found!n", bot->client->pers.netname);
         count = 0;
 
         temp = to;                                          //start at the end point
@@ -436,7 +629,7 @@ int CreatePathAStar(gentity_t *bot, int from, int to, short int *pathlist)
     }
     else
     {
-        //G_Printf("^1*** ^4BOT DEBUG^5: (CreatePathAStar) There is no route between node ^7%i^5 and node ^7%i^5.\n", from, to);
+        //G_Printf("^1*** ^4BOT DEBUG^5: (CreatePathAStar) There is no route between node ^7%i^5 and node ^7%i^5.n", from, to);
         count = CreateDumbRoute(from, to, pathlist);
 
         if (count > 0)

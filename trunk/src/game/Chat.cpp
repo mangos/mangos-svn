@@ -121,6 +121,15 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,          0, NULL,                                        "",   NULL }
     };
 
+    static ChatCommand wpCommandTable[] =
+    {
+        { "show",       2, &ChatHandler::HandleWpShowCommand,           "",   NULL },
+        { "add",        2, &ChatHandler::HandleWpAddCommand,            "",   NULL },
+        { "modify",     2, &ChatHandler::HandleWpModifyCommand,         "",   NULL },
+
+        { NULL,          0, NULL,                                       "",   NULL }
+    };
+
     static ChatCommand debugCommandTable[] =
     {
         { "inarc",       3, &ChatHandler::HandleDebugInArcCommand,         "",   NULL },
@@ -263,6 +272,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "password",    0, &ChatHandler::HandlePasswordCommand,         "",   NULL },
         { "lockaccount", 0, &ChatHandler::HandleLockAccountCommand,      "",   NULL },
         { "respawn",     3, &ChatHandler::HandleRespawnCommand,          "",   NULL },
+        { "wp",          2, NULL,                                        "",   wpCommandTable },
         { "flymode",     3, &ChatHandler::HandleFlyModeCommand,          "",   NULL },
         { "sendopcode",  3, &ChatHandler::HandleSendOpcodeCommand,       "",   NULL },
         { "sellerr",     3, &ChatHandler::HandleSellErrorCommand,        "",   NULL },
@@ -271,7 +281,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "ps",          3, &ChatHandler::HandlePlaySound2Command,       "",   NULL },
         { "scn",         3, &ChatHandler::HandleSendChannelNotifyCommand,"",   NULL },
         { "scm",         3, &ChatHandler::HandleSendChatMsgCommand,      "",   NULL },
-
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },
@@ -512,7 +521,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     {
         ASSERT(channelName);
         *data << channelName;
-        *data << (uint32)6;     // unk
+        *data << (uint32)6;                                 // unk
     }
 
     // in CHAT_MSG_WHISPER_INFORM mode used original target_guid

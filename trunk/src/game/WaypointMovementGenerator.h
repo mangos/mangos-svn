@@ -37,6 +37,20 @@
 
 #define FLIGHT_TRAVEL_UPDATE  100
 
+#define VISUAL_WAYPOINT 1
+
+struct WaypointBehavior
+{
+    uint32 emote;
+    uint32 spell;
+    string *text[5];
+    float orientation;
+    uint32 model1;
+    uint32 model2;
+    string *aiscript;
+    bool HasDone;
+};
+
 template<class T>
 class MANGOS_DLL_DECL PathMovementGenerator
 {
@@ -64,11 +78,13 @@ class MANGOS_DLL_DECL WaypointMovementGenerator : public MovementGenerator, publ
     Creature &i_creature;
     TimeTracker i_nextMoveTime;
     std::vector<uint32> i_delays;
+    std::vector<WaypointBehavior *> i_wpBehaviour;
     public:
         WaypointMovementGenerator(Creature &c) : i_creature(c), i_nextMoveTime(0) {}
+        void WPAIScript(Creature &pCreature, string * pAiscript);
         void Initialize(Creature &c)
         {
-            i_nextMoveTime.Reset(urand(0, 10000-1));        // TODO: check the lower bound (0 is probably too small)
+            i_nextMoveTime.Reset(0);                        // TODO: check the lower bound (0 is probably too small)
             i_creature.StopMoving();
             LoadPath(c);
         }

@@ -756,6 +756,10 @@ INSERT INTO `command` VALUES
 ('visible',1,'Syntax: .visible [0||1]\r\n\r\nOutput current visibility state or make GM visible(1) and invisible(0) for other players.'),
 ('wchange',3,'Syntax: .wchange #weathertype #status\r\n\r\nSet current weather to #weathertype with an intensity of #status.\r\n\r\n#weathertype can be 1 for rain, 2 for snow, and 3 for sand. #status can be 0 for disabled, and 1 for enabled.'),
 ('worldport',3,'Syntax: .worldport #map #position_x #position_y #position_z\r\n\r\nTeleport to the given coordinates on the specified continent (map).'),
+("wp", 2, "Using WP Command:\r\nEach Waypoint Command has it's own description!"),
+("wp add", 2, "Syntax: .wp add [#creature_guid or Select a Creature]"),
+("wp modify", 2, "Syntax: .wp modify [#creature_guid or Select a Creature]\r\nadd - Add a waypoint after the selected visual\r\nimport $filename for selected npc\r\nexport $filename for selected npc\r\nwaittime $time\r\nemote ID\r\nspell ID\r\ntext1| text2| text3| text4| text5 <text>\r\nmodel1 ID\r\nmodel2 ID\r\naiscript $Name\r\nmove(moves wp to player pos)\r\ndel (deletes the wp)\r\n\r\nOnly one parameter per time!"),
+("wp show", 2, "Syntax: .wp show [#creature_guid or Select a Creature]\r\non\r\nfirst\r\nlast\r\noff\r\ninfo\r\n\r\nFor using info you have to do first show on and than select a Visual-Waypoint and do the show info!"),
 ('whispers',1,'Syntax: .whispers on|off\r\nEnable/disable accepting whispers by GM from players. By default use mangosd.conf setting.'),
 ('spawndist',2,'Syntax: .spawndist #dist\r\n\r\nAdjust spawndistance of selected creature to dist.'),
 ('spawntime',2,'Syntax: .spawntime #time \r\n\r\nAdjust spawntime of selected creature to time.'),
@@ -973,6 +977,15 @@ CREATE TABLE `creature_movement` (
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `waittime` tinyint(3) unsigned NOT NULL default '0',
+  `text1` varchar(255) default NULL,
+  `text2` varchar(255) default NULL,
+  `text3` varchar(255) default NULL,
+  `text4` varchar(255) default NULL,
+  `text5` varchar(255) default NULL,
+  `aiscript` varchar(255) default NULL,
+  `emote` int(10) unsigned default '0',
+  `spell` int(5) unsigned default '0',
+  `wpguid` int(11) default '0' AFTER `spell`,
   PRIMARY KEY  (`id`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
@@ -1127,6 +1140,11 @@ CREATE TABLE `creature_template` (
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
+-- wpsys
+INSERT INTO creature_template
+  (entry, modelid_m, modelid_f, name, subname, minlevel, maxlevel, minhealth, maxhealth, minmana, maxmana, armor, faction, npcflag, speed, rank, mindmg, maxdmg, attackpower, baseattacktime, rangeattacktime, flags, mount, dynamicflags, size, family, bounding_radius, trainer_type, trainer_spell, class, race, minrangedmg, maxrangedmg, rangedattackpower, combat_reach, type, civilian, flag1, equipmodel1, equipmodel2, equipmodel3, equipinfo1, equipinfo2, equipinfo3, equipslot1, equipslot2, equipslot3, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, spell1, spell2, spell3, spell4, mingold, maxgold, AIName, MovementType, ScriptName)
+VALUES
+  (1, 10045, 0, "Waypoint (Only GM can see it)", "Visual", 1, 1, 64, 64, 0, 0, 0, 35, 0, "0,91", 0, 14, 15, 100, 2000, 2200, 4096, 0, 0, "0,5", 8, 2, 0, 0, 0, 0, "1,76", "2,42", 100, "2,56", 8, 1, 5242886, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", 0, "");
 --
 -- Dumping data for table `creature_template`
 --
