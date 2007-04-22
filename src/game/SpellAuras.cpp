@@ -694,8 +694,10 @@ void Aura::_AddAura()
         else
             UpdateSlotCounter(slot,true);
 
-        if(GetSpellProto()->SpellVisual == 5622)
+        // Update Seals information
+        if( IsSealSpell(GetId()) )
             m_target->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
+
         SetAuraSlot( slot );
         if( m_target->GetTypeId() == TYPEID_PLAYER )
             UpdateAuraDuration();
@@ -760,7 +762,7 @@ void Aura::_RemoveAura()
         value &= value1;
 
         m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
-        if(GetSpellProto()->SpellVisual == 5622)
+        if( IsSealSpell(GetId()) )
             m_target->RemoveFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_JUDGEMENT-1)));
 
         // reset cooldown state for spells infinity/long aura (it's all self applied (?))

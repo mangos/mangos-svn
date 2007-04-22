@@ -2140,7 +2140,7 @@ void Spell::EffectScriptEffect(uint32 i)
             (m_spellInfo->SpellIconID == 70 || m_spellInfo->SpellIconID  == 242))
             EffectHeal( i );
 
-        if(m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && (m_spellInfo->SpellFamilyFlags & (1<<23)))
+        if(m_spellInfo->SpellVisual == 5651 && m_spellInfo->SpellIconID == 205)
         {
             // paladin's judgement
             if(!unitTarget || !unitTarget->isAlive())
@@ -2155,15 +2155,16 @@ void Spell::EffectScriptEffect(uint32 i)
                 SpellEntry const *spellInfo = (*itr)->GetSpellProto();
 
                 // search seal (all seals have judgement's aura dummy spell id in 2 effect
-                if (!spellInfo || spellInfo->SpellVisual != 5622 || spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN || (*itr)->GetEffIndex() != 2 ) 
+                if ( !spellInfo || !IsSealSpell((*itr)->GetId()) || (*itr)->GetEffIndex() != 2 )
                     continue;
 
                 spellId2 = spellInfo->EffectBasePoints[(*itr)->GetEffIndex()]+1;
+
                 if(spellId2 <= 1)
                     continue;
 
                 // found, remove seal
-                m_caster->RemoveAurasDueToSpell(spellInfo->Id);
+                m_caster->RemoveAurasDueToSpell((*itr)->GetId());
                 break;
             }
 
