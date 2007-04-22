@@ -32,6 +32,7 @@
 #include "Creature.h"
 #include "MapManager.h"
 #include "Pet.h"
+#include "WaypointMovementGenerator.h"
 
 void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 {
@@ -315,6 +316,12 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
         return;
     }
 
+    if((unit->isArmorer()) || (unit->isGuard()) || (unit->isCivilian()) || (unit->isQuestGiver()) || (unit->isServiceProvider()) || (unit->isVendor()))
+    {
+        unit->StopMoving();
+        //npcIsStopped[unit->GetGUID()] = true;
+    }
+
     if(!Script->GossipHello( _player, unit ))
     {
         unit->prepareGossipMenu(_player,0);
@@ -475,23 +482,23 @@ void WorldSession::SendBindPoint(Creature *npc)
     data.Initialize(SMSG_SPELL_START, (8+8+4+2+4+2+8) );
     data.append(npc->GetPackGUID());
     data.append(npc->GetPackGUID());
-    data << bindspell;      // spell id
-    data << uint16(0);      // cast flags
-    data << uint32(0);      // time
-    data << uint16(0x0002); // target mask
-    data.append(_player->GetPackGUID()); // target's packed guid
+    data << bindspell;                                      // spell id
+    data << uint16(0);                                      // cast flags
+    data << uint32(0);                                      // time
+    data << uint16(0x0002);                                 // target mask
+    data.append(_player->GetPackGUID());                    // target's packed guid
     SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO, (8+8+4+2+1+8+1+2+8));
     data.append(npc->GetPackGUID());
     data.append(npc->GetPackGUID());
-    data << bindspell;          // spell id
-    data << uint16(0x0100);     // cast flags
-    data << uint8(0x01);        // targets count
-    data << _player->GetGUID(); // target's full guid
-    data << uint8(0x00);        // ?
-    data << uint16(0x0002);     // target mask
-    data.append(_player->GetPackGUID()); // target's packed guid
+    data << bindspell;                                      // spell id
+    data << uint16(0x0100);                                 // cast flags
+    data << uint8(0x01);                                    // targets count
+    data << _player->GetGUID();                             // target's full guid
+    data << uint8(0x00);                                    // ?
+    data << uint16(0x0002);                                 // target mask
+    data.append(_player->GetPackGUID());                    // target's packed guid
     SendPacket( &data );
 
     data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED, (8+4));

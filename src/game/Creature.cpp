@@ -35,6 +35,7 @@
 #include "CreatureAISelector.h"
 #include "Formulas.h"
 #include "SpellAuras.h"
+#include "WaypointMovementGenerator.h"
 
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
@@ -609,7 +610,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         case GOSSIP_OPTION_SPIRITHEALER:
             if( player->isDead() )
-                CastSpell(player,17251,true); // effect implemented in void Spell::EffectDummy(uint32 i)
+                CastSpell(player,17251,true);               // effect implemented in void Spell::EffectDummy(uint32 i)
             break;
         case GOSSIP_OPTION_QUESTGIVER:
             player->PrepareQuestMenu( guid );
@@ -1415,6 +1416,10 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     // Live player see live creatures or death creatures with corpse dissappiring time > 0
     if(pl->isAlive())
     {
+        if( (this->GetEntry() == VISUAL_WAYPOINT) && !pl->isGameMaster() )
+        {
+            return false;
+        }
         return isAlive() || m_deathTimer > 0;
     }
 
@@ -1495,39 +1500,39 @@ void Creature::LoadFlagRelatedData()
 //creature_addon table
 bool Creature::LoadCreaturesAddon()
 {
-	CreatureAddInfo const *cainfo = objmgr.GetCreatureAddon(GetGUIDLow());
+    CreatureAddInfo const *cainfo = objmgr.GetCreatureAddon(GetGUIDLow());
     if(!cainfo)
         return false;
 
-	if (cainfo->mount != 0)
+    if (cainfo->mount != 0)
         Mount(cainfo->mount);
-    
-	if (cainfo->bytes0 != 0)
-	SetUInt32Value(UNIT_FIELD_BYTES_0, cainfo->bytes0);
-    
-	if (cainfo->bytes1 != 0)
-	SetUInt32Value(UNIT_FIELD_BYTES_1, cainfo->bytes1);
 
-	if (cainfo->bytes2 != 0)
-	SetUInt32Value(UNIT_FIELD_BYTES_2, cainfo->bytes2);
+    if (cainfo->bytes0 != 0)
+        SetUInt32Value(UNIT_FIELD_BYTES_0, cainfo->bytes0);
+
+    if (cainfo->bytes1 != 0)
+        SetUInt32Value(UNIT_FIELD_BYTES_1, cainfo->bytes1);
+
+    if (cainfo->bytes2 != 0)
+        SetUInt32Value(UNIT_FIELD_BYTES_2, cainfo->bytes2);
 
     if (cainfo->emote != 0)
-	SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
+        SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
 
-	if (cainfo->aura != 0)
-	SetUInt32Value(UNIT_FIELD_AURA, cainfo->aura);
+    if (cainfo->aura != 0)
+        SetUInt32Value(UNIT_FIELD_AURA, cainfo->aura);
 
-	if (cainfo->auraflags != 0)
-	SetUInt32Value(UNIT_FIELD_AURAFLAGS, cainfo->auraflags);
+    if (cainfo->auraflags != 0)
+        SetUInt32Value(UNIT_FIELD_AURAFLAGS, cainfo->auraflags);
 
-	if (cainfo->auralevels != 0)
-	SetUInt32Value(UNIT_FIELD_AURALEVELS, cainfo->auralevels);
+    if (cainfo->auralevels != 0)
+        SetUInt32Value(UNIT_FIELD_AURALEVELS, cainfo->auralevels);
 
-	if (cainfo->auraapplications != 0)
-	SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, cainfo->auraapplications);
-  
-	if (cainfo->aurastate != 0)
-	SetUInt32Value(UNIT_FIELD_AURASTATE, cainfo->aurastate);
-  
+    if (cainfo->auraapplications != 0)
+        SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, cainfo->auraapplications);
+
+    if (cainfo->aurastate != 0)
+        SetUInt32Value(UNIT_FIELD_AURASTATE, cainfo->aurastate);
+
     return true;
 }

@@ -203,6 +203,7 @@ libmangosgame_a_SOURCES = \
 	UpdateMask.h \
 	WaypointMovementGenerator.cpp \
 	WaypointMovementGenerator.h \
+	wpAI.h \
 	Weather.cpp \
 	Weather.h \
 	World.cpp \
