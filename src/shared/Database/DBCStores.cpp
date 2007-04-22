@@ -162,7 +162,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sMapStore,                 dataPath+"dbc/Map.dbc");
 
     // must be after sAreaStore and sMapStore loading
-    for(uint32 i = 1; i <= sAreaStore.nCount; ++i)
+    for(uint32 i = 1; i < sAreaStore.nCount; ++i)
     {
         if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
         {
@@ -215,7 +215,7 @@ void LoadDBCStores(std::string dataPath)
 
     // Initialize global taxinodes mask
     memset(sTaxiNodesMask,0,sizeof(sTaxiNodesMask));
-    for(uint32 i = 1; i <= sTaxiNodesStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiNodesStore.nCount; ++i)
     {
         if(TaxiNodesEntry const* entry = sTaxiNodesStore.LookupEntry(i))
         {
@@ -227,7 +227,7 @@ void LoadDBCStores(std::string dataPath)
 
     //## TaxiPath.dbc ## Loaded only for initialization different structures
     LoadDBC(bar,bad_dbc_files,sTaxiPathStore,            dataPath+"dbc/TaxiPath.dbc");
-    for(uint32 i = 1; i <= sTaxiPathStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiPathStore.nCount; ++i)
         if(TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
             sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID,entry->price);
     uint32 pathCount = sTaxiPathStore.nCount;
@@ -237,16 +237,16 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sTaxiPathNodeStore,        dataPath+"dbc/TaxiPathNode.dbc");
     // Calculate path nodes count
     std::vector<uint32> pathLength;
-    pathLength.resize(pathCount+1);                         // 0 and some other indexes not used
-    for(uint32 i = 1; i <= sTaxiPathNodeStore.nCount; ++i)
+    pathLength.resize(pathCount);                           // 0 and some other indexes not used
+    for(uint32 i = 1; i < sTaxiPathNodeStore.nCount; ++i)
         if(TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
             ++pathLength[entry->path];
     // Set path length
-    sTaxiPathNodesByPath.resize(pathCount+1);               // 0 and some other indexes not used
+    sTaxiPathNodesByPath.resize(pathCount);                 // 0 and some other indexes not used
     for(uint32 i = 1; i < sTaxiPathNodesByPath.size(); ++i)
         sTaxiPathNodesByPath[i].resize(pathLength[i]);
     // fill data
-    for(uint32 i = 1; i <= sTaxiPathNodeStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiPathNodeStore.nCount; ++i)
         if(TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
             sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->mapid,entry->x,entry->y,entry->z,entry->actionFlag,entry->delay);
     sTaxiPathNodeStore.Clear();

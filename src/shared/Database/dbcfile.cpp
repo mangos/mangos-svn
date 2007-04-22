@@ -134,8 +134,8 @@ void * DBCFile::AutoProduceData(const char * format, uint32 * records)
             if(ind>maxi)maxi=ind;
         }
 
-        *records=maxi;
         maxi++;
+        *records=maxi;
         table=new ptr[maxi];
         memset(table,0,maxi*sizeof(ptr));
     }else

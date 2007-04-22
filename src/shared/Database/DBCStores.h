@@ -82,7 +82,7 @@ class DBCStorage
         inline
             T const* LookupEntry(uint32 id) const
         {
-            return (id>nCount)?NULL:data[id];
+            return (id>=nCount)?NULL:data[id];
 
         }
         inline
