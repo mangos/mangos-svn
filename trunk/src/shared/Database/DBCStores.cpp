@@ -389,6 +389,18 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, ui
     else return diff;
 }
 
+bool IsSealSpell(uint32 spellId)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+
+    // SpellID 25780 is Righteous Fury, NOT seal !
+    return spellId != 25780 && spellInfo && (
+        spellInfo->SpellVisual == 7986 || spellInfo->SpellVisual == 7978 || spellInfo->SpellVisual == 8062 ||
+        spellInfo->SpellVisual == 8072 || spellInfo->SpellVisual == 7992 || spellInfo->SpellVisual == 7987 || 
+        spellInfo->SpellVisual ==  298 || spellInfo->SpellVisual == 7975 );
+}
+
+
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);

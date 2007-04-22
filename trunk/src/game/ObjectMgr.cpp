@@ -2617,6 +2617,10 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
     if(spellInfo_2->SpellFamilyFlags == 2048)
         return false;
 
+    // Paladin Seals
+    if( IsSealSpell(spellId_1) && IsSealSpell(spellId_2) )
+        return true;
+
     if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
         spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
     {
