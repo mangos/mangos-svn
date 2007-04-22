@@ -985,7 +985,10 @@ CREATE TABLE `creature_movement` (
   `aiscript` varchar(255) default NULL,
   `emote` int(10) unsigned default '0',
   `spell` int(5) unsigned default '0',
-  `wpguid` int(11) default '0' AFTER `spell`,
+  `wpguid` int(11) default '0',
+  `orientation` float default 0,
+  `model1` int (11) default 0,
+  `model2` int (11) default 0,
   PRIMARY KEY  (`id`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
