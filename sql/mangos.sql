@@ -715,8 +715,7 @@ INSERT INTO `command` VALUES
 ('neargrave',3,'Syntax: .neargrave [alliance|horde]\r\n\r\nFind nearest graveyard linked to zone (or only nearest from accepts alliance or horde faction ghosts).'),
 ('NewMail',3,'Syntax: .NewMail #flag\r\n\r\nSend a new mail notification with flag #flag.'),
 ('npcflag',2,'Syntax: .npcflag #npcflag\r\n\r\nSet the NPC flags of creature template of the selected creature and selected creature to #npcflag. NPC flags will applied to all creatures of selected creature template after server restart or grid unload/load.'),
-('npcinfo',3,'Syntax: .npcinfo\r\n\r\nDisplay a list of details for the selected creature.\r\n\r\nThe list includes:\r\n- GUID, Faction, NPC flags, Entry ID, Model ID,\r\n- Level,\r\n- Health (current/maximum),
-\n\r\n- Field flags, dynamic flags, faction template, \r\n- Position information,\r\n- and the creature type, e.g. if the creature is a vendor.'),
+('npcinfo',3,'Syntax: .npcinfo\r\n\r\nDisplay a list of details for the selected creature.\r\n\r\nThe list includes:\r\n- GUID, Faction, NPC flags, Entry ID, Model ID,\r\n- Level,\r\n- Health (current/maximum),\n\r\n- Field flags, dynamic flags, faction template, \r\n- Position information,\r\n- and the creature type, e.g. if the creature is a vendor.'),
 ('npcinfoset',3,'Syntax: .npcinfoset\r\n\r\nTODO: Write me.'),
 ('object',3,'Syntax: .object #displayid $save\r\n\r\nAdd a new object of type mailbox with the display id of #displayid to your current position. If $save is set to \'true\', save the object in the database.'),
 ('password',0,'Syntax: .password $old_password $new_password $new_password\r\n\r\nChange your account password.'),
@@ -756,15 +755,15 @@ INSERT INTO `command` VALUES
 ('visible',1,'Syntax: .visible [0||1]\r\n\r\nOutput current visibility state or make GM visible(1) and invisible(0) for other players.'),
 ('wchange',3,'Syntax: .wchange #weathertype #status\r\n\r\nSet current weather to #weathertype with an intensity of #status.\r\n\r\n#weathertype can be 1 for rain, 2 for snow, and 3 for sand. #status can be 0 for disabled, and 1 for enabled.'),
 ('worldport',3,'Syntax: .worldport #map #position_x #position_y #position_z\r\n\r\nTeleport to the given coordinates on the specified continent (map).'),
-("wp", 2, "Using WP Command:\r\nEach Waypoint Command has it's own description!"),
-("wp add", 2, "Syntax: .wp add [#creature_guid or Select a Creature]"),
-("wp modify", 2, "Syntax: .wp modify [#creature_guid or Select a Creature]\r\nadd - Add a waypoint after the selected visual\r\nimport $filename for selected npc\r\nexport $filename for selected npc\r\nwaittime $time\r\nemote ID\r\nspell ID\r\ntext1| text2| text3| text4| text5 <text>\r\nmodel1 ID\r\nmodel2 ID\r\naiscript $Name\r\nmove(moves wp to player pos)\r\ndel (deletes the wp)\r\n\r\nOnly one parameter per time!"),
-("wp show", 2, "Syntax: .wp show [#creature_guid or Select a Creature]\r\non\r\nfirst\r\nlast\r\noff\r\ninfo\r\n\r\nFor using info you have to do first show on and than select a Visual-Waypoint and do the show info!"),
 ('whispers',1,'Syntax: .whispers on|off\r\nEnable/disable accepting whispers by GM from players. By default use mangosd.conf setting.'),
 ('spawndist',2,'Syntax: .spawndist #dist\r\n\r\nAdjust spawndistance of selected creature to dist.'),
 ('spawntime',2,'Syntax: .spawntime #time \r\n\r\nAdjust spawntime of selected creature to time.'),
 ('modify titles',1,'Syntax:\n.modify titles #mask\n.titles #mask\n\nAllows user to use all titles from #mask.\n\n #mask=0 disables the title-choose-field'),
-('titles',1,'Syntax:\n.modify titles #mask\n.titles #mask\n\nAllows user to use all titles from #mask.\n\n #mask=0 disables the title-choose-field');
+('titles',1,'Syntax:\n.modify titles #mask\n.titles #mask\n\nAllows user to use all titles from #mask.\n\n #mask=0 disables the title-choose-field'),
+('wp',2,'Using WP Command:\r\nEach Waypoint Command has it\'s own description!'),
+('wp add',2,'Syntax: .wp add [#creature_guid or Select a Creature]'),
+('wp modify',2,'Syntax: .wp modify [#creature_guid or Select a Creature]\r\nadd - Add a waypoint after the selected visual\r\nimport $filename for selected npc\r\nexport $filename for selected npc\r\nwaittime $time\r\nemote ID\r\nspell ID\r\ntext1| text2| text3| text4| text5 <text>\r\nmodel1 ID\r\nmodel2 ID\r\naiscript $Name\r\nmove(moves wp to player pos)\r\ndel (deletes the wp)\r\n\r\nOnly one parameter per time!'),
+('wp show',2,'Syntax: .wp show [#creature_guid or Select a Creature]\r\non\r\nfirst\r\nlast\r\noff\r\ninfo\r\n\r\nFor using info you have to do first show on and than select a Visual-Waypoint and do the show info!');
 /*!40000 ALTER TABLE `command` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -986,9 +985,9 @@ CREATE TABLE `creature_movement` (
   `emote` int(10) unsigned default '0',
   `spell` int(5) unsigned default '0',
   `wpguid` int(11) default '0',
-  `orientation` float default 0,
-  `model1` int (11) default 0,
-  `model2` int (11) default 0,
+  `orientation` float default '0',
+  `model1` int(11) default '0',
+  `model2` int(11) default '0',
   PRIMARY KEY  (`id`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
@@ -1143,17 +1142,14 @@ CREATE TABLE `creature_template` (
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
--- wpsys
-INSERT INTO creature_template
-  (entry, modelid_m, modelid_f, name, subname, minlevel, maxlevel, minhealth, maxhealth, minmana, maxmana, armor, faction, npcflag, speed, rank, mindmg, maxdmg, attackpower, baseattacktime, rangeattacktime, flags, mount, dynamicflags, size, family, bounding_radius, trainer_type, trainer_spell, class, race, minrangedmg, maxrangedmg, rangedattackpower, combat_reach, type, civilian, flag1, equipmodel1, equipmodel2, equipmodel3, equipinfo1, equipinfo2, equipinfo3, equipslot1, equipslot2, equipslot3, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, spell1, spell2, spell3, spell4, mingold, maxgold, AIName, MovementType, ScriptName)
-VALUES
-  (1, 10045, 0, "Waypoint (Only GM can see it)", "Visual", 1, 1, 64, 64, 0, 0, 0, 35, 0, "0,91", 0, 14, 15, 100, 2000, 2200, 4096, 0, 0, "0,5", 8, 2, 0, 0, 0, 0, "1,76", "2,42", 100, "2,56", 8, 1, 5242886, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", 0, "");
 --
 -- Dumping data for table `creature_template`
 --
 
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
+INSERT INTO `creature_template` VALUES 
+(1,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,0,0.91,0,14,15,100,2000,2200,4096,0,0.5,8,2,0,0,0,0,1.76,2.42,100,2.56,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2592,7 +2588,8 @@ CREATE TABLE `player_levelstats` (
 
 LOCK TABLES `player_levelstats` WRITE;
 /*!40000 ALTER TABLE `player_levelstats` DISABLE KEYS */;
-INSERT INTO `player_levelstats` VALUES (1,1,1,60,0,23,20,22,20,21),
+INSERT INTO `player_levelstats` VALUES 
+(1,1,1,60,0,23,20,22,20,21),
 (1,1,2,79,0,24,21,23,20,21),
 (1,1,3,98,0,25,21,24,20,22),
 (1,1,4,117,0,26,22,25,20,22),
@@ -5017,7 +5014,8 @@ CREATE TABLE `playercreateinfo` (
 
 LOCK TABLES `playercreateinfo` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo` DISABLE KEYS */;
-INSERT INTO `playercreateinfo` VALUES (1,1,0,12,-8949,-132,84),
+INSERT INTO `playercreateinfo` VALUES 
+(1,1,0,12,-8949,-132,84),
 (1,2,0,12,-8949,-132,84),
 (1,4,0,12,-8949,-132,84),
 (1,5,0,12,-8949,-132,84),
@@ -5056,7 +5054,19 @@ INSERT INTO `playercreateinfo` VALUES (1,1,0,12,-8949,-132,84),
 (8,4,1,14,-618,-4251,39),
 (8,5,1,14,-618,-4251,39),
 (8,7,1,14,-618,-4251,39),
-(8,8,1,14,-618,-4251,39);
+(8,8,1,14,-618,-4251,39),
+(10,2,530,3431,10349.6,-6357.29,33.4026),
+(10,3,530,3431,10349.6,-6357.29,33.4026),
+(10,4,530,3431,10349.6,-6357.29,33.4026),
+(10,5,530,3431,10349.6,-6357.29,33.4026),
+(10,8,530,3431,10349.6,-6357.29,33.4026),
+(10,9,530,3431,10349.6,-6357.29,33.4026),
+(11,1,530,3526,-3961.64,-13931.2,100.615),
+(11,2,530,3526,-3961.64,-13931.2,100.615),
+(11,3,530,3526,-3961.64,-13931.2,100.615),
+(11,5,530,3526,-3961.64,-13931.2,100.615),
+(11,7,530,3526,-3961.64,-13931.2,100.615),
+(11,8,530,3526,-3961.64,-13931.2,100.615);
 /*!40000 ALTER TABLE `playercreateinfo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -5081,7 +5091,8 @@ CREATE TABLE `playercreateinfo_action` (
 
 LOCK TABLES `playercreateinfo_action` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_action` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_action` VALUES (1,1,1,78,0,0),
+INSERT INTO `playercreateinfo_action` VALUES 
+(1,1,1,78,0,0),
 (1,1,0,6603,0,0),
 (1,1,11,65020,128,0),
 (1,2,2,635,0,0),
@@ -5269,7 +5280,95 @@ INSERT INTO `playercreateinfo_action` VALUES (1,1,1,78,0,0),
 (8,8,10,65021,128,0),
 (8,8,2,168,0,0),
 (8,8,11,65020,128,0),
-(8,8,0,6603,0,0);
+(8,8,0,6603,0,0),
+(10,2,0,6603,0,0),
+(10,2,1,20154,0,0),
+(10,2,2,635,0,0),
+(10,2,3,28734,0,0),
+(10,2,4,28730,0,0),
+(10,2,10,159,128,0),
+(10,2,11,20857,128,0),
+(10,3,0,6603,0,0),
+(10,3,1,2973,0,0),
+(10,3,2,75,0,0),
+(10,3,3,28734,0,0),
+(10,3,4,28730,0,0),
+(10,3,10,159,128,0),
+(10,3,11,20857,128,0),
+(10,4,0,6603,0,0),
+(10,4,1,1752,0,0),
+(10,4,2,2098,0,0),
+(10,4,3,2764,0,0),
+(10,4,4,28734,0,0),
+(10,4,5,25046,0,0),
+(10,4,11,20857,128,0),
+(10,5,0,6603,0,0),
+(10,5,1,585,0,0),
+(10,5,2,2050,0,0),
+(10,5,3,28734,0,0),
+(10,5,4,28730,0,0),
+(10,5,10,159,128,0),
+(10,5,11,20857,128,0),
+(10,8,0,6603,0,0),
+(10,8,1,133,0,0),
+(10,8,2,168,0,0),
+(10,8,3,28734,0,0),
+(10,8,4,28730,0,0),
+(10,8,10,159,128,0),
+(10,8,11,20857,128,0),
+(10,9,11,20857,128,0),
+(10,9,10,159,128,0),
+(10,9,4,28730,0,0),
+(10,9,3,28734,0,0),
+(10,9,2,687,0,0),
+(10,9,1,686,0,0),
+(10,9,0,6603,0,0),
+(11,1,0,6603,0,0),
+(11,1,72,6603,0,0),
+(11,1,73,78,0,0),
+(11,1,74,28880,0,0),
+(11,1,83,4540,128,0),
+(11,1,84,6603,0,0),
+(11,1,96,6603,0,0),
+(11,1,108,6603,0,0),
+(11,2,0,6603,0,0),
+(11,2,1,20154,0,0),
+(11,2,2,635,0,0),
+(11,2,3,28880,0,0),
+(11,2,10,159,128,0),
+(11,2,11,4540,128,0),
+(11,2,83,4540,128,0),
+(11,3,0,6603,0,0),
+(11,3,1,2973,0,0),
+(11,3,2,75,0,0),
+(11,3,3,28880,0,0),
+(11,3,10,159,128,0),
+(11,3,11,4540,128,0),
+(11,3,72,6603,0,0),
+(11,3,73,2973,0,0),
+(11,3,74,75,0,0),
+(11,3,82,159,128,0),
+(11,3,83,4540,128,0),
+(11,5,0,6603,0,0),
+(11,5,1,585,0,0),
+(11,5,2,2050,0,0),
+(11,5,3,28880,0,0),
+(11,5,10,159,128,0),
+(11,5,11,4540,128,0),
+(11,5,83,4540,128,0),
+(11,7,0,6603,0,0),
+(11,7,1,403,0,0),
+(11,7,2,331,0,0),
+(11,7,3,28880,0,0),
+(11,7,10,159,128,0),
+(11,7,11,4540,128,0),
+(11,8,0,6603,0,0),
+(11,8,1,133,0,0),
+(11,8,2,168,0,0),
+(11,8,3,28880,0,0),
+(11,8,10,159,128,0),
+(11,8,11,4540,128,0),
+(11,8,83,4540,128,0);
 /*!40000 ALTER TABLE `playercreateinfo_action` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -5292,7 +5391,8 @@ CREATE TABLE `playercreateinfo_item` (
 
 LOCK TABLES `playercreateinfo_item` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_item` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_item` VALUES (1,1,38,1),
+INSERT INTO `playercreateinfo_item` VALUES 
+(1,1,38,1),
 (1,1,39,1),
 (1,1,40,1),
 (1,1,25,1),
@@ -5627,7 +5727,98 @@ INSERT INTO `playercreateinfo_item` VALUES (1,1,38,1),
 (8,8,65020,4),
 (8,8,65021,2),
 (8,8,6948,1),
-(8,8,14649,1);
+(8,8,14649,1),
+(10,2,159,5),
+(10,2,2070,5),
+(10,2,6948,1),
+(10,2,23346,1),
+(10,2,24143,1),
+(10,2,24145,1),
+(10,2,24146,1),
+(10,3,159,5),
+(10,3,2101,1),
+(10,3,2512,200),
+(10,3,6948,1),
+(10,3,20857,5),
+(10,3,20899,1),
+(10,3,20900,1),
+(10,3,20901,1),
+(10,3,20980,1),
+(10,3,20982,1),
+(10,4,3111,100),
+(10,4,6948,1),
+(10,4,20857,10),
+(10,4,20896,1),
+(10,4,20897,1),
+(10,4,20898,1),
+(10,4,20982,1),
+(10,5,51,1),
+(10,5,52,1),
+(10,5,53,1),
+(10,5,159,5),
+(10,5,6948,1),
+(10,5,20891,1),
+(10,5,20981,5),
+(10,8,35,1),
+(10,8,159,5),
+(10,8,6096,1),
+(10,8,6948,1),
+(10,8,20857,5),
+(10,8,20893,1),
+(10,8,20894,1),
+(10,8,20895,1),
+(10,9,59,1),
+(10,9,159,5),
+(10,9,1396,1),
+(10,9,6948,1),
+(10,9,20857,5),
+(10,9,20892,1),
+(10,9,20983,1),
+(11,1,4540,5),
+(11,1,6948,1),
+(11,1,23346,1),
+(11,1,23473,1),
+(11,1,23474,1),
+(11,1,23475,1),
+(11,2,159,5),
+(11,2,2361,1),
+(11,2,4540,5),
+(11,2,6948,1),
+(11,2,23476,1),
+(11,2,23476,1),
+(11,2,23477,1),
+(11,3,25,1),
+(11,3,159,5),
+(11,3,2101,1),
+(11,3,2504,1),
+(11,3,2512,200),
+(11,3,4540,5),
+(11,3,6948,1),
+(11,3,23344,1),
+(11,3,23345,1),
+(11,3,23348,1),
+(11,5,36,1),
+(11,5,59,1),
+(11,5,159,5),
+(11,5,1396,1),
+(11,5,4540,5),
+(11,5,6097,1),
+(11,5,6948,1),
+(11,5,23322,1),
+(11,7,36,1),
+(11,7,159,5),
+(11,7,4540,5),
+(11,7,6948,1),
+(11,7,23344,1),
+(11,7,23345,1),
+(11,7,23348,1),
+(11,8,35,1),
+(11,8,159,5),
+(11,8,4540,5),
+(11,8,23473,1),
+(11,8,23475,1),
+(11,8,23478,1),
+(11,8,23479,1);
 /*!40000 ALTER TABLE `playercreateinfo_item` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -5650,7 +5841,8 @@ CREATE TABLE `playercreateinfo_skill` (
 
 LOCK TABLES `playercreateinfo_skill` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_skill` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_skill` VALUES (1,1,183,'GENERIC (DND)'),
+INSERT INTO `playercreateinfo_skill` VALUES 
+(1,1,183,'GENERIC (DND)'),
 (1,2,183,'GENERIC (DND)'),
 (1,4,183,'GENERIC (DND)'),
 (1,5,183,'GENERIC (DND)'),
@@ -5794,7 +5986,50 @@ INSERT INTO `playercreateinfo_skill` VALUES (1,1,183,'GENERIC (DND)'),
 (1,4,754,'Racial - Human'),
 (1,5,754,'Racial - Human'),
 (1,8,754,'Racial - Human'),
-(1,9,754,'Racial - Human');
+(1,9,754,'Racial - Human'),
+(10,2,183,'GENERIC (DND)'),
+(10,2,594,'Holy (Paladin)'),
+(10,2,756,'Blood Elf Racial'),
+(10,3,51,'Survival'),
+(10,3,163,'Marksmanship'),
+(10,3,183,'GENERIC (DND)'),
+(10,3,756,'Blood Elf Racial'),
+(10,4,38,'Combat'),
+(10,4,183,'GENERIC (DND)'),
+(10,4,253,'Assassination'),
+(10,4,756,'Blood Elf Racial'),
+(10,5,56,'Holy (Priest)'),
+(10,5,183,'GENERIC (DND)'),
+(10,5,756,'Blood Elf Racial'),
+(10,8,6,'Frost'),
+(10,8,8,'Fire'),
+(10,8,183,'GENERIC (DND)'),
+(10,8,756,'Blood Elf Racial'),
+(10,9,183,'GENERIC (DND)'),
+(10,9,354,'Demonology'),
+(10,9,593,'Destruction'),
+(10,9,756,'Blood Elf Racial'),
+(11,1,26,'Arms'),
+(11,1,183,'GENERIC (DND)'),
+(11,1,760,'Draenei Racial'),
+(11,2,183,'GENERIC (DND)'),
+(11,2,594,'Holy (Paladin)'),
+(11,2,760,'Draenei Racial'),
+(11,3,51,'Survival'),
+(11,3,163,'Marksmanship'),
+(11,3,183,'GENERIC (DND)'),
+(11,3,760,'Draenei Racial'),
+(11,5,56,'Holy (Priest)'),
+(11,5,183,'GENERIC (DND)'),
+(11,5,760,'Draenei Racial'),
+(11,7,183,'GENERIC (DND)'),
+(11,7,374,'Restoration (Shaman)'),
+(11,7,375,'Elemental Combat'),
+(11,7,760,'Draenei Racial'),
+(11,8,6,'Frost'),
+(11,8,8,'Fire'),
+(11,8,183,'GENERIC (DND)'),
+(11,8,760,'Draenei Racial');
 /*!40000 ALTER TABLE `playercreateinfo_skill` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -5818,7 +6053,8 @@ CREATE TABLE `playercreateinfo_spell` (
 
 LOCK TABLES `playercreateinfo_spell` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_spell` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_spell` VALUES (1,1,2382,'Generic',1),
+INSERT INTO `playercreateinfo_spell` VALUES 
+(1,1,2382,'Generic',1),
 (1,1,3365,'Opening',1),
 (1,1,3050,'Detect',1),
 (1,1,6233,'Closing',1),
@@ -7365,7 +7601,55 @@ INSERT INTO `playercreateinfo_spell` VALUES (1,1,2382,'Generic',1),
 (11,3,7355,'Stuck',1),
 (11,5,7355,'Stuck',1),
 (11,7,7355,'Stuck',1),
-(11,8,7355,'Stuck',1);
+(11,8,7355,'Stuck',1),
+(10,2,81,'Dodge',1),
+(10,2,107,'Block',1),
+(10,2,201,'One-Handed Swords',1),
+(10,2,202,'Two-Handed Swords',1),
+(10,2,203,'Unarmed',1),
+(10,2,204,'Defense',1),
+(10,2,522,'SPELLDEFENSE (DND)',1),
+(10,2,635,'Holy Light(rank1)',1),
+(10,2,669,'Language Orcish',1),
+(10,2,813,'Language Thalassian',1),
+(10,2,822,'Magic Resistance',1),
+(10,2,2382,'Generic Requires Miscellaneous',1),
+(10,2,2479,'Honorless Target',1),
+(10,2,3050,'Detect',1),
+(10,2,3365,'Opening',1),
+(10,2,6233,'Closing',1),
+(10,2,6246,'Closing',1),
+(10,2,6247,'Opening',1),
+(10,2,6477,'Opening',1),
+(10,2,6478,'Opening',1),
+(10,2,6603,'Attack',1),
+(10,2,7266,'Duel',1),
+(10,2,7267,'Grovel',1),
+(11,1,78,'Heroic Strike (rank1)',1),
+(11,1,81,'Dodge',1),
+(11,1,107,'Block',1),
+(11,1,198,'One-Handed Maces',1),
+(11,1,201,'One-Handed Swords',1),
+(11,1,202,'Two-Handed Swords',1),
+(11,1,203,'Unarmed',1),
+(11,1,204,'Defense',1),
+(11,1,522,'SPELLDEFENSE (DND)',1),
+(11,1,668,'Language Common',1),
+(11,1,2382,'Generic Requires Miscellaneous',1),
+(11,1,2457,'Battle Stance',1),
+(11,1,2479,'Honorless Target',1),
+(11,1,3050,'Detect',1),
+(11,1,3365,'Opening',1),
+(11,1,5301,'Defensive State (DND)',1),
+(11,1,6233,'Closing',1),
+(11,1,6246,'Closing',1),
+(11,1,6247,'Opening',1),
+(11,1,6477,'Opening',1),
+(11,1,6478,'Opening',1),
+(11,1,6562,'Heroic Presence',1),
+(11,1,6603,'Attack',1),
+(11,1,7266,'Duel',1),
+(11,1,7267,'Grovel',1);
 /*!40000 ALTER TABLE `playercreateinfo_spell` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7570,7 +7854,8 @@ CREATE TABLE `spell_chain` (
 
 LOCK TABLES `spell_chain` WRITE;
 /*!40000 ALTER TABLE `spell_chain` DISABLE KEYS */;
-INSERT INTO `spell_chain` VALUES (8613,0,8613,1),
+INSERT INTO `spell_chain` VALUES 
+(8613,0,8613,1),
 (8617,8613,8613,2),
 (8618,8617,8613,3),
 (10768,8618,8613,4),
@@ -8922,7 +9207,8 @@ CREATE TABLE `spell_learn_skill` (
 
 LOCK TABLES `spell_learn_skill` WRITE;
 /*!40000 ALTER TABLE `spell_learn_skill` DISABLE KEYS */;
-INSERT INTO `spell_learn_skill` VALUES (9078,415,1,1),
+INSERT INTO `spell_learn_skill` VALUES 
+(9078,415,1,1),
 (9077,414,1,1),
 (8737,413,1,1),
 (750,293,1,1),
@@ -8983,7 +9269,8 @@ CREATE TABLE `spell_learn_spell` (
 
 LOCK TABLES `spell_learn_spell` WRITE;
 /*!40000 ALTER TABLE `spell_learn_spell` DISABLE KEYS */;
-INSERT INTO `spell_learn_spell` VALUES (4036,3918,0),
+INSERT INTO `spell_learn_spell` VALUES 
+(4036,3918,0),
 (4036,3919,0),
 (4036,3920,0),
 (3908,2387,0),
@@ -9044,7 +9331,8 @@ CREATE TABLE `spell_proc_event` (
 
 LOCK TABLES `spell_proc_event` WRITE;
 /*!40000 ALTER TABLE `spell_proc_event` DISABLE KEYS */;
-INSERT INTO `spell_proc_event` VALUES (6866,4,0,0,0,20564,0),
+INSERT INTO `spell_proc_event` VALUES 
+(6866,4,0,0,0,20564,0),
 (6870,0,0,0,0,0,0),
 (7131,0,0,0,0,664232,0),
 (9452,0,0,0,0,20,3),
@@ -9910,7 +10198,8 @@ CREATE TABLE `spell_threat` (
 
 LOCK TABLES `spell_threat` WRITE;
 /*!40000 ALTER TABLE `spell_threat` DISABLE KEYS */;
-INSERT INTO `spell_threat` VALUES (1672,180),
+INSERT INTO `spell_threat` VALUES 
+(1672,180),
 (9881,207),
 (11556,43),
 (11567,145),
@@ -9996,4 +10285,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-04-19 19:11:40
+-- Dump completed on 2007-04-23  8:56:41
