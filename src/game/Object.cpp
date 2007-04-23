@@ -729,7 +729,7 @@ void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, f
     z = GetPositionZ();
 }
 
-void WorldObject::Say(const std::string text, const uint32 language)
+void WorldObject::Say(const char* text, const uint32 language, const uint64 TargetGuid)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);    
     data << (uint8)CHAT_MSG_MONSTER_SAY;
@@ -737,15 +737,15 @@ void WorldObject::Say(const std::string text, const uint32 language)
     data << (uint64)GetGUID();
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)0;
-    data << (uint32)(text.length()+1);
+    data << (uint64)TargetGuid;             //Unit Target
+    data << (uint32)(strlen(text)+1);
     data << text;
     data << (uint8)0;                       // ChatTag
 
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::Yell(const std::string text, const uint32 language)
+void WorldObject::Yell(const char* text, const uint32 language, const uint64 TargetGuid)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);    
     data << (uint8)CHAT_MSG_MONSTER_YELL;
@@ -753,24 +753,25 @@ void WorldObject::Yell(const std::string text, const uint32 language)
     data << (uint64)GetGUID();
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)0;
-    data << (uint32)(text.length()+1);
+    data << (uint64)TargetGuid;             //Unit Target
+    data << (uint32)(strlen(text)+1);
     data << text;
     data << (uint8)0;                       // ChatTag
 
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::TextEmote(const std::string text)
+void WorldObject::TextEmote(const char* text, const uint64 TargetGuid)
 {
-    std::string rightText = "%s " + text;
+    std::string rightText = "%s ";
+    rightText.append(text);
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);    
     data << (uint8)CHAT_MSG_MONSTER_EMOTE;
     data << (uint32)LANG_UNIVERSAL;
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)0;
+    data << (uint64)TargetGuid;             //Unit Target
     data << (uint32)(rightText.length()+1);
     data << rightText;
     data << (uint8)0;                       // ChatTag
@@ -778,15 +779,15 @@ void WorldObject::TextEmote(const std::string text)
     SendMessageToSet(&data, true);          // SendMessageToOwnTeamSet()?
 }
 
-void WorldObject::Whisper(const uint64 receiver, const std::string text)
+void WorldObject::Whisper(const uint64 receiver, const char* text)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_WHISPER;
     data << (uint32)LANG_UNIVERSAL;
     data << (uint32)1;
     data << GetName();
-    data << (uint64)receiver;
-    data << (uint32)(text.length()+1);
+    data << (uint64)receiver;               //Also the Unit Target
+    data << (uint32)(strlen(text)+1);
     data << text;
     data << (uint8)0;                       // ChatTag
 

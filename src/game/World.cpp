@@ -714,7 +714,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                ((Creature *)step.source)->Say(step.script->datatext.c_str(), 0);
+                ((Creature *)step.source)->Say(step.script->datatext.c_str(), 0, 0);
                 break;
             case SCRIPT_COMMAND_EMOTE:
                 if(!step.source)

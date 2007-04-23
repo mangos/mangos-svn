@@ -233,7 +233,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
                     if( tmpBehavior->text[1] == "" )
                     {
                         //sLog.outDebug("DEBUG: tmpBehavior->text[1] == NULL");
-                        creature.Say(tmpBehavior->text[0].c_str(), 0);
+                        creature.Say(tmpBehavior->text[0].c_str(), 0, 0);
                     }
                     else
                     {
@@ -246,7 +246,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
                                 //sLog.outDebug("DEBUG: tmpBehavior->text[i] == \"\": %d", i);
                                 //sLog.outDebug("DEBUG: rand() % (i): %d", rand() % (i));
 
-                                creature.Say(tmpBehavior->text[rand() % i].c_str(), 0);
+                                creature.Say(tmpBehavior->text[rand() % i].c_str(), 0, 0);
                                 break;
                             }
                         }

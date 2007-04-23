@@ -489,9 +489,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         virtual void Update( uint32 time );
 
-        char const* GetName() const { return m_name.c_str(); }
-        void SetName(std::string newname) { m_name=newname; }
-
         void setAttackTimer(WeaponAttackType type, uint32 time) { m_attackTimer[type] = time; }
         void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);
         uint32 getAttackTimer(WeaponAttackType type) const { return m_attackTimer[type]; }
@@ -920,7 +917,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         long m_AuraModifiers[TOTAL_AURAS];
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
-        std::string m_name;
         float m_speed_rate[MAX_MOVE_TYPE];
     private:
         void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)
