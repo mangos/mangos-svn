@@ -961,7 +961,14 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
     uint32 num_to_add;
 
     if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
-        num_to_add = max(m_spellInfo->EffectBasePoints[i]+1, 1);
+    {
+        int32 basePoints = m_spellInfo->EffectBasePoints[i];
+        int32 randomPoints = m_spellInfo->EffectDieSides[i];
+        if (randomPoints)
+            num_to_add = basePoints + irand(1, randomPoints);
+        else 
+            num_to_add = basePoints + 1;
+    }
     else if(player->getLevel() >= m_spellInfo->spellLevel)
         num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
     else
