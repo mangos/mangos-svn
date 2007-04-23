@@ -291,7 +291,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         case 7:         m_taximask[0]= 1 << ( 6-1); break; // Gnome
         case 8:         m_taximask[0]= 1 << (23-1); break; // Troll
         //case 10:        m_taximask[0]= 1 << (1-1); break; // Blood Elf
-        case 11:        m_taximask[0]= 1 << (94-1); break; // Draenei
+        case 11:        m_taximask[0+94/32]= 1 << (94%32-1); break; // Draenei
     }
 
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(class_);
