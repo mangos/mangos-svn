@@ -44,7 +44,7 @@ bool ChatHandler::HandleSayCommand(const char* args)
         return true;
     }
 
-    pCreature->Say(args, LANG_UNIVERSAL);
+    pCreature->Say(args, LANG_UNIVERSAL, 0);
 
     return true;
 }
@@ -60,7 +60,7 @@ bool ChatHandler::HandleYellCommand(const char* args)
         return true;
     }
 
-    pCreature->Yell(args, LANG_UNIVERSAL);
+    pCreature->Yell(args, LANG_UNIVERSAL, 0);
 
     return true;
 }
@@ -76,7 +76,7 @@ bool ChatHandler::HandleEmote2Command(const char* args)
         return true;
     }
 
-    pCreature->TextEmote(args);
+    pCreature->TextEmote(args, 0);
 
     return true;
 }

@@ -296,10 +296,10 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool IsBeingTeleported() { return mSemaphoreTeleport; }
         void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
 
-        virtual void Say(const std::string text, const uint32 language);
-        virtual void Yell(const std::string text, const uint32 language);
-        virtual void TextEmote(const std::string text);
-        virtual void Whisper(const uint64 receiver, const std::string text);
+        virtual void Say(const char* text, const uint32 language, const uint64 TargetGuid);
+        virtual void Yell(const char* text, const uint32 language, const uint64 TargetGuid);
+        virtual void TextEmote(const char* text, const uint64 TargetGuid);
+        virtual void Whisper(const uint64 receiver, const char* text);
 
         void SendDestroyObject(uint64 guid);
         void SendObjectDeSpawnAnim(uint64 guid);
