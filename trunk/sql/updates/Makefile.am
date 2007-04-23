@@ -280,6 +280,8 @@ pkgdata_DATA = \
 	3463_mangos.sql \
 	3463_realm.sql \
 	3474_creature_addon.sql \
+	3501.sql \
+	3503_creature_movement.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -540,4 +542,6 @@ EXTRA_DIST = \
 	3463_mangos.sql \
 	3463_realm.sql \
 	3474_creature_addon.sql \
+	3501.sql \
+	3503_creature_movement.sql \
 	README
