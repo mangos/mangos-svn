@@ -199,7 +199,8 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     //prepare mail data... :
     uint32 mailId = this->GenerateMailID();
     uint32 itemTextId = this->CreateItemText( msgAuctionWonBody.str() );
-    time_t etime = time(NULL) + (30 * DAY);
+    time_t dtime = time(NULL);                              //Will always be instant when from Auction House.
+    time_t etime = dtime + (30 * DAY);
 
     uint64 bidder_guid = MAKE_GUID(auction->bidder,HIGHGUID_PLAYER);
     Player *bidder = objmgr.GetPlayer(bidder_guid);
@@ -240,14 +241,14 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     {
         bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, bidder_guid, 0, 0, auction->item_template);
 
-        bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, 0, 0, AUCTION_CHECKED, pItem);
+        bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, dtime, 0, 0, AUCTION_CHECKED, pItem);
     }
     else
         delete pItem;
 
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '0', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime, AUCTION_CHECKED);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime,(uint64)dtime, AUCTION_CHECKED);
 }
 
 //call this method to send mail to auctionowner, when auction is successful, it does not clear ram
@@ -272,7 +273,8 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
     uint32 itemTextId = this->CreateItemText( auctionSuccessfulBody.str() );
 
     uint32 mailId = this->GenerateMailID();
-    time_t etime = time(NULL) + (30 * DAY);
+    time_t dtime = time(NULL);                              //Instant because it's Auction House
+    time_t etime = dtime + (30 * DAY);
     uint32 profit = auction->bid + auction->deposit - auctionCut;
 
     Player *owner = objmgr.GetPlayer((uint64) auction->owner);
@@ -281,12 +283,12 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
         //send auctionowner notification, bidder must be current!
         owner->GetSession()->SendAuctionOwnerNotification( auction );
 
-        owner->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, profit, 0, AUCTION_CHECKED, NULL);
+        owner->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, dtime, profit, 0, AUCTION_CHECKED, NULL);
     }
 
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "', '%u', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, profit, AUCTION_CHECKED);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, profit, AUCTION_CHECKED);
 }
 
 //does not clear ram
@@ -301,16 +303,17 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         uint32 messageId = objmgr.GenerateMailID();
         std::ostringstream subject;
         subject << auction->item_template << ":0:" << AUCTION_EXPIRED;
-        time_t etime = time(NULL) + 30 * DAY;
+        time_t dtime = time(NULL);                          //Instant since it's Auction House
+        time_t etime = dtime + 30 * DAY;
 
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "', '0', '0', '0')",
-            messageId, auction->location, auction->owner, subject.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime );
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '0')",
+            messageId, auction->location, auction->owner, subject.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime );
         if ( seller )
         {
             seller->GetSession()->SendAuctionOwnerNotification( auction );
 
-            seller->CreateMail(messageId, AUCTIONHOUSE_MAIL, auction->location, subject.str(), 0, auction->item_guid, auction->item_template, etime,0,0,NOT_READ,pItem);
+            seller->CreateMail(messageId, AUCTIONHOUSE_MAIL, auction->location, subject.str(), 0, auction->item_guid, auction->item_template, etime,dtime,0,0,NOT_READ,pItem);
         }
         else
         {
@@ -1952,8 +1955,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     sLog.outDebug("Returning mails current time: hour: %d, minute: %d, second: %d ", localtime(&basetime)->tm_hour, localtime(&basetime)->tm_min, localtime(&basetime)->tm_sec);
     //delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
-        sDatabase.PExecute("DELETE FROM `mail` WHERE `time` < '%u' AND `item_guid` = '0' AND `itemTextId` = 0", basetime);
-    QueryResult* result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`item_guid`,`time`,`cod`,`checked` FROM `mail` WHERE `time` < '%u'", basetime);
+        sDatabase.PExecute("DELETE FROM `mail` WHERE `expire_time` < '" I64FMTD "' AND `item_guid` = '0' AND `itemTextId` = 0", basetime);
+    QueryResult* result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`item_guid`,`expire_time`,`cod`,`checked` FROM `mail` WHERE `expire_time` < '" I64FMTD "'", basetime);
     if ( !result )
         return;                                             // any mails need to be returned or deleted
     Field *fields;
@@ -1971,7 +1974,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         m->receiver = fields[3].GetUInt32();
         m->itemTextId = fields[4].GetUInt32();
         m->item_guid = fields[5].GetUInt32();
-        m->time = fields[6].GetUInt32();
+        m->expire_time = fields[6].GetUInt32();
+        m->deliver_time = 0;
         m->COD = fields[7].GetUInt32();
         m->checked = fields[8].GetUInt32();
         Player *pl = 0;
@@ -1989,7 +1993,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             if (m->checked < 4)
             {
                 //mail will be returned:
-                sDatabase.PExecute("UPDATE `mail` SET `sender` = '%u', `receiver` = '%u', `time` = '" I64FMTD "', `cod` = '0', `checked` = '16' WHERE `id` = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), m->messageID);
+                sDatabase.PExecute("UPDATE `mail` SET `sender` = '%u', `receiver` = '%u', `expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`cod` = '0', `checked` = '16' WHERE `id` = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), (uint64)basetime, m->messageID);
                 delete m;
                 continue;
             }

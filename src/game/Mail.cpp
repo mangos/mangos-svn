@@ -166,19 +166,24 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     uint32 messagetype = 0;
     uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
     mailId = objmgr.GenerateMailID();
-    time_t etime = time(NULL) + DAY * ((COD > 0)? 3 : 30);  //time if COD 3 days, if no COD 30 days
+
+    // If theres is an item, there is a one hour delivery delay.
+    time_t dtime = (itemId != 0) ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
+
+    time_t etime = dtime + DAY * ((COD > 0)? 3 : 30);       //time if COD 3 days, if no COD 30 days
+
     if (receive)
     {
-        receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemTextId, GUID_LOPART(itemId), item_template, etime, money, COD, NOT_READ, pItem);
+        receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemTextId, GUID_LOPART(itemId), item_template, etime, dtime, money, COD, NOT_READ, pItem);
     }
     else if (pItem)
         delete pItem;                                       //item is sent, but receiver isn't online .. so remove it from RAM
     // backslash all '
     sDatabase.escape_string(subject);
     //not needed : sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '0')",
-        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, GUID_LOPART(itemId), item_template, (uint64)etime, money, COD);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '0')",
+        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, GUID_LOPART(itemId), item_template, (uint64)etime, (uint64)dtime, money, COD);
     sDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
     sDatabase.CommitTransaction();
@@ -200,9 +205,9 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
         if (pl->unReadMails)
             pl->unReadMails--;
         m->checked = m->checked | READ;
-        m->time = time(NULL) + (3 * DAY);
+        m->expire_time = time(NULL) + (3 * DAY);
         pl->m_mailsUpdated = true;
-        m->state = CHANGED;
+        m->state = MAIL_STATE_CHANGED;
     }
 }
 
@@ -219,7 +224,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
     pl->m_mailsUpdated = true;
     Mail *m = pl->GetMail(mailId);
     if(m)
-        m->state = DELETED;
+        m->state = MAIL_STATE_DELETED;
     pl->SendMailResult(mailId, MAIL_DELETED, 0);
 }
 
@@ -233,7 +238,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     recv_data >> mailId;
     Player *pl = _player;
     Mail *m = pl->GetMail(mailId);
-    if(!m || m->state == DELETED)
+    if(!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
     {
         pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, MAIL_ERR_INTERNAL_ERROR);
         return;
@@ -251,19 +256,24 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
         pItem = pl->GetMItem(m->item_guid);
         pl->RemoveMItem(m->item_guid);
     }
-    time_t etime = time(NULL) + 30*DAY;
+
+    // If theres is an item, there is a one hour delivery delay.
+    time_t dtime = (pItem != 0) ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
+
+    time_t etime = dtime + 30*DAY;
+
     Player *receiver = objmgr.GetPlayer((uint64)m->sender);
     if(receiver)
-        receiver->CreateMail(messageID,0,m->receiver,m->subject,m->itemTextId,m->item_guid,m->item_template,etime,m->money,0,RETURNED_CHECKED,pItem);
+        receiver->CreateMail(messageID,0,m->receiver,m->subject,m->itemTextId,m->item_guid,m->item_template,etime, dtime, m->money,0,RETURNED_CHECKED,pItem);
     else if ( pItem )
         delete pItem;
 
     std::string subject;
     subject = m->subject;
     sDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '%u', '0', '16')",
-        messageID, m->receiver, m->sender, subject.c_str(), m->itemTextId, m->item_guid, m->item_template, (uint64)etime, m->money);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '16')",
+        messageID, m->receiver, m->sender, subject.c_str(), m->itemTextId, m->item_guid, m->item_template, (uint64)etime, (uint64)dtime, m->money);
     delete m;                                               //we can deallocate old mail
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
 }
@@ -281,7 +291,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Player* pl = _player;
 
     Mail* m = pl->GetMail(mailId);
-    if(!m || m->state == DELETED)
+    if(!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
     {
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
         return;
@@ -305,17 +315,21 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         if (m->COD > 0)                                     //if there is COD, take COD money from player and send them to sender by mail
         {
             Player *receive = objmgr.GetPlayer(MAKE_GUID(m->sender,HIGHGUID_PLAYER));
-            time_t etime = time(NULL) + (30 * DAY);
+
+            // If theres is an item, there is a one hour delivery delay.
+            time_t dtime = (it != 0) ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
+
+            time_t etime = dtime + (30 * DAY);
             uint32 newMailId = objmgr.GenerateMailID();
             if (receive)
-                receive->CreateMail(newMailId, 0, m->receiver, m->subject, 0, 0, 0, etime, m->COD, 0, COD_PAYMENT_CHECKED, NULL);
+                receive->CreateMail(newMailId, 0, m->receiver, m->subject, 0, 0, 0, etime, dtime, m->COD, 0, COD_PAYMENT_CHECKED, NULL);
 
             //escape apostrophes
             std::string subject = m->subject;
             sDatabase.escape_string(subject);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '8')",
-                newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, m->COD);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+                "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '8')",
+                newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD);
 
             pl->ModifyMoney( -int32(m->COD) );
 
@@ -339,7 +353,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             }
         }
         m->COD = 0;
-        m->state = CHANGED;
+        m->state = MAIL_STATE_CHANGED;
         pl->m_mailsUpdated = true;
         pl->RemoveMItem(it->GetGUIDLow());
         Item* it2 = pl->StoreItem( dest, it, true);
@@ -369,14 +383,17 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     Player *pl = _player;
 
     Mail* m = pl->GetMail(mailId);
-    if(!m || m->state == DELETED)
+    if(!m || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
+    {
+        pl->SendMailResult(mailId, MAIL_MONEY_TAKEN, MAIL_ERR_INTERNAL_ERROR);
         return;
+    }
 
     pl->SendMailResult(mailId, MAIL_MONEY_TAKEN, 0);
 
     pl->ModifyMoney(m->money);
     m->money = 0;
-    m->state = CHANGED;
+    m->state = MAIL_STATE_CHANGED;
     pl->m_mailsUpdated = true;
 
     // save money and mail to prevent cheating
@@ -407,11 +424,14 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
     data << uint8(0);                                       // mail's count
     uint8 mails_count = 0;
+    time_t cur_time = time(NULL);
     std::deque<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
     {
-        if ((*itr)->state == DELETED)
+        // skip deleted or not delivered (deliver delay not expired) mails
+        if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->item_guid != 0 && cur_time < (*itr)->deliver_time)
             continue;
+
         mails_count++;
         data << (*itr)->messageID;
         data << (*itr)->messageType;                        // Message Type, once = 3
@@ -473,7 +493,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (*itr)->money;                              // Gold
         data << (*itr)->COD;                                // COD
         data << (*itr)->checked;                            // checked
-        data << (float)  ((*itr)->time - time(NULL)) / DAY; // Time
+        data << (float)((*itr)->expire_time-time(NULL))/DAY;// Time
         data << (uint32) 0;                                 // Constant, something like end..
     }
     data.put<uint8>(0, mails_count);
@@ -516,7 +536,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     Player *pl = _player;
 
     Mail* m = pl->GetMail(mailId);
-    if(!m || !m->itemTextId || m->state == DELETED)
+    if(!m || !m->itemTextId || m->state == MAIL_STATE_DELETED || m->deliver_time > time(NULL))
     {
         pl->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_INTERNAL_ERROR);
         return;
@@ -539,7 +559,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     if( msg == EQUIP_ERR_OK )
     {
         m->itemTextId = 0;
-        m->state = CHANGED;
+        m->state = MAIL_STATE_CHANGED;
         pl->m_mailsUpdated = true;
 
         pl->StoreItem(dest, bodyItem, true);
