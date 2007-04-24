@@ -2053,7 +2053,7 @@ void Player::RemoveMail(uint32 id)
 }
 
 //call this function when mail receiver is online
-void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t etime, uint32 money, uint32 COD, uint32 checked, Item* pItem)
+void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t expire_time, time_t deliver_time, uint32 money, uint32 COD, uint32 checked, Item* pItem)
 {
     if ( !m_mailsLoaded )
     {
@@ -2070,11 +2070,12 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
     m->itemTextId = itemTextId;
     m->item_guid = itemGuid;
     m->item_template = item_template;
-    m->time = etime;
+    m->expire_time = expire_time;
+    m->deliver_time = deliver_time;
     m->money = money;
     m->COD = COD;
     m->checked = checked;
-    m->state = UNCHANGED;
+    m->state = MAIL_STATE_UNCHANGED;
 
     AddMail(m);
     if ( pItem )
@@ -10658,7 +10659,7 @@ void Player::_LoadMail()
 
     m_mail.clear();
     //mails are in right order
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
     if(result)
     {
         do
@@ -10673,11 +10674,12 @@ void Player::_LoadMail()
             m->itemTextId = fields[5].GetUInt32();
             m->item_guid = fields[6].GetUInt32();
             m->item_template = fields[7].GetUInt32();
-            m->time = fields[8].GetUInt32();
-            m->money = fields[9].GetUInt32();
-            m->COD = fields[10].GetUInt32();
-            m->checked = fields[11].GetUInt32();
-            m->state = UNCHANGED;
+            m->expire_time = fields[8].GetUInt32();
+            m->deliver_time = fields[9].GetUInt32();
+            m->money = fields[10].GetUInt32();
+            m->COD = fields[11].GetUInt32();
+            m->checked = fields[12].GetUInt32();
+            m->state = MAIL_STATE_UNCHANGED;
             m_mail.push_back(m);
         } while( result->NextRow() );
         delete result;
@@ -11198,13 +11200,13 @@ void Player::_SaveMail()
     for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
     {
         Mail *m = (*itr);
-        if (m->state == CHANGED)
+        if (m->state == MAIL_STATE_CHANGED)
         {
-            sDatabase.PExecute("UPDATE `mail` SET `itemTextId` = '%u',`item_guid` = '%u',`item_template` = '%u',`time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
-                m->itemTextId, m->item_guid, m->item_template, (uint64)m->time, m->money, m->COD, m->checked, m->messageID);
-            m->state = UNCHANGED;
+            sDatabase.PExecute("UPDATE `mail` SET `itemTextId` = '%u',`item_guid` = '%u',`item_template` = '%u',`expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
+                m->itemTextId, m->item_guid, m->item_template, (uint64)m->expire_time, (uint64)m->deliver_time, m->money, m->COD, m->checked, m->messageID);
+            m->state = MAIL_STATE_UNCHANGED;
         }
-        else if (m->state == DELETED)
+        else if (m->state == MAIL_STATE_DELETED)
         {
             if (m->item_guid)
                 sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
@@ -11222,7 +11224,7 @@ void Player::_SaveMail()
         continueDeleting = false;
         for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
         {
-            if ((*itr)->state == DELETED)
+            if ((*itr)->state == MAIL_STATE_DELETED)
             {
                 Mail* m = *itr;
                 m_mail.erase(itr);

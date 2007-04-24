@@ -170,6 +170,10 @@ GM.LogTrade = 1
 #          2 (players from same team can 100% auto detect invisible player)
 GroupVisibility = 0
 
+# Mail delivery delay time in case sending item
+# Default: 3600 sec (1 hour)
+MailDeliveryDelay = 3600
+
 # Message of the Day. Displayed at worldlogin for every user.
 Motd = "Welcome to the Massive Network Game Object Server."
 

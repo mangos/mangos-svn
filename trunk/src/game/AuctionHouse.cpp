@@ -183,7 +183,8 @@ void WorldSession::SendAuctionOwnerNotification( AuctionEntry* auction)
 void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPrice)
 {
     uint32 mailId = objmgr.GenerateMailID();
-    time_t etime = time(NULL) + (30 * DAY);
+    time_t dtime = time(NULL);                              //Instant since it's Auction House
+    time_t etime = dtime + (30 * DAY);
 
     std::ostringstream msgAuctionOutbiddedSubject;
     msgAuctionOutbiddedSubject << auction->item_template << ":0:" << AUCTION_OUTBIDDED;
@@ -193,19 +194,20 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
     if (oldBidder)
     {
         oldBidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, auction->outBid, auction->item_template);
-        oldBidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionOutbiddedSubject.str(), 0, 0, 0, etime, auction->bid, 0, NOT_READ, NULL);
+        oldBidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionOutbiddedSubject.str(), 0, 0, 0, etime,dtime, auction->bid, 0, NOT_READ, NULL);
     }
 
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str().c_str(), (uint64)etime, auction->bid, NOT_READ);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
 }
 
 //this function sends mail, when auction is cancelled to old bidder
 void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
 {
     uint32 mailId = objmgr.GenerateMailID();
-    time_t etime = time(NULL) + (30 * DAY);
+    time_t dtime = time(NULL);                              //Instant since it's Auction House
+    time_t etime = dtime + (30 * DAY);
 
     std::ostringstream msgAuctionCancelledSubject;
     msgAuctionCancelledSubject << auction->item_template << ":0:" << AUCTION_CANCELLED_TO_BIDDER;
@@ -215,12 +217,12 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
     if (bidder)
     {
         // unknown : bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, newPrice - auction->bid, auction->item_template);
-        bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionCancelledSubject.str(), 0, 0, 0, etime, auction->bid, 0, NOT_READ, NULL);
+        bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionCancelledSubject.str(), 0, 0, 0, etime,dtime, auction->bid, 0, NOT_READ, NULL);
     }
 
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '%u', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionCancelledSubject.str().c_str(), (uint64)etime, auction->bid, NOT_READ);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "','" I64FMTD "', '%u','%u', '0', '%d')",
+        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionCancelledSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
 }
 
 //this void creates new auction and adds auction to some auctionhouse
@@ -473,12 +475,13 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             msgAuctionCanceledOwner << auction->item_template << ":0:" << AUCTION_CANCELED;
 
             uint32 messageID = objmgr.GenerateMailID();
-            time_t etime = time(NULL) + (30 * DAY);
+            time_t dtime = time(NULL);                      //Instant since it's Auction House
+            time_t etime = dtime + (30 * DAY);
 
-            pl->CreateMail( messageID, AUCTIONHOUSE_MAIL, auction->location, msgAuctionCanceledOwner.str(), 0, auction->item_guid, auction->item_template, etime, 0, 0, 0, pItem);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "', '0', '0', '0')",
-                messageID, AUCTIONHOUSE_MAIL, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime);
+            pl->CreateMail( messageID, AUCTIONHOUSE_MAIL, auction->location, msgAuctionCanceledOwner.str(), 0, auction->item_guid, auction->item_template, etime,dtime, 0, 0, 0, pItem);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+                "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '0')",
+                messageID, AUCTIONHOUSE_MAIL, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime);
 
         }
         else

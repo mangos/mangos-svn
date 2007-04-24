@@ -206,6 +206,11 @@ void Master::Run()
 
     sLog.outString( "Halting process..." );
 
+    #ifdef WIN32
+        // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
+        _exit(1);
+    #endif
+
     return;
 }
 

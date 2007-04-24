@@ -54,11 +54,11 @@ enum MailMessageType
     AUCTIONHOUSE_MAIL   = 2
 };
 
-enum Mail_state                                             //mail state created isn't used, because it caused items duplication
+enum Mail_state
 {
-    UNCHANGED           = 1,
-    CHANGED             = 2,
-    DELETED             = 3
+    MAIL_STATE_UNCHANGED = 1,
+    MAIL_STATE_CHANGED   = 2,
+    MAIL_STATE_DELETED   = 3
 };
 
 enum MailAuctionAnswers
@@ -81,7 +81,8 @@ struct Mail
     uint32 itemTextId;
     uint32 item_guid;
     uint32 item_template;
-    time_t time;
+    time_t expire_time;
+    time_t deliver_time;
     uint32 money;
     uint32 COD;
     uint32 checked;
