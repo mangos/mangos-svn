@@ -821,7 +821,7 @@ void Creature::generateMoneyLoot()
     }
 }
 
-void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, bool WalkBack)
+void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, uint8 type)
 {
     /*    uint32 timeElap = getMSTime();
         if ((timeElap - m_startMove) < m_moveTime)
@@ -841,7 +841,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 
         m_startMove = getMSTime();
         m_moveTime = time;*/
-    SendMonsterMove(x,y,z,WalkBack,run,time);
+    SendMonsterMove(x,y,z,type,run,time);
 }
 
 Player *Creature::GetLootRecipient() const

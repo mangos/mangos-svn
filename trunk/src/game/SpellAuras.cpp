@@ -244,9 +244,9 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT
     &Aura::HandleNULL,                                      //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT
     &Aura::HandleNULL,                                      //196                                   unused
-    &Aura::HandleNULL,                                      //197
+    &Aura::HandleNULL,                                      //197 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE_PCT
     &Aura::HandleNULL,                                      //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
-    &Aura::HandleNULL,                                      //199 SPELL_AURA_MOD_SPELL_HIT_CHANCE
+    &Aura::HandleNULL,                                      //199 SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT
     &Aura::HandleNULL,                                      //200
     &Aura::HandleAuraAllowFlight,                           //201                                   this aura probably must enable flight mode...
     &Aura::HandleNULL,                                      //202 SPELL_AURA_CANNOT_BE_DODGED
@@ -440,7 +440,7 @@ void Aura::Update(uint32 diff)
                 // fixed me if it needs checking when the position will be in water?
                 if(z<=pos_z+1.3 && z>=pos_z-1.3)
                 {
-                    m_target->SendMonsterMove(x,y,z,false,true,diff);
+                    m_target->SendMonsterMove(x,y,z,0,true,diff);
                     if(m_target->GetTypeId() != TYPEID_PLAYER)
                         m_target->Relocate(x,y,z,m_target->GetOrientation());
                 }
@@ -2692,7 +2692,6 @@ void Aura::HandleModHealingDone(bool apply, bool Real)
     // this information is for client side only
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,m_modifier.m_amount,apply);
-  
 }
 
 void Aura::HandleModHealingDonePercent(bool apply, bool Real)
@@ -2774,8 +2773,9 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 
 void Aura::HandleModRegen(bool apply, bool Real)            // eating
 {
-    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
-        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0 && apply)
+        //m_target->ApplyModFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT,apply);
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);    // do not stand up after aura remove...
 
     if(apply && m_periodicTimer <= 0)
     {

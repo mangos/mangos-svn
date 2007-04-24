@@ -281,6 +281,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "ps",          3, &ChatHandler::HandlePlaySound2Command,       "",   NULL },
         { "scn",         3, &ChatHandler::HandleSendChannelNotifyCommand,"",   NULL },
         { "scm",         3, &ChatHandler::HandleSendChatMsgCommand,      "",   NULL },
+
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },

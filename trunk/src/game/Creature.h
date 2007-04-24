@@ -299,7 +299,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void AIM_Initialize(void);
         MotionMaster* operator->(void) { return &i_motionMaster; }
 
-        void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, bool WalkBack);
+        void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, uint8 type);
         inline CreatureAI &AI(void) { return *i_AI; }
 
         inline void setMoveRunFlag(bool f) { m_moveRun = f; }
@@ -308,7 +308,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline void StopMoving(void)
         {
             clearUnitState(UNIT_STAT_MOVING);
-            AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, false);
+            AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, 1);
         }
 
         uint32 GetBlockValue() const                        //dunno mob block value

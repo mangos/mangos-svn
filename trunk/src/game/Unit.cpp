@@ -187,10 +187,10 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
         transitTime = static_cast<uint32>(dist / speed + 0.5);
     }
     //float orientation = (float)atan2((double)dy, (double)dx);
-    SendMonsterMove(x,y,z,false,run,transitTime);
+    SendMonsterMove(x,y,z,0,run,transitTime);
 }
 
-void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Walkback, bool Run, uint32 Time)
+void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time)
 {
     WorldPacket data( SMSG_MONSTER_MOVE, (41+GetPackGUID().size()) );
     data.append(GetPackGUID());
@@ -201,8 +201,22 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Wal
     // for now, we'll just use mstime
     data << getMSTime();
 
-    data << uint8(Walkback);                                // walkback when walking from A to B
-    data << uint32(Run ? 0x00000100 : 0x00000000);          // flags
+    data << uint8(type);                                    // unknown
+    switch(type)
+    {
+        case 0:                                             // normal packet
+            break;
+        case 1:                                             // stop packet
+            SendMessageToSet( &data, true );
+            return;
+        case 3:                                             // not used currently
+            data << uint64(0);                              // probably target guid
+            break;
+        case 4:                                             // not used currently
+            data << float(0);                               // probably orientation
+            break;
+    }
+    data << uint32(Run ? 0x00000100 : 0x00000000);          // flags (0x100 - running, 0x200 - taxi)
     /* Flags:
     512: Floating, moving without walking/running
     */

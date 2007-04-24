@@ -388,6 +388,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     SendPacket(&data);
     //sLog.outDebug( "WORLD: Sent tutorial flags." );
 
+    pCurrChar->_LoadSpellCooldowns();
     GetPlayer()->SendInitialSpells();
     GetPlayer()->SendInitialActionButtons();
     GetPlayer()->SendInitialReputations();
@@ -504,7 +505,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     pCurrChar->BroadcastPacketToFriendListers(&data);
 
     pCurrChar->LoadEnchant();
-    pCurrChar->_LoadSpellCooldowns();
 
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();

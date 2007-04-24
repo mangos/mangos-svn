@@ -972,7 +972,8 @@ enum QuestTypes
     QUEST_TYPE_DUNGEON             = 81,
     QUEST_TYPE_WORLD_EVENT         = 82,
     QUEST_TYPE_LEGENDARY           = 83,
-    QUEST_TYPE_ESCORT              = 84
+    QUEST_TYPE_ESCORT              = 84,
+    QUEST_TYPE_HEROIC              = 85
 };
 
 enum QuestSort

@@ -84,7 +84,6 @@ class DBCStorage
             T const* LookupEntry(uint32 id) const
         {
             return (id>=nCount)?NULL:data[id];
-
         }
         inline
             unsigned int GetNumRows() const
