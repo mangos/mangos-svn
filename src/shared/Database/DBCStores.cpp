@@ -400,7 +400,6 @@ bool IsSealSpell(uint32 spellId)
         spellInfo->SpellVisual ==  298 || spellInfo->SpellVisual == 7975 );
 }
 
-
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);

@@ -895,11 +895,12 @@ void Spell::cast(bool skipCheck)
     SendSpellCooldown();
 
     TakePower(mana);
-    TakeCastItem();
+    //TakeCastItem();
     TakeReagents();
     FillTargetMap();
     SendCastResult(castResult);
-    SendSpellGo();
+    SendSpellGo(); // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
+    TakeCastItem();
 
     if(IsChanneledSpell())
     {
@@ -1023,7 +1024,6 @@ void Spell::SendSpellCooldown()
         return;
 
     Player* _player = (Player*)m_caster;
-    bool send = false;
 
     // init cooldown values
     uint32 cat   = 0;
@@ -1033,6 +1033,7 @@ void Spell::SendSpellCooldown()
     // some special item spells without correct cooldown in SpellInfo
     // cooldown information stored in item prototype
     // This used in same way in WorldSession::HandleItemQuerySingleOpcode data sending to client.
+
     if(m_CastItem)
     {
         ItemPrototype const* proto = m_CastItem->GetProto();
@@ -1082,44 +1083,41 @@ void Spell::SendSpellCooldown()
     time_t recTime    = curTime+rec/1000;                   // in secs
     time_t catrecTime = curTime+catrec/1000;                // in secs
 
-    WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4+4+4));
-    data << m_caster->GetGUID();
-    data << uint8(0x0);
-
     // self spell cooldown
     if (rec > 0)
     {
         // only send if different from client known cooldown
         if(m_spellInfo->RecoveryTime != rec)
         {
+            /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
+            data << m_caster->GetGUID();
+            data << uint8(0x0);
             data << uint32(m_spellInfo->Id);
             data << uint32(rec);
-            send = true;
+            _player->GetSession()->SendPacket(&data);*/
         }
-        _player->AddSpellCooldown(m_spellInfo->Id,recTime);
+        if(m_CastItem)
+            _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem->GetEntry(), recTime);
+        else
+            _player->AddSpellCooldown(m_spellInfo->Id, 0, recTime);
     }
     else
     {
         // only send if different from client known cooldown
         if(m_spellInfo->RecoveryTime && m_spellInfo->RecoveryTime != catrec || m_spellInfo->CategoryRecoveryTime != catrec)
         {
+            /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
+            data << m_caster->GetGUID();
+            data << uint8(0x0);
             data << uint32(m_spellInfo->Id);
             data << uint32(catrec);
-            send = true;
+            _player->GetSession()->SendPacket(&data);*/
         }
-        _player->AddSpellCooldown(m_spellInfo->Id,catrecTime);
+        if(m_CastItem)
+            _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem->GetEntry(), catrecTime);
+        else
+            _player->AddSpellCooldown(m_spellInfo->Id, 0, catrecTime);
     }
-
-    if(send) // prevent send wrong (not complete packet)
-    {
-        _player->GetSession()->SendPacket(&data);
-        send = false;
-    }
-    data.clear();
-
-    data.Initialize(SMSG_SPELL_COOLDOWN, (8+1+4+4+4+4));
-    data << m_caster->GetGUID();
-    data << uint8(0x0);
 
     if (catrec)
     {
@@ -1134,21 +1132,24 @@ void Spell::SendSpellCooldown()
                 // only send if different from client known cooldown
                 if(cat != m_spellInfo->Category || m_spellInfo->CategoryRecoveryTime != catrec)
                 {
+                    /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
+                    data << m_caster->GetGUID();
+                    data << uint8(0x0);
                     data << uint32(*i_scset);
                     data << uint32(catrec);
-                    send = true;
+                    _player->GetSession()->SendPacket(&data);*/
                 }
-                _player->AddSpellCooldown(*i_scset,catrecTime);
+                if(m_CastItem)
+                    _player->AddSpellCooldown(*i_scset, m_CastItem->GetEntry(), catrecTime);
+                else
+                    _player->AddSpellCooldown(*i_scset, 0, catrecTime);
             }
         }
     }
 
-    if(send) // prevent send wrong (not complete packet)
-        _player->GetSession()->SendPacket(&data);
-
     // show cooldown for item
-    if(m_CastItem)
-        _player->SetItemsCooldown(cat);
+    //if(m_CastItem)
+    //    _player->SetItemsCooldown(cat);
 }
 
 void Spell::update(uint32 difftime)
@@ -1379,11 +1380,11 @@ void Spell::SendSpellStart()
         target = m_targets.getUnitTarget();
 
     WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2));
-    //data.append(target->GetPackGUID());
-    /* in fact this should be the causer's guid. so if you clicked on a item and
-       this caused spell it has to be the item's guid
-    */
-    data.append(m_caster->GetPackGUID());
+    if(m_CastItem)
+        data.append(m_CastItem->GetPackGUID());
+    else
+        data.append(m_caster->GetPackGUID());
+
     data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
     data << m_castFlags;
@@ -1413,11 +1414,11 @@ void Spell::SendSpellGo()
         m_castFlags = m_castFlags | CAST_FLAG_AMMO;
 
     WorldPacket data(SMSG_SPELL_GO, (50));                  // guess size
-    //data.append(target->GetPackGUID());
-    /* in fact this should be the causer's guid. so if you clicked on a item and
-       this caused spell it has to be the item's guid
-    */
-    data.append(m_caster->GetPackGUID());
+    if(m_CastItem)
+        data.append(m_CastItem->GetPackGUID());
+    else
+        data.append(m_caster->GetPackGUID());
+
     data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
 

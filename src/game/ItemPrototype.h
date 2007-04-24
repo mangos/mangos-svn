@@ -166,8 +166,7 @@ enum BAG_FAMILY
     BAG_FAMILY_ENGINEERING_SUPP                 = 8,
     BAG_FAMILY_KEYS                             = 9,
     BAG_FAMILY_GEMS                             = 10,
-    //BAG_FAMILY_UNK3                            = 11,
-    BAG_FAMILY_MINING_SUPP                      = 12
+    BAG_FAMILY_MINING_SUPP                      = 11
 };
 
 /* TODO: Not entirely positive on need for this??

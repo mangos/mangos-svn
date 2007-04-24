@@ -770,6 +770,9 @@ void BattleGround::AddPlayer(Player *plr)
 
     plr->SendInitWorldStates();
 
+    if(plr->groupInfo.group)   // leave old group before join battleground raid group, not blizz like (old group must be restored after leave BG)...
+        plr->groupInfo.group->RemoveMember(plr->GetGUID(), 0);
+
     if(!GetBgRaid(plr->GetTeam()))      // first player joined
     {
         Group *group = new Group;

@@ -23,7 +23,6 @@
 
 SpellEntry const* Cast(Player*player,Item* item, uint32 spellId)
 {
-
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo)
     {
@@ -522,6 +521,8 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
     }
 
     Field *fields = result->Fetch();
+
+    _Create(guid, HIGHGUID_ITEM);
 
     if(!LoadValues(fields[0].GetString()))
     {

@@ -71,7 +71,7 @@ inline void Traveller<Creature>::Relocation(float x, float y, float z, float ori
 template<>
 inline void Traveller<Creature>::MoveTo(float x, float y, float z, uint32 t)
 {
-    i_traveller.AI_SendMoveToPacket(x, y, z, t, i_traveller.getMoveRunFlag(), false);
+    i_traveller.AI_SendMoveToPacket(x, y, z, t, i_traveller.getMoveRunFlag(), 0);
 }
 
 // specialization for players

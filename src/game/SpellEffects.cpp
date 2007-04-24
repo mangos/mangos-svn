@@ -2757,7 +2757,7 @@ void Spell::EffectCharge(uint32 i)
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature *)unitTarget)->StopMoving();
 
-    m_caster->SendMonsterMove(x, y, z, false,true,1);
+    m_caster->SendMonsterMove(x, y, z, 0, true,1);
 
     m_caster->Attack(unitTarget,true);
 }

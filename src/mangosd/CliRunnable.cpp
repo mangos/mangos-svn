@@ -67,7 +67,7 @@ void CliMotd(char*,pPrintf);
 void CliCorpses(char*,pPrintf);
 void CliSetLogLevel(char*,pPrintf);
 void CliUpTime(char*,pPrintf);
-void CliSetTBC(char*,pPrintf); 
+void CliSetTBC(char*,pPrintf);
 
 /// Table of known commands
 const CliCommand Commands[]=
@@ -84,7 +84,7 @@ const CliCommand Commands[]=
     {"listbans", & CliBanList,"List bans"},
     {"unban", & CliRemoveBan,"Remove ban from account|ip"},
     {"setgm", & CliSetGM,"Edit user privileges"},
-    {"setbc", & CliSetTBC,"Set user expansion allowed"},  
+    {"setbc", & CliSetTBC,"Set user expansion allowed"},
     {"listgm", & CliListGM,"Display user privileges"},
     {"loadscripts", & CliLoadScripts,"Load script library"},
     {"setloglevel", & CliSetLogLevel,"Set Log Level"},
@@ -686,7 +686,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
         zprintf("No account %s found\r\n",szAcc);
     }
 }
-  
+
 /// @}
 
 /// %Thread start

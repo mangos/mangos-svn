@@ -2009,19 +2009,29 @@ void Player::SendInitialSpells()
     data << spellCooldowns;
     for(SpellCooldowns::const_iterator itr=m_spellCooldowns.begin(); itr!=m_spellCooldowns.end(); itr++)
     {
+        SpellEntry const *sEntry = sSpellStore.LookupEntry(itr->first);
+        if(!sEntry)
+            continue;
+
         data << uint16(itr->first);
-        data << uint32(0);                  // unk not everytime 0
 
-        time_t curTime = time(NULL);
-        if(itr->second <= curTime)
-            data << uint32(0); // expired
+        time_t cooldown = 0;
+        if(itr->second.end > time(NULL))
+            cooldown = (itr->second.end-time(NULL))*1000;
+
+        data << uint16(itr->second.itemid);
+        data << uint16(sEntry->Category);
+        if(sEntry->Category)                    // may be wrong, but anyway better than nothing...
+        {
+            data << uint32(0);
+            data << uint32(cooldown);
+        }
         else
-            data << uint32((itr->second-curTime)*1000);
-        //data << uint32(itr->second);        // always cooldown (in ms?)
-        data << uint32(0);                  // seems to be some flags (0x80000000 when cooldown locked)
+        {
+            data << uint32(cooldown);
+            data << uint32(0);
+        }
     }
-
-    WPAssert(data.size() == 1+2+(4*spellCount)+2+(14*spellCooldowns)); // correct?
 
     GetSession()->SendPacket(&data);
 
@@ -2338,7 +2348,6 @@ void Player::RemoveAllSpellCooldown()
             WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
             data << uint32(itr->first);
             data << GetGUID();
-            //data << uint32(0);
             GetSession()->SendPacket(&data);
         }
         m_spellCooldowns.clear();
@@ -2349,7 +2358,7 @@ void Player::_LoadSpellCooldowns()
 {
     m_spellCooldowns.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -2360,7 +2369,8 @@ void Player::_LoadSpellCooldowns()
             Field *fields = result->Fetch();
 
             uint32 spell_id = fields[0].GetUInt32();
-            time_t db_time  = (time_t)fields[1].GetUInt64();
+            uint32 item_id  = fields[1].GetUInt32();
+            time_t db_time  = (time_t)fields[2].GetUInt64();
 
             if(!sSpellStore.LookupEntry(spell_id))
             {
@@ -2372,17 +2382,17 @@ void Player::_LoadSpellCooldowns()
             if(db_time <= curTime)
                 continue;
 
-            AddSpellCooldown(spell_id,db_time);
+            AddSpellCooldown(spell_id, item_id, db_time);
 
-            sLog.outDebug("Player (GUID: %u) spell %u cooldown loaded (%u secs).",GetGUIDLow(),spell_id,uint32(db_time-curTime));
+            sLog.outDebug("Player (GUID: %u) spell %u, item %u cooldown loaded (%u secs).", GetGUIDLow(), spell_id, item_id, uint32(db_time-curTime));
         }
         while( result->NextRow() );
 
         delete result;
     }
 
-    if(!m_spellCooldowns.empty())
-        SetItemsCooldown();
+    //if(!m_spellCooldowns.empty())
+    //    SetItemsCooldown();
 }
 
 void Player::SetItemsCooldown(uint32 category)
@@ -2468,11 +2478,11 @@ void Player::_SaveSpellCooldowns()
     // remove outdated and save active
     for(SpellCooldowns::iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end();)
     {
-        if(itr->second <= curTime)
+        if(itr->second.end <= curTime)
             m_spellCooldowns.erase(itr++);
         else
         {
-            sDatabase.PExecute("INSERT INTO `character_spell_cooldown` (`guid`,`spell`,`time`) VALUES ('%u', '%u', '" I64FMTD "')", GetGUIDLow(), itr->first, uint64(itr->second));
+            sDatabase.PExecute("INSERT INTO `character_spell_cooldown` (`guid`,`spell`,`item`,`time`) VALUES ('%u', '%u', '%u', '" I64FMTD "')", GetGUIDLow(), itr->first, itr->second.itemid, uint64(itr->second.end));
             ++itr;
         }
     }
@@ -12000,7 +12010,7 @@ void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32
         {
             data << unSpellId;
             data << unTimeMs;               // in m.secs
-            AddSpellCooldown(unSpellId, curTime + unTimeMs/1000);
+            AddSpellCooldown(unSpellId, 0, curTime + unTimeMs/1000);
         }
     }
     GetSession()->SendPacket(&data);
@@ -12395,4 +12405,12 @@ void Player::SendAllowMove()
     WorldPacket data(SMSG_ALLOW_MOVE, 4);   // new 2.0.x, enable movement
     data << uint32(0x00000000);             // on blizz it increments periodically
     GetSession()->SendPacket(&data);
+}
+
+void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
+{
+    SpellCooldown sc;
+    sc.end = end_time;
+    sc.itemid = itemid;
+    m_spellCooldowns[spellid] = sc;
 }
