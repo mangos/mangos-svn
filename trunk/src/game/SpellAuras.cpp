@@ -2689,6 +2689,10 @@ void Aura::HandleModPercentStat(bool apply, bool Real)
 void Aura::HandleModHealingDone(bool apply, bool Real)
 {
     // implemented in Unit::SpellHealingBonus
+    // this information is for client side only
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,m_modifier.m_amount,apply);
+  
 }
 
 void Aura::HandleModHealingDonePercent(bool apply, bool Real)
@@ -3070,6 +3074,49 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     }
 
     // Magic damage modifiers implemented in Unit::SpellDamageBonus
+    // This information for client side use only
+
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        if(m_modifier.m_miscvalue2)
+        {
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_HOLY) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+1,m_modifier.m_amount,apply);
+            
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FIRE) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+2,m_modifier.m_amount,apply);
+
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_NATURE) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+3,m_modifier.m_amount,apply);
+
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FROST) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+4,m_modifier.m_amount,apply);
+
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_SHADOW) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+5,m_modifier.m_amount,apply);
+
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_ARCANE) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+6,m_modifier.m_amount,apply);
+        }
+        else
+        {
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_HOLY) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+1,m_modifier.m_amount,apply);
+            
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FIRE) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+2,m_modifier.m_amount,apply);
+
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_NATURE) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+3,m_modifier.m_amount,apply);
+
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FROST) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+4,m_modifier.m_amount,apply);
+
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_SHADOW) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+5,m_modifier.m_amount,apply);
+
+            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_ARCANE) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+6,m_modifier.m_amount,apply);
+        }
 }
 
 void Aura::HandleModDamagePercentDone(bool apply, bool Real)
@@ -3131,6 +3178,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     }
 
     // Magic damage percent modifiers implemented in Unit::SpellDamageBonus
+    // Client does not update visual spell damages when percentage aura is applied
 }
 
 void Aura::HandleModOffhandDamagePercent(bool apply, bool Real)
