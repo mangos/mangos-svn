@@ -853,7 +853,7 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
     }
 }
 
-/// Send a System Message to all players (except self if mentionned)
+/// Send a System Message to all players (except self if mentioned)
 void World::SendWorldText(const char* text, WorldSession *self)
 {
     WorldPacket data;
@@ -861,8 +861,8 @@ void World::SendWorldText(const char* text, WorldSession *self)
     SendGlobalMessage(&data, self);
 }
 
-/// Send a packet to all players in the zone (except self if mentionned)
-void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self, uint32 security)
+/// Send a packet to all players (or players selected team) in the zone (except self if mentioned)
+void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self, uint32 team)
 {
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
@@ -872,19 +872,28 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
             itr->second->GetPlayer()->IsInWorld() &&
             itr->second->GetPlayer()->GetZoneId() == zone &&
             itr->second != self &&
-            itr->second->GetSecurity() >= security)
+            (team == 0 || itr->second->GetPlayer()->GetTeam() == team) )
         {
             itr->second->SendPacket(packet);
         }
     }
 }
 
+/// Send a message to LocalDefense channel for players selected team in the zone
+void World::SendZoneUnderAttackMessage(uint32 zone, uint32 team)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ZONE_UNDER_ATTACK);
+    data << (uint32)zone;
+    SendZoneMessage(zone,&data,NULL,team);
+}
+
 /// Send a System Message to all players in the zone (except self if mentionned)
-void World::SendZoneText(uint32 zone, const char* text, WorldSession *self, uint32 security) 
+void World::SendZoneText(uint32 zone, const char* text, WorldSession *self, uint32 team) 
 {
     WorldPacket data;
     sChatHandler.FillSystemMessageData(&data, 0, text);
-    SendZoneMessage(zone, &data, self,security);
+    SendZoneMessage(zone, &data, self,team);
 }
 
 /// Kick (and save) all players
