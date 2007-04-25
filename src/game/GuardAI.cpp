@@ -172,6 +172,12 @@ void GuardAI::AttackStart(Unit *u)
     if( !u )
         return;
 
+    if (u->GetTypeId() == TYPEID_PLAYER)
+    {
+        uint32 enemy_team = ((Player*)u)->GetTeam();
+        sWorld.SendZoneUnderAttackMessage(i_creature.GetZoneId(), (enemy_team==ALLIANCE ? HORDE : ALLIANCE));
+    }
+
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     if(i_creature.Attack(u))
     {
