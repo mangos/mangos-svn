@@ -269,7 +269,6 @@
 #define LANG_ADDITEM                     "Command : Additem, itemId = %i, amount = %i"
 #define LANG_ADDITEMSET                  "Command : Additemset, itemsetId = %i"
 #define LANG_ITEM_CANNOT_CREATE          "Cannot create item '%i' (amount: %i)"
-#define LANG_ITEM_CREATED                "Item '%i' created (amount: %i)"
 #define LANG_INSERT_GUILD_NAME           "You need to insert a Guild Name!"
 #define LANG_PLAYER_NOT_FOUND            "Player not found!"
 #define LANG_PLAYER_IN_GUILD             "Player already have a guild!"
