@@ -44,11 +44,6 @@ Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( inst
 
 Corpse::~Corpse()
 {
-    if(m_uint32Values)                                      // only for fully created Object
-    {
-        if(GetType() == CORPSE_RESURRECTABLE)
-            ObjectAccessor::Instance().RemoveCorpse(this);
-    }
 }
 
 bool Corpse::Create( uint32 guidlow )
@@ -110,8 +105,15 @@ void Corpse::SaveToDB()
 void Corpse::DeleteBonesFromWorld()
 {
     assert(GetType()==CORPSE_BONES);
-    ObjectAccessor::Instance().RemoveBonesFromPlayerView(this);
-    ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    CorpsePtr corpse = MapManager::Instance().GetMap(GetMapId(), this)->GetObjectNear<Corpse>(*this, GetGUID());
+
+    if (!corpse) {
+	sLog.outError("Bones %u not found in world.", GetGUIDLow());
+    } else {
+	ObjectAccessor::Instance().RemoveBonesFromPlayerView(corpse);
+	ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    }
+
     RemoveFromWorld();
 }
 
@@ -220,6 +222,17 @@ void Corpse::_ConvertCorpseToBones()
         return;
 
     Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID());
+    CorpsePtr corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetOwnerGUID());
+    if(!corpse)
+    {
+	sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
+	return;
+    }
+
+    if ((&*corpse) != this) {
+	sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
+	return;
+    }
 
     // Removing outdated POI if at same map
     if(player && IsInMap(player))
@@ -227,33 +240,49 @@ void Corpse::_ConvertCorpseToBones()
 
     DEBUG_LOG("Deleting Corpse and spawning bones.\n");
 
+    // remove corpse from player_guid -> corpse map
+    ObjectAccessor::Instance().RemoveCorpse(this);
+
     // remove resurrectble corpse from grid object registry (loaded state checked into call)
-    MapManager::Instance().GetMap(GetMapId(), this)->Remove(this,false);
+    MapManager::Instance().GetMap(GetMapId(), this)->Remove(corpse,false);
 
     // remove corpse from DB
     DeleteFromDB();
 
-    // update data to bone state
-    m_type = CORPSE_BONES;
+    // Create bones, don't change Corpse
+    CorpsePtr bones = CorpsePtr(new Corpse(this));
+    bones->Create(GetGUIDLow());
 
-    SetUInt32Value(CORPSE_FIELD_FLAGS, 5);
-    SetUInt64Value(CORPSE_FIELD_OWNER, 0);
+    for (int i = 0; i < CORPSE_END; i++) {
+	bones->SetUInt32Value(i, GetUInt32Value(i));
+    }
+    bones->m_grid = m_grid;
+    bones->m_time = m_time;
+    bones->m_inWorld = m_inWorld;
+    bones->Relocate(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+    bones->SetMapId(GetMapId());
+
+    // update data to bone state
+    bones->m_type = CORPSE_BONES;
+
+    bones->SetUInt32Value(CORPSE_FIELD_FLAGS, 5);
+    bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
 
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
-        if(GetUInt32Value(CORPSE_FIELD_ITEM + i))
-            SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
+        if(corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
+            bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
     }
 
     // add bones to DB
-    SaveToDB();
+    bones->SaveToDB();
 
     // add bones in grid store if grid loaded where corpse placed
-    if(!MapManager::Instance().GetMap(GetMapId(), this)->IsRemovalGrid(GetPositionX(),GetPositionY()))
+    if(!MapManager::Instance().GetMap(bones->GetMapId(), &*bones)->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
     {
-        MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
+        MapManager::Instance().GetMap(GetMapId(), &*bones)->Add(bones);
     }
     // or prepare to delete at next tick if grid not loaded
     else
-        DeleteBonesFromWorld();
+        bones->DeleteBonesFromWorld();
 }

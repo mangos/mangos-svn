@@ -27,11 +27,11 @@
  * see each other's movement.
  */
 
+#include "zthread/FastMutex.h"
 #include "Policies/Singleton.h"
 #include "WaypointMovementGenerator.h"
 #include "Log.h"
 
-#include "zthread/FastMutex.h"
 #include <functional>
 #include <vector>
 #include <cassert>

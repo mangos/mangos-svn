@@ -53,7 +53,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         typedef HM_NAMESPACE::hash_map<uint64, Pet* >    PetsMapType;
         typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayersMapType;
-        typedef HM_NAMESPACE::hash_map<uint64, Corpse* > Player2CorpsesMapType;
+        typedef HM_NAMESPACE::hash_map<uint64, CorpsePtr > Player2CorpsesMapType;
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);
@@ -82,13 +82,13 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void DoDelayedMovesAndRemoves();
 
         void RemoveCreatureCorpseFromPlayerView(Creature *);
-        void RemoveBonesFromPlayerView(Corpse *);
+        void RemoveBonesFromPlayerView(CorpsePtr&);
 
         void Update(const uint32 &diff);
 
-        Corpse* GetCorpseForPlayerGUID(uint64 guid);
+        CorpsePtr& GetCorpseForPlayerGUID(uint64 guid);
         void RemoveCorpse(Corpse *corpse);
-        void AddCorpse(Corpse *corpse);
+        void AddCorpse(CorpsePtr& corpse);
         void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* map);
         bool ConvertCorpseForPlayer(uint64 player_guid);
 
@@ -111,6 +111,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
             ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
             void Visit(std::map<OBJECT_HANDLE, Player *> &);
             template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+            template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
         };
 
         friend struct ObjectChangeAccumulator;
@@ -143,6 +144,7 @@ namespace MaNGOS
         BuildUpdateForPlayer(Player &player, UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
         void Visit(std::map<OBJECT_HANDLE, Player *> &);
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
     };
 
     struct MANGOS_DLL_DECL CreatureCorpseViewRemover
@@ -151,14 +153,16 @@ namespace MaNGOS
         CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
     };
 
     struct MANGOS_DLL_DECL BonesViewRemover
     {
-        Object &i_objects;
-        BonesViewRemover(Object &o) : i_objects(o) {}
+        CorpsePtr i_objects;
+        BonesViewRemover(CorpsePtr &o) : i_objects(o) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
     };
 }
 #endif

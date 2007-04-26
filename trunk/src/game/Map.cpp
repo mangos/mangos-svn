@@ -184,6 +184,13 @@ void Map::AddToGrid(T* obj, NGridType *grid, Cell const& cell)
     (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
 }
 
+template<class T>
+void Map::AddToGrid(CountedPtr<T> &obj, NGridType *grid, Cell const& cell)
+{
+    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
+    (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
+}
+
 template<>
 void Map::AddToGrid(Player* obj, NGridType *grid, Cell const& cell)
 {
@@ -192,19 +199,19 @@ void Map::AddToGrid(Player* obj, NGridType *grid, Cell const& cell)
 }
 
 template<>
-void Map::AddToGrid(Corpse* obj, NGridType *grid, Cell const& cell)
+void Map::AddToGrid(CorpsePtr &obj, NGridType *grid, Cell const& cell)
 {
     // add to world object registry in grid
     if(obj->GetType()==CORPSE_RESURRECTABLE)
     {
         WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject<Corpse>(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj, obj->GetGUID());
     }
     // add to grid object store
     else
     {
         WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).AddGridObject<Corpse>(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).AddGridObject(obj, obj->GetGUID());
     }
 }
 
@@ -242,19 +249,19 @@ void Map::RemoveFromGrid(Player* obj, NGridType *grid, Cell const& cell)
 }
 
 template<>
-void Map::RemoveFromGrid(Corpse* obj, NGridType *grid, Cell const& cell)
+void Map::RemoveFromGrid(CorpsePtr &obj, NGridType *grid, Cell const& cell)
 {
     // remove from world object registry in grid
     if(obj->GetType()==CORPSE_RESURRECTABLE)
     {
         WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject<Corpse>(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj, obj->GetGUID());
     }
     // remove from grid object store
     else
     {
         WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject<Corpse>(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject(obj, obj->GetGUID());
     }
 }
 
@@ -283,33 +290,41 @@ void Map::DeleteFromWorld(T* obj)
 }
 
 template<class T>
-T* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
+void Map::DeleteFromWorld(CountedPtr<T> &obj)
 {
-    return ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(guid);
+    // Note: In case resurrectable corpse and pet its removed from gloabal lists in own destructors
+    //delete obj;
+    obj.reset();
+}
+
+template<class T>
+T* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell, T* fake) const
+{
+    return ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(guid, (T*)NULL);
 }
 
 template<>
-Player* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
+Player* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell, Player* fake) const
 {
-    return ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Player>(guid);
+    return ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Player>(guid, (Player*)NULL);
 }
 
 template<>
-Corpse* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
+CorpsePtr& Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
 {
-    Corpse* obj = ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Corpse>(guid);
+    CorpsePtr &obj = ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Corpse>(guid);
+    if(!obj)
+        obj = ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<Corpse>(guid);
+    return obj;
+}
+
+template<>
+Creature* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell, Creature *fake) const
+{
+    Creature* obj = ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Creature>(guid, (Creature*)NULL);
     if(obj)
         return obj;
-    return ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<Corpse>(guid);
-}
-
-template<>
-Creature* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell) const
-{
-    Creature* obj = ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Creature>(guid);
-    if(obj)
-        return obj;
-    return ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<Creature>(guid);
+    return ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<Creature>(guid, (Creature*)NULL);
 }
 
 uint64
@@ -587,6 +602,37 @@ Map::Add(T *obj)
 }
 
 template<class T>
+void
+Map::Add(CountedPtr<T> &obj)
+{
+    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+
+    assert((bool)obj);
+
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        sLog.outError("Map::Add: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
+
+    Cell cell = RedZone::GetZone(p);
+    EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
+    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    assert( grid != NULL );
+
+    AddToGrid(obj,grid,cell);
+
+    DEBUG_LOG("Object %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
+    cell.data.Part.reserved = ALL_DISTRICT;
+
+    MaNGOS::ObjectVisibleNotifier notifier(*static_cast<WorldObject *>(&(*obj)));
+    TypeContainerVisitor<MaNGOS::ObjectVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
+
+    CellLock<ReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, player_notifier, *this);
+}
+
+template<class T>
 bool
 Map::Find(T *obj) const
 {
@@ -603,17 +649,37 @@ Map::Find(T *obj) const
 
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
+    return this->FindInGrid<T>(obj->GetGUID(),grid,cell, (T*)NULL)!=0;
+}
+
+template<class T>
+bool
+Map::Find(CountedPtr<T> &obj) const
+{
+    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        sLog.outError("Map::Add: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return false;
+    }
+
+    Cell cell = RedZone::GetZone(p);
+    if(!i_grids[cell.GridX()][cell.GridY()])
+        return false;
+
+    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    assert( grid != NULL );
     return this->FindInGrid<T>(obj->GetGUID(),grid,cell)!=0;
 }
 
 template <class T>
-T* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl)
+T* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, T *fake)
 {
-    return GetObjectNear<T>(obj.GetPositionX(), obj.GetPositionY(), hdl);
+    return GetObjectNear<T>(obj.GetPositionX(), obj.GetPositionY(), hdl, fake);
 }
 
 template <class T>
-T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl)
+T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T *fake)
 {
     CellPair p = MaNGOS::ComputeCellPair(x,y);
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
@@ -636,7 +702,7 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl)
             NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
             assert( grid != NULL );
 
-            T *result = FindInGrid<T>(hdl,grid,cell);
+            T *result = FindInGrid<T>(hdl,grid,cell, fake);
             if (result) return result;
 
             if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
@@ -647,6 +713,49 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl)
             break;
     }
     return NULL;
+}
+
+template <class T>
+CountedPtr<T>& Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl)
+{
+    return GetObjectNear<T>(obj.GetPositionX(), obj.GetPositionY(), hdl);
+}
+
+template <class T>
+CountedPtr<T>& Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl)
+{
+    CellPair p = MaNGOS::ComputeCellPair(x,y);
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        sLog.outError("Map::GetObjectNear: invalid coordiates supplied X:%u Y:%u grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
+        return NullPtr<T>((T*)NULL);
+    }
+
+    CellPair xcell(p), cell_iter;
+    xcell << 1;
+    xcell -= 1;
+    for(; abs(int(p.x_coord - xcell.x_coord)) < 2; xcell >> 1)
+    {
+        for(cell_iter = xcell; abs(int(p.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+        {
+            Cell cell = RedZone::GetZone(cell_iter);
+            if(!i_grids[cell.GridX()][cell.GridY()])
+                continue;
+
+            NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+            assert( grid != NULL );
+
+            CountedPtr<T> &result = FindInGrid<T>(hdl,grid,cell);
+            if (result) return result;
+
+            if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
+                break;
+        }
+
+        if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
+            break;
+    }
+    return NullPtr<T>((T*)NULL);
 }
 
 void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
@@ -765,8 +874,8 @@ bool Map::RemoveBones(uint64 guid, float x, float y)
 {
     if (IsRemovalGrid(x, y))
     {
-        Corpse *corpse = GetObjectNear<Corpse>(x, y, guid);
-        if(corpse)
+        CorpsePtr corpse = GetObjectNear<Corpse>(x, y, guid);
+        if(corpse && corpse->GetTypeId() == TYPEID_CORPSE && corpse->GetType() == CORPSE_BONES)
             corpse->DeleteBonesFromWorld();
         else
             return false;
@@ -800,6 +909,45 @@ Map::Remove(T *obj, bool remove)
         cell.data.Part.reserved = ALL_DISTRICT;
         cell.SetNoCreate();                                 // not create cells at object remove
         MaNGOS::ObjectNotVisibleNotifier notifier(*static_cast<WorldObject *>(obj));
+        TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
+        CellLock<ReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, player_notifier, *this);
+    }
+
+    if( remove )
+    {
+        // if option set then object already saved at this moment
+        if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
+            obj->SaveRespawnTime();
+        DeleteFromWorld(obj);
+    }
+}
+
+template<class T>
+void
+Map::Remove(CountedPtr<T> &obj, bool remove)
+{
+    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        sLog.outError("Map::Remove: Object " I64FMTD " have invalide coordiated X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
+
+    Cell cell = RedZone::GetZone(p);
+    if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
+        return;
+
+    DEBUG_LOG("Remove object " I64FMTD " from grid[%u,%u]", obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
+    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    assert( grid != NULL );
+
+    RemoveFromGrid(obj,grid,cell);
+
+    {
+        Cell cell = RedZone::GetZone(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+        MaNGOS::ObjectNotVisibleNotifier notifier(*static_cast<WorldObject *>(&*obj));
         TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, WorldTypeMapContainer > player_notifier(notifier);
         CellLock<ReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, player_notifier, *this);
@@ -1320,7 +1468,7 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
     Cell const& cur_cell = c->GetCurrentCell();
 
     if(!i_grids[cur_cell.GridX()][cur_cell.GridY()] ||
-        FindInGrid<Creature>(c->GetGUID(),i_grids[cur_cell.GridX()][cur_cell.GridY()],cur_cell)!=c)
+        FindInGrid<Creature>(c->GetGUID(),i_grids[cur_cell.GridX()][cur_cell.GridY()],cur_cell, (Creature*)NULL)!=c)
     {
         sLog.outError("ERROR: %s (GUID: %u) not find in %s grid[%u,%u]cell[%u,%u]",
             (c->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature"),c->GetGUIDLow(), (moved ? "final" : "original"),
@@ -1343,12 +1491,12 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
     return true;
 }
 
-template void Map::Add(Corpse *);
+template void Map::Add(CorpsePtr&);
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);
 template void Map::Add(DynamicObject *);
 
-template void Map::Remove(Corpse *,bool);
+template void Map::Remove(CorpsePtr&,bool);
 template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
@@ -1356,13 +1504,13 @@ template void Map::Remove(DynamicObject *, bool);
 template bool Map::Find(Creature *) const;
 template bool Map::Find(GameObject *) const;
 template bool Map::Find(DynamicObject *) const;
-template bool Map::Find(Corpse *) const;
+template bool Map::Find(CorpsePtr&) const;
 
-template Creature* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
-template Creature* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
-template GameObject* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
-template GameObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
-template DynamicObject* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
-template DynamicObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
-template Corpse* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
-template Corpse* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
+template Creature* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, Creature*);
+template Creature* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, Creature*);
+template GameObject* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, GameObject*);
+template GameObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, GameObject*);
+template DynamicObject* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, DynamicObject*);
+template DynamicObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, DynamicObject*);
+template CorpsePtr& Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
+template CorpsePtr& Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl);

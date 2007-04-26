@@ -89,7 +89,7 @@ ObjectAccessor::GetCreatureOrPet(WorldObject const &u, uint64 guid)
 Creature*
 ObjectAccessor::GetCreature(WorldObject const &u, uint64 guid)
 {
-    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<Creature>(u, guid);
+    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<Creature>(u, guid, (Creature*)NULL);
 }
 
 Unit*
@@ -141,13 +141,13 @@ Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32
 GameObject*
 ObjectAccessor::GetGameObject(Unit const &u, uint64 guid)
 {
-    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<GameObject>(u, guid);
+    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<GameObject>(u, guid, (GameObject*)NULL);
 }
 
 DynamicObject*
 ObjectAccessor::GetDynamicObject(Unit const &u, uint64 guid)
 {
-    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<DynamicObject>(u, guid);
+    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<DynamicObject>(u, guid, (DynamicObject*)NULL);
 }
 
 Player*
@@ -280,7 +280,14 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
         switch(obj->GetTypeId())
         {
             case TYPEID_CORPSE:
-                MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((Corpse*)obj,true);
+		{
+		    CorpsePtr corpse = MapManager::Instance().GetMap(obj->GetMapId(), obj)->GetObjectNear<Corpse>(*obj, obj->GetGUID());
+		    if (!corpse) {
+			sLog.outError("ERROR: Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
+		    } else {
+			MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove(corpse,true);
+		    }
+		}
                 break;
             case TYPEID_DYNAMICOBJECT:
                 MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((DynamicObject*)obj,true);
@@ -388,13 +395,13 @@ ObjectAccessor::AddPet(Pet *pet)
     i_pets[pet->GetGUID()] = pet;
 }
 
-Corpse*
+CorpsePtr&
 ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
 {
     Guard guard(i_corpseGuard);
 
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
-    if( iter == i_player2corpse.end() ) return NULL;
+    if( iter == i_player2corpse.end() ) return NullPtr<Corpse>((Corpse*)NULL);
 
     assert(iter->second->GetType() == CORPSE_RESURRECTABLE);
 
@@ -413,7 +420,7 @@ ObjectAccessor::RemoveCorpse(Corpse *corpse)
 }
 
 void
-ObjectAccessor::AddCorpse(Corpse *corpse)
+ObjectAccessor::AddCorpse(CorpsePtr &corpse)
 {
     assert(corpse && corpse->GetType() == CORPSE_RESURRECTABLE);
 
@@ -447,7 +454,7 @@ ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* ma
 bool
 ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
 {
-    Guard guard(i_corpseGuard);
+//    Guard guard(i_corpseGuard);
 
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(player_guid);
 
@@ -455,10 +462,10 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     if( iter == i_player2corpse.end() )
         return false;
 
-    Corpse* corpse = iter->second;
+    CorpsePtr corpse = iter->second;
 
     // remove corpse from player_guid -> corpse map
-    i_player2corpse.erase(iter);
+    // i_player2corpse.erase(iter);
 
     corpse->_ConvertCorpseToBones();
 
@@ -578,16 +585,16 @@ ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
 }
 
 void
-ObjectAccessor::RemoveBonesFromPlayerView(Corpse *o)
+ObjectAccessor::RemoveBonesFromPlayerView(CorpsePtr& corpse)
 {
-    MaNGOS::BonesViewRemover remover(*o);
+    MaNGOS::BonesViewRemover remover(corpse);
     TypeContainerVisitor<MaNGOS::BonesViewRemover, WorldTypeMapContainer > player_notifier(remover);
-    CellPair p = MaNGOS::ComputeCellPair(o->GetPositionX(), o->GetPositionY());
+    CellPair p = MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
     Cell cell = RedZone::GetZone(p);
     cell.SetNoCreate();
     cell.data.Part.reserved = ALL_DISTRICT;
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(o->GetMapId(), o));
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(corpse->GetMapId(), &(*corpse)));
 }
 
 namespace MaNGOS
@@ -621,6 +628,6 @@ namespace MaNGOS
     void BonesViewRemover::Visit(PlayerMapType &m)
     {
         for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-            i_objects.DestroyForPlayer(iter->second);
+            i_objects->DestroyForPlayer(iter->second);
     }
 }
