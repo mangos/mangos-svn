@@ -1537,3 +1537,15 @@ bool Creature::LoadCreaturesAddon()
 
     return true;
 }
+
+/// Send a message to LocalDefense channel for players oposition team in the zone
+void Creature::SendZoneUnderAttackMessage(Player* attacker)
+{
+    uint32 enemy_team = attacker->GetTeam();
+
+    WorldPacket data;
+    data.Initialize(SMSG_ZONE_UNDER_ATTACK);
+    data << (uint32)GetZoneId();
+    sWorld.SendGlobalMessage(&data,NULL,(enemy_team==ALLIANCE ? HORDE : ALLIANCE));
+}
+

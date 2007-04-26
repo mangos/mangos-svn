@@ -63,7 +63,7 @@ void Channel::Join(uint64 p, const char *pass, uint32 unk1)
         SendToOne(&data,p);
 
         // if no owner first logged will become
-        if(!constant && owner == false)
+        if(!constant && m_ownerGUID)
         {
             SetOwner(p, (players.size()>1?true:false));
             players[p].moderator = true;
@@ -105,7 +105,7 @@ void Channel::Leave(uint64 p, bool send, uint32 unk1)
 
         if(changeowner)
         {
-            uint64 newowner = players.size() > 0 ? players.begin()->second.player : false;
+            uint64 newowner = players.size() > 0 ? players.begin()->second.player : 0;
             SetOwner(newowner);
         }
     }
@@ -138,14 +138,14 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
             MakeNotOn(&data,badname);
             SendToOne(&data,good);
         }
-        else if(sec < 2 && bad->GetGUID() == owner && good != owner)
+        else if(sec < 2 && bad->GetGUID() == m_ownerGUID && good != m_ownerGUID)
         {
             MakeNotOwner(&data);
             SendToOne(&data,good);
         }
         else
         {
-            bool changeowner = (owner == bad->GetGUID());
+            bool changeowner = (m_ownerGUID == bad->GetGUID());
 
             if(ban && !IsBanned(bad->GetGUID()))
             {
@@ -256,14 +256,14 @@ void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
             return;
 
         PlayerInfo inf = players[newp->GetGUID()];
-        if(p == owner && newp->GetGUID() == owner && mod)
+        if(p == m_ownerGUID && newp->GetGUID() == m_ownerGUID && mod)
             return;
         if(newp == NULL || !IsOn(newp->GetGUID()))
         {
             MakeNotOn(&data,p2n);
             SendToOne(&data,p);
         }
-        else if(owner == newp->GetGUID() && owner != p)
+        else if(m_ownerGUID == newp->GetGUID() && m_ownerGUID != p)
         {
             MakeNotOwner(&data);
             SendToOne(&data,p);
@@ -292,7 +292,7 @@ void Channel::SetOwner(uint64 p, const char *newname)
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(sec < 2 && p != owner)
+    else if(sec < 2 && p != m_ownerGUID)
     {
         MakeNotOwner(&data);
         SendToOne(&data,p);
@@ -538,12 +538,12 @@ void Channel::SendToOne(WorldPacket *data, uint64 who)
 void Channel::MakeWhoOwner(WorldPacket *data)
 {
     const char *name = "";
-    Player *plr = objmgr.GetPlayer(owner);
+    Player *plr = objmgr.GetPlayer(m_ownerGUID);
     if(plr)
         name = plr->GetName();
     else
         name = "PLAYER_NOT_FOUND";
 
     *MakeNotifyPacket(data,WHOOWNER);
-    *data << ((constant || owner == false) ? "Nobody" : name);
+    *data << ((constant || !m_ownerGUID) ? "Nobody" : name);
 }

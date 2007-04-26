@@ -2456,13 +2456,6 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             // set "wpguid" column to the visual waypoint
             sDatabase.PExecute("UPDATE `creature_movement` SET `wpguid` = '%u' WHERE `id` = '%u' and `point` = '%u'", wpCreature->GetGUIDLow(), lowguid, point);
 
-            /*
-            string *creatureName = new string;
-            *creatureName = "WP for GUID: " + lowguid;
-            *creatureName += " - WP number: "+ point;
-            pCreature->SetName(creatureName->c_str());
-            */
-
             wpCreature->SaveToDB();
                                                             // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
             wpCreature->LoadFromDB(wpCreature->GetGUIDLow(), NULL, chr->GetInstanceId());

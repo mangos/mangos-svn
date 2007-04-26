@@ -71,7 +71,7 @@ class Channel
     list<uint64> banned;
     std::string name;
     bool announce, constant, moderate;
-    uint64 owner;
+    uint64 m_ownerGUID;
     std::string password;
     private:
 
@@ -150,20 +150,20 @@ class Channel
 
         void _SetOwner(uint64 guid, bool exclaim = true)
         {
-            if(owner != false)
-                players[owner].owner = false;
+            if(m_ownerGUID)
+                players[m_ownerGUID].owner = false;
 
-            owner = guid;
-            if(owner != false)
+            m_ownerGUID = guid;
+            if(m_ownerGUID)
             {
-                uint8 oldFlag = GetFlag(guid);
-                players[guid].owner = true;
+                uint8 oldFlag = GetFlag(m_ownerGUID);
+                players[m_ownerGUID].owner = true;
                 WorldPacket data;
-                MakeModeChange(&data,guid,oldFlag);
+                MakeModeChange(&data,m_ownerGUID,oldFlag);
                 SendToAll(&data);
                 if(exclaim)
                 {
-                    MakeChangeOwner(&data,guid);
+                    MakeChangeOwner(&data,m_ownerGUID);
                     SendToAll(&data);
                 }
             }
@@ -195,7 +195,7 @@ class Channel
         }
 
     public:
-        Channel() : name(""), announce(true), constant(false), moderate(false), owner(false), password("")
+        Channel() : name(""), announce(true), constant(false), moderate(false), m_ownerGUID(0), password("")
         {
         }
         void SetName(std::string newname) { name = newname; }
