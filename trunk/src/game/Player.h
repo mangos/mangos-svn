@@ -338,7 +338,7 @@ enum LootType
     LOOT_CORPSE                 = 1,
     LOOT_SKINNING               = 2,
     LOOT_FISHING                = 3,
-    LOOT_PICKPOKETING           = 4,                        // unsupported by client, sending LOOT_SKINNING instead
+    LOOT_PICKPOCKETING          = 4,                        // unsupported by client, sending LOOT_SKINNING instead
     LOOT_DISENCHANTING          = 5                         // unsupported by client, sending LOOT_SKINNING instead
 };
 

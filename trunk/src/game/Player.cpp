@@ -5331,15 +5331,15 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             ObjectAccessor::Instance().GetCreature(*this, guid);
 
         // must be in range and creature must be alive for pickpocket and must be dead for another loot
-        if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOKETING) || !creature->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
+        if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
             return;
 
-        if(loot_type == LOOT_PICKPOKETING && IsFriendlyTo(creature))
+        if(loot_type == LOOT_PICKPOCKETING && IsFriendlyTo(creature))
             return;
 
         loot   = &creature->loot;
 
-        if(loot_type == LOOT_PICKPOKETING)
+        if(loot_type == LOOT_PICKPOCKETING)
         {
             uint32 lootid = creature->GetCreatureInfo()->pickpocketLootId;
 
@@ -5445,8 +5445,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             q_list = itr->second;
     }
 
-    // LOOT_PICKPOKETING and LOOT_DISENCHANTING unsupported by client, sending LOOT_SKINNING instead
-    if(loot_type == LOOT_PICKPOKETING || loot_type == LOOT_DISENCHANTING)
+    // LOOT_PICKPOCKETING and LOOT_DISENCHANTING unsupported by client, sending LOOT_SKINNING instead
+    if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING)
         loot_type = LOOT_SKINNING;
 
     WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));           // we guess size
