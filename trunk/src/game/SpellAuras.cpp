@@ -635,7 +635,7 @@ void Aura::_AddAura()
         }
     }
 
-    if(m_spellId == 23333 || m_spellId == 23335)    // for BG
+    if(m_spellId == 23333 || m_spellId == 23335)            // for BG
         m_positive = true;
 
     // not call total regen auras at adding
@@ -883,7 +883,11 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
 void Aura::TriggerSpell()
 {
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry( GetSpellProto()->EffectTriggerSpell[m_effIndex] );
+    SpellEntry const *spellInfo;
+    if (GetSpellProto()->EffectTriggerSpell[m_effIndex])
+        spellInfo = sSpellStore.LookupEntry(GetSpellProto()->EffectTriggerSpell[m_effIndex]);
+    else if (GetSpellProto()->Category == 1011)
+        spellInfo = sSpellStore.LookupEntry(22845);         // Frenzied Regeneration
 
     if(!spellInfo)
     {
@@ -1194,7 +1198,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = 4613;
             break;
         case FORM_FLIGHT:
-            modelid = 20013;  //test it !! (20857, 20872, 20013)
+            modelid = 20013;                                //test it !! (20857, 20872, 20013)
             break;
         case FORM_MOONKIN:
             if(unit_target->getRace() == RACE_NIGHTELF)
@@ -1259,7 +1263,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                         if(Rage_val!=0)
                             break;
                     }
-                    if (unit_target->GetPower(POWER_RAGE)>Rage_val) 
+                    if (unit_target->GetPower(POWER_RAGE)>Rage_val)
                         unit_target->SetPower(POWER_RAGE,Rage_val);
                 }   break;
                 default:
@@ -1298,7 +1302,8 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
     if(!m_target)
         return;
 
-    if(m_target->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->Id == 20584 && m_target->getRace() != RACE_NIGHTELF) // required creature_template=12861 with modelid=1825 in database for ghost spell
+                                                            // required creature_template=12861 with modelid=1825 in database for ghost spell
+    if(m_target->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->Id == 20584 && m_target->getRace() != RACE_NIGHTELF)
         return;
 
     if (apply)
@@ -1682,7 +1687,8 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if( apply )
     {
         m_target->addUnitState(UNIT_STAT_CONFUSED);
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)); // probably wrong
+                                                            // probably wrong
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real add aura
         if(Real)
@@ -1694,7 +1700,8 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     else
     {
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)); // probably wrong
+                                                            // probably wrong
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real remove aura
         if(Real)
@@ -1720,7 +1727,8 @@ void Aura::HandleModFear(bool Apply, bool Real)
         m_target->addUnitState(UNIT_STAT_FLEEING);
         // m_target->AttackStop();
 
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)); // probably wrong
+                                                            // probably wrong
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real add aura
         if(Real)
@@ -1734,7 +1742,8 @@ void Aura::HandleModFear(bool Apply, bool Real)
     else
     {
         m_target->clearUnitState(UNIT_STAT_FLEEING);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)); // probably wrong
+                                                            // probably wrong
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         // only at real remove aura
         if(Real)
@@ -1766,9 +1775,11 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         data<<uint8(0);
         m_target->SendMessageToSet(&data,true);
         */
-        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN6);        // blizz like 2.0.x
-        m_target->SetFlag(UNIT_FIELD_FLAGS_2, 0x00000001);              // blizz like 2.0.x
-        m_target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);       // blizz like 2.0.x
+                                                            // blizz like 2.0.x
+        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN6);
+        m_target->SetFlag(UNIT_FIELD_FLAGS_2, 0x00000001);  // blizz like 2.0.x
+                                                            // blizz like 2.0.x
+        m_target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 
         m_target->addUnitState(UNIT_STAT_DIED);
         m_target->CombatStop();
@@ -1782,9 +1793,12 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         data<<uint8(1);
         m_target->SendMessageToSet(&data,true);
         */
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN6);     // blizz like 2.0.x
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS_2, 0x00000001);           // blizz like 2.0.x
-        m_target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);    // blizz like 2.0.x
+                                                            // blizz like 2.0.x
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN6);
+                                                            // blizz like 2.0.x
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS_2, 0x00000001);
+                                                            // blizz like 2.0.x
+        m_target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 
         m_target->clearUnitState(UNIT_STAT_DIED);
     }
@@ -2256,10 +2270,12 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                 {
                     if(bg->IsHordeFlagPickedup())
                         if(GetSpellProto()->Id == 23333)    // Warsong Flag, horde
-                            m_target->CastSpell(m_target, 23334, true, 0); // Horde Flag Drop
+                                                            // Horde Flag Drop
+                            m_target->CastSpell(m_target, 23334, true, 0);
                     if(bg->IsAllianceFlagPickedup())
                         if(GetSpellProto()->Id == 23335)    // Silverwing Flag, alliance
-                            m_target->CastSpell(m_target, 23336, true, 0); // Alliance Flag Drop
+                                                            // Alliance Flag Drop
+                            m_target->CastSpell(m_target, 23336, true, 0);
                 }
             }
         }
@@ -2775,7 +2791,8 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
 {
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0 && apply)
         //m_target->ApplyModFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT,apply);
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);    // do not stand up after aura remove...
+                                                            // do not stand up after aura remove...
+            m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
 
     if(apply && m_periodicTimer <= 0)
     {
@@ -3078,45 +3095,45 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
 
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         if(m_modifier.m_miscvalue2)
-        {
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_HOLY) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+1,m_modifier.m_amount,apply);
-            
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FIRE) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+2,m_modifier.m_amount,apply);
+    {
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_HOLY) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+1,m_modifier.m_amount,apply);
 
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_NATURE) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+3,m_modifier.m_amount,apply);
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FIRE) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+2,m_modifier.m_amount,apply);
 
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FROST) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+4,m_modifier.m_amount,apply);
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_NATURE) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+3,m_modifier.m_amount,apply);
 
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_SHADOW) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+5,m_modifier.m_amount,apply);
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FROST) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+4,m_modifier.m_amount,apply);
 
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_ARCANE) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+6,m_modifier.m_amount,apply);
-        }
-        else
-        {
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_HOLY) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+1,m_modifier.m_amount,apply);
-            
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FIRE) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+2,m_modifier.m_amount,apply);
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_SHADOW) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+5,m_modifier.m_amount,apply);
 
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_NATURE) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+3,m_modifier.m_amount,apply);
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_ARCANE) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+6,m_modifier.m_amount,apply);
+    }
+    else
+    {
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_HOLY) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+1,m_modifier.m_amount,apply);
 
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FROST) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+4,m_modifier.m_amount,apply);
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FIRE) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+2,m_modifier.m_amount,apply);
 
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_SHADOW) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+5,m_modifier.m_amount,apply);
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_NATURE) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+3,m_modifier.m_amount,apply);
 
-            if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_ARCANE) != 0)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+6,m_modifier.m_amount,apply);
-        }
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_FROST) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+4,m_modifier.m_amount,apply);
+
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_SHADOW) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+5,m_modifier.m_amount,apply);
+
+        if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_ARCANE) != 0)
+            m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+6,m_modifier.m_amount,apply);
+    }
 }
 
 void Aura::HandleModDamagePercentDone(bool apply, bool Real)
@@ -3210,10 +3227,10 @@ void Aura::SendCoolDownEvent()
     Unit* caster = GetCaster();
     if(caster)
     {
-        WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8+4)); // last check 2.0.10
+        WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8+4));     // last check 2.0.10
         data << uint32(m_spellId) << m_caster_guid;
         //data << uint32(0); // removed
-        caster->SendMessageToSet(&data,true); // WTF? why we send cooldown message to set?
+        caster->SendMessageToSet(&data,true);               // WTF? why we send cooldown message to set?
     }
 }
 
@@ -3386,40 +3403,40 @@ void Aura::HandleAuraUntrackable(bool apply, bool Real)
 {
     // value 100% blizz like (2.0.10)
     m_target->ApplyModUInt32Value(UNIT_FIELD_BYTES_1, 0x4000000, apply);
-/*
-Packet offset 00
-Packet number: 1
-Opcode: 00A9
-Object count: 1
-Unk: 0
-Update block for object 1:
-Block offset 07
-Updatetype: UPDATETYPE_VALUES
-Object guid: 00000000004765CE
-=== values_update_block_start ===
-Bit mask blocks count: 45
-UNIT_FIELD_POWER1 (23): 1105
-UNIT_FIELD_AURA1 (48): 13161
-UNIT_FIELD_AURAFLAGS1 (104): 9
-UNIT_FIELD_BYTES_1 (152): 67108864
-=== values_update_block_end ===
+    /*
+    Packet offset 00
+    Packet number: 1
+    Opcode: 00A9
+    Object count: 1
+    Unk: 0
+    Update block for object 1:
+    Block offset 07
+    Updatetype: UPDATETYPE_VALUES
+    Object guid: 00000000004765CE
+    === values_update_block_start ===
+    Bit mask blocks count: 45
+    UNIT_FIELD_POWER1 (23): 1105
+    UNIT_FIELD_AURA1 (48): 13161
+    UNIT_FIELD_AURAFLAGS1 (104): 9
+    UNIT_FIELD_BYTES_1 (152): 67108864
+    === values_update_block_end ===
 
-Packet offset 00
-Packet number: 1
-Opcode: 00A9
-Object count: 1
-Unk: 0
-Update block for object 1:
-Block offset 07
-Updatetype: UPDATETYPE_VALUES
-Object guid: 00000000004765CE
-=== values_update_block_start ===
-Bit mask blocks count: 45
-UNIT_FIELD_AURA1 (48): 0
-UNIT_FIELD_AURAFLAGS1 (104): 0
-UNIT_FIELD_BYTES_1 (152): 0
-=== values_update_block_end ===
-*/
+    Packet offset 00
+    Packet number: 1
+    Opcode: 00A9
+    Object count: 1
+    Unk: 0
+    Update block for object 1:
+    Block offset 07
+    Updatetype: UPDATETYPE_VALUES
+    Object guid: 00000000004765CE
+    === values_update_block_start ===
+    Bit mask blocks count: 45
+    UNIT_FIELD_AURA1 (48): 0
+    UNIT_FIELD_AURAFLAGS1 (104): 0
+    UNIT_FIELD_BYTES_1 (152): 0
+    === values_update_block_end ===
+    */
 }
 
 void Aura::HandleAuraModPacify(bool apply, bool Real)
@@ -3463,7 +3480,7 @@ void Aura::HandleAuraAllowFlight(bool apply, bool Real)
     else
         data.Initialize(SMSG_FLY_MODE_STOP, 12);
     data.append(m_target->GetPackGUID());
-    data << uint32(0); // unk
+    data << uint32(0);                                      // unk
     m_target->SendMessageToSet(&data, true);
 }
 
@@ -3492,6 +3509,6 @@ void Aura::HandleAuraModSpeedMountedFlight(bool apply, bool Real)
     else
         data.Initialize(SMSG_FLY_MODE_STOP, 12);
     data.append(m_target->GetPackGUID());
-    data << uint32(0); // unk
+    data << uint32(0);                                      // unk
     m_target->SendMessageToSet(&data, true);
 }

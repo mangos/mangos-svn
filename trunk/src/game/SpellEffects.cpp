@@ -600,25 +600,29 @@ void Spell::EffectDummy(uint32 i)
             {
                 switch(m_spellInfo->Id)
                 {
-                    case 23383: // Alliance Flag Click
+                    case 23383:                             // Alliance Flag Click
                         sLog.outDebug("Alliance Flag Click");
                         if(((Player*)m_caster)->GetTeam() == ALLIANCE)
-                            m_caster->CastSpell(m_caster, 23385, true, 0); // Alliance Flag Returns (Event)
+                                                            // Alliance Flag Returns (Event)
+                            m_caster->CastSpell(m_caster, 23385, true, 0);
                         if(((Player*)m_caster)->GetTeam() == HORDE)
-                            m_caster->CastSpell(m_caster, 23335, true, 0); // Silverwing Flag
+                                                            // Silverwing Flag
+                            m_caster->CastSpell(m_caster, 23335, true, 0);
                         break;
-                    case 23384: // Horde Flag Click
+                    case 23384:                             // Horde Flag Click
                         sLog.outDebug("Horde Flag Click");
                         if(((Player*)m_caster)->GetTeam() == HORDE)
-                            m_caster->CastSpell(m_caster, 23386, true, 0); // Horde Flag Returns (Event)
+                                                            // Horde Flag Returns (Event)
+                            m_caster->CastSpell(m_caster, 23386, true, 0);
                         if(((Player*)m_caster)->GetTeam() == ALLIANCE)
-                            m_caster->CastSpell(m_caster, 23333, true, 0); // Warsong Flag
+                                                            // Warsong Flag
+                            m_caster->CastSpell(m_caster, 23333, true, 0);
                         break;
-                    case 23389: // Alliance Flag Capture
+                    case 23389:                             // Alliance Flag Capture
                         sLog.outDebug("Alliance Flag Capture");
                         bg->EventPlayerCapturedFlag((Player*)m_caster);
                         break;
-                    case 23390: // Horde Flag Capture
+                    case 23390:                             // Horde Flag Capture
                         sLog.outDebug("Horde Flag Capture");
                         bg->EventPlayerCapturedFlag((Player*)m_caster);
                         break;
@@ -630,13 +634,15 @@ void Spell::EffectDummy(uint32 i)
         }
     }
 
-    if(m_spellInfo->Id == 17251) // Spirit Healer Res
+    if(m_spellInfo->Id == 17251)                            // Spirit Healer Res
     {
-        if(m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER) // probably useless check
+                                                            // probably useless check
+        if(m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER)
         {
             WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
             data << m_caster->GetGUID();
-            ((Player*)m_targets.getUnitTarget())->GetSession()->SendPacket( &data ); // for this spell we have wrong unitTarget, but correct m_targets.getUnitTarget()...
+                                                            // for this spell we have wrong unitTarget, but correct m_targets.getUnitTarget()...
+            ((Player*)m_targets.getUnitTarget())->GetSession()->SendPacket( &data );
         }
     }
 }
@@ -665,7 +671,8 @@ void Spell::EffectApplyAura(uint32 i)
 {
     if(!unitTarget)
         return;
-    if(!unitTarget->isAlive() && !(m_spellInfo->Id == 20584 || m_spellInfo->Id == 8326)) // ghost spell check
+                                                            // ghost spell check
+    if(!unitTarget->isAlive() && !(m_spellInfo->Id == 20584 || m_spellInfo->Id == 8326))
         return;
 
     //If m_immuneToState type contain this aura type, IMMUNE aura.
@@ -679,7 +686,7 @@ void Spell::EffectApplyAura(uint32 i)
 
     Aura* Aur = new Aura(m_spellInfo, i, unitTarget,m_caster, m_CastItem);
 
-    if(!Aur) // is it useless?
+    if(!Aur)                                                // is it useless?
         return;
 
     if (!Aur->IsPositive() && Aur->GetCasterGUID() != Aur->GetTarget()->GetGUID())
@@ -832,27 +839,27 @@ void Spell::EffectSendEvent(uint32 i)
             {
                 switch(m_spellInfo->Id)
                 {
-                    case 23333: // Pickup Horde Flag
+                    case 23333:                             // Pickup Horde Flag
                         bg->EventPlayerPickedUpFlag(((Player*)m_caster));
                         sLog.outDebug("Send Event Horde Flag Picked Up");
                         break;
-                    case 23334: // Drop Horde Flag
+                    case 23334:                             // Drop Horde Flag
                         bg->EventPlayerDroppedFlag(((Player*)m_caster));
                         sLog.outDebug("Drop Horde Flag");
                         break;
-                    case 23335: // Pickup Alliance Flag
+                    case 23335:                             // Pickup Alliance Flag
                         bg->EventPlayerPickedUpFlag(((Player*)m_caster));
                         sLog.outDebug("Send Event Alliance Flag Picked Up");
                         break;
-                    case 23336: // Drop Alliance Flag
+                    case 23336:                             // Drop Alliance Flag
                         bg->EventPlayerDroppedFlag(((Player*)m_caster));
                         sLog.outDebug("Drop Alliance Flag");
                         break;
-                    case 23385: // Alliance Flag Returns
+                    case 23385:                             // Alliance Flag Returns
                         bg->EventPlayerReturnedFlag(((Player*)m_caster));
                         sLog.outDebug("Alliance Flag Returned");
                         break;
-                    case 23386: // Horde Flag Returns
+                    case 23386:                             // Horde Flag Returns
                         bg->EventPlayerReturnedFlag(((Player*)m_caster));
                         sLog.outDebug("Horde Flag Returned");
                         break;
@@ -896,6 +903,37 @@ void Spell::EffectPowerDrain(uint32 i)
 
 void Spell::EffectHeal( uint32 i )
 {
+    // Frenzied Regeneration
+    // Must be "hard coded" since 22845 is not set in spell
+    // EffectTriggerSpell[m_effIndex] field for affected spells
+    if (m_spellInfo->Id == 22845)
+    {
+        float LifePerRage = 0;
+        Unit::AuraList& mPeriodicTriggerSpell = m_caster->GetAurasByType(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        for(Unit::AuraList::iterator i = mPeriodicTriggerSpell.begin(); i != mPeriodicTriggerSpell.end(); ++i)
+            if ((*i)->GetSpellProto()->Category == 1011)
+        {
+            LifePerRage = (*i)->GetModifier()->m_amount / 10.0;
+            break;
+        }
+        if (LifePerRage)
+        {
+            int32 lRage = 0;
+            if (m_caster->GetPower(POWER_RAGE) > 100)
+            {
+                damage = 100 * LifePerRage;
+                lRage = 100;
+            }
+            else
+            {
+                damage = m_caster->GetPower(POWER_RAGE) * LifePerRage;
+                lRage = m_caster->GetPower(POWER_RAGE);
+            }
+            m_caster->SetPower(POWER_RAGE, m_caster->GetPower(POWER_RAGE) - lRage);
+        }
+        if (damage == 0) return;
+    }
+
     if( unitTarget && unitTarget->isAlive() && damage >= 0)
     {
         int32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL);
@@ -966,7 +1004,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         int32 randomPoints = m_spellInfo->EffectDieSides[i];
         if (randomPoints)
             num_to_add = basePoints + irand(1, randomPoints);
-        else 
+        else
             num_to_add = basePoints + 1;
     }
     else if(player->getLevel() >= m_spellInfo->spellLevel)
@@ -1715,7 +1753,8 @@ void Spell::EffectTameCreature(uint32 i)
         pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,time(NULL));
         pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);// + UNIT_FLAG_RENAME + UNIT_FLAG_RESTING); 
+                                                            // + UNIT_FLAG_RENAME + UNIT_FLAG_RESTING);
+        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
                                                             // this enables popup window (pet details, abandon, rename)
 
         uint32 new_id = 1;
@@ -1872,7 +1911,8 @@ void Spell::EffectSummonPet(uint32 i)
         {
             // this enables popup window (pet details, abandon, rename)
             //NewSummon->SetFlag(UNIT_FIELD_FLAGS,(UNIT_FLAG_RESTING | UNIT_FLAG_RENAME)); // changed in 2.0.8?
-            NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16)); // check it!
+                                                            // check it!
+            NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16));
         }
 
         NewSummon->AIM_Initialize();
@@ -2130,7 +2170,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
     int32 duration = GetDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
 
-    if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP) // make dropped flag clickable for other players (not set owner guid (created by) for this)...
+    if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP)   // make dropped flag clickable for other players (not set owner guid (created by) for this)...
         m_caster->AddGameObject(pGameObj);
     pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
@@ -2154,7 +2194,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 return;
             uint32 spellId2 = 0;
 
-            // all seals have aura dummy 
+            // all seals have aura dummy
             Unit::AuraList& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
 
             for(Unit::AuraList::iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
