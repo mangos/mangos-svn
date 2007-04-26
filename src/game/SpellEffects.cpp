@@ -1377,7 +1377,7 @@ void Spell::EffectPickPocket(uint32 i)
         {
             //Stealing successful
             //sLog.outDebug("Sending loot from pickpocket");
-            ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_PICKPOKETING);
+            ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_PICKPOCKETING);
         }
         else
         {
