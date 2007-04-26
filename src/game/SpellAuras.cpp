@@ -1237,10 +1237,24 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             switch(m_modifier.m_miscvalue)
             {
                 case FORM_CAT:
-                    // energy in cat start with 0.
-                    //TODO: implement SPELL_AURA_ADD_TARGET_TRIGGER that used for receiving with some chance non-0 energy at transformation
-                    unit_target->SetPower(POWER_ENERGY,0);
+                case FORM_BEAR:
+                case FORM_DIREBEAR:
+                {
+                    // get furor proc chance
+                    uint32 FurorChance = 0;
+                    Unit::AuraList& mDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::iterator i = mDummy.begin(); i != mDummy.end(); ++i)
+                        if ((*i)->GetSpellProto()->SpellIconID == 238)
+                            FurorChance = (*i)->GetSpellProto()->EffectBasePoints[0]+1;
+                    if (m_modifier.m_miscvalue == FORM_CAT)
+                        //if Furor procs, player gains 40 energy at shapeshift to cat form
+                        unit_target->SetPower(POWER_ENERGY,FurorChance >= urand(1,100) ? 40 : 0);
+                    else
+                        //if Furor procs, player gains 10 rage at shapeshift to bear/direbear form
+                        unit_target->SetPower(POWER_RAGE,FurorChance >= urand(1,100) ? 100 : 0);
                     break;
+                }
+
                 case FORM_BATTLESTANCE:
                 case FORM_DEFENSIVESTANCE:
                 case FORM_BERSERKERSTANCE:
@@ -2792,7 +2806,7 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
     if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0 && apply)
         //m_target->ApplyModFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT,apply);
                                                             // do not stand up after aura remove...
-            m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
 
     if(apply && m_periodicTimer <= 0)
     {
