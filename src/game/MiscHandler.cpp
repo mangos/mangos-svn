@@ -762,7 +762,7 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     if(!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
-    Corpse* corpse = GetPlayer()->GetCorpse();
+    CorpsePtr& corpse = GetPlayer()->GetCorpse();
 
     if (!corpse )
         return;

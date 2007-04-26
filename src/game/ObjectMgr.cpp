@@ -2579,6 +2579,7 @@ void ObjectMgr::LoadCorpses()
 
     barGoLink bar( result->GetRowCount() );
 
+    CorpsePtr corpse;
     do
     {
         bar.step();
@@ -2587,12 +2588,9 @@ void ObjectMgr::LoadCorpses()
 
         uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
 
-        Corpse* corpse = new Corpse(NULL);
+        corpse = CorpsePtr(new Corpse(NULL));
         if(!corpse->LoadFromDB(guid,fields))
-        {
-            delete corpse;
             continue;
-        }
 
         ObjectAccessor::Instance().AddCorpse(corpse);
 

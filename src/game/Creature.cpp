@@ -1428,7 +1428,8 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     {
         if(isAlive())
         {
-            if(Corpse* corpse = pl->GetCorpse())
+            CorpsePtr &corpse = pl->GetCorpse();
+            if(corpse)
             {
                 // 20 - aggro distance for same level, 25 - max additinal distance if player level less that creature level
                 if(corpse->IsWithinDistInMap(this,(20+25)*sWorld.getRate(RATE_CREATURE_AGGRO)))

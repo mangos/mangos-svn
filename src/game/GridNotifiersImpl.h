@@ -140,9 +140,9 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
 
 template<>
 inline void
-MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+MaNGOS::PlayerRelocationNotifier::Visit(CorpseMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CorpseMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         if( !i_player.isAlive() && iter->second->GetType()==CORPSE_RESURRECTABLE )
             iter->second->UpdateForPlayer(&i_player,false);
 }
@@ -280,16 +280,16 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature*
 }
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Corpse*> &m)
+void MaNGOS::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_objectptr) return;
 
-    for(std::map<OBJECT_HANDLE, Corpse *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
-            i_object = itr->second;
+            i_objectptr = itr->second;
             return;
         }
     }
@@ -328,11 +328,11 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creat
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Corpse *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
-            i_objects.push_back(itr->second);
+            i_objects.push_back(&*itr->second);
 }
 
 template<class Check>

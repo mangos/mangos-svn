@@ -34,6 +34,7 @@ class MANGOS_DLL_DECL ObjectGridRespawnMover
         void Move(GridType &grid);
 
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+        template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
         void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 };
 
@@ -74,6 +75,10 @@ ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
             // false result ignored: will be unload with other creatures at grid
         }
     }
+}
+
+template<class T> void addUnitState(CountedPtr<T> &obj, CellPair const& cell_pair)
+{
 }
 
 template<class T> void addUnitState(T *obj, CellPair const& cell_pair)
@@ -135,6 +140,53 @@ void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, T*>
     }
 }
 
+template <class T>
+void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, CountedPtr<T> > &m, uint32 &count, Map* map)
+{
+    if( result )
+    {
+        bool generateGuid = map->Instanceable();
+	CountedPtr<T> obj;
+
+        do
+        {
+            Field *fields = result->Fetch();
+            obj = CountedPtr<T>(new T(NULL));
+            uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
+            //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
+            if(!obj->LoadFromDB(guid, result, map->GetInstanceId()))
+            {
+                //delete obj;
+                continue;
+            }
+            else
+            {
+                // Check loaded cell/grid integrity
+                Cell old_cell = RedZone::GetZone(cell);
+
+                CellPair pos_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+                Cell pos_cell = RedZone::GetZone(pos_val);
+
+                if(old_cell != pos_cell)
+                {
+                    sLog.outError("Object (GUID: %u TypeId: %u Entry: %u) loaded (X: %f Y: %f) to grid[%u,%u]cell[%u,%u] instead grid[%u,%u]cell[%u,%u].", obj->GetGUIDLow(), obj->GetGUIDHigh(), obj->GetEntry(), obj->GetPositionX(), obj->GetPositionY(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), pos_cell.GridX(), pos_cell.GridY(), pos_cell.CellX(), pos_cell.CellY());
+                    //delete obj;
+                    continue;
+                }
+            }
+
+            obj->SetInstanceId(map->GetInstanceId());
+            m[obj->GetGUID()] = obj;
+
+            addUnitState(obj,cell);
+            obj->AddToWorld();
+            ++count;
+
+        }while( result->NextRow() );
+        delete result;
+    }
+}
+
 void
 ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
@@ -168,7 +220,7 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 }
 
 void
-ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+ObjectGridLoader::Visit(CorpseMapType &m)
 {
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
@@ -244,6 +296,24 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
     m.clear();
 }
 
+template<class T>
+void
+ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
+{
+    if( m.size() == 0 )
+        return;
+
+    for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        // if option set then object already saved at this moment
+        if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
+            iter->second->SaveRespawnTime();
+        //delete iter->second;
+    }
+
+    m.clear();
+}
+
 template<>
 void
 ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
@@ -289,4 +359,4 @@ ObjectGridStoper::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
 
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
-template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
+template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, CountedPtr<Corpse> > &m);

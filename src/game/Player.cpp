@@ -1358,7 +1358,7 @@ normal+TBC maps
             }
 
             // resurrect character at enter into instance where his corpse exist
-            Corpse* corpse = GetCorpse();
+            CorpsePtr corpse = GetCorpse();
             if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == mapid)
             {
                 if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
@@ -1425,7 +1425,8 @@ void Player::AddToWorld()
             m_items[i]->AddToWorld();
     }
 
-    if(Corpse* corpse = GetCorpse())
+    CorpsePtr corpse = GetCorpse();
+    if(corpse)
         corpse->UpdateForPlayer(this,true);
 }
 
@@ -2980,9 +2981,14 @@ void Player::BuildPlayerRepop()
     // there we must send 888 opcode
 
     // place corpse instead player body
-    Corpse* corpse = GetCorpse();
-    if(!corpse)
-        corpse = CreateCorpse();
+    if(!GetCorpse())
+        CreateCorpse();
+
+    CorpsePtr corpse = GetCorpse();
+    if (!corpse) {
+	sLog.outError("Error creating corpse for Player %s [%u]", GetName(), GetGUIDLow());
+	return;
+    }
 
     // now show corpse for all
     if(corpse)
@@ -3186,20 +3192,19 @@ void Player::KillPlayer()
     CreateCorpse();
 }
 
-Corpse* Player::CreateCorpse()
+void Player::CreateCorpse()
 {
     // prevent existence 2 corpse for player
     SpawnCorpseBones();
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    Corpse* corpse = new Corpse(this, CORPSE_RESURRECTABLE);
+    CorpsePtr corpse(new Corpse(this, CORPSE_RESURRECTABLE));
 
     if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
     {
-        delete corpse;
-        return NULL;
+        return ;
     }
 
     _uf = GetUInt32Value(UNIT_FIELD_BYTES_0);
@@ -3240,8 +3245,6 @@ Corpse* Player::CreateCorpse()
 
     // register for player, but not show
     ObjectAccessor::Instance().AddCorpse(corpse);
-
-    return corpse;
 }
 
 void Player::SpawnCorpseBones()
@@ -3250,7 +3253,7 @@ void Player::SpawnCorpseBones()
         SaveToDB();                                         // prevent loading as ghost without corpse
 }
 
-Corpse* Player::GetCorpse() const
+CorpsePtr& Player::GetCorpse() const
 {
     return ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetGUID());
 }
@@ -3352,7 +3355,7 @@ void Player::RepopAtGraveyard()
             data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
         }
-        if(Corpse* corpse = GetCorpse())
+        if(CorpsePtr corpse = GetCorpse())
             corpse->UpdateForPlayer(this,true);
     }
 }
@@ -10521,11 +10524,11 @@ void Player::LoadCorpse()
     }
     else
     {
-        if(Corpse* corpse = GetCorpse())
+        if(CorpsePtr corpse = GetCorpse())
         {
             corpse->UpdateForPlayer(this,true);
 
-            if( corpse->GetType() == CORPSE_RESURRECTABLE && IsWithinDistInMap(corpse,0.0))
+            if( corpse->GetType() == CORPSE_RESURRECTABLE && IsWithinDistInMap(&*corpse,0.0))
                 RepopAtGraveyard();
         }
         else

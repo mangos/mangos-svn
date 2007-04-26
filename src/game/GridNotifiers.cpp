@@ -124,6 +124,17 @@ VisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
     }
 }
 
+template<class T>
+void
+VisibleNotifier::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
+{
+    for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        iter->second->BuildUpdate(i_updateDatas);
+        iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+    }
+}
+
 void
 VisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
@@ -195,6 +206,14 @@ void
 NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
 {
     for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+        iter->second->BuildOutOfRangeUpdateBlock(&i_data);
+}
+
+template<class T>
+void
+NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
+{
+    for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator iter=m.begin(); iter != m.end(); ++iter)
         iter->second->BuildOutOfRangeUpdateBlock(&i_data);
 }
 
@@ -311,10 +330,19 @@ ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m)
     }
 }
 
-template void VisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
+template<class T> void
+ObjectUpdater::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
+{
+    for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        iter->second->Update(i_timeDiff);
+    }
+}
+
+template void VisibleNotifier::Visit<Corpse>(CorpseMapType &);
 template void VisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
 
-template void NotVisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
+template void NotVisibleNotifier::Visit<Corpse>(CorpseMapType &);
 template void NotVisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
 
 template void ObjectUpdater::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
