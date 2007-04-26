@@ -838,7 +838,7 @@ void World::ScriptsProcess()
 }
 
 /// Send a packet to all players (except self if mentionned)
-void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
+void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self, uint32 team)
 {
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
@@ -846,7 +846,8 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
         if (itr->second &&
             itr->second->GetPlayer() &&
             itr->second->GetPlayer()->IsInWorld() &&
-            itr->second != self)
+            itr->second != self &&
+            (team == 0 || itr->second->GetPlayer()->GetTeam() == team) )
         {
             itr->second->SendPacket(packet);
         }
@@ -877,15 +878,6 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
             itr->second->SendPacket(packet);
         }
     }
-}
-
-/// Send a message to LocalDefense channel for players selected team in the zone
-void World::SendZoneUnderAttackMessage(uint32 zone, uint32 team)
-{
-    WorldPacket data;
-    data.Initialize(SMSG_ZONE_UNDER_ATTACK);
-    data << (uint32)zone;
-    SendZoneMessage(zone,&data,NULL,team);
 }
 
 /// Send a System Message to all players in the zone (except self if mentionned)

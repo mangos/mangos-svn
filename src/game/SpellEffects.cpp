@@ -921,17 +921,15 @@ void Spell::EffectHeal( uint32 i )
             int32 lRage = 0;
             if (m_caster->GetPower(POWER_RAGE) > 100)
             {
-                damage = 100 * LifePerRage;
                 lRage = 100;
             }
             else
             {
-                damage = m_caster->GetPower(POWER_RAGE) * LifePerRage;
                 lRage = m_caster->GetPower(POWER_RAGE);
             }
             m_caster->SetPower(POWER_RAGE, m_caster->GetPower(POWER_RAGE) - lRage);
+            damage = uint32(lRage*LifePerRage);
         }
-        if (damage == 0) return;
     }
 
     if( unitTarget && unitTarget->isAlive() && damage >= 0)

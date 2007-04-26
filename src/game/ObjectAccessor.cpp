@@ -27,6 +27,7 @@
 #include "WorldPacket.h"
 #include "Item.h"
 #include "Container.h"
+#include "Corpse.h"
 #include "RedZoneDistrict.h"
 #include "GridNotifiers.h"
 #include "MapManager.h"
@@ -41,6 +42,74 @@
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
+
+namespace MaNGOS
+{
+
+    struct MANGOS_DLL_DECL BuildUpdateForPlayer
+    {
+        Player &i_player;
+        UpdateDataMapType &i_updatePlayers;
+
+        BuildUpdateForPlayer(Player &player, UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Player *> &m)
+        {
+            for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+            {
+                if( iter->second == &i_player )
+                    continue;
+
+                UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
+                if( iter2 == i_updatePlayers.end() )
+                {
+                    std::pair<UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
+                    assert(p.second);
+                    iter2 = p.first;
+                }
+
+                i_player.BuildValuesUpdateBlockForPlayer(&iter2->second, iter2->first);
+            }
+        }
+
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
+    };
+
+    struct MANGOS_DLL_DECL CreatureCorpseViewRemover
+    {
+        Creature &i_creature;
+        CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
+
+        void Visit(std::map<OBJECT_HANDLE, Player *> &m)
+        {
+            for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+                i_creature.DestroyForPlayer(iter->second);
+        }
+
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
+    };
+
+    struct MANGOS_DLL_DECL BonesViewRemover
+    {
+        CorpsePtr i_objects;
+
+        BonesViewRemover(CorpsePtr& corpse) : i_objects(corpse) {}
+        
+        void Visit(std::map<OBJECT_HANDLE, Player *>  &m)
+        {
+            for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+                i_objects->DestroyForPlayer(iter->second);
+        }
+        
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
+    };
+}
+
+ObjectAccessor::ObjectAccessor() {}
+ObjectAccessor::~ObjectAccessor() {}
 
 Creature*
 ObjectAccessor::GetNPCIfCanInteractWith(Player const &player, uint64 guid, uint32 npcflagmask)
@@ -595,39 +664,4 @@ ObjectAccessor::RemoveBonesFromPlayerView(CorpsePtr& corpse)
     cell.data.Part.reserved = ALL_DISTRICT;
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(corpse->GetMapId(), &(*corpse)));
-}
-
-namespace MaNGOS
-{
-
-    void BuildUpdateForPlayer::Visit(PlayerMapType &m)
-    {
-        for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        {
-            if( iter->second == &i_player )
-                continue;
-
-            UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
-            if( iter2 == i_updatePlayers.end() )
-            {
-                std::pair<UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
-                assert(p.second);
-                iter2 = p.first;
-            }
-
-            i_player.BuildValuesUpdateBlockForPlayer(&iter2->second, iter2->first);
-        }
-    }
-
-    void CreatureCorpseViewRemover::Visit(PlayerMapType &m)
-    {
-        for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-            i_creature.DestroyForPlayer(iter->second);
-    }
-
-    void BonesViewRemover::Visit(PlayerMapType &m)
-    {
-        for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-            i_objects->DestroyForPlayer(iter->second);
-    }
 }
