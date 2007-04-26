@@ -1146,10 +1146,6 @@ void Spell::SendSpellCooldown()
             }
         }
     }
-
-    // show cooldown for item
-    //if(m_CastItem)
-    //    _player->SetItemsCooldown(cat);
 }
 
 void Spell::update(uint32 difftime)

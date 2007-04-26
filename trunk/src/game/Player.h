@@ -712,7 +712,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddItemToBuyBackSlot( Item *pItem );
         Item* GetItemFromBuyBackSlot( uint32 slot );
         void RemoveItemFromBuyBackSlot( uint32 slot, bool del );
-        uint32 GetMaxKeyringSize() const { return getLevel() <= 40 ? 8 : ( getLevel() <= 50 ? 8 : 12 ); }
+        uint32 GetMaxKeyringSize() const { return 4; /*getLevel() <= 40 ? 8 : ( getLevel() <= 50 ? 8 : 12 ); - client side keyring size currently always set to 4, mimic this until fix */ }
         void SendEquipError( uint8 msg, Item* pItem, Item *pItem2 );
         void SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param );
         void SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param );
@@ -960,7 +960,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns();
         void _SaveSpellCooldowns();
-        void SetItemsCooldown(uint32 category = 0);
 
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
         {
