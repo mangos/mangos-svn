@@ -29,7 +29,8 @@ If your server can handle the small amount of lag this may cause
 and you can build without experiencing a significant increase in crashes
 then you may uncomment the following line to have correct random motion.
 */
-//#define USE_INTERPOLATION
+// uncomment now for wide testing purpose
+#define USE_INTERPOLATION
 
 void
 RandomMovementGenerator::Initialize(Creature &creature)

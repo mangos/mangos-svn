@@ -2392,83 +2392,6 @@ void Player::_LoadSpellCooldowns()
 
         delete result;
     }
-
-    //if(!m_spellCooldowns.empty())
-    //    SetItemsCooldown();
-}
-
-void Player::SetItemsCooldown(uint32 category)
-{
-    // keys in KEYRING_SLOT_START..KEYRING_SLOT_END can't have cooldowns
-    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
-    {
-        if(Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
-        {
-            for(int ii = 0; ii < 5; ++ii)
-            {
-                uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
-                if(spell_id != 0 && (pItem->GetProto()->Spells[ii].SpellCategory == category || !category && HasSpellCooldown(spell_id)))
-                {
-                    sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown setup.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
-                    WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
-                    data << pItem->GetGUID();
-                    data << uint32(spell_id);
-                    GetSession()->SendPacket(&data);
-                    break;
-                }
-            }
-        }
-    }
-    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-    {
-        if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
-        {
-            for(uint32 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
-            {
-                if(Item* pItem = GetItemByPos( i, j ))
-                {
-                    for(int ii = 0; ii < 5; ++ii)
-                    {
-                        uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
-                        if(spell_id != 0 && (pItem->GetProto()->Spells[ii].SpellCategory == category || !category && HasSpellCooldown(spell_id)))
-                        {
-                            sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown setup.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
-                            WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
-                            data << pItem->GetGUID();
-                            data << uint32(spell_id);
-                            GetSession()->SendPacket(&data);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
-    {
-        if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
-        {
-            for(uint32 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
-            {
-                if(Item* pItem = GetItemByPos( i, j ))
-                {
-                    for(int ii = 0; ii < 5; ++ii)
-                    {
-                        uint32 spell_id = pItem->GetProto()->Spells[ii].SpellId;
-                        if(spell_id != 0 && (pItem->GetProto()->Spells[ii].SpellCategory == category || !category && HasSpellCooldown(spell_id)))
-                        {
-                            sLog.outDebug("Item (GUID: %u Entry: %u) for spell: %u cooldown setup.",pItem->GetGUIDLow(),pItem->GetEntry(),spell_id);
-                            WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
-                            data << pItem->GetGUID();
-                            data << uint32(spell_id);
-                            GetSession()->SendPacket(&data);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 void Player::_SaveSpellCooldowns()
@@ -6458,7 +6381,6 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                 // search free slot - special bag case
                 if( pProto->BagFamily != BAG_FAMILY_NONE )
                 {
-                    /* not active until keyring show at key add implementation
                     if(pProto->BagFamily == BAG_FAMILY_KEYS)
                     {
                         uint32 keyringSize = GetMaxKeyringSize();
@@ -6472,7 +6394,6 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             }
                         }
                     }
-                    */
 
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                     {
@@ -6584,7 +6505,6 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                     if( bag == INVENTORY_SLOT_BAG_0 )
                     {
                         // search free slot - keyring case
-                        /* not active until keyring show at key add implementation
                         if(pProto->BagFamily == BAG_FAMILY_KEYS)
                         {
                             uint32 keyringSize = GetMaxKeyringSize();
@@ -6598,7 +6518,6 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                                 }
                             }
                         }
-                        */
 
                         for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
                         {
@@ -6708,9 +6627,11 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
     // fill space table
     int inv_slot_items[INVENTORY_SLOT_ITEM_END-INVENTORY_SLOT_ITEM_START];
     int inv_bags[INVENTORY_SLOT_BAG_END-INVENTORY_SLOT_BAG_START][MAX_BAG_SIZE];
+    int inv_keys[KEYRING_SLOT_END-KEYRING_SLOT_START];
 
     memset(inv_slot_items,0,sizeof(int)*(INVENTORY_SLOT_ITEM_END-INVENTORY_SLOT_ITEM_START));
     memset(inv_bags,0,sizeof(int)*(INVENTORY_SLOT_BAG_END-INVENTORY_SLOT_BAG_START)*MAX_BAG_SIZE);
+    memset(inv_keys,0,sizeof(int)*(KEYRING_SLOT_END-KEYRING_SLOT_START));
 
     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
@@ -6816,23 +6737,23 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
         // special bag case
         if( pProto->BagFamily != BAG_FAMILY_NONE )
         {
-            /* not active until keyring show at key add implementation
+            bool b_found = false;
             if(pProto->BagFamily == BAG_FAMILY_KEYS)
             {
                 uint32 keyringSize = GetMaxKeyringSize();
-                for(uint32 j = KEYRING_SLOT_START; j < KEYRING_SLOT_START+keyringSize; j++)
+                for(uint32 t = KEYRING_SLOT_START; t < KEYRING_SLOT_START+keyringSize; ++t)
                 {
-                    pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, j );
-                    if( !pItem2 )
+                    if( inv_keys[t-KEYRING_SLOT_START] == 0 )
                     {
-                        dest = ( (INVENTORY_SLOT_BAG_0 << 8) | j );
-                        return EQUIP_ERR_OK;
+                        inv_keys[t-KEYRING_SLOT_START] = 1;
+                        b_found = true;
+                        break;
                     }
                 }
             }
-            */
 
-            bool b_found = false;
+            if (b_found) continue;
+
             for(int t = INVENTORY_SLOT_BAG_START; !b_found && t < INVENTORY_SLOT_BAG_END; t++)
             {
                 pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, t );
