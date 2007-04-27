@@ -583,7 +583,7 @@ bool AuthSocket::_HandleLogonProof()
     }
     else
     {
-        char data[2]={AUTH_LOGON_PROOF,REALM_AUTH_NO_MATCH};
+        char data[4]={AUTH_LOGON_PROOF,REALM_AUTH_NO_MATCH,3,0};
         SendBuf(data,sizeof(data));
     }
     return true;
