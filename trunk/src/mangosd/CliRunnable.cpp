@@ -564,6 +564,7 @@ void ParseCommand( pPrintf zprintf, char* input)
 
     ///- Get the command and the arguments
     supposedCommand = strtok(input," ");
+    if (!supposedCommand) return;
     if (l>strlen(supposedCommand))
         arguments=&input[strlen(supposedCommand)+1];
 

@@ -92,10 +92,16 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_ITEM);
-    if(!pObject||!pObject->hasQuest(quest))
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_ITEM|TYPE_PLAYER);
+
+    // no or incorrect quest giver
+    if(!pObject
+        || (pObject->GetTypeId()!=TYPEID_PLAYER && !pObject->hasQuest(quest))
+        || (pObject->GetTypeId()==TYPEID_PLAYER && !((Player*)pObject)->CanShareQuest(quest))
+      )
     {
         _player->PlayerTalkClass->CloseGossip();
+        _player->SetDivider( 0 );
         return;
     }
 
@@ -106,6 +112,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         if(!GetPlayer()->CanTakeQuest(qInfo,true) )
         {
             _player->PlayerTalkClass->CloseGossip();
+            _player->SetDivider( 0 );
             return;
         }
 
