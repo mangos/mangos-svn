@@ -186,12 +186,6 @@ void World::RemoveWeather(uint32 id)
 /// Add a Weather object to the list
 Weather* World::AddWeather(uint32 zone_id)
 {
-    Weather *wth = sWorld.FindWeather(zone_id);
-
-    // weather already added
-    if(wth)
-        return wth;
-
     WeatherZoneChances const* weatherChances = objmgr.GetWeatherChances(zone_id);
 
     // zone not have weather, ignore

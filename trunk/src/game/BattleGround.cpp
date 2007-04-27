@@ -1066,7 +1066,7 @@ void BattleGround::RespawnFlag(uint32 Team, bool captured)
     {
         WorldPacket data;
         const char *message = LANG_BG_F_PLACED;
-        sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BATTLEGROUND, LANG_UNIVERSAL, NULL, NULL, message, NULL);
+        sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BATTLEGROUND, LANG_UNIVERSAL, NULL, 0, message, NULL);
         SendPacketToAll(&data);
 
         PlaySoundToAll(8232); // flags respawned sound...
