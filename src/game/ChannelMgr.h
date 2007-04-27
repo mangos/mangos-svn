@@ -34,8 +34,7 @@ class ChannelMgr
         {
             if(channels.count(name) == 0)
             {
-                Channel *nchan = new Channel;
-                nchan->SetName(name);
+                Channel *nchan = new Channel(name);
                 channels[name] = nchan;
             }
             return channels[name];
