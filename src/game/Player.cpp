@@ -11820,7 +11820,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
         WorldPacket data(SMSG_CAST_RESULT, 6);
         data << uint32(0);
         data << uint8(2);
-        data << uint8(CAST_FAIL_CANT_USE_WHEN_MOUNTED);
+        data << uint8(SPELL_FAILED_NOT_MOUNTED);
         GetSession()->SendPacket(&data);
         return false;
     }

@@ -174,7 +174,7 @@ GroupVisibility = 0
 # Default: 3600 sec (1 hour)
 MailDeliveryDelay = 3600
 
-# Message of the Day. Displayed at worldlogin for every user.
+# Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
 Motd = "Welcome to the Massive Network Game Object Server."
 
 # Health and power regeneration.
