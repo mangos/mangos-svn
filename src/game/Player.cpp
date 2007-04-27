@@ -9549,6 +9549,18 @@ QuestStatus Player::GetQuestStatus( uint32 quest_id )
     return QUEST_STATUS_NONE;
 }
 
+bool Player::CanShareQuest(uint32 quest_id)
+{
+    if( quest_id )
+    {
+        if( mQuestStatus.find( quest_id ) != mQuestStatus.end() )
+            return mQuestStatus[quest_id].m_status == QUEST_STATUS_NONE
+                || mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE;
+    }
+
+    return false;
+}
+
 void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
 {
     Quest * qInfo = objmgr.QuestTemplates[quest_id];
