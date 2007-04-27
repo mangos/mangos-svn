@@ -1223,8 +1223,13 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
 
+    // this map not exist in client
     if(!mEntry)
-        return; // this map not exist in client
+        return;
+
+    // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
+    if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND)
+        return;
 
     QueryResult *result = loginDatabase.PQuery("SELECT `tbc` FROM `account` WHERE `id`='%u'", GetSession()->GetAccountId());
 

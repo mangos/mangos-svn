@@ -83,6 +83,10 @@ BattleGround::BattleGround()
     BerserkBonus1Spawn[1] = 0;
     BerserkBonus2Spawn[0] = 0;
     BerserkBonus2Spawn[1] = 0;
+    AllianceFlagSpawn[0] = 0;
+    AllianceFlagSpawn[1] = 0;
+    HordeFlagSpawn[0] = 0;
+    HordeFlagSpawn[1] = 0;
 }
 
 BattleGround::~BattleGround()
@@ -113,10 +117,6 @@ void BattleGround::Update(time_t diff)
                 {
                     RemovePlayerFromQueue(itr->first);
                     sBattleGroundMgr.SendBattleGroundStatusPacket(plr, this, STATUS_NONE, 0, 0);
-                }
-                else
-                {
-                    ;   // do nothing
                 }
             }
             else // player currently offline
@@ -231,6 +231,9 @@ void BattleGround::Update(time_t diff)
         // WSG
         if(GetID() == 2)
         {
+            AllianceFlagSpawn[1] = 1;
+            HordeFlagSpawn[1] = 1;
+            sLog.outError("Flags activated...");
             MapManager::Instance().GetMap(af->GetMapId(), af)->Add(af);
             MapManager::Instance().GetMap(hf->GetMapId(), hf)->Add(hf);
             sLog.outError("Flags respawned...");
@@ -269,6 +272,25 @@ void BattleGround::Update(time_t diff)
         // WSG
         if(GetID() == 2)
         {
+            // Flags timers
+            AllianceFlagSpawn[0] -= diff;
+            HordeFlagSpawn[0] -= diff;
+            if(AllianceFlagSpawn[0] < 0)
+                AllianceFlagSpawn[0] = 0;
+            if(HordeFlagSpawn[0] < 0)
+                HordeFlagSpawn[0] = 0;
+            if(AllianceFlagSpawn[0] == 0 && AllianceFlagSpawn[1] == 0)
+            {
+                //MapManager::Instance().GetMap(af->GetMapId(), af)->Add(af);
+                RespawnFlag(ALLIANCE, true);
+                AllianceFlagSpawn[1] = 1;   // spawned
+            }
+            if(HordeFlagSpawn[0] == 0 && HordeFlagSpawn[1] == 0)
+            {
+                //MapManager::Instance().GetMap(hf->GetMapId(), hf)->Add(hf);
+                RespawnFlag(HORDE, true);
+                HordeFlagSpawn[1] = 1;      // spawned
+            }
             //Bonuses timers
             SpeedBonus1Spawn[0] -= diff;
             SpeedBonus2Spawn[0] -= diff;
@@ -592,11 +614,15 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         // check this case...
         if(m_AllianceFlagPickerGUID == guid)
         {
+            //AllianceFlagSpawn[0] = 0;
+            //AllianceFlagSpawn[1] = 1;
             SetAllianceFlagPicker(0);
             RespawnFlag(ALLIANCE, false);
         }
         if(m_HordeFlagPickerGUID == guid)
         {
+            //HordeFlagSpawn[0] = 0;
+            //HordeFlagSpawn[1] = 1;
             SetHordeFlagPicker(0);
             RespawnFlag(HORDE, false);
         }
@@ -878,10 +904,14 @@ void BattleGround::EventPlayerCapturedFlag(Player *Source)
         switch(Source->GetTeam())
         {
             case ALLIANCE:
-                RespawnFlag(HORDE, true);
+                HordeFlagSpawn[0] = 1*60*1000;
+                HordeFlagSpawn[1] = 0;
+                //RespawnFlag(HORDE, true);
                 break;
             case HORDE:
-                RespawnFlag(ALLIANCE, true);
+                AllianceFlagSpawn[0] = 1*60*1000;
+                AllianceFlagSpawn[1] = 0;
+                //RespawnFlag(ALLIANCE, true);
                 break;
         }
     }
@@ -1105,7 +1135,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
             SpeedBonus2Spawn[1] = 0;
             SpellId = 23451;
             break;
-        case 3706:                                          //Alliance elexir of regeneration spawn
+        case 3706:                                          //Alliance elixir of regeneration spawn
             sLog.outError("RegenBonus1SpawnState = %u, RegenBonus1SpawnTimer = %u", RegenBonus1Spawn[1], RegenBonus1Spawn[0]);
             if(RegenBonus1Spawn[1] == 0)
             {
@@ -1116,7 +1146,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
             RegenBonus1Spawn[1] = 0;
             SpellId = 23493;
             break;
-        case 3708:                                          //Horde elexir of regeneration spawn
+        case 3708:                                          //Horde elixir of regeneration spawn
             sLog.outError("RegenBonus2SpawnState = %u, RegenBonus2SpawnTimer = %u", RegenBonus2Spawn[1], RegenBonus2Spawn[0]);
             if(RegenBonus2Spawn[1] == 0)
             {
@@ -1127,7 +1157,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
             RegenBonus2Spawn[1] = 0;
             SpellId = 23493;
             break;
-        case 3707:                                          //Alliance elexir of berserk spawn
+        case 3707:                                          //Alliance elixir of berserk spawn
             sLog.outError("BerserkBonus1SpawnState = %u, BerserkBonus1SpawnTimer = %u", BerserkBonus1Spawn[1], BerserkBonus1Spawn[0]);
             if(BerserkBonus1Spawn[1] == 0)
             {
@@ -1138,7 +1168,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
             BerserkBonus1Spawn[1] = 0;
             SpellId = 23505;
             break;
-        case 3709:                                          //Horde elexir of berserk spawn
+        case 3709:                                          //Horde elixir of berserk spawn
             sLog.outError("BerserkBonus2SpawnState = %u, BerserkBonus2SpawnTimer = %u", BerserkBonus2Spawn[1], BerserkBonus2Spawn[0]);
             if(BerserkBonus2Spawn[1] == 0)
             {
@@ -1181,18 +1211,20 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
         case 4021:                                          //Unk2
             break;
         //Exits
-        case 3669:                                          //WSG Horde Exit (removed, but trigger still exist).
-        case 3671:                                          //WSG Alliance Exit (removed, but trigger still exist).
-        case 3948:                                          //AB Alliance Exit.
-        case 3949:                                          //AB Horde Exit.
-            if(Source->InBattleGround())
-            {
-                BattleGround* bg = sBattleGroundMgr.GetBattleGround(Source->GetBattleGroundId());
-                if(bg)
-                {
-                    bg->RemovePlayer(Source->GetGUID(), true, true);
-                }
-            }
+        case 3669:                                          //Warsong Gulch Horde Exit (removed, but trigger still exist).
+        case 3671:                                          //Warsong Gulch Alliance Exit (removed, but trigger still exist).
+            break;
+        case 3948:                                          //Arathi Basin Alliance Exit.
+            if(Source->GetTeam() != ALLIANCE)
+                Source->GetSession()->SendAreaTriggerMessage("Only The Alliance can use that portal");
+            else
+                RemovePlayer(Source->GetGUID(), true, true);
+            break;
+        case 3949:                                          //Arathi Basin Horde Exit.
+            if(Source->GetTeam() != ALLIANCE)
+                Source->GetSession()->SendAreaTriggerMessage("Only The Horde can use that portal");
+            else
+                RemovePlayer(Source->GetGUID(), true, true);
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %d", Trigger);

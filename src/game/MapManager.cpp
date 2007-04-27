@@ -202,5 +202,3 @@ void MapManager::InitMaxInstanceId()
         delete result;
     }
 }
-
-

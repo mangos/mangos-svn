@@ -105,10 +105,15 @@ void WorldSession::HandleArenaTeamRosterOpcode( WorldPacket & recv_data )
     WorldPacket data(SMSG_ARENA_TEAM_ROSTER, 4*7);
     data << uint8(0);                   // slot
     data << uint32(2);                  // members count
+    data << uint32(0);                  // unknown (may be arena team id?)
 
     for(uint8 i = 0; i < 2; i++)
     {
+        data << _player->GetGUID();     // guid
+        data << uint8(1);               // online flag
         data << _player->GetName();     // member name
+        data << uint8(1);               // unknown
+        data << uint32(1);              // unknown
         data << _player->getClass();    // class there...
         data << uint32(20);             // played this week
         data << uint32(11);             // wins this week

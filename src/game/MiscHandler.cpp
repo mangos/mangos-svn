@@ -865,7 +865,6 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     sLog.outDebug("WORLD: Received CMSG_AREATRIGGER");
 
     uint32 Trigger_ID;
-    WorldPacket data;
 
     recv_data >> Trigger_ID;
     sLog.outDebug("Trigger ID:%u",Trigger_ID);
@@ -902,6 +901,13 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             GetPlayer()->SetRestType(1);
         }
     }
+    else if(GetPlayer()->InBattleGround())
+    {
+        BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
+        if(bg)
+            if(bg->GetStatus() == STATUS_INPROGRESS)
+                bg->HandleAreaTrigger(GetPlayer(), Trigger_ID);
+    }
     else if(at && at->IsTeleport())
     {
         if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) || GetPlayer()->isGameMaster())
@@ -916,14 +922,6 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
             SendAreaTriggerMessage(msg.c_str());
         }
-    }
-
-    if(GetPlayer()->InBattleGround())
-    {
-        BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
-        if(bg)
-            if(bg->GetStatus()==STATUS_INPROGRESS)
-                bg->HandleAreaTrigger(GetPlayer(),Trigger_ID);
     }
 }
 
