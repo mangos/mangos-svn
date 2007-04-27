@@ -397,7 +397,7 @@ void Spell::EffectDummy(uint32 i)
                 ((Player*)m_caster)->GetSession()->SendPacket(&data);
             }
 
-            SendCastResult(CAST_FAIL_NO_NEARBY_CORPSES_TO_EAT);
+            SendCastResult(SPELL_FAILED_NO_EDIBLE_CORPSES);
             return;
         }
 
@@ -678,7 +678,7 @@ void Spell::EffectApplyAura(uint32 i)
     //If m_immuneToState type contain this aura type, IMMUNE aura.
     if(unitTarget->IsImmunedToSpellEffect(m_spellInfo->EffectApplyAuraName[i]))
     {
-        SendCastResult(CAST_FAIL_IMMUNE);
+        SendCastResult(SPELL_FAILED_IMMUNE);
         return;
     }
 
@@ -1125,7 +1125,7 @@ void Spell::EffectOpenLock(uint32 i)
     {
         sLog.outError( "Spell::EffectOpenLock: %s [guid = %u] has an unknown lockId: %u!",
             (gameObjTarget ? "gameobject" : "item"), GUID_LOPART(guid), lockId);
-        SendCastResult(CAST_FAIL_INVALID_TARGET);
+        SendCastResult(SPELL_FAILED_BAD_TARGETS);
         return;
     }
 
@@ -1153,7 +1153,7 @@ void Spell::EffectOpenLock(uint32 i)
     {
         if(SkillId != SKILL_LOCKPICKING)                    // wrong skill (cheating?)
         {
-            SendCastResult(CAST_FAIL_FIZZLED);
+            SendCastResult(SPELL_FAILED_FIZZLE);
             return;
         }
 
@@ -1162,7 +1162,7 @@ void Spell::EffectOpenLock(uint32 i)
     else
     if(SkillId == SKILL_LOCKPICKING)                    // apply picklock skill to wrong target
     {
-        SendCastResult(CAST_FAIL_INVALID_TARGET);
+        SendCastResult(SPELL_FAILED_BAD_TARGETS);
         return;
     }
 
@@ -1171,7 +1171,7 @@ void Spell::EffectOpenLock(uint32 i)
         loottype = LOOT_SKINNING;
         if ( player->GetSkillValue(SkillId) + spellSkillBonus < reqSkillValue )
         {
-            SendCastResult(CAST_FAIL_SKILL_NOT_HIGH_ENOUGH);
+            SendCastResult(SPELL_FAILED_LOW_CASTLEVEL);
             return;
         }
 
@@ -2932,7 +2932,7 @@ void Spell::EffectTransmitted(uint32 i)
 
         if ( !map->IsInWater(fx,fy) )
         {
-            SendCastResult(CAST_FAIL_CANT_BE_CAST_HERE);
+            SendCastResult(SPELL_FAILED_NOT_HERE);
             SendChannelUpdate(0);
             return;
         }

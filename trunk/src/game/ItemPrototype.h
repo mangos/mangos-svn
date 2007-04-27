@@ -210,7 +210,7 @@ enum INVENTORY_TYPES
     INVTYPE_AMMO                                = 24,
     INVTYPE_THROWN                              = 25,
     INVTYPE_RANGEDRIGHT                         = 26,
-    INVTYPE_SLOT_ITEM                           = 27,
+    INVTYPE_QUIVER                              = 27,
     INVTYPE_RELIC                               = 28,
     NUM_INVENTORY_TYPES                         = 29
 };
