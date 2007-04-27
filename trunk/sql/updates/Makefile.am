@@ -282,6 +282,9 @@ pkgdata_DATA = \
 	3474_creature_addon.sql \
 	3501.sql \
 	3503_creature_movement.sql \
+	3512_character_spell_cooldown.sql \
+	3514_mail.sql \
+	3516_spell_learn_spell.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -544,4 +547,7 @@ EXTRA_DIST = \
 	3474_creature_addon.sql \
 	3501.sql \
 	3503_creature_movement.sql \
+	3512_character_spell_cooldown.sql \
+	3514_mail.sql \
+	3516_spell_learn_spell.sql \
 	README
