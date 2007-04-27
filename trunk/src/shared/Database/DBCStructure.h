@@ -62,6 +62,14 @@ struct BattlemasterListEntry
     char*       name;
 };
 
+struct ChatChannelsEntry
+{
+    uint32      ChannelID;
+    uint32      flags;
+    char*       pattern;
+    char*       name;
+};
+
 struct ChrClassesEntry
 {
     uint32      ClassID;

@@ -195,14 +195,11 @@ class Channel
         }
 
     public:
-        Channel() : name(""), announce(true), constant(false), moderate(false), m_ownerGUID(0), password("")
-        {
-        }
-        void SetName(std::string newname) { name = newname; }
-        string GetName() { return name; }
+        explicit Channel(std::string _name);
+        std::string GetName() { return name; }
         bool IsConstant() { return constant; }
         bool IsAnnounce() { return announce; }
-        string GetPassword() { return password; }
+        std::string GetPassword() { return password; }
         void SetConstant(bool nconstant) { constant = nconstant; }
         void SetPassword(std::string npassword) { password = npassword; }
         void SetAnnounce(bool nannounce) { announce = nannounce; }

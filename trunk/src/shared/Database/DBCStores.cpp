@@ -35,6 +35,7 @@ static AreaFlagByMapID  sAreaFlagByMapID;                   // for instances wit
 
 DBCStorage <BankBagSlotPricesEntry> sBankBagSlotPricesStore(BankBagSlotPricesEntryfmt);
 DBCStorage <BattlemasterListEntry> sBattlemasterListStore(BattlemasterListEntryfmt);
+DBCStorage <ChatChannelsEntry> sChatChannelsStore(ChatChannelsEntryfmt);
 DBCStorage <ChrClassesEntry> sChrClassesStore(ChrClassesEntryfmt);
 DBCStorage <ChrRacesEntry> sChrRacesStore(ChrRacesEntryfmt);
 DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
@@ -129,8 +130,9 @@ inline void LoadDBC(barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& st
             snprintf(buf,100," (exist, but have %d fields instead %d) Wrong client version DBC file?",storage.fieldCount,strlen(storage.fmt));
             errlist.push_back(filename + buf);
             fclose(f);
-        }else
-        errlist.push_back(filename);
+        }
+        else
+            errlist.push_back(filename);
     }
 }
 
@@ -147,6 +149,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
     LoadDBC(bar,bad_dbc_files,sBankBagSlotPricesStore,   dataPath+"dbc/BankBagSlotPrices.dbc");
     LoadDBC(bar,bad_dbc_files,sBattlemasterListStore,    dataPath+"dbc/BattlemasterList.dbc");
+    LoadDBC(bar,bad_dbc_files,sChatChannelsStore,        dataPath+"dbc/ChatChannels.dbc");
     LoadDBC(bar,bad_dbc_files,sChrClassesStore,          dataPath+"dbc/ChrClasses.dbc");
     LoadDBC(bar,bad_dbc_files,sChrRacesStore,            dataPath+"dbc/ChrRaces.dbc");
     LoadDBC(bar,bad_dbc_files,sCreatureFamilyStore,      dataPath+"dbc/CreatureFamily.dbc");
@@ -629,6 +632,31 @@ bool CanUsedWhileStealthed(uint32 spellId)
     if ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000)
         return true;
     return false;
+}
+
+ChatChannelsEntry const* GetChannelEntryFor(char const* name)
+{
+    // not sorted, numbering index from 0
+    for(uint32 i = 0; i < sChatChannelsStore.nCount; ++i)
+    {
+        ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
+        if(ch)
+        {
+            if((ch->flags & 4) == 4)                          // global channel without zone name in pattern
+            {
+                if(strcmp(name,ch->pattern)==0)
+                    return ch;
+            }
+            else
+            {
+                // compare pattern (something - %s)
+                char zone_name_buf[50];
+                if(sscanf(name,ch->pattern,zone_name_buf)>0)
+                    return ch;
+            }
+        }
+    }
+    return NULL;
 }
 
 // script support functions

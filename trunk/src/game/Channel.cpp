@@ -20,13 +20,28 @@
 #include "ObjectMgr.h"
 #include "Chat.h"
 
+Channel::Channel(std::string _name)
+    : name(_name), announce(true), constant(false), moderate(false), m_ownerGUID(0), password("")
+{
+    // set special flags if built-in channel
+    ChatChannelsEntry const* ch = GetChannelEntryFor(name.c_str());
+    if(ch)
+    {
+        constant = true;                                    // built-in channel    
+        announce = false;                                   // no join/leave announces
+    }
+}
+
 void Channel::Join(uint64 p, const char *pass, uint32 unk1)
 {
     WorldPacket data;
     if(IsOn(p))
     {
-        MakeAlreadyOn(&data,p);
-        SendToOne(&data,p);
+        if(!constant)                                       // non send error message for built-in channels
+        {
+            MakeAlreadyOn(&data,p);
+            SendToOne(&data,p);
+        }
     }
     else if(IsBanned(p))
     {

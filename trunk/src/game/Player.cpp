@@ -4106,10 +4106,12 @@ void Player::SetInitialFactions()
             newFaction.ID = factionEntry->ID;
             newFaction.ReputationListID = factionEntry->reputationListID;
             newFaction.Standing = 0;
+            newFaction.Flags = 0;
             newFaction.uState = FACTION_NEW;
-            //Set visible to factions of own team
-            if( GetTeam() == factionEntry->team ) newFaction.Flags = 1;
-            else newFaction.Flags = 0;
+
+            // show(1) and disable AtWar button(16) of own team factions
+            if( GetTeam() == factionEntry->team )
+                newFaction.Flags = 16 | 1;
 
             //If the faction is Hostile or Hated  of my one we are at war!
             if(GetBaseReputationRank(factionEntry) <= REP_HOSTILE)
