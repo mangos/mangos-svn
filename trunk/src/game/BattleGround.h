@@ -243,5 +243,7 @@ class BattleGround
         int32 RegenBonus2Spawn[2];
         int32 BerserkBonus1Spawn[2];
         int32 BerserkBonus2Spawn[2];
+        int32 AllianceFlagSpawn[2];
+        int32 HordeFlagSpawn[2];
 };
 #endif

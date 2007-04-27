@@ -216,22 +216,16 @@ void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
         return;
 
     uint32 bgid;
-    uint32 NumberOfInstances = 1;
-
     recv_data >> bgid;          // id from DBC
 
-    WorldPacket data(SMSG_BATTLEFIELD_LIST, (8+4+1+4+4*NumberOfInstances));
-    data << _player->GetGUID(); // NPC guid, we use player guid now
-    data << bgid;               // DBC id
-    data << uint8(0x00);        // unk
-    data << NumberOfInstances;
+    BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(bgid);
 
-    for (uint8 i = 1; i < NumberOfInstances+1; i++)
-    {
-        data << uint32(i);
-    }
+    if(!bl)
+        return;
 
-    SendPacket(&data);
+    WorldPacket data;
+    sBattleGroundMgr.BuildBattleGroundListPacket(&data, _player->GetGUID(), _player, bgid);
+    SendPacket( &data );
 }
 
 void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
