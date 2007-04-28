@@ -69,6 +69,14 @@ bool ChatHandler::HandleLoadScriptsCommand(const char* args)
     return true;
 }
 
+/** \brief GM command level 3 - Create a guild.
+ *
+ * This command allows a GM (level 3) to create a guild.
+ *
+ * The "args" parameter contains the name of the guild leader
+ * and then the name of the guild.
+ *
+ */
 bool ChatHandler::HandleSecurityCommand(const char* args)
 {
     char* pName = strtok((char*)args, " ");
@@ -1862,8 +1870,9 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
     if (!*args)
         return false;
 
-    gname = strtok((char*)args, " ");
-    lname = strtok(NULL, " ");
+    lname = strtok((char*)args, " ");
+    gname = strtok(NULL, "");
+
     if(!lname)
         return false;
     else if(!gname)
@@ -3079,7 +3088,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
         player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
 
-        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 ); // 0x2800, 0x2801 2.0.8...
+        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );// 0x2800, 0x2801 2.0.8...
         player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 );
 
         //player->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO); // wrong...
@@ -3408,7 +3417,7 @@ bool ChatHandler::HandleFlyModeCommand(const char* args)
         return false;
     }
     data.append(unit->GetPackGUID());
-    data << uint32(0); // unk
+    data << uint32(0);                                      // unk
     unit->SendMessageToSet(&data, true);
     PSendSysMessage("%s's Fly Mode %s", unit->GetName(), args);
     return true;
@@ -3498,8 +3507,8 @@ bool ChatHandler::HandleSendChannelNotifyCommand(const char* args)
     uint8 code = atoi(args);
 
     WorldPacket data(SMSG_CHANNEL_NOTIFY, (1+10));
-    data << code; // notify type
-    data << name; // channel name
+    data << code;                                           // notify type
+    data << name;                                           // channel name
     data << uint32(0);
     data << uint32(0);
     m_session->SendPacket(&data);
@@ -3515,12 +3524,12 @@ bool ChatHandler::HandleSendChatMsgCommand(const char* args)
     uint8 type = atoi(args);
 
     WorldPacket data(SMSG_MESSAGECHAT, 100);
-    data << type;       // message type
-    data << uint32(0);  // lang
-    data << m_session->GetPlayer()->GetGUID(); // guid
-    data << uint32(9);  // msg len
-    data << msg;        // msg
-    data << uint8(0);   // chat tag
+    data << type;                                           // message type
+    data << uint32(0);                                      // lang
+    data << m_session->GetPlayer()->GetGUID();              // guid
+    data << uint32(9);                                      // msg len
+    data << msg;                                            // msg
+    data << uint8(0);                                       // chat tag
     m_session->SendPacket(&data);
     return true;
 }
