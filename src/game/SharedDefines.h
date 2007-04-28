@@ -902,12 +902,7 @@ enum TrainerType                                            // this is important
     TRAINER_TYPE_CLASS             = 0,
     TRAINER_TYPE_MOUNTS            = 1,
     TRAINER_TYPE_TRADESKILLS       = 2,
-    TRAINER_TYPE_PETS              = 3,
-#ifdef _MANGOS_ENHANCED
-	TRAINER_TYPE_MULTICLASS        = 4,
-	TRAINER_TYPE_AURA_VENDOR       = 5,
-	TRAINER_TYPE_HEAL_VENDOR       = 6
-#endif //_MANGOS_ENHANCED
+    TRAINER_TYPE_PETS              = 3
 };
 
 enum CreatureType
@@ -978,10 +973,7 @@ enum QuestTypes
     QUEST_TYPE_WORLD_EVENT         = 82,
     QUEST_TYPE_LEGENDARY           = 83,
     QUEST_TYPE_ESCORT              = 84,
-    QUEST_TYPE_HEROIC              = 85,
-#ifdef _MANGOS_ENHANCED
-	QUEST_TYPE_GUILD               = 86
-#endif //_MANGOS_ENHANCED
+    QUEST_TYPE_HEROIC              = 85
 };
 
 enum QuestSort
