@@ -642,7 +642,7 @@ INSERT INTO `command` VALUES
 ('changelevel',2,'Syntax: .changelevel #level\r\n\r\nChange the level of the selected creature to #level.\r\n\r\n#level may range from 1 to 63.'),
 ('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),
 ('cooldown',3,'Syntax: .cooldown [#spell_id]\r\n\r\nRemove all (if spell_id not provided) or #spel_id spell cooldown from selected character or you (if no selection).'),
-('createguild',3,'Syntax: .createguild $GuildName $GuildLeaderName\r\n\r\nCreate a guild named $GuildName with the player $GuildLeaderName as leader.'),
+('createguild',3,'Syntax: .createguild $GuildLeaderName $GuildName\r\n\r\nCreate a guild named $GuildName with the player $GuildLeaderName as leader.'),
 ('cshutdown',3,'Syntax: .cshutdown Cancels shutdown'),
 ('delete',2,'Syntax: .delete\r\n\r\nDelete the selected creature from the world.'),
 ('delobject',2,'Syntax: .delobject #go_guid\r\nDelete gameobject with guid #go_guid.'),
