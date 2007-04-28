@@ -12218,23 +12218,6 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
 }
 
-void Player::TeleportToHomebind()
-{
-    Field *fields;
-
-    QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GetGUIDLow());
-
-    if(!result)
-    {
-        sLog.outError("PLAYER: No homebind location set for '%s'\n", GetName());
-        return;
-    }
-
-    fields = result->Fetch();
-    TeleportTo(fields[0].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), GetOrientation());
-    delete result;
-}
-
 void Player::_LoadGroup()
 {
     QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
@@ -12295,8 +12278,8 @@ void Player::UpdateHomebindTime(uint32 time)
     {
         if (time >= m_HomebindTimer)
         {
-            // go to homebind location
-            TeleportToHomebind();
+            // teleport to homebind location
+            TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation());
         }
         else
         {

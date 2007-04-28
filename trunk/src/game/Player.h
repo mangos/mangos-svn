@@ -1249,6 +1249,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         float  m_recallO;
         void   SetRecallPosition(uint32 map, float x, float y, float z, float o);
 
+        //homebind coordinates
+        uint8 m_homebindMapId;
+        uint16 m_homebindZoneId;
+        float m_homebindX;
+        float m_homebindY;
+        float m_homebindZ;
+
         // Invisibility and detection system
         std::vector<Player *> InvisiblePjsNear;
         Player* m_DiscoveredPj;
@@ -1265,7 +1272,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         void UpdateHomebindTime(uint32 time);
-        void TeleportToHomebind();
 
         bool m_Loaded;
         uint32 m_HomebindTimer;

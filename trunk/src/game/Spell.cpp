@@ -2727,7 +2727,8 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
 
     if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556 || m_spellInfo->Id == 7355)
     {
-        Field *fields;
+        //old code, slow:
+        /*Field *fields;
         QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
         if(!result)
         {
@@ -2741,9 +2742,10 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
         float  TC_y = fields[3].GetFloat();
         float  TC_z = fields[4].GetFloat();
 
-        delete result;
+        delete result;*/
 
-        ((Player*)Target)->TeleportTo(TC_mapId,TC_x,TC_y,TC_z,Target->GetOrientation());
+        //homebind location is loaded always
+        ((Player*)Target)->TeleportTo(((Player*)m_caster)->m_homebindMapId,((Player*)m_caster)->m_homebindX,((Player*)m_caster)->m_homebindY,((Player*)m_caster)->m_homebindZ,Target->GetOrientation());
     }
     else
     {
