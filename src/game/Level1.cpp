@@ -81,7 +81,7 @@ bool ChatHandler::HandleEmote2Command(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleWhisperCommand(const char* args)
+bool ChatHandler::HandleWhisperCommand(const char* args)        //WTF? what should it do?
 {
     char* receiver = strtok((char*)args, " ");
     char* text = strtok(NULL, "");
@@ -89,7 +89,7 @@ bool ChatHandler::HandleWhisperCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();  
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
-    if(!pCreature)
+    if(!pCreature || !receiver || !text)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         return true;
