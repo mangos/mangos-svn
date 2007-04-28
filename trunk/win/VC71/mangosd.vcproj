@@ -48,8 +48,7 @@
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
 				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
 				SubSystem="1"
-				ImportLibrary="$(OutDir)/mangosd.lib"
-			/>
+				ImportLibrary="$(OutDir)/mangosd.lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
@@ -87,7 +86,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\mangosd"
-				PreprocessorDefinitions="VERSION=&quot;0.7-SVN&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI"
+				PreprocessorDefinitions="VERSION=&quot;0.7-SVN&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;_MANGOS_ENHANCED"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -115,8 +114,7 @@
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
 				SubSystem="1"
-				ImportLibrary="$(OutDir)/mangosd.lib"
-			/>
+				ImportLibrary="$(OutDir)/mangosd.lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\..\..\bin\Debug/mangosd.tlb"/>
@@ -147,72 +145,55 @@
 	</References>
 	<Files>
 		<Filter
-			Name="doc"
-			>
+			Name="doc">
 			<File
-				RelativePath="..\..\Authors"
-				>
+				RelativePath="..\..\Authors">
 			</File>
 			<File
-				RelativePath="..\..\ChangeLog"
-				>
+				RelativePath="..\..\ChangeLog">
 			</File>
 			<File
-				RelativePath="..\..\Copying"
-				>
+				RelativePath="..\..\Copying">
 			</File>
 			<File
-				RelativePath="..\..\Install"
-				>
+				RelativePath="..\..\Install">
 			</File>
 			<File
-				RelativePath="..\..\News"
-				>
+				RelativePath="..\..\News">
 			</File>
 			<File
-				RelativePath="..\..\Readme"
-				>
+				RelativePath="..\..\Readme">
 			</File>
 			<File
-				RelativePath="..\..\Thanks"
-				>
+				RelativePath="..\..\Thanks">
 			</File>
 		</Filter>
 		<File
-			RelativePath="..\..\src\mangosd\CliRunnable.cpp"
-			>
+			RelativePath="..\..\src\mangosd\CliRunnable.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\mangosd\CliRunnable.h"
-			>
+			RelativePath="..\..\src\mangosd\CliRunnable.h">
 		</File>
 		<File
-			RelativePath="..\..\src\mangosd\Main.cpp"
-			>
+			RelativePath="..\..\src\mangosd\Main.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\mangosd\Master.cpp"
-			>
+			RelativePath="..\..\src\mangosd\Master.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\mangosd\Master.h"
-			>
+			RelativePath="..\..\src\mangosd\Master.h">
 		</File>
 		<File
-			RelativePath="..\..\src\mangosd\RASocket.cpp"
-			>
+			RelativePath="..\..\src\mangosd\RASocket.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\mangosd\RASocket.h"
-			>
+			RelativePath="..\..\src\mangosd\RASocket.h">
 		</File>
 		<File
-			RelativePath="..\..\src\mangosd\WorldRunnable.cpp"
-			>
+			RelativePath="..\..\src\mangosd\WorldRunnable.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\mangosd\WorldRunnable.h"
-			>
+			RelativePath="..\..\src\mangosd\WorldRunnable.h">
 		</File>
 	</Files>
 	<Globals>

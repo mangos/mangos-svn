@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="mangosd"
 	ProjectGUID="{A3A04E47-43A2-4C08-90B3-029CEF558594}"
 	RootNamespace="mangosd"
@@ -137,7 +137,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\mangosd"
-				PreprocessorDefinitions="VERSION=&quot;0.7-SVN&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI"
+				PreprocessorDefinitions="VERSION=&quot;0.7-SVN&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;_MANGOS_ENHANCED"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"

@@ -563,6 +563,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
+#ifdef _MANGOS_ENHANCED
+		uint64	playerTalkNPCGUID;
+#endif //_MANGOS_ENHANCED
+
         void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true, bool ignore_transport = true, bool is_gm_command = false);
 
         bool Create ( uint32 guidlow, WorldPacket &data );

@@ -23,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
+				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_MANGOS_ENHANCED"
 				StringPooling="FALSE"
 				MinimalRebuild="FALSE"
 				BasicRuntimeChecks="3"
