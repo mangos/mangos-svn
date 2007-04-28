@@ -271,7 +271,67 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         }
 
         Spell *spell;
-        if(proto->spell->SpellVisual == 222)
+
+		if(spellId == 30546)
+		{// UQ1: Learn direct. This spell can not be learnt any other way... (Maybe bad DB!)
+			float u_oprientation = unit->GetOrientation();
+
+			_player->learnSpell((uint16)spellId);
+
+		    // trainer always see at customer in time of training (part of client functionality)
+	        unit->SetInFront(_player);
+
+			// Add some FX...
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(20211);
+			spell = new Spell(_player, spellInfo, false, NULL);
+
+			// trainer always return to original orientation
+			unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+			return;
+		}
+		else if(spellId == 19274)
+		{// UQ1: Learn direct. This spell can not be learnt any other way... (Maybe bad DB!)
+			float u_oprientation = unit->GetOrientation();
+
+			_player->learnSpell((uint16)spellId);
+
+		    // trainer always see at customer in time of training (part of client functionality)
+	        unit->SetInFront(_player);
+
+			// Add some FX...
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(20211);
+			spell = new Spell(_player, spellInfo, false, NULL);
+
+			// trainer always return to original orientation
+			unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+			return;
+		}
+		else if(spellId == 19275)
+		{// UQ1: Learn direct. This spell can not be learnt any other way... (Maybe bad DB!)
+			float u_oprientation = unit->GetOrientation();
+
+			_player->learnSpell((uint16)spellId);
+
+		    // trainer always see at customer in time of training (part of client functionality)
+	        unit->SetInFront(_player);
+
+			// Add some FX...
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(20211);
+			spell = new Spell(_player, spellInfo, false, NULL);
+
+			// trainer always return to original orientation
+			unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+			return;
+		}
+		else if(spellId == 29341)
+			spell = new Spell(_player, proto->spell, false, NULL);
+		else if(spellId == 3704)
+			spell = new Spell(_player, proto->spell, false, NULL);
+		else if(spellId == 1476)
+			spell = new Spell(_player, proto->spell, false, NULL);
+		else if(spellId == 33718) // UQ1: Fix for conjure food (rank 8) training!
+			spell = new Spell(_player, proto->spell, false, NULL);
+        else if(proto->spell->SpellVisual == 222)
             spell = new Spell(_player, proto->spell, false, NULL);
         else
             spell = new Spell(unit, proto->spell, false, NULL);
@@ -290,6 +350,484 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
     }
 }
+
+#ifdef _MANGOS_ENHANCED
+//
+// Start: Unique1's Multi-Class Training
+//
+
+char const *formatString( char const *format, ... )
+{
+    va_list        argptr;
+    #define    MAX_FMT_STRING    32000
+    static char        temp_buffer[MAX_FMT_STRING];
+    static char        string[MAX_FMT_STRING];
+    static int        index = 0;
+    char    *buf;
+    int len;
+
+    va_start(argptr, format);
+    vsnprintf(temp_buffer,MAX_FMT_STRING, format, argptr);
+    va_end(argptr);
+
+    len = strlen(temp_buffer);
+
+    if( len >= MAX_FMT_STRING )
+        return "ERROR";
+
+    if (len + index >= MAX_FMT_STRING-1)
+    {
+        index = 0;
+    }
+
+    buf = &string[index];
+    memcpy( buf, temp_buffer, len+1 );
+
+    index += len + 1;
+
+    return buf;
+}
+
+void Strip_XX( const char *in, char *out ) 
+{// Strip the " XX" from the end of the string! XX is II or IV or whatever...
+	int length = strlen(in);
+	int count = 0;
+
+	while ( *in && count < length - 3 ) 
+	{
+		*out++ = *in++;
+		count++;
+	}
+	*out = 0;
+}
+
+void prepareMulticlassGossipMenu( Creature *unit, Player *pPlayer, uint32 gossipid )
+{
+	GossipOptionList m_goptions;
+	Player *_player = pPlayer;
+	int	count = 0;
+
+	unit = ObjectAccessor::Instance().GetCreature(*_player, _player->playerTalkNPCGUID);
+
+	uint32 trainer_type = unit->GetCreatureInfo()->trainer_type;
+
+    PlayerMenu* pm=pPlayer->PlayerTalkClass;
+    pm->ClearMenus();
+
+	if(!m_goptions.size())
+        unit->LoadGossipOptions();
+
+	std::list<TrainerSpell*> Tspells;
+    std::list<TrainerSpell*>::iterator itr;
+
+    for (itr = unit->GetTspellsBegin(); itr != unit->GetTspellsEnd();itr++)
+    {
+        if((*itr)->spell)
+            Tspells.push_back(*itr);
+    }
+
+    for (itr = Tspells.begin(); itr != Tspells.end();itr++)
+    {
+		TrainerSpell *proto = *itr;
+        uint8 canlearnflag = 1;
+        bool ReqskillValueFlag = false;
+        bool LevelFlag = false;
+        bool ReqspellFlag = false;
+		uint32 entry_id;
+
+		if(trainer_type == TRAINER_TYPE_MULTICLASS)
+			entry_id = (*itr)->spell->EffectTriggerSpell[0];
+		else // Other types are direct casts!
+			entry_id = (*itr)->spell->Id;
+
+		SpellEntry const *spellInfo = sSpellStore.LookupEntry(entry_id);
+
+        if(!spellInfo)
+            continue;
+
+        if(trainer_type == TRAINER_TYPE_MULTICLASS && (*itr)->reqskill)
+        {
+            if(_player->GetPureSkillValue((*itr)->reqskill) >= (*itr)->reqskillvalue)
+                ReqskillValueFlag = true;
+        }
+        else ReqskillValueFlag = true;
+
+        uint32 spellLevel = ( (*itr)->reqlevel ? (*itr)->reqlevel : spellInfo->spellLevel);
+
+        if(trainer_type != TRAINER_TYPE_MULTICLASS || (_player->getLevel() >= spellLevel+10))
+            LevelFlag = true;
+
+        uint32 prev_id =  objmgr.GetPrevSpellInChain(spellInfo->Id);
+
+        if(trainer_type != TRAINER_TYPE_MULTICLASS || !prev_id || _player->HasSpell(prev_id))
+            ReqspellFlag = true;
+
+        if(ReqskillValueFlag && LevelFlag && ReqspellFlag)
+            canlearnflag = 0;                               //green, can learn
+
+        else canlearnflag = 1;                              //red, can't learn
+
+        if(trainer_type == TRAINER_TYPE_MULTICLASS && _player->HasSpell(spellInfo->Id))
+            canlearnflag = 2;                               //gray, can't learn
+
+        if((*itr)->spell->Effect[1] == 44)
+            if(!_player->CanLearnProSpell((*itr)->spell->Id))
+                canlearnflag = 1;
+
+		//if (spellLevel > 30)
+		//	continue;
+
+		int lang_ID = 0;
+
+		for (lang_ID = 0; lang_ID < 8; lang_ID++)
+		{// UQ1: Find the DBC language we are using!
+			if( strcmp((*itr)->spell->SpellName[lang_ID],"") != 0)
+				break;
+		}
+
+		PlayerSpellMap m_spells = _player->GetSpellMap();
+
+		//if (objmgr.GetSpellRank(spellInfo->Id) == 1)
+		if(trainer_type == TRAINER_TYPE_MULTICLASS)
+		{// Do we already have a higher level version of the spell?
+			bool bad = false;
+
+			for (PlayerSpellMap::const_iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2)
+			{
+				if(itr2->second->state == PLAYERSPELL_REMOVED) continue;
+				SpellEntry const *i_spellInfo = sSpellStore.LookupEntry(itr2->first);
+				if(!i_spellInfo) continue;
+
+				//SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell);
+				//PlayerSpell test_spell = itr2->second;
+				if( strcmp(i_spellInfo->SpellName[lang_ID],(*itr)->spell->SpellName[lang_ID]) == 0)
+				{// Same name, check ranks!
+					if (objmgr.GetSpellRank(i_spellInfo->Id) >= objmgr.GetSpellRank(spellInfo->Id))
+					{
+						bad = true;
+						break;
+					}
+				}
+		    }
+
+			if (bad) // Have a higher one!
+				continue;
+		}
+
+		if (canlearnflag == 0)
+		{
+			if (count+1 >= GOSSIP_MAX_MENU_ITEMS)
+				break;
+
+			// Calculate gold, silver and copper cost seperately...
+			uint32 total_cost = proto->spellcost*2;
+
+			uint32 gold = total_cost /(100*100);
+			uint32 silver = (total_cost % (100*100)) / 100;
+			uint32 copper = (total_cost % (100*100)) % 100;
+
+			char spell_name[255];
+
+			if (strncmp((*itr)->spell->SpellName[lang_ID], "Healing Draenei Survivor", 24) == 0)
+			{// Rename this one for healer NPC!
+				strncpy( spell_name, "Heal", sizeof( spell_name ) );
+			}
+			else if (strncmp((*itr)->spell->SpellName[lang_ID], "zzOLD", 5) == 0)
+			{// Remove the zzOLD from the name!
+				strncpy( spell_name, (*itr)->spell->SpellName[lang_ID] + 5, sizeof( spell_name ) );
+			}
+			else if (strncmp( (*itr)->spell->SpellName[lang_ID] + (strlen((*itr)->spell->SpellName[lang_ID])-3), " II", 3 ) == 0)
+			{// Remove the II from the name!
+				//strncpy( spell_name, (*itr)->spell->SpellName[lang_ID], strlen((*itr)->spell->SpellName[lang_ID])-3 );
+				//sLog.outDetail( "WORLD: Multiclass Trainer Request - %s found, length %i, stripped to %s.", (*itr)->spell->SpellName[lang_ID], strlen((*itr)->spell->SpellName[lang_ID]), spell_name );
+				Strip_XX((*itr)->spell->SpellName[lang_ID], spell_name);
+			}
+			else
+			{
+				strcpy(spell_name, (*itr)->spell->SpellName[lang_ID]);
+			}
+
+			if (trainer_type == TRAINER_TYPE_MULTICLASS && strcmp((*itr)->spell->Rank[lang_ID],"") != 0) // UQ1: Only multiclass trainers show rank of the spells...
+			{// "3" is a spellbook icon.
+				pm->GetGossipMenu()->AddMenuItem(3,formatString("|c8f0000ff%s |c8f202020[|c8f2020ff%s|c8f202020]\n|c8f202020%u |c8fffff00gold|c8f202020, %u |c8f888888silver|c8f202020, %u |c8fffaa00copper|c8f202020.", spell_name, (*itr)->spell->Rank[lang_ID], gold, silver, copper),_player->playerTalkNPCGUID, (*itr)->spell->Id, false);
+			}
+			else
+			{
+				if (trainer_type == TRAINER_TYPE_MULTICLASS)
+				{// "3" is a spellbook icon.
+					pm->GetGossipMenu()->AddMenuItem(3,formatString("|c8f0000ff%s\n|c8f202020%u |c8fffff00gold|c8f202020, %u |c8f888888silver|c8f202020, %u |c8fffaa00copper|c8f202020.", spell_name, gold, silver, copper),_player->playerTalkNPCGUID, (*itr)->spell->Id, false);
+				}
+				else
+				{
+					if (strncmp(spell_name + (strlen(spell_name)-5), "Armor", 5) == 0) 
+					{// "8" is an armor icon.
+						pm->GetGossipMenu()->AddMenuItem(8,formatString("|c8f0000ff%s\n|c8f202020%u |c8fffff00gold|c8f202020, %u |c8f888888silver|c8f202020, %u |c8fffaa00copper|c8f202020.", spell_name, gold, silver, copper),_player->playerTalkNPCGUID, (*itr)->spell->Id, false);
+					}
+					else if (strncmp(spell_name + (strlen(spell_name)-10), "Protection", 10) == 0) 
+					{// "8" is an armor icon.
+						pm->GetGossipMenu()->AddMenuItem(8,formatString("|c8f0000ff%s\n|c8f202020%u |c8fffff00gold|c8f202020, %u |c8f888888silver|c8f202020, %u |c8fffaa00copper|c8f202020.", spell_name, gold, silver, copper),_player->playerTalkNPCGUID, (*itr)->spell->Id, false);
+					}
+					// "9" is a weapon icon.
+					else if (gold > 0) 
+					{// "6" is a money sack (with gold coin) icon.
+						pm->GetGossipMenu()->AddMenuItem(6,formatString("|c8f0000ff%s\n|c8f202020%u |c8fffff00gold|c8f202020, %u |c8f888888silver|c8f202020, %u |c8fffaa00copper|c8f202020.", spell_name, gold, silver, copper),_player->playerTalkNPCGUID, (*itr)->spell->Id, false);
+					}
+					else 
+					{// "1" is a money sack icon.
+						pm->GetGossipMenu()->AddMenuItem(1,formatString("|c8f0000ff%s\n|c8f202020%u |c8fffff00gold|c8f202020, %u |c8f888888silver|c8f202020, %u |c8fffaa00copper|c8f202020.", spell_name, gold, silver, copper),_player->playerTalkNPCGUID, (*itr)->spell->Id, false);
+					}
+				}
+			}
+
+			sLog.outDetail( "WORLD: Multiclass Trainer Request - Send option %i [%s].", count, spell_name );
+
+			count++;
+		}
+    }
+
+	sLog.outDetail( "WORLD: Multiclass Trainer Request - Send %i options.", count );
+
+    Tspells.clear();
+}
+
+void HandleMulticlass( WorldPacket & recv_data, uint64 guid, Player *_player )
+{
+    sLog.outDetail( "WORLD: Received Multiclass Trainer Request" );
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+
+    if (!unit)
+    {
+        return;
+    }
+
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if(!unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
+        return;
+
+    if(!_player->isAlive())
+        return;
+
+	_player->playerTalkNPCGUID = guid;
+
+    if(!Script->GossipHello( _player, unit ))
+    {
+        prepareMulticlassGossipMenu(unit, _player,0);
+        unit->sendPreparedGossip( _player );
+    }
+}
+
+void HandleMulticlassOption( WorldPacket & recv_data, uint64 guid, Player *_player, uint32 option )
+{
+	PlayerMenu* pm=_player->PlayerTalkClass;
+	guid = _player->playerTalkNPCGUID;
+
+	sLog.outDetail( "WORLD: Received Multiclass Trainer Option %u (spell: %u) from %u to %u", option, pm->GetGossipMenu()->MenuItemAction( option ), _player->GetGUID(), uint32(GUID_LOPART(_player->playerTalkNPCGUID)) );
+
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->playerTalkNPCGUID);
+
+    if (!unit)
+    {
+        return;
+    }
+
+	uint32 trainer_type = unit->GetCreatureInfo()->trainer_type;
+
+    if( unit->IsHostileTo(_player))                         // do not talk with enemies
+        return;
+
+    if(!unit->IsWithinDistInMap(_player,OBJECT_ITERACTION_DISTANCE))
+        return;
+
+    if(!_player->isAlive())
+        return;
+
+    // Buy the spell!
+
+	TrainerSpell *proto=NULL;
+
+	//uint32 spellId = option;
+	uint32 spellId = pm->GetGossipMenu()->MenuItemAction( option );
+
+	std::list<TrainerSpell*>::iterator titr;
+
+    for (titr = unit->GetTspellsBegin(); titr != unit->GetTspellsEnd();titr++)
+    {
+        if((*titr)->spell->Id == spellId)
+        {
+            proto = *titr;
+            break;
+        }
+    }
+
+	uint32 entry_id;
+
+	//SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
+	if(trainer_type == TRAINER_TYPE_MULTICLASS)
+		entry_id = proto->spell->EffectTriggerSpell[0];
+	else // Other types are direct casts!
+		entry_id = spellId;
+
+	SpellEntry const *spellInfo = sSpellStore.LookupEntry(entry_id);
+
+    if(!spellInfo) return;
+    if(trainer_type == TRAINER_TYPE_MULTICLASS && _player->HasSpell(spellInfo->Id))
+        return;
+    if(trainer_type == TRAINER_TYPE_MULTICLASS && _player->getLevel()-10 < (proto->reqlevel ? proto->reqlevel : spellInfo->spellLevel))
+        return;
+    if(trainer_type == TRAINER_TYPE_MULTICLASS && proto->reqskill && _player->GetSkillValue(proto->reqskill) < proto->reqskillvalue)
+        return;
+
+    uint32 prev_id =  objmgr.GetPrevSpellInChain(spellInfo->Id);
+    if(trainer_type == TRAINER_TYPE_MULTICLASS && prev_id && !_player->HasSpell(prev_id))
+        return;
+
+    if(trainer_type == TRAINER_TYPE_MULTICLASS && proto->spell->Effect[1] == SPELL_EFFECT_SKILL_STEP)
+        if(!_player->CanLearnProSpell(spellId))
+            return;
+
+    if(!proto)
+    {
+        sLog.outErrorDb("TrainerBuySpell: Trainer(%u) has not the spell(%u).", uint32(GUID_LOPART(guid)), spellId);
+        return;
+    }
+    if( _player->GetMoney() >= proto->spellcost*2 )
+    {
+		// Clear menu and re-send an update!
+		sLog.outDetail( "HandleMulticlassOption: Clear menu and re-send an update!" );
+	
+		//pm->ClearMenus();
+		//_player->PlayerTalkClass->ClearMenus();
+		//_player->PlayerTalkClass->SendTalking("New spell has been learnt.", "Make good use of your new spell %c.");
+		//unit->LoadGossipOptions();
+
+		GossipOptionList m_goptions;
+		if(!m_goptions.size())
+			unit->LoadGossipOptions();
+	
+		pm->ClearMenus();
+		_player->PlayerTalkClass->ClearMenus();
+		//unit->sendPreparedGossip( _player );
+		//prepareMulticlassGossipMenu(unit, _player, 0);
+		pm->CloseGossip();
+		//unit->sendPreparedGossip( _player );
+		//_player->PlayerTalkClass->SendGossipMenu(0, _player->playerTalkNPCGUID);
+		//_player->PlayerTalkClass->SendGossipMenu(0, _player->playerTalkNPCGUID);
+
+		// Learn the spell!
+        WorldPacket data( SMSG_TRAINER_BUY_SUCCEEDED, 12 );
+        data << guid << spellId;
+        _player->GetSession()->SendPacket( &data );
+
+        _player->ModifyMoney( -int32(proto->spellcost*2) );
+        if(spellInfo->powerType == 2)
+        {
+            _player->addSpell(spellId,4);                   // ative = 4 for spell book of hunter's pet
+            return;
+        }
+
+		if(trainer_type == TRAINER_TYPE_MULTICLASS)
+		{
+			Spell *spell;
+			if(proto->spell->SpellVisual == 222)
+				spell = new Spell(_player, proto->spell, false, NULL);
+			else
+			    spell = new Spell(unit, proto->spell, false, NULL);
+
+			SpellCastTargets targets;
+			targets.setUnitTarget( _player );
+
+			float u_oprientation = unit->GetOrientation();
+
+			// trainer always see at customer in time of training (part of client functionality)
+			unit->SetInFront(_player);
+
+			spell->prepare(&targets);
+
+			// trainer always return to original orientation
+			unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+
+			// Remove the previous spell to save slots!
+/*			while (prev_id)
+			{
+				if (prev_id)
+				{
+					_player->removeSpell(prev_id);
+				}
+
+				prev_id = objmgr.GetPrevSpellInChain(prev_id);
+			}*/
+		}
+		else
+		{
+			// We need to check if this is actually a spell you can cast on someone else!
+			// If it is not, make them cast it on themselves!
+			Spell *spell;
+			SpellCastTargets targets;
+			float u_oprientation = unit->GetOrientation();
+
+			switch (entry_id)
+			{
+			case 16166: // Elemental Mastery - Learn Directly!
+			case 18562: // Innervate - Learn Directly!
+				_player->learnSpell((uint16)entry_id);
+
+				// trainer always see at customer in time of training (part of client functionality)
+				unit->SetInFront(_player);
+
+				// Add some FX...
+				spell = new Spell(_player, sSpellStore.LookupEntry(20211), false, NULL);
+
+				// trainer always return to original orientation
+				unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+
+				return;
+				break;
+			case 28624: // Healing Draenei Survivor (Healer NPC Heal) - NPC can cast it!
+			case 526: // Cure Poison (Healer NPC) - NPC can cast it!
+			case 2870: // Cure Disease (Healer NPC) - NPC can cast it!
+			case 2782: // Remove Curse (Healer NPC) - NPC can cast it!
+			case 25312: // Divine Spirit (rank 5) - NPC can cast it!
+			case 25389: // Power Word: Fortitude (rank 7) - NPC can cast it!
+			case 10156: // Arcane Intellect (rank 6) - NPC can cast it!
+			case 1038: // Blessing of Salvation - NPC can cast it!
+			    spell = new Spell(unit, proto->spell, false, NULL);
+
+				targets.setUnitTarget( _player );
+
+				// trainer always see at customer in time of training (part of client functionality)
+				unit->SetInFront(_player);
+
+				spell->prepare(&targets);
+
+				// trainer always return to original orientation
+				unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+				break;
+			default: // Default method: Players cast on themselves!
+				spell = new Spell(_player, proto->spell, false, NULL);
+
+				SpellCastTargets targets;
+				targets.setUnitTarget( _player );
+
+				// trainer always see at customer in time of training (part of client functionality)
+				unit->SetInFront(_player);
+
+				spell->prepare(&targets);
+
+				// trainer always return to original orientation
+				unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+				break;
+			}
+		}
+    }
+}
+
+//
+// End: Unique1's Multi-Class Training
+//
+#endif //_MANGOS_ENHANCED
 
 void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 {
@@ -315,6 +853,16 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleGossipHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
+
+#ifdef _MANGOS_ENHANCED
+	uint32 type = unit->GetCreatureInfo()->trainer_type;
+
+	if (type == TRAINER_TYPE_MULTICLASS || type == TRAINER_TYPE_AURA_VENDOR || type == TRAINER_TYPE_HEAL_VENDOR)
+	{
+		HandleMulticlass( recv_data, guid, _player );
+		return;
+	}
+#endif //_MANGOS_ENHANCED
 
     if((unit->isArmorer()) || (unit->isGuard()) || (unit->isCivilian()) || (unit->isQuestGiver()) || (unit->isServiceProvider()) || (unit->isVendor()))
     {
@@ -355,6 +903,16 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
+
+#ifdef _MANGOS_ENHANCED
+	uint32 type = unit->GetCreatureInfo()->trainer_type;
+
+	if (type == TRAINER_TYPE_MULTICLASS || type == TRAINER_TYPE_AURA_VENDOR || type == TRAINER_TYPE_HEAL_VENDOR)
+	{
+		HandleMulticlassOption( recv_data, _player->GetSelection(), _player, option );
+		return;
+	}
+#endif //_MANGOS_ENHANCED
 
     if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
         unit->OnGossipSelect( _player, option );
