@@ -460,7 +460,7 @@ bool AuthSocket::_HandleLogonChallenge()
             }
 
             ///- Send a packet to the client with the file length and MD5 hash
-            uint8 data[2]={AUTH_LOGON_PROOF,CSTATUS_NEGOTIATION_FAILED};
+            uint8 data[2]={AUTH_LOGON_PROOF,REALM_AUTH_UPDATE_CLIENT};
             SendBuf((const char*)data,sizeof(data));
 
             memcpy(&xferh,"0\x05Patch",7);

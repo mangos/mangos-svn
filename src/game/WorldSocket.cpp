@@ -34,7 +34,6 @@
 #include "Policies/SingletonImp.h"
 #include "WorldLog.h"
 #include "AddonHandler.h"
-#include "../realmd/AuthCodes.h"
 #include <cwctype>                                          // needs for towupper
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
@@ -287,7 +286,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         if ( strcmp((*result)[3].GetString(),GetRemoteAddress().c_str()) )
         {
             packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
-            packet << uint8( REALM_AUTH_ACCOUNT_FREEZED );
+            packet << uint8( AUTH_FAILED );
             SendPacket( &packet );
 
             sLog.outDetail( "SOCKET: Sent Auth Response (Account IP differs)." );

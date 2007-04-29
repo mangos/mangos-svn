@@ -321,8 +321,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
         WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
         data << petitionguid;
         data << _player->GetGUID();
-        uint32 r = 1; 
-        data << (uint32)r;                                      // can be other values for error reporting(need check 2, 4)
+        data << (uint32)PETITION_SIGN_ALREADY_SIGNED;
 
         // close at signer side
         SendPacket( &data );
@@ -341,7 +340,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
     WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
     data << petitionguid;
     data << _player->GetGUID();
-    data << (uint32)0;                                      // can be other values for error reporting(need check 2, 4)
+    data << (uint32)PETITION_SIGN_OK;
 
     // close at signer side
     SendPacket( &data );
@@ -456,7 +455,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
     if(_player->GetGuildId())
     {
         data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-        data << (uint32)2;                                  // already in guild
+        data << (uint32)PETITION_TURN_ALREADY_IN_GUILD;                                  // already in guild
         _player->GetSession()->SendPacket(&data);
     }
 
@@ -491,7 +490,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
     if(signs < sWorld.getConfig(CONFIG_MIN_PETITION_SIGNS))
     {
         data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-        data << (uint32)4;                                  // need more signatures...
+        data << (uint32)PETITION_TURN_NEED_MORE_SIGNATURES;                                  // need more signatures...
         SendPacket(&data);
         delete result;
         return;
@@ -548,7 +547,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
     sLog.outDebug("TURN IN PETITION GUID %u", GUID_LOPART(petitionguid));
 
     data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-    data << (uint32)0;
+    data << (uint32)PETITION_TURN_OK;
     SendPacket( &data );
 }
 
