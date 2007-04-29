@@ -311,11 +311,32 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
     if (signs > 9)                                          // client signs maximum
         return;
 
-    //client doesn't allow to sign petition two times by one player, not check yet (required additional SQL query)
+    //client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
+    //not allow sign another player from already sign player account 
+    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `player_account` = '%u'", GetAccountId());
 
-    sDatabase.PExecute("INSERT INTO `guild_charter_sign` (`ownerguid`,`charterguid`, `playerguid`) VALUES ('%u', '%u', '%u')", GUID_LOPART(ownerguid),GUID_LOPART(petitionguid), plguidlo);
+    if(result)
+    {
+        delete result;
+        WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
+        data << petitionguid;
+        data << _player->GetGUID();
+        uint32 r = 1; 
+        data << (uint32)r;                                      // can be other values for error reporting(need check 2, 4)
 
-    sLog.outDebug("PETITION SIGN: GUID %u by player: %s (GUID: %u)", GUID_LOPART(petitionguid), _player->GetName(),plguidlo);
+        // close at signer side
+        SendPacket( &data );
+
+        // update for owner if online
+        if(Player* owner = objmgr.GetPlayer(ownerguid))
+            owner->GetSession()->SendPacket( &data );
+        return;
+    }
+
+
+    sDatabase.PExecute("INSERT INTO `guild_charter_sign` (`ownerguid`,`charterguid`, `playerguid`, `player_account`) VALUES ('%u', '%u', '%u','%u')", GUID_LOPART(ownerguid),GUID_LOPART(petitionguid), plguidlo,GetAccountId());
+
+    sLog.outDebug("PETITION SIGN: GUID %u by player: %s (GUID: %u Account: %u)", GUID_LOPART(petitionguid), _player->GetName(),plguidlo,GetAccountId());
 
     WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
     data << petitionguid;
