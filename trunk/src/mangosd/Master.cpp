@@ -52,19 +52,19 @@
 #include <process.h>
 #include <mmsystem.h>
 
-DWORD			cthread1 = 0;
-DWORD			cthread2 = 0;
+DWORD cthread1 = 0;
+DWORD cthread2 = 0;
 
 void __cdecl RunCLI ( void * )
 {
-	CliRunnable *client(new CliRunnable);
-	client->run();
+    CliRunnable *client(new CliRunnable);
+    client->run();
 }
 
 void __cdecl RunWorld ( void * )
 {
-	WorldRunnable *world(new WorldRunnable);
-	world->run();
+    WorldRunnable *world(new WorldRunnable);
+    world->run();
 }
 #endif //defined( WIN32 ) && (_DEBUG)
 
@@ -121,23 +121,23 @@ void Master::Run()
     _HookSignals();
 
 #if defined( WIN32 ) && (_DEBUG)
-	///- Launch WorldRunnable thread - Use windows threads for debugging!
-	cthread2 = _beginthread( RunWorld, 0, LOWORD( 0) );
+    ///- Launch WorldRunnable thread - Use windows threads for debugging!
+    cthread2 = _beginthread( RunWorld, 0, LOWORD( 0) );
 #else //!defined( WIN32 ) && (_DEBUG)
     ///- Launch WorldRunnable thread
     ZThread::Thread t(new WorldRunnable);
     t.setPriority ((ZThread::Priority )2);
 #endif //!defined( WIN32 ) && (_DEBUG)
 
-    #ifdef ENABLE_CLI
+#ifdef ENABLE_CLI
 #if defined( WIN32 ) && (_DEBUG)
-	///- Launch CliRunnable thread - Use windows threads for debugging!
-	cthread1 = _beginthread( RunCLI, 0, LOWORD( 0) );
+    ///- Launch CliRunnable thread - Use windows threads for debugging!
+    cthread1 = _beginthread( RunCLI, 0, LOWORD( 0) );
 #else //!defined( WIN32 ) && (_DEBUG)
     ///- Launch CliRunnable thread
     ZThread::Thread td1(new CliRunnable);
 #endif //!defined( WIN32 ) && (_DEBUG)
-    #endif
+#endif
 
     #ifdef ENABLE_RA
     ///- Launch the RA listener socket
@@ -232,7 +232,7 @@ void Master::Run()
     _UnhookSignals();
 
 #if defined( WIN32 ) && (_DEBUG)
-	//t.wait(); // UQ1: I don't know why this is needed.. If it is, FIXME!
+    //t.wait(); // UQ1: I don't know why this is needed.. If it is, FIXME!
 #else //!defined( WIN32 ) && (_DEBUG)
     t.wait();
 #endif //!defined( WIN32 ) && (_DEBUG)
