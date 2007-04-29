@@ -1963,8 +1963,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     sLog.outDebug("Returning mails current time: hour: %d, minute: %d, second: %d ", localtime(&basetime)->tm_hour, localtime(&basetime)->tm_min, localtime(&basetime)->tm_sec);
     //delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
-        sDatabase.PExecute("DELETE FROM `mail` WHERE `expire_time` < '" I64FMTD "' AND `item_guid` = '0' AND `itemTextId` = 0", basetime);
-    QueryResult* result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`item_guid`,`expire_time`,`cod`,`checked` FROM `mail` WHERE `expire_time` < '" I64FMTD "'", basetime);
+        sDatabase.PExecute("DELETE FROM `mail` WHERE `expire_time` < '" I64FMTD "' AND `item_guid` = '0' AND `itemTextId` = 0", (uint64)basetime);
+    QueryResult* result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`item_guid`,`expire_time`,`cod`,`checked` FROM `mail` WHERE `expire_time` < '" I64FMTD "'", (uint64)basetime);
     if ( !result )
         return;                                             // any mails need to be returned or deleted
     Field *fields;
@@ -1982,7 +1982,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         m->receiver = fields[3].GetUInt32();
         m->itemTextId = fields[4].GetUInt32();
         m->item_guid = fields[5].GetUInt32();
-        m->expire_time = fields[6].GetUInt32();
+        m->expire_time = (time_t)fields[6].GetUInt64();
         m->deliver_time = 0;
         m->COD = fields[7].GetUInt32();
         m->checked = fields[8].GetUInt32();

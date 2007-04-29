@@ -4951,8 +4951,10 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
             float chance = pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
             uint32 enchant_spell_id = pEnchant->spellid[s];
             SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+
             if(!enchantSpell_info) continue;
-	    if(enchant_display!=4 && enchant_display!=2 && enchant_display!=5 && IsItemSpellToCombat(enchantSpell_info))
+
+            if(enchant_display!=4 && enchant_display!=2 && enchant_display!=5 && IsItemSpellToCombat(enchantSpell_info))
                 if (roll_chance_f(chance))
                     this->CastSpell(Target, enchantSpell_info->Id, true);
         }
@@ -10617,8 +10619,8 @@ void Player::_LoadMail()
             m->itemTextId = fields[5].GetUInt32();
             m->item_guid = fields[6].GetUInt32();
             m->item_template = fields[7].GetUInt32();
-            m->expire_time = fields[8].GetUInt32();
-            m->deliver_time = fields[9].GetUInt32();
+            m->expire_time = (time_t)fields[8].GetUInt64();
+            m->deliver_time = (time_t)fields[9].GetUInt64();
             m->money = fields[10].GetUInt32();
             m->COD = fields[11].GetUInt32();
             m->checked = fields[12].GetUInt32();
@@ -11063,8 +11065,10 @@ void Player::_SaveAuras()
                 break;
 
         if (i == 3 && !itr->second->IsPassive())
+        {
             sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u' AND `spell` = '%u'",GetGUIDLow(),(uint32)(itr->second->GetId()));
             sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
+        }
     }
 }
 
