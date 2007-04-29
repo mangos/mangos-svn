@@ -11063,7 +11063,7 @@ void Player::_SaveAuras()
                 break;
 
         if (i == 3 && !itr->second->IsPassive())
-	    sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u' AND `spell` = '%u' ,GetGUIDLow(),(uint32)(*itr).second->GetId())");
+            sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u' AND `spell` = '%u'",GetGUIDLow(),(uint32)(itr->second->GetId()));
             sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
     }
 }
