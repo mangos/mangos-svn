@@ -976,7 +976,7 @@ CREATE TABLE `creature_movement` (
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
-  `waittime` tinyint(3) unsigned NOT NULL default '0',
+  `waittime` int(5) unsigned NOT NULL default '0',
   `text1` varchar(255) default NULL,
   `text2` varchar(255) default NULL,
   `text3` varchar(255) default NULL,
