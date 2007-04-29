@@ -19,6 +19,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
+#include "WorldSocket.h" 
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -33,7 +34,6 @@
 #include "ObjectAccessor.h"
 #include "Transports.h"
 #include "Group.h"
-#include "../realmd/AuthCodes.h" 
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
