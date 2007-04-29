@@ -1577,6 +1577,7 @@ CREATE TABLE `guild_charter_sign` (
   `ownerguid` int(10) unsigned NOT NULL,
   `charterguid` int(11) unsigned NOT NULL default '0',
   `playerguid` int(11) unsigned NOT NULL default '0',
+  `player_account` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`charterguid`,`playerguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
