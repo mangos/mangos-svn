@@ -180,6 +180,15 @@ uint32 ObjectMgr::GetAuctionDeposit(uint32 location, uint32 time, Item *pItem)
     return (uint32) ( ((percentance * sWorld.getRate(RATE_AUCTION_DEPOSIT) * pItem->GetProto()->SellPrice * pItem->GetCount() ) / 100 ) * (time / 120 ) );
 }
 
+/// the sum of outbid is (1% from current bid)*5, if bid is very small, it is 1c
+uint32 ObjectMgr::GetAuctionOutBid(uint32 currentBid)
+{
+    uint32 outbid = (currentBid / 100) * 5;
+    if (!outbid)
+        outbid = 1;
+    return outbid;
+}
+
 //does not clear ram
 void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
 {
@@ -476,7 +485,6 @@ void ObjectMgr::LoadAuctions()
         aItem->time = fields[6].GetUInt32();
         aItem->bidder = fields[7].GetUInt32();
         aItem->bid = fields[8].GetUInt32();
-        aItem->outBid = ( aItem->bid > 0 );                 //when bid = 0 then 0 else 1
         aItem->startbid = fields[9].GetUInt32();
         aItem->deposit = fields[10].GetUInt32();
         aItem->location = fields[11].GetUInt8();

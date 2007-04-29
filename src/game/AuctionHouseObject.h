@@ -41,9 +41,8 @@ struct AuctionEntry
     uint32 item_guid;
     uint32 item_template;
     uint32 owner;
-    uint32 startbid;
+    uint32 startbid;                                        //maybe useless
     uint32 bid;
-    uint32 outBid;                                          //used only when auction is in ram, it isn't saved to DB
     uint32 buyout;
     time_t time;
     uint32 bidder;

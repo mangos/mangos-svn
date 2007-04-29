@@ -89,52 +89,34 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     }
     data << auction->Id;
     data << pItem->GetUInt32Value(OBJECT_FIELD_ENTRY);
-    
-    // Permanent enchantment
-    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0);
+
+    for (uint8 i = 0; i < 6; i++)
+    {
+        data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 + 0);
                                                             //Enchanting 0 (green)
-    data << (uint32) 0;                                     //(duration, but not show?)
-    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+2);
-                                                            //(charges)
+        data << (uint32) 0;                                 // Unknown maybe duration, but not shown?
+        data << pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES + i); 
+                                                            // Charges
+        //old: data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 + 2);
+    }
 
-    // Temporary enchantment
-    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+0);
-                                                            //Enchanting 1 (green)
-    data << (uint32) 0;                                     //(duration, but not show?)
-    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+2);
-                                                            //(charges)
+    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID);
+                                                            //random item property id
+    data << (uint32) 0;                                     //not pItem->GetCreator(), Unknown
 
-    data << (uint32) 0;                                     //Socket 0? (white)
-    data << (uint32) 0;                                     //(field of Socket 0?)
-    data << (uint32) 0;                                     //(charges)
-
-    data << (uint32) 0;                                     //Socket 1? (white)
-    data << (uint32) 0;                                     //(field of Socket 1?)
-    data << (uint32) 0;                                     //(charges)
-
-    data << (uint32) 0;                                     //Socket 2? (white)
-    data << (uint32) 0;                                     //(field of Socket 2?)
-    data << (uint32) 0;                                     //(charges)
-
-    data << (uint32) 0;                                     //Bonus ? (green)
-    data << (uint32) 0;                                     //(field of Bonus?)
-    data << (uint32) 0;                                     //(charges)
-
-    data << (uint32) pItem->GetItemRandomPropertyId();      //random item property id
-
-    data << (uint32) 0;                                     //not pItem->GetCreator();// 4a d0 64 02, 0, unknown, maybe enchating
     data << (uint32) pItem->GetCount();                     //item->count
                                                             //item->charge FFFFFFF
     data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES);
-    data << (uint32) 0;                                     //unknown
+    data << (uint32) 0;                                     //Unknown
     data << (uint32) auction->owner;                        //Auction->owner
-    data << (uint32) 0;                                     //player_high_guid
-    data << (uint32) auction->startbid;                     //Auction->startbid
-    data << (uint32) auction->outBid;                       //minimal outbid...
+    data << (uint32) 0;                                     //player high_guid
+    data << (uint32) auction->startbid;                     //Auction->startbid (not sure if useful)
+    data << (uint32) ((auction->bid)? objmgr.GetAuctionOutBid(auction->bid) : 0);
+                                                            //minimal outbid
     data << (uint32) auction->buyout;                       //auction->buyout
-    data << (uint32) (auction->time - time(NULL)) * 1000;   //time ---- has changed!
+    data << (uint32) (auction->time - time(NULL)) * 1000;   //time left
     data << (uint32) auction->bidder;                       //auction->bidder current
-    data << (uint32) 0;                                     //player highguid
+    data << (uint32) 0;                                     //player high_guid
     data << (uint32) auction->bid;                          //current bid
     return true;
 }
@@ -193,7 +175,7 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
     Player *oldBidder = objmgr.GetPlayer(oldBidder_guid);
     if (oldBidder)
     {
-        oldBidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, auction->outBid, auction->item_template);
+        oldBidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, objmgr.GetAuctionOutBid(auction->bid), auction->item_template);
         oldBidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionOutbiddedSubject.str(), 0, 0, 0, etime,dtime, auction->bid, 0, NOT_READ, NULL);
     }
 
@@ -291,7 +273,6 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->startbid = bid;
     AH->bidder = 0;
     AH->bid = 0;
-    AH->outBid = 0;
     AH->buyout = buyout;
     time_t base = time(NULL);
     AH->time = ((time_t)(etime * 60 * sWorld.getRate(RATE_AUCTION_TIME))) + base;
@@ -347,7 +328,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
     Player *pl = GetPlayer();
     if ((auction) && (auction->owner != pl->GetGUIDLow()))
     {
-        if (price < (auction->bid + auction->outBid))
+        if (price < (auction->bid + objmgr.GetAuctionOutBid(auction->bid)))
         {
             //auction has already higher bid, client tests it!
             //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
@@ -361,8 +342,6 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         }
         if ((price < auction->buyout) || (auction->buyout == 0))
         {
-            auction->outBid += 5;                           //this line must be here
-
             if (auction->bidder > 0)
             {
                 if ( auction->bidder == pl->GetGUIDLow() )
@@ -382,8 +361,6 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             }
             auction->bidder = pl->GetGUIDLow();
             auction->bid = price;
-            if ( auction->outBid > 10000 )                  //one gold
-                auction->outBid = 5;
 
             // after this update we should save player's money ...
             sDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u';", auction->bidder, auction->bid, auction->Id);
