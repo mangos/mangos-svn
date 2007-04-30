@@ -241,7 +241,7 @@ typedef std::list<GossipOption> GossipOptionList;
 #define CREATURE_Z_ATTACK_RANGE 3
 #define CREATURE_THREAT_RADIUS 10000.0f
 
-#define MAX_VENDOR_ITEMS 900                                // Tested limitation for show vendor items (client work with more items but not show its)
+#define MAX_VENDOR_ITEMS 255                                // Limitation in item count field size in SMSG_LIST_INVENTORY
 
 class MANGOS_DLL_SPEC Creature : public Unit
 {

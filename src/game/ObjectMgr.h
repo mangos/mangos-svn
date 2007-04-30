@@ -108,6 +108,7 @@ struct ReputationOnKillEntry
     bool is_teamaward2;
     uint32 reputration_max_cap2;
     int32 repvalue2;
+    bool team_dependent;
 };
 
 #define WEATHER_SEASONS 4
