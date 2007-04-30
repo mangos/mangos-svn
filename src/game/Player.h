@@ -1027,6 +1027,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetSpellByProto(ItemPrototype *proto);
 
         void ApplyDefenseBonusesMod(float value, bool apply);
+        void ApplyRatingMod(uint16 index, int32 value, bool apply);
         void UpdateBlockPercentage();
 
         const uint64& GetLootGUID() const { return m_lootGuid; }

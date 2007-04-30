@@ -1141,6 +1141,10 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
     if (School != SPELL_SCHOOL_NORMAL)
     {
         float tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
+        AuraList& mModTargetRes = GetAurasByType(SPELL_AURA_MOD_TARGET_RESISTANCE);
+        for(AuraList::iterator i = mModTargetRes.begin(); i != mModTargetRes.end(); ++i)
+            if ((*i)->GetModifier()->m_miscvalue & (1 << School))
+                tmpvalue2 += (*i)->GetModifier()->m_amount;
         if (tmpvalue2 < 0) tmpvalue2 = 0;
         *resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
         if(*resist > damage)
@@ -1819,8 +1823,7 @@ float Unit::GetUnitDodgeChance() const
 {
     if(hasUnitState(UNIT_STAT_STUNDED))
         return 0;
-
-    return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_DODGE_PERCENTAGE ] : 5;
+    return GetTypeId() == TYPEID_PLAYER ? GetFloatValue(PLAYER_DODGE_PERCENTAGE) : 5;
 }
 
 float Unit::GetUnitParryChance() const
@@ -2795,6 +2798,33 @@ void Unit::ApplyStats(bool apply)
 
     ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE, val, apply);
 
+    //Spell crit
+    static const struct
+    {
+        float base;
+        float rate0, rate1;
+    }
+    crit_data[MAX_CLASSES] =
+    {
+        {0,0,10},                       //  0: unused
+        {0,0,10},                       //  1: warrior
+        {3.70,14.77,0.65},              //  2: paladin
+        {0,0,10},                       //  3: hunter
+        {0,0,10},                       //  4: rogue
+        {2.97,10.03,0.82},              //  5: priest
+        {0,0,10},                       //  6: unused
+        {3.54,11.51,0.80},              //  7: shaman
+        {3.70,14.77,0.65},              //  8: mage
+        {3.18,11.30,0.82},              //  9: warlock
+        {0,0,10},                       // 10: unused
+        {3.33,12.41,0.79}               // 11: druid
+    };
+    float crit_ratio = crit_data[getClass()].rate0 + crit_data[getClass()].rate1*getLevel();
+    val = GetStat(STAT_INTELLECT) / crit_ratio;
+    for (uint8 i = 0; i < 7; ++i)
+        ApplyModFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1+i, val, apply);
+
+
     //dodge
     if(getClass() == CLASS_HUNTER) classrate = 26.5;
     else if(getClass() == CLASS_ROGUE)  classrate = 14.5;
@@ -3041,58 +3071,58 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,uint8 enchant_slot,bool a
                     ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
                     break;
                 case ITEM_STAT_DEFENCE_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u DEFENCE", enchant_amount);
                     break;
                 case ITEM_STAT_DODGE_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u DODGE", enchant_amount);
                     break;
                 case ITEM_STAT_PARRY_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u PARRY", enchant_amount);
                     break;
                 case ITEM_STAT_SHIELD_BLOCK_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
                     break;
                 case ITEM_STAT_MELEE_HIT_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
                     break;
                 case ITEM_STAT_RANGED_HIT_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
                     break;
                 case ITEM_STAT_SPELL_HIT_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
                     break;
                 case ITEM_STAT_MELEE_CS_RATING: // CS = Critical Strike
-                    ApplyModUInt32Value(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
                     break;
                 case ITEM_STAT_RANGED_CS_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
                     break;
                 case ITEM_STAT_SPELL_CS_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
                     break;
                 // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
                 // in Enchantments
                 case ITEM_STAT_HIT_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u HIT", enchant_amount);
                     break;
                 case ITEM_STAT_CS_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u CRITICAL", enchant_amount);
                     break;
                 // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
                 case ITEM_STAT_RESILIENCE_RATING:
-                    ApplyModUInt32Value(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
                     sLog.outDebug("+ %u RESILIENCE", enchant_amount);
                     break;
                 // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
@@ -4192,9 +4222,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
     // only players use intelligence for critical chance computations
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        int my_class = getClass();
-        float crit_ratio = crit_data[my_class].rate0 + crit_data[my_class].rate1*getLevel();
-        crit_chance = crit_data[my_class].base + GetStat(STAT_INTELLECT) / crit_ratio;
+        crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + spellProto->School);
         ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
     }
     else
