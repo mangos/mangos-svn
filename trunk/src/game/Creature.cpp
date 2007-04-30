@@ -1150,9 +1150,9 @@ void Creature::_LoadGoods()
     {
         Field *fields = result->Fetch();
 
-        if (GetItemCount() >= MAX_CREATURE_ITEMS)
+        if (GetItemCount() >= MAX_VENDOR_ITEMS)
         {
-            sLog.outErrorDb( "Vendor %u has too many items (%u >= %i). Check the DB!", GetEntry(), GetItemCount(), MAX_CREATURE_ITEMS );
+            sLog.outErrorDb( "Vendor %u has too many items (%u >= %i). Check the DB!", GetEntry(), GetItemCount(), MAX_VENDOR_ITEMS );
             break;
         }
 

@@ -1744,6 +1744,38 @@ bool Player::IsInSameGroupWith(Player const* p) const
             groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID());
 }
 
+///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
+/// \todo Should'nt we also check if there is no other invitees before disbanding the group?
+void Player::UninviteFromGroup()
+{
+    if(groupInfo.invite)                                    // uninvite invitee
+    {
+        Group* group = groupInfo.invite;
+        group->RemoveInvite(this);
+
+        if(group->GetMembersCount() <= 1)                   // group has just 1 member => disband
+        {
+            group->Disband(true);
+            objmgr.RemoveGroup(group);
+            delete group;
+            group = NULL;
+        }
+    }
+}
+
+void Player::RemoveFromGroup(Group* group, uint64 guid)
+{
+    if(group)
+    {
+        if (group->RemoveMember(guid, 0) <= 1)
+        {
+            group->Disband();
+            objmgr.RemoveGroup(group);
+            delete group;
+        }
+    }
+}
+
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
 {
     WorldPacket data(SMSG_LOG_XPGAIN, (21));
@@ -2817,9 +2849,16 @@ void Player::DeleteFromDB()
             guild->DelMember(guid);
     }
 
+    // remove from group
+    UninviteFromGroup();
+    RemoveFromGroup();
+
     // remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(GetGUID());
 
+    // unsummon and delete pet not required: player deleted from CLI or character list with not loaded pet.
+
+    // NOW we can finally clear other DB data releted to character
     sDatabase.BeginTransaction();
 
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)

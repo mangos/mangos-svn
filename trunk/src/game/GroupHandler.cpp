@@ -234,28 +234,11 @@ void WorldSession::HandleGroupUninvite(uint64 guid, std::string name)
     /********************/
 
     // everything's fine, do it
-    if(player && player->groupInfo.invite)                  // uninvite invitee
-    {
-        group->RemoveInvite(player);
 
-        if(group->GetMembersCount() <= 1)                   // group has just 1 member => disband
-        {
-            group->Disband(true);
-            objmgr.RemoveGroup(group);
-            delete group;
-            group = NULL;
-        }
-    }
+    if(player && player->groupInfo.invite)                  // uninvite invitee
+        player->UninviteFromGroup();
     else                                                    // uninvite member
-    {
-        if (group->RemoveMember(guid, 1) <= 1)
-        {
-            group->Disband();
-            objmgr.RemoveGroup(group);
-            delete group;
-            group = NULL;
-        }
-    }
+        Player::RemoveFromGroup(group,guid);
 }
 
 void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
@@ -291,13 +274,7 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
     // everything's fine, do it
     SendPartyResult(2, GetPlayer()->GetName(), 0);
 
-    Group *group = GetPlayer()->groupInfo.group;
-    if(group->RemoveMember(GetPlayer()->GetGUID(), 0) <= 1)
-    {
-        group->Disband();
-        objmgr.RemoveGroup(group);
-        delete group;
-    }
+    GetPlayer()->RemoveFromGroup();
 }
 
 void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
