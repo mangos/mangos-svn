@@ -619,30 +619,12 @@ void WorldSession::LogoutPlayer(bool Save)
         _player->RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
         ///- If the player is in a group (or invited), remove him. If the group if then only 1 person, disband the group.
-        /// \todo Should'nt we also check if there is no other invitees before disbanding the group?
-        if(_player->groupInfo.invite)
-        {
-            Group *group = _player->groupInfo.invite;
-            if(group->RemoveInvite(_player) <= 1)
-            {
-                group->Disband(true);
-                objmgr.RemoveGroup(group);
-                delete group;
-            }
-        }
+        _player->UninviteFromGroup();
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
         if(_player->groupInfo.group && !_player->groupInfo.group->isRaidGroup() && _socket)
-        {
-            Group *group = _player->groupInfo.group;
-            if (group->RemoveMember(_player->GetGUID(), 0) <= 1)
-            {
-                group->Disband();
-                objmgr.RemoveGroup(group);
-                delete group;
-            }
-        }
+            _player->RemoveFromGroup();
 
         ///- Remove the player from the world
         ObjectAccessor::Instance().RemovePlayer(_player);

@@ -1000,6 +1000,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsGroupVisibleFor(Player* p) const;
         bool IsInSameGroupWith(Player const* p) const;
         bool IsInSameRaidWith(Player const* p) const { return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group; }
+        void UninviteFromGroup();
+        static void RemoveFromGroup(Group* group, uint64 guid);
+        void RemoveFromGroup() { RemoveFromGroup(groupInfo.group,GetGUID()); }
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); Player::SetUInt32ValueInDB(PLAYER_GUILDID, GuildId, this->GetGUID()); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, rankId, this->GetGUID()); }

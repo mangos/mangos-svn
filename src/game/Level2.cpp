@@ -627,7 +627,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
         return true;
     }
 
-    if (vendor->GetItemCount() >= MAX_CREATURE_ITEMS)
+    if (vendor->GetItemCount() >= MAX_VENDOR_ITEMS)
     {
         SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
         return true;
