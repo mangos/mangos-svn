@@ -596,7 +596,7 @@ void ObjectMgr::LoadPetLevelInfo()
             uint32 current_level = fields[1].GetUInt32();
             if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
             {
-                if(current_level > 255)                     // harcoded level maximum
+                if(current_level > 255)                     // hardcoded level maximum
                     sLog.outErrorDb("Wrong (> 255) level %u in `pet_levelstats` table, ignoring.",current_level);
                 else
                     sLog.outDetail("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `pet_levelstats` table, ignoring.",current_level);
@@ -995,7 +995,7 @@ void ObjectMgr::LoadPlayerInfo()
             uint32 current_level = fields[2].GetUInt32();
             if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
             {
-                if(current_level > 255)                     // harcoded level maximum
+                if(current_level > 255)                     // hardcoded level maximum
                     sLog.outErrorDb("Wrong (> 255) level %u in `player_levelstats` table, ignoring.",current_level);
                 else
                     sLog.outDetail("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_levelstats` table, ignoring.",current_level);
@@ -1279,7 +1279,7 @@ void ObjectMgr::LoadQuests()
     }
 
     // create multimap previous quest for each existed quest
-    // some quests can have many previous maps setted by NextQuestId in previouse quest
+    // some quests can have many previous maps set by NextQuestId in previous quest
     // for example set of race quests can lead to single not race specific quest
     barGoLink bar( result->GetRowCount() );
     do
@@ -1550,7 +1550,7 @@ void ObjectMgr::LoadSpellChains()
             (spell_id == node.first) != (node.prev == 0) ||
             (node.rank <= 1) != (node.prev == 0) )
         {
-            sLog.outErrorDb("Spell %u listed in `spell_chain` have not compatiable chain data (prev: %u, first: %u, rank: %d)",spell_id,node.prev,node.first,node.rank);
+            sLog.outErrorDb("Spell %u listed in `spell_chain` have not compatible chain data (prev: %u, first: %u, rank: %d)",spell_id,node.prev,node.first,node.rank);
             continue;
         }
 
@@ -1559,7 +1559,7 @@ void ObjectMgr::LoadSpellChains()
         ++count;
     } while( result->NextRow() );
 
-    // additinal integrity checks
+    // additional integrity checks
     for(SpellChainMap::iterator i = SpellChains.begin(); i != SpellChains.end(); ++i)
     {
         if(i->second.prev)
@@ -1968,7 +1968,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     if ( !result )
         return;                                             // any mails need to be returned or deleted
     Field *fields;
-    //std::ostringstream delitems, delmails; //will be here for optimalization
+    //std::ostringstream delitems, delmails; //will be here for optimization
     //bool deletemail = false, deleteitem = false;
     //delitems << "DELETE FROM `item_instance` WHERE `guid` IN ( ";
     //delmails << "DELETE FROM `mail` WHERE `id` IN ( "
@@ -2242,7 +2242,7 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
 
     if(! result)
     {
-        sLog.outErrorDb("Table `game_graveyard_zone` incomplite: Zone %u Map %u Team %u not have linked graveyard.",zoneId,MapId,team);
+        sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Zone %u Map %u Team %u not have linked graveyard.",zoneId,MapId,team);
         return NULL;
     }
 
@@ -2272,11 +2272,11 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
             continue;
         }
 
-        // skip enimy faction graveyard at same map (normal area, city, or battleground)
+        // skip enemy faction graveyard at same map (normal area, city, or battleground)
         if(g_team != 0 && g_team != team)
             continue;
 
-        // find now nearest graveyrd at same map
+        // find now nearest graveyard at same map
         float dist2 = (entry->x - x)*(entry->x - x)+(entry->y - y)*(entry->y - y)+(entry->z - z)*(entry->z - z);
         if(foundNear)
         {
@@ -2670,8 +2670,8 @@ void ObjectMgr::LoadReputationOnKill()
 
     //                                             0             1                      2
     QueryResult *result = sDatabase.Query("SELECT `creature_id`,`RewOnKillRepFaction1`,`RewOnKillRepFaction2`,"
-        //3              4              5                    6              7              8         
-        "`IsTeamAward1`,`MaxStanding1`,`RewOnKillRepValue1`,`IsTeamAward2`,`MaxStanding2`,`RewOnKillRepValue2`"
+        //3              4              5                    6              7              8                   9
+        "`IsTeamAward1`,`MaxStanding1`,`RewOnKillRepValue1`,`IsTeamAward2`,`MaxStanding2`,`RewOnKillRepValue2`,`TeamDependent` "
         "FROM `creature_onkill_reputation`");
 
     if(!result)
@@ -2697,12 +2697,13 @@ void ObjectMgr::LoadReputationOnKill()
         ReputationOnKillEntry repOnKill;
         repOnKill.repfaction1          = fields[1].GetUInt32();
         repOnKill.repfaction2          = fields[2].GetUInt32();
-        repOnKill.is_teamaward1        = fields[3].GetUInt32();
+        repOnKill.is_teamaward1        = fields[3].GetUInt8();
         repOnKill.reputration_max_cap1 = fields[4].GetUInt32();
         repOnKill.repvalue1            = fields[5].GetInt32();
-        repOnKill.is_teamaward2        = fields[6].GetUInt32();
+        repOnKill.is_teamaward2        = fields[6].GetUInt8();
         repOnKill.reputration_max_cap2 = fields[7].GetUInt32();
         repOnKill.repvalue2            = fields[8].GetInt32();
+        repOnKill.team_dependent       = fields[9].GetUInt8();
 
         if(repOnKill.repfaction1)
         {

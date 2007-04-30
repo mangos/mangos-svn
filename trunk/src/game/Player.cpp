@@ -4476,7 +4476,7 @@ void Player::CalculateReputation(Unit *pVictim)
     if(!Rep)
         return;
 
-    if(Rep->repfaction1)
+    if(Rep->repfaction1 && (!Rep->team_dependent || GetTeam()==ALLIANCE))
     {
         int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1); 
         FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1); 
@@ -4493,7 +4493,7 @@ void Player::CalculateReputation(Unit *pVictim)
         }
     }
 
-    if(Rep->repfaction2)
+    if(Rep->repfaction2 && (!Rep->team_dependent || GetTeam()==HORDE))
     {
         int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2); 
         FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2); 
@@ -11337,7 +11337,7 @@ void Player::_SaveAuras()
 
         if (i == 3 && !itr->second->IsPassive())
         {
-            sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u' AND `spell` = '%u'",GetGUIDLow(),(uint32)(itr->second->GetId()));
+            sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u' and `spell` = '%u' and  `effect_index`= '%u'",GetGUIDLow(),(uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex());
             sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
         }
     }

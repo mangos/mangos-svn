@@ -358,30 +358,16 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // rest_start
 
     // home bind stuff
-    Field *fields;
-    QueryResult *result7 = sDatabase.PQuery("SELECT COUNT(`guid`) FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    if (result7)
     {
-        int cnt;
-        fields = result7->Fetch();
-        cnt = fields[0].GetUInt32();
-
-        if ( cnt > 0 )
+        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+        if (result4)
         {
-            QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-            assert(result4);
-            fields = result4->Fetch();
-            _player->m_homebindMapId = fields[0].GetUInt8();
+            Field *fields = result4->Fetch();
+            _player->m_homebindMapId = fields[0].GetUInt32();
             _player->m_homebindZoneId = fields[1].GetUInt16();
             _player->m_homebindX = fields[2].GetFloat();
             _player->m_homebindY = fields[3].GetFloat();
             _player->m_homebindZ = fields[4].GetFloat();
-            data.Initialize (SMSG_BINDPOINTUPDATE, 5*4);
-            data << _player->m_homebindX << _player->m_homebindY << _player->m_homebindZ;
-            data << (uint32) _player->m_homebindMapId;
-            data << (uint32) _player->m_homebindZoneId;
-            SendPacket (&data);
-            DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
             delete result4;
         }
         else
@@ -389,24 +375,33 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             int plrace = GetPlayer()->getRace();
             int plclass = GetPlayer()->getClass();
             QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
-            assert(result5);
-            fields = result5->Fetch();
+
+            if(!result5)
+            {
+                sLog.outErrorDb("Table `playercreateinfo` not have data for race %u class %u , character can't be loaded.",plrace, plclass);
+                LogoutPlayer(false);                            // without save
+                return;
+            }
+
+            Field *fields = result5->Fetch();
             // store and send homebind for player
-            _player->m_homebindMapId = fields[0].GetUInt8();
+            _player->m_homebindMapId = fields[0].GetUInt32();
             _player->m_homebindZoneId = fields[1].GetUInt16();
             _player->m_homebindX = fields[2].GetFloat();
             _player->m_homebindY = fields[3].GetFloat();
             _player->m_homebindZ = fields[4].GetFloat();
-            sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), _player->m_homebindMapId, _player->m_homebindZoneId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ);
-            data.Initialize (SMSG_BINDPOINTUPDATE, 5*4);
-            data << _player->m_homebindX << _player->m_homebindY << _player->m_homebindZ;
-            data << (uint32) _player->m_homebindMapId;
-            data << (uint32) _player->m_homebindZoneId;
-            SendPacket (&data);
-            DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+            sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), _player->m_homebindMapId, (uint32)_player->m_homebindZoneId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ);
             delete result5;
         }
-        delete result7;
+
+        data.Initialize (SMSG_BINDPOINTUPDATE, 5*4);
+        data << _player->m_homebindX << _player->m_homebindY << _player->m_homebindZ;
+        data << (uint32) _player->m_homebindMapId;
+        data << (uint32) _player->m_homebindZoneId;
+        SendPacket (&data);
+
+        DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",
+            _player->m_homebindMapId,_player->m_homebindZoneId,_player->m_homebindX,_player->m_homebindY, _player->m_homebindZ);
     }
 
     data.Initialize( SMSG_TUTORIAL_FLAGS, 8*32 );
