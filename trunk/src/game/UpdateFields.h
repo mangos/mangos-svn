@@ -292,9 +292,9 @@ enum EUnitFields
     PLAYER_FIELD_RESILIENCE_RATING             = 0x496 + UNIT_END, // custom
     PLAYER_FIELD_MELEE_HASTE_RATING            = 0x497 + UNIT_END, // custom
     PLAYER_FIELD_RANGED_HASTE_RATING           = 0x498 + UNIT_END, // custom
-    PLAYER_FIELD_UNK6_RATING                   = 0x499 + UNIT_END, // custom
+    PLAYER_FIELD_SPELL_HASTE_RATING            = 0x499 + UNIT_END, // custom
     PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING     = 0x49A + UNIT_END, // custom
-    PLAYER_FIELD_UNK7_RATING                   = 0x49B + UNIT_END, // custom
+    PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING   = 0x49B + UNIT_END, // custom
     PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING    = 0x49C + UNIT_END, // custom
     PLAYER_FIELD_ARENA_TEAM_INFO_1_1           = 0x49D + UNIT_END, // Size:9
     PLAYER_FIELD_HONOR_CURRENCY                = 0x4A6 + UNIT_END, // Size:1

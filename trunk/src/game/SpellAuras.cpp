@@ -170,7 +170,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraUntrackable,                           //120 SPELL_AURA_UNTRACKABLE
     &Aura::HandleAuraEmpathy,                               //121 SPELL_AURA_EMPATHY
     &Aura::HandleModOffhandDamagePercent,                   //122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT
-    &Aura::HandleNULL,                                      //123 SPELL_AURA_MOD_POWER_COST_PCT
+    &Aura::HandleModTargetResistance,                       //123 SPELL_AURA_MOD_TARGET_RESISTANCE
     &Aura::HandleAuraModRangedAttackPower,                  //124 SPELL_AURA_MOD_RANGED_ATTACK_POWER
     &Aura::HandleNoImmediateEffect,                         //125 SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN
     &Aura::HandleNoImmediateEffect,                         //126 SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT
@@ -236,7 +236,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE
     &Aura::HandleNULL,                                      //187 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE
     &Aura::HandleNULL,                                      //188 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE
-    &Aura::HandleNULL,                                      //189 SPELL_AURA_MOD_RATING
+    &Aura::HandleModRating,                                 //189 SPELL_AURA_MOD_RATING
     &Aura::HandleNULL,                                      //190 SPELL_AURA_MOD_FACTION_REPUTATION_GAIN
     &Aura::HandleNULL,                                      //191
     &Aura::HandleNULL,                                      //192 SPELL_AURA_HASTE_MELEE
@@ -3525,4 +3525,85 @@ void Aura::HandleAuraModSpeedMountedFlight(bool apply, bool Real)
     data.append(m_target->GetPackGUID());
     data << uint32(0);                                      // unk
     m_target->SendMessageToSet(&data, true);
+}
+
+void Aura::HandleModRating(bool apply, bool Real)
+{
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (m_modifier.m_miscvalue & SPELL_RATING_SKILL)
+        {
+            /*Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            if (pItem && pItem->IsFitToSpellRequirements(GetSpellProto()))
+                ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING,m_modifier.m_amount,apply);
+
+            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            if (pItem && pItem->IsFitToSpellRequirements(GetSpellProto()))
+                ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING,m_modifier.m_amount,apply);
+
+            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (pItem && pItem->IsFitToSpellRequirements(GetSpellProto()))
+                ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING,m_modifier.m_amount,apply);*/
+        }
+        
+        if (m_modifier.m_miscvalue & SPELL_RATING_DEFENCE)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING,m_modifier.m_amount,apply);
+        
+        if (m_modifier.m_miscvalue & SPELL_RATING_DODGE)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_PARRY)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_BLOCK)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_MELEE_HIT)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_RANGED_HIT)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_SPELL_HIT)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_MELEE_CRIT_HIT)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_RANGED_CRIT_HIT)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_SPELL_CRIT_HIT)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_MELEE_HASTE)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_RANGED_HASTE)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_SPELL_HASTE)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_HIT)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_CRIT_HIT)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING,m_modifier.m_amount,apply);
+
+        /*if (m_modifier.m_miscvalue & SPELL_RATING_HIT_AVOIDANCE)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_HIT_AVOIDANCE_RATING,m_modifier.m_amount,apply);
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_CRIT_AVOIDANCE)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_CRIT_AVOIDANCE_RATING,m_modifier.m_amount,apply);*/
+
+        if (m_modifier.m_miscvalue & SPELL_RATING_RESILIENCE)
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING,m_modifier.m_amount,apply);
+    }
+}
+
+void Aura::HandleModTargetResistance(bool apply, bool Real)
+{
+    if (m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,m_modifier.m_amount, apply);
 }

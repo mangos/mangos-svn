@@ -497,6 +497,13 @@ void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
     SetUInt32Value(index,cur);
 }
 
+void Object::ApplyModInt32Value(uint16 index, int32 val, bool apply)
+{
+    int32 cur = GetUInt32Value(index);
+    cur += (apply ? val : -val);
+    SetUInt32Value(index,cur);
+}
+
 void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
