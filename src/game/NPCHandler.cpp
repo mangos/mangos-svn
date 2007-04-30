@@ -270,8 +270,69 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
             return;
         }
 
-        Spell *spell;
-        if(proto->spell->SpellVisual == 222)
+		Spell *spell;
+
+		// UQ1: Fixes for some of the new spells that won't train.
+		if(spellId == 30546)
+		{// UQ1: Learn direct. This spell can not be learnt any other way... (Maybe bad DB!)
+			float u_oprientation = unit->GetOrientation();
+
+			_player->learnSpell((uint16)spellId);
+
+		    // trainer always see at customer in time of training (part of client functionality)
+	        unit->SetInFront(_player);
+
+			// Add some FX...
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(20211);
+			spell = new Spell(_player, spellInfo, false, NULL);
+
+			// trainer always return to original orientation
+			unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+			return;
+		}
+		else if(spellId == 19274)
+		{// UQ1: Learn direct. This spell can not be learnt any other way... (Maybe bad DB!)
+			float u_oprientation = unit->GetOrientation();
+
+			_player->learnSpell((uint16)spellId);
+
+		    // trainer always see at customer in time of training (part of client functionality)
+	        unit->SetInFront(_player);
+
+			// Add some FX...
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(20211);
+			spell = new Spell(_player, spellInfo, false, NULL);
+
+			// trainer always return to original orientation
+			unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+			return;
+		}
+		else if(spellId == 19275)
+		{// UQ1: Learn direct. This spell can not be learnt any other way... (Maybe bad DB!)
+			float u_oprientation = unit->GetOrientation();
+
+			_player->learnSpell((uint16)spellId);
+
+		    // trainer always see at customer in time of training (part of client functionality)
+	        unit->SetInFront(_player);
+
+			// Add some FX...
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(20211);
+			spell = new Spell(_player, spellInfo, false, NULL);
+
+			// trainer always return to original orientation
+			unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+			return;
+		}
+		else if(spellId == 29341)
+			spell = new Spell(_player, proto->spell, false, NULL);
+		else if(spellId == 3704)
+			spell = new Spell(_player, proto->spell, false, NULL);
+		else if(spellId == 1476)
+			spell = new Spell(_player, proto->spell, false, NULL);
+		else if(spellId == 33718) // UQ1: Fix for conjure food (rank 8) training!
+			spell = new Spell(_player, proto->spell, false, NULL);
+        else if(proto->spell->SpellVisual == 222)
             spell = new Spell(_player, proto->spell, false, NULL);
         else
             spell = new Spell(unit, proto->spell, false, NULL);
