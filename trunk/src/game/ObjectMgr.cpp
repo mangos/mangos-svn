@@ -602,6 +602,11 @@ void ObjectMgr::LoadPetLevelInfo()
                     sLog.outDetail("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `pet_levelstats` table, ignoring.",current_level);
                 continue;
             }
+            else if(current_level < 1)
+            {
+                sLog.outErrorDb("Wrong (<1) level %u in `pet_levelstats` table, ignoring.",current_level);
+                continue;
+            }
 
             PetLevelInfo*& pInfoMapEntry = petInfo[creature_id];
 
