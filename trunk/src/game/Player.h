@@ -204,6 +204,8 @@ struct Faction
     FactionState uState;
 };
 
+// TODO: Rewrite this so it uses pointers of structs instead of struct
+// O please this is so freaking slow
 typedef std::list<Faction> FactionsList;
 
 struct EnchantDuration

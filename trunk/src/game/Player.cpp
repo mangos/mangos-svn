@@ -4326,10 +4326,15 @@ void Player::SetInitialFactions()
 
 int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
 {
-    uint8 Race = getRace();
+    if (!factionEntry)
+        return 0;
+
+    uint32 Race = getRace();
     for (int i=0; i < 4; i++)
+    {
         if ( factionEntry->BaseRepMask[i] & (1 << (Race-1)))
             return factionEntry->BaseRepValue[i];
+    }
     sLog.outError("Player::GetBaseReputation: can't get base reputation of %s for faction id %d", GetName(), factionEntry->ID);
     return 0;
 }
@@ -4416,6 +4421,7 @@ bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputa
 
 bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing)
 {
+    // TODO: Rewrite this so it uses pointers of structs instead of struct
     for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
         if(int32(itr->ReputationListID) == factionEntry->reputationListID)
