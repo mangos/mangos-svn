@@ -184,7 +184,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_stableSlots = 0;
 
     /////////////////// Instance System /////////////////////
-    
+
     m_Loaded = false;
     m_HomebindTimer = 0;
     m_InstanceValid = true;
@@ -269,29 +269,31 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     // Taxi nodes setup
     memset(m_taximask, 0, sizeof(m_taximask));
-/*
-    // Automatically add the race's taxi hub to the character's taximask at creation time ( 1 << (taxi_node_id-1) )
-    ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
-    if(!rEntry)
-    {
-        sLog.outError("Race %u not found in DBÑ (Wrong DBC files?)",race);
-        return false;
-    }
+    /*
+        // Automatically add the race's taxi hub to the character's taximask at creation time ( 1 << (taxi_node_id-1) )
+        ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
+        if(!rEntry)
+        {
+            sLog.outError("Race %u not found in DBÑ (Wrong DBC files?)",race);
+            return false;
+        }
 
-    m_taximask[0] = rEntry->startingTaxiMask;
-*/
+        m_taximask[0] = rEntry->startingTaxiMask;
+    */
     switch(race)
     {
-        case 1:         m_taximask[0]= 1 << ( 2-1); break; // Human
-        case 2:         m_taximask[0]= 1 << (23-1); break; // Orc
-        case 3:         m_taximask[0]= 1 << ( 6-1); break; // Dwarf
-        case 4:         m_taximask[0]= (1 << (26-1)) | (1 << (27-1)); break; // Night Elf
-        case 5:         m_taximask[0]= 1 << (11-1); break; // Undead
-        case 6:         m_taximask[0]= 1 << (22-1); break; // Tauren
-        case 7:         m_taximask[0]= 1 << ( 6-1); break; // Gnome
-        case 8:         m_taximask[0]= 1 << (23-1); break; // Troll
+        case 1:         m_taximask[0]= 1 << ( 2-1); break;  // Human
+        case 2:         m_taximask[0]= 1 << (23-1); break;  // Orc
+        case 3:         m_taximask[0]= 1 << ( 6-1); break;  // Dwarf
+                                                            // Night Elf
+        case 4:         m_taximask[0]= (1 << (26-1)) | (1 << (27-1)); break;
+        case 5:         m_taximask[0]= 1 << (11-1); break;  // Undead
+        case 6:         m_taximask[0]= 1 << (22-1); break;  // Tauren
+        case 7:         m_taximask[0]= 1 << ( 6-1); break;  // Gnome
+        case 8:         m_taximask[0]= 1 << (23-1); break;  // Troll
         //case 10:        m_taximask[0]= 1 << (1-1); break; // Blood Elf
-        case 11:        m_taximask[0+94/32]= 1 << (94%32-1); break; // Draenei
+                                                            // Draenei
+        case 11:        m_taximask[0+94/32]= 1 << (94%32-1); break;
     }
 
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(class_);
@@ -337,7 +339,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
-    SetUInt32Value(UNIT_FIELD_BYTES_2, ( 0x28 << 8 ) ); // players - 0x2800, 0x2801, units - 0x1001
+    SetUInt32Value(UNIT_FIELD_BYTES_2, ( 0x28 << 8 ) );     // players - 0x2800, 0x2801, units - 0x1001
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
 
     //SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO); // wrong...
@@ -353,13 +355,13 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER_GUILDRANK, 0 );
     SetUInt32Value( PLAYER_GUILD_TIMESTAMP, 0 );
 
-    SetUInt32Value( PLAYER_FIELD_KNOWN_TITLES, 0 ); // 0=disabled
+    SetUInt32Value( PLAYER_FIELD_KNOWN_TITLES, 0 );         // 0=disabled
     SetUInt32Value( PLAYER_CHOSEN_TITLE, 0 );
     SetUInt32Value( PLAYER_FIELD_KILLS, 0 );
     SetUInt32Value( PLAYER_FIELD_KILLS_LIFETIME, 0 );
     SetUInt32Value( PLAYER_FIELD_HONOR_TODAY, 0 );
     SetUInt32Value( PLAYER_FIELD_HONOR_YESTERDAY, 0 );
-    SetUInt32Value( PLAYER_FIELD_MAX_LEVEL, 70 );    
+    SetUInt32Value( PLAYER_FIELD_MAX_LEVEL, 70 );
 
     // Played time
     m_Last_tick = time(NULL);
@@ -506,7 +508,7 @@ void Player::StartMirrorTimer(MirrorTimerType Type, uint32 MaxValue)
     data << MaxValue;
     data << BreathRegen;
     data << (uint8)0;
-    data << (uint32)0; // spell id
+    data << (uint32)0;                                      // spell id
     GetSession()->SendPacket(&data);
 }
 
@@ -521,7 +523,7 @@ void Player::ModifyMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Cur
     data << MaxValue;
     data << Regen;
     data << (uint8)0;
-    data << (uint32)0; // spell id
+    data << (uint32)0;                                      // spell id
     GetSession()->SendPacket( &data );
 }
 
@@ -1234,32 +1236,32 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     QueryResult *result = loginDatabase.PQuery("SELECT `tbc` FROM `account` WHERE `id`='%u'", GetSession()->GetAccountId());
 
     if(!result)
-        return; // unknown client or error
+        return;                                             // unknown client or error
 
     Field *fields = result->Fetch();
 
-    uint32 not_tbc_map = 0x10; // if any problems, then check 0x80000 also...
+    uint32 not_tbc_map = 0x10;                              // if any problems, then check 0x80000 also...
     // with 0x80000 we can teleport to Kharazan with normal client
     // with 0x10 we can't teleport to Kharazan with normal client
     uint8 tbc = fields[0].GetUInt8();
     delete result;
 
-    if(tbc == 0 && (mEntry->map_flag & not_tbc_map) == 0) // normal client and TBC map
+    if(tbc == 0 && (mEntry->map_flag & not_tbc_map) == 0)   // normal client and TBC map
     {
         sLog.outDebug("Player %s using Normal client and tried teleport to non existing map %u", GetName(), mapid);
 
         if(GetTransport())
-            RepopAtGraveyard(); // teleport to near graveyard if on transport, looks blizz like :)
+            RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
 
         // send error message
         WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
         data << mapid;
-        data << uint16(0x0106); // unk, probably error message id, now it's "You must have The Burning Crusade expansion installed to access this area.", look for other messages in GlobalStrings.lua (TRANSFER_ABORT_*).
+        data << uint16(0x0106);                             // unk, probably error message id, now it's "You must have The Burning Crusade expansion installed to access this area.", look for other messages in GlobalStrings.lua (TRANSFER_ABORT_*).
         GetSession()->SendPacket(&data);
 
-        return; // normal client can't teleport to this map...
+        return;                                             // normal client can't teleport to this map...
     }
-    else if(tbc == 1) // can teleport to any existing map
+    else if(tbc == 1)                                       // can teleport to any existing map
     {
         sLog.outDebug("Player %s have TBC client and will teleported to map %u", GetName(), mapid);
     }
@@ -1267,19 +1269,19 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     {
         sLog.outDebug("Player %s have normal client and will teleported to standard map %u", GetName(), mapid);
     }
-/*
-only TBC (no 0x80000 and 0x10 flags...)
-3604590=0x37006E=0x200000 + 0x100000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x8 + 0x4 + 0x2
+    /*
+    only TBC (no 0x80000 and 0x10 flags...)
+    3604590=0x37006E=0x200000 + 0x100000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x8 + 0x4 + 0x2
 
-Kharazan (normal/TBC??), but not have 0x10 flag (accessible by normal client?)
-4128878=0x3F006E=0x200000 + 0x100000 + 0x80000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x8 + 0x4 + 0x2
+    Kharazan (normal/TBC??), but not have 0x10 flag (accessible by normal client?)
+    4128878=0x3F006E=0x200000 + 0x100000 + 0x80000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x8 + 0x4 + 0x2
 
-normal+TBC maps
-4128894=0x3F007E=0x200000 + 0x100000 + 0x80000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x10 + 0x8 + 0x4 + 0x2
+    normal+TBC maps
+    4128894=0x3F007E=0x200000 + 0x100000 + 0x80000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x10 + 0x8 + 0x4 + 0x2
 
-normal+TBC maps
-8323198=0x7F007E=0x400000 + 0x200000 + 0x100000 + 0x80000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x10 + 0x8 + 0x4 + 0x2
-*/
+    normal+TBC maps
+    8323198=0x7F007E=0x400000 + 0x200000 + 0x100000 + 0x80000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x10 + 0x8 + 0x4 + 0x2
+    */
 
     // prepare zone change detect
     uint32 old_zone = GetZoneId();
@@ -1310,19 +1312,20 @@ normal+TBC maps
     else
     {
         Map* oldmap = MapManager::Instance().GetMap(GetMapId(), this);
-        
+
         // now we must check if we are going to be homebind after teleport, if it is so,
         // we must re-instantiate again (entering instance to be homebind is not very good idea)
         // this only affects entering instances, not re-logging in (teleport is not used on login)
         Map* map = MapManager::Instance().GetMap(mapid, this);
-        // verify, if it does want to homebind us (but only if we are not in GM state, 
+        // verify, if it does want to homebind us (but only if we are not in GM state,
         // GMs are allowed to teleport everywhere they want to be)
         if (!m_InstanceValid && (!isGameMaster() || !is_gm_command))
         {
             // yes, we are going to be homebind, avoid this action :)
-            SetInstanceId(0); // reset instance id
-            m_BoundInstances.erase(mapid); // unbind our instance binding
-            map = MapManager::Instance().GetMap(mapid, this); // obtain new map
+            SetInstanceId(0);                               // reset instance id
+            m_BoundInstances.erase(mapid);                  // unbind our instance binding
+                                                            // obtain new map
+            map = MapManager::Instance().GetMap(mapid, this);
         }
 
         if (map && MapManager::Instance().CanPlayerEnter(mapid, this) &&  map->AddInstanced(this))
@@ -1336,7 +1339,7 @@ normal+TBC maps
                 data << m_transport->GetEntry() << GetMapId();
             }
             GetSession()->SendPacket(&data);
-    
+
             data.Initialize(SMSG_NEW_WORLD, (20));
             if (m_transport)
             {
@@ -1739,9 +1742,9 @@ bool Player::IsGroupVisibleFor(Player* p) const
 
 bool Player::IsInSameGroupWith(Player const* p) const
 {
-    return  groupInfo.group != NULL && 
-            groupInfo.group == p->groupInfo.group &&
-            groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID());
+    return  groupInfo.group != NULL &&
+        groupInfo.group == p->groupInfo.group &&
+        groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID());
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
@@ -2064,7 +2067,7 @@ void Player::SendInitialSpells()
 
         data << uint16(itr->second.itemid);
         data << uint16(sEntry->Category);
-        if(sEntry->Category)                    // may be wrong, but anyway better than nothing...
+        if(sEntry->Category)                                // may be wrong, but anyway better than nothing...
         {
             data << uint32(0);
             data << uint32(cooldown);
@@ -2652,8 +2655,8 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(UNIT_FIELD_PETNUMBER);
     updateVisualBits.SetBit(UNIT_FIELD_PET_NAME_TIMESTAMP);
     updateVisualBits.SetBit(UNIT_DYNAMIC_FLAGS);
-    updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED); // ?
-    updateVisualBits.SetBit(UNIT_FIELD_BYTES_2); // ?
+    updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED);           // ?
+    updateVisualBits.SetBit(UNIT_FIELD_BYTES_2);            // ?
 
     updateVisualBits.SetBit(PLAYER_FLAGS);
     updateVisualBits.SetBit(PLAYER_BYTES);
@@ -2945,10 +2948,10 @@ void Player::SetMovement(uint8 pType)
 
 void Player::BuildPlayerRepop()
 {
-    CastSpell(this, 20584, true); // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
+    CastSpell(this, 20584, true);                           // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
     // there must be SMSG.FORCE_RUN_SPEED_CHANGE, SMSG.FORCE_SWIM_SPEED_CHANGE, SMSG.MOVE_WATER_WALK
 
-    CastSpell(this, 8326, true); // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+    CastSpell(this, 8326, true);                            // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
     // there must be SMSG.STOP_MIRROR_TIMER
     // there we must send 888 opcode
 
@@ -2957,9 +2960,10 @@ void Player::BuildPlayerRepop()
         CreateCorpse();
 
     CorpsePtr corpse = GetCorpse();
-    if (!corpse) {
-	sLog.outError("Error creating corpse for Player %s [%u]", GetName(), GetGUIDLow());
-	return;
+    if (!corpse)
+    {
+        sLog.outError("Error creating corpse for Player %s [%u]", GetName(), GetGUIDLow());
+        return;
     }
 
     // now show corpse for all
@@ -2997,7 +3001,7 @@ void Player::BuildPlayerRepop()
     if(corpse)
         corpse->ResetGhostTime();
 
-    data.Initialize(SMSG_UPDATE_AURA_DURATION, 5); // last check 2.0.10
+    data.Initialize(SMSG_UPDATE_AURA_DURATION, 5);          // last check 2.0.10
     data << uint8(0x28) << uint32(0);
     GetSession()->SendPacket( &data );
 
@@ -3036,7 +3040,7 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
 
 void Player::ResurrectPlayer()
 {
-    WorldPacket data(SMSG_SH_POSITION, 4*4); // remove spirit healer position
+    WorldPacket data(SMSG_SH_POSITION, 4*4);                // remove spirit healer position
     data << uint32(-1);
     data << uint32(0);
     data << uint32(0);
@@ -3048,15 +3052,15 @@ void Player::ResurrectPlayer()
     // remove death flag + set aura
     //RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
     RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_ALL);
-    RemoveAurasDueToSpell(8326); // SPELL_AURA_GHOST
-    RemoveAurasDueToSpell(20584); // speed bonuses
+    RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
+    RemoveAurasDueToSpell(20584);                           // speed bonuses
 
     setDeathState(ALIVE);
 
     SetMovement(MOVE_LAND_WALK);
     SetMovement(MOVE_UNROOT);
 
-    if(InBattleGround())    // special case for battleground resurrection
+    if(InBattleGround())                                    // special case for battleground resurrection
     {
         SetHealth(GetMaxHealth());
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
@@ -3131,7 +3135,7 @@ void Player::KillPlayer()
                 if(bg->GetAllianceFlagPickerGUID() == GetGUID())
                 {
                     bg->SetAllianceFlagPicker(0);
-                    CastSpell(this, 23336, true);   // Alliance Flag Drop
+                    CastSpell(this, 23336, true);           // Alliance Flag Drop
                 }
             }
             if(GetTeam() == ALLIANCE && bg->IsHordeFlagPickedup())
@@ -3139,10 +3143,10 @@ void Player::KillPlayer()
                 if(bg->GetHordeFlagPickerGUID() == GetGUID())
                 {
                     bg->SetHordeFlagPicker(0);
-                    CastSpell(this, 23334, true);   // Horde Flag Drop
+                    CastSpell(this, 23334, true);           // Horde Flag Drop
                 }
             }
-            bg->UpdatePlayerScore(this, 4, 1); // add +1 deaths
+            bg->UpdatePlayerScore(this, 4, 1);              // add +1 deaths
         }
     }
 
@@ -3318,9 +3322,9 @@ void Player::RepopAtGraveyard()
 
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
 
-        if(isDead()) // not send if alive, because it used in TeleportTo()
+        if(isDead())                                        // not send if alive, because it used in TeleportTo()
         {
-            WorldPacket data(SMSG_SH_POSITION, 4*4); // show spirit healer position on minimap
+            WorldPacket data(SMSG_SH_POSITION, 4*4);        // show spirit healer position on minimap
             data << ClosestGrave->map_id;
             data << ClosestGrave->x;
             data << ClosestGrave->y;
@@ -3403,7 +3407,7 @@ void Player::ApplyDefenseBonusesMod(float value, bool apply)
 void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
 {
     ApplyModUInt32Value(index, value, apply);
-    
+
     float RatingCoeffecient = 0;
     float RatingChange = 0.0;
 
@@ -3413,7 +3417,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         RatingCoeffecient = 2.0 / 52.0;
     else if (level < 60)
         RatingCoeffecient = (level - 8.0) / 52.0;
-    else if (level < 70) 
+    else if (level < 70)
         RatingCoeffecient = 82.0 / (262.0 - 3.0 * level);
     else RatingCoeffecient = (level + 12.0) / 52.0;
 
@@ -3422,7 +3426,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING:
         case PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING:
         case PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING:
-            {
+        {
             //Weapon skill: 2.5
             RatingChange = value/(2.5 * RatingCoeffecient);
             /*uint16  slot;
@@ -3436,8 +3440,8 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             uint32 skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon()
                 ? item->GetSkill() : SKILL_UNARMED;
             ModifySkillBonus(skill, (apply ? (int32)RatingChange: -(int32)RatingChange));*/
-            }
-            break;
+        }
+        break;
         case PLAYER_FIELD_DEFENCE_RATING:
             //Defense: 1.5
             RatingChange = value/(1.5 * RatingCoeffecient);
@@ -3467,7 +3471,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_RANGED_HIT_RATING:
             //Hit (melee): 10
             RatingChange = value/(10.0 * RatingCoeffecient);
-            m_modHitChance += apply?RatingChange:-RatingChange;         
+            m_modHitChance += apply?RatingChange:-RatingChange;
             break;
         case PLAYER_FIELD_SPELL_HIT_RATING:
             //Hit (spells): 8
@@ -3536,16 +3540,16 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             RatingChange = (int32)(value/(14.0 * RatingCoeffecient));
             ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,RatingChange,apply);
             break;
-        /*
-        case PLAYER_FIELD_HIT_AVOIDANCE_RATING:
-            break;
-        case PLAYER_FIELD_CRIT_AVOIDANCE_RATING:
-            break;
-        */
+            /*
+            case PLAYER_FIELD_HIT_AVOIDANCE_RATING:
+                break;
+            case PLAYER_FIELD_CRIT_AVOIDANCE_RATING:
+                break;
+            */
         case PLAYER_FIELD_RESILIENCE_RATING:
             //Resilience: 25
             RatingChange = (int32)(value/(25.0 * RatingCoeffecient));
-            break;     
+            break;
     }
 }
 
@@ -4193,7 +4197,7 @@ void Player::SendSetFactionStanding(const Faction* faction) const
 {
     if(faction->Flags & 0x00000001 )                        //If faction is visible then update it
     {
-        WorldPacket data(SMSG_SET_FACTION_STANDING, (12)); // last check 2.0.10
+        WorldPacket data(SMSG_SET_FACTION_STANDING, (12));  // last check 2.0.10
         //data << (uint32) faction->Flags;
         data << (uint32) 1;
         data << (uint32) faction->ReputationListID;
@@ -4269,21 +4273,21 @@ FactionsList::iterator Player::FindReputationListIdInFactionList(uint32 repListI
 
 void Player::SendSetFactionVisible(const Faction* faction) const
 {
-/*
-    // this code must be use at Gossip/NPC handler
-    // we must check if faction already visible/in list?
-    uint32 faction = unit->getFactionTemplateEntry()->faction;
-    for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
-    {
-        if(itr->ID == faction)
+    /*
+        // this code must be use at Gossip/NPC handler
+        // we must check if faction already visible/in list?
+        uint32 faction = unit->getFactionTemplateEntry()->faction;
+        for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
         {
-            //if(!_player->FactionIsInTheList(itr->ReputationListID)
-            SendSetFactionVisible(&*itr);
-            break;
+            if(itr->ID == faction)
+            {
+                //if(!_player->FactionIsInTheList(itr->ReputationListID)
+                SendSetFactionVisible(&*itr);
+                break;
+            }
         }
-    }
-*/
-    // make faction visible in reputation list, on blizz it use when talking with NPC of new faction 
+    */
+    // make faction visible in reputation list, on blizz it use when talking with NPC of new faction
     // we must check if faction already visible?
     WorldPacket data(SMSG_SET_FACTION_VISIBLE, 4);
     data << faction->ReputationListID;
@@ -4478,8 +4482,8 @@ void Player::CalculateReputation(Unit *pVictim)
 
     if(Rep->repfaction1 && (!Rep->team_dependent || GetTeam()==ALLIANCE))
     {
-        int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1); 
-        FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1); 
+        int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1);
+        FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1);
         uint32 current_reputation_rank1 = GetReputationRank(factionEntry1);
         if(factionEntry1 && current_reputation_rank1 <= Rep->reputration_max_cap1)
             ModifyFactionReputation(factionEntry1, donerep1);
@@ -4489,14 +4493,14 @@ void Player::CalculateReputation(Unit *pVictim)
         {
             FactionEntry const *team1_factionEntry = sFactionStore.LookupEntry(factionEntry1->team);
             if(team1_factionEntry)
-                ModifyFactionReputation(team1_factionEntry, donerep1 / 2); 
+                ModifyFactionReputation(team1_factionEntry, donerep1 / 2);
         }
     }
 
     if(Rep->repfaction2 && (!Rep->team_dependent || GetTeam()==HORDE))
     {
-        int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2); 
-        FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2); 
+        int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2);
+        FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2);
         uint32 current_reputation_rank2 = GetReputationRank(factionEntry2);
         if(factionEntry2 && current_reputation_rank2 <= Rep->reputration_max_cap2)
             ModifyFactionReputation(factionEntry2, donerep2);
@@ -4507,7 +4511,7 @@ void Player::CalculateReputation(Unit *pVictim)
             FactionEntry const *team2_factionEntry = sFactionStore.LookupEntry(factionEntry2->team);
             if(team2_factionEntry)
                 ModifyFactionReputation(team2_factionEntry, donerep2 / 2);
-        }    
+        }
     }
 }
 
@@ -4534,18 +4538,18 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 }
 
 void Player::UpdateArenaFields(void)
-{ 
+{
     /* arena calcs go here */
 }
 
 void Player::UpdateHonorFields()
 {
-    uint32 today = uint32(time(NULL) / DAY) * DAY;    
-    uint32 yesterday = today - DAY; 
+    uint32 today = uint32(time(NULL) / DAY) * DAY;
+    uint32 yesterday = today - DAY;
 
     QueryResult *result = sDatabase.PQuery("SELECT sum(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u'", GUID_LOPART(GetGUID()), today);
     if(result && (*result)[0].GetFloat() != 0)
-    {        
+    {
         float honor=0.0, honor_yesterday=0.0;
         uint32 kills_yesterday=0;
 
@@ -4576,14 +4580,15 @@ void Player::CalculateHonor(Unit *uVictim)
     if(uVictim->GetAura(2479, 0))
         return;
 
-    UpdateHonorFields(); // to prevent CalcluateHonor() on a new day before old honor was UpdateHonorFields()
+    UpdateHonorFields();                                    // to prevent CalcluateHonor() on a new day before old honor was UpdateHonorFields()
 
-    float honor = ((float)urand(1,80))/10;                      // honor between: 0.1 - 8.0
-    float approx_honor = honor * (((float)urand(8,12))/10);     // approx honor: 80% - 120% of real honor
+    float honor = ((float)urand(1,80))/10;                  // honor between: 0.1 - 8.0
+    float approx_honor = honor * (((float)urand(8,12))/10); // approx honor: 80% - 120% of real honor
     sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`) VALUES (%u, %u, %f, %u)", GUID_LOPART(GetGUID()), uVictim->GetEntry(), honor, time(0));
 
-    ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);           // add 1 today_kill
-    ApplyModUInt32Value(PLAYER_FIELD_KILLS_LIFETIME, 1, true);  // add 1 lifetime_kill
+    ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);       // add 1 today_kill
+                                                            // add 1 lifetime_kill
+    ApplyModUInt32Value(PLAYER_FIELD_KILLS_LIFETIME, 1, true);
     ApplyModUInt32Value(PLAYER_FIELD_HONOR_TODAY, (uint32)(approx_honor*10), true);
 }
 
@@ -4656,7 +4661,7 @@ void Player::UpdateZone(uint32 newZone)
     else                                                    // in friendly area
     {
         if(IsPvP() && !HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP) && pvpInfo.endTimer == 0)
-            pvpInfo.endTimer = time(0);                  // start toggle-off
+            pvpInfo.endTimer = time(0);                     // start toggle-off
     }
 
     // zonetype is flags
@@ -4677,11 +4682,11 @@ void Player::UpdateZone(uint32 newZone)
     // flags & 0x00004000   (16384) - outland zones? (only Circle of Blood Arena not have this flag, but have 0x00000400 flag)
     // flags & 0x00008000   (32768) - pvp objective area?
 
-    if((zone->flags & 0x800) != 0)                              // in sanctuary
+    if((zone->flags & 0x800) != 0)                          // in sanctuary
     {
-        UpdatePvP(false, true); // i'm right? need disable PvP in this area...
+        UpdatePvP(false, true);                             // i'm right? need disable PvP in this area...
     }
-    else if((zone->flags & 0x100) != 0)                         // in capital city
+    else if((zone->flags & 0x100) != 0)                     // in capital city
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         SetRestType(2);
@@ -5746,20 +5751,20 @@ void Player::SendInitWorldStates()
     }
 
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+2+(NumberOfFields*8)));
-    data << mapid;          // mapid
-    data << zoneid;         // zone id
-    data << NumberOfFields; // count of uint64 blocks
-    data << uint32(0x8d8) << uint32(0x0); // 1
-    data << uint32(0x8d7) << uint32(0x0); // 2
-    data << uint32(0x8d6) << uint32(0x0); // 3
-    data << uint32(0x8d5) << uint32(0x0); // 4
-    data << uint32(0x8d4) << uint32(0x0); // 5
-    data << uint32(0x8d3) << uint32(0x0); // 6
-    if(mapid == 530)        // Outland
+    data << mapid;                                          // mapid
+    data << zoneid;                                         // zone id
+    data << NumberOfFields;                                 // count of uint64 blocks
+    data << uint32(0x8d8) << uint32(0x0);                   // 1
+    data << uint32(0x8d7) << uint32(0x0);                   // 2
+    data << uint32(0x8d6) << uint32(0x0);                   // 3
+    data << uint32(0x8d5) << uint32(0x0);                   // 4
+    data << uint32(0x8d4) << uint32(0x0);                   // 5
+    data << uint32(0x8d3) << uint32(0x0);                   // 6
+    if(mapid == 530)                                        // Outland
     {
-            data << uint32(0x9bf) << uint32(0x0); // 7
-            data << uint32(0x9bd) << uint32(0xF); // 8
-            data << uint32(0x9bb) << uint32(0xF); // 9
+        data << uint32(0x9bf) << uint32(0x0);               // 7
+        data << uint32(0x9bd) << uint32(0xF);               // 8
+        data << uint32(0x9bb) << uint32(0xF);               // 9
     }
     switch(zoneid)
     {
@@ -5773,202 +5778,202 @@ void Player::SendInitWorldStates()
         case 1537:
         case 2257:
             break;
-        case 2597: // AV
-            data << uint32(0x7ae) << uint32(0x1); // 7
-            data << uint32(0x532) << uint32(0x1); // 8
-            data << uint32(0x531) << uint32(0x0); // 9
-            data << uint32(0x52e) << uint32(0x0); // 10
-            data << uint32(0x571) << uint32(0x0); // 11
-            data << uint32(0x570) << uint32(0x0); // 12
-            data << uint32(0x567) << uint32(0x1); // 13
-            data << uint32(0x566) << uint32(0x1); // 14
-            data << uint32(0x550) << uint32(0x1); // 15
-            data << uint32(0x544) << uint32(0x0); // 16
-            data << uint32(0x536) << uint32(0x0); // 17
-            data << uint32(0x535) << uint32(0x1); // 18
-            data << uint32(0x518) << uint32(0x0); // 19
-            data << uint32(0x517) << uint32(0x0); // 20
-            data << uint32(0x574) << uint32(0x0); // 21
-            data << uint32(0x573) << uint32(0x0); // 22
-            data << uint32(0x572) << uint32(0x0); // 23
-            data << uint32(0x56f) << uint32(0x0); // 24
-            data << uint32(0x56e) << uint32(0x0); // 25
-            data << uint32(0x56d) << uint32(0x0); // 26
-            data << uint32(0x56c) << uint32(0x0); // 27
-            data << uint32(0x56b) << uint32(0x0); // 28
-            data << uint32(0x56a) << uint32(0x1); // 29
-            data << uint32(0x569) << uint32(0x1); // 30
-            data << uint32(0x568) << uint32(0x1); // 13
-            data << uint32(0x565) << uint32(0x0); // 32
-            data << uint32(0x564) << uint32(0x0); // 33
-            data << uint32(0x563) << uint32(0x0); // 34
-            data << uint32(0x562) << uint32(0x0); // 35
-            data << uint32(0x561) << uint32(0x0); // 36
-            data << uint32(0x560) << uint32(0x0); // 37
-            data << uint32(0x55f) << uint32(0x0); // 38
-            data << uint32(0x55e) << uint32(0x0); // 39
-            data << uint32(0x55d) << uint32(0x0); // 40
-            data << uint32(0x3c6) << uint32(0x4); // 41
-            data << uint32(0x3c4) << uint32(0x6); // 42
-            data << uint32(0x3c2) << uint32(0x4); // 43
-            data << uint32(0x516) << uint32(0x1); // 44
-            data << uint32(0x515) << uint32(0x0); // 45
-            data << uint32(0x3b6) << uint32(0x6); // 46
-            data << uint32(0x55c) << uint32(0x0); // 47
-            data << uint32(0x55b) << uint32(0x0); // 48
-            data << uint32(0x55a) << uint32(0x0); // 49
-            data << uint32(0x559) << uint32(0x0); // 50
-            data << uint32(0x558) << uint32(0x0); // 51
-            data << uint32(0x557) << uint32(0x0); // 52
-            data << uint32(0x556) << uint32(0x0); // 53
-            data << uint32(0x555) << uint32(0x0); // 54
-            data << uint32(0x554) << uint32(0x1); // 55
-            data << uint32(0x553) << uint32(0x1); // 56
-            data << uint32(0x552) << uint32(0x1); // 57
-            data << uint32(0x551) << uint32(0x1); // 58
-            data << uint32(0x54f) << uint32(0x0); // 59
-            data << uint32(0x54e) << uint32(0x0); // 60
-            data << uint32(0x54d) << uint32(0x1); // 61
-            data << uint32(0x54c) << uint32(0x0); // 62
-            data << uint32(0x54b) << uint32(0x0); // 63
-            data << uint32(0x545) << uint32(0x0); // 64
-            data << uint32(0x543) << uint32(0x1); // 65
-            data << uint32(0x542) << uint32(0x0); // 66
-            data << uint32(0x540) << uint32(0x0); // 67
-            data << uint32(0x53f) << uint32(0x0); // 68
-            data << uint32(0x53e) << uint32(0x0); // 69
-            data << uint32(0x53d) << uint32(0x0); // 70
-            data << uint32(0x53c) << uint32(0x0); // 71
-            data << uint32(0x53b) << uint32(0x0); // 72
-            data << uint32(0x53a) << uint32(0x1); // 73
-            data << uint32(0x539) << uint32(0x0); // 74
-            data << uint32(0x538) << uint32(0x0); // 75
-            data << uint32(0x537) << uint32(0x0); // 76
-            data << uint32(0x534) << uint32(0x0); // 77
-            data << uint32(0x533) << uint32(0x0); // 78
-            data << uint32(0x530) << uint32(0x0); // 79
-            data << uint32(0x52f) << uint32(0x0); // 80
-            data << uint32(0x52d) << uint32(0x1); // 81
-        case 3277: // WSG
-            data << uint32(0x62d) << uint32(0x0); // 7 1581 alliance flag captures
-            data << uint32(0x62e) << uint32(0x0); // 8 1582 horde flag captures
-            data << uint32(0x609) << uint32(0x0); // 9 1545 unk, set to 1 on alliance flag pickup...
-            data << uint32(0x60a) << uint32(0x0); // 10 1546 unk, set to 1 on horde flag pickup, after drop it's -1
-            data << uint32(0x60b) << uint32(0x2); // 11 1547 unk
-            data << uint32(0x641) << uint32(0x3); // 12 1601 unk (max flag captures?)
-            data << uint32(0x922) << uint32(0x1); // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-            data << uint32(0x923) << uint32(0x1); // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+        case 2597:                                          // AV
+            data << uint32(0x7ae) << uint32(0x1);           // 7
+            data << uint32(0x532) << uint32(0x1);           // 8
+            data << uint32(0x531) << uint32(0x0);           // 9
+            data << uint32(0x52e) << uint32(0x0);           // 10
+            data << uint32(0x571) << uint32(0x0);           // 11
+            data << uint32(0x570) << uint32(0x0);           // 12
+            data << uint32(0x567) << uint32(0x1);           // 13
+            data << uint32(0x566) << uint32(0x1);           // 14
+            data << uint32(0x550) << uint32(0x1);           // 15
+            data << uint32(0x544) << uint32(0x0);           // 16
+            data << uint32(0x536) << uint32(0x0);           // 17
+            data << uint32(0x535) << uint32(0x1);           // 18
+            data << uint32(0x518) << uint32(0x0);           // 19
+            data << uint32(0x517) << uint32(0x0);           // 20
+            data << uint32(0x574) << uint32(0x0);           // 21
+            data << uint32(0x573) << uint32(0x0);           // 22
+            data << uint32(0x572) << uint32(0x0);           // 23
+            data << uint32(0x56f) << uint32(0x0);           // 24
+            data << uint32(0x56e) << uint32(0x0);           // 25
+            data << uint32(0x56d) << uint32(0x0);           // 26
+            data << uint32(0x56c) << uint32(0x0);           // 27
+            data << uint32(0x56b) << uint32(0x0);           // 28
+            data << uint32(0x56a) << uint32(0x1);           // 29
+            data << uint32(0x569) << uint32(0x1);           // 30
+            data << uint32(0x568) << uint32(0x1);           // 13
+            data << uint32(0x565) << uint32(0x0);           // 32
+            data << uint32(0x564) << uint32(0x0);           // 33
+            data << uint32(0x563) << uint32(0x0);           // 34
+            data << uint32(0x562) << uint32(0x0);           // 35
+            data << uint32(0x561) << uint32(0x0);           // 36
+            data << uint32(0x560) << uint32(0x0);           // 37
+            data << uint32(0x55f) << uint32(0x0);           // 38
+            data << uint32(0x55e) << uint32(0x0);           // 39
+            data << uint32(0x55d) << uint32(0x0);           // 40
+            data << uint32(0x3c6) << uint32(0x4);           // 41
+            data << uint32(0x3c4) << uint32(0x6);           // 42
+            data << uint32(0x3c2) << uint32(0x4);           // 43
+            data << uint32(0x516) << uint32(0x1);           // 44
+            data << uint32(0x515) << uint32(0x0);           // 45
+            data << uint32(0x3b6) << uint32(0x6);           // 46
+            data << uint32(0x55c) << uint32(0x0);           // 47
+            data << uint32(0x55b) << uint32(0x0);           // 48
+            data << uint32(0x55a) << uint32(0x0);           // 49
+            data << uint32(0x559) << uint32(0x0);           // 50
+            data << uint32(0x558) << uint32(0x0);           // 51
+            data << uint32(0x557) << uint32(0x0);           // 52
+            data << uint32(0x556) << uint32(0x0);           // 53
+            data << uint32(0x555) << uint32(0x0);           // 54
+            data << uint32(0x554) << uint32(0x1);           // 55
+            data << uint32(0x553) << uint32(0x1);           // 56
+            data << uint32(0x552) << uint32(0x1);           // 57
+            data << uint32(0x551) << uint32(0x1);           // 58
+            data << uint32(0x54f) << uint32(0x0);           // 59
+            data << uint32(0x54e) << uint32(0x0);           // 60
+            data << uint32(0x54d) << uint32(0x1);           // 61
+            data << uint32(0x54c) << uint32(0x0);           // 62
+            data << uint32(0x54b) << uint32(0x0);           // 63
+            data << uint32(0x545) << uint32(0x0);           // 64
+            data << uint32(0x543) << uint32(0x1);           // 65
+            data << uint32(0x542) << uint32(0x0);           // 66
+            data << uint32(0x540) << uint32(0x0);           // 67
+            data << uint32(0x53f) << uint32(0x0);           // 68
+            data << uint32(0x53e) << uint32(0x0);           // 69
+            data << uint32(0x53d) << uint32(0x0);           // 70
+            data << uint32(0x53c) << uint32(0x0);           // 71
+            data << uint32(0x53b) << uint32(0x0);           // 72
+            data << uint32(0x53a) << uint32(0x1);           // 73
+            data << uint32(0x539) << uint32(0x0);           // 74
+            data << uint32(0x538) << uint32(0x0);           // 75
+            data << uint32(0x537) << uint32(0x0);           // 76
+            data << uint32(0x534) << uint32(0x0);           // 77
+            data << uint32(0x533) << uint32(0x0);           // 78
+            data << uint32(0x530) << uint32(0x0);           // 79
+            data << uint32(0x52f) << uint32(0x0);           // 80
+            data << uint32(0x52d) << uint32(0x1);           // 81
+        case 3277:                                          // WSG
+            data << uint32(0x62d) << uint32(0x0);           // 7 1581 alliance flag captures
+            data << uint32(0x62e) << uint32(0x0);           // 8 1582 horde flag captures
+            data << uint32(0x609) << uint32(0x0);           // 9 1545 unk, set to 1 on alliance flag pickup...
+            data << uint32(0x60a) << uint32(0x0);           // 10 1546 unk, set to 1 on horde flag pickup, after drop it's -1
+            data << uint32(0x60b) << uint32(0x2);           // 11 1547 unk
+            data << uint32(0x641) << uint32(0x3);           // 12 1601 unk (max flag captures?)
+            data << uint32(0x922) << uint32(0x1);           // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+            data << uint32(0x923) << uint32(0x1);           // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
             break;
-        case 3358: // AB
-            data << uint32(0x6e7) << uint32(0x0); // 7 1767 stables alliance
-            data << uint32(0x6e8) << uint32(0x0); // 8 1768 stables horde
-            data << uint32(0x6e9) << uint32(0x0); // 9 1769 unk, ST?
-            data << uint32(0x6ea) << uint32(0x0); // 10 1770 stables (show/hide)
-            data << uint32(0x6ec) << uint32(0x0); // 11 1772 farm (0 - horde controlled, 1 - alliance controlled)
-            data << uint32(0x6ed) << uint32(0x0); // 12 1773 farm (show/hide)
-            data << uint32(0x6ee) << uint32(0x0); // 13 1774 farm color
-            data << uint32(0x6ef) << uint32(0x0); // 14 1775 gold mine color, may be FM?
-            data << uint32(0x6f0) << uint32(0x0); // 15 1776 alliance resources
-            data << uint32(0x6f1) << uint32(0x0); // 16 1777 horde resources
-            data << uint32(0x6f2) << uint32(0x0); // 17 1778 horde bases
-            data << uint32(0x6f3) << uint32(0x0); // 18 1779 alliance bases
-            data << uint32(0x6f4) << uint32(0x7d0); // 19 1780 max resources (2000)
-            data << uint32(0x6f6) << uint32(0x0); // 20 1782 blacksmith color
-            data << uint32(0x6f7) << uint32(0x0); // 21 1783 blacksmith (show/hide)
-            data << uint32(0x6f8) << uint32(0x0); // 22 1784 unk, bs?
-            data << uint32(0x6f9) << uint32(0x0); // 23 1785 unk, bs?
-            data << uint32(0x6fb) << uint32(0x0); // 24 1787 gold mine (0 - horde contr, 1 - alliance contr)
-            data << uint32(0x6fc) << uint32(0x0); // 25 1788 gold mine (0 - conflict, 1 - horde)
-            data << uint32(0x6fd) << uint32(0x0); // 26 1789 gold mine (1 - show/0 - hide)
-            data << uint32(0x6fe) << uint32(0x0); // 27 1790 gold mine color
-            data << uint32(0x700) << uint32(0x0); // 28 1792 gold mine color, wtf?, may be LM?
-            data << uint32(0x701) << uint32(0x0); // 29 1793 lumber mill color (0 - conflict, 1 - horde contr)
-            data << uint32(0x702) << uint32(0x0); // 30 1794 lumber mill (show/hide)
-            data << uint32(0x703) << uint32(0x0); // 31 1795 lumber mill color color
-            data << uint32(0x732) << uint32(0x1); // 32 1842 stables (1 - uncontrolled)
-            data << uint32(0x733) << uint32(0x1); // 33 1843 gold mine (1 - uncontrolled)
-            data << uint32(0x734) << uint32(0x1); // 34 1844 lumber mill (1 - uncontrolled)
-            data << uint32(0x735) << uint32(0x1); // 35 1845 farm (1 - uncontrolled)
-            data << uint32(0x736) << uint32(0x1); // 36 1846 blacksmith (1 - uncontrolled)
-            data << uint32(0x745) << uint32(0x2); // 37 1861 unk
-            data << uint32(0x7a3) << uint32(0x708); // 38 1955 warning limit (1800)
+        case 3358:                                          // AB
+            data << uint32(0x6e7) << uint32(0x0);           // 7 1767 stables alliance
+            data << uint32(0x6e8) << uint32(0x0);           // 8 1768 stables horde
+            data << uint32(0x6e9) << uint32(0x0);           // 9 1769 unk, ST?
+            data << uint32(0x6ea) << uint32(0x0);           // 10 1770 stables (show/hide)
+            data << uint32(0x6ec) << uint32(0x0);           // 11 1772 farm (0 - horde controlled, 1 - alliance controlled)
+            data << uint32(0x6ed) << uint32(0x0);           // 12 1773 farm (show/hide)
+            data << uint32(0x6ee) << uint32(0x0);           // 13 1774 farm color
+            data << uint32(0x6ef) << uint32(0x0);           // 14 1775 gold mine color, may be FM?
+            data << uint32(0x6f0) << uint32(0x0);           // 15 1776 alliance resources
+            data << uint32(0x6f1) << uint32(0x0);           // 16 1777 horde resources
+            data << uint32(0x6f2) << uint32(0x0);           // 17 1778 horde bases
+            data << uint32(0x6f3) << uint32(0x0);           // 18 1779 alliance bases
+            data << uint32(0x6f4) << uint32(0x7d0);         // 19 1780 max resources (2000)
+            data << uint32(0x6f6) << uint32(0x0);           // 20 1782 blacksmith color
+            data << uint32(0x6f7) << uint32(0x0);           // 21 1783 blacksmith (show/hide)
+            data << uint32(0x6f8) << uint32(0x0);           // 22 1784 unk, bs?
+            data << uint32(0x6f9) << uint32(0x0);           // 23 1785 unk, bs?
+            data << uint32(0x6fb) << uint32(0x0);           // 24 1787 gold mine (0 - horde contr, 1 - alliance contr)
+            data << uint32(0x6fc) << uint32(0x0);           // 25 1788 gold mine (0 - conflict, 1 - horde)
+            data << uint32(0x6fd) << uint32(0x0);           // 26 1789 gold mine (1 - show/0 - hide)
+            data << uint32(0x6fe) << uint32(0x0);           // 27 1790 gold mine color
+            data << uint32(0x700) << uint32(0x0);           // 28 1792 gold mine color, wtf?, may be LM?
+            data << uint32(0x701) << uint32(0x0);           // 29 1793 lumber mill color (0 - conflict, 1 - horde contr)
+            data << uint32(0x702) << uint32(0x0);           // 30 1794 lumber mill (show/hide)
+            data << uint32(0x703) << uint32(0x0);           // 31 1795 lumber mill color color
+            data << uint32(0x732) << uint32(0x1);           // 32 1842 stables (1 - uncontrolled)
+            data << uint32(0x733) << uint32(0x1);           // 33 1843 gold mine (1 - uncontrolled)
+            data << uint32(0x734) << uint32(0x1);           // 34 1844 lumber mill (1 - uncontrolled)
+            data << uint32(0x735) << uint32(0x1);           // 35 1845 farm (1 - uncontrolled)
+            data << uint32(0x736) << uint32(0x1);           // 36 1846 blacksmith (1 - uncontrolled)
+            data << uint32(0x745) << uint32(0x2);           // 37 1861 unk
+            data << uint32(0x7a3) << uint32(0x708);         // 38 1955 warning limit (1800)
             break;
-        case 3483: // Hellfire Peninsula
-            data << uint32(0x9ba) << uint32(0x1); // 10
-            data << uint32(0x9b9) << uint32(0x1); // 11
-            data << uint32(0x9b5) << uint32(0x0); // 12
-            data << uint32(0x9b4) << uint32(0x1); // 13
-            data << uint32(0x9b3) << uint32(0x0); // 14
-            data << uint32(0x9b2) << uint32(0x0); // 15
-            data << uint32(0x9b1) << uint32(0x1); // 16
-            data << uint32(0x9b0) << uint32(0x0); // 17
-            data << uint32(0x9ae) << uint32(0x0); // 18 horde pvp objectives captured
-            data << uint32(0x9ac) << uint32(0x0); // 19
-            data << uint32(0x9a8) << uint32(0x0); // 20
-            data << uint32(0x9a7) << uint32(0x0); // 21
-            data << uint32(0x9a6) << uint32(0x1); // 22
-        case 3519: // Terokkar Forest
-            data << uint32(0xa41) << uint32(0x0); // 10
-            data << uint32(0xa40) << uint32(0x14); // 11
-            data << uint32(0xa3f) << uint32(0x0); // 12
-            data << uint32(0xa3e) << uint32(0x0); // 13
-            data << uint32(0xa3d) << uint32(0x5); // 14
-            data << uint32(0xa3c) << uint32(0x0); // 15
-            data << uint32(0xa87) << uint32(0x0); // 16
-            data << uint32(0xa86) << uint32(0x0); // 17
-            data << uint32(0xa85) << uint32(0x0); // 18
-            data << uint32(0xa84) << uint32(0x0); // 19
-            data << uint32(0xa83) << uint32(0x0); // 20
-            data << uint32(0xa82) << uint32(0x0); // 21
-            data << uint32(0xa81) << uint32(0x0); // 22
-            data << uint32(0xa80) << uint32(0x0); // 23
-            data << uint32(0xa7e) << uint32(0x0); // 24
-            data << uint32(0xa7d) << uint32(0x0); // 25
-            data << uint32(0xa7c) << uint32(0x0); // 26
-            data << uint32(0xa7b) << uint32(0x0); // 27
-            data << uint32(0xa7a) << uint32(0x0); // 28
-            data << uint32(0xa79) << uint32(0x0); // 29
-            data << uint32(0x9d0) << uint32(0x5); // 30
-            data << uint32(0x9ce) << uint32(0x0); // 31
-            data << uint32(0x9cd) << uint32(0x0); // 32
-            data << uint32(0x9cc) << uint32(0x0); // 33
-            data << uint32(0xa88) << uint32(0x0); // 34
-            data << uint32(0xad0) << uint32(0x0); // 35
-            data << uint32(0xacf) << uint32(0x1); // 36
-        case 3521: // Zangarmarsh
-            data << uint32(0x9e1) << uint32(0x0); // 10
-            data << uint32(0x9e0) << uint32(0x0); // 11
-            data << uint32(0x9df) << uint32(0x0); // 12
-            data << uint32(0xa5d) << uint32(0x1); // 13
-            data << uint32(0xa5c) << uint32(0x0); // 14
-            data << uint32(0xa5b) << uint32(0x1); // 15
-            data << uint32(0xa5a) << uint32(0x0); // 16
-            data << uint32(0xa59) << uint32(0x1); // 17
-            data << uint32(0xa58) << uint32(0x0); // 18
-            data << uint32(0xa57) << uint32(0x0); // 19
-            data << uint32(0xa56) << uint32(0x0); // 20
-            data << uint32(0xa55) << uint32(0x1); // 21
-            data << uint32(0xa54) << uint32(0x0); // 22
-            data << uint32(0x9e7) << uint32(0x0); // 23
-            data << uint32(0x9e6) << uint32(0x0); // 24
-            data << uint32(0x9e5) << uint32(0x0); // 25
-            data << uint32(0xa00) << uint32(0x0); // 26
-            data << uint32(0x9ff) << uint32(0x1); // 27
-            data << uint32(0x9fe) << uint32(0x0); // 28
-            data << uint32(0x9fd) << uint32(0x0); // 29
-            data << uint32(0x9fc) << uint32(0x1); // 30
-            data << uint32(0x9fb) << uint32(0x0); // 31
-            data << uint32(0xa62) << uint32(0x0); // 32
-            data << uint32(0xa61) << uint32(0x1); // 33
-            data << uint32(0xa60) << uint32(0x1); // 34
-            data << uint32(0xa5f) << uint32(0x0); // 35
-        case 3703: // Shattrath City
+        case 3483:                                          // Hellfire Peninsula
+            data << uint32(0x9ba) << uint32(0x1);           // 10
+            data << uint32(0x9b9) << uint32(0x1);           // 11
+            data << uint32(0x9b5) << uint32(0x0);           // 12
+            data << uint32(0x9b4) << uint32(0x1);           // 13
+            data << uint32(0x9b3) << uint32(0x0);           // 14
+            data << uint32(0x9b2) << uint32(0x0);           // 15
+            data << uint32(0x9b1) << uint32(0x1);           // 16
+            data << uint32(0x9b0) << uint32(0x0);           // 17
+            data << uint32(0x9ae) << uint32(0x0);           // 18 horde pvp objectives captured
+            data << uint32(0x9ac) << uint32(0x0);           // 19
+            data << uint32(0x9a8) << uint32(0x0);           // 20
+            data << uint32(0x9a7) << uint32(0x0);           // 21
+            data << uint32(0x9a6) << uint32(0x1);           // 22
+        case 3519:                                          // Terokkar Forest
+            data << uint32(0xa41) << uint32(0x0);           // 10
+            data << uint32(0xa40) << uint32(0x14);          // 11
+            data << uint32(0xa3f) << uint32(0x0);           // 12
+            data << uint32(0xa3e) << uint32(0x0);           // 13
+            data << uint32(0xa3d) << uint32(0x5);           // 14
+            data << uint32(0xa3c) << uint32(0x0);           // 15
+            data << uint32(0xa87) << uint32(0x0);           // 16
+            data << uint32(0xa86) << uint32(0x0);           // 17
+            data << uint32(0xa85) << uint32(0x0);           // 18
+            data << uint32(0xa84) << uint32(0x0);           // 19
+            data << uint32(0xa83) << uint32(0x0);           // 20
+            data << uint32(0xa82) << uint32(0x0);           // 21
+            data << uint32(0xa81) << uint32(0x0);           // 22
+            data << uint32(0xa80) << uint32(0x0);           // 23
+            data << uint32(0xa7e) << uint32(0x0);           // 24
+            data << uint32(0xa7d) << uint32(0x0);           // 25
+            data << uint32(0xa7c) << uint32(0x0);           // 26
+            data << uint32(0xa7b) << uint32(0x0);           // 27
+            data << uint32(0xa7a) << uint32(0x0);           // 28
+            data << uint32(0xa79) << uint32(0x0);           // 29
+            data << uint32(0x9d0) << uint32(0x5);           // 30
+            data << uint32(0x9ce) << uint32(0x0);           // 31
+            data << uint32(0x9cd) << uint32(0x0);           // 32
+            data << uint32(0x9cc) << uint32(0x0);           // 33
+            data << uint32(0xa88) << uint32(0x0);           // 34
+            data << uint32(0xad0) << uint32(0x0);           // 35
+            data << uint32(0xacf) << uint32(0x1);           // 36
+        case 3521:                                          // Zangarmarsh
+            data << uint32(0x9e1) << uint32(0x0);           // 10
+            data << uint32(0x9e0) << uint32(0x0);           // 11
+            data << uint32(0x9df) << uint32(0x0);           // 12
+            data << uint32(0xa5d) << uint32(0x1);           // 13
+            data << uint32(0xa5c) << uint32(0x0);           // 14
+            data << uint32(0xa5b) << uint32(0x1);           // 15
+            data << uint32(0xa5a) << uint32(0x0);           // 16
+            data << uint32(0xa59) << uint32(0x1);           // 17
+            data << uint32(0xa58) << uint32(0x0);           // 18
+            data << uint32(0xa57) << uint32(0x0);           // 19
+            data << uint32(0xa56) << uint32(0x0);           // 20
+            data << uint32(0xa55) << uint32(0x1);           // 21
+            data << uint32(0xa54) << uint32(0x0);           // 22
+            data << uint32(0x9e7) << uint32(0x0);           // 23
+            data << uint32(0x9e6) << uint32(0x0);           // 24
+            data << uint32(0x9e5) << uint32(0x0);           // 25
+            data << uint32(0xa00) << uint32(0x0);           // 26
+            data << uint32(0x9ff) << uint32(0x1);           // 27
+            data << uint32(0x9fe) << uint32(0x0);           // 28
+            data << uint32(0x9fd) << uint32(0x0);           // 29
+            data << uint32(0x9fc) << uint32(0x1);           // 30
+            data << uint32(0x9fb) << uint32(0x0);           // 31
+            data << uint32(0xa62) << uint32(0x0);           // 32
+            data << uint32(0xa61) << uint32(0x1);           // 33
+            data << uint32(0xa60) << uint32(0x1);           // 34
+            data << uint32(0xa5f) << uint32(0x0);           // 35
+        case 3703:                                          // Shattrath City
             break;
         default:
-            data << uint32(0x914) << uint32(0x0); // 7
-            data << uint32(0x913) << uint32(0x0); // 8
-            data << uint32(0x912) << uint32(0x0); // 9
-            data << uint32(0x915) << uint32(0x0); // 10
+            data << uint32(0x914) << uint32(0x0);           // 7
+            data << uint32(0x913) << uint32(0x0);           // 8
+            data << uint32(0x912) << uint32(0x0);           // 9
+            data << uint32(0x915) << uint32(0x0);           // 10
             break;
     }
     GetSession()->SendPacket(&data);
@@ -6146,7 +6151,7 @@ void Player::SetSheath( uint32 sheathed )
             SetVirtualItemSlot(2,NULL);
             break;
     }
-    SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800+sheathed); // this must visualize Sheath changing for other players...
+    SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800+sheathed);    // this must visualize Sheath changing for other players...
 }
 
 uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
@@ -6916,7 +6921,7 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        
+
         if (pItem2 && !pItem2->IsInTrade())
         {
             inv_slot_items[i-INVENTORY_SLOT_ITEM_START] = pItem2->GetCount();
@@ -6959,7 +6964,7 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
         ItemPrototype const *pProto = pItem->GetProto();
 
         // strange item
-        if( !pProto ) 
+        if( !pProto )
             return EQUIP_ERR_ITEM_NOT_FOUND;
 
         // item it 'bind'
@@ -7095,9 +7100,9 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
         }
 
         // no free slot found?
-        if (!b_found) 
+        if (!b_found)
             return EQUIP_ERR_INVENTORY_FULL;
-    } 
+    }
 
     return EQUIP_ERR_OK;
 }
@@ -8687,7 +8692,7 @@ void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
         data << (pItem && pItem->GetProto() ? pItem->GetProto()->RequiredLevel : uint32(0));
     data << (pItem ? pItem->GetGUID() : uint64(0));
     data << (pItem2 ? pItem2->GetGUID() : uint64(0));
-    data << uint8(0); // not 0 there...
+    data << uint8(0);                                       // not 0 there...
     GetSession()->SendPacket(&data);
 }
 
@@ -8706,7 +8711,7 @@ void Player::SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 p
 void Player::SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param )
 {
     sLog.outDetail( "WORLD: Sent SMSG_SELL_ITEM" );
-    WorldPacket data( SMSG_SELL_ITEM, (8+4+4+1) ); // last check 2.0.10
+    WorldPacket data( SMSG_SELL_ITEM, (8+4+4+1) );          // last check 2.0.10
     data << (pCreature ? pCreature->GetGUID() : uint64(0));
     data << guid;
     if( param > 0 )
@@ -8931,21 +8936,23 @@ void Player::LoadEnchant()
 
 void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, bool broadcast)
 {
-    if(!item) // prevent crash
+    if(!item)                                               // prevent crash
         return;
 
-    WorldPacket data( SMSG_ITEM_PUSH_RESULT, (8+4+4+4+1+4+4+4+4+4) ); // last check 2.0.10
-    data << GetGUID();                              // player GUID
-    data << uint32(received);                       // 0=looted, 1=from npc
-    data << uint32(created);                        // 0=received, 1=created
-    data << uint32(1);                              // always 0x01 (propably meant to be count of listed items)
-    data << (uint8)item->GetBagSlot();              // bagslot
-    data << (uint32) ((item->GetCount()==count) ? item->GetSlot() : -1);    // item slot, but when added to stack: 0xFFFFFFFF
-    data << uint32(item->GetEntry());               // item id
-    data << (uint32)urand(0, 255);                  // 0 when bought from npc otherwise ???
+                                                            // last check 2.0.10
+    WorldPacket data( SMSG_ITEM_PUSH_RESULT, (8+4+4+4+1+4+4+4+4+4) );
+    data << GetGUID();                                      // player GUID
+    data << uint32(received);                               // 0=looted, 1=from npc
+    data << uint32(created);                                // 0=received, 1=created
+    data << uint32(1);                                      // always 0x01 (propably meant to be count of listed items)
+    data << (uint8)item->GetBagSlot();                      // bagslot
+                                                            // item slot, but when added to stack: 0xFFFFFFFF
+    data << (uint32) ((item->GetCount()==count) ? item->GetSlot() : -1);
+    data << uint32(item->GetEntry());                       // item id
+    data << (uint32)urand(0, 255);                          // 0 when bought from npc otherwise ???
     data << uint32(item->GetItemRandomPropertyId());
-    data << uint32(count);                          // count of items
-    data << GetItemCount(item->GetEntry());         // count of items in inventory
+    data << uint32(count);                                  // count of items
+    data << GetItemCount(item->GetEntry());                 // count of items in inventory
 
     if (broadcast && groupInfo.group)
         groupInfo.group->BroadcastPacket(&data);
@@ -10642,6 +10649,12 @@ bool Player::LoadFromDB( uint32 guid )
                 break;
         }
     }
+    //Unmount Player from previous mount, so speed bug with mount is no more...
+    if(IsMounted())
+    {
+        Unmount();
+        RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    }
 
     m_Loaded = true;
 
@@ -11673,8 +11686,8 @@ void Player::SendDungeonDifficulty()
 {
     WorldPacket data(MSG_SET_DUNGEON_DIFFICULTY, 12);
     data << m_dungeonDifficulty;
-    data << uint32(0x00000001); 
-    data << uint32(0x00000000); 
+    data << uint32(0x00000001);
+    data << uint32(0x00000000);
     GetSession()->SendPacket(&data);
 }
 
@@ -11753,7 +11766,7 @@ void Player::Uncharm()
 
 void Player::Say(const std::string text, const uint32 language)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_SAY;
     data << (uint32)language;
     data << (uint64)GetGUID();
@@ -11767,7 +11780,7 @@ void Player::Say(const std::string text, const uint32 language)
 
 void Player::Yell(const std::string text, const uint32 language)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_YELL;
     data << (uint32)language;
     data << (uint64)GetGUID();
@@ -11781,7 +11794,7 @@ void Player::Yell(const std::string text, const uint32 language)
 
 void Player::TextEmote(const std::string text)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_EMOTE;
     data << (uint32)LANG_UNIVERSAL;
     data << (uint64)GetGUID();
@@ -11812,7 +11825,7 @@ void Player::Whisper(const uint64 receiver, const std::string text, const uint32
     data << (uint32)(text.length()+1);
     data << text;
     data << (uint8)chatTag();
-    GetSession()->SendPacket(&data);   
+    GetSession()->SendPacket(&data);
 
     if(player->isAFK())
     {
@@ -11916,9 +11929,9 @@ void Player::PetSpellInitialize()
                         if(pet->m_spells[i] == spellInfo->EffectTriggerSpell[0])
                         {
                             if (pet->HasActState(STATE_RA_SPELL1 << i))
-                                data << uint16(0xC100);       // Spell enabled
+                                data << uint16(0xC100);     // Spell enabled
                             else
-                                data << uint16(0x8100);       // Spell disabled
+                                data << uint16(0x8100);     // Spell disabled
                             hasthisspell = true;
                             break;
                         }
@@ -11934,10 +11947,10 @@ void Player::PetSpellInitialize()
         data << count;
         // uint32 value is spell id...
         // uint64 value is constant 0, unknown...
-        data << uint32(0x6010) << uint64(0);    // if count = 1, 2 or 3
+        data << uint32(0x6010) << uint64(0);                // if count = 1, 2 or 3
         //data << uint32(0x5fd1) << uint64(0);  // if count = 2
-        data << uint32(0x8e8c) << uint64(0);    // if count = 3
-        data << uint32(0x8e8b) << uint64(0);    // if count = 3
+        data << uint32(0x8e8c) << uint64(0);                // if count = 3
+        data << uint32(0x8e8b) << uint64(0);                // if count = 3
 
         GetSession()->SendPacket(&data);
     }
@@ -12211,7 +12224,8 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
 
 void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs )
 {
-    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+m_spells.size()*8); // last check 2.0.10
+                                                            // last check 2.0.10
+    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+m_spells.size()*8);
     data << GetGUID();
     data << uint8(0x0);
     time_t curTime = time(NULL);
@@ -12230,7 +12244,7 @@ void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32
         if(idSchool == spellInfo->School && GetSpellCooldownDelay(unSpellId) < unTimeMs )
         {
             data << unSpellId;
-            data << unTimeMs;               // in m.secs
+            data << unTimeMs;                               // in m.secs
             AddSpellCooldown(unSpellId, 0, curTime + unTimeMs/1000);
         }
     }
@@ -12360,8 +12374,8 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                     return;
                 }
                 if( (iece->reqitem1 && !HasItemCount(iece->reqitem1, iece->reqitemcount1)) ||
-                (iece->reqitem2 && !HasItemCount(iece->reqitem2, iece->reqitemcount2)) ||
-                (iece->reqitem3 && !HasItemCount(iece->reqitem3, iece->reqitemcount3)) )
+                    (iece->reqitem2 && !HasItemCount(iece->reqitem2, iece->reqitemcount2)) ||
+                    (iece->reqitem3 && !HasItemCount(iece->reqitem3, iece->reqitemcount3)) )
                 {
                     SendEquipError(EQUIP_DONT_HAVE_REQITEMS_FOR_THAT_PURCHASE, NULL, NULL);
                     return;
@@ -12421,19 +12435,19 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             if( msg == EQUIP_ERR_OK )
             {
                 ModifyMoney( -(int32)price );
-                if(pProto->ExtendedCost) // case for new honor system
+                if(pProto->ExtendedCost)                    // case for new honor system
                 {
                     ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
                     if(iece->reqhonorpoints)
                         SetHonorPoints(GetHonorPoints() - iece->reqhonorpoints);
                     if(iece->reqarenapoints)
-                            SetArenaPoints(GetArenaPoints() - iece->reqarenapoints);
+                        SetArenaPoints(GetArenaPoints() - iece->reqarenapoints);
                     if(iece->reqitem1)
-                            DestroyItemCount(iece->reqitem1, iece->reqitemcount1, true);
+                        DestroyItemCount(iece->reqitem1, iece->reqitemcount1, true);
                     if(iece->reqitem2)
-                            DestroyItemCount(iece->reqitem2, iece->reqitemcount2, true);
+                        DestroyItemCount(iece->reqitem2, iece->reqitemcount2, true);
                     if(iece->reqitem3)
-                            DestroyItemCount(iece->reqitem3, iece->reqitemcount3, true);
+                        DestroyItemCount(iece->reqitem3, iece->reqitemcount3, true);
                 }
                 Item *it = StoreNewItem( dest, item, pProto->BuyCount * count, true );
                 if( crItem->maxcount != 0 )
@@ -12441,7 +12455,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
 
                 WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
                 data << pCreature->GetGUID();
-                data << (uint32)crItem->id;  // entry
+                data << (uint32)crItem->id;                 // entry
                 data << (uint32)crItem->count;
                 data << (uint32)count;
                 GetSession()->SendPacket(&data);
@@ -12457,7 +12471,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             if( msg == EQUIP_ERR_OK )
             {
                 ModifyMoney( -(int32)price );
-                if(pProto->ExtendedCost) // case for new honor system
+                if(pProto->ExtendedCost)                    // case for new honor system
                 {
                     ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
                     if(iece->reqhonorpoints)
@@ -12477,7 +12491,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
 
                 WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
                 data << pCreature->GetGUID();
-                data << (uint32)crItem->id;  // entry
+                data << (uint32)crItem->id;                 // entry
                 data << (uint32)crItem->count;
                 data << (uint32)count;
                 GetSession()->SendPacket(&data);
@@ -12539,7 +12553,7 @@ void Player::UpdateHomebindTime(uint32 time)
     // GMs never get homebind timer online
     if (m_InstanceValid || isGameMaster())
     {
-        if(m_HomebindTimer) // instance valid, but timer not reset
+        if(m_HomebindTimer)                                 // instance valid, but timer not reset
         {
             // hide reminder
             WorldPacket data(SMSG_RAID_GROUP_ONLY, 4+4);
@@ -12606,8 +12620,8 @@ void Player::UpdatePvP(bool state, bool ovrride)
 
 void Player::SendAllowMove()
 {
-    WorldPacket data(SMSG_ALLOW_MOVE, 4);   // new 2.0.x, enable movement
-    data << uint32(0x00000000);             // on blizz it increments periodically
+    WorldPacket data(SMSG_ALLOW_MOVE, 4);                   // new 2.0.x, enable movement
+    data << uint32(0x00000000);                             // on blizz it increments periodically
     GetSession()->SendPacket(&data);
 }
 
