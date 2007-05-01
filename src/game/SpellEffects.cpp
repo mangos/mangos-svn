@@ -2437,8 +2437,8 @@ void Spell::EffectSummonTotem(uint32 i)
     //pTotem->SetSpell(pTotem->GetCreatureInfo()->spell1);
     pTotem->SetSpell(m_spellInfo->Id);                      //use SummonTotem spellid
     pTotem->SetDuration(GetDuration(m_spellInfo));
-    pTotem->SetHealth(5);
-    pTotem->SetMaxHealth(5);
+    pTotem->SetMaxHealth(m_spellInfo->EffectBasePoints[i]+1);
+    pTotem->SetHealth(m_spellInfo->EffectBasePoints[i]+1);
     pTotem->Summon();
 }
 
