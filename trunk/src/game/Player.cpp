@@ -2981,7 +2981,7 @@ void Player::BuildPlayerRepop()
     SetMovement(MOVE_UNROOT);
 
     // setting new speed
-    /*if (getRace() == RACE_NIGHTELF)
+    if (getRace() == RACE_NIGHTELF)
     {
         SetSpeed(MOVE_RUN,  1.5f*1.2f, true);
         SetSpeed(MOVE_SWIM, 1.5f*1.2f, true);
@@ -2990,7 +2990,7 @@ void Player::BuildPlayerRepop()
     {
         SetSpeed(MOVE_RUN,  1.5f, true);
         SetSpeed(MOVE_SWIM, 1.5f, true);
-    }*/
+    }
 
     //! corpse reclaim delay 30 * 1000ms
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
@@ -12457,7 +12457,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                 }
                 Item *it = StoreNewItem( dest, item, pProto->BuyCount * count, true );
                 if( crItem->maxcount != 0 )
-                    crItem->count -= pProto->BuyCount;
+                    crItem->count -= pProto->BuyCount * count;
 
                 WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
                 data << pCreature->GetGUID();
@@ -12493,7 +12493,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                 }
                 Item *it = EquipNewItem( dest, item, pProto->BuyCount * count, true );
                 if( crItem->maxcount != 0 )
-                    crItem->count -= pProto->BuyCount;
+                    crItem->count -= pProto->BuyCount * count;
 
                 WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
                 data << pCreature->GetGUID();
