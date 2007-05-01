@@ -499,7 +499,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
-                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_DEST_CENTER);
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
 
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -559,7 +559,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
-            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_SELF_CENTER);
+            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_SELF_CENTER,SPELL_TARGETS_AOE_DAMAGE);
 
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -580,7 +580,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
-            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_IN_FRONT);
+            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_IN_FRONT,SPELL_TARGETS_AOE_DAMAGE);
 
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -611,7 +611,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
-                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_DEST_CENTER);
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
 
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);

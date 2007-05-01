@@ -597,7 +597,8 @@ enum SpellTargets
     SPELL_TARGETS_HOSTILE,
     SPELL_TARGETS_NOT_FRIENDLY,
     SPELL_TARGETS_NOT_HOSTILE,
-    SPELL_TARGETS_FRIENDLY
+    SPELL_TARGETS_FRIENDLY,
+    SPELL_TARGETS_AOE_DAMAGE
 };
 
 namespace MaNGOS
@@ -683,6 +684,24 @@ namespace MaNGOS
                     case SPELL_TARGETS_FRIENDLY:
                         if (!i_spell.m_caster->IsFriendlyTo( itr->second ))
                             continue;
+                        break;
+                    case SPELL_TARGETS_AOE_DAMAGE:
+                        {
+                            Unit* check = i_spell.m_caster;
+                            Unit* owner = i_spell.m_caster->GetOwner();
+                            if(owner)
+                                check = owner;
+                            if( check->GetTypeId()==TYPEID_PLAYER )
+                            {
+                                if (i_spell.m_caster->IsFriendlyTo( itr->second ))
+                                    continue;
+                            }
+                            else
+                            {
+                                if (!i_spell.m_caster->IsHostileTo( itr->second ))
+                                    continue;
+                            }
+                        }
                         break;
                     default: continue;
                 }
