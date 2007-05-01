@@ -222,7 +222,6 @@ void Object::DestroyForPlayer(Player *target) const
 
     WorldPacket data(SMSG_DESTROY_OBJECT, 8);
     data << GetGUID();
-
     target->GetSession()->SendPacket( &data );
 }
 
@@ -308,10 +307,11 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         *data << GetGUIDHigh();             // 2.0.6 - high guid was there, unk for 2.0.12
     }
 
-    if(flags & UPDATEFLAG_FULLGUID)         // 0x4
-    {
+    // if its unused, comment it. As its useless to check for it
+    //if(flags & UPDATEFLAG_FULLGUID)         // 0x4
+    //{
         // unused in mangos
-    }
+    //}
 
     if(flags & UPDATEFLAG_TRANSPORT)        // 0x2
     {

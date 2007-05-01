@@ -273,17 +273,21 @@ ObjectAccessor::_update()
         Guard guard(i_updateGuard);
         for(std::set<Object *>::iterator iter=i_objects.begin(); iter != i_objects.end(); ++iter)
         {
+            // check for valid pointer
+            if (!*iter)
+                continue;
             _buildUpdateObject(*iter, update_players);
             (*iter)->ClearUpdateMask(false);
         }
         i_objects.clear();
     }
 
+    WorldPacket packet; // here we allocate a std::vector with a size of 0x10000
     for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
     {
-        WorldPacket packet;
         iter->second.BuildPacket(&packet);
         iter->first->GetSession()->SendPacket(&packet);
+        packet.clear(); // clean the string
     }
 }
 
@@ -293,14 +297,15 @@ ObjectAccessor::UpdateObject(Object* obj, Player* exceptPlayer)
     UpdateDataMapType update_players;
     obj->BuildUpdate(update_players);
 
+    WorldPacket packet;
     for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
     {
-        if(iter->first==exceptPlayer)
+        if(iter->first == exceptPlayer)
             continue;
 
-        WorldPacket packet;
         iter->second.BuildPacket(&packet);
         iter->first->GetSession()->SendPacket(&packet);
+        packet.clear();
     }
 }
 
@@ -326,7 +331,7 @@ void ObjectAccessor::AddObjectToRemoveList(WorldObject *obj)
 
     Guard guard(i_removeGuard);
     i_objectsToRemove.insert(obj);
-    sLog.outDebug("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
+    //sLog.outDebug("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
 }
 
 void ObjectAccessor::DoDelayedMovesAndRemoves()
@@ -397,10 +402,17 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
     if( pl != NULL )
         _buildPacket(pl, obj, update_players);
 
+    // Capt: okey for all those fools who think its a real fix
+    //       THIS IS A TEMP FIX
     if( build_for_all )
     {
-        assert(dynamic_cast<WorldObject*>(obj)!=NULL);
-        _buildChangeObjectForPlayer((WorldObject*)obj, update_players);
+        WorldObject * temp = dynamic_cast<WorldObject*>(obj);
+
+        //assert(dynamic_cast<WorldObject*>(obj)!=NULL);
+        if (temp)
+            _buildChangeObjectForPlayer(temp, update_players);
+        else
+            sLog.outDebug("ObjectAccessor: Ln 405 Temp bug fix");
     }
 }
 
@@ -420,7 +432,6 @@ ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_
     }
 
     obj->BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
-
 }
 
 void
