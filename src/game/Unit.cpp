@@ -4976,6 +4976,10 @@ void Unit::AddThreat(Unit* pVictim, float threat, uint8 school, SpellEntry const
     else
         SortList(true);
 
+    //threat link to owner
+    Unit* victim_owner = pVictim->GetOwner();
+    if(victim_owner && victim_owner->isAlive())
+        AddThreat(victim_owner, 0.0f);
 }
 
 void Unit::AddToInHateList(Creature* attacker)
