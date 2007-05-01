@@ -240,85 +240,97 @@ struct SkillLineAbilityEntry
 
 struct SpellEntry
 {
-    uint32    Id;                                           //1
-    uint32    School;                                       //2
-    uint32    Category;                                     //3
-    uint32    Dispel;                                       //5
-    uint32    Mechanic;                                     //6
-    uint32    Attributes;                                   //7
-    uint32    AttributesEx;                                 //8
-    uint32    AttributesEx2;                                //9
-    uint32    AttributesEx3;                                //10
-    uint32    AttributesExEx;                               //11
-    uint32    Stances;
-    uint32    Targets;
-    uint32    TargetCreatureType;
-    uint32    RequiresSpellFocus;
-    uint32    CasterAuraState;
-    uint32    CastingTimeIndex;
-    uint32    RecoveryTime;
-    uint32    CategoryRecoveryTime;
-    uint32    InterruptFlags;
-    uint32    AuraInterruptFlags;
-    uint32    ChannelInterruptFlags;
-    uint32    procFlags;
-    uint32    procChance;
-    uint32    procCharges;
-    uint32    maxLevel;
-    uint32    baseLevel;
-    uint32    spellLevel;
-    uint32    DurationIndex;
-    int32     powerType;
-    uint32    manaCost;
-    uint32    manaCostPerlevel;
-    uint32    manaPerSecond;
-    uint32    manaPerSecondPerLevel;
-    uint32    rangeIndex;
-    float     speed;
-    uint32    modalNextSpell;                               //38
-    uint32    StackAmount;
-    uint32    Totem[2];                                     //40-41
-    uint32    Reagent[8];                                   //42-49
-    uint32    ReagentCount[8];                              //50-57
-    int32     EquippedItemClass;                            //58 (value)
-    int32     EquippedItemSubClassMask;                     //59 (mask)
-    int32     EquippedItemInventoryTypeMask;                //60 (mask)
-    uint32    Effect[3];                                    //61-63
-    int32     EffectDieSides[3];                            //64-66
-    uint32    EffectBaseDice[3];                            //67-69
-    float     EffectDicePerLevel[3];                        //70-72
-    float     EffectRealPointsPerLevel[3];                  //73-75
-    int32     EffectBasePoints[3];                          //76-78
-    uint32    EffectImplicitTargetA[3];                     //82-84
-    uint32    EffectImplicitTargetB[3];                     //85-87
-    uint32    EffectRadiusIndex[3];                         //88-90 - spellradius.dbc
-    uint32    EffectApplyAuraName[3];                       //91-93
-    uint32    EffectAmplitude[3];                           //94-96
-    float     EffectMultipleValue[3];                       //97-99
-    uint32    EffectChainTarget[3];                         //100-102
-    uint32    EffectItemType[3];                            //103-105
-    uint32    EffectMiscValue[3];                           //106-108
-    uint32    EffectTriggerSpell[3];
-    float     EffectPointsPerComboPoint[3];
-    uint32    SpellVisual;
-    uint32    SpellIconID;
-    uint32    activeIconID;
-    uint32    spellPriority;
-    char*     SpellName[8];
-    uint32    SpellNameFlag;
-    char*     Rank[8];
-    uint32    RankFlags;
-    uint32    ManaCostPercentage;
-    uint32    StartRecoveryCategory;
-    uint32    StartRecoveryTime;
-    uint32    AffectedTargetLevel;
-    uint32    SpellFamilyName;
-    uint32    SpellFamilyFlags;
-    uint32    MaxAffectedTargets;
-    uint32    DmgClass;
-    float     DmgMultiplier[3];
-    uint32    TotemCategory[2];
-    uint32    AreaId;
+    uint32    Id;                                           //0 normally counted from 0 field (but some tools start counting from 1, check this before tool use for data view!)
+    uint32    School;                                       //1
+    uint32    Category;                                     //2
+                                                            //3 not used
+    uint32    Dispel;                                       //4
+    uint32    Mechanic;                                     //5
+    uint32    Attributes;                                   //6
+    uint32    AttributesEx;                                 //7
+    uint32    AttributesEx2;                                //8
+    uint32    AttributesEx3;                                //9
+    uint32    AttributesExEx;                               //10
+                                                            //11 not used
+    uint32    Stances;                                      //12
+                                                            //13 not used
+    uint32    Targets;                                      //14
+    uint32    TargetCreatureType;                           //15
+    uint32    RequiresSpellFocus;                           //16
+                                                            //17 not used
+    uint32    CasterAuraState;                              //18
+                                                            //19 not used
+                                                            //20 not used
+    uint32    CastingTimeIndex;                             //21
+    uint32    RecoveryTime;                                 //22
+    uint32    CategoryRecoveryTime;                         //23
+    uint32    InterruptFlags;                               //24
+    uint32    AuraInterruptFlags;                           //25
+    uint32    ChannelInterruptFlags;                        //26
+    uint32    procFlags;                                    //27
+    uint32    procChance;                                   //28
+    uint32    procCharges;                                  //29
+    uint32    maxLevel;                                     //30
+    uint32    baseLevel;                                    //31
+    uint32    spellLevel;                                   //32
+    uint32    DurationIndex;                                //33
+    int32     powerType;                                    //34
+    uint32    manaCost;                                     //35
+    uint32    manaCostPerlevel;                             //36
+    uint32    manaPerSecond;                                //37
+    uint32    manaPerSecondPerLevel;                        //38
+    uint32    rangeIndex;                                   //39
+    float     speed;                                        //40
+    uint32    modalNextSpell;                               //41
+    uint32    StackAmount;                                  //42
+    uint32    Totem[2];                                     //43-44
+    uint32    Reagent[8];                                   //45-52
+    uint32    ReagentCount[8];                              //53-60
+    int32     EquippedItemClass;                            //61 (value)
+    int32     EquippedItemSubClassMask;                     //62 (mask)
+    int32     EquippedItemInventoryTypeMask;                //63 (mask)
+    uint32    Effect[3];                                    //64-66
+    int32     EffectDieSides[3];                            //67-69
+    uint32    EffectBaseDice[3];                            //70-72
+    float     EffectDicePerLevel[3];                        //73-75
+    float     EffectRealPointsPerLevel[3];                  //76-78
+    int32     EffectBasePoints[3];                          //79-81
+                                                            //82-84 not used
+    uint32    EffectImplicitTargetA[3];                     //85-87
+    uint32    EffectImplicitTargetB[3];                     //88-90
+    uint32    EffectRadiusIndex[3];                         //91-93 - spellradius.dbc
+    uint32    EffectApplyAuraName[3];                       //94-96
+    uint32    EffectAmplitude[3];                           //97-99
+    float     EffectMultipleValue[3];                       //100-102
+    uint32    EffectChainTarget[3];                         //103-105
+    uint32    EffectItemType[3];                            //106-108
+    uint32    EffectMiscValue[3];                           //109-111
+    uint32    EffectTriggerSpell[3];                        //112-114
+    float     EffectPointsPerComboPoint[3];                 //115-117
+    uint32    SpellVisual;                                  //118
+                                                            //119 not used
+    uint32    SpellIconID;                                  //120
+    uint32    activeIconID;                                 //121
+    uint32    spellPriority;                                //122
+    char*     SpellName[8];                                 //123-130
+    uint32    SpellNameFlag;                                //131
+    char*     Rank[8];                                      //132-139
+    uint32    RankFlags;                                    //140
+                                                            //141-158 not used
+    uint32    ManaCostPercentage;                           //159
+    uint32    StartRecoveryCategory;                        //160
+    uint32    StartRecoveryTime;                            //161
+    uint32    AffectedTargetLevel;                          //162
+    uint32    SpellFamilyName;                              //163
+    uint32    SpellFamilyFlags;                             //164
+    uint32    MaxAffectedTargets;                           //165
+                                                            //166 not used
+    uint32    DmgClass;                                     //167
+                                                            //168-169 not used
+    float     DmgMultiplier[3];                             //170-172
+                                                            //173-175 not used
+    uint32    TotemCategory[2];                             //176-177
+    uint32    AreaId;                                       //178
 };
 
 typedef std::set<uint32> SpellCategorySet;
