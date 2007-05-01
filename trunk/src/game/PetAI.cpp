@@ -220,10 +220,6 @@ void PetAI::UpdateAI(const uint32 diff)
                 //if pet misses its target, it will also be the first in threat list
                 i_pet.getVictim()->AddThreat(&i_pet,0.0f);
 
-                //threat link to owner
-                if(owner)
-                    i_pet.getVictim()->AddThreat(owner,0.0f);
-
                 if( _needToStop() )
                     _stopAttack();
             }
