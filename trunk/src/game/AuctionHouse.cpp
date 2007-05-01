@@ -92,12 +92,14 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
 
     for (uint8 i = 0; i < 6; i++)
     {
+        // Id
         data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 + 0);
-                                                            //Enchanting 0 (green)
-        data << (uint32) 0;                                 // Unknown maybe duration, but not shown?
-        data << pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES + i); 
-                                                            // Charges
-        //old: data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 + 2);
+        // Unknown maybe duration, but not shown?
+        data << (uint32) 0;
+        // Charges
+        //data << pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES + i); iterate by 0..5 but ITEM_FIELD_SPELL_CHARGES have only 0...4 fields
+        data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 + 2);
+                                                            
     }
 
     data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID);
