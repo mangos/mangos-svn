@@ -316,7 +316,10 @@ struct SpellEntry
     uint32    SpellNameFlag;                                //131
     char*     Rank[8];                                      //132-139
     uint32    RankFlags;                                    //140
-                                                            //141-158 not used
+    //char*   Description[8];                               //141-148 not used
+    //uint32  DescriptionFlags;                             //149     not used
+    //char*   ToolTip[8];                                   //150-157 not used
+    //uint32  ToolTipFlags;                                 //158     not used
     uint32    ManaCostPercentage;                           //159
     uint32    StartRecoveryCategory;                        //160
     uint32    StartRecoveryTime;                            //161
@@ -326,7 +329,7 @@ struct SpellEntry
     uint32    MaxAffectedTargets;                           //165
                                                             //166 not used
     uint32    DmgClass;                                     //167
-                                                            //168-169 not used
+                                                            //168-169 not used (DmgClass2, DmgClass3 ?)
     float     DmgMultiplier[3];                             //170-172
                                                             //173-175 not used
     uint32    TotemCategory[2];                             //176-177
