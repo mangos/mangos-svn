@@ -494,6 +494,32 @@ namespace MaNGOS
             float i_range;
     };
 
+    class AnyAoETargetUnitInObjectRangeCheck
+    {
+    public:
+        AnyAoETargetUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range)
+            : i_obj(obj), i_funit(funit), i_range(range)
+        {
+            Unit* check = i_funit;
+            Unit* owner = i_funit->GetOwner();
+            if(owner)
+                check = owner;
+            i_targetForPlayer = ( check->GetTypeId()==TYPEID_PLAYER );
+        }
+        bool operator()(Unit* u)
+        {
+            if(u->isAlive() && (i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u) )&& i_obj->IsWithinDistInMap(u, i_range))
+                return true;
+
+            return false;
+        }
+    private:
+        bool i_targetForPlayer;
+        WorldObject* const i_obj;
+        Unit* const i_funit;
+        float i_range;
+    };
+
     class AnyDeadUnitCheck
     {
         public:

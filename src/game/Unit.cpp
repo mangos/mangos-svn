@@ -3693,12 +3693,29 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
 
 bool Unit::IsHostileTo(Unit const* unit) const
 {
+    // always non-hostile to self
     if(unit==this)
         return false;
+
+    // always hostile to enemy
+    if(getVictim()==unit || unit->getVictim()==this)
+        return true;
 
     // test pet/charm masters instead pers/charmeds
     Unit const* testerOwner = GetOwner();
     Unit const* targetOwner = unit->GetOwner();
+
+    // always hostile to owner's enemy
+    if(testerOwner && (testerOwner->getVictim()==unit || unit->getVictim()==testerOwner))
+        return true;
+
+    // always hostile to enemy owner
+    if(targetOwner && (getVictim()==targetOwner || targetOwner->getVictim()==this))
+        return true;
+
+    // always hostile to owner of owner's enemy
+    if(testerOwner && targetOwner && (testerOwner->getVictim()==targetOwner || targetOwner->getVictim()==testerOwner))
+        return true;
 
     Unit const* tester = testerOwner ? testerOwner : this;
     Unit const* target = targetOwner ? targetOwner : unit;
@@ -3754,12 +3771,29 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
 {
+    // always friendly to self
     if(unit==this)
         return true;
+
+    // always non-friendly to enemy
+    if(getVictim()==unit || unit->getVictim()==this)
+        return false;
 
     // test pet/charm masters instead pers/charmeds
     Unit const* testerOwner = GetOwner();
     Unit const* targetOwner = unit->GetOwner();
+
+    // always non-friendly to owner's enemy
+    if(testerOwner && (testerOwner->getVictim()==unit || unit->getVictim()==testerOwner))
+        return false;
+
+    // always non-friendly to enemy owner
+    if(targetOwner && (getVictim()==targetOwner || targetOwner->getVictim()==this))
+        return false;
+
+    // always non-friendly to owner of owner's enemy
+    if(testerOwner && targetOwner && (testerOwner->getVictim()==targetOwner || targetOwner->getVictim()==testerOwner))
+        return false;
 
     Unit const* tester = testerOwner ? testerOwner : this;
     Unit const* target = targetOwner ? targetOwner : unit;
