@@ -35,7 +35,7 @@ class MANGOS_DLL_DECL ObjectGridRespawnMover
 
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(CreatureMapType &m);
 };
 
 void
@@ -46,7 +46,7 @@ ObjectGridRespawnMover::Move(GridType &grid)
 }
 
 void
-ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+ObjectGridRespawnMover::Visit(CreatureMapType &m)
 {
     if( m.size() == 0 )
         return;
@@ -54,7 +54,7 @@ ObjectGridRespawnMover::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
     // creature in unloading grid can have respawn point in another grid
     // if it will be unloaded then it will not respawn in original grid until unload/load original grid
     // move to respwn point to prevent this case. For player view in respawn grid this wll be normal respawn.
-    for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(), next; iter != m.end(); iter = next)
+    for(CreatureMapType::iterator iter=m.begin(), next; iter != m.end(); iter = next)
     {
         next = iter; ++next;
 
@@ -188,7 +188,7 @@ void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, Cou
 }
 
 void
-ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+ObjectGridLoader::Visit(GameObjectMapType &m)
 {
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
@@ -204,7 +204,7 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 }
 
 void
-ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+ObjectGridLoader::Visit(CreatureMapType &m)
 {
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
@@ -316,16 +316,16 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
 
 template<>
 void
-ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
+ObjectGridUnloader::Visit(CreatureMapType &m)
 {
     if( m.size() == 0 )
         return;
 
     // remove all cross-reference before deleting
-    for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         iter->second->CleanupCrossRefsBeforeDelete();
 
-    for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         // if option set then object already saved at this moment
         if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
@@ -344,19 +344,19 @@ ObjectGridStoper::Stop(GridType &grid)
 }
 
 void
-ObjectGridStoper::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
+ObjectGridStoper::Visit(CreatureMapType &m)
 {
     if( m.size() == 0 )
         return;
 
     // stop any fights at grid de-activation
-    for(std::map<OBJECT_HANDLE, Creature* >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         iter->second->CombatStop(true);
         iter->second->DeleteThreatList();
     }
 }
 
-template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
+template void ObjectGridUnloader::Visit(GameObjectMapType &m);
+template void ObjectGridUnloader::Visit(DynamicObjectMapType &m);
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, CountedPtr<Corpse> > &m);

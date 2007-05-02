@@ -53,7 +53,7 @@ namespace MaNGOS
 
         BuildUpdateForPlayer(Player &player, UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
 
-        void Visit(std::map<OBJECT_HANDLE, Player *> &m)
+        void Visit(PlayerMapType &m)
         {
             for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
             {
@@ -81,7 +81,7 @@ namespace MaNGOS
         Creature &i_creature;
         CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
 
-        void Visit(std::map<OBJECT_HANDLE, Player *> &m)
+        void Visit(PlayerMapType &m)
         {
             for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
                 i_creature.DestroyForPlayer(iter->second);
@@ -97,7 +97,7 @@ namespace MaNGOS
 
         BonesViewRemover(CorpsePtr& corpse) : i_objects(corpse) {}
         
-        void Visit(std::map<OBJECT_HANDLE, Player *>  &m)
+        void Visit(PlayerMapType  &m)
         {
             for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
                 i_objects->DestroyForPlayer(iter->second);
@@ -645,9 +645,9 @@ ObjectAccessor::PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &
 }
 
 void
-ObjectAccessor::ObjectChangeAccumulator::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+ObjectAccessor::ObjectChangeAccumulator::Visit(PlayerMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
         ObjectAccessor::_buildPacket(iter->second, &i_object, i_updateDatas);
 }
 

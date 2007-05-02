@@ -29,9 +29,9 @@
 
 template<>
 inline void
-MaNGOS::NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+MaNGOS::NotVisibleNotifier::Visit(CreatureMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         if( ( i_player.isAlive() && iter->second->isAlive()) ||
         (i_player.isDead() && iter->second->isDead()) )
             iter->second->BuildOutOfRangeUpdateBlock(&i_data);
@@ -39,9 +39,9 @@ MaNGOS::NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 
 template<>
 inline void
-MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+MaNGOS::VisibleNotifier::Visit(CreatureMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         if( iter->second->IsVisibleInGridForPlayer(&i_player) )
         {
@@ -57,9 +57,9 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 
 template<>
 inline void
-MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+MaNGOS::VisibleNotifier::Visit(PlayerMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         if( iter->second == &i_player )
             continue;
@@ -81,21 +81,21 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 }
 
 inline void
-MaNGOS::ObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+MaNGOS::ObjectUpdater::Visit(CreatureMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Creature*>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         if(!iter->second->isSpiritHealer())
             iter->second->Update(i_timeDiff);
 }
 
 template<>
 inline void
-MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+MaNGOS::PlayerRelocationNotifier::Visit(PlayerMapType &m)
 {
     if(!i_player.isAlive() || i_player.isInFlight())
         return;
 
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         // Remove selection
         if(i_player.GetSelection()==iter->second->GetGUID())
@@ -149,45 +149,45 @@ MaNGOS::PlayerRelocationNotifier::Visit(CorpseMapType &m)
 
 template<>
 inline void
-MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType &m)
 {
     if(!i_player.isAlive() || i_player.isInFlight())
         return;
 
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         if( iter->second->isAlive() && !iter->second->isInFlight())
             PlayerCreatureRelocationWorker(&i_player,iter->second);
 }
 
 template<>
 inline void
-MaNGOS::CreatureRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType &m)
 {
     if(!i_creature.isAlive() || i_creature.isInFlight())
         return;
 
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         if( iter->second->isAlive() && !iter->second->isInFlight())
             PlayerCreatureRelocationWorker(iter->second, &i_creature);
 }
 
 template<>
 inline void
-MaNGOS::CreatureRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType &m)
 {
     if(!i_creature.isAlive() || i_creature.isInFlight())
         return;
 
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         if( iter->second->isAlive() && !iter->second->isInFlight())
             CreatureCreatureRelocationWorker(iter->second, &i_creature);
 }
 
 template<>
 inline void
-MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *>  &m)
+MaNGOS::DynamicObjectUpdater::Visit(CreatureMapType  &m)
 {
-    for(std::map<OBJECT_HANDLE, Creature*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(itr->second->isAlive() && !itr->second->isInFlight() )
         {
@@ -207,9 +207,9 @@ MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *>  &m)
 
 template<>
 inline void
-MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Player *>  &m)
+MaNGOS::DynamicObjectUpdater::Visit(PlayerMapType  &m)
 {
-    for(std::map<OBJECT_HANDLE, Player*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(itr->second->isAlive() && !itr->second->isInFlight() )
         {
@@ -232,12 +232,12 @@ MaNGOS::DynamicObjectUpdater::Visit(std::map<OBJECT_HANDLE, Player *>  &m)
 // WorldObject searchers & workers
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+void MaNGOS::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
 {
     // already found
     if(i_object) return;
 
-    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
@@ -248,12 +248,12 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObjec
 }
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player*> &m)
+void MaNGOS::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
     if(i_object) return;
 
-    for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
@@ -264,12 +264,12 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player*> 
 }
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature*> &m)
+void MaNGOS::WorldObjectSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
     if(i_object) return;
 
-    for(std::map<OBJECT_HANDLE, Creature*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
@@ -296,12 +296,12 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, DynamicObject*> &m)
+void MaNGOS::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
 {
     // already found
     if(i_object) return;
 
-    for(std::map<OBJECT_HANDLE, DynamicObject*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
@@ -312,17 +312,17 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, DynamicOb
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(PlayerMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(CreatureMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }
@@ -336,17 +336,17 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
+void MaNGOS::WorldObjectListSearcher<Check>::Visit(DynamicObjectMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, DynamicObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }
@@ -354,12 +354,12 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Dynam
 // Gameobject searchers
 
 template<class Check>
-void MaNGOS::GameObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+void MaNGOS::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
 {
     // already found
     if(i_object) return;
 
-    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
@@ -370,9 +370,9 @@ void MaNGOS::GameObjectSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject
 }
 
 template<class Check>
-void MaNGOS::GameObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+void MaNGOS::GameObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }
@@ -380,12 +380,12 @@ void MaNGOS::GameObjectListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, GameOb
 // Unit searchers
 
 template<class Check>
-void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+void MaNGOS::UnitSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
     if(i_object) return;
 
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
@@ -396,12 +396,12 @@ void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 }
 
 template<class Check>
-void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+void MaNGOS::UnitSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
     if(i_object) return;
 
-    for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
@@ -412,17 +412,17 @@ void MaNGOS::UnitSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 }
 
 template<class Check>
-void MaNGOS::UnitListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+void MaNGOS::UnitListSearcher<Check>::Visit(PlayerMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }
 
 template<class Check>
-void MaNGOS::UnitListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+void MaNGOS::UnitListSearcher<Check>::Visit(CreatureMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }
@@ -430,12 +430,12 @@ void MaNGOS::UnitListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> 
 // Creature searchers
 
 template<class Check>
-void MaNGOS::CreatureSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+void MaNGOS::CreatureSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
     if(i_object) return;
 
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
@@ -446,9 +446,9 @@ void MaNGOS::CreatureSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> 
 }
 
 template<class Check>
-void MaNGOS::CreatureListSearcher<Check>::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+void MaNGOS::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
             i_objects.push_back(itr->second);
 }

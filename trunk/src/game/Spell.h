@@ -774,15 +774,15 @@ namespace MaNGOS
 
         #ifdef WIN32
         template<> inline void Visit(CorpseMapType &m ) {}
-        template<> inline void Visit(std::map<OBJECT_HANDLE, GameObject *> &m ) {}
-        template<> inline void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m ) {}
+        template<> inline void Visit(GameObjectMapType &m ) {}
+        template<> inline void Visit(DynamicObjectMapType &m ) {}
         #endif
     };
 
     #ifndef WIN32
     template<> inline void SpellNotifierCreatureAndPlayer::Visit(CorpseMapType &m ) {}
-    template<> inline void SpellNotifierCreatureAndPlayer::Visit(std::map<OBJECT_HANDLE, GameObject *> &m ) {}
-    template<> inline void SpellNotifierCreatureAndPlayer::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m ) {}
+    template<> inline void SpellNotifierCreatureAndPlayer::Visit(GameObjectMapType &m ) {}
+    template<> inline void SpellNotifierCreatureAndPlayer::Visit(DynamicObjectMapType &m ) {}
     #endif
 
 }

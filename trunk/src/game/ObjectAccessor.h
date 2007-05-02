@@ -109,7 +109,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
             UpdateDataMapType &i_updateDatas;
             Object &i_object;
             ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
-            void Visit(std::map<OBJECT_HANDLE, Player *> &);
+            void Visit(PlayerMapType &);
             template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
             template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
         };
