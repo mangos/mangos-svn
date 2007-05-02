@@ -285,6 +285,13 @@ pkgdata_DATA = \
 	3512_character_spell_cooldown.sql \
 	3514_mail.sql \
 	3516_spell_learn_spell.sql \
+	3533_command.sql \
+	3538_guild_charter_sign.sql \
+	3539_item_template.sql \
+	3545_creature_movement.sql \
+	3547_character_reputation.sql \
+	3553_creature_onkill_reputation.sql \
+	3562_player_levelstats.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -550,4 +557,11 @@ EXTRA_DIST = \
 	3512_character_spell_cooldown.sql \
 	3514_mail.sql \
 	3516_spell_learn_spell.sql \
+	3533_command.sql \
+	3538_guild_charter_sign.sql \
+	3539_item_template.sql \
+	3545_creature_movement.sql \
+	3547_character_reputation.sql \
+	3553_creature_onkill_reputation.sql \
+	3562_player_levelstats.sql \
 	README
