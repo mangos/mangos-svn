@@ -784,6 +784,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 m_modSpellHitChance;
         int32 m_baseSpellCritChance;
         int32 m_modCastSpeedPct;
+        float m_modResilience;
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
 
@@ -855,7 +856,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void UnsummonTotem(int8 slot = -1);
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage, DamageEffectType damagetype);
         uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype);
-        bool SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect);
+        bool SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit *pVictim);
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage,WeaponAttackType attType);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
         virtual bool IsImmunedToSpell(SpellEntry const* spellInfo) const;
