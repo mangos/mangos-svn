@@ -3893,7 +3893,7 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
-    if( GetTypeId()==TYPEID_UNIT && !((Creature*)this)->isPet() )
+    if( GetTypeId()==TYPEID_UNIT && !GetOwnerGUID() )
     {
         ((Creature*)this)->CallAssistence();
     }
