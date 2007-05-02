@@ -239,9 +239,52 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         }
         else if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
         {
-            // normal looted GO case
-            go->SetLootState(GO_LOOTED);
-            loot->clear();
+           // GO is mineral vein? so it is not removed after its looted
+            if(go->GetGoType() == GAMEOBJECT_TYPE_CHEST) 
+            { 
+                uint32 go_min = go->GetGOInfo()->sound4;
+                uint32 go_max = go->GetGOInfo()->sound5;
+
+                // only vein pass this check
+                if(go_min != 0 && go_max > go_min)
+                {
+                    float amount_rate = sWorld.getRate(RATE_MINING_AMOUNT);
+                    float min = go_min*amount_rate;
+                    float max = go_max*amount_rate;
+
+                    go->AddUse(player);
+                    float uses = float(go->GetUseCount());
+
+                    if(uses < max)
+                    {
+                        if(uses >= min)
+                        {
+                            float chance_rate = sWorld.getRate(RATE_MINING_NEXT);
+
+                            int32 ReqValue = 175;
+                            LockEntry const *lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->sound0);
+                            if(lockInfo)
+                                ReqValue = lockInfo->requiredskill;    
+                            float skill = float(player->GetSkillValue(SKILL_MINING))/(ReqValue+25);
+                            double chance = pow(0.8*chance_rate,4*(1/double(max))*double(uses));
+                            if(roll_chance_f(100*chance+skill))
+                            {
+                                go->SetLootState(GO_CLOSED);
+                            }
+                            else                            // not have more uses
+                                go->SetLootState(GO_LOOTED);
+                        }
+                        else                                // 100% chance until min uses
+                            go->SetLootState(GO_CLOSED);
+                    }
+                    else                                    // max uses already
+                        go->SetLootState(GO_LOOTED);
+                }
+                else                                        // not vein
+                    go->SetLootState(GO_LOOTED);
+
+                loot->clear();
+            }
         }
         else
             // not fully looted object

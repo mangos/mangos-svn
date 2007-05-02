@@ -225,6 +225,10 @@ Rate.Auction.Time = 1
 Rate.Auction.Deposit = 1
 Rate.Auction.Cut = 1
 
+# Mining Rates (Mining.Amount changes minimum/maximum usetimes of a deposit, Mining.Next changes chance to have next use of a deposit)
+Rate.Mining.Amount = 1
+Rate.Mining.Next   = 1
+
 # Save respawn time for creatures at death, for gameobjects at use/open
 #          0 (save creature/gameobject respawn time at grid unload)
 # Default: 1 (save creature/gameobject respawn time without waiting grid unload)
