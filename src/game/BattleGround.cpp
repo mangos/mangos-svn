@@ -169,10 +169,6 @@ void BattleGround::Update(time_t diff)
                         sBattleGroundMgr.SendBattleGroundStatusPacket(plr, this, STATUS_WAIT_JOIN, 120000 - tt, 0);
                         itr->second.LastInviteTime = getMSTime();
                     }
-                    else
-                    {
-                        ; // do nothing
-                    }
                 }
             }
             else
@@ -221,8 +217,8 @@ void BattleGround::Update(time_t diff)
         }
     }
 
-    //If Queue is empty and BG-Status = WAIT_JOIN, we must start BG
-    if(GetStatus() == STATUS_WAIT_JOIN && !GetQueuedPlayersSize())
+    //If BG-Status = WAIT_JOIN, we must start BG
+    if(GetStatus() == STATUS_WAIT_JOIN)
     {
         // AV
         if(GetID() == 1)
@@ -1220,7 +1216,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
                 RemovePlayer(Source->GetGUID(), true, true);
             break;
         case 3949:                                          //Arathi Basin Horde Exit.
-            if(Source->GetTeam() != ALLIANCE)
+            if(Source->GetTeam() != HORDE)
                 Source->GetSession()->SendAreaTriggerMessage("Only The Horde can use that portal");
             else
                 RemovePlayer(Source->GetGUID(), true, true);

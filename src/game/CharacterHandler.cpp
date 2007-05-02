@@ -652,10 +652,21 @@ void WorldSession::HandleSetWatchedFactionIndexOpcode(WorldPacket & recv_data)
 {
     CHECK_PACKET_SIZE(recv_data,4);
 
-    DEBUG_LOG("WORLD: Received CMSG_SET_WATCHED_FACTION_INDEX");
+    DEBUG_LOG("WORLD: Received CMSG_FIELD_WATCHED_FACTION_SHOW_BAR");
     uint32 fact;
     recv_data >> fact;
     GetPlayer()->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fact);
+}
+
+void WorldSession::HandleSetWatchedFactionInactiveOpcode(WorldPacket & recv_data)
+{
+    CHECK_PACKET_SIZE(recv_data,4+1);
+
+    DEBUG_LOG("WORLD: Received CMSG_FIELD_WATCHED_FACTION_INACTIVE");
+    uint32 replistid;
+    uint8 inactive;
+    recv_data >> replistid >> inactive;
+    _player->SetFactionInactive(replistid, inactive);
 }
 
 void WorldSession::HandleToggleHelmOpcode( WorldPacket & recv_data )

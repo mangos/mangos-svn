@@ -195,6 +195,16 @@ enum FactionState
     FACTION_NEW       = 2
 };
 
+enum FactionFlags
+{
+    FACTION_FLAG_VISIBLE    = 0x01,
+    FACTION_FLAG_AT_WAR     = 0x02,
+    FACTION_FLAG_UNKNOWN    = 0x04,
+    FACTION_FLAG_INVISIBLE  = 0x08, // unsure
+    FACTION_FLAG_OWN_TEAM   = 0x10,
+    FACTION_FLAG_INACTIVE   = 0x20
+};
+
 struct Faction
 {
     uint32 ID;
@@ -1126,6 +1136,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendSetFactionStanding(const Faction* faction) const;
         void SendInitialReputations();
         void SetFactionAtWar(uint32 repListID, bool atWar);
+        void SetFactionInactive(uint32 repListID, bool inactive);
         void SendSetFactionVisible(const Faction* faction) const;
         void UpdateMaxSkills();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
