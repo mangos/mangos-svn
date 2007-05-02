@@ -210,6 +210,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleSetFactionAtWar( WorldPacket & recv_data );
         void HandleSetFactionCheat( WorldPacket & recv_data );
         void HandleSetWatchedFactionIndexOpcode(WorldPacket & recv_data);
+        void HandleSetWatchedFactionInactiveOpcode(WorldPacket & recv_data);
 
         void HandleUpdateAccountData(WorldPacket& recvPacket);
         void HandleRequestAccountData(WorldPacket& recvPacket);

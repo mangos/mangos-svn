@@ -4195,10 +4195,9 @@ void Player::UpdateReputation() const
 
 void Player::SendSetFactionStanding(const Faction* faction) const
 {
-    if(faction->Flags & 0x00000001 )                        //If faction is visible then update it
+    if(faction->Flags & FACTION_FLAG_VISIBLE)               //If faction is visible then update it
     {
         WorldPacket data(SMSG_SET_FACTION_STANDING, (12));  // last check 2.0.10
-        //data << (uint32) faction->Flags;
         data << (uint32) 1;
         data << (uint32) faction->ReputationListID;
         data << (uint32) faction->Standing;
@@ -4217,8 +4216,7 @@ void Player::SendSetFactionStanding(const Faction* faction) const
     {
         uint32 ReputationListID;
         uint32 Standing;
-    }
-    */
+    }*/
 }
 
 void Player::SendInitialReputations()
@@ -4249,14 +4247,36 @@ void Player::SetFactionAtWar(uint32 repListID, bool atWar)
     {
         if(itr->ReputationListID == repListID)
         {
-            if(((itr->Flags & 2)!=0)==atWar)                // already set
+            if(((itr->Flags & FACTION_FLAG_AT_WAR) != 0) == atWar)               // already set
                 break;
 
             if( atWar )
-                itr->Flags |= 2;
+                itr->Flags |= FACTION_FLAG_AT_WAR;
             else
-                itr->Flags &= ~(uint32)2;
+                itr->Flags &= ~FACTION_FLAG_AT_WAR;
             if(itr->uState != FACTION_NEW) itr->uState = FACTION_CHANGED;
+            break;
+        }
+    }
+}
+
+void Player::SetFactionInactive(uint32 repListID, bool inactive)
+{
+    for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    {
+        if(itr->ReputationListID == repListID)
+        {
+            if(((itr->Flags & FACTION_FLAG_INACTIVE) != 0) == inactive)         // already set
+                break;
+
+            if(inactive)
+                itr->Flags |= FACTION_FLAG_INACTIVE;
+            else
+                itr->Flags &= ~FACTION_FLAG_INACTIVE;
+
+            if(itr->uState != FACTION_NEW)
+                itr->uState = FACTION_CHANGED;
+
             break;
         }
     }
@@ -4308,16 +4328,16 @@ void Player::SetInitialFactions()
             newFaction.ID = factionEntry->ID;
             newFaction.ReputationListID = factionEntry->reputationListID;
             newFaction.Standing = 0;
-            newFaction.Flags = 0;
+            newFaction.Flags = 0x0;
             newFaction.uState = FACTION_NEW;
 
             // show(1) and disable AtWar button(16) of own team factions
             if( GetTeam() == factionEntry->team )
-                newFaction.Flags = 16 | 1;
+                newFaction.Flags = FACTION_FLAG_OWN_TEAM | FACTION_FLAG_VISIBLE;
 
             //If the faction is Hostile or Hated  of my one we are at war!
             if(GetBaseReputationRank(factionEntry) <= REP_HOSTILE)
-                newFaction.Flags = (newFaction.Flags | 2 );
+                newFaction.Flags |= FACTION_FLAG_AT_WAR;
 
             m_factions.push_back(newFaction);
         }
@@ -4436,7 +4456,7 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
                 new_rep = Reputation_Bottom;
 
             itr->Standing = new_rep - BaseRep;
-            itr->Flags = (itr->Flags | 0x00000001);
+            itr->Flags |= FACTION_FLAG_VISIBLE;
             if(itr->uState != FACTION_NEW) itr->uState = FACTION_CHANGED;
 
             SendSetFactionStanding(&*itr);

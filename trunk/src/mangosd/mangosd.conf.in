@@ -50,7 +50,6 @@ LogWorld = 1
 LogFilter_TransportMoves = 0
 LogFilter_CreatureMoves = 0
 
-
 # Color for messages (format "normal_color details_color debug_color error_color)
 # Colors: 0 - BLACK, 1 - RED, 2 - GREEN,  3 - BROWN, 4 - BLUE, 5 - MAGENTA, 6 -  CYAN, 7 - GREY, 
 #         8 - YELLOW, 9 - LRED, 10 - LGREEN, 11 - LBLUE, 12 - LMAGENTA, 13 - LCYAN, 14 - WHITE
@@ -80,7 +79,6 @@ ProcessPriority = 1
 # Default: 1 (speed) 
 #          9 (best compression) 
 Compression = 1
-
 
 # Maximum number of players in the world. Excluding GM's
 # Default: 100
@@ -141,7 +139,6 @@ AllowTwoSide.WhoList = 0
 # Default: 0 (false)
 #          1 (true) 
 GM.WhisperingTo = 0
-
 
 # Is GM showed in GM list (if visible) in non-GM state (.gmoff)
 # Default: 0 (false)
@@ -211,7 +208,6 @@ Rate.Creature.Elite.RAREELITE.HP = 1
 Rate.Creature.Elite.WORLDBOSS.HP = 1
 Rate.Creature.Elite.RARE.HP = 1
 
-
 # Resting points grow rates (1 - normal, 2 - double rate, 0.5 - half rate, etc) from standard values
 Rate.Rest.InGame = 1
 Rate.Rest.Offline.InTavernOrCity = 1
@@ -268,7 +264,6 @@ MaxOverspeedPings = 2
 # Default: 1 (unload grids)
 GridUnload = 1;
 
-
 # All times are in milliseconds.
 
 # Default socket select time
@@ -288,7 +283,6 @@ PlayerSaveInterval = 900000
 
 # Default WorldServerPort
 WorldServerPort = 8085
-
 
 # Beep at mangosd start finished (mostly work only at Unix/Linux systems)
 # Default: 1 

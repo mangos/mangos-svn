@@ -784,7 +784,6 @@ namespace MaNGOS
     template<> inline void SpellNotifierCreatureAndPlayer::Visit(GameObjectMapType &m ) {}
     template<> inline void SpellNotifierCreatureAndPlayer::Visit(DynamicObjectMapType &m ) {}
     #endif
-
 }
 
 typedef void(Spell::*pEffect)(uint32 i);
