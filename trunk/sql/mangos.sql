@@ -1877,7 +1877,7 @@ CREATE TABLE `item_template` (
   `lockid` int(30) unsigned NOT NULL default '0',
   `Material` int(30) NOT NULL default '0',
   `sheath` int(30) unsigned NOT NULL default '0',
-  `Extra` int(30) NOT NULL default '0',  
+  `Extra` int(30) unsigned NOT NULL default '0',
   `unk_203` int(10) NOT NULL default '0',
   `block` int(30) unsigned NOT NULL default '0',
   `itemset` int(30) unsigned NOT NULL default '0',
@@ -3091,8 +3091,8 @@ INSERT INTO `player_levelstats` VALUES
 (2,4,16,331,0,35,40,33,20,29),
 (2,4,17,350,0,36,41,34,20,29),
 (2,4,18,370,0,37,43,35,20,29),
-(2,4,19,391,0,38,44,35,20,30),
 (2,4,20,414,0,38,46,36,20,30),
+(2,4,19,391,0,38,44,35,20,30),
 (2,4,21,436,0,39,48,37,21,31),
 (2,4,22,460,0,40,49,38,21,31),
 (2,4,23,485,0,41,51,39,21,32),
@@ -9314,7 +9314,6 @@ INSERT INTO `spell_learn_spell` VALUES
 (25229,25493,0),
 (25229,26925,0),
 (25229,32259,0);
-
 /*!40000 ALTER TABLE `spell_learn_spell` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10294,4 +10293,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-04-23  8:56:41
+-- Dump completed on 2007-05-02  7:10:17
