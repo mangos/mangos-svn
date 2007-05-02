@@ -98,6 +98,7 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     m_modHitChance = 0;
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
+    m_modResilience = 0.0;
     m_modCastSpeedPct = 0;
     m_CombatTimer = 0;
     m_victimThreat = 0.0f;
@@ -712,6 +713,8 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                 case MELEE_HIT_CRIT:
                 {
                     *damage *= 2;
+                    // Resilience - reduce crit damage by 2x%
+                    *damage -= pVictim->m_modResilience * 2/100 * (*damage);
                     *crit = true;
                     hitInfo |= HITINFO_CRITICALHIT;
                     break;
@@ -820,7 +823,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             *damage = SpellDamageBonus(pVictim, spellInfo, *damage, SPELL_DIRECT_DAMAGE);
 
             // Calculate critical bonus
-            *crit = SpellCriticalBonus(spellInfo, (int32*)damage);
+            *crit = SpellCriticalBonus(spellInfo, (int32*)damage, pVictim);
             break;
     }
 
@@ -1260,6 +1263,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             }
 
             *damage += crit_bonus;
+            
+            // Resilience - reduce crit damage by 2x%
+            *damage -= pVictim->m_modResilience * 2/100 * (*damage);
 
             if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
                 ((Player*)this)->UpdateWeaponSkill(attType);
@@ -1636,6 +1642,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
             return MELEE_HIT_BLOCK;
         }
     }
+
+    // Resilience - reduce crit chance by x%
+    modCrit -= pVictim->m_modResilience*100;
 
     // Critical chance
     tmp = crit_chance + skillBonus + modCrit;
@@ -4200,7 +4209,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
 
-bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
+bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit *pVictim)
 {
     // Chance to crit is computed from INT and LEVEL as follows:
     //   chance = base + INT / (rate0 + rate1 * LEVEL)
@@ -4268,13 +4277,22 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect)
         if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             crit_chance += (*i)->GetModifier()->m_amount;
 
+    // Resilience - reduce crit chance by x%
+    if (pVictim)
+        crit_chance -= pVictim->m_modResilience;
+
     crit_chance = crit_chance > 0.0 ? crit_chance : 0.0;
     if (roll_chance_f(crit_chance))
     {
         int32 crit_bonus = *peffect / 2;
         if (GetTypeId() == TYPEID_PLAYER)                   // adds additional damage to crit_bonus (from talents)
             ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+        
         *peffect += crit_bonus;
+        // Resilience - reduce crit damage by 2x%
+        if (pVictim)
+            *peffect -= pVictim->m_modResilience * 2/100 * (*peffect);
+
         return true;
     }
     return false;

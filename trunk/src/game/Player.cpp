@@ -3500,7 +3500,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             break;
         case PLAYER_FIELD_MELEE_HASTE_RATING:
             //Haste: 6.67
-            RatingChange = (int32)(value/(6.67 * RatingCoeffecient));
+            RatingChange = value/(6.66667f * RatingCoeffecient);
             if(RatingChange >= 0)
             {
                 ApplyAttackTimePercentMod(BASE_ATTACK,RatingChange,apply);
@@ -3514,7 +3514,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             break;
         case PLAYER_FIELD_RANGED_HASTE_RATING:
             //Haste: 6.67
-            RatingChange = (int32)(value/(6.67 * RatingCoeffecient));
+            RatingChange = value/(6.66667f * RatingCoeffecient);
             _ApplyAmmoBonuses(false);
             if(RatingChange >= 0)
                 ApplyAttackTimePercentMod(RANGED_ATTACK, RatingChange, apply);
@@ -3524,20 +3524,22 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             break;
         case PLAYER_FIELD_SPELL_HASTE_RATING:
             //Haste: 6.67
-            RatingChange = (int32)(value/(6.67 * RatingCoeffecient));
+            RatingChange = value/(6.66667f * RatingCoeffecient);
             ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,RatingChange,!apply);
             m_modCastSpeedPct += apply ? RatingChange : (-RatingChange);
             break;
         case PLAYER_FIELD_HIT_RATING:
             //Hit (melee): 10
-            RatingChange = (int32)(value/(10.0 * RatingCoeffecient));
+            RatingChange = value/(10.0 * RatingCoeffecient);
             ApplyModUInt32Value(PLAYER_FIELD_MELEE_HIT_RATING, value, apply);
             ApplyModUInt32Value(PLAYER_FIELD_RANGED_HIT_RATING, value, apply);
             m_modHitChance += apply?RatingChange:-RatingChange;
             break;
         case PLAYER_FIELD_CRIT_RATING:
             //Crit (melee and spells): 14
-            RatingChange = (int32)(value/(14.0 * RatingCoeffecient));
+            RatingChange = value/(14.0 * RatingCoeffecient);
+            ApplyModUInt32Value(PLAYER_FIELD_MELEE_CRIT_RATING, value, apply);
+            ApplyModUInt32Value(PLAYER_FIELD_RANGED_CRIT_RATING, value, apply);
             ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,RatingChange,apply);
             break;
             /*
@@ -3548,7 +3550,10 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             */
         case PLAYER_FIELD_RESILIENCE_RATING:
             //Resilience: 25
-            RatingChange = (int32)(value/(25.0 * RatingCoeffecient));
+            RatingChange = value/(25.0 * RatingCoeffecient);
+            ApplyModUInt32Value(PLAYER_FIELD_UNK4_RATING, value, apply);
+            ApplyModUInt32Value(PLAYER_FIELD_UNK5_RATING, value, apply);
+            m_modResilience += apply?RatingChange:-RatingChange;
             break;
     }
 }
