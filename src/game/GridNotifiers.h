@@ -56,12 +56,12 @@ namespace MaNGOS
         explicit VisibleNotifier(Player &player) : i_player(player) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m);
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &);
+        void Visit(GameObjectMapType &);
         void Notify(void);
 
         #ifdef WIN32
-        template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
-        template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
+        template<> void VisibleNotifier::Visit(CreatureMapType &);
+        template<> void VisibleNotifier::Visit(PlayerMapType &);
         #endif
     };
 
@@ -69,7 +69,7 @@ namespace MaNGOS
     {
         Player &i_player;
         explicit VisibleChangesNotifier(Player &player) : i_player(player) {}
-        void Visit(std::map<OBJECT_HANDLE, Player *> &);
+        void Visit(PlayerMapType &);
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
     };
@@ -82,11 +82,11 @@ namespace MaNGOS
         void Notify(void);
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m);
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &);
-        void Visit(std::map<OBJECT_HANDLE, Player *> &);
+        void Visit(GameObjectMapType &);
+        void Visit(PlayerMapType &);
 
         #ifdef WIN32
-        template<> void NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
+        template<> void NotVisibleNotifier::Visit(CreatureMapType &);
         #endif
     };
 
@@ -178,9 +178,9 @@ namespace MaNGOS
         explicit ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m);
-        void Visit(std::map<OBJECT_HANDLE, Player *> &) {}
+        void Visit(PlayerMapType &) {}
         void Visit(CorpseMapType &) {}
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &);
+        void Visit(CreatureMapType &);
     };
 
     template<class T>
@@ -238,8 +238,8 @@ namespace MaNGOS
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
         #ifdef WIN32
         template<> void Visit(CorpseMapType &);
-        template<> void Visit(std::map<OBJECT_HANDLE, Player   *> &);
-        template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
+        template<> void Visit(PlayerMapType &);
+        template<> void Visit(CreatureMapType &);
         #endif
     };
 
@@ -250,7 +250,7 @@ namespace MaNGOS
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
         #ifdef WIN32
-        template<> void Visit(std::map<OBJECT_HANDLE, Player *> &);
+        template<> void Visit(PlayerMapType &);
         #endif
     };
 
@@ -262,8 +262,8 @@ namespace MaNGOS
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m) {}
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
         #ifdef WIN32
-        template<> inline void Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
-        template<> inline void Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+        template<> inline void Visit<Player>(PlayerMapType &);
+        template<> inline void Visit<Creature>(CreatureMapType &);
         #endif
     };
 
@@ -281,11 +281,11 @@ namespace MaNGOS
         WorldObjectSearcher(WorldObject* & result, Check const& check) : i_object(result),i_check(check) {}
         WorldObjectSearcher(CountedPtr<WorldObject> & result, Check const& check) : i_objectptr(result),i_check(check) { i_objectptr.reset(); }
 
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-        void Visit(std::map<OBJECT_HANDLE, Player*> &m);
-        void Visit(std::map<OBJECT_HANDLE, Creature*> &m);
+        void Visit(GameObjectMapType &m);
+        void Visit(PlayerMapType &m);
+        void Visit(CreatureMapType &m);
         void Visit(CorpseMapType &m);
-        void Visit(std::map<OBJECT_HANDLE, DynamicObject*> &m);
+        void Visit(DynamicObjectMapType &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -299,11 +299,11 @@ namespace MaNGOS
 
         WorldObjectListSearcher(std::list<WorldObject*> &objects, Check & check) : i_objects(objects),i_check(check) {}
 
-        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(PlayerMapType &m);
+        void Visit(CreatureMapType &m);
         void Visit(CorpseMapType &m);
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-        void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
+        void Visit(GameObjectMapType &m);
+        void Visit(DynamicObjectMapType &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -316,20 +316,20 @@ namespace MaNGOS
 
         explicit WorldObjectWorker(Do const& _do) : i_do(_do) {}
 
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+        void Visit(GameObjectMapType &m)
         {
-            for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+            for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
                 i_do(itr->second);
         }
 
-        void Visit(std::map<OBJECT_HANDLE, Player*> &m)
+        void Visit(PlayerMapType &m)
         {
-            for(std::map<OBJECT_HANDLE, Player *>::iterator itr=m.begin(); itr != m.end(); ++itr)
+            for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
                 i_do(itr->second);
         }
-        void Visit(std::map<OBJECT_HANDLE, Creature*> &m)
+        void Visit(CreatureMapType &m)
         {
-            for(std::map<OBJECT_HANDLE, Creature*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+            for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
                 i_do(itr->second);
         }
 
@@ -339,9 +339,9 @@ namespace MaNGOS
                 i_do(itr->second);
         }
 
-        void Visit(std::map<OBJECT_HANDLE, DynamicObject*> &m)
+        void Visit(DynamicObjectMapType &m)
         {
-            for(std::map<OBJECT_HANDLE, DynamicObject*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+            for(DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
                 i_do(itr->second);
         }
 
@@ -358,7 +358,7 @@ namespace MaNGOS
 
         GameObjectSearcher(GameObject* & result, Check const& check) : i_object(result),i_check(check) {}
 
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+        void Visit(GameObjectMapType &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -372,7 +372,7 @@ namespace MaNGOS
 
         GameObjectListSearcher(std::list<GameObject*> &objects, Check & check) : i_objects(objects),i_check(check) {}
 
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+        void Visit(GameObjectMapType &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -388,8 +388,8 @@ namespace MaNGOS
 
         UnitSearcher(Unit* & result, Check & check) : i_object(result),i_check(check) {}
 
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
-        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
+        void Visit(CreatureMapType &m);
+        void Visit(PlayerMapType &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -403,8 +403,8 @@ namespace MaNGOS
 
         UnitListSearcher(std::list<Unit*> &objects, Check & check) : i_objects(objects),i_check(check) {}
 
-        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(PlayerMapType &m);
+        void Visit(CreatureMapType &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -420,7 +420,7 @@ namespace MaNGOS
 
         CreatureSearcher(Creature* & result, Check & check) : i_object(result),i_check(check) {}
 
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(CreatureMapType &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -434,7 +434,7 @@ namespace MaNGOS
 
         CreatureListSearcher(std::list<Creature*> &objects, Check & check) : i_objects(objects),i_check(check) {}
 
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(CreatureMapType &m);
 
         template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -582,16 +582,16 @@ namespace MaNGOS
     };
 
     #ifndef WIN32
-    template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
-    template<> void VisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
-    template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void VisibleNotifier::Visit<Creature>(CreatureMapType &);
+    template<> void VisibleNotifier::Visit<Player>(PlayerMapType &);
+    template<> void NotVisibleNotifier::Visit<Creature>(CreatureMapType &);
     template<> void PlayerRelocationNotifier::Visit<Corpse>(CorpseMapType &);
-    template<> void PlayerRelocationNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
-    template<> void PlayerRelocationNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
-    template<> void CreatureRelocationNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
-    template<> void CreatureRelocationNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
-    template<> inline void DynamicObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
-    template<> inline void DynamicObjectUpdater::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
+    template<> void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType &);
+    template<> void PlayerRelocationNotifier::Visit<Player>(PlayerMapType &);
+    template<> void CreatureRelocationNotifier::Visit<Player>(PlayerMapType &);
+    template<> void CreatureRelocationNotifier::Visit<Creature>(CreatureMapType &);
+    template<> inline void DynamicObjectUpdater::Visit<Creature>(CreatureMapType &);
+    template<> inline void DynamicObjectUpdater::Visit<Player>(PlayerMapType &);
     #endif
 }
 #endif

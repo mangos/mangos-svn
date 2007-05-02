@@ -33,11 +33,11 @@ class MANGOS_DLL_DECL ObjectGridLoader
             {}
 
         void Load(GridType &grid);
-        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(GameObjectMapType &m);
+        void Visit(CreatureMapType &m);
         void Visit(CorpseMapType &m);
 
-        void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
+        void Visit(DynamicObjectMapType &m)
         {
 
         }
@@ -97,7 +97,7 @@ class MANGOS_DLL_DECL ObjectGridStoper
         }
 
         void Stop(GridType &grid);
-        void Visit(std::map<OBJECT_HANDLE, Creature*> &m);
+        void Visit(CreatureMapType &m);
 
         template<class NONACTIVE>
             void Visit(std::map<OBJECT_HANDLE, NONACTIVE *> &m) {}

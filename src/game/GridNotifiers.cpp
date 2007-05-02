@@ -31,7 +31,7 @@ void PlayerNotifier::Visit(PlayerMapType &m)
 {
     BuildForMySelf();
 
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         if( iter->second == &i_player )
             continue;
@@ -136,9 +136,9 @@ VisibleNotifier::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
 }
 
 void
-VisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+VisibleNotifier::Visit(GameObjectMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, GameObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(GameObjectMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         if(iter->second->isSpawned())                       // show only respawned GO
         {
@@ -149,9 +149,9 @@ VisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 }
 
 void
-MaNGOS::VisibleChangesNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+MaNGOS::VisibleChangesNotifier::Visit(PlayerMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         // Invisibility for gms
         if(iter->second != &i_player)
@@ -218,18 +218,18 @@ NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
 }
 
 void
-NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
+NotVisibleNotifier::Visit(GameObjectMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, GameObject*>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(GameObjectMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         // ignore transport gameobjects at same map
         if(!i_player.IsInMap(iter->second) || !iter->second->IsTransport())
             iter->second->BuildOutOfRangeUpdateBlock(&i_data);
 }
 
 void
-MaNGOS::NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+MaNGOS::NotVisibleNotifier::Visit(PlayerMapType &m)
 {
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         if( iter->second == &i_player )
             continue;
@@ -254,7 +254,7 @@ ObjectVisibleNotifier::Visit(PlayerMapType &m)
     if(i_object.GetTypeId() == TYPEID_GAMEOBJECT && !((GameObject&)i_object).isSpawned())
         return;
 
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         UpdateData update_data;
         WorldPacket packet;
@@ -270,7 +270,7 @@ ObjectNotVisibleNotifier::Visit(PlayerMapType &m)
     // ignore transport gameobjects at same map
     bool transport = (i_object.GetTypeId() == TYPEID_GAMEOBJECT && ((GameObject&)i_object).IsTransport());
 
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         if(!i_object.IsInMap(iter->second) || !transport)
             iter->second->SendOutOfRange(&i_object);
 }
@@ -340,10 +340,10 @@ ObjectUpdater::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
 }
 
 template void VisibleNotifier::Visit<Corpse>(CorpseMapType &);
-template void VisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
+template void VisibleNotifier::Visit<DynamicObject>(DynamicObjectMapType &);
 
 template void NotVisibleNotifier::Visit<Corpse>(CorpseMapType &);
-template void NotVisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
+template void NotVisibleNotifier::Visit<DynamicObject>(DynamicObjectMapType &);
 
-template void ObjectUpdater::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
-template void ObjectUpdater::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
+template void ObjectUpdater::Visit<GameObject>(GameObjectMapType &);
+template void ObjectUpdater::Visit<DynamicObject>(DynamicObjectMapType &);
