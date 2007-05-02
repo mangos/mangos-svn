@@ -50,142 +50,142 @@
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
-    &Spell::EffectNULL,                                     //nothing
-    &Spell::EffectInstaKill,                                //SPELL_EFFECT_INSTAKILL = 1
-    &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_SCHOOL_DAMAGE = 2
-    &Spell::EffectDummy,                                    //SPELL_EFFECT_DUMMY = 3
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL_TELEPORT = 4, unused
-    &Spell::EffectTeleportUnits,                            //SPELL_EFFECT_TELEPORT_UNITS = 5
-    &Spell::EffectApplyAura,                                //SPELL_EFFECT_APPLY_AURA = 6
-    &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_ENVIRONMENTAL_DAMAGE =7
-    &Spell::EffectManaDrain,                                //SPELL_EFFECT_MANA_DRAIN = 8
-    &Spell::EffectHealthLeach,                              //SPELL_EFFECT_HEALTH_LEECH = 9
-    &Spell::EffectHeal,                                     //SPELL_EFFECT_HEAL = 10
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND = 11
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL = 12
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_BASE = 13, unused
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_SPECIALIZE = 14, unused
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL = 15, unused
-    &Spell::EffectQuestComplete,                            //SPELL_EFFECT_QUEST_COMPLETE = 16
-    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL = 17
-    &Spell::EffectResurrect,                                //SPELL_EFFECT_RESURRECT = 18
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_EXTRA_ATTACKS = 19
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DODGE = 20, one spell: Dodge
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_EVADE = 21, one spell: Evade (DND)
-    &Spell::EffectParry,                                    //SPELL_EFFECT_PARRY = 22
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_BLOCK = 23, one spell: Block
-    &Spell::EffectCreateItem,                               //SPELL_EFFECT_CREATE_ITEM = 24
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_WEAPON = 25
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DEFENSE = 26, one spell: Defence
-    &Spell::EffectPersistentAA,                             //SPELL_EFFECT_PERSISTENT_AREA_AURA = 27
-    &Spell::EffectSummon,                                   //SPELL_EFFECT_SUMMON = 28
-    &Spell::EffectMomentMove,                               //SPELL_EFFECT_LEAP = 29
-    &Spell::EffectEnergize,                                 //SPELL_EFFECT_ENERGIZE = 30
-    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_PERCENT_DAMAGE = 31
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE = 32
-    &Spell::EffectOpenLock,                                 //SPELL_EFFECT_OPEN_LOCK = 33
-    &Spell::EffectSummonChangeItem,                         //SPELL_EFFECT_SUMMON_CHANGE_ITEM = 34
-    &Spell::EffectApplyAA,                                  //SPELL_EFFECT_APPLY_AREA_AURA = 35
-    &Spell::EffectLearnSpell,                               //SPELL_EFFECT_LEARN_SPELL = 36
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE = 37, one spell: SPELLDEFENSE (DND)
-    &Spell::EffectDispel,                                   //SPELL_EFFECT_DISPEL = 38
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_LANGUAGE = 39
-    &Spell::EffectDualWield,                                //SPELL_EFFECT_DUAL_WIELD = 40
-    &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_WILD = 41
-    &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_GUARDIAN = 42
-    &Spell::EffectTeleUnitsFaceCaster,                      //SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER = 43
-    &Spell::EffectLearnSkill,                               //SPELL_EFFECT_SKILL_STEP = 44
-    &Spell::EffectNULL,                                     //unknown45 = 45, honor/pvp related
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPAWN = 46, we must spawn pet there
-    &Spell::EffectTradeSkill,                               //SPELL_EFFECT_TRADE_SKILL = 47
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH = 48, one spell: Base Stealth
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DETECT = 49, one spell: Detect
-    &Spell::EffectTransmitted,                              //SPELL_EFFECT_TRANS_DOOR = 50
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_FORCE_CRITICAL_HIT = 51, unused
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_GUARANTEE_HIT = 52, one spell: zzOLDCritical Shot
-    &Spell::EffectEnchantItemPerm,                          //SPELL_EFFECT_ENCHANT_ITEM = 53
-    &Spell::EffectEnchantItemTmp,                           //SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY = 54
-    &Spell::EffectTameCreature,                             //SPELL_EFFECT_TAMECREATURE = 55
-    &Spell::EffectSummonPet,                                //SPELL_EFFECT_SUMMON_PET = 56
-    &Spell::EffectLearnPetSpell,                            //SPELL_EFFECT_LEARN_PET_SPELL = 57
-    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE = 58
-    &Spell::EffectOpenSecretSafe,                           //SPELL_EFFECT_OPEN_LOCK_ITEM = 59
-    &Spell::EffectProficiency,                              //SPELL_EFFECT_PROFICIENCY = 60
-    &Spell::EffectSendEvent,                                //SPELL_EFFECT_SEND_EVENT = 61
-    &Spell::EffectPowerDrain,                               //SPELL_EFFECT_POWER_BURN = 62
-    &Spell::EffectThreat,                                   //SPELL_EFFECT_THREAT = 63
-    &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_TRIGGER_SPELL = 64
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEALTH_FUNNEL = 65, unused
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_POWER_FUNNEL = 66, unused
-    &Spell::EffectHealMaxHealth,                            //SPELL_EFFECT_HEAL_MAX_HEALTH = 67
-    &Spell::EffectInterruptCast,                            //SPELL_EFFECT_INTERRUPT_CAST = 68
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DISTRACT = 69
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PULL = 70, one spell: Distract Move
-    &Spell::EffectPickPocket,                               //SPELL_EFFECT_PICKPOCKET = 71
-    &Spell::EffectAddFarsight,                              //SPELL_EFFECT_ADD_FARSIGHT = 72
-    &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_POSSESSED = 73
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75, one spell: Mechanical Patch Kit
-    &Spell::EffectSummonObjectWild,                         //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
-    &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT = 77
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK = 78
-    &Spell::EffectSanctuary,                                //SPELL_EFFECT_SANCTUARY = 79
-    &Spell::EffectAddComboPoints,                           //SPELL_EFFECT_ADD_COMBO_POINTS = 80
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_CREATE_HOUSE = 81: one spell: Create House (TEST)
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND_SIGHT = 82
-    &Spell::EffectDuel,                                     //SPELL_EFFECT_DUEL = 83
-    &Spell::EffectStuck,                                    //SPELL_EFFECT_STUCK = 84
-    &Spell::EffectSummonPlayer,                             //SPELL_EFFECT_SUMMON_PLAYER = 85
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ACTIVATE_OBJECT = 86
-    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT1 = 87
-    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT2 = 88
-    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT3 = 89
-    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT4 = 90
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_THREAT_ALL = 91, one spell: zzOLDBrainwash
-    &Spell::EffectEnchantHeldItem,                          //SPELL_EFFECT_ENCHANT_HELD_ITEM = 92
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PHANTASM = 93
-    &Spell::EffectSelfResurrect,                            //SPELL_EFFECT_SELF_RESURRECT = 94
-    &Spell::EffectSkinning,                                 //SPELL_EFFECT_SKINNING = 95
-    &Spell::EffectCharge,                                   //SPELL_EFFECT_CHARGE = 96
-    &Spell::EffectSummonCritter,                            //SPELL_EFFECT_SUMMON_CRITTER = 97
-    &Spell::EffectKnockBack,                                //SPELL_EFFECT_KNOCK_BACK = 98
-    &Spell::EffectDisEnchant,                               //SPELL_EFFECT_DISENCHANT = 99
-    &Spell::EffectInebriate,                                //SPELL_EFFECT_INEBRIATE = 100
-    &Spell::EffectFeedPet,                                  //SPELL_EFFECT_FEED_PET = 101
-    &Spell::EffectDismissPet,                               //SPELL_EFFECT_DISMISS_PET = 102
-    &Spell::EffectReputation,                               //SPELL_EFFECT_REPUTATION = 103
-    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT1 = 104
-    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT2 = 105
-    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT3 = 106
-    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT4 = 107
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DISPEL_MECHANIC = 108
-    &Spell::EffectSummonDeadPet,                            //SPELL_EFFECT_SUMMON_DEAD_PET = 109
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DESTROY_ALL_TOTEMS = 110
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE = 111
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEMON = 112
-    &Spell::EffectResurrectNew,                             //SPELL_EFFECT_RESURRECT_NEW = 113
-    &Spell::EffectAttackMe,                                 //SPELL_EFFECT_ATTACK_ME = 114
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE_PCT = 115
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SKIN_PLAYER_CORPSE = 116, one spell: Remove Insignia, bg usage, required special corpse flags...
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPIRIT_HEAL = 117, one spell: Spirit Heal
-    &Spell::EffectSkill,                                    //SPELL_EFFECT_SKILL = 118 -- professions and more
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_APPLY_AURA_NEW = 119
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TELEPORT_GRAVEYARD = 120, two spells: Graveyard Teleport and Graveyard Teleport Test
-    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_NORMALIZED_WEAPON_DMG = 121
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_122 = 122 -- silithist cap reward spell
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_123 = 123 -- taxi/flight related
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_124 = 124 -- aggro redirect?
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_125 = 125 -- invis?
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_126 = 126 -- spell steal effect?
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_127 = 127 -- Prospecting spell
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_128 = 128
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_129 = 129
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_130 = 130 -- threat redirect
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_131 = 131 -- unused
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_132 = 132 -- taxi related, one spell: Brazen Taxi
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_133 = 133 -- one spell: Forget
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_134 = 134
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_135 = 135 -- pet related
+    &Spell::EffectNULL,                                     //  0
+    &Spell::EffectInstaKill,                                //  1 SPELL_EFFECT_INSTAKILL
+    &Spell::EffectSchoolDMG,                                //  2 SPELL_EFFECT_SCHOOL_DAMAGE
+    &Spell::EffectDummy,                                    //  3 SPELL_EFFECT_DUMMY
+    &Spell::EffectNULL,                                     //  4 SPELL_EFFECT_PORTAL_TELEPORT         unused
+    &Spell::EffectTeleportUnits,                            //  5 SPELL_EFFECT_TELEPORT_UNITS
+    &Spell::EffectApplyAura,                                //  6 SPELL_EFFECT_APPLY_AURA
+    &Spell::EffectSchoolDMG,                                //  7 SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
+    &Spell::EffectManaDrain,                                //  8 SPELL_EFFECT_MANA_DRAIN
+    &Spell::EffectHealthLeach,                              //  9 SPELL_EFFECT_HEALTH_LEECH
+    &Spell::EffectHeal,                                     // 10 SPELL_EFFECT_HEAL
+    &Spell::EffectNULL,                                     // 11 SPELL_EFFECT_BIND
+    &Spell::EffectNULL,                                     // 12 SPELL_EFFECT_PORTAL
+    &Spell::EffectNULL,                                     // 13 SPELL_EFFECT_RITUAL_BASE              unused
+    &Spell::EffectNULL,                                     // 14 SPELL_EFFECT_RITUAL_SPECIALIZE        unused
+    &Spell::EffectNULL,                                     // 15 SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL   unused
+    &Spell::EffectQuestComplete,                            // 16 SPELL_EFFECT_QUEST_COMPLETE
+    &Spell::EffectWeaponDmg,                                // 17 SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL
+    &Spell::EffectResurrect,                                // 18 SPELL_EFFECT_RESURRECT
+    &Spell::EffectNULL,                                     // 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS
+    &Spell::EffectNULL,                                     // 20 SPELL_EFFECT_DODGE                    one spell: Dodge
+    &Spell::EffectNULL,                                     // 21 SPELL_EFFECT_EVADE                    one spell: Evade (DND)
+    &Spell::EffectParry,                                    // 22 SPELL_EFFECT_PARRY
+    &Spell::EffectNULL,                                     // 23 SPELL_EFFECT_BLOCK                    one spell: Block
+    &Spell::EffectCreateItem,                               // 24 SPELL_EFFECT_CREATE_ITEM
+    &Spell::EffectNULL,                                     // 25 SPELL_EFFECT_WEAPON
+    &Spell::EffectNULL,                                     // 26 SPELL_EFFECT_DEFENSE                  one spell: Defense
+    &Spell::EffectPersistentAA,                             // 27 SPELL_EFFECT_PERSISTENT_AREA_AURA
+    &Spell::EffectSummon,                                   // 28 SPELL_EFFECT_SUMMON
+    &Spell::EffectMomentMove,                               // 29 SPELL_EFFECT_LEAP
+    &Spell::EffectEnergize,                                 // 30 SPELL_EFFECT_ENERGIZE
+    &Spell::EffectWeaponDmg,                                // 31 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE
+    &Spell::EffectNULL,                                     // 32 SPELL_EFFECT_TRIGGER_MISSILE
+    &Spell::EffectOpenLock,                                 // 33 SPELL_EFFECT_OPEN_LOCK
+    &Spell::EffectSummonChangeItem,                         // 34 SPELL_EFFECT_SUMMON_CHANGE_ITEM
+    &Spell::EffectApplyAA,                                  // 35 SPELL_EFFECT_APPLY_AREA_AURA
+    &Spell::EffectLearnSpell,                               // 36 SPELL_EFFECT_LEARN_SPELL
+    &Spell::EffectNULL,                                     // 37 SPELL_EFFECT_SPELL_DEFENSE            one spell: SPELLDEFENSE (DND)
+    &Spell::EffectDispel,                                   // 38 SPELL_EFFECT_DISPEL
+    &Spell::EffectNULL,                                     // 39 SPELL_EFFECT_LANGUAGE
+    &Spell::EffectDualWield,                                // 40 SPELL_EFFECT_DUAL_WIELD
+    &Spell::EffectSummonWild,                               // 41 SPELL_EFFECT_SUMMON_WILD
+    &Spell::EffectSummonWild,                               // 42 SPELL_EFFECT_SUMMON_GUARDIAN
+    &Spell::EffectTeleUnitsFaceCaster,                      // 43 SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
+    &Spell::EffectLearnSkill,                               // 44 SPELL_EFFECT_SKILL_STEP
+    &Spell::EffectNULL,                                     // 45                                       honor/pvp related
+    &Spell::EffectNULL,                                     // 46 SPELL_EFFECT_SPAWN                    we must spawn pet there
+    &Spell::EffectTradeSkill,                               // 47 SPELL_EFFECT_TRADE_SKILL
+    &Spell::EffectNULL,                                     // 48 SPELL_EFFECT_STEALTH                  one spell: Base Stealth
+    &Spell::EffectNULL,                                     // 49 SPELL_EFFECT_DETECT                   one spell: Detect
+    &Spell::EffectTransmitted,                              // 50 SPELL_EFFECT_TRANS_DOOR
+    &Spell::EffectNULL,                                     // 51 SPELL_EFFECT_FORCE_CRITICAL_HIT       unused
+    &Spell::EffectNULL,                                     // 52 SPELL_EFFECT_GUARANTEE_HIT            one spell: zzOLDCritical Shot
+    &Spell::EffectEnchantItemPerm,                          // 53 SPELL_EFFECT_ENCHANT_ITEM
+    &Spell::EffectEnchantItemTmp,                           // 54 SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY
+    &Spell::EffectTameCreature,                             // 55 SPELL_EFFECT_TAMECREATURE
+    &Spell::EffectSummonPet,                                // 56 SPELL_EFFECT_SUMMON_PET
+    &Spell::EffectLearnPetSpell,                            // 57 SPELL_EFFECT_LEARN_PET_SPELL
+    &Spell::EffectWeaponDmg,                                // 58 SPELL_EFFECT_WEAPON_DAMAGE
+    &Spell::EffectOpenSecretSafe,                           // 59 SPELL_EFFECT_OPEN_LOCK_ITEM
+    &Spell::EffectProficiency,                              // 60 SPELL_EFFECT_PROFICIENCY
+    &Spell::EffectSendEvent,                                // 61 SPELL_EFFECT_SEND_EVENT
+    &Spell::EffectPowerDrain,                               // 62 SPELL_EFFECT_POWER_BURN
+    &Spell::EffectThreat,                                   // 63 SPELL_EFFECT_THREAT
+    &Spell::EffectTriggerSpell,                             // 64 SPELL_EFFECT_TRIGGER_SPELL
+    &Spell::EffectNULL,                                     // 65 SPELL_EFFECT_HEALTH_FUNNEL            unused
+    &Spell::EffectNULL,                                     // 66 SPELL_EFFECT_POWER_FUNNEL             unused
+    &Spell::EffectHealMaxHealth,                            // 67 SPELL_EFFECT_HEAL_MAX_HEALTH
+    &Spell::EffectInterruptCast,                            // 68 SPELL_EFFECT_INTERRUPT_CAST
+    &Spell::EffectNULL,                                     // 69 SPELL_EFFECT_DISTRACT
+    &Spell::EffectNULL,                                     // 70 SPELL_EFFECT_PULL                     one spell: Distract Move
+    &Spell::EffectPickPocket,                               // 71 SPELL_EFFECT_PICKPOCKET
+    &Spell::EffectAddFarsight,                              // 72 SPELL_EFFECT_ADD_FARSIGHT
+    &Spell::EffectSummonWild,                               // 73 SPELL_EFFECT_SUMMON_POSSESSED
+    &Spell::EffectNULL,                                     // 74 SPELL_EFFECT_SUMMON_TOTEM
+    &Spell::EffectNULL,                                     // 75 SPELL_EFFECT_HEAL_MECHANICAL          one spell: Mechanical Patch Kit
+    &Spell::EffectSummonObjectWild,                         // 76 SPELL_EFFECT_SUMMON_OBJECT_WILD
+    &Spell::EffectScriptEffect,                             // 77 SPELL_EFFECT_SCRIPT_EFFECT
+    &Spell::EffectNULL,                                     // 78 SPELL_EFFECT_ATTACK
+    &Spell::EffectSanctuary,                                // 79 SPELL_EFFECT_SANCTUARY
+    &Spell::EffectAddComboPoints,                           // 80 SPELL_EFFECT_ADD_COMBO_POINTS
+    &Spell::EffectNULL,                                     // 81 SPELL_EFFECT_CREATE_HOUSE             one spell: Create House (TEST)
+    &Spell::EffectNULL,                                     // 82 SPELL_EFFECT_BIND_SIGHT
+    &Spell::EffectDuel,                                     // 83 SPELL_EFFECT_DUEL
+    &Spell::EffectStuck,                                    // 84 SPELL_EFFECT_STUCK
+    &Spell::EffectSummonPlayer,                             // 85 SPELL_EFFECT_SUMMON_PLAYER
+    &Spell::EffectNULL,                                     // 86 SPELL_EFFECT_ACTIVATE_OBJECT
+    &Spell::EffectSummonTotem,                              // 87 SPELL_EFFECT_SUMMON_TOTEM_SLOT1
+    &Spell::EffectSummonTotem,                              // 88 SPELL_EFFECT_SUMMON_TOTEM_SLOT2
+    &Spell::EffectSummonTotem,                              // 89 SPELL_EFFECT_SUMMON_TOTEM_SLOT3
+    &Spell::EffectSummonTotem,                              // 90 SPELL_EFFECT_SUMMON_TOTEM_SLOT4
+    &Spell::EffectNULL,                                     // 91 SPELL_EFFECT_THREAT_ALL               one spell: zzOLDBrainwash
+    &Spell::EffectEnchantHeldItem,                          // 92 SPELL_EFFECT_ENCHANT_HELD_ITEM
+    &Spell::EffectNULL,                                     // 93 SPELL_EFFECT_SUMMON_PHANTASM
+    &Spell::EffectSelfResurrect,                            // 94 SPELL_EFFECT_SELF_RESURRECT
+    &Spell::EffectSkinning,                                 // 95 SPELL_EFFECT_SKINNING
+    &Spell::EffectCharge,                                   // 96 SPELL_EFFECT_CHARGE
+    &Spell::EffectSummonCritter,                            // 97 SPELL_EFFECT_SUMMON_CRITTER
+    &Spell::EffectKnockBack,                                // 98 SPELL_EFFECT_KNOCK_BACK
+    &Spell::EffectDisEnchant,                               // 99 SPELL_EFFECT_DISENCHANT
+    &Spell::EffectInebriate,                                //100 SPELL_EFFECT_INEBRIATE
+    &Spell::EffectFeedPet,                                  //101 SPELL_EFFECT_FEED_PET
+    &Spell::EffectDismissPet,                               //102 SPELL_EFFECT_DISMISS_PET
+    &Spell::EffectReputation,                               //103 SPELL_EFFECT_REPUTATION
+    &Spell::EffectSummonObject,                             //104 SPELL_EFFECT_SUMMON_OBJECT_SLOT1
+    &Spell::EffectSummonObject,                             //105 SPELL_EFFECT_SUMMON_OBJECT_SLOT2
+    &Spell::EffectSummonObject,                             //106 SPELL_EFFECT_SUMMON_OBJECT_SLOT3
+    &Spell::EffectSummonObject,                             //107 SPELL_EFFECT_SUMMON_OBJECT_SLOT4
+    &Spell::EffectNULL,                                     //108 SPELL_EFFECT_DISPEL_MECHANIC
+    &Spell::EffectSummonDeadPet,                            //109 SPELL_EFFECT_SUMMON_DEAD_PET
+    &Spell::EffectNULL,                                     //110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
+    &Spell::EffectNULL,                                     //111 SPELL_EFFECT_DURABILITY_DAMAGE
+    &Spell::EffectNULL,                                     //112 SPELL_EFFECT_SUMMON_DEMON
+    &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
+    &Spell::EffectAttackMe,                                 //114 SPELL_EFFECT_ATTACK_ME
+    &Spell::EffectNULL,                                     //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
+    &Spell::EffectNULL,                                     //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
+    &Spell::EffectNULL,                                     //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
+    &Spell::EffectSkill,                                    //118 SPELL_EFFECT_SKILL                    professions and more
+    &Spell::EffectNULL,                                     //119 SPELL_EFFECT_APPLY_AURA_NEW
+    &Spell::EffectNULL,                                     //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       two spells: Graveyard Teleport and Graveyard Teleport Test
+    &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
+    &Spell::EffectNULL,                                     //122 SPELL_EFFECT_122                      silithist cap reward spell
+    &Spell::EffectNULL,                                     //123 SPELL_EFFECT_123                      taxi/flight related
+    &Spell::EffectNULL,                                     //124 SPELL_EFFECT_124                      aggro redirect?
+    &Spell::EffectNULL,                                     //125 SPELL_EFFECT_125                      invis?
+    &Spell::EffectNULL,                                     //126 SPELL_EFFECT_126                      spell steal effect?
+    &Spell::EffectNULL,                                     //127 SPELL_EFFECT_127                      Prospecting spell
+    &Spell::EffectNULL,                                     //128 SPELL_EFFECT_128
+    &Spell::EffectNULL,                                     //129 SPELL_EFFECT_129
+    &Spell::EffectNULL,                                     //130 SPELL_EFFECT_130                      threat redirect
+    &Spell::EffectNULL,                                     //131 SPELL_EFFECT_131                      unused
+    &Spell::EffectNULL,                                     //132 SPELL_EFFECT_132                      taxi related, one spell: Brazen Taxi
+    &Spell::EffectNULL,                                     //133 SPELL_EFFECT_133                      one spell: Forget
+    &Spell::EffectNULL,                                     //134 SPELL_EFFECT_134
+    &Spell::EffectNULL,                                     //135 SPELL_EFFECT_135                      pet related
 };
 
 void Spell::EffectNULL(uint32 i)
