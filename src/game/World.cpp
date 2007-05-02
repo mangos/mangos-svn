@@ -141,11 +141,6 @@ bool World::RemoveSession(uint32 id)
         if (itr->second->PlayerLoading())
             return false;
         itr->second->KickPlayer();
-
-        // session can't be erased or deleted currently (to prevent iterator invalidation and socket problems)
-        m_kicked_sessions.insert(itr->second);
-        itr->second = NULL;
-        return true;
     }
 
     return true;
@@ -595,11 +590,6 @@ void World::Update(time_t diff)
     if (m_timers[WUPDATE_SESSIONS].Passed())
     {
         m_timers[WUPDATE_SESSIONS].Reset();
-
-        ///- Delete kicked sessions
-        for (std::set<WorldSession*>::iterator itr = m_kicked_sessions.begin(); itr != m_kicked_sessions.end(); ++itr)
-            delete *itr;
-        m_kicked_sessions.clear();
 
         ///- Then send an update signal to remaining ones
         for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)

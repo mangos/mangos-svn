@@ -187,14 +187,23 @@ void WorldSocket::OnRead()
 }
 
 /// On socket closing
+void WorldSocket::CloseSocket()
+{
+    ///- Set CloseAndDelete flag for TcpSocket class
+    SetCloseAndDelete(true);
+    ///- Set _session to NULL. Prevent crashes
+    _session = NULL;
+}
+
+/// On socket deleting
 void WorldSocket::OnDelete()
 {
     ///- Stop sending remaining data through this socket
     if (_session)
     {
-        _session->SetSocket(0);
+        _session->SetSocket(NULL);
         // Session deleted from World session list at socket==0, This is only back reference from socket to session.
-        _session = 0;
+        _session = NULL;
     }
 
     ///- Remove the socket from the WorldSocketMgr list

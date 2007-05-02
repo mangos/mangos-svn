@@ -52,6 +52,12 @@ WorldSession::~WorldSession()
     if(_player)
         LogoutPlayer(true);
 
+    /// - If have unclosed socket, close it
+    if(_socket)
+        _socket->CloseSocket();
+
+    _socket = NULL;
+
     ///- empty incoming packet queue
     while(!_recvQueue.empty())
     {
@@ -665,7 +671,7 @@ void WorldSession::KickPlayer()
         return;
 
     // player will be  logout and session will removed in next update tick
-    _socket->SetCloseAndDelete(true);
+    _socket->CloseSocket();
     _socket = NULL;
 }
 /*

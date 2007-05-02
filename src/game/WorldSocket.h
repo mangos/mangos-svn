@@ -136,6 +136,7 @@ class WorldSocket : public TcpSocket
         ~WorldSocket();
 
         void SendPacket(WorldPacket* packet);
+        void CloseSocket();
 
         void OnAccept();
         void OnRead();
