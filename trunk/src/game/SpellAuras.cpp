@@ -197,7 +197,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //147 SPELL_AURA_ADD_CREATURE_IMMUNITY
     &Aura::HandleNULL,                                      //148 SPELL_AURA_RETAIN_COMBO_POINTS
     &Aura::HandleNULL,                                      //149 SPELL_AURA_RESIST_PUSHBACK
-    &Aura::HandleModShieldBlock,                            //150 SPELL_AURA_MOD_SHIELD_BLOCK_PCT
+    &Aura::HandleNoImmediateEffect,                         //150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT
     &Aura::HandleAuraTrackStealthed,                        //151 SPELL_AURA_TRACK_STEALTHED
     &Aura::HandleNULL,                                      //152 SPELL_AURA_MOD_DETECTED_RANGE
     &Aura::HandleNULL,                                      //153 SPELL_AURA_SPLIT_DAMAGE_FLAT
@@ -205,7 +205,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //155 SPELL_AURA_MOD_WATER_BREATHING
     &Aura::HandleNoImmediateEffect,                         //156 SPELL_AURA_MOD_REPUTATION_GAIN
     &Aura::HandleNULL,                                      //157 SPELL_AURA_PET_DAMAGE_MULTI
-    &Aura::HandleNULL,                                      //158 SPELL_AURA_MOD_SHIELD_BLOCK
+    &Aura::HandleNoImmediateEffect,                         //158 SPELL_AURA_MOD_SHIELD_BLOCKVALUE
     &Aura::HandleNULL,                                      //159 SPELL_AURA_NO_PVP_CREDIT      only for Honorless Target spell
     &Aura::HandleNULL,                                      //160 SPELL_AURA_MOD_AOE_AVOIDANCE
     &Aura::HandleNULL,                                      //161 SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT
@@ -2924,14 +2924,6 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
         return;
 
     m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleModShieldBlock(bool apply, bool Real)
-{
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    ((Player*)m_target)->ApplyBlockValueMod(m_modifier.m_amount,apply);
 }
 
 void Aura::HandleModHitChance(bool Apply, bool Real)
