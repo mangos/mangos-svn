@@ -119,6 +119,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
                 if (*i == PlayerGuidLow) return true;
             return false;
         }
+        void ClearSkillupList() { m_SkillupList.clear(); }
 
         void AddUse(Player* player);
         uint32 GetUseCount() const { return m_usetimes; }
