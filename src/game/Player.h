@@ -1157,8 +1157,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDrunkValue(uint16 newDrunkValue);
         uint16 GetDrunkValue() const { return m_drunk; }
         uint32 GetDeathTimer() const { return m_deathTimer; }
-        uint32 GetBlockValue() const { return m_BlockValue; }
-        void ApplyBlockValueMod(int32 val,bool apply);
+        uint32 GetBlockValue() const;                       // overwrite Unit version (virtual)
         bool CanParry() const { return m_canParry; }
         void SetCanParry(bool value) { m_canParry = value; }
         bool CanDualWield() const { return m_canDualWield; }
@@ -1437,7 +1436,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_restTime;
 
-        uint32 m_BlockValue;
         uint32 m_WeaponProficiency;
         uint32 m_ArmorProficiency;
         bool m_canParry;

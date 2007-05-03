@@ -153,8 +153,6 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_movement_flags = 0;
 
-    m_BlockValue = 0;
-
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;
     m_WeaponProficiency = 0;
@@ -5083,7 +5081,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 
     if (proto->Block)
     {
-        ApplyBlockValueMod(proto->Block, apply);
+        m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE]+= (apply ? long(proto->Block) : -long(proto->Block) );
         //sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
     }
 
@@ -12019,11 +12017,6 @@ int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
     return total;
 }
 
-void Player::ApplyBlockValueMod(int32 val,bool apply)
-{
-    ApplyModUInt32Var(m_BlockValue,val,apply);
-}
-
 void Player::RemoveAreaAurasFromGroup()
 {
     Group* pGroup = groupInfo.group;
@@ -12662,4 +12655,15 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
     sc.end = end_time;
     sc.itemid = itemid;
     m_spellCooldowns[spellid] = sc;
+}
+
+uint32 Player::GetBlockValue() const
+{
+    if(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE] <= 0)
+        return 0;
+
+    if(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT] <= -100)
+        return 0;
+
+    return m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE]*(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT]+100)/100;
 }

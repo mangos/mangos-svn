@@ -865,8 +865,10 @@ float Item::GetEnchantMod(uint32 enchant_id, ItemPrototype const * itemProto)
                         mod += pow((float)(points * ITEM_STAT_HEALING_MOD), 1.50f); break;
                     case SPELL_AURA_MOD_ATTACK_POWER:
                         mod += pow((float)(points * ITEM_STAT_ATTACK_POWER_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_SHIELD_BLOCK_PCT:
-                        if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
+                    case SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT:
+                        if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND)
+                            return 0;
+
                         if(inv_type == INVTYPE_SHIELD)
                             mod += pow((float)(points * ITEM_STAT_BLOCK_SHIELD_MOD), 1.50f);
                         else
