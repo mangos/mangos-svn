@@ -1855,8 +1855,6 @@ uint8 Spell::CanCast()
     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetMovementFlags() &&  (IsAutoRepeat() || m_rangedShoot) )
         return SPELL_FAILED_MOVING;
 
-    uint8 castResult = 0;
-
     Unit *target = m_targets.getUnitTarget();
 
     if(target)
@@ -1910,11 +1908,9 @@ uint8 Spell::CanCast()
             if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
             {
                 if(TargetCreatureType == 0x40)
-                    castResult = SPELL_FAILED_TARGET_IS_PLAYER;
+                    return SPELL_FAILED_TARGET_IS_PLAYER;
                 else
-                    castResult = SPELL_FAILED_BAD_TARGETS;
-
-                return castResult;
+                    return SPELL_FAILED_BAD_TARGETS;
             }
         }
 
@@ -1935,46 +1931,28 @@ uint8 Spell::CanCast()
             }
         }
 
-        /*
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass >= 0)
-        {
-            Item *pitem = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0,INVTYPE_WEAPON);
-            if(!pitem)
-                castResult = SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND;
-            else if(pitem->GetProto()->Class != m_spellInfo->EquippedItemClass)
-                castResult = SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND;
-            else if(!(pitem->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
-                castResult = SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND;
-        }*/
-        //Old not working code
-        //if((m_spellInfo->AttributesExEx & 0x4000000) && !target->HasInArc(M_PI, m_caster) )
-        //    castResult = SPELL_FAILED_NOT_BEHIND;
-
         //Must be behind the target.
         if( m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI, m_caster) )
         {
             SendInterrupted(2);
-            castResult = SPELL_FAILED_NOT_BEHIND;
+            return SPELL_FAILED_NOT_BEHIND;
         }
-        else
-            //Target must be facing you.
+
+        //Target must be facing you.
         if((m_spellInfo->Attributes == 0x150010) && !target->HasInArc(M_PI, m_caster) )
         {
             SendInterrupted(2);
-            castResult = SPELL_FAILED_NOT_INFRONT;
+            return SPELL_FAILED_NOT_INFRONT;
         }
-        else
+
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
-            castResult = SPELL_FAILED_CONFUSED;
+            return SPELL_FAILED_CONFUSED;
 
         if((m_spellInfo->AttributesEx3 & 0x800) != 0) // need check...
-            castResult = SPELL_FAILED_ONLY_BATTLEGROUNDS;
+            return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
         if(m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetAreaId())
-            castResult = SPELL_FAILED_REQUIRES_AREA;
-
-        if(castResult!=0)
-            return castResult;
+            return SPELL_FAILED_REQUIRES_AREA;
     }
 
     if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
@@ -1987,19 +1965,18 @@ uint8 Spell::CanCast()
     if(m_caster->m_silenced)
         return SPELL_FAILED_SILENCED;
 
-    castResult = CheckItems();                              // always check items (focus object can be required for any type casts)
+    // always check items (focus object can be required for any type casts)
+    if(uint8 castResult = CheckItems())
+        return castResult;
 
-    if(castResult == 0)
-        castResult = CheckRange();
+    if(uint8 castResult = CheckRange())
+        return castResult;
 
-    if(castResult == 0)
     {
         uint32 mana = 0;
-        castResult = CheckMana(&mana);
+        if(uint8 castResult = CheckMana(&mana))
+            return castResult;
     }
-
-    if( castResult != 0 )
-        return castResult;
 
     for (int i = 0; i < 3; i++)
     {
@@ -2009,18 +1986,13 @@ uint8 Spell::CanCast()
             case SPELL_EFFECT_DUMMY:
             {
                 if (!m_targets.getUnitTarget())
-                {
-                    castResult = SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                    break;
-                }
+                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
                 // Execute
                 if(m_spellInfo->SpellIconID == 1648)
                 {
                     if(m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
-                    {
-                        castResult = SPELL_FAILED_BAD_TARGETS;
-                        break;
-                    }
+                        return SPELL_FAILED_BAD_TARGETS;
                 }
                 break;
             }
@@ -2030,49 +2002,32 @@ uint8 Spell::CanCast()
                 if(m_spellInfo->SpellVisual == 7250)
                 {
                     if (!m_targets.getUnitTarget())
-                    {
-                        castResult = SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                        break;
-                    }
+                        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
                     if(m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
-                    {
-                        castResult = SPELL_FAILED_BAD_TARGETS;
-                        break;
-                    }
+                        return SPELL_FAILED_BAD_TARGETS;
                 }
                 break;
             }
             case SPELL_EFFECT_TAMECREATURE:
             {
                 if (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER)
-                {
-                    castResult = SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                    break;
-                }
+                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
                 if (m_targets.getUnitTarget()->getLevel() > m_caster->getLevel())
-                {
-                    castResult = SPELL_FAILED_HIGHLEVEL;
-                    break;
-                }
+                    return SPELL_FAILED_HIGHLEVEL;
+
                 CreatureInfo const *cinfo = ((Creature*)m_targets.getUnitTarget())->GetCreatureInfo();
                 CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
                 if( cinfo->type != CREATURE_TYPE_BEAST || !cFamily || !cFamily->tamable )
-                {
-                    castResult = SPELL_FAILED_BAD_TARGETS;
-                    break;
-                }
+                    return SPELL_FAILED_BAD_TARGETS;
+
                 if(m_caster->GetPetGUID())
-                {
-                    castResult = SPELL_FAILED_ALREADY_HAVE_SUMMON;
-                    break;
-                }
+                    return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+
                 if(m_caster->GetCharmGUID())
-                {
-                    castResult = SPELL_FAILED_ALREADY_HAVE_CHARM;
-                    break;
-                }
+                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
+
                 break;
             }
             case SPELL_EFFECT_LEARN_PET_SPELL:
@@ -2080,102 +2035,75 @@ uint8 Spell::CanCast()
                 Pet* pet = m_caster->GetPet();
 
                 if(!pet)
-                {
-                    castResult = SPELL_FAILED_NO_PET;
-                    break;
-                }
+                    return SPELL_FAILED_NO_PET;
 
                 SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
 
                 if(!learn_spellproto)
-                {
-                    castResult = SPELL_FAILED_NOT_KNOWN;
-                    break;
-                }
+                    return SPELL_FAILED_NOT_KNOWN;
 
                 uint8 learn_msg = 1;
                 for(int8 x=0;x<4;x++)
                 {
                     if(pet->m_spells[x] == learn_spellproto->Id)
-                    {
-                        castResult = SPELL_FAILED_SPELL_LEARNED;
-                        break;
-                    }
+                        return SPELL_FAILED_SPELL_LEARNED;
+
                     SpellEntry const *has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
                     if (!has_spellproto) learn_msg = 0;
                     else if (has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
                         learn_msg = 0;
                 }
                 if(learn_msg)
-                    castResult = SPELL_FAILED_NOT_KNOWN;
+                    return SPELL_FAILED_NOT_KNOWN;
+
                 break;
             }
             case SPELL_AURA_MOUNTED:
             {
                 if (m_caster->IsInWater())
-                {
-                    castResult = SPELL_FAILED_ONLY_ABOVEWATER;
-                    break;
-                }
+                    return SPELL_FAILED_ONLY_ABOVEWATER;
+
                 break;
             }
             case SPELL_EFFECT_FEED_PET:
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.m_itemTarget )
-                {
-                    castResult = SPELL_FAILED_BAD_TARGETS;
-                    break;
-                }
+                    return SPELL_FAILED_BAD_TARGETS;
 
                 Pet* pet = m_caster->GetPet();
 
                 if(!pet)
-                {
-                    castResult = SPELL_FAILED_NO_PET;
-                    break;
-                }
+                    return SPELL_FAILED_NO_PET;
 
                 if(!pet->HaveInDiet(m_targets.m_itemTarget->GetProto()))
-                {
-                    castResult = SPELL_FAILED_WRONG_PET_FOOD;
-                    break;
-                }
+                    return SPELL_FAILED_WRONG_PET_FOOD;
 
                 break;
             }
             case SPELL_EFFECT_SKINNING:
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetTypeId() != TYPEID_UNIT)
-                {
-                    castResult = SPELL_FAILED_BAD_TARGETS;
-                    break;
-                }
+                    return SPELL_FAILED_BAD_TARGETS;
 
                 if( !(m_targets.getUnitTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & UNIT_FLAG_SKINNABLE) )
-                {
-                    castResult = SPELL_FAILED_TARGET_UNSKINNABLE;
-                    break;
-                }
+                    return SPELL_FAILED_TARGET_UNSKINNABLE;
 
                 if ( ( ((Creature*)m_targets.getUnitTarget())->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
                     && ( !((Creature*)m_targets.getUnitTarget())->lootForBody || !((Creature*)m_targets.getUnitTarget())->loot.empty() ) )
                 {
-                    castResult = SPELL_FAILED_TARGET_NOT_LOOTED;
-                    break;
+                    return SPELL_FAILED_TARGET_NOT_LOOTED;
                 }
 
                 int32 SkinningValue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
                 int32 TargetLevel = m_targets.getUnitTarget()->getLevel();
                 int32 ReqValue = (SkinningValue < 100 ? (TargetLevel-10)*10 : TargetLevel*5);
                 if (ReqValue > SkinningValue)
-                {
-                    castResult = SPELL_FAILED_LOW_CASTLEVEL;
-                    break;
-                }
+                    return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
                 if (m_caster->m_currentSpell == this && (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
-                    castResult = SPELL_FAILED_TRY_AGAIN;
+                    return SPELL_FAILED_TRY_AGAIN;
+
                 break;
             }
             case SPELL_EFFECT_OPEN_LOCK:
@@ -2211,13 +2139,10 @@ uint8 Spell::CanCast()
                         break;
 
                     if (ReqValue > SkillValue)
-                    {
-                        castResult = SPELL_FAILED_LOW_CASTLEVEL;
-                        break;
-                    }
+                        return SPELL_FAILED_LOW_CASTLEVEL;
 
                     if (ReqValue > irand(SkillValue-25, SkillValue+37))
-                        castResult = SPELL_FAILED_TRY_AGAIN;
+                        return SPELL_FAILED_TRY_AGAIN;
                 }
                 break;
             }
@@ -2225,16 +2150,11 @@ uint8 Spell::CanCast()
             {
                 Creature *pet = m_caster->GetPet();
                 if(!pet)
-                {
-                    castResult = SPELL_FAILED_NO_PET;
-                    break;
-                }
+                    return SPELL_FAILED_NO_PET;
 
                 if(pet->isAlive())
-                {
-                    castResult = SPELL_FAILED_ALREADY_HAVE_SUMMON;
-                    break;
-                }
+                    return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+
                 break;
             }
             case SPELL_EFFECT_SUMMON:
@@ -2247,17 +2167,26 @@ uint8 Spell::CanCast()
             case SPELL_EFFECT_SUMMON_DEMON:
             {
                 if(m_caster->GetPetGUID())
-                {
-                    castResult = SPELL_FAILED_ALREADY_HAVE_SUMMON;
-                    break;
-                }
+                    return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+
                 if(m_caster->GetCharmGUID())
-                {
-                    castResult = SPELL_FAILED_ALREADY_HAVE_CHARM;
-                    break;
-                }
+                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
+
                 break;
             }
+           case SPELL_EFFECT_SUMMON_PLAYER:
+           {
+               if(!m_targets.getUnitTarget())
+                   return SPELL_FAILED_BAD_TARGETS;
+
+               // check if our map is instanceable
+               if( MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Instanceable() &&
+                   !m_caster->IsInMap(m_targets.getUnitTarget()) )
+               {
+                   return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
+               }
+               break;
+           }
             case SPELL_EFFECT_LEAP:
             case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
             {
@@ -2270,14 +2199,11 @@ uint8 Spell::CanCast()
                 float caster_pos_z = m_caster->GetPositionZ();
                 // Control the caster to not climb or drop when +-fz > 8
                 if(!(fz<=caster_pos_z+8 && fz>=caster_pos_z-8))
-                    castResult = SPELL_FAILED_TRY_AGAIN;
+                    return SPELL_FAILED_TRY_AGAIN;
                 break;
             }
             default:break;
         }
-
-        if(castResult != 0)
-            return castResult;
     }
 
     // Conflagrate - do only when preparing
@@ -2356,10 +2282,10 @@ uint8 Spell::CanCast()
             };break;
             default:break;
         }
-        if(castResult != 0)
-            return castResult;
     }
-    return castResult;
+
+    // all ok
+    return 0;
 }
 
 uint8 Spell::CheckRange()
