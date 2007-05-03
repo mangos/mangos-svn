@@ -885,10 +885,17 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 void Aura::TriggerSpell()
 {
     SpellEntry const *spellInfo;
+
+    // generic code
     if (GetSpellProto()->EffectTriggerSpell[m_effIndex])
         spellInfo = sSpellStore.LookupEntry(GetSpellProto()->EffectTriggerSpell[m_effIndex]);
+    // specific code for cases with no triger spell provided in field
     else if (GetSpellProto()->Category == 1011)
         spellInfo = sSpellStore.LookupEntry(22845);         // Frenzied Regeneration
+    else if (GetId()==29528)
+        spellInfo = sSpellStore.LookupEntry(28713);         // Inoculation
+    else
+        spellInfo = NULL;
 
     if(!spellInfo)
     {
