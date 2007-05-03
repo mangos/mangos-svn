@@ -283,6 +283,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                 else                                        // not vein
                     go->SetLootState(GO_LOOTED);
 
+                go->ClearSkillupList();                     // to allow at next go open after full looting (for veins mostly) receive skill-up
                 loot->clear();
             }
         }
