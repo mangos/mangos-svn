@@ -44,6 +44,7 @@
 #include "TargetedMovementGenerator.h"
 #include "Formulas.h"
 #include "BattleGround.h"
+#include "CreatureAI.h"
 
 pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
@@ -1697,6 +1698,8 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
 void Aura::HandleModConfuse(bool apply, bool Real)
 {
+    Unit* caster = GetCaster();
+
     uint32 apply_stat = UNIT_STAT_CONFUSED;
     if( apply )
     {
@@ -1707,6 +1710,14 @@ void Aura::HandleModConfuse(bool apply, bool Real)
         // only at real add aura
         if(Real)
         {
+            //This fixes blind so it doesn't continue to attack
+            // TODO: may other spells casted confuse aura (but not all) stop attack
+            if( caster && caster->GetTypeId() == TYPEID_PLAYER && 
+                GetSpellProto()->Mechanic == MECHANIC_CONFUSED && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
+            {
+                caster->AttackStop();
+            }
+
             if (m_target->GetTypeId() == TYPEID_UNIT)
                 (*((Creature*)m_target))->Mutate(new ConfusedMovementGenerator(*((Creature*)m_target)));
         }
@@ -1843,14 +1854,33 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         // only at real add aura
         if(Real)
         {
-            //Save last orientation
-            if (caster)
+            if( caster )
+            {
+                //If this is a knockout spell for rogues attacker stops
+                if( caster->GetTypeId() == TYPEID_PLAYER && 
+                    GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
+                {
+                    caster->AttackStop();
+                }
+
+                //Save last orientation
                 m_target->SetOrientation(m_target->GetAngle(caster));
+            }
 
             if(m_target->GetTypeId() != TYPEID_PLAYER)
+            {
                 ((Creature *)m_target)->StopMoving();
 
-            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8+4);
+                //Removes threat and stops combat state so from player so he can re-stealth
+                if( GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (GetSpellProto()->SpellIconID == 249) )
+                {
+                    //Unit will not attack player if out of range
+                   ((Creature *)m_target)->CombatStop();
+                   ((Creature *)m_target)->DeleteThreatList();
+                }
+            }
+
+            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
             data.append(m_target->GetPackGUID());
             data << uint32(0);
             m_target->SendMessageToSet(&data,true);
@@ -1860,17 +1890,25 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     {
         m_target->clearUnitState(UNIT_STAT_STUNDED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-        if(caster && m_target->isAlive())
-            m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
 
         // only at real remove aura
         if(Real)
         {
+            if(caster && m_target->isAlive())
+                m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
+
             WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
             data.append(m_target->GetPackGUID());
             data << uint32(0);
             m_target->SendMessageToSet(&data,true);
 
+            //If sap is used then threat is removed and mob goes back to normal waypoint
+            if( m_target->GetTypeId() != TYPEID_PLAYER && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (GetSpellProto()->SpellIconID == 249))
+            {  
+                //Units no longer brain dead after they come back from sap ;p
+                ((Creature *)m_target)->AI().EnterEvadeMode();
+            }
+                        
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
             {
                 if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
