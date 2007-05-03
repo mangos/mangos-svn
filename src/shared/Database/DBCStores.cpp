@@ -410,8 +410,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
     if(spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
     {
-        // only paladin seals have this
-        if (spellInfo->SpellVisual == 5622)
+        if (IsSealSpell(spellId))
             return SPELL_SEAL;
 
         for (int i = 0; i < 3; i++)
