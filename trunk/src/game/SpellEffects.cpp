@@ -1078,6 +1078,7 @@ void Spell::EffectEnergize(uint32 i)
         return;
 
     unitTarget->ModifyPower(power,damage);
+    m_caster->SendHealSpellOnPlayerPet(unitTarget, m_spellInfo->Id, damage, power);
 }
 
 void Spell::EffectOpenLock(uint32 i)
