@@ -975,10 +975,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
     }
 
-    // seal
-    if(GetSpellProto()->SpellVisual == 5622 && caster && caster->GetTypeId() == TYPEID_PLAYER)
+    // seal of righteousness
+    if(GetSpellProto()->SpellVisual == 7986 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
+        if(GetEffIndex() == 0)
         {
             Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
             if(apply)
@@ -1931,6 +1931,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 if(!spellInfo)
                     return;
 
+                // (not modify stats and then not required ApplyStats call
                 caster->CastSpell(m_target,spellInfo,true,NULL);
                 return;
             }
@@ -1953,8 +1954,12 @@ void Aura::HandleModStealth(bool apply, bool Real)
                 m_target->SendUpdateToPlayer((Player*)m_target);
 
             // for RACE_NIGHTELF stealth
-            if(m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->HasSpell(21009))
+            if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
+            {
+                m_target->ApplyStats(true);
                 m_target->CastSpell(m_target, 21009, true);
+                m_target->ApplyStats(false);
+            }
         }
     }
     else
@@ -1970,8 +1975,12 @@ void Aura::HandleModStealth(bool apply, bool Real)
                 m_target->SendUpdateToPlayer((Player*)m_target);
 
             // for RACE_NIGHTELF stealth
-            if(m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->HasSpell(21009))
+            if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
+            {
+                m_target->ApplyStats(true);
                 m_target->RemoveAurasDueToSpell(21009);
+                m_target->ApplyStats(false);
+            }
         }
     }
 }
@@ -2323,10 +2332,12 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                     if(bg->IsHordeFlagPickedup())
                         if(GetSpellProto()->Id == 23333)    // Warsong Flag, horde
                                                             // Horde Flag Drop
+                                                            // (not modify stats and then not required ApplyStats call)
                             m_target->CastSpell(m_target, 23334, true, 0);
                     if(bg->IsAllianceFlagPickedup())
                         if(GetSpellProto()->Id == 23335)    // Silverwing Flag, alliance
                                                             // Alliance Flag Drop
+                                                            // (not modify stats and then not required ApplyStats call)
                             m_target->CastSpell(m_target, 23336, true, 0);
                 }
             }

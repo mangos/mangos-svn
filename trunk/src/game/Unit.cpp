@@ -3430,7 +3430,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     sLog.outDebug("ProcDamageAndSpell: doing %u damage from aura id %u (triggered by an attacker)", i->second, i->first->Id);
                     uint32 damage = i->second;
                     // TODO: remove hack for Seal of Righteousness. That should not be there
-                    if(i->first->SpellIconID == 25 && i->first->SpellVisual == 5622)
+                    if(i->first->SpellVisual == 7986)
                         damage = (damage * GetAttackTime(BASE_ATTACK))/60/1000;
                     if(pVictim && pVictim->isAlive())
                         SpellNonMeleeDamageLog(pVictim, i->first->Id, damage, true);
