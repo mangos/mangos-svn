@@ -2058,13 +2058,6 @@ uint8 Spell::CanCast()
 
                 break;
             }
-            case SPELL_AURA_MOUNTED:
-            {
-                if (m_caster->IsInWater())
-                    return SPELL_FAILED_ONLY_ABOVEWATER;
-
-                break;
-            }
             case SPELL_EFFECT_FEED_PET:
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.m_itemTarget )
@@ -2271,6 +2264,13 @@ uint8 Spell::CanCast()
                     return SPELL_FAILED_CANT_STEALTH;
 
             };break;
+            case SPELL_AURA_MOUNTED:
+            {
+                if (m_caster->IsInWater())
+                    return SPELL_FAILED_ONLY_ABOVEWATER;
+
+                break;
+            }
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
             {
                 if(!m_targets.getUnitTarget())
