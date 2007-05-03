@@ -1253,16 +1253,20 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                     Unit::AuraList& mDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::iterator i = mDummy.begin(); i != mDummy.end(); ++i)
                         if ((*i)->GetSpellProto()->SpellIconID == 238)
-                            FurorChance = (*i)->GetSpellProto()->EffectBasePoints[0]+1;
-                    if (m_modifier.m_miscvalue == FORM_CAT)
-                        //if Furor procs, player gains 40 energy at shapeshift to cat form
-                        unit_target->SetPower(POWER_ENERGY,FurorChance >= urand(1,100) ? 40 : 0);
-                    else
-                        //if Furor procs, player gains 10 rage at shapeshift to bear/direbear form
-                        unit_target->SetPower(POWER_RAGE,FurorChance >= urand(1,100) ? 100 : 0);
+                            FurorChance = (*i)->GetModifier()->m_amount;
+                    if (roll_chance_f(FurorChance))
+                    {
+                        unit_target->ApplyStats(true);
+                        if (m_modifier.m_miscvalue == FORM_CAT)
+                            //if Furor procs, player gains 40 energy at shapeshift to cat form
+                            unit_target->CastSpell(unit_target,17099,true,NULL);
+                        else
+                            //if Furor procs, player gains 10 rage at shapeshift to bear/direbear form
+                            unit_target->CastSpell(unit_target,17057,true,NULL);
+                        unit_target->ApplyStats(false);
+                    }
                     break;
                 }
-
                 case FORM_BATTLESTANCE:
                 case FORM_DEFENSIVESTANCE:
                 case FORM_BERSERKERSTANCE:
