@@ -176,8 +176,8 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
         if(mysql_query(mMysql, sql))
         {
-            sLog.outError( "SQL: %s", sql );
-            sLog.outError("query ERROR: %s", mysql_error(mMysql));
+            sLog.outErrorDb( "SQL: %s", sql );
+            sLog.outErrorDb("query ERROR: %s", mysql_error(mMysql));
             return NULL;
         }
         else
@@ -219,8 +219,8 @@ bool DatabaseMysql::Execute(const char *sql)
 
         if(mysql_query(mMysql, sql))
         {
-            sLog.outError("SQL: %s", sql);
-            sLog.outError("SQL ERROR: %s", mysql_error(mMysql));
+            sLog.outErrorDb("SQL: %s", sql);
+            sLog.outErrorDb("SQL ERROR: %s", mysql_error(mMysql));
             return false;
         }
         else

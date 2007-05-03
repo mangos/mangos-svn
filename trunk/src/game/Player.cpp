@@ -3464,17 +3464,17 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_MELEE_HIT_RATING:
             //Hit (melee): 10
             RatingChange = value/(10.0 * RatingCoeffecient);
-            m_modHitChance += apply?RatingChange:-RatingChange;
+            m_modHitChance += apply?int32(RatingChange):-int32(RatingChange);
             break;
         case PLAYER_FIELD_RANGED_HIT_RATING:
             //Hit (melee): 10
             RatingChange = value/(10.0 * RatingCoeffecient);
-            m_modHitChance += apply?RatingChange:-RatingChange;
+            m_modHitChance += apply?int32(RatingChange):-int32(RatingChange);
             break;
         case PLAYER_FIELD_SPELL_HIT_RATING:
             //Hit (spells): 8
             RatingChange = value/(8.0 * RatingCoeffecient);
-            m_modSpellHitChance += apply?RatingChange:-RatingChange;
+            m_modSpellHitChance += apply?int32(RatingChange):-int32(RatingChange);
             break;
         case PLAYER_FIELD_MELEE_CRIT_RATING:
             //Crit (melee and spells): 14
@@ -3524,14 +3524,14 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             //Haste: 6.67
             RatingChange = value/(6.66667f * RatingCoeffecient);
             ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,RatingChange,!apply);
-            m_modCastSpeedPct += apply ? RatingChange : (-RatingChange);
+            m_modCastSpeedPct += apply?int32(RatingChange):-int32(RatingChange);
             break;
         case PLAYER_FIELD_HIT_RATING:
             //Hit (melee): 10
             RatingChange = value/(10.0 * RatingCoeffecient);
             ApplyModUInt32Value(PLAYER_FIELD_MELEE_HIT_RATING, value, apply);
             ApplyModUInt32Value(PLAYER_FIELD_RANGED_HIT_RATING, value, apply);
-            m_modHitChance += apply?RatingChange:-RatingChange;
+            m_modHitChance += apply?int32(RatingChange):-int32(RatingChange);
             break;
         case PLAYER_FIELD_CRIT_RATING:
             //Crit (melee and spells): 14
@@ -3540,12 +3540,12 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             ApplyModUInt32Value(PLAYER_FIELD_RANGED_CRIT_RATING, value, apply);
             ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,RatingChange,apply);
             break;
-            /*
-            case PLAYER_FIELD_HIT_AVOIDANCE_RATING:
-                break;
-            case PLAYER_FIELD_CRIT_AVOIDANCE_RATING:
-                break;
-            */
+        /*
+        case PLAYER_FIELD_HIT_AVOIDANCE_RATING:
+            break;
+        case PLAYER_FIELD_CRIT_AVOIDANCE_RATING:
+            break;
+        */
         case PLAYER_FIELD_RESILIENCE_RATING:
             //Resilience: 25
             RatingChange = value/(25.0 * RatingCoeffecient);
