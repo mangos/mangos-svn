@@ -850,11 +850,11 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     // fix me : 'running' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creatures ?
     // perhaps it should be 'state'?
-    sDatabase.PExecuteLog("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, pCreature->GetDBTableGUIDLow());
+    //sDatabase.PExecuteLog("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, pCreature->GetDBTableGUIDLow());
 
     pCreature->setMoveRunFlag(option > 0);
 
-    SendSysMessage(LANG_VALUE_SAVED);
+    //SendSysMessage(LANG_VALUE_SAVED);
     return true;
 }
 

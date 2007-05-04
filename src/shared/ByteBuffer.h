@@ -25,10 +25,6 @@
 class ByteBuffer
 {
     public:
-        class error
-        {
-        };
-
         const static size_t DEFAULT_SIZE = 0x1000;
 
         // constructor

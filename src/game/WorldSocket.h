@@ -160,7 +160,9 @@ class WorldSocket : public TcpSocket
 
         uint32 m_LastPingMSTime;
         uint32 m_OverSpeedPings;
-        
+
+        // internal checks
+        void SizeError(WorldPacket const& packet, uint32 size) const;
 };
 #endif
 /// @}
