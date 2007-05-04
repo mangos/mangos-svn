@@ -30,6 +30,9 @@ DatabaseSqlite::~DatabaseSqlite()
 
 bool DatabaseSqlite::Initialize(const char *infoString)
 {
+    if(!Database::Initialize(infoString))
+        return false;
+
     char *errmsg;
 
     mSqlite = sqlite_open(infoString, 0, &errmsg);

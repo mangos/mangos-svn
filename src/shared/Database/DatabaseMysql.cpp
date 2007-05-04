@@ -20,12 +20,7 @@
 #include "Util.h"
 #include "Policies/SingletonImp.h"
 #include "Platform/Define.h"
-#include "Config/ConfigEnv.h"
 #include "../src/zthread/ThreadImpl.h"
-
-#include <ctime>
-#include <iostream>
-#include <fstream>
 
 using namespace std;
 
@@ -69,6 +64,9 @@ DatabaseMysql::~DatabaseMysql()
 
 bool DatabaseMysql::Initialize(const char *infoString)
 {
+    if(!Database::Initialize(infoString))
+        return false;
+
     tranThread = NULL;
     MYSQL *mysqlInit;
     mysqlInit = mysql_init(NULL);
@@ -77,10 +75,6 @@ bool DatabaseMysql::Initialize(const char *infoString)
         sLog.outError( "Could not initialize Mysql connection" );
         return false;
     }
-
-    // Enable logging of SQL commands (usally only GM commands)
-    // (See method: PExecuteLog)
-    m_logSQL = sConfig.GetIntDefault("LogSQL", 0);
 
     vector<string> tokens = StrSplit(infoString, ";");
 
@@ -240,49 +234,6 @@ bool DatabaseMysql::Execute(const char *sql)
     }
 
     return true;
-}
-
-bool DatabaseMysql::PExecuteLog(const char * format,...)
-{
-    if (!format)
-        return false;
-
-    if( !m_logSQL )
-        return PExecute(format);
-
-    va_list ap;
-    char szQuery [1024];
-    va_start(ap, format);
-    int res = vsnprintf( szQuery, 1024, format, ap );
-    va_end(ap);
-
-    if(res==-1)
-    {
-        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
-        return false;
-    }
-    time_t curr;
-    tm local;
-    time(&curr);                                            // get current time_t value
-    local=*(localtime(&curr));                              // dereference and assign
-    char fName[128];
-    sprintf( fName, "%04d-%02d-%02d_logSQL.sql", local.tm_year+1900, local.tm_mon+1, local.tm_mday );
-
-    fstream log_file ( fName, ios::app );
-
-    if ( !log_file.is_open() )
-    {
-        // The file could not be opened
-        sLog.outError("SQL-Logging is disabled - Log file for the SQL commands could not be openend: %s",fName);
-    }
-    else
-    {
-        // Safely use the file stream
-        log_file << szQuery << "\n";
-        log_file.close();
-    }
-    return PExecute(format);
-
 }
 
 bool DatabaseMysql::PExecute(const char * format,...)
