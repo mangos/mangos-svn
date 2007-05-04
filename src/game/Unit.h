@@ -733,7 +733,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool AddAura(Aura *aur, bool uniq = false);
 
-        void RemoveFirstAuraByDispel(uint32 dispel_type);
+        void RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster); // PBW
         void RemoveAura(AuraMap::iterator &i, bool onDeath = false);
         void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveAurasDueToSpell(uint32 spellId);
