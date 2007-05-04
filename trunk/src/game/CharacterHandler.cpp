@@ -248,12 +248,12 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     recv_data >> playerGuid;
 
     Player* plr = new Player(this);
-    ASSERT(plr);
 
-    plr->SetSession(this);
     // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
     if(!plr->LoadFromDB(GUID_LOPART(playerGuid)))
     {
+        KickPlayer();                                       // disconnect client, player no set to session and it will not deleted or saved at kick
+        delete plr;                                         // delete it manually
         m_playerLoading = false;
         return;
     }
