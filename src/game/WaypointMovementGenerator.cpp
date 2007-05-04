@@ -37,6 +37,7 @@ alter table creature_movement add `wpguid` int(11) default '0';
 #include "ObjectMgr.h"
 #include "Creature.h"
 #include "FlightMaster.h"
+#include "DestinationHolderImp.h"
 
 #include <cassert>
 
@@ -375,6 +376,28 @@ FlightPathMovementGenerator::Initialize()
     i_currentNode = 0;
     Traveller<Player> traveller(i_player);
     i_destinationHolder.SetDestination(traveller, i_path[i_currentNode].x, i_path[i_currentNode].y, i_path[i_currentNode].z);
+}
+
+void
+FlightPathMovementGenerator::UpdatePath(Player &player, const uint32 &diff)
+{
+    if( !MovementInProgress() )
+        return;
+
+    Traveller<Player> traveller(player);
+    if( i_destinationHolder.UpdateTraveller(traveller, diff, false) )
+    {
+        i_destinationHolder.ResetUpdate(FLIGHT_TRAVEL_UPDATE);
+        if( i_destinationHolder.HasArrived() )
+        {
+            ++i_currentNode;
+            if( i_currentNode < i_path.Size() )
+            {
+                DEBUG_LOG("loading node %u for player %s", i_currentNode, i_player.GetName());
+                i_destinationHolder.SetDestination(traveller, i_path[i_currentNode].x, i_path[i_currentNode].y, i_path[i_currentNode].z);
+            }
+        }
+    }
 }
 
 //
