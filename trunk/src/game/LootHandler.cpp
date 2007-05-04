@@ -239,7 +239,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         }
         else if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
         {
-           // GO is mineral vein? so it is not removed after its looted
+            // GO is mineral vein? so it is not removed after its looted
             if(go->GetGoType() == GAMEOBJECT_TYPE_CHEST) 
             { 
                 uint32 go_min = go->GetGOInfo()->sound4;
@@ -282,9 +282,11 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                 }
                 else                                        // not vein
                     go->SetLootState(GO_LOOTED);
-
-                loot->clear();
             }
+            else                                            // not chest (or vein/herb/etc)
+                go->SetLootState(GO_LOOTED);
+
+            loot->clear();
         }
         else
             // not fully looted object
