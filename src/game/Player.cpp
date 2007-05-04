@@ -4597,7 +4597,7 @@ void Player::UpdateHonorFields()
         SetUInt32Value(PLAYER_FIELD_HONOR_YESTERDAY, (uint32)(honor_yesterday*10));
         SetUInt32Value(PLAYER_FIELD_KILLS, (kills_yesterday<<16));
 
-        sDatabase.PQuery("DELETE FROM `character_kill` WHERE `date`<'%u'", today);
+        sDatabase.PQuery("DELETE FROM `character_kill` WHERE `date`<'%u' AND `guid`='%u'", today,GUID_LOPART(GetGUID()));
     }
 }
 
