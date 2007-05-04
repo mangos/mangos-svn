@@ -398,9 +398,9 @@ bool IsSealSpell(uint32 spellId)
 
     // SpellID 25780 is Righteous Fury, NOT seal !
     return spellId != 25780 && spellInfo && (
-        spellInfo->SpellVisual == 7986 || spellInfo->SpellVisual == 7978 || spellInfo->SpellVisual == 8062 ||
-        spellInfo->SpellVisual == 8072 || spellInfo->SpellVisual == 7992 || spellInfo->SpellVisual == 7987 || 
-        spellInfo->SpellVisual ==  298 || spellInfo->SpellVisual == 7975 );
+        spellInfo->SpellVisual ==  298 || spellInfo->SpellVisual == 7975 || spellInfo->SpellVisual == 7978 ||
+        spellInfo->SpellVisual == 7986 || spellInfo->SpellVisual == 7987 || spellInfo->SpellVisual == 7992 ||
+        spellInfo->SpellVisual == 8062 || spellInfo->SpellVisual == 8072 || spellInfo->SpellVisual == 8073 );
 }
 
 SpellSpecific GetSpellSpecific(uint32 spellId)
