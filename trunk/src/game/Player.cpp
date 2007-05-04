@@ -11831,7 +11831,7 @@ void Player::TextEmote(const std::string text)
     data << text;
     data << (uint8)chatTag();
 
-    SendMessageToSet(&data, true);
+    SendMessageToOwnTeamSet(&data, true);
 }
 
 void Player::Whisper(const uint64 receiver, const std::string text, const uint32 language)

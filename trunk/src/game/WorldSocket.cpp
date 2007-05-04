@@ -64,6 +64,8 @@ struct ServerPktHeader
 #pragma pack(pop)
 #endif
 
+#define SOCKET_CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
+
 /// WorldSocket construction and initialisation.
 WorldSocket::WorldSocket(SocketHandler &sh): TcpSocket(sh), _cmd(0), _remaining(0), _session(NULL)
 {
@@ -228,20 +230,19 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     BigNumber K;
 
+    SOCKET_CHECK_PACKET_SIZE(recvPacket,4+4+1+4+20);
+
     ///- Read the content of the packet
-    try
-    {
-        recvPacket >> BuiltNumberClient;                    // for now no use
-        recvPacket >> unk2;
-        recvPacket >> account;
-        recvPacket >> clientSeed;
-        recvPacket.read(digest, 20);
-    }
-    catch(ByteBuffer::error &)
-    {
-        sLog.outError("WorldSocket::_HandleAuthSession Get Incomplete packet");
-        return;
-    }
+    recvPacket >> BuiltNumberClient;                    // for now no use
+    recvPacket >> unk2;
+    recvPacket >> account;
+
+    // recheck size
+    SOCKET_CHECK_PACKET_SIZE(recvPacket,4+4+(account.size()+1)+4+20);
+
+    recvPacket >> clientSeed;
+    recvPacket.read(digest, 20);
+
     sLog.outDebug("Auth: client %u, unk2 %u, account %s, clientseed %u", BuiltNumberClient, unk2, account.c_str(), clientSeed);
 
     ///- Get the account information from the realmd database
@@ -405,16 +406,10 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
 {
     uint32 ping;
 
+    CHECK_PACKET_SIZE(recvPacket,4);
+
     ///- Get the ping packet content
-    try
-    {
-        recvPacket >> ping;
-    }
-    catch(ByteBuffer::error &)
-    {
-        sLog.outDetail("Incomplete ping packet");
-        return;
-    }
+    recvPacket >> ping;
 
     ///- check ping speed for players
     if(_session && _session->GetSecurity() == 0)
@@ -500,3 +495,10 @@ void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
     packet << uint32 (PlayersInQue);                        //amount of players in queue
     SendPacket(&packet);
 }
+
+void WorldSocket::SizeError(WorldPacket const& packet, uint32 size) const
+{
+    sLog.outError("Client send packet %s (%u) with size %u but expected %u (attempt crash server?), skipped",
+        LookupName(packet.GetOpcode(),g_worldOpcodeNames),packet.GetOpcode(),packet.size(),size);
+}
+
