@@ -23,7 +23,7 @@
 #include "RedZoneDistrict.h"
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
-#include "DestinationHolder.h"
+#include "DestinationHolderImp.h"
 
 void
 HomeMovementGenerator::Initialize(Creature & owner)
