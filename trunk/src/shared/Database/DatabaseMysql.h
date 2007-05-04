@@ -44,10 +44,6 @@ class DatabaseMysql : public Database
         QueryResult* PQuery(const char *format,...);
         QueryResult* Query(const char *sql);
         bool Execute(const char *sql);
-        // 0 - do not log, 1 - log sql commands
-        uint32 m_logSQL;
-        // Writes SQL commands to a LOG file (see mangosd.conf "LogSQL")
-        bool PExecuteLog(const char *format,...);
         bool PExecute(const char *format,...);
         bool BeginTransaction();
         bool CommitTransaction();
