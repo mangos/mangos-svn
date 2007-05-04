@@ -24,6 +24,14 @@ WorldDatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
 # Settings for maximum database-ping interval (minutes between pings)
 MaxPingTime = 30
 
+# Enable logging of GM commands - all SQL code will be written to a log file
+# All commands are written to a file: YYYY-MM-DD_logSQL.sql
+# If a new day starts (00:00:00) then a new file is created - the old
+# file will not be deleted.
+# 0 - Do not log
+# 1 - Write SQL code to logfile
+LogSQL = 1
+
 # Server console level of logging
 # 0 = Minimum; 1 = Basic&Error; 2 = Detail; 3 = Full/Debug
 # Default: 0
