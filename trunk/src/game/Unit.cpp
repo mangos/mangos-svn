@@ -532,7 +532,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
             Attack(pVictim,(damagetype == DIRECT_DAMAGE));
         }
 
-        if(pVictim->getTransForm())
+	if(pVictim->getTransForm() && pVictim->hasUnitState(UNIT_STAT_CONFUSED))
         {
             pVictim->RemoveAurasDueToSpell(pVictim->getTransForm());
             pVictim->setTransForm(0);
@@ -1430,7 +1430,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool isTriggered)
 {
-    if(hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING) )
+    if(hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)
         return;
 
     if (!pVictim->isAlive())
@@ -2335,7 +2335,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
     return true;
 }
 
-void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
+void Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster) // PBW
 {
     AuraMap::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end();)
@@ -2361,13 +2361,14 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
                     default:
                         positive = ((*i).second->GetSpellProto()->AttributesEx & (1<<7)) ? false : true;
                 }
-                if(positive)
+                if(positive && IsFriendlyTo(pCaster)) // PBW
                 {
                     ++i;
                     continue;
                 }
             }
             RemoveAura(i);
+			break; // PBW
         }
         else
             ++i;
