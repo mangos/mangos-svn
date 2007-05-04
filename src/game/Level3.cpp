@@ -2257,7 +2257,7 @@ bool ChatHandler::HandleLinkGraveCommand(const char* args)
     }
     else
     {
-        sDatabase.PExecute("INSERT INTO `game_graveyard_zone` ( `id`,`ghost_map`,`ghost_zone`,`faction`) VALUES ('%u', '%u', '%u','%u')",
+        sDatabase.PExecuteLog("INSERT INTO `game_graveyard_zone` ( `id`,`ghost_map`,`ghost_zone`,`faction`) VALUES ('%u', '%u', '%u','%u')",
             g_id,player->GetMapId(),player->GetZoneId(),g_team);
 
         PSendSysMessage(LANG_COMMAND_GRAVEYARDLINKED, g_id,player->GetZoneId());
@@ -2954,7 +2954,7 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     float ort = player->GetOrientation();
     int mapid = player->GetMapId();
 
-    if(sDatabase.PExecute("INSERT INTO `game_tele` (`position_x`,`position_y`,`position_z`,`orientation`,`map`,`name`) VALUES (%f,%f,%f,%f,%d,'%s')",x,y,z,ort,mapid,name.c_str()))
+    if(sDatabase.PExecuteLog("INSERT INTO `game_tele` (`position_x`,`position_y`,`position_z`,`orientation`,`map`,`name`) VALUES (%f,%f,%f,%f,%d,'%s')",x,y,z,ort,mapid,name.c_str()))
     {
         SendSysMessage(LANG_COMMAND_TP_ADDED);
     }
@@ -2980,7 +2980,7 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     }
     delete result;
 
-    if(sDatabase.PExecute("DELETE FROM `game_tele` WHERE `name` = '%s'",name.c_str()))
+    if(sDatabase.PExecuteLog("DELETE FROM `game_tele` WHERE `name` = '%s'",name.c_str()))
     {
         SendSysMessage(LANG_COMMAND_TP_DELETED);
     }

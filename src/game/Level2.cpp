@@ -634,7 +634,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     }
 
     // add to DB and to current ingame vendor
-    QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`item`,`maxcount`,`incrtime`) VALUES('%u','%u','%u','%u')",vendor->GetEntry(), itemId, maxcount,incrtime);
+    sDatabase.PExecuteLog("INSERT INTO `npc_vendor` (`entry`,`item`,`maxcount`,`incrtime`) VALUES('%u','%u','%u','%u')",vendor->GetEntry(), itemId, maxcount,incrtime);
     vendor->AddItem(itemId,maxcount,incrtime);
     PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime);
     return false;
@@ -668,7 +668,7 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
         return true;
     }
 
-    sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry`='%u' AND `item`='%u'",vendor->GetEntry(), itemId);
+    sDatabase.PExecuteLog("DELETE FROM `npc_vendor` WHERE `entry`='%u' AND `item`='%u'",vendor->GetEntry(), itemId);
     PSendSysMessage(LANG_ITEM_DELETED_FROM_LIST,itemId,pProto->Name1);
     return true;
 }
@@ -724,11 +724,11 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
 
     Player* player = m_session->GetPlayer();
 
-    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`waittime`) VALUES ('%u','%u','%f', '%f', '%f','%u')",
+    sDatabase.PExecuteLog("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`waittime`) VALUES ('%u','%u','%f', '%f', '%f','%u')",
         lowguid, point, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), wait);
 
     // update movement type
-    sDatabase.PExecute("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", WAYPOINT_MOTION_TYPE,lowguid);
+    sDatabase.PExecuteLog("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", WAYPOINT_MOTION_TYPE,lowguid);
     if(pCreature)
     {
         pCreature->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
@@ -808,8 +808,8 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
 
     // update movement type
     sDatabase.BeginTransaction();
-    sDatabase.PExecute("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", move_type,lowguid);
-    sDatabase.PExecute("DELETE FROM `creature_movement` WHERE `id` = '%u'",lowguid);
+    sDatabase.PExecuteLog("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", move_type,lowguid);
+    sDatabase.PExecuteLog("DELETE FROM `creature_movement` WHERE `id` = '%u'",lowguid);
     sDatabase.CommitTransaction();
     if(pCreature)
     {
@@ -850,7 +850,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     // fix me : 'running' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creatures ?
     // perhaps it should be 'state'?
-    sDatabase.PExecute("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, pCreature->GetDBTableGUIDLow());
+    sDatabase.PExecuteLog("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, pCreature->GetDBTableGUIDLow());
 
     pCreature->setMoveRunFlag(option > 0);
 
@@ -903,7 +903,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     pCreature->SetUInt32Value(UNIT_NPC_FLAGS, npcFlags);
 
-    sDatabase.PExecute("UPDATE `creature_template` SET `npcflag` = '%u' WHERE `entry` = '%u'", npcFlags, pCreature->GetEntry());
+    sDatabase.PExecuteLog("UPDATE `creature_template` SET `npcflag` = '%u' WHERE `entry` = '%u'", npcFlags, pCreature->GetEntry());
 
     SendSysMessage(LANG_VALUE_SAVED_REJOIN);
 
@@ -1351,7 +1351,7 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
     else
         return false;
 
-    sDatabase.PQuery("UPDATE `creature` SET `spawndist`=%i, `MovementType`=%i WHERE `guid`=%u",option,mtype,u_guid);
+    sDatabase.PExecuteLog("UPDATE `creature` SET `spawndist`=%i, `MovementType`=%i WHERE `guid`=%u",option,mtype,u_guid);
     PSendSysMessage(LANG_COMMAND_SPAWNDIST,option);
     return true;
 }
@@ -1382,7 +1382,7 @@ bool ChatHandler::HandleSpawnTimeCommand(const char* args)
     else
         return false;
 
-    sDatabase.PQuery("UPDATE `creature` SET `spawntimesecs`=%i WHERE `guid`=%u",i_stime,u_guid);
+    sDatabase.PExecuteLog("UPDATE `creature` SET `spawntimesecs`=%i WHERE `guid`=%u",i_stime,u_guid);
     PSendSysMessage(LANG_COMMAND_SPAWNTIME,i_stime);
 
     return true;
@@ -1524,11 +1524,11 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
 
     Player* player = m_session->GetPlayer();
 
-    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`) VALUES ('%u','%u','%f', '%f', '%f', '%f')",
+    sDatabase.PExecuteLog("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`) VALUES ('%u','%u','%f', '%f', '%f', '%f')",
         lowguid, point, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
 
     // update movement type
-    sDatabase.PExecute("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", WAYPOINT_MOTION_TYPE,lowguid);
+    sDatabase.PExecuteLog("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", WAYPOINT_MOTION_TYPE,lowguid);
     if(pCreature)
     {
         pCreature->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
@@ -1839,12 +1839,12 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         }
         for( int i=maxPoint; i>point; i-- )
         {
-            sDatabase.PExecute("UPDATE `creature_movement` SET point=point+1 WHERE id='%u' AND point='%u'",
+            sDatabase.PExecuteLog("UPDATE `creature_movement` SET point=point+1 WHERE id='%u' AND point='%u'",
                 lowguid, i);
         }
 
         Player* chr = m_session->GetPlayer();
-        sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`) VALUES ('%u','%u','%f', '%f', '%f')",
+        sDatabase.PExecuteLog("INSERT INTO `creature_movement` (`id`,`point`,`position_x`,`position_y`,`position_z`) VALUES ('%u','%u','%f', '%f', '%f')",
             lowguid, point+1, chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ());
 
         if(npcCreature)
@@ -1865,7 +1865,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             delete wpCreature;
             return false;
         }
-        sDatabase.PExecute("UPDATE `creature_movement` SET `wpguid` = '%u' WHERE `id` = '%u' and `point` = '%u'", wpCreature->GetGUIDLow(), lowguid, point+1);
+        sDatabase.PExecuteLog("UPDATE `creature_movement` SET `wpguid` = '%u' WHERE `id` = '%u' and `point` = '%u'", wpCreature->GetGUIDLow(), lowguid, point+1);
 
         wpCreature->SaveToDB();
         wpCreature->LoadFromDB(wpCreature->GetGUIDLow(), NULL, chr->GetInstanceId());
@@ -1900,9 +1900,9 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         // Adjust the waypoints
         // Respawn the owner of the waypoints
 
-        sDatabase.PExecute("DELETE FROM `creature_movement` WHERE id='%u' AND point='%u'",
+        sDatabase.PExecuteLog("DELETE FROM `creature_movement` WHERE id='%u' AND point='%u'",
             lowguid, point);
-        sDatabase.PExecute("UPDATE `creature_movement` SET point=point-1 WHERE id='%u' AND point>'%u'",
+        sDatabase.PExecuteLog("UPDATE `creature_movement` SET point=point-1 WHERE id='%u' AND point>'%u'",
             lowguid, point);
 
         if(npcCreature)
@@ -1968,7 +1968,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 //MapManager::Instance().GetMap(npcCreature->GetMapId())->Add(wpCreature2);
             }
 
-            sDatabase.PExecute("UPDATE `creature_movement` SET `position_x` = '%f',`position_y` = '%f',`position_z` = '%f' where `id` = '%u' AND point='%u'",
+            sDatabase.PExecuteLog("UPDATE `creature_movement` SET `position_x` = '%f',`position_y` = '%f',`position_z` = '%f' where `id` = '%u' AND point='%u'",
                 chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), lowguid, point );
 
             if(npcCreature)
@@ -2179,12 +2179,12 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
     if( text == 0 )
     {
-        sDatabase.PExecute("UPDATE `creature_movement` SET %s=NULL WHERE id='%u' AND point='%u'",
+        sDatabase.PExecuteLog("UPDATE `creature_movement` SET %s=NULL WHERE id='%u' AND point='%u'",
             show_str, lowguid, point);
     }
     else
     {
-        sDatabase.PExecute("UPDATE `creature_movement` SET %s='%s' WHERE id='%u' AND point='%u'",
+        sDatabase.PExecuteLog("UPDATE `creature_movement` SET %s='%s' WHERE id='%u' AND point='%u'",
             show_str, text, lowguid, point);
     }
 
@@ -2412,7 +2412,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
                 {
                     PSendSysMessage("Warning: Could not delete WP from the world with ID: %d", wpguid);
                     hasError = true;
-                    sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", wpguid);
+                    sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", wpguid);
                 }
                 else
                 {
@@ -2454,7 +2454,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             wpCreature->SetVisibility(VISIBILITY_OFF);
             sLog.outDebug("DEBUG: UPDATE `creature_movement` SET `wpguid` = '%u");
             // set "wpguid" column to the visual waypoint
-            sDatabase.PExecute("UPDATE `creature_movement` SET `wpguid` = '%u' WHERE `id` = '%u' and `point` = '%u'", wpCreature->GetGUIDLow(), lowguid, point);
+            sDatabase.PExecuteLog("UPDATE `creature_movement` SET `wpguid` = '%u' WHERE `id` = '%u' and `point` = '%u'", wpCreature->GetGUIDLow(), lowguid, point);
 
             wpCreature->SaveToDB();
                                                             // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
@@ -2576,7 +2576,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             {
                 PSendSysMessage("Warning: Could not delete WP from the world with ID: %d", guid);
                 hasError = true;
-                sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", guid);
+                sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", guid);
             }
             else
             {
@@ -2588,7 +2588,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             }
         }while(result->NextRow());
         // set "wpguid" column to "empty" - no visual waypoint spawned
-        sDatabase.PExecute("UPDATE `creature_movement` SET `wpguid` = '0'");
+        sDatabase.PExecuteLog("UPDATE `creature_movement` SET `wpguid` = '0'");
 
         if( hasError )
         {

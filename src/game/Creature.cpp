@@ -863,7 +863,7 @@ void Creature::SaveToDB()
 {
     sDatabase.BeginTransaction();
 
-    sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
+    sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
 
     std::ostringstream ss;
     ss << "INSERT INTO `creature` VALUES ("
@@ -887,7 +887,7 @@ void Creature::SaveToDB()
         << GetDefaultMovementType() << ","                  // default movement generator type
         << "'')";                                           // should save auras
 
-    sDatabase.Execute( ss.str( ).c_str( ) );
+    sDatabase.PExecuteLog( ss.str( ).c_str( ) );
 
     sDatabase.CommitTransaction();
 }
@@ -1214,10 +1214,10 @@ void Creature::_LoadQuests()
 void Creature::DeleteFromDB()
 {
     sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
-    sDatabase.PExecute("DELETE FROM `creature_grid` WHERE `guid` = '%u'", m_DBTableGuid);
-    sDatabase.PExecute("DELETE FROM `creature_movement` WHERE `id` = '%u'", m_DBTableGuid);
-    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+    sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
+    sDatabase.PExecuteLog("DELETE FROM `creature_grid` WHERE `guid` = '%u'", m_DBTableGuid);
+    sDatabase.PExecuteLog("DELETE FROM `creature_movement` WHERE `id` = '%u'", m_DBTableGuid);
+    sDatabase.PExecuteLog("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
     sDatabase.CommitTransaction();
 }
 
