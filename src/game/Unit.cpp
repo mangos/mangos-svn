@@ -4153,8 +4153,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     }
 
     // Taken/Done total percent damage auras
-    float DoneTotalMod = 1;
-    float TakenTotalMod = 1;
+    float DoneTotalMod = 1.0f;
+    float TakenTotalMod = 1.0f;
 
     // ..done
     AuraList& mModDamagePercentDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
@@ -4173,15 +4173,15 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if(spellProto->SpellVisual == 1225 && spellProto->SpellIconID == 208)
     {
         CastingTime = 2800; // 80% from +shadow damage
-        DoneTotalMod = 1;
-        TakenTotalMod = 1;
+        DoneTotalMod = 1.0f;
+        TakenTotalMod = 1.0f;
     }
     // Dark Pact
     if(spellProto->SpellVisual == 827 && spellProto->SpellIconID == 154 && GetPet())
     {
         CastingTime = 3360; // 96% from +shadow damage
-        DoneTotalMod = 1;
-        TakenTotalMod = 1;
+        DoneTotalMod = 1.0f;
+        TakenTotalMod = 1.0f;
     }
 
     // Level Factor
@@ -4195,7 +4195,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f;
     float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor / 100.0f;
 
-    float tmpDamage = (pdamage+DoneActualBenefit)*DoneTotalMod;
+    float tmpDamage = (float(pdamage)+DoneActualBenefit)*DoneTotalMod;
     tmpDamage = (tmpDamage+TakenActualBenefit)*TakenTotalMod;
 
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
@@ -4535,7 +4535,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
     }
 
-    float tmpDamage = ((*pdamage + DoneFlatBenefit) + TakenFlatBenefit)*TakenTotalMod;
+    float tmpDamage = ((int32(*pdamage) + DoneFlatBenefit) + TakenFlatBenefit)*TakenTotalMod;
 
     // bonus result can be negative
     *pdamage =  tmpDamage > 0 ? uint32(tmpDamage) : 0;
