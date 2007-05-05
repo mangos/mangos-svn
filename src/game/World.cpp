@@ -198,7 +198,7 @@ Weather* World::AddWeather(uint32 zone_id)
 void World::SetInitialWorldSettings()
 {
     ///- Initialize the random number generator
-    srandom((unsigned int)time(NULL));
+    srand((unsigned int)time(NULL));
 
     ///- Read the version of the configuration file and warn the user in case of emptiness or mismatch
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
