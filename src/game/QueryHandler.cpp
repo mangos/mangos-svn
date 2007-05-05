@@ -172,8 +172,6 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     recv_data >> entryID;
     recv_data >> guid;
 
-    sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%u'", guid);
-
     const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
                                                             // guess size
     WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 150 );
@@ -181,7 +179,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 
     if( !info  )
     {
-        sLog.outDebug( "Missing game object info for entry %u", entryID);
+        sLog.outDebug( "WORLD: CMSG_GAMEOBJECT_QUERY - Missing game object info for entry %u", entryID);
 
         data << uint64(0);
         data << uint64(0);
@@ -205,6 +203,8 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
         return;
     }
 
+    sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u - GUID: %u.", info->name, entryID, guid);
+    
     data << (uint32)info->type;
     data << (uint32)info->displayId;
     data << info->name;

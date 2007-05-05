@@ -1319,7 +1319,7 @@ void Spell::EffectSummon(uint32 i)
         m_caster->GetMapId(),x,y,z,-m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i]))
     {
-        sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        sLog.outErrorDb("Spell::EffectSummon: no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
         delete spawnCreature;
         return;
     }
