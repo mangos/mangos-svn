@@ -34,14 +34,8 @@
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
 #include "Database/DatabaseEnv.h"
-
-#ifdef ENABLE_CLI
 #include "CliRunnable.h"
-#endif
-
-#ifdef ENABLE_RA
 #include "RASocket.h"
-#endif
 
 /// \todo Warning disabling not useful under VC++2005. Can somebody say on which compiler it is useful?
 #pragma warning(disable:4305)
@@ -129,29 +123,28 @@ void Master::Run()
     t.setPriority ((ZThread::Priority )2);
 #endif //!defined( WIN32 ) && (_DEBUG)
 
-#ifdef ENABLE_CLI
+    if (sConfig.GetBoolDefault("Console.Enable", 0)) {
 #if defined( WIN32 ) && (_DEBUG)
-    ///- Launch CliRunnable thread - Use windows threads for debugging!
-    cthread1 = _beginthread( RunCLI, 0, LOWORD( 0) );
+	cthread1 = _beginthread( RunCLI, 0, LOWORD( 0) );
 #else //!defined( WIN32 ) && (_DEBUG)
     ///- Launch CliRunnable thread
-    ZThread::Thread td1(new CliRunnable);
+        ZThread::Thread td1(new CliRunnable);
 #endif //!defined( WIN32 ) && (_DEBUG)
-#endif
-
-    #ifdef ENABLE_RA
-    ///- Launch the RA listener socket
-    port_t raport = sConfig.GetIntDefault( "RA.Port", 3443 );
-    ListenSocket<RASocket> RAListenSocket(h);
-
-    if (RAListenSocket.Bind(raport))
-    {
-        sLog.outError( "MaNGOS RA can not bind to port %d", raport );
-        // return; //go on with no RA
     }
 
-    h.Add(&RAListenSocket);
-    #endif
+    ///- Launch the RA listener socket
+    ListenSocket<RASocket> RAListenSocket(h);
+    if (sConfig.GetBoolDefault("Ra.Enable", 0))
+    {
+        port_t raport = sConfig.GetIntDefault( "Ra.Port", 3443 );
+
+        if (RAListenSocket.Bind(raport))
+            sLog.outError( "MaNGOS RA can not bind to port %d", raport );
+        else
+            h.Add(&RAListenSocket);
+
+        sLog.outString("Starting Remote access listner on port %d", raport);
+    }
 
     ///- Handle affinity for multiple processors and process priority on Windows
     #ifdef WIN32

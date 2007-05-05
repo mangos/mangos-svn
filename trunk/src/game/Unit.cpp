@@ -1225,6 +1225,12 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     if (*damageType == SPELL_SCHOOL_NORMAL)
         *damage = CalcArmorReducedDamage(pVictim, *damage);
 
+    // Instant Attacks (Spellmods) 
+    // TODO: AP bonus related to mainhand weapon 
+    if(spellCasted) 
+	if(GetTypeId()== TYPEID_PLAYER) 
+	    ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage); 
+
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
         ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
     if(GetTypeId() != TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
@@ -2741,7 +2747,7 @@ void Unit::ApplyStats(bool apply)
             switch(m_form)
             {
                 case FORM_CAT:
-                    val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20 + GetStat(STAT_AGILITY)); break;
+		    val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20 + GetStat(STAT_AGILITY)); break;
                 case FORM_BEAR:
                 case FORM_DIREBEAR:
                     val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
@@ -3399,7 +3405,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                         if((*i)->GetId()==16864)
                         {
                             static uint32 spells[3] = { 12536, 16246, 16870 };
-                            spellProto = sSpellStore.LookupEntry(spells[rand32(0,2)]);
+                            spellProto = sSpellStore.LookupEntry(spells[urand(0,2)]);
                         }
                         // normal case
                         else
@@ -3559,7 +3565,7 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
         case MELEE_HIT_MISS:
             return;
         case MELEE_HIT_CRIT:
-            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
+	    if(spellCasted && attType == BASE_ATTACK)
             {
                 procAttacker = PROC_FLAG_HIT_MELEE | PROC_FLAG_CRIT_MELEE;
                 procVictim = PROC_FLAG_STRUCK_MELEE | PROC_FLAG_STRUCK_CRIT_MELEE;
@@ -5412,7 +5418,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     if(randomPoints <= 1)
         value = basePoints;
     else
-        value = basePoints+rand32(0, randomPoints-1);
+        value = basePoints+urand(0, randomPoints-1);
 
     if(comboDamage > 0)
     {

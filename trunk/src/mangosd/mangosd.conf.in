@@ -251,6 +251,14 @@ SkillChance.Grey   = 0
 #          1.5 - 150%
 Rate.Creature.Aggro = 1
 
+# Enable console
+# Default: 0 - off
+Console.Enable = 0
+
+# Enable remote console
+# Default: 0 - off
+Ra.Enable = 0
+
 # Default remote console port
 Ra.Port = 3443
 

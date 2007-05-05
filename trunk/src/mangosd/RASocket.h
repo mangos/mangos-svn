@@ -26,12 +26,6 @@
 #include "Common.h"
 #include "Network/TcpSocket.h"
 
-#ifdef ENABLE_RA
-
-#ifndef ENABLE_CLI
-#error CLI is required
-#endif
-
 #define RA_BUFF_SIZE 1024
 
 class SocketHandler;
@@ -69,6 +63,5 @@ class RASocket: public TcpSocket
         void Log(const char *,...);
         static int zprintf( const char * szText, ... );
 };
-#endif
 #endif
 /// @}

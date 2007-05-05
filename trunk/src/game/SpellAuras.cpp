@@ -823,6 +823,13 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     uint8 type = spellInfo->EffectApplyAuraName[m_effIndex];
     uint32 mask = spellInfo->EffectItemType[m_effIndex];
 
+    // Sometimes a spell has more than one effect, but only the first mask is filled (e.g. rogue talent id: 13975) 
+    // in this case we need a fallback and take the fist mask. This one should fit. 
+    // Otherwise the mod will not have an effect at all. 
+    if(mask == 0) { 
+        mask = spellInfo->EffectItemType[0]; 
+    } 
+
     if(op >= SPELLMOD_COUNT)
         return;
 
