@@ -966,7 +966,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
     if(!cinfo)
     {
-        sLog.outError("Error: creature entry %u does not exist.",Entry);
+        sLog.outErrorDb("Error: creature entry %u does not exist.",Entry);
         return false;
     }
     uint32 rank = isPet()? 0 : cinfo->rank;

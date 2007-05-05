@@ -333,7 +333,7 @@ void GameObject::SaveToDB()
     std::ostringstream ss;
 
     sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
+    sDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
 
     const GameObjectInfo *goI = GetGOInfo();
 
@@ -356,7 +356,7 @@ void GameObject::SaveToDB()
             << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
             << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
 
-        sDatabase.Execute( ss.str( ).c_str( ) );
+        sDatabase.PExecuteLog( ss.str( ).c_str( ) );
     }
     sDatabase.CommitTransaction();
 }
