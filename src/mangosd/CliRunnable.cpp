@@ -31,7 +31,6 @@
 #include "Config/ConfigEnv.h"
 #include "Util.h"
 
-#ifdef ENABLE_CLI
 #include "CliRunnable.h"
 
 typedef int(* pPrintf)(const char*,...);
@@ -401,7 +400,7 @@ void CliRemoveBan(char *command,pPrintf zprintf)
     ///- Get the command parameter
     char *banip = strtok(command," ");
     if(!banip)
-        zprintf("Syntax is: removeban <account|ip>\r\n");
+        zprintf("Syntax is: unban <account|ip>\r\n");
 
     sWorld.RemoveBanAccount(banip);
 
@@ -735,4 +734,3 @@ void CliRunnable::run()
     ///- End the database thread
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }
-#endif

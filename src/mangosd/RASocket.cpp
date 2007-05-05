@@ -27,12 +27,6 @@
 #include "World.h"
 #include "Config/ConfigEnv.h"
 
-#ifdef ENABLE_RA
-
-#ifndef ENABLE_CLI
-#error CLI is required
-#endif
-
 /// \todo Make this thread safe if in the future 2 admins should be able to log at the same time.
 SOCKET r;
 
@@ -264,4 +258,3 @@ void RASocket:: Log( const char * szText, ... )
     }
     va_end(ap);
 }
-#endif
