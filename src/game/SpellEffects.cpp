@@ -1385,24 +1385,27 @@ void Spell::EffectLearnSpell(uint32 i)
 
 void Spell::EffectDispel(uint32 i) // PBW
 {
-	for(int n = 0; n < (m_spellInfo->EffectBasePoints[i]+1); n++){
-		if(m_spellInfo->rangeIndex == 1){ 
-			//ToDo: Shaman Totems (Poison Cleansing Totem[8168] and Disease Cleansing Totem[8171]) are SelfOnly spells
-			//		and will dispel one poison/disease from one party member every 5 second that activated ...
-			m_caster->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster);
-			sLog.outDebug("Spell: Removed aura type %u from caster", m_spellInfo->EffectMiscValue[i]);
-		} else {
-			for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[i].begin();iunit != m_targetUnitGUIDs[i].end();++iunit)
-			{
-				Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
-				if(unit && unit->isAlive() && (unit->GetTypeId() == TYPEID_PLAYER || unit->GetTypeId() == TYPEID_UNIT))
-				{
-					unit->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster);
-					sLog.outDebug("Spell: Removed aura type %u from %u", m_spellInfo->EffectMiscValue[i], unit->GetGUIDLow());
-				}
-			}
-		}
-	}
+    for(int n = 0; n < (m_spellInfo->EffectBasePoints[i]+1); n++){
+        if(m_spellInfo->rangeIndex == 1)
+        { 
+            //ToDo: Shaman Totems (Poison Cleansing Totem[8168] and Disease Cleansing Totem[8171]) are SelfOnly spells
+			//      and will dispel one poison/disease from one party member every 5 second that activated ...
+            m_caster->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster);
+            sLog.outDebug("Spell: Removed aura type %u from caster", m_spellInfo->EffectMiscValue[i]);
+        }
+        else
+        {
+            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[i].begin();iunit != m_targetUnitGUIDs[i].end();++iunit)
+            {
+                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                if(unit && unit->isAlive() && (unit->GetTypeId() == TYPEID_PLAYER || unit->GetTypeId() == TYPEID_UNIT))
+                {
+                    unit->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster);
+                    sLog.outDebug("Spell: Removed aura type %u from %u", m_spellInfo->EffectMiscValue[i], unit->GetGUIDLow());
+                }
+            }
+        }
+    }
 }
 
 void Spell::EffectDualWield(uint32 i)

@@ -532,7 +532,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
             Attack(pVictim,(damagetype == DIRECT_DAMAGE));
         }
 
-	if(pVictim->getTransForm() && pVictim->hasUnitState(UNIT_STAT_CONFUSED))
+        if(pVictim->getTransForm() && pVictim->hasUnitState(UNIT_STAT_CONFUSED))
         {
             pVictim->RemoveAurasDueToSpell(pVictim->getTransForm());
             pVictim->setTransForm(0);
@@ -2341,7 +2341,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
     return true;
 }
 
-void Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster) // PBW
+void Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
 {
     AuraMap::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end();)
@@ -2374,7 +2374,7 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster) // PBW
                 }
             }
             RemoveAura(i);
-			break; // PBW
+            break;
         }
         else
             ++i;
@@ -2747,7 +2747,7 @@ void Unit::ApplyStats(bool apply)
             switch(m_form)
             {
                 case FORM_CAT:
-		    val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20 + GetStat(STAT_AGILITY)); break;
+                    val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20 + GetStat(STAT_AGILITY)); break;
                 case FORM_BEAR:
                 case FORM_DIREBEAR:
                     val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
@@ -3565,7 +3565,7 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
         case MELEE_HIT_MISS:
             return;
         case MELEE_HIT_CRIT:
-	    if(spellCasted && attType == BASE_ATTACK)
+            if(spellCasted && attType == BASE_ATTACK)
             {
                 procAttacker = PROC_FLAG_HIT_MELEE | PROC_FLAG_CRIT_MELEE;
                 procVictim = PROC_FLAG_STRUCK_MELEE | PROC_FLAG_STRUCK_CRIT_MELEE;
