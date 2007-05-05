@@ -2391,10 +2391,18 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
     if(m_target->IsHostileTo(caster) && (m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->isGameMaster()))
     {
         if (m_target->HasStealthAura() && m_modifier.m_miscvalue == 5)
+        {
+            m_target->ApplyStats(true);
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            m_target->ApplyStats(false);
+        }
 
         if (m_target->HasInvisibilityAura() && m_modifier.m_miscvalue == 6)
+        {
+            m_target->ApplyStats(true);
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+            m_target->ApplyStats(false);
+        }
 
         if( caster->GetTypeId()==TYPEID_PLAYER && !caster->IsPvP() && m_target->IsPvP())
             ((Player*)caster)->UpdatePvP(true, true);
