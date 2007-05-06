@@ -252,8 +252,9 @@ SkillChance.Grey   = 0
 Rate.Creature.Aggro = 1
 
 # Enable console
-# Default: 0 - off
-Console.Enable = 0
+#          0 - off
+# Default: 1 - on
+Console.Enable = 1
 
 # Enable remote console
 # Default: 0 - off

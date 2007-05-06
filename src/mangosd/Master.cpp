@@ -114,22 +114,23 @@ void Master::Run()
     ///- Catch termination signals
     _HookSignals();
 
-#if defined( WIN32 ) && (_DEBUG)
-    ///- Launch WorldRunnable thread - Use windows threads for debugging!
-    cthread2 = _beginthread( RunWorld, 0, LOWORD( 0) );
-#else //!defined( WIN32 ) && (_DEBUG)
-    ///- Launch WorldRunnable thread
-    ZThread::Thread t(new WorldRunnable);
-    t.setPriority ((ZThread::Priority )2);
-#endif //!defined( WIN32 ) && (_DEBUG)
+    #if defined( WIN32 ) && (_DEBUG)
+        ///- Launch WorldRunnable thread - Use windows threads for debugging!
+        cthread2 = _beginthread( RunWorld, 0, LOWORD( 0) );
+    #else //!defined( WIN32 ) && (_DEBUG)
+        ///- Launch WorldRunnable thread
+        ZThread::Thread t(new WorldRunnable);
+        t.setPriority ((ZThread::Priority )2);
+    #endif //!defined( WIN32 ) && (_DEBUG)
 
-    if (sConfig.GetBoolDefault("Console.Enable", 0)) {
-#if defined( WIN32 ) && (_DEBUG)
-	cthread1 = _beginthread( RunCLI, 0, LOWORD( 0) );
-#else //!defined( WIN32 ) && (_DEBUG)
-    ///- Launch CliRunnable thread
-        ZThread::Thread td1(new CliRunnable);
-#endif //!defined( WIN32 ) && (_DEBUG)
+    if (sConfig.GetBoolDefault("Console.Enable", 1))
+    {
+        #if defined( WIN32 ) && (_DEBUG)
+    	    cthread1 = _beginthread( RunCLI, 0, LOWORD( 0) );
+        #else //!defined( WIN32 ) && (_DEBUG)
+            ///- Launch CliRunnable thread
+            ZThread::Thread td1(new CliRunnable);
+        #endif //!defined( WIN32 ) && (_DEBUG)
     }
 
     ///- Launch the RA listener socket

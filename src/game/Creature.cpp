@@ -116,6 +116,12 @@ void Creature::CreateTrainerSpells()
             continue;
         }
 
+        if(spellinfo->Effect[0]!=SPELL_EFFECT_LEARN_SPELL)
+        {
+            sLog.outErrorDb("TrainerBuySpell: Trainer(%u) has not learning spell(%u).", GetGUIDLow(), spellid);
+            continue;
+        }
+
         tspell = new TrainerSpell;
         tspell->spell = spellinfo;
         tspell->spellcost = fields[1].GetUInt32();
