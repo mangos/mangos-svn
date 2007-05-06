@@ -957,8 +957,11 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     }
 
     pCreature->setFaction(factionId);
+    
+    // faction is set in creature_template - not inside creature
+    //pCreature->SaveToDB(); -- obsolete
+    sDatabase.PExecuteLog("UPDATE `creature_template` SET `faction` = '%u' WHERE `guid` = '%u'", factionId, pCreature->GetGUID());
 
-    pCreature->SaveToDB();
 
     return true;
 }
