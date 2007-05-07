@@ -28,6 +28,7 @@
 #include "Config/ConfigEnv.h"
 #include "Transports.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 
 #include "MapManager.h"
 #include "MapInstanced.h"
@@ -510,8 +511,8 @@ void Map::InitResetTime()
 
 void Map::Reset()
 {
-    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", GetInstanceId());
-    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", GetInstanceId());
+
+    objmgr.DeleteRespawnTimeForInstance(GetInstanceId());
 
     UnloadAll();
 

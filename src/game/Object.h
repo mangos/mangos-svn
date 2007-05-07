@@ -183,14 +183,8 @@ class MANGOS_DLL_SPEC Object
 
         void InitValues() { _InitValues(); }
 
-        void addQuest(uint32 questid) { mQuests.push_back(questid); }
-        void addInvolvedQuest(uint32 questid) { mInvolvedQuests.push_back(questid); }
-        bool hasQuest(uint32 quest_id);
-        bool hasInvolvedQuest(uint32 quest_id);
-
-        std::list<uint32> mQuests;
-        std::list<uint32> mInvolvedQuests;
-
+        virtual bool hasQuest(uint32 quest_id) const { return false; }
+        virtual bool hasInvolvedQuest(uint32 quest_id) const { return false; }
     protected:
 
         Object ( );

@@ -4444,7 +4444,6 @@ bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputa
 
 bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing)
 {
-    // TODO: Rewrite this so it uses pointers of structs instead of struct
     for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
         if(int32(itr->ReputationListID) == factionEntry->reputationListID)
@@ -8996,14 +8995,24 @@ void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, 
 void Player::PrepareQuestMenu( uint64 guid )
 {
     Object *pObject;
+    QuestRelations* pObjectQR;
+    QuestRelations* pObjectQIR;
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
     if( pCreature )
+    {
         pObject = (Object*)pCreature;
+        pObjectQR  = &objmgr.mCreatureQuestRelations;
+        pObjectQIR = &objmgr.mCreatureQuestInvolvedRelations;
+    }
     else
     {
         GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*this, guid);
         if( pGameObject )
+        {
             pObject = (Object*)pGameObject;
+            pObjectQR  = &objmgr.mGOQuestRelations;
+            pObjectQIR = &objmgr.mGOQuestInvolvedRelations;
+        }
         else
             return;
     }
@@ -9011,9 +9020,9 @@ void Player::PrepareQuestMenu( uint64 guid )
     QuestMenu *qm = PlayerTalkClass->GetQuestMenu();
     qm->ClearMenu();
 
-    for( std::list<uint32>::iterator i = pObject->mInvolvedQuests.begin( ); i != pObject->mInvolvedQuests.end( ); i++ )
+    for(QuestRelations::const_iterator i = pObjectQIR->lower_bound(pObject->GetEntry()); i != pObjectQIR->upper_bound(pObject->GetEntry()); ++i)
     {
-        uint32 quest_id = *i;
+        uint32 quest_id = i->second;
         QuestStatus status = GetQuestStatus( quest_id );
         if ( status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus( quest_id ) )
             qm->AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
@@ -9023,9 +9032,9 @@ void Player::PrepareQuestMenu( uint64 guid )
             qm->AddMenuItem(quest_id, DIALOG_STATUS_CHAT);
     }
 
-    for( std::list<uint32>::iterator i = pObject->mQuests.begin( ); i != pObject->mQuests.end( ); i++ )
+    for(QuestRelations::const_iterator i = pObjectQR->lower_bound(pObject->GetEntry()); i != pObjectQR->upper_bound(pObject->GetEntry()); ++i)
     {
-        uint32 quest_id = *i;
+        uint32 quest_id = i->second;
         Quest* pQuest = objmgr.QuestTemplates[quest_id];
 
         QuestStatus status = GetQuestStatus( quest_id );
@@ -9100,25 +9109,34 @@ Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
     if( pQuest )
     {
         Object *pObject;
+        QuestRelations* pObjectQR;
+        QuestRelations* pObjectQIR;
+
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
         if( pCreature )
         {
             pObject = (Object*)pCreature;
+            pObjectQR  = &objmgr.mCreatureQuestRelations;
+            pObjectQIR = &objmgr.mCreatureQuestInvolvedRelations;
         }
         else
         {
             GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*this, guid);
             if( pGameObject )
+            {
                 pObject = (Object*)pGameObject;
+                pObjectQR  = &objmgr.mGOQuestRelations;
+                pObjectQIR = &objmgr.mGOQuestInvolvedRelations;
+            }
             else
                 return NULL;
         }
 
         uint32 nextQuestID = pQuest->GetNextQuestInChain();
-        list<uint32>::iterator iter = find(pObject->mQuests.begin(), pObject->mQuests.end(), nextQuestID);
-        if (iter != pObject->mQuests.end())
+        for(QuestRelations::const_iterator itr = pObjectQR->lower_bound(pObject->GetEntry()); itr != pObjectQR->upper_bound(pObject->GetEntry()); ++itr)
         {
-            return objmgr.QuestTemplates[nextQuestID];
+            if (itr->second == nextQuestID)
+                return objmgr.QuestTemplates[nextQuestID];
         }
     }
     return NULL;
@@ -10573,14 +10591,11 @@ bool Player::LoadFromDB( uint32 guid )
     m_resetTalentsCost = fields[18].GetUInt32();
     m_resetTalentsTime = fields[19].GetUInt64();
 
-    // reserve some flags + ad ghost flag
+    // reserve some flags
     uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & ( PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM );
 
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM) )
         SetUInt32Value(PLAYER_FLAGS, 0 | old_safe_flags);
-
-    if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
-        m_deathState = DEAD;
 
     _LoadTaxiMask( fields[11].GetString() );
 
@@ -10633,6 +10648,10 @@ bool Player::LoadFromDB( uint32 guid )
     //_LoadMail();
 
     _LoadAuras(time_diff);
+
+    // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
+    if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
+        m_deathState = DEAD;
 
     _LoadSpells(time_diff);
 

@@ -42,7 +42,7 @@
 #include "Database/SQLStorage.h"
 
 extern SQLStorage sCreatureStorage;
-extern SQLStorage sCreatureAddStorage;
+extern SQLStorage sCreatureDataAddonStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
@@ -88,6 +88,24 @@ struct AreaTrigger
 
     bool IsTeleport() const { return target_X != 0 || target_Y !=0 || target_Z !=0; }
 };
+
+typedef std::set<uint32> CellGuidSet;
+typedef std::map<uint32/*player guid*/,uint32/*instance*/> CellCorpseSet;
+struct CellObjectGuids
+{
+    CellGuidSet creatures;
+    CellGuidSet gameobjects;
+    CellCorpseSet corpses;
+};
+typedef HM_NAMESPACE::hash_map<uint32/*cell_id*/,CellObjectGuids> CellObjectGuidsMap;
+typedef HM_NAMESPACE::hash_map<uint32/*mapid*/,CellObjectGuidsMap> MapObjectGuids;
+
+typedef HM_NAMESPACE::hash_map<uint64/*(instance,guid) pair*/,time_t> RespawnTimes;
+
+typedef HM_NAMESPACE::hash_map<uint32,CreatureData> CreatureDataMap;
+typedef HM_NAMESPACE::hash_map<uint32,GameObjectData> GameObjectDataMap;
+
+typedef std::multimap<uint32,uint32> QuestRelations;
 
 struct PetLevelInfo
 {
@@ -212,7 +230,10 @@ class ObjectMgr
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
         CreatureInfo const *GetCreatureTemplate( uint32 id );
-        CreatureAddInfo const *GetCreatureAddon( uint32 lowguid );
+        CreatureDataAddon const *GetCreatureAddon( uint32 lowguid )
+        {
+            return sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(lowguid);
+        }
 
         static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
 
@@ -307,12 +328,29 @@ class ObjectMgr
         void LoadGuilds();
         void LoadGroups();
         void LoadQuests();
+        void LoadQuestRelations()
+        { 
+            LoadQuestRelationsHelper(mGOQuestRelations,"gameobject_questrelation");
+            LoadQuestRelationsHelper(mGOQuestInvolvedRelations,"gameobject_involvedrelation");
+            LoadQuestRelationsHelper(mCreatureQuestRelations,"creature_questrelation");
+            LoadQuestRelationsHelper(mCreatureQuestInvolvedRelations,"creature_involvedrelation");
+        } 
+        void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
+        QuestRelations mGOQuestRelations;
+        QuestRelations mGOQuestInvolvedRelations;
+        QuestRelations mCreatureQuestRelations;
+        QuestRelations mCreatureQuestInvolvedRelations;
+
         void LoadSpellChains();
         void LoadSpellLearnSkills();
         void LoadSpellLearnSpells();
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();
+        void LoadCreatures();
+        void LoadCreatureRespawnTimes();
         void LoadCreatureAddons();
+        void LoadGameobjects();
+        void LoadGameobjectRespawnTimes();
         void LoadSpellProcEvents();
         void LoadSpellThreats();
         void LoadItemPrototypes();
@@ -458,6 +496,38 @@ class ObjectMgr
         }
 
         OpcodeTableMap opcodeTable;
+
+        CellObjectGuids const& GetCellObjectGuids(uint32 mapid, uint32 cell_id)
+        {
+            return mMapObjectGuids[mapid][cell_id];
+        }
+
+        CreatureData const* GetCreatureData(uint32 guid) const
+        {
+            CreatureDataMap::const_iterator itr = mCreatureDataMap.find(guid);
+            if(itr==mCreatureDataMap.end()) return NULL;
+            return &itr->second;
+        }
+        CreatureData& NewCreatureData(uint32 guid) { return mCreatureDataMap[guid]; }
+        void DeleteCreatureData(uint32 guid);
+
+        GameObjectData const* GetGOData(uint32 guid) const
+        {
+            GameObjectDataMap::const_iterator itr = mGameObjectDataMap.find(guid);
+            if(itr==mGameObjectDataMap.end()) return NULL;
+            return &itr->second;
+        }
+        GameObjectData& NewGOData(uint32 guid) { return mGameObjectDataMap[guid]; }
+        void DeleteGOData(uint32 guid);
+
+        void AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance);
+        void DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid);
+
+        time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance) { return mCreatureRespawnTimes[MAKE_GUID(loguid,instance)]; }
+        void SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t);
+        time_t GetGORespawnTime(uint32 loguid, uint32 instance) { return mGORespawnTimes[MAKE_GUID(loguid,instance)]; }
+        void SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t);
+        void DeleteRespawnTimeForInstance(uint32 instance);
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -510,6 +580,12 @@ class ObjectMgr
         typedef std::map<uint32,std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;
         HalfNameMap PetHalfName1;
+
+        MapObjectGuids mMapObjectGuids;
+        CreatureDataMap mCreatureDataMap;
+        GameObjectDataMap mGameObjectDataMap;
+        RespawnTimes mCreatureRespawnTimes;
+        RespawnTimes mGORespawnTimes;
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()

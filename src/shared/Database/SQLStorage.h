@@ -26,9 +26,10 @@ class SQLStorage
 {
     public:
 
-        SQLStorage(const char*fmt,const char * sqlname)
+        SQLStorage(const char*fmt,const char * _entry_field,const char * sqlname)
         {
             format=fmt;
+            entry_field = _entry_field;
             table=sqlname;
             data=NULL;
             pIndex=NULL;
@@ -64,6 +65,7 @@ class SQLStorage
         uint32 iOldNumRecords;
         const char *format;
         const char *table;
+        const char *entry_field;
         //bool HasString;
 };
 #endif

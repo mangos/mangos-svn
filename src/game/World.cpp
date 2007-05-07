@@ -365,7 +365,7 @@ void World::SetInitialWorldSettings()
 
     ///- Clean up and pack instances
     sLog.outString( "Cleaning up instances..." );
-    objmgr.CleanupInstances();
+    objmgr.CleanupInstances();                              // must be called before `creature_respawn`/`gameobject_respawn` tables
 
     sLog.outString( "Packing instances..." );
     objmgr.PackInstances();
@@ -407,14 +407,23 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
     objmgr.LoadReputationOnKill();
 
+    sLog.outString( "Loading Creature Data..." );
+    objmgr.LoadCreatures();
+
     sLog.outString( "Loading Creature Addon Data..." );
     objmgr.LoadCreatureAddons();
+
+    sLog.outString( "Loading Gameobject Data..." );
+    objmgr.LoadGameobjects();
 
     sLog.outString( "Loading Weather Data..." );
     objmgr.LoadWeatherZoneChances();
 
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables
+
+    sLog.outString( "Loading Quests Relations..." );
+    objmgr.LoadQuestRelations();
 
     sLog.outString( "Loading AreaTrigger definitions..." );
     objmgr.LoadAreaTriggers();

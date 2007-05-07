@@ -330,98 +330,111 @@ void GameObject::getFishLoot(Loot *fishloot)
 
 void GameObject::SaveToDB()
 {
+    const GameObjectInfo *goI = GetGOInfo();
+
+    if (!goI)
+        return;
+
+    // update in loaded data (changing data only in this place)
+    GameObjectData& data = objmgr.NewGOData(m_DBTableGuid);
+
+    // data->guid = guid don't must be update at save
+    data.id = GetEntry();
+    data.mapid = GetMapId();
+    data.posX = GetFloatValue(GAMEOBJECT_POS_X);
+    data.posY = GetFloatValue(GAMEOBJECT_POS_Y);
+    data.posZ = GetFloatValue(GAMEOBJECT_POS_Z);
+    data.orientation = GetFloatValue(GAMEOBJECT_FACING);
+    data.rotation0 = GetFloatValue(GAMEOBJECT_ROTATION+0);
+    data.rotation1 = GetFloatValue(GAMEOBJECT_ROTATION+1);
+    data.rotation2 = GetFloatValue(GAMEOBJECT_ROTATION+2);
+    data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION+3);
+    data.lootid = lootid;
+    data.spawntimesecs = m_respawnDelayTime;
+    data.animprogress = GetUInt32Value (GAMEOBJECT_ANIMPROGRESS);
+    data.dynflags = GetUInt32Value (GAMEOBJECT_DYN_FLAGS);
+
+    // updated in DB
     std::ostringstream ss;
+    ss << "INSERT INTO `gameobject` VALUES ( "
+        << m_DBTableGuid << ", "
+        << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
+        << GetMapId() << ", "
+        << GetFloatValue(GAMEOBJECT_POS_X) << ", "
+        << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
+        << GetFloatValue(GAMEOBJECT_POS_Z) << ", "
+        << GetFloatValue(GAMEOBJECT_FACING) << ", "
+        << GetFloatValue(GAMEOBJECT_ROTATION) << ", "
+        << GetFloatValue(GAMEOBJECT_ROTATION+1) << ", "
+        << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
+        << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
+        << lootid <<", "
+        << m_respawnDelayTime << ", "
+        << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
+        << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
+
 
     sDatabase.BeginTransaction();
     sDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
-
-    const GameObjectInfo *goI = GetGOInfo();
-
-    if (goI)
-    {
-        ss << "INSERT INTO `gameobject` VALUES ( "
-            << m_DBTableGuid << ", "
-            << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
-            << GetMapId() << ", "
-            << GetFloatValue(GAMEOBJECT_POS_X) << ", "
-            << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
-            << GetFloatValue(GAMEOBJECT_POS_Z) << ", "
-            << GetFloatValue(GAMEOBJECT_FACING) << ", "
-            << GetFloatValue(GAMEOBJECT_ROTATION) << ", "
-            << GetFloatValue(GAMEOBJECT_ROTATION+1) << ", "
-            << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
-            << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
-            << lootid <<", "
-            << m_respawnDelayTime << ", "
-            << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
-            << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
-
-        sDatabase.PExecuteLog( ss.str( ).c_str( ) );
-    }
+    sDatabase.PExecuteLog( ss.str( ).c_str( ) );
     sDatabase.CommitTransaction();
 }
 
-bool GameObject::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
+bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
 {
-    bool external = (result != NULL);
-    if (!external)
-        //                                0    1     2            3            4            5             6           7           8           9           10     11              12             13         14            15
-        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`respawntime`,`guid` "
-            "FROM `gameobject` LEFT JOIN `gameobject_respawn` ON ((`gameobject`.`guid`=`gameobject_respawn`.`guid`) AND (`gameobject_respawn`.`instance` = '%u')) WHERE `gameobject`.`guid` = '%u'", InstanceId, guid);
+    GameObjectData const* data = objmgr.GetGOData(guid);
 
-    if( !result )
+    if( !data )
     {
         sLog.outErrorDb("ERROR: Gameobject (GUID: %u) not found in table `gameobject`, can't load. ",guid);
         return false;
     }
 
-    Field *fields = result->Fetch();
-    uint32 entry = fields[0].GetUInt32();
-    uint32 map_id=fields[1].GetUInt32();
-    float x = fields[2].GetFloat();
-    float y = fields[3].GetFloat();
-    float z = fields[4].GetFloat();
-    float ang = fields[5].GetFloat();
+    uint32 entry = data->id;
+    uint32 map_id = data->mapid;
+    float x = data->posX;
+    float y = data->posY;
+    float z = data->posZ;
+    float ang = data->orientation;
 
-    float rotation0 = fields[6].GetFloat();
-    float rotation1 = fields[7].GetFloat();
-    float rotation2 = fields[8].GetFloat();
-    float rotation3 = fields[9].GetFloat();
+    float rotation0 = data->rotation0;
+    float rotation1 = data->rotation1;
+    float rotation2 = data->rotation2;
+    float rotation3 = data->rotation3;
 
-    uint32 animprogress = fields[12].GetUInt32();
-    uint32 dynflags = fields[13].GetUInt32();
+    uint32 animprogress = data->animprogress;
+    uint32 dynflags = data->dynflags;
 
     uint32 stored_guid = guid;
     if (InstanceId != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
     SetInstanceId(InstanceId);
 
     if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, dynflags) )
-    {
-        if (!external) delete result;
         return false;
-    }
 
     m_DBTableGuid = stored_guid;
 
-    lootid=fields[10].GetUInt32();
-    m_respawnDelayTime=fields[11].GetUInt32();
-    m_respawnTime=fields[14].GetUInt64();
+    lootid=data->lootid;
+    m_respawnDelayTime=data->spawntimesecs;
+    m_respawnTime=objmgr.GetGORespawnTime(stored_guid,InstanceId);
+
     if(m_respawnTime && m_respawnTime <= time(NULL))        // ready to respawn
     {
         m_respawnTime = 0;
-        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+        objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
     }
 
-    if (!external) delete result;
-
-    _LoadQuests();
     return true;
 }
 
 void GameObject::DeleteFromDB()
 {
+    objmgr.DeleteGOData(m_DBTableGuid);
+
+    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
     sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+    sDatabase.CommitTransaction();
 }
 
 GameObjectInfo const *GameObject::GetGOInfo() const
@@ -432,48 +445,28 @@ GameObjectInfo const *GameObject::GetGOInfo() const
 /*********************************************************/
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
-
-void GameObject::_LoadQuests()
+bool GameObject::hasQuest(uint32 quest_id) const
 {
-    mQuests.clear();
-    mInvolvedQuests.clear();
-
-    Field *fields;
-    Quest *pQuest;
-
-    QueryResult *result = sDatabase.PQuery("SELECT `quest` FROM `gameobject_questrelation` WHERE `id` = '%u'", GetEntry ());
-
-    if(result)
+    QuestRelations const& qr = objmgr.mGOQuestRelations;
+    for(QuestRelations::const_iterator itr = qr.lower_bound(GetEntry()); itr != qr.upper_bound(GetEntry()); ++itr)
     {
-        do
-        {
-            fields = result->Fetch();
-            pQuest = objmgr.QuestTemplates[ fields[0].GetUInt32() ];
-            if (!pQuest) continue;
-
-            addQuest(pQuest->GetQuestId());
-        }
-        while( result->NextRow() );
-
-        delete result;
+        if(itr->second==quest_id)
+            return true;
     }
-
-    QueryResult *result1 = sDatabase.PQuery("SELECT `quest` FROM `gameobject_involvedrelation` WHERE `id` = '%u'", GetEntry ());
-
-    if(!result1) return;
-
-    do
-    {
-        fields = result1->Fetch();
-        pQuest = objmgr.QuestTemplates[ fields[0].GetUInt32() ];
-        if (!pQuest) continue;
-
-        addInvolvedQuest(pQuest->GetQuestId());
-    }
-    while( result1->NextRow() );
-
-    delete result1;
+    return false;
 }
+
+bool GameObject::hasInvolvedQuest(uint32 quest_id) const
+{
+    QuestRelations const& qr = objmgr.mGOQuestInvolvedRelations;
+    for(QuestRelations::const_iterator itr = qr.lower_bound(GetEntry()); itr != qr.upper_bound(GetEntry()); ++itr)
+    {
+        if(itr->second==quest_id)
+            return true;
+    }
+    return false;
+}
+
 
 bool GameObject::IsTransport() const
 {
@@ -491,8 +484,5 @@ Unit* GameObject::GetOwner() const
 void GameObject::SaveRespawnTime()
 {
     if(m_respawnTime > time(NULL) && !GetOwnerGUID())
-    {
-        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
-        sDatabase.PExecute("INSERT INTO `gameobject_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", m_DBTableGuid, uint64(m_respawnTime), GetInstanceId());
-    }
+        objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),m_respawnTime);
 }

@@ -141,6 +141,7 @@ struct TrainerSpell
 #pragma pack(push,1)
 #endif
 
+// from `creature_template` table
 struct CreatureInfo
 {
     uint32  Entry;
@@ -206,7 +207,31 @@ struct CreatureInfo
     uint32 randomDisplayID() const;
 };
 
-struct CreatureAddInfo
+// from `creature` table
+struct CreatureData
+{
+    uint32 id;                                              // entry in creature_template
+    uint32 mapid;
+    float posX;
+    float posY;
+    float posZ;
+    float orientation;
+    uint32 spawntimesecs;
+    float spawndist;
+    uint32 currentwaypoint;
+    float spawn_posX;
+    float spawn_posY;
+    float spawn_posZ;
+    float spawn_orientation;
+    uint32 curhealth;
+    uint32 curmana;
+    uint8 deathState;
+    uint8 movementType;
+    std::string auras;
+};
+
+// from `creature_addon` table
+struct CreatureDataAddon
 {
 	uint32 guid;
 	uint32 RefId;
@@ -375,7 +400,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
 
-        bool LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId);
+        bool LoadFromDB(uint32 guid, uint32 InstanceId);
         virtual void SaveToDB();                            // overwrited in Pet
         virtual void DeleteFromDB();                        // overwrited in Pet
 
@@ -417,9 +442,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint64 lootingGroupLeaderGUID;                      // used to find group which is looting corpse
 
         void SendZoneUnderAttackMessage(Player* attacker);
+
+        bool hasQuest(uint32 quest_id) const;
+        bool hasInvolvedQuest(uint32 quest_id)  const;
     protected:
         void _LoadGoods();
-        void _LoadQuests();
         void _LoadMovement();
         void _RealtimeSetCreatureInfo();
 

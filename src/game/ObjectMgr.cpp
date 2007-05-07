@@ -348,16 +348,141 @@ void ObjectMgr::LoadCreatureTemplates()
     sLog.outString( "" );
 }
 
-CreatureAddInfo const* ObjectMgr::GetCreatureAddon(uint32 lowguid)
-{
-    return sCreatureAddStorage.LookupEntry<CreatureAddInfo>(lowguid);
-}
-
 void ObjectMgr::LoadCreatureAddons()
 {
-    sCreatureAddStorage.Load();
+    sCreatureDataAddonStorage.Load();
 
-    sLog.outString( ">> Loaded %u creature addons", sCreatureAddStorage.RecordCount );
+    sLog.outString( ">> Loaded %u creature addons", sCreatureDataAddonStorage.RecordCount );
+    sLog.outString( "" );
+}
+
+void ObjectMgr::LoadCreatures()
+{
+    uint32 count = 0; 
+
+    //                                            0      1    2     3            4            5            6             7               8           9                 
+    QueryResult *result = sDatabase.Query("SELECT `guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,"
+    //   10                 11                 12                 13                  14          15        16           17             18
+        "`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`spawn_orientation`,`curhealth`,`curmana`,`DeathState`,`MovementType`,`auras` "
+        "FROM `creature`");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 creature. DB table `creature` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 guid = fields[0].GetUInt32();
+
+        CreatureData& data = mCreatureDataMap[guid];
+
+        data.id             = fields[ 1].GetUInt32();
+        data.mapid          = fields[ 2].GetUInt32();
+        data.posX           = fields[ 3].GetFloat();
+        data.posY           = fields[ 4].GetFloat();
+        data.posZ           = fields[ 5].GetFloat();
+        data.orientation    = fields[ 6].GetFloat();
+        data.spawntimesecs  = fields[ 7].GetUInt32();
+        data.spawndist      = fields[ 8].GetFloat();
+        data.currentwaypoint= fields[ 9].GetUInt32();
+        data.spawn_posX     = fields[10].GetFloat();
+        data.spawn_posY     = fields[11].GetFloat();
+        data.spawn_posZ     = fields[12].GetFloat();
+        data.spawn_orientation = fields[13].GetFloat();
+        data.curhealth      = fields[14].GetUInt32();
+        data.curmana        = fields[15].GetUInt32();
+        data.deathState     = fields[16].GetUInt8();
+        data.movementType   = fields[17].GetUInt8();
+        data.auras          = fields[18].GetCppString();
+
+        // build mapid*cellid -> guid_set map
+        CellPair cell_pair = MaNGOS::ComputeCellPair(data.posX, data.posY);
+        uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+        CellObjectGuids& cell_guids = mMapObjectGuids[data.mapid][cell_id];
+        cell_guids.creatures.insert(guid);
+
+        count++;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString( ">> Loaded %u creatures", mCreatureDataMap.size() );
+    sLog.outString( "" );
+}
+
+void ObjectMgr::LoadGameobjects()
+{
+    uint32 count = 0; 
+
+    //                                            0      1    2     3            4            5            6             
+    QueryResult *result = sDatabase.Query("SELECT `guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
+    //   7           8           9           10          11     12              13             14
+        "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags` "
+        "FROM `gameobject`");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 gameobjects. DB table `gameobject` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 guid = fields[0].GetUInt32();
+
+        GameObjectData& data = mGameObjectDataMap[guid];
+
+        data.id             = fields[ 1].GetUInt32();
+        data.mapid          = fields[ 2].GetUInt32();
+        data.posX           = fields[ 3].GetFloat();
+        data.posY           = fields[ 4].GetFloat();
+        data.posZ           = fields[ 5].GetFloat();
+        data.orientation    = fields[ 6].GetFloat();
+        data.rotation0      = fields[ 7].GetFloat();
+        data.rotation1      = fields[ 8].GetFloat();
+        data.rotation2      = fields[ 9].GetFloat();
+        data.rotation3      = fields[10].GetFloat();
+        data.lootid         = fields[11].GetUInt32();
+        data.spawntimesecs  = fields[12].GetUInt32();
+        data.animprogress   = fields[13].GetUInt32();
+        data.dynflags       = fields[14].GetUInt32();
+
+        // build mapid*cellid -> guid_set map
+        CellPair cell_pair = MaNGOS::ComputeCellPair(data.posX, data.posY);
+        uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+        CellObjectGuids& cell_guids = mMapObjectGuids[data.mapid][cell_id];
+        cell_guids.gameobjects.insert(guid);
+
+        count++;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString( ">> Loaded %u gameobjects", mGameObjectDataMap.size());
     sLog.outString( "" );
 }
 
@@ -2577,7 +2702,8 @@ bool ObjectMgr::canStackSpellRank(SpellEntry const *spellInfo)
 void ObjectMgr::LoadCorpses()
 {
     uint32 count = 0;
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance`,`guid` FROM `corpse` WHERE `bones_flag` = 0");
+    //                                             0            1            2            3             4     5      6            7          8        9
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance`,`player`,`guid` FROM `corpse` WHERE `bones_flag` = 0");
 
     if( !result )
     {
@@ -2953,4 +3079,128 @@ void ObjectMgr::LoadWeatherZoneChances()
 
     sLog.outString("");
     sLog.outString(">> Loaded %u weather definitions", count);
+}
+
+void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t)
+{
+    mCreatureRespawnTimes[MAKE_GUID(loguid,instance)] = t;
+    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", loguid, instance);
+    if(t)
+        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
+}
+
+void ObjectMgr::DeleteCreatureData(uint32 guid)
+{
+    // remove mapid*cellid -> guid_set map
+    CreatureData const* data = GetCreatureData(guid);
+    if(data)
+    {
+        CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+        uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+        CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
+        cell_guids.creatures.erase(guid);
+    }
+
+    mCreatureDataMap.erase(guid);
+}
+
+void ObjectMgr::SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t)
+{
+    mGORespawnTimes[MAKE_GUID(loguid,instance)] = t;
+    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", loguid, instance);
+    if(t)
+        sDatabase.PExecute("INSERT INTO `gameobject_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
+}
+
+void ObjectMgr::DeleteRespawnTimeForInstance(uint32 instance)
+{
+    RespawnTimes::iterator next;
+
+    for(RespawnTimes::iterator itr = mGORespawnTimes.begin(); itr != mGORespawnTimes.end(); itr = next)
+    {
+        next = itr;
+        ++next;
+
+        if(GUID_HIPART(itr->first)==instance)
+            mGORespawnTimes.erase(itr);
+    }
+
+    for(RespawnTimes::iterator itr = mCreatureRespawnTimes.begin(); itr != mCreatureRespawnTimes.end(); itr = next)
+    {
+        next = itr;
+        ++next;
+
+        if(GUID_HIPART(itr->first)==instance)
+            mCreatureRespawnTimes.erase(itr);
+    }
+
+    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", instance);
+    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", instance);
+}
+
+void ObjectMgr::DeleteGOData(uint32 guid)
+{
+    // remove mapid*cellid -> guid_set map
+    GameObjectData const* data = GetGOData(guid);
+    if(data)
+    {
+        CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+        uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+        CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
+        cell_guids.gameobjects.erase(guid);
+    }
+
+    mCreatureDataMap.erase(guid);
+}
+
+void ObjectMgr::AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance)
+{
+    CellObjectGuids& cell_guids = mMapObjectGuids[mapid][cellid];
+    cell_guids.corpses[player_guid] = instance;
+}
+
+void ObjectMgr::DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid)
+{
+    CellObjectGuids& cell_guids = mMapObjectGuids[mapid][cellid];
+    cell_guids.corpses.erase(player_guid);
+}
+
+void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
+{
+    uint32 count = 0; 
+
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`quest` FROM `%s`",table);
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 quest relations from %s. DB table `%s` is empty.",table,table);
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 id    = fields[0].GetUInt32();
+        uint32 quest = fields[1].GetUInt32();
+
+        map.insert(QuestRelations::value_type(id,quest));
+
+        count++;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString("");
+    sLog.outString(">> Loaded %u quest relations from %s", count,table);
 }

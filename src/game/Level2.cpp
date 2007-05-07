@@ -393,7 +393,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     pCreature->SaveToDB();
 
     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-    pCreature->LoadFromDB(pCreature->GetGUIDLow(), NULL, chr->GetInstanceId());
+    pCreature->LoadFromDB(pCreature->GetGUIDLow(), chr->GetInstanceId());
 
     pCreature->AddToWorld();
     MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
@@ -1871,8 +1871,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         sDatabase.PExecuteLog("UPDATE `creature_movement` SET `wpguid` = '%u' WHERE `id` = '%u' and `point` = '%u'", wpCreature->GetGUIDLow(), lowguid, point+1);
 
         wpCreature->SaveToDB();
-        wpCreature->LoadFromDB(wpCreature->GetGUIDLow(), NULL, chr->GetInstanceId());
         // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+        wpCreature->LoadFromDB(wpCreature->GetGUIDLow(), chr->GetInstanceId());
         wpCreature->AddToWorld();
         MapManager::Instance().GetMap(wpCreature->GetMapId(), wpCreature)->Add(wpCreature);
 
@@ -1964,8 +1964,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                     return false;
                 }
                 wpCreature2->SaveToDB();
-                                                            // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-                wpCreature2->LoadFromDB(wpCreature2->GetGUIDLow(), NULL, chr->GetInstanceId());
+                // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+                wpCreature2->LoadFromDB(wpCreature2->GetGUIDLow(), chr->GetInstanceId());
                 wpCreature2->AddToWorld();
                 MapManager::Instance().GetMap(npcCreature->GetMapId(), npcCreature)->Add(wpCreature2);
                 //MapManager::Instance().GetMap(npcCreature->GetMapId())->Add(wpCreature2);
@@ -2460,8 +2460,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             sDatabase.PExecuteLog("UPDATE `creature_movement` SET `wpguid` = '%u' WHERE `id` = '%u' and `point` = '%u'", wpCreature->GetGUIDLow(), lowguid, point);
 
             wpCreature->SaveToDB();
-                                                            // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-            wpCreature->LoadFromDB(wpCreature->GetGUIDLow(), NULL, chr->GetInstanceId());
+            // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+            wpCreature->LoadFromDB(wpCreature->GetGUIDLow(), chr->GetInstanceId());
             wpCreature->AddToWorld();
             MapManager::Instance().GetMap(wpCreature->GetMapId(), wpCreature)->Add(wpCreature);
             //MapManager::Instance().GetMap(wpCreature->GetMapId())->Add(wpCreature);
@@ -2501,7 +2501,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         }
 
         pCreature->SaveToDB();
-        pCreature->LoadFromDB(pCreature->GetGUIDLow(), NULL, chr->GetInstanceId());
+        pCreature->LoadFromDB(pCreature->GetGUIDLow(), chr->GetInstanceId());
         pCreature->AddToWorld();
         MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
         //player->PlayerTalkClass->SendPointOfInterest(x, y, 6, 6, 0, "First Waypoint");
@@ -2549,7 +2549,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         }
 
         pCreature->SaveToDB();
-        pCreature->LoadFromDB(pCreature->GetGUIDLow(), NULL, chr->GetInstanceId());
+        pCreature->LoadFromDB(pCreature->GetGUIDLow(), chr->GetInstanceId());
         pCreature->AddToWorld();
         MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
         //player->PlayerTalkClass->SendPointOfInterest(x, y, 6, 6, 0, "Last Waypoint");

@@ -800,32 +800,6 @@ LOCK TABLES `corpse` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `corpse_grid`
---
-
-DROP TABLE IF EXISTS `corpse_grid`;
-CREATE TABLE `corpse_grid` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `position_x` int(11) NOT NULL default '0',
-  `position_y` int(11) NOT NULL default '0',
-  `cell_position_x` int(11) NOT NULL default '0',
-  `cell_position_y` int(11) NOT NULL default '0',
-  `grid` int(11) unsigned NOT NULL default '0' COMMENT 'Grid Identifier',
-  `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
-) ENGINE=MEMORY DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
-
---
--- Dumping data for table `corpse_grid`
---
-
-LOCK TABLES `corpse_grid` WRITE;
-/*!40000 ALTER TABLE `corpse_grid` DISABLE KEYS */;
-/*!40000 ALTER TABLE `corpse_grid` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `creature`
 --
 
@@ -869,7 +843,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_addon`;
 CREATE TABLE `creature_addon` (
-  `entry` int(11) NOT NULL default '0',
+  `guid` int(11) NOT NULL default '0',
   `RefId` int(11) NOT NULL default '0',
   `mount` int(11) unsigned NOT NULL default '0',
   `bytes0` int(11) unsigned NOT NULL default '0',
@@ -892,32 +866,6 @@ CREATE TABLE `creature_addon` (
 LOCK TABLES `creature_addon` WRITE;
 /*!40000 ALTER TABLE `creature_addon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_addon` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `creature_grid`
---
-
-DROP TABLE IF EXISTS `creature_grid`;
-CREATE TABLE `creature_grid` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `position_x` int(11) NOT NULL default '0',
-  `position_y` int(11) NOT NULL default '0',
-  `cell_position_x` int(11) NOT NULL default '0',
-  `cell_position_y` int(11) NOT NULL default '0',
-  `grid` int(11) unsigned NOT NULL default '0' COMMENT 'Grid Identifier',
-  `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
-) ENGINE=MEMORY DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Exploration System';
-
---
--- Dumping data for table `creature_grid`
---
-
-LOCK TABLES `creature_grid` WRITE;
-/*!40000 ALTER TABLE `creature_grid` DISABLE KEYS */;
-/*!40000 ALTER TABLE `creature_grid` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1313,32 +1261,6 @@ CREATE TABLE `gameobject` (
 LOCK TABLES `gameobject` WRITE;
 /*!40000 ALTER TABLE `gameobject` DISABLE KEYS */;
 /*!40000 ALTER TABLE `gameobject` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `gameobject_grid`
---
-
-DROP TABLE IF EXISTS `gameobject_grid`;
-CREATE TABLE `gameobject_grid` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `position_x` int(11) NOT NULL default '0',
-  `position_y` int(11) NOT NULL default '0',
-  `cell_position_x` int(11) NOT NULL default '0',
-  `cell_position_y` int(11) NOT NULL default '0',
-  `grid` int(11) unsigned NOT NULL default '0' COMMENT 'Grid Identifier',
-  `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
-) ENGINE=MEMORY DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
-
---
--- Dumping data for table `gameobject_grid`
---
-
-LOCK TABLES `gameobject_grid` WRITE;
-/*!40000 ALTER TABLE `gameobject_grid` DISABLE KEYS */;
-/*!40000 ALTER TABLE `gameobject_grid` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
