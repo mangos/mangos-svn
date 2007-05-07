@@ -855,7 +855,7 @@ CREATE TABLE `creature_addon` (
   `auralevels` int(11) unsigned NOT NULL default '0',
   `auraapplications` int(11) unsigned NOT NULL default '0',
   `aurastate` int(11) unsigned NOT NULL default '0',
-  UNIQUE KEY `guid` (`entry`),
+  UNIQUE KEY `guid` (`guid`),
   KEY `emote` (`emote`,`RefId`,`mount`,`aura`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -10215,4 +10215,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-05-02  7:10:17
+-- Dump completed on 2007-05-07  9:01:20
