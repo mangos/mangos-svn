@@ -9036,6 +9036,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     {
         uint32 quest_id = i->second;
         Quest* pQuest = objmgr.QuestTemplates[quest_id];
+        if(!pQuest) continue;
 
         QuestStatus status = GetQuestStatus( quest_id );
 

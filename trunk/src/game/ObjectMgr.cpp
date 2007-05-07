@@ -3194,6 +3194,12 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
         uint32 id    = fields[0].GetUInt32();
         uint32 quest = fields[1].GetUInt32();
 
+        if ( !objmgr.QuestTemplates[quest] )
+        {
+            sLog.outErrorDb("Table %s: Quest %u listed for entry %u not exist.",table,quest,id);
+            continue;
+        }
+
         map.insert(QuestRelations::value_type(id,quest));
 
         count++;

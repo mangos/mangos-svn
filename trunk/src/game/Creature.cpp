@@ -320,6 +320,8 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     {
         quest_id = i->second;
         pQuest = objmgr.QuestTemplates[quest_id];
+        if ( !pQuest ) continue;
+
         status = pPlayer->GetQuestStatus( quest_id );
         if ((status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
             (pQuest->IsAutoComplete() && pPlayer->CanTakeQuest(pQuest, false)))
@@ -818,7 +820,7 @@ void Creature::generateMoneyLoot()
 {
     uint32 maxgold = GetCreatureInfo()->maxgold;
 
-    if (GetCreatureInfo()->maxgold > 0)
+    if (maxgold > 0)
     {
         uint32 mingold = GetCreatureInfo()->mingold;
 

@@ -423,7 +423,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables
 
     sLog.outString( "Loading Quests Relations..." );
-    objmgr.LoadQuestRelations();
+    objmgr.LoadQuestRelations();                            // must be after quest load
 
     sLog.outString( "Loading AreaTrigger definitions..." );
     objmgr.LoadAreaTriggers();

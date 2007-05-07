@@ -95,7 +95,7 @@ WaypointMovementGenerator::_load(Creature &c)
             {
                 WaypointBehavior *tmpWPB = new WaypointBehavior;
 
-                sLog.outDebug("DEBUG: _load  ---  Adding WaypointBehavior");
+                // sLog.outDebug("DEBUG: _load  ---  Adding WaypointBehavior");
 
                 tmpWPB->text[0] = text1;
                 tmpWPB->text[1] = text2;
