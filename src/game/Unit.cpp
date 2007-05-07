@@ -5201,25 +5201,27 @@ Unit* Unit::SelectNextVictim()
         if(!target)
             continue;
 
-        if(!((Creature*)this)->IsOutOfThreatArea(target) && target->isInAccessablePlaceFor( ((Creature*)this) ) )
+        if(hasVictim)
         {
-            if(hasVictim)                                   //make checks on distance to victim and amount of threat
-            {                                               //only until current victim values
-                //if(iter->UnitGuid == guid)
-                //break;
+            if(iter->UnitGuid == guid)
+                return target;
 
+            Map* map = MapManager::Instance().GetMap(GetMapId(), this);
+            if((map->Instanceable() || (!((Creature*)this)->IsOutOfThreatArea(target))) && target->isInAccessablePlaceFor( ((Creature*)this) ))
+            {
                 if((IsWithinDistInMap(target, ATTACK_DIST) && (iter->Threat > 1.1f * threat)) || (iter->Threat > 1.3f * threat))
                 {                                           //implement 110% threat rule for targets in melee range
                     SetCurrentVictimThreat(iter->Threat);   //and 130% rule for targets in ranged distances
                     return target;                          //for selecting alive targets
                 }
-                else
-                    continue;
             }
-
+        }
+        else if(!((Creature*)this)->IsOutOfThreatArea(target) && target->isInAccessablePlaceFor( ((Creature*)this) ) )
+        {
             SetCurrentVictimThreat(iter->Threat);
             return target;
         }
+
     }
 
     return NULL;
