@@ -566,4 +566,5 @@ EXTRA_DIST = \
 	3562_player_levelstats.sql \
 	3605_creature_addon.sql \
 	3605_grid.sql \
+	3611_spell_learn_skill.sql \
 	README
