@@ -209,8 +209,12 @@ class MANGOS_DLL_SPEC Item : public Object
             uState = state;
         }
 
-    protected:
-        void _LoadQuests();
+        bool hasQuest(uint32 quest_id) const 
+        {
+            ItemPrototype const *itemProto = GetProto();
+            return itemProto && itemProto->StartQuest == quest_id;
+        }
+        bool hasInvolvedQuest(uint32 quest_id) const { return false; }
     private:
         uint8 m_slot;
         Bag *m_container;

@@ -315,9 +315,10 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     uint32 quest_id;
     Quest *pQuest;
 
-    for( std::list<uint32>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
+    QuestRelations const& qir = objmgr.mCreatureQuestInvolvedRelations;
+    for(QuestRelations::const_iterator i = qir.lower_bound(GetEntry()); i != qir.upper_bound(GetEntry()); ++i )
     {
-        quest_id = *i;
+        quest_id = i->second;
         pQuest = objmgr.QuestTemplates[quest_id];
         status = pPlayer->GetQuestStatus( quest_id );
         if ((status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
@@ -339,9 +340,10 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     if ( result == DIALOG_STATUS_INCOMPLETE )
         return result;
 
-    for( std::list<uint32>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
+    QuestRelations const& qr = objmgr.mCreatureQuestRelations;
+    for(QuestRelations::const_iterator i = qr.lower_bound(GetEntry()); i != qr.upper_bound(GetEntry()); ++i )
     {
-        pQuest = objmgr.QuestTemplates[*i];
+        pQuest = objmgr.QuestTemplates[quest_id = i->second];
         if ( !pQuest )
             continue;
 
@@ -869,6 +871,30 @@ void Creature::SetLootRecipient(Player *player)
 
 void Creature::SaveToDB()
 {
+    // update in loaded data
+    CreatureData& data = objmgr.NewCreatureData(m_DBTableGuid);
+
+    // data->guid = guid don't must be update at save
+    data.id = GetEntry();
+    data.mapid = GetMapId();
+    data.posX = GetPositionX();
+    data.posY = GetPositionY();
+    data.posZ = GetPositionZ();
+    data.orientation = GetOrientation();
+    data.spawntimesecs = m_respawnDelay;
+    data.spawndist = m_respawnradius;
+    data.currentwaypoint = 0;
+    data.spawn_posX = respawn_cord[0];
+    data.spawn_posY = respawn_cord[1];
+    data.spawn_posZ = respawn_cord[2];
+    data.spawn_orientation = GetOrientation();
+    data.curhealth = GetHealth();
+    data.curmana = GetPower(POWER_MANA);
+    data.deathState = m_deathState;
+    data.movementType = GetDefaultMovementType();
+    data.auras = "";
+
+    // updated in DB
     sDatabase.BeginTransaction();
 
     sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
@@ -1066,49 +1092,40 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     return true;
 }
 
-bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
+bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
 {
-    bool external = (result != NULL);
-    if (!external)
-        //                                  0    1        2            3            4            5             6               7           8                  9                  10                 11          12        13            14           15          16
-        result = sDatabase.PQuery("SELECT `id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`DeathState`,`MovementType`,`auras` "
-            "FROM `creature` LEFT JOIN `creature_respawn` ON ((`creature`.`guid`=`creature_respawn`.`guid`) AND (`creature_respawn`.`instance` = '%u')) WHERE `creature`.`guid` = '%u'", InstanceId, guid);
+    CreatureData const* data = objmgr.GetCreatureData(guid);
 
-    if(!result)
+    if(!data)
     {
         sLog.outErrorDb("Creature (GUID: %u) not found in table `creature`, can't load. ",guid);
         return false;
     }
 
-    Field *fields = result->Fetch();
-
     uint32 stored_guid = guid;
+
     if (InstanceId != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     SetInstanceId(InstanceId);
 
-    if(!Create(guid,fields[1].GetUInt32(),fields[2].GetFloat(),fields[3].GetFloat(),
-        fields[4].GetFloat(),fields[5].GetFloat(),fields[0].GetUInt32()))
-    {
-        if (!external) delete result;
+    if(!Create(guid,data->mapid,data->posX,data->posY,data->posZ,data->orientation,data->id))
         return false;
-    }
 
     m_DBTableGuid = stored_guid;
 
     if(GetCreatureInfo()->rank > 0)
         this->m_corpseDelay *= 3;                           //if creature is elite, then remove corpse later
 
-    SetHealth(fields[11].GetUInt32());
-    SetPower(POWER_MANA,fields[12].GetUInt32());
+    SetHealth(data->curhealth);
+    SetPower(POWER_MANA,data->curmana);
 
-    m_respawnradius = fields[7].GetFloat();
-    respawn_cord[0] = fields[8].GetFloat();
-    respawn_cord[1] = fields[9].GetFloat();
-    respawn_cord[2] = fields[10].GetFloat();
+    m_respawnradius = data->spawndist;
+    respawn_cord[0] = data->spawn_posX;
+    respawn_cord[1] = data->spawn_posY;
+    respawn_cord[2] = data->spawn_posZ;
 
-    m_respawnDelay = fields[6].GetUInt32();
-    m_deathState = (DeathState)fields[14].GetUInt32();
-    if(m_deathState == JUST_DIED)                           // Dont must be set to JUST_DEAD, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
+    m_respawnDelay = data->spawntimesecs;
+    m_deathState = (DeathState)data->deathState;
+    if(m_deathState == JUST_DIED)                           // Don't must be set to JUST_DEAD, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
     {
         sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) in wrong state: JUST_DEAD (1). State set to ALIVE.",GetGUIDLow(),GetEntry());
         m_deathState = ALIVE;
@@ -1120,17 +1137,17 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
         m_deathState = ALIVE;
     }
 
-    m_respawnTime  = (time_t)fields[13].GetUInt64();
+    m_respawnTime  = objmgr.GetCreatureRespawnTime(stored_guid,InstanceId);
     if(m_respawnTime > time(NULL))                          // not ready to respawn
         m_deathState = DEAD;
-    else                                                    // ready to respawn
+    else if(m_respawnTime)                                  // respawn time set but expired
     {
         m_respawnTime = 0;
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+        objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
     }
 
     {
-        uint32 mtg = fields[15].GetUInt32();
+        uint32 mtg = data->movementType;
         if(mtg < MAX_DB_MOTION_TYPE)
             m_defaultMovementType = MovementGeneratorType(mtg);
         else
@@ -1139,8 +1156,6 @@ bool Creature::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
             sLog.outErrorDb("Creature (GUID: %u ID: %u) have wrong movement generator type value %u, ignore and set to IDLE.",guid,GetEntry(),mtg);
         }
     }
-
-    if(!external) delete result;
 
     LoadFlagRelatedData();
 
@@ -1178,49 +1193,32 @@ void Creature::_LoadGoods()
     delete result;
 }
 
-void Creature::_LoadQuests()
+bool Creature::hasQuest(uint32 quest_id) const
 {
-    mQuests.clear();
-    mInvolvedQuests.clear();
-
-    Field *fields;
-
-    QueryResult *result = sDatabase.PQuery("SELECT `quest` FROM `creature_questrelation` WHERE `id` = '%u'", GetEntry());
-
-    if(result)
+    QuestRelations const& qr = objmgr.mCreatureQuestRelations;
+    for(QuestRelations::const_iterator itr = qr.lower_bound(GetEntry()); itr != qr.upper_bound(GetEntry()); ++itr)
     {
-        do
-        {
-            fields = result->Fetch();
-            Quest* qInfo = objmgr.QuestTemplates[fields[0].GetUInt32()];
-            if (!qInfo) continue;
-
-            addQuest(qInfo->GetQuestId());
-        }
-        while( result->NextRow() );
-
-        delete result;
+        if(itr->second==quest_id)
+            return true;
     }
+    return false;
+}
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT `quest` FROM `creature_involvedrelation` WHERE `id` = '%u'", GetEntry());
-
-    if(!result1) return;
-
-    do
+bool Creature::hasInvolvedQuest(uint32 quest_id) const
+{
+    QuestRelations const& qr = objmgr.mCreatureQuestInvolvedRelations;
+    for(QuestRelations::const_iterator itr = qr.lower_bound(GetEntry()); itr != qr.upper_bound(GetEntry()); ++itr)
     {
-        fields = result1->Fetch();
-        Quest* qInfo = objmgr.QuestTemplates[fields[0].GetUInt32()];
-        if (!qInfo) continue;
-
-        addInvolvedQuest(qInfo->GetQuestId());
+        if(itr->second==quest_id)
+            return true;
     }
-    while( result1->NextRow() );
-
-    delete result1;
+    return false;
 }
 
 void Creature::DeleteFromDB()
 {
+    objmgr.DeleteCreatureData(m_DBTableGuid);
+
     sDatabase.BeginTransaction();
     sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
     sDatabase.PExecuteLog("DELETE FROM `creature_grid` WHERE `guid` = '%u'", m_DBTableGuid);
@@ -1469,15 +1467,9 @@ void Creature::SaveRespawnTime()
         return;
 
     if(m_respawnTime > time(NULL))                          // dead (no corpse)
-    {
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
-        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", m_DBTableGuid, uint64(m_respawnTime), GetInstanceId());
-    }
+        objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),m_respawnTime);
     else if(m_deathTimer > 0)                               // dead (corpse)
-    {
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
-        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", m_DBTableGuid, uint64(time(NULL)+m_respawnDelay+m_deathTimer/1000), GetInstanceId());
-    }
+        objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),time(NULL)+m_respawnDelay+m_deathTimer/1000);
 }
 
 bool Creature::IsOutOfThreatArea(Unit* pVictim) const
@@ -1502,15 +1494,12 @@ void Creature::LoadFlagRelatedData()
 
     if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ) )
         _LoadGoods();
-
-    if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER ) )
-        _LoadQuests();
 }
 
 //creature_addon table
 bool Creature::LoadCreaturesAddon()
 {
-    CreatureAddInfo const *cainfo = objmgr.GetCreatureAddon(GetGUIDLow());
+    CreatureDataAddon const *cainfo = objmgr.GetCreatureAddon(GetGUIDLow());
     if(!cainfo)
         return false;
 

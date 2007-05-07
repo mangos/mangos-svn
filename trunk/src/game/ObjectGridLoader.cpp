@@ -17,8 +17,8 @@
  */
 
 #include "ObjectGridLoader.h"
-#include "Database/DatabaseEnv.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "MapManager.h"
 #include "RedZoneDistrict.h"
 #include "Creature.h"
@@ -95,95 +95,55 @@ template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
 }
 
 template <class T>
-void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count, Map* map)
+void LoadHelper(CellGuidSet const& guid_set, CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count, Map* map)
 {
-    if( result )
+    bool generateGuid = map->Instanceable();
+
+    for(CellGuidSet::const_iterator i_guid = guid_set.begin(); i_guid != guid_set.end(); ++i_guid)
     {
-        bool generateGuid = map->Instanceable();
-
-        do
+        T* obj = new T(NULL);
+        uint32 guid = *i_guid;
+        //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
+        if(!obj->LoadFromDB(guid, map->GetInstanceId()))
         {
-            Field *fields = result->Fetch();
-            T *obj = new T( NULL );
-            uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
-            //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
-            if(!obj->LoadFromDB(guid, result, map->GetInstanceId()))
-            {
-                delete obj;
-                continue;
-            }
-            else
-            {
-                // Check loaded cell/grid integrity
-                Cell old_cell = RedZone::GetZone(cell);
+            //delete obj;
+            continue;
+        }
 
-                CellPair pos_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-                Cell pos_cell = RedZone::GetZone(pos_val);
+        obj->SetInstanceId(map->GetInstanceId());
+        m[obj->GetGUID()] = obj;
 
-                if(old_cell != pos_cell)
-                {
-                    sLog.outError("Object (GUID: %u TypeId: %u Entry: %u) loaded (X: %f Y: %f) to grid[%u,%u]cell[%u,%u] instead grid[%u,%u]cell[%u,%u].", obj->GetGUIDLow(), obj->GetGUIDHigh(), obj->GetEntry(), obj->GetPositionX(), obj->GetPositionY(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), pos_cell.GridX(), pos_cell.GridY(), pos_cell.CellX(), pos_cell.CellY());
-                    delete obj;
-                    continue;
-                }
-            }
+        addUnitState(obj,cell);
+        obj->AddToWorld();
+        ++count;
 
-            obj->SetInstanceId(map->GetInstanceId());
-            m[obj->GetGUID()] = obj;
-
-            addUnitState(obj,cell);
-            obj->AddToWorld();
-            ++count;
-
-        }while( result->NextRow() );
-        delete result;
     }
 }
 
-template <class T>
-void LoadHelper(QueryResult *result, CellPair &cell, std::map<OBJECT_HANDLE, CountedPtr<T> > &m, uint32 &count, Map* map)
+void LoadHelper(CellCorpseSet const& cell_corpses, CellPair &cell, std::map<OBJECT_HANDLE, CountedPtr<Corpse> > &m, uint32 &count, Map* map)
 {
-    if( result )
+    if(cell_corpses.empty())
+        return;
+
+    bool generateGuid = map->Instanceable();
+    CountedPtr<Corpse> obj;
+
+    for(CellCorpseSet::const_iterator itr = cell_corpses.begin(); itr != cell_corpses.end(); ++itr)
     {
-        bool generateGuid = map->Instanceable();
-	CountedPtr<T> obj;
+        if(itr->second != map->GetInstanceId())
+            continue;
 
-        do
-        {
-            Field *fields = result->Fetch();
-            obj = CountedPtr<T>(new T(NULL));
-            uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
-            //sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
-            if(!obj->LoadFromDB(guid, result, map->GetInstanceId()))
-            {
-                //delete obj;
-                continue;
-            }
-            else
-            {
-                // Check loaded cell/grid integrity
-                Cell old_cell = RedZone::GetZone(cell);
+        uint32 player_guid = itr->first;
 
-                CellPair pos_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-                Cell pos_cell = RedZone::GetZone(pos_val);
+        obj = ObjectAccessor::Instance().GetCorpseForPlayerGUID(player_guid);
+        if(!obj)
+            continue;
 
-                if(old_cell != pos_cell)
-                {
-                    sLog.outError("Object (GUID: %u TypeId: %u Entry: %u) loaded (X: %f Y: %f) to grid[%u,%u]cell[%u,%u] instead grid[%u,%u]cell[%u,%u].", obj->GetGUIDLow(), obj->GetGUIDHigh(), obj->GetEntry(), obj->GetPositionX(), obj->GetPositionY(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), pos_cell.GridX(), pos_cell.GridY(), pos_cell.CellX(), pos_cell.CellY());
-                    //delete obj;
-                    continue;
-                }
-            }
+        m[obj->GetGUID()] = obj;
 
-            obj->SetInstanceId(map->GetInstanceId());
-            m[obj->GetGUID()] = obj;
-
-            addUnitState(obj,cell);
-            obj->AddToWorld();
-            ++count;
-
-        }while( result->NextRow() );
-        delete result;
+        addUnitState(obj,cell);
+        obj->AddToWorld();
+        ++count;
     }
 }
 
@@ -194,13 +154,10 @@ ObjectGridLoader::Visit(GameObjectMapType &m)
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
     CellPair cell_pair(x,y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
-    QueryResult *result = sDatabase.PQuery(
-    //      0    1                  2                         3                         4            5             6           7           8           9           10     11              12             13         14            15
-        "SELECT `id`,`gameobject`.`map`,`gameobject`.`position_x`,`gameobject`.`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`respawntime`,`gameobject`.`guid` "
-        "FROM `gameobject` LEFT JOIN `gameobject_grid` ON `gameobject`.`guid` = `gameobject_grid`.`guid` "
-        "LEFT JOIN `gameobject_respawn` ON ((`gameobject`.`guid`=`gameobject_respawn`.`guid`) AND (`gameobject_respawn`.`instance` = '%u')) "
-        "WHERE `grid` = '%u' AND `cell` = '%u' AND `gameobject_grid`.`map` = '%u'", i_map->GetInstanceId(), i_grid.GetGridId(), cell_id, i_map->GetId());
-    LoadHelper(result, cell_pair, m, i_gameObjects, i_map);
+
+    CellObjectGuids const& cell_guids = objmgr.GetCellObjectGuids(i_map->GetId(), cell_id);
+
+    LoadHelper(cell_guids.gameobjects, cell_pair, m, i_gameObjects, i_map);
 }
 
 void
@@ -210,13 +167,10 @@ ObjectGridLoader::Visit(CreatureMapType &m)
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
     CellPair cell_pair(x,y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
-    QueryResult *result = sDatabase.PQuery(
-    //          0    1                2                       3                       4            5             6               7           8                  9                  10                 11          12        13            14      15             16      17
-        "SELECT `id`,`creature`.`map`,`creature`.`position_x`,`creature`.`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`curhealth`,`curmana`,`respawntime`,`DeathState`,`MovementType`,`auras`,`creature`.`guid`"
-        "FROM `creature` LEFT JOIN `creature_grid` ON `creature`.`guid` = `creature_grid`.`guid` "
-        "LEFT JOIN `creature_respawn` ON ((`creature`.`guid`=`creature_respawn`.`guid`) AND (`creature_respawn`.`instance` = '%u'))"
-        "WHERE `grid` = '%u' AND `cell` = '%u' AND `creature_grid`.`map` = '%u' ", i_map->GetInstanceId(), i_grid.GetGridId(), cell_id, i_map->GetId());
-    LoadHelper(result, cell_pair, m, i_creatures, i_map);
+
+    CellObjectGuids const& cell_guids = objmgr.GetCellObjectGuids(i_map->GetId(), cell_id);
+
+    LoadHelper(cell_guids.creatures, cell_pair, m, i_gameObjects, i_map);
 }
 
 void
@@ -227,12 +181,8 @@ ObjectGridLoader::Visit(CorpseMapType &m)
     CellPair cell_pair(x,y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    // Load bones to grid store
-    QueryResult *result = sDatabase.PQuery(
-        "SELECT `corpse`.`position_x`,`corpse`.`position_y`,`position_z`,`orientation`,`corpse`.`map`,`data`,`bones_flag`,`instance`,`corpse`.`guid` "
-        "FROM `corpse` LEFT JOIN `corpse_grid` ON `corpse`.`guid` = `corpse_grid`.`guid` "
-        "WHERE `grid` = '%u' AND `cell` = '%u' AND `corpse_grid`.`map` = '%u' AND `bones_flag` = 1 AND `instance` = '%u'", i_grid.GetGridId(), cell_id, i_map->GetId(), i_map->GetInstanceId());
-    LoadHelper(result, cell_pair, m, i_corpses, i_map);
+    CellObjectGuids const& cell_guids = objmgr.GetCellObjectGuids(i_map->GetId(), cell_id);
+    LoadHelper(cell_guids.corpses, cell_pair, m, i_corpses, i_map);
 }
 
 void

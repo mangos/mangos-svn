@@ -31,6 +31,7 @@
 #pragma pack(push,1)
 #endif
 
+// from `gameobject_template`
 struct GameObjectInfo
 {
     uint32  id;
@@ -51,6 +52,25 @@ struct GameObjectInfo
     uint32  sound8;
     uint32  sound9;
     char   *ScriptName;
+};
+
+// from `ganeobject`
+struct GameObjectData
+{
+    uint32 id;                                              // entry in gamobject_template
+    uint32 mapid;
+    float posX;
+    float posY;
+    float posZ;
+    float orientation;
+    float rotation0;
+    float rotation1;
+    float rotation2;
+    float rotation3;
+    uint32 lootid;
+    uint32 spawntimesecs;
+    uint32 animprogress;
+    uint32 dynflags;
 };
 
 #if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
@@ -93,7 +113,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
 
         void SaveToDB();
-        bool LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId);
+        bool LoadFromDB(uint32 guid, uint32 InstanceId);
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }
         void SetRespawnTime(int32 respawn)
@@ -130,9 +150,9 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         Loot        loot;
         uint32      lootid;
 
+        bool hasQuest(uint32 quest_id) const;
+        bool hasInvolvedQuest(uint32 quest_id) const;
     protected:
-        void _LoadQuests();
-
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer

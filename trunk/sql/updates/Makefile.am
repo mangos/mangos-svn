@@ -564,4 +564,6 @@ EXTRA_DIST = \
 	3547_character_reputation.sql \
 	3553_creature_onkill_reputation.sql \
 	3562_player_levelstats.sql \
+	3605_creature_addon.sql \
+	3605_grid.sql \
 	README

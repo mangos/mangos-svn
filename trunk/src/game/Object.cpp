@@ -153,7 +153,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         }*/
     }
 
-    sLog.outDebug("BuildCreateUpdate: update-type: %u, object-type: %u got flags: %X, flags2: %X", updatetype, m_objectTypeId, flags, flags2);
+    //sLog.outDebug("BuildCreateUpdate: update-type: %u, object-type: %u got flags: %X, flags2: %X", updatetype, m_objectTypeId, flags, flags2);
 
     ByteBuffer buf(500);
     buf << updatetype;
@@ -553,16 +553,6 @@ void Object::RemoveFlag( uint16 index, uint32 oldFlag )
             }
         }
     }
-}
-
-bool Object::hasQuest(uint32 quest_id)
-{
-    return (find(mQuests.begin(), mQuests.end(), quest_id) != mQuests.end());
-}
-
-bool Object::hasInvolvedQuest(uint32 quest_id)
-{
-    return (find(mInvolvedQuests.begin(), mInvolvedQuests.end(), quest_id) != mInvolvedQuests.end());
 }
 
 bool Object::PrintIndexError(uint32 index, bool set) const

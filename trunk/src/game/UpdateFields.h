@@ -102,7 +102,7 @@ enum EUnitFields
     UNIT_FIELD_FLAGS                           = 0x28 + OBJECT_END, // Size:1
     UNIT_FIELD_FLAGS_2                         = 0x29 + OBJECT_END, // Size:1
     UNIT_FIELD_AURA                            = 0x2A + OBJECT_END, // Size:56
-    UNIT_FIELD_AURA_LAST                       = 0x63 + OBJECT_END,
+    UNIT_FIELD_AURA_LAST                       = 0x61 + OBJECT_END,
     UNIT_FIELD_AURAFLAGS                       = 0x62 + OBJECT_END, // Size:7
     UNIT_FIELD_AURAFLAGS_01                    = 0x63 + OBJECT_END,
     UNIT_FIELD_AURAFLAGS_02                    = 0x64 + OBJECT_END,

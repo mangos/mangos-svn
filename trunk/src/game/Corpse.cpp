@@ -90,15 +90,6 @@ void Corpse::SaveToDB()
         ss << GetUInt32Value(i) << " ";
     ss << "', NOW(), " << int(GetType()) << ", " << int(GetInstanceId()) << ")";
     sDatabase.Execute( ss.str().c_str() );
-
-    // update grid table
-    sDatabase.PExecute(
-        "INSERT INTO `corpse_grid` (`guid`,`map`,`position_x`,`position_y`,`cell_position_x`,`cell_position_y` ) "
-        "SELECT `guid`,`map`,((`position_x`-%f)/%f) + %u,((`position_y`-%f)/%f) + %u,((`position_x`-%f)/%f) + %u,((`position_y`-%f)/%f) + %u "
-        "FROM `corpse` WHERE `guid` = '%u'", CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID,
-        CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, GetGUIDLow()
-        );
-    sDatabase.PExecute("UPDATE `corpse_grid` SET `grid`=(`position_x`*%u) + `position_y`,`cell`=((`cell_position_y` * %u) + `cell_position_x`) WHERE `guid` = '%u'", MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP,GetGUIDLow());
     sDatabase.CommitTransaction();
 }
 
@@ -131,8 +122,6 @@ void Corpse::DeleteFromDB(bool inner_transaction)
         // all corpses (not bones)
         ss  << "DELETE FROM `corpse` WHERE `player` = '" << GUID_LOPART(GetOwnerGUID()) << "' AND `bones_flag` = '0'";
     sDatabase.Execute( ss.str().c_str() );
-
-    sDatabase.PExecute( "DELETE FROM `corpse_grid` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(inner_transaction)
         sDatabase.CommitTransaction();
@@ -225,13 +214,13 @@ void Corpse::_ConvertCorpseToBones()
     CorpsePtr corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetOwnerGUID());
     if(!corpse)
     {
-	sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
-	return;
+	    sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
+	    return;
     }
 
     if ((&*corpse) != this) {
-	sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
-	return;
+	    sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
+	    return;
     }
 
     // Removing outdated POI if at same map
@@ -254,7 +243,7 @@ void Corpse::_ConvertCorpseToBones()
     bones->Create(GetGUIDLow());
 
     for (int i = 0; i < CORPSE_END; i++) {
-	bones->SetUInt32Value(i, GetUInt32Value(i));
+	    bones->SetUInt32Value(i, GetUInt32Value(i));
     }
     bones->m_grid = m_grid;
     bones->m_time = m_time;
