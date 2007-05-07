@@ -901,6 +901,8 @@ void Aura::TriggerSpell()
         spellInfo = sSpellStore.LookupEntry(22845);         // Frenzied Regeneration
     else if (GetId()==29528)
         spellInfo = sSpellStore.LookupEntry(28713);         // Inoculation
+    else if (GetId()==29917)
+        spellInfo = sSpellStore.LookupEntry(29916);         // Feed Captured Animal
     else
         spellInfo = NULL;
 
@@ -1085,6 +1087,43 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
             sLog.outErrorDb("AuraMounted: `creature_template`='%u' not found in database (only need it modelid)", m_modifier.m_miscvalue);
             return;
         }
+
+        // drop flag at mount in bg
+        if(m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
+        {
+            Player* player = (Player*)m_target;
+            BattleGround *bg = sBattleGroundMgr.GetBattleGround(player->GetBattleGroundId());
+            if(bg)
+            {
+                if(player->GetTeam() == HORDE && bg->IsAllianceFlagPickedup())
+                {
+                    if(bg->GetAllianceFlagPickerGUID() == m_target->GetGUID())
+                    {
+                        bg->SetAllianceFlagPicker(0);
+
+                        // not modify stats and not requires ApplyStats calls wrapping
+                        m_target->RemoveAurasDueToSpell(23335);
+
+                        // not modify stats and not requires ApplyStats calls wrapping
+                        m_target->CastSpell(m_target,23336,true,NULL);
+                    }
+                }
+                if(player->GetTeam() == ALLIANCE && bg->IsHordeFlagPickedup())
+                {
+                    if(bg->GetHordeFlagPickerGUID() == m_target->GetGUID())
+                    {
+                        bg->SetHordeFlagPicker(0);
+
+                        // not modify stats and not requires ApplyStats calls wrapping
+                        m_target->RemoveAurasDueToSpell(23333);
+
+                        // not modify stats and not requires ApplyStats calls wrapping
+                        m_target->CastSpell(m_target,23334,true,NULL);
+                    }
+                }
+            }
+        }
+
         uint32 displayId = ci->randomDisplayID();
         if(displayId != 0)
             m_target->Mount(displayId);
