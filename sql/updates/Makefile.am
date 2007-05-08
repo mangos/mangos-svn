@@ -292,6 +292,9 @@ pkgdata_DATA = \
 	3547_character_reputation.sql \
 	3553_creature_onkill_reputation.sql \
 	3562_player_levelstats.sql \
+	3605_creature_addon.sql \
+	3605_grid.sql \
+	3611_spell_learn_skill.sql \
 	README
 
 ## Additional files to include when running 'make dist'
