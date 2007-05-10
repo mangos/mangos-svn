@@ -27,6 +27,7 @@
 
 class Unit;
 class Creature;
+struct SpellEntry;
 
 #define TIME_INTERVAL_LOOK   5000
 #define VISIBILITY_RANGE    10000
@@ -56,6 +57,8 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual void KilledUnit(Unit *) {};
 
         virtual void SummonedCreatureDespawn(Creature* unit) {};
+
+        virtual void SpellHit(Unit*, const SpellEntry*) {};
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>

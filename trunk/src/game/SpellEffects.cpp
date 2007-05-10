@@ -704,11 +704,11 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_EMPATHY:
             case SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS:
                 break;
+
             default:
+                //If Aura is applied to monster then attack caster
                 if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat())
                     ((Creature*)Aur->GetTarget())->AI().AttackStart(m_caster);
-                else
-                    m_caster->Attack(Aur->GetTarget());
         }
     }
 

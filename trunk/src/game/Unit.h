@@ -884,7 +884,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         int32 CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index);
         Creature* SummonCreature(uint32 id, uint32 mapid, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
-    protected:
+
+        static Unit* GetUnit(WorldObject& object, uint64 guid);
+
+protected:
         Unit ( WorldObject *instantiator );
 
         void _UpdateSpells(uint32 time);

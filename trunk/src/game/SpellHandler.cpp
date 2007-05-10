@@ -27,6 +27,7 @@
 #include "SpellAuras.h"
 #include "BattleGroundMgr.h"
 #include "MapManager.h"
+#include "ScriptCalls.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
@@ -122,6 +123,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
         ++count;
     }
+
+    Script->ItemUse(pUser,pItem);
 }
 
 #define OPEN_CHEST 11437
