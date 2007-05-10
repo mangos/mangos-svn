@@ -102,6 +102,9 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
     // Called when the creature kills a unit
     void KilledUnit(Unit *){}
 
+    // Called when hit by a spell
+    void SpellHit(Unit *, const SpellEntry*){}
+
     Creature* m_creature;
 
     // Check condition for attack stop
