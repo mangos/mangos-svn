@@ -40,7 +40,6 @@ bool LoadScriptingModule(char const* libName)
         delete testScript;
         return false;
     }
-    else printf("Scripts Library %s was successfully loaded.\n",name.c_str());
 
     if(   !(testScript->ScriptsInit         =(scriptCallScriptsInit         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsInit"         ))
         ||!(testScript->ScriptsFree         =(scriptCallScriptsFree         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsFree"         ))
@@ -63,10 +62,13 @@ bool LoadScriptingModule(char const* libName)
         ||!(testScript->GetAI               =(scriptCallGetAI               )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GetAI"               ))
         )
     {
+        printf("Error loading Scripts Library %s !\n Library missing required functions.",name.c_str());
         MANGOS_CLOSE_LIBRARY(testScript->hScriptsLib);
         delete testScript;
         return false;
     }
+
+    printf("Scripts Library %s was successfully loaded.\n",name.c_str());
 
     //heh we are still there :P we have a valid library
     //we reload script
