@@ -948,7 +948,7 @@ void Spell::cast(bool skipCheck)
                     DamageMultiplier *= m_spellInfo->DmgMultiplier[j];
 
                 //Call scripted function for AI if this spell is casted upon a creature
-                if (unit->GetTypeId() == TYPEID_UNIT)
+                if (unit->GetTypeId() == TYPEID_UNIT && &((Creature*)unit)->AI())
                     ((Creature*)unit)->AI().SpellHit(m_caster,m_spellInfo);
             }
         }

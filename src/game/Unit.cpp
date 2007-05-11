@@ -314,7 +314,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
             pVictim->DeleteThreatList();
             return;
         }
-        if(!pVictim->isInCombat())
+        if(!pVictim->isInCombat() && &((Creature*)pVictim)->AI())
             ((Creature*)pVictim)->AI().AttackStart(this);
     }
 
@@ -356,7 +356,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
         pVictim->SetHealth(0);
 
         // Call KilledUnit for creatures
-        if (GetTypeId() == TYPEID_UNIT)
+        if (GetTypeId() == TYPEID_UNIT && &((Creature*)this)->AI())
             ((Creature*)this)->AI().KilledUnit(pVictim);
 
         // 10% durability loss on death
@@ -395,7 +395,8 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
             // Call creature just died function
-            ((Creature*)pVictim)->AI().JustDied(this);
+            if (&((Creature*)pVictim)->AI())
+                ((Creature*)pVictim)->AI().JustDied(this);
         }
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
@@ -540,7 +541,9 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
-            ((Creature *)pVictim)->AI().DamageInflict(this, damage);
+            if (&((Creature *)pVictim)->AI())
+                ((Creature *)pVictim)->AI().DamageInflict(this, damage);
+
             if(spellProto && IsDamageToThreatSpell(spellProto))
                 damage *= 2;
             pVictim->AddThreat(this, damage, damageSchool, spellProto);
@@ -5068,7 +5071,7 @@ void Unit::RemoveFromThreatList(uint64 guid)
         }
     }
 
-    if(IsThreatListEmpty() && GetTypeId() == TYPEID_UNIT )
+    if(IsThreatListEmpty() && GetTypeId() == TYPEID_UNIT && &((Creature*)this)->AI())
         ((Creature*)this)->AI().EnterEvadeMode();
 }
 
@@ -5144,7 +5147,7 @@ bool Unit::SelectHostilTarget()
 
     if(IsThreatListEmpty())
     {
-        if(!IsHateOfflineListEmpty())
+        if(!IsHateOfflineListEmpty() && &((Creature*)this)->AI())
             ((Creature*)this)->AI().EnterEvadeMode();
         return false;
     }
@@ -5169,11 +5172,12 @@ bool Unit::SelectHostilTarget()
     if(target)
     {
         SetInFront(target);
-        ((Creature*)this)->AI().AttackStart(target);
+        if (&((Creature*)this)->AI())
+            ((Creature*)this)->AI().AttackStart(target);
         return true;
     }
-    else
-        ((Creature*)this)->AI().EnterEvadeMode();
+    else if (&((Creature*)this)->AI())
+            ((Creature*)this)->AI().EnterEvadeMode();
 
     return false;
 }
@@ -5325,7 +5329,8 @@ void Unit::TauntApply(Unit* taunter)
         return;
 
     SetInFront(taunter);
-    ((Creature*)this)->AI().AttackStart(taunter);
+    if (&((Creature*)this)->AI())
+        ((Creature*)this)->AI().AttackStart(taunter);
 
     uint64 guid = taunter->GetGUID();
     float threat = GetCurrentVictimThreat();
@@ -5360,7 +5365,7 @@ void Unit::TauntFadeOut(Unit *taunter)
 
     if(IsThreatListEmpty())
     {
-        if(!IsHateOfflineListEmpty())
+        if(!IsHateOfflineListEmpty() && &((Creature*)this)->AI())
             ((Creature*)this)->AI().EnterEvadeMode();
         return;
     }
@@ -5393,7 +5398,8 @@ void Unit::TauntFadeOut(Unit *taunter)
     if (target && target != taunter)
     {
         SetInFront(target);
-        ((Creature*)this)->AI().AttackStart(target);
+        if (&((Creature*)this)->AI())
+            ((Creature*)this)->AI().AttackStart(target);
     }
 }
 
