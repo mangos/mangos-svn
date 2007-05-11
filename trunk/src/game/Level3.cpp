@@ -2027,9 +2027,14 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     if (!*args)
         return false;
 
-    uint32 id = atoi((char*)args);
+
+    char* pParam1 = strtok((char*)args, " ");
+    uint32 id = atoi((char*)pParam1);
     if(!id)
         return false;
+
+    char* lootID = strtok(NULL, " ");
+    char* spawntimeSecs = strtok(NULL, " ");
 
     const GameObjectInfo *goI = objmgr.GetGameObjectInfo(id);
 
@@ -2060,6 +2065,16 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     pGameObj->SetMapId(chr->GetMapId());
     //pGameObj->SetNameId(id);
     sLog.outError(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
+    if( lootID ) {
+        uint32 value = atoi((char*)lootID);
+        pGameObj->lootid = value;
+        //sLog.outDebug("*** LOOT: %d", value);
+    }
+    if( spawntimeSecs ) {
+        uint32 value = atoi((char*)spawntimeSecs);
+        pGameObj->SetRespawnTime(value);
+        //sLog.outDebug("*** spawntimeSecs: %d", value);
+    }
 
     pGameObj->SaveToDB();
     pGameObj->AddToWorld();
