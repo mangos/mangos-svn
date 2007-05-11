@@ -241,6 +241,17 @@ bool ReceiveEmote ( Player *player, Creature *_Creature, uint32 emote )
 }
 
 MANGOS_DLL_EXPORT
+bool ItemUse( Player *player, Item* _Item)
+{
+    Script *tmpscript = NULL;
+
+    tmpscript = GetScriptByName(_Item->GetProto()->ScriptName);
+    if(!tmpscript || !tmpscript->pItemUse) return false;
+
+    return tmpscript->pItemUse(player,_Item);
+}
+
+MANGOS_DLL_EXPORT
 CreatureAI* GetAI(Creature *_Creature )
 {
     Script *tmpscript = GetScriptByName(_Creature->GetCreatureInfo()->ScriptName);
