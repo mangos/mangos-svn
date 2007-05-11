@@ -279,7 +279,8 @@ void Spell::EffectDummy(uint32 i)
 
         ((Creature*)m_caster)->SetNoCallAssistence(true);
         ((Creature*)unitTarget)->SetNoCallAssistence(true);
-        ((Creature*)unitTarget)->AI().AttackStart(m_caster->getVictim());
+        if (&((Creature*)unitTarget)->AI())
+            ((Creature*)unitTarget)->AI().AttackStart(m_caster->getVictim());
         return;
     }
 
@@ -707,7 +708,7 @@ void Spell::EffectApplyAura(uint32 i)
 
             default:
                 //If Aura is applied to monster then attack caster
-                if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat())
+                if(Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat() && &((Creature*)Aur->GetTarget())->AI())
                     ((Creature*)Aur->GetTarget())->AI().AttackStart(m_caster);
         }
     }
@@ -1440,7 +1441,8 @@ void Spell::EffectPickPocket(uint32 i)
         {
             //Reveal action + get attack
             m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            ((Creature*)unitTarget)->AI().AttackStart(m_caster);
+            if (&((Creature*)unitTarget)->AI())
+                ((Creature*)unitTarget)->AI().AttackStart(m_caster);
         }
     }
 }
@@ -1993,7 +1995,8 @@ void Spell::EffectAttackMe(uint32 i)
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
         unitTarget->SetInFront(m_caster);
-        ((Creature*)unitTarget)->AI().AttackStart(m_caster);
+        if (&((Creature*)unitTarget)->AI())
+            ((Creature*)unitTarget)->AI().AttackStart(m_caster);
     }
 }
 

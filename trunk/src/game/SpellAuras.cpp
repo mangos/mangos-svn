@@ -1963,6 +1963,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             if( m_target->GetTypeId() != TYPEID_PLAYER && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (GetSpellProto()->SpellIconID == 249))
             {  
                 //Units no longer brain dead after they come back from sap ;p
+                if (&((Creature *)m_target)->AI())
                 ((Creature *)m_target)->AI().EnterEvadeMode();
             }
                         
