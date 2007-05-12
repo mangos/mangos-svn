@@ -78,7 +78,7 @@ void SpellCastTargets::setUnitTarget(Unit *target)
 {
 
     if (!target)
-	return;
+        return;
 	
     m_destX = target->GetPositionX();
     m_destY = target->GetPositionY();
@@ -952,8 +952,8 @@ void Spell::cast(bool skipCheck)
                     DamageMultiplier *= m_spellInfo->DmgMultiplier[j];
 
                 //Call scripted function for AI if this spell is casted upon a creature
-                if (unit->GetTypeId() == TYPEID_UNIT && &((Creature*)unit)->AI())
-                    ((Creature*)unit)->AI().SpellHit(m_caster,m_spellInfo);
+                if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->AI())
+                    ((Creature*)unit)->AI()->SpellHit(m_caster,m_spellInfo);
             }
         }
 

@@ -95,7 +95,7 @@ PlayerLimit = 100
 # Max level that can reached by player for expirience (in range from 1 to 255).
 # Change not recommended
 # Default: 60
-MaxPlayerLevel = 60
+MaxPlayerLevel = 70
 
 # Activate weather system
 # Default: 1 (true)

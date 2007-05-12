@@ -887,7 +887,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         static Unit* GetUnit(WorldObject& object, uint64 guid);
 
-protected:
+    protected:
         Unit ( WorldObject *instantiator );
 
         void _UpdateSpells(uint32 time);

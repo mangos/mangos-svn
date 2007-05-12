@@ -321,16 +321,16 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return GetCreatureInfo()->rank == CREATURE_ELITE_WORLDBOSS;
         }
 
-        void AIM_Initialize(void);
+        void AIM_Initialize();
         MotionMaster* operator->(void) { return &i_motionMaster; }
 
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, uint8 type);
-        inline CreatureAI &AI(void) { return *i_AI; }
+        CreatureAI* AI() { return i_AI; }
 
-        inline void setMoveRunFlag(bool f) { m_moveRun = f; }
-        inline bool getMoveRunFlag() { return m_moveRun; }
-        inline bool IsStopped(void) const { return !(hasUnitState(UNIT_STAT_MOVING)); }
-        inline void StopMoving(void)
+        void setMoveRunFlag(bool f) { m_moveRun = f; }
+        bool getMoveRunFlag() const { return m_moveRun; }
+        bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
+        void StopMoving()
         {
             clearUnitState(UNIT_STAT_MOVING);
             AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, 1);

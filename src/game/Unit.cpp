@@ -314,8 +314,8 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
             pVictim->DeleteThreatList();
             return;
         }
-        if(!pVictim->isInCombat() && &((Creature*)pVictim)->AI())
-            ((Creature*)pVictim)->AI().AttackStart(this);
+        if(!pVictim->isInCombat() && ((Creature*)pVictim)->AI())
+            ((Creature*)pVictim)->AI()->AttackStart(this);
     }
 
     DEBUG_LOG("DealDamageStart");
@@ -356,8 +356,8 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
         pVictim->SetHealth(0);
 
         // Call KilledUnit for creatures
-        if (GetTypeId() == TYPEID_UNIT && &((Creature*)this)->AI())
-            ((Creature*)this)->AI().KilledUnit(pVictim);
+        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
+            ((Creature*)this)->AI()->KilledUnit(pVictim);
 
         // 10% durability loss on death
         // clean InHateListOf
@@ -395,8 +395,8 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
             // Call creature just died function
-            if (&((Creature*)pVictim)->AI())
-                ((Creature*)pVictim)->AI().JustDied(this);
+            if (((Creature*)pVictim)->AI())
+                ((Creature*)pVictim)->AI()->JustDied(this);
         }
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
@@ -541,8 +541,8 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
-            if (&((Creature *)pVictim)->AI())
-                ((Creature *)pVictim)->AI().DamageInflict(this, damage);
+            if (((Creature *)pVictim)->AI())
+                ((Creature *)pVictim)->AI()->DamageInflict(this, damage);
 
             if(spellProto && IsDamageToThreatSpell(spellProto))
                 damage *= 2;
@@ -5071,8 +5071,8 @@ void Unit::RemoveFromThreatList(uint64 guid)
         }
     }
 
-    if(IsThreatListEmpty() && GetTypeId() == TYPEID_UNIT && &((Creature*)this)->AI())
-        ((Creature*)this)->AI().EnterEvadeMode();
+    if(IsThreatListEmpty() && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
+        ((Creature*)this)->AI()->EnterEvadeMode();
 }
 
 void Unit::DeleteThreatList()
@@ -5147,8 +5147,8 @@ bool Unit::SelectHostilTarget()
 
     if(IsThreatListEmpty())
     {
-        if(!IsHateOfflineListEmpty() && &((Creature*)this)->AI())
-            ((Creature*)this)->AI().EnterEvadeMode();
+        if(!IsHateOfflineListEmpty() && ((Creature*)this)->AI())
+            ((Creature*)this)->AI()->EnterEvadeMode();
         return false;
     }
 
@@ -5172,12 +5172,12 @@ bool Unit::SelectHostilTarget()
     if(target)
     {
         SetInFront(target);
-        if (&((Creature*)this)->AI())
-            ((Creature*)this)->AI().AttackStart(target);
+        if (((Creature*)this)->AI())
+            ((Creature*)this)->AI()->AttackStart(target);
         return true;
     }
-    else if (&((Creature*)this)->AI())
-            ((Creature*)this)->AI().EnterEvadeMode();
+    else if (((Creature*)this)->AI())
+        ((Creature*)this)->AI()->EnterEvadeMode();
 
     return false;
 }
@@ -5329,8 +5329,8 @@ void Unit::TauntApply(Unit* taunter)
         return;
 
     SetInFront(taunter);
-    if (&((Creature*)this)->AI())
-        ((Creature*)this)->AI().AttackStart(taunter);
+    if (((Creature*)this)->AI())
+        ((Creature*)this)->AI()->AttackStart(taunter);
 
     uint64 guid = taunter->GetGUID();
     float threat = GetCurrentVictimThreat();
@@ -5365,8 +5365,8 @@ void Unit::TauntFadeOut(Unit *taunter)
 
     if(IsThreatListEmpty())
     {
-        if(!IsHateOfflineListEmpty() && &((Creature*)this)->AI())
-            ((Creature*)this)->AI().EnterEvadeMode();
+        if(!IsHateOfflineListEmpty() && ((Creature*)this)->AI())
+            ((Creature*)this)->AI()->EnterEvadeMode();
         return;
     }
 
@@ -5398,8 +5398,8 @@ void Unit::TauntFadeOut(Unit *taunter)
     if (target && target != taunter)
     {
         SetInFront(target);
-        if (&((Creature*)this)->AI())
-            ((Creature*)this)->AI().AttackStart(target);
+        if (((Creature*)this)->AI())
+            ((Creature*)this)->AI()->AttackStart(target);
     }
 }
 

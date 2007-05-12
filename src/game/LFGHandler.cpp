@@ -90,6 +90,7 @@ void WorldSession::HandleLfgSetCommentOpcode( WorldPacket & recv_data )
                 sDatabase.PExecute("INSERT INTO `looking_for_group` (`guid`, `slot`, `comment`) VALUES ('%u', '%u', '')", _player->GetGUIDLow(), i);
         recv_data >> comment;
         sLog.outDebug("LFG comment %s", comment.c_str());
+        sDatabase.escape_string(comment);
         sDatabase.PExecute("UPDATE `looking_for_group` SET `comment` = '%s' WHERE `guid` = '%u'", comment.c_str(), _player->GetGUIDLow());     
     }
     else
