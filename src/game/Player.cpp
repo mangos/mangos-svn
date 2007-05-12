@@ -12687,3 +12687,41 @@ uint32 Player::GetBlockValue() const
 
     return m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE]*(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT]+100)/100;
 }
+
+bool Player::DropBattleGroundFlag()
+{
+    if(InBattleGround())
+        return false;
+
+    BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
+    if(!bg)
+        return false;
+
+    if(GetTeam() == HORDE)
+    {
+        if(bg->IsAllianceFlagPickedup())
+        {
+            if(bg->GetAllianceFlagPickerGUID() == GetGUID())
+            {
+                bg->SetAllianceFlagPicker(0);
+                RemoveAurasDueToSpell(23335);
+                CastSpell(this,23336,true,NULL);
+                return true;
+            }
+        }
+    }
+    else                                                    // ALLIANCE
+    {
+        if(bg->IsHordeFlagPickedup())
+        {
+            if(bg->GetHordeFlagPickerGUID() == GetGUID())
+            {
+                bg->SetHordeFlagPicker(0);
+                RemoveAurasDueToSpell(23333);
+                CastSpell(this,23334,true,NULL);
+                return true;
+            }
+        }
+    }
+    return false;
+}

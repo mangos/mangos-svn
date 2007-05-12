@@ -1195,26 +1195,28 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
 
-        inline bool InBattleGround() const { return m_bgBattleGroundID != 0; }
-        inline bool InBattleGroundQueue() const { return m_bgBattleGroundQueueID != 0; }
-        inline uint32 GetBattleGroundId() const { return m_bgBattleGroundID; }
-        inline uint32 GetBattleGroundQueueId() const { return m_bgBattleGroundQueueID; }
-        inline void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; }
-        inline void SetBattleGroundQueueId(uint8 val) { m_bgBattleGroundQueueID = val; }
-        inline uint32 GetBattleGroundEntryPointMap() const { return m_bgEntryPointMap; }
-        inline void SetBattleGroundEntryPointMap(uint32 Map) { m_bgEntryPointMap = Map;}
+        bool InBattleGround() const { return m_bgBattleGroundID != 0; }
+        bool InBattleGroundQueue() const { return m_bgBattleGroundQueueID != 0; }
+        uint32 GetBattleGroundId() const { return m_bgBattleGroundID; }
+        uint32 GetBattleGroundQueueId() const { return m_bgBattleGroundQueueID; }
+        void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; }
+        void SetBattleGroundQueueId(uint8 val) { m_bgBattleGroundQueueID = val; }
 
-        inline float GetBattleGroundEntryPointX() const { return m_bgEntryPointX; }
-        inline void SetBattleGroundEntryPointX(float PosX) { m_bgEntryPointX = PosX;}
+        uint32 GetBattleGroundEntryPointMap() const { return m_bgEntryPointMap; }
+        float GetBattleGroundEntryPointX() const { return m_bgEntryPointX; }
+        float GetBattleGroundEntryPointY() const { return m_bgEntryPointY; }
+        float GetBattleGroundEntryPointZ() const { return m_bgEntryPointZ; }
+        float GetBattleGroundEntryPointO() const { return m_bgEntryPointO; }
+        void SetBattleGroundEntryPoint(uint32 Map, float PosX, float PosY, float PosZ, float PosO )
+        { 
+            m_bgEntryPointMap = Map;
+            m_bgEntryPointX = PosX;
+            m_bgEntryPointY = PosY;
+            m_bgEntryPointZ = PosZ;
+            m_bgEntryPointO = PosO;
+        }
 
-        inline float GetBattleGroundEntryPointY() const { return m_bgEntryPointY; }
-        inline void SetBattleGroundEntryPointY(float PosY) { m_bgEntryPointY = PosY;}
-
-        inline float GetBattleGroundEntryPointZ() const { return m_bgEntryPointZ; }
-        inline void SetBattleGroundEntryPointZ(float PosZ) { m_bgEntryPointZ = PosZ;}
-
-        inline float GetBattleGroundEntryPointO() const { return m_bgEntryPointO; }
-        void SetBattleGroundEntryPointO(float PosO) { m_bgEntryPointO = PosO;}
+        bool DropBattleGroundFlag();
 
         /*********************************************************/
         /***                    REST SYSTEM                    ***/
