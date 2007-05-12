@@ -172,8 +172,8 @@ void TemporarySummon::UnSummon()
     CleanupCrossRefsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 
-    if(m_summoner && m_summoner->GetTypeId()==TYPEID_UNIT && &((Creature*)m_summoner)->AI())
-        ((Creature*)m_summoner)->AI().SummonedCreatureDespawn(this);
+    if(m_summoner && m_summoner->GetTypeId()==TYPEID_UNIT && ((Creature*)m_summoner)->AI())
+        ((Creature*)m_summoner)->AI()->SummonedCreatureDespawn(this);
 }
 
 void TemporarySummon::SaveToDB()

@@ -110,8 +110,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     if(TargetUnit!=pet->getVictim())
                         pet->AttackStop();
                     (*pet)->Clear();
-                    if (&pet->AI())
-                        pet->AI().AttackStart(TargetUnit);
+                    if (pet->AI())
+                        pet->AI()->AttackStart(TargetUnit);
                     WorldPacket data(SMSG_AI_REACTION, 12);
                     data << guid1 << uint32(00000002);
                     SendPacket(&data);

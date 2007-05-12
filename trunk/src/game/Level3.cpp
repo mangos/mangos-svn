@@ -2065,12 +2065,16 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     pGameObj->SetMapId(chr->GetMapId());
     //pGameObj->SetNameId(id);
     sLog.outError(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
-    if( lootID ) {
+
+    if( lootID )
+    {
         uint32 value = atoi((char*)lootID);
         pGameObj->lootid = value;
         //sLog.outDebug("*** LOOT: %d", value);
     }
-    if( spawntimeSecs ) {
+
+    if( spawntimeSecs )
+    {
         uint32 value = atoi((char*)spawntimeSecs);
         pGameObj->SetRespawnTime(value);
         //sLog.outDebug("*** spawntimeSecs: %d", value);
