@@ -203,7 +203,7 @@ void Weather::SendWeatherUpdateToPlayer(Player *player)
     uint32 sound = GetSound();
     WorldPacket data( SMSG_WEATHER, (4+4+4) );
 
-    data << (uint32)m_type << (float)m_grade << (uint32)sound;
+    data << (uint32)m_type << (float)m_grade << (uint32)sound << uint8(0);
     player->GetSession()->SendPacket( &data );
 }
 
@@ -222,7 +222,7 @@ bool Weather::UpdateWeather()
         m_grade = 0.0001;
 
     WorldPacket data( SMSG_WEATHER, (4+4+4) );
-    data << (uint32)m_type << (float)m_grade << (uint32)sound;
+    data << (uint32)m_type << (float)m_grade << (uint32)sound << uint8(0);
     player->SendMessageToSet( &data, true );
 
     ///- Log the event

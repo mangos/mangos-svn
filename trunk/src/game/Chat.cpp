@@ -32,6 +32,8 @@
 
 LanguageDesc lang_description[LANGUAGES_COUNT] =
 {
+    { LANG_UNIVERSAL2,      0, 0                       },
+    { LANG_GLOBAL,          0, 0                       },
     { LANG_UNIVERSAL,       0, 0                       },
     { LANG_ORCISH,        669, SKILL_LANG_ORCISH       },
     { LANG_DARNASSIAN,    671, SKILL_LANG_DARNASSIAN   },

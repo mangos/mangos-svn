@@ -255,7 +255,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_ACCEPT_TRADE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAcceptTradeOpcode             );
     objmgr.opcodeTable[ CMSG_BEGIN_TRADE ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBeginTradeOpcode              );
     objmgr.opcodeTable[ CMSG_BUSY_TRADE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBusyTradeOpcode               );
-                                                            // sended after loguot complete
+                                                            // sended after logout complete
     objmgr.opcodeTable[ CMSG_CANCEL_TRADE ]                     = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleCancelTradeOpcode             );
     objmgr.opcodeTable[ CMSG_CLEAR_TRADE_ITEM ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleClearTradeItemOpcode          );
     objmgr.opcodeTable[ CMSG_IGNORE_TRADE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleIgnoreTradeOpcode             );
@@ -435,10 +435,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_MOVE_FLY_STATE_CHANGE ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveFlyStateChangeOpcode      );
     objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
     objmgr.opcodeTable[ CMSG_SELF_RES ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode                 );
-
-        // Socket gem
     objmgr.opcodeTable[ CMSG_SOCKET_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  );
-
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -1149,6 +1146,7 @@ void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
     sLog.outDebug("CMSG_REALM_STATE_REQUEST");
 
     uint32 unk;
+    std::string unk_str = "01/01/01";
     recv_data >> unk;
 
     WorldPacket data(SMSG_REALM_STATE_RESPONSE, 17);
@@ -1157,9 +1155,7 @@ void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
     // 0x0 realm normal
     // 0x1 realm split
     // 0x2 realm split pending
-    data << uint16(0x3130) << uint8(0x2F);
-    data << uint16(0x3130) << uint8(0x2F);
-    data << uint16(0x3130) << uint8(0x00);
+    data << unk_str;
     SendPacket(&data);
     sLog.outDebug("response sent %u", unk);
 }

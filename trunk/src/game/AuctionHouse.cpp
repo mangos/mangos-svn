@@ -26,10 +26,10 @@
 #include "UpdateMask.h"
 #include "AuctionHouseObject.h"
 
-//pls DO NOT use iterator++, because it is slowlier than ++iterator!!!
-//post-incrementation is always slowlier than pre-incrementation !
+//please DO NOT use iterator++, because it is slower than ++iterator!!!
+//post-incrementation is always slower than pre-incrementation !
 
-//void called when player click on auctionhouse npc
+//void called when player click on auctioneer npc
 void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);

@@ -32,7 +32,6 @@
 #include "RedZoneDistrict.h"
 #include "Transports.h"
 
-
 bool ChatHandler::HandleSayCommand(const char* args)
 {
     uint64 guid = m_session->GetPlayer()->GetSelection();    
@@ -616,7 +615,6 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
 
 bool ChatHandler::HandleModifyFactionCommand(const char* args)
 {
-
     uint32 factionid;
     uint32 flag;
     uint32  npcflag;
@@ -638,7 +636,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
             factionid = chr->getFaction();
             flag      = chr->GetUInt32Value(UNIT_FIELD_FLAGS);
             npcflag   = chr->GetUInt32Value(UNIT_NPC_FLAGS);
-            dyflag   = chr->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
+            dyflag    = chr->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
             PSendSysMessage(LANG_CURRENT_FACTION,chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
         }
         return true;
@@ -652,7 +650,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
 
     factionid = atoi(pfactionid);
 
-    char*  pflag = strtok(NULL, " ");
+    char *pflag = strtok(NULL, " ");
     if (!pflag)
         flag = chr->GetUInt32Value(UNIT_FIELD_FLAGS);
     else
@@ -693,7 +691,6 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
 
 bool ChatHandler::HandleModifySpellCommand(const char* args)
 {
-
     WorldPacket data;
 
     char* pspellflatid = strtok((char*)args, " ");
@@ -747,6 +744,9 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
 
 bool ChatHandler::HandleModifyTalentCommand (const char* args)
 {
+    if (!*args)
+        return false;
+
     int tp = atoi((char*)args);
     if (tp>0)
     {
@@ -1330,7 +1330,6 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
         sLog.outDetail(LANG_CURRENT_MONEY, moneyuser, addmoney, newmoney);
         if(newmoney <= 0 )
         {
-
             PSendSysMessage(LANG_YOU_TAKE_ALL_MONEY, chr->GetName());
 
             char buf[256];
@@ -1342,7 +1341,6 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
         }
         else
         {
-
             PSendSysMessage(LANG_YOU_TAKE_MONEY, abs(addmoney), chr->GetName());
 
             char buf[256];
@@ -1355,7 +1353,6 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
     }
     else
     {
-
         PSendSysMessage(LANG_YOU_GIVE_MONEY, addmoney, chr->GetName());
 
         char buf[256];

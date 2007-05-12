@@ -1137,7 +1137,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
                 break;
             }
             MapManager::Instance().GetMap(RegenBonus1->GetMapId(), RegenBonus1)->Remove(RegenBonus1, false);
-            RegenBonus1Spawn[0] = 3*60*1000; // 3 minutes
+            RegenBonus1Spawn[0] = 3*60*1000;                // 3 minutes
             RegenBonus1Spawn[1] = 0;
             SpellId = 23493;
             break;
@@ -1148,7 +1148,7 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
                 break;
             }
             MapManager::Instance().GetMap(RegenBonus2->GetMapId(), RegenBonus2)->Remove(RegenBonus2, false);
-            RegenBonus2Spawn[0] = 3*60*1000; // 3 minutes
+            RegenBonus2Spawn[0] = 3*60*1000;                // 3 minutes
             RegenBonus2Spawn[1] = 0;
             SpellId = 23493;
             break;

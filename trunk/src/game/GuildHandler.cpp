@@ -788,7 +788,6 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
 
     GetPlayer()->SetGuildIdInvited(0);
     GetPlayer()->SetInGuild(0);
-
 }
 
 void WorldSession::HandleGuildInfoOpcode(WorldPacket& recvPacket)
@@ -824,7 +823,6 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
     if(!guild) return;
 
     guild->Roster(this);
-
 }
 
 void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
@@ -1404,7 +1402,6 @@ void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
     }
 
     guild->SetGINFO(GINFO);
-
 }
 
 void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)

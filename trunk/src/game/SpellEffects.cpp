@@ -54,7 +54,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectInstaKill,                                //  1 SPELL_EFFECT_INSTAKILL
     &Spell::EffectSchoolDMG,                                //  2 SPELL_EFFECT_SCHOOL_DAMAGE
     &Spell::EffectDummy,                                    //  3 SPELL_EFFECT_DUMMY
-    &Spell::EffectNULL,                                     //  4 SPELL_EFFECT_PORTAL_TELEPORT         unused
+    &Spell::EffectNULL,                                     //  4 SPELL_EFFECT_PORTAL_TELEPORT          unused
     &Spell::EffectTeleportUnits,                            //  5 SPELL_EFFECT_TELEPORT_UNITS
     &Spell::EffectApplyAura,                                //  6 SPELL_EFFECT_APPLY_AURA
     &Spell::EffectSchoolDMG,                                //  7 SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
@@ -595,42 +595,39 @@ void Spell::EffectDummy(uint32 i)
     if(m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
     {
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(((Player*)m_caster)->GetBattleGroundId());
-        if(bg)
+        if(bg && bg->GetStatus() == STATUS_INPROGRESS)
         {
-            if(bg->GetStatus() == STATUS_INPROGRESS)
+            switch(m_spellInfo->Id)
             {
-                switch(m_spellInfo->Id)
-                {
-                    case 23383:                             // Alliance Flag Click
-                        sLog.outDebug("Alliance Flag Click");
-                        if(((Player*)m_caster)->GetTeam() == ALLIANCE)
+                case 23383:                             // Alliance Flag Click
+                    sLog.outDebug("Alliance Flag Click");
+                    if(((Player*)m_caster)->GetTeam() == ALLIANCE)
                                                             // Alliance Flag Returns (Event)
-                            m_caster->CastSpell(m_caster, 23385, true, 0);
-                        if(((Player*)m_caster)->GetTeam() == HORDE)
+                        m_caster->CastSpell(m_caster, 23385, true, 0);
+                    if(((Player*)m_caster)->GetTeam() == HORDE)
                                                             // Silverwing Flag
-                            m_caster->CastSpell(m_caster, 23335, true, 0);
-                        break;
-                    case 23384:                             // Horde Flag Click
-                        sLog.outDebug("Horde Flag Click");
-                        if(((Player*)m_caster)->GetTeam() == HORDE)
+                        m_caster->CastSpell(m_caster, 23335, true, 0);
+                    break;
+                case 23384:                             // Horde Flag Click
+                    sLog.outDebug("Horde Flag Click");
+                    if(((Player*)m_caster)->GetTeam() == HORDE)
                                                             // Horde Flag Returns (Event)
-                            m_caster->CastSpell(m_caster, 23386, true, 0);
-                        if(((Player*)m_caster)->GetTeam() == ALLIANCE)
+                        m_caster->CastSpell(m_caster, 23386, true, 0);
+                    if(((Player*)m_caster)->GetTeam() == ALLIANCE)
                                                             // Warsong Flag
-                            m_caster->CastSpell(m_caster, 23333, true, 0);
-                        break;
-                    case 23389:                             // Alliance Flag Capture
-                        sLog.outDebug("Alliance Flag Capture");
-                        bg->EventPlayerCapturedFlag((Player*)m_caster);
-                        break;
-                    case 23390:                             // Horde Flag Capture
-                        sLog.outDebug("Horde Flag Capture");
-                        bg->EventPlayerCapturedFlag((Player*)m_caster);
-                        break;
-                    default:
-                        sLog.outDebug("Unknown spellid %u at BG dummy", m_spellInfo->Id);
-                        break;
-                }
+                        m_caster->CastSpell(m_caster, 23333, true, 0);
+                    break;
+                case 23389:                             // Alliance Flag Capture
+                    sLog.outDebug("Alliance Flag Capture");
+                    bg->EventPlayerCapturedFlag((Player*)m_caster);
+                    break;
+                case 23390:                             // Horde Flag Capture
+                    sLog.outDebug("Horde Flag Capture");
+                    bg->EventPlayerCapturedFlag((Player*)m_caster);
+                    break;
+                default:
+                    sLog.outDebug("Unknown spellid %u at BG dummy", m_spellInfo->Id);
+                    break;
             }
         }
     }
@@ -835,40 +832,37 @@ void Spell::EffectSendEvent(uint32 i)
     if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
     {
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(((Player *)m_caster)->GetBattleGroundId());
-        if(bg)
+        if(bg && bg->GetStatus() == STATUS_INPROGRESS)
         {
-            if(bg->GetStatus() == STATUS_INPROGRESS)
+            switch(m_spellInfo->Id)
             {
-                switch(m_spellInfo->Id)
-                {
-                    case 23333:                             // Pickup Horde Flag
-                        bg->EventPlayerPickedUpFlag(((Player*)m_caster));
-                        sLog.outDebug("Send Event Horde Flag Picked Up");
-                        break;
-                    case 23334:                             // Drop Horde Flag
-                        bg->EventPlayerDroppedFlag(((Player*)m_caster));
-                        sLog.outDebug("Drop Horde Flag");
-                        break;
-                    case 23335:                             // Pickup Alliance Flag
-                        bg->EventPlayerPickedUpFlag(((Player*)m_caster));
-                        sLog.outDebug("Send Event Alliance Flag Picked Up");
-                        break;
-                    case 23336:                             // Drop Alliance Flag
-                        bg->EventPlayerDroppedFlag(((Player*)m_caster));
-                        sLog.outDebug("Drop Alliance Flag");
-                        break;
-                    case 23385:                             // Alliance Flag Returns
-                        bg->EventPlayerReturnedFlag(((Player*)m_caster));
-                        sLog.outDebug("Alliance Flag Returned");
-                        break;
-                    case 23386:                             // Horde Flag Returns
-                        bg->EventPlayerReturnedFlag(((Player*)m_caster));
-                        sLog.outDebug("Horde Flag Returned");
-                        break;
-                    default:
-                        sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
-                        break;
-                }
+                case 23333:                             // Pickup Horde Flag
+                    bg->EventPlayerPickedUpFlag(((Player*)m_caster));
+                    sLog.outDebug("Send Event Horde Flag Picked Up");
+                    break;
+                case 23334:                             // Drop Horde Flag
+                    bg->EventPlayerDroppedFlag(((Player*)m_caster));
+                    sLog.outDebug("Drop Horde Flag");
+                    break;
+                case 23335:                             // Pickup Alliance Flag
+                    bg->EventPlayerPickedUpFlag(((Player*)m_caster));
+                    sLog.outDebug("Send Event Alliance Flag Picked Up");
+                    break;
+                case 23336:                             // Drop Alliance Flag
+                    bg->EventPlayerDroppedFlag(((Player*)m_caster));
+                    sLog.outDebug("Drop Alliance Flag");
+                    break;
+                case 23385:                             // Alliance Flag Returns
+                    bg->EventPlayerReturnedFlag(((Player*)m_caster));
+                    sLog.outDebug("Alliance Flag Returned");
+                    break;
+                case 23386:                             // Horde Flag Returns
+                    bg->EventPlayerReturnedFlag(((Player*)m_caster));
+                    sLog.outDebug("Horde Flag Returned");
+                    break;
+                default:
+                    sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
+                    break;
             }
         }
     }
@@ -1085,7 +1079,6 @@ void Spell::EffectEnergize(uint32 i)
 
 void Spell::EffectOpenLock(uint32 i)
 {
-
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
     {
         sLog.outDebug( "WORLD: Open Lock - No Player Caster!");
@@ -1162,8 +1155,7 @@ void Spell::EffectOpenLock(uint32 i)
 
         reqSkillValue = lockInfo->requiredlockskill;
     }
-    else
-    if(SkillId == SKILL_LOCKPICKING)                    // apply picklock skill to wrong target
+    else if(SkillId == SKILL_LOCKPICKING)                   // apply picklock skill to wrong target
     {
         SendCastResult(SPELL_FAILED_BAD_TARGETS);
         return;
@@ -1496,7 +1488,6 @@ void Spell::EffectSummonWild(uint32 i)
     }
     else                                                    // in another case summon new
     {
-
         uint32 level = m_caster->getLevel();
 
         // level of pet summoned using engineering item based at engineering skill level
@@ -1820,7 +1811,6 @@ void Spell::EffectSummonPet(uint32 i)
     // if pet requested type already exist
     if( OldSummon )
     {
-
         if(petentry == 0 || OldSummon->GetCreatureInfo()->Entry == petentry)
         {
             // pet in corpse state can't be summoned
@@ -2111,7 +2101,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             }
             else
             if(uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID))
-                ((Player*)m_caster)->DestroyItemCount( ammo , 1, true);
+                ((Player*)m_caster)->DestroyItemCount(ammo, 1, true);
             // wand not have ammo
         }
     }

@@ -297,6 +297,9 @@ enum EUnitFields
     PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING   = 0x49B + UNIT_END, // custom
     PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING    = 0x49C + UNIT_END, // custom
     PLAYER_FIELD_ARENA_TEAM_INFO_1_1           = 0x49D + UNIT_END, // Size:9
+    PLAYER_FIELD_ARENA_TEAM_ID_2v2             = 0x49D + UNIT_END, // custom
+    PLAYER_FIELD_ARENA_TEAM_ID_3v3             = 0x4A0 + UNIT_END, // custom
+    PLAYER_FIELD_ARENA_TEAM_ID_5v5             = 0x4A3 + UNIT_END, // custom
     PLAYER_FIELD_HONOR_CURRENCY                = 0x4A6 + UNIT_END, // Size:1
     PLAYER_FIELD_ARENA_CURRENCY                = 0x4A7 + UNIT_END, // Size:1
     PLAYER_FIELD_MOD_MANA_REGEN                = 0x4A8 + UNIT_END, // Size:1

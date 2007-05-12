@@ -41,7 +41,6 @@ Guild::Guild()
     CreatedYear = 0;
     CreatedMonth = 0;
     CreatedDay = 0;
-
 }
 
 Guild::~Guild()

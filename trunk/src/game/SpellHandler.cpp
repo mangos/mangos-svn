@@ -412,30 +412,39 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             // go to end function to spell casting
             break;
         }
-        case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
-            //BG flag click
-            info = obj->GetGOInfo();
-            if(info)
-                spellId = info->sound1;
-            break;
-        case GAMEOBJECT_TYPE_FLAGDROP:                      //26
-            //BG flag dropped
-            if(_player->InBattleGround())
+        case GAMEOBJECT_TYPE_FLAGSTAND:                     // 24
+            if(_player->InBattleGround() &&                 // in battleground
+                !_player->IsMounted() &&                    // not mounted
+                !_player->HasStealthAura() &&               // not stealthed
+                !_player->HasInvisibilityAura())            // not invisible
             {
+                //BG flag click
                 info = obj->GetGOInfo();
-                if(info->id == 179785) // Silverwing Flag
+                if(info)
+                    spellId = info->sound1;
+            }
+            break;
+        case GAMEOBJECT_TYPE_FLAGDROP:                      // 26
+            if(_player->InBattleGround() &&                 // in battleground
+                !_player->IsMounted() &&                    // not mounted
+                !_player->HasStealthAura() &&               // not stealthed
+                !_player->HasInvisibilityAura())            // not invisible
+            {
+                //BG flag dropped
+                info = obj->GetGOInfo();
+                if(info->id == 179785)                      // Silverwing Flag
                 {
                     if(_player->GetTeam() == ALLIANCE)
-                        spellId = 23385; // Alliance Flag Returns
+                        spellId = 23385;                    // Alliance Flag Returns
                     if(_player->GetTeam() == HORDE)
-                        spellId = 23335; // Silverwing Flag
+                        spellId = 23335;                    // Silverwing Flag
                 }
-                if(info->id == 179786) // Warsong Flag
+                if(info->id == 179786)                      // Warsong Flag
                 {
                     if(_player->GetTeam() == HORDE)
-                        spellId = 23386; // Horde Flag Returns
+                        spellId = 23386;                    // Horde Flag Returns
                     if(_player->GetTeam() == ALLIANCE)
-                        spellId = 23333; // Warsong Flag
+                        spellId = 23333;                    // Warsong Flag
                 }
                 obj->Delete();
             }
