@@ -11851,7 +11851,10 @@ void Player::TextEmote(const std::string text)
     data << text;
     data << (uint8)chatTag();
 
-    SendMessageToOwnTeamSet(&data, true);
+    if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT))
+        SendMessageToSet(&data, true);
+    else
+        SendMessageToOwnTeamSet(&data,true);
 }
 
 void Player::Whisper(const uint64 receiver, const std::string text, const uint32 language)
