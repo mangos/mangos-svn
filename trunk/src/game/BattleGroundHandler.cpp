@@ -122,11 +122,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
                 member->SetBattleGroundQueueId(bgid); // add to queue
 
                 // store entry point coords (same as leader entry point)
-                member->SetBattleGroundEntryPointMap(_player->GetMapId());
-                member->SetBattleGroundEntryPointO(_player->GetOrientation());
-                member->SetBattleGroundEntryPointX(_player->GetPositionX());
-                member->SetBattleGroundEntryPointY(_player->GetPositionY());
-                member->SetBattleGroundEntryPointZ(_player->GetPositionZ());
+                member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
 
                 sBattleGroundMgr.SendBattleGroundStatusPacket(member, bg, STATUS_WAIT_QUEUE, 0, 0); // send status packet (in queue)
                 sBattleGroundMgr.SendGroupJoinedBattlegroundPacket(member, bgid);
@@ -139,11 +135,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
         _player->SetBattleGroundQueueId(bgid); // add to queue
 
         // store entry point coords
-        _player->SetBattleGroundEntryPointMap(_player->GetMapId());
-        _player->SetBattleGroundEntryPointO(_player->GetOrientation());
-        _player->SetBattleGroundEntryPointX(_player->GetPositionX());
-        _player->SetBattleGroundEntryPointY(_player->GetPositionY());
-        _player->SetBattleGroundEntryPointZ(_player->GetPositionZ());
+        _player->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
 
         sBattleGroundMgr.SendBattleGroundStatusPacket(_player, bg, STATUS_WAIT_QUEUE, 0, 0); // send status packet (in queue)
         bg->AddPlayerToQueue(_player);
