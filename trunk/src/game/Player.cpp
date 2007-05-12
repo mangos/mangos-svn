@@ -3513,12 +3513,10 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_RANGED_HASTE_RATING:
             //Haste: 6.67
             RatingChange = value/(6.66667f * RatingCoeffecient);
-            _ApplyAmmoBonuses(false);
             if(RatingChange >= 0)
                 ApplyAttackTimePercentMod(RANGED_ATTACK, RatingChange, apply);
             else
                 ApplyAttackTimePercentMod(RANGED_ATTACK, -RatingChange, !apply);
-            _ApplyAmmoBonuses(true);
             break;
         case PLAYER_FIELD_SPELL_HASTE_RATING:
             //Haste: 6.67
@@ -4888,13 +4886,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
         (*i)->ApplyModifier(false);
 
-    if(proto->InventoryType == INVTYPE_RANGED)
-        _ApplyAmmoBonuses(false);
-
     _ApplyItemBonuses(proto,slot,apply);
-
-    if(proto->InventoryType == INVTYPE_RANGED)
-        _ApplyAmmoBonuses(true);
 
     for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
         (*i)->ApplyModifier(true);
@@ -5357,6 +5349,10 @@ void Player::_RemoveAllItemMods()
 
     _RemoveStatsMods();
 
+    // additional bonuses from ammo
+    if(GetItemByPos(INVENTORY_SLOT_BAG_0,EQUIPMENT_SLOT_RANGED))
+        _ApplyAmmoBonuses(false);
+
     AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
     AuraList& mModHaste             = GetAurasByType(SPELL_AURA_MOD_HASTE);
     AuraList& mModRangedHaste       = GetAurasByType(SPELL_AURA_MOD_RANGED_HASTE);
@@ -5369,8 +5365,6 @@ void Player::_RemoveAllItemMods()
         (*i)->ApplyModifier(false);
     for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
         (*i)->ApplyModifier(false);
-
-    _ApplyAmmoBonuses(false);
 
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
@@ -5433,8 +5427,6 @@ void Player::_ApplyAllItemMods()
         }
     }
 
-    _ApplyAmmoBonuses(true);
-
     for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
         (*i)->ApplyModifier(true);
     for(AuraList::iterator i = mModRangedHaste.begin(); i != mModRangedHaste.end(); ++i)
@@ -5443,6 +5435,10 @@ void Player::_ApplyAllItemMods()
         (*i)->ApplyModifier(true);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(true);
+
+    // additional bonuses from ammo
+    if(GetItemByPos(INVENTORY_SLOT_BAG_0,EQUIPMENT_SLOT_RANGED))
+        _ApplyAmmoBonuses(true);
 
     _ApplyStatsMods();
 
@@ -5476,19 +5472,48 @@ void Player::_ApplyAllItemMods()
 
 void Player::_ApplyAmmoBonuses(bool apply)
 {
-    uint32 item = GetUInt32Value(PLAYER_AMMO_ID);
-    if(!item)
+    // check ammo 
+    uint32 ammo_id = GetUInt32Value(PLAYER_AMMO_ID);
+    if(!ammo_id)
         return;
 
-    ItemPrototype const *proto = objmgr.GetItemPrototype( item );
-
-    if(!proto)
+    ItemPrototype const *ammo_proto = objmgr.GetItemPrototype( ammo_id );
+    if( !ammo_proto || ammo_proto->Class!=ITEM_CLASS_PROJECTILE )
         return;
 
+    // check ranged weapon
+    Item *weapon = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+    if(!weapon  || weapon->IsBroken() )
+        return;
+
+    ItemPrototype const* weapon_proto = weapon->GetProto();
+    if(!weapon_proto || weapon_proto->Class!=ITEM_CLASS_WEAPON )
+        return;
+
+    // check ammo ws. weapon compatibility
+    switch(weapon_proto->SubClass)
+    {
+        case ITEM_SUBCLASS_WEAPON_BOW:
+            if(ammo_proto->SubClass!=ITEM_SUBCLASS_ARROW)
+                return;
+            break;
+        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+            if(ammo_proto->SubClass!=ITEM_SUBCLASS_BOLT)
+                return;
+            break;
+        case ITEM_SUBCLASS_WEAPON_GUN:
+            if(ammo_proto->SubClass!=ITEM_SUBCLASS_BULLET)
+                return;
+            break;
+        default:
+            return;
+    }
+
+    // all ok
     std::string applystr = apply ? "Add" : "Remove";
 
-    float minDamage = proto->Damage[0].DamageMin*GetAttackTime(RANGED_ATTACK)/1000;
-    float maxDamage = proto->Damage[0].DamageMax*GetAttackTime(RANGED_ATTACK)/1000;
+    float minDamage = ammo_proto->Damage[0].DamageMin*GetAttackTime(RANGED_ATTACK)/1000;
+    float maxDamage = ammo_proto->Damage[0].DamageMax*GetAttackTime(RANGED_ATTACK)/1000;
 
     ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minDamage, apply);
     sLog.outDetail("%s Ranged mindam: %f, now is: %f", applystr.c_str(), minDamage, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE));
@@ -7659,9 +7684,9 @@ void Player::SetAmmo( uint32 item )
         }
     }
 
-    _ApplyAmmoBonuses(false);
+    _RemoveAllItemMods();
     SetUInt32Value(PLAYER_AMMO_ID, item);
-    _ApplyAmmoBonuses(true);
+    _ApplyAllItemMods();
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.

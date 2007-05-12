@@ -3051,13 +3051,7 @@ void Aura::HandleHaste(bool apply, bool Real)
         m_target->ApplyAttackTimePercentMod(BASE_ATTACK,  m_modifier.m_amount,apply);
         m_target->ApplyAttackTimePercentMod(OFF_ATTACK,   m_modifier.m_amount,apply);
 
-        if(m_target->GetTypeId()==TYPEID_PLAYER)
-            ((Player*)m_target)->_ApplyAmmoBonuses(false);
-
         m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount,apply);
-
-        if(m_target->GetTypeId()==TYPEID_PLAYER)
-            ((Player*)m_target)->_ApplyAmmoBonuses(true);
     }
     else
     {
@@ -3065,37 +3059,23 @@ void Aura::HandleHaste(bool apply, bool Real)
         m_target->ApplyAttackTimePercentMod(BASE_ATTACK,  -m_modifier.m_amount,!apply);
         m_target->ApplyAttackTimePercentMod(OFF_ATTACK,   -m_modifier.m_amount,!apply);
 
-        if(m_target->GetTypeId()==TYPEID_PLAYER)
-            ((Player*)m_target)->_ApplyAmmoBonuses(false);
-
         m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,-m_modifier.m_amount,!apply);
-
-        if(m_target->GetTypeId()==TYPEID_PLAYER)
-            ((Player*)m_target)->_ApplyAmmoBonuses(true);
     }
 }
 
 void Aura::HandleAuraModRangedHaste(bool apply, bool Real)
 {
-    if(m_target->GetTypeId()==TYPEID_PLAYER)
-        ((Player*)m_target)->_ApplyAmmoBonuses(false);
-
     if(m_modifier.m_amount >= 0)
         m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
     else
         m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, -m_modifier.m_amount, !apply);
-
-    if(m_target->GetTypeId()==TYPEID_PLAYER)
-        ((Player*)m_target)->_ApplyAmmoBonuses(true);
 }
 
 void Aura::HandleRangedAmmoHaste(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    ((Player*)m_target)->_ApplyAmmoBonuses(false);
     m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount, apply);
-    ((Player*)m_target)->_ApplyAmmoBonuses(true);
 }
 
 /********************************/
